@@ -1,11 +1,11 @@
 #pragma once
 #include "consts/types.h"
 
-size_t sprintbit(bitvector_t vector, const char *names[], char *result, size_t reslen);
-size_t sprinttype(int type, const char *names[], char *result, size_t reslen);
-size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result, size_t reslen);
+size_t sprintbit(bitvector_t vector, const char *const names[], char *result, size_t reslen);
+size_t sprinttype(int type, const char *const names[], char *result, size_t reslen);
+size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar, char *result, size_t reslen);
 
-int get_flag_by_name(const char *flag_list[], char *flag_name);
+int get_flag_by_name(const char *const flag_list[], char *flag_name);
 
 #define Q_FIELD(x) ((int)(x) / 32)
 #define Q_BIT(x)   (1U << ((x) % 32))

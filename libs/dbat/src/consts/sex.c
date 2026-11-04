@@ -1,6 +1,6 @@
 #include "dbat/consts/sex.h"
 
-const char *genders[NUM_SEX + 1] =
+const char *const genders[NUM_SEX + 1] =
     {
         "neutral",
         "male",

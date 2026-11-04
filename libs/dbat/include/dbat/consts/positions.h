@@ -12,4 +12,4 @@ constexpr int POS_STANDING  = 8; /* standing		*/
 
 constexpr int NUM_POSITIONS = 9;
 
-extern const char *position_types[NUM_POSITIONS + 1];
+extern const char *const position_types[NUM_POSITIONS + 1];

@@ -7,10 +7,10 @@
 #include "dbat/atomicfile.h"
 
 #include <unistd.h>
+#include "dbat/game_world.h"
 
-static DISABLED_DATA *disabled_first = 0;
 
-static void save_disabled();
+static void save_disabled(GameWorld *g);
 
 /*
  * Code to disable or enable buggy commands on the run, saving
@@ -30,28 +30,28 @@ ACMD(do_disable)
   DISABLED_DATA *p, *temp;
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "Monsters can't disable commands, silly.\r\n");
+    send_to_char(g, ch, "Monsters can't disable commands, silly.\r\n");
     return;
   }
 
   skip_spaces(&argument);
 
   if (!*argument) {      /* Nothing specified. Show disabled commands. */
-    if (!disabled_first) /* Any disabled at all ? */
-      send_to_char(ch, "There are no disabled commands.\r\n");
+    if (!g->disabled_first) /* Any disabled at all ? */
+      send_to_char(g, ch, "There are no disabled commands.\r\n");
     else {
-      send_to_char(ch,
+      send_to_char(g, ch,
                    "Commands that are currently disabled:\r\n\r\n"
                    " Command       Disabled by     Level\r\n"
                    "-----------   --------------  -------\r\n");
-      for (p = disabled_first; p; p = p->next)
-        send_to_char(ch, " %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
+      for (p = g->disabled_first; p; p = p->next)
+        send_to_char(g, ch, " %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
     }
     return;
   }
 
   /* command given - first check if it is one of the disabled commands */
-  for (length = strlen(argument), p = disabled_first; p; p = p->next)
+  for (length = strlen(argument), p = g->disabled_first; p; p = p->next)
     if (!strncmp(argument, p->command->command, length))
       break;
 
@@ -59,17 +59,17 @@ ACMD(do_disable)
 
     /* Was it disabled by a higher level imm? */
     if (char_get_admlevel(ch) < p->level) {
-      send_to_char(ch, "This command was disabled by a higher power.\r\n");
+      send_to_char(g, ch, "This command was disabled by a higher power.\r\n");
       return;
     }
 
-    REMOVE_FROM_LIST(p, disabled_first, next, temp);
-    send_to_char(ch, "Command '%s' enabled.\r\n", p->command->command);
-    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
+    REMOVE_FROM_LIST(p, g->disabled_first, next, temp);
+    send_to_char(g, ch, "Command '%s' enabled.\r\n", p->command->command);
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
            char_get_name(ch), p->command->command);
     free(p->disabled_by);
     free(p);
-    save_disabled(); /* save to disk */
+    save_disabled(g); /* save to disk */
 
   } else { /* not a disabled command, check if the command exists */
 
@@ -81,12 +81,12 @@ ACMD(do_disable)
 
     /*  Found?     */
     if (*cmd_info[i].command == '\n') {
-      send_to_char(ch, "You don't know of any such command.\r\n");
+      send_to_char(g, ch, "You don't know of any such command.\r\n");
       return;
     }
 
     if (!strcmp(cmd_info[i].command, "disable")) {
-      send_to_char(ch, "You cannot disable the disable command.\r\n");
+      send_to_char(g, ch, "You cannot disable the disable command.\r\n");
       return;
     }
 
@@ -96,21 +96,21 @@ ACMD(do_disable)
     p->disabled_by = strdup(char_get_name(ch)); /* save name of disabler  */
     p->level       = char_get_admlevel(ch);     /* save level of disabler */
     p->subcmd      = cmd_info[i].subcmd;        /* the subcommand if any  */
-    p->next        = disabled_first;
-    disabled_first = p; /* add before the current first element */
-    send_to_char(ch, "Command '%s' disabled.\r\n", p->command->command);
-    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
+    p->next        = g->disabled_first;
+    g->disabled_first = p; /* add before the current first element */
+    send_to_char(g, ch, "Command '%s' disabled.\r\n", p->command->command);
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
            char_get_name(ch), p->command->command);
-    save_disabled(); /* save to disk */
+    save_disabled(g); /* save to disk */
   }
 }
 
 /* check if a command is disabled */
-bool check_disabled(const struct command_info *command)
+bool check_disabled(GameWorld *g, const struct command_info *command)
 {
   DISABLED_DATA *p;
 
-  for (p = disabled_first; p; p = p->next)
+  for (p = g->disabled_first; p; p = p->next)
     if (p->command->command_pointer == command->command_pointer)
       if (p->command->subcmd == command->subcmd)
         return true;
@@ -119,15 +119,15 @@ bool check_disabled(const struct command_info *command)
 }
 
 /* Load disabled commands */
-void load_disabled()
+void load_disabled(GameWorld *g)
 {
   FILE *fp;
   DISABLED_DATA *p;
   int i;
   char line[READ_SIZE], name[MAX_INPUT_LENGTH], temp[MAX_INPUT_LENGTH];
 
-  if (disabled_first)
-    free_disabled();
+  if (g->disabled_first)
+    free_disabled(g);
 
   if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
     return; /* No disabled file.. no disabled commands. */
@@ -147,21 +147,21 @@ void load_disabled()
     } else { /* add new disabled command */
       p->disabled_by = strdup(temp);
       p->command     = &cmd_info[i];
-      p->next        = disabled_first;
-      disabled_first = p;
+      p->next        = g->disabled_first;
+      g->disabled_first = p;
     }
   }
   fclose(fp);
 }
 
 /* Save disabled commands */
-static void save_disabled()
+static void save_disabled(GameWorld *g)
 {
   struct atomic_file af;
   FILE *fp;
   DISABLED_DATA *p;
 
-  if (!disabled_first) {
+  if (!g->disabled_first) {
     /* delete file if no commands are disabled */
     unlink(DISABLED_FILE);
     return;
@@ -172,20 +172,20 @@ static void save_disabled()
     return;
   }
 
-  for (p = disabled_first; p; p = p->next)
+  for (p = g->disabled_first; p; p = p->next)
     fprintf(fp, "%s %d %d %s\n", p->command->command, p->subcmd, p->level, p->disabled_by);
   fprintf(fp, "%s\n", END_MARKER);
   atomic_commit(&af);
 }
 
 /* free all disabled commands from memory */
-void free_disabled()
+void free_disabled(GameWorld *g)
 {
   DISABLED_DATA *p;
 
-  while (disabled_first) {
-    p              = disabled_first;
-    disabled_first = disabled_first->next;
+  while (g->disabled_first) {
+    p              = g->disabled_first;
+    g->disabled_first = g->disabled_first->next;
     free(p->disabled_by);
     free(p);
   }

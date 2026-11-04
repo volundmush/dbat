@@ -1,7 +1,7 @@
 #pragma once
 
-extern const char *attack_names_comp[];
-extern const char *attack_names[];
+extern const char *const attack_names_comp[];
+extern const char *const attack_names[];
 extern const int attack_skills[];
 
 constexpr int TYPE_HIT      = 300;

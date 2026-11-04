@@ -8,5 +8,3 @@ struct help_index_element {
   int min_level;  /*Min Level to read help entry*/
 };
 
-extern int top_of_helpt;
-extern struct help_index_element *help_table;

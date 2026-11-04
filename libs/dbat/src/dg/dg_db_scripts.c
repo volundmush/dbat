@@ -28,6 +28,7 @@
 #include "dbat/object_utils.h"
 
 #include <stdlib.h>
+#include "dbat/game_world.h"
 
 /* local functions */
 static void trig_data_init(trig_data *this_data);
@@ -38,12 +39,12 @@ struct dg_lint_block {
   int line;
 };
 
-static void dg_lint_warn(const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
+static void dg_lint_warn(GameWorld *g, const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
 {
-  mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", trig_get_vnum(trig),
+  mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", trig_get_vnum(g, trig),
           trig->name ? trig->name : "", line, msg);
   if (d)
-    write_to_output(d, "Warning: line %d: %s\r\n", line, msg);
+    write_to_output(g, d, "Warning: line %d: %s\r\n", line, msg);
 }
 
 /*
@@ -53,7 +54,7 @@ static void dg_lint_warn(const trig_data *trig, struct descriptor_data *d, int l
  * describe what will actually run. Warnings go to the syslog, and also to d if it is
  * not NULL. Returns the number of warnings.
  */
-int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
+int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d)
 {
   struct dg_lint_block open[64];
   int depth = 0, line = 0, warnings = 0;
@@ -70,7 +71,7 @@ int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
 
     if (!strncasecmp(p, "if ", 3) || !strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
       if (depth == (int)(countof(open))) {
-        dg_lint_warn(trig, d, line, "blocks nested too deeply to check the rest of the script");
+        dg_lint_warn(g, trig, d, line, "blocks nested too deeply to check the rest of the script");
         return warnings + 1;
       }
       if (!strncasecmp(p, "if ", 3))
@@ -85,30 +86,30 @@ int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
       while (*q && isspace(*q))
         q++;
       if (q > p + 4 && !strncasecmp(q, "if", 2) && (!q[2] || q[2] == '(' || isspace(q[2]))) {
-        dg_lint_warn(trig, d, line, "'else if' runs as a plain 'else' and its condition is ignored; write 'elseif'");
+        dg_lint_warn(g, trig, d, line, "'else if' runs as a plain 'else' and its condition is ignored; write 'elseif'");
         warnings++;
       }
       if (!depth || strcmp(open[depth - 1].kind, "if")) {
-        dg_lint_warn(trig, d, line, "'else' without 'if'");
+        dg_lint_warn(g, trig, d, line, "'else' without 'if'");
         warnings++;
       }
     } else if (!strncasecmp("end", p, 3)) {
       if (depth && !strcmp(open[depth - 1].kind, "if"))
         depth--;
       else {
-        dg_lint_warn(trig, d, line, "'end' without 'if'");
+        dg_lint_warn(g, trig, d, line, "'end' without 'if'");
         warnings++;
       }
     } else if (!strncasecmp("done", p, 4)) {
       while (depth && !strcmp(open[depth - 1].kind, "if")) {
         snprintf(msg, sizeof(msg), "'if' has no 'end' before the 'done' at line %d", line);
-        dg_lint_warn(trig, d, open[--depth].line, msg);
+        dg_lint_warn(g, trig, d, open[--depth].line, msg);
         warnings++;
       }
       if (depth)
         depth--;
       else {
-        dg_lint_warn(trig, d, line, "'done' without 'while' or 'switch'");
+        dg_lint_warn(g, trig, d, line, "'done' without 'while' or 'switch'");
         warnings++;
       }
     }
@@ -117,13 +118,13 @@ int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
   while (depth) {
     depth--;
     snprintf(msg, sizeof(msg), "'%s' has no '%s'", open[depth].kind, strcmp(open[depth].kind, "if") ? "done" : "end");
-    dg_lint_warn(trig, d, open[depth].line, msg);
+    dg_lint_warn(g, trig, d, open[depth].line, msg);
     warnings++;
   }
   return warnings;
 }
 
-void parse_trigger(FILE *trig_f, trig_vnum nr)
+void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
 {
   int t[2], k, attach_type;
   char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
@@ -139,7 +140,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr)
 
   snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
-  trig->nr   = top_of_trigt;
+  trig->nr   = g->top_of_trigt;
   trig->name = fread_string(trig_f, errors);
 
   get_line(trig_f, line);
@@ -166,22 +167,22 @@ void parse_trigger(FILE *trig_f, trig_vnum nr)
 
   free(cmds);
 
-  trig_index[top_of_trigt++] = t_index;
+  g->trig_index[g->top_of_trigt++] = t_index;
 
-  dg_lint_trigger(trig, nullptr);
+  dg_lint_trigger(g, trig, nullptr);
 }
 
 /*
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-trig_data *read_trigger(trig_rnum nr)
+trig_data *read_trigger(GameWorld *g, trig_rnum nr)
 {
   index_data *t_index;
   trig_data *trig;
 
-  if (nr >= top_of_trigt) return nullptr;
-  if ((t_index = trig_index[nr]) == nullptr)
+  if (nr >= g->top_of_trigt) return nullptr;
+  if ((t_index = g->trig_index[nr]) == nullptr)
     return nullptr;
 
   CREATE(trig, trig_data, 1);
@@ -230,7 +231,7 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 }
 
 /* for mobs and rooms: */
-void dg_read_trigger(FILE *fp, void *proto, int type)
+void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
 {
   char line[READ_SIZE];
   char junk[8];
@@ -245,26 +246,26 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
   count = sscanf(line, "%7s %d", junk, &vnum);
 
   if (count != 2) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Error assigning trigger! - Line was\n  %s", line);
     return;
   }
 
-  rnum = real_trigger(vnum);
+  rnum = real_trigger(g, vnum);
   if (rnum == NOTHING) {
     switch (type) {
       case MOB_TRIGGER:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-               vnum, char_get_name((char_data *)proto), char_get_mob_vnum((char_data *)proto));
+               vnum, char_get_name((char_data *)proto), char_get_mob_vnum(g, (char_data *)proto));
         break;
       case WLD_TRIGGER:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-               vnum, rroom_get_vnum(room_get_number((room_data *)proto)));
+               vnum, rroom_get_vnum(g, room_get_number((room_data *)proto)));
         break;
       default:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (?)", vnum);
         break;
     }
@@ -300,20 +301,20 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       }
 
       if (rnum != NOTHING) {
-        add_trigger(dg_ensure_script(room_script_slot(room)), read_trigger(rnum), -1);
+        add_trigger(g, dg_ensure_script(room_script_slot(room)), read_trigger(g, rnum), -1);
       } else {
-        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: non-existant trigger #%d assigned to room #%d",
                vnum, room_get_number(room));
       }
       break;
     default:
-      mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
              "SYSERR: Trigger vnum #%d assigned to non-mob/obj/room", vnum);
   }
 }
 
-void dg_obj_trigger(char *line, struct obj_data *obj)
+void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
 {
   char junk[8];
   trig_vnum vnum;
@@ -324,16 +325,16 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   count = sscanf(line, "%7s %d", junk, &vnum);
 
   if (count != 2) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: dg_obj_trigger() : Error assigning trigger! - Line was:\n  %s", line);
     return;
   }
 
-  rnum = real_trigger(vnum);
+  rnum = real_trigger(g, vnum);
   if (rnum == NOTHING) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-           vnum, obj_get_short_description(obj), obj_get_vnum(obj));
+           vnum, obj_get_short_description(obj), obj_get_vnum(g, obj));
     return;
   }
 
@@ -349,7 +350,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   }
 }
 
-void assign_triggers(void *i, int type)
+void assign_triggers(GameWorld *g, void *i, int type)
 {
   struct char_data *mob  = nullptr;
   struct obj_data *obj   = nullptr;
@@ -362,13 +363,13 @@ void assign_triggers(void *i, int type)
       mob       = (char_data *)i;
       trg_proto = char_get_proto_script(mob);
       while (trg_proto) {
-        rnum = real_trigger(trg_proto->vnum);
+        rnum = real_trigger(g, trg_proto->vnum);
         if (rnum == NOTHING) {
-          mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+          mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
-                 trg_proto->vnum, mob_index[char_get_nr(mob)].vnum);
+                 trg_proto->vnum, g->mob_index[char_get_nr(mob)].vnum);
         } else {
-          add_trigger(dg_ensure_script(char_script_slot(mob)), read_trigger(rnum), -1);
+          add_trigger(g, dg_ensure_script(char_script_slot(mob)), read_trigger(g, rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
@@ -377,12 +378,12 @@ void assign_triggers(void *i, int type)
       obj       = (obj_data *)i;
       trg_proto = obj_get_proto_script(obj);
       while (trg_proto) {
-        rnum = real_trigger(trg_proto->vnum);
+        rnum = real_trigger(g, trg_proto->vnum);
         if (rnum == NOTHING) {
           mud_log("SYSERR: trigger #%d non-existant, for obj #%d",
-                  trg_proto->vnum, obj_index[obj_get_item_number(obj)].vnum);
+                  trg_proto->vnum, g->obj_index[obj_get_item_number(obj)].vnum);
         } else {
-          add_trigger(dg_ensure_script(obj_script_slot(obj)), read_trigger(rnum), -1);
+          add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
@@ -391,19 +392,19 @@ void assign_triggers(void *i, int type)
       room      = (struct room_data *)i;
       trg_proto = room_get_proto_script(room);
       while (trg_proto) {
-        rnum = real_trigger(trg_proto->vnum);
+        rnum = real_trigger(g, trg_proto->vnum);
         if (rnum == NOTHING) {
-          mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+          mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for room #%d",
                  trg_proto->vnum, room_get_number(room));
         } else {
-          add_trigger(dg_ensure_script(room_script_slot(room)), read_trigger(rnum), -1);
+          add_trigger(g, dg_ensure_script(room_script_slot(room)), read_trigger(g, rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
       break;
     default:
-      mudlog(LOG_BRF, ADMLVL_BUILDER, true,
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
              "SYSERR: unknown type for assign_triggers()");
       break;
   }

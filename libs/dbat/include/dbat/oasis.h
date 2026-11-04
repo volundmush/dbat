@@ -73,9 +73,9 @@ constexpr int OASIS_CFG = 5;
  * Utilities exported from olc.c.
  *   -- Umm, shouldn't this say 'from oasis.c' now???  * Mythran
  */
-void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type);
+void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type);
 void split_argument(char *argument, char *tag);
-void send_cannot_edit(struct char_data *ch, zone_vnum zone);
+void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
 
 /*
  * OLC structures.
@@ -417,9 +417,9 @@ constexpr int HSEDIT_BUILDER            = 22;
  */
 #ifndef ACMD
 #define ACMD(name) \
-  void name(struct char_data *ch, char *argument, int cmd, int subcmd)
+  void name(GameWorld *g, struct char_data *ch, char *argument, int cmd, int subcmd)
 #endif
-void clear_screen(struct descriptor_data *);
+void clear_screen(GameWorld *g, struct descriptor_data *);
 ACMD(do_oasis);
 
 /*
@@ -432,38 +432,38 @@ ACMD(do_iedit);
 ACMD(do_show_save_list);
 ACMD(do_rcopy);
 
-void medit_parse(struct descriptor_data *d, char *arg);
-void medit_string_cleanup(struct descriptor_data *d, int terminator);
+void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void medit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 
-void oedit_parse(struct descriptor_data *d, char *arg);
-void oedit_string_cleanup(struct descriptor_data *d, int terminator);
+void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_oedit);
 
-void redit_string_cleanup(struct descriptor_data *d, int terminator);
-void redit_save_internally(struct descriptor_data *d);
-void redit_parse(struct descriptor_data *d, char *arg);
-void free_room(struct room_data *room);
+void redit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
+void redit_save_internally(GameWorld *g, struct descriptor_data *d);
+void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void free_room(GameWorld *g, struct room_data *room);
 ACMD(do_oasis_redit);
 
-void sedit_parse(struct descriptor_data *d, char *arg);
+void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 ACMD(do_oasis_gedit);
 
-void zedit_parse(struct descriptor_data *d, char *arg);
+void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 ACMD(do_oasis_zedit);
 
-void cedit_parse(struct descriptor_data *d, char *arg);
-void cedit_string_cleanup(struct descriptor_data *d, int terminator);
+void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void cedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
-void trigedit_parse(struct descriptor_data *d, char *arg);
+void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 
 ACMD(do_oasis_hsedit);
 
-bool parse_stats(struct descriptor_data *d, char *arg);
+bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg);
 
-bool free_strings(void *data, int type);
-void print_zone(struct char_data *ch, zone_vnum vnum);
-bool can_edit_zone(struct char_data *ch, zone_rnum rnum);
+bool free_strings(GameWorld *g, void *data, int type);
+void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum);
+bool can_edit_zone(GameWorld *g, struct char_data *ch, zone_rnum rnum);
 
 #define CONTEXT_HELP_STRING "help"
 
@@ -611,8 +611,8 @@ constexpr int CONTEXT_GEDIT_SELECT_LANGS          = 139;
 constexpr int NUM_CONTEXTS = 140;
 
 /* Prototypes for the context sensitive help system */
-bool context_help(struct descriptor_data *d, char *arg);
-void boot_context_help(void);
+bool context_help(GameWorld *g, struct descriptor_data *d, char *arg);
+void boot_context_help(GameWorld *g);
 #endif /* ifndef __GENOLC_C__ */
 
 /*. Submodes of GEDIT connectedness     . */

@@ -24,17 +24,18 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* local functions */
-static void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
+static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch, struct char_data *tch, int spellnum);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
-void affect_update(void)
+void affect_update(GameWorld *g)
 {
   struct affected_type *af, *next;
   struct char_data *i;
 
-  for (i = affect_list; i; i = char_get_next_affect(i)) {
+  for (i = g->affect_list; i; i = char_get_next_affect(i)) {
     for (af = char_get_affected(i); af; af = next) {
       next = af->next;
       if (af->duration >= 1)
@@ -42,13 +43,13 @@ void affect_update(void)
       else if (af->duration == 0) {
         if (af->type > 0)
           if (!af->next || (af->next->type != af->type) || (af->next->duration > 0)) {
-            if (spell_info[af->type].wear_off_msg)
-              send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
+            if (g->spell_info[af->type].wear_off_msg)
+              send_to_char(g, i, "%s\r\n", g->spell_info[af->type].wear_off_msg);
             if (char_get_speedboost(i) > 0 && af->type == SPELL_HAYASA) {
               char_set_speedboost(i, 0);
             }
           }
-        affect_remove(i, af);
+        affect_remove(g, i, af);
       }
     }
   }
@@ -91,7 +92,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 
 constexpr int MAX_SPELL_AFFECTS = 5; /* change if more needed */
 
-void mag_affects(int level, struct char_data *ch, struct char_data *victim,
+void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                  int spellnum)
 {
   struct affected_type af[MAX_SPELL_AFFECTS];
@@ -110,8 +111,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
   }
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
-    if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-      send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+    if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
+      send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
   }
@@ -149,7 +150,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
     case SPELL_BLINDNESS:
       if (char_mob_flagged(victim, MOB_NOBLIND)) {
-        send_to_char(ch, "You fail.\r\n");
+        send_to_char(g, ch, "You fail.\r\n");
         return;
       }
 
@@ -288,8 +289,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].bitvector = AFF_SLEEP;
 
       if (char_get_position(victim) > POS_SLEEPING) {
-        send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
-        act("$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
+        send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
+        act(g, "$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -304,8 +305,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].bitvector = AFF_SLEEP;
 
       if (char_get_position(victim) > POS_SLEEPING) {
-        send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
-        act("$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
+        send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
+        act(g, "$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -313,7 +314,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_BULL_STRENGTH:
       af[0].location = APPLY_STR;
       af[0].duration = level;
-      af[0].modifier = 1 + (rand_number(1, 4));
+      af[0].modifier = 1 + (rand_number(g, 1, 4));
       accum_duration = false;
       accum_affect   = false;
       to_vict        = "You feel stronger!";
@@ -348,7 +349,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(ch, "%s", CONFIG_NOEFFECT);
+        send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
         return;
       }
 
@@ -357,36 +358,36 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
     return;
   }
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++)
     if (af[i].bitvector || (af[i].location != APPLY_NONE))
-      affect_join(victim, af + i, accum_duration, false, accum_affect, false);
+      affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
 
   if (to_vict != nullptr)
-    act(to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, 0, ch, TO_ROOM);
 }
 
 /*
  * This function is used to provide services to mag_groups.  This function
  * is the one you should change to add new group spells.
  */
-static void perform_mag_groups(int level, struct char_data *ch,
+static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch,
                                struct char_data *tch, int spellnum)
 {
   switch (spellnum) {
     case SPELL_MASS_HEAL:
-      mag_points(level, ch, tch, SPELL_HEAL);
+      mag_points(g, level, ch, tch, SPELL_HEAL);
       break;
     case SPELL_GROUP_ARMOR:
-      mag_affects(level, ch, tch, SPELL_MAGE_ARMOR);
+      mag_affects(g, level, ch, tch, SPELL_MAGE_ARMOR);
       break;
     case SPELL_GROUP_RECALL:
-      spell_recall(level, ch, tch, nullptr, nullptr);
+      spell_recall(g, level, ch, tch, nullptr, nullptr);
       break;
   }
 }
@@ -402,7 +403,7 @@ static void perform_mag_groups(int level, struct char_data *ch,
  * To add new group spells, you shouldn't have to change anything in
  * mag_groups -- just add a new case to perform_mag_groups.
  */
-void mag_groups(int level, struct char_data *ch, int spellnum)
+void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *k;
   struct follow_type *f, *f_next;
@@ -425,12 +426,12 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
       continue;
     if (ch == tch)
       continue;
-    perform_mag_groups(level, ch, tch, spellnum);
+    perform_mag_groups(g, level, ch, tch, spellnum);
   }
 
   if ((k != ch) && char_aff_flagged(k, AFF_GROUP))
-    perform_mag_groups(level, ch, k, spellnum);
-  perform_mag_groups(level, ch, ch, spellnum);
+    perform_mag_groups(g, level, ch, k, spellnum);
+  perform_mag_groups(g, level, ch, ch, spellnum);
 }
 
 /*
@@ -438,11 +439,11 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
  *
  * No spells of this class currently implemented.
  */
-void mag_masses(int level, struct char_data *ch, int spellnum)
+void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *tch_next;
 
-  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = tch_next) {
+  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = tch_next) {
     tch_next = char_get_next_in_room(tch);
     if (tch == ch)
       continue;
@@ -460,7 +461,7 @@ void mag_masses(int level, struct char_data *ch, int spellnum)
  *
  *  area spells have limited targets within the room.
  */
-void mag_areas(int level, struct char_data *ch, int spellnum)
+void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *next_tch;
   const char *to_char = nullptr, *to_room = nullptr;
@@ -480,11 +481,11 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
   }
 
   if (to_char != nullptr)
-    act(to_char, false, ch, 0, 0, TO_CHAR);
+    act(g, to_char, false, ch, 0, 0, TO_CHAR);
   if (to_room != nullptr)
-    act(to_room, false, ch, 0, 0, TO_ROOM);
+    act(g, to_room, false, ch, 0, 0, TO_ROOM);
 
-  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_tch) {
+  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_tch) {
     next_tch = char_get_next_in_room(tch);
 
     /*
@@ -516,7 +517,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
 {
 }
 
-void mag_points(int level, struct char_data *ch, struct char_data *victim,
+void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                 int spellnum)
 {
   int healing = 0;
@@ -527,29 +528,29 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
 
   switch (spellnum) {
     case SPELL_CURE_LIGHT:
-      healing = dice(1, 8) + MIN(level, 5);
-      send_to_char(victim, "You feel better.\r\n");
+      healing = dice(g, 1, 8) + MIN(level, 5);
+      send_to_char(g, victim, "You feel better.\r\n");
       break;
     case SPELL_CURE_CRITIC:
-      healing = dice(4, 8) + MIN(level, 20);
-      send_to_char(victim, "You feel a lot better!\r\n");
+      healing = dice(g, 4, 8) + MIN(level, 20);
+      send_to_char(g, victim, "You feel a lot better!\r\n");
       break;
     case SPELL_HEAL:
-      healing = 100 + dice(3, 8);
-      send_to_char(victim, "A warm feeling floods your body.\r\n");
+      healing = 100 + dice(g, 3, 8);
+      send_to_char(g, victim, "A warm feeling floods your body.\r\n");
       if (char_aff_flagged(ch, AFF_CDEATH)) {
-        send_to_char(ch, "Your nerves settle slightly\r\n");
+        send_to_char(g, ch, "Your nerves settle slightly\r\n");
       }
       break;
     case SPELL_SENSU:
-      if (char_get_conditions(victim, HUNGER) > -1) {
-        char_set_conditions(victim, HUNGER, 48);
+      if (char_get_conditions(g, victim, HUNGER) > -1) {
+        char_set_conditions(g, victim, HUNGER, 48);
       }
-      restore(victim, true);
+      restore(g, victim, true);
       break;
 
     case ART_WHOLENESS_OF_BODY:
-      healing = getEffMaxPL(victim) - getCurPL(victim);
+      healing = getEffMaxPL(g, victim) - getCurPL(g, victim);
       healing = MAX(0, healing);
       tmp     = char_get_ki(ch) / 2;
       if (tmp > healing)
@@ -560,10 +561,10 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
       char_set_ki(ch, char_get_ki(ch) - (tmp * 2));
       break;
   }
-  update_pos(victim);
+  update_pos(g, victim);
 }
 
-void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
+void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                    int spellnum)
 {
   int spell = 0, msg_not_affected = true;
@@ -600,18 +601,18 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
 
   if (!affected_by_spell(victim, spell)) {
     if (msg_not_affected)
-      send_to_char(ch, "%s", CONFIG_NOEFFECT);
+      send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
     return;
   }
 
-  affect_from_char(victim, spell);
+  affect_from_char(g, victim, spell);
   if (to_vict != nullptr)
-    act(to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, 0, ch, TO_ROOM);
 }
 
-void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
+void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_data *obj,
                     int spellnum)
 {
   const char *to_char = nullptr, *to_room = nullptr;
@@ -662,17 +663,17 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
   }
 
   if (to_char == nullptr)
-    send_to_char(ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
   else
-    act(to_char, true, ch, obj, 0, TO_CHAR);
+    act(g, to_char, true, ch, obj, 0, TO_CHAR);
 
   if (to_room != nullptr)
-    act(to_room, true, ch, obj, 0, TO_ROOM);
+    act(g, to_room, true, ch, obj, 0, TO_ROOM);
   else if (to_char != nullptr)
-    act(to_char, true, ch, obj, 0, TO_ROOM);
+    act(g, to_char, true, ch, obj, 0, TO_ROOM);
 }
 
-void mag_creations(int level, struct char_data *ch, int spellnum)
+void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
   struct obj_data *tobj;
   obj_vnum z;
@@ -686,24 +687,24 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
       z = 10;
       break;
     default:
-      send_to_char(ch, "Spell unimplemented, it would seem.\r\n");
+      send_to_char(g, ch, "Spell unimplemented, it would seem.\r\n");
       return;
   }
 
-  if (!(tobj = read_object(z, VIRTUAL))) {
-    send_to_char(ch, "I seem to have goofed.\r\n");
+  if (!(tobj = read_object(g, z, VIRTUAL))) {
+    send_to_char(g, ch, "I seem to have goofed.\r\n");
     mud_log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
             spellnum, z);
     return;
   }
-  add_unique_id(tobj);
-  obj_to_char(tobj, ch);
-  act("$n creates $p.", false, ch, tobj, 0, TO_ROOM);
-  act("You create $p.", false, ch, tobj, 0, TO_CHAR);
-  load_otrigger(tobj);
+  add_unique_id(g, tobj);
+  obj_to_char(g, tobj, ch);
+  act(g, "$n creates $p.", false, ch, tobj, 0, TO_ROOM);
+  act(g, "You create $p.", false, ch, tobj, 0, TO_CHAR);
+  load_otrigger(g, tobj);
 }
 
-void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
+void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                   int spellnum)
 {
   struct affected_type af[MAX_SPELL_AFFECTS];
@@ -722,8 +723,8 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
   }
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
-    if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-      send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+    if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
+      send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
   }
@@ -752,7 +753,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
       break;
     case ART_QUIVERING_PALM:
       if (char_get_level(ch) <= char_get_level(victim)) {
-        send_to_char(ch, "They are too high level for that.\r\n");
+        send_to_char(g, ch, "They are too high level for that.\r\n");
         return;
       }
       af[0].duration  = MAX(6, 20 - level);
@@ -793,7 +794,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
 
     case SPELL_FLARE:
       if (char_mob_flagged(victim, MOB_NOBLIND)) {
-        send_to_char(ch, "You fail.\r\n");
+        send_to_char(g, ch, "You fail.\r\n");
         return;
       }
       af[0].location  = APPLY_ACCURACY;
@@ -821,7 +822,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(ch, "%s", CONFIG_NOEFFECT);
+        send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
         return;
       }
   /*
@@ -829,12 +830,12 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
     return;
   }
 
   if (to_vict != nullptr)
-    act(to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, 0, ch, TO_ROOM);
 }

@@ -97,7 +97,8 @@ typedef struct skill_data skill_data;
 typedef struct transform_bonus transform_bonus;
 typedef struct transforms_available transforms_available;
 typedef struct pclean_criteria_data pclean_criteria_data;
+typedef struct GameWorld GameWorld;
 
-#define ACMD(name)    void(name)(struct char_data * ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int(name)(struct char_data * ch, void *me, int cmd, char *argument)
+#define ACMD(name)    void(name)(GameWorld * g, struct char_data * ch, char *argument, int cmd, int subcmd)
+#define SPECIAL(name) int(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, char *argument)
 typedef SPECIAL((*spec_proc_func));

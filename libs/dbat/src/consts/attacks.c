@@ -1,7 +1,7 @@
 #include "dbat/consts/attacks.h"
 
 /* Combine Attack Names */
-const char *attack_names_comp[] = {
+const char *const attack_names_comp[] = {
     "Kamehameha",          /* 0 Roshi */
     "Galik Gun",           /* 1 Bardock */
     "Masenko",             /* 2 Piccolo */
@@ -19,7 +19,7 @@ const char *attack_names_comp[] = {
     "\n"};
 
 /* Combine Attack Names */
-const char *attack_names[] = {
+const char *const attack_names[] = {
     "kamehameha",          /* 0 Roshi */
     "galik gun",           /* 1 Bardock */
     "masenko",             /* 2 Piccolo */

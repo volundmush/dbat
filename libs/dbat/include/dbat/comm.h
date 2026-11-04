@@ -20,15 +20,15 @@ constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run bef
 #define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
-int arena_watch(struct char_data *ch);
-void send_to_all(const char *messg, ...) __attribute__((format(printf, 1, 2)));
-void send_to_room(room_rnum room, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_outdoor(const char *messg, ...) __attribute__((format(printf, 1, 2)));
-void send_to_moon(const char *messg, ...) __attribute__((format(printf, 1, 2)));
-void send_to_planet(int type, int planet, const char *messg, ...) __attribute__((format(printf, 3, 4)));
-void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 3, 4)));
-char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
-void close_socket(struct descriptor_data *d);
+int arena_watch(GameWorld *g, struct char_data *ch);
+void send_to_all(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
+void send_to_outdoor(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_moon(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));
+void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
+char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+void close_socket(GameWorld *g, struct descriptor_data *d);
 
 constexpr int TO_ROOM        = 1;
 constexpr int TO_VICT        = 2;
@@ -43,30 +43,22 @@ constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 /* I/O functions */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 int write_to_descriptor(int desc, const char *txt);
-size_t write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 2, 3)));
-size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 2, 0)));
-void string_add(struct descriptor_data *d, char *str);
+size_t write_to_output(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
+size_t vwrite_to_output(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
+void string_add(GameWorld *g, struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 
 constexpr int PAGE_WIDTH = 79; /* column at which the text editor wraps lines */
 
-void show_help(struct descriptor_data *t, const char *entry);
+void show_help(GameWorld *g, struct descriptor_data *t, const char *entry);
 
 /* variables */
-extern unsigned long pulse;
 extern FILE *logfile;
-extern int circle_shutdown, circle_reboot;
-extern int mother_desc;
-extern uint16_t port;
-extern int buf_switches, buf_largecount, buf_overflows;
-extern int no_specials, scheck;
 extern const char compress_offer[4];
-extern bool fCopyOver;
-extern char *last_act_message;
 
 // functions
-void init_game(uint16_t port);
+void init_game(GameWorld *g, uint16_t port);
 
-void free_bufpool(void);
+void free_bufpool(GameWorld *g);
 void setup_log(const char *filename, int fd);
 bool sendok(struct char_data *ch, int to_sleeping);

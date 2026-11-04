@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include "nanny_internal.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* The account's character slots, numbered from 1. */
 char **account_slot(struct descriptor_data *d, int n)
@@ -214,7 +215,7 @@ void userCreate(struct descriptor_data *d)
 }
 
 /* Delete A User Account */
-void userDelete(struct descriptor_data *d)
+void userDelete(GameWorld *g, struct descriptor_data *d)
 {
   int player_i;
 
@@ -223,13 +224,13 @@ void userDelete(struct descriptor_data *d)
   if (get_filename(fname, sizeof(fname), USER_FILE, d->user)) {
     for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++) {
       const char *name = *account_slot(d, n);
-      if (strcasecmp(name, "Empty") && (player_i = get_ptable_by_name(name)) >= 0)
-        remove_player(player_i);
+      if (strcasecmp(name, "Empty") && (player_i = get_ptable_by_name(g, name)) >= 0)
+        remove_player(g, player_i);
     }
     unlink(fname);
     return;
   }
-  write_to_output(d, "Error. Your user file doesn't even exist!\n");
+  write_to_output(g, d, "Error. Your user file doesn't even exist!\n");
   return;
 }
 
@@ -270,7 +271,7 @@ const char *rIntro(struct char_data *ch, char *arg)
 }
 
 /* Update A User Account */
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name)
+void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name)
 {
   struct atomic_file af;
   char fname[40];
@@ -422,7 +423,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
     if (setRpp == 0) {
       fprintf(fl, "%d\n", rpp);
     } else if (rpp + setRpp < 0) {
-      send_to_imm("RPP would be below 0, reward canceled.");
+      send_to_imm(g, "RPP would be below 0, reward canceled.");
       fprintf(fl, "%d\n", rpp);
     } else {
       rpp += setRpp;
@@ -442,7 +443,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
     if (setRBank == 0) {
       fprintf(fl, "%d\n", rbank);
     } else if (rbank + setRBank < 0) {
-      send_to_imm("RPP Bank would be below 0, reward canceled.");
+      send_to_imm(g, "RPP Bank would be below 0, reward canceled.");
       fprintf(fl, "%d\n", rbank);
     } else {
       rbank += setRBank;
@@ -452,11 +453,11 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
     atomic_commit(&af);
     return;
   }
-  send_to_imm("Error with userWrite!");
+  send_to_imm(g, "Error with userWrite!");
   return;
 }
 
-void fingerUser(struct char_data *ch, char *name)
+void fingerUser(GameWorld *g, struct char_data *ch, char *name)
 {
   char filename[40], uname[100] = "", email[100] = "", pass[100] = "", tmp1[100] = "", tmp2[100] = "", tmp3[100] = "", tmp4[100] = "", tmp5[100] = "", line[256] = "";
   int total = 0, rpp = 0, rbank = 0;
@@ -464,11 +465,11 @@ void fingerUser(struct char_data *ch, char *name)
 
   /* Read and Write User Index */
   if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
-    send_to_char(ch, "That user doesn't exist.\r\n");
+    send_to_char(g, ch, "That user doesn't exist.\r\n");
     return;
   }
   if (!(file = fopen(filename, "r"))) {
-    send_to_char(ch, "That user is bugged! Report to Iovan.\r\n");
+    send_to_char(g, ch, "That user is bugged! Report to Iovan.\r\n");
     return;
   }
 
@@ -514,49 +515,49 @@ void fingerUser(struct char_data *ch, char *name)
   }
   fclose(file);
 
-  send_to_char(ch, "@D[@gUsername   @D: @w%-30s@D]@n\r\n", uname);
-  send_to_char(ch, "@D[@gEmail      @D: @w%-30s@D]@n\r\n", email);
+  send_to_char(g, ch, "@D[@gUsername   @D: @w%-30s@D]@n\r\n", uname);
+  send_to_char(g, ch, "@D[@gEmail      @D: @w%-30s@D]@n\r\n", email);
   if (char_get_admlevel(ch) > 4) {
-    send_to_char(ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", pass);
+    send_to_char(g, ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", pass);
   } else if (char_get_admlevel(ch) > 0) {
-    send_to_char(ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", "??????????");
+    send_to_char(g, ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", "??????????");
   }
-  send_to_char(ch, "@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", total);
-  send_to_char(ch, "@D[@gRP Points  @D: @w%-30d@D]@n\r\n", rpp);
-  send_to_char(ch, "@D[@gRP Bank    @D: @w%-30d@D]@n\r\n", rbank);
+  send_to_char(g, ch, "@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", total);
+  send_to_char(g, ch, "@D[@gRP Points  @D: @w%-30d@D]@n\r\n", rpp);
+  send_to_char(g, ch, "@D[@gRP Bank    @D: @w%-30d@D]@n\r\n", rbank);
   if (char_get_admlevel(ch) > 0) {
-    send_to_char(ch, "@D[@gCh. Slot 1 @D: @w%-30s@D]@n\r\n", tmp1);
-    send_to_char(ch, "@D[@gCh. Slot 2 @D: @w%-30s@D]@n\r\n", tmp2);
-    send_to_char(ch, "@D[@gCh. Slot 3 @D: @w%-30s@D]@n\r\n", tmp3);
-    send_to_char(ch, "@D[@gCh. Slot 4 @D: @w%-30s@D]@n\r\n", tmp4);
-    send_to_char(ch, "@D[@gCh. Slot 5 @D: @w%-30s@D]@n\r\n", tmp5);
-    send_to_char(ch, "\n");
-    customRead(char_get_desc(ch), 1, name);
+    send_to_char(g, ch, "@D[@gCh. Slot 1 @D: @w%-30s@D]@n\r\n", tmp1);
+    send_to_char(g, ch, "@D[@gCh. Slot 2 @D: @w%-30s@D]@n\r\n", tmp2);
+    send_to_char(g, ch, "@D[@gCh. Slot 3 @D: @w%-30s@D]@n\r\n", tmp3);
+    send_to_char(g, ch, "@D[@gCh. Slot 4 @D: @w%-30s@D]@n\r\n", tmp4);
+    send_to_char(g, ch, "@D[@gCh. Slot 5 @D: @w%-30s@D]@n\r\n", tmp5);
+    send_to_char(g, ch, "\n");
+    customRead(g, char_get_desc(ch), 1, name);
   }
   return;
 }
 
-void userRead(struct descriptor_data *d)
+void userRead(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output(d, "                 @RUser Menu@n\n");
-  write_to_output(d, "@D=============================================@n\r\n");
-  write_to_output(d, "@D|@gUser Account  @D: @w%-27s@D|@n\n", d->user);
-  write_to_output(d, "@D|@gEmail Address @D: @w%-27s@D|@n\n", d->email);
-  write_to_output(d, "@D|@gMax Characters@D: @w%-27d@D|@n\n", d->total);
-  write_to_output(d, "@D|@gRP Points     @D: @w%-27d@D|@n\n", d->rpp);
-  write_to_output(d, "@D|@gRP Bank       @D: @w%-27d@D|@n\n", d->rbank);
-  write_to_output(d, "@D=============================================@n\r\n\r\n");
-  write_to_output(d, "      @D[@y----@YSelect A Character Slot@y----@D]@n\n");
+  write_to_output(g, d, "                 @RUser Menu@n\n");
+  write_to_output(g, d, "@D=============================================@n\r\n");
+  write_to_output(g, d, "@D|@gUser Account  @D: @w%-27s@D|@n\n", d->user);
+  write_to_output(g, d, "@D|@gEmail Address @D: @w%-27s@D|@n\n", d->email);
+  write_to_output(g, d, "@D|@gMax Characters@D: @w%-27d@D|@n\n", d->total);
+  write_to_output(g, d, "@D|@gRP Points     @D: @w%-27d@D|@n\n", d->rpp);
+  write_to_output(g, d, "@D|@gRP Bank       @D: @w%-27d@D|@n\n", d->rbank);
+  write_to_output(g, d, "@D=============================================@n\r\n\r\n");
+  write_to_output(g, d, "      @D[@y----@YSelect A Character Slot@y----@D]@n\n");
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
     if (n <= 3 || d->total >= n)
-      write_to_output(d, "                @B(@W%d@B) @C%s@n\n", n, *account_slot(d, n));
-  write_to_output(d, "\n");
-  write_to_output(d, "      @D[@y---- @YSelect Another Option @y----@D]@n\n");
-  write_to_output(d, "                @B(@WB@B) @CBuy New C. Slot @D(@R15 RPP@D)@n\n");
-  write_to_output(d, "                @B(@WC@B) @CUser's Customs\n");
-  write_to_output(d, "                @B(@WD@B) @RDelete User@n\n");
-  write_to_output(d, "                @B(@WE@B) @CEmail@n\n");
-  write_to_output(d, "                @B(@WP@B) @CNew Password@n\n");
-  write_to_output(d, "                @B(@WQ@B) @CQuit@n\n");
-  write_to_output(d, "\r\nMake your choice: \n");
+      write_to_output(g, d, "                @B(@W%d@B) @C%s@n\n", n, *account_slot(d, n));
+  write_to_output(g, d, "\n");
+  write_to_output(g, d, "      @D[@y---- @YSelect Another Option @y----@D]@n\n");
+  write_to_output(g, d, "                @B(@WB@B) @CBuy New C. Slot @D(@R15 RPP@D)@n\n");
+  write_to_output(g, d, "                @B(@WC@B) @CUser's Customs\n");
+  write_to_output(g, d, "                @B(@WD@B) @RDelete User@n\n");
+  write_to_output(g, d, "                @B(@WE@B) @CEmail@n\n");
+  write_to_output(g, d, "                @B(@WP@B) @CNew Password@n\n");
+  write_to_output(g, d, "                @B(@WQ@B) @CQuit@n\n");
+  write_to_output(g, d, "\r\nMake your choice: \n");
 }

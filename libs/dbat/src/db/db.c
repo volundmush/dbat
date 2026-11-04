@@ -65,102 +65,65 @@
 #include "dbat/context_help.h"
 #include "dbat/local_limits.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
-static void load_help(FILE *fl, char *name);
+static void load_help(GameWorld *g, FILE *fl, char *name);
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
 
-int dg_owner_purged; /* For control of scripts */
 
-int no_mail               = 0;       /* mail disabled?		 */
-int mini_mud              = 0;       /* mini-mud mode?		 */
-int no_rent_check         = 0;       /* skip rent check on boot?	 */
-time_t boot_time          = 0;       /* time of mud boot		 */
-int circle_restrict       = 0;       /* level of game restriction	 */
-int dballtime             = 0;       /* used by dragonball load system*/
-int SHENRON               = false;   /* Shenron has been summoned     */
-int DRAGONR               = 0;       /* Room Shenron has been summoned to */
-int DRAGONZ               = 0;       /* Zone Shenron has been summoned to */
-int WISH[2]               = {0, 0};  /* Keeps track of wishes granted */
-int DRAGONC               = 0;       /* Keeps count of Shenron's remaining time */
-struct char_data *EDRAGON = nullptr; /* This is Shenron when he is loaded */
-room_rnum r_mortal_start_room;       /* rnum of mortal start room	 */
-room_rnum r_immort_start_room;       /* rnum of immort start room	 */
-room_rnum r_frozen_start_room;       /* rnum of frozen start room	 */
-int xap_objs          = 0;           /* Xap objs                      */
-static int converting = false;
 
-char *credits          = nullptr; /* game credits			 */
-char *news             = nullptr; /* mud news			 */
-char *motd             = nullptr; /* message of the day - mortals  */
-char *imotd            = nullptr; /* message of the day - immorts  */
-static char *GREETINGS = nullptr; /* opening credits screen	 */
-char *GREETANSI        = nullptr; /* ansi opening credits screen	 */
-char *help             = nullptr; /* help screen			 */
-char *info             = nullptr; /* info page			 */
-char *wizlist          = nullptr; /* list of higher gods		 */
-char *immlist          = nullptr; /* list of peon gods		 */
-char *background       = nullptr; /* background story		 */
-char *handbook         = nullptr; /* handbook for new immortals	 */
-char *policies         = nullptr; /* policies page		 */
-char *ihelp            = nullptr; /* help screen (immortals)	 */
 
-struct help_index_element *help_table = nullptr; /* the help table	 */
-int top_of_helpt                      = 0;
 
-struct social_messg *soc_mess_list = nullptr; /* list of socials */
-int top_of_socialt                 = -1;      /* number of socials */
 
 /* local functions */
-static void mob_stats(struct char_data *mob);
-static void dragon_level(struct char_data *ch);
-static int check_object_spell_number(struct obj_data *obj, int val);
-static int check_object_level(struct obj_data *obj, int val);
-static void setup_dir(FILE *fl, room_rnum room, int dir);
-static void discrete_load(FILE *fl, int mode, char *filename);
-static int check_object(struct obj_data *);
-static void parse_room(FILE *fl, room_vnum virtual_nr);
-static void parse_mobile(FILE *mob_f, mob_vnum nr);
-static char *parse_object(FILE *obj_f, IDXTYPE nr);
-static void load_zones(FILE *fl, char *zonename);
+static void mob_stats(GameWorld *g, struct char_data *mob);
+static void dragon_level(GameWorld *g, struct char_data *ch);
+static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val);
+static int check_object_level(GameWorld *g, struct obj_data *obj, int val);
+static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir);
+static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename);
+static int check_object(GameWorld *g, struct obj_data *);
+static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr);
+static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr);
+static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr);
+static void load_zones(GameWorld *g, FILE *fl, char *zonename);
 static int file_to_string(const char *name, char *buf);
 static int file_to_string_alloc(const char *name, char **buf);
 static int count_alias_records(FILE *fl);
 static int count_hash_records(FILE *fl);
 static bitvector_t asciiflag_conv_aff(char *flag);
-static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr);
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr);
-static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
+static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mob_vnum nr);
+static void interpret_espec(GameWorld *g, const char *keyword, const char *value, struct char_data *ch, mob_vnum nr);
+static void parse_espec(GameWorld *g, char *buf, struct char_data *ch, mob_vnum nr);
+static bool parse_enhanced_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mob_vnum nr);
 static void get_one_line(FILE *fl, char *buf);
-static void check_start_rooms(void);
-static void renum_world(void);
-static void renum_zone_table(void);
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
-static void reset_time(void);
+static void check_start_rooms(GameWorld *g);
+static void renum_world(GameWorld *g);
+static void renum_zone_table(GameWorld *g);
+static void log_zone_error(GameWorld *g, zone_rnum zone, int cmd_no, const char *message);
+static void reset_time(GameWorld *g);
 static int suntzu_weapon_convert(int wp_type);
-static void free_obj_unique_hash();
+static void free_obj_unique_hash(GameWorld *g);
 static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-void mag_assign_spells(void);
-void load_banned(void);
-void Read_Invalid_List(void);
+void mag_assign_spells(GameWorld *g);
 static int hsort(const void *a, const void *b);
-void build_player_index(void);
+void build_player_index(GameWorld *g);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 /* external vars */
 
-static void dragon_level(struct char_data *ch)
+static void dragon_level(GameWorld *g, struct char_data *ch)
 {
   struct descriptor_data *d;
   int level = 0, count = 0;
 
-  for (d = descriptor_list; d; d = d->next) {
+  for (d = g->descriptors; d; d = d->next) {
     if (desc_is_playing(d) && char_get_admlevel(d->character) < 1) {
       level += char_get_level(d->character);
       count += 1;
@@ -170,18 +133,18 @@ static void dragon_level(struct char_data *ch)
   if (level > 0 && count > 0) {
     level = level / count;
   } else {
-    level = rand_number(60, 110);
+    level = rand_number(g, 60, 110);
   }
 
   if (level < 50) {
-    level = rand_number(40, 60);
+    level = rand_number(g, 40, 60);
   }
 
   char_set_race_level(ch, 0);
-  char_set_race_level(ch, level + rand_number(5, 20));
+  char_set_race_level(ch, level + rand_number(g, 5, 20));
 }
 
-static void mob_stats(struct char_data *mob)
+static void mob_stats(GameWorld *g, struct char_data *mob)
 {
   int start = char_get_level(mob) * 0.5, finish = char_get_level(mob);
 
@@ -189,94 +152,94 @@ static void mob_stats(struct char_data *mob)
     finish = 20;
 
   if (!char_is_humanoid(mob)) {
-    char_set_real_abils_str(mob, rand_number(start, finish));
-    char_set_real_abils_intel(mob, rand_number(start, finish) - 30);
-    char_set_real_abils_wis(mob, rand_number(start, finish) - 30);
-    char_set_real_abils_dex(mob, rand_number(start + 5, finish));
-    char_set_real_abils_con(mob, rand_number(start + 5, finish));
-    char_set_real_abils_cha(mob, rand_number(start, finish));
+    char_set_real_abils_str(mob, rand_number(g, start, finish));
+    char_set_real_abils_intel(mob, rand_number(g, start, finish) - 30);
+    char_set_real_abils_wis(mob, rand_number(g, start, finish) - 30);
+    char_set_real_abils_dex(mob, rand_number(g, start + 5, finish));
+    char_set_real_abils_con(mob, rand_number(g, start + 5, finish));
+    char_set_real_abils_cha(mob, rand_number(g, start, finish));
   } else {
     if (char_is_saiyan(mob)) {
-      char_set_real_abils_str(mob, rand_number(start + 10, finish));
-      char_set_real_abils_intel(mob, rand_number(start, finish - 10));
-      char_set_real_abils_wis(mob, rand_number(start, finish - 5));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start + 5, finish));
-      char_set_real_abils_cha(mob, rand_number(start + 5, finish));
+      char_set_real_abils_str(mob, rand_number(g, start + 10, finish));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish - 10));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish - 5));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start + 5, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start + 5, finish));
     } else if (char_is_konatsu(mob)) {
-      char_set_real_abils_str(mob, rand_number(start, finish - 10));
-      char_set_real_abils_intel(mob, rand_number(start, finish));
-      char_set_real_abils_wis(mob, rand_number(start, finish));
-      char_set_real_abils_dex(mob, rand_number(start + 10, finish));
-      char_set_real_abils_con(mob, rand_number(start, finish));
-      char_set_real_abils_cha(mob, rand_number(start, finish));
+      char_set_real_abils_str(mob, rand_number(g, start, finish - 10));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish));
+      char_set_real_abils_dex(mob, rand_number(g, start + 10, finish));
+      char_set_real_abils_con(mob, rand_number(g, start, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start, finish));
     } else if (char_is_android(mob)) {
-      char_set_real_abils_str(mob, rand_number(start, finish));
-      char_set_real_abils_intel(mob, rand_number(start, finish));
-      char_set_real_abils_wis(mob, rand_number(start, finish - 10));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start, finish));
-      char_set_real_abils_cha(mob, rand_number(start, finish));
+      char_set_real_abils_str(mob, rand_number(g, start, finish));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish - 10));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start, finish));
     } else if (char_is_majin(mob)) {
-      char_set_real_abils_str(mob, rand_number(start, finish));
-      char_set_real_abils_intel(mob, rand_number(start, finish - 10));
-      char_set_real_abils_wis(mob, rand_number(start, finish - 5));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start + 15, finish));
-      char_set_real_abils_cha(mob, rand_number(start, finish));
+      char_set_real_abils_str(mob, rand_number(g, start, finish));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish - 10));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish - 5));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start + 15, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start, finish));
     } else if (char_is_truffle(mob)) {
-      char_set_real_abils_str(mob, rand_number(start, finish - 10));
-      char_set_real_abils_intel(mob, rand_number(start + 15, finish));
-      char_set_real_abils_wis(mob, rand_number(start, finish));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start, finish));
-      char_set_real_abils_cha(mob, rand_number(start, finish));
+      char_set_real_abils_str(mob, rand_number(g, start, finish - 10));
+      char_set_real_abils_intel(mob, rand_number(g, start + 15, finish));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start, finish));
     } else if (char_is_icer(mob)) {
-      char_set_real_abils_str(mob, rand_number(start + 5, finish));
-      char_set_real_abils_intel(mob, rand_number(start, finish));
-      char_set_real_abils_wis(mob, rand_number(start, finish));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start, finish));
-      char_set_real_abils_cha(mob, rand_number(start + 10, finish));
+      char_set_real_abils_str(mob, rand_number(g, start + 5, finish));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start + 10, finish));
     } else {
-      char_set_real_abils_str(mob, rand_number(start, finish));
-      char_set_real_abils_intel(mob, rand_number(start, finish));
-      char_set_real_abils_wis(mob, rand_number(start, finish));
-      char_set_real_abils_dex(mob, rand_number(start, finish));
-      char_set_real_abils_con(mob, rand_number(start, finish));
-      char_set_real_abils_cha(mob, rand_number(start, finish));
+      char_set_real_abils_str(mob, rand_number(g, start, finish));
+      char_set_real_abils_intel(mob, rand_number(g, start, finish));
+      char_set_real_abils_wis(mob, rand_number(g, start, finish));
+      char_set_real_abils_dex(mob, rand_number(g, start, finish));
+      char_set_real_abils_con(mob, rand_number(g, start, finish));
+      char_set_real_abils_cha(mob, rand_number(g, start, finish));
     }
   }
 
   if (char_get_real_abils_str(mob) > 100)
     char_set_real_abils_str(mob, 100);
   else if (char_get_real_abils_str(mob) < 5)
-    char_set_real_abils_str(mob, rand_number(5, 8));
+    char_set_real_abils_str(mob, rand_number(g, 5, 8));
 
   if (char_get_real_abils_intel(mob) > 100)
     char_set_real_abils_intel(mob, 100);
   else if (char_get_real_abils_intel(mob) < 5)
-    char_set_real_abils_intel(mob, rand_number(5, 8));
+    char_set_real_abils_intel(mob, rand_number(g, 5, 8));
 
   if (char_get_real_abils_wis(mob) > 100)
     char_set_real_abils_wis(mob, 100);
   else if (char_get_real_abils_wis(mob) < 5)
-    char_set_real_abils_wis(mob, rand_number(5, 8));
+    char_set_real_abils_wis(mob, rand_number(g, 5, 8));
 
   if (char_get_real_abils_con(mob) > 100)
     char_set_real_abils_con(mob, 100);
   else if (char_get_real_abils_con(mob) < 5)
-    char_set_real_abils_con(mob, rand_number(5, 8));
+    char_set_real_abils_con(mob, rand_number(g, 5, 8));
 
   if (char_get_real_abils_cha(mob) > 100)
     char_set_real_abils_cha(mob, 100);
   else if (char_get_real_abils_cha(mob) < 5)
-    char_set_real_abils_cha(mob, rand_number(5, 8));
+    char_set_real_abils_cha(mob, rand_number(g, 5, 8));
 
   if (char_get_real_abils_dex(mob) > 100)
     char_set_real_abils_dex(mob, 100);
   else if (char_get_real_abils_dex(mob) < 5)
-    char_set_real_abils_dex(mob, rand_number(5, 8));
+    char_set_real_abils_dex(mob, rand_number(g, 5, 8));
 }
 
 /* Convert CWG-SunTzu armor objects to new armor types */
@@ -340,18 +303,18 @@ static int suntzu_weapon_convert(int wp_type)
 *************************************************************************/
 
 /* this is necessary for the autowiz system */
-void reboot_wizlists(void)
+void reboot_wizlists(GameWorld *g)
 {
-  file_to_string_alloc(WIZLIST_FILE, &wizlist);
-  file_to_string_alloc(IMMLIST_FILE, &immlist);
+  file_to_string_alloc(WIZLIST_FILE, &g->wizlist);
+  file_to_string_alloc(IMMLIST_FILE, &g->immlist);
 }
 
 /* Wipe out all the loaded text files, for shutting down. */
-void free_text_files(void)
+void free_text_files(GameWorld *g)
 {
   char **textfiles[] = {
-      &wizlist, &immlist, &news, &credits, &motd, &imotd, &help, &info,
-      &policies, &handbook, &background, &GREETINGS, &GREETANSI, &ihelp, nullptr};
+      &g->wizlist, &g->immlist, &g->news, &g->credits, &g->motd, &g->imotd, &g->help, &g->info,
+      &g->policies, &g->handbook, &g->background, &g->GREETINGS, &g->GREETANSI, &g->ihelp, nullptr};
   int rf;
 
   for (rf = 0; textfiles[rf]; rf++)
@@ -374,96 +337,96 @@ ACMD(do_reboot)
   one_argument(argument, arg);
 
   if (!strcasecmp(arg, "all") || *arg == '*') {
-    if (load_levels() < 0)
-      send_to_char(ch, "Cannot read level configurations\r\n");
-    if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-      prune_crlf(GREETINGS);
-    if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-      prune_crlf(GREETANSI);
-    if (file_to_string_alloc(WIZLIST_FILE, &wizlist) < 0)
-      send_to_char(ch, "Cannot read wizlist\r\n");
-    if (file_to_string_alloc(IMMLIST_FILE, &immlist) < 0)
-      send_to_char(ch, "Cannot read immlist\r\n");
-    if (file_to_string_alloc(NEWS_FILE, &news) < 0)
-      send_to_char(ch, "Cannot read news\r\n");
-    if (file_to_string_alloc(CREDITS_FILE, &credits) < 0)
-      send_to_char(ch, "Cannot read credits\r\n");
-    if (file_to_string_alloc(MOTD_FILE, &motd) < 0)
-      send_to_char(ch, "Cannot read motd\r\n");
-    if (file_to_string_alloc(IMOTD_FILE, &imotd) < 0)
-      send_to_char(ch, "Cannot read imotd\r\n");
-    if (file_to_string_alloc(HELP_PAGE_FILE, &help) < 0)
-      send_to_char(ch, "Cannot read help front page\r\n");
-    if (file_to_string_alloc(INFO_FILE, &info) < 0)
-      send_to_char(ch, "Cannot read info file\r\n");
-    if (file_to_string_alloc(POLICIES_FILE, &policies) < 0)
-      send_to_char(ch, "Cannot read policies\r\n");
-    if (file_to_string_alloc(HANDBOOK_FILE, &handbook) < 0)
-      send_to_char(ch, "Cannot read handbook\r\n");
-    if (file_to_string_alloc(BACKGROUND_FILE, &background) < 0)
-      send_to_char(ch, "Cannot read background\r\n");
-    if (help_table)
-      free_help_table();
-    index_boot(DB_BOOT_HLP);
+    if (load_levels(g) < 0)
+      send_to_char(g, ch, "Cannot read level configurations\r\n");
+    if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
+      prune_crlf(g->GREETINGS);
+    if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
+      prune_crlf(g->GREETANSI);
+    if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
+      send_to_char(g, ch, "Cannot read wizlist\r\n");
+    if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
+      send_to_char(g, ch, "Cannot read immlist\r\n");
+    if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
+      send_to_char(g, ch, "Cannot read news\r\n");
+    if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
+      send_to_char(g, ch, "Cannot read credits\r\n");
+    if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
+      send_to_char(g, ch, "Cannot read motd\r\n");
+    if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
+      send_to_char(g, ch, "Cannot read imotd\r\n");
+    if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
+      send_to_char(g, ch, "Cannot read help front page\r\n");
+    if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
+      send_to_char(g, ch, "Cannot read info file\r\n");
+    if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
+      send_to_char(g, ch, "Cannot read policies\r\n");
+    if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
+      send_to_char(g, ch, "Cannot read handbook\r\n");
+    if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
+      send_to_char(g, ch, "Cannot read background\r\n");
+    if (g->help_table)
+      free_help_table(g);
+    index_boot(g, DB_BOOT_HLP);
   } else if (!strcasecmp(arg, "levels")) {
-    if (load_levels() < 0)
-      send_to_char(ch, "Cannot read level configurations\r\n");
+    if (load_levels(g) < 0)
+      send_to_char(g, ch, "Cannot read level configurations\r\n");
   } else if (!strcasecmp(arg, "wizlist")) {
-    if (file_to_string_alloc(WIZLIST_FILE, &wizlist) < 0)
-      send_to_char(ch, "Cannot read wizlist\r\n");
+    if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
+      send_to_char(g, ch, "Cannot read wizlist\r\n");
   } else if (!strcasecmp(arg, "immlist")) {
-    if (file_to_string_alloc(IMMLIST_FILE, &immlist) < 0)
-      send_to_char(ch, "Cannot read immlist\r\n");
+    if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
+      send_to_char(g, ch, "Cannot read immlist\r\n");
   } else if (!strcasecmp(arg, "news")) {
-    if (file_to_string_alloc(NEWS_FILE, &news) < 0)
-      send_to_char(ch, "Cannot read news\r\n");
+    if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
+      send_to_char(g, ch, "Cannot read news\r\n");
   } else if (!strcasecmp(arg, "credits")) {
-    if (file_to_string_alloc(CREDITS_FILE, &credits) < 0)
-      send_to_char(ch, "Cannot read credits\r\n");
+    if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
+      send_to_char(g, ch, "Cannot read credits\r\n");
   } else if (!strcasecmp(arg, "motd")) {
-    if (file_to_string_alloc(MOTD_FILE, &motd) < 0)
-      send_to_char(ch, "Cannot read motd\r\n");
+    if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
+      send_to_char(g, ch, "Cannot read motd\r\n");
   } else if (!strcasecmp(arg, "imotd")) {
-    if (file_to_string_alloc(IMOTD_FILE, &imotd) < 0)
-      send_to_char(ch, "Cannot read imotd\r\n");
+    if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
+      send_to_char(g, ch, "Cannot read imotd\r\n");
   } else if (!strcasecmp(arg, "help")) {
-    if (file_to_string_alloc(HELP_PAGE_FILE, &help) < 0)
-      send_to_char(ch, "Cannot read help front page\r\n");
+    if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
+      send_to_char(g, ch, "Cannot read help front page\r\n");
   } else if (!strcasecmp(arg, "info")) {
-    if (file_to_string_alloc(INFO_FILE, &info) < 0)
-      send_to_char(ch, "Cannot read info\r\n");
+    if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
+      send_to_char(g, ch, "Cannot read info\r\n");
   } else if (!strcasecmp(arg, "policy")) {
-    if (file_to_string_alloc(POLICIES_FILE, &policies) < 0)
-      send_to_char(ch, "Cannot read policy\r\n");
+    if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
+      send_to_char(g, ch, "Cannot read policy\r\n");
   } else if (!strcasecmp(arg, "handbook")) {
-    if (file_to_string_alloc(HANDBOOK_FILE, &handbook) < 0)
-      send_to_char(ch, "Cannot read handbook\r\n");
+    if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
+      send_to_char(g, ch, "Cannot read handbook\r\n");
   } else if (!strcasecmp(arg, "background")) {
-    if (file_to_string_alloc(BACKGROUND_FILE, &background) < 0)
-      send_to_char(ch, "Cannot read background\r\n");
+    if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
+      send_to_char(g, ch, "Cannot read background\r\n");
   } else if (!strcasecmp(arg, "greetings")) {
-    if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-      prune_crlf(GREETINGS);
+    if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
+      prune_crlf(g->GREETINGS);
     else
-      send_to_char(ch, "Cannot read greetings.\r\n");
+      send_to_char(g, ch, "Cannot read greetings.\r\n");
   } else if (!strcasecmp(arg, "greetansi")) {
-    if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-      prune_crlf(GREETANSI);
+    if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
+      prune_crlf(g->GREETANSI);
     else
-      send_to_char(ch, "Cannot read greetings.\r\n");
+      send_to_char(g, ch, "Cannot read greetings.\r\n");
   } else if (!strcasecmp(arg, "xhelp")) {
-    if (help_table)
-      free_help_table();
-    index_boot(DB_BOOT_HLP);
+    if (g->help_table)
+      free_help_table(g);
+    index_boot(g, DB_BOOT_HLP);
   } else if (!strcasecmp(arg, "ihelp")) {
-    if (file_to_string_alloc(IHELP_PAGE_FILE, &ihelp) < 0)
-      send_to_char(ch, "Cannot read help front page\r\n");
+    if (file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp) < 0)
+      send_to_char(g, ch, "Cannot read help front page\r\n");
   } else {
-    send_to_char(ch, "Unknown reload option.\r\n");
+    send_to_char(g, ch, "Unknown reload option.\r\n");
     return;
   }
 
-  send_to_char(ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK);
 }
 
 /* The vnum lookups (real_room() and friends) are binary searches, so each table must be in ascending vnum order. */
@@ -482,57 +445,57 @@ static void check_sorted(const char *what, const void *table, IDXTYPE count, siz
   }
 }
 
-void boot_world(void)
+void boot_world(GameWorld *g)
 {
   mud_log("Loading level tables.");
-  load_levels();
+  load_levels(g);
 
   mud_log("Loading zone table.");
-  index_boot(DB_BOOT_ZON);
-  check_sorted("zone", zone_table, top_of_zone_table + 1, sizeof(*zone_table), offsetof(struct zone_data, number));
+  index_boot(g, DB_BOOT_ZON);
+  check_sorted("zone", g->zones, g->top_zone + 1, sizeof(*g->zones), offsetof(struct zone_data, number));
 
   mud_log("Loading triggers and generating index.");
-  index_boot(DB_BOOT_TRG);
+  index_boot(g, DB_BOOT_TRG);
 
   mud_log("Loading rooms.");
-  index_boot(DB_BOOT_WLD);
-  check_sorted("room", world, top_of_world + 1, sizeof(*world), offsetof(struct room_data, number));
+  index_boot(g, DB_BOOT_WLD);
+  check_sorted("room", g->rooms, g->top_room + 1, sizeof(*g->rooms), offsetof(struct room_data, number));
 
   mud_log("Renumbering rooms.");
-  renum_world();
+  renum_world(g);
 
   mud_log("Checking start rooms.");
-  check_start_rooms();
+  check_start_rooms(g);
 
   mud_log("Loading mobs and generating index.");
-  index_boot(DB_BOOT_MOB);
-  check_sorted("mobile", mob_index, top_of_mobt + 1, sizeof(*mob_index), offsetof(struct index_data, vnum));
+  index_boot(g, DB_BOOT_MOB);
+  check_sorted("mobile", g->mob_index, g->top_mob + 1, sizeof(*g->mob_index), offsetof(struct index_data, vnum));
 
   mud_log("Loading objs and generating index.");
-  index_boot(DB_BOOT_OBJ);
-  check_sorted("object", obj_index, top_of_objt + 1, sizeof(*obj_index), offsetof(struct index_data, vnum));
+  index_boot(g, DB_BOOT_OBJ);
+  check_sorted("object", g->obj_index, g->top_obj + 1, sizeof(*g->obj_index), offsetof(struct index_data, vnum));
 
   mud_log("Renumbering zone table.");
-  renum_zone_table();
+  renum_zone_table(g);
 
   mud_log("Loading disabled commands list...");
-  load_disabled();
+  load_disabled(g);
 
-  if (converting) {
+  if (g->converting) {
     mud_log("Saving converted worldfiles to disk.");
-    save_all();
+    save_all(g);
   }
 
-  if (!no_specials) {
+  if (!g->no_specials) {
     mud_log("Loading shops.");
-    index_boot(DB_BOOT_SHP);
+    index_boot(g, DB_BOOT_SHP);
 
     mud_log("Loading guild masters.");
-    index_boot(DB_BOOT_GLD);
+    index_boot(g, DB_BOOT_GLD);
   }
-  if (SELFISHMETER >= 10) {
+  if (g->SELFISHMETER >= 10) {
     mud_log("Loading Shadow Dragons.");
-    load_shadow_dragons();
+    load_shadow_dragons(g);
   }
 }
 
@@ -550,108 +513,108 @@ static void free_extra_descriptions(struct extra_descr_data *edesc)
 }
 
 /* Free the world, in a memory allocation sense. */
-void destroy_db(void)
+void destroy_db(GameWorld *g)
 {
   ssize_t cnt, itr;
   struct char_data *chtmp;
   struct obj_data *objtmp;
 
   /* Active Mobiles & Players */
-  while (character_list) {
-    chtmp          = character_list;
-    character_list = char_get_next(character_list);
+  while (g->characters) {
+    chtmp          = g->characters;
+    g->characters = char_get_next(g->characters);
     if (char_get_master(chtmp))
-      stop_follower(chtmp);
-    free_char(chtmp);
+      stop_follower(g, chtmp);
+    free_char(g, chtmp);
   }
 
   /* Active Objects */
-  while (object_list) {
-    objtmp      = object_list;
-    object_list = obj_get_next(object_list);
-    free_obj(objtmp);
+  while (g->objects) {
+    objtmp      = g->objects;
+    g->objects = obj_get_next(g->objects);
+    free_obj(g, objtmp);
   }
 
   /* Rooms */
-  for (cnt = 0; cnt <= top_of_world; cnt++) {
-    if (rroom_get_name(cnt))
-      free(rroom_get_name(cnt));
-    if (rroom_get_description(cnt))
-      free(rroom_get_description(cnt));
-    free_extra_descriptions(rroom_get_ex_description(cnt));
+  for (cnt = 0; cnt <= g->top_room; cnt++) {
+    if (rroom_get_name(g, cnt))
+      free(rroom_get_name(g, cnt));
+    if (rroom_get_description(g, cnt))
+      free(rroom_get_description(g, cnt));
+    free_extra_descriptions(rroom_get_ex_description(g, cnt));
 
     /* free any assigned scripts */
-    if (rroom_get_script(cnt))
-      extract_script(&world[cnt], WLD_TRIGGER);
+    if (rroom_get_script(g, cnt))
+      extract_script(g, &g->rooms[cnt], WLD_TRIGGER);
     /* free script proto list */
-    free_proto_script(&world[cnt], WLD_TRIGGER);
+    free_proto_script(&g->rooms[cnt], WLD_TRIGGER);
 
     for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-      if (!rroom_get_dir_option(cnt, itr))
+      if (!rroom_get_dir_option(g, cnt, itr))
         continue;
 
-      if (rroom_get_dir_option(cnt, itr)->general_description)
-        free(rroom_get_dir_option(cnt, itr)->general_description);
-      if (rroom_get_dir_option(cnt, itr)->keyword)
-        free(rroom_get_dir_option(cnt, itr)->keyword);
-      free(rroom_get_dir_option(cnt, itr));
+      if (rroom_get_dir_option(g, cnt, itr)->general_description)
+        free(rroom_get_dir_option(g, cnt, itr)->general_description);
+      if (rroom_get_dir_option(g, cnt, itr)->keyword)
+        free(rroom_get_dir_option(g, cnt, itr)->keyword);
+      free(rroom_get_dir_option(g, cnt, itr));
     }
   }
-  free(world);
-  top_of_world = 0;
+  free(g->rooms);
+  g->top_room = 0;
 
   /* Objects */
-  for (cnt = 0; cnt <= top_of_objt; cnt++) {
-    if (obj_get_name(&obj_proto[cnt]))
-      free(obj_get_name(&obj_proto[cnt]));
-    if (obj_get_description(&obj_proto[cnt]))
-      free(obj_get_description(&obj_proto[cnt]));
-    if (obj_get_short_description(&obj_proto[cnt]))
-      free(obj_get_short_description(&obj_proto[cnt]));
-    if (obj_get_action_description(&obj_proto[cnt]))
-      free(obj_get_action_description(&obj_proto[cnt]));
-    if (obj_get_ex_description(&obj_proto[cnt]))
-      free_extra_descriptions(obj_get_ex_description(&obj_proto[cnt]));
-    free(obj_get_sbinfo(&obj_proto[cnt])); /* spellbook pages */
+  for (cnt = 0; cnt <= g->top_obj; cnt++) {
+    if (obj_get_name(&g->obj_proto[cnt]))
+      free(obj_get_name(&g->obj_proto[cnt]));
+    if (obj_get_description(&g->obj_proto[cnt]))
+      free(obj_get_description(&g->obj_proto[cnt]));
+    if (obj_get_short_description(&g->obj_proto[cnt]))
+      free(obj_get_short_description(&g->obj_proto[cnt]));
+    if (obj_get_action_description(&g->obj_proto[cnt]))
+      free(obj_get_action_description(&g->obj_proto[cnt]));
+    if (obj_get_ex_description(&g->obj_proto[cnt]))
+      free_extra_descriptions(obj_get_ex_description(&g->obj_proto[cnt]));
+    free(obj_get_sbinfo(&g->obj_proto[cnt])); /* spellbook pages */
 
     /* free script proto list */
-    free_proto_script(&obj_proto[cnt], OBJ_TRIGGER);
+    free_proto_script(&g->obj_proto[cnt], OBJ_TRIGGER);
   }
-  free(obj_proto);
-  free(obj_index);
+  free(g->obj_proto);
+  free(g->obj_index);
 
   /* Mobiles */
-  for (cnt = 0; cnt <= top_of_mobt; cnt++) {
-    if (char_get_alias(&mob_proto[cnt]))
-      free(char_get_alias(&mob_proto[cnt]));
-    if (char_get_raw_title(&mob_proto[cnt]))
-      free(char_get_raw_title(&mob_proto[cnt]));
-    if (char_get_sdesc(&mob_proto[cnt]))
-      free(char_get_sdesc(&mob_proto[cnt]));
-    if (char_get_ldesc(&mob_proto[cnt]))
-      free(char_get_ldesc(&mob_proto[cnt]));
-    if (char_get_ddesc(&mob_proto[cnt]))
-      free(char_get_ddesc(&mob_proto[cnt]));
+  for (cnt = 0; cnt <= g->top_mob; cnt++) {
+    if (char_get_alias(&g->mob_proto[cnt]))
+      free(char_get_alias(&g->mob_proto[cnt]));
+    if (char_get_raw_title(&g->mob_proto[cnt]))
+      free(char_get_raw_title(&g->mob_proto[cnt]));
+    if (char_get_sdesc(&g->mob_proto[cnt]))
+      free(char_get_sdesc(&g->mob_proto[cnt]));
+    if (char_get_ldesc(&g->mob_proto[cnt]))
+      free(char_get_ldesc(&g->mob_proto[cnt]));
+    if (char_get_ddesc(&g->mob_proto[cnt]))
+      free(char_get_ddesc(&g->mob_proto[cnt]));
 
     /* free script proto list */
-    free_proto_script(&mob_proto[cnt], MOB_TRIGGER);
+    free_proto_script(&g->mob_proto[cnt], MOB_TRIGGER);
 
-    while (char_get_affected(&mob_proto[cnt]))
-      affect_remove(&mob_proto[cnt], char_get_affected(&mob_proto[cnt]));
+    while (char_get_affected(&g->mob_proto[cnt]))
+      affect_remove(g, &g->mob_proto[cnt], char_get_affected(&g->mob_proto[cnt]));
   }
-  free(mob_proto);
-  free(mob_index);
+  free(g->mob_proto);
+  free(g->mob_index);
 
   /* Shops */
-  destroy_shops();
+  destroy_shops(g);
 
   /* Guilds */
-  destroy_guilds();
+  destroy_guilds(g);
 
   /* Zones */
   /* zone table reset queue */
-  if (reset_q.head) {
-    struct reset_q_element *ftemp = reset_q.head, *temp;
+  if (g->reset_q.head) {
+    struct reset_q_element *ftemp = g->reset_q.head, *temp;
     while (ftemp) {
       temp = ftemp->next;
       free(ftemp);
@@ -659,14 +622,14 @@ void destroy_db(void)
     }
   }
 
-#define THIS_CMD zone_table[cnt].cmd[itr]
+#define THIS_CMD g->zones[cnt].cmd[itr]
 
-  for (cnt = 0; cnt <= top_of_zone_table; cnt++) {
-    if (zone_table[cnt].name)
-      free(zone_table[cnt].name);
-    if (zone_table[cnt].builders)
-      free(zone_table[cnt].builders);
-    if (zone_table[cnt].cmd) {
+  for (cnt = 0; cnt <= g->top_zone; cnt++) {
+    if (g->zones[cnt].name)
+      free(g->zones[cnt].name);
+    if (g->zones[cnt].builders)
+      free(g->zones[cnt].builders);
+    if (g->zones[cnt].cmd) {
       /* first see if any vars were defined in this zone */
       for (itr = 0; THIS_CMD.command != 'S'; itr++)
         if (THIS_CMD.command == 'V') {
@@ -676,16 +639,16 @@ void destroy_db(void)
             free(THIS_CMD.sarg2);
         }
       /* then free the command list */
-      free(zone_table[cnt].cmd);
+      free(g->zones[cnt].cmd);
     }
   }
-  free(zone_table);
+  free(g->zones);
 
 #undef THIS_CMD
 
   /* zone table reset queue */
-  if (reset_q.head) {
-    struct reset_q_element *ftemp = reset_q.head, *temp;
+  if (g->reset_q.head) {
+    struct reset_q_element *ftemp = g->reset_q.head, *temp;
     while (ftemp) {
       temp = ftemp->next;
       free(ftemp);
@@ -694,13 +657,13 @@ void destroy_db(void)
   }
 
   /* Triggers */
-  for (cnt = 0; cnt < top_of_trigt; cnt++) {
-    if (trig_index[cnt]->proto) {
+  for (cnt = 0; cnt < g->top_of_trigt; cnt++) {
+    if (g->trig_index[cnt]->proto) {
       /* make sure to nuke the command list (memory leak) */
       /* free_trigger() doesn't free the command list */
-      if (trig_index[cnt]->proto->cmdlist) {
+      if (g->trig_index[cnt]->proto->cmdlist) {
         struct cmdlist_element *i, *j;
-        i = trig_index[cnt]->proto->cmdlist;
+        i = g->trig_index[cnt]->proto->cmdlist;
         while (i) {
           j = i->next;
           if (i->cmd)
@@ -709,24 +672,24 @@ void destroy_db(void)
           i = j;
         }
       }
-      free_trigger(trig_index[cnt]->proto);
+      free_trigger(g, g->trig_index[cnt]->proto);
     }
-    free(trig_index[cnt]);
+    free(g->trig_index[cnt]);
   }
-  free(trig_index);
+  free(g->trig_index);
 
   /* Events */
-  event_free_all();
+  event_free_all(g);
 
   /* context sensitive help system */
-  free_context_help();
+  free_context_help(g);
 
   free_feats();
 
-  free_obj_unique_hash();
+  free_obj_unique_hash(g);
 
   mud_log("Freeing Assemblies.");
-  free_assemblies();
+  free_assemblies(g);
 }
 
 /* You can define this to anything you want; 1 would work but it would
@@ -739,140 +702,139 @@ void destroy_db(void)
      - Elie Rosenblum Dec. 12 2003 */
 constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
-static struct obj_unique_hash_elem **obj_unique_hash_pools = nullptr;
 
-static void init_obj_unique_hash()
+static void init_obj_unique_hash(GameWorld *g)
 {
-  CREATE(obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
+  CREATE(g->obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
 }
 
 /* body of the booting system */
-void boot_db(void)
+void boot_db(GameWorld *g)
 {
   zone_rnum i;
 
   mud_log("Boot db -- BEGIN.");
 
   mud_log("Resetting the game time:");
-  reset_time();
+  reset_time(g);
 
   mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
-  file_to_string_alloc(NEWS_FILE, &news);
-  file_to_string_alloc(CREDITS_FILE, &credits);
-  file_to_string_alloc(MOTD_FILE, &motd);
-  file_to_string_alloc(IMOTD_FILE, &imotd);
-  file_to_string_alloc(HELP_PAGE_FILE, &help);
-  file_to_string_alloc(INFO_FILE, &info);
-  file_to_string_alloc(WIZLIST_FILE, &wizlist);
-  file_to_string_alloc(IMMLIST_FILE, &immlist);
-  file_to_string_alloc(POLICIES_FILE, &policies);
-  file_to_string_alloc(HANDBOOK_FILE, &handbook);
-  file_to_string_alloc(BACKGROUND_FILE, &background);
-  file_to_string_alloc(IHELP_PAGE_FILE, &ihelp);
-  if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-    prune_crlf(GREETINGS);
-  if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-    prune_crlf(GREETANSI);
+  file_to_string_alloc(NEWS_FILE, &g->news);
+  file_to_string_alloc(CREDITS_FILE, &g->credits);
+  file_to_string_alloc(MOTD_FILE, &g->motd);
+  file_to_string_alloc(IMOTD_FILE, &g->imotd);
+  file_to_string_alloc(HELP_PAGE_FILE, &g->help);
+  file_to_string_alloc(INFO_FILE, &g->info);
+  file_to_string_alloc(WIZLIST_FILE, &g->wizlist);
+  file_to_string_alloc(IMMLIST_FILE, &g->immlist);
+  file_to_string_alloc(POLICIES_FILE, &g->policies);
+  file_to_string_alloc(HANDBOOK_FILE, &g->handbook);
+  file_to_string_alloc(BACKGROUND_FILE, &g->background);
+  file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp);
+  if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
+    prune_crlf(g->GREETINGS);
+  if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
+    prune_crlf(g->GREETANSI);
 
   mud_log("Loading spell definitions.");
-  mag_assign_spells();
+  mag_assign_spells(g);
 
   mud_log("Loading feats.");
-  assign_feats();
+  assign_feats(g);
 
-  boot_world();
+  boot_world(g);
 
   mud_log("Loading help entries.");
-  index_boot(DB_BOOT_HLP);
+  index_boot(g, DB_BOOT_HLP);
 
   mud_log("Setting up context sensitive help system for OLC");
-  boot_context_help();
+  boot_context_help(g);
 
   mud_log("Generating player index.");
-  build_player_index();
+  build_player_index(g);
 
-  if (ERAPLAYERS <= 0)
-    ERAPLAYERS = top_of_p_table + 1;
+  if (g->ERAPLAYERS <= 0)
+    g->ERAPLAYERS = g->top_of_p_table + 1;
 
   insure_directory(LIB_PLROBJS "CRASH");
 
   mud_log("Booting mail system.");
-  if (!scan_file()) {
+  if (!scan_file(g)) {
     mud_log("    Mail boot failed -- Mail system disabled");
-    no_mail = 1;
+    g->no_mail = 1;
   }
 
   if (auto_pwipe) {
     mud_log("Cleaning out inactive players.");
-    clean_pfiles();
+    clean_pfiles(g);
   }
 
   mud_log("Loading social messages.");
-  boot_social_messages();
+  boot_social_messages(g);
 
   mud_log("Building command list.");
-  create_command_list(); /* aedit patch -- M. Scott */
+  create_command_list(g); /* aedit patch -- M. Scott */
 
   mud_log("Assigning function pointers:");
 
-  if (!no_specials) {
+  if (!g->no_specials) {
     mud_log("   Mobiles.");
-    assign_mobiles();
+    assign_mobiles(g);
     mud_log("   Shopkeepers.");
-    assign_the_shopkeepers();
+    assign_the_shopkeepers(g);
     mud_log("   Objects.");
-    assign_objects();
+    assign_objects(g);
     mud_log("   Rooms.");
-    assign_rooms();
+    assign_rooms(g);
     mud_log("   Guildmasters.");
-    assign_the_guilds();
+    assign_the_guilds(g);
   }
 
   mud_log("Init Object Unique Hash");
-  init_obj_unique_hash();
+  init_obj_unique_hash(g);
 
   mud_log("Booting assembled objects.");
-  assemblyBootAssemblies();
+  assemblyBootAssemblies(g);
 
   mud_log("Sorting command list and spells.");
-  sort_commands();
-  sort_spells();
-  sort_feats();
+  sort_commands(g);
+  sort_spells(g);
+  sort_feats(g);
 
   mud_log("Booting boards system.");
-  init_boards();
+  init_boards(g);
 
   mud_log("Reading banned site and invalid-name list.");
-  load_banned();
-  Read_Invalid_List();
+  load_banned(g);
+  Read_Invalid_List(g);
 
-  if (!no_rent_check) {
+  if (!g->no_rent_check) {
     mud_log("Deleting timed-out crash and rent files:");
-    update_obj_file();
+    update_obj_file(g);
     mud_log("   Done.");
   }
 
   /* Moved here so the object limit code works. -gg 6/24/98 */
-  if (!mini_mud) {
+  if (!g->mini_mud) {
     mud_log("Booting houses.");
-    House_boot();
+    House_boot(g);
   }
 
-  for (i = 0; i <= top_of_zone_table; i++) {
-    mud_log("Resetting #%d: %s (rooms %d-%d).", zone_table[i].number,
-            zone_table[i].name, zone_table[i].bot, zone_table[i].top);
-    reset_zone(i);
+  for (i = 0; i <= g->top_zone; i++) {
+    mud_log("Resetting #%d: %s (rooms %d-%d).", g->zones[i].number,
+            g->zones[i].name, g->zones[i].bot, g->zones[i].top);
+    reset_zone(g, i);
   }
 
-  reset_q.head = reset_q.tail = nullptr;
+  g->reset_q.head = g->reset_q.tail = nullptr;
 
-  boot_time = time(0);
+  g->boot_time = time(0);
 
   mud_log("Boot db -- DONE.");
 }
 
 /* save the auction file */
-void auc_save()
+void auc_save(GameWorld *g)
 {
   FILE *fl;
 
@@ -881,7 +843,7 @@ void auc_save()
   else {
     struct obj_data *obj, *next_obj;
 
-    for (obj = rroom_get_contents(real_room(80)); obj; obj = next_obj) {
+    for (obj = rroom_get_contents(g, real_room(g, 80)); obj; obj = next_obj) {
       next_obj = obj_get_next_content(obj);
       if (obj) {
         fprintf(fl, "%" PRId64 " %s %d %d %d %d %ld\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
@@ -930,7 +892,7 @@ static void fscanf_time(FILE *fl, time_t *t)
     *t = v;
 }
 
-static void reset_time(void)
+static void reset_time(GameWorld *g)
 {
   time_t beginning_of_time = 0;
   FILE *bgtime;
@@ -939,76 +901,76 @@ static void reset_time(void)
     mud_log("SYSERR: Can't read from '%s' time file.", TIME_FILE);
   else {
     fscanf_time(bgtime, &beginning_of_time);
-    fscanf_time(bgtime, &NEWSUPDATE);
-    fscanf_time(bgtime, &BOARDNEWMORT);
-    fscanf_time(bgtime, &BOARDNEWDUO);
-    fscanf_time(bgtime, &BOARDNEWCOD);
-    fscanf_time(bgtime, &BOARDNEWBUI);
-    fscanf_time(bgtime, &BOARDNEWIMM);
-    fscanf_time(bgtime, &INTERESTTIME);
-    fscanf_time(bgtime, &LASTINTEREST);
-    fscanf(bgtime, "%d\n", &HIGHPCOUNT);
-    fscanf_time(bgtime, &PCOUNTDATE);
-    fscanf(bgtime, "%d\n", &WISHTIME);
-    fscanf(bgtime, "%d\n", &PCOUNT);
-    fscanf_time(bgtime, &LASTPAYOUT);
-    fscanf(bgtime, "%d\n", &LASTPAYTYPE);
-    fscanf(bgtime, "%d\n", &LASTNEWS);
-    fscanf(bgtime, "%d\n", &dballtime);
-    fscanf(bgtime, "%d\n", &SELFISHMETER);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON1);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON2);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON3);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON4);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON5);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON6);
-    fscanf(bgtime, "%d\n", &SHADOW_DRAGON7);
-    fscanf(bgtime, "%d\n", &ERAPLAYERS);
+    fscanf_time(bgtime, &g->NEWSUPDATE);
+    fscanf_time(bgtime, &g->BOARDNEWMORT);
+    fscanf_time(bgtime, &g->BOARDNEWDUO);
+    fscanf_time(bgtime, &g->BOARDNEWCOD);
+    fscanf_time(bgtime, &g->BOARDNEWBUI);
+    fscanf_time(bgtime, &g->BOARDNEWIMM);
+    fscanf_time(bgtime, &g->INTERESTTIME);
+    fscanf_time(bgtime, &g->LASTINTEREST);
+    fscanf(bgtime, "%d\n", &g->HIGHPCOUNT);
+    fscanf_time(bgtime, &g->PCOUNTDATE);
+    fscanf(bgtime, "%d\n", &g->WISHTIME);
+    fscanf(bgtime, "%d\n", &g->PCOUNT);
+    fscanf_time(bgtime, &g->LASTPAYOUT);
+    fscanf(bgtime, "%d\n", &g->LASTPAYTYPE);
+    fscanf(bgtime, "%d\n", &g->LASTNEWS);
+    fscanf(bgtime, "%d\n", &g->dballtime);
+    fscanf(bgtime, "%d\n", &g->SELFISHMETER);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON1);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON2);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON3);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON4);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON5);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON6);
+    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON7);
+    fscanf(bgtime, "%d\n", &g->ERAPLAYERS);
     fclose(bgtime);
   }
 
-  if (dballtime == 0)
-    dballtime = 604800;
+  if (g->dballtime == 0)
+    g->dballtime = 604800;
 
   if (beginning_of_time == 0)
     beginning_of_time = 650336715;
 
-  time_info = *mud_time_passed(time(0), beginning_of_time);
+  g->time_info = *mud_time_passed(time(0), beginning_of_time);
 
-  if (time_info.hours <= 4)
-    weather_info.sunlight = SUN_DARK;
-  else if (time_info.hours == 5)
-    weather_info.sunlight = SUN_RISE;
-  else if (time_info.hours <= 20)
-    weather_info.sunlight = SUN_LIGHT;
-  else if (time_info.hours == 21)
-    weather_info.sunlight = SUN_SET;
+  if (g->time_info.hours <= 4)
+    g->weather_info.sunlight = SUN_DARK;
+  else if (g->time_info.hours == 5)
+    g->weather_info.sunlight = SUN_RISE;
+  else if (g->time_info.hours <= 20)
+    g->weather_info.sunlight = SUN_LIGHT;
+  else if (g->time_info.hours == 21)
+    g->weather_info.sunlight = SUN_SET;
   else
-    weather_info.sunlight = SUN_DARK;
+    g->weather_info.sunlight = SUN_DARK;
 
-  mud_log("   Current Gametime: %dH %dD %dM %dY.", time_info.hours,
-          time_info.day, time_info.month, time_info.year);
+  mud_log("   Current Gametime: %dH %dD %dM %dY.", g->time_info.hours,
+          g->time_info.day, g->time_info.month, g->time_info.year);
 
-  weather_info.pressure = 960;
-  if ((time_info.month >= 7) && (time_info.month <= 12))
-    weather_info.pressure += dice(1, 50);
+  g->weather_info.pressure = 960;
+  if ((g->time_info.month >= 7) && (g->time_info.month <= 12))
+    g->weather_info.pressure += dice(g, 1, 50);
   else
-    weather_info.pressure += dice(1, 80);
+    g->weather_info.pressure += dice(g, 1, 80);
 
-  weather_info.change = 0;
+  g->weather_info.change = 0;
 
-  if (weather_info.pressure <= 980)
-    weather_info.sky = SKY_LIGHTNING;
-  else if (weather_info.pressure <= 1000)
-    weather_info.sky = SKY_RAINING;
-  else if (weather_info.pressure <= 1020)
-    weather_info.sky = SKY_CLOUDY;
+  if (g->weather_info.pressure <= 980)
+    g->weather_info.sky = SKY_LIGHTNING;
+  else if (g->weather_info.pressure <= 1000)
+    g->weather_info.sky = SKY_RAINING;
+  else if (g->weather_info.pressure <= 1020)
+    g->weather_info.sky = SKY_CLOUDY;
   else
-    weather_info.sky = SKY_CLOUDLESS;
+    g->weather_info.sky = SKY_CLOUDLESS;
 }
 
 /* Write the time in 'when' to the MUD-time file. */
-void save_mud_time(struct time_info_data *when)
+void save_mud_time(GameWorld *g, struct time_info_data *when)
 {
   struct atomic_file af;
   FILE *bgtime;
@@ -1017,31 +979,31 @@ void save_mud_time(struct time_info_data *when)
     mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
   else {
     fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(when));
-    fprintf(bgtime, "%lld\n", (long long)NEWSUPDATE);
-    fprintf(bgtime, "%lld\n", (long long)BOARDNEWMORT);
-    fprintf(bgtime, "%lld\n", (long long)BOARDNEWDUO);
-    fprintf(bgtime, "%lld\n", (long long)BOARDNEWCOD);
-    fprintf(bgtime, "%lld\n", (long long)BOARDNEWBUI);
-    fprintf(bgtime, "%lld\n", (long long)BOARDNEWIMM);
-    fprintf(bgtime, "%lld\n", (long long)INTERESTTIME);
-    fprintf(bgtime, "%lld\n", (long long)LASTINTEREST);
-    fprintf(bgtime, "%d\n", HIGHPCOUNT);
-    fprintf(bgtime, "%lld\n", (long long)PCOUNTDATE);
-    fprintf(bgtime, "%d\n", WISHTIME);
-    fprintf(bgtime, "%d\n", PCOUNT);
-    fprintf(bgtime, "%lld\n", (long long)LASTPAYOUT);
-    fprintf(bgtime, "%d\n", LASTPAYTYPE);
-    fprintf(bgtime, "%d\n", LASTNEWS);
-    fprintf(bgtime, "%d\n", dballtime);
-    fprintf(bgtime, "%d\n", SELFISHMETER);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON1);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON2);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON3);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON4);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON5);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON6);
-    fprintf(bgtime, "%d\n", SHADOW_DRAGON7);
-    fprintf(bgtime, "%d\n", ERAPLAYERS);
+    fprintf(bgtime, "%lld\n", (long long)g->NEWSUPDATE);
+    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWMORT);
+    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWDUO);
+    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWCOD);
+    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWBUI);
+    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWIMM);
+    fprintf(bgtime, "%lld\n", (long long)g->INTERESTTIME);
+    fprintf(bgtime, "%lld\n", (long long)g->LASTINTEREST);
+    fprintf(bgtime, "%d\n", g->HIGHPCOUNT);
+    fprintf(bgtime, "%lld\n", (long long)g->PCOUNTDATE);
+    fprintf(bgtime, "%d\n", g->WISHTIME);
+    fprintf(bgtime, "%d\n", g->PCOUNT);
+    fprintf(bgtime, "%lld\n", (long long)g->LASTPAYOUT);
+    fprintf(bgtime, "%d\n", g->LASTPAYTYPE);
+    fprintf(bgtime, "%d\n", g->LASTNEWS);
+    fprintf(bgtime, "%d\n", g->dballtime);
+    fprintf(bgtime, "%d\n", g->SELFISHMETER);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON1);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON2);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON3);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON4);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON5);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON6);
+    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON7);
+    fprintf(bgtime, "%d\n", g->ERAPLAYERS);
     atomic_commit(&af);
   }
 }
@@ -1103,7 +1065,7 @@ static int count_hash_records(FILE *fl)
   return (count);
 }
 
-void index_boot(int mode)
+void index_boot(GameWorld *g, int mode)
 {
   const char *index_filename, *prefix = nullptr; /* NULL or egcs 1.1 complains */
   FILE *db_index, *db_file;
@@ -1140,7 +1102,7 @@ void index_boot(int mode)
       exit(1);
   }
 
-  if (mini_mud)
+  if (g->mini_mud)
     index_filename = MINDEX_FILE;
   else
     index_filename = INDEX_FILE;
@@ -1186,34 +1148,34 @@ void index_boot(int mode)
    */
   switch (mode) {
     case DB_BOOT_TRG:
-      CREATE(trig_index, struct index_data *, rec_count);
+      CREATE(g->trig_index, struct index_data *, rec_count);
       break;
     case DB_BOOT_WLD:
-      CREATE(world, struct room_data, rec_count);
+      CREATE(g->rooms, struct room_data, rec_count);
       size[0] = sizeof(struct room_data) * rec_count;
       mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_MOB:
-      CREATE(mob_proto, struct char_data, rec_count);
-      CREATE(mob_index, struct index_data, rec_count);
+      CREATE(g->mob_proto, struct char_data, rec_count);
+      CREATE(g->mob_index, struct index_data, rec_count);
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct char_data) * rec_count;
       mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_OBJ:
-      CREATE(obj_proto, struct obj_data, rec_count);
-      CREATE(obj_index, struct index_data, rec_count);
+      CREATE(g->obj_proto, struct obj_data, rec_count);
+      CREATE(g->obj_index, struct index_data, rec_count);
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct obj_data) * rec_count;
       mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_ZON:
-      CREATE(zone_table, struct zone_data, rec_count);
+      CREATE(g->zones, struct zone_data, rec_count);
       size[0] = sizeof(struct zone_data) * rec_count;
       mud_log("   %d zones, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_HLP:
-      CREATE(help_table, struct help_index_element, rec_count);
+      CREATE(g->help_table, struct help_index_element, rec_count);
       size[0] = sizeof(struct help_index_element) * rec_count;
       mud_log("   %d entries, %d bytes.", rec_count, size[0]);
       break;
@@ -1232,19 +1194,19 @@ void index_boot(int mode)
       case DB_BOOT_OBJ:
       case DB_BOOT_MOB:
       case DB_BOOT_TRG:
-        discrete_load(db_file, mode, buf2);
+        discrete_load(g, db_file, mode, buf2);
         break;
       case DB_BOOT_ZON:
-        load_zones(db_file, buf2);
+        load_zones(g, db_file, buf2);
         break;
       case DB_BOOT_HLP:
-        load_help(db_file, buf2);
+        load_help(g, db_file, buf2);
         break;
       case DB_BOOT_SHP:
-        boot_the_shops(db_file, buf2, rec_count);
+        boot_the_shops(g, db_file, buf2, rec_count);
         break;
       case DB_BOOT_GLD:
-        boot_the_guilds(db_file, buf2, rec_count);
+        boot_the_guilds(g, db_file, buf2, rec_count);
         break;
     }
 
@@ -1255,12 +1217,12 @@ void index_boot(int mode)
 
   /* Sort the help index. */
   if (mode == DB_BOOT_HLP) {
-    qsort(help_table, top_of_helpt, sizeof(struct help_index_element), hsort);
-    top_of_helpt--;
+    qsort(g->help_table, g->top_of_helpt, sizeof(struct help_index_element), hsort);
+    g->top_of_helpt--;
   }
 }
 
-static void discrete_load(FILE *fl, int mode, char *filename)
+static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
 {
   IDXTYPE nr = -1, last;
   char line[READ_SIZE];
@@ -1300,16 +1262,16 @@ static void discrete_load(FILE *fl, int mode, char *filename)
       else
         switch (mode) {
           case DB_BOOT_WLD:
-            parse_room(fl, nr);
+            parse_room(g, fl, nr);
             break;
           case DB_BOOT_MOB:
-            parse_mobile(fl, nr);
+            parse_mobile(g, fl, nr);
             break;
           case DB_BOOT_TRG:
-            parse_trigger(fl, nr);
+            parse_trigger(g, fl, nr);
             break;
           case DB_BOOT_OBJ:
-            strlcpy(line, parse_object(fl, nr), sizeof(line));
+            strlcpy(line, parse_object(g, fl, nr), sizeof(line));
             break;
         }
     } else {
@@ -1388,10 +1350,8 @@ static bitvector_t asciiflag_conv_aff(char *flag)
   return (flags);
 }
 /* load the rooms */
-static void parse_room(FILE *fl, room_vnum virtual_nr)
+static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 {
-  static room_rnum room_nr = 0;
-  static zone_rnum zone    = 0;
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
   char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
@@ -1401,16 +1361,16 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
   /* This really had better fit or there are other problems. */
   snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-  zone = real_zone_by_thing(virtual_nr);
-  if (zone == NOWHERE) {
+  g->parse_room_zone = real_zone_by_thing(g, virtual_nr);
+  if (g->parse_room_zone == NOWHERE) {
     mud_log("SYSERR: Room #%d is outside of any zone.", virtual_nr);
     exit(1);
   }
 
-  rroom_set_zone(room_nr, zone);
-  rroom_set_number(room_nr, virtual_nr);
-  rroom_set_name(room_nr, fread_string(fl, buf2));
-  rroom_set_description(room_nr, fread_string(fl, buf2));
+  rroom_set_zone(g, g->parse_room_index, g->parse_room_zone);
+  rroom_set_number(g, g->parse_room_index, virtual_nr);
+  rroom_set_name(g, g->parse_room_index, fread_string(fl, buf2));
+  rroom_set_description(g, g->parse_room_index, fread_string(fl, buf2));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1430,26 +1390,26 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
    */
 
     mud_log("Converting room #%d to 128bits..", virtual_nr);
-    rroom_get_room_flags(room_nr)[0] = asciiflag_conv(flags);
-    rroom_get_room_flags(room_nr)[1] = 0;
-    rroom_get_room_flags(room_nr)[2] = 0;
-    rroom_get_room_flags(room_nr)[3] = 0;
+    rroom_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
+    rroom_get_room_flags(g, g->parse_room_index)[1] = 0;
+    rroom_get_room_flags(g, g->parse_room_index)[2] = 0;
+    rroom_get_room_flags(g, g->parse_room_index)[3] = 0;
 
     sprintf(flags, "room #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
     if (bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
-      add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
-      converting = true;
+      add_to_save_list(g, g->zones[real_zone_by_thing(g, virtual_nr)].number, 3);
+      g->converting = true;
     }
 
     mud_log("   done.");
   } else if (retval == 6) {
-    rroom_get_room_flags(room_nr)[0] = asciiflag_conv(flags);
-    rroom_get_room_flags(room_nr)[1] = asciiflag_conv(flags2);
-    rroom_get_room_flags(room_nr)[2] = asciiflag_conv(flags3);
-    rroom_get_room_flags(room_nr)[3] = asciiflag_conv(flags4);
+    rroom_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
+    rroom_get_room_flags(g, g->parse_room_index)[1] = asciiflag_conv(flags2);
+    rroom_get_room_flags(g, g->parse_room_index)[2] = asciiflag_conv(flags3);
+    rroom_get_room_flags(g, g->parse_room_index)[3] = asciiflag_conv(flags4);
 
-    rroom_set_sector_type(room_nr, t[2]);
+    rroom_set_sector_type(g, g->parse_room_index, t[2]);
     sprintf(flags, "object #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
   } else {
@@ -1457,45 +1417,45 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
     exit(1);
   }
 
-  rroom_set_func(room_nr, nullptr);
-  rroom_set_contents(room_nr, nullptr);
-  rroom_set_people(room_nr, nullptr);
-  rroom_set_light(room_nr, 0); /* Zero light sources */
-  rroom_set_timed(room_nr, -1);
-  rroom_set_dmg(room_nr, 0);
-  rroom_set_gravity(room_nr, 0);
+  rroom_set_func(g, g->parse_room_index, nullptr);
+  rroom_set_contents(g, g->parse_room_index, nullptr);
+  rroom_set_people(g, g->parse_room_index, nullptr);
+  rroom_set_light(g, g->parse_room_index, 0); /* Zero light sources */
+  rroom_set_timed(g, g->parse_room_index, -1);
+  rroom_set_dmg(g, g->parse_room_index, 0);
+  rroom_set_gravity(g, g->parse_room_index, 0);
 
-  if (rroom_flagged(room_nr, ROOM_VEGETA) || rroom_flagged(room_nr, ROOM_GRAVITYX10)) {
-    rroom_set_gravity(room_nr, 10);
+  if (rroom_flagged(g, g->parse_room_index, ROOM_VEGETA) || rroom_flagged(g, g->parse_room_index, ROOM_GRAVITYX10)) {
+    rroom_set_gravity(g, g->parse_room_index, 10);
   }
   if (virtual_nr >= 19800 && virtual_nr <= 19899) {
-    rroom_set_gravity(room_nr, 1000);
+    rroom_set_gravity(g, g->parse_room_index, 1000);
   }
   if (virtual_nr >= 64000 && virtual_nr <= 64006) {
-    rroom_set_gravity(room_nr, 100);
+    rroom_set_gravity(g, g->parse_room_index, 100);
   }
   if (virtual_nr >= 64007 && virtual_nr <= 64016) {
-    rroom_set_gravity(room_nr, 300);
+    rroom_set_gravity(g, g->parse_room_index, 300);
   }
   if (virtual_nr >= 64017 && virtual_nr <= 64030) {
-    rroom_set_gravity(room_nr, 500);
+    rroom_set_gravity(g, g->parse_room_index, 500);
   }
   if (virtual_nr >= 64031 && virtual_nr <= 64048) {
-    rroom_set_gravity(room_nr, 1000);
+    rroom_set_gravity(g, g->parse_room_index, 1000);
   }
   if (virtual_nr >= 64049 && virtual_nr <= 64070) {
-    rroom_set_gravity(room_nr, 5000);
+    rroom_set_gravity(g, g->parse_room_index, 5000);
   }
   if (virtual_nr >= 64071 && virtual_nr <= 64096) {
-    rroom_set_gravity(room_nr, 10000);
+    rroom_set_gravity(g, g->parse_room_index, 10000);
   }
   if (virtual_nr == 64097) {
-    rroom_set_gravity(room_nr, 1000);
+    rroom_set_gravity(g, g->parse_room_index, 1000);
   }
   for (i = 0; i < NUM_OF_DIRS; i++)
-    rroom_set_dir_option(room_nr, i, nullptr);
+    rroom_set_dir_option(g, g->parse_room_index, i, nullptr);
 
-  rroom_set_ex_description(room_nr, nullptr);
+  rroom_set_ex_description(g, g->parse_room_index, nullptr);
 
   snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1506,7 +1466,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
     }
     switch (*line) {
       case 'D':
-        setup_dir(fl, room_nr, atoi(line + 1));
+        setup_dir(g, fl, g->parse_room_index, atoi(line + 1));
         break;
       case 'E':
         CREATE(new_descr, struct extra_descr_data, 1);
@@ -1525,19 +1485,19 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
             new_descr->description = tmp;
           }
         }
-        new_descr->next               = rroom_get_ex_description(room_nr);
-        rroom_set_ex_description(room_nr, new_descr);
+        new_descr->next               = rroom_get_ex_description(g, g->parse_room_index);
+        rroom_set_ex_description(g, g->parse_room_index, new_descr);
         break;
       case 'S': /* end of room */
         /* DG triggers -- script is defined after the end of the room */
         letter = fread_letter(fl);
         ungetc(letter, fl);
         while (letter == 'T') {
-          dg_read_trigger(fl, &world[room_nr], WLD_TRIGGER);
+          dg_read_trigger(g, fl, &g->rooms[g->parse_room_index], WLD_TRIGGER);
           letter = fread_letter(fl);
           ungetc(letter, fl);
         }
-        top_of_world = room_nr++;
+        g->top_room = g->parse_room_index++;
         return;
       default:
         mud_log("%s", buf);
@@ -1547,18 +1507,18 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
 }
 
 /* read direction data */
-static void setup_dir(FILE *fl, room_rnum room, int dir)
+static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", rroom_get_vnum(room) + 1, dir);
+  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", rroom_get_vnum(g, room) + 1, dir);
 
   struct room_direction_data *new_exit;
   CREATE(new_exit, struct room_direction_data, 1);
-  rroom_set_dir_option(room, dir, new_exit);
-  rroom_get_dir_option(room, dir)->general_description = fread_string(fl, buf2);
-  rroom_get_dir_option(room, dir)->keyword             = fread_string(fl, buf2);
+  rroom_set_dir_option(g, room, dir, new_exit);
+  rroom_get_dir_option(g, room, dir)->general_description = fread_string(fl, buf2);
+  rroom_get_dir_option(g, room, dir)->keyword             = fread_string(fl, buf2);
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Format error, %s", buf2);
@@ -1570,106 +1530,106 @@ static void setup_dir(FILE *fl, room_rnum room, int dir)
   } else if (bitwarning == false) {
 
     if (t[0] == 1)
-      rroom_get_dir_option(room, dir)->exit_info = EX_ISDOOR;
+      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR;
     else if (t[0] == 2)
-      rroom_get_dir_option(room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF;
+      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF;
     else if (t[0] == 3)
-      rroom_get_dir_option(room, dir)->exit_info = EX_ISDOOR | EX_SECRET;
+      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_SECRET;
     else if (t[0] == 4)
-      rroom_get_dir_option(room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
+      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
     else
-      rroom_get_dir_option(room, dir)->exit_info = 0;
+      rroom_get_dir_option(g, room, dir)->exit_info = 0;
 
-    rroom_get_dir_option(room, dir)->key     = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-    rroom_get_dir_option(room, dir)->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
+    rroom_get_dir_option(g, room, dir)->key     = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
+    rroom_get_dir_option(g, room, dir)->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
 
     if (retval == 3) {
       mud_log("Converting world files to include DC add ons.");
-      rroom_get_dir_option(room, dir)->dclock        = 20;
-      rroom_get_dir_option(room, dir)->dchide        = 20;
-      rroom_get_dir_option(room, dir)->dcskill       = 0;
-      rroom_get_dir_option(room, dir)->dcmove        = 0;
-      rroom_get_dir_option(room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(room, dir)->totalfailroom = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->dclock        = 20;
+      rroom_get_dir_option(g, room, dir)->dchide        = 20;
+      rroom_get_dir_option(g, room, dir)->dcskill       = 0;
+      rroom_get_dir_option(g, room, dir)->dcmove        = 0;
+      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
+      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(zone_table[rroom_get_zone(room)].number, 3);
-        converting = true;
+        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        g->converting = true;
       }
     } else if (retval == 5) {
-      rroom_get_dir_option(room, dir)->dclock        = t[3];
-      rroom_get_dir_option(room, dir)->dchide        = t[4];
-      rroom_get_dir_option(room, dir)->dcskill       = 0;
-      rroom_get_dir_option(room, dir)->dcmove        = 0;
-      rroom_get_dir_option(room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(room, dir)->totalfailroom = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
+      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
+      rroom_get_dir_option(g, room, dir)->dcskill       = 0;
+      rroom_get_dir_option(g, room, dir)->dcmove        = 0;
+      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
+      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(zone_table[rroom_get_zone(room)].number, 3);
-        converting = true;
+        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        g->converting = true;
       }
     } else if (retval == 7) {
-      rroom_get_dir_option(room, dir)->dclock        = t[3];
-      rroom_get_dir_option(room, dir)->dchide        = t[4];
-      rroom_get_dir_option(room, dir)->dcskill       = t[5];
-      rroom_get_dir_option(room, dir)->dcmove        = t[6];
-      rroom_get_dir_option(room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(room, dir)->totalfailroom = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
+      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
+      rroom_get_dir_option(g, room, dir)->dcskill       = t[5];
+      rroom_get_dir_option(g, room, dir)->dcmove        = t[6];
+      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
+      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(zone_table[rroom_get_zone(room)].number, 3);
-        converting = true;
+        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        g->converting = true;
       }
     } else if (retval == 11) {
-      rroom_get_dir_option(room, dir)->dclock        = t[3];
-      rroom_get_dir_option(room, dir)->dchide        = t[4];
-      rroom_get_dir_option(room, dir)->dcskill       = t[5];
-      rroom_get_dir_option(room, dir)->dcmove        = t[6];
-      rroom_get_dir_option(room, dir)->failsavetype  = t[7];
-      rroom_get_dir_option(room, dir)->dcfailsave    = t[8];
-      rroom_get_dir_option(room, dir)->failroom      = t[9];
-      rroom_get_dir_option(room, dir)->totalfailroom = t[10];
+      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
+      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
+      rroom_get_dir_option(g, room, dir)->dcskill       = t[5];
+      rroom_get_dir_option(g, room, dir)->dcmove        = t[6];
+      rroom_get_dir_option(g, room, dir)->failsavetype  = t[7];
+      rroom_get_dir_option(g, room, dir)->dcfailsave    = t[8];
+      rroom_get_dir_option(g, room, dir)->failroom      = t[9];
+      rroom_get_dir_option(g, room, dir)->totalfailroom = t[10];
     }
   }
 }
 
 /* make sure the start rooms exist & resolve their vnums to rnums */
-static void check_start_rooms(void)
+static void check_start_rooms(GameWorld *g)
 {
-  if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
+  if ((g->r_mortal_start_room = real_room(g, CONFIG_MORTAL_START)) == NOWHERE) {
     mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
     exit(1);
   }
-  if ((r_immort_start_room = real_room(CONFIG_IMMORTAL_START)) == NOWHERE) {
-    if (!mini_mud)
+  if ((g->r_immort_start_room = real_room(g, CONFIG_IMMORTAL_START)) == NOWHERE) {
+    if (!g->mini_mud)
       mud_log("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
-    r_immort_start_room = r_mortal_start_room;
+    g->r_immort_start_room = g->r_mortal_start_room;
   }
-  if ((r_frozen_start_room = real_room(CONFIG_FROZEN_START)) == NOWHERE) {
-    if (!mini_mud)
+  if ((g->r_frozen_start_room = real_room(g, CONFIG_FROZEN_START)) == NOWHERE) {
+    if (!g->mini_mud)
       mud_log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
-    r_frozen_start_room = r_mortal_start_room;
+    g->r_frozen_start_room = g->r_mortal_start_room;
   }
 }
 
 /* resolve all vnums into rnums in the world */
-static void renum_world(void)
+static void renum_world(GameWorld *g)
 {
   room_rnum room;
   int door;
 
-  for (room = 0; room <= top_of_world; room++)
+  for (room = 0; room <= g->top_room; room++)
     for (door = 0; door < NUM_OF_DIRS; door++)
-      if (rroom_get_dir_option(room, door))
-        if (rroom_get_dir_option(room, door)->to_room != NOWHERE)
-          rroom_get_dir_option(room, door)->to_room =
-              real_room(rroom_get_dir_option(room, door)->to_room);
+      if (rroom_get_dir_option(g, room, door))
+        if (rroom_get_dir_option(g, room, door)->to_room != NOWHERE)
+          rroom_get_dir_option(g, room, door)->to_room =
+              real_room(g, rroom_get_dir_option(g, room, door)->to_room);
 }
 
-#define ZCMD2 zone_table[zone].cmd[cmd_no]
+#define ZCMD2 g->zones[zone].cmd[cmd_no]
 
 /*
  * "resulve vnums into rnums in the zone reset tables"
@@ -1682,14 +1642,14 @@ static void renum_world(void)
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
-static void renum_zone_table(void)
+static void renum_zone_table(GameWorld *g)
 {
   int cmd_no;
   room_rnum a, b, c, olda, oldb, oldc;
   zone_rnum zone;
   char buf[128];
 
-  for (zone = 0; zone <= top_of_zone_table; zone++)
+  for (zone = 0; zone <= g->top_zone; zone++)
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       a = b = c = 0;
       olda      = ZCMD2.arg1;
@@ -1697,45 +1657,45 @@ static void renum_zone_table(void)
       oldc      = ZCMD2.arg3;
       switch (ZCMD2.command) {
         case 'M':
-          a = ZCMD2.arg1 = real_mobile(ZCMD2.arg1);
-          c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+          a = ZCMD2.arg1 = real_mobile(g, ZCMD2.arg1);
+          c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
           break;
         case 'O':
-          a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
+          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
           if (ZCMD2.arg3 != NOWHERE)
-            c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+            c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
           break;
         case 'G':
-          a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
+          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
           break;
         case 'E':
-          a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
+          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
           break;
         case 'P':
-          a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-          c = ZCMD2.arg3 = real_object(ZCMD2.arg3);
+          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
+          c = ZCMD2.arg3 = real_object(g, ZCMD2.arg3);
           break;
         case 'D':
-          a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
+          a = ZCMD2.arg1 = real_room(g, ZCMD2.arg1);
           break;
         case 'R': /* rem obj from room */
-          a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
-          b = ZCMD2.arg2 = real_object(ZCMD2.arg2);
+          a = ZCMD2.arg1 = real_room(g, ZCMD2.arg1);
+          b = ZCMD2.arg2 = real_object(g, ZCMD2.arg2);
           break;
         case 'T': /* a trigger */
-          b = ZCMD2.arg2 = real_trigger(ZCMD2.arg2);
-          c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+          b = ZCMD2.arg2 = real_trigger(g, ZCMD2.arg2);
+          c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
           break;
         case 'V': /* trigger variable assignment */
-          b = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+          b = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
           break;
       }
       if (a == NOWHERE || b == NOWHERE || c == NOWHERE) {
-        if (!mini_mud) {
+        if (!g->mini_mud) {
           snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
                    a == NOWHERE ? olda : b == NOWHERE ? oldb
                                                       : oldc);
-          log_zone_error(zone, cmd_no, buf);
+          log_zone_error(g, zone, cmd_no, buf);
         }
         ZCMD2.command = '*';
       }
@@ -1754,7 +1714,7 @@ static void mob_autobalance(struct char_data *ch)
   char_set_mob_specials_damsizedice(ch, 0);
 }
 
-static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
+static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mob_vnum nr)
 {
   int t[10];
   char line[READ_SIZE];
@@ -1847,7 +1807,7 @@ static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
   char_set_sex(ch, t[2]);
 
   char_set_speaking(ch, MIN_LANGUAGES);
-  set_height_and_weight_by_race(ch);
+  set_height_and_weight_by_race(g, ch);
 
   if (char_mob_flagged(ch, MOB_AUTOBALANCE)) {
     mob_autobalance(ch);
@@ -1875,7 +1835,7 @@ static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
 #define RANGE(low, high) \
   (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr)
+static void interpret_espec(GameWorld *g, const char *keyword, const char *value, struct char_data *ch, mob_vnum nr)
 {
   int num_arg = 0, matched = false;
   int num, num2, num3, num4, num5, num6;
@@ -1909,7 +1869,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
   CASE("StrAdd")
   {
     mud_log("mob #%d trying to set StrAdd, rebalance its strength.",
-            char_get_mob_vnum(ch));
+            char_get_mob_vnum(g, ch));
   }
 
   CASE("Int")
@@ -1989,7 +1949,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
       af.location  = num4;
       af.bitvector = num5;
       af.specific  = num6;
-      affect_to_char(ch, &af);
+      affect_to_char(g, ch, &af);
     }
   }
 
@@ -2037,7 +1997,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr)
+static void parse_espec(GameWorld *g, char *buf, struct char_data *ch, mob_vnum nr)
 {
   char *ptr;
 
@@ -2046,14 +2006,14 @@ static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr)
     while (isspace(*ptr))
       ptr++;
   }
-  interpret_espec(buf, ptr, ch, nr);
+  interpret_espec(g, buf, ptr, ch, nr);
 }
 
-static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
+static bool parse_enhanced_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mob_vnum nr)
 {
   char line[READ_SIZE];
 
-  parse_simple_mob(mob_f, ch, nr);
+  parse_simple_mob(g, mob_f, ch, nr);
 
   while (get_line(mob_f, line)) {
     if (!strcmp(line, "E")) /* end of the enhanced section */
@@ -2062,20 +2022,20 @@ static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
       mud_log("SYSERR: Unterminated E section in mob #%d", nr);
       return false;
     } else
-      parse_espec(line, ch, nr);
+      parse_espec(g, line, ch, nr);
   }
 
   mud_log("SYSERR: Unexpected end of file reached after mob #%d", nr);
   return false;
 }
 
-static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
+static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *ch)
 {
   int j, t[10], retval;
   char line[READ_SIZE], *tmpptr, letter;
   char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
   char f7[128], f8[128], buf2[128];
-  mob_vnum nr = mob_index[char_get_nr(ch)].vnum;
+  mob_vnum nr = g->mob_index[char_get_nr(ch)].vnum;
 
   /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
   char_set_player_specials(ch, nullptr);
@@ -2141,8 +2101,8 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     letter = *f4;
 
     if (bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
-      converting = true;
+      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 0);
+      g->converting = true;
     }
 
     mud_log("   done.");
@@ -2185,11 +2145,11 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
   switch (toupper(letter)) {
     case 'S': /* Simple monsters */
-      parse_simple_mob(mob_f, ch, nr);
+      parse_simple_mob(g, mob_f, ch, nr);
       break;
     case 'E': /* Circle3 Enhanced monsters */
-      parse_enhanced_mob(mob_f, ch, nr);
-      mob_stats(ch);
+      parse_enhanced_mob(g, mob_f, ch, nr);
+      mob_stats(g, ch);
       break;
     /* add new mob types here.. */
     default:
@@ -2201,7 +2161,7 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   letter = fread_letter(mob_f);
   ungetc(letter, mob_f);
   while (letter == 'T') {
-    dg_read_trigger(mob_f, ch, MOB_TRIGGER);
+    dg_read_trigger(g, mob_f, ch, MOB_TRIGGER);
     letter = fread_letter(mob_f);
     ungetc(letter, mob_f);
   }
@@ -2220,30 +2180,28 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   return true;
 }
 
-static void parse_mobile(FILE *mob_f, mob_vnum nr)
+static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr)
 {
-  static mob_rnum i = 0;
 
-  mob_index[i].vnum   = nr;
-  mob_index[i].number = 0;
-  mob_index[i].func   = nullptr;
+  g->mob_index[g->parse_mob_index].vnum   = nr;
+  g->mob_index[g->parse_mob_index].number = 0;
+  g->mob_index[g->parse_mob_index].func   = nullptr;
 
-  clear_char(mob_proto + i);
+  clear_char(g->mob_proto + g->parse_mob_index);
 
-  char_set_nr(&mob_proto[i], i);
-  char_set_desc(&mob_proto[i], nullptr);
+  char_set_nr(&g->mob_proto[g->parse_mob_index], g->parse_mob_index);
+  char_set_desc(&g->mob_proto[g->parse_mob_index], nullptr);
 
-  if (parse_mobile_from_file(mob_f, mob_proto + i)) {
-    top_of_mobt = i++;
+  if (parse_mobile_from_file(g, mob_f, g->mob_proto + g->parse_mob_index)) {
+    g->top_mob = g->parse_mob_index++;
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
   }
 }
 
 /* read all objects from obj file; generate index and prototypes */
-static char *parse_object(FILE *obj_f, IDXTYPE nr)
+static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 {
-  static obj_rnum i = 0;
   static char line[READ_SIZE];
   int t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
   char *tmpptr, buf2[128];
@@ -2252,33 +2210,33 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
 
-  obj_index[i].vnum   = nr;
-  obj_index[i].number = 0;
-  obj_index[i].func   = nullptr;
+  g->obj_index[g->parse_obj_index].vnum   = nr;
+  g->obj_index[g->parse_obj_index].number = 0;
+  g->obj_index[g->parse_obj_index].func   = nullptr;
 
-  clear_object(obj_proto + i);
-  obj_set_item_number(&obj_proto[i], i);
+  clear_object(g->obj_proto + g->parse_obj_index);
+  obj_set_item_number(&g->obj_proto[g->parse_obj_index], g->parse_obj_index);
 
   sprintf(buf2, "object #%d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  obj_set_name(&obj_proto[i], fread_string(obj_f, buf2));
-  if (obj_get_name(&obj_proto[i]) == nullptr) {
+  obj_set_name(&g->obj_proto[g->parse_obj_index], fread_string(obj_f, buf2));
+  if (obj_get_name(&g->obj_proto[g->parse_obj_index]) == nullptr) {
     mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_short_description(&obj_proto[i], tmpptr);
+  obj_set_short_description(&g->obj_proto[g->parse_obj_index], tmpptr);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
 
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_description(&obj_proto[i], tmpptr);
+  obj_set_description(&g->obj_proto[g->parse_obj_index], tmpptr);
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
-  obj_set_action_description(&obj_proto[i], fread_string(obj_f, buf2));
+  obj_set_action_description(&g->obj_proto[g->parse_obj_index], fread_string(obj_f, buf2));
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -2298,41 +2256,41 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
       t[3] = asciiflag_conv_aff(f3);
 
     mud_log("Converting object #%d to 128bits..", nr);
-    obj_get_extra_flags(obj_proto + i)[0] = asciiflag_conv(f1);
-    obj_get_extra_flags(obj_proto + i)[1] = 0;
-    obj_get_extra_flags(obj_proto + i)[2] = 0;
-    obj_get_extra_flags(obj_proto + i)[3] = 0;
-    obj_get_wear_flags(obj_proto + i)[0]  = asciiflag_conv(f2);
-    obj_get_wear_flags(obj_proto + i)[1]  = 0;
-    obj_get_wear_flags(obj_proto + i)[2]  = 0;
-    obj_get_wear_flags(obj_proto + i)[3]  = 0;
-    obj_get_bitvector(obj_proto + i)[0]   = asciiflag_conv_aff(f3);
-    obj_get_bitvector(obj_proto + i)[1]   = 0;
-    obj_get_bitvector(obj_proto + i)[2]   = 0;
-    obj_get_bitvector(obj_proto + i)[3]   = 0;
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f1);
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[1] = 0;
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[2] = 0;
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[3] = 0;
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[0]  = asciiflag_conv(f2);
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[1]  = 0;
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[2]  = 0;
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[3]  = 0;
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[0]   = asciiflag_conv_aff(f3);
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[1]   = 0;
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[2]   = 0;
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[3]   = 0;
 
     if (bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = true;
+      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      g->converting = true;
     }
 
     mud_log("   done.");
   } else if (retval == 13) {
 
-    obj_get_extra_flags(obj_proto + i)[0] = asciiflag_conv(f1);
-    obj_get_extra_flags(obj_proto + i)[1] = asciiflag_conv(f2);
-    obj_get_extra_flags(obj_proto + i)[2] = asciiflag_conv(f3);
-    obj_get_extra_flags(obj_proto + i)[3] = asciiflag_conv(f4);
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f1);
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f2);
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f3);
+    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f4);
 
-    obj_get_wear_flags(obj_proto + i)[0] = asciiflag_conv(f5);
-    obj_get_wear_flags(obj_proto + i)[1] = asciiflag_conv(f6);
-    obj_get_wear_flags(obj_proto + i)[2] = asciiflag_conv(f7);
-    obj_get_wear_flags(obj_proto + i)[3] = asciiflag_conv(f8);
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f5);
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f6);
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f7);
+    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f8);
 
-    obj_get_bitvector(obj_proto + i)[0] = asciiflag_conv(f9);
-    obj_get_bitvector(obj_proto + i)[1] = asciiflag_conv(f10);
-    obj_get_bitvector(obj_proto + i)[2] = asciiflag_conv(f11);
-    obj_get_bitvector(obj_proto + i)[3] = asciiflag_conv(f12);
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f9);
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f10);
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f11);
+    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f12);
 
   } else {
     mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -2340,7 +2298,7 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
   }
 
   /* Object flags checked in check_object(). */
-  obj_set_type_flag(obj_proto + i, t[0]);
+  obj_set_type_flag(g->obj_proto + g->parse_obj_index, t[0]);
 
   if (!get_line(obj_f, line)) {
     mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -2356,26 +2314,26 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
   }
 
   for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-    obj_set_value(obj_proto + i, j, t[j]);
+    obj_set_value(g->obj_proto + g->parse_obj_index, j, t[j]);
 
-  if ((obj_get_type_flag(obj_proto + i) == ITEM_PORTAL ||
-       obj_get_type_flag(obj_proto + i) == ITEM_HATCH) &&
-      (!obj_get_value(obj_proto + i, VAL_DOOR_DCLOCK) ||
-       !obj_get_value(obj_proto + i, VAL_DOOR_DCHIDE))) {
-    obj_set_value(obj_proto + i, VAL_DOOR_DCLOCK, 20);
-    obj_set_value(obj_proto + i, VAL_DOOR_DCHIDE, 20);
+  if ((obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_PORTAL ||
+       obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_HATCH) &&
+      (!obj_get_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCLOCK) ||
+       !obj_get_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCHIDE))) {
+    obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCLOCK, 20);
+    obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCHIDE, 20);
     if (bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = true;
+      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      g->converting = true;
     }
   }
 
-  if (obj_get_type_flag(obj_proto + i) == ITEM_WEAPON && obj_get_value(obj_proto + i, 0) > 169) {
-    obj_set_value(obj_proto + i, 0, suntzu_weapon_convert(t[0]));
+  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_WEAPON && obj_get_value(g->obj_proto + g->parse_obj_index, 0) > 169) {
+    obj_set_value(g->obj_proto + g->parse_obj_index, 0, suntzu_weapon_convert(t[0]));
 
     if (bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = true;
+      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      g->converting = true;
     }
   }
 
@@ -2401,29 +2359,29 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
       exit(1);
     }
   }
-  obj_set_weight(obj_proto + i, t[0]);
-  obj_set_cost(obj_proto + i, t[1]);
-  obj_set_cost_per_day(obj_proto + i, t[2]);
-  obj_set_level(obj_proto + i, t[3]);
-  obj_set_size(obj_proto + i, SIZE_MEDIUM);
+  obj_set_weight(g->obj_proto + g->parse_obj_index, t[0]);
+  obj_set_cost(g->obj_proto + g->parse_obj_index, t[1]);
+  obj_set_cost_per_day(g->obj_proto + g->parse_obj_index, t[2]);
+  obj_set_level(g->obj_proto + g->parse_obj_index, t[3]);
+  obj_set_size(g->obj_proto + g->parse_obj_index, SIZE_MEDIUM);
 
   /* check to make sure that weight of containers exceeds curr. quantity */
-  if (obj_get_type_flag(obj_proto + i) == ITEM_DRINKCON ||
-      obj_get_type_flag(obj_proto + i) == ITEM_FOUNTAIN) {
-    if (obj_get_weight(obj_proto + i) < obj_get_value(obj_proto + i, 1))
-      obj_set_weight(obj_proto + i, obj_get_value(obj_proto + i, 1) + 5);
+  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_DRINKCON ||
+      obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_FOUNTAIN) {
+    if (obj_get_weight(g->obj_proto + g->parse_obj_index) < obj_get_value(g->obj_proto + g->parse_obj_index, 1))
+      obj_set_weight(g->obj_proto + g->parse_obj_index, obj_get_value(g->obj_proto + g->parse_obj_index, 1) + 5);
   }
   /* *** make sure portal objects have their timer set correctly *** */
-  if (obj_get_type_flag(obj_proto + i) == ITEM_PORTAL) {
-    obj_set_timer(obj_proto + i, -1);
+  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_PORTAL) {
+    obj_set_timer(g->obj_proto + g->parse_obj_index, -1);
   }
 
   /* *** extra descriptions and affect fields *** */
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-    obj_get_affected(&obj_proto[i])[j].location = APPLY_NONE;
-    obj_get_affected(&obj_proto[i])[j].modifier = 0;
-    obj_get_affected(&obj_proto[i])[j].specific = 0;
+    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].location = APPLY_NONE;
+    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].modifier = 0;
+    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = 0;
   }
 
   strcat(buf2, ", after numeric constants\n" /* strcat: OK (for 'buf2 >= 87') */
@@ -2440,8 +2398,8 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
         CREATE(new_descr, struct extra_descr_data, 1);
         new_descr->keyword          = fread_string(obj_f, buf2);
         new_descr->description      = fread_string(obj_f, buf2);
-        new_descr->next             = obj_get_ex_description(&obj_proto[i]);
-        obj_set_ex_description(&obj_proto[i], new_descr);
+        new_descr->next             = obj_get_ex_description(&g->obj_proto[g->parse_obj_index]);
+        obj_set_ex_description(&g->obj_proto[g->parse_obj_index], new_descr);
         break;
       case 'A':
         if (j >= MAX_OBJ_AFFECT) {
@@ -2468,11 +2426,11 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
 
         if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
           mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                  nr, obj_get_short_description(obj_proto + i));
+                  nr, obj_get_short_description(g->obj_proto + g->parse_obj_index));
         }
-        obj_get_affected(&obj_proto[i])[j].location = t[0];
-        obj_get_affected(&obj_proto[i])[j].modifier = t[1];
-        obj_get_affected(&obj_proto[i])[j].specific = t[2];
+        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].location = t[0];
+        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].modifier = t[1];
+        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = t[2];
         j++;
         break;
       case 'S': /* Spells for Spellbooks*/
@@ -2494,15 +2452,15 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
                   buf2, retval, line);
           exit(1);
         }
-        if (!obj_get_sbinfo(&obj_proto[i])) {
-          CREATE(*obj_sbinfo_slot(&obj_proto[i]), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+        if (!obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])) {
+          CREATE(*obj_sbinfo_slot(&g->obj_proto[g->parse_obj_index]), struct obj_spellbook_spell, SPELLBOOK_SIZE);
         }
-        obj_get_sbinfo(&obj_proto[i])[j].spellname = t[0];
-        obj_get_sbinfo(&obj_proto[i])[j].pages     = t[1];
+        obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].spellname = t[0];
+        obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].pages     = t[1];
         j++;
         break;
       case 'T': /* DG triggers */
-        dg_obj_trigger(line, &obj_proto[i]);
+        dg_obj_trigger(g, line, &g->obj_proto[g->parse_obj_index]);
         break;
       case 'Z':
         if (!get_line(obj_f, line)) {
@@ -2518,18 +2476,18 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
                   buf2, line);
           exit(1);
         }
-        obj_set_size(obj_proto + i, t[0]);
+        obj_set_size(g->obj_proto + g->parse_obj_index, t[0]);
         break;
       case '$':
       case '#':
         /* Objects that set CHARM on players are bad. */
-        if (obj_aff_flagged(obj_proto + i, AFF_CHARM)) {
+        if (obj_aff_flagged(g->obj_proto + g->parse_obj_index, AFF_CHARM)) {
           mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-          obj_aff_set(obj_proto + i, AFF_CHARM, false);
+          obj_aff_set(g->obj_proto + g->parse_obj_index, AFF_CHARM, false);
         }
-        top_of_objt = i;
-        check_object(obj_proto + i);
-        i++;
+        g->top_obj = g->parse_obj_index;
+        check_object(g, g->obj_proto + g->parse_obj_index);
+        g->parse_obj_index++;
         return (line);
       default:
         mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -2539,12 +2497,12 @@ static char *parse_object(FILE *obj_f, IDXTYPE nr)
   return line;
 }
 
-#define Z zone_table[zone]
+#define Z g->zones[g->parse_zone_index]
 
 /* load the zone table and command tables */
-static void load_zones(FILE *fl, char *zonename)
+static void load_zones(GameWorld *g, FILE *fl, char *zonename)
 {
-  static zone_rnum zone = 0;
+  zone_rnum zone = g->parse_zone_index; /* ZCMD2 indexes by this */
   int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
   char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
   int zone_fix = false;
@@ -2702,7 +2660,7 @@ static void load_zones(FILE *fl, char *zonename)
     exit(1);
   }
 
-  top_of_zone_table = zone++;
+  g->top_zone = g->parse_zone_index++;
 }
 
 #undef Z
@@ -2717,23 +2675,23 @@ static void get_one_line(FILE *fl, char *buf)
   buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
 }
 
-void free_help_table(void)
+void free_help_table(GameWorld *g)
 {
-  if (help_table) {
+  if (g->help_table) {
     int hp;
-    for (hp = 0; hp <= top_of_helpt; hp++) { /* top_of_helpt is the last index */
-      if (help_table[hp].keywords)
-        free(help_table[hp].keywords);
-      if (help_table[hp].entry && !help_table[hp].duplicate)
-        free(help_table[hp].entry);
+    for (hp = 0; hp <= g->top_of_helpt; hp++) { /* top_of_helpt is the last index */
+      if (g->help_table[hp].keywords)
+        free(g->help_table[hp].keywords);
+      if (g->help_table[hp].entry && !g->help_table[hp].duplicate)
+        free(g->help_table[hp].entry);
     }
-    free(help_table);
-    help_table = nullptr;
+    free(g->help_table);
+    g->help_table = nullptr;
   }
-  top_of_helpt = 0;
+  g->top_of_helpt = 0;
 }
 
-static void load_help(FILE *fl, char *name)
+static void load_help(GameWorld *g, FILE *fl, char *name)
 {
   char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
   size_t entrylen;
@@ -2786,7 +2744,7 @@ static void load_help(FILE *fl, char *name)
 
     while (*next_key) {
       el.keywords                = strdup(next_key);
-      help_table[top_of_helpt++] = el;
+      g->help_table[g->top_of_helpt++] = el;
       el.duplicate++;
       scan = one_word(scan, next_key);
     }
@@ -2808,77 +2766,77 @@ static int hsort(const void *a, const void *b)
 *  procedures for resetting, both play-time and boot-time	 	 *
 *************************************************************************/
 
-int vnum_mobile(char *searchname, struct char_data *ch)
+int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch)
 {
   mob_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= top_of_mobt; nr++)
-    if (isname(searchname, char_get_alias(&mob_proto[nr])))
-      send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, mob_index[nr].vnum, char_get_sdesc(&mob_proto[nr]),
-                   char_get_proto_script(&mob_proto[nr]) ? "[TRIG]" : "");
+  for (nr = 0; nr <= g->top_mob; nr++)
+    if (isname(searchname, char_get_alias(&g->mob_proto[nr])))
+      send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
+                   ++found, g->mob_index[nr].vnum, char_get_sdesc(&g->mob_proto[nr]),
+                   char_get_proto_script(&g->mob_proto[nr]) ? "[TRIG]" : "");
 
   return (found);
 }
 
-int vnum_object(char *searchname, struct char_data *ch)
+int vnum_object(GameWorld *g, char *searchname, struct char_data *ch)
 {
   obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (isname(searchname, obj_get_name(&obj_proto[nr])))
-      send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, obj_index[nr].vnum, obj_get_short_description(&obj_proto[nr]),
-                   obj_get_proto_script(&obj_proto[nr]) ? "[TRIG]" : "");
+  for (nr = 0; nr <= g->top_obj; nr++)
+    if (isname(searchname, obj_get_name(&g->obj_proto[nr])))
+      send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
+                   ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
+                   obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
 
   return (found);
 }
 
-int vnum_material(char *searchname, struct char_data *ch)
+int vnum_material(GameWorld *g, char *searchname, struct char_data *ch)
 {
   obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (isname(searchname, material_names[obj_get_value(&obj_proto[nr], VAL_ALL_MATERIAL)])) {
-      send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, obj_index[nr].vnum, obj_get_short_description(&obj_proto[nr]),
-                   obj_get_proto_script(&obj_proto[nr]) ? "[TRIG]" : "");
+  for (nr = 0; nr <= g->top_obj; nr++)
+    if (isname(searchname, material_names[obj_get_value(&g->obj_proto[nr], VAL_ALL_MATERIAL)])) {
+      send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
+                   ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
+                   obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
     }
 
   return (found);
 }
 
-int vnum_weapontype(char *searchname, struct char_data *ch)
+int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch)
 {
   obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (obj_get_type_flag(&obj_proto[nr]) == ITEM_WEAPON) {
-      if (isname(searchname, weapon_type[obj_get_value(&obj_proto[nr], VAL_WEAPON_SKILL)])) {
-        send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                     ++found, obj_index[nr].vnum, obj_get_short_description(&obj_proto[nr]),
-                     obj_get_proto_script(&obj_proto[nr]) ? "[TRIG]" : "");
+  for (nr = 0; nr <= g->top_obj; nr++)
+    if (obj_get_type_flag(&g->obj_proto[nr]) == ITEM_WEAPON) {
+      if (isname(searchname, weapon_type[obj_get_value(&g->obj_proto[nr], VAL_WEAPON_SKILL)])) {
+        send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
+                     ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
+                     obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
       }
     }
 
   return (found);
 }
 
-int vnum_armortype(char *searchname, struct char_data *ch)
+int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch)
 {
   obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (obj_get_type_flag(&obj_proto[nr]) == ITEM_ARMOR) {
-      if (isname(searchname, armor_type[obj_get_value(&obj_proto[nr], VAL_ARMOR_SKILL)])) {
-        send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                     ++found, obj_index[nr].vnum, obj_get_short_description(&obj_proto[nr]),
-                     obj_get_proto_script(&obj_proto[nr]) ? "[TRIG]" : "");
+  for (nr = 0; nr <= g->top_obj; nr++)
+    if (obj_get_type_flag(&g->obj_proto[nr]) == ITEM_ARMOR) {
+      if (isname(searchname, armor_type[obj_get_value(&g->obj_proto[nr], VAL_ARMOR_SKILL)])) {
+        send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
+                     ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
+                     obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
       }
     }
 
@@ -2888,13 +2846,13 @@ int vnum_armortype(char *searchname, struct char_data *ch)
 /* create a character, and add it to the char list */
 
 /* create a new mobile from a prototype */
-struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rnum */
 {
   mob_rnum i;
   struct char_data *mob;
 
   if (type == VIRTUAL) {
-    if ((i = real_mobile(nr)) == NOBODY) {
+    if ((i = real_mobile(g, nr)) == NOBODY) {
       mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
       return (nullptr);
     }
@@ -2903,9 +2861,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
   CREATE(mob, struct char_data, 1);
   clear_char(mob);
-  *mob             = mob_proto[i];
-  char_set_next(mob, character_list);
-  character_list   = mob;
+  *mob             = g->mob_proto[i];
+  char_set_next(mob, g->characters);
+  g->characters   = mob;
   char_set_next_affect(mob, nullptr);
 
   if (char_is_hoshijin(mob) && char_get_sex(mob) == SEX_MALE) {
@@ -2913,12 +2871,12 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     char_set_hairc(mob, 0);
     char_set_hairs(mob, 0);
   } else {
-    char_set_hairl(mob, rand_number(0, 4));
-    char_set_hairc(mob, rand_number(1, 13));
-    char_set_hairs(mob, rand_number(1, 11));
+    char_set_hairl(mob, rand_number(g, 0, 4));
+    char_set_hairc(mob, rand_number(g, 1, 13));
+    char_set_hairs(mob, rand_number(g, 1, 11));
   }
 
-  char_set_eye(mob, rand_number(0, 11));
+  char_set_eye(mob, rand_number(g, 0, 11));
 
   char_set_absorbs(mob, 0);
   char_set_absorbing(mob, nullptr);
@@ -2928,209 +2886,209 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   char_set_blocks(mob, nullptr);
 
   if (!char_is_human(mob) && !char_is_saiyan(mob) && !char_is_halfbreed(mob) && !char_is_namek(mob)) {
-    char_set_skin(mob, rand_number(0, 11));
+    char_set_skin(mob, rand_number(g, 0, 11));
   }
   if (char_is_namek(mob)) {
     char_set_skin(mob, 2);
   }
   if (char_is_human(mob) || char_is_saiyan(mob) || char_is_halfbreed(mob)) {
-    if (rand_number(1, 5) <= 2) {
-      char_set_skin(mob, rand_number(0, 1));
-    } else if (rand_number(1, 5) <= 4) {
-      char_set_skin(mob, rand_number(4, 5));
-    } else if (rand_number(1, 5) <= 5) {
-      char_set_skin(mob, rand_number(9, 10));
+    if (rand_number(g, 1, 5) <= 2) {
+      char_set_skin(mob, rand_number(g, 0, 1));
+    } else if (rand_number(g, 1, 5) <= 4) {
+      char_set_skin(mob, rand_number(g, 4, 5));
+    } else if (rand_number(g, 1, 5) <= 5) {
+      char_set_skin(mob, rand_number(g, 9, 10));
     }
   }
   if (char_is_saiyan(mob)) {
-    char_set_hairc(mob, rand_number(1, 2));
+    char_set_hairc(mob, rand_number(g, 1, 2));
     char_set_eye(mob, 1);
   }
 
-  if (char_get_mob_vnum(mob) >= 81 && char_get_mob_vnum(mob) <= 87) {
-    dragon_level(mob);
+  if (char_get_mob_vnum(g, mob) >= 81 && char_get_mob_vnum(g, mob) <= 87) {
+    dragon_level(g, mob);
   }
 
   int64_t mult = 0;
 
   switch (char_get_level(mob)) {
     case 1:
-      mult = rand_number(50, 80);
+      mult = rand_number(g, 50, 80);
       break;
     case 2:
-      mult = rand_number(90, 120);
+      mult = rand_number(g, 90, 120);
       break;
     case 3:
-      mult = rand_number(100, 140);
+      mult = rand_number(g, 100, 140);
       break;
     case 4:
-      mult = rand_number(120, 180);
+      mult = rand_number(g, 120, 180);
       break;
     case 5:
-      mult = rand_number(200, 250);
+      mult = rand_number(g, 200, 250);
       break;
     case 6:
-      mult = rand_number(240, 300);
+      mult = rand_number(g, 240, 300);
       break;
     case 7:
-      mult = rand_number(280, 350);
+      mult = rand_number(g, 280, 350);
       break;
     case 8:
-      mult = rand_number(320, 400);
+      mult = rand_number(g, 320, 400);
       break;
     case 9:
-      mult = rand_number(380, 480);
+      mult = rand_number(g, 380, 480);
       break;
     case 10:
-      mult = rand_number(500, 600);
+      mult = rand_number(g, 500, 600);
       break;
     case 11:
     case 12:
     case 13:
     case 14:
     case 15:
-      mult = rand_number(1200, 1600);
+      mult = rand_number(g, 1200, 1600);
       break;
     case 16:
     case 17:
     case 18:
     case 19:
     case 20:
-      mult = rand_number(2400, 3000);
+      mult = rand_number(g, 2400, 3000);
       break;
     case 21:
     case 22:
     case 23:
     case 24:
     case 25:
-      mult = rand_number(5500, 8000);
+      mult = rand_number(g, 5500, 8000);
       break;
     case 26:
     case 27:
     case 28:
     case 29:
     case 30:
-      mult = rand_number(10000, 14000);
+      mult = rand_number(g, 10000, 14000);
       break;
     case 31:
     case 32:
     case 33:
     case 34:
     case 35:
-      mult = rand_number(16000, 20000);
+      mult = rand_number(g, 16000, 20000);
       break;
     case 36:
     case 37:
     case 38:
     case 39:
     case 40:
-      mult = rand_number(22000, 30000);
+      mult = rand_number(g, 22000, 30000);
       break;
     case 41:
     case 42:
     case 43:
     case 44:
     case 45:
-      mult = rand_number(50000, 70000);
+      mult = rand_number(g, 50000, 70000);
       break;
     case 46:
     case 47:
     case 48:
     case 49:
     case 50:
-      mult = rand_number(95000, 140000);
+      mult = rand_number(g, 95000, 140000);
       break;
     case 51:
     case 52:
     case 53:
     case 54:
     case 55:
-      mult = rand_number(180000, 250000);
+      mult = rand_number(g, 180000, 250000);
       break;
     case 56:
     case 57:
     case 58:
     case 59:
     case 60:
-      mult = rand_number(400000, 480000);
+      mult = rand_number(g, 400000, 480000);
       break;
     case 61:
     case 62:
     case 63:
     case 64:
     case 65:
-      mult = rand_number(700000, 900000);
+      mult = rand_number(g, 700000, 900000);
       break;
     case 66:
     case 67:
     case 68:
     case 69:
     case 70:
-      mult = rand_number(1400000, 1600000);
+      mult = rand_number(g, 1400000, 1600000);
       break;
     case 71:
     case 72:
     case 73:
     case 74:
     case 75:
-      mult = rand_number(2200000, 2500000);
+      mult = rand_number(g, 2200000, 2500000);
       break;
     case 76:
     case 77:
     case 78:
     case 79:
     case 80:
-      mult = rand_number(3000000, 3500000);
+      mult = rand_number(g, 3000000, 3500000);
       break;
     case 81:
     case 82:
     case 83:
     case 84:
     case 85:
-      mult = rand_number(4250000, 4750000);
+      mult = rand_number(g, 4250000, 4750000);
       break;
     case 86:
     case 87:
     case 88:
     case 89:
     case 90:
-      mult = rand_number(6500000, 8500000);
+      mult = rand_number(g, 6500000, 8500000);
       break;
     case 91:
     case 92:
     case 93:
     case 94:
     case 95:
-      mult = rand_number(15000000, 18000000);
+      mult = rand_number(g, 15000000, 18000000);
       break;
     case 96:
     case 97:
     case 98:
     case 99:
     case 100:
-      mult = rand_number(22000000, 30000000);
+      mult = rand_number(g, 22000000, 30000000);
       break;
     case 101:
-      mult = rand_number(32000000, 40000000);
+      mult = rand_number(g, 32000000, 40000000);
       break;
     case 102:
-      mult = rand_number(42000000, 55000000);
+      mult = rand_number(g, 42000000, 55000000);
       break;
     case 103:
-      mult = rand_number(80000000, 95000000);
+      mult = rand_number(g, 80000000, 95000000);
       break;
     case 104:
-      mult = rand_number(150000000, 200000000);
+      mult = rand_number(g, 150000000, 200000000);
       break;
     case 105:
-      mult = rand_number(220000000, 250000000);
+      mult = rand_number(g, 220000000, 250000000);
       break;
     case 106:
     case 107:
     case 108:
     case 109:
     case 110:
-      mult = rand_number(500000000, 750000000);
+      mult = rand_number(g, 500000000, 750000000);
       break;
     case 111:
     case 112:
@@ -3142,13 +3100,13 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     case 118:
     case 119:
     case 120:
-      mult = rand_number(800000000, 900000000);
+      mult = rand_number(g, 800000000, 900000000);
       break;
     default:
       if (char_get_level(mob) >= 150) {
-        mult = rand_number(1500000000, 2000000000);
+        mult = rand_number(g, 1500000000, 2000000000);
       } else {
-        mult = rand_number(1250000000, 1500000000);
+        mult = rand_number(g, 1250000000, 1500000000);
       }
       break;
   }
@@ -3192,10 +3150,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
       char_set_basest(mob, getBaseST(mob) * 2);
     }
   }
-  if (char_get_mob_vnum(mob) == 2245) {
-    char_set_basepl(mob, rand_number(1, 4));
-    char_set_baseki(mob, rand_number(1, 4));
-    char_set_basest(mob, rand_number(1, 4));
+  if (char_get_mob_vnum(g, mob) == 2245) {
+    char_set_basepl(mob, rand_number(g, 1, 4));
+    char_set_baseki(mob, rand_number(g, 1, 4));
+    char_set_basest(mob, rand_number(g, 1, 4));
   }
 
   int base = 0;
@@ -3205,119 +3163,119 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     case 3:
     case 4:
     case 5:
-      base = rand_number(80, 120);
+      base = rand_number(g, 80, 120);
       break;
     case 6:
-      base = rand_number(200, 280);
+      base = rand_number(g, 200, 280);
       break;
     case 7:
-      base = rand_number(250, 350);
+      base = rand_number(g, 250, 350);
       break;
     case 8:
-      base = rand_number(275, 375);
+      base = rand_number(g, 275, 375);
       break;
     case 9:
-      base = rand_number(300, 400);
+      base = rand_number(g, 300, 400);
       break;
     case 10:
-      base = rand_number(325, 450);
+      base = rand_number(g, 325, 450);
       break;
     case 11:
     case 12:
     case 13:
     case 14:
     case 15:
-      base = rand_number(500, 700);
+      base = rand_number(g, 500, 700);
       break;
     case 16:
     case 17:
     case 18:
     case 19:
     case 20:
-      base = rand_number(700, 1000);
+      base = rand_number(g, 700, 1000);
       break;
     case 21:
     case 22:
     case 23:
     case 24:
     case 25:
-      base = rand_number(1000, 1200);
+      base = rand_number(g, 1000, 1200);
       break;
     case 26:
     case 27:
     case 28:
     case 29:
     case 30:
-      base = rand_number(1200, 1400);
+      base = rand_number(g, 1200, 1400);
       break;
     case 31:
     case 32:
     case 33:
     case 34:
     case 35:
-      base = rand_number(1400, 1600);
+      base = rand_number(g, 1400, 1600);
       break;
     case 36:
     case 37:
     case 38:
     case 39:
     case 40:
-      base = rand_number(1600, 1800);
+      base = rand_number(g, 1600, 1800);
       break;
     case 41:
     case 42:
     case 43:
     case 44:
     case 45:
-      base = rand_number(1800, 2000);
+      base = rand_number(g, 1800, 2000);
       break;
     case 46:
     case 47:
     case 48:
     case 49:
     case 50:
-      base = rand_number(2000, 2200);
+      base = rand_number(g, 2000, 2200);
       break;
     case 51:
     case 52:
     case 53:
     case 54:
     case 55:
-      base = rand_number(2200, 2500);
+      base = rand_number(g, 2200, 2500);
       break;
     case 56:
     case 57:
     case 58:
     case 59:
     case 60:
-      base = rand_number(2500, 2800);
+      base = rand_number(g, 2500, 2800);
       break;
     case 61:
     case 62:
     case 63:
     case 64:
     case 65:
-      base = rand_number(2800, 3000);
+      base = rand_number(g, 2800, 3000);
       break;
     case 66:
     case 67:
     case 68:
     case 69:
     case 70:
-      base = rand_number(3000, 3200);
+      base = rand_number(g, 3000, 3200);
       break;
     case 71:
     case 72:
     case 73:
     case 74:
     case 75:
-      base = rand_number(3200, 3500);
+      base = rand_number(g, 3200, 3500);
       break;
     case 76:
     case 77:
     case 78:
     case 79:
-      base = rand_number(3500, 3800);
+      base = rand_number(g, 3500, 3800);
       break;
     case 80:
     case 81:
@@ -3325,74 +3283,74 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     case 83:
     case 84:
     case 85:
-      base = rand_number(4000, 4500);
+      base = rand_number(g, 4000, 4500);
       break;
     case 86:
     case 87:
     case 88:
     case 89:
     case 90:
-      base = rand_number(4500, 5500);
+      base = rand_number(g, 4500, 5500);
       break;
     case 91:
     case 92:
     case 93:
     case 94:
     case 95:
-      base = rand_number(5500, 7000);
+      base = rand_number(g, 5500, 7000);
       break;
     case 96:
     case 97:
     case 98:
     case 99:
-      base = rand_number(8000, 10000);
+      base = rand_number(g, 8000, 10000);
       break;
     case 100:
-      base = rand_number(10000, 15000);
+      base = rand_number(g, 10000, 15000);
       break;
     case 101:
-      base = rand_number(15000, 25000);
+      base = rand_number(g, 15000, 25000);
       break;
     case 102:
-      base = rand_number(35000, 40000);
+      base = rand_number(g, 35000, 40000);
       break;
     case 103:
-      base = rand_number(40000, 50000);
+      base = rand_number(g, 40000, 50000);
       break;
     case 104:
-      base = rand_number(60000, 80000);
+      base = rand_number(g, 60000, 80000);
       break;
     case 105:
-      base = rand_number(80000, 100000);
+      base = rand_number(g, 80000, 100000);
       break;
     default:
-      base = rand_number(130000, 180000);
+      base = rand_number(g, 130000, 180000);
       break;
   }
   char_set_cooldown(mob, 0);
   if (char_get_gold(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
     if (char_get_level(mob) < 4) {
-      char_set_gold(mob, char_get_level(mob) * rand_number(1, 2));
+      char_set_gold(mob, char_get_level(mob) * rand_number(g, 1, 2));
     } else if (char_get_level(mob) < 10) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(1, 2)) - 1);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 1, 2)) - 1);
     } else if (char_get_level(mob) < 20) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(1, 3)) - 2);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 1, 3)) - 2);
     } else if (char_get_level(mob) < 30) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(1, 3)) - 4);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 1, 3)) - 4);
     } else if (char_get_level(mob) < 40) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(1, 3)) - 6);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 1, 3)) - 6);
     } else if (char_get_level(mob) < 50) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(2, 3)) - 25);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 2, 3)) - 25);
     } else if (char_get_level(mob) < 60) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(2, 3)) - 40);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 2, 3)) - 40);
     } else if (char_get_level(mob) < 70) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(2, 3)) - 50);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 2, 3)) - 50);
     } else if (char_get_level(mob) < 80) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(2, 4)) - 60);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 2, 4)) - 60);
     } else if (char_get_level(mob) < 90) {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(2, 4)) - 70);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 2, 4)) - 70);
     } else {
-      char_set_gold(mob, (char_get_level(mob) * rand_number(3, 4)) - 85);
+      char_set_gold(mob, (char_get_level(mob) * rand_number(g, 3, 4)) - 85);
     }
     if (!char_is_humanoid(mob)) {
       char_set_gold(mob, char_get_gold(mob) * 0.5);
@@ -3445,7 +3403,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
   }
 
-  char_set_time_birth(mob, time(0) - birth_age(mob));
+  char_set_time_birth(mob, time(0) - birth_age(g, mob));
   char_set_time_logon(mob, time(0));
   char_set_time_created(mob, char_get_time_logon(mob)); /* why not */
   char_set_time_maxage(mob, char_get_time_birth(mob) + max_age(mob));
@@ -3460,18 +3418,18 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     char_mob_set(mob, MOB_LLEG, true);
   }
 
-  mob_index[i].number++;
+  g->mob_index[i].number++;
 
-  char_set_id(mob, dg_new_mob_uid());
+  char_set_id(mob, dg_new_mob_uid(g));
   /* find_char helper */
-  add_to_lookup_table(char_get_id(mob), MOB_TRIGGER, (void *)mob);
+  add_to_lookup_table(g, char_get_id(mob), MOB_TRIGGER, (void *)mob);
 
-  copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
-  assign_triggers(mob, MOB_TRIGGER);
+  copy_proto_script(&g->mob_proto[i], mob, MOB_TRIGGER);
+  assign_triggers(g, mob, MOB_TRIGGER);
   racial_body_parts(mob);
 
-  if (char_get_mob_vnum(mob) >= 800 && char_get_mob_vnum(mob) <= 805) {
-    number_of_assassins += 1;
+  if (char_get_mob_vnum(g, mob) >= 800 && char_get_mob_vnum(g, mob) <= 805) {
+    g->number_of_assassins += 1;
   }
 
   return (mob);
@@ -3484,36 +3442,36 @@ struct obj_unique_hash_elem {
   struct obj_unique_hash_elem *next_e;
 };
 
-static void free_obj_unique_hash()
+static void free_obj_unique_hash(GameWorld *g)
 {
   int i;
   struct obj_unique_hash_elem *elem;
   struct obj_unique_hash_elem *next_elem;
-  if (obj_unique_hash_pools) {
+  if (g->obj_unique_hash_pools) {
     for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-      elem = obj_unique_hash_pools[i];
+      elem = g->obj_unique_hash_pools[i];
       while (elem) {
         next_elem = elem->next_e;
         free(elem);
         elem = next_elem;
       }
     }
-    free(obj_unique_hash_pools);
+    free(g->obj_unique_hash_pools);
   }
 }
 
-void add_unique_id(struct obj_data *obj)
+void add_unique_id(GameWorld *g, struct obj_data *obj)
 {
   struct obj_unique_hash_elem *elem;
   int i;
-  if (!obj_unique_hash_pools)
-    init_obj_unique_hash();
+  if (!g->obj_unique_hash_pools)
+    init_obj_unique_hash(g);
   if (obj_get_unique_id(obj) == -1) {
     if (sizeof(long long) > sizeof(long))
-      obj_set_unique_id(obj, (((long long)circle_random()) << (sizeof(long long) * 4)) +
-                       circle_random());
+      obj_set_unique_id(obj, (((long long)circle_random(g)) << (sizeof(long long) * 4)) +
+                       circle_random(g));
     else
-      obj_set_unique_id(obj, circle_random());
+      obj_set_unique_id(obj, circle_random(g));
   }
   if (CONFIG_ALL_ITEMS_UNIQUE) {
     if (!obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))
@@ -3524,18 +3482,18 @@ void add_unique_id(struct obj_data *obj)
   elem->unique_id          = obj_get_unique_id(obj);
   elem->obj                = obj;
   i                        = obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS;
-  elem->next_e             = obj_unique_hash_pools[i];
-  obj_unique_hash_pools[i] = elem;
+  elem->next_e             = g->obj_unique_hash_pools[i];
+  g->obj_unique_hash_pools[i] = elem;
 }
 
-static void remove_unique_id(struct obj_data *obj)
+static void remove_unique_id(GameWorld *g, struct obj_data *obj)
 {
   struct obj_unique_hash_elem *elem, **ptr, *tmp;
 
   if (obj == nullptr || obj_get_unique_id(obj) < 0)
     return;
 
-  ptr = obj_unique_hash_pools + (obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS);
+  ptr = g->obj_unique_hash_pools + (obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS);
 
   if (!(ptr && *ptr))
     return;
@@ -3554,53 +3512,53 @@ static void remove_unique_id(struct obj_data *obj)
   }
 }
 
-static void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
+static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_data *obj2)
 {
-  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%lld:%" PRId64 "]",
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%lld:%" PRId64 "]",
          obj_get_short_description(obj1) ? obj_get_short_description(obj1) : "<No name>",
-         obj_get_vnum(obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
-  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
+         obj_get_vnum(g, obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                     "In object: %s, Carried by: %s, Worn by: %s",
-         rroom_get_vnum(obj_get_in_room(obj1)),
-         obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : rroom_get_name(obj_get_in_room(obj1)),
+         rroom_get_vnum(g, obj_get_in_room(obj1)),
+         obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : rroom_get_name(g, obj_get_in_room(obj1)),
          obj_get_in_obj(obj1) ? obj_get_short_description(obj_get_in_obj(obj1)) : "None",
          obj_get_carried_by(obj1) ? char_get_name(obj_get_carried_by(obj1)) : "Nobody",
          obj_get_worn_by(obj1) ? char_get_name(obj_get_worn_by(obj1)) : "Nobody");
-  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
                                     "In object: %s, Carried by: %s, Worn by: %s",
-         rroom_get_vnum(obj_get_in_room(obj2)),
-         obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : rroom_get_name(obj_get_in_room(obj2)),
+         rroom_get_vnum(g, obj_get_in_room(obj2)),
+         obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : rroom_get_name(g, obj_get_in_room(obj2)),
          obj_get_in_obj(obj2) ? obj_get_short_description(obj_get_in_obj(obj2)) : "None",
          obj_get_carried_by(obj2) ? char_get_name(obj_get_carried_by(obj2)) : "Nobody",
          obj_get_worn_by(obj2) ? char_get_name(obj_get_worn_by(obj2)) : "Nobody");
 }
 
-void check_unique_id(struct obj_data *obj)
+void check_unique_id(GameWorld *g, struct obj_data *obj)
 {
   struct obj_unique_hash_elem *elem;
   if (!obj || obj_get_unique_id(obj) == -1)
     return;
-  elem = obj_unique_hash_pools[obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS];
+  elem = g->obj_unique_hash_pools[obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS];
   while (elem) {
     if (elem->obj == obj) {
       mud_log("SYSERR: check_unique_id checking for existing object?!");
     }
     if (elem->generation == obj_get_generation(obj) && elem->unique_id == obj_get_unique_id(obj)) {
-      log_dupe_objects(elem->obj, obj);
+      log_dupe_objects(g, elem->obj, obj);
       obj_extra_set(obj, ITEM_PURGE, true);
     }
     elem = elem->next_e;
   }
 }
 
-char *sprintuniques(obj_vnum low, obj_vnum high)
+char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high)
 {
   int i, count = 0, remain, header;
   struct obj_unique_hash_elem *q;
   char *str, *ptr;
   remain = 40;
   for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-    q = obj_unique_hash_pools[i];
+    q = g->obj_unique_hash_pools[i];
     remain += 40;
     while (q) {
       count++;
@@ -3619,9 +3577,9 @@ char *sprintuniques(obj_vnum low, obj_vnum high)
   remain -= count;
   for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
     header = 0;
-    q      = obj_unique_hash_pools[i];
+    q      = g->obj_unique_hash_pools[i];
     while (q) {
-      if (obj_get_vnum(q->obj) >= low && obj_get_vnum(q->obj) <= high) {
+      if (obj_get_vnum(g, q->obj) >= low && obj_get_vnum(g, q->obj) <= high) {
         if (!header) {
           header = 1;
           count  = snprintf(ptr, remain, "|-Hash %d\r\n", i);
@@ -3629,7 +3587,7 @@ char *sprintuniques(obj_vnum low, obj_vnum high)
           remain -= count;
         }
         count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10lld:%-19" PRId64 "@n] - %s\r\n",
-                         obj_get_vnum(q->obj), (long long)q->generation, q->unique_id,
+                         obj_get_vnum(g, q->obj), (long long)q->generation, q->unique_id,
                          obj_get_short_description(q->obj) ? obj_get_short_description(q->obj) : "<Unknown>");
         ptr += count;
         remain -= count;
@@ -3641,65 +3599,65 @@ char *sprintuniques(obj_vnum low, obj_vnum high)
 }
 
 /* create an object, and add it to the object list */
-struct obj_data *create_obj(void)
+struct obj_data *create_obj(GameWorld *g)
 {
   struct obj_data *obj;
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
-  obj_set_next(obj, object_list);
-  object_list = obj;
+  obj_set_next(obj, g->objects);
+  g->objects = obj;
 
-  obj_set_id(obj, dg_new_obj_uid());
+  obj_set_id(obj, dg_new_obj_uid(g));
   /* find_obj helper */
-  add_to_lookup_table(obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
+  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
 
   obj_set_generation(obj, time(0));
   obj_set_unique_id(obj, -1);
 
-  assign_triggers(obj, OBJ_TRIGGER);
+  assign_triggers(g, obj, OBJ_TRIGGER);
 
   return (obj);
 }
 
 /* create a new object from a prototype */
-struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
+struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnum */
 {
   struct obj_data *obj;
-  obj_rnum i = type == VIRTUAL ? real_object(nr) : nr;
+  obj_rnum i = type == VIRTUAL ? real_object(g, nr) : nr;
   int j;
 
-  if (i == NOTHING || i > top_of_objt) {
+  if (i == NOTHING || i > g->top_obj) {
     mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
     return (nullptr);
   }
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
-  *obj        = obj_proto[i];
-  obj_set_next(obj, object_list);
-  object_list = obj;
+  *obj        = g->obj_proto[i];
+  obj_set_next(obj, g->objects);
+  g->objects = obj;
   obj_set_room_loaded(obj, NOWHERE);
 
-  obj_index[i].number++;
+  g->obj_index[i].number++;
 
-  obj_set_id(obj, dg_new_obj_uid());
+  obj_set_id(obj, dg_new_obj_uid(g));
   /* find_obj helper */
-  add_to_lookup_table(obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
+  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
 
   obj_set_generation(obj, time(0));
   obj_set_unique_id(obj, -1);
 
-  if (obj_get_sbinfo(&obj_proto[i])) {
+  if (obj_get_sbinfo(&g->obj_proto[i])) {
     CREATE(*obj_sbinfo_slot(obj), struct obj_spellbook_spell, SPELLBOOK_SIZE);
     for (j = 0; j < SPELLBOOK_SIZE; j++) {
-      obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(&obj_proto[i])[j].spellname;
-      obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(&obj_proto[i])[j].pages;
+      obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(&g->obj_proto[i])[j].spellname;
+      obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(&g->obj_proto[i])[j].pages;
     }
   }
-  copy_proto_script(&obj_proto[i], obj, OBJ_TRIGGER);
-  assign_triggers(obj, OBJ_TRIGGER);
-  if (obj_get_vnum(obj) == 65) {
+  copy_proto_script(&g->obj_proto[i], obj, OBJ_TRIGGER);
+  assign_triggers(g, obj, OBJ_TRIGGER);
+  if (obj_get_vnum(g, obj) == 65) {
     obj_set_healcharge(obj, 20);
   }
   if (obj_get_type_flag(obj) == ITEM_FOOD) {
@@ -3714,65 +3672,64 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 constexpr int ZO_DEAD = 999;
 
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
-void zone_update(void)
+void zone_update(GameWorld *g)
 {
   zone_rnum i;
   struct reset_q_element *update_u, *temp;
-  static int timer = 0;
 
   /* jelson 10/22/92 */
-  if (((++timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60) {
+  if (((++g->zone_update_timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60) {
     /* one minute has passed */
     /*
      * NOT accurate unless PULSE_ZONE is a multiple of PASSES_PER_SEC or a
      * factor of 60
      */
 
-    timer = 0;
+    g->zone_update_timer = 0;
 
     /* since one minute has passed, increment zone ages */
-    for (i = 0; i <= top_of_zone_table; i++) {
-      if (zone_table[i].age < zone_table[i].lifespan &&
-          zone_table[i].reset_mode)
-        (zone_table[i].age)++;
+    for (i = 0; i <= g->top_zone; i++) {
+      if (g->zones[i].age < g->zones[i].lifespan &&
+          g->zones[i].reset_mode)
+        (g->zones[i].age)++;
 
-      if (zone_table[i].age >= zone_table[i].lifespan &&
-          zone_table[i].age < ZO_DEAD && zone_table[i].reset_mode) {
+      if (g->zones[i].age >= g->zones[i].lifespan &&
+          g->zones[i].age < ZO_DEAD && g->zones[i].reset_mode) {
         /* enqueue zone */
 
         CREATE(update_u, struct reset_q_element, 1);
 
         update_u->zone_to_reset = i;
 
-        if (!reset_q.head)
-          reset_q.head = reset_q.tail = update_u;
+        if (!g->reset_q.head)
+          g->reset_q.head = g->reset_q.tail = update_u;
         else {
-          reset_q.tail->next = update_u;
-          reset_q.tail       = update_u;
+          g->reset_q.tail->next = update_u;
+          g->reset_q.tail       = update_u;
         }
 
-        zone_table[i].age = ZO_DEAD;
+        g->zones[i].age = ZO_DEAD;
       }
     }
   } /* end - one minute has passed */
 
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
-  for (update_u = reset_q.head; update_u; update_u = update_u->next)
-    if (zone_table[update_u->zone_to_reset].reset_mode == 2 ||
-        is_empty(update_u->zone_to_reset)) {
-      reset_zone(update_u->zone_to_reset);
-      mudlog(LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-             zone_table[update_u->zone_to_reset].name, zone_table[update_u->zone_to_reset].number);
+  for (update_u = g->reset_q.head; update_u; update_u = update_u->next)
+    if (g->zones[update_u->zone_to_reset].reset_mode == 2 ||
+        is_empty(g, update_u->zone_to_reset)) {
+      reset_zone(g, update_u->zone_to_reset);
+      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
+             g->zones[update_u->zone_to_reset].name, g->zones[update_u->zone_to_reset].number);
       /* dequeue */
-      if (update_u == reset_q.head)
-        reset_q.head = reset_q.head->next;
+      if (update_u == g->reset_q.head)
+        g->reset_q.head = g->reset_q.head->next;
       else {
-        for (temp = reset_q.head; temp->next != update_u;
+        for (temp = g->reset_q.head; temp->next != update_u;
              temp = temp->next);
 
         if (!update_u->next)
-          reset_q.tail = temp;
+          g->reset_q.tail = temp;
 
         temp->next = update_u->next;
       }
@@ -3782,21 +3739,21 @@ void zone_update(void)
     }
 }
 
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
+static void log_zone_error(GameWorld *g, zone_rnum zone, int cmd_no, const char *message)
 {
-  mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
-  mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-         ZCMD2.command, zone_table[zone].number, ZCMD2.line);
+  mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
+  mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
+         ZCMD2.command, g->zones[zone].number, ZCMD2.line);
 }
 
-#define ZONE_ERROR(message)                \
+#define ZONE_ERROR(g, message)                \
   {                                        \
-    log_zone_error(zone, cmd_no, message); \
+    log_zone_error(g, zone, cmd_no, message); \
     last_cmd = 0;                          \
   }
 
 /* execute the reset command table of a given zone */
-void reset_zone(zone_rnum zone)
+void reset_zone(GameWorld *g, zone_rnum zone)
 {
   int cmd_no, last_cmd = 0;
   struct char_data *mob = nullptr;
@@ -3808,7 +3765,7 @@ void reset_zone(zone_rnum zone)
   int mob_load           = false;   /* ### */
   int obj_load           = false;   /* ### */
 
-  if (pre_reset(zone_table[zone].number) == false) {
+  if (pre_reset(g, g->zones[zone].number) == false) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
 
       if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
@@ -3831,37 +3788,37 @@ void reset_zone(zone_rnum zone)
 
         case 'M': /* read a mobile */
 
-          if ((mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-              (rand_number(1, 100) >= ZCMD2.arg5)) {
+          if ((g->mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+              (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             int room_max = 0;
             struct char_data *i;
-            mob = read_mobile(ZCMD2.arg1, REAL);
+            mob = read_mobile(g, ZCMD2.arg1, REAL);
 
             /* First find out how many mobs of VNUM are in the mud with this rooms */
             /* VNUM as a load point for max from room checks. */
             /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
             if (ZCMD2.arg4 > 0) {
-              for (i = character_list; i; i = char_get_next(i)) {
-                if ((char_get_hometown(i) == rroom_get_vnum(ZCMD2.arg3)) && (char_get_mob_vnum(i) == char_get_mob_vnum(mob))) {
+              for (i = g->characters; i; i = char_get_next(i)) {
+                if ((char_get_hometown(i) == rroom_get_vnum(g, ZCMD2.arg3)) && (char_get_mob_vnum(g, i) == char_get_mob_vnum(g, mob))) {
                   room_max++;
                 }
               }
             }
-            char_to_room(mob, ZCMD2.arg3);
+            char_to_room(g, mob, ZCMD2.arg3);
 
             /* Get rid of it if room_max has been met, ignore room_max if zero */
 
             if (room_max && (room_max >= ZCMD2.arg4)) {
-              extract_char(mob);
-              extract_pending_chars();
+              extract_char(g, mob);
+              extract_pending_chars(g);
               break;
             }
 
             /*  Set the mobs loadroom for room_max checks. */
-            char_set_hometown(mob, rroom_get_vnum(ZCMD2.arg3));
+            char_set_hometown(mob, rroom_get_vnum(g, ZCMD2.arg3));
 
-            load_mtrigger(mob);
+            load_mtrigger(g, mob);
             tmob     = mob;
             last_cmd = 1;
             mob_load = true;
@@ -3871,23 +3828,23 @@ void reset_zone(zone_rnum zone)
           break;
 
         case 'O': /* read an object */
-          if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-              (rand_number(1, 100) >= ZCMD2.arg5)) {
+          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+              (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 != NOWHERE) {
               int room_max = 0;
               struct obj_data *k;
-              obj = read_object(ZCMD2.arg1, REAL);
+              obj = read_object(g, ZCMD2.arg1, REAL);
 
               /* First find out how many obj of VNUM are in the mud with this rooms */
               /* VNUM as a load point for max from room checks. */
               /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
               if (ZCMD2.arg4 > 0) {
-                for (k = object_list; k; k = obj_get_next(k)) {
-                  if (((obj_get_room_loaded(k) == rroom_get_vnum(ZCMD2.arg3)) && (obj_get_vnum(k) == obj_get_vnum(obj))) || (obj_get_vnum(k) == obj_get_vnum(obj) && rroom_get_vnum(ZCMD2.arg3) == rroom_get_vnum(obj_get_in_room(k)))) {
+                for (k = g->objects; k; k = obj_get_next(k)) {
+                  if (((obj_get_room_loaded(k) == rroom_get_vnum(g, ZCMD2.arg3)) && (obj_get_vnum(g, k) == obj_get_vnum(g, obj))) || (obj_get_vnum(g, k) == obj_get_vnum(g, obj) && rroom_get_vnum(g, ZCMD2.arg3) == rroom_get_vnum(g, obj_get_in_room(k)))) {
                     /*  For objects, lets not count them if they've been removed from the room */
                     /*  We'll let max_in_mud handle those. */
-                    if (obj_get_in_room(k) == NOWHERE || rroom_get_vnum(obj_get_in_room(k)) != rroom_get_vnum(ZCMD2.arg3)) {
+                    if (obj_get_in_room(k) == NOWHERE || rroom_get_vnum(g, obj_get_in_room(k)) != rroom_get_vnum(g, ZCMD2.arg3)) {
                       continue;
                     }
                     room_max++;
@@ -3895,27 +3852,27 @@ void reset_zone(zone_rnum zone)
                 }
               }
 
-              add_unique_id(obj);
-              obj_to_room(obj, ZCMD2.arg3);
+              add_unique_id(g, obj);
+              obj_to_room(g, obj, ZCMD2.arg3);
 
               /* Get rid of it if room_max has been met. */
 
               if (room_max && (room_max >= ZCMD2.arg4)) {
-                extract_obj(obj);
+                extract_obj(g, obj);
                 break;
               }
 
               /* Set the loadroom for room_max checks */
 
-              obj_set_room_loaded(obj, rroom_get_vnum(ZCMD2.arg3));
+              obj_set_room_loaded(obj, rroom_get_vnum(g, ZCMD2.arg3));
 
               last_cmd = 1;
-              load_otrigger(obj);
+              load_otrigger(g, obj);
               tobj     = obj;
               obj_load = true;
             } else {
-              obj = read_object(ZCMD2.arg1, REAL);
-              add_unique_id(obj);
+              obj = read_object(g, ZCMD2.arg1, REAL);
+              add_unique_id(g, obj);
               obj_set_in_room(obj, NOWHERE);
               last_cmd = 1;
               tobj     = obj;
@@ -3927,18 +3884,18 @@ void reset_zone(zone_rnum zone)
           break;
 
         case 'P': /* object to object */
-          if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-              obj_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-            obj = read_object(ZCMD2.arg1, REAL);
-            if (!(obj_to = get_obj_num(ZCMD2.arg3))) {
-              ZONE_ERROR("target obj not found, command disabled");
+          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+              obj_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
+            obj = read_object(g, ZCMD2.arg1, REAL);
+            if (!(obj_to = get_obj_num(g, ZCMD2.arg3))) {
+              ZONE_ERROR(g, "target obj not found, command disabled");
               ZCMD2.command = '*';
               break;
             }
-            add_unique_id(obj);
-            obj_to_obj(obj, obj_to);
+            add_unique_id(g, obj);
+            obj_to_obj(g, obj, obj_to);
             last_cmd = 1;
-            load_otrigger(obj);
+            load_otrigger(g, obj);
             tobj = obj;
           } else
             last_cmd = 0;
@@ -3947,20 +3904,20 @@ void reset_zone(zone_rnum zone)
 
         case 'G': /* obj_to_char */
           if (!mob) {
-            ZONE_ERROR("attempt to give obj to non-existant mob, command disabled");
+            ZONE_ERROR(g, "attempt to give obj to non-existant mob, command disabled");
             ZCMD2.command = '*';
             break;
           }
-          if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-              mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-            obj = read_object(ZCMD2.arg1, REAL);
-            add_unique_id(obj);
-            obj_to_char(obj, mob);
-            if (char_get_mob_spec(mob) != shop_keeper) {
-              randomize_eq(obj);
+          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+              mob_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
+            obj = read_object(g, ZCMD2.arg1, REAL);
+            add_unique_id(g, obj);
+            obj_to_char(g, obj, mob);
+            if (char_get_mob_spec(g, mob) != shop_keeper) {
+              randomize_eq(g, obj);
             }
             last_cmd = 1;
-            load_otrigger(obj);
+            load_otrigger(g, obj);
             tobj = obj;
           } else
             last_cmd = 0;
@@ -3969,24 +3926,24 @@ void reset_zone(zone_rnum zone)
 
         case 'E': /* object to equipment list */
           if (!mob) {
-            ZONE_ERROR("trying to equip non-existant mob, command disabled");
+            ZONE_ERROR(g, "trying to equip non-existant mob, command disabled");
             ZCMD2.command = '*';
             break;
           }
-          if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-              mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
+          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+              mob_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 < 0 || ZCMD2.arg3 >= NUM_WEARS) {
-              ZONE_ERROR("invalid equipment pos number");
+              ZONE_ERROR(g, "invalid equipment pos number");
             } else {
-              obj = read_object(ZCMD2.arg1, REAL);
-              add_unique_id(obj);
+              obj = read_object(g, ZCMD2.arg1, REAL);
+              add_unique_id(g, obj);
               obj_set_in_room(obj, char_get_in_room(mob));
-              load_otrigger(obj);
-              if (wear_otrigger(obj, mob, ZCMD2.arg3)) {
+              load_otrigger(g, obj);
+              if (wear_otrigger(g, obj, mob, ZCMD2.arg3)) {
                 obj_set_in_room(obj, NOWHERE);
-                equip_char(mob, obj, ZCMD2.arg3);
+                equip_char(g, mob, obj, ZCMD2.arg3);
               } else
-                obj_to_char(obj, mob);
+                obj_to_char(g, obj, mob);
               tobj     = obj;
               last_cmd = 1;
             }
@@ -3996,8 +3953,8 @@ void reset_zone(zone_rnum zone)
           break;
 
         case 'R': /* rem obj from room */
-          if ((obj = get_obj_in_list_num(ZCMD2.arg2, rroom_get_contents(ZCMD2.arg1))) != nullptr)
-            extract_obj(obj);
+          if ((obj = get_obj_in_list_num(ZCMD2.arg2, rroom_get_contents(g, ZCMD2.arg1))) != nullptr)
+            extract_obj(g, obj);
           last_cmd = 1;
           tmob     = nullptr;
           tobj     = nullptr;
@@ -4005,27 +3962,27 @@ void reset_zone(zone_rnum zone)
 
         case 'D': /* set state of door */
           if (ZCMD2.arg2 < 0 || ZCMD2.arg2 >= NUM_OF_DIRS ||
-              (rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2) == nullptr)) {
-            ZONE_ERROR("door does not exist, command disabled");
+              (rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2) == nullptr)) {
+            ZONE_ERROR(g, "door does not exist, command disabled");
             ZCMD2.command = '*';
           } else
             switch (ZCMD2.arg3) {
               case 0:
-                REMOVE_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_LOCKED);
-                REMOVE_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_CLOSED);
                 break;
               case 1:
-                SET_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_CLOSED);
-                REMOVE_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_LOCKED);
                 break;
               case 2:
-                SET_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_LOCKED);
-                SET_BIT(rroom_get_dir_option(ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_CLOSED);
                 break;
             }
@@ -4036,18 +3993,18 @@ void reset_zone(zone_rnum zone)
 
         case 'T': /* trigger command */
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
-            add_trigger(dg_ensure_script(char_script_slot(tmob)), read_trigger(ZCMD2.arg2), -1);
+            add_trigger(g, dg_ensure_script(char_script_slot(tmob)), read_trigger(g, ZCMD2.arg2), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
-            add_trigger(dg_ensure_script(obj_script_slot(tobj)), read_trigger(ZCMD2.arg2), -1);
+            add_trigger(g, dg_ensure_script(obj_script_slot(tobj)), read_trigger(g, ZCMD2.arg2), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
-            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > top_of_world) {
-              ZONE_ERROR("Invalid room number in trigger assignment");
+            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > g->top_room) {
+              ZONE_ERROR(g, "Invalid room number in trigger assignment");
             }
-            if (!rroom_get_script(ZCMD2.arg3))
-              dg_ensure_script(rroom_script_slot(ZCMD2.arg3));
-            add_trigger(rroom_get_script(ZCMD2.arg3), read_trigger(ZCMD2.arg2), -1);
+            if (!rroom_get_script(g, ZCMD2.arg3))
+              dg_ensure_script(rroom_script_slot(g, ZCMD2.arg3));
+            add_trigger(g, rroom_get_script(g, ZCMD2.arg3), read_trigger(g, ZCMD2.arg2), -1);
             last_cmd = 1;
           }
 
@@ -4056,26 +4013,26 @@ void reset_zone(zone_rnum zone)
         case 'V':
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
             if (!char_get_script(tmob)) {
-              ZONE_ERROR("Attempt to give variable to scriptless mobile");
+              ZONE_ERROR(g, "Attempt to give variable to scriptless mobile");
             } else
               add_var(&(char_get_script(tmob)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
             if (!obj_get_script(tobj)) {
-              ZONE_ERROR("Attempt to give variable to scriptless object");
+              ZONE_ERROR(g, "Attempt to give variable to scriptless object");
             } else
               add_var(&(obj_get_script(tobj)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
-            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > top_of_world) {
-              ZONE_ERROR("Invalid room number in variable assignment");
+            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > g->top_room) {
+              ZONE_ERROR(g, "Invalid room number in variable assignment");
             } else {
-              if (!(rroom_get_script(ZCMD2.arg3))) {
-                ZONE_ERROR("Attempt to give variable to scriptless object");
+              if (!(rroom_get_script(g, ZCMD2.arg3))) {
+                ZONE_ERROR(g, "Attempt to give variable to scriptless object");
               } else
-                add_var(&(rroom_get_script(ZCMD2.arg3)->global_vars),
+                add_var(&(rroom_get_script(g, ZCMD2.arg3)->global_vars),
                         ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
               last_cmd = 1;
             }
@@ -4083,78 +4040,78 @@ void reset_zone(zone_rnum zone)
           break;
 
         default:
-          ZONE_ERROR("unknown cmd in reset table; cmd disabled");
+          ZONE_ERROR(g, "unknown cmd in reset table; cmd disabled");
           ZCMD2.command = '*';
           break;
       }
     }
 
-    zone_table[zone].age = 0;
+    g->zones[zone].age = 0;
 
     /* handle reset_wtrigger's */
-    rvnum = zone_table[zone].bot;
-    while (rvnum <= zone_table[zone].top) {
-      rrnum = real_room(rvnum);
+    rvnum = g->zones[zone].bot;
+    while (rvnum <= g->zones[zone].top) {
+      rrnum = real_room(g, rvnum);
       if (rrnum != NOWHERE) {
-        reset_wtrigger(&world[rrnum]);
-        if (rroom_flagged(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
-          send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-          rroom_set_flag(rrnum, ROOM_AURA, false);
+        reset_wtrigger(g, &g->rooms[rrnum]);
+        if (rroom_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
+          send_to_room(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
+          rroom_set_flag(g, rrnum, ROOM_AURA, false);
         }
-        if (rroom_sect(rrnum) == SECT_LAVA) {
-          rroom_set_geffect(rrnum, 5);
+        if (rroom_sect(g, rrnum) == SECT_LAVA) {
+          rroom_set_geffect(g, rrnum, 5);
         }
-        if (rroom_get_geffect(rrnum) < -1) {
-          send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-          rroom_set_geffect(rrnum, rroom_get_geffect(rrnum) + (1));
-        } else if (rroom_get_geffect(rrnum) == -1) {
-          send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-          rroom_set_geffect(rrnum, 0);
+        if (rroom_get_geffect(g, rrnum) < -1) {
+          send_to_room(g, rrnum, "The area loses some of the water flooding it.\r\n");
+          rroom_set_geffect(g, rrnum, rroom_get_geffect(g, rrnum) + (1));
+        } else if (rroom_get_geffect(g, rrnum) == -1) {
+          send_to_room(g, rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
+          rroom_set_geffect(g, rrnum, 0);
         }
-        if (rroom_get_dmg(rrnum) >= 100) {
-          send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(rrnum, rroom_get_dmg(rrnum) - (rand_number(5, 10)));
-        } else if (rroom_get_dmg(rrnum) >= 50) {
-          send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(rrnum, rroom_get_dmg(rrnum) - (rand_number(1, 10)));
-        } else if (rroom_get_dmg(rrnum) >= 10) {
-          send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(rrnum, rroom_get_dmg(rrnum) - (rand_number(1, 10)));
-        } else if (rroom_get_dmg(rrnum) > 1) {
-          send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(rrnum, rroom_get_dmg(rrnum) - (rand_number(1, rroom_get_dmg(rrnum))));
-        } else if (rroom_get_dmg(rrnum) > 0) {
-          send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(rrnum, rroom_get_dmg(rrnum) - 1);
+        if (rroom_get_dmg(g, rrnum) >= 100) {
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
+          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 5, 10)));
+        } else if (rroom_get_dmg(g, rrnum) >= 50) {
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
+          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
+        } else if (rroom_get_dmg(g, rrnum) >= 10) {
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
+          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
+        } else if (rroom_get_dmg(g, rrnum) > 1) {
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
+          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, rroom_get_dmg(g, rrnum))));
+        } else if (rroom_get_dmg(g, rrnum) > 0) {
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
+          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - 1);
         }
-        if (rroom_get_geffect(rrnum) >= 1 && rand_number(1, 4) == 4 && !rroom_sunken(rrnum) && rroom_sect(rrnum) != SECT_LAVA) {
-          send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-          rroom_set_geffect(rrnum, 0);
-        } else if (rroom_get_geffect(rrnum) >= 1 && rand_number(1, 2) == 2 && rroom_sunken(rrnum) && rroom_sect(rrnum) != SECT_LAVA) {
-          send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-          rroom_set_geffect(rrnum, 0);
+        if (rroom_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 4) == 4 && !rroom_sunken(g, rrnum) && rroom_sect(g, rrnum) != SECT_LAVA) {
+          send_to_room(g, rrnum, "The lava has cooled and become solid rock.\r\n");
+          rroom_set_geffect(g, rrnum, 0);
+        } else if (rroom_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 2) == 2 && rroom_sunken(g, rrnum) && rroom_sect(g, rrnum) != SECT_LAVA) {
+          send_to_room(g, rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
+          rroom_set_geffect(g, rrnum, 0);
         }
       }
       rvnum++;
     }
   } else {
     /* even if reset is blocked, age should be reset */
-    zone_table[zone].age = 0;
+    g->zones[zone].age = 0;
   }
-  post_reset(zone_table[zone].number);
+  post_reset(g->zones[zone].number);
 }
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
-bool is_empty(zone_rnum zone_nr)
+bool is_empty(GameWorld *g, zone_rnum zone_nr)
 {
   struct descriptor_data *i;
 
-  for (i = descriptor_list; i; i = i->next) {
+  for (i = g->descriptors; i; i = i->next) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
     if (char_get_in_room(i->character) == NOWHERE)
       continue;
-    if (rroom_get_zone(char_get_in_room(i->character)) != zone_nr)
+    if (rroom_get_zone(g, char_get_in_room(i->character)) != zone_nr)
       continue;
     /*
      * if an immortal has nohassle off, he counts as present 
@@ -4163,7 +4120,7 @@ bool is_empty(zone_rnum zone_nr)
     if (char_is_npc(i->character))
       continue; /* immortal switched into a mob */
 
-    if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(i->character, PRF_NOHASSLE)))
+    if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(g, i->character, PRF_NOHASSLE)))
       continue;
 
     return false;
@@ -4226,7 +4183,7 @@ static void free_followers(struct follow_type *k)
 }
 
 /* release memory allocated for a char struct */
-void free_char(struct char_data *ch)
+void free_char(GameWorld *g, struct char_data *ch)
 {
   int i;
   mob_rnum nr;
@@ -4234,8 +4191,8 @@ void free_char(struct char_data *ch)
 
   if (char_get_player_specials(ch)) {
 
-    while ((a = char_get_aliases(ch)) != nullptr) {
-      char_set_aliases(ch, char_get_aliases(ch)->next);
+    while ((a = char_get_aliases(g, ch)) != nullptr) {
+      char_set_aliases(g, ch, char_get_aliases(g, ch)->next);
       free_alias(a);
     }
     if (char_get_player_specials(ch)->poofin)
@@ -4266,8 +4223,8 @@ void free_char(struct char_data *ch)
     free((char *)char_get_feature(ch));
     free((char *)char_get_rdisplay(ch));
     for (i = 0; i < NUM_HIST; i++)
-      if (char_get_comm_hist(ch, i))
-        free(char_get_comm_hist(ch, i));
+      if (char_get_comm_hist(g, ch, i))
+        free(char_get_comm_hist(g, ch, i));
     if (char_get_player_specials(ch))
       free(char_get_player_specials(ch));
 
@@ -4276,26 +4233,26 @@ void free_char(struct char_data *ch)
 
   } else if ((nr = char_get_nr(ch)) != NOBODY) {
     /* otherwise, free strings only if the string is not pointing at proto */
-    if (char_get_alias(ch) && char_get_alias(ch) != char_get_alias(&mob_proto[nr]))
+    if (char_get_alias(ch) && char_get_alias(ch) != char_get_alias(&g->mob_proto[nr]))
       free(char_get_alias(ch));
-    if (char_get_raw_title(ch) && char_get_raw_title(ch) != char_get_raw_title(&mob_proto[nr]))
+    if (char_get_raw_title(ch) && char_get_raw_title(ch) != char_get_raw_title(&g->mob_proto[nr]))
       free(char_get_raw_title(ch));
-    if (char_get_sdesc(ch) && char_get_sdesc(ch) != char_get_sdesc(&mob_proto[nr]))
+    if (char_get_sdesc(ch) && char_get_sdesc(ch) != char_get_sdesc(&g->mob_proto[nr]))
       free(char_get_sdesc(ch));
-    if (char_get_ldesc(ch) && char_get_ldesc(ch) != char_get_ldesc(&mob_proto[nr]))
+    if (char_get_ldesc(ch) && char_get_ldesc(ch) != char_get_ldesc(&g->mob_proto[nr]))
       free(char_get_ldesc(ch));
-    if (char_get_ddesc(ch) && char_get_ddesc(ch) != char_get_ddesc(&mob_proto[nr]))
+    if (char_get_ddesc(ch) && char_get_ddesc(ch) != char_get_ddesc(&g->mob_proto[nr]))
       free(char_get_ddesc(ch));
     /* free script proto list if it's not the prototype */
-    if (char_get_proto_script(ch) && char_get_proto_script(ch) != char_get_proto_script(&mob_proto[nr]))
+    if (char_get_proto_script(ch) && char_get_proto_script(ch) != char_get_proto_script(&g->mob_proto[nr]))
       free_proto_script(ch, MOB_TRIGGER);
   }
   while (char_get_affected(ch))
-    affect_remove(ch, char_get_affected(ch));
+    affect_remove(g, ch, char_get_affected(ch));
 
   /* free any assigned scripts */
   if (char_get_script(ch))
-    extract_script(ch, MOB_TRIGGER);
+    extract_script(g, ch, MOB_TRIGGER);
 
   /* new version of free_followers take the followers pointer as arg */
   free_followers(char_get_followers(ch));
@@ -4309,22 +4266,22 @@ void free_char(struct char_data *ch)
   * to 0, and has not yet been added to the lookup table.
   */
   if (char_get_id(ch) != 0)
-    remove_from_lookup_table(char_get_id(ch));
+    remove_from_lookup_table(g, char_get_id(ch));
 
   free(ch);
 }
 
 /* release memory allocated for an obj struct */
-void free_obj(struct obj_data *obj)
+void free_obj(GameWorld *g, struct obj_data *obj)
 {
-  remove_unique_id(obj);
+  remove_unique_id(g, obj);
   if (obj_get_item_number(obj) == NOWHERE) {
-    free_object_strings(obj);
+    free_object_strings(g, obj);
     /* free script proto list */
     free_proto_script(obj, OBJ_TRIGGER);
   } else {
-    free_object_strings_proto(obj);
-    if (obj_get_proto_script(obj) != obj_get_proto_script(&obj_proto[obj_get_item_number(obj)]))
+    free_object_strings_proto(g, obj);
+    if (obj_get_proto_script(obj) != obj_get_proto_script(&g->obj_proto[obj_get_item_number(obj)]))
       free_proto_script(obj, OBJ_TRIGGER);
   }
 
@@ -4335,10 +4292,10 @@ void free_obj(struct obj_data *obj)
 
   /* free any assigned scripts */
   if (obj_get_script(obj))
-    extract_script(obj, OBJ_TRIGGER);
+    extract_script(g, obj, OBJ_TRIGGER);
 
   /* find_obj helper */
-  remove_from_lookup_table(obj_get_id(obj));
+  remove_from_lookup_table(g, obj_get_id(obj));
 
   if (obj_get_sbinfo(obj))
     free(obj_get_sbinfo(obj));
@@ -4398,7 +4355,7 @@ static int file_to_string(const char *name, char *buf)
 }
 
 /* clear some of the the working variables of a char */
-void reset_char(struct char_data *ch)
+void reset_char(GameWorld *g, struct char_data *ch)
 {
   int i;
 
@@ -4419,7 +4376,7 @@ void reset_char(struct char_data *ch)
   char_set_carry_items(ch, 0);
   char_set_time_logon(ch, time(0));
 
-  char_set_last_tell(ch, NOBODY);
+  char_set_last_tell(g, ch, NOBODY);
 }
 
 /* clear ALL the working variables of a char; do NOT free any space alloc'ed */
@@ -4450,7 +4407,7 @@ void clear_object(struct obj_data *obj)
  * Called during character creation after picking character class
  * (and then never again for that character).
  */
-void init_char(struct char_data *ch)
+void init_char(GameWorld *g, struct char_data *ch)
 {
   int i;
 
@@ -4468,8 +4425,8 @@ void init_char(struct char_data *ch)
   char_set_blocks(ch, nullptr);
 
   /* If this is our first player make him LVL_IMPL. */
-  if (top_of_p_table == 0) {
-    admin_set(ch, ADMLVL_IMPL);
+  if (g->top_of_p_table == 0) {
+    admin_set(g, ch, ADMLVL_IMPL);
 
     /* The implementor never goes through do_start(). */
     char_set_baseki(ch, 1000);
@@ -4477,7 +4434,7 @@ void init_char(struct char_data *ch)
     char_set_basest(ch, 1000);
   }
 
-  set_title(ch, nullptr);
+  set_title(g, ch, nullptr);
   char_set_sdesc(ch, nullptr);
   char_set_ldesc(ch, nullptr);
   char_set_ddesc(ch, nullptr);
@@ -4491,11 +4448,11 @@ void init_char(struct char_data *ch)
   char_set_hometown(ch, 1);
   char_set_armor(ch, 0);
 
-  set_height_and_weight_by_race(ch);
+  set_height_and_weight_by_race(g, ch);
 
-  if ((i = get_ptable_by_name(char_get_name(ch))) != -1) {
-    char_set_idnum(ch, ++top_idnum);
-    player_table[i].id = char_get_idnum(ch);
+  if ((i = get_ptable_by_name(g, char_get_name(ch))) != -1) {
+    char_set_idnum(ch, ++g->top_idnum);
+    g->player_table[i].id = char_get_idnum(ch);
   } else
     mud_log("SYSERR: init_char: Character '%s' not found in player table.", char_get_name(ch));
 
@@ -4511,13 +4468,13 @@ void init_char(struct char_data *ch)
     char_get_affected_by(ch)[i] = 0;
 
   for (i = 0; i < 3; i++)
-    char_set_conditions(ch, i, (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24));
+    char_set_conditions(g, ch, i, (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24));
 
-  char_set_load_room(ch, NOWHERE);
+  char_set_load_room(g, ch, NOWHERE);
   char_set_speaking(ch, SKILL_LANG_COMMON);
-  char_set_feat_points(ch, 1);
+  char_set_feat_points(g, ch, 1);
   // initialize plrobjs so it doesn't complain on startup.
-  Crash_crashsave(ch);
+  Crash_crashsave(g, ch);
 }
 
 /*
@@ -4556,27 +4513,27 @@ static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t 
 }
 
 /* returns the real number of the room with given virtual number */
-room_rnum real_room(room_vnum vnum)
+room_rnum real_room(GameWorld *g, room_vnum vnum)
 {
-  return find_vnum(vnum, world, top_of_world + 1, sizeof(*world), room_order);
+  return find_vnum(vnum, g->rooms, g->top_room + 1, sizeof(*g->rooms), room_order);
 }
 
 /* returns the real number of the monster with given virtual number */
-mob_rnum real_mobile(mob_vnum vnum)
+mob_rnum real_mobile(GameWorld *g, mob_vnum vnum)
 {
-  return find_vnum(vnum, mob_index, top_of_mobt + 1, sizeof(*mob_index), index_order);
+  return find_vnum(vnum, g->mob_index, g->top_mob + 1, sizeof(*g->mob_index), index_order);
 }
 
 /* returns the real number of the object with given virtual number */
-obj_rnum real_object(obj_vnum vnum)
+obj_rnum real_object(GameWorld *g, obj_vnum vnum)
 {
-  return find_vnum(vnum, obj_index, top_of_objt + 1, sizeof(*obj_index), index_order);
+  return find_vnum(vnum, g->obj_index, g->top_obj + 1, sizeof(*g->obj_index), index_order);
 }
 
 /* returns the real number of the zone with given virtual number */
-zone_rnum real_zone(zone_vnum vnum)
+zone_rnum real_zone(GameWorld *g, zone_vnum vnum)
 {
-  return find_vnum(vnum, zone_table, top_of_zone_table + 1, sizeof(*zone_table), zone_order);
+  return find_vnum(vnum, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_order);
 }
 
 /*
@@ -4584,20 +4541,20 @@ zone_rnum real_zone(zone_vnum vnum)
  *
  * TODO: Add checks for unknown bitvectors.
  */
-static int check_object(struct obj_data *obj)
+static int check_object(GameWorld *g, struct obj_data *obj)
 {
   char objname[MAX_INPUT_LENGTH + 32];
   int error = false;
 
   if (obj_get_weight(obj) < 0 && (error = true))
     mud_log("SYSERR: Object #%d (%s) has negative weight (%" PRId64 ").",
-            obj_get_vnum(obj), obj_get_short_description(obj), obj_get_weight(obj));
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_weight(obj));
 
   if (obj_get_cost_per_day(obj) < 0 && (error = true))
     mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-            obj_get_vnum(obj), obj_get_short_description(obj), obj_get_cost_per_day(obj));
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_cost_per_day(obj));
 
-  snprintf(objname, sizeof(objname), "Object #%d (%s)", obj_get_vnum(obj), obj_get_short_description(obj));
+  snprintf(objname, sizeof(objname), "Object #%d (%s)", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_DRINKCON: {
@@ -4612,23 +4569,23 @@ static int check_object(struct obj_data *obj)
     case ITEM_FOUNTAIN:
       if ((obj_get_value(obj, 0) > 0) && (obj_get_value(obj, 1) > obj_get_value(obj, 0) && (error = true)))
         mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                obj_get_vnum(obj), obj_get_short_description(obj),
+                obj_get_vnum(g, obj), obj_get_short_description(obj),
                 obj_get_value(obj, 1), obj_get_value(obj, 0));
       break;
     case ITEM_SCROLL:
     case ITEM_POTION:
-      error |= check_object_level(obj, 0);
-      error |= check_object_spell_number(obj, 1);
-      error |= check_object_spell_number(obj, 2);
-      error |= check_object_spell_number(obj, 3);
+      error |= check_object_level(g, obj, 0);
+      error |= check_object_spell_number(g, obj, 1);
+      error |= check_object_spell_number(g, obj, 2);
+      error |= check_object_spell_number(g, obj, 3);
       break;
     case ITEM_WAND:
     case ITEM_STAFF:
-      error |= check_object_level(obj, 0);
-      error |= check_object_spell_number(obj, 3);
+      error |= check_object_level(g, obj, 0);
+      error |= check_object_spell_number(g, obj, 3);
       if (obj_get_value(obj, 2) > obj_get_value(obj, 1) && (error = true))
         mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                obj_get_vnum(obj), obj_get_short_description(obj),
+                obj_get_vnum(g, obj), obj_get_short_description(obj),
                 obj_get_value(obj, 2), obj_get_value(obj, 1));
       break;
   }
@@ -4636,7 +4593,7 @@ static int check_object(struct obj_data *obj)
   return (error);
 }
 
-static int check_object_spell_number(struct obj_data *obj, int val)
+static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val)
 {
   int error = false;
   const char *spellname;
@@ -4653,54 +4610,54 @@ static int check_object_spell_number(struct obj_data *obj, int val)
     error = true;
   if (obj_get_value(obj, val) >= SKILL_TABLE_SIZE)
     error = true;
-  if (skill_type(obj_get_value(obj, val)) != SKTYPE_SPELL)
+  if (skill_type(g, obj_get_value(obj, val)) != SKTYPE_SPELL)
     error = true;
   if (error)
     mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-            obj_get_vnum(obj), obj_get_short_description(obj), obj_get_value(obj, val));
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
 
   /*
    * This bug has been fixed, but if you don't like the special behavior...
    */
 #if 0
   if (obj_get_type_flag(obj) == ITEM_STAFF &&
-	spell_has_routine(obj_get_value(obj, val), MAG_AREAS | MAG_MASSES))
+	spell_has_routine(g, obj_get_value(obj, val), MAG_AREAS | MAG_MASSES))
     mud_log("... '%s' (#%d) uses %s spell '%s'.",
-	obj->short_description,	obj_get_vnum(obj),
-	spell_has_routine(obj_get_value(obj, val), MAG_AREAS) ? "area" : "mass",
-	skill_name(obj_get_value(obj, val)));
+	obj->short_description,	obj_get_vnum(g, obj),
+	spell_has_routine(g, obj_get_value(obj, val), MAG_AREAS) ? "area" : "mass",
+	skill_name(g, obj_get_value(obj, val)));
 #endif
 
-  if (scheck) /* Spell names don't exist in syntax check mode. */
+  if (g->scheck) /* Spell names don't exist in syntax check mode. */
     return (error);
 
   /* Now check for unnamed spells. */
-  spellname = skill_name(obj_get_value(obj, val));
+  spellname = skill_name(g, obj_get_value(obj, val));
 
   if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
     mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-            obj_get_vnum(obj), obj_get_short_description(obj), spellname,
+            obj_get_vnum(g, obj), obj_get_short_description(obj), spellname,
             obj_get_value(obj, val));
 
   return (error);
 }
 
-static int check_object_level(struct obj_data *obj, int val)
+static int check_object_level(GameWorld *g, struct obj_data *obj, int val)
 {
   int error = false;
 
   if ((obj_get_value(obj, val) < 0) && (error = true))
     mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
-            obj_get_vnum(obj), obj_get_short_description(obj), obj_get_value(obj, val));
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
 
   return (error);
 }
 
-static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
+static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context,
                              const char *file, int line, const char *format, ...)
-    __attribute__((format(printf, 6, 7)));
+    __attribute__((format(printf, 7, 8)));
 
-static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
+static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context,
                              const char *file, int line, const char *format, ...)
 {
   va_list args;
@@ -4713,7 +4670,7 @@ static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context
   if (result < 0 || ferror(fp)) {
     int saved_errno = errno;
     mud_log("SYSERR: %s:%d: fprintf failed saving object #%d (%s): %s",
-            file, line, obj_get_vnum(obj), context,
+            file, line, obj_get_vnum(g, obj), context,
             saved_errno ? strerror(saved_errno) : "stream error");
     return false;
   }
@@ -4721,10 +4678,10 @@ static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context
   return true;
 }
 
-#define OBJ_SAVE_FPRINTF(fp, obj, context, ...) \
-  obj_save_fprintf((fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
+#define OBJ_SAVE_FPRINTF(g, fp, obj, context, ...) \
+  obj_save_fprintf(g, (fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
 
-bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
+bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate)
 {
   int counter2, i;
   struct extra_descr_data *ex_desc;
@@ -4743,10 +4700,10 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
   sprintascii(ebuf2, obj_get_extra_flags(obj)[2]);
   sprintascii(ebuf3, obj_get_extra_flags(obj)[3]);
 
-  if (!OBJ_SAVE_FPRINTF(fp, obj, "base object data",
+  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "base object data",
                         "#%d\n"
                         "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d\n",
-                        obj_get_vnum(obj), locate, obj_get_value(obj, 0), obj_get_value(obj, 1),
+                        obj_get_vnum(g, obj), locate, obj_get_value(obj, 0), obj_get_value(obj, 1),
                         obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 4),
                         obj_get_value(obj, 5), obj_get_value(obj, 6), obj_get_value(obj, 7),
                         ebuf0, ebuf1, ebuf2, ebuf3,
@@ -4758,7 +4715,7 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
   /* An early "return 1" for non-unique, non-spellbook objects used to sit here, but its
    * condition (!type == ITEM_SPELLBOOK) was always false, so every object saves its XAP data. */
 
-  if (!OBJ_SAVE_FPRINTF(fp, obj, "XAP object data",
+  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "XAP object data",
                         "XAP\n"
                         "%s~\n"
                         "%s~\n"
@@ -4774,19 +4731,19 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
     return false;
 
   if (obj_get_generation(obj))
-    if (!OBJ_SAVE_FPRINTF(fp, obj, "generation", "G\n%lld\n", (long long)obj_get_generation(obj)))
+    if (!OBJ_SAVE_FPRINTF(g, fp, obj, "generation", "G\n%lld\n", (long long)obj_get_generation(obj)))
       return false;
   if (obj_get_unique_id(obj))
-    if (!OBJ_SAVE_FPRINTF(fp, obj, "unique id", "U\n%" PRId64 "\n", obj_get_unique_id(obj)))
+    if (!OBJ_SAVE_FPRINTF(g, fp, obj, "unique id", "U\n%" PRId64 "\n", obj_get_unique_id(obj)))
       return false;
 
-  if (!OBJ_SAVE_FPRINTF(fp, obj, "size", "Z\n%d\n", obj_get_size(obj)))
+  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "size", "Z\n%d\n", obj_get_size(obj)))
     return false;
 
   /* Do we have affects? */
   for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
     if (obj_get_affected(obj)[counter2].modifier)
-      if (!OBJ_SAVE_FPRINTF(fp, obj, "affect", "A\n"
+      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "affect", "A\n"
                                                "%d %d %d\n",
                             obj_get_affected(obj)[counter2].location, obj_get_affected(obj)[counter2].modifier,
                             obj_get_affected(obj)[counter2].specific))
@@ -4801,7 +4758,7 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       }
       strcpy(buf1, ex_desc->description);
       strip_cr(buf1);
-      if (!OBJ_SAVE_FPRINTF(fp, obj, "extra description", "E\n"
+      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "extra description", "E\n"
                                                           "%s~\n"
                                                           "%s~\n",
                             ex_desc->keyword,
@@ -4816,7 +4773,7 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       if (obj_get_sbinfo(obj)[i].spellname == 0) {
         break;
       }
-      if (!OBJ_SAVE_FPRINTF(fp, obj, "spellbook", "S\n"
+      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "spellbook", "S\n"
                                                   "%d %d\n",
                             obj_get_sbinfo(obj)[i].spellname, obj_get_sbinfo(obj)[i].pages))
         return false;
@@ -4830,7 +4787,7 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
 
 /* External variables from config.c */
 
-static void load_default_config(void)
+static void load_default_config(GameWorld *g)
 {
   /****************************************************************************/
   /** This function is called only once, at boot-time.                       **/
@@ -4867,7 +4824,7 @@ static void load_default_config(void)
   CONFIG_ENABLE_COMPRESSION     = enable_compression;
   CONFIG_ENABLE_LANGUAGES       = enable_languages;
   CONFIG_ALL_ITEMS_UNIQUE       = all_items_unique;
-  CONFIG_EXP_MULTIPLIER         = exp_multiplier;
+  CONFIG_EXP_MULTIPLIER         = g->exp_multiplier;
   /****************************************************************************/
   /** Rent / crashsave options.                                              **/
   /****************************************************************************/
@@ -4949,14 +4906,14 @@ static void load_default_config(void)
   CONFIG_CREATION_METHOD = method;
 }
 
-void load_config(void)
+void load_config(GameWorld *g)
 {
   FILE *fl;
   char line[MAX_STRING_LENGTH];
   char tag[MAX_INPUT_LENGTH];
   char buf[MAX_INPUT_LENGTH];
 
-  load_default_config();
+  load_default_config(g);
 
   snprintf(buf, sizeof(buf), "%s/%s", DFLT_DIR, CONFIG_CONFFILE);
   if (!(fl = fopen(CONFIG_CONFFILE, "r")) && !(fl = fopen(buf, "r"))) {
@@ -4970,7 +4927,7 @@ void load_config(void)
   /****************************************************************************/
   while (get_line(fl, line)) {
     split_argument(line, tag);
-    config_load_option(tag, line, fl);
+    config_load_option(g, tag, line, fl);
   }
   if (!CONFIG_DFLT_DIR) /* an empty DFLT_DIR line */
     CONFIG_DFLT_DIR = strdup(DFLT_DIR);

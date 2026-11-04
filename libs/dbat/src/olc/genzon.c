@@ -13,32 +13,41 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 
 /* real zone of room/mobile/object/shop given */
 /* Orders a vnum against the range of vnums a zone covers. */
-static int zone_range_order(const void *key, const void *zone)
-{
-  room_vnum vnum            = *(const room_vnum *)key;
-  const struct zone_data *z = zone;
+/* bsearch() can only pass its comparator two pointers, so the key carries the world too */
+struct zone_range_key {
+  GameWorld *g;
+  room_vnum vnum;
+};
 
-  if (vnum < genolc_zone_bottom(z - zone_table))
+static int zone_range_order(const void *key_ptr, const void *zone)
+{
+  const struct zone_range_key *key = key_ptr;
+  GameWorld *g                     = key->g;
+  const struct zone_data *z        = zone;
+
+  if (key->vnum < genolc_zone_bottom(g, z - g->zones))
     return -1;
-  return vnum > z->top;
+  return key->vnum > z->top;
 }
 
-zone_rnum real_zone_by_thing(room_vnum vznum)
+zone_rnum real_zone_by_thing(GameWorld *g, room_vnum vznum)
 {
+  struct zone_range_key key = {g, vznum};
   struct zone_data *found;
 
-  if (top_of_zone_table < 0)
+  if (g->top_zone < 0)
     return NOWHERE;
-  found = bsearch(&vznum, zone_table, top_of_zone_table + 1, sizeof(*zone_table), zone_range_order);
-  return found ? found - zone_table : NOWHERE;
+  found = bsearch(&key, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_range_order);
+  return found ? found - g->zones : NOWHERE;
 }
 
-zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
+zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
   struct atomic_file af;
   FILE *fp;
@@ -71,8 +80,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    * Make sure the zone does not exist.
    */
   room_vnum room = vzone_num * 100; /* Old CircleMUD 100-zones. */
-  for (i = 0; i <= top_of_zone_table; i++)
-    if (genolc_zone_bottom(i) <= room && zone_table[i].top >= room) {
+  for (i = 0; i <= g->top_zone; i++)
+    if (genolc_zone_bottom(g, i) <= room && g->zones[i].top >= room) {
       *error = "A zone already covers that area.\r\n";
       return NOWHERE;
     }
@@ -82,13 +91,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
@@ -98,13 +107,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
@@ -114,13 +123,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return NOWHERE;
   }
@@ -130,13 +139,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return NOWHERE;
   }
@@ -146,13 +155,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return NOWHERE;
   }
@@ -162,13 +171,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return NOWHERE;
   }
@@ -178,13 +187,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s/%d.gld", GLD_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return NOWHERE;
   }
@@ -192,13 +201,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   /*
    * Update index files.
    */
-  create_world_index(vzone_num, "zon");
-  create_world_index(vzone_num, "wld");
-  create_world_index(vzone_num, "mob");
-  create_world_index(vzone_num, "obj");
-  create_world_index(vzone_num, "shp");
-  create_world_index(vzone_num, "trg");
-  create_world_index(vzone_num, "gld");
+  create_world_index(g, vzone_num, "zon");
+  create_world_index(g, vzone_num, "wld");
+  create_world_index(g, vzone_num, "mob");
+  create_world_index(g, vzone_num, "obj");
+  create_world_index(g, vzone_num, "shp");
+  create_world_index(g, vzone_num, "trg");
+  create_world_index(g, vzone_num, "gld");
 
   /*
    * Make a new zone in memory. This was the source of all the zedit new
@@ -210,23 +219,23 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    * through top_of_zone (top_of_zone_table + 1 items) and a new one which
    * makes it top_of_zone_table + 2 elements large.
    */
-  RECREATE(zone_table, struct zone_data, top_of_zone_table + 2);
-  zone_table[top_of_zone_table + 1].number = 32000;
+  RECREATE(g->zones, struct zone_data, g->top_zone + 2);
+  g->zones[g->top_zone + 1].number = 32000;
 
-  if (vzone_num > zone_table[top_of_zone_table].number)
-    rznum = top_of_zone_table + 1;
+  if (vzone_num > g->zones[g->top_zone].number)
+    rznum = g->top_zone + 1;
   else {
     room_vnum j;
     room_rnum rnum;
-    for (i = top_of_zone_table + 1; i > 0 && vzone_num < zone_table[i - 1].number; i--) {
-      zone_table[i] = zone_table[i - 1];
-      for (j = zone_table[i].bot; j <= zone_table[i].top; j++)
-        if ((rnum = real_room(j)) != NOWHERE)
-          rroom_set_zone(rnum, rroom_get_zone(rnum) + 1);
+    for (i = g->top_zone + 1; i > 0 && vzone_num < g->zones[i - 1].number; i--) {
+      g->zones[i] = g->zones[i - 1];
+      for (j = g->zones[i].bot; j <= g->zones[i].top; j++)
+        if ((rnum = real_room(g, j)) != NOWHERE)
+          rroom_set_zone(g, rnum, rroom_get_zone(g, rnum) + 1);
     }
     rznum = i;
   }
-  zone = &zone_table[rznum];
+  zone = &g->zones[rznum];
 
   /*
    * Ok, insert the new zone here.
@@ -251,21 +260,21 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   CREATE(zone->cmd, struct reset_com, 1);
   zone->cmd[0].command = 'S';
 
-  top_of_zone_table++;
+  g->top_zone++;
 
-  for (i = top_of_world; i > 0; i--)
-    if (rroom_get_zone(i) < real_zone(rznum))
+  for (i = g->top_room; i > 0; i--)
+    if (rroom_get_zone(g, i) < real_zone(g, rznum))
       break;
     else
-      rroom_set_zone(i, real_zone_by_thing(rroom_get_vnum(i)));
+      rroom_set_zone(g, i, real_zone_by_thing(g, rroom_get_vnum(g, i)));
 
-  add_to_save_list(zone->number, SL_ZON);
+  add_to_save_list(g, zone->number, SL_ZON);
   return rznum;
 }
 
 /*-------------------------------------------------------------------*/
 
-void create_world_index(zone_vnum znum, const char *type)
+void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 {
   struct atomic_file index_af;
   FILE *newfile, *oldfile;
@@ -308,11 +317,11 @@ void create_world_index(zone_vnum znum, const char *type)
   snprintf(old_name, sizeof(old_name), "%s/index", prefix);
 
   if (!(oldfile = fopen(old_name, "r"))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", old_name);
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", old_name);
     return;
   }
   if (!(newfile = atomic_open(&index_af, old_name, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
     fclose(oldfile);
     return;
   }
@@ -348,7 +357,7 @@ void create_world_index(zone_vnum znum, const char *type)
 
 /*-------------------------------------------------------------------*/
 
-void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
+void remove_room_zone_commands(GameWorld *g, zone_rnum zone, room_rnum room_num)
 {
   int subcmd         = 0;
   room_rnum cmd_room = -2;
@@ -357,23 +366,23 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
    * Delete all entries in zone_table that relate to this room so we
    * can add all the ones we have in their place.
    */
-  while (zone_table[zone].cmd[subcmd].command != 'S') {
-    switch (zone_table[zone].cmd[subcmd].command) {
+  while (g->zones[zone].cmd[subcmd].command != 'S') {
+    switch (g->zones[zone].cmd[subcmd].command) {
       case 'M':
       case 'O':
       case 'T':
       case 'V':
-        cmd_room = zone_table[zone].cmd[subcmd].arg3;
+        cmd_room = g->zones[zone].cmd[subcmd].arg3;
         break;
       case 'D':
       case 'R':
-        cmd_room = zone_table[zone].cmd[subcmd].arg1;
+        cmd_room = g->zones[zone].cmd[subcmd].arg1;
         break;
       default:
         break;
     }
     if (cmd_room == room_num)
-      remove_cmd_from_list(&zone_table[zone].cmd, subcmd);
+      remove_cmd_from_list(&g->zones[zone].cmd, subcmd);
     else
       subcmd++;
   }
@@ -386,7 +395,7 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
  * writes simple comments in the form of (<name>) to each record.  A
  * header for each field is also there.
  */
-bool save_zone(zone_rnum zone_num)
+bool save_zone(GameWorld *g, zone_rnum zone_num)
 {
   int subcmd, arg4 = -1, arg5 = -1;
   IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
@@ -399,44 +408,44 @@ bool save_zone(zone_rnum zone_num)
   char zbuf3[MAX_STRING_LENGTH];
   char zbuf4[MAX_STRING_LENGTH];
 
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-    mud_log("SYSERR: GenOLC: save_zone: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+  if (zone_num < 0 || zone_num > g->top_zone) {
+    mud_log("SYSERR: GenOLC: save_zone: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, g->zones[zone_num].number);
   if (!(zfile = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.", zone_table[zone_num].number);
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.", g->zones[zone_num].number);
     return false;
   }
 
   /*
    * Print zone header to file	
    */
-  sprintascii(zbuf1, zone_table[zone_num].zone_flags[0]);
-  sprintascii(zbuf2, zone_table[zone_num].zone_flags[1]);
-  sprintascii(zbuf3, zone_table[zone_num].zone_flags[2]);
-  sprintascii(zbuf4, zone_table[zone_num].zone_flags[3]);
+  sprintascii(zbuf1, g->zones[zone_num].zone_flags[0]);
+  sprintascii(zbuf2, g->zones[zone_num].zone_flags[1]);
+  sprintascii(zbuf3, g->zones[zone_num].zone_flags[2]);
+  sprintascii(zbuf4, g->zones[zone_num].zone_flags[3]);
 
   fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
   fprintf(zfile, "#%d\n"
                  "%s~\n"
                  "%s~\n"
                  "%d %d %d %d %s %s %s %s %d %d\n",
-          zone_table[zone_num].number,
-          (zone_table[zone_num].builders && *zone_table[zone_num].builders)
-              ? zone_table[zone_num].builders
+          g->zones[zone_num].number,
+          (g->zones[zone_num].builders && *g->zones[zone_num].builders)
+              ? g->zones[zone_num].builders
               : "None.",
-          (zone_table[zone_num].name && *zone_table[zone_num].name)
-              ? zone_table[zone_num].name
+          (g->zones[zone_num].name && *g->zones[zone_num].name)
+              ? g->zones[zone_num].name
               : "undefined",
-          genolc_zone_bottom(zone_num),
-          zone_table[zone_num].top,
-          zone_table[zone_num].lifespan,
-          zone_table[zone_num].reset_mode,
+          genolc_zone_bottom(g, zone_num),
+          g->zones[zone_num].top,
+          g->zones[zone_num].lifespan,
+          g->zones[zone_num].reset_mode,
           zbuf1, zbuf2, zbuf3, zbuf4,
-          zone_table[zone_num].min_level,
-          zone_table[zone_num].max_level);
+          g->zones[zone_num].min_level,
+          g->zones[zone_num].max_level);
 
   /*
 	 * Handy Quick Reference Chart for Zone Values.
@@ -455,74 +464,74 @@ bool save_zone(zone_rnum zone_num)
 	 * -----------------------------------------------------------------------------------------
 	 */
 
-  for (subcmd = 0; zone_get_cmd(zone_num, subcmd)->command != 'S'; subcmd++) {
-    switch (zone_get_cmd(zone_num, subcmd)->command) {
+  for (subcmd = 0; zone_get_cmd(g, zone_num, subcmd)->command != 'S'; subcmd++) {
+    switch (zone_get_cmd(g, zone_num, subcmd)->command) {
       case 'M':
-        arg1    = mob_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
-        arg4    = zone_get_cmd(zone_num, subcmd)->arg4;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = char_get_sdesc(&mob_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
+        arg1    = g->mob_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
+        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
+        arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = char_get_sdesc(&g->mob_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'O':
-        arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
-        arg4    = zone_get_cmd(zone_num, subcmd)->arg4;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
+        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
+        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
+        arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'G':
-        arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
+        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = -1;
         arg4    = -1;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'E':
-        arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = zone_get_cmd(zone_num, subcmd)->arg3;
+        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
+        arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
         arg4    = -1;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'P':
-        arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = obj_index[zone_get_cmd(zone_num, subcmd)->arg3].vnum;
+        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
+        arg3    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg3].vnum;
         arg4    = -1;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'D':
-        arg1    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg1);
-        arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = zone_get_cmd(zone_num, subcmd)->arg3;
-        comment = rroom_get_name(zone_get_cmd(zone_num, subcmd)->arg1);
+        arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
+        arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
+        comment = rroom_get_name(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
         break;
       case 'R':
-        arg1    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg1);
-        arg2    = obj_index[zone_get_cmd(zone_num, subcmd)->arg2].vnum;
-        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg2]);
+        arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
+        arg2    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg2].vnum;
+        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg2]);
         arg3    = -1;
         break;
       case 'T':
-        arg1    = zone_get_cmd(zone_num, subcmd)->arg1;                   /* trigger type */
-        arg2    = trig_index[zone_get_cmd(zone_num, subcmd)->arg2]->vnum; /* trigger vnum */
-        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);     /* room num */
+        arg1    = zone_get_cmd(g, zone_num, subcmd)->arg1;                   /* trigger type */
+        arg2    = g->trig_index[zone_get_cmd(g, zone_num, subcmd)->arg2]->vnum; /* trigger vnum */
+        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);     /* room num */
         arg4    = -1;
-        arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = trig_index[real_trigger(arg2)]->proto->name;
+        arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
+        comment = g->trig_index[real_trigger(g, arg2)]->proto->name;
         break;
       case 'V':
-        arg1 = zone_get_cmd(zone_num, subcmd)->arg1; /* trigger type */
-        arg2 = zone_get_cmd(zone_num, subcmd)->arg2; /* context */
-        arg3 = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
+        arg1 = zone_get_cmd(g, zone_num, subcmd)->arg1; /* trigger type */
+        arg2 = zone_get_cmd(g, zone_num, subcmd)->arg2; /* context */
+        arg3 = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
         arg4 = -1;
-        arg5 = zone_get_cmd(zone_num, subcmd)->arg5;
+        arg5 = zone_get_cmd(g, zone_num, subcmd)->arg5;
         break;
       case '*':
         /*
@@ -530,25 +539,25 @@ bool save_zone(zone_rnum zone_num)
        */
         continue;
       default:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: z_save_to_disk(): Unknown cmd '%c' - NOT saving", zone_get_cmd(zone_num, subcmd)->command);
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: z_save_to_disk(): Unknown cmd '%c' - NOT saving", zone_get_cmd(g, zone_num, subcmd)->command);
         continue;
     }
-    if (zone_get_cmd(zone_num, subcmd)->command != 'V')
+    if (zone_get_cmd(g, zone_num, subcmd)->command != 'V')
       fprintf(zfile, "%c %d %d %d %d %d %d \t(%s)\n",
-              zone_get_cmd(zone_num, subcmd)->command, zone_get_cmd(zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5, comment);
+              zone_get_cmd(g, zone_num, subcmd)->command, zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5, comment);
     else
       fprintf(zfile, "%c %d %d %d %d %d %d %s %s\n",
-              zone_get_cmd(zone_num, subcmd)->command, zone_get_cmd(zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5,
-              zone_get_cmd(zone_num, subcmd)->sarg1, zone_get_cmd(zone_num, subcmd)->sarg2);
+              zone_get_cmd(g, zone_num, subcmd)->command, zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5,
+              zone_get_cmd(g, zone_num, subcmd)->sarg1, zone_get_cmd(g, zone_num, subcmd)->sarg2);
   }
   fputs("S\n$\n", zfile);
   if (!atomic_commit(&af))
     return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
-  if (in_save_list(zone_table[zone_num].number, SL_ZON)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_ZON);
-    create_world_index(zone_table[zone_num].number, "zon");
+  if (in_save_list(g, g->zones[zone_num].number, SL_ZON)) {
+    remove_from_save_list(g, g->zones[zone_num].number, SL_ZON);
+    create_world_index(g, g->zones[zone_num].number, "zon");
     mud_log("GenOLC: save_zone: Saving zone '%s'", oldname);
   }
   return true;

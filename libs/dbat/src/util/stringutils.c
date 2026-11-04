@@ -274,7 +274,7 @@ char *delete_doubledollar(char *string)
  * it to be returned.  Returns -1 if not found; 0..n otherwise.  Array
  * must be terminated with a '\n' so it knows to stop searching.
  */
-int search_block(char *arg, const char **list, int exact)
+int search_block(char *arg, const char *const *list, int exact)
 {
   int i, l;
 
@@ -316,7 +316,7 @@ bool is_number(const char *str)
   return true;
 }
 
-static const char *fill[] =
+static const char *const fill[] =
     {
         "in",
         "into",
@@ -333,7 +333,7 @@ bool fill_word(char *argument)
   return (search_block(argument, fill, true) >= 0);
 }
 
-static const char *reserved[] =
+static const char *const reserved[] =
     {
         "a",
         "an",

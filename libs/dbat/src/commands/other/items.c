@@ -47,12 +47,13 @@
 #include "dbat/mail.h"
 #include "dbat/local_limits.h"
 #include "other_internal.h"
+#include "dbat/game_world.h"
 
-static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
+static void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch, int type);
 
 /* This handles increasing the stats of a created object based on the skill *
  * and/or stats of the user.                                                */
-static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
+static void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch, int type)
 {
 
   if (!obj || !ch)
@@ -84,7 +85,7 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
         obj_set_level(obj, boost);
         obj_get_affected(obj)[0].location = 17;
         obj_get_affected(obj)[0].modifier += (boost * char_get_level(ch));
-        if (obj_get_vnum(obj) == 91) {
+        if (obj_get_vnum(g, obj) == 91) {
           obj_get_affected(obj)[1].location = 1;
           obj_get_affected(obj)[1].modifier = (boost / 20);
         } else {
@@ -137,7 +138,7 @@ ACMD(do_form)
 
   half_chop(clam, arg2, arg3);
 
-  if (!know_skill(ch, SKILL_CREATE)) {
+  if (!know_skill(g, ch, SKILL_CREATE)) {
     return;
   }
 
@@ -205,7 +206,7 @@ ACMD(do_form)
   }
 
   if (!*arg) {
-    send_to_char(ch, "What do you want to create?\r\n"
+    send_to_char(g, ch, "What do you want to create?\r\n"
                      "@GCreation @WMenu@n\r\n"
                      "@D---------------@n\r\n"
                      "@wcreate food\r\n"
@@ -217,18 +218,18 @@ ACMD(do_form)
                  kachin ? "create kachin\r\n" : "", boost ? "create elixir\r\n" : "");
     return;
   }
-  reveal_hiding(ch, 0);
+  reveal_hiding(g, ch, 0);
   if (!(strcmp(arg, "food"))) {
-    cost = getMaxKI(ch) / (skill / 2);
+    cost = getMaxKI(g, ch) / (skill / 2);
     cost *= discount;
 
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
     if (!*arg2) {
-      send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
-      send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
+      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
+      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
     } else if (*arg2) {
       if (!strcasecmp(arg2, "highest") && skill >= 100) {
         level = 4;
@@ -241,37 +242,37 @@ ACMD(do_form)
       }
     }
     if (level == 4) {
-      obj = read_object(1512, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1512, VIRTUAL);
+      add_unique_id(g, obj);
     } else if (level == 3) {
-      obj = read_object(1511, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1511, VIRTUAL);
+      add_unique_id(g, obj);
     } else if (level == 2) {
-      obj = read_object(1510, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1510, VIRTUAL);
+      add_unique_id(g, obj);
     } else {
-      obj = read_object(70, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 70, VIRTUAL);
+      add_unique_id(g, obj);
     }
-    obj_to_char(obj, ch);
-    reveal_hiding(ch, 0);
+    obj_to_char(g, obj, ch);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "water"))) {
-    cost = getMaxKI(ch) / (skill * 2);
+    cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
     if (!*arg2) {
-      send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
-      send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
+      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
+      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
     } else if (*arg2) {
       if (!strcasecmp(arg2, "highest") && skill >= 100) {
         level = 4;
@@ -284,88 +285,88 @@ ACMD(do_form)
       }
     }
     if (level == 4) {
-      obj = read_object(1515, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1515, VIRTUAL);
+      add_unique_id(g, obj);
     } else if (level == 3) {
-      obj = read_object(1514, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1514, VIRTUAL);
+      add_unique_id(g, obj);
     } else if (level == 2) {
-      obj = read_object(1513, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 1513, VIRTUAL);
+      add_unique_id(g, obj);
     } else {
-      obj = read_object(71, VIRTUAL);
-      add_unique_id(obj);
+      obj = read_object(g, 71, VIRTUAL);
+      add_unique_id(g, obj);
     }
-    obj_to_char(obj, ch);
-    reveal_hiding(ch, 0);
+    obj_to_char(g, obj, ch);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "bag"))) {
-    cost = getMaxKI(ch) / (skill * 2);
+    cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
     if (bag == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(319, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_char(obj, ch);
-    reveal_hiding(ch, 0);
+    obj = read_object(g, 319, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_char(g, obj, ch);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "mattress"))) {
-    cost = getMaxKI(ch) / skill;
+    cost = getMaxKI(g, ch) / skill;
     cost *= discount;
 
     if (mattress == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(16, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_char(obj, ch); // cooldown removed on 10/24/2021
-    reveal_hiding(ch, 0); //GET_COOLDOWN(ch) = 10;
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    obj = read_object(g, 16, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_char(g, obj, ch); // cooldown removed on 10/24/2021
+    reveal_hiding(g, ch, 0); //GET_COOLDOWN(ch) = 10;
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "weapon"))) {
-    cost = getMaxKI(ch) / 5;
+    cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
     if (sword == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
     if (!*arg2) {
-      send_to_char(ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
+      send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
       return;
     }
     if (!*arg3) {
-      send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | higher | highest)\r\n");
-      send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
+      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | higher | highest)\r\n");
+      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
     } else if (*arg3) {
       if (!strcasecmp(arg3, "highest") && skill >= 100) {
         level = 5;
@@ -381,400 +382,400 @@ ACMD(do_form)
     }
     if (!strcasecmp(arg2, "sword")) {
       if (level == 5) {
-        obj = read_object(1519, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1519, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(1518, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1518, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(1517, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1517, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(1516, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1516, VIRTUAL);
+        add_unique_id(g, obj);
       } else {
-        obj = read_object(90, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 90, VIRTUAL);
+        add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "dagger")) {
       if (level == 5) {
-        obj = read_object(1540, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1540, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(1539, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1539, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(1538, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1538, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(1537, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1537, VIRTUAL);
+        add_unique_id(g, obj);
       } else {
-        obj = read_object(1536, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1536, VIRTUAL);
+        add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "club")) {
       if (level == 5) {
-        obj = read_object(1545, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1545, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(1544, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1544, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(1543, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1543, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(1542, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1542, VIRTUAL);
+        add_unique_id(g, obj);
       } else {
-        obj = read_object(1541, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1541, VIRTUAL);
+        add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "spear")) {
       if (level == 5) {
-        obj = read_object(1550, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1550, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(1549, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1549, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(1548, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1548, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(1547, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1547, VIRTUAL);
+        add_unique_id(g, obj);
       } else {
-        obj = read_object(1546, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1546, VIRTUAL);
+        add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "gun")) {
       if (level == 5) {
-        obj = read_object(1555, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1555, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(1554, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1554, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(1553, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1553, VIRTUAL);
+        add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(1552, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1552, VIRTUAL);
+        add_unique_id(g, obj);
       } else {
-        obj = read_object(1551, VIRTUAL);
-        add_unique_id(obj);
+        obj = read_object(g, 1551, VIRTUAL);
+        add_unique_id(g, obj);
       }
     } else {
-      send_to_char(ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
+      send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
       return;
     }
-    obj_to_char(obj, ch);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "clothesbeam"))) {
-    cost = getMaxKI(ch) / 2;
+    cost = getMaxKI(g, ch) / 2;
     cost *= discount;
 
     if (clothes == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
     if (!*arg2) {
-      send_to_char(ch, "Who do you want to hit with clothesbeam?\r\nSyntax: create clothesbeam (target)\r\n");
+      send_to_char(g, ch, "Who do you want to hit with clothesbeam?\r\nSyntax: create clothesbeam (target)\r\n");
       return;
     }
 
     struct char_data *vict = nullptr;
 
-    if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
+    if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
+      send_to_char(g, ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
       return;
     }
 
     if (char_get_master(vict) != ch) {
-      send_to_char(ch, "They must be following you first.\r\n");
+      send_to_char(g, ch, "They must be following you first.\r\n");
       return;
     }
-    obj = read_object(92, VIRTUAL); /* gi */
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, vict);
+    obj = read_object(g, 92, VIRTUAL); /* gi */
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(91, VIRTUAL); /* pants */
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, vict);
+    obj = read_object(g, 91, VIRTUAL); /* pants */
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(1528, VIRTUAL); /* wrist */
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, vict);
+    obj = read_object(g, 1528, VIRTUAL); /* wrist */
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(1528, VIRTUAL); /* wrist */
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, vict);
+    obj = read_object(g, 1528, VIRTUAL); /* wrist */
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(1532, VIRTUAL); /* boots */
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, vict);
+    obj = read_object(g, 1532, VIRTUAL); /* boots */
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    do_wear(vict, (char[]){"all"}, 0, 0);
-    reveal_hiding(ch, 0);
+    do_wear(g, vict, (char[]){"all"}, 0, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "gi"))) {
-    cost = getMaxKI(ch) / 5;
+    cost = getMaxKI(g, ch) / 5;
     cost *= discount;
     if (gi == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(92, VIRTUAL);
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 92, VIRTUAL);
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "shuriken"))) {
-    cost = getMaxKI(ch) / 4;
+    cost = getMaxKI(g, ch) / 4;
     cost *= discount;
 
     if (shuriken == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(19053, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 19053, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_char(g, obj, ch);
     obj_extra_set(obj, ITEM_NORENT, true);
     obj_extra_set(obj, ITEM_NOSELL, true);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "pants"))) {
-    cost = getMaxKI(ch) / 5;
+    cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
     if (pants == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(91, VIRTUAL);
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 91, VIRTUAL);
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "wristband"))) {
-    cost = getMaxKI(ch) / 5;
+    cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
     if (wrist == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(1528, VIRTUAL);
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 1528, VIRTUAL);
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "boots"))) {
-    cost = getMaxKI(ch) / 5;
+    cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
     if (boots == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(1532, VIRTUAL);
-    add_unique_id(obj);
-    boost_obj(obj, ch, 0);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 1532, VIRTUAL);
+    add_unique_id(g, obj);
+    boost_obj(g, obj, ch, 0);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "light"))) {
-    cost = getMaxKI(ch) / (skill * 2);
+    cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
     if (light == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(72, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 72, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "kachin"))) {
-    cost = getMaxKI(ch) - 1;
+    cost = getMaxKI(g, ch) - 1;
     cost *= discount;
 
     if (kachin == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(87, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_room(obj, char_get_in_room(ch));
+    obj = read_object(g, 87, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "elixir"))) {
-    cost = getMaxKI(ch) - 1;
+    cost = getMaxKI(g, ch) - 1;
     cost *= discount;
 
     if (boost == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    if (getCurPL(ch) < getEffMaxPL(ch)) {
-      send_to_char(ch, "You need to be at full powerlevel to create %s\r\n", arg);
+    if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
+      send_to_char(g, ch, "You need to be at full powerlevel to create %s\r\n", arg);
       return;
     }
-    if (char_get_practice_points(ch) < 10) {
-      send_to_char(ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
+    if (char_get_practice_points(g, ch) < 10) {
+      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
       return;
     }
-    obj = read_object(86, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_room(obj, char_get_in_room(ch));
+    obj = read_object(g, 86, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_size(obj, get_size(ch));
-    reveal_hiding(ch, 0);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
-    decCurHealthPercent(ch, 1, 1);
-    char_set_practice_points(ch, char_get_practice_points(ch) - (10));
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
+    decCurHealthPercent(g, ch, 1, 1);
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (10));
     return;
   }
   if (!(strcmp(arg, "senzu"))) {
-    cost          = getMaxKI(ch);
-    int64_t cost2 = getEffMaxPL(ch) - 1;
+    cost          = getMaxKI(g, ch);
+    int64_t cost2 = getEffMaxPL(g, ch) - 1;
 
     if (senzu == false) {
-      send_to_char(ch, "What do you want to create?\r\n");
+      send_to_char(g, ch, "What do you want to create?\r\n");
       return;
     }
-    if ((getCurKI(ch)) < cost) {
-      send_to_char(ch, "You do not have enough ki to create %s, you need full ki.\r\n", arg);
+    if ((getCurKI(g, ch)) < cost) {
+      send_to_char(g, ch, "You do not have enough ki to create %s, you need full ki.\r\n", arg);
       return;
     }
-    if (getCurPL(ch) <= cost2) {
-      send_to_char(ch, "You do not have enough powerlevel to create %s, you need to be at full.\r\n", arg);
+    if (getCurPL(g, ch) <= cost2) {
+      send_to_char(g, ch, "You do not have enough powerlevel to create %s, you need to be at full.\r\n", arg);
       return;
     }
-    if ((getCurST(ch)) < getMaxST(ch)) {
-      send_to_char(ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
+    if ((getCurST(g, ch)) < getMaxST(g, ch)) {
+      send_to_char(g, ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
       return;
     }
-    if (char_get_practice_points(ch) < 50) {
-      send_to_char(ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
+    if (char_get_practice_points(g, ch) < 50) {
+      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
       return;
     }
-    obj = read_object(1, VIRTUAL);
-    add_unique_id(obj);
-    obj_to_char(obj, ch);
-    reveal_hiding(ch, 0);
+    obj = read_object(g, 1, VIRTUAL);
+    add_unique_id(g, obj);
+    obj_to_char(g, obj, ch);
+    reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
-    decCurKI(ch, cost, 0);
-    decCurHealth(ch, cost2, 0);
-    decCurSTPercent(ch, 1, 1);
-    char_set_practice_points(ch, char_get_practice_points(ch) - (50));
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    decCurKI(g, ch, cost, 0);
+    decCurHealth(g, ch, cost2, 0);
+    decCurSTPercent(g, ch, 1, 1);
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (50));
     return;
   }
-  send_to_char(ch, "Create what?\r\n");
+  send_to_char(g, ch, "Create what?\r\n");
   return;
 }
 
@@ -782,41 +783,41 @@ ACMD(do_recharge)
 {
 
   if (char_is_npc(ch) || !char_is_android(ch)) {
-    send_to_char(ch, "Only androids can use recharge\r\n");
+    send_to_char(g, ch, "Only androids can use recharge\r\n");
     return;
   }
 
   if (char_get_con_cooldown(ch) > 0) {
-    send_to_char(ch, "You must wait a short period before your nanites can convert your ki.\r\n");
+    send_to_char(g, ch, "You must wait a short period before your nanites can convert your ki.\r\n");
     return;
   }
 
   if (!char_plr_flagged(ch, PLR_REPAIR)) {
-    send_to_char(ch, "You are not a repair model android.\r\n");
+    send_to_char(g, ch, "You are not a repair model android.\r\n");
     return;
   }
   int64_t cost = 0;
 
-  cost = getMaxST(ch) / 20;
+  cost = getMaxST(g, ch) / 20;
 
-  if ((getCurKI(ch)) < cost) {
-    send_to_char(ch, "You do not have enough ki to recharge your stamina.\r\n");
+  if ((getCurKI(g, ch)) < cost) {
+    send_to_char(g, ch, "You do not have enough ki to recharge your stamina.\r\n");
     return;
   }
-  if ((getCurST(ch)) >= getMaxST(ch)) {
-    send_to_char(ch, "Your energy reserves are already full.\r\n");
+  if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
+    send_to_char(g, ch, "Your energy reserves are already full.\r\n");
     return;
   }
-  reveal_hiding(ch, 0);
+  reveal_hiding(g, ch, 0);
   char_set_con_cooldown(ch, 10);
-  act("You focus your ki into your energy reserves, recharging them some.", true, ch, 0, 0, TO_CHAR);
-  act("$n stops and glows green briefly.", true, ch, 0, 0, TO_ROOM);
-  decCurKI(ch, cost, 0);
-  if ((getCurST(ch)) + (cost * 2) < getMaxST(ch)) {
-    incCurST(ch, cost * 2, true);
+  act(g, "You focus your ki into your energy reserves, recharging them some.", true, ch, 0, 0, TO_CHAR);
+  act(g, "$n stops and glows green briefly.", true, ch, 0, 0, TO_ROOM);
+  decCurKI(g, ch, cost, 0);
+  if ((getCurST(g, ch)) + (cost * 2) < getMaxST(g, ch)) {
+    incCurST(g, ch, cost * 2, true);
   } else {
     restoreST(ch, false);
-    send_to_char(ch, "You are fully recharged now.\r\n");
+    send_to_char(g, ch, "You are fully recharged now.\r\n");
   }
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -826,35 +827,35 @@ ACMD(do_srepair)
   int i;
 
   if (!char_is_android(ch)) {
-    send_to_char(ch, "Only androids can use repair, maybe you want 'fix' instead?\r\n");
+    send_to_char(g, ch, "Only androids can use repair, maybe you want 'fix' instead?\r\n");
     return;
   }
 
   if (char_get_con_cooldown(ch) > 0) {
-    send_to_char(ch, "You must wait a short period before your nanites can repair you.\r\n");
+    send_to_char(g, ch, "You must wait a short period before your nanites can repair you.\r\n");
     return;
   }
 
   if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_REPAIR)) {
-    send_to_char(ch, "You are not a repair model android.\r\n");
+    send_to_char(g, ch, "You are not a repair model android.\r\n");
     return;
   }
   int64_t cost = 0, heal = 0;
 
-  cost = getEffMaxPL(ch) / 40;
+  cost = getEffMaxPL(g, ch) / 40;
 
-  if ((getCurST(ch)) < cost) {
-    send_to_char(ch, "You do not have enough stamina to repair yourself.\r\n");
+  if ((getCurST(g, ch)) < cost) {
+    send_to_char(g, ch, "You do not have enough stamina to repair yourself.\r\n");
     return;
   }
-  if (getCurPL(ch) >= getEffMaxPL(ch)) {
-    send_to_char(ch, "You are already at full functionality and do not require repairs.\r\n");
+  if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
+    send_to_char(g, ch, "You are already at full functionality and do not require repairs.\r\n");
     return;
   }
-  reveal_hiding(ch, 0);
+  reveal_hiding(g, ch, 0);
   char_set_con_cooldown(ch, 10);
-  act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, 0, 0, TO_CHAR);
-  act("$n stops a moment as small glowing particles move across $s body.", true, ch, 0, 0, TO_ROOM);
+  act(g, "You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, 0, 0, TO_CHAR);
+  act(g, "$n stops a moment as small glowing particles move across $s body.", true, ch, 0, 0, TO_ROOM);
 
   int repaired = false;
   if (!char_is_npc(ch)) {
@@ -875,21 +876,21 @@ ACMD(do_srepair)
   }
 
   if (repaired == true) {
-    send_to_char(ch, "@GYour nano-robots also repair all of your equipment a little bit.@n\r\n");
+    send_to_char(g, ch, "@GYour nano-robots also repair all of your equipment a little bit.@n\r\n");
   }
-  decCurST(ch, cost, 0);
+  decCurST(g, ch, cost, 0);
   heal = cost * 2;
   if (char_get_bonuses(ch, BONUS_HEALER) > 0) {
     heal += heal * .25;
   }
 
-  if (incCurHealth(ch, heal, true) == getEffMaxPL(ch)) {
-    send_to_char(ch, "You are fully repaired now.\r\n");
+  if (incCurHealth(g, ch, heal, true) == getEffMaxPL(g, ch)) {
+    send_to_char(g, ch, "You are fully repaired now.\r\n");
   }
 
-  if (!char_is_npc(ch) && rand_number(1, 3) == 2 && (getCurKI(ch)) < getMaxKI(ch)) {
-    send_to_char(ch, "@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
-    incCurKI(ch, cost, true);
+  if (!char_is_npc(ch) && rand_number(g, 1, 3) == 2 && (getCurKI(g, ch)) < getMaxKI(g, ch)) {
+    send_to_char(g, ch, "@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
+    incCurKI(g, ch, cost, true);
   }
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -903,19 +904,19 @@ ACMD(do_upgrade)
   two_arguments(argument, arg, arg2);
 
   if (char_is_npc(ch) || !char_is_android(ch)) {
-    send_to_char(ch, "You are not an android!\r\n");
+    send_to_char(g, ch, "You are not an android!\r\n");
     return;
   }
 
   if (!*arg) {
     if (!char_plr_flagged(ch, PLR_ABSORB)) {
-      send_to_char(ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
+      send_to_char(g, ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
                        "@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n"
                        "@cUpgrade @CKi        @D: @Y40 @WPoints\r\n"
                        "@cUpgrade @GStamina   @D: @Y50 @WPoints\r\n"
                        "@D            -----------\r\n");
     }
-    send_to_char(ch, "@cAugment @RPowerlevel\r\n"
+    send_to_char(g, ch, "@cAugment @RPowerlevel\r\n"
                      "@cAugment @CKi\r\n"
                      "@cAugment @GStamina\r\n"
                      "@WCurrent Upgrade Points @D[@y%s@D]@n\r\n",
@@ -927,16 +928,16 @@ ACMD(do_upgrade)
     struct obj_data *obj = nullptr;
     int64_t gain         = 0;
     if (char_get_level(ch) < 80) {
-      send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
+      send_to_char(g, ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, nullptr, char_get_inventory(ch)))) {
-      send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
+    if (!(obj = get_obj_in_list_vis(g, ch, (char[]){"Augmentation"}, nullptr, char_get_inventory(ch)))) {
+      send_to_char(g, ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }
     switch (char_get_level(ch)) { /* R: Original was GET_LEVEL(ch) */
       case 80:
-        gain = getEffMaxPL(ch) * 0.005;
+        gain = getEffMaxPL(g, ch) * 0.005;
         break;
       case 81:
       case 82:
@@ -948,7 +949,7 @@ ACMD(do_upgrade)
       case 88:
       case 89:
       case 90:
-        gain = getEffMaxPL(ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 2000; */
+        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 2000; */
         break;
       case 91:
       case 92:
@@ -959,68 +960,68 @@ ACMD(do_upgrade)
       case 97:
       case 98:
       case 99:
-        gain = getEffMaxPL(ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 4000; */
+        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 4000; */
         break;
       case 100:
-        gain = getEffMaxPL(ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 100000 */
+        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 100000 */
         if (gain > 10000000) {
           gain = 10000000;
         }
         break;
     }
     if (!strcasecmp("powerlevel", arg2)) {
-      obj_from_char(obj);
-      extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      obj_from_char(g, obj);
+      extract_obj(g, obj);
+      act(g, "@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBasePL(ch, gain, true);
-      send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+      send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
     }
     if (!strcasecmp("ki", arg2)) {
-      obj_from_char(obj);
-      extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      obj_from_char(g, obj);
+      extract_obj(g, obj);
+      act(g, "@WYou install the circuits and upgrade your maximum ki.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBaseKI(ch, gain, true);
-      send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+      send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
     }
     if (!strcasecmp("stamina", arg2)) {
-      obj_from_char(obj);
-      extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      obj_from_char(g, obj);
+      extract_obj(g, obj);
+      act(g, "@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBaseST(ch, gain, true);
-      send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+      send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
     }
-    send_to_char(ch, "What do you want to augment? Powerlevel, ki, or stamina?\r\n");
+    send_to_char(g, ch, "What do you want to augment? Powerlevel, ki, or stamina?\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_ABSORB)) {
-    send_to_char(ch, "You are an absorb model and can only upgrade with augmentation kits.\r\n");
+    send_to_char(g, ch, "You are an absorb model and can only upgrade with augmentation kits.\r\n");
     return;
   }
 
   if (is_soft_cap(ch, 0, 1.0)) {
-    send_to_char(ch, "@mYou are unable to spend anymore UGP right now (Softcap)@n\r\n");
+    send_to_char(g, ch, "@mYou are unable to spend anymore UGP right now (Softcap)@n\r\n");
     return;
   }
 
   if (!*arg2 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
-    send_to_char(ch, "How many times do you want to increase %s?", arg);
+    send_to_char(g, ch, "How many times do you want to increase %s?", arg);
     return;
   }
 
   if (atoi(arg2) <= 0 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
-    send_to_char(ch, "It needs to be between 1-1000\r\n");
+    send_to_char(g, ch, "It needs to be between 1-1000\r\n");
     return;
   }
 
   if (atoi(arg2) > 1000 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
-    send_to_char(ch, "It needs to be between 1-1000\r\n");
+    send_to_char(g, ch, "It needs to be between 1-1000\r\n");
     return;
   }
 
@@ -1048,15 +1049,15 @@ ACMD(do_upgrade)
       count--;
     }
     if (cost > char_get_upgrade(ch)) {
-      send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
+      send_to_char(g, ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
       return;
     }
     if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
+      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
     gainBasePL(ch, bonus, true);
   } else if (!strcasecmp("ki", arg)) {
     count = atoi(arg2);
@@ -1082,15 +1083,15 @@ ACMD(do_upgrade)
       count--;
     }
     if (cost > char_get_upgrade(ch)) {
-      send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
+      send_to_char(g, ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
       return;
     }
     if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
+      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
     gainBaseKI(ch, bonus, true);
   } else if (!strcasecmp("stamina", arg)) {
     count = atoi(arg2);
@@ -1116,18 +1117,18 @@ ACMD(do_upgrade)
       count--;
     }
     if (cost > char_get_upgrade(ch)) {
-      send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
+      send_to_char(g, ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
       return;
     }
     if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
+      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
     gainBaseST(ch, bonus, true);
   } else {
-    send_to_char(ch, "That is not a valid upgrade option.\r\n");
+    send_to_char(g, ch, "That is not a valid upgrade option.\r\n");
     return;
   }
 }
@@ -1142,69 +1143,69 @@ ACMD(do_ingest)
     one_argument(argument, arg);
 
     if (!*arg) {
-      send_to_char(ch, "Who do you want to ingest?\r\n");
+      send_to_char(g, ch, "Who do you want to ingest?\r\n");
       return;
     }
 
-    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(ch, "Ingest who?\r\n");
+    if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+      send_to_char(g, ch, "Ingest who?\r\n");
       return;
     }
-    if (!can_kill(ch, vict, nullptr, 0)) {
+    if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
     if (char_get_absorbby(vict)) {
-      send_to_char(ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
+      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
       return;
     }
     if (char_get_absorbs(ch) > 3) {
-      send_to_char(ch, "You already have already ingested 4 people.\r\n");
+      send_to_char(g, ch, "You already have already ingested 4 people.\r\n");
       return;
     }
     if (char_get_level(ch) < 25) {
-      send_to_char(ch, "You can't ingest yet.\r\n");
+      send_to_char(g, ch, "You can't ingest yet.\r\n");
       return;
     }
     if (char_get_level(ch) < 100 && char_get_level(ch) >= 75 && char_get_absorbs(ch) == 3) {
-      send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
+      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
       return;
     }
     if (char_get_level(ch) < 75 && char_get_level(ch) >= 50 && char_get_absorbs(ch) == 2) {
-      send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
+      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
       return;
     }
     if (char_get_level(ch) < 50 && char_get_level(ch) >= 25 && char_get_absorbs(ch) == 1) {
-      send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
+      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
       return;
     }
 
-    if (getEffMaxPL(vict) >= (getBasePL(ch)) * 3) {
-      send_to_char(ch, "You are too weak to ingest them into your body!\r\n");
+    if (getEffMaxPL(g, vict) >= (getBasePL(ch)) * 3) {
+      send_to_char(g, ch, "You are too weak to ingest them into your body!\r\n");
       return;
     }
     if (char_aff_flagged(vict, AFF_SANCTUARY)) {
-      send_to_char(ch, "You can't ingest them, they have a barrier!\r\n");
+      send_to_char(g, ch, "You can't ingest them, they have a barrier!\r\n");
       return;
     }
-    reveal_hiding(ch, 0);
-    if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-      act("@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, 0, vict, TO_CHAR);
-      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_VICT);
-      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_NOTVICT);
+    reveal_hiding(g, ch, 0);
+    if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
+      act(g, "@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, 0, vict, TO_CHAR);
+      act(g, "@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_VICT);
+      act(g, "@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_ZANZOKEN, false);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    if (char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(ch) + rand_number(1, 5)) {
-      act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, 0, vict, TO_CHAR);
-      act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, 0, vict, TO_VICT);
-      act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, 0, vict, TO_NOTVICT);
+    if (char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, ch) + rand_number(g, 1, 5)) {
+      act(g, "@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, 0, vict, TO_CHAR);
+      act(g, "@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, 0, vict, TO_VICT);
+      act(g, "@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, 0, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    act("@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, 0, vict, TO_CHAR);
-    act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, 0, vict, TO_VICT);
-    act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, 0, vict, TO_CHAR);
+    act(g, "@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, 0, vict, TO_VICT);
+    act(g, "@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, 0, vict, TO_NOTVICT);
     char_set_absorbs(ch, char_get_absorbs(ch) + (1));
     int64_t pl   = (getBasePL(vict)) / 6;
     int64_t stam = (getBaseST(vict)) / 6;
@@ -1213,15 +1214,15 @@ ACMD(do_ingest)
     gainBaseST(ch, stam, true);
     gainBaseKI(ch, ki, true);
     if (!char_is_npc(vict) && !char_is_npc(ch)) {
-      send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(char_get_in_room(vict)));
+      send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(g, char_get_in_room(vict)));
       char_plr_set(vict, PLR_ABSORBED, true);
     }
-    send_to_char(ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
-    if (rand_number(1, 3) == 3) {
-      send_to_char(ch, "You get %s's eye color.\r\n", char_get_name(vict));
+    send_to_char(g, ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
+    if (rand_number(g, 1, 3) == 3) {
+      send_to_char(g, ch, "You get %s's eye color.\r\n", char_get_name(vict));
       char_set_eye(ch, char_get_eye(vict));
-    } else if (rand_number(1, 3) == 3) {
-      send_to_char(ch, "%s changes your height.\r\n", char_get_name(vict));
+    } else if (rand_number(g, 1, 3) == 3) {
+      send_to_char(g, ch, "%s changes your height.\r\n", char_get_name(vict));
       if (char_get_pc_height(ch) > char_get_pc_height(vict)) {
         char_set_height(ch, char_get_height(ch) - (((char_get_pc_height(ch) - char_get_pc_height(vict)) / 2)));
       } else if (char_get_pc_height(ch) < char_get_pc_height(vict)) {
@@ -1229,8 +1230,8 @@ ACMD(do_ingest)
       } else {
         char_set_height(ch, char_get_pc_height(vict));
       }
-    } else if (rand_number(1, 3) == 3) {
-      send_to_char(ch, "%s changes your weight.\r\n", char_get_name(vict));
+    } else if (rand_number(g, 1, 3) == 3) {
+      send_to_char(g, ch, "%s changes your weight.\r\n", char_get_name(vict));
       if (char_get_pc_weight(ch) > char_get_pc_weight(vict)) {
         char_set_weight(ch, char_get_weight(ch) - (((char_get_pc_weight(ch) - char_get_pc_weight(vict)) / 2)));
       } else if (char_get_pc_weight(ch) < char_get_pc_weight(vict)) {
@@ -1239,16 +1240,16 @@ ACMD(do_ingest)
         char_set_weight(ch, char_get_pc_weight(vict));
       }
     } else {
-      send_to_char(ch, "Your forelock length changes because of %s.\r\n", char_get_name(vict));
+      send_to_char(g, ch, "Your forelock length changes because of %s.\r\n", char_get_name(vict));
       char_set_hairl(ch, char_get_hairl(vict));
     }
-    handle_ingest_learn(ch, vict);
-    die(vict, nullptr);
+    handle_ingest_learn(g, ch, vict);
+    die(g, vict, nullptr);
     return;
   } // End of ingest
 
   else {
-    send_to_char(ch, "You are not a majin, you can not ingest.\r\n");
+    send_to_char(g, ch, "You are not a majin, you can not ingest.\r\n");
     return;
   } // Error
 }
@@ -1260,73 +1261,73 @@ ACMD(do_plant)
   char vict_name[MAX_INPUT_LENGTH], obj_name[MAX_INPUT_LENGTH];
   int roll = 0, detect = 0, fail = 0;
 
-  if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
-    send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+    send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
 
   two_arguments(argument, obj_name, vict_name);
 
-  if (!(vict = get_char_vis(ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(ch, "Plant what on who?\r\n");
+  if (!(vict = get_char_vis(g, ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
+    send_to_char(g, ch, "Plant what on who?\r\n");
     return;
   }
   if (vict == ch) {
-    send_to_char(ch, "Come on now, that's rather stupid!\r\n");
+    send_to_char(g, ch, "Come on now, that's rather stupid!\r\n");
     return;
   }
   if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE) {
-    send_to_char(ch, "That isn't such a good idea...\r\n");
+    send_to_char(g, ch, "That isn't such a good idea...\r\n");
     return;
   }
 
-  roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + rand_number(1, 3);
-  fail = rand_number(1, 105);
+  roll = roll_skill(g, ch, SKILL_SLEIGHT_OF_HAND) + rand_number(g, 1, 3);
+  fail = rand_number(g, 1, 105);
 
   if (char_get_position(vict) < POS_SLEEPING)
     detect = 0;
   else
-    detect = (roll_skill(vict, SKILL_SPOT) + rand_number(1, 3));
+    detect = (roll_skill(g, vict, SKILL_SPOT) + rand_number(g, 1, 3));
 
   /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
-  if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(vict) == shop_keeper) && char_get_admlevel(ch) < 5)
+  if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(g, vict) == shop_keeper) && char_get_admlevel(ch) < 5)
     roll = -10; /* Failure */
 
-  if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, char_get_inventory(ch)))) {
-    send_to_char(ch, "You don't have that to plant on them.\r\n");
+  if (!(obj = get_obj_in_list_vis(g, ch, obj_name, nullptr, char_get_inventory(ch)))) {
+    send_to_char(g, ch, "You don't have that to plant on them.\r\n");
     return;
   }
   if (roll <= detect && roll <= fail) {
-    reveal_hiding(ch, 0);
-    act("@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
-    act("@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
-    act("@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", true, ch, obj, vict, TO_CHAR);
+    reveal_hiding(g, ch, 0);
+    act(g, "@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
+    act(g, "@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
   if (roll <= fail) {
-    act("@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", true, ch, obj, vict, TO_CHAR);
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
-  if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
-    reveal_hiding(ch, 0);
-    act("@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
-    act("@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
-    act("@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", true, ch, obj, vict, TO_CHAR);
+  if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {
+    reveal_hiding(g, ch, 0);
+    act(g, "@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
+    act(g, "@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
   } else if (roll <= detect) {
-    act("@cYou feel like the weight of your inventory has changed.@n", true, ch, obj, vict, TO_VICT);
-    act("@c$N@w looks around after feeling $S pockets.@n", true, ch, obj, vict, TO_NOTVICT);
-    act("@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch, obj, vict, TO_CHAR);
-    obj_from_char(obj);
-    obj_to_char(obj, vict);
+    act(g, "@cYou feel like the weight of your inventory has changed.@n", true, ch, obj, vict, TO_VICT);
+    act(g, "@c$N@w looks around after feeling $S pockets.@n", true, ch, obj, vict, TO_NOTVICT);
+    act(g, "@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch, obj, vict, TO_CHAR);
+    obj_from_char(g, obj);
+    obj_to_char(g, obj, vict);
     char_set_wait(ch, PULSE_2SEC);
     return;
   } else {
-    act("@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
-    obj_from_char(obj);
-    obj_to_char(obj, vict);
+    act(g, "@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
+    obj_from_char(g, obj);
+    obj_to_char(g, obj, vict);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
@@ -1346,104 +1347,104 @@ ACMD(do_forgery)
     return;
   }
 
-  if (!know_skill(ch, SKILL_FORGERY)) {
+  if (!know_skill(g, ch, SKILL_FORGERY)) {
     return;
   }
 
   if (!*arg) {
-    send_to_char(ch, "Okay, make a forgery of what?\r\n");
+    send_to_char(g, ch, "Okay, make a forgery of what?\r\n");
     return;
   }
 
-  if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(ch, "You want to make a fake copy of what?\r\n");
+  if (!(obj2 = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
+    send_to_char(g, ch, "You want to make a fake copy of what?\r\n");
     return;
   }
 
   for (obj = char_get_inventory(ch); obj; obj = next_obj) {
     next_obj = obj_get_next_content(obj);
-    if (found == false && obj_get_vnum(obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
+    if (found == false && obj_get_vnum(g, obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
       obj4  = obj;
     }
   }
 
   if (found == false || obj4 == nullptr) {
-    send_to_char(ch, "You need a forgery kit.\r\n");
+    send_to_char(g, ch, "You need a forgery kit.\r\n");
     return;
   }
 
-  if (obj_get_vnum(obj2) == 19) {
-    send_to_char(ch, "You can't duplicate a forgery kit.\r\n");
+  if (obj_get_vnum(g, obj2) == 19) {
+    send_to_char(g, ch, "You can't duplicate a forgery kit.\r\n");
     return;
   }
 
   if (obj_extra_flagged(obj2, ITEM_FORGED)) {
-    send_to_char(ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj_get_short_description(obj2));
+    send_to_char(g, ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj_get_short_description(obj2));
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
-    send_to_char(ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj_get_short_description(obj2));
+    send_to_char(g, ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj_get_short_description(obj2));
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
-  if (obj_get_vnum(obj2) >= 60000 || obj_get_vnum(obj2) == 0) {
-    send_to_char(ch, "You can not make a forgery of that! It's far too squishy....");
+  if (obj_get_vnum(g, obj2) >= 60000 || obj_get_vnum(g, obj2) == 0) {
+    send_to_char(g, ch, "You can not make a forgery of that! It's far too squishy....");
     return;
   }
-  if (obj_get_vnum(obj2) >= 18800 && obj_get_vnum(obj2) <= 18999) {
-    send_to_char(ch, "You can not make a forgery of that!\r\n");
+  if (obj_get_vnum(g, obj2) >= 18800 && obj_get_vnum(g, obj2) <= 18999) {
+    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
     return;
   }
-  if (obj_get_vnum(obj2) >= 19080 && obj_get_vnum(obj2) <= 19199) {
-    send_to_char(ch, "You can not make a forgery of that!\r\n");
+  if (obj_get_vnum(g, obj2) >= 19080 && obj_get_vnum(g, obj2) <= 19199) {
+    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
     return;
   }
-  if (obj_get_vnum(obj2) >= 4 && obj_get_vnum(obj2) <= 6) {
-    send_to_char(ch, "You can not make a forgery of that!\r\n");
+  if (obj_get_vnum(g, obj2) >= 4 && obj_get_vnum(g, obj2) <= 6) {
+    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
     return;
   }
 
   if (obj_extra_flagged(obj2, ITEM_PROTECTED)) {
-    send_to_char(ch, "You don't know where to begin with this work of ART.\r\n");
+    send_to_char(g, ch, "You don't know where to begin with this work of ART.\r\n");
     return;
   }
 
-  reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, 0, TO_ROOM);
-  improve_skill(ch, SKILL_FORGERY, 1);
-  if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(0)) {
-    if (rand_number(1, 10) >= 9) { /* Uh oh */
-      send_to_char(ch, "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj_get_short_description(obj2));
-      extract_obj(obj4);
-      extract_obj(obj2);
+  reveal_hiding(g, ch, 0);
+  act(g, "@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, 0, TO_ROOM);
+  improve_skill(g, ch, SKILL_FORGERY, 1);
+  if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(g, 0)) {
+    if (rand_number(g, 1, 10) >= 9) { /* Uh oh */
+      send_to_char(g, ch, "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj_get_short_description(obj2));
+      extract_obj(g, obj4);
+      extract_obj(g, obj2);
       return;
     }
-    send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj_get_short_description(obj2));
-    act("@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, 0, TO_ROOM);
-    obj_from_char(obj4);
-    extract_obj(obj4);
+    send_to_char(g, ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj_get_short_description(obj2));
+    act(g, "@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, 0, TO_ROOM);
+    obj_from_char(g, obj4);
+    extract_obj(g, obj4);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
-  obj_vnum loadn = obj_get_vnum(obj2);
+  obj_vnum loadn = obj_get_vnum(g, obj2);
 
-  obj3 = read_object(loadn, VIRTUAL);
-  add_unique_id(obj3);
-  obj_to_char(obj3, ch);
+  obj3 = read_object(g, loadn, VIRTUAL);
+  add_unique_id(g, obj3);
+  obj_to_char(g, obj3, ch);
 
   /* Set Object Variables */
   obj_extra_set(obj3, ITEM_FORGED, true);
-  obj_set_weight(obj3, rand_number(obj_get_weight(obj3) / 2, obj_get_weight(obj3)));
+  obj_set_weight(obj3, rand_number(g, obj_get_weight(obj3) / 2, obj_get_weight(obj3)));
 
-  obj_from_char(obj4);
-  extract_obj(obj4);
-  send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj_get_short_description(obj2));
-  act("@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, 0, TO_ROOM);
+  obj_from_char(g, obj4);
+  extract_obj(g, obj4);
+  send_to_char(g, ch, "You make an excellent forgery of %s@n!\r\n", obj_get_short_description(obj2));
+  act(g, "@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, 0, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
 }
 
@@ -1460,40 +1461,40 @@ ACMD(do_appraise)
     return;
   }
 
-  if (!know_skill(ch, SKILL_APPRAISE)) {
+  if (!know_skill(g, ch, SKILL_APPRAISE)) {
     return;
   }
 
   if (!*arg) {
-    send_to_char(ch, "Okay, appraise what?\r\n");
+    send_to_char(g, ch, "Okay, appraise what?\r\n");
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(ch, "You want to appraise what?\r\n");
+  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
+    send_to_char(g, ch, "You want to appraise what?\r\n");
     return;
   }
 
-  reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, 0, TO_ROOM);
-  improve_skill(ch, SKILL_APPRAISE, 1);
-  if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(-10)) {
-    send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj_get_short_description(obj));
-    act("@c$n@w looks stumped about $p.@n", true, ch, obj, 0, TO_ROOM);
+  reveal_hiding(g, ch, 0);
+  act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, 0, TO_ROOM);
+  improve_skill(g, ch, SKILL_APPRAISE, 1);
+  if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(g, -10)) {
+    send_to_char(g, ch, "You fail to perceive the worth of %s..\r\n", obj_get_short_description(obj));
+    act(g, "@c$n@w looks stumped about $p.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-    send_to_char(ch, "%s is broken!\r\n", obj_get_short_description(obj));
-    act("@c$n@w looks at $p and frowns.@n", true, ch, obj, 0, TO_ROOM);
+    send_to_char(g, ch, "%s is broken!\r\n", obj_get_short_description(obj));
+    act(g, "@c$n@w looks at $p and frowns.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_FORGED)) {
-    send_to_char(ch, "%s is fake and worthless!\r\n", obj_get_short_description(obj));
-    act("@c$n@w looks at $p with an angry face.@n", true, ch, obj, 0, TO_ROOM);
+    send_to_char(g, ch, "%s is fake and worthless!\r\n", obj_get_short_description(obj));
+    act(g, "@c$n@w looks at $p with an angry face.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
@@ -1503,34 +1504,34 @@ ACMD(do_appraise)
   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
-  send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj_get_short_description(obj), add_commas(obj_get_cost(obj)), displevel);
+  send_to_char(g, ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj_get_short_description(obj), add_commas(obj_get_cost(obj)), displevel);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
     if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
-      send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
+      send_to_char(g, ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
-      send_to_char(ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
+      send_to_char(g, ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
-      send_to_char(ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
+      send_to_char(g, ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
-      send_to_char(ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
+      send_to_char(g, ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
-      send_to_char(ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
+      send_to_char(g, ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
     }
   }
-  send_to_char(ch, "Size: %s\r\n", size_names[obj_get_size(obj)]);
+  send_to_char(g, ch, "Size: %s\r\n", size_names[obj_get_size(obj)]);
   if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(ch, "Token Slots  : @m0/1@n\n");
+    send_to_char(g, ch, "Token Slots  : @m0/1@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(ch, "Token Slots  : @m1/1@n\n");
+    send_to_char(g, ch, "Token Slots  : @m1/1@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(ch, "Token Slots  : @m0/2@n\n");
+    send_to_char(g, ch, "Token Slots  : @m0/2@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(ch, "Token Slots  : @m1/2@n\n");
+    send_to_char(g, ch, "Token Slots  : @m1/2@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(ch, "Token Slots  : @m2/2@n\n");
+    send_to_char(g, ch, "Token Slots  : @m2/2@n\n");
   }
-  send_to_char(ch, "Bonuses:");
-  act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, 0, TO_ROOM);
+  send_to_char(g, ch, "Bonuses:");
+  act(g, "@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, 0, TO_ROOM);
   int percent = false;
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj_get_affected(obj)[i].modifier) {
@@ -1538,23 +1539,23 @@ ACMD(do_appraise)
         percent = true;
       }
       sprinttype(obj_get_affected(obj)[i].location, apply_types, buf, sizeof(buf));
-      send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj_get_affected(obj)[i].modifier, percent == true ? "%" : "", buf);
+      send_to_char(g, ch, "%s %+d%s to %s", found++ ? "," : "", obj_get_affected(obj)[i].modifier, percent == true ? "%" : "", buf);
       percent = false;
       switch (obj_get_affected(obj)[i].location) {
         case APPLY_FEAT:
-          send_to_char(ch, " (%s)", feat_list[obj_get_affected(obj)[i].specific].name);
+          send_to_char(g, ch, " (%s)", g->feat_list[obj_get_affected(obj)[i].specific].name);
           break;
         case APPLY_SKILL:
-          send_to_char(ch, " (%s)", spell_info[obj_get_affected(obj)[i].specific].name);
+          send_to_char(g, ch, " (%s)", g->spell_info[obj_get_affected(obj)[i].specific].name);
           break;
       }
     }
   }
   if (!found)
-    send_to_char(ch, " None");
+    send_to_char(g, ch, " None");
   char buf2[MAX_STRING_LENGTH];
   sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
-  send_to_char(ch, "\nSpecial: %s\r\n", buf2);
+  send_to_char(g, ch, "\nSpecial: %s\r\n", buf2);
 
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -1564,43 +1565,43 @@ ACMD(do_disguise)
   int skill = 0, roll = 0;
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "You forgot your disguise off in mobland.\r\n");
+    send_to_char(g, ch, "You forgot your disguise off in mobland.\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_DISGUISED)) {
-    send_to_char(ch, "You stop disguising yourself.\r\n");
+    send_to_char(g, ch, "You stop disguising yourself.\r\n");
     char_plr_set(ch, PLR_DISGUISED, false);
-    act("@C$n @wpulls off $s disguise and reveals $mself!", true, ch, 0, 0, TO_ROOM);
+    act(g, "@C$n @wpulls off $s disguise and reveals $mself!", true, ch, 0, 0, TO_ROOM);
     return;
   }
 
-  if (!know_skill(ch, SKILL_DISGUISE)) {
+  if (!know_skill(g, ch, SKILL_DISGUISE)) {
     return;
   }
 
   if (!char_get_equipment(ch, WEAR_HEAD)) {
-    send_to_char(ch, "You can't disguise your identity without anything on your head.\r\n");
+    send_to_char(g, ch, "You can't disguise your identity without anything on your head.\r\n");
     return;
   }
 
-  if ((getCurST(ch)) < (getCurST(ch)) / 50) {
-    send_to_char(ch, "You are too tired to try that right now.\r\n");
+  if ((getCurST(g, ch)) < (getCurST(g, ch)) / 50) {
+    send_to_char(g, ch, "You are too tired to try that right now.\r\n");
     return;
   }
 
   skill = char_get_skill(ch, SKILL_DISGUISE);
-  roll  = axion_dice(-10);
+  roll  = axion_dice(g, -10);
 
   if (skill > roll) {
-    send_to_char(ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
-    act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, 0, 0, TO_ROOM);
+    send_to_char(g, ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
+    act(g, "@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_DISGUISED, true);
     return;
   }
-  send_to_char(ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
-  act("@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, 0, 0, TO_ROOM);
-  decCurST(ch, getMaxST(ch) / 50, 0);
+  send_to_char(g, ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
+  act(g, "@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, 0, 0, TO_ROOM);
+  decCurST(g, ch, getMaxST(g, ch) / 50, 0);
   return;
 }
 
@@ -1611,7 +1612,7 @@ ACMD(do_use)
 
   half_chop(argument, arg, buf);
   if (!*arg) {
-    send_to_char(ch, "What do you want to %s?\r\n", CMD_NAME);
+    send_to_char(g, ch, "What do you want to %s?\r\n", CMD_NAME);
     return;
   }
 
@@ -1619,14 +1620,14 @@ ACMD(do_use)
     switch (subcmd) {
       case SCMD_RECITE:
       case SCMD_QUAFF:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+        if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
+          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
         break;
       case SCMD_USE:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+        if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
+          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
         break;
@@ -1643,102 +1644,102 @@ ACMD(do_use)
   switch (subcmd) {
     case SCMD_QUAFF:
       if (obj_get_type_flag(mag_item) != ITEM_POTION) {
-        send_to_char(ch, "You can only swallow beans.\r\n");
+        send_to_char(g, ch, "You can only swallow beans.\r\n");
         return;
       }
       if (char_is_android(ch)) {
-        send_to_char(ch, "You can't swallow beans, you are an android.\r\n");
+        send_to_char(g, ch, "You can't swallow beans, you are an android.\r\n");
         return;
       }
       if (obj_extra_flagged(mag_item, ITEM_FORGED)) {
-        send_to_char(ch, "You can't swallow that, it is fake!\r\n");
+        send_to_char(g, ch, "You can't swallow that, it is fake!\r\n");
         return;
       }
       if (obj_extra_flagged(mag_item, ITEM_BROKEN)) {
-        send_to_char(ch, "You can't swallow that, it is broken!\r\n");
+        send_to_char(g, ch, "You can't swallow that, it is broken!\r\n");
         return;
       }
       break;
     case SCMD_RECITE:
       if (obj_get_type_flag(mag_item) != ITEM_SCROLL) {
-        send_to_char(ch, "You can only recite scrolls.\r\n");
+        send_to_char(g, ch, "You can only recite scrolls.\r\n");
         return;
       }
       break;
     case SCMD_USE:
       if (char_is_android(ch)) {
-        send_to_char(ch, "You are not biological enough to use these, Tincan.\r\n");
+        send_to_char(g, ch, "You are not biological enough to use these, Tincan.\r\n");
         return;
       }
-      switch (obj_get_vnum(mag_item)) {
+      switch (obj_get_vnum(g, mag_item)) {
         case 381:
-          if ((getCurST(ch)) >= getMaxST(ch)) {
-            send_to_char(ch, "Your stamina is full.\r\n");
+          if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
+            send_to_char(g, ch, "Your stamina is full.\r\n");
             return;
           }
-          act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, 0, TO_CHAR);
-          act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
+          act(g, "@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, 0, TO_CHAR);
+          act(g, "@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
           if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
-            send_to_char(ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
-            incCurST(ch, getMaxST(ch) * .25, true);
+            send_to_char(g, ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
+            incCurST(g, ch, getMaxST(g, ch) * .25, true);
           } else {
-            incCurST(ch, getMaxST(ch) * .1, true);
+            incCurST(g, ch, getMaxST(g, ch) * .1, true);
           }
-          extract_obj(mag_item);
+          extract_obj(g, mag_item);
           return;
         case 382:
           if (char_aff_flagged(ch, AFF_BURNED)) {
-            act("@WYou gently apply the salve to your burns.@n", true, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, 0, TO_ROOM);
+            act(g, "@WYou gently apply the salve to your burns.@n", true, ch, mag_item, 0, TO_CHAR);
+            act(g, "@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, 0, TO_ROOM);
             char_aff_set(ch, AFF_BURNED, false);
-            extract_obj(mag_item);
+            extract_obj(g, mag_item);
           } else {
-            send_to_char(ch, "You are not burned.\r\n");
+            send_to_char(g, ch, "You are not burned.\r\n");
           }
           return;
         case 383:
           if (char_aff_flagged(ch, AFF_POISON)) {
-            act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
-            null_affect(ch, AFF_POISON);
-            extract_obj(mag_item);
+            act(g, "@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, 0, TO_CHAR);
+            act(g, "@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
+            null_affect(g, ch, AFF_POISON);
+            extract_obj(g, mag_item);
           } else {
-            send_to_char(ch, "You are not poisoned.\r\n");
+            send_to_char(g, ch, "You are not poisoned.\r\n");
           }
           return;
         case 385:
-          act("@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, 0, TO_CHAR);
-          act("@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, 0, TO_ROOM);
+          act(g, "@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, 0, TO_CHAR);
+          act(g, "@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, 0, TO_ROOM);
           if (char_aff_flagged(ch, AFF_BLIND)) {
-            act("@WYour eyesight has returned!@n", true, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, 0, TO_ROOM);
-            null_affect(ch, AFF_BLIND);
+            act(g, "@WYour eyesight has returned!@n", true, ch, mag_item, 0, TO_CHAR);
+            act(g, "@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, 0, TO_ROOM);
+            null_affect(g, ch, AFF_BLIND);
           }
           refreshed = false;
 
-          if (getCurPL(ch) <= getEffMaxPL(ch) * 0.99) {
-            incCurHealth(ch, large_rand(getEffMaxPL(ch) * 0.08, getEffMaxPL(ch) * 0.16), true);
+          if (getCurPL(g, ch) <= getEffMaxPL(g, ch) * 0.99) {
+            incCurHealth(g, ch, large_rand(g, getEffMaxPL(g, ch) * 0.08, getEffMaxPL(g, ch) * 0.16), true);
             refreshed = true;
-          } else if ((getCurKI(ch)) <= getEffMaxPL(ch) * 0.99) {
-            incCurKI(ch, large_rand(getMaxKI(ch) * 0.08, getMaxKI(ch) * 0.16), true);
+          } else if ((getCurKI(g, ch)) <= getEffMaxPL(g, ch) * 0.99) {
+            incCurKI(g, ch, large_rand(g, getMaxKI(g, ch) * 0.08, getMaxKI(g, ch) * 0.16), true);
             refreshed = true;
-          } else if ((getCurST(ch)) <= getMaxST(ch) * 0.99) {
-            incCurST(ch, large_rand(getMaxST(ch) * 0.08, getMaxST(ch) * 0.16), true);
+          } else if ((getCurST(g, ch)) <= getMaxST(g, ch) * 0.99) {
+            incCurST(g, ch, large_rand(g, getMaxST(g, ch) * 0.08, getMaxST(g, ch) * 0.16), true);
             refreshed = true;
           }
           if (refreshed == true) {
-            send_to_char(ch, "@CYou feel refreshed!\r\n");
+            send_to_char(g, ch, "@CYou feel refreshed!\r\n");
           }
-          extract_obj(mag_item);
+          extract_obj(g, mag_item);
           return;
         default:
-          send_to_char(ch, "That is not something you can apparently use.\r\n");
+          send_to_char(g, ch, "That is not something you can apparently use.\r\n");
           return;
       }
       break;
   }
 
-  mag_objectmagic(ch, mag_item, buf);
+  mag_objectmagic(g, ch, mag_item, buf);
 }
 
 ACMD(do_value)
@@ -1751,11 +1752,11 @@ ACMD(do_value)
   if (!*arg) {
     switch (subcmd) {
       case SCMD_WIMPY:
-        if (char_get_wimp_level(ch)) {
-          send_to_char(ch, "Your current wimp level is %d powerlevel.\r\n", char_get_wimp_level(ch));
+        if (char_get_wimp_level(g, ch)) {
+          send_to_char(g, ch, "Your current wimp level is %d powerlevel.\r\n", char_get_wimp_level(g, ch));
           return;
         }
-        send_to_char(ch, "At the moment, you're not a wimp.  (sure, sure...)\r\n");
+        send_to_char(g, ch, "At the moment, you're not a wimp.  (sure, sure...)\r\n");
         return;
         break;
     }
@@ -1769,18 +1770,18 @@ ACMD(do_value)
           return;
         if ((value_lev = atoi(arg)) != 0) {
           if (value_lev < 0)
-            send_to_char(ch, "Heh, heh, heh.. we are jolly funny today, eh?\r\n");
-          else if (value_lev > getEffMaxPL(ch))
-            send_to_char(ch, "That doesn't make much sense, now does it?\r\n");
-          else if (value_lev > (getEffMaxPL(ch) * 0.5))
-            send_to_char(ch, "You can't set your wimp level above half your powerlevel.\r\n");
+            send_to_char(g, ch, "Heh, heh, heh.. we are jolly funny today, eh?\r\n");
+          else if (value_lev > getEffMaxPL(g, ch))
+            send_to_char(g, ch, "That doesn't make much sense, now does it?\r\n");
+          else if (value_lev > (getEffMaxPL(g, ch) * 0.5))
+            send_to_char(g, ch, "You can't set your wimp level above half your powerlevel.\r\n");
           else {
-            send_to_char(ch, "Okay, you'll wimp out if you drop below %d powerlevel.\r\n", value_lev);
-            char_set_wimp_level(ch, value_lev);
+            send_to_char(g, ch, "Okay, you'll wimp out if you drop below %d powerlevel.\r\n", value_lev);
+            char_set_wimp_level(g, ch, value_lev);
           }
         } else {
-          send_to_char(ch, "Okay, you'll now tough out fights to the bitter end.\r\n");
-          char_set_wimp_level(ch, 0);
+          send_to_char(g, ch, "Okay, you'll now tough out fights to the bitter end.\r\n");
+          char_set_wimp_level(g, ch, 0);
         }
         break;
       default:
@@ -1788,7 +1789,7 @@ ACMD(do_value)
         break;
     }
   } else
-    send_to_char(ch, "Specify a value.  (0 to disable)\r\n");
+    send_to_char(g, ch, "Specify a value.  (0 to disable)\r\n");
 }
 
 ACMD(do_compare)
@@ -1803,15 +1804,15 @@ ACMD(do_compare)
   two_arguments(argument, arg1, arg2);
 
   if (!*arg1 || !*arg2) {
-    send_to_char(ch, "Compare what to what?\n\r");
+    send_to_char(g, ch, "Compare what to what?\n\r");
     return;
   }
 
-  o1 = generic_find(arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
-  o2 = generic_find(arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
+  o1 = generic_find(g, arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
+  o2 = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
 
   if (!o1 || !o2) {
-    send_to_char(ch, "You do not have that item.\r\n");
+    send_to_char(g, ch, "You do not have that item.\r\n");
     return;
   }
   if (obj1 == obj2) {
@@ -1843,7 +1844,7 @@ ACMD(do_compare)
       msg = "$p looks worse than $P.";
   }
 
-  act(msg, false, ch, obj1, obj2, TO_CHAR);
+  act(g, msg, false, ch, obj1, obj2, TO_CHAR);
   return;
 }
 
@@ -1857,23 +1858,23 @@ ACMD(do_break)
   one_argument(argument, arg);
 
   if (!*arg) {
-    send_to_char(ch, "Usually you break SOMETHING.\r\n");
+    send_to_char(g, ch, "Usually you break SOMETHING.\r\n");
     return;
   }
 
-  if (!(cmbrk = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
-    send_to_char(ch, "Can't seem to find what you want to break!\r\n");
+  if (!(cmbrk = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
+    send_to_char(g, ch, "Can't seem to find what you want to break!\r\n");
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-    send_to_char(ch, "Seems like it's already broken!\r\n");
+    send_to_char(g, ch, "Seems like it's already broken!\r\n");
     return;
   }
 
   /* Ok, break it! */
-  send_to_char(ch, "You ruin %s.\r\n", obj_get_short_description(obj));
-  act("$n ruins $p.", false, ch, obj, 0, TO_ROOM);
+  send_to_char(g, ch, "You ruin %s.\r\n", obj_get_short_description(obj));
+  act(g, "$n ruins $p.", false, ch, obj, 0, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
   obj_extra_toggle(obj, ITEM_BROKEN);
 
@@ -1889,36 +1890,36 @@ ACMD(do_fix)
 
   one_argument(argument, arg);
 
-  if (!know_skill(ch, SKILL_REPAIR)) {
+  if (!know_skill(g, ch, SKILL_REPAIR)) {
     return;
   }
 
   if (!*arg) {
-    send_to_char(ch, "Usually you fix SOMETHING.\r\n");
+    send_to_char(g, ch, "Usually you fix SOMETHING.\r\n");
     return;
   }
 
   if (!strcasecmp("self", arg)) {
     if (!char_is_android(ch)) {
-      send_to_char(ch, "Only androids can fix their bodies with repair kits.\r\n");
+      send_to_char(g, ch, "Only androids can fix their bodies with repair kits.\r\n");
       return;
     }
     self = true;
   }
 
   if (self == false) {
-    if (!(cmbrk = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &dummy, &obj))) {
-      send_to_char(ch, "Can't seem to find what you want to fix!\r\n");
+    if (!(cmbrk = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &dummy, &obj))) {
+      send_to_char(g, ch, "Can't seem to find what you want to fix!\r\n");
       return;
     }
 
     if ((cmbrk) && obj_get_value(obj, VAL_ALL_HEALTH) >= 100) {
-      send_to_char(ch, "But it isn't even damaged!\r\n");
+      send_to_char(g, ch, "But it isn't even damaged!\r\n");
       return;
     }
 
     if (obj_extra_flagged(obj, ITEM_FORGED)) {
-      send_to_char(ch, "That is fake, why bother fixing it?\r\n");
+      send_to_char(g, ch, "That is fake, why bother fixing it?\r\n");
       return;
     }
 
@@ -1927,12 +1928,12 @@ ACMD(do_fix)
       case MATERIAL_FOOD:
       case MATERIAL_PAPER:
       case MATERIAL_LIQUID:
-        send_to_char(ch, "You can't repair that.\r\n");
+        send_to_char(g, ch, "You can't repair that.\r\n");
         return;
         break;
     }
 
-    if (obj_get_vnum(obj) == 20099 || obj_get_vnum(obj) == 20098) {
+    if (obj_get_vnum(g, obj) == 20099 || obj_get_vnum(g, obj) == 20098) {
       custom = true;
     }
   }
@@ -1940,12 +1941,12 @@ ACMD(do_fix)
   for (rep = char_get_inventory(ch); rep; rep = next_obj) {
     next_obj = obj_get_next_content(rep);
     if (custom == false) {
-      if (found == false && obj_get_vnum(rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
+      if (found == false && obj_get_vnum(g, rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
         found = true;
         obj4  = rep;
       }
     } else {
-      if (found == false && obj_get_vnum(rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
+      if (found == false && obj_get_vnum(g, rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
         found = true;
         obj4  = rep;
       }
@@ -1953,73 +1954,73 @@ ACMD(do_fix)
   }
 
   if (found == false && custom == false) {
-    send_to_char(ch, "You do not even have a repair kit.\r\n");
+    send_to_char(g, ch, "You do not even have a repair kit.\r\n");
     return;
   }
   if (found == false && custom == true) {
-    send_to_char(ch, "You do not even have a Nano-tech Repair Orb.\r\n");
+    send_to_char(g, ch, "You do not even have a Nano-tech Repair Orb.\r\n");
     return;
   }
 
   if (self == false) {
-    if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
-      act("You try to repair $p but screw up..", true, ch, obj, 0, TO_CHAR);
-      act("$n tries to repair $p but screws up..", true, ch, obj, 0, TO_ROOM);
-      extract_obj(obj4);
-      improve_skill(ch, SKILL_REPAIR, 1);
+    if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
+      act(g, "You try to repair $p but screw up..", true, ch, obj, 0, TO_CHAR);
+      act(g, "$n tries to repair $p but screws up..", true, ch, obj, 0, TO_ROOM);
+      extract_obj(g, obj4);
+      improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_2SEC);
       return;
     }
 
     if (obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
-      send_to_char(ch, "You repair %s a bit.\r\n", obj_get_short_description(obj));
-      act("$n repairs $p a bit.", false, ch, obj, 0, TO_ROOM);
+      send_to_char(g, ch, "You repair %s a bit.\r\n", obj_get_short_description(obj));
+      act(g, "$n repairs $p a bit.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
       obj_extra_set(obj, ITEM_BROKEN, false);
     } else {
-      send_to_char(ch, "You repair %s completely.\r\n", obj_get_short_description(obj));
-      act("$n repairs $p completely.", false, ch, obj, 0, TO_ROOM);
+      send_to_char(g, ch, "You repair %s completely.\r\n", obj_get_short_description(obj));
+      act(g, "$n repairs $p completely.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, 100);
       obj_extra_set(obj, ITEM_BROKEN, false);
     }
     if (obj_get_carried_by(obj) == nullptr && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
       int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
-      send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
+      send_to_char(g, ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
       char_plr_set(ch, PLR_REPLEARN, true);
-      gain_exp(ch, gain);
-    } else if (rand_number(2, 12) >= 10 && char_plr_flagged(ch, PLR_REPLEARN)) {
+      gain_exp(g, ch, gain);
+    } else if (rand_number(g, 2, 12) >= 10 && char_plr_flagged(ch, PLR_REPLEARN)) {
       char_plr_set(ch, PLR_REPLEARN, false);
-      send_to_char(ch, "@mYou think you might be on to something...@n\r\n");
+      send_to_char(g, ch, "@mYou think you might be on to something...@n\r\n");
     }
-    improve_skill(ch, SKILL_REPAIR, 1);
-    extract_obj(obj4);
+    improve_skill(g, ch, SKILL_REPAIR, 1);
+    extract_obj(g, obj4);
     char_set_wait(ch, PULSE_2SEC);
     return;
   } else { /* For androids repairing themselves */
 
-    if (getCurPL(ch) >= getEffMaxPL(ch)) {
-      send_to_char(ch, "Your body is already in peak condition.\r\n");
+    if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
+      send_to_char(g, ch, "Your body is already in peak condition.\r\n");
       return;
     }
-    if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
-      act("You try to repair your body but screw up..", true, ch, 0, 0, TO_CHAR);
-      act("$n tries to repair $s body but screws up..", true, ch, 0, 0, TO_ROOM);
-      extract_obj(obj4);
-      improve_skill(ch, SKILL_REPAIR, 1);
+    if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
+      act(g, "You try to repair your body but screw up..", true, ch, 0, 0, TO_CHAR);
+      act(g, "$n tries to repair $s body but screws up..", true, ch, 0, 0, TO_ROOM);
+      extract_obj(g, obj4);
+      improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_5SEC);
       return;
     }
-    act("You use the repair kit to fix part of your body...", true, ch, 0, 0, TO_CHAR);
-    act("$n works on their body with a repair kit.", true, ch, 0, 0, TO_ROOM);
+    act(g, "You use the repair kit to fix part of your body...", true, ch, 0, 0, TO_CHAR);
+    act(g, "$n works on their body with a repair kit.", true, ch, 0, 0, TO_ROOM);
     int64_t mult = char_get_skill(ch, SKILL_REPAIR);
-    int64_t add  = (getEffMaxPL(ch) * 0.005 + 10) * mult;
+    int64_t add  = (getEffMaxPL(g, ch) * 0.005 + 10) * mult;
 
-    extract_obj(obj4);
-    if (incCurHealth(ch, add, true) == getEffMaxPL(ch)) {
-      send_to_char(ch, "Your body has been totally repaired.\r\n");
+    extract_obj(g, obj4);
+    if (incCurHealth(g, ch, add, true) == getEffMaxPL(g, ch)) {
+      send_to_char(g, ch, "Your body has been totally repaired.\r\n");
       char_set_wait(ch, PULSE_5SEC);
     } else {
-      send_to_char(ch, "Your body still needs some work done to it.\r\n");
+      send_to_char(g, ch, "Your body still needs some work done to it.\r\n");
       char_set_wait(ch, PULSE_5SEC);
     }
   }

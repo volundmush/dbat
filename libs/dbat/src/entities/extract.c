@@ -10,11 +10,11 @@
 #include "dbat/act.misc.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
-static int extractions_pending = 0;
 
 /* Extract a ch completely from the world, and leave his stuff behind */
-void extract_char_final(struct char_data *ch)
+void extract_char_final(GameWorld *g, struct char_data *ch)
 {
   struct char_data *k, *temp;
   struct obj_data *chair;
@@ -34,9 +34,9 @@ void extract_char_final(struct char_data *ch)
    * we're checking below this loop to the proper value.
    */
   if (!char_is_npc(ch) && !char_get_desc(ch)) {
-    for (d = descriptor_list; d; d = d->next)
+    for (d = g->descriptors; d; d = d->next)
       if (d->original == ch) {
-        do_return(d->character, nullptr, 0, 0);
+        do_return(g, d->character, nullptr, 0, 0);
         break;
       }
   }
@@ -51,7 +51,7 @@ void extract_char_final(struct char_data *ch)
      * body after the removal so dump them to the main menu.
      */
     if (char_get_desc(ch)->original)
-      do_return(ch, nullptr, 0, 0);
+      do_return(g, ch, nullptr, 0, 0);
     else {
       /*
        * Now we boot anybody trying to log in with the same character, to
@@ -60,20 +60,20 @@ void extract_char_final(struct char_data *ch)
        * for being link-dead, so we want CON_CLOSE to clean everything up.
        * If we're here, we know it's a player so no IS_NPC check required.
        */
-      for (d = descriptor_list; d; d = d->next) {
+      for (d = g->descriptors; d; d = d->next) {
         if (d == char_get_desc(ch))
           continue;
         if (d->character && char_get_idnum(ch) == char_get_idnum(d->character))
           desc_set_connected(d, CON_CLOSE);
       }
       desc_set_connected(char_get_desc(ch), CON_MENU);
-      write_to_output(char_get_desc(ch), "%s", CONFIG_MENU);
+      write_to_output(g, char_get_desc(ch), "%s", CONFIG_MENU);
     }
   }
   /* On with the character's assets... */
 
   if (char_get_followers(ch) || char_get_master(ch))
-    die_follower(ch);
+    die_follower(g, ch);
 
   if (char_get_sits(ch)) {
     chair = char_get_sits(ch);
@@ -81,26 +81,26 @@ void extract_char_final(struct char_data *ch)
     char_set_sits(ch, nullptr);
   }
 
-  if (char_is_npc(ch) && char_get_mob_vnum(ch) == 25) {
+  if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 25) {
     if (char_get_original(ch)) {
-      handle_multi_merge(ch);
+      handle_multi_merge(g, ch);
     }
   }
 
   if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
     struct char_data *clone = nullptr;
-    for (clone = character_list; clone; clone = char_get_next(clone)) {
+    for (clone = g->characters; clone; clone = char_get_next(clone)) {
       if (char_is_npc(clone)) {
-        if (char_get_mob_vnum(clone) == 25) {
+        if (char_get_mob_vnum(g, clone) == 25) {
           if (char_get_original(clone) == ch) {
-            handle_multi_merge(clone);
+            handle_multi_merge(g, clone);
           }
         }
       }
     }
   }
 
-  purge_homing(ch);
+  purge_homing(g, ch);
 
   if (char_get_mindlink(ch)) {
     char_set_mindlink(char_get_mindlink(ch), nullptr);
@@ -108,16 +108,16 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (char_get_grappling(ch)) {
-    act("@WYou stop grappling with @C$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
-    act("@C$n@W stops grappling with @c$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_ROOM);
+    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
+    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_ROOM);
     char_set_grap(char_get_grappling(ch), -1);
     char_set_grappled(char_get_grappling(ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
   if (char_get_grappled(ch)) {
-    act("@WYou stop being grappled with by @C$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_CHAR);
-    act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_ROOM);
+    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_CHAR);
+    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_ROOM);
     char_set_grap(char_get_grappled(ch), -1);
     char_set_grappling(char_get_grappled(ch), nullptr);
     char_set_grappled(ch, nullptr);
@@ -125,10 +125,10 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (char_get_carrying(ch)) {
-    carry_drop(ch, 3);
+    carry_drop(g, ch, 3);
   }
   if (char_get_carried_by(ch)) {
-    carry_drop(char_get_carried_by(ch), 3);
+    carry_drop(g, char_get_carried_by(ch), 3);
   }
 
   if (char_get_poisonby(ch)) {
@@ -136,15 +136,15 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (char_get_drag(ch)) {
-    act("@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act("@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
     char_set_dragged(char_get_drag(ch), nullptr);
     char_set_drag(ch, nullptr);
   }
 
   if (char_get_dragged(ch)) {
-    act("@WYou stop being dragged by @C$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_CHAR);
-    act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_ROOM);
+    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_CHAR);
+    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_ROOM);
     char_set_drag(char_get_dragged(ch), nullptr);
     char_set_dragged(ch, nullptr);
   }
@@ -178,42 +178,42 @@ void extract_char_final(struct char_data *ch)
   /* transfer objects to room, if any */
   while (char_get_inventory(ch)) {
     obj = char_get_inventory(ch);
-    obj_from_char(obj);
-    obj_to_room(obj, char_get_in_room(ch));
+    obj_from_char(g, obj);
+    obj_to_room(g, obj, char_get_in_room(ch));
   }
 
   /* transfer equipment to room, if any */
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i))
-      obj_to_room(unequip_char(ch, i), char_get_in_room(ch));
+      obj_to_room(g, unequip_char(g, ch, i), char_get_in_room(ch));
 
   if (char_get_fighting(ch))
-    stop_fighting(ch);
+    stop_fighting(g, ch);
 
-  for (k = combat_list; k; k = temp) {
+  for (k = g->combat_list; k; k = temp) {
     temp = char_get_next_fighting(k);
     if (char_get_fighting(k) == ch)
-      stop_fighting(k);
+      stop_fighting(g, k);
   }
 
-  char_from_room(ch);
+  char_from_room(g, ch);
 
   if (char_is_npc(ch)) {
     if (char_get_nr(ch) != NOTHING) /* prototyped */
-      mob_index[char_get_nr(ch)].number--;
+      g->mob_index[char_get_nr(ch)].number--;
     clearMemory(ch);
     if (char_get_script(ch))
-      extract_script(ch, MOB_TRIGGER);
+      extract_script(g, ch, MOB_TRIGGER);
     if (char_get_memory(ch))
       extract_script_mem(char_get_memory(ch));
   } else {
-    save_char(ch);
+    save_char(g, ch);
     Crash_delete_crashfile(ch);
   }
 
   /* If there's a descriptor, they're in the menu now. */
   if (char_is_npc(ch) || !char_get_desc(ch))
-    free_char(ch);
+    free_char(g, ch);
 }
 
 /*
@@ -225,11 +225,11 @@ void extract_char_final(struct char_data *ch)
  *    doesn't work if the _next_ person in the list
  *    gets killed, for example, by an area spell.
  *
- * Q: Why do we leave them on the character_list?
+ * Q: Why do we leave them on the character list?
  * A: Because code doing 'vict = vict->next' would
  *    get really confused otherwise.
  */
-void extract_char(struct char_data *ch)
+void extract_char(GameWorld *g, struct char_data *ch)
 {
   struct follow_type *foll;
   int i;
@@ -255,46 +255,46 @@ void extract_char(struct char_data *ch)
       /* transfer objects to char, if any */
       while (char_get_inventory(foll->follower)) {
         obj = char_get_inventory(foll->follower);
-        obj_from_char(obj);
-        obj_to_char(obj, ch);
+        obj_from_char(g, obj);
+        obj_to_char(g, obj, ch);
       }
 
       /* transfer equipment to char, if any */
       for (i = 0; i < NUM_WEARS; i++)
         if (char_get_equipment(foll->follower, i)) {
-          obj = unequip_char(foll->follower, i);
-          obj_to_char(obj, ch);
+          obj = unequip_char(g, foll->follower, i);
+          obj_to_char(g, obj, ch);
         }
 
-      extract_char(foll->follower);
+      extract_char(g, foll->follower);
     }
   }
 
-  extractions_pending++;
+  g->extractions_pending++;
 }
 
 /* Extract an object from the world */
-void extract_obj(struct obj_data *obj)
+void extract_obj(GameWorld *g, struct obj_data *obj)
 {
   struct char_data *ch;
 
   if (obj_get_worn_by(obj) != nullptr)
-    if (unequip_char(obj_get_worn_by(obj), obj_get_worn_on(obj)) != obj)
+    if (unequip_char(g, obj_get_worn_by(obj), obj_get_worn_on(obj)) != obj)
       mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
   if (obj_get_in_room(obj) != NOWHERE)
-    obj_from_room(obj);
+    obj_from_room(g, obj);
   else if (obj_get_carried_by(obj))
-    obj_from_char(obj);
+    obj_from_char(g, obj);
   else if (obj_get_in_obj(obj))
-    obj_from_obj(obj);
+    obj_from_obj(g, obj);
 
   /* Get rid of the contents of the object, as well. */
-  if (obj_get_fellow_wall(obj) && obj_get_vnum(obj) == 79) {
+  if (obj_get_fellow_wall(obj) && obj_get_vnum(g, obj) == 79) {
     struct obj_data *trash;
     trash = obj_get_fellow_wall(obj);
     obj_set_fellow_wall(obj, nullptr);
     obj_set_fellow_wall(trash, nullptr);
-    extract_obj(trash);
+    extract_obj(g, trash);
   }
   if (obj_get_sitting(obj)) {
     ch = obj_get_sitting(obj);
@@ -315,32 +315,32 @@ void extract_obj(struct obj_data *obj)
   }
 
   while (obj_get_contains(obj))
-    extract_obj(obj_get_contains(obj));
+    extract_obj(g, obj_get_contains(obj));
 
-  obj_unlink_from_list(obj);
+  obj_unlink_from_list(g, obj);
 
   if (obj_get_item_number(obj) != NOTHING)
-    (obj_index[obj_get_item_number(obj)].number)--;
+    (g->obj_index[obj_get_item_number(obj)].number)--;
 
   if (obj_get_script(obj))
-    extract_script(obj, OBJ_TRIGGER);
+    extract_script(g, obj, OBJ_TRIGGER);
 
-  if (obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81) {
-    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(&obj_proto[obj_get_item_number(obj)]))
+  if (obj_get_vnum(g, obj) != 80 && obj_get_vnum(g, obj) != 81) {
+    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(&g->obj_proto[obj_get_item_number(obj)]))
       free_proto_script(obj, OBJ_TRIGGER);
   }
 
-  free_obj(obj);
+  free_obj(g, obj);
 }
 
-void extract_pending_chars(void)
+void extract_pending_chars(GameWorld *g)
 {
   struct char_data *vict, *next_vict, *prev_vict;
 
-  if (extractions_pending < 0)
-    mud_log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
+  if (g->extractions_pending < 0)
+    mud_log("SYSERR: Negative (%d) extractions pending.", g->extractions_pending);
 
-  for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
+  for (vict = g->characters, prev_vict = nullptr; vict && g->extractions_pending; vict = next_vict) {
     next_vict = char_get_next(vict);
 
     if (char_mob_flagged(vict, MOB_NOTDEADYET))
@@ -353,18 +353,18 @@ void extract_pending_chars(void)
       continue;
     }
 
-    char_unlink_from_affect_list(vict);
-    extract_char_final(vict);
-    extractions_pending--;
+    char_unlink_from_affect_list(g, vict);
+    extract_char_final(g, vict);
+    g->extractions_pending--;
 
     if (prev_vict)
       char_set_next(prev_vict, next_vict);
     else
-      character_list = next_vict;
+      g->characters = next_vict;
   }
 
-  if (extractions_pending > 0)
-    mud_log("SYSERR: Couldn't find %d extractions as counted.", extractions_pending);
+  if (g->extractions_pending > 0)
+    mud_log("SYSERR: Couldn't find %d extractions as counted.", g->extractions_pending);
 
-  extractions_pending = 0;
+  g->extractions_pending = 0;
 }

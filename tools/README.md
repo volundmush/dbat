@@ -14,6 +14,12 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 - **Shared pieces:**
   - `build-tree.sh` is the shared builder.
-  - `roundtrip.c` holds `roundtrip_dump()`, which `verify.sh` calls from gdb.
+  - `roundtrip.c` holds `roundtrip_dump()`, which `verify.sh` calls from gdb. For each tree, `verify.sh` checks whether it passes `g` to this and to `circle_srandom()`, so a ref from before `GameWorld` still works. It calls server functions, so each tree is built with its own copy when it has one.
 - **Where they work:** the scripts build in `$TMPDIR` and need `gcc`, `gdb`, `objdump` and `python3`.
 - **Typical loop:** make a change, run `tools/objdiff.sh` if it should be code-neutral, and run `tools/verify.sh` before committing.
+
+## Tests
+
+`libs/dbat/tests/` holds self-contained tests that need no `data/` files. Run them with `ctest` from a CMake build directory, or with `zig build test`.
+
+Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.h`), so a test can build as many worlds as it wants. A test only has to set the global `logfile`, which stays global because crash handlers write to it.

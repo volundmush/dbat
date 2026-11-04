@@ -13,12 +13,11 @@
 /* Functions defined in feats.c */
 bool is_proficient_with_armor(const struct char_data *ch, int armor_type);
 bool is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
-int find_feat_num(char *name);
-void assign_feats(void);
-void sort_feats(void);
+int find_feat_num(GameWorld *g, char *name);
+void assign_feats(GameWorld *g);
+void sort_feats(GameWorld *g);
 bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
 
-extern int feat_sort_info[MAX_FEATS];
 
 /* Feats defined below up to MAX_FEATS */
 
@@ -209,7 +208,6 @@ struct feat_info {
   int can_stack;    /* TRUE or FALSE, can the feat be learned more than once? */
 };
 
-extern struct feat_info feat_list[NUM_FEATS_DEFINED];
 
 constexpr int HRANK_ANY    = 0;
 constexpr int HRANK_ARCANE = 1;

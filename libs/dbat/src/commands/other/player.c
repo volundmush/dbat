@@ -47,9 +47,10 @@
 #include "dbat/mail.h"
 #include "dbat/local_limits.h"
 #include "other_internal.h"
+#include "dbat/game_world.h"
 
-static bool perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
-static void print_group(struct char_data *ch);
+static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
+static void print_group(GameWorld *g, struct char_data *ch);
 
 ACMD(do_spar)
 {
@@ -57,12 +58,12 @@ ACMD(do_spar)
     return;
   }
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    act("@wYou cease your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
-    act("@C$n@w ceases $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
+    act(g, "@wYou cease your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
+    act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
   }
   if (!char_plr_flagged(ch, PLR_SPAR)) {
-    act("@wYou move into your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
-    act("@C$n@w moves into $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
+    act(g, "@wYou move into your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
+    act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
   }
   char_plr_toggle(ch, PLR_SPAR);
 }
@@ -72,58 +73,58 @@ ACMD(do_quit)
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
-  if (rroom_flagged(char_get_in_room(ch), ROOM_PAST)) {
-    send_to_char(ch, "This is the past, you can't quit here!\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+    send_to_char(g, ch, "This is the past, you can't quit here!\r\n");
     return;
   }
-  if (rroom_get_vnum(char_get_in_room(ch)) >= 2002 && rroom_get_vnum(char_get_in_room(ch)) <= 2011) {
-    send_to_char(ch, "You can't quit in the arena!\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 2002 && rroom_get_vnum(g, char_get_in_room(ch)) <= 2011) {
+    send_to_char(g, ch, "You can't quit in the arena!\r\n");
     return;
   }
-  if (rroom_get_vnum(char_get_in_room(ch)) >= 101 && rroom_get_vnum(char_get_in_room(ch)) <= 139) {
-    send_to_char(ch, "You can't quit in the mud school!\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 101 && rroom_get_vnum(g, char_get_in_room(ch)) <= 139) {
+    send_to_char(g, ch, "You can't quit in the mud school!\r\n");
     return;
   }
-  if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
-    send_to_char(ch, "You can't quit in a pocket dimension!\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+    send_to_char(g, ch, "You can't quit in a pocket dimension!\r\n");
     return;
   }
-  if (rroom_get_vnum(char_get_in_room(ch)) == 2069) {
-    send_to_char(ch, "You can't quit here!\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) == 2069) {
+    send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
   if (char_get_mindlink(ch) && char_get_linker(ch) == 0) {
-    send_to_char(ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
+    send_to_char(g, ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
     if (char_get_in_room(char_get_mindlink(ch)) != NOWHERE) {
-      look_at_room(char_get_in_room(char_get_mindlink(ch)), ch, 0);
-      send_to_char(ch, "You get an impression of where this interference is originating from.\r\n");
+      look_at_room(g, char_get_in_room(char_get_mindlink(ch)), ch, 0);
+      send_to_char(g, ch, "You get an impression of where this interference is originating from.\r\n");
     }
     return;
   }
-  if (rroom_get_vnum(char_get_in_room(ch)) == 2070) {
-    send_to_char(ch, "You can't quit here!\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) == 2070) {
+    send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
-  if (dball_count(ch)) {
-    send_to_char(ch, "You can not quit while you have dragon balls! Place them somewhere first.");
+  if (dball_count(g, ch)) {
+    send_to_char(g, ch, "You can not quit while you have dragon balls! Place them somewhere first.");
     return;
   }
 
   if (subcmd != SCMD_QUIT)
-    send_to_char(ch, "You have to type quit--no less, to quit!\r\n");
+    send_to_char(g, ch, "You have to type quit--no less, to quit!\r\n");
   else if (char_get_position(ch) == POS_FIGHTING)
-    send_to_char(ch, "No way!  You're fighting for your life!\r\n");
+    send_to_char(g, ch, "No way!  You're fighting for your life!\r\n");
   else if (char_get_position(ch) < POS_STUNNED) {
-    send_to_char(ch, "You die before your time...\r\n");
-    die(ch, nullptr);
+    send_to_char(g, ch, "You die before your time...\r\n");
+    die(g, ch, nullptr);
   } else {
-    act("$n has left the game.", true, ch, 0, 0, TO_ROOM);
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s has quit the game.", char_get_name(ch));
-    send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
+    act(g, "$n has left the game.", true, ch, 0, 0, TO_ROOM);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s has quit the game.", char_get_name(ch));
+    send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
     if (char_get_followers(ch) || char_get_master(ch))
-      die_follower(ch);
-    if (ch == ch_selling)
-      stop_auction(AUC_QUIT_CANCEL, nullptr);
+      die_follower(g, ch);
+    if (ch == g->ch_selling)
+      stop_auction(g, AUC_QUIT_CANCEL, nullptr);
 
     /*  We used to check here for duping attempts, but we may as well
      *  do it right in extract_char(), since there is no check if a
@@ -132,24 +133,24 @@ ACMD(do_quit)
      */
 
     /* If someone is quitting in their house, let them load back here. */
-    if (!rroom_flagged(char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-        char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
+    if (!rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
+        char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
       }
     }
-    if (rroom_flagged(char_get_in_room(ch), ROOM_PAST)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-        char_set_load_room(ch, rroom_get_vnum(real_room(1561)));
+    if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
+        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1561)));
       }
     }
 
-    Crash_rentsave(ch, 0);
+    Crash_rentsave(g, ch, 0);
 
-    extract_char(ch); /* Char is saved before extracting. */
+    extract_char(g, ch); /* Char is saved before extracting. */
   }
   /* Remove any snoopers */
   if (char_get_desc(ch)->snoop_by) {
-    write_to_output(char_get_desc(ch)->snoop_by, "Your victim is no longer among us.\r\n");
+    write_to_output(g, char_get_desc(ch)->snoop_by, "Your victim is no longer among us.\r\n");
     char_get_desc(ch)->snoop_by->snooping = nullptr;
     char_get_desc(ch)->snoop_by           = nullptr;
   }
@@ -170,35 +171,35 @@ ACMD(do_save)
      * immortal advances from mortality, you may want < instead of <=.
      */
     if (CONFIG_AUTO_SAVE && char_get_admlevel(ch) < 1) {
-      send_to_char(ch, "Saving.\r\n");
-      write_aliases(ch);
-      save_char(ch);
-      Crash_crashsave(ch);
-      if (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899) {
-        if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-          char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
+      send_to_char(g, ch, "Saving.\r\n");
+      write_aliases(g, ch);
+      save_char(g, ch);
+      Crash_crashsave(g, ch);
+      if (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899) {
+        if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
+          char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
         }
       }
       return;
     }
-    send_to_char(ch, "Saving.\r\n");
+    send_to_char(g, ch, "Saving.\r\n");
   }
 
-  write_aliases(ch);
-  if (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899) {
-    if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-      char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
+  write_aliases(g, ch);
+  if (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899) {
+    if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
+      char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
     }
   }
-  save_char(ch);
-  Crash_crashsave(ch);
+  save_char(g, ch);
+  Crash_crashsave(g, ch);
 }
 
 /* generic function for commands which are normally overridden by
    special procedures - i.e., shop commands, mail commands, etc. */
 ACMD(do_not_here)
 {
-  send_to_char(ch, "Sorry, but you cannot do that here!\r\n");
+  send_to_char(g, ch, "Sorry, but you cannot do that here!\r\n");
 }
 
 ACMD(do_practice)
@@ -211,9 +212,9 @@ ACMD(do_practice)
   one_argument(argument, arg);
 
   if (*arg)
-    send_to_char(ch, "You can only practice skills with your trainer.\r\n");
+    send_to_char(g, ch, "You can only practice skills with your trainer.\r\n");
   else
-    send_to_char(ch, "Use the skills command unless you are at your trainer.\r\n");
+    send_to_char(g, ch, "Use the skills command unless you are at your trainer.\r\n");
   /*list_skills(ch);*/
 }
 
@@ -224,7 +225,7 @@ ACMD(do_skills)
   if (char_is_npc(ch)) {
     return;
   }
-  list_skills(ch, arg);
+  list_skills(g, ch, arg);
 }
 
 ACMD(do_visible)
@@ -232,18 +233,18 @@ ACMD(do_visible)
   int appeared = 0;
 
   if (char_get_admlevel(ch)) {
-    perform_immort_vis(ch);
+    perform_immort_vis(g, ch);
     return;
   }
 
   if (char_aff_flagged(ch, AFF_INVISIBLE)) {
-    appear(ch);
+    appear(g, ch);
     appeared = 1;
-    send_to_char(ch, "You break the spell of invisibility.\r\n");
+    send_to_char(g, ch, "You break the spell of invisibility.\r\n");
   }
 
   if (!appeared)
-    send_to_char(ch, "You are already visible.\r\n");
+    send_to_char(g, ch, "You are already visible.\r\n");
 }
 
 ACMD(do_title)
@@ -252,26 +253,26 @@ ACMD(do_title)
   delete_doubledollar(argument);
 
   if (char_is_npc(ch))
-    send_to_char(ch, "Your title is fine... go away.\r\n");
+    send_to_char(g, ch, "Your title is fine... go away.\r\n");
   else if (char_plr_flagged(ch, PLR_NOTITLE))
-    send_to_char(ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
+    send_to_char(g, ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
   else if (strstr(argument, "(") || strstr(argument, ")"))
-    send_to_char(ch, "Titles can't contain the ( or ) characters.\r\n");
+    send_to_char(g, ch, "Titles can't contain the ( or ) characters.\r\n");
   else if (strlen(argument) > MAX_TITLE_LENGTH)
-    send_to_char(ch, "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH);
+    send_to_char(g, ch, "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH);
   else {
-    set_title(ch, argument);
-    send_to_char(ch, "Okay, you're now %s %s.\r\n", char_get_name(ch), char_get_title(ch));
+    set_title(g, ch, argument);
+    send_to_char(g, ch, "Okay, you're now %s %s.\r\n", char_get_name(ch), char_get_title(ch));
   }
 }
 
-static bool perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
+static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
 {
-  if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(ch, vict))
+  if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(g, ch, vict))
     return false;
 
   if (char_get_bonuses(vict, BONUS_LONER) > 0) {
-    act("$n is the loner type and refuses to be in your group.", true, vict, 0, ch, TO_VICT);
+    act(g, "$n is the loner type and refuses to be in your group.", true, vict, 0, ch, TO_VICT);
     return false;
   }
 
@@ -301,58 +302,58 @@ static bool perform_group(struct char_data *ch, struct char_data *vict, int high
 
   char_aff_set(vict, AFF_GROUP, true);
   if (ch != vict)
-    act("$N is now a member of your group.", false, ch, 0, vict, TO_CHAR);
-  act("You are now a member of $n's group.", false, ch, 0, vict, TO_VICT);
-  act("$N is now a member of $n's group.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$N is now a member of your group.", false, ch, 0, vict, TO_CHAR);
+  act(g, "You are now a member of $n's group.", false, ch, 0, vict, TO_VICT);
+  act(g, "$N is now a member of $n's group.", false, ch, 0, vict, TO_NOTVICT);
   return true;
 }
 
-static void print_group(struct char_data *ch)
+static void print_group(GameWorld *g, struct char_data *ch)
 {
   struct char_data *k;
   struct follow_type *f;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
-    send_to_char(ch, "But you are not the member of a group!\r\n");
+    send_to_char(g, ch, "But you are not the member of a group!\r\n");
   else {
     char buf[MAX_STRING_LENGTH];
 
-    send_to_char(ch, "Your group consists of:\r\n");
+    send_to_char(g, ch, "Your group consists of:\r\n");
 
     k = (char_get_master(ch) ? char_get_master(ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP)) {
-      send_to_char(ch, "@D----------------@n\r\n");
-      if (getCurPL(k) > getEffMaxPL(k) / 10) {
+      send_to_char(g, ch, "@D----------------@n\r\n");
+      if (getCurPL(g, k) > getEffMaxPL(g, k) / 10) {
         snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(getCurPL(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
+                 add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
                  char_class_abbr(k), char_race_abbr(k));
       }
-      if (getCurPL(k) <= (getEffMaxPL(k) - (getCurCarriedWeight(k))) / 10) {
+      if (getCurPL(g, k) <= (getEffMaxPL(g, k) - (getCurCarriedWeight(k))) / 10) {
         snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(getCurPL(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
+                 add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
                  char_class_abbr(k), char_race_abbr(k));
       }
-      act(buf, false, ch, 0, k, TO_CHAR);
+      act(g, buf, false, ch, 0, k, TO_CHAR);
     }
 
     for (f = char_get_followers(k); f; f = f->next) {
       if (!char_aff_flagged(f->follower, AFF_GROUP))
         continue;
-      send_to_char(ch, "@D----------------@n\r\n");
-      if (getCurPL(f->follower) > (getEffMaxPL(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      send_to_char(g, ch, "@D----------------@n\r\n");
+      if (getCurPL(g, f->follower) > (getEffMaxPL(g, f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
+                 add_commas(getCurPL(g, f->follower)), add_commas((getCurKI(g, f->follower))), add_commas((getCurST(g, f->follower))),
                  char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
-      if (getCurPL(f->follower) <= (getEffMaxPL(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      if (getCurPL(g, f->follower) <= (getEffMaxPL(g, f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
+                 add_commas(getCurPL(g, f->follower)), add_commas((getCurKI(g, f->follower))), add_commas((getCurST(g, f->follower))),
                  char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
-      act(buf, false, ch, 0, f->follower, TO_CHAR);
+      act(g, buf, false, ch, 0, f->follower, TO_CHAR);
     }
-    send_to_char(ch, "@D----------------@n\r\n");
+    send_to_char(g, ch, "@D----------------@n\r\n");
   }
 }
 
@@ -367,25 +368,25 @@ ACMD(do_group)
   one_argument(argument, buf);
 
   if (char_get_bonuses(ch, BONUS_LONER) > 0) {
-    send_to_char(ch, "You can not group as you prefer to be alone.\r\n");
+    send_to_char(g, ch, "You can not group as you prefer to be alone.\r\n");
     return;
   }
 
   if (!*buf) {
-    print_group(ch);
+    print_group(g, ch);
     return;
   }
 
   if (char_get_master(ch)) {
-    act("You cannot enroll group members without being head of a group.",
+    act(g, "You cannot enroll group members without being head of a group.",
         false, ch, 0, 0, TO_CHAR);
     return;
   }
 
   highlvl = char_get_level(ch);
   lowlvl  = char_get_level(ch);
-  highpl  = getEffMaxPL(ch);
-  lowpl   = getEffMaxPL(ch);
+  highpl  = getEffMaxPL(g, ch);
+  lowpl   = getEffMaxPL(g, ch);
 
   for (found = 0, f = char_get_followers(ch); f; f = f->next) {
     if (char_aff_flagged(f->follower, AFF_GROUP)) {
@@ -401,10 +402,10 @@ ACMD(do_group)
   int foundwas = 0;
 
   if (!strcasecmp(buf, "all")) {
-    perform_group(ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
+    perform_group(g, ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
     for (found = 0, f = char_get_followers(ch); f; f = f->next) {
       foundwas = found;
-      found += perform_group(ch, f->follower, highlvl, lowlvl, highpl, lowpl);
+      found += perform_group(g, ch, f->follower, highlvl, lowlvl, highpl, lowpl);
       if (found > foundwas) {
         if (char_get_level(f->follower) > highlvl)
           highlvl = char_get_level(f->follower);
@@ -413,26 +414,26 @@ ACMD(do_group)
       }
     }
     if (!found)
-      send_to_char(ch, "Everyone following you is already in your group.\r\n");
+      send_to_char(g, ch, "Everyone following you is already in your group.\r\n");
     return;
   }
 
-  if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(ch, "%s", CONFIG_NOPERSON);
+  if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
   else if ((char_get_master(vict) != ch) && (vict != ch))
-    act("$N must follow you to enter your group.", false, ch, 0, vict, TO_CHAR);
+    act(g, "$N must follow you to enter your group.", false, ch, 0, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
       if (!char_aff_flagged(ch, AFF_GROUP)) {
-        send_to_char(ch, "You form a group, with you as leader.\r\n");
+        send_to_char(g, ch, "You form a group, with you as leader.\r\n");
         char_aff_set(ch, AFF_GROUP, true);
       }
-      perform_group(ch, vict, highlvl, lowlvl, highpl, lowpl);
+      perform_group(g, ch, vict, highlvl, lowlvl, highpl, lowpl);
     } else {
       if (ch != vict)
-        act("$N is no longer a member of your group.", false, ch, 0, vict, TO_CHAR);
-      act("You have been kicked out of $n's group!", false, ch, 0, vict, TO_VICT);
-      act("$N has been kicked out of $n's group!", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "$N is no longer a member of your group.", false, ch, 0, vict, TO_CHAR);
+      act(g, "You have been kicked out of $n's group!", false, ch, 0, vict, TO_VICT);
+      act(g, "$N has been kicked out of $n's group!", false, ch, 0, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_GROUP, false);
     }
   }
@@ -448,7 +449,7 @@ ACMD(do_ungroup)
 
   if (!*buf) {
     if (char_get_master(ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
-      send_to_char(ch, "But you lead no group!\r\n");
+      send_to_char(g, ch, "But you lead no group!\r\n");
       return;
     }
 
@@ -456,41 +457,41 @@ ACMD(do_ungroup)
       next_fol = f->next;
       if (char_aff_flagged(f->follower, AFF_GROUP)) {
         char_aff_set(f->follower, AFF_GROUP, false);
-        act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
+        act(g, "$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
         char_set_combatexpertise(f->follower, 0);
         if (!char_aff_flagged(f->follower, AFF_CHARM))
-          stop_follower(f->follower);
+          stop_follower(g, f->follower);
       }
     }
 
     char_aff_set(ch, AFF_GROUP, false);
     char_set_combatexpertise(ch, 0);
-    send_to_char(ch, "You disband the group.\r\n");
+    send_to_char(g, ch, "You disband the group.\r\n");
     return;
   }
-  if (!(tch = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(ch, "There is no such person!\r\n");
+  if (!(tch = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
+    send_to_char(g, ch, "There is no such person!\r\n");
     return;
   }
   if (char_get_master(tch) != ch) {
-    send_to_char(ch, "That person is not following you!\r\n");
+    send_to_char(g, ch, "That person is not following you!\r\n");
     return;
   }
 
   if (!char_aff_flagged(tch, AFF_GROUP)) {
-    send_to_char(ch, "That person isn't in your group.\r\n");
+    send_to_char(g, ch, "That person isn't in your group.\r\n");
     return;
   }
 
   char_aff_set(tch, AFF_GROUP, false);
   char_set_combatexpertise(tch, 0);
 
-  act("$N is no longer a member of your group.", false, ch, 0, tch, TO_CHAR);
-  act("You have been kicked out of $n's group!", false, ch, 0, tch, TO_VICT);
-  act("$N has been kicked out of $n's group!", false, ch, 0, tch, TO_NOTVICT);
+  act(g, "$N is no longer a member of your group.", false, ch, 0, tch, TO_CHAR);
+  act(g, "You have been kicked out of $n's group!", false, ch, 0, tch, TO_VICT);
+  act(g, "$N has been kicked out of $n's group!", false, ch, 0, tch, TO_NOTVICT);
 
   if (!char_aff_flagged(tch, AFF_CHARM))
-    stop_follower(tch);
+    stop_follower(g, tch);
 }
 
 ACMD(do_split)
@@ -509,11 +510,11 @@ ACMD(do_split)
   if (is_number(buf)) {
     amount = atoi(buf);
     if (amount <= 0) {
-      send_to_char(ch, "Sorry, you can't do that.\r\n");
+      send_to_char(g, ch, "Sorry, you can't do that.\r\n");
       return;
     }
     if (amount > char_get_gold(ch)) {
-      send_to_char(ch, "You don't seem to have that much gold to split.\r\n");
+      send_to_char(g, ch, "You don't seem to have that much gold to split.\r\n");
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
@@ -534,7 +535,7 @@ ACMD(do_split)
       share = amount / num;
       rest  = amount % num;
     } else {
-      send_to_char(ch, "With whom do you wish to share your gold?\r\n");
+      send_to_char(g, ch, "With whom do you wish to share your gold?\r\n");
       return;
     }
 
@@ -550,7 +551,7 @@ ACMD(do_split)
     if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) &&
         !char_is_npc(k) && k != ch) {
       char_set_gold(k, char_get_gold(k) + (share));
-      send_to_char(k, "%s", buf);
+      send_to_char(g, k, "%s", buf);
     }
 
     for (f = char_get_followers(k); f; f = f->next) {
@@ -560,19 +561,19 @@ ACMD(do_split)
           f->follower != ch) {
 
         char_set_gold(f->follower, char_get_gold(f->follower) + (share));
-        send_to_char(f->follower, "%s", buf);
+        send_to_char(g, f->follower, "%s", buf);
       }
     }
-    send_to_char(ch, "You split %d zenni among %d members -- %d zenni each.\r\n",
+    send_to_char(g, ch, "You split %d zenni among %d members -- %d zenni each.\r\n",
                  amount, num, share);
 
     if (rest) {
-      send_to_char(ch, "%d zenni %s not splitable, so you keep the money.\r\n",
+      send_to_char(g, ch, "%d zenni %s not splitable, so you keep the money.\r\n",
                    rest, (rest == 1) ? "was" : "were");
       char_set_gold(ch, char_get_gold(ch) + (rest));
     }
   } else {
-    send_to_char(ch, "How much zenni do you wish to split with your group?\r\n");
+    send_to_char(g, ch, "How much zenni do you wish to split with your group?\r\n");
     return;
   }
 }
@@ -582,38 +583,38 @@ ACMD(do_display)
   size_t i;
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "Mosters don't need displays.  Go away.\r\n");
+    send_to_char(g, ch, "Mosters don't need displays.  Go away.\r\n");
     return;
   }
   skip_spaces(&argument);
 
   if (!*argument) {
-    send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
+    send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
     return;
   }
 
   if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
-    char_prf_set(ch, PRF_DISPHP, true);
-    char_prf_set(ch, PRF_DISPMOVE, true);
-    char_prf_set(ch, PRF_DISPKI, true);
-    char_prf_set(ch, PRF_DISPTNL, true);
-    char_prf_set(ch, PRF_FURY, true);
-    char_prf_set(ch, PRF_DISTIME, true);
-    char_prf_set(ch, PRF_DISGOLD, true);
-    char_prf_set(ch, PRF_DISPRAC, true);
-    char_prf_set(ch, PRF_DISHUTH, true);
-    char_prf_set(ch, PRF_DISPERC, true);
+    char_prf_set(g, ch, PRF_DISPHP, true);
+    char_prf_set(g, ch, PRF_DISPMOVE, true);
+    char_prf_set(g, ch, PRF_DISPKI, true);
+    char_prf_set(g, ch, PRF_DISPTNL, true);
+    char_prf_set(g, ch, PRF_FURY, true);
+    char_prf_set(g, ch, PRF_DISTIME, true);
+    char_prf_set(g, ch, PRF_DISGOLD, true);
+    char_prf_set(g, ch, PRF_DISPRAC, true);
+    char_prf_set(g, ch, PRF_DISHUTH, true);
+    char_prf_set(g, ch, PRF_DISPERC, true);
   } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
-    char_prf_set(ch, PRF_DISPHP, false);
-    char_prf_set(ch, PRF_DISPKI, false);
-    char_prf_set(ch, PRF_DISPMOVE, false);
-    char_prf_set(ch, PRF_DISPTNL, false);
-    char_prf_set(ch, PRF_FURY, false);
-    char_prf_set(ch, PRF_DISTIME, false);
-    char_prf_set(ch, PRF_DISGOLD, false);
-    char_prf_set(ch, PRF_DISPRAC, false);
-    char_prf_set(ch, PRF_DISHUTH, false);
-    char_prf_set(ch, PRF_DISPERC, false);
+    char_prf_set(g, ch, PRF_DISPHP, false);
+    char_prf_set(g, ch, PRF_DISPKI, false);
+    char_prf_set(g, ch, PRF_DISPMOVE, false);
+    char_prf_set(g, ch, PRF_DISPTNL, false);
+    char_prf_set(g, ch, PRF_FURY, false);
+    char_prf_set(g, ch, PRF_DISTIME, false);
+    char_prf_set(g, ch, PRF_DISGOLD, false);
+    char_prf_set(g, ch, PRF_DISPRAC, false);
+    char_prf_set(g, ch, PRF_DISHUTH, false);
+    char_prf_set(g, ch, PRF_DISPERC, false);
   } else {
     /*char_prf_set(ch, PRF_DISPHP, false);
     char_prf_set(ch, PRF_DISPMOVE, false);
@@ -623,46 +624,46 @@ ACMD(do_display)
     for (i = 0; i < strlen(argument); i++) {
       switch (tolower(argument[i])) {
         case 'p':
-          char_prf_toggle(ch, PRF_DISPHP);
+          char_prf_toggle(g, ch, PRF_DISPHP);
           break;
         case 's':
-          char_prf_toggle(ch, PRF_DISPMOVE);
+          char_prf_toggle(g, ch, PRF_DISPMOVE);
           break;
         case 'k':
-          char_prf_toggle(ch, PRF_DISPKI);
+          char_prf_toggle(g, ch, PRF_DISPKI);
           break;
         case 't':
-          char_prf_toggle(ch, PRF_DISPTNL);
+          char_prf_toggle(g, ch, PRF_DISPTNL);
           break;
         case 'h':
-          char_prf_toggle(ch, PRF_DISTIME);
+          char_prf_toggle(g, ch, PRF_DISTIME);
           break;
         case 'g':
-          char_prf_toggle(ch, PRF_DISGOLD);
+          char_prf_toggle(g, ch, PRF_DISGOLD);
           break;
         case 'l':
-          char_prf_toggle(ch, PRF_DISPRAC);
+          char_prf_toggle(g, ch, PRF_DISPRAC);
           break;
         case 'c':
-          char_prf_toggle(ch, PRF_DISPERC);
+          char_prf_toggle(g, ch, PRF_DISPERC);
           break;
         case 'm':
-          char_prf_toggle(ch, PRF_DISHUTH);
+          char_prf_toggle(g, ch, PRF_DISHUTH);
           break;
         case 'f':
           if (!char_is_halfbreed(ch)) {
-            send_to_char(ch, "Only halfbreeds use fury.\r\n");
+            send_to_char(g, ch, "Only halfbreeds use fury.\r\n");
           }
-          char_prf_toggle(ch, PRF_FURY);
+          char_prf_toggle(g, ch, PRF_FURY);
           break;
         default:
-          send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
+          send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
           return;
       }
     }
   }
 
-  send_to_char(ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK);
 }
 
 ACMD(do_gen_write)
@@ -691,7 +692,7 @@ ACMD(do_gen_write)
   tmp = asctime(localtime(&ct));
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "Monsters can't have ideas - Go away.\r\n");
+    send_to_char(g, ch, "Monsters can't have ideas - Go away.\r\n");
     return;
   }
 
@@ -699,10 +700,10 @@ ACMD(do_gen_write)
   delete_doubledollar(argument);
 
   if (!*argument) {
-    send_to_char(ch, "That must be a mistake...\r\n");
+    send_to_char(g, ch, "That must be a mistake...\r\n");
     return;
   }
-  send_to_imm("[A new %s has been filed by: %s]\r\n", CMD_NAME, char_get_name(ch));
+  send_to_imm(g, "[A new %s has been filed by: %s]\r\n", CMD_NAME, char_get_name(ch));
 
   if (stat(filename, &fbuf) < 0) {
     perror("SYSERR: Can't stat() file");
@@ -714,7 +715,7 @@ ACMD(do_gen_write)
     return;
   }
   if (fbuf.st_size >= CONFIG_MAX_FILESIZE) {
-    send_to_char(ch, "Sorry, the file is full right now.. try again later.\r\n");
+    send_to_char(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
     return;
   }
   if (!(fl = fopen(filename, "a"))) {
@@ -725,13 +726,13 @@ ACMD(do_gen_write)
      *  at the end of the line should explain what the problem is.
      */
 
-    send_to_char(ch, "Could not open the file.  Sorry.\r\n");
+    send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)), (tmp + 4), argument);
+  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), (tmp + 4), argument);
   fprintf(fl, "@D-------------------------------@n\n");
   fclose(fl);
-  send_to_char(ch, "Okay.  Thanks!\r\n");
+  send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }
 
 constexpr int TOG_OFF = 0;
@@ -837,181 +838,181 @@ ACMD(do_gen_tog)
 
   switch (subcmd) {
     case SCMD_NOSUMMON:
-      result = char_prf_toggle(ch, PRF_SUMMONABLE);
+      result = char_prf_toggle(g, ch, PRF_SUMMONABLE);
       break;
     case SCMD_NOHASSLE:
-      result = char_prf_toggle(ch, PRF_NOHASSLE);
+      result = char_prf_toggle(g, ch, PRF_NOHASSLE);
       break;
     case SCMD_BRIEF:
-      result = char_prf_toggle(ch, PRF_BRIEF);
+      result = char_prf_toggle(g, ch, PRF_BRIEF);
       break;
     case SCMD_COMPACT:
-      result = char_prf_toggle(ch, PRF_COMPACT);
+      result = char_prf_toggle(g, ch, PRF_COMPACT);
       break;
     case SCMD_NOTELL:
-      result = char_prf_toggle(ch, PRF_NOTELL);
+      result = char_prf_toggle(g, ch, PRF_NOTELL);
       break;
     case SCMD_NOAUCTION:
-      result = char_prf_toggle(ch, PRF_NOAUCT);
+      result = char_prf_toggle(g, ch, PRF_NOAUCT);
       break;
     case SCMD_DEAF:
-      result = char_prf_toggle(ch, PRF_DEAF);
+      result = char_prf_toggle(g, ch, PRF_DEAF);
       break;
     case SCMD_NOGOSSIP:
-      result = char_prf_toggle(ch, PRF_NOGOSS);
+      result = char_prf_toggle(g, ch, PRF_NOGOSS);
       break;
     case SCMD_NOGRATZ:
-      result = char_prf_toggle(ch, PRF_NOGRATZ);
+      result = char_prf_toggle(g, ch, PRF_NOGRATZ);
       break;
     case SCMD_NOWIZ:
-      result = char_prf_toggle(ch, PRF_NOWIZ);
+      result = char_prf_toggle(g, ch, PRF_NOWIZ);
       break;
     case SCMD_QUEST:
-      result = char_prf_toggle(ch, PRF_QUEST);
+      result = char_prf_toggle(g, ch, PRF_QUEST);
       break;
     case SCMD_ROOMFLAGS:
-      result = char_prf_toggle(ch, PRF_ROOMFLAGS);
+      result = char_prf_toggle(g, ch, PRF_ROOMFLAGS);
       break;
     case SCMD_NOREPEAT:
-      result = char_prf_toggle(ch, PRF_NOREPEAT);
+      result = char_prf_toggle(g, ch, PRF_NOREPEAT);
       break;
     case SCMD_HOLYLIGHT:
-      result = char_prf_toggle(ch, PRF_HOLYLIGHT);
+      result = char_prf_toggle(g, ch, PRF_HOLYLIGHT);
       break;
     case SCMD_SLOWNS:
       result = (CONFIG_NS_IS_SLOW = !CONFIG_NS_IS_SLOW);
       break;
     case SCMD_AUTOEXIT:
-      result = char_prf_toggle(ch, PRF_AUTOEXIT);
+      result = char_prf_toggle(g, ch, PRF_AUTOEXIT);
       break;
     case SCMD_TRACK:
       result = (CONFIG_TRACK_T_DOORS = !CONFIG_TRACK_T_DOORS);
       break;
     case SCMD_AFK:
-      result = char_prf_toggle(ch, PRF_AFK);
-      if (char_prf_flagged(ch, PRF_AFK))
-        act("$n has gone AFK.", true, ch, 0, 0, TO_ROOM);
+      result = char_prf_toggle(g, ch, PRF_AFK);
+      if (char_prf_flagged(g, ch, PRF_AFK))
+        act(g, "$n has gone AFK.", true, ch, 0, 0, TO_ROOM);
       else {
-        act("$n has come back from AFK.", true, ch, 0, 0, TO_ROOM);
-        if (has_mail(char_get_idnum(ch)))
-          send_to_char(ch, "You have mail waiting.\r\n");
+        act(g, "$n has come back from AFK.", true, ch, 0, 0, TO_ROOM);
+        if (has_mail(g, char_get_idnum(ch)))
+          send_to_char(g, ch, "You have mail waiting.\r\n");
       }
       break;
     case SCMD_AUTOLOOT:
-      result = char_prf_toggle(ch, PRF_AUTOLOOT);
+      result = char_prf_toggle(g, ch, PRF_AUTOLOOT);
       break;
     case SCMD_AUTOGOLD:
-      result = char_prf_toggle(ch, PRF_AUTOGOLD);
+      result = char_prf_toggle(g, ch, PRF_AUTOGOLD);
       break;
     case SCMD_CLS:
-      result = char_prf_toggle(ch, PRF_CLS);
+      result = char_prf_toggle(g, ch, PRF_CLS);
       break;
     case SCMD_BUILDWALK:
       if (char_get_admlevel(ch) < ADMLVL_IMMORT) {
-        send_to_char(ch, "Immortals only, sorry.\r\n");
+        send_to_char(g, ch, "Immortals only, sorry.\r\n");
         return;
       }
-      result = char_prf_toggle(ch, PRF_BUILDWALK);
-      if (char_prf_flagged(ch, PRF_BUILDWALK))
-        mudlog(LOG_CMP, char_get_level(ch), true,
-               "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
+      result = char_prf_toggle(g, ch, PRF_BUILDWALK);
+      if (char_prf_flagged(g, ch, PRF_BUILDWALK))
+        mudlog(g, LOG_CMP, char_get_level(ch), true,
+               "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), char_get_olc_zone(g, ch));
       else
-        mudlog(LOG_CMP, char_get_level(ch), true,
-               "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
+        mudlog(g, LOG_CMP, char_get_level(ch), true,
+               "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), char_get_olc_zone(g, ch));
       break;
     case SCMD_AUTOSPLIT:
-      result = char_prf_toggle(ch, PRF_AUTOSPLIT);
+      result = char_prf_toggle(g, ch, PRF_AUTOSPLIT);
       break;
     case SCMD_AUTOSAC:
-      result = char_prf_toggle(ch, PRF_AUTOSAC);
+      result = char_prf_toggle(g, ch, PRF_AUTOSAC);
       break;
     case SCMD_SNEAK:
       result = char_aff_toggle(ch, AFF_SNEAK);
       break;
     case SCMD_HIDE:
-      if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
-        send_to_char(ch, "You stand out too much to hide right now!\r\n");
+      if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(g, ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
+        send_to_char(g, ch, "You stand out too much to hide right now!\r\n");
         return;
       }
       if (char_plr_flagged(ch, PLR_HEALT)) {
-        send_to_char(ch, "You are inside a healing tank!\r\n");
+        send_to_char(g, ch, "You are inside a healing tank!\r\n");
         return;
       }
       if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
-        send_to_char(ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
-        char_set_skills_base(ch, SKILL_HIDE, rand_number(1, 5));
+        send_to_char(g, ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
+        char_set_skills_base(ch, SKILL_HIDE, rand_number(g, 1, 5));
       } else if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-        send_to_char(ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
+        send_to_char(g, ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
         return;
       }
       result = char_aff_toggle(ch, AFF_HIDE);
       break;
     case SCMD_AUTOMEM:
-      result = char_prf_toggle(ch, PRF_AUTOMEM);
+      result = char_prf_toggle(g, ch, PRF_AUTOMEM);
       break;
     case SCMD_VIEWORDER:
-      result = char_prf_toggle(ch, PRF_VIEWORDER);
+      result = char_prf_toggle(g, ch, PRF_VIEWORDER);
       break;
     case SCMD_TEST:
       if (char_get_admlevel(ch) >= 1) {
-        char_prf_toggle(ch, PRF_TEST);
-        send_to_char(ch, "Okay. Testing is now: %s\r\n", char_prf_flagged(ch, PRF_TEST) ? "On" : "Off");
-        if (char_prf_flagged(ch, PRF_TEST)) {
-          send_to_char(ch, "Make sure to remove nohassle as well.\r\n");
+        char_prf_toggle(g, ch, PRF_TEST);
+        send_to_char(g, ch, "Okay. Testing is now: %s\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
+        if (char_prf_flagged(g, ch, PRF_TEST)) {
+          send_to_char(g, ch, "Make sure to remove nohassle as well.\r\n");
         }
         return;
       }
-      send_to_char(ch, "You are not an immortal.\r\n");
+      send_to_char(g, ch, "You are not an immortal.\r\n");
       return;
       break;
     case SCMD_NOCOMPRESS:
       if (CONFIG_ENABLE_COMPRESSION) {
-        result = char_prf_toggle(ch, PRF_NOCOMPRESS);
+        result = char_prf_toggle(g, ch, PRF_NOCOMPRESS);
         break;
       }
-      send_to_char(ch, "Sorry, compression is globally disabled.\r\n");
+      send_to_char(g, ch, "Sorry, compression is globally disabled.\r\n");
       return;
     case SCMD_AUTOASSIST:
-      result = char_prf_toggle(ch, PRF_AUTOASSIST);
+      result = char_prf_toggle(g, ch, PRF_AUTOASSIST);
       break;
     case SCMD_WHOHIDE:
-      result = char_prf_toggle(ch, PRF_HIDE);
+      result = char_prf_toggle(g, ch, PRF_HIDE);
       break;
     case SCMD_NMWARN:
-      result = char_prf_toggle(ch, PRF_NMWARN);
+      result = char_prf_toggle(g, ch, PRF_NMWARN);
       break;
     case SCMD_HINTS:
-      result = char_prf_toggle(ch, PRF_HINTS);
+      result = char_prf_toggle(g, ch, PRF_HINTS);
       break;
     case SCMD_NODEC:
-      result = char_prf_toggle(ch, PRF_NODEC);
+      result = char_prf_toggle(g, ch, PRF_NODEC);
       break;
     case SCMD_NOEQSEE:
-      result = char_prf_toggle(ch, PRF_NOEQSEE);
+      result = char_prf_toggle(g, ch, PRF_NOEQSEE);
       break;
     case SCMD_NOMUSIC:
-      result = char_prf_toggle(ch, PRF_NOMUSIC);
+      result = char_prf_toggle(g, ch, PRF_NOMUSIC);
       break;
     case SCMD_NOPARRY:
-      result = char_prf_toggle(ch, PRF_NOPARRY);
+      result = char_prf_toggle(g, ch, PRF_NOPARRY);
       break;
     case SCMD_LKEEP:
-      result = char_prf_toggle(ch, PRF_LKEEP);
+      result = char_prf_toggle(g, ch, PRF_LKEEP);
       break;
     case SCMD_CARVE:
-      result = char_prf_toggle(ch, PRF_CARVE);
+      result = char_prf_toggle(g, ch, PRF_CARVE);
       break;
     case SCMD_NOGIVE:
-      result = char_prf_toggle(ch, PRF_NOGIVE);
+      result = char_prf_toggle(g, ch, PRF_NOGIVE);
       break;
     case SCMD_INSTRUCT:
-      result = char_prf_toggle(ch, PRF_INSTRUCT);
+      result = char_prf_toggle(g, ch, PRF_INSTRUCT);
       break;
     case SCMD_GHEALTH:
-      result = char_prf_toggle(ch, PRF_GHEALTH);
+      result = char_prf_toggle(g, ch, PRF_GHEALTH);
       break;
     case SCMD_IHEALTH:
-      result = char_prf_toggle(ch, PRF_IHEALTH);
+      result = char_prf_toggle(g, ch, PRF_IHEALTH);
       break;
     default:
       mud_log("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);
@@ -1023,9 +1024,9 @@ ACMD(do_gen_tog)
   }
 
   if (result)
-    send_to_char(ch, "%s", tog_messages[subcmd][TOG_ON]);
+    send_to_char(g, ch, "%s", tog_messages[subcmd][TOG_ON]);
   else
-    send_to_char(ch, "%s", tog_messages[subcmd][TOG_OFF]);
+    send_to_char(g, ch, "%s", tog_messages[subcmd][TOG_OFF]);
 
   return;
 }
@@ -1072,7 +1073,7 @@ ACMD(do_file)
     for (i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_level(ch))
         snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-    send_to_char(ch, "%s", buf);
+    send_to_char(g, ch, "%s", buf);
     return;
   }
 
@@ -1083,12 +1084,12 @@ ACMD(do_file)
       break;
 
   if (*(fields[l].cmd) == '\n') {
-    send_to_char(ch, "That is not a valid option!\r\n");
+    send_to_char(g, ch, "That is not a valid option!\r\n");
     return;
   }
 
   if (char_get_admlevel(ch) < fields[l].level) {
-    send_to_char(ch, "You are not godly enough to view that file!\r\n");
+    send_to_char(g, ch, "You are not godly enough to view that file!\r\n");
     return;
   }
 
@@ -1102,7 +1103,7 @@ ACMD(do_file)
     req_lines = atoi(value);
 
   if (!(req_file = fopen(fields[l].file, "r"))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, true,
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true,
            "SYSERR: Error opening file %s using 'file' command.",
            fields[l].file);
     return;
@@ -1129,7 +1130,7 @@ ACMD(do_file)
   }
   fclose(req_file);
 
-  send_to_char(ch, "%s", buf);
+  send_to_char(g, ch, "%s", buf);
 }
 
 /* Returns true if the spell/skillnum is innate to the character

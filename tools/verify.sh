@@ -12,7 +12,7 @@ here="$root/tools"
 work=$(mktemp -d "${TMPDIR:-/tmp}/dbat-verify.XXXXXX")
 echo "verify: $ref vs working tree in $work"
 mkdir -p "$work/ref-src"
-git -C "$root" archive "$ref" libs apps | tar -x -C "$work/ref-src"
+git -C "$root" archive "$ref" libs apps tools | tar -x -C "$work/ref-src"
 "$here/build-tree.sh" "$work/ref-src" "$work/ref" -O2 & p1=$!
 "$here/build-tree.sh" "$root" "$work/new" -O2 & p2=$!
 wait $p1; wait $p2
@@ -24,15 +24,19 @@ set confirm off
 handle SIGPIPE nostop noprint pass
 break boot_db
 run -d data @PORT@ > boot.log 2>&1
-call (void)circle_srandom(12345)
+call (void)@SRANDOM@
 finish
-call (long)roundtrip_dump()
+call (long)@ROUNDTRIP@
 kill
 quit
 GDB
 for side in ref new; do
   port_var=port_$side
-  sed "s/@PORT@/${!port_var}/" "$work/rt.gdb.in" > "$work/$side/rt.gdb"
+  # The ref may predate GameWorld; `finish` above leaves gdb in init_game, where g is in scope.
+  tree=$root; [ $side = ref ] && tree=$work/ref-src
+  call='roundtrip_dump()'; grep -q 'roundtrip_dump(GameWorld' "$tree/tools/roundtrip.c" && call='roundtrip_dump(g)'
+  srandom='circle_srandom(12345)'; grep -q 'circle_srandom(GameWorld' "$tree/libs/dbat/include/dbat/random.h" && srandom='circle_srandom(g, 12345)'
+  sed "s/@PORT@/${!port_var}/; s/@ROUNDTRIP@/$call/; s/@SRANDOM@/$srandom/" "$work/rt.gdb.in" > "$work/$side/rt.gdb"
 done
 for side in ref new; do
   (

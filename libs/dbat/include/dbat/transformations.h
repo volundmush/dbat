@@ -17,5 +17,5 @@ struct transforms_available {
   struct transform_bonus *bonuses;
 };
 
-extern transform_bonus base_form;
-extern transform_bonus oozaru;
+extern const transform_bonus base_form;
+extern const transform_bonus oozaru;

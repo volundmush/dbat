@@ -26,6 +26,7 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* external variables */
 
@@ -43,19 +44,19 @@ ASPELL(spell_create_water)
 
   if (obj_get_type_flag(obj) == ITEM_DRINKCON) {
     if ((obj_get_value(obj, VAL_DRINKCON_LIQUID) != LIQ_WATER) && (obj_get_value(obj, VAL_DRINKCON_HOWFULL) != 0)) {
-      name_from_drinkcon(obj);
+      name_from_drinkcon(g, obj);
       obj_set_value(obj, VAL_DRINKCON_LIQUID, LIQ_SLIME);
-      name_to_drinkcon(obj, LIQ_SLIME);
+      name_to_drinkcon(g, obj, LIQ_SLIME);
     } else {
       water = MAX(obj_get_value(obj, VAL_DRINKCON_CAPACITY) - obj_get_value(obj, VAL_DRINKCON_HOWFULL), 0);
       if (water > 0) {
         if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) >= 0)
-          name_from_drinkcon(obj);
+          name_from_drinkcon(g, obj);
         obj_set_value(obj, VAL_DRINKCON_LIQUID, LIQ_WATER);
         obj_set_value(obj, VAL_DRINKCON_HOWFULL, obj_get_value(obj, VAL_DRINKCON_HOWFULL) + (water));
-        name_to_drinkcon(obj, LIQ_WATER);
-        weight_change_object(obj, water);
-        act("$p is filled.", false, ch, obj, 0, TO_CHAR);
+        name_to_drinkcon(g, obj, LIQ_WATER);
+        weight_change_object(g, obj, water);
+        act(g, "$p is filled.", false, ch, obj, 0, TO_CHAR);
       }
     }
   }
@@ -66,14 +67,14 @@ ASPELL(spell_recall)
   if (victim == nullptr || char_is_npc(victim))
     return;
 
-  act("$n disappears.", true, victim, 0, 0, TO_ROOM);
-  char_from_room(victim);
-  char_to_room(victim, real_room(CONFIG_MORTAL_START));
-  act("$n appears in the middle of the room.", true, victim, 0, 0, TO_ROOM);
-  look_at_room(char_get_in_room(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
+  act(g, "$n disappears.", true, victim, 0, 0, TO_ROOM);
+  char_from_room(g, victim);
+  char_to_room(g, victim, real_room(g, CONFIG_MORTAL_START));
+  act(g, "$n appears in the middle of the room.", true, victim, 0, 0, TO_ROOM);
+  look_at_room(g, char_get_in_room(victim), victim, 0);
+  entry_memory_mtrigger(g, victim);
+  greet_mtrigger(g, victim, -1);
+  greet_memory_mtrigger(g, victim);
 }
 
 ASPELL(spell_teleport)
@@ -84,18 +85,18 @@ ASPELL(spell_teleport)
     return;
 
   do {
-    to_room = rand_number(0, top_of_world);
-  } while (rroom_flagged(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
+    to_room = rand_number(g, 0, g->top_room);
+  } while (rroom_flagged(g, to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
-  act("$n slowly fades out of existence and is gone.",
+  act(g, "$n slowly fades out of existence and is gone.",
       false, victim, 0, 0, TO_ROOM);
-  char_from_room(victim);
-  char_to_room(victim, to_room);
-  act("$n slowly fades into existence.", false, victim, 0, 0, TO_ROOM);
-  look_at_room(char_get_in_room(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
+  char_from_room(g, victim);
+  char_to_room(g, victim, to_room);
+  act(g, "$n slowly fades into existence.", false, victim, 0, 0, TO_ROOM);
+  look_at_room(g, char_get_in_room(victim), victim, 0);
+  entry_memory_mtrigger(g, victim);
+  greet_mtrigger(g, victim, -1);
+  greet_memory_mtrigger(g, victim);
 }
 
 #define SUMMON_FAIL "You failed.\r\n"
@@ -106,49 +107,49 @@ ASPELL(spell_summon)
     return;
 
   if (char_get_level(victim) > level + 3) {
-    send_to_char(ch, "%s", SUMMON_FAIL);
+    send_to_char(g, ch, "%s", SUMMON_FAIL);
     return;
   }
 
   if (!CONFIG_PK_ALLOWED) {
     if (char_mob_flagged(victim, MOB_AGGRESSIVE)) {
-      act("As the words escape your lips and $N travels\r\n"
+      act(g, "As the words escape your lips and $N travels\r\n"
           "through time and space towards you, you realize that $E is\r\n"
           "aggressive and might harm you, so you wisely send $M back.",
           false, ch, 0, victim, TO_CHAR);
       return;
     }
-    if (!char_is_npc(victim) && !char_prf_flagged(victim, PRF_SUMMONABLE) &&
+    if (!char_is_npc(victim) && !char_prf_flagged(g, victim, PRF_SUMMONABLE) &&
         !char_plr_flagged(victim, PLR_KILLER)) {
-      send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
+      send_to_char(g, victim, "%s just tried to summon you to: %s.\r\n"
                            "%s failed because you have summon protection on.\r\n"
                            "Type NOSUMMON to allow other players to summon you.\r\n",
-                   char_get_name(ch), rroom_get_name(char_get_in_room(ch)),
+                   char_get_name(ch), rroom_get_name(g, char_get_in_room(ch)),
                    (char_get_sex(ch) == SEX_MALE) ? "He" : "She");
 
-      send_to_char(ch, "You failed because %s has summon protection on.\r\n", char_get_name(victim));
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), rroom_get_name(char_get_in_room(ch)));
+      send_to_char(g, ch, "You failed because %s has summon protection on.\r\n", char_get_name(victim));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), rroom_get_name(g, char_get_in_room(ch)));
       return;
     }
   }
 
   if (char_mob_flagged(victim, MOB_NOSUMMON) ||
       (char_is_npc(victim) && mag_newsaves(ch, victim, SPELL_SUMMON, level, char_get_aff_abils_intel(ch)))) {
-    send_to_char(ch, "%s", SUMMON_FAIL);
+    send_to_char(g, ch, "%s", SUMMON_FAIL);
     return;
   }
 
-  act("$n disappears suddenly.", true, victim, 0, 0, TO_ROOM);
+  act(g, "$n disappears suddenly.", true, victim, 0, 0, TO_ROOM);
 
-  char_from_room(victim);
-  char_to_room(victim, char_get_in_room(ch));
+  char_from_room(g, victim);
+  char_to_room(g, victim, char_get_in_room(ch));
 
-  act("$n arrives suddenly.", true, victim, 0, 0, TO_ROOM);
-  act("$n has summoned you!", false, ch, 0, victim, TO_VICT);
-  look_at_room(char_get_in_room(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
+  act(g, "$n arrives suddenly.", true, victim, 0, 0, TO_ROOM);
+  act(g, "$n has summoned you!", false, ch, 0, victim, TO_VICT);
+  look_at_room(g, char_get_in_room(victim), victim, 0);
+  entry_memory_mtrigger(g, victim);
+  greet_mtrigger(g, victim, -1);
+  greet_memory_mtrigger(g, victim);
 }
 
 ASPELL(spell_locate_object)
@@ -164,35 +165,35 @@ ASPELL(spell_locate_object)
    * at what the player originally meant to search for. -gg
    */
   if (!obj) {
-    send_to_char(ch, "You sense nothing.\r\n");
+    send_to_char(g, ch, "You sense nothing.\r\n");
     return;
   }
 
   strlcpy(name, fname(obj_get_name(obj)), sizeof(name));
   j = level / 2;
 
-  for (i = object_list; i && (j > 0); i = obj_get_next(i)) {
+  for (i = g->objects; i && (j > 0); i = obj_get_next(i)) {
     if (!isname(name, obj_get_name(i)))
       continue;
 
-    send_to_char(ch, "%c%s", toupper(*obj_get_short_description(i)), (obj_get_short_description(i)) + 1);
+    send_to_char(g, ch, "%c%s", toupper(*obj_get_short_description(i)), (obj_get_short_description(i)) + 1);
 
     if (obj_get_carried_by(i))
-      send_to_char(ch, " is being carried by %s.\r\n", char_pers(obj_get_carried_by(i), ch));
+      send_to_char(g, ch, " is being carried by %s.\r\n", char_pers(g, obj_get_carried_by(i), ch));
     else if (obj_get_in_room(i) != NOWHERE)
-      send_to_char(ch, " is in %s.\r\n", rroom_get_name(obj_get_in_room(i)));
+      send_to_char(g, ch, " is in %s.\r\n", rroom_get_name(g, obj_get_in_room(i)));
     else if (obj_get_in_obj(i))
-      send_to_char(ch, " is in %s.\r\n", obj_get_short_description(obj_get_in_obj(i)));
+      send_to_char(g, ch, " is in %s.\r\n", obj_get_short_description(obj_get_in_obj(i)));
     else if (obj_get_worn_by(i))
-      send_to_char(ch, " is being worn by %s.\r\n", char_pers(obj_get_worn_by(i), ch));
+      send_to_char(g, ch, " is being worn by %s.\r\n", char_pers(g, obj_get_worn_by(i), ch));
     else
-      send_to_char(ch, "'s location is uncertain.\r\n");
+      send_to_char(g, ch, "'s location is uncertain.\r\n");
 
     j--;
   }
 
   if (j == level / 2)
-    send_to_char(ch, "You sense nothing.\r\n");
+    send_to_char(g, ch, "You sense nothing.\r\n");
 }
 
 ASPELL(spell_charm)
@@ -203,31 +204,31 @@ ASPELL(spell_charm)
     return;
 
   if (victim == ch)
-    send_to_char(ch, "You like yourself even better!\r\n");
-  else if (!char_is_npc(victim) && !char_prf_flagged(victim, PRF_SUMMONABLE))
-    send_to_char(ch, "You fail because SUMMON protection is on!\r\n");
+    send_to_char(g, ch, "You like yourself even better!\r\n");
+  else if (!char_is_npc(victim) && !char_prf_flagged(g, victim, PRF_SUMMONABLE))
+    send_to_char(g, ch, "You fail because SUMMON protection is on!\r\n");
   else if (char_aff_flagged(victim, AFF_SANCTUARY))
-    send_to_char(ch, "Your victim is protected by sanctuary!\r\n");
+    send_to_char(g, ch, "Your victim is protected by sanctuary!\r\n");
   else if (char_mob_flagged(victim, MOB_NOCHARM))
-    send_to_char(ch, "Your victim resists!\r\n");
+    send_to_char(g, ch, "Your victim resists!\r\n");
   else if (char_aff_flagged(ch, AFF_CHARM))
-    send_to_char(ch, "You can't have any followers of your own!\r\n");
+    send_to_char(g, ch, "You can't have any followers of your own!\r\n");
   else if (char_aff_flagged(victim, AFF_CHARM) || level < char_get_level(victim))
-    send_to_char(ch, "You fail.\r\n");
+    send_to_char(g, ch, "You fail.\r\n");
   /* player charming another player - no legal reason for this */
   else if (!CONFIG_PK_ALLOWED && !char_is_npc(victim))
-    send_to_char(ch, "You fail - shouldn't be doing it anyway.\r\n");
-  else if (char_is_saiyan(victim) && rand_number(1, 100) <= 90)
-    send_to_char(ch, "Your victim resists!\r\n");
+    send_to_char(g, ch, "You fail - shouldn't be doing it anyway.\r\n");
+  else if (char_is_saiyan(victim) && rand_number(g, 1, 100) <= 90)
+    send_to_char(g, ch, "Your victim resists!\r\n");
   else if (circle_follow(victim, ch))
-    send_to_char(ch, "Sorry, following in circles cannot be allowed.\r\n");
+    send_to_char(g, ch, "Sorry, following in circles cannot be allowed.\r\n");
   else if (mag_newsaves(ch, victim, SPELL_CHARM, level, char_get_aff_abils_intel(ch)))
-    send_to_char(ch, "Your victim resists!\r\n");
+    send_to_char(g, ch, "Your victim resists!\r\n");
   else {
     if (char_get_master(victim))
-      stop_follower(victim);
+      stop_follower(g, victim);
 
-    add_follower(victim, ch);
+    add_follower(g, victim, ch);
     char_set_master_id(victim, char_get_idnum(ch));
 
     af.type     = SPELL_CHARM;
@@ -239,9 +240,9 @@ ASPELL(spell_charm)
     af.modifier  = 0;
     af.location  = 0;
     af.bitvector = AFF_CHARM;
-    affect_to_char(victim, &af);
+    affect_to_char(g, victim, &af);
 
-    act("Isn't $n just such a nice fellow?", false, ch, 0, victim, TO_VICT);
+    act(g, "Isn't $n just such a nice fellow?", false, ch, 0, victim, TO_VICT);
     if (char_is_npc(victim))
       char_mob_set(victim, MOB_SPEC, false);
   }
@@ -257,17 +258,17 @@ ASPELL(spell_identify)
     char buf2[MAX_STRING_LENGTH];
 
     sprinttype(obj_get_type_flag(obj), item_types, bitbuf, sizeof(bitbuf));
-    send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj_get_short_description(obj), bitbuf);
+    send_to_char(g, ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj_get_short_description(obj), bitbuf);
 
     if (obj_get_bitvector(obj)) {
       sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
-      send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
+      send_to_char(g, ch, "Item will give you following abilities:  %s\r\n", bitbuf);
     }
 
     sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
-    send_to_char(ch, "Item is: %s\r\n", bitbuf);
+    send_to_char(g, ch, "Item is: %s\r\n", bitbuf);
 
-    send_to_char(ch, "Weight: %" PRId64 ", Value: %d, Rent: %d, Min Level: %d\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
+    send_to_char(g, ch, "Weight: %" PRId64 ", Value: %d, Rent: %d, Min Level: %d\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
 
     switch (obj_get_type_flag(obj)) {
       case ITEM_SCROLL:
@@ -275,37 +276,37 @@ ASPELL(spell_identify)
         len = i = 0;
 
         if (obj_get_value(obj, VAL_SCROLL_SPELL1) >= 1) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(obj_get_value(obj, VAL_SCROLL_SPELL1)));
+          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL1)));
           if (i >= 0)
             len += i;
         }
 
         if (obj_get_value(obj, VAL_SCROLL_SPELL2) >= 1 && len < sizeof(bitbuf)) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(obj_get_value(obj, VAL_SCROLL_SPELL2)));
+          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL2)));
           if (i >= 0)
             len += i;
         }
 
         if (obj_get_value(obj, VAL_SCROLL_SPELL3) >= 1 && len < sizeof(bitbuf)) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(obj_get_value(obj, VAL_SCROLL_SPELL3)));
+          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL3)));
           if (i >= 0)
             len += i;
         }
 
-        send_to_char(ch, "This %s casts: %s\r\n", item_types[(int)obj_get_type_flag(obj)], bitbuf);
+        send_to_char(g, ch, "This %s casts: %s\r\n", item_types[(int)obj_get_type_flag(obj)], bitbuf);
         break;
       case ITEM_WAND:
       case ITEM_STAFF:
-        send_to_char(ch, "This %s casts: %s\r\nIt has %d maximum charge%s and %d remaining.\r\n",
-                     item_types[(int)obj_get_type_flag(obj)], skill_name(obj_get_value(obj, VAL_WAND_SPELL)),
+        send_to_char(g, ch, "This %s casts: %s\r\nIt has %d maximum charge%s and %d remaining.\r\n",
+                     item_types[(int)obj_get_type_flag(obj)], skill_name(g, obj_get_value(obj, VAL_WAND_SPELL)),
                      obj_get_value(obj, VAL_WAND_MAXCHARGES), obj_get_value(obj, VAL_WAND_MAXCHARGES) == 1 ? "" : "s", obj_get_value(obj, VAL_WAND_CHARGES));
         break;
       case ITEM_WEAPON:
-        send_to_char(ch, "Damage Dice is '%dD%d' for an average per-round damage of %.1f.\r\n",
+        send_to_char(g, ch, "Damage Dice is '%dD%d' for an average per-round damage of %.1f.\r\n",
                      obj_get_value(obj, VAL_WEAPON_DAMDICE), obj_get_value(obj, VAL_WEAPON_DAMSIZE), ((obj_get_value(obj, VAL_WEAPON_DAMSIZE) + 1) / 2.0) * obj_get_value(obj, VAL_WEAPON_DAMDICE));
         break;
       case ITEM_ARMOR:
-        send_to_char(ch, "AC-apply is %.1f\r\n", ((float)obj_get_value(obj, VAL_ARMOR_APPLYAC)) / 10);
+        send_to_char(g, ch, "AC-apply is %.1f\r\n", ((float)obj_get_value(obj, VAL_ARMOR_APPLYAC)) / 10);
         break;
     }
     found = false;
@@ -313,22 +314,22 @@ ASPELL(spell_identify)
       if ((obj_get_affected(obj)[i].location != APPLY_NONE) &&
           (obj_get_affected(obj)[i].modifier != 0)) {
         if (!found) {
-          send_to_char(ch, "Can affect you as :\r\n");
+          send_to_char(g, ch, "Can affect you as :\r\n");
           found = true;
         }
         sprinttype(obj_get_affected(obj)[i].location, apply_types, bitbuf, sizeof(bitbuf));
         switch (obj_get_affected(obj)[i].location) {
           case APPLY_FEAT:
-            snprintf(buf2, sizeof(buf2), " (%s)", feat_list[obj_get_affected(obj)[i].specific].name);
+            snprintf(buf2, sizeof(buf2), " (%s)", g->feat_list[obj_get_affected(obj)[i].specific].name);
             break;
           case APPLY_SKILL:
-            snprintf(buf2, sizeof(buf2), " (%s)", spell_info[obj_get_affected(obj)[i].specific].name);
+            snprintf(buf2, sizeof(buf2), " (%s)", g->spell_info[obj_get_affected(obj)[i].specific].name);
             break;
           default:
             buf2[0] = 0;
             break;
         }
-        send_to_char(ch, "   Affects: %s%s By %d\r\n", bitbuf, buf2,
+        send_to_char(g, ch, "   Affects: %s%s By %d\r\n", bitbuf, buf2,
                      obj_get_affected(obj)[i].modifier);
       }
     }
@@ -375,12 +376,12 @@ ASPELL(spell_enchant_weapon)
 
   if (char_is_good(ch)) {
     obj_extra_set(obj, ITEM_ANTI_EVIL, true);
-    act("$p glows blue.", false, ch, obj, 0, TO_CHAR);
+    act(g, "$p glows blue.", false, ch, obj, 0, TO_CHAR);
   } else if (char_is_evil(ch)) {
     obj_extra_set(obj, ITEM_ANTI_GOOD, true);
-    act("$p glows red.", false, ch, obj, 0, TO_CHAR);
+    act(g, "$p glows red.", false, ch, obj, 0, TO_CHAR);
   } else
-    act("$p glows yellow.", false, ch, obj, 0, TO_CHAR);
+    act(g, "$p glows yellow.", false, ch, obj, 0, TO_CHAR);
 }
 
 ASPELL(spell_detect_poison)
@@ -388,14 +389,14 @@ ASPELL(spell_detect_poison)
   if (victim) {
     if (victim == ch) {
       if (char_aff_flagged(victim, AFF_POISON))
-        send_to_char(ch, "You can sense poison in your blood.\r\n");
+        send_to_char(g, ch, "You can sense poison in your blood.\r\n");
       else
-        send_to_char(ch, "You feel healthy.\r\n");
+        send_to_char(g, ch, "You feel healthy.\r\n");
     } else {
       if (char_aff_flagged(victim, AFF_POISON))
-        act("You sense that $E is poisoned.", false, ch, 0, victim, TO_CHAR);
+        act(g, "You sense that $E is poisoned.", false, ch, 0, victim, TO_CHAR);
       else
-        act("You sense that $E is healthy.", false, ch, 0, victim, TO_CHAR);
+        act(g, "You sense that $E is healthy.", false, ch, 0, victim, TO_CHAR);
     }
   }
 
@@ -405,13 +406,13 @@ ASPELL(spell_detect_poison)
       case ITEM_FOUNTAIN:
       case ITEM_FOOD:
         if (obj_get_value(obj, VAL_FOOD_POISON))
-          act("You sense that $p has been contaminated.", false, ch, obj, 0, TO_CHAR);
+          act(g, "You sense that $p has been contaminated.", false, ch, obj, 0, TO_CHAR);
         else
-          act("You sense that $p is safe for consumption.", false, ch, obj, 0,
+          act(g, "You sense that $p is safe for consumption.", false, ch, obj, 0,
               TO_CHAR);
         break;
       default:
-        send_to_char(ch, "You sense that it should not be consumed.\r\n");
+        send_to_char(g, ch, "You sense that it should not be consumed.\r\n");
     }
   }
 }
@@ -420,49 +421,49 @@ ASPELL(spell_portal)
 {
   struct obj_data *portal, *tportal;
   struct room_data *rm;
-  rm = &world[char_get_in_room(victim)];
+  rm = &g->rooms[char_get_in_room(victim)];
 
   if (ch == nullptr || victim == nullptr)
     return;
 
-  if (!can_edit_zone(ch, room_get_zone(rm)) && zone_flagged(room_get_zone(rm), ZONE_QUEST)) {
-    send_to_char(ch, "That target is in a quest zone.\r\n");
+  if (!can_edit_zone(g, ch, room_get_zone(rm)) && zone_flagged(g, room_get_zone(rm), ZONE_QUEST)) {
+    send_to_char(g, ch, "That target is in a quest zone.\r\n");
     return;
   }
 
-  if (zone_flagged(room_get_zone(rm), ZONE_CLOSED) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
-    send_to_char(ch, "That target is in a closed zone.\r\n");
+  if (zone_flagged(g, room_get_zone(rm), ZONE_CLOSED) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
+    send_to_char(g, ch, "That target is in a closed zone.\r\n");
     return;
   }
 
-  if (zone_flagged(room_get_zone(rm), ZONE_NOIMMORT) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
-    send_to_char(ch, "That target is in a zone closed to all.\r\n");
+  if (zone_flagged(g, room_get_zone(rm), ZONE_NOIMMORT) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
+    send_to_char(g, ch, "That target is in a zone closed to all.\r\n");
     return;
   }
 
   /* create the portal */
-  portal = read_object(portal_object, VIRTUAL);
-  obj_set_value(portal, VAL_PORTAL_DEST, rroom_get_vnum(char_get_in_room(victim)));
+  portal = read_object(g, portal_object, VIRTUAL);
+  obj_set_value(portal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(victim)));
   obj_set_value(portal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(portal, VAL_PORTAL_MAXHEALTH, 100);
   obj_set_timer(portal, (int)(level / 10));
-  add_unique_id(portal);
-  obj_to_room(portal, char_get_in_room(ch));
-  act("$n opens a portal in thin air.",
+  add_unique_id(g, portal);
+  obj_to_room(g, portal, char_get_in_room(ch));
+  act(g, "$n opens a portal in thin air.",
       true, ch, 0, 0, TO_ROOM);
-  act("You open a portal out of thin air.",
+  act(g, "You open a portal out of thin air.",
       true, ch, 0, 0, TO_CHAR);
   /* create the portal at the other end */
-  tportal = read_object(portal_object, VIRTUAL);
-  obj_set_value(tportal, VAL_PORTAL_DEST, rroom_get_vnum(char_get_in_room(ch)));
+  tportal = read_object(g, portal_object, VIRTUAL);
+  obj_set_value(tportal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(ch)));
   obj_set_value(tportal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(tportal, VAL_PORTAL_MAXHEALTH, 100);
   obj_set_timer(tportal, (int)(level / 10));
-  add_unique_id(portal);
-  obj_to_room(tportal, char_get_in_room(victim));
-  act("A shimmering portal appears out of thin air.",
+  add_unique_id(g, portal);
+  obj_to_room(g, tportal, char_get_in_room(victim));
+  act(g, "A shimmering portal appears out of thin air.",
       true, victim, 0, 0, TO_ROOM);
-  act("A shimmering portal opens here for you.",
+  act(g, "A shimmering portal opens here for you.",
       true, victim, 0, 0, TO_CHAR);
 }
 
@@ -481,7 +482,7 @@ ASPELL(art_abundant_step)
   while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
 
   if (!p || !*p) {
-    send_to_char(ch, "You must give directions from your current location. Examples:\r\n"
+    send_to_char(g, ch, "You must give directions from your current location. Examples:\r\n"
                      "  w w nw n e\r\n"
                      "  2w nw n e\r\n");
     return;
@@ -499,9 +500,9 @@ ASPELL(art_abundant_step)
       j      = i;
       tc     = buf[i];
       buf[i] = 0;
-      for (i = 1; complete_cmd_info[i].command_pointer == do_move && strcmp(complete_cmd_info[i].sort_as, buf); i++);
-      if (complete_cmd_info[i].command_pointer == do_move) {
-        i = complete_cmd_info[i].subcmd - 1;
+      for (i = 1; g->complete_cmd_info[i].command_pointer == do_move && strcmp(g->complete_cmd_info[i].sort_as, buf); i++);
+      if (g->complete_cmd_info[i].command_pointer == do_move) {
+        i = g->complete_cmd_info[i].subcmd - 1;
       } else
         i = -1;
       buf[j] = tc;
@@ -510,11 +511,11 @@ ASPELL(art_abundant_step)
       while (rep--) {
         if (++steps > max)
           break;
-        if (!rroom_get_dir_option(r, i)) {
-          send_to_char(ch, "Invalid step. Skipping.\r\n");
+        if (!rroom_get_dir_option(g, r, i)) {
+          send_to_char(g, ch, "Invalid step. Skipping.\r\n");
           break;
         }
-        nextroom = rroom_get_dir_option(r, i)->to_room;
+        nextroom = rroom_get_dir_option(g, r, i)->to_room;
         if (nextroom == NOWHERE)
           break;
         r = nextroom;
@@ -522,20 +523,20 @@ ASPELL(art_abundant_step)
     if (steps > max)
       break;
   }
-  send_to_char(ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
-  act("$n is suddenly absent.", true, ch, 0, 0, TO_ROOM);
+  send_to_char(g, ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
+  act(g, "$n is suddenly absent.", true, ch, 0, 0, TO_ROOM);
 
-  char_from_room(ch);
-  char_to_room(ch, r);
+  char_from_room(g, ch);
+  char_to_room(g, ch, r);
 
-  act("$n is suddenly present.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n is suddenly present.", true, ch, 0, 0, TO_ROOM);
 
-  look_at_room(char_get_in_room(ch), ch, 0);
+  look_at_room(g, char_get_in_room(ch), ch, 0);
 
   return;
 }
 
-int roll_skill(const struct char_data *ch, int snum)
+int roll_skill(GameWorld *g, const struct char_data *ch, int snum)
 {
   int roll, skval, i;
   if (!char_is_npc(ch)) {
@@ -554,25 +555,25 @@ int roll_skill(const struct char_data *ch, int snum)
   } else {
     int numb = 0;
     if (char_get_level(ch) <= 10) {
-      numb = rand_number(15, 30);
+      numb = rand_number(g, 15, 30);
     }
     if (char_get_level(ch) <= 20) {
-      numb = rand_number(20, 40);
+      numb = rand_number(g, 20, 40);
     }
     if (char_get_level(ch) <= 30) {
-      numb = rand_number(40, 60);
+      numb = rand_number(g, 40, 60);
     }
     if (char_get_level(ch) <= 60) {
-      numb = rand_number(60, 80);
+      numb = rand_number(g, 60, 80);
     }
     if (char_get_level(ch) <= 80) {
-      numb = rand_number(70, 90);
+      numb = rand_number(g, 70, 90);
     }
     if (char_get_level(ch) <= 90) {
-      numb = rand_number(80, 95);
+      numb = rand_number(g, 80, 95);
     }
     if (char_get_level(ch) <= 100) {
-      numb = rand_number(90, 100);
+      numb = rand_number(g, 90, 100);
     }
     skval = numb;
   }
@@ -581,7 +582,7 @@ int roll_skill(const struct char_data *ch, int snum)
   }
   if (snum < 0 || snum >= SKILL_TABLE_SIZE)
     return 0;
-  if (IS_SET(spell_info[snum].skilltype, SKTYPE_SPELL)) {
+  if (IS_SET(g->spell_info[snum].skilltype, SKTYPE_SPELL)) {
     /*
      * There's no real roll for a spell to succeed, so instead we will
      * return the spell resistance roll; the defender must have resistance
@@ -590,38 +591,38 @@ int roll_skill(const struct char_data *ch, int snum)
      */
     for (i = 0, roll = 0; i < NUM_CLASSES; i++)
       if (char_get_class_ranks(ch, i) &&
-          (spell_info[snum].min_level[i] < char_get_class_ranks(ch, i)))
+          (g->spell_info[snum].min_level[i] < char_get_class_ranks(ch, i)))
         roll += char_get_class_ranks(ch, i); /* Caster level for eligable classes */
-    return roll + rand_number(1, 20);
+    return roll + rand_number(g, 1, 20);
   }
-  if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
-    if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
+  if (IS_SET(g->spell_info[snum].skilltype, SKTYPE_SKILL)) {
+    if (!skval && IS_SET(g->spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
       return -1;
     }
     roll = skval;
-    if (IS_SET(spell_info[snum].flags, SKFLAG_STRMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_STRMOD))
       roll += ability_mod_value(char_get_aff_abils_str(ch));
-    if (IS_SET(spell_info[snum].flags, SKFLAG_DEXMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_DEXMOD))
       roll += dex_mod_capped(ch);
-    if (IS_SET(spell_info[snum].flags, SKFLAG_CONMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_CONMOD))
       roll += ability_mod_value(char_get_aff_abils_con(ch));
-    if (IS_SET(spell_info[snum].flags, SKFLAG_INTMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_INTMOD))
       roll += ability_mod_value(char_get_aff_abils_intel(ch));
-    if (IS_SET(spell_info[snum].flags, SKFLAG_WISMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_WISMOD))
       roll += ability_mod_value(char_get_aff_abils_wis(ch));
-    if (IS_SET(spell_info[snum].flags, SKFLAG_CHAMOD))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_CHAMOD))
       roll += ability_mod_value(char_get_aff_abils_cha(ch));
-    if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORALL))
+    if (IS_SET(g->spell_info[snum].flags, SKFLAG_ARMORALL))
       roll -= 0;
-    else if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORBAD))
+    else if (IS_SET(g->spell_info[snum].flags, SKFLAG_ARMORBAD))
       roll -= 0;
-    return roll + rand_number(1, 20);
+    return roll + rand_number(g, 1, 20);
   }
   mud_log("Trying to roll uncategorized skill/spell #%d for %s", snum, char_get_name(ch));
   return 0;
 }
 
-bool roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
+bool roll_resisted(GameWorld *g, const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
 {
-  return roll_skill(actor, sact) >= roll_skill(resistor, sres);
+  return roll_skill(g, actor, sact) >= roll_skill(g, resistor, sres);
 }

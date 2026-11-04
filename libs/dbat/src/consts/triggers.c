@@ -1,7 +1,7 @@
 #include "dbat/consts/triggers.h"
 
 /* mob trigger types */
-const char *trig_types[NUM_MTRIG_TYPES + 1] = {
+const char *const trig_types[NUM_MTRIG_TYPES + 1] = {
     "Global",
     "Random",
     "Command",
@@ -25,7 +25,7 @@ const char *trig_types[NUM_MTRIG_TYPES + 1] = {
     "\n"};
 
 /* obj trigger types */
-const char *otrig_types[NUM_OTRIG_TYPES + 1] = {
+const char *const otrig_types[NUM_OTRIG_TYPES + 1] = {
     "Global",
     "Random",
     "Command",
@@ -49,7 +49,7 @@ const char *otrig_types[NUM_OTRIG_TYPES + 1] = {
     "\n"};
 
 /* wld trigger types */
-const char *wtrig_types[NUM_WTRIG_TYPES + 1] = {
+const char *const wtrig_types[NUM_WTRIG_TYPES + 1] = {
     "Global",
     "Random",
     "Command",

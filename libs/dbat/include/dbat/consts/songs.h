@@ -13,4 +13,4 @@ constexpr int SONG_TELEPORT_FRIGID  = 9;
 constexpr int SONG_TELEPORT_AETHER  = 10;
 constexpr int SONG_TELEPORT_KANASSA = 11;
 
-extern const char *song_types[];
+extern const char *const song_types[];

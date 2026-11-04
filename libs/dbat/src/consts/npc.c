@@ -1,7 +1,7 @@
 #include "dbat/consts/npc.h"
 
 /* NPC Personality Types */
-const char *npc_personality[MAX_PERSONALITIES + 1] = {
+const char *const npc_personality[MAX_PERSONALITIES + 1] = {
     "Basic",       /* 0 */
     "Careful",     /* 1 */
     "Aggressive",  /* 2 */

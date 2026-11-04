@@ -6,8 +6,9 @@
 #include "dbat/object_utils.h"
 #include "dbat/spells.h"
 #include "dbat/feats.h"
+#include "dbat/game_world.h"
 
-static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, const char *msg)
+static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, const char *msg)
 {
   switch (loc) {
     case APPLY_NONE:
@@ -111,7 +112,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
       break;
 
     case APPLY_TURN_LEVEL:
-      char_set_tlevel(ch, char_get_tlevel(ch) + (mod));
+      char_set_tlevel(g, ch, char_get_tlevel(g, ch) + (mod));
       break;
 
     case APPLY_SPELL_LVL_0:
@@ -164,7 +165,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
   } /* switch */
 }
 
-static void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
+static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
 {
   if (add) {
     if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
@@ -177,10 +178,10 @@ static void affect_modify(struct char_data *ch, int loc, int mod, int spec, long
     }
   }
 
-  aff_apply_modify(ch, loc, mod, spec, "affect_modify");
+  aff_apply_modify(g, ch, loc, mod, spec, "affect_modify");
 }
 
-void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, bitvector_t bitv[], bool add)
+void affect_modify_ar(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, bitvector_t bitv[], bool add)
 {
   int i, j;
 
@@ -203,12 +204,12 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, bitvecto
     mod = -mod;
   }
 
-  aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
+  aff_apply_modify(g, ch, loc, mod, spec, "affect_modify_ar");
 }
 
 /* This updates a character by subtracting everything he is affected by */
 /* restoring original abilities, and then affecting all again           */
-void affect_total(struct char_data *ch)
+void affect_total(GameWorld *g, struct char_data *ch)
 {
   struct affected_type *af;
   int i, j;
@@ -216,21 +217,21 @@ void affect_total(struct char_data *ch)
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i))
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
+        affect_modify_ar(g, ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
                          obj_get_affected(char_get_equipment(ch, i))[j].modifier,
                          obj_get_affected(char_get_equipment(ch, i))[j].specific,
                          obj_get_bitvector(char_get_equipment(ch, i)), false);
   }
 
   for (af = char_get_affected(ch); af; af = af->next)
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
+    affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
   char_reset_aff_abils(ch);
 
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i)) {
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
+        affect_modify_ar(g, ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
                          obj_get_affected(char_get_equipment(ch, i))[j].modifier,
                          obj_get_affected(char_get_equipment(ch, i))[j].specific,
                          obj_get_bitvector(char_get_equipment(ch, i)), true);
@@ -238,7 +239,7 @@ void affect_total(struct char_data *ch)
   }
 
   for (af = char_get_affected(ch); af; af = af->next)
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
+    affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, true);
 
   /* Make certain values are between 0..100, not < 0 and not > 100! */
 
@@ -276,22 +277,22 @@ void affect_total(struct char_data *ch)
 
 /* Insert an affect_type in a char_data structure
    Automatically sets apropriate bits and apply's */
-void affect_to_char(struct char_data *ch, struct affected_type *af)
+void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af)
 {
   struct affected_type *affected_alloc;
 
   CREATE(affected_alloc, struct affected_type, 1);
 
   if (!char_get_affected(ch)) {
-    char_set_next_affect(ch, affect_list);
-    affect_list     = ch;
+    char_set_next_affect(ch, g->affect_list);
+    g->affect_list     = ch;
   }
   *affected_alloc      = *af;
   affected_alloc->next = char_get_affected(ch);
   char_set_affected(ch, affected_alloc);
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-  affect_total(ch);
+  affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, true);
+  affect_total(g, ch);
 }
 
 /*
@@ -299,7 +300,7 @@ void affect_to_char(struct char_data *ch, struct affected_type *af)
  * reaches zero). Pointer *af must never be NIL!  Frees mem and calls
  * affect_location_apply
  */
-void affect_remove(struct char_data *ch, struct affected_type *af)
+void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af)
 {
   struct affected_type *cmtemp;
 
@@ -308,25 +309,25 @@ void affect_remove(struct char_data *ch, struct affected_type *af)
     return;
   }
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
+  affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, false);
   REMOVE_FROM_LIST(af, *char_affected_slot(ch), next, cmtemp);
   free(af);
-  affect_total(ch);
+  affect_total(g, ch);
   if (!char_get_affected(ch)) {
-    char_unlink_from_affect_list(ch);
+    char_unlink_from_affect_list(g, ch);
     char_set_next_affect(ch, nullptr);
   }
 }
 
 /* Call affect_remove with every spell of spelltype "skill" */
-void affect_from_char(struct char_data *ch, int type)
+void affect_from_char(GameWorld *g, struct char_data *ch, int type)
 {
   struct affected_type *hjp, *next;
 
   for (hjp = char_get_affected(ch); hjp; hjp = next) {
     next = hjp->next;
     if (hjp->type == type)
-      affect_remove(ch, hjp);
+      affect_remove(g, ch, hjp);
   }
 }
 
@@ -345,7 +346,7 @@ bool affected_by_spell(struct char_data *ch, int type)
   return (false);
 }
 
-void affect_join(struct char_data *ch, struct affected_type *af,
+void affect_join(GameWorld *g, struct char_data *ch, struct affected_type *af,
                  bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
 {
   struct affected_type *hjp, *next;
@@ -365,11 +366,11 @@ void affect_join(struct char_data *ch, struct affected_type *af,
       if (avg_mod)
         af->modifier /= 2;
 
-      affect_remove(ch, hjp);
-      affect_to_char(ch, af);
+      affect_remove(g, ch, hjp);
+      affect_to_char(g, ch, af);
       found = true;
     }
   }
   if (!found)
-    affect_to_char(ch, af);
+    affect_to_char(g, ch, af);
 }

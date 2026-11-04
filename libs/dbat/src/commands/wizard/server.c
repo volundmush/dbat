@@ -56,13 +56,13 @@
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
 /* local functions */
-static void execute_copyover(void);
-static void game_info(const char *format, ...) __attribute__((format(printf, 1, 2)));
+static void execute_copyover(GameWorld *g);
+static void game_info(GameWorld *g, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
 /* local variables */
-static int copyover_timer = 0; /* for timed copyovers */
 
 // definitions
 ACMD(do_lag)
@@ -74,24 +74,24 @@ ACMD(do_lag)
   two_arguments(argument, arg, arg2);
 
   if (!*arg || !*arg2) {
-    send_to_char(ch, "Syntax: lag (target) (number of seconds)\r\n");
+    send_to_char(g, ch, "Syntax: lag (target) (number of seconds)\r\n");
     return;
   }
 
   int found = false, num = atoi(arg2);
 
   if (num <= 0 || num > 5) {
-    send_to_char(ch, "Keep it between 1 to 5 seconds please.\r\n");
+    send_to_char(g, ch, "Keep it between 1 to 5 seconds please.\r\n");
     return;
   }
 
-  for (d = descriptor_list; d; d = d->next) {
+  for (d = g->descriptors; d; d = d->next) {
     if (!d->character) {
       continue;
     }
     if (!strcasecmp(CAP(char_get_name(d->character)), CAP(arg))) {
       if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
-        send_to_char(ch, "Sorry, you've been outranked.\r\n");
+        send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
         continue;
       }
       switch (num) {
@@ -116,7 +116,7 @@ ACMD(do_lag)
   }
 
   if (found == false) {
-    send_to_char(ch, "That player isn't around.\r\n");
+    send_to_char(g, ch, "That player isn't around.\r\n");
     return;
   }
 }
@@ -126,37 +126,37 @@ ACMD(do_shutdown)
   char arg[MAX_INPUT_LENGTH];
 
   if (subcmd != SCMD_SHUTDOWN) {
-    send_to_char(ch, "If you want to shut something down, say so!\r\n");
+    send_to_char(g, ch, "If you want to shut something down, say so!\r\n");
     return;
   }
   one_argument(argument, arg);
 
   if (!*arg) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
-    send_to_all("Shutting down.\r\n");
-    circle_shutdown = 1;
+    send_to_all(g, "Shutting down.\r\n");
+    g->circle_shutdown = 1;
   } else if (!strcasecmp(arg, "reboot")) {
     mud_log("(GC) Reboot by %s.", char_get_name(ch));
-    send_to_all("Rebooting.. come back in a minute or two.\r\n");
+    send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
     touch(FASTBOOT_FILE);
-    circle_shutdown = circle_reboot = 1;
+    g->circle_shutdown = g->circle_reboot = 1;
   } else if (!strcasecmp(arg, "die")) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
-    send_to_all("Shutting down for maintenance.\r\n");
+    send_to_all(g, "Shutting down for maintenance.\r\n");
     touch(KILLSCRIPT_FILE);
-    circle_shutdown = 1;
+    g->circle_shutdown = 1;
   } else if (!strcasecmp(arg, "now")) {
     mud_log("(GC) Shutdown NOW by %s.", char_get_name(ch));
-    send_to_all("Rebooting.. come back in a minute or two.\r\n");
-    circle_shutdown = 1;
-    circle_reboot   = 2; /* do not autosave olc */
+    send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
+    g->circle_shutdown = 1;
+    g->circle_reboot   = 2; /* do not autosave olc */
   } else if (!strcasecmp(arg, "pause")) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
-    send_to_all("Shutting down for maintenance.\r\n");
+    send_to_all(g, "Shutting down for maintenance.\r\n");
     touch(PAUSE_FILE);
-    circle_shutdown = 1;
+    g->circle_shutdown = 1;
   } else
-    send_to_char(ch, "Unknown shutdown option.\r\n");
+    send_to_char(g, ch, "Unknown shutdown option.\r\n");
 }
 
 /* Path of the binary to re-exec on copyover: whatever file is now at the path this process was started
@@ -175,7 +175,7 @@ static bool copyover_exe_path(char *out, size_t size)
   return true;
 }
 
-static void game_info(const char *format, ...)
+static void game_info(GameWorld *g, const char *format, ...)
 {
   struct descriptor_data *i;
   va_list args;
@@ -186,17 +186,17 @@ static void game_info(const char *format, ...)
 
   snprintf(messg, sizeof(messg), "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W");
 
-  for (i = descriptor_list; i; i = i->next) {
+  for (i = g->descriptors; i; i = i->next) {
     if (desc_get_connected(i) != CON_PLAYING && (desc_get_connected(i) != CON_REDIT && desc_get_connected(i) != CON_OEDIT && desc_get_connected(i) != CON_MEDIT))
       continue;
     if (!(i->character))
       continue;
 
-    write_to_output(i, "%s", messg);
+    write_to_output(g, i, "%s", messg);
     va_start(args, format);
-    vwrite_to_output(i, format, args);
+    vwrite_to_output(g, i, format, args);
     va_end(args);
-    write_to_output(i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n");
+    write_to_output(g, i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n");
   }
 }
 
@@ -208,42 +208,42 @@ ACMD(do_copyover)
 
   one_argument(argument, arg);
   if (!*arg) {
-    execute_copyover();
+    execute_copyover(g);
   } else if (is_abbrev(arg, "cancel") || is_abbrev(arg, "stop")) {
-    if (!copyover_timer) {
-      send_to_char(ch, "A timed copyover has not been started!\r\n");
+    if (!g->copyover_timer) {
+      send_to_char(g, ch, "A timed copyover has not been started!\r\n");
     } else {
-      copyover_timer = 0;
-      game_info("Copyover cancelled");
+      g->copyover_timer = 0;
+      game_info(g, "Copyover cancelled");
     }
   } else if (is_abbrev(arg, "help")) {
-    send_to_char(ch, "COPYOVER\r\n\r\n");
-    send_to_char(ch, "Usage: @ycopyover@n           - Perform an immediate copyover\r\n"
+    send_to_char(g, ch, "COPYOVER\r\n\r\n");
+    send_to_char(g, ch, "Usage: @ycopyover@n           - Perform an immediate copyover\r\n"
                      "       @ycopyover <seconds>@n - Start a timed copyover\r\n"
                      "       @ycopyover cancel@n    - Stop a timed copyover\r\n\r\n");
-    send_to_char(ch, "A timed copyover will produce an automatic warning when it starts, and then\r\n");
-    send_to_char(ch, "every minute.  During the last minute, there will be a warning every 15 seconds.\r\n");
+    send_to_char(g, ch, "A timed copyover will produce an automatic warning when it starts, and then\r\n");
+    send_to_char(g, ch, "every minute.  During the last minute, there will be a warning every 15 seconds.\r\n");
   } else {
     secs = atoi(arg);
     if (!secs || secs < 0) {
-      send_to_char(ch, "Type @ycopyover help@n for usage info.");
+      send_to_char(g, ch, "Type @ycopyover help@n for usage info.");
     } else {
-      copyover_timer = secs;
+      g->copyover_timer = secs;
       mud_log("-- Timed Copyover started by %s - %d seconds until copyover --", char_get_name(ch), secs);
       if (secs >= 60) {
         if (secs % 60) {
-          game_info("A copyover will be performed in %d minutes and %d seconds.", (copyover_timer / 60), (copyover_timer % 60));
+          game_info(g, "A copyover will be performed in %d minutes and %d seconds.", (g->copyover_timer / 60), (g->copyover_timer % 60));
         } else {
-          game_info("A copyover will be performed in %d minute%s.", (copyover_timer / 60), (copyover_timer / 60) > 1 ? "s" : "");
+          game_info(g, "A copyover will be performed in %d minute%s.", (g->copyover_timer / 60), (g->copyover_timer / 60) > 1 ? "s" : "");
         }
       } else {
-        game_info("A copyover will be performed in %d seconds.", copyover_timer);
+        game_info(g, "A copyover will be performed in %d seconds.", g->copyover_timer);
       }
     }
   }
 }
 
-static void execute_copyover(void)
+static void execute_copyover(GameWorld *g)
 {
   FILE *fp;
   struct descriptor_data *d, *d_next;
@@ -252,33 +252,33 @@ static void execute_copyover(void)
   fp = fopen(COPYOVER_FILE, "w");
 
   if (!fp) {
-    send_to_imm("Copyover file not writeable, aborted.\n\r");
+    send_to_imm(g, "Copyover file not writeable, aborted.\n\r");
     return;
   }
 
   /* Consider changing all saved areas here, if you use OLC */
-  save_all();
-  save_mud_time(&time_info);
+  save_all(g);
+  save_mud_time(g, &g->time_info);
   snprintf(buf, sizeof(buf), "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
   /* For each playing descriptor, save its state */
-  for (d = descriptor_list; d; d = d_next) {
+  for (d = g->descriptors; d; d = d_next) {
     struct char_data *och = d->character;
     d_next                = d->next; /* We delete from the list , so need to save this */
     if (!d->character || d->connected > CON_PLAYING) {
       write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
-      close_socket(d); /* throw'em out */
+      close_socket(g, d); /* throw'em out */
     } else {
-      if (rroom_get_vnum(char_get_in_room(och)) > 1) {
-        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(char_get_in_room(och)), d->user);
-      } else if (rroom_get_vnum(char_get_in_room(och)) <= 1 && rroom_get_vnum(char_get_was_in_room(och)) > 1) {
-        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(char_get_was_in_room(och)), d->user);
+      if (rroom_get_vnum(g, char_get_in_room(och)) > 1) {
+        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(g, char_get_in_room(och)), d->user);
+      } else if (rroom_get_vnum(g, char_get_in_room(och)) <= 1 && rroom_get_vnum(g, char_get_was_in_room(och)) > 1) {
+        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(g, char_get_was_in_room(och)), d->user);
       } else {
         fprintf(fp, "%d %s %s 300 %s\n", d->descriptor, char_get_name(och), d->host, d->user);
       }
       mud_log("printing descriptor name and host of connected players");
       /* save och */
-      Crash_rentsave(och, 0);
-      save_char(och);
+      Crash_rentsave(g, och, 0);
+      save_char(g, och);
       write_to_descriptor(d->descriptor, buf);
     }
   }
@@ -294,8 +294,8 @@ static void execute_copyover(void)
 
   /* exec - descriptors are inherited */
 
-  snprintf(buf, sizeof(buf), "%d", port);
-  snprintf(buf2, sizeof(buf2), "-C%d", mother_desc);
+  snprintf(buf, sizeof(buf), "%d", g->port);
+  snprintf(buf2, sizeof(buf2), "-C%d", g->mother_desc);
   char exe[PATH_MAX];
   if (!copyover_exe_path(exe, sizeof(exe)))
     strlcpy(exe, "zig-out/bin/dbat", sizeof(exe));
@@ -304,28 +304,28 @@ static void execute_copyover(void)
   /* Failed - sucessful exec will not return */
 
   perror("do_copyover: execl");
-  send_to_imm("Copyover FAILED!\n\r");
+  send_to_imm(g, "Copyover FAILED!\n\r");
 
   exit(1); /* too much trouble to try to recover! */
 }
 
-void copyover_check(void)
+void copyover_check(GameWorld *g)
 {
-  if (!copyover_timer) return;
-  copyover_timer--;
-  if (!copyover_timer) {
-    execute_copyover();
+  if (!g->copyover_timer) return;
+  g->copyover_timer--;
+  if (!g->copyover_timer) {
+    execute_copyover(g);
   }
-  if (copyover_timer > 59) {
-    if (copyover_timer % 60 == 0) {
-      game_info("A copyover will be performed in %d minute%s.", (copyover_timer / 60), (copyover_timer / 60) > 1 ? "s" : "");
+  if (g->copyover_timer > 59) {
+    if (g->copyover_timer % 60 == 0) {
+      game_info(g, "A copyover will be performed in %d minute%s.", (g->copyover_timer / 60), (g->copyover_timer / 60) > 1 ? "s" : "");
     }
   } else {
-    if (copyover_timer % 10 == 0 && copyover_timer > 29) {
-      game_info("A copyover will be performed in %d seconds.", (copyover_timer));
+    if (g->copyover_timer % 10 == 0 && g->copyover_timer > 29) {
+      game_info(g, "A copyover will be performed in %d seconds.", (g->copyover_timer));
     }
-    if (copyover_timer % 5 == 0 && copyover_timer <= 29) {
-      game_info("A copyover will be performed in %d seconds.", (copyover_timer));
+    if (g->copyover_timer % 5 == 0 && g->copyover_timer <= 29) {
+      game_info(g, "A copyover will be performed in %d seconds.", (g->copyover_timer));
     }
   }
 }
@@ -338,20 +338,20 @@ ACMD(do_dc)
 
   one_argument(argument, arg);
   if (!(num_to_dc = atoi(arg))) {
-    send_to_char(ch, "Usage: DC <user number> (type USERS for a list)\r\n");
+    send_to_char(g, ch, "Usage: DC <user number> (type USERS for a list)\r\n");
     return;
   }
-  for (d = descriptor_list; d && d->desc_num != num_to_dc; d = d->next);
+  for (d = g->descriptors; d && d->desc_num != num_to_dc; d = d->next);
 
   if (!d) {
-    send_to_char(ch, "No such connection.\r\n");
+    send_to_char(g, ch, "No such connection.\r\n");
     return;
   }
   if (d->character && char_get_admlevel(d->character) >= char_get_admlevel(ch)) {
-    if (!char_can_see(ch, d->character))
-      send_to_char(ch, "No such connection.\r\n");
+    if (!char_can_see(g, ch, d->character))
+      send_to_char(g, ch, "No such connection.\r\n");
     else
-      send_to_char(ch, "Umm.. maybe that's not such a good idea...\r\n");
+      send_to_char(g, ch, "Umm.. maybe that's not such a good idea...\r\n");
     return;
   }
 
@@ -371,7 +371,7 @@ ACMD(do_dc)
    * the below 'if' check. -gg 12/17/99
    */
   if (desc_get_connected(d) == CON_DISCONNECT || desc_get_connected(d) == CON_CLOSE)
-    send_to_char(ch, "They're already being disconnected.\r\n");
+    send_to_char(g, ch, "They're already being disconnected.\r\n");
   else {
     /*
      * Remember that we can disconnect people not in the game and
@@ -383,7 +383,7 @@ ACMD(do_dc)
     else
       desc_set_connected(d, CON_CLOSE);
 
-    send_to_char(ch, "Connection #%d closed.\r\n", num_to_dc);
+    send_to_char(g, ch, "Connection #%d closed.\r\n", num_to_dc);
     mud_log("(GC) Connection closed by %s.", char_get_name(ch));
   }
 }
@@ -398,48 +398,48 @@ ACMD(do_wizlock)
   if (*arg) {
     value = atoi(arg);
     if (value < 0 || value > 101) {
-      send_to_char(ch, "Invalid wizlock value.\r\n");
+      send_to_char(g, ch, "Invalid wizlock value.\r\n");
       return;
     }
-    circle_restrict = value;
+    g->circle_restrict = value;
     when            = "now";
   } else
     when = "currently";
 
   if (*arg) {
-    switch (circle_restrict) {
+    switch (g->circle_restrict) {
       case 0:
-        send_to_char(ch, "The game is %s completely open.\r\n", when);
-        send_to_all("@RWIZLOCK@D: @WThe game has been completely opened by @C%s@W.@n", char_get_name(ch));
+        send_to_char(g, ch, "The game is %s completely open.\r\n", when);
+        send_to_all(g, "@RWIZLOCK@D: @WThe game has been completely opened by @C%s@W.@n", char_get_name(ch));
         mud_log("WIZLOCK: The game has been completely opened by %s.", char_get_name(ch));
         break;
       case 1:
-        send_to_char(ch, "The game is %s closed to new players.\r\n", when);
-        send_to_all("@RWIZLOCK@D: @WThe game is %s closed to new players by @C%s@W.@n", when, char_get_name(ch));
+        send_to_char(g, ch, "The game is %s closed to new players.\r\n", when);
+        send_to_all(g, "@RWIZLOCK@D: @WThe game is %s closed to new players by @C%s@W.@n", when, char_get_name(ch));
         mud_log("WIZLOCK: The game is %s closed to new players by %s.", when, char_get_name(ch));
         break;
       case 101:
-        send_to_char(ch, "The game is %s closed to non-imms.\r\n", when);
-        send_to_all("@RWIZLOCK@D: @WThe game is %s closed to non-imms by @C%s@W.@n", when, char_get_name(ch));
+        send_to_char(g, ch, "The game is %s closed to non-imms.\r\n", when);
+        send_to_all(g, "@RWIZLOCK@D: @WThe game is %s closed to non-imms by @C%s@W.@n", when, char_get_name(ch));
         mud_log("WIZLOCK: The game is %s closed to non-imms by %s.", when, char_get_name(ch));
         break;
       default:
-        send_to_char(ch, "Only level %d+ may enter the game %s.\r\n", circle_restrict, when);
-        send_to_all("@RWIZLOCK@D: @WLevel %d+ only can enter the game %s, thanks to @C%s@W.@n", circle_restrict, when, char_get_name(ch));
-        mud_log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", circle_restrict, when, char_get_name(ch));
+        send_to_char(g, ch, "Only level %d+ may enter the game %s.\r\n", g->circle_restrict, when);
+        send_to_all(g, "@RWIZLOCK@D: @WLevel %d+ only can enter the game %s, thanks to @C%s@W.@n", g->circle_restrict, when, char_get_name(ch));
+        mud_log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", g->circle_restrict, when, char_get_name(ch));
         break;
     }
   }
   if (!*arg) {
-    switch (circle_restrict) {
+    switch (g->circle_restrict) {
       case 0:
-        send_to_char(ch, "The game is %s completely open.\r\n", when);
+        send_to_char(g, ch, "The game is %s completely open.\r\n", when);
         break;
       case 1:
-        send_to_char(ch, "The game is %s closed to new players.\r\n", when);
+        send_to_char(g, ch, "The game is %s closed to new players.\r\n", when);
         break;
       default:
-        send_to_char(ch, "Only level %d and above may enter the game %s.\r\n", circle_restrict, when);
+        send_to_char(g, ch, "Only level %d and above may enter the game %s.\r\n", g->circle_restrict, when);
         break;
     }
   }
@@ -448,16 +448,16 @@ ACMD(do_wizlock)
 ACMD(do_saveall)
 {
   if (char_get_admlevel(ch) < ADMLVL_BUILDER)
-    send_to_char(ch, "You are not holy enough to use this privelege.\n\r");
+    send_to_char(g, ch, "You are not holy enough to use this privelege.\n\r");
   else {
-    save_all();
-    House_save_all();
-    send_to_char(ch, "World and house files saved.\n\r");
+    save_all(g);
+    House_save_all(g);
+    send_to_char(g, ch, "World and house files saved.\n\r");
   }
 }
 
 ACMD(do_wizupdate)
 {
-  run_autowiz();
-  send_to_char(ch, "Wizlists updated.\n\r");
+  run_autowiz(g);
+  send_to_char(g, ch, "Wizlists updated.\n\r");
 }

@@ -4,6 +4,7 @@
 ************************************************************************ */
 
 #include "dbat/random.h"
+#include "dbat/game_world.h"
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand
@@ -62,34 +63,33 @@ constexpr unsigned int PM_REMAINDER  = 2836;       /* r = m % a */
 ** 	 = a(z%q)- rz/q+ m(z/q) - az
 */
 
-static unsigned long seed;
 
 /* local functions */
 
-void circle_srandom(unsigned long initial_seed)
+void circle_srandom(GameWorld *g, unsigned long initial_seed)
 {
-  seed = initial_seed;
+  g->rng_seed = initial_seed;
 }
 
-unsigned long circle_random(void)
+unsigned long circle_random(GameWorld *g)
 {
   int lo, hi, test;
 
-  hi = seed / PM_QUOTIENT;
-  lo = seed % PM_QUOTIENT;
+  hi = g->rng_seed / PM_QUOTIENT;
+  lo = g->rng_seed % PM_QUOTIENT;
 
   test = PM_MULTIPLIER * lo - PM_REMAINDER * hi;
 
   if (test > 0)
-    seed = test;
+    g->rng_seed = test;
   else
-    seed = test + PM_MODULUS;
+    g->rng_seed = test + PM_MODULUS;
 
-  return (seed);
+  return (g->rng_seed);
 }
 
 /* creates a random number in long long int */
-int64_t large_rand(int64_t from, int64_t to)
+int64_t large_rand(GameWorld *g, int64_t from, int64_t to)
 {
   /* error checking in case people call this incorrectly */
   if (from > to) {
@@ -107,11 +107,11 @@ int64_t large_rand(int64_t from, int64_t to)
    * though, which shouldn't have that problem. Mean and standard
    * deviation of both are identical (within the realm of statistical
    * identity) if the rand() implementation is non-broken.  */
-  return ((circle_random() % (to - from + 1)) + from);
+  return ((circle_random(g) % (to - from + 1)) + from);
 }
 
 /* creates a random number in interval [from;to] */
-int rand_number(int from, int to)
+int rand_number(GameWorld *g, int from, int to)
 {
   /* error checking in case people call this incorrectly */
   if (from > to) {
@@ -119,17 +119,17 @@ int rand_number(int from, int to)
     from    = to;
     to      = tmp;
   }
-  return large_rand(from, to);
+  return large_rand(g, from, to);
 }
 
 /* Axion engine dice function */
-int axion_dice(int adjust)
+int axion_dice(GameWorld *g, int adjust)
 {
 
   int die1 = 0, die2 = 0, roll = 0;
 
-  die1 = rand_number(1, 60);
-  die2 = rand_number(1, 60);
+  die1 = rand_number(g, 1, 60);
+  die2 = rand_number(g, 1, 60);
 
   roll = (die1 + die2) + adjust;
 
@@ -140,7 +140,7 @@ int axion_dice(int adjust)
 }
 
 /* simulates dice roll */
-int dice(int num, int size)
+int dice(GameWorld *g, int num, int size)
 {
   int sum = 0;
 
@@ -148,19 +148,19 @@ int dice(int num, int size)
     return (0);
 
   while (num-- > 0)
-    sum += rand_number(1, size);
+    sum += rand_number(g, 1, size);
 
   return (sum);
 }
 
 /* Add should be set to the amount you want to add to whatever is rolled. */
-int roll_aff_duration(int num, int add)
+int roll_aff_duration(GameWorld *g, int num, int add)
 {
   int start   = num / 20;
   int finish  = num / 10;
   int outcome = add;
 
-  outcome += rand_number(start, finish);
+  outcome += rand_number(g, start, finish);
 
   return (outcome);
 }

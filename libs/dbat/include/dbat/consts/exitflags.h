@@ -10,4 +10,4 @@ constexpr bitvector_t EX_SECRET    = (1u << 4); /* The door is hidden        */
 
 constexpr int NUM_EXIT_FLAGS = 5;
 
-extern const char *exit_bits[NUM_EXIT_FLAGS + 1];
+extern const char *const exit_bits[NUM_EXIT_FLAGS + 1];

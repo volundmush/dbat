@@ -65,4 +65,4 @@ constexpr int PRF_ENERGIZE   = 59;
 constexpr int NUM_PRF_FLAGS = 60;
 constexpr int PR_ARRAY_MAX  = 4;
 
-extern const char *preference_bits[NUM_PRF_FLAGS + 1];
+extern const char *const preference_bits[NUM_PRF_FLAGS + 1];

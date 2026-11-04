@@ -14,34 +14,35 @@
 #include "dbat/dg_olc.h"
 #include "dbat/atomicfile.h"
 #include "dbat/object_utils.h"
+#include "dbat/game_world.h"
 
-static obj_rnum adjust_objects(obj_rnum refpt);
+static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt);
 static bool copy_object_preserve(struct obj_data *to, struct obj_data *from);
-static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
-static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum);
-static int update_objects(struct obj_data *refobj);
+static obj_rnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
+static obj_rnum insert_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum);
+static int update_objects(GameWorld *g, struct obj_data *refobj);
 
 static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
-obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
+obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
 {
   obj_rnum found  = NOTHING;
-  zone_rnum rznum = real_zone_by_thing(ovnum);
+  zone_rnum rznum = real_zone_by_thing(g, ovnum);
 
   /*
    * Write object to internal tables.
    */
-  obj_set_item_number(newobj, real_object(ovnum));
+  obj_set_item_number(newobj, real_object(g, ovnum));
   if (obj_get_item_number(newobj) != NOTHING) {
-    copy_object(&obj_proto[obj_get_item_number(newobj)], newobj);
-    update_objects(&obj_proto[obj_get_item_number(newobj)]);
-    add_to_save_list(zone_table[rznum].number, SL_OBJ);
+    copy_object(g, &g->obj_proto[obj_get_item_number(newobj)], newobj);
+    update_objects(g, &g->obj_proto[obj_get_item_number(newobj)]);
+    add_to_save_list(g, g->zones[rznum].number, SL_OBJ);
     return obj_get_item_number(newobj);
   }
 
-  found = insert_object(newobj, ovnum);
-  adjust_objects(found);
-  add_to_save_list(zone_table[rznum].number, SL_OBJ);
+  found = insert_object(g, newobj, ovnum);
+  adjust_objects(g, found);
+  add_to_save_list(g, g->zones[rznum].number, SL_OBJ);
   return found;
 }
 
@@ -54,12 +55,12 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
  * if object is pointing to this prototype, then we need to replace it
  * with the new one.
  */
-static int update_objects(struct obj_data *refobj)
+static int update_objects(GameWorld *g, struct obj_data *refobj)
 {
   struct obj_data *obj, swap;
   int count = 0;
 
-  for (obj = object_list; obj; obj = obj_get_next(obj)) {
+  for (obj = g->objects; obj; obj = obj_get_next(obj)) {
     if (obj_get_item_number(obj) != obj_get_item_number(refobj))
       continue;
 
@@ -89,30 +90,30 @@ static int update_objects(struct obj_data *refobj)
  * Adjust the internal values of other objects as if something was inserted at the given array index.
  * Might also be useful to make 'holes' in the array for some reason.
  */
-static obj_rnum adjust_objects(obj_rnum refpt)
+static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
 {
   shop_rnum shop;
   int i, cmd_no;
   zone_rnum zone;
   struct obj_data *obj;
 
-  if (refpt < 0 || refpt > top_of_objt)
+  if (refpt < 0 || refpt > g->top_obj)
     return NOTHING;
 
   /*
    * Renumber live objects.
    */
-  for (obj = object_list; obj; obj = obj_get_next(obj))
+  for (obj = g->objects; obj; obj = obj_get_next(obj))
     obj_set_item_number(obj, obj_get_item_number(obj) + ((obj_get_item_number(obj) != NOTHING && obj_get_item_number(obj) >= refpt)));
 
   /*
    * Renumber zone table.
    */
-  for (zone = 0; zone <= top_of_zone_table; zone++) {
-    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++) {
-      switch (zone_get_cmd(zone, cmd_no)->command) {
+  for (zone = 0; zone <= g->top_zone; zone++) {
+    for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
+      switch (zone_get_cmd(g, zone, cmd_no)->command) {
         case 'P':
-          zone_get_cmd(zone, cmd_no)->arg3 += (zone_get_cmd(zone, cmd_no)->arg3 >= refpt);
+          zone_get_cmd(g, zone, cmd_no)->arg3 += (zone_get_cmd(g, zone, cmd_no)->arg3 >= refpt);
           /*
          * No break here - drop into next case.
          */
@@ -120,10 +121,10 @@ static obj_rnum adjust_objects(obj_rnum refpt)
         case 'O':
         case 'G':
         case 'E':
-          zone_get_cmd(zone, cmd_no)->arg1 += (zone_get_cmd(zone, cmd_no)->arg1 >= refpt);
+          zone_get_cmd(g, zone, cmd_no)->arg1 += (zone_get_cmd(g, zone, cmd_no)->arg1 >= refpt);
           break;
         case 'R':
-          zone_get_cmd(zone, cmd_no)->arg2 += (zone_get_cmd(zone, cmd_no)->arg2 >= refpt);
+          zone_get_cmd(g, zone, cmd_no)->arg2 += (zone_get_cmd(g, zone, cmd_no)->arg2 >= refpt);
           break;
       }
     }
@@ -132,9 +133,9 @@ static obj_rnum adjust_objects(obj_rnum refpt)
   /*
    * Renumber shop produce.
    */
-  for (shop = 0; shop <= top_shop; shop++)
-    for (i = 0; rshop_get_product(shop, i) != NOTHING; i++)
-      rshop_set_product(shop, i, rshop_get_product(shop, i) + (rshop_get_product(shop, i) >= refpt));
+  for (shop = 0; shop <= g->top_shop; shop++)
+    for (i = 0; rshop_get_product(g, shop, i) != NOTHING; i++)
+      rshop_set_product(g, shop, i, rshop_get_product(g, shop, i) + (rshop_get_product(g, shop, i) >= refpt));
 
   return refpt;
 }
@@ -145,55 +146,55 @@ static obj_rnum adjust_objects(obj_rnum refpt)
  * Function handle the insertion of an object within the prototype framework.  Note that this does not adjust internal values
  * of other objects, use add_object() for that.
  */
-static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
+static obj_rnum insert_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum)
 {
   obj_rnum i;
 
-  top_of_objt++;
-  RECREATE(obj_index, struct index_data, top_of_objt + 1);
-  RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
+  g->top_obj++;
+  RECREATE(g->obj_index, struct index_data, g->top_obj + 1);
+  RECREATE(g->obj_proto, struct obj_data, g->top_obj + 1);
 
   /*
    * Start counting through both tables.
    */
-  for (i = top_of_objt; i > 0; i--) {
+  for (i = g->top_obj; i > 0; i--) {
     /*
      * Check if current virtual is bigger than our virtual number.
      */
-    if (ovnum > obj_index[i - 1].vnum)
-      return index_object(obj, ovnum, i);
+    if (ovnum > g->obj_index[i - 1].vnum)
+      return index_object(g, obj, ovnum, i);
 
     /* Copy over the object that should be here. */
-    obj_index[i]             = obj_index[i - 1];
-    obj_proto[i]             = obj_proto[i - 1];
-    obj_set_item_number(&obj_proto[i], i);
+    g->obj_index[i]             = g->obj_index[i - 1];
+    g->obj_proto[i]             = g->obj_proto[i - 1];
+    obj_set_item_number(&g->obj_proto[i], i);
   }
 
   /* Not found, place at 0. */
-  return index_object(obj, ovnum, 0);
+  return index_object(g, obj, ovnum, 0);
 }
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
+static obj_rnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
 {
-  if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
+  if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > g->top_obj)
     return NOWHERE;
 
   obj_set_item_number(obj, ornum);
-  obj_index[ornum].vnum   = ovnum;
-  obj_index[ornum].number = 0;
-  obj_index[ornum].func   = nullptr;
+  g->obj_index[ornum].vnum   = ovnum;
+  g->obj_index[ornum].number = 0;
+  g->obj_index[ornum].func   = nullptr;
 
-  copy_object_preserve(&obj_proto[ornum], obj);
-  obj_set_in_room(&obj_proto[ornum], NOWHERE);
+  copy_object_preserve(&g->obj_proto[ornum], obj);
+  obj_set_in_room(&g->obj_proto[ornum], NOWHERE);
 
   return ornum;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-bool save_objects(zone_rnum zone_num)
+bool save_objects(GameWorld *g, zone_rnum zone_num)
 {
   char cmfname[128], buf[MAX_STRING_LENGTH];
   char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
@@ -210,22 +211,22 @@ bool save_objects(zone_rnum zone_num)
   struct obj_data *obj;
   struct extra_descr_data *ex_desc;
 
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-    mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+  if (zone_num < 0 || zone_num > g->top_zone) {
+    mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
     return false;
   }
 
-  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
+  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, g->zones[zone_num].number);
   if (!(fp = atomic_open(&af, cmfname, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
     return false;
   }
   /*
    * Start running through all objects in this zone.
    */
-  for (counter = genolc_zone_bottom(zone_num); counter <= zone_table[zone_num].top; counter++) {
-    if ((realcounter = real_object(counter)) != NOTHING) {
-      if (obj_get_action_description(obj = &obj_proto[realcounter])) {
+  for (counter = genolc_zone_bottom(g, zone_num); counter <= g->zones[zone_num].top; counter++) {
+    if ((realcounter = real_object(g, counter)) != NOTHING) {
+      if (obj_get_action_description(obj = &g->obj_proto[realcounter])) {
         strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
         strip_cr(buf);
       } else
@@ -238,7 +239,7 @@ bool save_objects(zone_rnum zone_num)
               "%s~\n"
               "%s~\n",
 
-              obj_get_vnum(obj),
+              obj_get_vnum(g, obj),
               (obj_get_name(obj) && *obj_get_name(obj)) ? obj_get_name(obj) : "undefined",
               (obj_get_short_description(obj) && *obj_get_short_description(obj)) ? obj_get_short_description(obj) : "undefined",
               (obj_get_description(obj) && *obj_get_description(obj)) ? obj_get_description(obj) : "undefined",
@@ -289,7 +290,7 @@ bool save_objects(zone_rnum zone_num)
            * Sanity check to prevent nasty protection faults.
            */
           if (!ex_desc->keyword || !ex_desc->description || !*ex_desc->keyword || !*ex_desc->description) {
-            mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
+            mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
             continue;
           }
           strlcpy(buf, ex_desc->description, sizeof(buf));
@@ -332,9 +333,9 @@ bool save_objects(zone_rnum zone_num)
     return false;
   snprintf(buf, sizeof(buf), "%s", cmfname);
 
-  if (in_save_list(zone_table[zone_num].number, SL_OBJ)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_OBJ);
-    create_world_index(zone_table[zone_num].number, "obj");
+  if (in_save_list(g, g->zones[zone_num].number, SL_OBJ)) {
+    remove_from_save_list(g, g->zones[zone_num].number, SL_OBJ);
+    create_world_index(g, g->zones[zone_num].number, "obj");
     mud_log("GenOLC: save_objects: Saving objects '%s'", buf);
   }
   return true;
@@ -343,13 +344,13 @@ bool save_objects(zone_rnum zone_num)
 /*
  * Free all, unconditionally.
  */
-void free_object_strings(struct obj_data *obj)
+void free_object_strings(GameWorld *g, struct obj_data *obj)
 {
 #if 0 /* Debugging, do not enable. */
   struct obj_data *t;
   int i = 0;
 
-  for (t = object_list; t; t = t->next) {
+  for (t = g->objects; t; t = t->next) {
     if (t == obj) {
       i++;
       continue;
@@ -378,24 +379,24 @@ void free_object_strings(struct obj_data *obj)
 /*
  * For object instances that are not the prototype.
  */
-void free_object_strings_proto(struct obj_data *obj)
+void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
 {
   obj_rnum robj_num = obj_get_item_number(obj);
 
-  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(&obj_proto[robj_num]))
+  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(&g->obj_proto[robj_num]))
     free(obj_get_name(obj));
-  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(&obj_proto[robj_num]))
+  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(&g->obj_proto[robj_num]))
     free(obj_get_description(obj));
-  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(&obj_proto[robj_num]))
+  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(&g->obj_proto[robj_num]))
     free(obj_get_short_description(obj));
-  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(&obj_proto[robj_num]))
+  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(&g->obj_proto[robj_num]))
     free(obj_get_action_description(obj));
   if (obj_get_ex_description(obj)) {
     struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
     int ok_key, ok_desc, ok_item;
     for (thised = obj_get_ex_description(obj); thised; thised = next_one) {
       next_one = thised->next;
-      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(&obj_proto[robj_num]); plist; plist = plist->next) {
+      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(&g->obj_proto[robj_num]); plist; plist = plist->next) {
         if (plist->keyword == thised->keyword)
           ok_key = 0;
         if (plist->description == thised->description)
@@ -426,9 +427,9 @@ static void copy_object_strings(struct obj_data *to, struct obj_data *from)
     obj_set_ex_description(to, nullptr);
 }
 
-bool copy_object(struct obj_data *to, struct obj_data *from)
+bool copy_object(GameWorld *g, struct obj_data *to, struct obj_data *from)
 {
-  free_object_strings(to);
+  free_object_strings(g, to);
   return copy_object_main(to, from, true);
 }
 
@@ -444,7 +445,7 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
   return true;
 }
 
-obj_rnum delete_object(obj_rnum rnum)
+obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
 {
   obj_rnum i;
   zone_rnum zrnum;
@@ -453,18 +454,18 @@ obj_rnum delete_object(obj_rnum rnum)
   int j, cmd_no;
   zone_rnum zone;
 
-  if (rnum == NOTHING || rnum > top_of_objt)
+  if (rnum == NOTHING || rnum > g->top_obj)
     return NOTHING;
 
-  obj = &obj_proto[rnum];
+  obj = &g->obj_proto[rnum];
 
-  zrnum = real_zone_by_thing(obj_get_vnum(obj));
-  add_to_save_list(zone_table[zrnum].number, SL_OBJ);
+  zrnum = real_zone_by_thing(g, obj_get_vnum(g, obj));
+  add_to_save_list(g, g->zones[zrnum].number, SL_OBJ);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(obj), obj_get_short_description(obj));
+  mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
-  for (tmp = object_list; tmp; tmp = obj_get_next(tmp)) {
+  for (tmp = g->objects; tmp; tmp = obj_get_next(tmp)) {
     if (obj_get_item_number(tmp) != obj_get_item_number(obj))
       continue;
 
@@ -475,77 +476,77 @@ obj_rnum delete_object(obj_rnum rnum)
         next_content = obj_get_next_content(this_content);
         if (obj_get_in_room(tmp)) {
           /* Transfer stuff from object to room. */
-          obj_from_obj(this_content);
-          obj_to_room(this_content, obj_get_in_room(tmp));
+          obj_from_obj(g, this_content);
+          obj_to_room(g, this_content, obj_get_in_room(tmp));
         } else if (obj_get_worn_by(tmp) || obj_get_carried_by(tmp)) {
           /* Transfer stuff from object to person inventory. */
-          obj_from_char(this_content);
-          obj_to_char(this_content, obj_get_carried_by(tmp));
+          obj_from_char(g, this_content);
+          obj_to_char(g, this_content, obj_get_carried_by(tmp));
         } else if (obj_get_in_obj(tmp)) {
           /* Transfer stuff from object to containing object. */
-          obj_from_obj(this_content);
-          obj_to_obj(this_content, obj_get_in_obj(tmp));
+          obj_from_obj(g, this_content);
+          obj_to_obj(g, this_content, obj_get_in_obj(tmp));
         }
       }
     }
-    /* Remove from object_list, etc. - handles weight changes, and similar. */
-    extract_obj(tmp);
+    /* Remove from g->objects, etc. - handles weight changes, and similar. */
+    extract_obj(g, tmp);
   }
 
   /* Adjust rnums of all other objects. */
-  for (tmp = object_list; tmp; tmp = obj_get_next(tmp)) {
+  for (tmp = g->objects; tmp; tmp = obj_get_next(tmp)) {
     obj_set_item_number(tmp, obj_get_item_number(tmp) - ((obj_get_item_number(tmp) > rnum)));
   }
 
-  for (i = rnum; i < top_of_objt; i++) {
-    obj_index[i]             = obj_index[i + 1];
-    obj_proto[i]             = obj_proto[i + 1];
-    obj_set_item_number(&obj_proto[i], i);
+  for (i = rnum; i < g->top_obj; i++) {
+    g->obj_index[i]             = g->obj_index[i + 1];
+    g->obj_proto[i]             = g->obj_proto[i + 1];
+    obj_set_item_number(&g->obj_proto[i], i);
   }
 
-  top_of_objt--;
-  RECREATE(obj_index, struct index_data, top_of_objt + 1);
-  RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
+  g->top_obj--;
+  RECREATE(g->obj_index, struct index_data, g->top_obj + 1);
+  RECREATE(g->obj_proto, struct obj_data, g->top_obj + 1);
 
-  for (shop = 0; shop <= top_shop; shop++)
-    for (j = 0; rshop_get_product(shop, j) != NOTHING; j++)
-      rshop_set_product(shop, j, rshop_get_product(shop, j) - (rshop_get_product(shop, j) > rnum));
+  for (shop = 0; shop <= g->top_shop; shop++)
+    for (j = 0; rshop_get_product(g, shop, j) != NOTHING; j++)
+      rshop_set_product(g, shop, j, rshop_get_product(g, shop, j) - (rshop_get_product(g, shop, j) > rnum));
 
   /* Renumber zone table. */
-  for (zone = 0; zone <= top_of_zone_table; zone++) {
+  for (zone = 0; zone <= g->top_zone; zone++) {
     bool changed = false;
-    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++) {
-      switch (zone_get_cmd(zone, cmd_no)->command) {
+    for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
+      switch (zone_get_cmd(g, zone, cmd_no)->command) {
         case 'P':
-          if (zone_get_cmd(zone, cmd_no)->arg3 == rnum) {
-            zone_get_cmd(zone, cmd_no)->command = '*';
-            zone_get_cmd(zone, cmd_no)->arg3    = NOTHING;
+          if (zone_get_cmd(g, zone, cmd_no)->arg3 == rnum) {
+            zone_get_cmd(g, zone, cmd_no)->command = '*';
+            zone_get_cmd(g, zone, cmd_no)->arg3    = NOTHING;
             changed                             = true;
           } else
-            zone_get_cmd(zone, cmd_no)->arg3 -= (zone_get_cmd(zone, cmd_no)->arg3 > rnum);
+            zone_get_cmd(g, zone, cmd_no)->arg3 -= (zone_get_cmd(g, zone, cmd_no)->arg3 > rnum);
           break;
         case 'O':
         case 'G':
         case 'E':
-          if (zone_get_cmd(zone, cmd_no)->arg1 == rnum) {
-            zone_get_cmd(zone, cmd_no)->command = '*';
-            zone_get_cmd(zone, cmd_no)->arg1    = NOTHING;
+          if (zone_get_cmd(g, zone, cmd_no)->arg1 == rnum) {
+            zone_get_cmd(g, zone, cmd_no)->command = '*';
+            zone_get_cmd(g, zone, cmd_no)->arg1    = NOTHING;
             changed                             = true;
           } else
-            zone_get_cmd(zone, cmd_no)->arg1 -= (zone_get_cmd(zone, cmd_no)->arg1 > rnum);
+            zone_get_cmd(g, zone, cmd_no)->arg1 -= (zone_get_cmd(g, zone, cmd_no)->arg1 > rnum);
           break;
         case 'R':
-          if (zone_get_cmd(zone, cmd_no)->arg2 == rnum) {
-            zone_get_cmd(zone, cmd_no)->command = '*';
-            zone_get_cmd(zone, cmd_no)->arg2    = NOTHING;
+          if (zone_get_cmd(g, zone, cmd_no)->arg2 == rnum) {
+            zone_get_cmd(g, zone, cmd_no)->command = '*';
+            zone_get_cmd(g, zone, cmd_no)->arg2    = NOTHING;
             changed                             = true;
           } else
-            zone_get_cmd(zone, cmd_no)->arg2 -= (zone_get_cmd(zone, cmd_no)->arg2 > rnum);
+            zone_get_cmd(g, zone, cmd_no)->arg2 -= (zone_get_cmd(g, zone, cmd_no)->arg2 > rnum);
           break;
       }
       if (changed) {
         // Do something if the command was changed, e.g., save the zone or log the change
-        add_to_save_list(zone_table[zone].number, SL_ZON);
+        add_to_save_list(g, g->zones[zone].number, SL_ZON);
       }
     }
   }

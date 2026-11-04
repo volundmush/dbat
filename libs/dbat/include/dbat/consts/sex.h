@@ -6,4 +6,4 @@ constexpr int SEX_FEMALE  = 2;
 
 constexpr int NUM_SEX = 3;
 
-extern const char *genders[NUM_SEX + 1];
+extern const char *const genders[NUM_SEX + 1];

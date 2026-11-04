@@ -1,7 +1,7 @@
 #include "dbat/consts/applies.h"
 
 /* APPLY_x */
-const char *apply_types[NUM_APPLIES + 1] = {
+const char *const apply_types[NUM_APPLIES + 1] = {
     "NONE",
     "STR",
     "AGL",

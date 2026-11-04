@@ -11,4 +11,4 @@ constexpr int ADMLVL_VICE    = 4;
 constexpr int ADMLVL_GRGOD   = 5;
 constexpr int ADMLVL_IMPL    = 6;
 
-extern const char *admin_level_names[ADMLVL_IMPL + 2];
+extern const char *const admin_level_names[ADMLVL_IMPL + 2];

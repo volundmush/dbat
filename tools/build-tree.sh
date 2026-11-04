@@ -9,11 +9,14 @@ mkdir -p "$out/obj"
 # __FILE__ is made relative to the tree, so builds of different checkouts are comparable byte for byte
 cflags=(-std=gnu23 -g -w -DPATH_MAX=4096 -fmacro-prefix-map="$tree/=" -fmacro-prefix-map="$here/=tools/"
         -I"$tree/libs/dbat/include" "$@")
+# The helper calls server functions, so it must match the tree being built.
+roundtrip="$tree/tools/roundtrip.c"
+[ -f "$roundtrip" ] || roundtrip="$here/roundtrip.c"
 pids=()
 while IFS= read -r f; do
   obj="$out/obj/$(echo "${f#"$tree"/}" | tr / _).o"
   gcc "${cflags[@]}" -c "$f" -o "$obj" & pids+=($!)
-done < <(find "$tree/libs/dbat/src" -name '*.c'; echo "$tree/apps/server/src/main.c"; echo "$here/roundtrip.c")
+done < <(find "$tree/libs/dbat/src" -name '*.c'; echo "$tree/apps/server/src/main.c"; echo "$roundtrip")
 fail=0; for p in "${pids[@]}"; do wait "$p" || fail=1; done
 [ $fail -eq 0 ] || { echo "build-tree: compile failed in $tree" >&2; exit 1; }
 gcc -o "$out/dbat" "$out"/obj/*.o -lm -lcrypt ${LDFLAGS_EXTRA:-}

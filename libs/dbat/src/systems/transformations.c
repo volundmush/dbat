@@ -2,7 +2,7 @@
 #include "dbat/consts/races.h"
 #include "dbat/consts/playerflags.h"
 
-struct transform_bonus base_form = {
+const struct transform_bonus base_form = {
     .bonus                = 0,
     .mult                 = 1.0,
     .drain                = 0.0,
@@ -65,7 +65,7 @@ struct transform_bonus base_form = {
  * Oozaru Transformation
  * ============================================================================= */
 
-struct transform_bonus oozaru = {
+const struct transform_bonus oozaru = {
     .bonus                = 10000,
     .mult                 = 2.0,
     .drain                = 0.0,

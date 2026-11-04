@@ -12,17 +12,17 @@ bool genolc_checkstring(struct descriptor_data *d, char *arg);
  * for the price when allow_int is set (shop buy/sell). Returns NULL if msg is safe to use that way, else why not. */
 const char *npc_msg_format_problem(const char *msg, bool allow_int);
 
-bool remove_from_save_list(zone_vnum, int type);
-bool add_to_save_list(zone_vnum, int type);
-bool in_save_list(zone_vnum, int type);
+bool remove_from_save_list(GameWorld *g, zone_vnum, int type);
+bool add_to_save_list(GameWorld *g, zone_vnum, int type);
+bool in_save_list(GameWorld *g, zone_vnum, int type);
 void strip_cr(char *);
-bool save_all(void);
+bool save_all(GameWorld *g);
 char *str_udup(const char *);
-void olc_list_columns(struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
+void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
 void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);
 void free_ex_descriptions(struct extra_descr_data *head);
 int sprintascii(char *out, bitvector_t bits);
-void free_save_list(void);
+void free_save_list(GameWorld *g);
 
 struct save_list_data {
   zone_vnum zone;
@@ -44,6 +44,6 @@ constexpr int SL_HLP = SL_MAX + 2; /* must be above MAX */
 
 #define LIMIT(var, low, high) MIN(high, MAX(var, low))
 
-room_vnum genolc_zone_bottom(zone_rnum rznum);
+room_vnum genolc_zone_bottom(GameWorld *g, zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
-void create_world_index(zone_vnum znum, const char *type);
+void create_world_index(GameWorld *g, zone_vnum znum, const char *type);

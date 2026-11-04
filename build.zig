@@ -106,4 +106,18 @@ pub fn build(b: *std.Build) void {
     check_cmd.addArgs(&.{ "-c", "9999" });
     check_cmd.has_side_effects = true;
     check_step.dependOn(&check_cmd.step);
+
+    // `zig build test`: self-contained tests, needing no data/ files.
+    const test_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    test_mod.addIncludePath(b.path("libs/dbat/include"));
+    test_mod.addCSourceFiles(.{ .files = &[_][]const u8{"libs/dbat/tests/test_game_world.c"}, .flags = &c_flags });
+    test_mod.linkLibrary(dbat_lib);
+    const test_exe = b.addExecutable(.{
+        .name = "dbat_test_game_world",
+        .root_module = test_mod,
+    });
+    const test_step = b.step("test", "Build and run the tests");
+    const test_cmd = b.addRunArtifact(test_exe);
+    test_cmd.has_side_effects = true;
+    test_step.dependOn(&test_cmd.step);
 }

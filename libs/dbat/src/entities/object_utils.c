@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "dbat/room_utils.h"
+#include "dbat/game_world.h"
 
 bool wearable_obj(struct obj_data *obj)
 {
@@ -53,10 +54,10 @@ bool wearable_obj(struct obj_data *obj)
     return false;
 }
 
-void randomize_eq(struct obj_data *obj)
+void randomize_eq(GameWorld *g, struct obj_data *obj)
 {
   if (wearable_obj(obj) && !obj_extra_flagged(obj, ITEM_NORANDOM)) {
-    int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1;
+    int value = 0, slot = 0, roll = rand_number(g, 2, 12), slot1 = 1, slot2 = 1;
     int stat     = 0;
     int strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
     // Setting the strength stats
@@ -251,58 +252,58 @@ void randomize_eq(struct obj_data *obj)
         }
       }
       slot += 1;
-      roll = rand_number(2, 12);
+      roll = rand_number(g, 2, 12);
     }
 
     if (slot1 == 0) {
-      if (strength == false && rand_number(1, 6) == 1) {
+      if (strength == false && rand_number(g, 1, 6) == 1) {
         strength                  = true;
         obj->affected[0].location = 1;
         obj->affected[0].modifier = 1;
-      } else if (dexterity == false && rand_number(1, 6) == 1) {
+      } else if (dexterity == false && rand_number(g, 1, 6) == 1) {
         dexterity                 = true;
         obj->affected[0].location = 2;
         obj->affected[0].modifier = 1;
-      } else if (intelligence == false && rand_number(1, 6) == 1) {
+      } else if (intelligence == false && rand_number(g, 1, 6) == 1) {
         intelligence              = true;
         obj->affected[0].location = 3;
         obj->affected[0].modifier = 1;
-      } else if (wisdom == false && rand_number(1, 6) == 1) {
+      } else if (wisdom == false && rand_number(g, 1, 6) == 1) {
         wisdom                    = true;
         obj->affected[0].location = 4;
         obj->affected[0].modifier = 1;
-      } else if (constitution == false && rand_number(1, 6) == 1) {
+      } else if (constitution == false && rand_number(g, 1, 6) == 1) {
         constitution              = true;
         obj->affected[0].location = 5;
         obj->affected[0].modifier = 1;
-      } else if (speed == false && rand_number(1, 6) == 1) {
+      } else if (speed == false && rand_number(g, 1, 6) == 1) {
         speed                     = true;
         obj->affected[0].location = 6;
         obj->affected[0].modifier = 1;
       }
     }
     if (slot2 == 0 && roll >= 10) {
-      if (strength == false && rand_number(1, 6) == 1) {
+      if (strength == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 1;
         obj->affected[1].modifier = 1;
-      } else if (dexterity == false && rand_number(1, 6) == 1) {
+      } else if (dexterity == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 2;
         obj->affected[1].modifier = 1;
-      } else if (intelligence == false && rand_number(1, 6) == 1) {
+      } else if (intelligence == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 3;
         obj->affected[1].modifier = 1;
-      } else if (wisdom == false && rand_number(1, 6) == 1) {
+      } else if (wisdom == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 4;
         obj->affected[1].modifier = 1;
-      } else if (constitution == false && rand_number(1, 6) == 1) {
+      } else if (constitution == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 5;
         obj->affected[1].modifier = 1;
-      } else if (speed == false && rand_number(1, 6) == 1) {
+      } else if (speed == false && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 6;
         obj->affected[1].modifier = 1;
       }
     }
-    int dice = rand_number(2, 12);
+    int dice = rand_number(g, 2, 12);
     if (dice >= 10) {
       obj_extra_set(obj, ITEM_SLOT2, true);
     } else if (dice >= 7) {
@@ -347,7 +348,7 @@ const char *money_desc(int amount)
   return ("an absolutely colossal mountain of zenni");
 }
 
-struct obj_data *create_money(int amount)
+struct obj_data *create_money(GameWorld *g, int amount)
 {
   struct obj_data *obj;
   struct extra_descr_data *new_descr;
@@ -358,7 +359,7 @@ struct obj_data *create_money(int amount)
     mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
     return (nullptr);
   }
-  obj = create_obj();
+  obj = create_obj(g);
   CREATE(new_descr, struct extra_descr_data, 1);
 
   if (amount == 1) {
@@ -382,7 +383,7 @@ struct obj_data *create_money(int amount)
       snprintf(buf, sizeof(buf), "It looks to be about %d zenni.", 100 * (amount / 100));
     else if (amount < 100000)
       snprintf(buf, sizeof(buf), "You guess there is, maybe, %d zenni.",
-               1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
+               1000 * ((amount / 1000) + rand_number(g, 0, (amount / 1000))));
     else
       strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
     new_descr->description = strdup(buf);
@@ -433,11 +434,11 @@ static bool obj_is_valid(const struct obj_data *obj)
   return obj != nullptr;
 }
 
-obj_vnum obj_get_vnum(const struct obj_data *obj)
+obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj)
 {
   if (!obj_is_valid(obj)) return NOTHING;
-  if (obj->item_number < 0 || obj->item_number > top_of_objt) return NOTHING;
-  return obj_index[obj->item_number].vnum;
+  if (obj->item_number < 0 || obj->item_number > g->top_obj) return NOTHING;
+  return g->obj_index[obj->item_number].vnum;
 }
 
 /* Formerly macros in object_utils.h. */
@@ -457,14 +458,14 @@ bool obj_extra_flagged(const struct obj_data *obj, int flag)
   return (IS_SET_AR(obj_get_extra_flags(obj), (flag)));
 }
 
-static bool obj_valid_rnum(const struct obj_data *obj)
+static bool obj_valid_rnum(GameWorld *g, const struct obj_data *obj)
 {
-  return (obj_get_item_number(obj) <= top_of_objt && obj_get_item_number(obj) != NOTHING);
+  return (obj_get_item_number(obj) <= g->top_obj && obj_get_item_number(obj) != NOTHING);
 }
 
-spec_proc_func obj_get_spec(const struct obj_data *obj)
+spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj)
 {
-  return (obj_valid_rnum(obj) ? obj_index[obj_get_item_number(obj)].func : nullptr);
+  return (obj_valid_rnum(g, obj) ? g->obj_index[obj_get_item_number(obj)].func : nullptr);
 }
 
 bool obj_is_corpse(const struct obj_data *obj)
@@ -814,9 +815,9 @@ void obj_set_in_room(struct obj_data *obj, room_rnum v)
   obj->in_room = v;
 }
 
-struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door)
+struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *obj, int door)
 {
-  return rroom_get_dir_option(obj_get_in_room(obj), door);
+  return rroom_get_dir_option(g, obj_get_in_room(obj), door);
 }
 
 /* Flag setters and toggles. */
@@ -889,11 +890,11 @@ struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
   return &obj->sbinfo;
 }
 
-void obj_unlink_from_list(struct obj_data *obj)
+void obj_unlink_from_list(GameWorld *g, struct obj_data *obj)
 {
   struct obj_data *temp;
 
-  REMOVE_FROM_LIST(obj, object_list, next, temp);
+  REMOVE_FROM_LIST(obj, g->objects, next, temp);
 }
 
 void obj_unlink_content(struct obj_data **head, struct obj_data *obj)

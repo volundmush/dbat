@@ -21,14 +21,13 @@
 #include "dbat/relocate.h"
 #include "dbat/search.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
-static long assemblyGetAssemblyIndex(obj_vnum lVnum);
+static long assemblyGetAssemblyIndex(GameWorld *g, obj_vnum lVnum);
 
 /* Local global variables. */
-static long g_lNumAssemblies      = 0;
-static ASSEMBLY *g_pAssemblyTable = nullptr;
 
-void assemblyBootAssemblies(void)
+void assemblyBootAssemblies(GameWorld *g)
 {
   char szLine[MAX_STRING_LENGTH] = {'\0'};
   char szTag[MAX_STRING_LENGTH]  = {'\0'};
@@ -60,7 +59,7 @@ void assemblyBootAssemblies(void)
         mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, line %ld: "
                 "szTag=%s, szLine=%s.",
                 ASSEMBLIES_FILE, lLineCount, szTag, szLine);
-      } else if (!assemblyAddComponent(lVnum, lPartVnum, iExtract, iInRoom)) {
+      } else if (!assemblyAddComponent(g, lVnum, lPartVnum, iExtract, iInRoom)) {
         mud_log("SYSERR: bootAssemblies(): Could not add component #%d to "
                 "assembly #%d.",
                 lPartVnum, lVnum);
@@ -76,7 +75,7 @@ void assemblyBootAssemblies(void)
                 "vnum #%d at line %ld.",
                 szType, lVnum, lLineCount);
         lVnum = NOTHING;
-      } else if (!assemblyCreate(lVnum, iType)) {
+      } else if (!assemblyCreate(g, lVnum, iType)) {
         mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum "
                 "#%d, type %s.",
                 lVnum, szType);
@@ -94,7 +93,7 @@ void assemblyBootAssemblies(void)
   fclose(pFile);
 }
 
-void assemblySaveAssemblies(void)
+void assemblySaveAssemblies(GameWorld *g)
 {
   struct atomic_file af;
   char szType[MAX_STRING_LENGTH] = {'\0'};
@@ -110,8 +109,8 @@ void assemblySaveAssemblies(void)
     return;
   }
 
-  for (i = 0; i < g_lNumAssemblies; i++) {
-    pAssembly = (g_pAssemblyTable + i);
+  for (i = 0; i < g->g_lNumAssemblies; i++) {
+    pAssembly = (g->g_pAssemblyTable + i);
     sprinttype(pAssembly->uchAssemblyType, AssemblyTypes, szType, sizeof(szType));
     fprintf(pFile, "Vnum                #%d %s\n", pAssembly->lVnum, szType);
 
@@ -122,14 +121,14 @@ void assemblySaveAssemblies(void)
               (pAssembly->pComponents[j].bInRoom ? 1 : 0));
     }
 
-    if (i < g_lNumAssemblies - 1)
+    if (i < g->g_lNumAssemblies - 1)
       fprintf(pFile, "\n");
   }
 
   atomic_commit(&af);
 }
 
-void assemblyListToChar(struct char_data *pCharacter)
+void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
 {
   char szBuffer[MAX_STRING_LENGTH]  = {'\0'};
   char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
@@ -141,50 +140,50 @@ void assemblyListToChar(struct char_data *pCharacter)
     mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
     return;
   }
-  if (g_pAssemblyTable == nullptr) {
-    send_to_char(pCharacter, "No assemblies exist.\r\n");
+  if (g->g_pAssemblyTable == nullptr) {
+    send_to_char(g, pCharacter, "No assemblies exist.\r\n");
     return;
   }
 
   /* Send out a "header" of sorts. */
-  send_to_char(pCharacter, "The following assemblies exists:\r\n");
+  send_to_char(g, pCharacter, "The following assemblies exists:\r\n");
 
-  for (i = 0; i < g_lNumAssemblies; i++) {
-    if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0) {
-      send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
-      mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%d in assembly table.", g_pAssemblyTable[i].lVnum);
+  for (i = 0; i < g->g_lNumAssemblies; i++) {
+    if ((lRnum = real_object(g, g->g_pAssemblyTable[i].lVnum)) < 0) {
+      send_to_char(g, pCharacter, "[-----] ***RESERVED***\r\n");
+      mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
     } else {
-      sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
-      sprintf(szBuffer, "[%5d] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-              obj_get_short_description(&obj_proto[lRnum]), szAssmType);
-      send_to_char(pCharacter, "%s", szBuffer);
+      sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
+      sprintf(szBuffer, "[%5d] %s (%s)\r\n", g->g_pAssemblyTable[i].lVnum,
+              obj_get_short_description(&g->obj_proto[lRnum]), szAssmType);
+      send_to_char(g, pCharacter, "%s", szBuffer);
 
-      for (j = 0; j < g_pAssemblyTable[i].lNumComponents; j++) {
-        if ((lRnum = real_object(g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
-          send_to_char(pCharacter, " -----: ***RESERVED***\r\n");
+      for (j = 0; j < g->g_pAssemblyTable[i].lNumComponents; j++) {
+        if ((lRnum = real_object(g, g->g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
+          send_to_char(g, pCharacter, " -----: ***RESERVED***\r\n");
           mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%d in assembly for vnum #%d.",
-                  g_pAssemblyTable[i].pComponents[j].lVnum, g_pAssemblyTable[i].lVnum);
+                  g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
         } else {
-          sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g_pAssemblyTable[i].pComponents[j].lVnum,
-                  obj_get_short_description(&obj_proto[lRnum]),
-                  (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
-                  (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
-          send_to_char(pCharacter, "%s", szBuffer);
+          sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g->g_pAssemblyTable[i].pComponents[j].lVnum,
+                  obj_get_short_description(&g->obj_proto[lRnum]),
+                  (g->g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
+                  (g->g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
+          send_to_char(g, pCharacter, "%s", szBuffer);
         }
       }
     }
   }
 }
 
-bool assemblyAddComponent(obj_vnum lVnum, obj_vnum lComponentVnum, bool bExtract, bool bInRoom)
+bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum, bool bExtract, bool bInRoom)
 {
   ASSEMBLY *pAssembly = nullptr;
 
-  if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
+  if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
-  if (real_object(lComponentVnum) <= NOTHING) {
+  if (real_object(g, lComponentVnum) <= NOTHING) {
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%d.",
             lComponentVnum);
     return (false);
@@ -216,7 +215,7 @@ bool assemblyAddComponent(obj_vnum lVnum, obj_vnum lComponentVnum, bool bExtract
   return (true);
 }
 
-bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int extract_yes)
+bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, int extract_yes)
 {
   bool bOk                             = true;
   long i                               = 0;
@@ -228,7 +227,7 @@ bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int e
     mud_log("SYSERR: NULL assemblyCheckComponents(): 'pCharacter'.");
     return (false);
   }
-  if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
+  if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
     mud_log("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
@@ -241,22 +240,22 @@ bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int e
   CREATE(ppComponentObjects, struct obj_data *, pAssembly->lNumComponents);
 
   for (i = 0; i < pAssembly->lNumComponents && bOk; i++) {
-    if ((lRnum = real_object(pAssembly->pComponents[i].lVnum)) < 0)
+    if ((lRnum = real_object(g, pAssembly->pComponents[i].lVnum)) < 0)
       bOk = false;
     else {
       if (pAssembly->pComponents[i].bInRoom) {
         if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                         rroom_get_contents(char_get_in_room(pCharacter)))) == nullptr)
+                                                         rroom_get_contents(g, char_get_in_room(pCharacter)))) == nullptr)
           bOk = false;
         else {
-          obj_from_room(ppComponentObjects[i]);
+          obj_from_room(g, ppComponentObjects[i]);
         }
       } else {
         if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
                                                          char_get_inventory(pCharacter))) == nullptr)
           bOk = false;
         else {
-          obj_from_char(ppComponentObjects[i]);
+          obj_from_char(g, ppComponentObjects[i]);
         }
       }
     }
@@ -267,11 +266,11 @@ bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int e
       continue;
 
     if (pAssembly->pComponents[i].bExtract && bOk && extract_yes == true)
-      extract_obj(ppComponentObjects[i]);
+      extract_obj(g, ppComponentObjects[i]);
     else if (pAssembly->pComponents[i].bInRoom)
-      obj_to_room(ppComponentObjects[i], char_get_in_room(pCharacter));
+      obj_to_room(g, ppComponentObjects[i], char_get_in_room(pCharacter));
     else
-      obj_to_char(ppComponentObjects[i], pCharacter);
+      obj_to_char(g, ppComponentObjects[i], pCharacter);
   }
 
   free(ppComponentObjects);
@@ -279,7 +278,7 @@ bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int e
   return (bOk);
 }
 
-bool assemblyCreate(obj_vnum lVnum, int iAssembledType)
+bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType)
 {
   long lBottom                = 0;
   long lMiddle                = 0;
@@ -291,92 +290,92 @@ bool assemblyCreate(obj_vnum lVnum, int iAssembledType)
   else if (iAssembledType < 0 || iAssembledType >= MAX_ASSM)
     return (false);
 
-  if (g_pAssemblyTable == nullptr) {
-    CREATE(g_pAssemblyTable, ASSEMBLY, 1);
-    g_lNumAssemblies = 1;
+  if (g->g_pAssemblyTable == nullptr) {
+    CREATE(g->g_pAssemblyTable, ASSEMBLY, 1);
+    g->g_lNumAssemblies = 1;
   } else {
-    lTop = g_lNumAssemblies - 1;
+    lTop = g->g_lNumAssemblies - 1;
 
     for (;;) {
       lMiddle = (lBottom + lTop) / 2;
 
-      if (g_pAssemblyTable[lMiddle].lVnum == lVnum)
+      if (g->g_pAssemblyTable[lMiddle].lVnum == lVnum)
         return (false);
       else if (lBottom >= lTop)
         break;
-      else if (g_pAssemblyTable[lMiddle].lVnum > lVnum)
+      else if (g->g_pAssemblyTable[lMiddle].lVnum > lVnum)
         lTop = lMiddle - 1;
       else
         lBottom = lMiddle + 1;
     }
 
-    if (g_pAssemblyTable[lMiddle].lVnum <= lVnum)
+    if (g->g_pAssemblyTable[lMiddle].lVnum <= lVnum)
       lMiddle += 1;
 
-    CREATE(pNewAssemblyTable, ASSEMBLY, g_lNumAssemblies + 1);
+    CREATE(pNewAssemblyTable, ASSEMBLY, g->g_lNumAssemblies + 1);
 
     if (lMiddle > 0)
-      memmove(pNewAssemblyTable, g_pAssemblyTable, lMiddle * sizeof(ASSEMBLY));
+      memmove(pNewAssemblyTable, g->g_pAssemblyTable, lMiddle * sizeof(ASSEMBLY));
 
-    if (lMiddle <= g_lNumAssemblies - 1)
-      memmove(pNewAssemblyTable + lMiddle + 1, g_pAssemblyTable + lMiddle, (g_lNumAssemblies - lMiddle) * sizeof(ASSEMBLY));
+    if (lMiddle <= g->g_lNumAssemblies - 1)
+      memmove(pNewAssemblyTable + lMiddle + 1, g->g_pAssemblyTable + lMiddle, (g->g_lNumAssemblies - lMiddle) * sizeof(ASSEMBLY));
 
-    free(g_pAssemblyTable);
-    g_pAssemblyTable = pNewAssemblyTable;
-    g_lNumAssemblies += 1;
+    free(g->g_pAssemblyTable);
+    g->g_pAssemblyTable = pNewAssemblyTable;
+    g->g_lNumAssemblies += 1;
   }
 
-  g_pAssemblyTable[lMiddle].lNumComponents  = 0;
-  g_pAssemblyTable[lMiddle].lVnum           = lVnum;
-  g_pAssemblyTable[lMiddle].pComponents     = nullptr;
-  g_pAssemblyTable[lMiddle].uchAssemblyType = (unsigned char)iAssembledType;
+  g->g_pAssemblyTable[lMiddle].lNumComponents  = 0;
+  g->g_pAssemblyTable[lMiddle].lVnum           = lVnum;
+  g->g_pAssemblyTable[lMiddle].pComponents     = nullptr;
+  g->g_pAssemblyTable[lMiddle].uchAssemblyType = (unsigned char)iAssembledType;
   return (true);
 }
 
-bool assemblyDestroy(obj_vnum lVnum)
+bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
 {
   long lIndex                 = 0;
   ASSEMBLY *pNewAssemblyTable = nullptr;
 
   /* Find the real number of the assembled vnum. */
-  if (g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex(lVnum)) < 0) {
+  if (g->g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex(g, lVnum)) < 0) {
     mud_log("SYSERR: assemblyDestroy(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
 
   /* Deallocate component array. */
-  if (g_pAssemblyTable[lIndex].pComponents != nullptr)
-    free(g_pAssemblyTable[lIndex].pComponents);
+  if (g->g_pAssemblyTable[lIndex].pComponents != nullptr)
+    free(g->g_pAssemblyTable[lIndex].pComponents);
 
-  if (g_lNumAssemblies > 1) {
+  if (g->g_lNumAssemblies > 1) {
     /* Create a new table, the same size as the old one less one item. */
-    CREATE(pNewAssemblyTable, ASSEMBLY, g_lNumAssemblies - 1);
+    CREATE(pNewAssemblyTable, ASSEMBLY, g->g_lNumAssemblies - 1);
 
     /* Copy all assemblies before the one removed into the new table. */
     if (lIndex > 0)
-      memmove(pNewAssemblyTable, g_pAssemblyTable, lIndex * sizeof(ASSEMBLY));
+      memmove(pNewAssemblyTable, g->g_pAssemblyTable, lIndex * sizeof(ASSEMBLY));
 
     /* Copy all assemblies after the one removed into the new table. */
-    if (lIndex < g_lNumAssemblies - 1) {
-      memmove(pNewAssemblyTable + lIndex, g_pAssemblyTable + lIndex + 1, (g_lNumAssemblies - lIndex - 1) * sizeof(ASSEMBLY));
+    if (lIndex < g->g_lNumAssemblies - 1) {
+      memmove(pNewAssemblyTable + lIndex, g->g_pAssemblyTable + lIndex + 1, (g->g_lNumAssemblies - lIndex - 1) * sizeof(ASSEMBLY));
     }
   }
 
   /* Deallocate the old table. */
-  free(g_pAssemblyTable);
+  free(g->g_pAssemblyTable);
 
   /* Decrement the assembly count and assign the new table. */
-  g_lNumAssemblies -= 1;
-  g_pAssemblyTable = pNewAssemblyTable;
+  g->g_lNumAssemblies -= 1;
+  g->g_pAssemblyTable = pNewAssemblyTable;
 
   return (true);
 }
 
-int assemblyGetType(obj_vnum lVnum)
+int assemblyGetType(GameWorld *g, obj_vnum lVnum)
 {
   ASSEMBLY *pAssembly = nullptr;
 
-  if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
+  if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
     mud_log("SYSERR: assemblyGetType(): Invalid 'lVnum' #%d.", lVnum);
     return (-1);
   }
@@ -384,76 +383,76 @@ int assemblyGetType(obj_vnum lVnum)
   return ((int)pAssembly->uchAssemblyType);
 }
 
-obj_vnum assemblyFindAssembly(const char *pszAssemblyName)
+obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
 {
   long i         = 0;
   obj_rnum lRnum = NOTHING;
 
-  if (g_pAssemblyTable == nullptr)
+  if (g->g_pAssemblyTable == nullptr)
     return (-1);
   else if (pszAssemblyName == nullptr || *pszAssemblyName == '\0')
     return (-1);
 
-  for (i = 0; i < g_lNumAssemblies; i++) {
-    if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
-      mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g_pAssemblyTable[i].lVnum);
-    else if (isname(pszAssemblyName, obj_get_name(&obj_proto[lRnum])))
-      return (g_pAssemblyTable[i].lVnum);
+  for (i = 0; i < g->g_lNumAssemblies; i++) {
+    if ((lRnum = real_object(g, g->g_pAssemblyTable[i].lVnum)) < 0)
+      mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
+    else if (isname(pszAssemblyName, obj_get_name(&g->obj_proto[lRnum])))
+      return (g->g_pAssemblyTable[i].lVnum);
   }
 
   return (-1);
 }
 
-static long assemblyGetAssemblyIndex(obj_vnum lVnum)
+static long assemblyGetAssemblyIndex(GameWorld *g, obj_vnum lVnum)
 {
   long lBottom = 0;
   long lMiddle = 0;
   long lTop    = 0;
 
-  lTop = g_lNumAssemblies - 1;
+  lTop = g->g_lNumAssemblies - 1;
 
   for (;;) {
     lMiddle = (lBottom + lTop) / 2;
 
-    if (g_pAssemblyTable[lMiddle].lVnum == lVnum)
+    if (g->g_pAssemblyTable[lMiddle].lVnum == lVnum)
       return (lMiddle);
     else if (lBottom >= lTop)
       return (-1);
-    else if (g_pAssemblyTable[lMiddle].lVnum > lVnum)
+    else if (g->g_pAssemblyTable[lMiddle].lVnum > lVnum)
       lTop = lMiddle - 1;
     else
       lBottom = lMiddle + 1;
   }
 }
 
-ASSEMBLY *assemblyGetAssemblyPtr(obj_vnum lVnum)
+ASSEMBLY *assemblyGetAssemblyPtr(GameWorld *g, obj_vnum lVnum)
 {
   long lIndex = 0;
 
-  if (g_pAssemblyTable == nullptr)
+  if (g->g_pAssemblyTable == nullptr)
     return (nullptr);
 
-  if ((lIndex = assemblyGetAssemblyIndex(lVnum)) >= 0)
-    return (g_pAssemblyTable + lIndex);
+  if ((lIndex = assemblyGetAssemblyIndex(g, lVnum)) >= 0)
+    return (g->g_pAssemblyTable + lIndex);
 
   return (nullptr);
 }
 
 #undef __ASSEMBLIES_C__
 
-void free_assemblies(void)
+void free_assemblies(GameWorld *g)
 {
   int i;
 
-  if (g_pAssemblyTable == nullptr)
+  if (g->g_pAssemblyTable == nullptr)
     return;
 
-  for (i = 0; i < g_lNumAssemblies; i++) {
-    if (g_pAssemblyTable[i].pComponents)
-      free(g_pAssemblyTable[i].pComponents);
+  for (i = 0; i < g->g_lNumAssemblies; i++) {
+    if (g->g_pAssemblyTable[i].pComponents)
+      free(g->g_pAssemblyTable[i].pComponents);
 
-    g_pAssemblyTable[i].lNumComponents = 0;
+    g->g_pAssemblyTable[i].lNumComponents = 0;
   }
 
-  free(g_pAssemblyTable);
+  free(g->g_pAssemblyTable);
 }

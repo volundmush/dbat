@@ -13,9 +13,6 @@ struct player_index_element {
   time_t played;
 };
 
-extern int top_of_p_table;
-extern struct player_index_element *player_table;
 
-void remove_player(int pfilepos);
-void clean_pfiles(void);
-extern long top_idnum;
+void remove_player(GameWorld *g, int pfilepos);
+void clean_pfiles(GameWorld *g);

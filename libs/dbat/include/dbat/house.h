@@ -42,15 +42,13 @@ constexpr int HOUSE_NOSAVE     = (1 << 6); /* Do not crash save this room - priv
 
 constexpr int HOUSE_NUM_FLAGS = 7;
 
-extern struct house_control_rec house_control[MAX_HOUSES]; /* house.c */
-extern int num_of_houses;                                  /* house.c */
 
-void House_boot(void);
-void House_save_all(void);
-bool House_can_enter(struct char_data *ch, room_vnum house);
-void hcontrol_list_houses(struct char_data *ch);
-int find_house(room_vnum vnum);         /* house.c */
-void House_save_control(void);          /* house.c */
+void House_boot(GameWorld *g);
+void House_save_all(GameWorld *g);
+bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house);
+void hcontrol_list_houses(GameWorld *g, struct char_data *ch);
+int find_house(GameWorld *g, room_vnum vnum);         /* house.c */
+void House_save_control(GameWorld *g);          /* house.c */
 void House_delete_file(room_vnum vnum); /* house.c */
 
 ACMD(do_hcontrol);

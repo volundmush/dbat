@@ -23,63 +23,63 @@
 
 /* Player-only data (player_specials). On an NPC these log the caller with a backtrace; reads then give
  * 0/NULL and writes are ignored. */
-bitvector_t *char_get_pref(const struct char_data *ch);
-int char_get_gauntlet(const struct char_data *ch);
-void char_set_gauntlet(struct char_data *ch, int v);
-int char_get_tlevel(const struct char_data *ch);
-void char_set_tlevel(struct char_data *ch, int v);
+bitvector_t *char_get_pref(GameWorld *g, const struct char_data *ch);
+int char_get_gauntlet(GameWorld *g, const struct char_data *ch);
+void char_set_gauntlet(GameWorld *g, struct char_data *ch, int v);
+int char_get_tlevel(GameWorld *g, const struct char_data *ch);
+void char_set_tlevel(GameWorld *g, struct char_data *ch, int v);
 struct char_data *char_get_carrying(const struct char_data *ch);
-void char_set_carrying(struct char_data *ch, struct char_data *v);
+void char_set_carrying(GameWorld *g, struct char_data *ch, struct char_data *v);
 struct char_data *char_get_carried_by(const struct char_data *ch);
-void char_set_carried_by(struct char_data *ch, struct char_data *v);
+void char_set_carried_by(GameWorld *g, struct char_data *ch, struct char_data *v);
 int char_get_racial_pref(const struct char_data *ch);
-void char_set_racial_pref(struct char_data *ch, int v);
-int8_t char_get_conditions(const struct char_data *ch, int i);
-void char_set_conditions(struct char_data *ch, int i, int8_t v);
-room_vnum char_get_load_room(const struct char_data *ch);
-void char_set_load_room(struct char_data *ch, room_vnum v);
-int char_get_practice_points(const struct char_data *ch);
-void char_set_practice_points(struct char_data *ch, int v);
-int char_get_ability_trains(const struct char_data *ch);
-void char_set_ability_trains(struct char_data *ch, int v);
-int char_get_trainstr(const struct char_data *ch);
-void char_set_trainstr(struct char_data *ch, int v);
-int char_get_trainint(const struct char_data *ch);
-void char_set_trainint(struct char_data *ch, int v);
-int char_get_traincon(const struct char_data *ch);
-void char_set_traincon(struct char_data *ch, int v);
-int char_get_trainwis(const struct char_data *ch);
-void char_set_trainwis(struct char_data *ch, int v);
-int char_get_trainagl(const struct char_data *ch);
-void char_set_trainagl(struct char_data *ch, int v);
-int char_get_trainspd(const struct char_data *ch);
-void char_set_trainspd(struct char_data *ch, int v);
-int16_t char_get_invis_level(const struct char_data *ch);
-void char_set_invis_level(struct char_data *ch, int16_t v);
-int char_get_wimp_level(const struct char_data *ch);
-void char_set_wimp_level(struct char_data *ch, int v);
-int8_t char_get_freeze_level(const struct char_data *ch);
-void char_set_freeze_level(struct char_data *ch, int8_t v);
-uint8_t char_get_bad_pws(const struct char_data *ch);
-void char_set_bad_pws(struct char_data *ch, uint8_t v);
-char *char_get_poofin(const struct char_data *ch);
-void char_set_poofin(struct char_data *ch, char *v);
-char *char_get_poofout(const struct char_data *ch);
-void char_set_poofout(struct char_data *ch, char *v);
-int char_get_olc_zone(const struct char_data *ch);
-void char_set_olc_zone(struct char_data *ch, zone_vnum v);
-struct alias_data *char_get_aliases(const struct char_data *ch);
-void char_set_aliases(struct char_data *ch, struct alias_data *v);
-int32_t char_get_last_tell(const struct char_data *ch);
-void char_set_last_tell(struct char_data *ch, int32_t v);
-char *char_get_host(const struct char_data *ch);
-void char_set_host(struct char_data *ch, char *v);
-struct txt_block *char_get_comm_hist(const struct char_data *ch, int i);
-void char_set_comm_hist(struct char_data *ch, int i, struct txt_block *v);
+void char_set_racial_pref(GameWorld *g, struct char_data *ch, int v);
+int8_t char_get_conditions(GameWorld *g, const struct char_data *ch, int i);
+void char_set_conditions(GameWorld *g, struct char_data *ch, int i, int8_t v);
+room_vnum char_get_load_room(GameWorld *g, const struct char_data *ch);
+void char_set_load_room(GameWorld *g, struct char_data *ch, room_vnum v);
+int char_get_practice_points(GameWorld *g, const struct char_data *ch);
+void char_set_practice_points(GameWorld *g, struct char_data *ch, int v);
+int char_get_ability_trains(GameWorld *g, const struct char_data *ch);
+void char_set_ability_trains(GameWorld *g, struct char_data *ch, int v);
+int char_get_trainstr(GameWorld *g, const struct char_data *ch);
+void char_set_trainstr(GameWorld *g, struct char_data *ch, int v);
+int char_get_trainint(GameWorld *g, const struct char_data *ch);
+void char_set_trainint(GameWorld *g, struct char_data *ch, int v);
+int char_get_traincon(GameWorld *g, const struct char_data *ch);
+void char_set_traincon(GameWorld *g, struct char_data *ch, int v);
+int char_get_trainwis(GameWorld *g, const struct char_data *ch);
+void char_set_trainwis(GameWorld *g, struct char_data *ch, int v);
+int char_get_trainagl(GameWorld *g, const struct char_data *ch);
+void char_set_trainagl(GameWorld *g, struct char_data *ch, int v);
+int char_get_trainspd(GameWorld *g, const struct char_data *ch);
+void char_set_trainspd(GameWorld *g, struct char_data *ch, int v);
+int16_t char_get_invis_level(GameWorld *g, const struct char_data *ch);
+void char_set_invis_level(GameWorld *g, struct char_data *ch, int16_t v);
+int char_get_wimp_level(GameWorld *g, const struct char_data *ch);
+void char_set_wimp_level(GameWorld *g, struct char_data *ch, int v);
+int8_t char_get_freeze_level(GameWorld *g, const struct char_data *ch);
+void char_set_freeze_level(GameWorld *g, struct char_data *ch, int8_t v);
+uint8_t char_get_bad_pws(GameWorld *g, const struct char_data *ch);
+void char_set_bad_pws(GameWorld *g, struct char_data *ch, uint8_t v);
+char *char_get_poofin(GameWorld *g, const struct char_data *ch);
+void char_set_poofin(GameWorld *g, struct char_data *ch, char *v);
+char *char_get_poofout(GameWorld *g, const struct char_data *ch);
+void char_set_poofout(GameWorld *g, struct char_data *ch, char *v);
+int char_get_olc_zone(GameWorld *g, const struct char_data *ch);
+void char_set_olc_zone(GameWorld *g, struct char_data *ch, zone_vnum v);
+struct alias_data *char_get_aliases(GameWorld *g, const struct char_data *ch);
+void char_set_aliases(GameWorld *g, struct char_data *ch, struct alias_data *v);
+int32_t char_get_last_tell(GameWorld *g, const struct char_data *ch);
+void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v);
+char *char_get_host(GameWorld *g, const struct char_data *ch);
+void char_set_host(GameWorld *g, struct char_data *ch, char *v);
+struct txt_block *char_get_comm_hist(GameWorld *g, const struct char_data *ch, int i);
+void char_set_comm_hist(GameWorld *g, struct char_data *ch, int i, struct txt_block *v);
 int char_get_speaking(const struct char_data *ch);
 void char_set_speaking(struct char_data *ch, int v);
-int char_get_feat_points(const struct char_data *ch);
-void char_set_feat_points(struct char_data *ch, int v);
+int char_get_feat_points(GameWorld *g, const struct char_data *ch);
+void char_set_feat_points(GameWorld *g, struct char_data *ch, int v);
 
 /* Derived character values that used to be macros. */
 int char_get_age_years(struct char_data *ch);
@@ -98,18 +98,18 @@ bitvector_t *char_get_admflags(const struct char_data *ch);
 /* Return the gauntlet highest room for ch */
 
 bool char_is_npc(const struct char_data *ch);
-bool char_is_mob(const struct char_data *ch);
+bool char_is_mob(GameWorld *g, const struct char_data *ch);
 
 bool char_mob_flagged(const struct char_data *ch, int flag);
 bool char_plr_flagged(const struct char_data *ch, int flag);
 bool char_aff_flagged(const struct char_data *ch, int flag);
-bool char_prf_flagged(const struct char_data *ch, int flag);
+bool char_prf_flagged(GameWorld *g, const struct char_data *ch, int flag);
 bool char_adm_flagged(const struct char_data *ch, int flag);
 bool char_body_flagged(const struct char_data *ch, int flag);
 bool char_is_affected(const struct char_data *ch, int skill);
 
 bool char_plr_toggle(struct char_data *ch, int flag);
-bool char_prf_toggle(struct char_data *ch, int flag);
+bool char_prf_toggle(GameWorld *g, struct char_data *ch, int flag);
 bool char_aff_toggle(struct char_data *ch, int flag);
 bool char_mob_toggle(struct char_data *ch, int flag);
 
@@ -118,7 +118,7 @@ bool char_mob_toggle(struct char_data *ch, int flag);
 void char_plr_set(struct char_data *ch, int flag, bool on);
 void char_mob_set(struct char_data *ch, int flag, bool on);
 void char_aff_set(struct char_data *ch, int flag, bool on);
-void char_prf_set(struct char_data *ch, int flag, bool on);
+void char_prf_set(GameWorld *g, struct char_data *ch, int flag, bool on);
 void char_body_set(struct char_data *ch, int flag, bool on);
 
 /* new define for quick check */
@@ -126,7 +126,7 @@ bool char_is_dead(const struct char_data *ch);
 
 room_rnum char_get_in_room(const struct char_data *ch);
 void char_set_in_room(struct char_data *ch, room_rnum v);
-zone_vnum char_in_zone(const struct char_data *ch);
+zone_vnum char_in_zone(GameWorld *g, const struct char_data *ch);
 room_rnum char_get_was_in_room(const struct char_data *ch);
 void char_set_was_in_room(struct char_data *ch, room_rnum v);
 
@@ -218,14 +218,14 @@ void char_set_aff_abils_con(struct char_data *ch, int8_t v);
 int8_t char_get_aff_abils_cha(const struct char_data *ch);
 void char_set_aff_abils_cha(struct char_data *ch, int8_t v);
 
-double char_get_mutboost(struct char_data *ch);
-double char_get_speedi(struct char_data *ch);
-double char_get_speedcalc(struct char_data *ch);
-double char_get_speedbonus(struct char_data *ch);
-double char_get_speedvar(struct char_data *ch);
-double char_get_speedvem(struct char_data *ch);
-long char_get_speedint(struct char_data *ch);
-bool char_is_weighted(struct char_data *ch);
+double char_get_mutboost(GameWorld *g, struct char_data *ch);
+double char_get_speedi(GameWorld *g, struct char_data *ch);
+double char_get_speedcalc(GameWorld *g, struct char_data *ch);
+double char_get_speedbonus(GameWorld *g, struct char_data *ch);
+double char_get_speedvar(GameWorld *g, struct char_data *ch);
+double char_get_speedvem(GameWorld *g, struct char_data *ch);
+long char_get_speedint(GameWorld *g, struct char_data *ch);
+bool char_is_weighted(GameWorld *g, struct char_data *ch);
 
 int64_t char_get_exp(const struct char_data *ch);
 void char_set_exp(struct char_data *ch, int64_t v);
@@ -322,11 +322,11 @@ int char_get_asb(const struct char_data *ch);
 void char_set_asb(struct char_data *ch, int v);
 int char_get_regen(const struct char_data *ch);
 void char_set_regen(struct char_data *ch, int v);
-double char_get_blessbonus(struct char_data *ch);
+double char_get_blessbonus(GameWorld *g, struct char_data *ch);
 double char_get_poself(struct char_data *ch);
-double char_get_posebonus(struct char_data *ch);
-double char_get_lifebonus(struct char_data *ch);
-double char_get_lifebonuses(struct char_data *ch);
+double char_get_posebonus(GameWorld *g, struct char_data *ch);
+double char_get_lifebonus(GameWorld *g, struct char_data *ch);
+double char_get_lifebonuses(GameWorld *g, struct char_data *ch);
 int char_get_lifeperc(const struct char_data *ch);
 void char_set_lifeperc(struct char_data *ch, int v);
 int char_get_speedboost(const struct char_data *ch);
@@ -442,10 +442,10 @@ bitvector_t *char_get_bodyparts(const struct char_data *ch);
 struct obj_data *char_get_equipment(const struct char_data *ch, int i);
 void char_set_equipment(struct char_data *ch, int i, struct obj_data *v);
 
-spec_proc_func char_get_mob_spec(const struct char_data *ch);
+spec_proc_func char_get_mob_spec(GameWorld *g, const struct char_data *ch);
 mob_rnum char_get_nr(const struct char_data *ch);
 void char_set_nr(struct char_data *ch, mob_rnum v);
-mob_vnum char_get_mob_vnum(const struct char_data *mob);
+mob_vnum char_get_mob_vnum(GameWorld *g, const struct char_data *mob);
 
 int8_t char_get_mob_specials_default_pos(const struct char_data *ch);
 void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v);
@@ -464,13 +464,13 @@ void char_set_cooldown(struct char_data *ch, int v);
         ) */
 
 bool char_is_awake(const struct char_data *ch);
-bool char_can_see_in_dark(const struct char_data *ch);
+bool char_can_see_in_dark(GameWorld *g, const struct char_data *ch);
 
 bool char_is_good(const struct char_data *ch);
 bool char_is_evil(const struct char_data *ch);
 bool char_is_neutral(const struct char_data *ch);
 
-bool char_in_arena(const struct char_data *ch);
+bool char_in_arena(GameWorld *g, const struct char_data *ch);
 int char_get_arenawatch(const struct char_data *ch);
 void char_set_arenawatch(struct char_data *ch, int v);
 
@@ -480,27 +480,27 @@ int char_get_wait(const struct char_data *ch);
 void char_set_wait(struct char_data *ch, int v);
 
 /* Can subject see character "obj"? */
-bool char_can_see(const struct char_data *sub, const struct char_data *obj);
+bool char_can_see(GameWorld *g, const struct char_data *sub, const struct char_data *obj);
 
 /* End of CAN_SEE */
 
 /* Is anyone carrying this object and if so, are they visible? */
 
-bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj);
+bool char_can_see_obj(GameWorld *g, const struct char_data *sub, const struct obj_data *obj);
 
-bool char_can_get_obj(struct char_data *ch, struct obj_data *obj);
+bool char_can_get_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 
-const char *char_pers(struct char_data *ch, struct char_data *vict);
+const char *char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict);
 
-const char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict);
+const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
-const char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
+const char *obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
-struct room_direction_data *char_get_exit(const struct char_data *ch, int door);
-void char_set_exit(struct char_data *ch, int door, struct room_direction_data *v);
-struct room_direction_data *char_get_exit2(const struct char_data *ch, int door);
+struct room_direction_data *char_get_exit(GameWorld *g, const struct char_data *ch, int door);
+void char_set_exit(GameWorld *g, struct char_data *ch, int door, struct room_direction_data *v);
+struct room_direction_data *char_get_exit2(GameWorld *g, const struct char_data *ch, int door);
 
-bool char_can_go(const struct char_data *ch, int door);
+bool char_can_go(GameWorld *g, const struct char_data *ch, int door);
 
 bool char_is_roshi(const struct char_data *ch);
 bool char_is_piccolo(const struct char_data *ch);
@@ -531,28 +531,28 @@ bool char_is_shadowdancer(const struct char_data *ch);
 bool char_is_thaumaturgist(const struct char_data *ch);
 
 int char_gold_carry(const struct char_data *ch);
-bool char_is_shadow_dragon1(const struct char_data *ch);
-bool char_is_shadow_dragon2(const struct char_data *ch);
-bool char_is_shadow_dragon3(const struct char_data *ch);
-bool char_is_shadow_dragon4(const struct char_data *ch);
-bool char_is_shadow_dragon5(const struct char_data *ch);
-bool char_is_shadow_dragon6(const struct char_data *ch);
-bool char_is_shadow_dragon7(const struct char_data *ch);
+bool char_is_shadow_dragon1(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon2(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon3(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon4(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon5(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon6(GameWorld *g, const struct char_data *ch);
+bool char_is_shadow_dragon7(GameWorld *g, const struct char_data *ch);
 bool char_can_grand_master(const struct char_data *ch);
 bool char_is_humanoid(const struct char_data *ch);
 bool char_is_restricted_race(const struct char_data *ch);
 bool char_is_cheap_race(const struct char_data *ch);
 bool char_is_nonptrans(const struct char_data *ch);
 bool char_is_transformed(const struct char_data *ch);
-#define BIRTH_PHASE (time_info.day <= 15)
-#define LIFE_PHASE  (!BIRTH_PHASE && time_info.day <= 22)
+#define BIRTH_PHASE (g->time_info.day <= 15)
+#define LIFE_PHASE  (!BIRTH_PHASE && g->time_info.day <= 22)
 #define DEATH_PHASE (!BIRTH_PHASE && !LIFE_PHASE)
-bool char_moon_ok(const struct char_data *ch);
-#define MOON_TIME (time_info.hours >= 21 || time_info.hours <= 4)
-#define MOON_DATE (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
-bool MOON_TIMECHECK();
-bool char_ether_stream(const struct char_data *ch);
-bool char_has_moon(const struct char_data *ch);
+bool char_moon_ok(GameWorld *g, const struct char_data *ch);
+#define MOON_TIME (g->time_info.hours >= 21 || g->time_info.hours <= 4)
+#define MOON_DATE (g->time_info.day == 19 || g->time_info.day == 20 || g->time_info.day == 21)
+bool MOON_TIMECHECK(GameWorld *g);
+bool char_ether_stream(GameWorld *g, const struct char_data *ch);
+bool char_has_moon(GameWorld *g, const struct char_data *ch);
 bool char_has_arms(const struct char_data *ch);
 
 bool char_is_human(const struct char_data *ch);
@@ -581,7 +581,7 @@ bool char_is_mechanical(const struct char_data *ch);
 
 bool char_is_female(const struct char_data *ch);
 
-bool char_is_outside(const struct char_data *ch);
+bool char_is_outside(GameWorld *g, const struct char_data *ch);
 
 const char *char_hshr(const struct char_data *ch);
 const char *char_hssh(const struct char_data *ch);
@@ -590,74 +590,74 @@ const char *char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
 
-int roll_stats(struct char_data *ch, int type, int bonus);
+int roll_stats(GameWorld *g, struct char_data *ch, int type, int bonus);
 const char *juggleRaceName(char_data *ch, bool capitalized);
-void restore_by(char_data *ch, char_data *healer);
-void restore(char_data *ch, bool announce);
-void resurrect(char_data *ch, int mode);
-void ghostify(char_data *ch);
-void teleport_to(char_data *ch, IDXTYPE rnum);
-bool in_past(char_data *ch);
+void restore_by(GameWorld *g, char_data *ch, char_data *healer);
+void restore(GameWorld *g, char_data *ch, bool announce);
+void resurrect(GameWorld *g, char_data *ch, int mode);
+void ghostify(GameWorld *g, char_data *ch);
+void teleport_to(GameWorld *g, char_data *ch, IDXTYPE rnum);
+bool in_past(GameWorld *g, char_data *ch);
 bool is_newbie(char_data *ch);
-bool in_northran(char_data *ch);
+bool in_northran(GameWorld *g, char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
 bool is_soft_cap(char_data *ch, int64_t type, long double mult);
-bool calcGravCost(char_data *ch, int64_t num);
+bool calcGravCost(GameWorld *g, char_data *ch, int64_t num);
 
-int64_t getCurHealth(char_data *ch);
-int64_t getMaxHealth(char_data *ch);
-double getCurHealthPercent(char_data *ch);
-int64_t getPercentOfMaxHealth(char_data *ch, double amt);
+int64_t getCurHealth(GameWorld *g, char_data *ch);
+int64_t getMaxHealth(GameWorld *g, char_data *ch);
+double getCurHealthPercent(GameWorld *g, char_data *ch);
+int64_t getPercentOfMaxHealth(GameWorld *g, char_data *ch, double amt);
 bool isFullHealth(char_data *ch);
 int64_t setCurHealth(char_data *ch, int64_t amt);
-int64_t setCurHealthPercent(char_data *ch, double amt);
-int64_t incCurHealth(char_data *ch, int64_t amt, bool limit_max);
-int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor);
-int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max);
-int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor);
+int64_t setCurHealthPercent(GameWorld *g, char_data *ch, double amt);
+int64_t incCurHealth(GameWorld *g, char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurHealth(GameWorld *g, char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurHealthPercent(GameWorld *g, char_data *ch, double amt, bool limit_max);
+int64_t decCurHealthPercent(GameWorld *g, char_data *ch, double amt, int64_t floor);
 void restoreHealth(char_data *ch, bool announce);
 
-int64_t getMaxPL(char_data *ch);
-int64_t getMaxPLTrans(char_data *ch);
-int64_t getCurPL(char_data *ch);
+int64_t getMaxPL(GameWorld *g, char_data *ch);
+int64_t getMaxPLTrans(GameWorld *g, char_data *ch);
+int64_t getCurPL(GameWorld *g, char_data *ch);
 int64_t getBasePL(char_data *ch);
 int64_t getEffBasePL(char_data *ch);
 
-int64_t getCurKI(char_data *ch);
-int64_t getMaxKI(char_data *ch);
+int64_t getCurKI(GameWorld *g, char_data *ch);
+int64_t getMaxKI(GameWorld *g, char_data *ch);
 int64_t getBaseKI(char_data *ch);
 int64_t getEffBaseKI(char_data *ch);
-double getCurKIPercent(char_data *ch);
-int64_t getPercentOfMaxKI(char_data *ch, double amt);
+double getCurKIPercent(GameWorld *g, char_data *ch);
+int64_t getPercentOfMaxKI(GameWorld *g, char_data *ch, double amt);
 bool isFullKI(char_data *ch);
-int64_t setCurKIPercent(char_data *ch, double amt);
-int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max);
-int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor);
-int64_t incCurKIPercent(char_data *ch, double amt, bool limit_max);
-int64_t decCurKIPercent(char_data *ch, double amt, int64_t floor);
+int64_t setCurKIPercent(GameWorld *g, char_data *ch, double amt);
+int64_t incCurKI(GameWorld *g, char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurKI(GameWorld *g, char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurKIPercent(GameWorld *g, char_data *ch, double amt, bool limit_max);
+int64_t decCurKIPercent(GameWorld *g, char_data *ch, double amt, int64_t floor);
 void restoreKI(char_data *ch, bool announce);
 
-int64_t getCurST(char_data *ch);
-int64_t getMaxST(char_data *ch);
+int64_t getCurST(GameWorld *g, char_data *ch);
+int64_t getMaxST(GameWorld *g, char_data *ch);
 int64_t getBaseST(char_data *ch);
 int64_t getEffBaseST(char_data *ch);
-double getCurSTPercent(char_data *ch);
+double getCurSTPercent(GameWorld *g, char_data *ch);
 bool isFullST(char_data *ch);
-int64_t setCurSTPercent(char_data *ch, double amt);
-int64_t incCurST(char_data *ch, int64_t amt, bool limit_max);
-int64_t decCurST(char_data *ch, int64_t amt, int64_t floor);
-int64_t incCurSTPercent(char_data *ch, double amt, bool limit_max);
-int64_t decCurSTPercent(char_data *ch, double amt, int64_t floor);
+int64_t setCurSTPercent(GameWorld *g, char_data *ch, double amt);
+int64_t incCurST(GameWorld *g, char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurST(GameWorld *g, char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurSTPercent(GameWorld *g, char_data *ch, double amt, bool limit_max);
+int64_t decCurSTPercent(GameWorld *g, char_data *ch, double amt, int64_t floor);
 void restoreST(char_data *ch, bool announce);
 
-int64_t getCurLF(char_data *ch);
-int64_t getMaxLF(char_data *ch);
+int64_t getCurLF(GameWorld *g, char_data *ch);
+int64_t getMaxLF(GameWorld *g, char_data *ch);
 double getCurLFPercent(char_data *ch);
 bool isFullLF(char_data *ch);
-int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max);
-int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor);
-int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max);
-int64_t decCurLFPercent(char_data *ch, double amt, int64_t floor);
+int64_t incCurLF(GameWorld *g, char_data *ch, int64_t amt, bool limit_max);
+int64_t decCurLF(GameWorld *g, char_data *ch, int64_t amt, int64_t floor);
+int64_t incCurLFPercent(GameWorld *g, char_data *ch, double amt, bool limit_max);
+int64_t decCurLFPercent(GameWorld *g, char_data *ch, double amt, int64_t floor);
 void restoreLF(char_data *ch, bool announce);
 
 bool isFullVitals(char_data *ch);
@@ -674,83 +674,83 @@ void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult);
 
 int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult);
 
-void cureStatusKnockedOut(char_data *ch, bool announce);
+void cureStatusKnockedOut(GameWorld *g, char_data *ch, bool announce);
 void setStatusKnockedOut(char_data *ch);
 
-int64_t getMaxCarryWeight(char_data *ch);
+int64_t getMaxCarryWeight(GameWorld *g, char_data *ch);
 int64_t getCurCarriedWeight(char_data *ch);
 
-int64_t getEffMaxPL(char_data *ch);
-bool isWeightedPL(char_data *ch);
+int64_t getEffMaxPL(GameWorld *g, char_data *ch);
+bool isWeightedPL(GameWorld *g, char_data *ch);
 
-void apply_kaioken(char_data *ch, int times, bool announce);
-void remove_kaioken(char_data *ch, int8_t announce);
+void apply_kaioken(GameWorld *g, char_data *ch, int times, bool announce);
+void remove_kaioken(GameWorld *g, char_data *ch, int8_t announce);
 
-void dispel_ash(struct char_data *ch);
+void dispel_ash(GameWorld *g, struct char_data *ch);
 bool has_group(struct char_data *ch);
-const char *report_party_health(struct char_data *ch);
-bool sec_roll_check(struct char_data *ch);
+const char *report_party_health(GameWorld *g, struct char_data *ch);
+bool sec_roll_check(GameWorld *g, struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
 int trans_req(struct char_data *ch, int trans);
 const char *disp_align(struct char_data *ch);
 void senseCreate(struct char_data *ch);
-int read_sense_memory(struct char_data *ch, struct char_data *vict);
-void sense_memory_write(struct char_data *ch, struct char_data *vict);
-bool roll_pursue(struct char_data *ch, struct char_data *vict);
-void reveal_hiding(struct char_data *ch, int type);
-bool block_calc(struct char_data *ch);
+int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict);
+void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vict);
+bool roll_pursue(GameWorld *g, struct char_data *ch, struct char_data *vict);
+void reveal_hiding(GameWorld *g, struct char_data *ch, int type);
+bool block_calc(GameWorld *g, struct char_data *ch);
 int64_t molt_threshold(struct char_data *ch);
-void handle_evolution(struct char_data *ch, int64_t dmg);
-void demon_refill_lf(struct char_data *ch, int64_t num);
-void mob_talk(struct char_data *ch, const char *speech);
+void handle_evolution(GameWorld *g, struct char_data *ch, int64_t dmg);
+void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num);
+void mob_talk(GameWorld *g, struct char_data *ch, const char *speech);
 bool is_sparring(struct char_data *ch);
 const char *introd_calc(struct char_data *ch);
-int64_t gear_exp(struct char_data *ch, int64_t exp);
-void purge_homing(struct char_data *ch);
-void improve_skill(struct char_data *ch, int skill, int num);
-void stop_follower(struct char_data *ch);
-void die_follower(struct char_data *ch);
-void add_follower(struct char_data *ch, struct char_data *leader);
+int64_t gear_exp(GameWorld *g, struct char_data *ch, int64_t exp);
+void purge_homing(GameWorld *g, struct char_data *ch);
+void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num);
+void stop_follower(GameWorld *g, struct char_data *ch);
+void die_follower(GameWorld *g, struct char_data *ch);
+void add_follower(GameWorld *g, struct char_data *ch, struct char_data *leader);
 bool circle_follow(struct char_data *ch, struct char_data *victim);
 
-void update_pos(struct char_data *victim);
+void update_pos(GameWorld *g, struct char_data *victim);
 
-bool perform_get_from_room(struct char_data *ch, struct obj_data *obj);
-void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
-void perform_remove(struct char_data *ch, int pos);
+bool perform_get_from_room(GameWorld *g, struct char_data *ch, struct obj_data *obj);
+void perform_wear(GameWorld *g, struct char_data *ch, struct obj_data *obj, int where);
+void perform_remove(GameWorld *g, struct char_data *ch, int pos);
 
-bool can_grav(struct char_data *ch);
-bool check_skill(struct char_data *ch, int skill);
-bool check_points(struct char_data *ch, int64_t ki, int64_t st);
-void pcost(struct char_data *ch, double ki, int64_t st);
-bool limb_ok(struct char_data *ch, int type);
-int64_t physical_cost(struct char_data *ch, int skill);
+bool can_grav(GameWorld *g, struct char_data *ch);
+bool check_skill(GameWorld *g, struct char_data *ch, int skill);
+bool check_points(GameWorld *g, struct char_data *ch, int64_t ki, int64_t st);
+void pcost(GameWorld *g, struct char_data *ch, double ki, int64_t st);
+bool limb_ok(GameWorld *g, struct char_data *ch, int type);
+int64_t physical_cost(GameWorld *g, struct char_data *ch, int skill);
 
-int init_skill(struct char_data *ch, int snum);
-int chance_to_hit(struct char_data *ch);
-int handle_speed(struct char_data *ch, struct char_data *vict);
+int init_skill(GameWorld *g, struct char_data *ch, int snum);
+int chance_to_hit(GameWorld *g, struct char_data *ch);
+int handle_speed(GameWorld *g, struct char_data *ch, struct char_data *vict);
 struct time_info_data *age(struct char_data *ch);
 const char *get_i_name(struct char_data *ch, struct char_data *vict);
 
-void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
-bool know_skill(struct char_data *ch, int skill);
+void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
+bool know_skill(GameWorld *g, struct char_data *ch, int skill);
 
-size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void admin_set(struct char_data *ch, int value);
-char *sense_location(struct char_data *ch);
-void null_affect(struct char_data *ch, int aff_flag);
+size_t send_to_char(GameWorld *g, struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 3, 4)));
+void admin_set(GameWorld *g, struct char_data *ch, int value);
+char *sense_location(GameWorld *g, struct char_data *ch);
+void null_affect(GameWorld *g, struct char_data *ch, int aff_flag);
 bool is_affected(struct char_data *ch, int aff_flag);
-void remove_affect(struct char_data *ch, int aff_flag);
-bool planet_check(struct char_data *ch, struct char_data *vict);
+void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag);
+bool planet_check(GameWorld *g, struct char_data *ch, struct char_data *vict);
 /* Player autoexit levels: used as an index to exitlevels           */
 
-int char_exit_level(const struct char_data *ch);
+int char_exit_level(GameWorld *g, const struct char_data *ch);
 
 int char_get_bank_interest(const struct char_data *ch);
 
-void char_lose_tail(char_data *ch);
+void char_lose_tail(GameWorld *g, char_data *ch);
 bool char_has_tail(char_data *ch);
-void char_gain_tail(char_data *ch, bool announce);
+void char_gain_tail(GameWorld *g, char_data *ch, bool announce);
 
 room_vnum sensei_start_room(int s_id);
 room_vnum sensei_location_id(int s_id);
@@ -758,7 +758,7 @@ room_vnum sensei_location_id(int s_id);
 int race_get_size(int r_id);
 bool race_is_playable(int r_id);
 bool race_is_people(int r_id);
-bool can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
+bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
 
 /* Raw fields, used by OLC and the mob files (formerly genmob.h macros). */
 char *char_get_alias(const struct char_data *ch);
@@ -888,8 +888,8 @@ struct obj_data **char_get_equipment_array(struct char_data *ch);
 
 /* Unlinking a character from the lists that run through it */
 void char_unlink_person(struct char_data **head, struct char_data *ch);
-void char_unlink_from_affect_list(struct char_data *ch);
-void char_unlink_from_combat_list(struct char_data *ch);
+void char_unlink_from_affect_list(GameWorld *g, struct char_data *ch);
+void char_unlink_from_combat_list(GameWorld *g, struct char_data *ch);
 
 /* Resets the affected stats to the raw ones. */
 void char_reset_aff_abils(struct char_data *ch);

@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include <errno.h>
+#include "dbat/game_world.h"
 
 static int find_context_gedit(struct descriptor_data *d);
 static int find_context_medit(struct descriptor_data *d);
@@ -28,7 +29,6 @@ static int find_context_trigedit(struct descriptor_data *d);
 static int find_context_zedit(struct descriptor_data *d);
 
 /* local global */
-static char *context_help_list[NUM_CONTEXTS];
 
 static int find_context(struct descriptor_data *d)
 {
@@ -242,10 +242,10 @@ static int find_context_gedit(struct descriptor_data *d)
   }
 }
 
-static char NO_HELP[]        = "No help available (yet)!\r\n";
+static const char NO_HELP[]        = "No help available (yet)!\r\n";
 constexpr int FIND_HELP_CHAR = '*';
 
-bool context_help(struct descriptor_data *d, char *arg)
+bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int context = NOTHING;
   char actbuf[MAX_INPUT_LENGTH], *tmp;
@@ -259,21 +259,21 @@ bool context_help(struct descriptor_data *d, char *arg)
   if (!*tmp)
     context = find_context(d);
 
-  if (context != NOTHING && context < NUM_CONTEXTS && *context_help_list[context]) {
-    if (*context_help_list[context] == FIND_HELP_CHAR) {
-      strlcpy(actbuf, context_help_list[context] + 1, sizeof(actbuf));
-      do_help(d->character, actbuf, 0, 0);
+  if (context != NOTHING && context < NUM_CONTEXTS && *g->context_help_list[context]) {
+    if (*g->context_help_list[context] == FIND_HELP_CHAR) {
+      strlcpy(actbuf, g->context_help_list[context] + 1, sizeof(actbuf));
+      do_help(g, d->character, actbuf, 0, 0);
     } else {
-      write_to_output(d, "\r\n%s\r\n>  ", context_help_list[context]);
+      write_to_output(g, d, "\r\n%s\r\n>  ", g->context_help_list[context]);
     }
     return true;
   }
   strlcpy(actbuf, tmp, sizeof(actbuf));
-  do_help(d->character, actbuf, 0, 0);
+  do_help(g, d->character, actbuf, 0, 0);
   return true;
 }
 
-void boot_context_help(void)
+void boot_context_help(GameWorld *g)
 {
   int i, num;
   FILE *fl;
@@ -283,7 +283,7 @@ void boot_context_help(void)
 
   /* init to 'no help' string */
   for (i = 0; i < NUM_CONTEXTS; i++)
-    context_help_list[i] = NO_HELP;
+    g->context_help_list[i] = (char *)NO_HELP;
 
   if (!fl) {
     mud_log("No context help found : %s", strerror(errno));
@@ -291,17 +291,17 @@ void boot_context_help(void)
   }
   while (get_line(fl, line)) {
     if (sscanf(line, "#%d *", &num) == 1 && num >= 0 && num < NUM_CONTEXTS) /* got a number, now get the text */
-      context_help_list[num] = fread_string(fl, "Context sensitive help");
+      g->context_help_list[num] = fread_string(fl, "Context sensitive help");
   }
 
   fclose(fl);
 }
 
-void free_context_help(void)
+void free_context_help(GameWorld *g)
 {
   int i;
 
   for (i = 0; i < NUM_CONTEXTS; i++)
-    if (context_help_list[i] && context_help_list[i] != NO_HELP)
-      free(context_help_list[i]);
+    if (g->context_help_list[i] && g->context_help_list[i] != NO_HELP)
+      free(g->context_help_list[i]);
 }

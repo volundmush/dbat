@@ -1,7 +1,7 @@
 #include "dbat/consts/senseis.h"
 
 /* Sensei Fighting Style */
-const char *sensei_style[MAX_SENSEI] = {
+const char *const sensei_style[MAX_SENSEI] = {
     "Kame Arts",         /* Roshi */
     "Demon Taijutsu",    /* Piccolo */
     "Crane Arts",        /* Krane */
@@ -18,7 +18,7 @@ const char *sensei_style[MAX_SENSEI] = {
     "Adaptive Taijutsu", /* Kurzak */
     "\n"};
 
-const char *class_abbrevs[NUM_CLASSES + 1] = {
+const char *const class_abbrevs[NUM_CLASSES + 1] = {
     "Ro",
     "Pi",
     "Kr",
@@ -53,7 +53,7 @@ const char *class_abbrevs[NUM_CLASSES + 1] = {
     "\n"};
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *pc_class_types[NUM_CLASSES + 1] = {
+const char *const pc_class_types[NUM_CLASSES + 1] = {
     "Roshi",
     "Piccolo",
     "Krane",
@@ -88,7 +88,7 @@ const char *pc_class_types[NUM_CLASSES + 1] = {
     "\n"};
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *class_names[NUM_CLASSES + 1] = {
+const char *const class_names[NUM_CLASSES + 1] = {
     "roshi",
     "piccolo",
     "krane",

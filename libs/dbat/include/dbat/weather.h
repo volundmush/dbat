@@ -16,13 +16,11 @@ struct time_info_data {
   int16_t year;
 };
 
-extern struct time_info_data time_info;  /* the infomation about the time    */
-extern struct weather_data weather_info; /* the infomation about the weather */
 
 #include "dbat/consts/types.h"
 
 // commands
-void star_phase(struct char_data *ch, int type);
-void oozaru_transform(struct char_data *ch);
-void oozaru_revert(struct char_data *ch);
-void weather_and_time(int mode);
+void star_phase(GameWorld *g, struct char_data *ch, int type);
+void oozaru_transform(GameWorld *g, struct char_data *ch);
+void oozaru_revert(GameWorld *g, struct char_data *ch);
+void weather_and_time(GameWorld *g, int mode);

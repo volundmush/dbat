@@ -17,14 +17,14 @@
 #include "dbat/oasis.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
+#include "dbat/game_world.h"
 
 /* List of zones to be saved.  */
-static struct save_list_data *save_list;
 
 /* Structure defining all known save types.  */
 static struct {
   int save_type;
-  bool (*func)(IDXTYPE rnum);
+  bool (*func)(GameWorld *g, IDXTYPE rnum);
   const char *message;
 } save_types[] = {
     {SL_MOB, save_mobiles, "mobile"},
@@ -78,10 +78,10 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
 
 /* A numbered menu of names, `columns` to a line: "@g%2d@n) %-20.20s" then gap after each name.
    Numbering starts at first_number. */
-void olc_list_columns(struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)
+void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)
 {
   for (int i = 0; i < count; i++)
-    write_to_output(d, "@g%2d@n) %-20.20s%s%s", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
+    write_to_output(g, d, "@g%2d@n) %-20.20s%s%s", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
 }
 
 char *str_udup(const char *txt)
@@ -90,25 +90,25 @@ char *str_udup(const char *txt)
 }
 
 /* Original use: to be called at shutdown time.  */
-bool save_all(void)
+bool save_all(GameWorld *g)
 {
-  while (save_list) {
-    if (save_list->type < 0 || save_list->type > SL_MAX) {
-      switch (save_list->type) {
+  while (g->save_list) {
+    if (g->save_list->type < 0 || g->save_list->type > SL_MAX) {
+      switch (g->save_list->type) {
         case SL_ACT:
           mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
-          save_list = save_list->next; /* Fatal error, skip this one. */
+          g->save_list = g->save_list->next; /* Fatal error, skip this one. */
           break;
         case SL_HLP:
           mud_log("Help not saved - can not autosave. Use 'hedit save'.");
-          save_list = save_list->next; /* Fatal error, skip this one. */
+          g->save_list = g->save_list->next; /* Fatal error, skip this one. */
           break;
         default:
-          mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", save_list->type);
+          mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", g->save_list->type);
           break;
       }
-    } else if (!save_types[save_list->type].func(real_zone(save_list->zone)))
-      save_list = save_list->next; /* Fatal error, skip this one. */
+    } else if (!save_types[g->save_list->type].func(g, real_zone(g, g->save_list->zone)))
+      g->save_list = g->save_list->next; /* Fatal error, skip this one. */
   }
 
   return true;
@@ -163,11 +163,11 @@ void free_ex_descriptions(struct extra_descr_data *head)
   }
 }
 
-bool remove_from_save_list(zone_vnum zone, int type)
+bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *ritem, *temp;
 
-  for (ritem = save_list; ritem; ritem = ritem->next)
+  for (ritem = g->save_list; ritem; ritem = ritem->next)
     if (ritem->zone == zone && ritem->type == type)
       break;
 
@@ -175,12 +175,12 @@ bool remove_from_save_list(zone_vnum zone, int type)
     mud_log("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
     return false;
   }
-  REMOVE_FROM_LIST(ritem, save_list, next, temp);
+  REMOVE_FROM_LIST(ritem, g->save_list, next, temp);
   free(ritem);
   return true;
 }
 
-bool add_to_save_list(zone_vnum zone, int type)
+bool add_to_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *nitem;
   zone_rnum rznum;
@@ -188,42 +188,42 @@ bool add_to_save_list(zone_vnum zone, int type)
   if (type == SL_CFG)
     return false;
 
-  rznum = real_zone(zone);
-  if (rznum == NOWHERE || rznum > top_of_zone_table) {
+  rznum = real_zone(g, zone);
+  if (rznum == NOWHERE || rznum > g->top_zone) {
     if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, top_of_zone_table);
+      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, g->top_zone);
       return false;
     }
   }
 
-  for (nitem = save_list; nitem; nitem = nitem->next)
+  for (nitem = g->save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
       return false;
 
   CREATE(nitem, struct save_list_data, 1);
   nitem->zone = zone;
   nitem->type = type;
-  nitem->next = save_list;
-  save_list   = nitem;
+  nitem->next = g->save_list;
+  g->save_list   = nitem;
   return true;
 }
 
-bool in_save_list(zone_vnum zone, int type)
+bool in_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *nitem;
 
-  for (nitem = save_list; nitem; nitem = nitem->next)
+  for (nitem = g->save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
       return true;
 
   return false;
 }
 
-void free_save_list(void)
+void free_save_list(GameWorld *g)
 {
   struct save_list_data *sld, *next_sld;
 
-  for (sld = save_list; sld; sld = next_sld) {
+  for (sld = g->save_list; sld; sld = next_sld) {
     next_sld = sld->next;
     free(sld);
   }
@@ -232,17 +232,17 @@ void free_save_list(void)
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list)
 {
-  if (save_list == nullptr)
-    send_to_char(ch, "All world files are up to date.\r\n");
+  if (g->save_list == nullptr)
+    send_to_char(g, ch, "All world files are up to date.\r\n");
   else {
     struct save_list_data *item;
 
-    send_to_char(ch, "The following files need saving:\r\n");
-    for (item = save_list; item; item = item->next) {
+    send_to_char(g, ch, "The following files need saving:\r\n");
+    for (item = g->save_list; item; item = item->next) {
       if (item->type != SL_CFG)
-        send_to_char(ch, " - %s data for zone %d.\r\n", save_types[item->type].message, item->zone);
+        send_to_char(g, ch, " - %s data for zone %d.\r\n", save_types[item->type].message, item->zone);
       else
-        send_to_char(ch, " - Game configuration data.\r\n");
+        send_to_char(g, ch, " - Game configuration data.\r\n");
     }
   }
 }
@@ -252,9 +252,9 @@ room_vnum genolc_zonep_bottom(struct zone_data *zone)
   return zone->bot;
 }
 
-zone_vnum genolc_zone_bottom(zone_rnum rznum)
+zone_vnum genolc_zone_bottom(GameWorld *g, zone_rnum rznum)
 {
-  return zone_table[rznum].bot;
+  return g->zones[rznum].bot;
 }
 
 int sprintascii(char *out, bitvector_t bits)

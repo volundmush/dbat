@@ -38,6 +38,7 @@
 #include "dbat/local_limits.h"
 
 #include <errno.h>
+#include "dbat/game_world.h"
 
 static const char *sensei_abbr(int s);
 
@@ -68,7 +69,7 @@ static const char *sensei_abbr(int s);
  * the end of this file reads in the actual values.
  */
 
-static const char *config_sect[NUM_CONFIG_SECTIONS + 1] = {
+static const char *const config_sect[NUM_CONFIG_SECTIONS + 1] = {
     "version",
     "experience",
     "vernum",
@@ -89,10 +90,6 @@ enum {
   CONFIG_LEVEL_BASEHIT,
 };
 
-static char level_version[READ_SIZE];
-static int level_vernum = 0;
-static int save_classes[SAVING_WILL + 1][NUM_CLASSES];
-static int basehit_classes[NUM_CLASSES];
 
 enum { SAVE_MANUAL,
        SAVE_LOW,
@@ -103,7 +100,7 @@ enum { BASEHIT_MANUAL,
        BASEHIT_MEDIUM,
        BASEHIT_HIGH };
 
-void cedit_creation(struct char_data *ch)
+void cedit_creation(GameWorld *g, struct char_data *ch)
 {
   switch (CONFIG_CREATION_METHOD) {
     case CEDIT_CREATION_METHOD_3: /* Points Pool */
@@ -131,7 +128,7 @@ void cedit_creation(struct char_data *ch)
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 
 /* Some initializations for characters, including initial skills */
-void do_start(struct char_data *ch)
+void do_start(GameWorld *g, struct char_data *ch)
 {
   int punch;
   struct obj_data *obj;
@@ -142,27 +139,27 @@ void do_start(struct char_data *ch)
   char_set_exp(ch, 1);
 
   if (char_is_android(ch)) {
-    char_set_conditions(ch, HUNGER, -1);
-    char_set_conditions(ch, THIRST, -1);
-    char_set_conditions(ch, DRUNK, -1);
+    char_set_conditions(g, ch, HUNGER, -1);
+    char_set_conditions(g, ch, THIRST, -1);
+    char_set_conditions(g, ch, DRUNK, -1);
   } else if (char_is_bio(ch) && char_has_genome(ch, 3)) {
-    char_set_conditions(ch, HUNGER, -1);
-    char_set_conditions(ch, DRUNK, 0);
-    char_set_conditions(ch, THIRST, 48);
+    char_set_conditions(g, ch, HUNGER, -1);
+    char_set_conditions(g, ch, DRUNK, 0);
+    char_set_conditions(g, ch, THIRST, 48);
   } else if (char_is_namek(ch)) {
-    char_set_conditions(ch, HUNGER, -1);
-    char_set_conditions(ch, DRUNK, 0);
-    char_set_conditions(ch, THIRST, 48);
+    char_set_conditions(g, ch, HUNGER, -1);
+    char_set_conditions(g, ch, DRUNK, 0);
+    char_set_conditions(g, ch, THIRST, 48);
   } else {
-    char_set_conditions(ch, THIRST, 48);
-    char_set_conditions(ch, HUNGER, 48);
-    char_set_conditions(ch, DRUNK, 0);
+    char_set_conditions(g, ch, THIRST, 48);
+    char_set_conditions(g, ch, HUNGER, 48);
+    char_set_conditions(g, ch, DRUNK, 0);
   }
 
-  char_prf_set(ch, PRF_AUTOEXIT, true);
-  char_prf_set(ch, PRF_HINTS, true);
-  char_prf_set(ch, PRF_NOMUSIC, true);
-  char_prf_set(ch, PRF_DISPHP, true);
+  char_prf_set(g, ch, PRF_AUTOEXIT, true);
+  char_prf_set(g, ch, PRF_HINTS, true);
+  char_prf_set(g, ch, PRF_NOMUSIC, true);
+  char_prf_set(g, ch, PRF_DISPHP, true);
   char_set_limb_condition(ch, (1) - 1, 100);
   char_set_limb_condition(ch, (2) - 1, 100);
   char_set_limb_condition(ch, (3) - 1, 100);
@@ -208,76 +205,76 @@ void do_start(struct char_data *ch)
   if (char_get_race(ch) == RACE_BIO) {
     char_set_absorbs(ch, 3);
   }
-  char_prf_set(ch, PRF_VIEWORDER, true);
-  char_prf_set(ch, PRF_DISPMOVE, true);
-  char_prf_set(ch, PRF_DISPKI, true);
-  char_prf_set(ch, PRF_DISPEXP, true);
-  char_prf_set(ch, PRF_DISPTNL, true);
+  char_prf_set(g, ch, PRF_VIEWORDER, true);
+  char_prf_set(g, ch, PRF_DISPMOVE, true);
+  char_prf_set(g, ch, PRF_DISPKI, true);
+  char_prf_set(g, ch, PRF_DISPEXP, true);
+  char_prf_set(g, ch, PRF_DISPTNL, true);
 
   if (!char_plr_flagged(ch, PLR_FORGET)) {
     if (char_get_choice(ch) == 1) {
-      punch = rand_number(30, 40);
+      punch = rand_number(g, 30, 40);
       char_set_skills_base(ch, SKILL_BLOCK, punch);
     }
     if (char_get_choice(ch) == 2) {
-      punch = rand_number(10, 20);
+      punch = rand_number(g, 10, 20);
       char_set_skills_base(ch, SKILL_PUNCH, punch);
     }
     if (char_get_choice(ch) == 3) {
-      punch = rand_number(30, 40);
+      punch = rand_number(g, 30, 40);
       char_set_skills_base(ch, SKILL_KICK, punch);
     }
     if (char_get_choice(ch) == 4) {
-      punch = rand_number(20, 30);
+      punch = rand_number(g, 20, 30);
       char_set_skills_base(ch, SKILL_SLAM, punch);
     }
     if (char_get_choice(ch) == 5) {
-      punch = rand_number(20, 30);
+      punch = rand_number(g, 20, 30);
       char_set_skills_base(ch, SKILL_FOCUS, punch);
     }
     if (char_is_human(ch)) {
-      punch = rand_number(5, 15);
+      punch = rand_number(g, 5, 15);
       char_set_skills_base(ch, SKILL_BUILD, punch);
     }
     if (char_is_truffle(ch)) {
-      punch = rand_number(15, 25);
+      punch = rand_number(g, 15, 25);
       char_set_skills_base(ch, SKILL_BUILD, punch);
     }
     if (char_is_konatsu(ch)) {
-      punch = rand_number(50, 60);
+      punch = rand_number(g, 50, 60);
       char_set_skills_base(ch, SKILL_SWORD, punch);
-      punch = rand_number(10, 30);
+      punch = rand_number(g, 10, 30);
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, punch);
-      punch = rand_number(10, 30);
+      punch = rand_number(g, 10, 30);
       char_set_skills_base(ch, SKILL_HIDE, punch);
     }
     if (char_is_tapion(ch) || char_is_ginyu(ch) || char_is_dabura(ch) || char_is_kurzak(ch)) {
-      punch = rand_number(30, 40);
+      punch = rand_number(g, 30, 40);
       if (char_is_kurzak(ch) || char_is_tapion(ch)) {
-        punch += rand_number(5, 10);
+        punch += rand_number(g, 5, 10);
       }
       char_set_skills_base(ch, SKILL_THROW, punch);
     }
     if (char_is_kai(ch) || char_is_kanassan(ch)) {
-      punch = rand_number(40, 60);
+      punch = rand_number(g, 40, 60);
       char_set_skills_base(ch, SKILL_FOCUS, punch);
     }
     if (char_is_kanassan(ch)) {
-      punch = rand_number(40, 60);
+      punch = rand_number(g, 40, 60);
       char_set_skills_base(ch, SKILL_CONCENTRATION, punch);
     }
     if (char_is_kai(ch)) {
-      punch = rand_number(30, 50);
+      punch = rand_number(g, 30, 50);
       char_set_skills_base(ch, SKILL_HEAL, punch);
     }
     if (char_is_demon(ch)) {
-      punch = rand_number(50, 60);
+      punch = rand_number(g, 50, 60);
       char_set_skills_base(ch, SKILL_SPEAR, punch);
       char_set_skills_base(ch, SKILL_HONOO, punch);
     }
 
     punch = 0;
-    punch = rand_number(50, 70);
+    punch = rand_number(g, 50, 70);
     char_set_skills_base(ch, SKILL_PUNCH, char_get_skills_base(ch, SKILL_PUNCH) + punch);
   } /* End CC skills */
   else {
@@ -285,20 +282,20 @@ void do_start(struct char_data *ch)
   }
 
   if (char_is_kai(ch) || char_is_kanassan(ch)) {
-    punch = rand_number(15, 30);
+    punch = rand_number(g, 15, 30);
     char_set_skills_base(ch, SKILL_TELEPATHY, punch);
   }
 
   if (char_is_majin(ch) || char_is_namek(ch) || char_is_bio(ch)) {
-    punch = rand_number(10, 16);
+    punch = rand_number(g, 10, 16);
     char_set_skills_base(ch, SKILL_REGENERATE, punch);
   }
   if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
-    punch = rand_number(25, 35);
+    punch = rand_number(g, 25, 35);
     char_set_skills_base(ch, SKILL_ABSORB, punch);
   }
   if (char_is_bio(ch)) {
-    punch = rand_number(15, 25);
+    punch = rand_number(g, 15, 25);
     char_set_skills_base(ch, SKILL_ABSORB, punch);
 
     // Kai Genome bioandroids.
@@ -308,11 +305,11 @@ void do_start(struct char_data *ch)
     }
   }
   if (char_is_arlian(ch)) {
-    punch = rand_number(30, 50);
+    punch = rand_number(g, 30, 50);
     char_set_skills_base(ch, SKILL_SEISHOU, punch);
   }
   if (char_is_icer(ch)) {
-    punch = rand_number(20, 30);
+    punch = rand_number(g, 20, 30);
     char_set_skills_base(ch, SKILL_TAILWHIP, punch);
   }
 
@@ -321,17 +318,17 @@ void do_start(struct char_data *ch)
     //GET_CLASS(ch) = 0;
   }
   if (char_get_alignment(ch) < 51 && char_get_alignment(ch) > -51) {
-    set_title(ch, "the Warrior");
+    set_title(g, ch, "the Warrior");
   }
   if (char_get_alignment(ch) >= 51) {
-    set_title(ch, "the Hero");
+    set_title(g, ch, "the Hero");
   }
   if (char_get_alignment(ch) <= -51) {
-    set_title(ch, "The Villain");
+    set_title(g, ch, "The Villain");
   }
   /* roll_real_abils(ch); */
   if (char_get_gold(ch) <= 0) {
-    char_set_gold(ch, dice(3, 6) * 10);
+    char_set_gold(ch, dice(g, 3, 6) * 10);
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -371,42 +368,42 @@ void do_start(struct char_data *ch)
   char_set_lifeperc(ch, 75);
 
   /* assign starting items etc...*/
-  obj = read_object(17, VIRTUAL);
-  obj_to_char(obj, ch);
+  obj = read_object(g, 17, VIRTUAL);
+  obj_to_char(g, obj, ch);
   if (char_is_hoshijin(ch)) {
-    obj = read_object(3428, VIRTUAL);
-    obj_to_char(obj, ch);
+    obj = read_object(g, 3428, VIRTUAL);
+    obj_to_char(g, obj, ch);
   }
   struct obj_data *obj2;
-  obj2 = read_object(17998, VIRTUAL);
-  obj_to_char(obj2, ch);
+  obj2 = read_object(g, 17998, VIRTUAL);
+  obj_to_char(g, obj2, ch);
 
   if (char_is_tapion(ch) || char_is_ginyu(ch)) {
     struct obj_data *throw_obj;
-    throw_obj = read_object(19050, VIRTUAL);
-    obj_to_char(throw_obj, ch);
-    if (rand_number(1, 2) == 2) {
+    throw_obj = read_object(g, 19050, VIRTUAL);
+    obj_to_char(g, throw_obj, ch);
+    if (rand_number(g, 1, 2) == 2) {
       throw_obj = nullptr;
-      throw_obj = read_object(19050, VIRTUAL);
-      obj_to_char(throw_obj, ch);
+      throw_obj = read_object(g, 19050, VIRTUAL);
+      obj_to_char(g, throw_obj, ch);
     }
-    if (rand_number(1, 2) == 2) {
+    if (rand_number(g, 1, 2) == 2) {
       throw_obj = nullptr;
-      throw_obj = read_object(19050, VIRTUAL);
-      obj_to_char(throw_obj, ch);
+      throw_obj = read_object(g, 19050, VIRTUAL);
+      obj_to_char(g, throw_obj, ch);
     }
 
   } else if (char_is_dabura(ch)) {
     struct obj_data *throw_obj;
-    throw_obj = read_object(19055, VIRTUAL);
-    obj_to_char(throw_obj, ch);
+    throw_obj = read_object(g, 19055, VIRTUAL);
+    obj_to_char(g, throw_obj, ch);
     throw_obj = nullptr;
-    throw_obj = read_object(19055, VIRTUAL);
-    obj_to_char(throw_obj, ch);
+    throw_obj = read_object(g, 19055, VIRTUAL);
+    obj_to_char(g, throw_obj, ch);
   }
 
-  send_to_imm("New character created, %s, by user, %s.", char_get_name(ch), char_get_user(ch));
-  advance_level(ch, char_get_class(ch));
+  send_to_imm(g, "New character created, %s, by user, %s.", char_get_name(ch), char_get_user(ch));
+  advance_level(g, ch, char_get_class(ch));
   /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
   char_set_basepl(ch, MAX(getBasePL(ch), 100L));
@@ -415,9 +412,9 @@ void do_start(struct char_data *ch)
 
   if (char_is_android(ch) && char_plr_flagged(ch, PLR_SENSEM)) {
     char_set_skills_base(ch, SKILL_SENSE, 100);
-    gainBasePL(ch, rand_number(400, 500), false);
-    gainBaseST(ch, rand_number(400, 500), false);
-    gainBaseKI(ch, rand_number(400, 500), false);
+    gainBasePL(ch, rand_number(g, 400, 500), false);
+    gainBaseST(ch, rand_number(g, 400, 500), false);
+    gainBaseKI(ch, rand_number(g, 400, 500), false);
   }
 
   if (char_get_real_abils_str(ch) > 20) {
@@ -457,19 +454,19 @@ void do_start(struct char_data *ch)
     char_set_real_abils_wis(ch, 8);
   }
 
-  char_set_transclass(ch, rand_number(1, 3));
+  char_set_transclass(ch, rand_number(g, 1, 3));
 
   if (CONFIG_SITEOK_ALL)
     char_plr_set(ch, PLR_SITEOK, true);
 
-  if (char_get_race(ch) == RACE_SAIYAN && rand_number(1, 100) >= 95) {
+  if (char_get_race(ch) == RACE_SAIYAN && rand_number(g, 1, 100) >= 95) {
     char_plr_set(ch, PLR_LSSJ, true);
-    write_to_output(char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
+    write_to_output(g, char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
   restoreVitals(ch, true);
 
   char_get_player_specials(ch)->olc_zone = NOWHERE;
-  save_char(ch);
+  save_char(g, ch);
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -487,7 +484,7 @@ void do_start(struct char_data *ch)
  * each class every time they gain a level.
  */
 /* Rillao: transloc, add new transes here */
-void advance_level(struct char_data *ch, int whichclass)
+void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
 {
   int64_t add_hp = 0, add_move = 0, add_mana = 0;
   int add_prac      = 1, add_train, i, ranks;
@@ -614,22 +611,22 @@ void advance_level(struct char_data *ch, int whichclass)
   if (add_hp >= 300000 && add_hp < 600000) {
     add_hp *= .75;
     if (add_hp < 300000) {
-      add_hp = rand_number(300000, 330000);
+      add_hp = rand_number(g, 300000, 330000);
     }
   } else if (add_hp >= 600000 && add_hp < 1000000) {
     add_hp *= .70;
     if (add_hp < 600000) {
-      add_hp = rand_number(600000, 650000);
+      add_hp = rand_number(g, 600000, 650000);
     }
   } else if (add_hp >= 1000000 && add_hp < 2000000) {
     add_hp *= .65;
     if (add_hp < 1000000) {
-      add_hp = rand_number(1000000, 1250000);
+      add_hp = rand_number(g, 1000000, 1250000);
     }
   } else if (add_hp >= 2000000) {
     add_hp *= .45;
     if (add_hp < 2000000) {
-      add_hp = rand_number(2000000, 2250000);
+      add_hp = rand_number(g, 2000000, 2250000);
     }
   }
   if (add_hp >= 15000000) {
@@ -638,22 +635,22 @@ void advance_level(struct char_data *ch, int whichclass)
   if (add_move >= 300000 && add_move < 600000) {
     add_move *= .75;
     if (add_move < 300000) {
-      add_move = rand_number(300000, 330000);
+      add_move = rand_number(g, 300000, 330000);
     }
   } else if (add_move >= 600000 && add_move < 1000000) {
     add_move *= .70;
     if (add_move < 600000) {
-      add_move = rand_number(600000, 650000);
+      add_move = rand_number(g, 600000, 650000);
     }
   } else if (add_move >= 1000000 && add_move < 2000000) {
     add_move *= .65;
     if (add_move < 1000000) {
-      add_move = rand_number(1000000, 1250000);
+      add_move = rand_number(g, 1000000, 1250000);
     }
   } else if (add_move >= 2000000) {
     add_move *= .45;
     if (add_move < 2000000) {
-      add_move = rand_number(2000000, 2250000);
+      add_move = rand_number(g, 2000000, 2250000);
     }
   }
   if (add_move >= 15000000) {
@@ -662,22 +659,22 @@ void advance_level(struct char_data *ch, int whichclass)
   if (add_mana >= 300000 && add_mana < 600000) {
     add_mana *= .75;
     if (add_mana < 300000) {
-      add_mana = rand_number(300000, 330000);
+      add_mana = rand_number(g, 300000, 330000);
     }
   } else if (add_mana >= 600000 && add_mana < 1000000) {
     add_mana *= .70;
     if (add_mana < 600000) {
-      add_mana = rand_number(600000, 650000);
+      add_mana = rand_number(g, 600000, 650000);
     }
   } else if (add_mana >= 1000000 && add_mana < 2000000) {
     add_mana *= .65;
     if (add_mana < 1000000) {
-      add_mana = rand_number(1000000, 1250000);
+      add_mana = rand_number(g, 1000000, 1250000);
     }
   } else if (add_mana >= 2000000) {
     add_mana *= .45;
     if (add_mana < 2000000) {
-      add_mana = rand_number(2000000, 2250000);
+      add_mana = rand_number(g, 2000000, 2250000);
     }
   }
   if (add_mana >= 15000000) {
@@ -685,64 +682,64 @@ void advance_level(struct char_data *ch, int whichclass)
   }
   switch (char_get_level(ch)) {
     case 5:
-      add_hp += rand_number(600, 1000);
-      add_move += rand_number(600, 1000);
-      add_mana += rand_number(600, 1000);
+      add_hp += rand_number(g, 600, 1000);
+      add_move += rand_number(g, 600, 1000);
+      add_mana += rand_number(g, 600, 1000);
       break;
     case 10:
-      add_hp += rand_number(5000, 8000);
-      add_move += rand_number(5000, 8000);
-      add_mana += rand_number(5000, 8000);
+      add_hp += rand_number(g, 5000, 8000);
+      add_move += rand_number(g, 5000, 8000);
+      add_mana += rand_number(g, 5000, 8000);
       break;
     case 20:
-      add_hp += rand_number(15000, 18000);
-      add_move += rand_number(15000, 18000);
-      add_mana += rand_number(15000, 18000);
+      add_hp += rand_number(g, 15000, 18000);
+      add_move += rand_number(g, 15000, 18000);
+      add_mana += rand_number(g, 15000, 18000);
       break;
     case 30:
-      add_hp += rand_number(20000, 30000);
-      add_move += rand_number(20000, 30000);
-      add_mana += rand_number(20000, 30000);
+      add_hp += rand_number(g, 20000, 30000);
+      add_move += rand_number(g, 20000, 30000);
+      add_mana += rand_number(g, 20000, 30000);
       break;
     case 40:
-      add_hp += rand_number(50000, 60000);
-      add_move += rand_number(50000, 60000);
-      add_mana += rand_number(50000, 60000);
+      add_hp += rand_number(g, 50000, 60000);
+      add_move += rand_number(g, 50000, 60000);
+      add_mana += rand_number(g, 50000, 60000);
       break;
     case 50:
-      add_hp += rand_number(60000, 70000);
-      add_move += rand_number(60000, 70000);
-      add_mana += rand_number(60000, 70000);
+      add_hp += rand_number(g, 60000, 70000);
+      add_move += rand_number(g, 60000, 70000);
+      add_mana += rand_number(g, 60000, 70000);
       break;
     case 60:
-      add_hp += rand_number(80000, 100000);
-      add_move += rand_number(80000, 100000);
-      add_mana += rand_number(80000, 100000);
+      add_hp += rand_number(g, 80000, 100000);
+      add_move += rand_number(g, 80000, 100000);
+      add_mana += rand_number(g, 80000, 100000);
       break;
     case 70:
-      add_hp += rand_number(100000, 150000);
-      add_move += rand_number(100000, 150000);
-      add_mana += rand_number(100000, 150000);
+      add_hp += rand_number(g, 100000, 150000);
+      add_move += rand_number(g, 100000, 150000);
+      add_mana += rand_number(g, 100000, 150000);
       break;
     case 80:
-      add_hp += rand_number(150000, 200000);
-      add_move += rand_number(150000, 200000);
-      add_mana += rand_number(150000, 200000);
+      add_hp += rand_number(g, 150000, 200000);
+      add_move += rand_number(g, 150000, 200000);
+      add_mana += rand_number(g, 150000, 200000);
       break;
     case 90:
-      add_hp += rand_number(150000, 200000);
-      add_move += rand_number(150000, 200000);
-      add_mana += rand_number(150000, 200000);
+      add_hp += rand_number(g, 150000, 200000);
+      add_move += rand_number(g, 150000, 200000);
+      add_mana += rand_number(g, 150000, 200000);
       break;
     case 99:
-      add_hp += rand_number(1500000, 2000000);
-      add_move += rand_number(1500000, 2000000);
-      add_mana += rand_number(1500000, 2000000);
+      add_hp += rand_number(g, 1500000, 2000000);
+      add_move += rand_number(g, 1500000, 2000000);
+      add_mana += rand_number(g, 1500000, 2000000);
       break;
     case 100:
-      add_hp += rand_number(5000000, 6000000);
-      add_move += rand_number(5000000, 6000000);
-      add_mana += rand_number(5000000, 6000000);
+      add_hp += rand_number(g, 5000000, 6000000);
+      add_move += rand_number(g, 5000000, 6000000);
+      add_mana += rand_number(g, 5000000, 6000000);
       break;
   }
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -759,7 +756,7 @@ void advance_level(struct char_data *ch, int whichclass)
   if (char_get_level(ch) > 1) {
     /* blah */
   } else {
-    gainBasePL(ch, rand_number(1, 20), false);
+    gainBasePL(ch, rand_number(g, 1, 20), false);
     char_set_basepl(ch, MAX(getBasePL(ch), 250L));
     char_set_baseki(ch, MAX(getBaseKI(ch), 250L));
     char_set_basest(ch, MAX(getBaseST(ch), 250L));
@@ -774,15 +771,15 @@ void advance_level(struct char_data *ch, int whichclass)
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-  if (rand_number(1, 8) == 2) {
+  if (rand_number(g, 1, 8) == 2) {
     add_train = 1;
     if (add_train) {
-      char_set_ability_trains(ch, char_get_ability_trains(ch) + (add_train));
+      char_set_ability_trains(g, ch, char_get_ability_trains(g, ch) + (add_train));
     }
   }
-  if (rand_number(1, 4) == 4) {
-    send_to_char(ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
-    add_prac += rand_number(4, 12);
+  if (rand_number(g, 1, 4) == 4) {
+    send_to_char(g, ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
+    add_prac += rand_number(g, 4, 12);
   }
 
   if ((char_is_demon(ch) || char_is_kanassan(ch)) && char_get_level(ch) > 80) {
@@ -804,7 +801,7 @@ void advance_level(struct char_data *ch, int whichclass)
     add_mana *= 1.25;
     add_move *= 1.25;
   }
-  char_set_practice_points(ch, char_get_practice_points(ch) + (add_prac));
+  char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (add_prac));
   gainBasePL(ch, add_hp, true);
   gainBaseKI(ch, add_mana, true);
   gainBaseST(ch, add_move, true);
@@ -816,26 +813,26 @@ void advance_level(struct char_data *ch, int whichclass)
   add_move = nmo;
   /* epic and class feat points no longer exist; epic characters gained only those */
   if (char_get_class_level(ch) < LVL_EPICSTART)
-    char_set_feat_points(ch, char_get_feat_points(ch) + (add_gen_feats));
+    char_set_feat_points(g, ch, char_get_feat_points(g, ch) + (add_gen_feats));
 
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)
-      char_set_conditions(ch, i, (char)-1);
-    char_prf_set(ch, PRF_HOLYLIGHT, true);
+      char_set_conditions(g, ch, i, (char)-1);
+    char_prf_set(g, ch, PRF_HOLYLIGHT, true);
   }
 
   sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
   if (char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_level(ch) == 20 || char_get_level(ch) == 40 || char_get_level(ch) == 60 || char_get_level(ch) == 80 || char_get_level(ch) == 100)) {
     char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-    send_to_char(ch, "@CYou feel like you could remember a new skill!@n\r\n");
+    send_to_char(g, ch, "@CYou feel like you could remember a new skill!@n\r\n");
   }
-  if (char_is_namek(ch) && rand_number(1, 100) <= 5) {
+  if (char_is_namek(ch) && rand_number(g, 1, 100) <= 5) {
     char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-    send_to_char(ch, "@CYou feel as though you could learn another skill.@n\r\n");
+    send_to_char(g, ch, "@CYou feel as though you could learn another skill.@n\r\n");
   }
-  if (char_is_icer(ch) && rand_number(1, 100) <= 25) {
+  if (char_is_icer(ch) && rand_number(g, 1, 100) <= 25) {
     bring_to_cap(ch);
-    send_to_char(ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
+    send_to_char(g, ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
 
   int gain_stat = false;
@@ -859,10 +856,10 @@ void advance_level(struct char_data *ch, int whichclass)
     int raise = false, stat_fail = 0;
     if (char_is_konatsu(ch)) {
       while (raise == false) {
-        if (char_get_real_abils_dex(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+        if (char_get_real_abils_dex(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_CLUMSY) <= 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
-            send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -870,13 +867,13 @@ void advance_level(struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
-            send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(ch, "@RBoth agility and speed are capped!@n");
+          send_to_char(g, ch, "@RBoth agility and speed are capped!@n");
           raise = true;
         }
       } // End while
@@ -884,10 +881,10 @@ void advance_level(struct char_data *ch, int whichclass)
 
     else if (char_is_mutant(ch)) {
       while (raise == false) {
-        if (char_get_real_abils_con(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+        if (char_get_real_abils_con(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_con(ch) < 45 || char_get_bonuses(ch, BONUS_FRAIL) <= 0) {
             char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
-            send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your constitution increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -895,13 +892,13 @@ void advance_level(struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
-            send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(ch, "@RBoth constitution and speed are capped!@n");
+          send_to_char(g, ch, "@RBoth constitution and speed are capped!@n");
           raise = true;
         }
       } // End while
@@ -909,10 +906,10 @@ void advance_level(struct char_data *ch, int whichclass)
 
     else if (char_is_hoshijin(ch)) {
       while (raise == false) {
-        if (char_get_real_abils_str(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+        if (char_get_real_abils_str(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_str(ch) < 45 || char_get_bonuses(ch, BONUS_WIMP) <= 0) {
             char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
-            send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your strength increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -920,13 +917,13 @@ void advance_level(struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_dex(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
-            send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
+            send_to_char(g, ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(ch, "@RBoth strength and agility are capped!@n");
+          send_to_char(g, ch, "@RBoth strength and agility are capped!@n");
           raise = true;
         }
       } // End while
@@ -935,26 +932,26 @@ void advance_level(struct char_data *ch, int whichclass)
   } // End stat bonus on level gain
 
   strcat(buf, ".\r\n");
-  send_to_char(ch, "%s", buf);
+  send_to_char(g, ch, "%s", buf);
 
-  if (char_get_skill(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
-    send_to_char(ch, "You can now perform another Potential Release.\r\n");
+  if (char_get_skill(ch, SKILL_POTENTIAL) && rand_number(g, 1, 4) == 4) {
+    send_to_char(g, ch, "You can now perform another Potential Release.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 25) {
-    send_to_char(ch, "You can now perform another Majinization.\r\n");
+    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 50) {
-    send_to_char(ch, "You can now perform another Majinization.\r\n");
+    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 75) {
-    send_to_char(ch, "You can now perform another Majinization.\r\n");
+    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 100) {
-    send_to_char(ch, "You can now perform another Majinization.\r\n");
+    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
 
@@ -971,27 +968,27 @@ void advance_level(struct char_data *ch, int whichclass)
     case 100:
       if (char_get_bonuses(ch, BONUS_BRAWNY) > 0) {
         char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
-        send_to_char(ch, "@GYour muscles have grown stronger!@n\r\n");
+        send_to_char(g, ch, "@GYour muscles have grown stronger!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SCHOLARLY) > 0) {
         char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
-        send_to_char(ch, "@GYour mind has grown sharper!@n\r\n");
+        send_to_char(g, ch, "@GYour mind has grown sharper!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SAGE) > 0) {
         char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
-        send_to_char(ch, "@GYour understanding about life has improved!@n\r\n");
+        send_to_char(g, ch, "@GYour understanding about life has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_AGILE) > 0) {
         char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 2);
-        send_to_char(ch, "@GYour body has grown more agile!@n\r\n");
+        send_to_char(g, ch, "@GYour body has grown more agile!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_QUICK) > 0) {
         char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
-        send_to_char(ch, "@GYou feel like your speed has improved!@n\r\n");
+        send_to_char(g, ch, "@GYou feel like your speed has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_STURDY) > 0) {
         char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
-        send_to_char(ch, "@GYour body feels tougher now!@n\r\n");
+        send_to_char(g, ch, "@GYour body feels tougher now!@n\r\n");
       }
       break;
   }
@@ -1000,10 +997,10 @@ void advance_level(struct char_data *ch, int whichclass)
     char_set_armor(ch, 0);
   }
   if (char_get_level(ch) == 2) {
-    ERAPLAYERS += 1;
+    g->ERAPLAYERS += 1;
   }
   snoop_check(ch);
-  save_char(ch);
+  save_char(g, ch);
 }
 
 /*
@@ -1526,7 +1523,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
   return str;
 }
 
-int load_levels()
+int load_levels(GameWorld *g)
 {
   FILE *fp;
   char line[READ_SIZE], sect_name[READ_SIZE] = {'\0'}, *ptr;
@@ -1540,9 +1537,9 @@ int load_levels()
 
   for (cls = 0; cls < NUM_CLASSES; cls++) {
     for (tp = 0; tp <= SAVING_WILL; tp++) {
-      save_classes[tp][cls] = 0;
+      g->save_classes[tp][cls] = 0;
     }
-    basehit_classes[cls] = 0;
+    g->basehit_classes[cls] = 0;
   }
 
   for (;;) {
@@ -1571,12 +1568,12 @@ int load_levels()
           mud_log("SYSERR: Suntzu %s config files are not compatible with rasputin", LEVEL_CONFIG);
           return -1;
         }
-        strcpy(level_version, line); /* OK - both are READ_SIZE */
+        strcpy(g->level_version, line); /* OK - both are READ_SIZE */
       } else if (sect_type == CONFIG_LEVEL_VERNUM) {
-        level_vernum = atoi(line);
+        g->level_vernum = atoi(line);
       } else if (sect_type == CONFIG_LEVEL_EXPERIENCE) {
         tp             = atoi(line);
-        exp_multiplier = tp;
+        g->exp_multiplier = tp;
       } else if ((sect_type >= CONFIG_LEVEL_FORTITUDE && sect_type <= CONFIG_LEVEL_WILL) ||
                  sect_type == CONFIG_LEVEL_BASEHIT) {
         for (ptr = line; ptr && *ptr && !isdigit(*ptr); ptr++);
@@ -1606,9 +1603,9 @@ int load_levels()
           return -1;
         }
         if (sect_type == CONFIG_LEVEL_BASEHIT) {
-          basehit_classes[cls] = tp;
+          g->basehit_classes[cls] = tp;
         } else {
-          save_classes[SAVING_FORTITUDE + sect_type - CONFIG_LEVEL_FORTITUDE][cls] = tp;
+          g->save_classes[SAVING_FORTITUDE + sect_type - CONFIG_LEVEL_FORTITUDE][cls] = tp;
         }
       } else {
         mud_log("Unsupported level config option");
@@ -1638,11 +1635,11 @@ int highest_skill_value(int level, int type)
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 /* Not anymore because for DBZ it was crap and unnecessary. */
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-time_t birth_age(struct char_data *ch)
+time_t birth_age(GameWorld *g, struct char_data *ch)
 {
   int tmp;
 
-  tmp = rand_number(16, 18);
+  tmp = rand_number(g, 16, 18);
 
   return tmp;
 }

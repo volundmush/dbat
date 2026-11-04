@@ -22,12 +22,13 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/room_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
 
-static room_vnum redit_find_new_vnum(zone_rnum zone);
+static room_vnum redit_find_new_vnum(GameWorld *g, zone_rnum zone);
 
 /* External Functions */
 
@@ -56,7 +57,7 @@ ACMD(do_dig)
 
   /* Can't dig if we don't know where to go. */
   if (!*sdir || !*sroom) {
-    send_to_char(ch, "Format: tunnel <direction> <room> - to create an exit\r\n"
+    send_to_char(g, ch, "Format: tunnel <direction> <room> - to create an exit\r\n"
                      "        tunnel <direction> -1     - to delete an exit\r\n");
     return;
   }
@@ -66,18 +67,18 @@ ACMD(do_dig)
     rvnum = NOWHERE;
   else
     rvnum = (room_vnum)rawvnum;
-  rrnum = real_room(rvnum);
+  rrnum = real_room(g, rvnum);
   if ((dir = search_block(sdir, abbr_dirs, false)) < 0)
     dir = search_block(sdir, dirs, false);
-  zone = rroom_get_zone(char_get_in_room(ch));
+  zone = rroom_get_zone(g, char_get_in_room(ch));
 
   if (dir < 0) {
-    send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
+    send_to_char(g, ch, "Cannot create an exit to the '%s'.\r\n", sdir);
     return;
   }
   /* Make sure that the builder has access to the zone he's in. */
-  if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
-    send_cannot_edit(ch, zone);
+  if ((zone == NOWHERE) || !can_edit_zone(g, ch, zone)) {
+    send_cannot_edit(g, ch, zone);
     return;
   }
   /*
@@ -85,26 +86,26 @@ ACMD(do_dig)
    * After all, it'd just get us more errors on 'show errors'
    */
   if (rvnum == 0) {
-    send_to_char(ch, "The target exists, but you can't dig to limbo!\r\n");
+    send_to_char(g, ch, "The target exists, but you can't dig to limbo!\r\n");
     return;
   }
   /*
    * target room == -1 removes the exit 
    */
   if (rvnum == NOTHING) {
-    if (rroom_get_dir_option(char_get_in_room(ch), dir)) {
+    if (rroom_get_dir_option(g, char_get_in_room(ch), dir)) {
       /* free the old pointers, if any */
-      if (rroom_get_dir_option(char_get_in_room(ch), dir)->general_description)
-        free(rroom_get_dir_option(char_get_in_room(ch), dir)->general_description);
-      if (rroom_get_dir_option(char_get_in_room(ch), dir)->keyword)
-        free(rroom_get_dir_option(char_get_in_room(ch), dir)->keyword);
-      free(rroom_get_dir_option(char_get_in_room(ch), dir));
-      rroom_set_dir_option(char_get_in_room(ch), dir, nullptr);
-      add_to_save_list(zone_table[rroom_get_zone(char_get_in_room(ch))].number, SL_WLD);
-      send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
+      if (rroom_get_dir_option(g, char_get_in_room(ch), dir)->general_description)
+        free(rroom_get_dir_option(g, char_get_in_room(ch), dir)->general_description);
+      if (rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword)
+        free(rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword);
+      free(rroom_get_dir_option(g, char_get_in_room(ch), dir));
+      rroom_set_dir_option(g, char_get_in_room(ch), dir, nullptr);
+      add_to_save_list(g, g->zones[rroom_get_zone(g, char_get_in_room(ch))].number, SL_WLD);
+      send_to_char(g, ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
     }
-    send_to_char(ch, "There is no exit to the %s.\r\n"
+    send_to_char(g, ch, "There is no exit to the %s.\r\n"
                      "No exit removed.\r\n",
                  dirs[dir]);
     return;
@@ -112,19 +113,19 @@ ACMD(do_dig)
   /*
    * Can't dig in a direction, if it's already a door. 
    */
-  if (rroom_get_dir_option(char_get_in_room(ch), dir)) {
-    send_to_char(ch, "There already is an exit to the %s.\r\n", dirs[dir]);
+  if (rroom_get_dir_option(g, char_get_in_room(ch), dir)) {
+    send_to_char(g, ch, "There already is an exit to the %s.\r\n", dirs[dir]);
     return;
   }
 
   /* Make sure that the builder has access to the zone he's linking to. */
-  zone = real_zone_by_thing(rvnum);
+  zone = real_zone_by_thing(g, rvnum);
   if (zone == NOWHERE) {
-    send_to_char(ch, "You cannot link to a non-existing zone!\r\n");
+    send_to_char(g, ch, "You cannot link to a non-existing zone!\r\n");
     return;
   }
-  if (!can_edit_zone(ch, zone)) {
-    send_cannot_edit(ch, zone);
+  if (!can_edit_zone(g, ch, zone)) {
+    send_cannot_edit(g, ch, zone);
     return;
   }
   /*
@@ -137,7 +138,7 @@ ACMD(do_dig)
      * This way we can let redit_save_internally handle the room adding.
      */
     if (d->olc) {
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
       free(d->olc);
     }
     CREATE(d->olc, struct oasis_olc_data, 1);
@@ -160,16 +161,16 @@ ACMD(do_dig)
      * Save the new room to memory.
      * redit_save_internally handles adding the room in the right place, etc.
      */
-    redit_save_internally(d);
+    redit_save_internally(g, d);
     OLC_VAL(d) = 0;
 
-    send_to_char(ch, "New room (%d) created.\r\n", rvnum);
-    cleanup_olc(d, CLEANUP_ALL);
-    update_space();
+    send_to_char(g, ch, "New room (%d) created.\r\n", rvnum);
+    cleanup_olc(g, d, CLEANUP_ALL);
+    update_space(g);
     /* 
      * update rrnum to the correct room rnum after adding the room 
      */
-    rrnum = real_room(rvnum);
+    rrnum = real_room(g, rvnum);
   }
 
   /*
@@ -178,33 +179,33 @@ ACMD(do_dig)
   {
     struct room_direction_data *new_exit;
     CREATE(new_exit, struct room_direction_data, 1);
-    rroom_set_dir_option(char_get_in_room(ch), dir, new_exit);
+    rroom_set_dir_option(g, char_get_in_room(ch), dir, new_exit);
   }
-  rroom_get_dir_option(char_get_in_room(ch), dir)->general_description = nullptr;
-  rroom_get_dir_option(char_get_in_room(ch), dir)->keyword             = nullptr;
-  rroom_get_dir_option(char_get_in_room(ch), dir)->to_room             = rrnum;
-  add_to_save_list(zone_table[rroom_get_zone(char_get_in_room(ch))].number, SL_WLD);
-  save_rooms(zone_table[rroom_get_zone(rrnum)].number);
-  send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
-               dirs[dir], rvnum, rroom_get_name(rrnum));
+  rroom_get_dir_option(g, char_get_in_room(ch), dir)->general_description = nullptr;
+  rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword             = nullptr;
+  rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room             = rrnum;
+  add_to_save_list(g, g->zones[rroom_get_zone(g, char_get_in_room(ch))].number, SL_WLD);
+  save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
+  send_to_char(g, ch, "You make an exit %s to room %d (%s).\r\n",
+               dirs[dir], rvnum, rroom_get_name(g, rrnum));
 
   /* 
    * check if we can dig from there to here. 
    */
-  if (rroom_get_dir_option(rrnum, rev_dir[dir]))
-    send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
+  if (rroom_get_dir_option(g, rrnum, rev_dir[dir]))
+    send_to_char(g, ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                  rvnum, dirs[rev_dir[dir]]);
   else {
     {
       struct room_direction_data *new_exit;
       CREATE(new_exit, struct room_direction_data, 1);
-      rroom_set_dir_option(rrnum, rev_dir[dir], new_exit);
+      rroom_set_dir_option(g, rrnum, rev_dir[dir], new_exit);
     }
-    rroom_get_dir_option(rrnum, rev_dir[dir])->general_description = nullptr;
-    rroom_get_dir_option(rrnum, rev_dir[dir])->keyword             = nullptr;
-    rroom_get_dir_option(rrnum, rev_dir[dir])->to_room             = char_get_in_room(ch);
-    add_to_save_list(zone_table[rroom_get_zone(rrnum)].number, SL_WLD);
-    save_rooms(zone_table[rroom_get_zone(rrnum)].number);
+    rroom_get_dir_option(g, rrnum, rev_dir[dir])->general_description = nullptr;
+    rroom_get_dir_option(g, rrnum, rev_dir[dir])->keyword             = nullptr;
+    rroom_get_dir_option(g, rrnum, rev_dir[dir])->to_room             = char_get_in_room(ch);
+    add_to_save_list(g, g->zones[rroom_get_zone(g, rrnum)].number, SL_WLD);
+    save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
   }
 }
 
@@ -223,73 +224,73 @@ ACMD(do_rcopy)
   two_arguments(argument, arg, arg2);
 
   if (!*arg) {
-    send_to_char(ch, "Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n");
+    send_to_char(g, ch, "Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n");
     return;
   }
 
   if (!*arg2) {
     tvnum = atoi(arg);
-    rvnum = rroom_get_vnum(char_get_in_room(ch));
+    rvnum = rroom_get_vnum(g, char_get_in_room(ch));
   } else {
     rvnum = atoi(arg2);
     tvnum = atoi(arg);
   }
 
   if (rvnum == 0 || tvnum == 0) {
-    send_to_char(ch, "The void is fine as it is, try again.\r\n");
+    send_to_char(g, ch, "The void is fine as it is, try again.\r\n");
     return;
   }
   if (rvnum == tvnum) {
-    send_to_char(ch, "Don't copy a room to its self!\r\n");
+    send_to_char(g, ch, "Don't copy a room to its self!\r\n");
     return;
   }
 
-  trnum = real_room(tvnum);
-  rrnum = real_room(rvnum);
+  trnum = real_room(g, tvnum);
+  rrnum = real_room(g, rvnum);
 
   if (trnum == NOWHERE) {
-    send_to_char(ch, "Could not find base room: %d\r\n", tvnum);
+    send_to_char(g, ch, "Could not find base room: %d\r\n", tvnum);
     return;
   }
   if (rrnum == NOWHERE) {
-    send_to_char(ch, "Could not find target room: %d\r\n", rvnum);
+    send_to_char(g, ch, "Could not find target room: %d\r\n", rvnum);
     return;
   }
 
-  zone = rroom_get_zone(rrnum);
-  if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
-    send_to_char(ch, "\r\n");
-    send_cannot_edit(ch, zone);
+  zone = rroom_get_zone(g, rrnum);
+  if ((zone == NOWHERE) || !can_edit_zone(g, ch, zone)) {
+    send_to_char(g, ch, "\r\n");
+    send_cannot_edit(g, ch, zone);
     return;
   }
 
   /* Free descriptions. */
-  if (rroom_get_name(rrnum))
-    free(rroom_get_name(rrnum));
-  if (rroom_get_description(rrnum))
-    free(rroom_get_description(rrnum));
-  if (rroom_get_ex_description(rrnum))
-    free_ex_descriptions(rroom_get_ex_description(rrnum));
-  rroom_set_sector_type(rrnum, rroom_sect(trnum));
+  if (rroom_get_name(g, rrnum))
+    free(rroom_get_name(g, rrnum));
+  if (rroom_get_description(g, rrnum))
+    free(rroom_get_description(g, rrnum));
+  if (rroom_get_ex_description(g, rrnum))
+    free_ex_descriptions(rroom_get_ex_description(g, rrnum));
+  rroom_set_sector_type(g, rrnum, rroom_sect(g, trnum));
 
   /* Copy over description name and extra descriptions */
-  rroom_set_description(rrnum, str_udup(rroom_get_description(trnum)));
-  rroom_set_name(rrnum, str_udup(rroom_get_name(trnum)));
+  rroom_set_description(g, rrnum, str_udup(rroom_get_description(g, trnum)));
+  rroom_set_name(g, rrnum, str_udup(rroom_get_name(g, trnum)));
 
   /* Copy over any existings extra descriptions */
-  if (rroom_get_ex_description(trnum))
-    copy_ex_descriptions(room_ex_description_slot(&world[rrnum]), rroom_get_ex_description(trnum));
+  if (rroom_get_ex_description(g, trnum))
+    copy_ex_descriptions(room_ex_description_slot(&g->rooms[rrnum]), rroom_get_ex_description(g, trnum));
   else
-    rroom_set_ex_description(rrnum, nullptr);
+    rroom_set_ex_description(g, rrnum, nullptr);
 
   /* Finally copy over room flags */
   for (i = 0; i < AF_ARRAY_MAX; i++) {
-    rroom_get_room_flags(rrnum)[i] = rroom_get_room_flags(trnum)[i];
+    rroom_get_room_flags(g, rrnum)[i] = rroom_get_room_flags(g, trnum)[i];
   }
-  send_to_imm("Log: %s has copied room [%d] to room [%d].", char_get_name(ch), tvnum, rvnum);
-  add_to_save_list(zone_table[rroom_get_zone(rrnum)].number, SL_WLD);
-  save_rooms(zone_table[rroom_get_zone(rrnum)].number);
-  send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
+  send_to_imm(g, "Log: %s has copied room [%d] to room [%d].", char_get_name(ch), tvnum, rvnum);
+  add_to_save_list(g, g->zones[rroom_get_zone(g, rrnum)].number, SL_WLD);
+  save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
+  send_to_char(g, ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
 
 /****************************************************************************
@@ -297,18 +298,18 @@ ACMD(do_rcopy)
 ****************************************************************************/
 
 /* For buildwalk. Finds the next free vnum in the zone */
-static room_vnum redit_find_new_vnum(zone_rnum zone)
+static room_vnum redit_find_new_vnum(GameWorld *g, zone_rnum zone)
 {
-  room_vnum vnum = genolc_zone_bottom(zone);
-  room_rnum rnum = real_room(vnum);
+  room_vnum vnum = genolc_zone_bottom(g, zone);
+  room_rnum rnum = real_room(g, vnum);
 
   if (rnum == NOWHERE)
     return NOWHERE;
 
   for (;;) {
-    if (vnum > zone_table[zone].top)
+    if (vnum > g->zones[zone].top)
       return (NOWHERE);
-    if (rnum > top_of_world || rroom_get_vnum(rnum) > vnum)
+    if (rnum > g->top_room || rroom_get_vnum(g, rnum) > vnum)
       break;
     rnum++;
     vnum++;
@@ -316,18 +317,18 @@ static room_vnum redit_find_new_vnum(zone_rnum zone)
   return (vnum);
 }
 
-bool buildwalk(struct char_data *ch, int dir)
+bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
 {
   room_vnum vnum;
   room_rnum rnum;
 
-  if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_BUILDWALK) &&
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_BUILDWALK) &&
       char_get_admlevel(ch) >= ADMLVL_IMMORT) {
 
-    if (!can_edit_zone(ch, rroom_get_zone(char_get_in_room(ch)))) {
-      send_cannot_edit(ch, rroom_get_zone(char_get_in_room(ch)));
-    } else if ((vnum = redit_find_new_vnum(rroom_get_zone(char_get_in_room(ch)))) == NOWHERE)
-      send_to_char(ch, "No free vnums are available in this zone!\r\n");
+    if (!can_edit_zone(g, ch, rroom_get_zone(g, char_get_in_room(ch)))) {
+      send_cannot_edit(g, ch, rroom_get_zone(g, char_get_in_room(ch)));
+    } else if ((vnum = redit_find_new_vnum(g, rroom_get_zone(g, char_get_in_room(ch)))) == NOWHERE)
+      send_to_char(g, ch, "No free vnums are available in this zone!\r\n");
     else {
       struct descriptor_data *d = char_get_desc(ch);
       /*
@@ -335,11 +336,11 @@ bool buildwalk(struct char_data *ch, int dir)
        * This way we can let redit_save_internally handle the room adding.
        */
       if (d->olc) {
-        mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
+        mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
         free(d->olc);
       }
       CREATE(d->olc, struct oasis_olc_data, 1);
-      OLC_ZNUM(d) = rroom_get_zone(char_get_in_room(ch));
+      OLC_ZNUM(d) = rroom_get_zone(g, char_get_in_room(ch));
       OLC_NUM(d)  = vnum;
       CREATE(OLC_ROOM(d), struct room_data, 1);
 
@@ -353,26 +354,26 @@ bool buildwalk(struct char_data *ch, int dir)
        * Save the new room to memory.
        * redit_save_internally handles adding the room in the right place, etc.
        */
-      redit_save_internally(d);
+      redit_save_internally(g, d);
       OLC_VAL(d) = 0;
 
       /* Link rooms */
-      rnum = real_room(vnum);
+      rnum = real_room(g, vnum);
       {
         struct room_direction_data *new_exit;
         CREATE(new_exit, struct room_direction_data, 1);
-        char_set_exit(ch, dir, new_exit);
+        char_set_exit(g, ch, dir, new_exit);
       }
-      char_get_exit(ch, dir)->to_room = rnum;
+      char_get_exit(g, ch, dir)->to_room = rnum;
       struct room_direction_data *back_exit;
       CREATE(back_exit, struct room_direction_data, 1);
-      rroom_set_dir_option(rnum, rev_dir[dir], back_exit);
-      rroom_get_dir_option(rnum, rev_dir[dir])->to_room = char_get_in_room(ch);
+      rroom_set_dir_option(g, rnum, rev_dir[dir], back_exit);
+      rroom_get_dir_option(g, rnum, rev_dir[dir])->to_room = char_get_in_room(ch);
 
       /* Report room creation to user */
-      send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);
-      cleanup_olc(d, CLEANUP_STRUCTS);
-      update_space();
+      send_to_char(g, ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);
+      cleanup_olc(g, d, CLEANUP_STRUCTS);
+      update_space(g);
       return true;
     }
   }

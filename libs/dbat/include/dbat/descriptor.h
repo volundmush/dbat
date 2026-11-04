@@ -86,4 +86,3 @@ struct descriptor_data {
   int rbank;
 };
 
-extern struct descriptor_data *descriptor_list;

@@ -84,4 +84,4 @@ constexpr int PLR_NOGROW       = 79; /* Halt Growth for S & HB           */
 
 constexpr int NUM_PLR_FLAGS = 80;
 
-extern const char *player_bits[NUM_PLR_FLAGS + 1];
+extern const char *const player_bits[NUM_PLR_FLAGS + 1];

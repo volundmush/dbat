@@ -12,4 +12,4 @@ constexpr int HIST_SNET    = 9;
 
 constexpr int NUM_HIST = 10;
 
-extern const char *history_types[NUM_HIST + 1];
+extern const char *const history_types[NUM_HIST + 1];

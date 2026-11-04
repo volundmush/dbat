@@ -2,4 +2,4 @@
 /* Shared between the files of this directory only. */
 #include "dbat/consts/types.h"
 
-bool valid_silk(struct obj_data *obj);
+bool valid_silk(GameWorld *g, struct obj_data *obj);

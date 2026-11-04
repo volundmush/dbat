@@ -4,7 +4,7 @@
  * WEAR_x - for eq list
  * Not use in sprinttype() so no \n.
  */
-const char *wear_where[NUM_WEARS + 1] = {
+const char *const wear_where[NUM_WEARS + 1] = {
     "@c<@CUsed Somewhere     @c>@n ",
     "@c<@CWorn On Finger     @c>@n ",
     "@c<@CWorn On Finger     @c>@n ",
@@ -31,7 +31,7 @@ const char *wear_where[NUM_WEARS + 1] = {
     "\n"};
 
 /* WEAR_x - for stat */
-const char *equipment_types[NUM_WEARS + 1] = {
+const char *const equipment_types[NUM_WEARS + 1] = {
     "Used as light",
     "Worn on right finger",
     "Worn on left finger",
@@ -58,7 +58,7 @@ const char *equipment_types[NUM_WEARS + 1] = {
     "\n"};
 
 /* ITEM_x (ordinal object types) */
-const char *item_types[NUM_ITEM_TYPES + 1] = {
+const char *const item_types[NUM_ITEM_TYPES + 1] = {
     "UNDEFINED",
     "LIGHT",
     "SCROLL",
@@ -99,7 +99,7 @@ const char *item_types[NUM_ITEM_TYPES + 1] = {
     "\n"};
 
 /* ITEM_WEAR_ (wear bitvector) */
-const char *wear_bits[NUM_ITEM_WEARS + 1] = {
+const char *const wear_bits[NUM_ITEM_WEARS + 1] = {
     "TAKE",
     "FINGER",
     "NECK",
@@ -122,7 +122,7 @@ const char *wear_bits[NUM_ITEM_WEARS + 1] = {
     "\n"};
 
 /* ITEM_x (extra bits) */
-const char *extra_bits[NUM_ITEM_FLAGS + 1] = {
+const char *const extra_bits[NUM_ITEM_FLAGS + 1] = {
     "GLOW",
     "HUM",
     "NO_RENT",
@@ -221,7 +221,7 @@ const char *extra_bits[NUM_ITEM_FLAGS + 1] = {
     "\n"};
 
 /* CONT_x */
-const char *container_bits[NUM_CONT_FLAGS + 1] = {
+const char *const container_bits[NUM_CONT_FLAGS + 1] = {
     "CLOSEABLE",
     "PICKPROOF",
     "CLOSED",
@@ -230,7 +230,7 @@ const char *container_bits[NUM_CONT_FLAGS + 1] = {
 };
 
 /* LIQ_x */
-const char *drinks[NUM_LIQ_TYPES + 1] =
+const char *const drinks[NUM_LIQ_TYPES + 1] =
     {
         "water",
         "beer",
@@ -251,7 +251,7 @@ const char *drinks[NUM_LIQ_TYPES + 1] =
         "\n"};
 
 /* MATERIAL_ */
-const char *material_names[NUM_MATERIALS + 1] = {
+const char *const material_names[NUM_MATERIALS + 1] = {
     "bone",
     "ceramic",
     "copper",
@@ -302,7 +302,7 @@ const char *material_names[NUM_MATERIALS + 1] = {
     "\n"};
 
 /* one-word alias for each drink */
-const char *drinknames[NUM_LIQ_TYPES + 1] =
+const char *const drinknames[NUM_LIQ_TYPES + 1] =
     {
         "water",
         "beer",
@@ -324,7 +324,7 @@ const char *drinknames[NUM_LIQ_TYPES + 1] =
 
 /* effect of drinks on hunger, thirst, and drunkenness -- see values.doc */
 /* (Drunk, Hunger, Thirst) */
-int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS] = {
+const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS] = {
     {0, 0, 5},
     {3, 1, 1},
     {3, 1, 1},
@@ -344,7 +344,7 @@ int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS] = {
 };
 
 /* color of the various drinks */
-const char *color_liquid[NUM_LIQ_TYPES + 1] =
+const char *const color_liquid[NUM_LIQ_TYPES + 1] =
     {
         "clear",
         "brown",

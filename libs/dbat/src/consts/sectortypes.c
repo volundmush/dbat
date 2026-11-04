@@ -1,7 +1,7 @@
 #include "dbat/consts/sectortypes.h"
 
 /* SECT_ */
-const char *sector_types[NUM_ROOM_SECTORS + 1] = {
+const char *const sector_types[NUM_ROOM_SECTORS + 1] = {
     "Inside",
     "City",
     "Plain",

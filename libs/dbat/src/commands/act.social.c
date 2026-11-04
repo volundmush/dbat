@@ -23,10 +23,11 @@
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/random.h"
+#include "dbat/game_world.h"
 
 /* local functions */
 static char *fread_action(FILE *fl, int nr);
-static int find_action(int cmd);
+static int find_action(GameWorld *g, int cmd);
 static int social_sort_order(const void *a, const void *b);
 
 ACMD(do_action)
@@ -37,23 +38,23 @@ ACMD(do_action)
   struct char_data *vict;
   struct obj_data *targ;
 
-  if ((act_nr = find_action(cmd)) < 0) {
-    send_to_char(ch, "That action is not supported.\r\n");
+  if ((act_nr = find_action(g, cmd)) < 0) {
+    send_to_char(g, ch, "That action is not supported.\r\n");
     return;
   }
 
-  action = &soc_mess_list[act_nr];
+  action = &g->soc_mess_list[act_nr];
 
   if (!argument || !*argument) {
-    send_to_char(ch, "%s\r\n", action->char_no_arg);
-    act(action->others_no_arg, action->hide, ch, 0, 0, TO_ROOM);
+    send_to_char(g, ch, "%s\r\n", action->char_no_arg);
+    act(g, action->others_no_arg, action->hide, ch, 0, 0, TO_ROOM);
     return;
   }
 
   two_arguments(argument, arg, part);
 
   if ((!action->char_body_found) && (*part)) {
-    send_to_char(ch, "Sorry, this social does not support body parts.\r\n");
+    send_to_char(g, ch, "Sorry, this social does not support body parts.\r\n");
     return;
   }
 
@@ -65,44 +66,44 @@ ACMD(do_action)
   else
     *arg = '\0';
 
-  vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM);
+  vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
   if (!vict) {
     if (action->char_obj_found) {
-      targ = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch));
-      if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch)));
+      targ = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
+      if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch)));
       if (targ) {
-        act(action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
-        act(action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);
+        act(g, action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
+        act(g, action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);
         return;
       }
     }
     if (action->not_found)
-      send_to_char(ch, "%s\r\n", action->not_found);
+      send_to_char(g, ch, "%s\r\n", action->not_found);
     else
-      send_to_char(ch, "I don't see anything by that name here.\r\n");
+      send_to_char(g, ch, "I don't see anything by that name here.\r\n");
     return;
   }
 
   if (vict == ch) {
     if (action->char_auto)
-      send_to_char(ch, "%s\r\n", action->char_auto);
+      send_to_char(g, ch, "%s\r\n", action->char_auto);
     else
-      send_to_char(ch, "Erm, no.\r\n");
-    act(action->others_auto, action->hide, ch, 0, 0, TO_ROOM);
+      send_to_char(g, ch, "Erm, no.\r\n");
+    act(g, action->others_auto, action->hide, ch, 0, 0, TO_ROOM);
     return;
   }
 
   if (char_get_position(vict) < action->min_victim_position)
-    act("$N is not in a proper position for that.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$N is not in a proper position for that.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
   else {
     if (*part) {
-      act(action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
-      act(action->others_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_NOTVICT);
-      act(action->vict_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_VICT);
+      act(g, action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
+      act(g, action->others_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_NOTVICT);
+      act(g, action->vict_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_VICT);
     } else {
-      act(action->char_found, 0, ch, 0, vict, TO_CHAR | TO_SLEEP);
-      act(action->others_found, action->hide, ch, 0, vict, TO_NOTVICT);
-      act(action->vict_found, action->hide, ch, 0, vict, TO_VICT);
+      act(g, action->char_found, 0, ch, 0, vict, TO_CHAR | TO_SLEEP);
+      act(g, action->others_found, action->hide, ch, 0, vict, TO_NOTVICT);
+      act(g, action->vict_found, action->hide, ch, 0, vict, TO_VICT);
     }
   }
 }
@@ -115,46 +116,46 @@ ACMD(do_insult)
   one_argument(argument, arg);
 
   if (*arg) {
-    if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(ch, "Can't hear you!\r\n");
+    if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
+      send_to_char(g, ch, "Can't hear you!\r\n");
     else {
       if (victim != ch) {
-        send_to_char(ch, "You insult %s.\r\n", char_get_name(victim));
+        send_to_char(g, ch, "You insult %s.\r\n", char_get_name(victim));
 
-        switch (rand_number(0, 2)) {
+        switch (rand_number(g, 0, 2)) {
           case 0:
             if (char_get_sex(ch) == SEX_MALE) {
               if (char_get_sex(victim) == SEX_MALE)
-                act("$n accuses you of fighting like a woman!", false, ch, 0, victim, TO_VICT);
+                act(g, "$n accuses you of fighting like a woman!", false, ch, 0, victim, TO_VICT);
               else
-                act("$n says that women can't fight.", false, ch, 0, victim, TO_VICT);
+                act(g, "$n says that women can't fight.", false, ch, 0, victim, TO_VICT);
             } else { /* Ch == Woman */
               if (char_get_sex(victim) == SEX_MALE)
-                act("$n accuses you of having the smallest... (brain?)",
+                act(g, "$n accuses you of having the smallest... (brain?)",
                     false, ch, 0, victim, TO_VICT);
               else
-                act("$n tells you that you'd lose a beauty contest against a troll.",
+                act(g, "$n tells you that you'd lose a beauty contest against a troll.",
                     false, ch, 0, victim, TO_VICT);
             }
             break;
           case 1:
-            act("$n calls your mother a bitch!", false, ch, 0, victim, TO_VICT);
+            act(g, "$n calls your mother a bitch!", false, ch, 0, victim, TO_VICT);
             break;
           default:
-            act("$n tells you to get lost!", false, ch, 0, victim, TO_VICT);
+            act(g, "$n tells you to get lost!", false, ch, 0, victim, TO_VICT);
             break;
         } /* end switch */
 
-        act("$n insults $N.", true, ch, 0, victim, TO_NOTVICT);
+        act(g, "$n insults $N.", true, ch, 0, victim, TO_NOTVICT);
       } else { /* ch == victim */
-        send_to_char(ch, "You feel insulted.\r\n");
+        send_to_char(g, ch, "You feel insulted.\r\n");
       }
     }
   } else
-    send_to_char(ch, "I'm sure you don't want to insult *everybody*...\r\n");
+    send_to_char(g, ch, "I'm sure you don't want to insult *everybody*...\r\n");
 }
 
-void boot_social_messages(void)
+void boot_social_messages(GameWorld *g)
 {
   FILE *fl;
   int nr = 0, hide, min_char_pos, min_pos, min_lvl, curr_soc = -1;
@@ -175,7 +176,7 @@ void boot_social_messages(void)
     *next_soc = '\0';
     while (!feof(fl)) {
       fgets(next_soc, MAX_STRING_LENGTH, fl);
-      if (*next_soc == '~') top_of_socialt++;
+      if (*next_soc == '~') g->top_of_socialt++;
     }
   } else { /* old style */
 
@@ -187,14 +188,14 @@ void boot_social_messages(void)
     /* count socials */
     while (!feof(fl)) {
       fgets(next_soc, MAX_STRING_LENGTH, fl);
-      if (*next_soc == '\n' || *next_soc == '\r') top_of_socialt++; /* all socials are followed by a blank line */
+      if (*next_soc == '\n' || *next_soc == '\r') g->top_of_socialt++; /* all socials are followed by a blank line */
     }
   }
 
-  mud_log("Social table contains %d socials.", top_of_socialt);
+  mud_log("Social table contains %d socials.", g->top_of_socialt);
   rewind(fl);
 
-  CREATE(soc_mess_list, struct social_messg, top_of_socialt + 1);
+  CREATE(g->soc_mess_list, struct social_messg, g->top_of_socialt + 1);
 
   /* now read 'em */
   for (;;) {
@@ -216,72 +217,72 @@ void boot_social_messages(void)
         exit(1);
       }
       curr_soc++;
-      soc_mess_list[curr_soc].command             = strdup(next_soc + 1);
-      soc_mess_list[curr_soc].sort_as             = strdup(sorted);
-      soc_mess_list[curr_soc].hide                = hide;
-      soc_mess_list[curr_soc].min_char_position   = min_char_pos;
-      soc_mess_list[curr_soc].min_victim_position = min_pos;
-      soc_mess_list[curr_soc].min_level_char      = min_lvl;
+      g->soc_mess_list[curr_soc].command             = strdup(next_soc + 1);
+      g->soc_mess_list[curr_soc].sort_as             = strdup(sorted);
+      g->soc_mess_list[curr_soc].hide                = hide;
+      g->soc_mess_list[curr_soc].min_char_position   = min_char_pos;
+      g->soc_mess_list[curr_soc].min_victim_position = min_pos;
+      g->soc_mess_list[curr_soc].min_level_char      = min_lvl;
     } else { /* old style */
       if (fscanf(fl, " %d %d \n", &hide, &min_pos) != 2) {
         mud_log("SYSERR: format error in social file near social '%s'", next_soc);
         exit(1);
       }
       curr_soc++;
-      soc_mess_list[curr_soc].command             = strdup(next_soc);
-      soc_mess_list[curr_soc].sort_as             = strdup(next_soc);
-      soc_mess_list[curr_soc].hide                = hide;
-      soc_mess_list[curr_soc].min_char_position   = POS_RESTING;
-      soc_mess_list[curr_soc].min_victim_position = min_pos;
-      soc_mess_list[curr_soc].min_level_char      = 0;
+      g->soc_mess_list[curr_soc].command             = strdup(next_soc);
+      g->soc_mess_list[curr_soc].sort_as             = strdup(next_soc);
+      g->soc_mess_list[curr_soc].hide                = hide;
+      g->soc_mess_list[curr_soc].min_char_position   = POS_RESTING;
+      g->soc_mess_list[curr_soc].min_victim_position = min_pos;
+      g->soc_mess_list[curr_soc].min_level_char      = 0;
     }
 
-    soc_mess_list[curr_soc].char_no_arg   = fread_action(fl, nr);
-    soc_mess_list[curr_soc].others_no_arg = fread_action(fl, nr);
-    soc_mess_list[curr_soc].char_found    = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].char_no_arg   = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].others_no_arg = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].char_found    = fread_action(fl, nr);
 
     /* if no char_found, the rest is to be ignored */
-    if (CONFIG_NEW_SOCIALS == false && !soc_mess_list[curr_soc].char_found)
+    if (CONFIG_NEW_SOCIALS == false && !g->soc_mess_list[curr_soc].char_found)
       continue;
 
-    soc_mess_list[curr_soc].others_found = fread_action(fl, nr);
-    soc_mess_list[curr_soc].vict_found   = fread_action(fl, nr);
-    soc_mess_list[curr_soc].not_found    = fread_action(fl, nr);
-    soc_mess_list[curr_soc].char_auto    = fread_action(fl, nr);
-    soc_mess_list[curr_soc].others_auto  = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].others_found = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].vict_found   = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].not_found    = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].char_auto    = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].others_auto  = fread_action(fl, nr);
 
     if (CONFIG_NEW_SOCIALS == false)
       continue;
 
-    soc_mess_list[curr_soc].char_body_found   = fread_action(fl, nr);
-    soc_mess_list[curr_soc].others_body_found = fread_action(fl, nr);
-    soc_mess_list[curr_soc].vict_body_found   = fread_action(fl, nr);
-    soc_mess_list[curr_soc].char_obj_found    = fread_action(fl, nr);
-    soc_mess_list[curr_soc].others_obj_found  = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].char_body_found   = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].others_body_found = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].vict_body_found   = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].char_obj_found    = fread_action(fl, nr);
+    g->soc_mess_list[curr_soc].others_obj_found  = fread_action(fl, nr);
   }
 
   /* close file & set top */
   fclose(fl);
-  top_of_socialt = curr_soc;
+  g->top_of_socialt = curr_soc;
 }
 
-void create_command_list(void)
+void create_command_list(GameWorld *g)
 {
   int i, j, k;
 
   /* free up old command list */
-  if (complete_cmd_info)
-    free_command_list();
+  if (g->complete_cmd_info)
+    free_command_list(g);
 
   /* re check the sort on the socials */
-  qsort(soc_mess_list, top_of_socialt + 1, sizeof(*soc_mess_list), social_sort_order);
+  qsort(g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_sort_order);
 
   /* count the commands in the command list */
   i = 0;
   while (*cmd_info[i].command != '\n') i++;
   i++;
 
-  CREATE(complete_cmd_info, struct command_info, top_of_socialt + i + 2);
+  CREATE(g->complete_cmd_info, struct command_info, g->top_of_socialt + i + 2);
 
   /* this loop sorts the socials and commands together into one big list */
   i = 0;
@@ -289,42 +290,42 @@ void create_command_list(void)
   k = 0;
 
   while (*cmd_info[i].command != '\n') {
-    complete_cmd_info[k++] = cmd_info[i++];
+    g->complete_cmd_info[k++] = cmd_info[i++];
   }
 
-  while (j <= top_of_socialt) {
-    soc_mess_list[j].act_nr               = k;
-    complete_cmd_info[k].command          = soc_mess_list[j].command;
-    complete_cmd_info[k].sort_as          = soc_mess_list[j].sort_as;
-    complete_cmd_info[k].minimum_position = soc_mess_list[j].min_char_position;
-    complete_cmd_info[k].command_pointer  = do_action;
-    complete_cmd_info[k].minimum_level    = soc_mess_list[j++].min_level_char;
-    complete_cmd_info[k].minimum_admlevel = ADMLVL_NONE;
-    complete_cmd_info[k++].subcmd         = 0;
+  while (j <= g->top_of_socialt) {
+    g->soc_mess_list[j].act_nr               = k;
+    g->complete_cmd_info[k].command          = g->soc_mess_list[j].command;
+    g->complete_cmd_info[k].sort_as          = g->soc_mess_list[j].sort_as;
+    g->complete_cmd_info[k].minimum_position = g->soc_mess_list[j].min_char_position;
+    g->complete_cmd_info[k].command_pointer  = do_action;
+    g->complete_cmd_info[k].minimum_level    = g->soc_mess_list[j++].min_level_char;
+    g->complete_cmd_info[k].minimum_admlevel = ADMLVL_NONE;
+    g->complete_cmd_info[k++].subcmd         = 0;
   }
 
-  complete_cmd_info[k].command          = strdup("\n");
-  complete_cmd_info[k].sort_as          = strdup("zzzzzzz");
-  complete_cmd_info[k].minimum_position = 0;
-  complete_cmd_info[k].command_pointer  = 0;
-  complete_cmd_info[k].minimum_level    = 0;
-  complete_cmd_info[k].minimum_admlevel = 0;
-  complete_cmd_info[k].subcmd           = 0;
+  g->complete_cmd_info[k].command          = strdup("\n");
+  g->complete_cmd_info[k].sort_as          = strdup("zzzzzzz");
+  g->complete_cmd_info[k].minimum_position = 0;
+  g->complete_cmd_info[k].command_pointer  = 0;
+  g->complete_cmd_info[k].minimum_level    = 0;
+  g->complete_cmd_info[k].minimum_admlevel = 0;
+  g->complete_cmd_info[k].subcmd           = 0;
   mud_log("Command info rebuilt, %d total commands.", k);
 }
 
-void free_command_list(void)
+void free_command_list(GameWorld *g)
 {
   int k;
 
-  if (!complete_cmd_info)
+  if (!g->complete_cmd_info)
     return;
   /* entries point at cmd_info's and the socials' strings, except the terminator made by create_command_list() */
-  for (k = 0; *complete_cmd_info[k].command != '\n'; k++);
-  free((char *)complete_cmd_info[k].command);
-  free((char *)complete_cmd_info[k].sort_as);
-  free(complete_cmd_info);
-  complete_cmd_info = nullptr;
+  for (k = 0; *g->complete_cmd_info[k].command != '\n'; k++);
+  free((char *)g->complete_cmd_info[k].command);
+  free((char *)g->complete_cmd_info[k].sort_as);
+  free(g->complete_cmd_info);
+  g->complete_cmd_info = nullptr;
 }
 
 static char *fread_action(FILE *fl, int nr)
@@ -348,16 +349,16 @@ static char *fread_action(FILE *fl, int nr)
   return (strdup(buf));
 }
 
-void free_social_messages(void)
+void free_social_messages(GameWorld *g)
 {
   struct social_messg *mess;
   int i;
 
-  for (i = 0; i <= top_of_socialt; i++) {
-    mess = &soc_mess_list[i];
+  for (i = 0; i <= g->top_of_socialt; i++) {
+    mess = &g->soc_mess_list[i];
     free_action(mess);
   }
-  free(soc_mess_list);
+  free(g->soc_mess_list);
 }
 
 void free_action(struct social_messg *mess)
@@ -393,14 +394,14 @@ static int social_order(const void *key, const void *social)
 }
 
 /* soc_mess_list is in act_nr order: create_command_list() numbers it that way. */
-static int find_action(int cmd)
+static int find_action(GameWorld *g, int cmd)
 {
   struct social_messg *found;
 
-  if (top_of_socialt < 0)
+  if (g->top_of_socialt < 0)
     return -1;
-  found = bsearch(&cmd, soc_mess_list, top_of_socialt + 1, sizeof(*soc_mess_list), social_order);
-  return found ? found - soc_mess_list : -1;
+  found = bsearch(&cmd, g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_order);
+  return found ? found - g->soc_mess_list : -1;
 }
 
 ACMD(do_gmote)
@@ -413,48 +414,48 @@ ACMD(do_gmote)
   half_chop(argument, buf, arg);
 
   if (subcmd)
-    for (length = strlen(buf), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++)
-      if (!strncmp(complete_cmd_info[cmd].command, buf, length))
+    for (length = strlen(buf), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
+      if (!strncmp(g->complete_cmd_info[cmd].command, buf, length))
         break;
 
-  if ((act_nr = find_action(cmd)) < 0) {
+  if ((act_nr = find_action(g, cmd)) < 0) {
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(buf, false, ch, 0, vict, TO_GMOTE);
+    act(g, buf, false, ch, 0, vict, TO_GMOTE);
     return;
   }
 
-  if (rroom_flagged(char_get_in_room(ch), ROOM_SOUNDPROOF)) {
-    send_to_char(ch, "The walls seem to absorb your actions.\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
+    send_to_char(g, ch, "The walls seem to absorb your actions.\r\n");
     return;
   }
 
-  action = &soc_mess_list[act_nr];
+  action = &g->soc_mess_list[act_nr];
 
   if (!action->char_found)
     *arg = '\0';
 
   if (!*arg) {
     if (!action->others_no_arg || !*action->others_no_arg) {
-      send_to_char(ch, "Who are you going to do that to?\r\n");
+      send_to_char(g, ch, "Who are you going to do that to?\r\n");
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
-  } else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(ch, "%s\r\n", action->not_found);
+  } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    send_to_char(g, ch, "%s\r\n", action->not_found);
     return;
   } else if (vict == ch) {
     if (!action->others_auto || !*action->others_auto) {
-      send_to_char(ch, "%s\r\n", action->char_auto);
+      send_to_char(g, ch, "%s\r\n", action->char_auto);
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);
   } else {
     if (char_get_position(vict) < action->min_victim_position) {
-      act("$N is not in a proper position for that.",
+      act(g, "$N is not in a proper position for that.",
           false, ch, 0, vict, TO_CHAR | TO_SLEEP);
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
   }
-  act(buf, false, ch, 0, vict, TO_GMOTE);
+  act(g, buf, false, ch, 0, vict, TO_GMOTE);
 }

@@ -7,10 +7,11 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* Local functions not used elsewhere */
-static struct char_data *find_char_by_uid_in_lookup_table(long uid);
-static struct obj_data *find_obj_by_uid_in_lookup_table(long uid);
+static struct char_data *find_char_by_uid_in_lookup_table(GameWorld *g, long uid);
+static struct obj_data *find_obj_by_uid_in_lookup_table(GameWorld *g, long uid);
 
 /* Return pointer to first occurrence of string ct in */
 /* cs, or NULL if not present.  Case insensitive */
@@ -41,18 +42,18 @@ char *str_str(char *cs, char *ct)
   return nullptr;
 }
 
-int trgvar_in_room(room_vnum vnum)
+int trgvar_in_room(GameWorld *g, room_vnum vnum)
 {
-  room_rnum rnum = real_room(vnum);
+  room_rnum rnum = real_room(g, vnum);
   int i          = 0;
   char_data *ch;
 
   if (rnum == NOWHERE) {
-    script_log("people.vnum: world[rnum] does not exist");
+    script_log(g, "people.vnum: world[rnum] does not exist");
     return (-1);
   }
 
-  for (ch = rroom_get_people(rnum); ch != nullptr; ch = char_get_next_in_room(ch))
+  for (ch = rroom_get_people(g, rnum); ch != nullptr; ch = char_get_next_in_room(ch))
     i++;
 
   return i;
@@ -77,7 +78,7 @@ obj_data *get_obj_in_list(char *name, obj_data *list)
   return nullptr;
 }
 
-obj_data *get_object_in_equip(char_data *ch, char *name)
+obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name)
 {
   int j, n = 0, number;
   obj_data *obj;
@@ -96,7 +97,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name)
     obj_vnum ovnum = atoi(name);
     for (j = 0; j < NUM_WEARS; j++)
       if ((obj = char_get_equipment(ch, j)))
-        if (obj_get_vnum(obj) == ovnum)
+        if (obj_get_vnum(g, obj) == ovnum)
           return (obj);
   } else {
     snprintf(tmpname, sizeof(tmpname), "%s", name);
@@ -192,36 +193,36 @@ bool can_wear_on_pos(struct obj_data *obj, int pos)
  ************************************************************/
 
 /* return char with UID n */
-struct char_data *find_char(long n)
+struct char_data *find_char(GameWorld *g, long n)
 {
   /* Players and legacy mobs live below ROOM_ID_BASE; mobs from MOB_ID_BASE. */
   if (n < 0 || (n >= ROOM_ID_BASE && n < MOB_ID_BASE)) /* See note in dg_scripts.h */
     return nullptr;
 
-  return find_char_by_uid_in_lookup_table(n);
+  return find_char_by_uid_in_lookup_table(g, n);
 }
 
 /* return object with UID n */
-obj_data *find_obj(long n)
+obj_data *find_obj(GameWorld *g, long n)
 {
   if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.h */
     return nullptr;
 
-  return find_obj_by_uid_in_lookup_table(n);
+  return find_obj_by_uid_in_lookup_table(g, n);
 }
 
 /* return room with UID n */
-room_data *find_room(long n)
+room_data *find_room(GameWorld *g, long n)
 {
   room_rnum rnum;
 
   n -= ROOM_ID_BASE;
   if (n < 0)
     return nullptr;
-  rnum = real_room((room_vnum)n);
+  rnum = real_room(g, (room_vnum)n);
 
   if (rnum != NOWHERE)
-    return &world[rnum];
+    return &g->rooms[rnum];
 
   return nullptr;
 }
@@ -231,19 +232,19 @@ room_data *find_room(long n)
  ************************************************************/
 
 /* search the entire world for a char, and return a pointer */
-char_data *get_char(char *name)
+char_data *get_char(GameWorld *g, char *name)
 {
   char_data *i;
 
   if (*name == UID_CHAR) {
-    i = find_char(atoi(name + 1));
+    i = find_char(g, atoi(name + 1));
 
-    if (i && valid_dg_target(i, DG_ALLOW_GODS))
+    if (i && valid_dg_target(g, i, DG_ALLOW_GODS))
       return i;
   } else {
-    for (i = character_list; i; i = char_get_next(i))
+    for (i = g->characters; i; i = char_get_next(i))
       if (isname(name, char_get_alias(i)) &&
-          valid_dg_target(i, DG_ALLOW_GODS))
+          valid_dg_target(g, i, DG_ALLOW_GODS))
         return i;
   }
 
@@ -253,21 +254,21 @@ char_data *get_char(char *name)
 /*
  * Finds a char in the same room as the object with the name 'name'
  */
-char_data *get_char_near_obj(obj_data *obj, char *name)
+char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name)
 {
   char_data *ch;
 
   if (*name == UID_CHAR) {
-    ch = find_char(atoi(name + 1));
+    ch = find_char(g, atoi(name + 1));
 
-    if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
   } else {
     room_rnum num;
     if ((num = obj_room(obj)) != NOWHERE)
-      for (ch = rroom_get_people(num); ch; ch = char_get_next_in_room(ch))
+      for (ch = rroom_get_people(g, num); ch; ch = char_get_next_in_room(ch))
         if (isname(name, char_get_alias(ch)) &&
-            valid_dg_target(ch, DG_ALLOW_GODS))
+            valid_dg_target(g, ch, DG_ALLOW_GODS))
           return ch;
   }
 
@@ -278,19 +279,19 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching in room room first
  */
-char_data *get_char_in_room(room_data *room, char *name)
+char_data *get_char_in_room(GameWorld *g, room_data *room, char *name)
 {
   char_data *ch;
 
   if (*name == UID_CHAR) {
-    ch = find_char(atoi(name + 1));
+    ch = find_char(g, atoi(name + 1));
 
-    if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
   } else {
     for (ch = room_get_people(room); ch; ch = char_get_next_in_room(ch))
       if (isname(name, char_get_alias(ch)) &&
-          valid_dg_target(ch, DG_ALLOW_GODS))
+          valid_dg_target(g, ch, DG_ALLOW_GODS))
         return ch;
   }
 
@@ -299,7 +300,7 @@ char_data *get_char_in_room(room_data *room, char *name)
 
 /* searches the room with the object for an object with name 'name'*/
 
-obj_data *get_obj_near_obj(obj_data *obj, char *name)
+obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
   char_data *ch;
@@ -324,7 +325,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
       return obj_get_in_obj(obj);
   }
   /* or worn ?*/
-  else if (obj_get_worn_by(obj) && (i = get_object_in_equip(obj_get_worn_by(obj), name)))
+  else if (obj_get_worn_by(obj) && (i = get_object_in_equip(g, obj_get_worn_by(obj), name)))
     return i;
   /* or carried ? */
   else if (obj_get_carried_by(obj) &&
@@ -332,26 +333,26 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
     return i;
   else if ((rm = obj_room(obj)) != NOWHERE) {
     /* check the floor */
-    if ((i = get_obj_in_list(name, rroom_get_contents(rm))))
+    if ((i = get_obj_in_list(name, rroom_get_contents(g, rm))))
       return i;
 
     /* check peoples' inventory */
-    for (ch = rroom_get_people(rm); ch; ch = char_get_next_in_room(ch))
-      if ((i = get_object_in_equip(ch, name)))
+    for (ch = rroom_get_people(g, rm); ch; ch = char_get_next_in_room(ch))
+      if ((i = get_object_in_equip(g, ch, name)))
         return i;
   }
   return nullptr;
 }
 
 /* returns the object in the world with name name, or NULL if not found */
-obj_data *get_obj(char *name)
+obj_data *get_obj(GameWorld *g, char *name)
 {
   obj_data *obj;
 
   if (*name == UID_CHAR)
-    return find_obj(atoi(name + 1));
+    return find_obj(g, atoi(name + 1));
   else {
-    for (obj = object_list; obj; obj = obj_get_next(obj))
+    for (obj = g->objects; obj; obj = obj_get_next(obj))
       if (isname(name, obj_get_name(obj)))
         return obj;
   }
@@ -360,45 +361,45 @@ obj_data *get_obj(char *name)
 }
 
 /* finds room by id or vnum.  returns NULL if not found */
-room_data *get_room(char *name)
+room_data *get_room(GameWorld *g, char *name)
 {
   room_rnum nr;
 
   if (*name == UID_CHAR)
-    return find_room(atoi(name + 1));
-  else if ((nr = real_room(atoi(name))) == NOWHERE)
+    return find_room(g, atoi(name + 1));
+  else if ((nr = real_room(g, atoi(name))) == NOWHERE)
     return nullptr;
   else
-    return &world[nr];
+    return &g->rooms[nr];
 }
 
 /*
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching with the person owing the object
  */
-char_data *get_char_by_obj(obj_data *obj, char *name)
+char_data *get_char_by_obj(GameWorld *g, obj_data *obj, char *name)
 {
   char_data *ch;
 
   if (*name == UID_CHAR) {
-    ch = find_char(atoi(name + 1));
+    ch = find_char(g, atoi(name + 1));
 
-    if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
   } else {
     if (obj_get_carried_by(obj) &&
         isname(name, char_get_alias(obj_get_carried_by(obj))) &&
-        valid_dg_target(obj_get_carried_by(obj), DG_ALLOW_GODS))
+        valid_dg_target(g, obj_get_carried_by(obj), DG_ALLOW_GODS))
       return obj_get_carried_by(obj);
 
     if (obj_get_worn_by(obj) &&
         isname(name, char_get_alias(obj_get_worn_by(obj))) &&
-        valid_dg_target(obj_get_worn_by(obj), DG_ALLOW_GODS))
+        valid_dg_target(g, obj_get_worn_by(obj), DG_ALLOW_GODS))
       return obj_get_worn_by(obj);
 
-    for (ch = character_list; ch; ch = char_get_next(ch))
+    for (ch = g->characters; ch; ch = char_get_next(ch))
       if (isname(name, char_get_alias(ch)) &&
-          valid_dg_target(ch, DG_ALLOW_GODS))
+          valid_dg_target(g, ch, DG_ALLOW_GODS))
         return ch;
   }
 
@@ -409,24 +410,24 @@ char_data *get_char_by_obj(obj_data *obj, char *name)
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching in room room first
  */
-char_data *get_char_by_room(room_data *room, char *name)
+char_data *get_char_by_room(GameWorld *g, room_data *room, char *name)
 {
   char_data *ch;
 
   if (*name == UID_CHAR) {
-    ch = find_char(atoi(name + 1));
+    ch = find_char(g, atoi(name + 1));
 
-    if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
   } else {
     for (ch = room_get_people(room); ch; ch = char_get_next_in_room(ch))
       if (isname(name, char_get_alias(ch)) &&
-          valid_dg_target(ch, DG_ALLOW_GODS))
+          valid_dg_target(g, ch, DG_ALLOW_GODS))
         return ch;
 
-    for (ch = character_list; ch; ch = char_get_next(ch))
+    for (ch = g->characters; ch; ch = char_get_next(ch))
       if (isname(name, char_get_alias(ch)) &&
-          valid_dg_target(ch, DG_ALLOW_GODS))
+          valid_dg_target(g, ch, DG_ALLOW_GODS))
         return ch;
   }
 
@@ -437,13 +438,13 @@ char_data *get_char_by_room(room_data *room, char *name)
  * returns the object in the world with name name, or NULL if not found
  * search based on obj
  */
-obj_data *get_obj_by_obj(obj_data *obj, char *name)
+obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
   room_rnum rm;
 
   if (*name == UID_CHAR)
-    return find_obj(atoi(name + 1));
+    return find_obj(g, atoi(name + 1));
 
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
     return obj;
@@ -454,7 +455,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name)
   if (obj_get_in_obj(obj) && isname(name, obj_get_name(obj_get_in_obj(obj))))
     return obj_get_in_obj(obj);
 
-  if (obj_get_worn_by(obj) && (i = get_object_in_equip(obj_get_worn_by(obj), name)))
+  if (obj_get_worn_by(obj) && (i = get_object_in_equip(g, obj_get_worn_by(obj), name)))
     return i;
 
   if (obj_get_carried_by(obj) &&
@@ -462,10 +463,10 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name)
     return i;
 
   if (((rm = obj_room(obj)) != NOWHERE) &&
-      (i = get_obj_in_list(name, rroom_get_contents(rm))))
+      (i = get_obj_in_list(name, rroom_get_contents(g, rm))))
     return i;
 
-  return get_obj(name);
+  return get_obj(g, name);
 }
 
 /* only searches the room */
@@ -489,18 +490,18 @@ obj_data *get_obj_in_room(room_data *room, char *name)
 }
 
 /* returns obj with name - searches room, then world */
-obj_data *get_obj_by_room(room_data *room, char *name)
+obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name)
 {
   obj_data *obj;
 
   if (*name == UID_CHAR)
-    return find_obj(atoi(name + 1));
+    return find_obj(g, atoi(name + 1));
 
   for (obj = room_get_contents(room); obj; obj = obj_get_next_content(obj))
     if (isname(name, obj_get_name(obj)))
       return obj;
 
-  for (obj = object_list; obj; obj = obj_get_next(obj))
+  for (obj = g->objects; obj; obj = obj_get_next(obj))
     if (isname(name, obj_get_name(obj)))
       return obj;
 
@@ -508,39 +509,26 @@ obj_data *get_obj_by_room(room_data *room, char *name)
 }
 /* find_char() helpers */
 
-// Must be power of 2
-constexpr int BUCKET_COUNT = 4096;
-// to recognize an empty bucket head; real UIDs are never negative
-constexpr long UID_OUT_OF_RANGE = -1;
 
-struct lookup_table_t {
-  long uid;
-  int type; /* MOB_TRIGGER for characters, OBJ_TRIGGER for objects */
-  void *c;
-  struct lookup_table_t *next;
-};
-static struct lookup_table_t lookup_table[BUCKET_COUNT];
-static long lookup_table_entries = 0;
-
-void init_lookup_table(void)
+void init_lookup_table(GameWorld *g)
 {
   int i;
   for (i = 0; i < BUCKET_COUNT; i++) {
-    lookup_table[i].uid  = UID_OUT_OF_RANGE;
-    lookup_table[i].type = -1;
-    lookup_table[i].c    = nullptr;
-    lookup_table[i].next = nullptr;
+    g->lookup_table[i].uid  = UID_OUT_OF_RANGE;
+    g->lookup_table[i].type = -1;
+    g->lookup_table[i].c    = nullptr;
+    g->lookup_table[i].next = nullptr;
   }
 }
 
-static struct lookup_table_t *lookup_table_find(long uid)
+static struct lookup_table_t *lookup_table_find(GameWorld *g, long uid)
 {
   struct lookup_table_t *lt;
 
   if (uid < 0)
     return nullptr;
 
-  for (lt = lookup_table[uid & (BUCKET_COUNT - 1)].next; lt; lt = lt->next)
+  for (lt = g->lookup_table[uid & (BUCKET_COUNT - 1)].next; lt; lt = lt->next)
     if (lt->uid == uid)
       return lt;
 
@@ -562,45 +550,45 @@ static const char *uid_range_name(long uid)
   return "mob";
 }
 
-static void log_lookup_miss(const char *what, long uid, struct lookup_table_t *lt)
+static void log_lookup_miss(GameWorld *g, const char *what, long uid, struct lookup_table_t *lt)
 {
   char ctx[MAX_STRING_LENGTH];
 
-  dg_context_str(ctx, sizeof(ctx));
+  dg_context_str(g, ctx, sizeof(ctx));
   if (lt)
     mud_log("%s: uid %ld (%s range) belongs to a %s, not a %s%s",
             what, uid, uid_range_name(uid), lt->type == OBJ_TRIGGER ? "object" : "character",
             strcmp(what, "find_obj") ? "character" : "object", ctx);
   else
     mud_log("%s: no entity with uid %ld (%s range; next mob uid %ld, next obj uid %ld)%s",
-            what, uid, uid_range_name(uid), max_mob_id, max_obj_id, ctx);
+            what, uid, uid_range_name(uid), g->max_mob_id, g->max_obj_id, ctx);
 }
 
-static struct char_data *find_char_by_uid_in_lookup_table(long uid)
+static struct char_data *find_char_by_uid_in_lookup_table(GameWorld *g, long uid)
 {
-  struct lookup_table_t *lt = lookup_table_find(uid);
+  struct lookup_table_t *lt = lookup_table_find(g, uid);
 
   if (lt && lt->type == MOB_TRIGGER)
     return (struct char_data *)(lt->c);
 
-  log_lookup_miss("find_char", uid, lt);
+  log_lookup_miss(g, "find_char", uid, lt);
   return nullptr;
 }
 
-static struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
+static struct obj_data *find_obj_by_uid_in_lookup_table(GameWorld *g, long uid)
 {
-  struct lookup_table_t *lt = lookup_table_find(uid);
+  struct lookup_table_t *lt = lookup_table_find(g, uid);
 
   if (lt && lt->type == OBJ_TRIGGER)
     return (struct obj_data *)(lt->c);
 
-  log_lookup_miss("find_obj", uid, lt);
+  log_lookup_miss(g, "find_obj", uid, lt);
   return nullptr;
 }
 
-void add_to_lookup_table(long uid, int type, void *c)
+void add_to_lookup_table(GameWorld *g, long uid, int type, void *c)
 {
-  struct lookup_table_t *lt = lookup_table_find(uid), *head;
+  struct lookup_table_t *lt = lookup_table_find(g, uid), *head;
 
   if (lt) {
     if (lt->c == c && lt->type == type)
@@ -614,17 +602,17 @@ void add_to_lookup_table(long uid, int type, void *c)
     return;
   }
 
-  head = &lookup_table[uid & (BUCKET_COUNT - 1)];
+  head = &g->lookup_table[uid & (BUCKET_COUNT - 1)];
   CREATE(lt, struct lookup_table_t, 1);
   lt->uid    = uid;
   lt->type   = type;
   lt->c      = c;
   lt->next   = head->next;
   head->next = lt;
-  lookup_table_entries++;
+  g->lookup_table_entries++;
 }
 
-void remove_from_lookup_table(long uid)
+void remove_from_lookup_table(GameWorld *g, long uid)
 {
   struct lookup_table_t *lt, *prev;
 
@@ -637,12 +625,12 @@ void remove_from_lookup_table(long uid)
   if (uid <= 0)
     return;
 
-  prev = &lookup_table[uid & (BUCKET_COUNT - 1)];
+  prev = &g->lookup_table[uid & (BUCKET_COUNT - 1)];
   for (lt = prev->next; lt; prev = lt, lt = lt->next)
     if (lt->uid == uid) {
       prev->next = lt->next;
       free(lt);
-      lookup_table_entries--;
+      g->lookup_table_entries--;
       return;
     }
 
@@ -654,10 +642,9 @@ void remove_from_lookup_table(long uid)
  * ever exhausted we wrap and skip UIDs that are still in use rather than
  * spilling into the next entity type's range.
  */
-static long next_uid(long *counter, long base, long max, const char *what)
+static long next_uid(GameWorld *g, long *counter, long base, long max, const char *what)
 {
-  static bool warned_mob = false, warned_obj = false;
-  bool *warned = (base == MOB_ID_BASE) ? &warned_mob : &warned_obj;
+  bool *warned = (base == MOB_ID_BASE) ? &g->warned_mob_lookup : &g->warned_obj_lookup;
   long tries;
 
   if (!*warned && *counter - base >= (max - base) / 10 * 9) {
@@ -673,7 +660,7 @@ static long next_uid(long *counter, long base, long max, const char *what)
       *counter = base;
     }
     uid = (*counter)++;
-    if (!lookup_table_find(uid))
+    if (!lookup_table_find(g, uid))
       return uid;
   }
 
@@ -681,25 +668,25 @@ static long next_uid(long *counter, long base, long max, const char *what)
   return base;
 }
 
-long dg_new_mob_uid(void)
+long dg_new_mob_uid(GameWorld *g)
 {
-  return next_uid(&max_mob_id, MOB_ID_BASE, MOB_ID_MAX, "mob");
+  return next_uid(g, &g->max_mob_id, MOB_ID_BASE, MOB_ID_MAX, "mob");
 }
 
-long dg_new_obj_uid(void)
+long dg_new_obj_uid(GameWorld *g)
 {
-  return next_uid(&max_obj_id, OBJ_ID_BASE, OBJ_ID_MAX, "object");
+  return next_uid(g, &g->max_obj_id, OBJ_ID_BASE, OBJ_ID_MAX, "object");
 }
 
-void dg_log_uid_stats(void)
+void dg_log_uid_stats(GameWorld *g)
 {
   mud_log("DG UIDs: next mob %ld (%.4f%% used), next obj %ld (%.4f%% used), lookup entries %ld",
-          max_mob_id, 100.0 * (max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
-          max_obj_id, 100.0 * (max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
-          lookup_table_entries);
+          g->max_mob_id, 100.0 * (g->max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
+          g->max_obj_id, 100.0 * (g->max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
+          g->lookup_table_entries);
 }
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[])
+int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[])
 {
   int i, item = -1;
 

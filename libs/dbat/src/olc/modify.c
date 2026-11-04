@@ -26,12 +26,13 @@
 #include "dbat/dg_olc.h"
 #include "dbat/config.h"
 #include "dbat/hedit.h"
+#include "dbat/game_world.h"
 
 /* local functions */
 
 static void smash_numb(char *str);
-static void playing_string_cleanup(struct descriptor_data *d, int action);
-static void exdesc_string_cleanup(struct descriptor_data *d, int action);
+static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action);
+static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int action);
 
 /* ************************************************************************
 *  modification of malloc'ed strings                                      *
@@ -118,7 +119,7 @@ void string_write(struct descriptor_data *d, char **writeto, size_t len, long ma
  * Add user input to the 'current' string (as defined by d->str).
  * This is still overly complex.
  */
-void string_add(struct descriptor_data *d, char *str)
+void string_add(GameWorld *g, struct descriptor_data *d, char *str)
 {
   int action;
 
@@ -131,14 +132,14 @@ void string_add(struct descriptor_data *d, char *str)
   /* changed to only accept '@' if it's by itself - fnord 10/15/2004 */
   if ((action = (*str == '@' && !str[1])))
     *str = '\0';
-  else if ((action = improved_editor_execute(d, str)) == STRINGADD_ACTION)
+  else if ((action = improved_editor_execute(g, d, str)) == STRINGADD_ACTION)
     return;
 
   if (action != STRINGADD_OK)
     /* Do nothing. */;
   else if (!(*d->str)) {
     if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
-      send_to_char(d->character, "String too long - Truncated.\r\n");
+      send_to_char(g, d->character, "String too long - Truncated.\r\n");
       strcpy(str + (d->max_str - 3), "\r\n");
       CREATE(*d->str, char, d->max_str);
       strcpy(*d->str, str); /* strcpy: OK (size checked) */
@@ -150,7 +151,7 @@ void string_add(struct descriptor_data *d, char *str)
     }
   } else {
     if (strlen(str) + strlen(*d->str) + 3 > d->max_str) { /* \r\n\0 */
-      send_to_char(d->character, "String too long.  Last line skipped.\r\n");
+      send_to_char(g, d->character, "String too long.  Last line skipped.\r\n");
       if (!using_improved_editor)
         action = STRINGADD_SAVE;
       else if (action == STRINGADD_OK)
@@ -210,7 +211,7 @@ void string_add(struct descriptor_data *d, char *str)
     int i;
     struct {
       int mode;
-      void (*func)(struct descriptor_data *dsc, int todo);
+      void (*func)(GameWorld *g, struct descriptor_data *dsc, int todo);
     } cleanup_modes[] = {
         {CON_CEDIT,    cedit_string_cleanup   },
         {CON_MEDIT,    medit_string_cleanup   },
@@ -228,7 +229,7 @@ void string_add(struct descriptor_data *d, char *str)
 
     for (i = 0; cleanup_modes[i].func; i++)
       if (desc_get_connected(d) == cleanup_modes[i].mode)
-        (*cleanup_modes[i].func)(d, action);
+        (*cleanup_modes[i].func)(g, d, action);
 
     /* Common post cleanup code. */
     d->str     = nullptr;
@@ -242,15 +243,15 @@ void string_add(struct descriptor_data *d, char *str)
     strcat(*d->str, "\r\n");
 }
 
-static void playing_string_cleanup(struct descriptor_data *d, int action)
+static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action)
 {
   if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && *d->str) {
-      store_mail(d->mail_to, char_get_idnum(d->character), *d->str);
-      write_to_output(d, "Message sent!\r\n");
-      notify_if_playing(d->character, d->mail_to);
+      store_mail(g, d->mail_to, char_get_idnum(d->character), *d->str);
+      write_to_output(g, d, "Message sent!\r\n");
+      notify_if_playing(g, d->character, d->mail_to);
     } else {
-      write_to_output(d, "Mail aborted.\r\n");
+      write_to_output(g, d, "Mail aborted.\r\n");
     }
     /* store_mail() keeps its own copy; the text and its holder came from postmaster_send_mail() */
     free(*d->str);
@@ -259,16 +260,16 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {
     if (d->mail_to >= BOARD_MAGIC) {
-      struct board_info *board = locate_board(d->mail_to - BOARD_MAGIC);
+      struct board_info *board = locate_board(g, d->mail_to - BOARD_MAGIC);
 
       if (action == STRINGADD_ABORT) {
         if (board_discard_message(board, d->str))
-          write_to_output(d, "Post aborted.\r\n");
+          write_to_output(g, d, "Post aborted.\r\n");
         else
-          write_to_output(d, "Unable to find your message to delete it!\r\n");
+          write_to_output(g, d, "Unable to find your message to delete it!\r\n");
       } else {
-        write_to_output(d, "\r\nPost saved.\r\n");
-        save_board(board);
+        write_to_output(g, d, "\r\nPost saved.\r\n");
+        save_board(g, board);
       }
     }
 
@@ -276,12 +277,12 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
   }
 }
 
-static void exdesc_string_cleanup(struct descriptor_data *d, int action)
+static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int action)
 {
   if (action == STRINGADD_ABORT)
-    write_to_output(d, "Description aborted.\r\n");
+    write_to_output(g, d, "Description aborted.\r\n");
 
-  write_to_output(d, "%s", CONFIG_MENU);
+  write_to_output(g, d, "%s", CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 
@@ -299,26 +300,26 @@ ACMD(do_skillset)
   argument = one_argument(argument, name);
 
   if (!*name) { /* no arguments. print an informative text */
-    send_to_char(ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
+    send_to_char(g, ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
                      "Skill being one of the following:\r\n");
     for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++) {
-      if (spell_info[i].name == unused_spellname) /* This is valid. */
+      if (g->spell_info[i].name == unused_spellname) /* This is valid. */
         continue;
-      send_to_char(ch, "%18s", spell_info[i].name);
+      send_to_char(g, ch, "%18s", g->spell_info[i].name);
       if (qend++ % 4 == 3)
-        send_to_char(ch, "\r\n");
+        send_to_char(g, ch, "\r\n");
     }
     if (qend % 4 != 0)
-      send_to_char(ch, "\r\n");
+      send_to_char(g, ch, "\r\n");
     return;
   }
 
-  if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(ch, "%s", CONFIG_NOPERSON);
+  if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
     return;
   }
   if (char_is_npc(vict)) {
-    send_to_char(ch, "NPCs don't have skills.\r\n");
+    send_to_char(g, ch, "NPCs don't have skills.\r\n");
     return;
   }
   skip_spaces(&argument);
@@ -326,21 +327,21 @@ ACMD(do_skillset)
   /* If there is no chars in argument */
   if (!*argument) {
     i = snprintf(help_text, sizeof(help_text) - i, "\r\nSkills:\r\n");
-    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, nullptr);
+    i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, nullptr);
     i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nSpells:\r\n");
-    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, nullptr);
+    i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, nullptr);
     if (CONFIG_ENABLE_LANGUAGES) {
       i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nLanguages:\r\n");
-      i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
+      i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
     }
     if (i >= sizeof(help_text))
       strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    send_to_char(ch, "%s", help_text);
+    send_to_char(g, ch, "%s", help_text);
     return;
   }
 
   if (*argument != '\'') {
-    send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+    send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
   /* Locate the last quote and lowercase the magic words (if any) */
@@ -349,25 +350,25 @@ ACMD(do_skillset)
     argument[qend] = tolower(argument[qend]);
 
   if (argument[qend] != '\'') {
-    send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+    send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
   strcpy(help_text, (argument + 1)); /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
   help_text[qend - 1] = '\0';
-  if ((skill = find_skill_num(help_text, SKTYPE_SKILL)) <= 0) {
-    send_to_char(ch, "Unrecognized skill.\r\n");
+  if ((skill = find_skill_num(g, help_text, SKTYPE_SKILL)) <= 0) {
+    send_to_char(g, ch, "Unrecognized skill.\r\n");
     return;
   }
   argument += qend + 1; /* skip to next parameter */
   argument = one_argument(argument, buf);
 
   if (!*buf) {
-    send_to_char(ch, "Learned value expected.\r\n");
+    send_to_char(g, ch, "Learned value expected.\r\n");
     return;
   }
   value = atoi(buf);
   if (value < 0) {
-    send_to_char(ch, "Minimum value for learned is 0.\r\n");
+    send_to_char(g, ch, "Minimum value for learned is 0.\r\n");
     return;
   }
 
@@ -376,6 +377,6 @@ ACMD(do_skillset)
    * checked for the -1 above so we are safe here.
    */
   char_set_skills_base(vict, skill, value);
-  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), spell_info[skill].name, value);
-  send_to_char(ch, "You change %s's %s to %d.\r\n", char_get_name(vict), spell_info[skill].name, value);
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), g->spell_info[skill].name, value);
+  send_to_char(g, ch, "You change %s's %s to %d.\r\n", char_get_name(vict), g->spell_info[skill].name, value);
 }

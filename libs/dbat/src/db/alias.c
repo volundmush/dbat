@@ -23,8 +23,9 @@
 #include "dbat/db.h"
 #include "dbat/comm.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
-void write_aliases(struct char_data *ch)
+void write_aliases(GameWorld *g, struct char_data *ch)
 {
   struct atomic_file af;
   FILE *file;
@@ -33,7 +34,7 @@ void write_aliases(struct char_data *ch)
 
   get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
 
-  if (char_get_aliases(ch) == nullptr) {
+  if (char_get_aliases(g, ch) == nullptr) {
     remove(fn);
     return;
   }
@@ -48,7 +49,7 @@ void write_aliases(struct char_data *ch)
     return;
   }
 
-  for (temp = char_get_aliases(ch); temp; temp = temp->next) {
+  for (temp = char_get_aliases(g, ch); temp; temp = temp->next) {
     int aliaslen = strlen(temp->alias);
     int repllen  = strlen(temp->replacement) - 1;
 
@@ -92,7 +93,7 @@ static bool read_alias_record(FILE *file, struct alias_data *a)
   return true;
 }
 
-void read_aliases(struct char_data *ch)
+void read_aliases(GameWorld *g, struct char_data *ch)
 {
   FILE *file;
   char xbuf[MAX_STRING_LENGTH];
@@ -130,7 +131,7 @@ void read_aliases(struct char_data *ch)
       break;
   }
 
-  char_set_aliases(ch, head);
+  char_set_aliases(g, ch, head);
   fclose(file);
 }
 
@@ -162,32 +163,32 @@ ACMD(do_alias)
   repl = any_one_arg(argument, arg);
 
   if (!*arg) { /* no argument specified -- list currently defined aliases */
-    send_to_char(ch, "Currently defined aliases:\r\n");
-    if ((a = char_get_aliases(ch)) == nullptr)
-      send_to_char(ch, " None.\r\n");
+    send_to_char(g, ch, "Currently defined aliases:\r\n");
+    if ((a = char_get_aliases(g, ch)) == nullptr)
+      send_to_char(g, ch, " None.\r\n");
     else {
       while (a != nullptr) {
-        send_to_char(ch, "%-15s %s\r\n", a->alias, a->replacement);
+        send_to_char(g, ch, "%-15s %s\r\n", a->alias, a->replacement);
         a = a->next;
       }
     }
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    if ((a = find_alias(char_get_aliases(ch), arg)) != nullptr) {
-      struct alias_data *head = char_get_aliases(ch);
+    if ((a = find_alias(char_get_aliases(g, ch), arg)) != nullptr) {
+      struct alias_data *head = char_get_aliases(g, ch);
       REMOVE_FROM_LIST(a, head, next, temp);
-      char_set_aliases(ch, head);
+      char_set_aliases(g, ch, head);
       free_alias(a);
     }
     /* if no replacement string is specified, assume we want to delete */
     if (!*repl) {
       if (a == nullptr)
-        send_to_char(ch, "No such alias.\r\n");
+        send_to_char(g, ch, "No such alias.\r\n");
       else
-        send_to_char(ch, "Alias deleted.\r\n");
+        send_to_char(g, ch, "Alias deleted.\r\n");
     } else { /* otherwise, either add or redefine an alias */
       if (!strcasecmp(arg, "alias")) {
-        send_to_char(ch, "You can't alias 'alias'.\r\n");
+        send_to_char(g, ch, "You can't alias 'alias'.\r\n");
         return;
       }
       CREATE(a, struct alias_data, 1);
@@ -198,9 +199,9 @@ ACMD(do_alias)
         a->type = ALIAS_COMPLEX;
       else
         a->type = ALIAS_SIMPLE;
-      a->next = char_get_aliases(ch);
-      char_set_aliases(ch, a);
-      send_to_char(ch, "Alias added.\r\n");
+      a->next = char_get_aliases(g, ch);
+      char_set_aliases(g, ch, a);
+      send_to_char(g, ch, "Alias added.\r\n");
     }
   }
 }
@@ -288,7 +289,7 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
  *   1: String was _not_ modified in place; rather, the expanded aliases
  *      have been placed at the front of the character's input queue.
  */
-bool perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
+bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen)
 {
   char first_arg[MAX_INPUT_LENGTH], *ptr;
   struct alias_data *a, *tmp;
@@ -298,7 +299,7 @@ bool perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return false;
 
   /* bail out immediately if the guy doesn't have any aliases */
-  if ((tmp = char_get_aliases(d->character)) == nullptr)
+  if ((tmp = char_get_aliases(g, d->character)) == nullptr)
     return false;
 
   /* find the alias we're supposed to match */

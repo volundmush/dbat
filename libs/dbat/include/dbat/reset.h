@@ -17,7 +17,7 @@ struct gauntlet_mob {
 };
 
 /* Reset functions */
-bool pre_reset(zone_vnum znum);
+bool pre_reset(GameWorld *g, zone_vnum znum);
 void post_reset(zone_vnum znum);
 
 /* Zone pre-reset functions */

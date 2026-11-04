@@ -1,6 +1,7 @@
 #include "dbat/shop_utils.h"
 #include "dbat/shop.h"
 #include "dbat/flags.h"
+#include "dbat/game_world.h"
 
 room_vnum shop_get_vnum(const struct shop_data *shop)
 {
@@ -257,149 +258,149 @@ char *shop_get_buy_word(const struct shop_data *shop, int n)
   return shop->type[n].keywords;
 }
 
-room_vnum rshop_get_vnum(shop_rnum i)
+room_vnum rshop_get_vnum(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].vnum;
+  return g->shops[i].vnum;
 }
 
-void rshop_set_vnum(shop_rnum i, room_vnum v)
+void rshop_set_vnum(GameWorld *g, shop_rnum i, room_vnum v)
 {
-  shop_index[i].vnum = v;
+  g->shops[i].vnum = v;
 }
 
-mob_rnum rshop_get_keeper(shop_rnum i)
+mob_rnum rshop_get_keeper(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].keeper;
+  return g->shops[i].keeper;
 }
 
-void rshop_set_keeper(shop_rnum i, mob_rnum v)
+void rshop_set_keeper(GameWorld *g, shop_rnum i, mob_rnum v)
 {
-  shop_index[i].keeper = v;
+  g->shops[i].keeper = v;
 }
 
-int rshop_get_open1(shop_rnum i)
+int rshop_get_open1(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].open1;
+  return g->shops[i].open1;
 }
 
-int rshop_get_close1(shop_rnum i)
+int rshop_get_close1(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].close1;
+  return g->shops[i].close1;
 }
 
-int rshop_get_open2(shop_rnum i)
+int rshop_get_open2(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].open2;
+  return g->shops[i].open2;
 }
 
-int rshop_get_close2(shop_rnum i)
+int rshop_get_close2(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].close2;
+  return g->shops[i].close2;
 }
 
-int rshop_get_bank(shop_rnum i)
+int rshop_get_bank(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].bankAccount;
+  return g->shops[i].bankAccount;
 }
 
-void rshop_set_bank(shop_rnum i, int v)
+void rshop_set_bank(GameWorld *g, shop_rnum i, int v)
 {
-  shop_index[i].bankAccount = v;
+  g->shops[i].bankAccount = v;
 }
 
-int rshop_get_temper(shop_rnum i)
+int rshop_get_temper(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].temper1;
+  return g->shops[i].temper1;
 }
 
-bitvector_t rshop_get_bitvector(shop_rnum i)
+bitvector_t rshop_get_bitvector(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].bitvector;
+  return g->shops[i].bitvector;
 }
 
-bitvector_t *rshop_get_with_who(shop_rnum i)
+bitvector_t *rshop_get_with_who(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].with_who;
+  return g->shops[i].with_who;
 }
 
-int rshop_get_lastsort(shop_rnum i)
+int rshop_get_lastsort(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].lastsort;
+  return g->shops[i].lastsort;
 }
 
-void rshop_set_lastsort(shop_rnum i, int v)
+void rshop_set_lastsort(GameWorld *g, shop_rnum i, int v)
 {
-  shop_index[i].lastsort = v;
+  g->shops[i].lastsort = v;
 }
 
-float rshop_get_profit_buy(shop_rnum i)
+float rshop_get_profit_buy(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].profit_buy;
+  return g->shops[i].profit_buy;
 }
 
-float rshop_get_profit_sell(shop_rnum i)
+float rshop_get_profit_sell(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].profit_sell;
+  return g->shops[i].profit_sell;
 }
 
-spec_proc_func rshop_get_func(shop_rnum i)
+spec_proc_func rshop_get_func(GameWorld *g, shop_rnum i)
 {
-  return shop_index[i].func;
+  return g->shops[i].func;
 }
 
-void rshop_set_func(shop_rnum i, spec_proc_func v)
+void rshop_set_func(GameWorld *g, shop_rnum i, spec_proc_func v)
 {
-  shop_index[i].func = v;
+  g->shops[i].func = v;
 }
 
-room_vnum rshop_get_room(shop_rnum i, int n)
+room_vnum rshop_get_room(GameWorld *g, shop_rnum i, int n)
 {
-  return shop_index[i].in_room[n];
+  return g->shops[i].in_room[n];
 }
 
-void rshop_set_room(shop_rnum i, int n, room_vnum v)
+void rshop_set_room(GameWorld *g, shop_rnum i, int n, room_vnum v)
 {
-  shop_index[i].in_room[n] = v;
+  g->shops[i].in_room[n] = v;
 }
 
-obj_vnum rshop_get_product(shop_rnum i, int n)
+obj_vnum rshop_get_product(GameWorld *g, shop_rnum i, int n)
 {
-  return shop_index[i].producing[n];
+  return g->shops[i].producing[n];
 }
 
-void rshop_set_product(shop_rnum i, int n, obj_vnum v)
+void rshop_set_product(GameWorld *g, shop_rnum i, int n, obj_vnum v)
 {
-  shop_index[i].producing[n] = v;
+  g->shops[i].producing[n] = v;
 }
 
-int rshop_get_buy_type(shop_rnum i, int n)
+int rshop_get_buy_type(GameWorld *g, shop_rnum i, int n)
 {
-  return shop_index[i].type[n].type;
+  return g->shops[i].type[n].type;
 }
 
-void rshop_set_buy_type(shop_rnum i, int n, int v)
+void rshop_set_buy_type(GameWorld *g, shop_rnum i, int n, int v)
 {
-  shop_index[i].type[n].type = v;
+  g->shops[i].type[n].type = v;
 }
 
-char *rshop_get_buy_word(shop_rnum i, int n)
+char *rshop_get_buy_word(GameWorld *g, shop_rnum i, int n)
 {
-  return shop_index[i].type[n].keywords;
+  return g->shops[i].type[n].keywords;
 }
 
-void rshop_set_buy_word(shop_rnum i, int n, char *v)
+void rshop_set_buy_word(GameWorld *g, shop_rnum i, int n, char *v)
 {
-  shop_index[i].type[n].keywords = v;
+  g->shops[i].type[n].keywords = v;
 }
 
-bool rshop_uses_bank(shop_rnum i)
+bool rshop_uses_bank(GameWorld *g, shop_rnum i)
 {
-  return IS_SET(shop_index[i].bitvector, WILL_BANK_MONEY);
+  return IS_SET(g->shops[i].bitvector, WILL_BANK_MONEY);
 }
 
-bool rshop_allows_steal(shop_rnum i)
+bool rshop_allows_steal(GameWorld *g, shop_rnum i)
 {
-  return IS_SET(shop_index[i].bitvector, WILL_ALLOW_STEAL);
+  return IS_SET(g->shops[i].bitvector, WILL_ALLOW_STEAL);
 }
 
 int shop_buy_get_type(const struct shop_buy_data *buy)

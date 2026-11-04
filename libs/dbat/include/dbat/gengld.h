@@ -5,9 +5,9 @@
 
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void free_guild(struct guild_data *guild);
-guild_rnum add_guild(struct guild_data *guild);
-bool save_guilds(zone_rnum zone_num);
-guild_rnum real_guild(guild_vnum vnum);
+guild_rnum add_guild(GameWorld *g, struct guild_data *guild);
+bool save_guilds(GameWorld *g, zone_rnum zone_num);
+guild_rnum real_guild(GameWorld *g, guild_vnum vnum);
 
 /*
  * Handy macros.

@@ -28,16 +28,17 @@
 #include <errno.h>
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* local functions */
 
-static void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
-static bool Crash_save(struct obj_data *obj, FILE *fp, int location);
+static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj, int location);
+static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location);
 static void Crash_restore_weight(struct obj_data *obj);
-static void Crash_extract_objs(struct obj_data *obj);
+static void Crash_extract_objs(GameWorld *g, struct obj_data *obj);
 static bool Crash_is_unrentable(struct obj_data *obj);
-static void Crash_extract_norents(struct obj_data *obj);
-static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename);
+static void Crash_extract_norents(GameWorld *g, struct obj_data *obj);
+static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename);
 
 static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
 {
@@ -57,7 +58,7 @@ static bool Crash_build_save_filename(char *dst, size_t dst_size, const char *fi
   return true;
 }
 
-static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, const char *save_type)
+static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentcode, int cost, const char *save_type)
 {
   struct atomic_file af;
   char filename[MAX_INPUT_LENGTH];
@@ -82,7 +83,7 @@ static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, 
 
   for (j = 0; j < NUM_WEARS; j++)
     if (char_get_equipment(ch, j)) {
-      if (!Crash_save(char_get_equipment(ch, j), fp, j + 1)) {
+      if (!Crash_save(g, char_get_equipment(ch, j), fp, j + 1)) {
         Crash_restore_weight(char_get_equipment(ch, j));
         mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
         atomic_abort(&af);
@@ -97,7 +98,7 @@ static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, 
       Crash_restore_weight(char_get_equipment(ch, j));
     }
 
-  if (!Crash_save(char_get_inventory(ch), fp, 0)) {
+  if (!Crash_save(g, char_get_inventory(ch), fp, 0)) {
     Crash_restore_weight(char_get_inventory(ch));
     mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     atomic_abort(&af);
@@ -133,9 +134,9 @@ void delete_inv_backup(struct char_data *ch)
   return;
 }
 
-bool Obj_to_store(struct obj_data *obj, FILE *fl, int location)
+bool Obj_to_store(GameWorld *g, struct obj_data *obj, FILE *fl, int location)
 {
-  my_obj_save_to_disk(fl, obj, location);
+  my_obj_save_to_disk(g, fl, obj, location);
   if (ferror(fl))
     return false;
   return true;
@@ -144,7 +145,7 @@ bool Obj_to_store(struct obj_data *obj, FILE *fl, int location)
 /*
  * AutoEQ by Burkhard Knopf <burkhard.knopf@informatik.tu-clausthal.de>
  */
-static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
+static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj, int location)
 {
   int j;
 
@@ -242,15 +243,15 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
         if (invalid_align(ch, obj) || invalid_class(ch, obj))
           location = LOC_INVENTORY;
         else
-          equip_char(ch, obj, j);
+          equip_char(g, ch, obj, j);
       } else { /* Oops, saved a player with double equipment? */
-        mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
+        mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
         location = LOC_INVENTORY;
       }
     }
   }
   if (location <= 0) /* Inventory */
-    obj_to_char(obj, ch);
+    obj_to_char(g, obj, ch);
 }
 
 bool Crash_delete_file(char *name)
@@ -309,7 +310,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
   return true;
 }
 
-static bool Crash_clean_file(char *name)
+static bool Crash_clean_file(GameWorld *g, char *name)
 {
   char filename[MAX_STRING_LENGTH];
   FILE *fl;
@@ -366,16 +367,16 @@ static bool Crash_clean_file(char *name)
   return false;
 }
 
-void update_obj_file(void)
+void update_obj_file(GameWorld *g)
 {
   int i;
 
-  for (i = 0; i <= top_of_p_table; i++)
-    if (*player_table[i].name)
-      Crash_clean_file(player_table[i].name);
+  for (i = 0; i <= g->top_of_p_table; i++)
+    if (*g->player_table[i].name)
+      Crash_clean_file(g, g->player_table[i].name);
 }
 
-void Crash_listrent(struct char_data *ch, char *name)
+void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
 {
   FILE *fl = nullptr;
   char filename[MAX_STRING_LENGTH];
@@ -391,11 +392,11 @@ void Crash_listrent(struct char_data *ch, char *name)
   if (get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     fl = fopen(filename, "rb");
   if (!fl) {
-    send_to_char(ch, "%s has no rent file.\r\n", name);
+    send_to_char(g, ch, "%s has no rent file.\r\n", name);
     return;
   }
 
-  send_to_char(ch, "%s\r\n", filename);
+  send_to_char(g, ch, "%s\r\n", filename);
 
   if (!feof(fl)) {
     get_line(fl, line);
@@ -405,20 +406,20 @@ void Crash_listrent(struct char_data *ch, char *name)
 
   switch (rentcode) {
     case RENT_RENTED:
-      send_to_char(ch, "Rent\r\n");
+      send_to_char(g, ch, "Rent\r\n");
       break;
     case RENT_CRASH:
-      send_to_char(ch, "Crash\r\n");
+      send_to_char(g, ch, "Crash\r\n");
       break;
     case RENT_CRYO:
-      send_to_char(ch, "Cryo\r\n");
+      send_to_char(g, ch, "Cryo\r\n");
       break;
     case RENT_TIMEDOUT:
     case RENT_FORCED:
-      send_to_char(ch, "TimedOut\r\n");
+      send_to_char(g, ch, "TimedOut\r\n");
       break;
     default:
-      send_to_char(ch, "Undef\r\n");
+      send_to_char(g, ch, "Undef\r\n");
       break;
   }
   buf[0] = 0;
@@ -429,8 +430,8 @@ void Crash_listrent(struct char_data *ch, char *name)
     if (*line == '#') { /* swell - its an item */
       sscanf(line, "#%d", &nr);
       if (nr != NOTHING) { /* then we can dispense with it easily */
-        if (real_object(nr) != NOTHING) {
-          obj = read_object(nr, VIRTUAL);
+        if (real_object(g, nr) != NOTHING) {
+          obj = read_object(g, nr, VIRTUAL);
           if (len + 255 < sizeof(buf)) {
             len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
                             nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
@@ -438,7 +439,7 @@ void Crash_listrent(struct char_data *ch, char *name)
             snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
             break;
           }
-          extract_obj(obj);
+          extract_obj(g, obj);
         } else {
           if (len + 255 < sizeof(buf)) {
             len += snprintf(buf + len, sizeof(buf) - len,
@@ -472,19 +473,19 @@ void Crash_listrent(struct char_data *ch, char *name)
     }
   }
 
-  send_to_char(ch, "%s", buf);
+  send_to_char(g, ch, "%s", buf);
   fclose(fl);
 }
 
-static bool Crash_save(struct obj_data *obj, FILE *fp, int location)
+static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
 
   if (obj) {
-    Crash_save(obj_get_next_content(obj), fp, location);
-    Crash_save(obj_get_contains(obj), fp, MIN(0, location) - 1);
-    result = Obj_to_store(obj, fp, location);
+    Crash_save(g, obj_get_next_content(obj), fp, location);
+    Crash_save(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
+    result = Obj_to_store(g, obj, fp, location);
 
     for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
@@ -509,7 +510,7 @@ static void Crash_restore_weight(struct obj_data *obj)
  * Get !RENT items from equipment to inventory and
  * extract !RENT out of worn containers.
  */
-static void Crash_extract_norent_eq(struct char_data *ch)
+static void Crash_extract_norent_eq(GameWorld *g, struct char_data *ch)
 {
   int j;
 
@@ -518,18 +519,18 @@ static void Crash_extract_norent_eq(struct char_data *ch)
       continue;
 
     if (Crash_is_unrentable(char_get_equipment(ch, j)))
-      obj_to_char(unequip_char(ch, j), ch);
+      obj_to_char(g, unequip_char(g, ch, j), ch);
     else
-      Crash_extract_norents(char_get_equipment(ch, j));
+      Crash_extract_norents(g, char_get_equipment(ch, j));
   }
 }
 
-static void Crash_extract_objs(struct obj_data *obj)
+static void Crash_extract_objs(GameWorld *g, struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_objs(obj_get_contains(obj));
-    Crash_extract_objs(obj_get_next_content(obj));
-    extract_obj(obj);
+    Crash_extract_objs(g, obj_get_contains(obj));
+    Crash_extract_objs(g, obj_get_next_content(obj));
+    extract_obj(g, obj);
   }
 }
 
@@ -545,64 +546,64 @@ static bool Crash_is_unrentable(struct obj_data *obj)
   return false;
 }
 
-static void Crash_extract_norents(struct obj_data *obj)
+static void Crash_extract_norents(GameWorld *g, struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_norents(obj_get_contains(obj));
-    Crash_extract_norents(obj_get_next_content(obj));
+    Crash_extract_norents(g, obj_get_contains(obj));
+    Crash_extract_norents(g, obj_get_next_content(obj));
     if (Crash_is_unrentable(obj))
-      extract_obj(obj);
+      extract_obj(g, obj);
   }
 }
 
-void Crash_crashsave(struct char_data *ch)
+void Crash_crashsave(GameWorld *g, struct char_data *ch)
 {
   if (char_is_npc(ch))
     return;
 
-  if (Crash_write_safe_file(ch, RENT_CRASH, 0, "crashsave"))
+  if (Crash_write_safe_file(g, ch, RENT_CRASH, 0, "crashsave"))
     char_plr_set(ch, PLR_CRASH, false);
 }
 
-void Crash_rentsave(struct char_data *ch, int cost)
+void Crash_rentsave(GameWorld *g, struct char_data *ch, int cost)
 {
   int j;
 
   if (char_is_npc(ch))
     return;
 
-  Crash_extract_norent_eq(ch);
-  Crash_extract_norents(char_get_inventory(ch));
+  Crash_extract_norent_eq(g, ch);
+  Crash_extract_norents(g, char_get_inventory(ch));
 
-  if (!Crash_write_safe_file(ch, RENT_RENTED, cost, "rentsave"))
+  if (!Crash_write_safe_file(g, ch, RENT_RENTED, cost, "rentsave"))
     return;
 
   for (j = 0; j < NUM_WEARS; j++)
     if (char_get_equipment(ch, j))
-      Crash_extract_objs(char_get_equipment(ch, j));
+      Crash_extract_objs(g, char_get_equipment(ch, j));
 
-  Crash_extract_objs(char_get_inventory(ch));
+  Crash_extract_objs(g, char_get_inventory(ch));
 }
 
 /* ************************************************************************
  * Routines used for the receptionist					  *
  ************************************************************************* */
 
-void Crash_save_all(void)
+void Crash_save_all(GameWorld *g)
 {
   struct descriptor_data *d;
-  for (d = descriptor_list; d; d = d->next) {
+  for (d = g->descriptors; d; d = d->next) {
     if ((desc_get_connected(d) == CON_PLAYING) && !char_is_npc(d->character)) {
       if (char_plr_flagged(d->character, PLR_CRASH)) {
-        Crash_crashsave(d->character);
-        save_char(d->character);
+        Crash_crashsave(g, d->character);
+        save_char(g, d->character);
         char_plr_set(d->character, PLR_CRASH, false);
       }
     }
   }
 }
 
-int Crash_load(struct char_data *ch)
+int Crash_load(GameWorld *g, struct char_data *ch)
 {
   FILE *fl;
   char cmfname[MAX_STRING_LENGTH], cmfnamebak[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
@@ -614,23 +615,23 @@ int Crash_load(struct char_data *ch)
     return -1;
 
   if ((fl = fopen(cmfname, "rb")))
-    return Crash_load_file(ch, fl, cmfname);
+    return Crash_load_file(g, ch, fl, cmfname);
 
   snprintf(buf1, sizeof(buf1), "SYSERR: READING OBJECT FILE %s (5)", cmfname);
   perror(buf1);
-  send_to_char(ch,
+  send_to_char(g, ch,
                "\r\n********************* NOTICE *********************\r\n"
                "There was a problem loading your objects from disk.\r\n"
                "Trying your backup object file.\r\n");
 
   if ((fl = fopen(cmfnamebak, "rb"))) {
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
-    return Crash_load_file(ch, fl, cmfnamebak);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
+    return Crash_load_file(g, ch, fl, cmfnamebak);
   }
 
   Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
-  send_to_char(ch,
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
+  send_to_char(g, ch,
                "\r\n********************* NOTICE *********************\r\n"
                "There was a problem loading your objects from backup.\r\n"
                "Contact staff for assistance.\r\n");
@@ -638,7 +639,7 @@ int Crash_load(struct char_data *ch)
   return -1;
 }
 
-static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
+static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename)
 {
   char buf2[MAX_STRING_LENGTH];
   char line[256];
@@ -661,24 +662,24 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
          &netcost, &gold, &account, &nitems);
 
   if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
-    save_char(ch);
+    save_char(g, ch);
   }
   switch (orig_rent_code = rentcode) {
     case RENT_RENTED:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s un-renting and entering game.", char_get_name(ch));
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-renting and entering game.", char_get_name(ch));
       break;
     case RENT_CRASH:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
       break;
     case RENT_CRYO:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s un-cryo'ing and entering game.", char_get_name(ch));
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-cryo'ing and entering game.", char_get_name(ch));
       break;
     case RENT_FORCED:
     case RENT_TIMEDOUT:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s retrieving force-saved items and entering game.", char_get_name(ch));
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving force-saved items and entering game.", char_get_name(ch));
       break;
     default:
-      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
+      mudlog(g, LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
       break;
   }
 
@@ -698,14 +699,14 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
       }
       /* we have the number, check it, load obj. */
       if (nr == NOTHING) { /* then it is unique */
-        temp              = create_obj();
+        temp              = create_obj(g);
         obj_set_item_number(temp, NOTHING);
         obj_set_size(temp, SIZE_MEDIUM);
       } else if (nr < 0 || nr >= 999999) {
         get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       } else {
-        temp = read_object(nr, VIRTUAL);
+        temp = read_object(g, nr, VIRTUAL);
         if (!temp) {
           get_line(fl, line);
           continue;
@@ -866,17 +867,17 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
       } /* exit our xap loop */
       if (temp != nullptr) {
         num_objs++;
-        check_unique_id(temp);
-        add_unique_id(temp);
+        check_unique_id(g, temp);
+        add_unique_id(g, temp);
         if (obj_get_type_flag(temp) == ITEM_DRINKCON) {
-          name_from_drinkcon(temp);
+          name_from_drinkcon(g, temp);
           if (obj_get_value(temp, 1) != 0)
-            name_to_drinkcon(temp, obj_get_value(temp, 2));
+            name_to_drinkcon(g, temp, obj_get_value(temp, 2));
         }
-        if (obj_get_vnum(temp) == 20099 || obj_get_vnum(temp) == 20098)
+        if (obj_get_vnum(g, temp) == 20099 || obj_get_vnum(g, temp) == 20098)
           if (obj_extra_flagged(temp, ITEM_UNBREAKABLE))
             obj_extra_set(temp, ITEM_UNBREAKABLE, false);
-        auto_equip(ch, temp, locate);
+        auto_equip(g, ch, temp, locate);
       } else {
         continue;
       }
@@ -908,24 +909,24 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           if (cont_row[j]) { /* no container -> back to ch's inventory */
             for (; cont_row[j]; cont_row[j] = obj1) {
               obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(cont_row[j], ch);
+              obj_to_char(g, cont_row[j], ch);
             }
             cont_row[j] = nullptr;
           }
         if (cont_row[0]) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* rem item ; fill ; equip again */
-            temp           = unequip_char(ch, locate - 1);
+            temp           = unequip_char(g, ch, locate - 1);
             obj_set_contains(temp, nullptr); /* should be empty - but who knows */
             for (; cont_row[0]; cont_row[0] = obj1) {
               obj1 = obj_get_next_content(cont_row[0]);
-              obj_to_obj(cont_row[0], temp);
+              obj_to_obj(g, cont_row[0], temp);
             }
-            equip_char(ch, temp, locate - 1);
+            equip_char(g, ch, temp, locate - 1);
           } else { /* object isn't container -> empty content list */
             for (; cont_row[0]; cont_row[0] = obj1) {
               obj1 = obj_get_next_content(cont_row[0]);
-              obj_to_char(cont_row[0], ch);
+              obj_to_char(g, cont_row[0], ch);
             }
             cont_row[0] = nullptr;
           }
@@ -935,7 +936,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           if (cont_row[j]) { /* no container -> back to ch's inventory */
             for (; cont_row[j]; cont_row[j] = obj1) {
               obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(cont_row[j], ch);
+              obj_to_char(g, cont_row[j], ch);
             }
             cont_row[j] = nullptr;
           }
@@ -943,17 +944,17 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
         if (j == -locate && cont_row[j]) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* take item ; fill ; give to char again */
-            obj_from_char(temp);
+            obj_from_char(g, temp);
             obj_set_contains(temp, nullptr);
             for (; cont_row[j]; cont_row[j] = obj1) {
               obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_obj(cont_row[j], temp);
+              obj_to_obj(g, cont_row[j], temp);
             }
-            obj_to_char(temp, ch); /* add to inv first ... */
+            obj_to_char(g, temp, ch); /* add to inv first ... */
           } else {                 /* object isn't container -> empty content list */
             for (; cont_row[j]; cont_row[j] = obj1) {
               obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(cont_row[j], ch);
+              obj_to_char(g, cont_row[j], ch);
             }
             cont_row[j] = nullptr;
           }
@@ -963,7 +964,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           /* let obj be part of content list
              but put it at the list's end thus having the items
              in the same order as before renting */
-          obj_from_char(temp);
+          obj_from_char(g, temp);
           if ((obj1 = cont_row[-locate - 1])) {
             while (obj_get_next_content(obj1))
               obj1 = obj_get_next_content(obj1);
@@ -978,7 +979,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
   }
 
   /* Little hoarding check. -gg 3/1/98 */
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s (level %d) has %d objects (max %d).",
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s (level %d) has %d objects (max %d).",
          char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);

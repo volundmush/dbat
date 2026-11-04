@@ -5,14 +5,14 @@
 // variables
 
 // functions
-void log_imm_action(const char *messg, ...) __attribute__((format(printf, 1, 2)));
-void hint_system(struct char_data *ch, int num);
-bool dball_count(struct char_data *ch);
-void log_custom(struct descriptor_data *d, struct obj_data *obj);
-void wishSYS(void);
+void log_imm_action(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void hint_system(GameWorld *g, struct char_data *ch, int num);
+bool dball_count(GameWorld *g, struct char_data *ch);
+void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj);
+void wishSYS(GameWorld *g);
 void bring_to_cap(struct char_data *ch);
-void base_update(void);
-void load_shadow_dragons();
+void base_update(GameWorld *g);
+void load_shadow_dragons(GameWorld *g);
 void update_innate(struct char_data *ch);
 
 // commands

@@ -7,6 +7,7 @@
 #include "dbat/stringutils.h"
 #include "dbat/comm.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
 void customWrite(struct char_data *ch, struct obj_data *obj)
 {
@@ -43,7 +44,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   atomic_commit(&af);
 }
 
-void customRead(struct descriptor_data *d, int type, char *name)
+void customRead(GameWorld *g, struct descriptor_data *d, int type, char *name)
 {
 
   char fname[40], line[256], filler[256] = "";
@@ -71,7 +72,7 @@ void customRead(struct descriptor_data *d, int type, char *name)
       sprintf(filler, "%s", line);
     }
 
-    send_to_char(d->character, "%s", buf);
+    send_to_char(g, d->character, "%s", buf);
 
     fclose(fl);
     return;
@@ -95,7 +96,7 @@ void customRead(struct descriptor_data *d, int type, char *name)
     sprintf(filler, "%s", line);
   }
 
-  write_to_output(d, "%s", buf);
+  write_to_output(g, d, "%s", buf);
 
   fclose(fl);
 }

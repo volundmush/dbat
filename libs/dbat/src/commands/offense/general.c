@@ -24,6 +24,7 @@
 #include "dbat/guild.h"
 #include "dbat/class.h"
 #include "dbat/techniques.h"
+#include "dbat/game_world.h"
 
 /* This handles charging for energy attacks */
 ACMD(do_charge)
@@ -35,87 +36,87 @@ ACMD(do_charge)
   one_argument(argument, arg);
 
   if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-    send_to_char(ch, "@WYou are concentrating too much on your aura to be able to charge.");
+    send_to_char(g, ch, "@WYou are concentrating too much on your aura to be able to charge.");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char(ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_MBREAK)) {
-    send_to_char(ch, "Your mind is still strained from psychic attacks...\r\n");
+    send_to_char(g, ch, "Your mind is still strained from psychic attacks...\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_POISON)) {
-    send_to_char(ch, "You feel too sick from the poison to concentrate.\r\n");
+    send_to_char(g, ch, "You feel too sick from the poison to concentrate.\r\n");
     return;
   }
   if (!*arg) {
-    send_to_char(ch, "Charge, yes. How much percent though?\r\n");
-    send_to_char(ch, "[ 1 - 100 | cancel | release]\r\n");
+    send_to_char(g, ch, "Charge, yes. How much percent though?\r\n");
+    send_to_char(g, ch, "[ 1 - 100 | cancel | release]\r\n");
     return;
   }
   if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) <= 0)) {
-    send_to_char(ch, "Try cancel instead, you have nothing charged up yet!\r\n");
+    send_to_char(g, ch, "Try cancel instead, you have nothing charged up yet!\r\n");
     return;
   }
   if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) > 0)) {
-    send_to_char(ch, "You stop charging and release your pent up energy.\r\n");
-    switch (rand_number(1, 3)) {
+    send_to_char(g, ch, "You stop charging and release your pent up energy.\r\n");
+    switch (rand_number(g, 1, 3)) {
       case 1:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 2:
-        act("$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 3:
-        act("$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
         break;
       default:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
     }
-    incCurKI(ch, char_get_charge(ch), true);
+    incCurKI(g, ch, char_get_charge(ch), true);
     char_set_charge(ch, 0);
     char_set_chargeto(ch, 0);
     char_plr_set(ch, PLR_CHARGE, false);
     return;
   }
   if (!strcasecmp("release", arg) && char_get_charge(ch) > 0) {
-    send_to_char(ch, "You release your pent up energy.\r\n");
-    switch (rand_number(1, 3)) {
+    send_to_char(g, ch, "You release your pent up energy.\r\n");
+    switch (rand_number(g, 1, 3)) {
       case 1:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 2:
-        act("$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 3:
-        act("$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
         break;
       default:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
     }
-    incCurKI(ch, char_get_charge(ch), true);
+    incCurKI(g, ch, char_get_charge(ch), true);
     char_set_charge(ch, 0);
     char_set_chargeto(ch, 0);
     return;
   }
   if (!strcasecmp("cancel", arg) && char_plr_flagged(ch, PLR_CHARGE)) {
-    send_to_char(ch, "You stop charging.\r\n");
-    switch (rand_number(1, 3)) {
+    send_to_char(g, ch, "You stop charging.\r\n");
+    switch (rand_number(g, 1, 3)) {
       case 1:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 2:
-        act("$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
         break;
       case 3:
-        act("$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
         break;
       default:
-        act("$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
         break;
     }
     char_plr_set(ch, PLR_CHARGE, false);
@@ -123,22 +124,22 @@ ACMD(do_charge)
     return;
   }
   if (!strcasecmp("cancel", arg) && !char_plr_flagged(ch, PLR_CHARGE)) {
-    send_to_char(ch, "You are not even charging!\r\n");
+    send_to_char(g, ch, "You are not even charging!\r\n");
     return;
   }
-  if ((getCurKI(ch)) < getMaxKI(ch) / 100) {
-    send_to_char(ch, "You don't even have enough ki!\r\n");
+  if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 100) {
+    send_to_char(g, ch, "You don't even have enough ki!\r\n");
     return;
   }
   if ((amt = atoi(arg)) > 0) {
     if (amt >= 101) {
-      send_to_char(ch, "You have set it too high!\r\n");
+      send_to_char(g, ch, "You have set it too high!\r\n");
       return;
     }
     if (char_aff_flagged(ch, AFF_SPIRITCONTROL)) {
       int64_t diff = 0;
-      if ((getCurKI(ch)) < ((getMaxKI(ch) * 0.01) * amt) + 1) {
-        diff = (((getMaxKI(ch) * 0.01) * amt) + 1) - (getCurKI(ch));
+      if ((getCurKI(g, ch)) < ((getMaxKI(g, ch) * 0.01) * amt) + 1) {
+        diff = (((getMaxKI(g, ch) * 0.01) * amt) + 1) - (getCurKI(g, ch));
       }
       int chance = 15;
       chance -= char_get_skill(ch, SKILL_SPIRITCONTROL) / 10;
@@ -147,38 +148,38 @@ ACMD(do_charge)
       else if (chance > 15)
         chance = 15;
 
-      if (chance > rand_number(1, 100)) {
-        send_to_char(ch, "The rush of ki that you try to pool temporarily overwhelms you and you lose control!\r\n");
-        null_affect(ch, AFF_SPIRITCONTROL);
+      if (chance > rand_number(g, 1, 100)) {
+        send_to_char(g, ch, "The rush of ki that you try to pool temporarily overwhelms you and you lose control!\r\n");
+        null_affect(g, ch, AFF_SPIRITCONTROL);
         return;
       }
-      int64_t spiritcost = getMaxKI(ch) * 0.05;
+      int64_t spiritcost = getMaxKI(g, ch) * 0.05;
       if (char_get_skill(ch, SKILL_SPIRITCONTROL) >= 100) {
-        spiritcost = getMaxKI(ch) * 0.01;
+        spiritcost = getMaxKI(g, ch) * 0.01;
       }
-      reveal_hiding(ch, 0);
-      send_to_char(ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
-      send_to_char(ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
+      reveal_hiding(g, ch, 0);
+      send_to_char(g, ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
+      send_to_char(g, ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
       char bloom[MAX_INPUT_LENGTH];
       snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(bloom, true, ch, 0, 0, TO_ROOM);
-      char_set_charge(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff);
-      decCurKI(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
+      act(g, bloom, true, ch, 0, 0, TO_ROOM);
+      char_set_charge(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff);
+      decCurKI(g, ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
     } else {
-      reveal_hiding(ch, 0);
-      send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
+      reveal_hiding(g, ch, 0);
+      send_to_char(g, ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
       char bloom[MAX_INPUT_LENGTH];
       snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(bloom, true, ch, 0, 0, TO_ROOM);
-      char_set_chargeto(ch, (((getMaxKI(ch) * 0.01) * amt) + 1));
+      act(g, bloom, true, ch, 0, 0, TO_ROOM);
+      char_set_chargeto(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1));
       char_set_charge(ch, char_get_charge(ch) + (1));
       char_plr_set(ch, PLR_CHARGE, true);
     }
-  } else if (amt < 1 && rroom_get_vnum(char_get_in_room(ch)) != 1562) {
-    send_to_char(ch, "You have set it too low!\r\n");
+  } else if (amt < 1 && rroom_get_vnum(g, char_get_in_room(ch)) != 1562) {
+    send_to_char(g, ch, "You have set it too low!\r\n");
     return;
   } else {
-    send_to_char(ch, "That is an invalid argument.\r\n");
+    send_to_char(g, ch, "That is an invalid argument.\r\n");
   }
 }
 
@@ -186,77 +187,77 @@ ACMD(do_powerup)
 {
   if (char_is_npc(ch)) {
     char_mob_set(ch, MOB_POWERUP, true);
-    if (getEffMaxPL(ch) < 50000) {
-      act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, 0, 0, TO_ROOM);
-    } else if (getEffMaxPL(ch) < 500000) {
-      act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_ROOM);
-    } else if (getEffMaxPL(ch) < 5000000) {
-      act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, 0, 0, TO_ROOM);
-    } else if (getEffMaxPL(ch) < 50000000) {
-      act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_ROOM);
-    } else if (getEffMaxPL(ch) < 100000000) {
-      act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, 0, 0, TO_ROOM);
-    } else if (getEffMaxPL(ch) < 300000000) {
-      act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, 0, 0, TO_ROOM);
+    if (getEffMaxPL(g, ch) < 50000) {
+      act(g, "@RYou begin to powerup, and air billows outward around you!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and air billows outward around $m!@n", true, ch, 0, 0, TO_ROOM);
+    } else if (getEffMaxPL(g, ch) < 500000) {
+      act(g, "@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_ROOM);
+    } else if (getEffMaxPL(g, ch) < 5000000) {
+      act(g, "@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, 0, 0, TO_ROOM);
+    } else if (getEffMaxPL(g, ch) < 50000000) {
+      act(g, "@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_ROOM);
+    } else if (getEffMaxPL(g, ch) < 100000000) {
+      act(g, "@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, 0, 0, TO_ROOM);
+    } else if (getEffMaxPL(g, ch) < 300000000) {
+      act(g, "@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, 0, 0, TO_ROOM);
     } else {
-      act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, 0, 0, TO_CHAR);
-      act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, 0, 0, TO_ROOM);
     }
     return;
   }
   if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-    send_to_char(ch, "@WYou are concentrating too much on your aura to be able to power up.");
+    send_to_char(g, ch, "@WYou are concentrating too much on your aura to be able to power up.");
     return;
   }
   if (char_is_android(ch)) {
-    send_to_char(ch, "@WYou are an android, you do not powerup.@n");
+    send_to_char(g, ch, "@WYou are an android, you do not powerup.@n");
     return;
   }
   if (char_get_suppression(ch) > 0) {
-    send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" PRId64 " percent.@n", char_get_suppression(ch));
+    send_to_char(g, ch, "@WYou currently have your powerlevel suppressed to %" PRId64 " percent.@n", char_get_suppression(ch));
     return;
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {
-    send_to_char(ch, "@WYou stop powering up.@n");
+    send_to_char(g, ch, "@WYou stop powering up.@n");
     char_plr_set(ch, PLR_POWERUP, false);
     return;
   }
-  if (getCurPL(ch) >= getEffMaxPL(ch)) {
-    send_to_char(ch, "@WYou are already at max!@n");
+  if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
+    send_to_char(g, ch, "@WYou are already at max!@n");
     return;
   }
-  if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
-    send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
+  if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
+    send_to_char(g, ch, "@WYou do not have enough ki to powerup!@n");
     return;
   }
-  reveal_hiding(ch, 0);
-  if (getEffMaxPL(ch) < 50000) {
-    act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, 0, 0, TO_ROOM);
-  } else if (getEffMaxPL(ch) < 500000) {
-    act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_ROOM);
-  } else if (getEffMaxPL(ch) < 5000000) {
-    act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, 0, 0, TO_ROOM);
-  } else if (getEffMaxPL(ch) < 50000000) {
-    act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_ROOM);
-  } else if (getEffMaxPL(ch) < 100000000) {
-    act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, 0, 0, TO_ROOM);
-  } else if (getEffMaxPL(ch) < 300000000) {
-    act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, 0, 0, TO_ROOM);
+  reveal_hiding(g, ch, 0);
+  if (getEffMaxPL(g, ch) < 50000) {
+    act(g, "@RYou begin to powerup, and air billows outward around you!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and air billows outward around $m!@n", true, ch, 0, 0, TO_ROOM);
+  } else if (getEffMaxPL(g, ch) < 500000) {
+    act(g, "@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, 0, 0, TO_ROOM);
+  } else if (getEffMaxPL(g, ch) < 5000000) {
+    act(g, "@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, 0, 0, TO_ROOM);
+  } else if (getEffMaxPL(g, ch) < 50000000) {
+    act(g, "@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, 0, 0, TO_ROOM);
+  } else if (getEffMaxPL(g, ch) < 100000000) {
+    act(g, "@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, 0, 0, TO_ROOM);
+  } else if (getEffMaxPL(g, ch) < 300000000) {
+    act(g, "@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, 0, 0, TO_ROOM);
   } else {
-    act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, 0, 0, TO_CHAR);
-    act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, 0, 0, TO_ROOM);
   }
   char_plr_set(ch, PLR_POWERUP, true);
   return;
@@ -271,34 +272,34 @@ ACMD(do_rescue)
   one_argument(argument, arg);
 
   if (!*arg)
-    send_to_char(ch, "Whom do you wish to rescue?\r\n");
-  else if (!(helpee = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "Whom do you wish to rescue?\r\n");
+  else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
   else if (helpee == ch)
-    send_to_char(ch, "You can't help yourself any more than this!\r\n");
+    send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else if (!char_get_fighting(helpee))
-    send_to_char(ch, "They are not fighting anyone!\r\n");
+    send_to_char(g, ch, "They are not fighting anyone!\r\n");
   else if (char_get_fighting(ch) && !char_is_npc(ch))
-    send_to_char(ch, "You are a little too busy fighting for yourself!\r\n");
+    send_to_char(g, ch, "You are a little too busy fighting for yourself!\r\n");
   else {
     opponent     = char_get_fighting(helpee);
     int mobbonus = 0;
 
     if (char_is_npc(ch)) {
-      mobbonus = char_get_speedi(ch) * 0.2;
+      mobbonus = char_get_speedi(g, ch) * 0.2;
     }
-    if (char_get_speedi(ch) + mobbonus < char_get_speedi(opponent) && rand_number(1, 3) != 3) {
-      act("@GYou leap towards @g$N@G and try to rescue $M but are too slow!@n", true, ch, 0, helpee, TO_CHAR);
-      act("@g$n@G leaps towards you! $n is too slow and fails to rescue you!@n", true, ch, 0, helpee, TO_VICT);
-      act("@g$n@G leaps towards @g$N@G and tries to rescue $M but is too slow!@n", true, ch, 0, helpee, TO_NOTVICT);
+    if (char_get_speedi(g, ch) + mobbonus < char_get_speedi(g, opponent) && rand_number(g, 1, 3) != 3) {
+      act(g, "@GYou leap towards @g$N@G and try to rescue $M but are too slow!@n", true, ch, 0, helpee, TO_CHAR);
+      act(g, "@g$n@G leaps towards you! $n is too slow and fails to rescue you!@n", true, ch, 0, helpee, TO_VICT);
+      act(g, "@g$n@G leaps towards @g$N@G and tries to rescue $M but is too slow!@n", true, ch, 0, helpee, TO_NOTVICT);
       return;
     }
-    act("@GYou leap in front of @g$N@G and rescue $M!@n", true, ch, 0, helpee, TO_CHAR);
-    act("@g$n@G leaps in front of you! You are rescued!@n", true, ch, 0, helpee, TO_VICT);
-    act("@g$n@G leaps in front of @g$N@G and rescues $M!@n", true, ch, 0, helpee, TO_NOTVICT);
-    stop_fighting(opponent);
-    hurt(0, 0, ch, opponent, nullptr, rand_number(1, char_get_level(ch)), 1);
-    hurt(0, 0, opponent, ch, nullptr, rand_number(1, char_get_level(ch)), 1);
+    act(g, "@GYou leap in front of @g$N@G and rescue $M!@n", true, ch, 0, helpee, TO_CHAR);
+    act(g, "@g$n@G leaps in front of you! You are rescued!@n", true, ch, 0, helpee, TO_VICT);
+    act(g, "@g$n@G leaps in front of @g$N@G and rescues $M!@n", true, ch, 0, helpee, TO_NOTVICT);
+    stop_fighting(g, opponent);
+    hurt(g, 0, 0, ch, opponent, nullptr, rand_number(g, 1, char_get_level(ch)), 1);
+    hurt(g, 0, 0, opponent, ch, nullptr, rand_number(g, 1, char_get_level(ch)), 1);
     return;
   }
 }
@@ -309,17 +310,17 @@ ACMD(do_assist)
   struct char_data *helpee, *opponent;
 
   if (char_get_fighting(ch)) {
-    send_to_char(ch, "You're already fighting!  How can you assist someone else?\r\n");
+    send_to_char(g, ch, "You're already fighting!  How can you assist someone else?\r\n");
     return;
   }
   one_argument(argument, arg);
 
   if (!*arg)
-    send_to_char(ch, "Whom do you wish to assist?\r\n");
-  else if (!(helpee = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "Whom do you wish to assist?\r\n");
+  else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
   else if (helpee == ch)
-    send_to_char(ch, "You can't help yourself any more than this!\r\n");
+    send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else {
     /*
      * Hit the same enemy the person you're helping is.
@@ -327,25 +328,25 @@ ACMD(do_assist)
     if (char_get_fighting(helpee))
       opponent = char_get_fighting(helpee);
     else
-      for (opponent = rroom_get_people(char_get_in_room(ch));
+      for (opponent = rroom_get_people(g, char_get_in_room(ch));
            opponent && (char_get_fighting(opponent) != helpee);
            opponent = char_get_next_in_room(opponent));
 
     if (!opponent)
-      act("But nobody is fighting $M!", true, ch, 0, helpee, TO_CHAR);
-    else if (!char_can_see(ch, opponent))
-      act("You can't see who is fighting $M!", true, ch, 0, helpee, TO_CHAR);
+      act(g, "But nobody is fighting $M!", true, ch, 0, helpee, TO_CHAR);
+    else if (!char_can_see(g, ch, opponent))
+      act(g, "You can't see who is fighting $M!", true, ch, 0, helpee, TO_CHAR);
     /* prevent accidental pkill */
     else {
-      reveal_hiding(ch, 0);
-      send_to_char(ch, "You join the fight!\r\n");
-      act("$N assists you!", 0, helpee, 0, ch, TO_CHAR);
-      act("$n assists $N.", true, ch, 0, helpee, TO_NOTVICT);
+      reveal_hiding(g, ch, 0);
+      send_to_char(g, ch, "You join the fight!\r\n");
+      act(g, "$N assists you!", 0, helpee, 0, ch, TO_CHAR);
+      act(g, "$n assists $N.", true, ch, 0, helpee, TO_NOTVICT);
       if (!char_get_fighting(ch)) {
-        set_fighting(ch, opponent);
+        set_fighting(g, ch, opponent);
       }
       if (!char_get_fighting(opponent)) {
-        set_fighting(opponent, ch);
+        set_fighting(g, opponent, ch);
       }
     }
   }
@@ -362,17 +363,17 @@ ACMD(do_kill)
   one_argument(argument, arg);
 
   if (!*arg) {
-    send_to_char(ch, "Kill who?\r\n");
+    send_to_char(g, ch, "Kill who?\r\n");
   } else {
-    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(ch, "They aren't here.\r\n");
+    if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
+      send_to_char(g, ch, "They aren't here.\r\n");
     else if (ch == vict)
-      send_to_char(ch, "Your mother would be so sad.. :(\r\n");
+      send_to_char(g, ch, "Your mother would be so sad.. :(\r\n");
     else {
-      act("You chop $M to pieces!  Ah!  The blood!", true, ch, 0, vict, TO_CHAR);
-      act("$N chops you to pieces!", true, vict, 0, ch, TO_CHAR);
-      act("$n brutally slays $N!", true, ch, 0, vict, TO_NOTVICT);
-      raw_kill(vict, ch);
+      act(g, "You chop $M to pieces!  Ah!  The blood!", true, ch, 0, vict, TO_CHAR);
+      act(g, "$N chops you to pieces!", true, vict, 0, ch, TO_CHAR);
+      act(g, "$n brutally slays $N!", true, ch, 0, vict, TO_NOTVICT);
+      raw_kill(g, vict, ch);
     }
   }
 }
@@ -385,41 +386,41 @@ ACMD(do_flee)
   one_argument(argument, arg);
 
   if (char_get_position(ch) < POS_RESTING) {
-    send_to_char(ch, "You are in pretty bad shape, unable to flee!\r\n");
+    send_to_char(g, ch, "You are in pretty bad shape, unable to flee!\r\n");
     return;
   }
 
   if (char_get_grappling(ch)) {
-    send_to_char(ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
 
   if (char_get_grappled(ch)) {
-    send_to_char(ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
 
   if (char_get_absorbing(ch)) {
-    send_to_char(ch, "You are absorbing from someone!\r\n");
+    send_to_char(g, ch, "You are absorbing from someone!\r\n");
     return;
   }
 
   if (char_get_absorbby(ch)) {
-    send_to_char(ch, "You are being absorbed from by someone!\r\n");
+    send_to_char(g, ch, "You are being absorbed from by someone!\r\n");
     return;
   }
 
   if (!char_is_npc(ch)) {
     int fail = false;
     struct obj_data *obj, *next_obj;
-    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
       next_obj = obj_get_next_content(obj);
       if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
         fail = true;
       }
     }
     if (fail == true) {
-      send_to_char(ch, "You are too busy controlling your attack!\r\n");
+      send_to_char(g, ch, "You are too busy controlling your attack!\r\n");
       return;
     }
   }
@@ -431,59 +432,59 @@ ACMD(do_flee)
       } else if ((attempt = search_block(arg, abbr_dirs, false) > -1)) {
         attempt = search_block(arg, abbr_dirs, false);
       } else {
-        attempt = rand_number(0, NUM_OF_DIRS - 1); /* Select a random direction */
+        attempt = rand_number(g, 0, NUM_OF_DIRS - 1); /* Select a random direction */
       }
     }
     if (!*arg) {
-      attempt = rand_number(0, NUM_OF_DIRS - 1); /* Select a random direction */
+      attempt = rand_number(g, 0, NUM_OF_DIRS - 1); /* Select a random direction */
     }
-    if (char_can_go(ch, attempt) &&
-        !rroom_flagged(char_get_exit(ch, attempt)->to_room, ROOM_DEATH)) {
-      act("$n panics, and attempts to flee!", true, ch, 0, 0, TO_ROOM);
-      if (char_is_npc(ch) && rroom_flagged(char_get_exit(ch, attempt)->to_room, ROOM_NOMOB)) {
+    if (char_can_go(g, ch, attempt) &&
+        !rroom_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_DEATH)) {
+      act(g, "$n panics, and attempts to flee!", true, ch, 0, 0, TO_ROOM);
+      if (char_is_npc(ch) && rroom_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_NOMOB)) {
         return;
       }
 
       struct obj_data *wall;
-      for (wall = rroom_get_contents(char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
-        if (obj_get_vnum(wall) == 79) {
+      for (wall = rroom_get_contents(g, char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
+        if (obj_get_vnum(g, wall) == 79) {
           if (obj_get_cost(wall) == attempt) {
-            send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
+            send_to_char(g, ch, "That direction has a glacial wall blocking it.\r\n");
             return;
           }
         }
       }
 
-      if (!block_calc(ch)) {
+      if (!block_calc(g, ch)) {
         return;
       }
 
       if (char_get_absorbing(ch)) {
-        send_to_char(ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(ch)));
+        send_to_char(g, ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(ch)));
         return;
       }
       if (char_get_absorbby(ch)) {
-        if (axion_dice(0) < char_get_skill(char_get_absorbing(ch), SKILL_ABSORB)) {
-          send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
-          send_to_char(char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
+        if (axion_dice(g, 0) < char_get_skill(char_get_absorbing(ch), SKILL_ABSORB)) {
+          send_to_char(g, ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
+          send_to_char(g, char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
           char_set_wait(ch, PULSE_2SEC);
           return;
         }
-        act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
-        act("@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_VICT);
-        act("@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), 0, ch, TO_CHAR);
+        act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
+        act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_VICT);
+        act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), 0, ch, TO_CHAR);
         char_set_absorbing(char_get_absorbby(ch), nullptr);
         char_set_absorbby(ch, nullptr);
       }
-      if (do_simple_move(ch, attempt, true)) {
-        send_to_char(ch, "You flee head over heels.\r\n");
+      if (do_simple_move(g, ch, attempt, true)) {
+        send_to_char(g, ch, "You flee head over heels.\r\n");
         char_set_wait(ch, PULSE_2SEC);
       } else {
-        act("$n tries to flee, but can't!", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n tries to flee, but can't!", true, ch, 0, 0, TO_ROOM);
         char_set_wait(ch, PULSE_2SEC);
       }
       return;
     }
   }
-  send_to_char(ch, "PANIC!  You couldn't escape!\r\n");
+  send_to_char(g, ch, "PANIC!  You couldn't escape!\r\n");
 }

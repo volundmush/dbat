@@ -46,6 +46,7 @@
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
 #include "other_internal.h"
+#include "dbat/game_world.h"
 
 /* Used by do_rpp for soft-cap */
 void bring_to_cap(struct char_data *ch)
@@ -75,8 +76,8 @@ ACMD(do_train)
     return;
   }
 
-  if (char_get_carry_weight(ch) > getMaxCarryWeight(ch)) {
-    send_to_char(ch, "You are weighted down too much!\r\n");
+  if (char_get_carry_weight(ch) > getMaxCarryWeight(g, ch)) {
+    send_to_char(g, ch, "You are weighted down too much!\r\n");
     return;
   }
 
@@ -113,17 +114,17 @@ ACMD(do_train)
   }
 
   if (!*arg) {
-    send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
-    send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(ch)), char_get_real_abils_str(ch) >= 80 ? "@rCAPPED" : add_commas(strcap));
-    send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(ch)), char_get_real_abils_cha(ch) >= 80 ? "@rCAPPED" : add_commas(spdcap));
-    send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_traincon(ch)), char_get_real_abils_con(ch) >= 80 ? "@rCAPPED" : add_commas(concap));
-    send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_trainint(ch)), char_get_real_abils_intel(ch) >= 80 ? "@rCAPPED" : add_commas(intcap));
-    send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainwis(ch)), char_get_real_abils_wis(ch) >= 80 ? "@rCAPPED" : add_commas(wiscap));
-    send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainagl(ch)), char_get_real_abils_dex(ch) >= 80 ? "@rCAPPED" : add_commas(aglcap));
-    send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
-    send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
-    send_to_char(ch, "@D---------------------------------------------@n\r\n");
-    send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
+    send_to_char(g, ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
+    send_to_char(g, ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(g, ch)), char_get_real_abils_str(ch) >= 80 ? "@rCAPPED" : add_commas(strcap));
+    send_to_char(g, ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(g, ch)), char_get_real_abils_cha(ch) >= 80 ? "@rCAPPED" : add_commas(spdcap));
+    send_to_char(g, ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_traincon(g, ch)), char_get_real_abils_con(ch) >= 80 ? "@rCAPPED" : add_commas(concap));
+    send_to_char(g, ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_trainint(g, ch)), char_get_real_abils_intel(ch) >= 80 ? "@rCAPPED" : add_commas(intcap));
+    send_to_char(g, ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainwis(g, ch)), char_get_real_abils_wis(ch) >= 80 ? "@rCAPPED" : add_commas(wiscap));
+    send_to_char(g, ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainagl(g, ch)), char_get_real_abils_dex(ch) >= 80 ? "@rCAPPED" : add_commas(aglcap));
+    send_to_char(g, ch, "@D  -----------------------------------------  @n\r\n");
+    send_to_char(g, ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
+    send_to_char(g, ch, "@D---------------------------------------------@n\r\n");
+    send_to_char(g, ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
     return;
   }
 
@@ -141,17 +142,17 @@ ACMD(do_train)
 */
 
   /* Figure up the weight bonus */
-  total = weight * (rroom_get_gravity(char_get_in_room(ch)) + 1);
-  total += (rroom_get_gravity(char_get_in_room(ch)) + 1) ^ 2;
-  if (rroom_get_vnum(char_get_in_room(ch)) >= 6100 && rroom_get_vnum(char_get_in_room(ch)) <= 6135) {
+  total = weight * (rroom_get_gravity(g, char_get_in_room(ch)) + 1);
+  total += (rroom_get_gravity(g, char_get_in_room(ch)) + 1) ^ 2;
+  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 6100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 6135) {
     total += total * 0.15;
   }
 
   int sensei = -1;
 
-  if (rroom_get_vnum(char_get_in_room(ch)) == sensei_location_id(char_get_class(ch))) {
-    if (!(char_get_gold(ch) >= 8 && char_get_practice_points(ch) >= 1)) {
-      send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
+  if (rroom_get_vnum(g, char_get_in_room(ch)) == sensei_location_id(char_get_class(ch))) {
+    if (!(char_get_gold(ch) >= 8 && char_get_practice_points(g, ch) >= 1)) {
+      send_to_char(g, ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
       return;
     }
     total += total * 0.85;
@@ -166,25 +167,25 @@ ACMD(do_train)
     else if (char_get_level(ch) >= 10)
       total *= 150;
     sensei = char_get_class(ch);
-    send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", char_sensei_name(ch));
+    send_to_char(g, ch, "@G%s begins to instruct you in training technique.@n\r\n", char_sensei_name(ch));
   }
 
-  if (total > getEffMaxPL(ch) * 2) {
+  if (total > getEffMaxPL(g, ch) * 2) {
     bonus = 5;
-  } else if (total > getEffMaxPL(ch)) {
+  } else if (total > getEffMaxPL(g, ch)) {
     bonus = 4;
-  } else if (total > (getEffMaxPL(ch) / 2)) {
+  } else if (total > (getEffMaxPL(g, ch) / 2)) {
     bonus = 3;
-  } else if (total > (getEffMaxPL(ch) / 4)) {
+  } else if (total > (getEffMaxPL(g, ch) / 4)) {
     bonus = 2;
-  } else if (total > (getEffMaxPL(ch) / 8)) {
+  } else if (total > (getEffMaxPL(g, ch) / 8)) {
     bonus = 1;
   }
 
   if (sensei < 0)
-    cost = ((total / 20) + (getMaxST(ch) / 50));
+    cost = ((total / 20) + (getMaxST(g, ch) / 50));
   else
-    cost = ((total / 25) + (getMaxST(ch) / 60));
+    cost = ((total / 25) + (getMaxST(g, ch) / 60));
 
   if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
     cost -= cost * 0.25;
@@ -255,17 +256,17 @@ ACMD(do_train)
     stat_train  = &(char_get_player_specials(ch)->trainwis);
     needed      = wiscap;
   } else {
-    send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
+    send_to_char(g, ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
     return;
   }
 
   if (*stat_val == 80) {
-    send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
+    send_to_char(g, ch, "Your base %s is maxed!\r\n", stat_name);
     return;
   }
 
   if (*stat_val >= 45 && char_get_bonuses(ch, nega_trait) > 0) {
-    send_to_char(ch, "You're not able to withstand increasing your %s beyond 45.\r\n", stat_name);
+    send_to_char(g, ch, "You're not able to withstand increasing your %s beyond 45.\r\n", stat_name);
     return;
   }
 
@@ -278,7 +279,7 @@ ACMD(do_train)
     stat_cap = 40;
 
   if (*stat_val >= stat_cap) {
-    send_to_char(ch, "You have reached the stat cap for your level.\r\n");
+    send_to_char(g, ch, "You have reached the stat cap for your level.\r\n");
     return;
   }
 
@@ -287,123 +288,123 @@ ACMD(do_train)
     case 2:
     case 3:
     case 4:
-      if ((getCurST(ch)) < cost) {
-        send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
+      if ((getCurST(g, ch)) < cost) {
+        send_to_char(g, ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
         return;
       }
-      plus = (((total / 20) + (getMaxST(ch) / 50)) * 100) / getMaxST(ch);
-      decCurST(ch, cost, 0);
+      plus = (((total / 20) + (getMaxST(g, ch) / 50)) * 100) / getMaxST(g, ch);
+      decCurST(g, ch, cost, 0);
       break;
     case 5:
     case 6:
-      if ((getCurKI(ch)) < cost) {
-        send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
+      if ((getCurKI(g, ch)) < cost) {
+        send_to_char(g, ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
         return;
       }
-      plus = (((total / 20) + (getMaxKI(ch) / 50)) * 100) / getMaxKI(ch);
-      decCurKI(ch, cost, 0);
+      plus = (((total / 20) + (getMaxKI(g, ch) / 50)) * 100) / getMaxKI(g, ch);
+      decCurKI(g, ch, cost, 0);
       break;
   }
 
   /* what training message is displayed? */
-  reveal_hiding(ch, 0);
+  reveal_hiding(g, ch, 0);
 
-  int msg_case = rand_number(1, 3);
+  int msg_case = rand_number(g, 1, 3);
 
   switch (stat_id) {
     case 1:
       switch (msg_case) {
         case 1:
-          act("@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n throws a flurry of punches into the air.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n throws a flurry of punches into the air.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou leap into the air and throw a wild kick at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n leaps into the air and throws a wild kick at nothing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and throw a wild kick at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n leaps into the air and throws a wild kick at nothing.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
     case 2:
       switch (msg_case) {
         case 1:
-          act("@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n dashes quickly around the surrounding area as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n dashes quickly around the surrounding area as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou dodge to the side as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n dodges to the side as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dodge to the side as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n dodges to the side as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou dash backwards as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n dashes backwards as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dash backwards as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n dashes backwards as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
     case 3:
       switch (msg_case) {
         case 1:
-          act("@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou leap into the air and then slam into the ground with your fists!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n leaps into the air and then slams into the ground with $s fists!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your fists!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s fists!?@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou leap into the air and then slam into the ground with your body!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n leaps into the air and then slams into the ground with $s body!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your body!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s body!?@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
     case 4:
       switch (msg_case) {
         case 1:
-          act("@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou flip to the side off one hand and then land on your feet.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n flips to the side off one hand and then lands on $s feet.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou flip to the side off one hand and then land on your feet.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n flips to the side off one hand and then lands on $s feet.@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
     case 5:
       switch (msg_case) {
         case 1:
-          act("@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
     case 6:
       switch (msg_case) {
         case 1:
-          act("@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 2:
-          act("@WYou look around and contemplate battle tactics for an imaginary scenario.@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n looks around and appears to be imagining things that aren't there.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou look around and contemplate battle tactics for an imaginary scenario.@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n looks around and appears to be imagining things that aren't there.@n", true, ch, 0, 0, TO_ROOM);
           break;
         case 3:
-          act("@WYou invent a battle plan for a battle that doesn't exist!@n", true, ch, 0, 0, TO_CHAR);
-          act("@W$n seems to have thought of something.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou invent a battle plan for a battle that doesn't exist!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@W$n seems to have thought of something.@n", true, ch, 0, 0, TO_ROOM);
           break;
       }
       break;
@@ -420,10 +421,10 @@ ACMD(do_train)
 
   plus *= 2;
 
-  if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
+  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
     plus *= 4;
   }
-  if (rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     plus *= 3;
   }
   if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
@@ -442,50 +443,50 @@ ACMD(do_train)
   switch (bonus) {
     case 1:
       *stat_train += 5 + plus;
-      send_to_char(ch, "You feel slight improvement. @D[@G+%d@D]@n\r\n", (plus + 5));
+      send_to_char(g, ch, "You feel slight improvement. @D[@G+%d@D]@n\r\n", (plus + 5));
       char_set_wait(ch, PULSE_3SEC);
       break;
     case 2:
       *stat_train += 10 + plus;
-      send_to_char(ch, "You feel some improvement. @D[@G+%d@D]@n\r\n", (plus + 10));
+      send_to_char(g, ch, "You feel some improvement. @D[@G+%d@D]@n\r\n", (plus + 10));
       char_set_wait(ch, PULSE_3SEC);
       break;
     case 3:
       *stat_train += 25 + plus;
-      send_to_char(ch, "You feel good improvement. @D[@G+%d@D]@n\r\n", (plus + 25));
+      send_to_char(g, ch, "You feel good improvement. @D[@G+%d@D]@n\r\n", (plus + 25));
       char_set_wait(ch, PULSE_3SEC);
       break;
     case 4:
       *stat_train += 50 + plus;
-      send_to_char(ch, "You feel great improvement! @D[@G+%d@D]@n\r\n", (plus + 50));
+      send_to_char(g, ch, "You feel great improvement! @D[@G+%d@D]@n\r\n", (plus + 50));
       char_set_wait(ch, PULSE_5SEC);
       break;
     case 5:
       *stat_train += 100 + plus;
-      send_to_char(ch, "You feel awesome improvement! @D[@G+%d@D]@n\r\n", (plus + 100));
+      send_to_char(g, ch, "You feel awesome improvement! @D[@G+%d@D]@n\r\n", (plus + 100));
       char_set_wait(ch, PULSE_5SEC);
       break;
     default:
       *stat_train += 1;
-      send_to_char(ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
+      send_to_char(g, ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
       char_set_wait(ch, PULSE_3SEC);
       break;
   }
 
   if (sensei > -1) {
     char_set_gold(ch, char_get_gold(ch) - (8));
-    char_set_practice_points(ch, char_get_practice_points(ch) - (1));
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (1));
   }
 
   if (*stat_train >= needed) {
     *stat_train -= needed;
-    send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
+    send_to_char(g, ch, "You feel your %s improve!@n\r\n", stat_name);
     *stat_val += 1;
     if (char_is_piccolo(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0) {
       char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.25));
-      send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
+      send_to_char(g, ch, "You gained quite a bit of experience from that!\r\n");
     }
-    save_char(ch);
+    save_char(g, ch);
   }
 }
 
@@ -498,46 +499,46 @@ ACMD(do_potential)
 
   one_argument(argument, arg);
 
-  if (!know_skill(ch, SKILL_POTENTIAL)) {
+  if (!know_skill(g, ch, SKILL_POTENTIAL)) {
     return;
   }
 
   if (!*arg) {
-    send_to_char(ch, "Who's potential do you want to release?\r\n");
-    send_to_char(ch, "Potential Releases: %d\r\n", char_get_boosts(ch));
+    send_to_char(g, ch, "Who's potential do you want to release?\r\n");
+    send_to_char(g, ch, "Potential Releases: %d\r\n", char_get_boosts(ch));
     return;
   }
-  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(ch, "That target isn't here.\r\n");
+  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+    send_to_char(g, ch, "That target isn't here.\r\n");
     return;
   }
 
   if (char_is_npc(vict)) {
-    send_to_char(ch, "Why would you waste your time releasing their potential?\r\n");
+    send_to_char(g, ch, "Why would you waste your time releasing their potential?\r\n");
     return;
   }
   if (vict == ch) {
-    send_to_char(ch, "You can't release your own potential.\r\n");
+    send_to_char(g, ch, "You can't release your own potential.\r\n");
     return;
   }
   if (char_get_boosts(ch) == 0) {
-    send_to_char(ch, "You have no potential releases to perform.\r\n");
+    send_to_char(g, ch, "You have no potential releases to perform.\r\n");
     return;
   }
   if (char_plr_flagged(vict, PLR_PR)) {
-    send_to_char(ch, "Their potential has already been released\r\n");
+    send_to_char(g, ch, "Their potential has already been released\r\n");
     return;
   }
   if (char_is_android(vict)) {
-    send_to_char(ch, "They are a machine and have no potential to release.\r\n");
+    send_to_char(g, ch, "They are a machine and have no potential to release.\r\n");
     return;
   }
   if (char_get_majinize(vict) > 0) {
-    send_to_char(ch, "They are already majinized and have no potential to release.\r\n");
+    send_to_char(g, ch, "They are already majinized and have no potential to release.\r\n");
     return;
   }
   if (char_is_majin(vict)) {
-    send_to_char(ch, "They have no potential to release...\r\n");
+    send_to_char(g, ch, "They have no potential to release...\r\n");
     return;
   }
   /* Rillao: transloc, add new transes here */
@@ -551,14 +552,14 @@ ACMD(do_potential)
       gainBaseKI(vict, (getBaseKI(vict) / 100) * boost, false);
       gainBaseST(vict, (getBaseST(vict) / 100) * boost, false);
     }
-    reveal_hiding(ch, 0);
-    act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", true, ch, 0, vict, TO_CHAR);
-    act("$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", true, ch, 0, vict, TO_VICT);
-    act("$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true, ch, 0, vict, TO_NOTVICT);
-    improve_skill(ch, SKILL_POTENTIAL, 0);
-    improve_skill(ch, SKILL_POTENTIAL, 0);
-    improve_skill(ch, SKILL_POTENTIAL, 0);
-    improve_skill(ch, SKILL_POTENTIAL, 0);
+    reveal_hiding(g, ch, 0);
+    act(g, "You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", true, ch, 0, vict, TO_CHAR);
+    act(g, "$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", true, ch, 0, vict, TO_VICT);
+    act(g, "$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true, ch, 0, vict, TO_NOTVICT);
+    improve_skill(g, ch, SKILL_POTENTIAL, 0);
+    improve_skill(g, ch, SKILL_POTENTIAL, 0);
+    improve_skill(g, ch, SKILL_POTENTIAL, 0);
+    improve_skill(g, ch, SKILL_POTENTIAL, 0);
     char_set_boosts(ch, char_get_boosts(ch) - (1));
     return;
   }
@@ -570,43 +571,43 @@ ACMD(do_situp)
   int cost = 1, bonus = 0;
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "You are a mob fool!\r\n");
+    send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
-  if (rroom_flagged(char_get_in_room(ch), ROOM_HELL)) {
-    send_to_char(ch, "The fire makes it too hot!\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+    send_to_char(g, ch, "The fire makes it too hot!\r\n");
     return;
   }
   if (char_get_drag(ch)) {
-    send_to_char(ch, "You are dragging someone!\r\n");
+    send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_FISHING)) {
-    send_to_char(ch, "Stop fishing first.\r\n");
+    send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
   if (char_get_carrying(ch)) {
-    send_to_char(ch, "You are carrying someone!\r\n");
+    send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
-  if ((rroom_get_gravity(char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * ((rroom_get_gravity(char_get_in_room(ch)) * 2) + char_get_level(ch));
+  if ((rroom_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * ((rroom_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
   } else if (char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * char_get_level(ch);
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
   }
 
-  if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
+  if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
     cost += 1000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
     cost += 2000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
     cost += 7500000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
     cost += 15000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
     cost += 25000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
     cost += 50000000;
   }
 
@@ -628,139 +629,139 @@ ACMD(do_situp)
   }
 
   if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
-    send_to_char(ch, "You will gain nothing from exercising!\r\n");
+    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
     return;
   }
 
-  if (!limb_ok(ch, 1)) {
+  if (!limb_ok(g, ch, 1)) {
     return;
   }
 
-  if ((getCurST(ch)) < cost) {
-    send_to_char(ch, "You are too tired!\r\n");
+  if ((getCurST(g, ch)) < cost) {
+    send_to_char(g, ch, "You are too tired!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
+    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
   if (char_get_fighting(ch)) {
-    send_to_char(ch, "You are fighting you moron!\r\n");
+    send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    send_to_char(ch, "You can't do situps in midair!\r\n");
+    send_to_char(g, ch, "You can't do situps in midair!\r\n");
     return;
   }
-  if (rroom_get_gravity(char_get_in_room(ch)) == 0) {
+  if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
     bonus = 1;
-    act("@gYou do a situp.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 10) {
-    bonus = rand_number(3, 7);
-    act("@gYou do a situp, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 20) {
-    bonus = rand_number(8, 14);
-    act("@gYou do a situp, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 30) {
-    bonus = rand_number(14, 20);
-    act("@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 40) {
-    bonus = rand_number(20, 35);
-    act("@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 50) {
-    bonus = rand_number(40, 60);
-    act("@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 100) {
-    bonus = rand_number(180, 250);
-    act("@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 200) {
-    bonus = rand_number(400, 600);
-    act("@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
-    bonus = rand_number(800, 1200);
-    act("@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
-    bonus = rand_number(2000, 3000);
-    act("@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
-    bonus = rand_number(4000, 6000);
-    act("@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
-    bonus = rand_number(9000, 10000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
-    bonus = rand_number(15000, 20000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
-    bonus = rand_number(25000, 30000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10) {
+    bonus = rand_number(g, 3, 7);
+    act(g, "@gYou do a situp, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 20) {
+    bonus = rand_number(g, 8, 14);
+    act(g, "@gYou do a situp, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 30) {
+    bonus = rand_number(g, 14, 20);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 40) {
+    bonus = rand_number(g, 20, 35);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 50) {
+    bonus = rand_number(g, 40, 60);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 100) {
+    bonus = rand_number(g, 180, 250);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 200) {
+    bonus = rand_number(g, 400, 600);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
+    bonus = rand_number(g, 800, 1200);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
+    bonus = rand_number(g, 2000, 3000);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
+    bonus = rand_number(g, 4000, 6000);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
+    bonus = rand_number(g, 9000, 10000);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
+    bonus = rand_number(g, 15000, 20000);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
+    bonus = rand_number(g, 25000, 30000);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
   }
-  if (cost >= getMaxST(ch) / 2) {
-    send_to_char(ch, "This gravity is a great challenge for you!\r\n");
+  if (cost >= getMaxST(g, ch) / 2) {
+    send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
     bonus *= 10;
-  } else if (cost >= getMaxST(ch) / 4) {
-    send_to_char(ch, "This gravity is an awesome challenge for you!\r\n");
+  } else if (cost >= getMaxST(g, ch) / 4) {
+    send_to_char(g, ch, "This gravity is an awesome challenge for you!\r\n");
     bonus *= 8;
-  } else if (cost >= getMaxST(ch) / 10) {
-    send_to_char(ch, "This gravity is a good challenge for you!\r\n");
+  } else if (cost >= getMaxST(g, ch) / 10) {
+    send_to_char(g, ch, "This gravity is a good challenge for you!\r\n");
     bonus *= 6;
-  } else if (cost < getMaxST(ch) / 1000) {
-    send_to_char(ch, "This gravity is so easy to you, you could do it in your sleep...\r\n");
+  } else if (cost < getMaxST(g, ch) / 1000) {
+    send_to_char(g, ch, "This gravity is so easy to you, you could do it in your sleep...\r\n");
     bonus /= 8;
-  } else if (cost < getMaxST(ch) / 100) {
-    send_to_char(ch, "This gravity is the opposite of a challenge for you...\r\n");
+  } else if (cost < getMaxST(g, ch) / 100) {
+    send_to_char(g, ch, "This gravity is the opposite of a challenge for you...\r\n");
     bonus /= 5;
-  } else if (cost < getMaxST(ch) / 50) {
-    send_to_char(ch, "This gravity is definitely not a challenge for you...\r\n");
+  } else if (cost < getMaxST(g, ch) / 50) {
+    send_to_char(g, ch, "This gravity is definitely not a challenge for you...\r\n");
     bonus /= 4;
-  } else if (cost < getMaxST(ch) / 30) {
-    send_to_char(ch, "This gravity is barely a challenge for you...\r\n");
+  } else if (cost < getMaxST(g, ch) / 30) {
+    send_to_char(g, ch, "This gravity is barely a challenge for you...\r\n");
     bonus /= 3;
-  } else if (cost < getMaxST(ch) / 20) {
-    send_to_char(ch, "This gravity is hardly a challenge for you...\r\n");
+  } else if (cost < getMaxST(g, ch) / 20) {
+    send_to_char(g, ch, "This gravity is hardly a challenge for you...\r\n");
     bonus /= 2;
   } else {
-    send_to_char(ch, "This gravity is just perfect for you...\r\n");
+    send_to_char(g, ch, "This gravity is just perfect for you...\r\n");
     bonus *= 4;
   }
   if (is_soft_cap(ch, 2, 1.0)) {
     bonus = 0;
   }
-  if (rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
-    send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+    send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-  } else if (rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-    if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+  } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
       bonus *= 10;
     } else {
       bonus *= 5;
     }
-  } else if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
-    send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
+  } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+    send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
   }
-  if (bonus <= 0 && !rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+  if (bonus <= 0 && !rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     bonus = 1;
   }
-  if (bonus <= 0 && rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+  if (bonus <= 0 && rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     bonus = 15;
   }
-  if (bonus <= 0 && rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-    if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+  if (bonus <= 0 && rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
       bonus = 12;
     } else {
       bonus = 6;
@@ -777,22 +778,22 @@ ACMD(do_situp)
   if (char_get_bonuses(ch, BONUS_LONER)) {
     bonus += bonus * 0.1;
   }
-  send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+  send_to_char(g, ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
   gainBaseST(ch, bonus, true);
-  if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
+  if (rroom_get_gravity(g, char_get_in_room(ch)) <= 50) {
     char_set_wait(ch, PULSE_2SEC);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 200) {
     char_set_wait(ch, PULSE_3SEC);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 500) {
     char_set_wait(ch, PULSE_4SEC);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 1000) {
     char_set_wait(ch, PULSE_5SEC);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 5000) {
     char_set_wait(ch, PULSE_6SEC);
-  } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 10000) {
     char_set_wait(ch, PULSE_7SEC);
   }
-  decCurST(ch, cost, 0);
+  decCurST(g, ch, cost, 0);
 }
 
 ACMD(do_meditate)
@@ -805,50 +806,50 @@ ACMD(do_meditate)
   two_arguments(argument, arg, arg2);
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "You are a mob fool!\r\n");
+    send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
-  if (rroom_flagged(char_get_in_room(ch), ROOM_HELL)) {
-    send_to_char(ch, "The fire makes it too hot!\r\n");
+  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+    send_to_char(g, ch, "The fire makes it too hot!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_FISHING)) {
-    send_to_char(ch, "Stop fishing first.\r\n");
+    send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
 
   if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
-    send_to_char(ch, "You will gain nothing from exercising!\r\n");
+    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
     return;
   }
 
   if (char_get_carrying(ch)) {
-    send_to_char(ch, "You are carrying someone!\r\n");
+    send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
   if (char_get_drag(ch)) {
-    send_to_char(ch, "You are dragging someone!\r\n");
+    send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
+    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
 
   if (char_get_fighting(ch)) {
-    send_to_char(ch, "You are fighting you moron!\r\n");
+    send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
 
   if (char_get_position(ch) != POS_SITTING) {
-    send_to_char(ch, "You need to be sitting to meditate.\r\n");
+    send_to_char(g, ch, "You need to be sitting to meditate.\r\n");
     return;
   }
 
   if (!*arg) {
-    send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
+    send_to_char(g, ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
     return;
   }
 
@@ -857,40 +858,40 @@ ACMD(do_meditate)
     if (char_is_saiyan(ch)) {
       slot_cost = 7000;
     }
-    if (char_get_practice_points(ch) < slot_cost) {
-      send_to_char(ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
-      send_to_char(ch, "%s needed.\r\n", add_commas(slot_cost));
+    if (char_get_practice_points(g, ch) < slot_cost) {
+      send_to_char(g, ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
+      send_to_char(g, ch, "%s needed.\r\n", add_commas(slot_cost));
     } else if (char_get_skill_slots(ch) >= 60 && char_get_bonuses(ch, BONUS_GMEMORY) == 0) {
-      send_to_char(ch, "You can not have any more slots through this process.\r\n");
+      send_to_char(g, ch, "You can not have any more slots through this process.\r\n");
     } else if (char_get_skill_slots(ch) >= 65 && char_get_bonuses(ch, BONUS_GMEMORY) == 1) {
-      send_to_char(ch, "You can not have any more slots through this process.\r\n");
+      send_to_char(g, ch, "You can not have any more slots through this process.\r\n");
     } else {
-      send_to_char(ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
+      send_to_char(g, ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
       char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-      char_set_practice_points(ch, char_get_practice_points(ch) - (slot_cost));
+      char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (slot_cost));
       return;
     }
     return;
   }
   if (!strcasecmp(arg, "break")) {
     if (char_get_mindlink(ch) == nullptr) {
-      send_to_char(ch, "You are not mind linked with anyone.\r\n");
+      send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
       return;
     }
     if (char_get_linker(ch) == 1) {
-      send_to_char(ch, "This is not how you break YOUR mind link.\r\n");
+      send_to_char(g, ch, "This is not how you break YOUR mind link.\r\n");
       return;
     }
-    if ((getCurKI(ch)) < getMaxKI(char_get_mindlink(ch)) * 0.05) {
-      send_to_char(ch, "You do not have enough ki to manage a break.\r\n");
+    if ((getCurKI(g, ch)) < getMaxKI(g, char_get_mindlink(ch)) * 0.05) {
+      send_to_char(g, ch, "You do not have enough ki to manage a break.\r\n");
       return;
     }
-    if (char_get_aff_abils_intel(ch) + rand_number(-5, 10) >= char_get_aff_abils_intel(char_get_mindlink(ch)) + (char_get_skill(char_get_mindlink(ch), SKILL_TELEPATHY) * 0.1)) {
-      act("@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
-      act("$n closes their eyes for a few seconds.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
-      send_to_char(char_get_mindlink(ch), "@rYour mind linked target manages to push you out!@n\r\n");
-      if (char_get_aff_abils_intel(char_get_mindlink(ch)) < axion_dice(-10) && !char_aff_flagged(char_get_mindlink(ch), AFF_SHOCKED)) {
-        send_to_char(char_get_mindlink(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
+    if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(char_get_mindlink(ch)) + (char_get_skill(char_get_mindlink(ch), SKILL_TELEPATHY) * 0.1)) {
+      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
+      act(g, "$n closes their eyes for a few seconds.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
+      send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target manages to push you out!@n\r\n");
+      if (char_get_aff_abils_intel(char_get_mindlink(ch)) < axion_dice(g, -10) && !char_aff_flagged(char_get_mindlink(ch), AFF_SHOCKED)) {
+        send_to_char(g, char_get_mindlink(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
         char_aff_set(char_get_mindlink(ch), AFF_SHOCKED, false);
       }
 
@@ -899,20 +900,20 @@ ACMD(do_meditate)
       char_set_mindlink(ch, nullptr);
       return;
     }
-    act("@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
-    act("$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
-    send_to_char(char_get_mindlink(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
+    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
+    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
+    send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
-    decCurKI(ch, getMaxKI(char_get_mindlink(ch)) * .05, 0);
+    decCurKI(g, ch, getMaxKI(g, char_get_mindlink(ch)) * .05, 0);
     return;
   }
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
-    send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
+  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    send_to_char(g, ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
     return;
   }
 
-  if (obj_get_vnum(obj) == 79) {
-    send_to_char(ch, "It's frozen to the surface.\r\n");
+  if (obj_get_vnum(g, obj) == 79) {
+    send_to_char(g, ch, "It's frozen to the surface.\r\n");
     return;
   }
 
@@ -922,24 +923,24 @@ ACMD(do_meditate)
     weight += char_get_weight(obj_get_sitting(obj));
   }
 
-  if ((rroom_get_gravity(char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * ((rroom_get_gravity(char_get_in_room(ch)) * 2) + char_get_level(ch));
+  if ((rroom_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * ((rroom_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
   } else if (char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * char_get_level(ch);
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
   }
-  cost += weight * ((rroom_get_gravity(char_get_in_room(ch)) + 1) / 5);
+  cost += weight * ((rroom_get_gravity(g, char_get_in_room(ch)) + 1) / 5);
 
-  if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
+  if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
     cost += 1000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
     cost += 2000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
     cost += 7500000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
     cost += 15000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
     cost += 25000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
     cost += 50000000;
   }
 
@@ -964,107 +965,107 @@ ACMD(do_meditate)
     cost *= 4;
   }
 
-  if ((getCurKI(ch)) < cost) {
-    send_to_char(ch, "You don't have enough ki!\r\n");
+  if ((getCurKI(g, ch)) < cost) {
+    send_to_char(g, ch, "You don't have enough ki!\r\n");
     return;
   }
 
   else {
     /* Meditate Message */
-    act("@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, 0, TO_CHAR);
-    act("@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, 0, TO_CHAR);
+    act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, 0, TO_ROOM);
 
-    if (rroom_get_gravity(char_get_in_room(ch)) == 0) {
+    if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
       bonus = 1;
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 10) {
-      bonus = rand_number(2, 4);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 20) {
-      bonus = rand_number(5, 10);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 30) {
-      bonus = rand_number(10, 15);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 40) {
-      bonus = rand_number(15, 20);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 50) {
-      bonus = rand_number(40, 60);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 100) {
-      bonus = rand_number(180, 250);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 200) {
-      bonus = rand_number(400, 600);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
-      bonus = rand_number(800, 1200);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
-      bonus = rand_number(2000, 3000);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
-      bonus = rand_number(4000, 6000);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
-      bonus = rand_number(9000, 10000);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
-      bonus = rand_number(15000, 20000);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
-      bonus = rand_number(25000, 30000);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10) {
+      bonus = rand_number(g, 2, 4);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 20) {
+      bonus = rand_number(g, 5, 10);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 30) {
+      bonus = rand_number(g, 10, 15);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 40) {
+      bonus = rand_number(g, 15, 20);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 50) {
+      bonus = rand_number(g, 40, 60);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 100) {
+      bonus = rand_number(g, 180, 250);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 200) {
+      bonus = rand_number(g, 400, 600);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
+      bonus = rand_number(g, 800, 1200);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
+      bonus = rand_number(g, 2000, 3000);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
+      bonus = rand_number(g, 4000, 6000);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
+      bonus = rand_number(g, 9000, 10000);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
+      bonus = rand_number(g, 15000, 20000);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
+      bonus = rand_number(g, 25000, 30000);
     }
 
     bonus += ((weight + 1) / 500) + 1;
 
-    if (cost >= getMaxKI(ch) / 2) {
-      send_to_char(ch, "The object weight and gravity are a great challenge for you!\r\n");
+    if (cost >= getMaxKI(g, ch) / 2) {
+      send_to_char(g, ch, "The object weight and gravity are a great challenge for you!\r\n");
       bonus *= 10;
-    } else if (cost >= getMaxKI(ch) / 4) {
-      send_to_char(ch, "The object weight and gravity are an awesome challenge for you!\r\n");
+    } else if (cost >= getMaxKI(g, ch) / 4) {
+      send_to_char(g, ch, "The object weight and gravity are an awesome challenge for you!\r\n");
       bonus *= 8;
-    } else if (cost >= getMaxKI(ch) / 10) {
-      send_to_char(ch, "The object weight and gravity are a good challenge for you!\r\n");
+    } else if (cost >= getMaxKI(g, ch) / 10) {
+      send_to_char(g, ch, "The object weight and gravity are a good challenge for you!\r\n");
       bonus *= 6;
-    } else if (cost < getMaxKI(ch) / 1000) {
-      send_to_char(ch, "The object weight and gravity are so easy to you, you could do it in your sleep....\r\n");
+    } else if (cost < getMaxKI(g, ch) / 1000) {
+      send_to_char(g, ch, "The object weight and gravity are so easy to you, you could do it in your sleep....\r\n");
       bonus /= 8;
-    } else if (cost < getMaxKI(ch) / 100) {
-      send_to_char(ch, "The object weight and gravity are the opposite of a challenge for you....\r\n");
+    } else if (cost < getMaxKI(g, ch) / 100) {
+      send_to_char(g, ch, "The object weight and gravity are the opposite of a challenge for you....\r\n");
       bonus /= 5;
-    } else if (cost < getMaxKI(ch) / 50) {
-      send_to_char(ch, "The object weight and gravity are definitely not a challenge for you....\r\n");
+    } else if (cost < getMaxKI(g, ch) / 50) {
+      send_to_char(g, ch, "The object weight and gravity are definitely not a challenge for you....\r\n");
       bonus /= 4;
-    } else if (cost < getMaxKI(ch) / 30) {
-      send_to_char(ch, "The object weight and gravity are barely a challenge for you....\r\n");
+    } else if (cost < getMaxKI(g, ch) / 30) {
+      send_to_char(g, ch, "The object weight and gravity are barely a challenge for you....\r\n");
       bonus /= 3;
-    } else if (cost < getMaxKI(ch) / 20) {
-      send_to_char(ch, "The object weight and gravity are hardly a challenge for you....\r\n");
+    } else if (cost < getMaxKI(g, ch) / 20) {
+      send_to_char(g, ch, "The object weight and gravity are hardly a challenge for you....\r\n");
       bonus /= 2;
     } else {
-      send_to_char(ch, "This gravity is just perfect for you....\r\n");
+      send_to_char(g, ch, "This gravity is just perfect for you....\r\n");
       bonus *= 4;
     }
     if (is_soft_cap(ch, 1, 1.0)) {
       bonus = 0;
     }
-    if (rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
-      send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
+    if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+      send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
       bonus *= 10;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+    } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
         bonus *= 10;
       } else {
         bonus *= 5;
       }
-    } else if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
-      send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
+    } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+      send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
       bonus *= 20;
     }
-    if (bonus <= 0 && !rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+    if (bonus <= 0 && !rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
       bonus = 1;
     }
-    if (bonus <= 0 && rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+    if (bonus <= 0 && rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
       bonus = 15;
     }
-    if (bonus <= 1 && rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+    if (bonus <= 1 && rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
         bonus = 12;
       } else {
         bonus = 6;
       }
     }
-    if (bonus != 1 && char_is_demon(ch) && rand_number(1, 100) >= 80) {
-      send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2));
+    if (bonus != 1 && char_is_demon(ch) && rand_number(g, 1, 100) >= 80) {
+      send_to_char(g, ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2));
       gainBasePL(ch, bonus / 2, false);
     }
 
@@ -1076,23 +1077,23 @@ ACMD(do_meditate)
       bonus += bonus * 0.1;
     }
     /* Rillao: transloc, add new transes here */
-    send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+    send_to_char(g, ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
     gainBaseKI(ch, bonus, true);
-    if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
+    if (rroom_get_gravity(g, char_get_in_room(ch)) <= 50) {
       char_set_wait(ch, PULSE_2SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 200) {
       char_set_wait(ch, PULSE_3SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 500) {
       char_set_wait(ch, PULSE_4SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 1000) {
       char_set_wait(ch, PULSE_5SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 5000) {
       char_set_wait(ch, PULSE_6SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 10000) {
       char_set_wait(ch, PULSE_7SEC);
     }
 
-    decCurKI(ch, cost, 0);
+    decCurKI(g, ch, cost, 0);
   }
 }
 
@@ -1102,40 +1103,40 @@ ACMD(do_pushup)
   int cost = 1, bonus = 0;
 
   if (char_is_npc(ch)) {
-    send_to_char(ch, "You are a mob fool!\r\n");
+    send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_FISHING)) {
-    send_to_char(ch, "Stop fishing first.\r\n");
+    send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
   if (char_get_drag(ch)) {
-    send_to_char(ch, "You are dragging someone!\r\n");
+    send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
   if (char_get_carrying(ch)) {
-    send_to_char(ch, "You are carrying someone!\r\n");
+    send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
-  if ((rroom_get_gravity(char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * ((rroom_get_gravity(char_get_in_room(ch)) * 2) + char_get_level(ch));
+  if ((rroom_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * ((rroom_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
   } else if (char_is_bardock(ch)) {
-    cost += rroom_get_gravity(char_get_in_room(ch)) * char_get_level(ch);
+    cost += rroom_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
   }
 
-  if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
+  if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
     cost += 1000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
     cost += 2000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
     cost += 7500000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
     cost += 15000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
     cost += 25000000;
-  } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
+  } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
     cost += 50000000;
   }
 
@@ -1158,141 +1159,141 @@ ACMD(do_pushup)
   }
 
   if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
-    send_to_char(ch, "You will gain nothing from exercising!\r\n");
+    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
     return;
   }
 
-  if (!limb_ok(ch, 0)) {
+  if (!limb_ok(g, ch, 0)) {
     return;
   }
 
-  if ((getCurST(ch)) < cost) {
-    send_to_char(ch, "You are too tired!\r\n");
+  if ((getCurST(g, ch)) < cost) {
+    send_to_char(g, ch, "You are too tired!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
+    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
   if (char_get_fighting(ch)) {
-    send_to_char(ch, "You are fighting you moron!\r\n");
+    send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    send_to_char(ch, "You can't do pushups in midair!\r\n");
+    send_to_char(g, ch, "You can't do pushups in midair!\r\n");
     return;
   }
 
   else {
-    if (rroom_get_gravity(char_get_in_room(ch)) == 0) {
+    if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
       bonus = 1;
-      act("@gYou do a pushup.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 10) {
-      bonus = rand_number(3, 7);
-      act("@gYou do a pushup, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 20) {
-      bonus = rand_number(8, 14);
-      act("@gYou do a pushup, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 30) {
-      bonus = rand_number(14, 20);
-      act("@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 40) {
-      bonus = rand_number(20, 35);
-      act("@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 50) {
-      bonus = rand_number(40, 60);
-      act("@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 100) {
-      bonus = rand_number(180, 250);
-      act("@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 200) {
-      bonus = rand_number(400, 600);
-      act("@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 300) {
-      bonus = rand_number(800, 1200);
-      act("@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 400) {
-      bonus = rand_number(2000, 3000);
-      act("@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 500) {
-      bonus = rand_number(4000, 6000);
-      act("@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 1000) {
-      bonus = rand_number(9000, 10000);
-      act("@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 5000) {
-      bonus = rand_number(15000, 20000);
-      act("@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) == 10000) {
-      bonus = rand_number(25000, 30000);
-      act("@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act("@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10) {
+      bonus = rand_number(g, 3, 7);
+      act(g, "@gYou do a pushup, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 20) {
+      bonus = rand_number(g, 8, 14);
+      act(g, "@gYou do a pushup, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 30) {
+      bonus = rand_number(g, 14, 20);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 40) {
+      bonus = rand_number(g, 20, 35);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 50) {
+      bonus = rand_number(g, 40, 60);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 100) {
+      bonus = rand_number(g, 180, 250);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 200) {
+      bonus = rand_number(g, 400, 600);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
+      bonus = rand_number(g, 800, 1200);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
+      bonus = rand_number(g, 2000, 3000);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
+      bonus = rand_number(g, 4000, 6000);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
+      bonus = rand_number(g, 9000, 10000);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
+      bonus = rand_number(g, 15000, 20000);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
+      bonus = rand_number(g, 25000, 30000);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
     }
-    if (cost >= getMaxPLTrans(ch) / 2) {
-      send_to_char(ch, "This gravity is a great challenge for you!\r\n");
+    if (cost >= getMaxPLTrans(g, ch) / 2) {
+      send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
       bonus *= 10;
-    } else if (cost >= getMaxPLTrans(ch) / 4) {
-      send_to_char(ch, "This gravity is an awesome challenge for you!\r\n");
+    } else if (cost >= getMaxPLTrans(g, ch) / 4) {
+      send_to_char(g, ch, "This gravity is an awesome challenge for you!\r\n");
       bonus *= 8;
-    } else if (cost >= getMaxPLTrans(ch) / 10) {
-      send_to_char(ch, "This gravity is a good challenge for you!\r\n");
+    } else if (cost >= getMaxPLTrans(g, ch) / 10) {
+      send_to_char(g, ch, "This gravity is a good challenge for you!\r\n");
       bonus *= 6;
-    } else if (cost < getMaxPLTrans(ch) / 1000) {
-      send_to_char(ch, "This gravity is so easy to you, you could do it in your sleep....\r\n");
+    } else if (cost < getMaxPLTrans(g, ch) / 1000) {
+      send_to_char(g, ch, "This gravity is so easy to you, you could do it in your sleep....\r\n");
       bonus /= 8;
-    } else if (cost < getMaxPLTrans(ch) / 100) {
-      send_to_char(ch, "This gravity is the opposite of a challenge for you....\r\n");
+    } else if (cost < getMaxPLTrans(g, ch) / 100) {
+      send_to_char(g, ch, "This gravity is the opposite of a challenge for you....\r\n");
       bonus /= 5;
-    } else if (cost < getMaxPLTrans(ch) / 50) {
-      send_to_char(ch, "This gravity is definitely not a challenge for you....\r\n");
+    } else if (cost < getMaxPLTrans(g, ch) / 50) {
+      send_to_char(g, ch, "This gravity is definitely not a challenge for you....\r\n");
       bonus /= 4;
-    } else if (cost < getMaxPLTrans(ch) / 30) {
-      send_to_char(ch, "This gravity is barely a challenge for you....\r\n");
+    } else if (cost < getMaxPLTrans(g, ch) / 30) {
+      send_to_char(g, ch, "This gravity is barely a challenge for you....\r\n");
       bonus /= 3;
-    } else if (cost < getMaxPLTrans(ch) / 20) {
-      send_to_char(ch, "This gravity is hardly a challenge for you....\r\n");
+    } else if (cost < getMaxPLTrans(g, ch) / 20) {
+      send_to_char(g, ch, "This gravity is hardly a challenge for you....\r\n");
       bonus /= 2;
     } else {
-      send_to_char(ch, "This gravity is just perfect for you....\r\n");
+      send_to_char(g, ch, "This gravity is just perfect for you....\r\n");
       bonus *= 4;
     }
     if (is_soft_cap(ch, 0, 1.0)) {
       bonus = 0;
     }
-    if (rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
-      send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
+    if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+      send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
       bonus *= 10;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+    } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
         bonus *= 10;
       } else {
         bonus *= 5;
       }
-    } else if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
-      send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
+    } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+      send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
       bonus *= 20;
     }
-    if (bonus <= 0 && !rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+    if (bonus <= 0 && !rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
       bonus = 1;
     }
-    if (bonus <= 0 && rroom_flagged(char_get_in_room(ch), ROOM_HBTC)) {
+    if (bonus <= 0 && rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
       bonus = 15;
     }
-    if (bonus <= 1 && rroom_flagged(char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (rroom_get_vnum(char_get_in_room(ch)) >= 19100 && rroom_get_vnum(char_get_in_room(ch)) <= 19199) {
+    if (bonus <= 1 && rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
+      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
         bonus = 12;
       } else {
         bonus = 6;
@@ -1309,72 +1310,72 @@ ACMD(do_pushup)
       bonus += bonus * 0.1;
     }
     /* Rillao: transloc, add new transes here */
-    send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+    send_to_char(g, ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
 
     if (char_is_human(ch)) {
       bonus = bonus * 0.8;
     }
     gainBasePL(ch, bonus, true);
-    if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
+    if (rroom_get_gravity(g, char_get_in_room(ch)) <= 50) {
       char_set_wait(ch, PULSE_2SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 200) {
       char_set_wait(ch, PULSE_3SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 500) {
       char_set_wait(ch, PULSE_4SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 1000) {
       char_set_wait(ch, PULSE_5SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 5000) {
       char_set_wait(ch, PULSE_6SEC);
-    } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
+    } else if (rroom_get_gravity(g, char_get_in_room(ch)) <= 10000) {
       char_set_wait(ch, PULSE_7SEC);
     }
-    decCurST(ch, cost, 0);
+    decCurST(g, ch, cost, 0);
   }
 }
 
 /* This handles many player specific routines. It may be a bit too bloated though. */
-void base_update(void)
+void base_update(GameWorld *g)
 {
   struct descriptor_data *d;
   int cash = false, inc = 0;
   int countch = false, pcoun = 0;
 
-  if (INTERESTTIME != 0 && INTERESTTIME <= time(0) && time(0) != 0) {
-    INTERESTTIME = time(0) + 86400;
-    LASTINTEREST = time(0);
-    save_mud_time(&time_info);
+  if (g->INTERESTTIME != 0 && g->INTERESTTIME <= time(0) && time(0) != 0) {
+    g->INTERESTTIME = time(0) + 86400;
+    g->LASTINTEREST = time(0);
+    save_mud_time(g, &g->time_info);
     cash    = true;
     countch = true;
   }
 
-  if (TOPCOUNTDOWN > 0) {
-    TOPCOUNTDOWN -= 4;
+  if (g->TOPCOUNTDOWN > 0) {
+    g->TOPCOUNTDOWN -= 4;
   }
 
-  for (d = descriptor_list; d; d = d->next) {
+  for (d = g->descriptors; d; d = d->next) {
     if (!desc_is_playing(d))
       continue;
     if (char_is_npc(d->character)) {
       if (char_get_absorbing(d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(d->character))) {
-        send_to_char(d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
+        send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
         char_set_absorbby(char_get_absorbing(d->character), nullptr);
         char_set_absorbing(d->character, nullptr);
       }
-      if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(1, 10) >= 7) {
-        int64_t drain1 = getMaxKI(d->character) * 0.01, drain2 = getMaxST(d->character) * 0.01;
+      if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(g, 1, 10) >= 7) {
+        int64_t drain1 = getMaxKI(g, d->character) * 0.01, drain2 = getMaxST(g, d->character) * 0.01;
         struct char_data *drained = char_get_absorbing(d->character);
-        if ((getCurST(drained)) - drain2 < 0) {
-          drain2 = (getCurST(drained));
+        if ((getCurST(g, drained)) - drain2 < 0) {
+          drain2 = (getCurST(g, drained));
         }
-        if ((getCurKI(drained)) - drain1 < 0) {
-          drain1 = (getCurKI(drained));
+        if ((getCurKI(g, drained)) - drain1 < 0) {
+          drain1 = (getCurKI(g, drained));
         }
-        incCurST(d->character, drain2, true);
-        incCurKI(d->character, drain1, true);
-        incCurHealth(d->character, drain1 * .5, true);
+        incCurST(g, d->character, drain2, true);
+        incCurKI(g, d->character, drain1, true);
+        incCurHealth(g, d->character, drain1 * .5, true);
 
         if (isFullKI(d->character) && isFullST(d->character)) {
-          do_absorb(d->character, nullptr, 0, 0);
+          do_absorb(g, d->character, nullptr, 0, 0);
         }
       }
       continue;
@@ -1382,16 +1383,16 @@ void base_update(void)
     if (countch == true) {
       pcoun += 1;
     }
-    if (!char_is_npc(d->character) && rand_number(1, 15) >= 14) {
-      ash_burn(d->character);
+    if (!char_is_npc(d->character) && rand_number(g, 1, 15) >= 14) {
+      ash_burn(g, d->character);
     }
-    int64_t forty_lf = getMaxLF(d->character) * 0.4;
-    if (char_aff_flagged(d->character, AFF_CURSE) && getCurLF(d->character) > forty_lf) {
-      decCurLFPercent(d->character, .01, 0);
-      demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
+    int64_t forty_lf = getMaxLF(g, d->character) * 0.4;
+    if (char_aff_flagged(d->character, AFF_CURSE) && getCurLF(g, d->character) > forty_lf) {
+      decCurLFPercent(g, d->character, .01, 0);
+      demon_refill_lf(g, d->character, getMaxLF(g, d->character) * 0.01);
 
-      if (getCurLF(d->character) < forty_lf) {
-        incCurLF(d->character, forty_lf - getCurLF(d->character), true);
+      if (getCurLF(g, d->character) < forty_lf) {
+        incCurLF(g, d->character, forty_lf - getCurLF(g, d->character), true);
       }
     }
     if (char_get_backstabcool(d->character) > 0) {
@@ -1399,52 +1400,52 @@ void base_update(void)
     }
     if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 60) {
       if (char_is_bio(d->character)) {
-        act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, 0, 0, TO_CHAR);
       } else {
-        act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, 0, 0, TO_CHAR);
-        act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, 0, 0, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 30) {
       if (char_is_bio(d->character)) {
-        act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, 0, 0, TO_ROOM);
       } else {
-        act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, 0, 0, TO_CHAR);
-        act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, 0, 0, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 15) {
       if (char_is_bio(d->character)) {
-        act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, 0, 0, TO_ROOM);
       } else {
-        act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, 0, 0, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 0) {
       if (char_is_bio(d->character)) {
         restoreHealth(d->character, true);
-        act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, 0, 0, TO_ROOM);
       }
       //Zenkai Boost
       else if (char_is_saiyan(d->character)) {
 
-        setCurHealthPercent(d->character, 0.5);
-        double curKiPerc = getCurKIPercent(d->character);
+        setCurHealthPercent(g, d->character, 0.5);
+        double curKiPerc = getCurKIPercent(g, d->character);
         // if less than 25%, restore up to 25%
         if (curKiPerc < 0.25) {
-          setCurKIPercent(d->character, 0.25);
+          setCurKIPercent(g, d->character, 0.25);
         }
-        double curSTPerc = getCurSTPercent(d->character);
+        double curSTPerc = getCurSTPercent(g, d->character);
         // if less than 25%, restore up to 25%
         if (curSTPerc < 0.25) {
-          setCurSTPercent(d->character, 0.25);
+          setCurSTPercent(g, d->character, 0.25);
         }
 
-        if (!char_in_arena(d->character)) {
+        if (!char_in_arena(g, d->character)) {
           int64_t zenkaiPL, zenkaiKi, zenkaiSt;
           zenkaiPL = getBasePL(d->character) * 0.03;
           zenkaiKi = getBaseKI(d->character) * 0.015;
@@ -1454,15 +1455,15 @@ void base_update(void)
           gainBaseKI(d->character, zenkaiKi, false);
           gainBaseST(d->character, zenkaiSt, false);
 
-          send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
-          send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
+          send_to_char(g, d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
+          send_to_char(g, d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
         }
-        act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, 0, 0, TO_ROOM);
       } else {
         restoreHealth(d->character, true);
-        act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, 0, 0, TO_CHAR);
-        act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, 0, 0, TO_ROOM);
       }
       char_plr_set(d->character, PLR_GOOP, false);
     } else {
@@ -1472,7 +1473,7 @@ void base_update(void)
       char_set_con_cooldown(d->character, char_get_con_cooldown(d->character) - (2));
       if (char_get_con_cooldown(d->character) <= 0) {
         char_set_con_cooldown(d->character, 0);
-        send_to_char(d->character, "You can concentrate again.\r\n");
+        send_to_char(g, d->character, "You can concentrate again.\r\n");
       }
     }
     /* Andros Start */
@@ -1480,12 +1481,12 @@ void base_update(void)
       char_set_con_sdcooldown(d->character, char_get_con_sdcooldown(d->character) - (10));
       if (char_get_con_sdcooldown(d->character) <= 0) {
         char_set_con_sdcooldown(d->character, 0);
-        send_to_char(d->character, "Your body has recovered from your last selfdestruct.\r\n");
+        send_to_char(g, d->character, "Your body has recovered from your last selfdestruct.\r\n");
       }
     } /* Andros End */
     if (char_get_carrying(d->character)) {
       if (char_get_in_room(char_get_carrying(d->character)) != char_get_in_room(d->character)) {
-        carry_drop(d->character, 3);
+        carry_drop(g, d->character, 3);
       }
     }
     if (char_get_defender(d->character)) {
@@ -1516,15 +1517,15 @@ void base_update(void)
     if (char_get_ping(d->character) >= 1) {
       char_set_ping(d->character, char_get_ping(d->character) - (1));
       if (char_plr_flagged(d->character, PLR_PILOTING) && char_get_ping(d->character) == 0) {
-        send_to_char(d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
+        send_to_char(g, d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
       }
     }
-    if (char_get_admlevel(d->character) < 1 && TOPCOUNTDOWN <= 0 && char_get_level(d->character) > 0) {
-      topWrite(d->character);
+    if (char_get_admlevel(d->character) < 1 && g->TOPCOUNTDOWN <= 0 && char_get_level(d->character) > 0) {
+      topWrite(g, d->character);
     }
     if (char_plr_flagged(d->character, PLR_SELFD) && !char_plr_flagged(d->character, PLR_SELFD2)) {
-      if (rand_number(4, 100) < char_get_skill(d->character, SKILL_SELFD)) {
-        send_to_char(d->character, "You feel you are ready to self destruct!\r\n");
+      if (rand_number(g, 4, 100) < char_get_skill(d->character, SKILL_SELFD)) {
+        send_to_char(g, d->character, "You feel you are ready to self destruct!\r\n");
         char_plr_set(d->character, PLR_SELFD2, true);
       }
     }
@@ -1532,95 +1533,95 @@ void base_update(void)
       char_set_combo(d->character, -1);
       char_set_combhits(d->character, 0);
     }
-    if (char_moon_ok(d->character)) {
-      oozaru_transform(d->character);
+    if (char_moon_ok(g, d->character)) {
+      oozaru_transform(g, d->character);
     }
     if (cash == true && char_get_bank_gold(d->character) > 0) {
       inc = char_get_bank_interest(d->character);
-      char_set_lastint(d->character, LASTINTEREST);
+      char_set_lastint(d->character, g->LASTINTEREST);
       char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (inc));
-      send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
+      send_to_char(g, d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
     }
     if (!char_is_npc(d->character)) {
-      check_eq(d->character);
+      check_eq(g, d->character);
     }
-    if (!char_is_npc(d->character) && rroom_get_geffect(char_get_in_room(d->character)) >= 1 && rand_number(1, 100) >= 96) {
-      if (rroom_get_geffect(char_get_in_room(d->character)) <= 4) {
-        switch (rand_number(1, 4)) {
+    if (!char_is_npc(d->character) && rroom_get_geffect(g, char_get_in_room(d->character)) >= 1 && rand_number(g, 1, 100) >= 96) {
+      if (rroom_get_geffect(g, char_get_in_room(d->character)) <= 4) {
+        switch (rand_number(g, 1, 4)) {
           case 1:
-            act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_ROOM);
-            act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_ROOM);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_CHAR);
             break;
           case 2:
-            act("@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_ROOM);
-            act("@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_ROOM);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_CHAR);
             break;
           case 3:
-            act("@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_ROOM);
-            act("@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_ROOM);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_CHAR);
             break;
           case 4:
-            act("@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_ROOM);
-            act("@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_ROOM);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_CHAR);
             break;
         }
-        rroom_set_geffect(char_get_in_room(d->character), rroom_get_geffect(char_get_in_room(d->character)) + (1));
-      } else if (rroom_get_geffect(char_get_in_room(d->character)) == 5) {
-        act("@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_ROOM);
-        act("@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_CHAR);
-        rroom_set_geffect(char_get_in_room(d->character), rroom_get_geffect(char_get_in_room(d->character)) + (1));
+        rroom_set_geffect(g, char_get_in_room(d->character), rroom_get_geffect(g, char_get_in_room(d->character)) + (1));
+      } else if (rroom_get_geffect(g, char_get_in_room(d->character)) == 5) {
+        act(g, "@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_ROOM);
+        act(g, "@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_CHAR);
+        rroom_set_geffect(g, char_get_in_room(d->character), rroom_get_geffect(g, char_get_in_room(d->character)) + (1));
       }
     }
     if (char_get_absorbing(d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(d->character))) {
-      send_to_char(d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
+      send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
       char_set_absorbby(char_get_absorbing(d->character), nullptr);
       char_set_absorbing(d->character, nullptr);
     }
     if (char_is_android(d->character) && char_get_absorbing(d->character)) {
-      if (getCurST(char_get_absorbing(d->character)) < (getMaxST(d->character) / 15) &&
-          getCurKI(char_get_absorbing(d->character)) < (getMaxKI(d->character) / 15)) {
-        act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-        act("@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
-        act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+      if (getCurST(g, char_get_absorbing(d->character)) < (getMaxST(g, d->character) / 15) &&
+          getCurKI(g, char_get_absorbing(d->character)) < (getMaxKI(g, d->character) / 15)) {
+        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
+        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
+        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
         if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
-          set_fighting(d->character, char_get_absorbby(char_get_absorbing(d->character)));
+          set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
         }
         if (!char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) || char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) != d->character) {
-          set_fighting(char_get_absorbby(char_get_absorbing(d->character)), d->character);
+          set_fighting(g, char_get_absorbby(char_get_absorbing(d->character)), d->character);
         }
         char_set_absorbby(char_get_absorbing(d->character), nullptr);
         char_set_absorbing(d->character, nullptr);
       }
     }
-    if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(1, 9) >= 6) {
-      if (getCurST(char_get_absorbing(d->character)) > (getMaxST(d->character) / 15) ||
-          getCurKI(char_get_absorbing(d->character)) > (getMaxKI(d->character) / 15)) {
+    if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(g, 1, 9) >= 6) {
+      if (getCurST(g, char_get_absorbing(d->character)) > (getMaxST(g, d->character) / 15) ||
+          getCurKI(g, char_get_absorbing(d->character)) > (getMaxKI(g, d->character) / 15)) {
 
-        incCurKI(d->character, getMaxKI(d->character) * .08, true);
-        incCurST(d->character, getMaxST(d->character) * .08, true);
+        incCurKI(g, d->character, getMaxKI(g, d->character) * .08, true);
+        incCurST(g, d->character, getMaxST(g, d->character) * .08, true);
 
-        decCurKI(char_get_absorbing(d->character), getMaxKI(d->character) / 20, 1);
-        decCurST(char_get_absorbing(d->character), getMaxST(d->character) / 20, 1);
+        decCurKI(g, char_get_absorbing(d->character), getMaxKI(g, d->character) / 20, 1);
+        decCurST(g, char_get_absorbing(d->character), getMaxST(g, d->character) / 20, 1);
 
-        act("@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-        act("@C$n@W absorbs stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
-        send_to_char(char_get_absorbing(d->character), "@wTry 'escape'!@n\r\n");
-        act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
-        if (getCurPL(d->character) < getEffMaxPL(d->character)) {
-          incCurHealth(d->character, getMaxKI(d->character) * .04, true);
-          send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
+        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
+        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
+        send_to_char(g, char_get_absorbing(d->character), "@wTry 'escape'!@n\r\n");
+        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+        if (getCurPL(g, d->character) < getEffMaxPL(g, d->character)) {
+          incCurHealth(g, d->character, getMaxKI(g, d->character) * .04, true);
+          send_to_char(g, d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
         }
 
         if (isFullST(d->character) && isFullKI(d->character)) {
 
-          act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-          act("@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
-          act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
+          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
+          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
           if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
-            set_fighting(d->character, char_get_absorbby(char_get_absorbing(d->character)));
+            set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
           }
           if (!char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) || char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) != d->character) {
-            set_fighting(char_get_absorbby(char_get_absorbing(d->character)), d->character);
+            set_fighting(g, char_get_absorbby(char_get_absorbing(d->character)), d->character);
           }
           char_set_absorbby(char_get_absorbing(d->character), nullptr);
           char_set_absorbing(d->character, nullptr);
@@ -1630,10 +1631,10 @@ void base_update(void)
         bool ium                 = !is_soft_cap(d->character, 1, 1.0);
         struct char_data *leader = char_get_master(d->character) ? char_get_master(d->character) : d->character;
         if (sum) {
-          if (rand_number(1, 8) >= 6) {
-            int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+          if (rand_number(g, 1, 8) >= 6) {
+            int gain = rand_number(g, char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
             if (char_get_level(d->character) > 30) {
-              gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
+              gain += rand_number(g, char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
             }
             if (char_get_level(d->character) > 60) {
               gain *= 2;
@@ -1644,22 +1645,22 @@ void base_update(void)
             if (char_get_level(d->character) > 90) {
               gain *= 4;
             }
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
-            if (group_bonus(d->character, 2) == 7) {
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
+            if (group_bonus(g, d->character, 2) == 7) {
               if (char_plr_flagged(leader, PLR_SENSEM)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
-                send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+                send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
               }
             }
             gainBasePL(d->character, gain, false);
           }
         }
         if (mum) {
-          if (rand_number(1, 8) >= 6) {
-            int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+          if (rand_number(g, 1, 8) >= 6) {
+            int gain = rand_number(g, char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
             if (char_get_level(d->character) > 30) {
-              gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
+              gain += rand_number(g, char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
             }
             if (char_get_level(d->character) > 60) {
               gain *= 2;
@@ -1670,22 +1671,22 @@ void base_update(void)
             if (char_get_level(d->character) > 90) {
               gain *= 4;
             }
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
-            if (group_bonus(d->character, 2) == 7) {
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
+            if (group_bonus(g, d->character, 2) == 7) {
               if (char_plr_flagged(leader, PLR_SENSEM)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
-                send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+                send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
               }
             }
             gainBaseST(d->character, gain, false);
           }
         }
         if (ium) {
-          if (rand_number(1, 8) >= 6) {
-            int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+          if (rand_number(g, 1, 8) >= 6) {
+            int gain = rand_number(g, char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
             if (char_get_level(d->character) > 30) {
-              gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
+              gain += rand_number(g, char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
             }
             if (char_get_level(d->character) > 60) {
               gain *= 2;
@@ -1696,35 +1697,35 @@ void base_update(void)
             if (char_get_level(d->character) > 90) {
               gain *= 4;
             }
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-            if (char_get_master(d->character) && group_bonus(d->character, 2) == 7) {
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
+            if (char_get_master(d->character) && group_bonus(g, d->character, 2) == 7) {
               if (char_plr_flagged(leader, PLR_SENSEM)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
-                send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+                send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
               }
             }
             gainBaseKI(d->character, gain, false);
           }
         }
         if (!sum) {
-          if (rand_number(1, 8) >= 6) {
+          if (rand_number(g, 1, 8) >= 6) {
             int gain = 1;
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
             gainBasePL(d->character, gain, false);
           }
         }
         if (!mum) {
-          if (rand_number(1, 8) >= 6) {
+          if (rand_number(g, 1, 8) >= 6) {
             int gain = 1;
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
             gainBaseST(d->character, gain, false);
           }
         }
         if (!ium) {
-          if (rand_number(1, 8) >= 6) {
+          if (rand_number(g, 1, 8) >= 6) {
             int gain = 1;
-            send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
+            send_to_char(g, d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
             gainBaseKI(d->character, gain, false);
           }
         }
@@ -1738,7 +1739,7 @@ void base_update(void)
       }
     }
     if (char_get_overf(d->character) == true) {
-      mudlog(LOG_NRM, ADMLVL_GOD, true, "OVERFLOW: %s has caused an overflow, check for illegal activity.", char_get_name(d->character));
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "OVERFLOW: %s has caused an overflow, check for illegal activity.", char_get_name(d->character));
       char_set_overf(d->character, false);
     }
     if (char_get_spam(d->character) > 0) {
@@ -1748,11 +1749,11 @@ void base_update(void)
   }
 
   if (countch == true) {
-    PCOUNT    = pcoun;
-    PCOUNTDAY = time(0);
+    g->PCOUNT    = pcoun;
+    g->PCOUNTDAY = time(0);
   }
 
-  if (TOPCOUNTDOWN <= 0) {
-    TOPCOUNTDOWN = 60;
+  if (g->TOPCOUNTDOWN <= 0) {
+    g->TOPCOUNTDOWN = 60;
   }
 }

@@ -16,6 +16,6 @@ constexpr int OUTDIR    = 11;
 
 constexpr int NUM_OF_DIRS = 12; /* number of directions in a room (nsewud) */
 
-extern const char *dirs[NUM_OF_DIRS + 1];
-extern const char *abbr_dirs[NUM_OF_DIRS + 1];
-extern int rev_dir[NUM_OF_DIRS];
+extern const char *const dirs[NUM_OF_DIRS + 1];
+extern const char *const abbr_dirs[NUM_OF_DIRS + 1];
+extern const int rev_dir[NUM_OF_DIRS];

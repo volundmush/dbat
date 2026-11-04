@@ -9,7 +9,7 @@
 // Object Classification
 // =============================================================================
 
-obj_vnum obj_get_vnum(const struct obj_data *obj);
+obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj);
 
 // =============================================================================
 // Misc
@@ -86,7 +86,7 @@ int obj_get_size(const struct obj_data *obj);
 void obj_set_size(struct obj_data *obj, int v);
 obj_vnum obj_get_item_number(const struct obj_data *obj);
 void obj_set_item_number(struct obj_data *obj, obj_vnum v);
-spec_proc_func obj_get_spec(const struct obj_data *obj);
+spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj);
 
 bool obj_is_corpse(const struct obj_data *obj);
 
@@ -100,16 +100,16 @@ void obj_set_room_loaded(struct obj_data *obj, room_vnum v);
 #include "dbat/objects.h"
 
 bool wearable_obj(struct obj_data *obj);
-void randomize_eq(struct obj_data *obj);
+void randomize_eq(GameWorld *g, struct obj_data *obj);
 bool is_better(struct obj_data *object, struct obj_data *object2);
 
 int32_t obj_get_id(const struct obj_data *obj);
 void obj_set_id(struct obj_data *obj, int32_t v);
 room_rnum obj_get_in_room(const struct obj_data *obj);
 void obj_set_in_room(struct obj_data *obj, room_rnum v);
-struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door);
+struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *obj, int door);
 const char *money_desc(int amount);
-struct obj_data *create_money(int amount);
+struct obj_data *create_money(GameWorld *g, int amount);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct obj_data **obj_contains_slot(struct obj_data *obj);
@@ -120,8 +120,8 @@ struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
 
 /* Removes obj from a list linked through next_content: a room's contents, a container or an inventory. */
 void obj_unlink_content(struct obj_data **head, struct obj_data *obj);
-/* Removes obj from object_list. */
-void obj_unlink_from_list(struct obj_data *obj);
+/* Removes obj from g->objects. */
+void obj_unlink_from_list(GameWorld *g, struct obj_data *obj);
 
 /* Field accessors */
 char *obj_get_action_description(const struct obj_data *obj);

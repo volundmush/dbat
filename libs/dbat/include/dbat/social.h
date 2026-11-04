@@ -37,5 +37,3 @@ struct social_messg {
   char *others_obj_found;
 };
 
-extern struct social_messg *soc_mess_list;
-extern int top_of_socialt;

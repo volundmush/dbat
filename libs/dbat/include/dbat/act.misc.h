@@ -1,13 +1,13 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-void handle_multi_merge(struct char_data *form);
-void handle_songs(void);
-void fish_update(void);
-void disp_rpp_store(struct char_data *ch);
-void handle_rpp_store(struct char_data *ch, int choice);
-void rpp_feature(struct char_data *ch, const char *arg);
-void ash_burn(struct char_data *ch);
+void handle_multi_merge(GameWorld *g, struct char_data *form);
+void handle_songs(GameWorld *g);
+void fish_update(GameWorld *g);
+void disp_rpp_store(GameWorld *g, struct char_data *ch);
+void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice);
+void rpp_feature(GameWorld *g, struct char_data *ch, const char *arg);
+void ash_burn(GameWorld *g, struct char_data *ch);
 
 // commands
 ACMD(do_restring);

@@ -253,9 +253,8 @@ struct spell_info_type {
   int domain;
 };
 
-extern struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
-bool spell_has_routine(int spellnum, int flag);
+bool spell_has_routine(GameWorld *g, int spellnum, int flag);
 
 /* Possible Targets:
 
@@ -286,10 +285,10 @@ struct attack_hit_type {
 };
 
 #define ASPELL(spellname)                         \
-  void spellname(int level, struct char_data *ch, \
+  void spellname(GameWorld *g, int level, struct char_data *ch, \
                  struct char_data *victim, struct obj_data *obj, const char *arg)
 
-#define MANUAL_SPELL(spellname) spellname(level, caster, cvict, ovict, arg);
+#define MANUAL_SPELL(g, spellname) spellname(g, level, caster, cvict, ovict, arg);
 
 ASPELL(spell_create_water);
 ASPELL(spell_recall);
@@ -305,47 +304,47 @@ ASPELL(art_abundant_step);
 
 /* basic magic calling functions */
 
-int find_skill_num(char *name, int sktype);
+int find_skill_num(GameWorld *g, char *name, int sktype);
 
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
                int spellnum);
 
-void mag_affects(int level, struct char_data *ch, struct char_data *victim,
+void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                  int spellnum);
 
-void mag_groups(int level, struct char_data *ch, int spellnum);
+void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
-void mag_masses(int level, struct char_data *ch, int spellnum);
+void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
-void mag_areas(int level, struct char_data *ch, int spellnum);
+void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
 void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg);
 
-void mag_points(int level, struct char_data *ch, struct char_data *victim,
+void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                 int spellnum);
 
-void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
+void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                    int spellnum);
 
-void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
+void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_data *obj,
                     int spellnum);
 
-void mag_creations(int level, struct char_data *ch, int spellnum);
+void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
-void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
+void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                   int spellnum);
 
-int call_magic(struct char_data *caster, struct char_data *cvict,
+int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
                struct obj_data *ovict, int spellnum, int level, int casttype, char *arg);
 
-void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
+void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
                      char *argument);
 
 bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
                   int level, int cast_stat);
 
 /* other prototypes */
-const char *skill_name(int num);
-int roll_skill(const struct char_data *ch, int snum);
-bool roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
-int skill_type(int skill);
+const char *skill_name(GameWorld *g, int num);
+int roll_skill(GameWorld *g, const struct char_data *ch, int snum);
+bool roll_resisted(GameWorld *g, const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
+int skill_type(GameWorld *g, int skill);

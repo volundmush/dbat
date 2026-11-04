@@ -96,8 +96,3 @@ struct obj_data {
   struct obj_spellbook_spell *sbinfo; /* For spellbook info */
 };
 
-extern struct index_data *obj_index;
-extern struct obj_data *object_list;
-extern struct obj_data *obj_proto;
-extern obj_rnum top_of_objt;
-extern long max_obj_id;

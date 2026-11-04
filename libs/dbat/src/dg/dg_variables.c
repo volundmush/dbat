@@ -24,6 +24,7 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* Utility functions */
 
@@ -76,12 +77,12 @@ void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
-static const char *skill_percent(struct char_data *ch, char *skill)
+static const char *skill_percent(GameWorld *g, struct char_data *ch, char *skill)
 {
   static char retval[16];
   int skillnum;
 
-  skillnum = find_skill_num(skill, SKTYPE_SKILL);
+  skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
   if (skillnum <= 0) return ("unknown skill");
 
   snprintf(retval, sizeof(retval), "%d", char_get_skill(ch, skillnum));
@@ -98,7 +99,7 @@ static const char *skill_percent(struct char_data *ch, char *skill)
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-static int item_in_list(char *item, obj_data *list)
+static int item_in_list(GameWorld *g, char *item, obj_data *list)
 {
   obj_data *i;
   int count = 0;
@@ -113,23 +114,23 @@ static int item_in_list(char *item, obj_data *list)
       if (id == obj_get_id(i))
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(item, obj_get_contains(i));
+        count += item_in_list(g, item, obj_get_contains(i));
     }
   } else if (is_number(item)) { /* check for vnum */
     obj_vnum ovnum = atoi(item);
 
     for (i = list; i; i = obj_get_next_content(i)) {
-      if (obj_get_vnum(i) == ovnum)
+      if (obj_get_vnum(g, i) == ovnum)
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(item, obj_get_contains(i));
+        count += item_in_list(g, item, obj_get_contains(i));
     }
   } else {
     for (i = list; i; i = obj_get_next_content(i)) {
       if (isname(item, obj_get_name(i)))
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(item, obj_get_contains(i));
+        count += item_in_list(g, item, obj_get_contains(i));
     }
   }
   return count;
@@ -145,14 +146,14 @@ static int item_in_list(char *item, obj_data *list)
    MUD -- 4dimensions.org:6000
 */
 
-static bool char_has_item(char *item, struct char_data *ch)
+static bool char_has_item(GameWorld *g, char *item, struct char_data *ch)
 {
 
   /* If this works, no more searching needed */
-  if (get_object_in_equip(ch, item) != nullptr)
+  if (get_object_in_equip(g, ch, item) != nullptr)
     return true;
 
-  if (item_in_list(item, char_get_inventory(ch)) == 0)
+  if (item_in_list(g, item, char_get_inventory(ch)) == 0)
     return false;
   else
     return true;
@@ -232,10 +233,10 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
   return false;
 }
 
-static void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen);
+static void find_replacement(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* sets str to the value of field on character c (var.field where var names a character) */
-static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
+static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
   obj_data *obj;
   int i, j;
@@ -245,7 +246,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
   else if (!strcasecmp(field, "global")) { /* get global of something else */
     *str = '\0';
     if (char_is_npc(c) && char_get_script(c)) {
-      find_replacement(go, char_get_script(c), nullptr, MOB_TRIGGER,
+      find_replacement(g, go, char_get_script(c), nullptr, MOB_TRIGGER,
                        subfield, (char[]){""}, nullptr, str, slen);
     }
     return;
@@ -288,7 +289,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       break;
     case 'c':
       if (!strcasecmp(field, "canbeseen")) {
-        if ((type == MOB_TRIGGER) && !char_can_see(((char_data *)go), c))
+        if ((type == MOB_TRIGGER) && !char_can_see(g, ((char_data *)go), c))
           strcpy(str, "0");
         else
           strcpy(str, "1");
@@ -351,9 +352,9 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       } else if (!strcasecmp(field, "drunk")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
-          char_set_conditions(c, DRUNK, MAX(-1, MIN(addition, 24)));
+          char_set_conditions(g, c, DRUNK, MAX(-1, MIN(addition, 24)));
         }
-        snprintf(str, slen, "%d", char_get_conditions(c, DRUNK));
+        snprintf(str, slen, "%d", char_get_conditions(g, c, DRUNK));
       }
       break;
     case 'e':
@@ -380,7 +381,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         if (subfield && *subfield) {
           int64_t addition = MIN(atoll(subfield), 2100000000);
 
-          gain_exp(c, addition);
+          gain_exp(g, c, addition);
         }
         snprintf(str, slen, "%" PRId64 "", char_get_exp(c));
       }
@@ -417,7 +418,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         if (!(subfield && *subfield))
           *str = '\0';
         else
-          snprintf(str, slen, "%d", char_has_item(subfield, c));
+          snprintf(str, slen, "%d", char_has_item(g, subfield, c));
       } else if (!strcasecmp(field, "hisher"))
         snprintf(str, slen, "%s", char_hshr(c));
 
@@ -431,20 +432,20 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         if (subfield && *subfield) {
           int64_t addition = atoll(subfield);
           if (addition > 0) {
-            incCurHealth(c, addition, true);
+            incCurHealth(g, c, addition, true);
           } else {
-            decCurHealth(c, addition, 0);
+            decCurHealth(g, c, addition, 0);
           }
 
-          update_pos(c);
+          update_pos(g, c);
         }
-        snprintf(str, slen, "%" PRId64 "", getCurPL(c));
+        snprintf(str, slen, "%" PRId64 "", getCurPL(g, c));
       } else if (!strcasecmp(field, "hunger")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
-          char_set_conditions(c, HUNGER, MAX(-1, MIN(addition, 24)));
+          char_set_conditions(g, c, HUNGER, MAX(-1, MIN(addition, 24)));
         }
-        snprintf(str, slen, "%d", char_get_conditions(c, HUNGER));
+        snprintf(str, slen, "%d", char_get_conditions(g, c, HUNGER));
       }
       break;
     case 'i':
@@ -462,7 +463,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       else if (!strcasecmp(field, "inventory")) {
         if (subfield && *subfield) {
           for (obj = char_get_inventory(c); obj; obj = obj_get_next_content(obj)) {
-            if (obj_get_vnum(obj) == atoi(subfield)) {
+            if (obj_get_vnum(g, obj) == atoi(subfield)) {
               snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj)); /* arg given, found */
               return;
             }
@@ -524,43 +525,43 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         if (subfield && *subfield) {
           //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
         }
-        snprintf(str, slen, "%" PRId64 "", getEffMaxPL(c));
+        snprintf(str, slen, "%" PRId64 "", getEffMaxPL(g, c));
       }
 
       else if (!strcasecmp(field, "mana")) {
         if (subfield && *subfield) {
           int64_t addition = atoll(subfield);
           if (addition > 0) {
-            incCurKI(c, addition, true);
+            incCurKI(g, c, addition, true);
           } else {
-            decCurKI(c, addition, 0);
+            decCurKI(g, c, addition, 0);
           }
         }
-        snprintf(str, slen, "%" PRId64 "", (getCurKI(c)));
+        snprintf(str, slen, "%" PRId64 "", (getCurKI(g, c)));
       } else if (!strcasecmp(field, "maxmana")) {
         if (subfield && *subfield) {
           //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
         }
-        snprintf(str, slen, "%" PRId64 "", getMaxKI(c));
+        snprintf(str, slen, "%" PRId64 "", getMaxKI(g, c));
       }
 
       else if (!strcasecmp(field, "move")) {
         if (subfield && *subfield) {
           int64_t addition = atoll(subfield);
           if (addition > 0) {
-            incCurST(c, addition, true);
+            incCurST(g, c, addition, true);
           } else {
-            decCurST(c, addition, 0);
+            decCurST(g, c, addition, 0);
           }
         }
-        snprintf(str, slen, "%" PRId64 "", (getCurST(c)));
+        snprintf(str, slen, "%" PRId64 "", (getCurST(g, c)));
       }
 
       else if (!strcasecmp(field, "maxmove")) {
         if (subfield && *subfield) {
           //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
         }
-        snprintf(str, slen, "%" PRId64 "", getMaxST(c));
+        snprintf(str, slen, "%" PRId64 "", getMaxST(g, c));
       }
 
       else if (!strcasecmp(field, "master")) {
@@ -597,14 +598,14 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       } else if (!strcasecmp(field, "prac")) {
         if (char_is_npc(c)) {
           if (char_get_in_room(c) != NOWHERE) {
-            send_to_room(char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
+            send_to_room(g, char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
           }
         }
         if (subfield && *subfield) {
           int addition = atoi(subfield);
-          char_set_practice_points(c, MAX(0, char_get_practice_points(c) + addition));
+          char_set_practice_points(g, c, MAX(0, char_get_practice_points(g, c) + addition));
         }
-        snprintf(str, slen, "%d", char_get_practice_points(c));
+        snprintf(str, slen, "%d", char_get_practice_points(g, c));
       } else if (!strcasecmp(field, "plr")) {
         if (subfield && *subfield) {
           int plr = get_flag_by_name(player_bits, subfield);
@@ -617,7 +618,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       } else if (!strcasecmp(field, "pref")) {
         if (subfield && *subfield) {
           int pref = get_flag_by_name(preference_bits, subfield);
-          if (pref != NOFLAG && char_prf_flagged(c, pref))
+          if (pref != NOFLAG && char_prf_flagged(g, c, pref))
             strcpy(str, "1");
           else
             strcpy(str, "0");
@@ -629,7 +630,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       if (!strcasecmp(field, "room")) { /* in NOWHERE, return the void */
                                         /* see note in dg_scripts.h */
         snprintf(str, slen, "%c%d", UID_CHAR,
-                 (char_get_in_room(c) != NOWHERE) ? rroom_get_vnum(char_get_in_room(c)) + ROOM_ID_BASE : ROOM_ID_BASE);
+                 (char_get_in_room(c) != NOWHERE) ? rroom_get_vnum(g, char_get_in_room(c)) + ROOM_ID_BASE : ROOM_ID_BASE);
       } else if (!strcasecmp(field, "race")) {
         snprintf(str, slen, "%s", char_true_race_name(c));
       } else if (!strcasecmp(field, "rpp")) {
@@ -668,7 +669,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       }
 
       else if (!strcasecmp(field, "skill"))
-        snprintf(str, slen, "%s", skill_percent(c, subfield));
+        snprintf(str, slen, "%s", skill_percent(g, c, subfield));
 
       else if (!strcasecmp(field, "skillset")) {
         if (!char_is_npc(c) && subfield && *subfield) {
@@ -676,7 +677,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
           amount = one_word(subfield, skillname);
           skip_spaces(&amount);
           if (amount && *amount && is_number(amount)) {
-            int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
+            int skillnum = find_skill_num(g, skillname, SKTYPE_SKILL);
             if (skillnum > 0) {
               int new_value = MAX(0, MIN(100, atoi(amount)));
               char_set_skills_base(c, skillnum, new_value);
@@ -691,9 +692,9 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       if (!strcasecmp(field, "thirst")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
-          char_set_conditions(c, THIRST, MAX(-1, MIN(addition, 24)));
+          char_set_conditions(g, c, THIRST, MAX(-1, MIN(addition, 24)));
         }
-        snprintf(str, slen, "%d", char_get_conditions(c, THIRST));
+        snprintf(str, slen, "%d", char_get_conditions(g, c, THIRST));
       } else if (!strcasecmp(field, "tnl")) {
         snprintf(str, slen, "%d", level_exp(c, char_get_level(c) + 1));
       }
@@ -701,10 +702,10 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
     case 'v':
       if (!strcasecmp(field, "vnum")) {
         if (subfield && *subfield) {
-          snprintf(str, slen, "%d", char_is_npc(c) ? (int)(char_get_mob_vnum(c) == atoi(subfield)) : -1);
+          snprintf(str, slen, "%d", char_is_npc(c) ? (int)(char_get_mob_vnum(g, c) == atoi(subfield)) : -1);
         } else {
           if (char_is_npc(c))
-            snprintf(str, slen, "%d", char_get_mob_vnum(c));
+            snprintf(str, slen, "%d", char_get_mob_vnum(g, c));
           else
             /*
            * for compatibility with unsigned indexes
@@ -761,13 +762,13 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         snprintf(str, slen, "%s", vd->value);
       else {
         *str = '\0';
-        script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                   trig->name, trig_get_vnum(trig), field);
+        script_log(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
+                   trig->name, trig_get_vnum(g, trig), field);
       }
     } else {
       *str = '\0';
-      script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                 trig->name, trig_get_vnum(trig), field);
+      script_log(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
+                 trig->name, trig_get_vnum(g, trig), field);
     }
   }
 }
@@ -776,14 +777,14 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
  * true if s is one of the strings o shares with its prototype, which must not be freed
  * (the rule free_object_strings_proto() and name_to_drinkcon() follow)
  */
-static bool obj_string_is_proto(const obj_data *o, const char *s)
+static bool obj_string_is_proto(GameWorld *g, const obj_data *o, const char *s)
 {
   obj_rnum rnum = obj_get_item_number(o);
-  return rnum != NOTHING && (s == obj_get_name(&obj_proto[rnum]) || s == obj_get_short_description(&obj_proto[rnum]));
+  return rnum != NOTHING && (s == obj_get_name(&g->obj_proto[rnum]) || s == obj_get_short_description(&g->obj_proto[rnum]));
 }
 
 /* sets str to the value of field on object o */
-static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
+static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
   if (text_processed(field, subfield, vd, str, slen)) return;
 
@@ -833,7 +834,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
       /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
       else if (!strcasecmp(field, "count")) {
         if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          snprintf(str, slen, "%d", item_in_list(subfield, obj_get_contains(o)));
+          snprintf(str, slen, "%d", item_in_list(g, subfield, obj_get_contains(o)));
         else
           strcpy(str, "0");
       }
@@ -855,7 +856,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
       /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
       if (!strcasecmp(field, "has_in")) {
         if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          snprintf(str, slen, "%s", (item_in_list(subfield, obj_get_contains(o)) ? "1" : "0"));
+          snprintf(str, slen, "%s", (item_in_list(g, subfield, obj_get_contains(o)) ? "1" : "0"));
         else
           strcpy(str, "0");
       }
@@ -875,7 +876,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
 
       else if (!strcasecmp(field, "is_inroom")) {
         if (obj_get_in_room(o) != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(obj_get_in_room(o)) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, obj_get_in_room(o)) + ROOM_ID_BASE);
         else
           *str = '\0';
       } else if (!strcasecmp(field, "is_pc")) {
@@ -903,7 +904,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s %s", obj_get_name(o), subfield);
-          if (!obj_string_is_proto(o, obj_get_name(o)))
+          if (!obj_string_is_proto(g, o, obj_get_name(o)))
             free(obj_get_name(o));
           obj_set_name(o, strdup(blah));
         }
@@ -917,7 +918,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
     case 'r':
       if (!strcasecmp(field, "room")) {
         if (obj_room(o) != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(obj_room(o)) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, obj_room(o)) + ROOM_ID_BASE);
         else
           *str = '\0';
       }
@@ -929,7 +930,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(o), subfield);
-          if (!obj_string_is_proto(o, obj_get_short_description(o)))
+          if (!obj_string_is_proto(g, o, obj_get_short_description(o)))
             free(obj_get_short_description(o));
           obj_set_short_description(o, strdup(blah));
         }
@@ -971,9 +972,9 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
     case 'v':
       if (!strcasecmp(field, "vnum"))
         if (subfield && *subfield) {
-          snprintf(str, slen, "%d", (int)(obj_get_vnum(o) == atoi(subfield)));
+          snprintf(str, slen, "%d", (int)(obj_get_vnum(g, o) == atoi(subfield)));
         } else {
-          snprintf(str, slen, "%d", obj_get_vnum(o));
+          snprintf(str, slen, "%d", obj_get_vnum(g, o));
         }
       else if (!strcasecmp(field, "val0"))
         snprintf(str, slen, "%d", obj_get_value(o, 0));
@@ -1031,34 +1032,34 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
       else {
         *str = '\0';
         if (strcasecmp(trig->name, "Rename Object")) {
-          script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                     trig->name, trig_get_vnum(trig), type, field);
+          script_log(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
+                     trig->name, trig_get_vnum(g, trig), type, field);
         }
       }
     } else {
       *str = '\0';
       if (strcasecmp(trig->name, "Rename Object")) {
-        script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                   trig->name, trig_get_vnum(trig), type, field);
+        script_log(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
+                   trig->name, trig_get_vnum(g, trig), type, field);
       }
     }
   }
 }
 
 /* sets str to %room.<exit>[(vnum|key|bits|room)]% for exit dir of room r */
-static void room_exit_field(struct room_data *r, int dir, char *subfield, char *str, size_t slen)
+static void room_exit_field(GameWorld *g, struct room_data *r, int dir, char *subfield, char *str, size_t slen)
 {
   if (room_get_dir_option(r, dir)) {
     if (subfield && *subfield) {
       if (!strcasecmp(subfield, "vnum"))
-        snprintf(str, slen, "%d", rroom_get_vnum(room_get_dir_option(r, dir)->to_room));
+        snprintf(str, slen, "%d", rroom_get_vnum(g, room_get_dir_option(r, dir)->to_room));
       else if (!strcasecmp(subfield, "key"))
         snprintf(str, slen, "%d", room_get_dir_option(r, dir)->key);
       else if (!strcasecmp(subfield, "bits"))
         sprintbit(room_get_dir_option(r, dir)->exit_info, exit_bits, str, slen);
       else if (!strcasecmp(subfield, "room")) {
         if (room_get_dir_option(r, dir)->to_room != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(room_get_dir_option(r, dir)->to_room) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, room_get_dir_option(r, dir)->to_room) + ROOM_ID_BASE);
         else
           *str = '\0';
       }
@@ -1097,7 +1098,7 @@ static int room_exit_field_dir(const char *field)
 }
 
 /* sets str to the value of field on room r */
-static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
+static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
   obj_data *obj;
   int dir;
@@ -1108,8 +1109,8 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
   if (room_get_number(r) == 0) {
     if (!room_get_script(r)) {
       *str = '\0';
-      script_log("Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                 trig->name, trig_get_vnum(trig), type);
+      script_log(g, "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
+                 trig->name, trig_get_vnum(g, trig), type);
     } else {
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
@@ -1139,7 +1140,7 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
   } else if (!strcasecmp(field, "contents")) {
     if (subfield && *subfield) {
       for (obj = room_get_contents(r); obj; obj = obj_get_next_content(obj)) {
-        if (obj_get_vnum(obj) == atoi(subfield)) {
+        if (obj_get_vnum(g, obj) == atoi(subfield)) {
           /* arg given, found */
           snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj));
           return;
@@ -1162,9 +1163,9 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
     else
       *str = '\0';
   } else if (!strcasecmp(field, "id")) {
-    room_rnum rnum = real_room(room_get_number(r));
+    room_rnum rnum = real_room(g, room_get_number(r));
     if (rnum != NOWHERE)
-      snprintf(str, slen, "%d", rroom_get_vnum(rnum) + ROOM_ID_BASE);
+      snprintf(str, slen, "%d", rroom_get_vnum(g, rnum) + ROOM_ID_BASE);
     else
       *str = '\0';
   } else if (!strcasecmp(field, "weather")) {
@@ -1175,30 +1176,30 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
         "lightning"};
 
     if (!room_flagged(r, ROOM_INDOORS))
-      snprintf(str, slen, "%s", sky_look[weather_info.sky]);
+      snprintf(str, slen, "%s", sky_look[g->weather_info.sky]);
     else
       *str = '\0';
   } else if (!strcasecmp(field, "fishing")) {
-    room_rnum thisroom = real_room(room_get_number(r));
-    if (rroom_flagged(thisroom, ROOM_FISHING))
+    room_rnum thisroom = real_room(g, room_get_number(r));
+    if (rroom_flagged(g, thisroom, ROOM_FISHING))
       snprintf(str, slen, "1");
     else
       snprintf(str, slen, "0");
   } else if (!strcasecmp(field, "zonenumber"))
-    snprintf(str, slen, "%d", zone_table[room_get_zone(r)].number);
+    snprintf(str, slen, "%d", g->zones[room_get_zone(r)].number);
   else if (!strcasecmp(field, "zonename"))
-    snprintf(str, slen, "%s", zone_table[room_get_zone(r)].name);
+    snprintf(str, slen, "%s", g->zones[room_get_zone(r)].name);
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
-      room_rnum thisroom = real_room(room_get_number(r));
-      if (check_flags_by_name_ar(rroom_get_room_flags(thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+      room_rnum thisroom = real_room(g, room_get_number(r));
+      if (check_flags_by_name_ar(rroom_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
         snprintf(str, slen, "1");
       else
         snprintf(str, slen, "0");
     } else
       snprintf(str, slen, "0");
   } else if ((dir = room_exit_field_dir(field)) >= 0) {
-    room_exit_field(r, dir, subfield, str, slen);
+    room_exit_field(g, r, dir, subfield, str, slen);
   } else {
     if (room_get_script(r)) { /* check for global var */
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
@@ -1208,19 +1209,19 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
         snprintf(str, slen, "%s", vd->value);
       else {
         *str = '\0';
-        script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                   trig->name, trig_get_vnum(trig), type, field);
+        script_log(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
+                   trig->name, trig_get_vnum(g, trig), type, field);
       }
     } else {
       *str = '\0';
-      script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                 trig->name, trig_get_vnum(trig), type, field);
+      script_log(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
+                 trig->name, trig_get_vnum(g, trig), type, field);
     }
   }
 }
 
 /* sets str to be the value of var.field */
-static void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
+static void find_replacement(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
 {
   struct trig_var_data *vd = nullptr;
   char_data *ch, *c          = nullptr, *rndm;
@@ -1327,39 +1328,39 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
         case MOB_TRIGGER:
           ch = (char_data *)go;
 
-          if ((o = get_object_in_equip(ch, name)))
+          if ((o = get_object_in_equip(g, ch, name)))
             ;
           else if ((o = get_obj_in_list(name, char_get_inventory(ch))))
             ;
-          else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(&world[char_get_in_room(ch)], name)))
+          else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, &g->rooms[char_get_in_room(ch)], name)))
             ;
-          else if ((o = get_obj_in_list(name, rroom_get_contents(char_get_in_room(ch)))))
+          else if ((o = get_obj_in_list(name, rroom_get_contents(g, char_get_in_room(ch)))))
             ;
-          else if ((c = get_char(name)))
+          else if ((c = get_char(g, name)))
             ;
-          else if ((o = get_obj(name)))
+          else if ((o = get_obj(g, name)))
             ;
-          else if ((r = get_room(name))) {}
+          else if ((r = get_room(g, name))) {}
 
           break;
         case OBJ_TRIGGER:
           obj = (obj_data *)go;
 
-          if ((c = get_char_by_obj(obj, name)))
+          if ((c = get_char_by_obj(g, obj, name)))
             ;
-          else if ((o = get_obj_by_obj(obj, name)))
+          else if ((o = get_obj_by_obj(g, obj, name)))
             ;
-          else if ((r = get_room(name))) {}
+          else if ((r = get_room(g, name))) {}
 
           break;
         case WLD_TRIGGER:
           room = (struct room_data *)go;
 
-          if ((c = get_char_by_room(room, name)))
+          if ((c = get_char_by_room(g, room, name)))
             ;
-          else if ((o = get_obj_by_room(room, name)))
+          else if ((o = get_obj_by_room(g, room, name)))
             ;
-          else if ((r = get_room(name))) {}
+          else if ((r = get_room(g, name))) {}
 
           break;
       }
@@ -1387,10 +1388,10 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
       }
 
       else if (!strcasecmp(var, "global")) {
-        struct script_data *thescript = rroom_get_script(0);
+        struct script_data *thescript = rroom_get_script(g, 0);
         *str                          = '\0';
         if (!thescript) {
-          script_log("Attempt to find global var. Apparently the void has no script.");
+          script_log(g, "Attempt to find global var. Apparently the void has no script.");
           return;
         }
         for (vd = thescript->global_vars; vd; vd = vd->next)
@@ -1402,17 +1403,17 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
 
         return;
       } else if (!strcasecmp(var, "people")) {
-        snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
+        snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? trgvar_in_room(g, num) : 0);
         return;
       } else if (!strcasecmp(var, "time")) {
         if (!strcasecmp(field, "hour"))
-          snprintf(str, slen, "%d", time_info.hours);
+          snprintf(str, slen, "%d", g->time_info.hours);
         else if (!strcasecmp(field, "day"))
-          snprintf(str, slen, "%d", time_info.day + 1);
+          snprintf(str, slen, "%d", g->time_info.day + 1);
         else if (!strcasecmp(field, "month"))
-          snprintf(str, slen, "%d", time_info.month + 1);
+          snprintf(str, slen, "%d", g->time_info.month + 1);
         else if (!strcasecmp(field, "year"))
-          snprintf(str, slen, "%d", time_info.year);
+          snprintf(str, slen, "%d", g->time_info.year);
         else *str = '\0';
         return;
       }
@@ -1440,18 +1441,18 @@ in the vault (vnum: 453) now and then. you can just use
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
       else if (!strcasecmp(var, "findmob")) {
         if (!field || !*field || !subfield || !*subfield) {
-          script_log("findmob.vnum(mvnum) - illegal syntax");
+          script_log(g, "findmob.vnum(mvnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(atoi(field));
+          room_rnum rrnum = real_room(g, atoi(field));
           mob_vnum mvnum  = atoi(subfield);
 
           if (rrnum == NOWHERE) {
-            script_log("findmob.vnum(ovnum): No room with vnum %d", atoi(field));
+            script_log(g, "findmob.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
-            for (i = 0, ch = rroom_get_people(rrnum); ch; ch = char_get_next_in_room(ch))
-              if (char_get_mob_vnum(ch) == mvnum)
+            for (i = 0, ch = rroom_get_people(g, rrnum); ch; ch = char_get_next_in_room(ch))
+              if (char_get_mob_vnum(g, ch) == mvnum)
                 i++;
 
             snprintf(str, slen, "%d", i);
@@ -1461,17 +1462,17 @@ in the vault (vnum: 453) now and then. you can just use
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
       else if (!strcasecmp(var, "findobj")) {
         if (!field || !*field || !subfield || !*subfield) {
-          script_log("findobj.vnum(ovnum) - illegal syntax");
+          script_log(g, "findobj.vnum(ovnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(atoi(field));
+          room_rnum rrnum = real_room(g, atoi(field));
 
           if (rrnum == NOWHERE) {
-            script_log("findobj.vnum(ovnum): No room with vnum %d", atoi(field));
+            script_log(g, "findobj.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
             /* item_in_list looks within containers as well. */
-            snprintf(str, slen, "%d", item_in_list(subfield, rroom_get_contents(rrnum)));
+            snprintf(str, slen, "%d", item_in_list(g, subfield, rroom_get_contents(g, rrnum)));
           }
         }
       } else if (!strcasecmp(var, "random")) {
@@ -1481,20 +1482,20 @@ in the vault (vnum: 453) now and then. you can just use
 
           if (type == MOB_TRIGGER) {
             ch = (char_data *)go;
-            for (c = rroom_get_people(char_get_in_room(ch)); c; c = char_get_next_in_room(c))
-              if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
-                  char_can_see(ch, c)) {
-                if (!rand_number(0, count))
+            for (c = rroom_get_people(g, char_get_in_room(ch)); c; c = char_get_next_in_room(c))
+              if ((c != ch) && valid_dg_target(g, c, DG_ALLOW_GODS) &&
+                  char_can_see(g, ch, c)) {
+                if (!rand_number(g, 0, count))
                   rndm = c;
                 count++;
               }
           }
 
           else if (type == OBJ_TRIGGER) {
-            for (c = rroom_get_people(obj_room((obj_data *)go)); c;
+            for (c = rroom_get_people(g, obj_room((obj_data *)go)); c;
                  c = char_get_next_in_room(c))
-              if (valid_dg_target(c, DG_ALLOW_GODS)) {
-                if (!rand_number(0, count))
+              if (valid_dg_target(g, c, DG_ALLOW_GODS)) {
+                if (!rand_number(g, 0, count))
                   rndm = c;
                 count++;
               }
@@ -1503,9 +1504,9 @@ in the vault (vnum: 453) now and then. you can just use
           else if (type == WLD_TRIGGER) {
             for (c = room_get_people((struct room_data *)go); c;
                  c = char_get_next_in_room(c))
-              if (valid_dg_target(c, DG_ALLOW_GODS)) {
+              if (valid_dg_target(g, c, DG_ALLOW_GODS)) {
 
-                if (!rand_number(0, count))
+                if (!rand_number(g, 0, count))
                   rndm = c;
                 count++;
               }
@@ -1522,7 +1523,7 @@ in the vault (vnum: 453) now and then. you can just use
 
           switch (type) {
             case WLD_TRIGGER:
-              in_room = real_room(room_get_number((struct room_data *)go));
+              in_room = real_room(g, room_get_number((struct room_data *)go));
               break;
             case OBJ_TRIGGER:
               in_room = obj_room((struct obj_data *)go);
@@ -1535,7 +1536,7 @@ in the vault (vnum: 453) now and then. you can just use
             *str = '\0';
           } else {
             doors = 0;
-            room  = &world[in_room];
+            room  = &g->rooms[in_room];
             for (i = 0; i < NUM_OF_DIRS; i++)
               if (room_get_dir_option(room, i))
                 doors++;
@@ -1544,7 +1545,7 @@ in the vault (vnum: 453) now and then. you can just use
               *str = '\0';
             } else {
               for (;;) {
-                doors = rand_number(0, NUM_OF_DIRS - 1);
+                doors = rand_number(g, 0, NUM_OF_DIRS - 1);
                 if (room_get_dir_option(room, doors))
                   break;
               }
@@ -1552,18 +1553,18 @@ in the vault (vnum: 453) now and then. you can just use
             }
           }
         } else
-          snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? rand_number(1, num) : 0);
+          snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? rand_number(g, 1, num) : 0);
 
         return;
       }
     }
 
     if (c)
-      char_field(c, go, vd, trig, type, field, subfield, str, slen);
+      char_field(g, c, go, vd, trig, type, field, subfield, str, slen);
     else if (o)
-      obj_field(o, vd, trig, type, field, subfield, str, slen);
+      obj_field(g, o, vd, trig, type, field, subfield, str, slen);
     else if (r)
-      room_field(r, vd, trig, type, field, subfield, str, slen);
+      room_field(g, r, vd, trig, type, field, subfield, str, slen);
   }
 }
 
@@ -1583,7 +1584,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(void *go, struct script_data *sc, trig_data *trig,
+void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf)
 {
   char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
@@ -1642,10 +1643,10 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
         for (field = p; *p && ((*p != '%') || (paren_count > 0) || (dots)); p++) {
           if (dots > 0) {
             *subfield_p = '\0';
-            find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
+            find_replacement(g, go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
             if (*repl_str) {
               snprintf(tmp2, sizeof(tmp2), "eval tmpvr %s", repl_str); //temp var
-              process_eval(go, sc, trig, type, tmp2);
+              process_eval(g, go, sc, trig, type, tmp2);
               strcpy(var, "tmpvr");
               field = p;
               dots  = 0;
@@ -1671,11 +1672,11 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
       *subfield_p = '\0';
 
       if (*subfield) {
-        var_subst(go, sc, trig, type, subfield, tmp2);
+        var_subst(g, go, sc, trig, type, subfield, tmp2);
         strcpy(subfield, tmp2);
       }
 
-      find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
+      find_replacement(g, go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
 
       strncat(buf, repl_str, left);
       len = strlen(repl_str);

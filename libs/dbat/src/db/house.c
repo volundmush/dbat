@@ -21,22 +21,21 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
-static void House_list_guests(struct char_data *ch, int i, int quiet);
+static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet);
 
 /* local globals */
-struct house_control_rec house_control[MAX_HOUSES];
-int num_of_houses = 0;
 
 /* local functions */
 static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
-static bool House_load(room_vnum vnum);
-static bool House_save(struct obj_data *obj, FILE *fp, int location);
+static bool House_load(GameWorld *g, room_vnum vnum);
+static bool House_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location);
 static void House_restore_weight(struct obj_data *obj);
 
-static void hcontrol_build_house(struct char_data *ch, char *arg);
-static void hcontrol_destroy_house(struct char_data *ch, char *arg);
-static void hcontrol_pay_house(struct char_data *ch, char *arg);
+static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg);
+static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg);
+static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg);
 
 /* First, the basics: finding the filename; loading/saving objects */
 
@@ -52,7 +51,7 @@ static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
 
 /* Save all objects for a house (recursive; initial call must be followed
    by a call to House_restore_weight)  Assumes file is open already. */
-static bool House_save(struct obj_data *obj, FILE *fp, int location)
+static bool House_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
@@ -62,9 +61,9 @@ static bool House_save(struct obj_data *obj, FILE *fp, int location)
     }
   }
   if (obj) {
-    House_save(obj_get_next_content(obj), fp, location);
-    House_save(obj_get_contains(obj), fp, MIN(0, location) - 1);
-    result = Obj_to_store(obj, fp, location);
+    House_save(g, obj_get_next_content(obj), fp, location);
+    House_save(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
+    result = Obj_to_store(g, obj, fp, location);
     if (!result)
       return false;
 
@@ -86,14 +85,14 @@ static void House_restore_weight(struct obj_data *obj)
 }
 
 /* Save all objects in a house */
-static void House_crashsave(room_vnum vnum)
+static void House_crashsave(GameWorld *g, room_vnum vnum)
 {
   struct atomic_file af;
   room_rnum rnum;
   char buf[MAX_STRING_LENGTH];
   FILE *fp;
 
-  if ((rnum = real_room(vnum)) == NOWHERE)
+  if ((rnum = real_room(g, vnum)) == NOWHERE)
     return;
   if (!House_get_filename(vnum, buf, sizeof(buf)))
     return;
@@ -101,14 +100,14 @@ static void House_crashsave(room_vnum vnum)
     perror("SYSERR: Error saving house file");
     return;
   }
-  if (!House_save(rroom_get_contents(rnum), fp, 0)) {
+  if (!House_save(g, rroom_get_contents(g, rnum), fp, 0)) {
     atomic_abort(&af); /* keep the last good house file */
     return;
   }
   bool saved = atomic_commit(&af);
-  House_restore_weight(rroom_get_contents(rnum));
+  House_restore_weight(rroom_get_contents(g, rnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
-    rroom_set_flag(rnum, ROOM_HOUSE_CRASH, false);
+    rroom_set_flag(g, rnum, ROOM_HOUSE_CRASH, false);
 }
 
 /* Delete a house save file */
@@ -133,19 +132,19 @@ void House_delete_file(room_vnum vnum)
  *  Functions for house administration (creation, deletion, etc.  *
  *****************************************************************/
 
-int find_house(room_vnum vnum)
+int find_house(GameWorld *g, room_vnum vnum)
 {
   int i;
 
-  for (i = 0; i < num_of_houses; i++)
-    if (house_control[i].vnum == vnum)
+  for (i = 0; i < g->num_of_houses; i++)
+    if (g->house_control[i].vnum == vnum)
       return (i);
 
   return (NOWHERE);
 }
 
 /* Save the house control information */
-void House_save_control(void)
+void House_save_control(GameWorld *g)
 {
   struct atomic_file af;
   FILE *fl;
@@ -155,20 +154,20 @@ void House_save_control(void)
     return;
   }
   /* write all the house control recs in one fell swoop.  Pretty nifty, eh? */
-  fwrite(house_control, sizeof(struct house_control_rec), num_of_houses, fl);
+  fwrite(g->house_control, sizeof(struct house_control_rec), g->num_of_houses, fl);
 
   atomic_commit(&af);
 }
 
 /* call from boot_db - will load control recs, load objs, set atrium bits */
 /* should do sanity checks on vnums & remove invalid records */
-void House_boot(void)
+void House_boot(GameWorld *g)
 {
   struct house_control_rec temp_house;
   room_rnum real_house;
   FILE *fl;
 
-  memset((char *)house_control, 0, sizeof(struct house_control_rec) * MAX_HOUSES);
+  memset((char *)g->house_control, 0, sizeof(struct house_control_rec) * MAX_HOUSES);
 
   if (!(fl = fopen(HCONTROL_FILE, "rb"))) {
     if (errno == ENOENT)
@@ -177,67 +176,67 @@ void House_boot(void)
       perror("SYSERR: " HCONTROL_FILE);
     return;
   }
-  while (!feof(fl) && num_of_houses < MAX_HOUSES) {
+  while (!feof(fl) && g->num_of_houses < MAX_HOUSES) {
     fread(&temp_house, sizeof(struct house_control_rec), 1, fl);
 
     if (feof(fl))
       break;
 
-    if (get_name_by_id(temp_house.owner) == nullptr)
+    if (get_name_by_id(g, temp_house.owner) == nullptr)
       continue; /* owner no longer exists -- skip */
 
-    if ((real_house = real_room(temp_house.vnum)) == NOWHERE)
+    if ((real_house = real_room(g, temp_house.vnum)) == NOWHERE)
       continue; /* this vnum doesn't exist -- skip */
 
-    if (find_house(temp_house.vnum) != NOWHERE)
+    if (find_house(g, temp_house.vnum) != NOWHERE)
       continue; /* this vnum is already a house -- skip */
 
-    house_control[num_of_houses++] = temp_house;
+    g->house_control[g->num_of_houses++] = temp_house;
 
-    rroom_set_flag(real_house, ROOM_HOUSE, true);
-    House_load(temp_house.vnum);
+    rroom_set_flag(g, real_house, ROOM_HOUSE, true);
+    House_load(g, temp_house.vnum);
   }
 
   fclose(fl);
-  House_save_control();
+  House_save_control(g);
 }
 
 /* "House Control" functions */
 
-static const char *HCONTROL_FORMAT =
+static const char *const HCONTROL_FORMAT =
     "Usage: hcontrol build <house vnum> <exit direction> <player name>\r\n"
     "       hcontrol destroy <house vnum>\r\n"
     "       hcontrol pay <house vnum>\r\n"
     "       hcontrol show\r\n";
 
-void hcontrol_list_houses(struct char_data *ch)
+void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
 {
   int i;
   char *timestr, *temp;
   char built_on[128], last_pay[128], own_name[MAX_NAME_LENGTH + 1];
 
-  if (!num_of_houses) {
-    send_to_char(ch, "No houses have been defined.\r\n");
+  if (!g->num_of_houses) {
+    send_to_char(g, ch, "No houses have been defined.\r\n");
     return;
   }
-  send_to_char(ch,
+  send_to_char(g, ch,
                "Address  Atrium  Build Date  Guests  Owner        Last Paymt\r\n"
                "-------  ------  ----------  ------  ------------ ----------\r\n");
 
-  for (i = 0; i < num_of_houses; i++) {
+  for (i = 0; i < g->num_of_houses; i++) {
     /* Avoid seeing <UNDEF> entries from self-deleted people. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].owner)) == nullptr)
+    if ((temp = get_name_by_id(g, g->house_control[i].owner)) == nullptr)
       continue;
 
-    if (house_control[i].built_on) {
-      timestr         = asctime(localtime(&(house_control[i].built_on)));
+    if (g->house_control[i].built_on) {
+      timestr         = asctime(localtime(&(g->house_control[i].built_on)));
       *(timestr + 10) = '\0';
       strlcpy(built_on, timestr, sizeof(built_on));
     } else
       strcpy(built_on, "Unknown"); /* strcpy: OK (for 'strlen("Unknown") < 128') */
 
-    if (house_control[i].last_payment) {
-      timestr         = asctime(localtime(&(house_control[i].last_payment)));
+    if (g->house_control[i].last_payment) {
+      timestr         = asctime(localtime(&(g->house_control[i].last_payment)));
       *(timestr + 10) = '\0';
       strlcpy(last_pay, timestr, sizeof(last_pay));
     } else
@@ -245,15 +244,15 @@ void hcontrol_list_houses(struct char_data *ch)
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
     strcpy(own_name, temp); /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
-    send_to_char(ch, "%7d %-10s    %2d    %-12s %s\r\n",
-                 house_control[i].vnum, built_on,
-                 house_control[i].num_of_guests, CAP(own_name), last_pay);
+    send_to_char(g, ch, "%7d %-10s    %2d    %-12s %s\r\n",
+                 g->house_control[i].vnum, built_on,
+                 g->house_control[i].num_of_guests, CAP(own_name), last_pay);
 
-    House_list_guests(ch, i, true);
+    House_list_guests(g, ch, i, true);
   }
 }
 
-static void hcontrol_build_house(struct char_data *ch, char *arg)
+static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
 {
   char arg1[MAX_INPUT_LENGTH];
   struct house_control_rec temp_house;
@@ -262,51 +261,51 @@ static void hcontrol_build_house(struct char_data *ch, char *arg)
   int16_t exit_num;
   long owner;
 
-  if (num_of_houses >= MAX_HOUSES) {
-    send_to_char(ch, "Max houses already defined.\r\n");
+  if (g->num_of_houses >= MAX_HOUSES) {
+    send_to_char(g, ch, "Max houses already defined.\r\n");
     return;
   }
 
   /* first arg: house's vnum */
   arg = one_argument(arg, arg1);
   if (!*arg1) {
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
   virt_house = atoi(arg1);
-  if ((real_house = real_room(virt_house)) == NOWHERE) {
-    send_to_char(ch, "No such room exists.\r\n");
+  if ((real_house = real_room(g, virt_house)) == NOWHERE) {
+    send_to_char(g, ch, "No such room exists.\r\n");
     return;
   }
-  if ((find_house(virt_house)) != NOWHERE) {
-    send_to_char(ch, "House already exists.\r\n");
+  if ((find_house(g, virt_house)) != NOWHERE) {
+    send_to_char(g, ch, "House already exists.\r\n");
     return;
   }
 
   /* second arg: direction of house's exit */
   arg = one_argument(arg, arg1);
   if (!*arg1) {
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
   if ((exit_num = search_block(arg1, dirs, false)) < 0 &&
       (exit_num = search_block(arg1, abbr_dirs, false)) < 0) {
-    send_to_char(ch, "'%s' is not a valid direction.\r\n", arg1);
+    send_to_char(g, ch, "'%s' is not a valid direction.\r\n", arg1);
     return;
   }
-  if (rroom_get_exit_to_room(real_house, exit_num) == NOWHERE) {
-    send_to_char(ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
+  if (rroom_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
+    send_to_char(g, ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
     return;
   }
 
   /* third arg: player's name */
   one_argument(arg, arg1);
   if (!*arg1) {
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  if ((owner = get_id_by_name(arg1)) < 0) {
-    send_to_char(ch, "Unknown player '%s'.\r\n", arg1);
+  if ((owner = get_id_by_name(g, arg1)) < 0) {
+    send_to_char(g, ch, "Unknown player '%s'.\r\n", arg1);
     return;
   }
 
@@ -318,74 +317,74 @@ static void hcontrol_build_house(struct char_data *ch, char *arg)
   temp_house.owner         = owner;
   temp_house.num_of_guests = 0;
 
-  house_control[num_of_houses++] = temp_house;
+  g->house_control[g->num_of_houses++] = temp_house;
 
-  rroom_set_flag(real_house, ROOM_HOUSE, true);
-  House_crashsave(virt_house);
+  rroom_set_flag(g, real_house, ROOM_HOUSE, true);
+  House_crashsave(g, virt_house);
 
-  send_to_char(ch, "House built.  Mazel tov!\r\n");
-  House_save_control();
+  send_to_char(g, ch, "House built.  Mazel tov!\r\n");
+  House_save_control(g);
 }
 
-static void hcontrol_destroy_house(struct char_data *ch, char *arg)
+static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg)
 {
   int i, j;
   room_rnum real_atrium, real_house;
 
   if (!*arg) {
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  if ((i = find_house(atoi(arg))) == NOWHERE) {
-    send_to_char(ch, "Unknown house.\r\n");
+  if ((i = find_house(g, atoi(arg))) == NOWHERE) {
+    send_to_char(g, ch, "Unknown house.\r\n");
     return;
   }
-  if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
-    mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
+  if ((real_atrium = real_room(g, g->house_control[i].atrium)) == NOWHERE)
+    mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), g->house_control[i].atrium);
   else
-    rroom_set_flag(real_atrium, ROOM_ATRIUM, false);
+    rroom_set_flag(g, real_atrium, ROOM_ATRIUM, false);
 
-  if ((real_house = real_room(house_control[i].vnum)) == NOWHERE)
-    mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vnum);
+  if ((real_house = real_room(g, g->house_control[i].vnum)) == NOWHERE)
+    mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), g->house_control[i].vnum);
   else {
-    rroom_set_flag(real_house, ROOM_HOUSE, false);
-    rroom_set_flag(real_house, ROOM_HOUSE_CRASH, false);
+    rroom_set_flag(g, real_house, ROOM_HOUSE, false);
+    rroom_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
   }
 
-  House_delete_file(house_control[i].vnum);
+  House_delete_file(g->house_control[i].vnum);
 
-  for (j = i; j < num_of_houses - 1; j++)
-    house_control[j] = house_control[j + 1];
+  for (j = i; j < g->num_of_houses - 1; j++)
+    g->house_control[j] = g->house_control[j + 1];
 
-  num_of_houses--;
+  g->num_of_houses--;
 
-  send_to_char(ch, "House deleted.\r\n");
-  House_save_control();
+  send_to_char(g, ch, "House deleted.\r\n");
+  House_save_control(g);
 
   /*
    * Now, reset the ROOM_ATRIUM flag on all existing houses' atriums,
    * just in case the house we just deleted shared an atrium with another
    * house.  --JE 9/19/94
    */
-  for (i = 0; i < num_of_houses; i++)
-    if ((real_atrium = real_room(house_control[i].atrium)) != NOWHERE)
-      rroom_set_flag(real_atrium, ROOM_ATRIUM, true);
+  for (i = 0; i < g->num_of_houses; i++)
+    if ((real_atrium = real_room(g, g->house_control[i].atrium)) != NOWHERE)
+      rroom_set_flag(g, real_atrium, ROOM_ATRIUM, true);
 }
 
-static void hcontrol_pay_house(struct char_data *ch, char *arg)
+static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg)
 {
   int i;
 
   if (!*arg)
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
-  else if ((i = find_house(atoi(arg))) == NOWHERE)
-    send_to_char(ch, "Unknown house.\r\n");
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
+  else if ((i = find_house(g, atoi(arg))) == NOWHERE)
+    send_to_char(g, ch, "Unknown house.\r\n");
   else {
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "Payment for house %s collected by %s.", arg, char_get_name(ch));
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house %s collected by %s.", arg, char_get_name(ch));
 
-    house_control[i].last_payment = time(0);
-    House_save_control();
-    send_to_char(ch, "Payment recorded.\r\n");
+    g->house_control[i].last_payment = time(0);
+    House_save_control(g);
+    send_to_char(g, ch, "Payment recorded.\r\n");
   }
 }
 
@@ -397,15 +396,15 @@ ACMD(do_hcontrol)
   half_chop(argument, arg1, arg2);
 
   if (is_abbrev(arg1, "build"))
-    hcontrol_build_house(ch, arg2);
+    hcontrol_build_house(g, ch, arg2);
   else if (is_abbrev(arg1, "destroy"))
-    hcontrol_destroy_house(ch, arg2);
+    hcontrol_destroy_house(g, ch, arg2);
   else if (is_abbrev(arg1, "pay"))
-    hcontrol_pay_house(ch, arg2);
+    hcontrol_pay_house(g, ch, arg2);
   else if (is_abbrev(arg1, "show"))
-    hcontrol_list_houses(ch);
+    hcontrol_list_houses(g, ch);
   else
-    send_to_char(ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "%s", HCONTROL_FORMAT);
 }
 
 /* The house command, used by mortal house owners to assign guests */
@@ -416,104 +415,104 @@ ACMD(do_house)
 
   one_argument(argument, arg);
 
-  if (!rroom_flagged(char_get_in_room(ch), ROOM_HOUSE))
-    send_to_char(ch, "You must be in your house to set guests.\r\n");
-  else if ((i = find_house(rroom_get_vnum(char_get_in_room(ch)))) == NOWHERE)
-    send_to_char(ch, "Um.. this house seems to be screwed up.\r\n");
-  else if (char_get_idnum(ch) != house_control[i].owner)
-    send_to_char(ch, "Only the primary owner can set guests.\r\n");
+  if (!rroom_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
+    send_to_char(g, ch, "You must be in your house to set guests.\r\n");
+  else if ((i = find_house(g, rroom_get_vnum(g, char_get_in_room(ch)))) == NOWHERE)
+    send_to_char(g, ch, "Um.. this house seems to be screwed up.\r\n");
+  else if (char_get_idnum(ch) != g->house_control[i].owner)
+    send_to_char(g, ch, "Only the primary owner can set guests.\r\n");
   else if (!*arg)
-    House_list_guests(ch, i, false);
-  else if ((id = get_id_by_name(arg)) < 0)
-    send_to_char(ch, "No such player.\r\n");
+    House_list_guests(g, ch, i, false);
+  else if ((id = get_id_by_name(g, arg)) < 0)
+    send_to_char(g, ch, "No such player.\r\n");
   else if (id == char_get_idnum(ch))
-    send_to_char(ch, "It's your house!\r\n");
+    send_to_char(g, ch, "It's your house!\r\n");
   else {
-    for (j = 0; j < house_control[i].num_of_guests; j++)
-      if (house_control[i].guests[j] == id) {
-        for (; j < house_control[i].num_of_guests; j++)
-          house_control[i].guests[j] = house_control[i].guests[j + 1];
-        house_control[i].num_of_guests--;
-        House_save_control();
-        send_to_char(ch, "Guest deleted.\r\n");
+    for (j = 0; j < g->house_control[i].num_of_guests; j++)
+      if (g->house_control[i].guests[j] == id) {
+        for (; j < g->house_control[i].num_of_guests; j++)
+          g->house_control[i].guests[j] = g->house_control[i].guests[j + 1];
+        g->house_control[i].num_of_guests--;
+        House_save_control(g);
+        send_to_char(g, ch, "Guest deleted.\r\n");
         return;
       }
-    if (house_control[i].num_of_guests == MAX_GUESTS) {
-      send_to_char(ch, "You have too many guests.\r\n");
+    if (g->house_control[i].num_of_guests == MAX_GUESTS) {
+      send_to_char(g, ch, "You have too many guests.\r\n");
       return;
     }
-    j                          = house_control[i].num_of_guests++;
-    house_control[i].guests[j] = id;
-    House_save_control();
-    send_to_char(ch, "Guest added.\r\n");
+    j                          = g->house_control[i].num_of_guests++;
+    g->house_control[i].guests[j] = id;
+    House_save_control(g);
+    send_to_char(g, ch, "Guest added.\r\n");
   }
 }
 
 /* Misc. administrative functions */
 
 /* crash-save all the houses */
-void House_save_all(void)
+void House_save_all(GameWorld *g)
 {
   int i;
   room_rnum real_house;
 
-  for (i = 0; i < num_of_houses; i++)
-    if ((real_house = real_room(house_control[i].vnum)) != NOWHERE)
-      House_crashsave(house_control[i].vnum);
+  for (i = 0; i < g->num_of_houses; i++)
+    if ((real_house = real_room(g, g->house_control[i].vnum)) != NOWHERE)
+      House_crashsave(g, g->house_control[i].vnum);
 }
 
 /* note: arg passed must be house vnum, so there. */
-bool House_can_enter(struct char_data *ch, room_vnum house)
+bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house)
 {
   int i, j;
 
-  if (char_adm_flagged(ch, ADM_ALLHOUSES) || (i = find_house(house)) == NOWHERE)
+  if (char_adm_flagged(ch, ADM_ALLHOUSES) || (i = find_house(g, house)) == NOWHERE)
     return true;
 
-  switch (house_control[i].mode) {
+  switch (g->house_control[i].mode) {
     case HOUSE_CLAN:
     case HOUSE_UNOWNED:
       return true;
     case HOUSE_PRIVATE:
-      if (char_get_idnum(ch) == house_control[i].owner)
+      if (char_get_idnum(ch) == g->house_control[i].owner)
         return true;
-      for (j = 0; j < house_control[i].num_of_guests; j++)
-        if (char_get_idnum(ch) == house_control[i].guests[j])
+      for (j = 0; j < g->house_control[i].num_of_guests; j++)
+        if (char_get_idnum(ch) == g->house_control[i].guests[j])
           return true;
   }
 
   return false;
 }
 
-static void House_list_guests(struct char_data *ch, int i, int quiet)
+static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet)
 {
   int j, num_printed;
   char *temp;
 
-  if (house_control[i].num_of_guests == 0) {
+  if (g->house_control[i].num_of_guests == 0) {
     if (!quiet)
-      send_to_char(ch, "  Guests: None\r\n");
+      send_to_char(g, ch, "  Guests: None\r\n");
     return;
   }
 
-  send_to_char(ch, "  Guests: ");
+  send_to_char(g, ch, "  Guests: ");
 
-  for (num_printed = j = 0; j < house_control[i].num_of_guests; j++) {
+  for (num_printed = j = 0; j < g->house_control[i].num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].guests[j])) == nullptr)
+    if ((temp = get_name_by_id(g, g->house_control[i].guests[j])) == nullptr)
       continue;
 
     num_printed++;
-    send_to_char(ch, "%c%s ", toupper(*temp), temp + 1);
+    send_to_char(g, ch, "%c%s ", toupper(*temp), temp + 1);
   }
 
   if (num_printed == 0)
-    send_to_char(ch, "all dead");
+    send_to_char(g, ch, "all dead");
 
-  send_to_char(ch, "\r\n");
+  send_to_char(g, ch, "\r\n");
 }
 
-static bool House_load(room_vnum rvnum)
+static bool House_load(GameWorld *g, room_vnum rvnum)
 {
   FILE *fl;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
@@ -530,7 +529,7 @@ static bool House_load(room_vnum rvnum)
   struct extra_descr_data *new_descr;
   room_rnum rrnum;
 
-  if ((rrnum = real_room(rvnum)) == NOWHERE)
+  if ((rrnum = real_room(g, rvnum)) == NOWHERE)
     return false;
 
   if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
@@ -559,13 +558,13 @@ static bool House_load(room_vnum rvnum)
       }
       /* we have the number, check it, load obj. */
       if (nr == NOTHING) { /* then it is unique */
-        temp              = create_obj();
+        temp              = create_obj(g);
         obj_set_item_number(temp, NOTHING);
       } else if (nr < 0 || nr >= 999999) {
         get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       } else {
-        temp = read_object(nr, VIRTUAL);
+        temp = read_object(g, nr, VIRTUAL);
         if (!temp) {
           get_line(fl, line);
           continue;
@@ -727,7 +726,7 @@ static bool House_load(room_vnum rvnum)
         } /* exit our for loop */
       } /* exit our xap loop */
       if (temp != nullptr) {
-        obj_to_room(temp, rrnum);
+        obj_to_room(g, temp, rrnum);
       } else {
         continue;
       }
@@ -737,7 +736,7 @@ static bool House_load(room_vnum rvnum)
         if (cont_row[j]) { /* no container -> back to ch's inventory */
           for (; cont_row[j]; cont_row[j] = obj1) {
             obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_room(cont_row[j], rrnum);
+            obj_to_room(g, cont_row[j], rrnum);
           }
           cont_row[j] = nullptr;
         }
@@ -745,17 +744,17 @@ static bool House_load(room_vnum rvnum)
       if (j == -locate && cont_row[j]) { /* content list existing */
         if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
           /* take item ; fill ; give to char again */
-          obj_from_room(temp);
+          obj_from_room(g, temp);
           obj_set_contains(temp, nullptr);
           for (; cont_row[j]; cont_row[j] = obj1) {
             obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_obj(cont_row[j], temp);
+            obj_to_obj(g, cont_row[j], temp);
           }
-          obj_to_room(temp, rrnum); /* add to inv first ... */
+          obj_to_room(g, temp, rrnum); /* add to inv first ... */
         } else {                    /* object isn't container -> empty content list */
           for (; cont_row[j]; cont_row[j] = obj1) {
             obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_room(cont_row[j], rrnum);
+            obj_to_room(g, cont_row[j], rrnum);
           }
           cont_row[j] = nullptr;
         }
@@ -765,7 +764,7 @@ static bool House_load(room_vnum rvnum)
         /* let obj be part of content list
                   but put it at the list's end thus having the items
                   in the same order as before renting */
-        obj_from_room(temp);
+        obj_from_room(g, temp);
         if ((obj1 = cont_row[-locate - 1])) {
           while (obj_get_next_content(obj1))
             obj1 = obj_get_next_content(obj1);

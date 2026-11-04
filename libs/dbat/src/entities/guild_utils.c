@@ -1,6 +1,7 @@
 #include "dbat/guild_utils.h"
 #include "dbat/guild.h"
 #include "dbat/flags.h"
+#include "dbat/game_world.h"
 
 room_vnum guild_get_vnum(const struct guild_data *guild)
 {
@@ -117,57 +118,57 @@ void guild_set_feat(struct guild_data *guild, int n, int v)
   guild->feats[n] = v;
 }
 
-room_vnum rguild_get_vnum(guild_rnum i)
+room_vnum rguild_get_vnum(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].vnum;
+  return g->guild_index[i].vnum;
 }
 
-void rguild_set_vnum(guild_rnum i, room_vnum v)
+void rguild_set_vnum(GameWorld *g, guild_rnum i, room_vnum v)
 {
-  guild_index[i].vnum = v;
+  g->guild_index[i].vnum = v;
 }
 
-mob_rnum rguild_get_gm(guild_rnum i)
+mob_rnum rguild_get_gm(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].gm;
+  return g->guild_index[i].gm;
 }
 
-void rguild_set_gm(guild_rnum i, mob_rnum v)
+void rguild_set_gm(GameWorld *g, guild_rnum i, mob_rnum v)
 {
-  guild_index[i].gm = v;
+  g->guild_index[i].gm = v;
 }
 
-int rguild_get_open(guild_rnum i)
+int rguild_get_open(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].open;
+  return g->guild_index[i].open;
 }
 
-int rguild_get_close(guild_rnum i)
+int rguild_get_close(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].close;
+  return g->guild_index[i].close;
 }
 
-float rguild_get_charge(guild_rnum i)
+float rguild_get_charge(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].charge;
+  return g->guild_index[i].charge;
 }
 
-int rguild_get_minlvl(guild_rnum i)
+int rguild_get_minlvl(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].minlvl;
+  return g->guild_index[i].minlvl;
 }
 
-bitvector_t *rguild_get_with_who(guild_rnum i)
+bitvector_t *rguild_get_with_who(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].with_who;
+  return g->guild_index[i].with_who;
 }
 
-spec_proc_func rguild_get_func(guild_rnum i)
+spec_proc_func rguild_get_func(GameWorld *g, guild_rnum i)
 {
-  return guild_index[i].func;
+  return g->guild_index[i].func;
 }
 
-void rguild_set_func(guild_rnum i, spec_proc_func v)
+void rguild_set_func(GameWorld *g, guild_rnum i, spec_proc_func v)
 {
-  guild_index[i].func = v;
+  g->guild_index[i].func = v;
 }

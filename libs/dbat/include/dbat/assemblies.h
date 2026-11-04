@@ -25,21 +25,21 @@ struct component_data {
   obj_vnum lVnum; /* Vnum of the component object. */
 };
 
-void assemblyBootAssemblies(void);
-void assemblySaveAssemblies(void);
-void assemblyListToChar(struct char_data *pCharacter);
+void assemblyBootAssemblies(GameWorld *g);
+void assemblySaveAssemblies(GameWorld *g);
+void assemblyListToChar(GameWorld *g, struct char_data *pCharacter);
 
-bool assemblyAddComponent(obj_vnum lVnum, obj_vnum lComponentVnum,
+bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
                           bool bExtract, bool bInRoom);
-bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int extract_yes);
-bool assemblyCreate(obj_vnum lVnum, int iAssembledType);
-bool assemblyDestroy(obj_vnum lVnum);
+bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, int extract_yes);
+bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType);
+bool assemblyDestroy(GameWorld *g, obj_vnum lVnum);
 
-int assemblyGetType(obj_vnum lVnum);
+int assemblyGetType(GameWorld *g, obj_vnum lVnum);
 
-obj_vnum assemblyFindAssembly(const char *pszAssemblyName);
+obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName);
 
-ASSEMBLY *assemblyGetAssemblyPtr(obj_vnum lVnum);
+ASSEMBLY *assemblyGetAssemblyPtr(GameWorld *g, obj_vnum lVnum);
 
 /* ******************************************************************** */
-void free_assemblies(void);
+void free_assemblies(GameWorld *g);

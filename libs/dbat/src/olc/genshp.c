@@ -12,6 +12,7 @@
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
 static void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
@@ -324,14 +325,14 @@ static int shop_order(const void *key, const void *shop)
   return (k > v) - (k < v);
 }
 
-shop_rnum real_shop(shop_vnum vnum)
+shop_rnum real_shop(GameWorld *g, shop_vnum vnum)
 {
   struct shop_data *found;
 
-  if (top_shop < 0)
+  if (g->top_shop < 0)
     return NOWHERE;
-  found = bsearch(&vnum, shop_index, top_shop + 1, sizeof(*shop_index), shop_order);
-  return found ? found - shop_index : NOWHERE;
+  found = bsearch(&vnum, g->shops, g->top_shop + 1, sizeof(*g->shops), shop_order);
+  return found ? found - g->shops : NOWHERE;
 }
 
 /*-------------------------------------------------------------------*/
@@ -367,63 +368,63 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
 
 /*-------------------------------------------------------------------*/
 
-shop_rnum add_shop(struct shop_data *nshp)
+shop_rnum add_shop(GameWorld *g, struct shop_data *nshp)
 {
   shop_rnum rshop;
   shop_rnum found = 0;
-  zone_rnum rznum = real_zone_by_thing(shop_get_vnum(nshp));
+  zone_rnum rznum = real_zone_by_thing(g, shop_get_vnum(nshp));
 
   /*
    * The shop already exists, just update it.
    */
-  if ((rshop = real_shop(shop_get_vnum(nshp))) != NOWHERE) {
+  if ((rshop = real_shop(g, shop_get_vnum(nshp))) != NOWHERE) {
     /* free old strings. They're not used in any other place -- Welcor */
-    copy_shop(&shop_index[rshop], nshp, true);
+    copy_shop(&g->shops[rshop], nshp, true);
     if (rznum != NOWHERE)
-      add_to_save_list(zone_table[rznum].number, SL_SHP);
+      add_to_save_list(g, g->zones[rznum].number, SL_SHP);
     else
-      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
     return rshop;
   }
 
-  top_shop++;
-  RECREATE(shop_index, struct shop_data, top_shop + 1);
+  g->top_shop++;
+  RECREATE(g->shops, struct shop_data, g->top_shop + 1);
 
-  for (rshop = top_shop; rshop > 0; rshop--) {
-    if (nshp->vnum > rshop_get_vnum(rshop - 1)) {
+  for (rshop = g->top_shop; rshop > 0; rshop--) {
+    if (nshp->vnum > rshop_get_vnum(g, rshop - 1)) {
       found = rshop;
 
       /* Make a "nofree" variant and remove these later. */
-      shop_index[rshop].in_room   = nullptr;
-      shop_index[rshop].producing = nullptr;
-      shop_index[rshop].type      = nullptr;
+      g->shops[rshop].in_room   = nullptr;
+      g->shops[rshop].producing = nullptr;
+      g->shops[rshop].type      = nullptr;
       /* don't free old strings - they're still in use -- Welcor */
-      copy_shop(&shop_index[rshop], nshp, false);
+      copy_shop(&g->shops[rshop], nshp, false);
       break;
     }
-    shop_index[rshop] = shop_index[rshop - 1];
+    g->shops[rshop] = g->shops[rshop - 1];
   }
 
   if (!found) {
     /* Make a "nofree" variant and remove these later. */
-    shop_index[rshop].in_room   = nullptr;
-    shop_index[rshop].producing = nullptr;
-    shop_index[rshop].type      = nullptr;
+    g->shops[rshop].in_room   = nullptr;
+    g->shops[rshop].producing = nullptr;
+    g->shops[rshop].type      = nullptr;
     /* don't free old strings - they're still in use -- Welcor */
-    copy_shop(&shop_index[0], nshp, false);
+    copy_shop(&g->shops[0], nshp, false);
   }
 
   if (rznum != NOWHERE)
-    add_to_save_list(zone_table[rznum].number, SL_SHP);
+    add_to_save_list(g, g->zones[rznum].number, SL_SHP);
   else
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
   return rshop;
 }
 
 /*-------------------------------------------------------------------*/
 
-bool save_shops(zone_rnum zone_num)
+bool save_shops(GameWorld *g, zone_rnum zone_num)
 {
   IDXTYPE i;
   int j;
@@ -433,34 +434,34 @@ bool save_shops(zone_rnum zone_num)
   char fname[128], oldname[128];
   struct shop_data *shop;
 
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-    mud_log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+  if (zone_num < 0 || zone_num > g->top_zone) {
+    mud_log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, g->zones[zone_num].number);
   if (!(shop_file = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
     return false;
   }
   if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
-    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
     atomic_abort(&af);
     return false;
   }
   /*
    * Search database for shops in this zone.
    */
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
-    if ((rshop = real_shop(i)) != NOWHERE) {
+  for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
+    if ((rshop = real_shop(g, i)) != NOWHERE) {
       fprintf(shop_file, "#%d~\n", i);
-      shop = shop_index + rshop;
+      shop = g->shops + rshop;
 
       /*
        * Save the products.
        */
       for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
-        fprintf(shop_file, "%d\n", obj_index[shop_get_product(shop, j)].vnum);
+        fprintf(shop_file, "%d\n", g->obj_index[shop_get_product(shop, j)].vnum);
       fprintf(shop_file, "-1\n");
 
       /*
@@ -509,7 +510,7 @@ bool save_shops(zone_rnum zone_num)
               shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
               shop_get_temper(shop),
               shop_get_bitvector(shop),
-              shop_get_keeper(shop) == NOBODY ? -1 : mob_index[shop_get_keeper(shop)].vnum);
+              shop_get_keeper(shop) == NOBODY ? -1 : g->mob_index[shop_get_keeper(shop)].vnum);
       for (j = 0; j < SW_ARRAY_MAX; j++)
         fprintf(shop_file, "%s%d", j ? " " : "", shop_get_with_who(shop)[j]);
       fprintf(shop_file, "\n");
@@ -533,9 +534,9 @@ bool save_shops(zone_rnum zone_num)
     return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
-  if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_SHP);
-    create_world_index(zone_table[zone_num].number, "shp");
+  if (in_save_list(g, g->zones[zone_num].number, SL_SHP)) {
+    remove_from_save_list(g, g->zones[zone_num].number, SL_SHP);
+    create_world_index(g, g->zones[zone_num].number, "shp");
     mud_log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
   return true;

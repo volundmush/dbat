@@ -27,21 +27,22 @@
 #include "dbat/gengld.h"
 #include "dbat/hsedit.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-static void free_config(struct config_data *data);
+static void free_config(GameWorld *g, struct config_data *data);
 
 /* -------------------------------------------------------------------------- */
 
 /*
  * Only player characters should be using OLC anyway.
  */
-void clear_screen(struct descriptor_data *d)
+void clear_screen(GameWorld *g, struct descriptor_data *d)
 {
-  if (char_prf_flagged(d->character, PRF_CLS))
-    write_to_output(d, "[H[J");
+  if (char_prf_flagged(g, d->character, PRF_CLS))
+    write_to_output(g, d, "[H[J");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -84,39 +85,39 @@ ACMD(do_oasis)
       /* The command to see what needs to be saved, typically 'olc'.  */
 
     case SCMD_OASIS_CEDIT:
-      do_oasis_cedit(ch, argument, cmd, subcmd);
+      do_oasis_cedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_ZEDIT:
-      do_oasis_zedit(ch, argument, cmd, subcmd);
+      do_oasis_zedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_REDIT:
-      do_oasis_redit(ch, argument, cmd, subcmd);
+      do_oasis_redit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_OEDIT:
-      do_oasis_oedit(ch, argument, cmd, subcmd);
+      do_oasis_oedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_MEDIT:
-      do_oasis_medit(ch, argument, cmd, subcmd);
+      do_oasis_medit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_SEDIT:
-      do_oasis_sedit(ch, argument, cmd, subcmd);
+      do_oasis_sedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_AEDIT:
-      do_oasis_aedit(ch, argument, cmd, subcmd);
+      do_oasis_aedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_HEDIT:
-      do_oasis_hedit(ch, argument, cmd, subcmd);
+      do_oasis_hedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_HSEDIT:
-      do_oasis_hsedit(ch, argument, cmd, subcmd);
+      do_oasis_hsedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_RLIST:
@@ -126,19 +127,19 @@ ACMD(do_oasis)
     case SCMD_OASIS_ZLIST:
     case SCMD_OASIS_TLIST:
     case SCMD_OASIS_GLIST:
-      do_oasis_list(ch, argument, cmd, subcmd);
+      do_oasis_list(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_TRIGEDIT:
-      do_oasis_trigedit(ch, argument, cmd, subcmd);
+      do_oasis_trigedit(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_LINKS:
-      do_oasis_links(ch, argument, cmd, subcmd);
+      do_oasis_links(g, ch, argument, cmd, subcmd);
       break;
 
     case SCMD_OASIS_GEDIT:
-      do_oasis_gedit(ch, argument, cmd, subcmd);
+      do_oasis_gedit(g, ch, argument, cmd, subcmd);
       break;
 
     default:
@@ -158,7 +159,7 @@ ACMD(do_oasis)
  * attatched to a descriptor, sets all flags back to how they
  * should be.
  */
-void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
+void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
 {
   /*
    * Clean up WHAT?
@@ -175,7 +176,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
       case CLEANUP_ALL:
         /* free(OLC_SCRIPT(d)) equivalent */
         free_proto_script(OLC_ROOM(d), WLD_TRIGGER);
-        free_room(OLC_ROOM(d));
+        free_room(g, OLC_ROOM(d));
         break;
       case CLEANUP_STRUCTS:
         free(OLC_ROOM(d));
@@ -188,7 +189,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
 
   /* cedit's copy of the configuration (it has no room, so this can't go above) */
   if (OLC_CONFIG(d)) {
-    free_config(OLC_CONFIG(d));
+    free_config(g, OLC_CONFIG(d));
     OLC_CONFIG(d) = nullptr;
   }
 
@@ -198,7 +199,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
    * with strdup().
    */
   if (OLC_OBJ(d)) {
-    free_object_strings(OLC_OBJ(d));
+    free_object_strings(g, OLC_OBJ(d));
     free(OLC_OBJ(d));
   }
 
@@ -207,7 +208,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
    * the prototype.
    */
   if (OLC_MOB(d))
-    free_mobile(OLC_MOB(d));
+    free_mobile(g, OLC_MOB(d));
 
   /*
    * Check for a zone.  cleanup_type is irrelevant here, free() everything.
@@ -302,7 +303,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
     * Either way, we need to get rid of this.
     */
   if (OLC_TRIG(d)) {
-    free_trigger(OLC_TRIG(d));
+    free_trigger(g, OLC_TRIG(d));
     OLC_TRIG(d) = nullptr;
   }
   /*
@@ -315,16 +316,16 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
    */
   if (d->character) {
     char_plr_set(d->character, PLR_WRITING, false);
-    act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
+    act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
 
     if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", char_get_name(d->character));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_TEDIT)
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", char_get_name(d->character));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_HEDIT)
-      mudlog(LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
+      mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(d->character));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, d->character));
 
     desc_set_connected(d, CON_PLAYING);
   }
@@ -360,12 +361,12 @@ void split_argument(char *argument, char *tag)
   *wrt = '\0';
 }
 
-static void free_config(struct config_data *data)
+static void free_config(GameWorld *g, struct config_data *data)
 {
   /****************************************************************************/
   /** Free strings.                                                          **/
   /****************************************************************************/
-  free_strings(data, OASIS_CFG);
+  free_strings(g, data, OASIS_CFG);
 
   /****************************************************************************/
   /** Free the data structure.                                               **/
@@ -390,7 +391,7 @@ static void free_config(struct config_data *data)
 /**                  FALSE.                                                  **/
 /**                                                                          **/
 /******************************************************************************/
-bool can_edit_zone(struct char_data *ch, zone_rnum rnum)
+bool can_edit_zone(GameWorld *g, struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
   if (!char_get_desc(ch) || char_is_npc(ch) || rnum == NOWHERE)
@@ -404,11 +405,11 @@ bool can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return (true);
 
   /* always access if a player helped build the zone in the first place */
-  if (is_name(char_get_name(ch), zone_table[rnum].builders))
+  if (is_name(char_get_name(ch), g->zones[rnum].builders))
     return (true);
 
   /* no access if you haven't been assigned a zone */
-  if (char_get_olc_zone(ch) == NOWHERE)
+  if (char_get_olc_zone(g, ch) == NOWHERE)
     return false;
 
   /* no access if you're not at least LVL_BUILDER */
@@ -416,18 +417,18 @@ bool can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return false;
 
   /* always access if you're assigned to this zone */
-  if (real_zone(char_get_olc_zone(ch)) == rnum)
+  if (real_zone(g, char_get_olc_zone(g, ch)) == rnum)
     return true;
 
   return (false);
 }
 
-void send_cannot_edit(struct char_data *ch, zone_vnum zone)
+void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone)
 {
-  send_to_char(ch, "You do not have permission to edit zone %d.", zone);
-  if (char_get_olc_zone(ch) != NOWHERE)
-    send_to_char(ch, "  Try zone %d.", char_get_olc_zone(ch));
-  send_to_char(ch, "\r\n");
-  mudlog(LOG_BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
-         char_get_name(ch), zone, char_get_olc_zone(ch));
+  send_to_char(g, ch, "You do not have permission to edit zone %d.", zone);
+  if (char_get_olc_zone(g, ch) != NOWHERE)
+    send_to_char(g, ch, "  Try zone %d.", char_get_olc_zone(g, ch));
+  send_to_char(g, ch, "\r\n");
+  mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
+         char_get_name(ch), zone, char_get_olc_zone(g, ch));
 }

@@ -49,4 +49,4 @@ constexpr int APPLY_ALL_STATS   = 45; /* Apply to all attributes	*/
 
 constexpr int NUM_APPLIES = 46;
 
-extern const char *apply_types[NUM_APPLIES + 1];
+extern const char *const apply_types[NUM_APPLIES + 1];

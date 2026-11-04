@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 // functions
-void boot_social_messages(void);
-void free_social_messages(void);
+void boot_social_messages(GameWorld *g);
+void free_social_messages(GameWorld *g);
 void free_action(struct social_messg *mess);
-void free_command_list(void);
-void create_command_list(void);
+void free_command_list(GameWorld *g);
+void create_command_list(GameWorld *g);
 
 // commands
 ACMD(do_action);

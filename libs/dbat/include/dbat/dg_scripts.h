@@ -97,10 +97,7 @@ struct script_memory {
   struct script_memory *next;
 };
 
-extern struct index_data **trig_index;
 
-extern struct trig_data *trigger_list;
-extern trig_rnum top_of_trigt;
 
 #include "db.h"
 #include "genzon.h"
@@ -135,131 +132,131 @@ ACMD(do_mrecho);
 
 /* function prototypes from dg_triggers.c */
 
-void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
-void speech_mtrigger(char_data *actor, char *str);
-void speech_wtrigger(char_data *actor, char *str);
-void greet_memory_mtrigger(char_data *ch);
-bool greet_mtrigger(char_data *actor, int dir);
-int entry_mtrigger(char_data *ch);
-void entry_memory_mtrigger(char_data *ch);
-int enter_wtrigger(room_data *room, char_data *actor, int dir);
-int drop_otrigger(obj_data *obj, char_data *actor);
-void timer_otrigger(obj_data *obj);
-int get_otrigger(obj_data *obj, char_data *actor);
-int drop_wtrigger(obj_data *obj, char_data *actor);
-int give_otrigger(obj_data *obj, char_data *actor,
+void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
+void speech_mtrigger(GameWorld *g, char_data *actor, char *str);
+void speech_wtrigger(GameWorld *g, char_data *actor, char *str);
+void greet_memory_mtrigger(GameWorld *g, char_data *ch);
+bool greet_mtrigger(GameWorld *g, char_data *actor, int dir);
+int entry_mtrigger(GameWorld *g, char_data *ch);
+void entry_memory_mtrigger(GameWorld *g, char_data *ch);
+int enter_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
+int drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
+void timer_otrigger(GameWorld *g, obj_data *obj);
+int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
+int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor);
+int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor,
                   char_data *victim);
-int receive_mtrigger(char_data *ch, char_data *actor,
+int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
                      obj_data *obj);
-void bribe_mtrigger(char_data *ch, char_data *actor,
+void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
                     int amount);
-int wear_otrigger(obj_data *obj, char_data *actor, int where);
-int remove_otrigger(obj_data *obj, char_data *actor);
+int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where);
+int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
 
-bool command_mtrigger(char_data *actor, char *cmd, char *argument);
-bool command_otrigger(char_data *actor, char *cmd, char *argument);
-int command_wtrigger(char_data *actor, char *cmd, char *argument);
+bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
+bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
+int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
 
-int death_mtrigger(char_data *ch, char_data *actor);
-void fight_mtrigger(char_data *ch);
-void hitprcnt_mtrigger(char_data *ch);
+int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor);
+void fight_mtrigger(GameWorld *g, char_data *ch);
+void hitprcnt_mtrigger(GameWorld *g, char_data *ch);
 
-void random_mtrigger(char_data *ch);
-void random_otrigger(obj_data *obj);
-void random_wtrigger(room_data *ch);
-void reset_wtrigger(room_data *ch);
+void random_mtrigger(GameWorld *g, char_data *ch);
+void random_otrigger(GameWorld *g, obj_data *obj);
+void random_wtrigger(GameWorld *g, room_data *ch);
+void reset_wtrigger(GameWorld *g, room_data *ch);
 
-void load_mtrigger(char_data *ch);
-void load_otrigger(obj_data *obj);
+void load_mtrigger(GameWorld *g, char_data *ch);
+void load_otrigger(GameWorld *g, obj_data *obj);
 
-int cast_mtrigger(char_data *actor, char_data *ch, int spellnum);
-int cast_otrigger(char_data *actor, obj_data *obj, int spellnum);
-int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum);
+int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum);
+int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum);
+int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum);
 
-int leave_mtrigger(char_data *actor, int dir);
-int leave_wtrigger(room_data *room, char_data *actor, int dir);
-bool leave_otrigger(room_data *room, char_data *actor, int dir);
+int leave_mtrigger(GameWorld *g, char_data *actor, int dir);
+int leave_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
+bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
 
-int door_mtrigger(char_data *actor, int subcmd, int dir);
-int door_wtrigger(char_data *actor, int subcmd, int dir);
+int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
+int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
 
-int consume_otrigger(obj_data *obj, char_data *actor, int cmd);
+int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd);
 
-void time_mtrigger(char_data *ch);
-void time_otrigger(obj_data *obj);
-void time_wtrigger(room_data *room);
+void time_mtrigger(GameWorld *g, char_data *ch);
+void time_otrigger(GameWorld *g, obj_data *obj);
+void time_wtrigger(GameWorld *g, room_data *room);
 
 /* function prototypes from dg_scripts.c */
 char *str_str(char *cs, char *ct);
 int find_eq_pos_script(char *arg);
 bool can_wear_on_pos(struct obj_data *obj, int pos);
-struct char_data *find_char(long n);
-char_data *get_char(char *name);
-char_data *get_char_near_obj(obj_data *obj, char *name);
-char_data *get_char_in_room(room_data *room, char *name);
-obj_data *get_obj_near_obj(obj_data *obj, char *name);
-obj_data *get_obj(char *name);
-room_data *get_room(char *name);
-char_data *get_char_by_obj(obj_data *obj, char *name);
-char_data *get_char_by_room(room_data *room, char *name);
-obj_data *get_obj_by_obj(obj_data *obj, char *name);
+struct char_data *find_char(GameWorld *g, long n);
+char_data *get_char(GameWorld *g, char *name);
+char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name);
+char_data *get_char_in_room(GameWorld *g, room_data *room, char *name);
+obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name);
+obj_data *get_obj(GameWorld *g, char *name);
+room_data *get_room(GameWorld *g, char *name);
+char_data *get_char_by_obj(GameWorld *g, obj_data *obj, char *name);
+char_data *get_char_by_room(GameWorld *g, room_data *room, char *name);
+obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name);
 obj_data *get_obj_in_room(room_data *room, char *name);
-obj_data *get_obj_by_room(room_data *room, char *name);
-int trgvar_in_room(room_vnum vnum);
+obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name);
+int trgvar_in_room(GameWorld *g, room_vnum vnum);
 obj_data *get_obj_in_list(char *name, obj_data *list);
-obj_data *get_object_in_equip(char_data *ch, char *name);
-void script_trigger_check(void);
-void check_time_triggers(void);
-void find_uid_name(char *uid, char *name, size_t nlen);
-void do_sstat_room(struct char_data *ch, struct room_data *rm);
-void do_sstat_object(char_data *ch, obj_data *j);
-void do_sstat_character(char_data *ch, char_data *k);
-void add_trigger(struct script_data *sc, trig_data *t, int loc);
-void script_vlog(const char *format, va_list args) __attribute__((format(printf, 1, 0)));
-void script_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
+obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name);
+void script_trigger_check(GameWorld *g);
+void check_time_triggers(GameWorld *g);
+void find_uid_name(GameWorld *g, char *uid, char *name, size_t nlen);
+void do_sstat_room(GameWorld *g, struct char_data *ch, struct room_data *rm);
+void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j);
+void do_sstat_character(GameWorld *g, char_data *ch, char_data *k);
+void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc);
+void script_vlog(GameWorld *g, const char *format, va_list args) __attribute__((format(printf, 2, 0)));
+void script_log(GameWorld *g, const char *format, ...) __attribute__((format(printf, 2, 3)));
 char *matching_quote(char *p);
-struct room_data *dg_room_of_obj(struct obj_data *obj);
-void obj_command_interpreter(obj_data *obj, char *argument);
-void wld_command_interpreter(room_data *room, char *argument);
+struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj);
+void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument);
+void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
 
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
-int script_driver(void *go_adress, trig_data *trig, int type, int mode);
-trig_rnum real_trigger(trig_vnum vnum);
-void process_eval(void *go, struct script_data *sc, trig_data *trig,
+int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode);
+trig_rnum real_trigger(GameWorld *g, trig_vnum vnum);
+void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
 void read_saved_vars(struct char_data *ch);
-void save_char_vars(struct char_data *ch);
-void init_lookup_table(void);
-void add_to_lookup_table(long uid, int type, void *c);
-long dg_new_mob_uid(void);
-long dg_new_obj_uid(void);
-void dg_log_uid_stats(void);
-void remove_from_lookup_table(long uid);
+void save_char_vars(GameWorld *g, struct char_data *ch);
+void init_lookup_table(GameWorld *g);
+void add_to_lookup_table(GameWorld *g, long uid, int type, void *c);
+long dg_new_mob_uid(GameWorld *g);
+long dg_new_obj_uid(GameWorld *g);
+void dg_log_uid_stats(GameWorld *g);
+void remove_from_lookup_table(GameWorld *g, long uid);
 
 /* from dg_db_scripts.c */
-void parse_trigger(FILE *trig_f, trig_vnum nr);
-int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d);
-trig_data *read_trigger(trig_rnum nr);
+void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
+int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d);
+trig_data *read_trigger(GameWorld *g, trig_rnum nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
-void dg_read_trigger(FILE *fp, void *proto, int type);
-void dg_obj_trigger(char *line, struct obj_data *obj);
-void assign_triggers(void *i, int type);
+void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type);
+void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj);
+void assign_triggers(GameWorld *g, void *i, int type);
 
 /* From dg_variables.c */
 void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id);
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
-void var_subst(void *go, struct script_data *sc, trig_data *trig,
+void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf);
 
 /* From dg_handler.c */
 void free_varlist(struct trig_var_data *vd);
 struct script_data *dg_ensure_script(struct script_data **slot);
 bool remove_var(struct trig_var_data **var_list, char *name);
-void free_trigger(trig_data *trig);
-void extract_trigger(struct trig_data *trig);
-void extract_script(void *thing, int type);
+void free_trigger(GameWorld *g, trig_data *trig);
+void extract_trigger(GameWorld *g, struct trig_data *trig);
+void extract_script(GameWorld *g, void *thing, int type);
 void extract_script_mem(struct script_memory *sc);
 void free_proto_script(void *thing, int type);
 void copy_proto_script(void *source, void *dest, int type);
@@ -267,20 +264,20 @@ void delete_variables(const char *charname);
 void update_wait_events(struct room_data *to, struct room_data *from);
 
 /* from dg_comm.c */
-void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
-void send_to_zone(const char *messg, zone_rnum zone);
+void sub_write(GameWorld *g, char *arg, char_data *ch, int8_t find_invis, int targets);
+void send_to_zone(GameWorld *g, const char *messg, zone_rnum zone);
 
 /* from dg_misc.c */
-void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
+void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                 int type, char *cmd);
-void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
+void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
-bool valid_dg_target(char_data *ch, int bitvector);
-void script_damage(char_data *vict, int dam);
-extern const char *dg_door_fields[];
-bool dg_door_apply(room_data *rm, int dir, int field, char *value);
+bool valid_dg_target(GameWorld *g, char_data *ch, int bitvector);
+void script_damage(GameWorld *g, char_data *vict, int dam);
+extern const char *const dg_door_fields[];
+bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value);
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
+int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[]);
 
 /* from dg_objcmd.c */
 room_rnum obj_room(obj_data *obj);
@@ -292,10 +289,7 @@ room_rnum obj_room(obj_data *obj);
 /* See consts/triggers.h; allocate with dg_new_mob_uid()/dg_new_obj_uid(). */
 
 /* the virtual number of trigger t */
-static inline trig_vnum trig_get_vnum(const trig_data *t)
-{
-  return trig_index[t->nr]->vnum;
-}
+trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t);
 
 /* true if script sc exists and has a trigger of the given type */
 static inline bool script_has_type(const struct script_data *sc, bitvector_t type)
@@ -308,3 +302,33 @@ static inline bool trigger_ready(const trig_data *t, bitvector_t type)
 {
   return (t->trigger_type & type) && !t->depth;
 }
+
+/*
+ * The trigger currently being run by script_driver(), so errors can say which
+ * trigger, which entity and which line caused them. Everything is copied in
+ * because the owner may be purged while its script is still running.
+ */
+struct dg_run_ctx {
+  bool active;
+  long long trig_vnum;
+  char trig_name[64];
+  int owner_type;
+  char owner_name[64];
+  long long owner_vnum;
+  long owner_uid;
+  long long room_vnum;
+  char line[256];
+};
+
+/* find_char() helpers */
+// Must be power of 2
+constexpr int BUCKET_COUNT = 4096;
+// to recognize an empty bucket head; real UIDs are never negative
+constexpr long UID_OUT_OF_RANGE = -1;
+
+struct lookup_table_t {
+  long uid;
+  int type; /* MOB_TRIGGER for characters, OBJ_TRIGGER for objects */
+  void *c;
+  struct lookup_table_t *next;
+};

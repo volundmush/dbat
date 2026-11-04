@@ -51,5 +51,3 @@ struct room_data {
 };
 /* ====================================================================== */
 
-extern struct room_data *world;
-extern room_rnum top_of_world;

@@ -25,28 +25,26 @@ struct guild_data {
   int feats[NUM_FEATS_DEFINED];       /* array to keep track of which feats things we'll train */
 };
 
-extern struct guild_data *guild_index;
-extern guild_rnum top_guild;
 
 ACMD(do_teach);
 
 /* Functions defined in guild.c */
-int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);
-void levelup_parse(struct descriptor_data *d, char *arg);
+int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);
+void levelup_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);
-void show_guild(struct char_data *ch, char *arg);
-void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
-void list_skills(struct char_data *ch, char *arg);
-int count_guilds(guild_vnum low, guild_vnum high);
+void show_guild(GameWorld *g, struct char_data *ch, char *arg);
+void handle_ingest_learn(GameWorld *g, struct char_data *ch, struct char_data *vict);
+void list_skills(GameWorld *g, struct char_data *ch, char *arg);
+int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high);
 
 /*. External . */
 SPECIAL(guild);
 
 /* Trade restriction flags (TRADE_*) on a guild_data. */
 bool guild_trade_toggle(struct guild_data *rec, int flag);
-void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
-void assign_the_guilds(void);
-void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
-void destroy_guilds(void);
-void sort_spells(void);
+void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count);
+void assign_the_guilds(GameWorld *g);
+void list_guilds(GameWorld *g, struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
+void destroy_guilds(GameWorld *g);
+void sort_spells(GameWorld *g);

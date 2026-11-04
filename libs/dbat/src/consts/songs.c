@@ -1,6 +1,6 @@
 #include "dbat/consts/songs.h"
 
-const char *song_types[] = {
+const char *const song_types[] = {
     "\n",
     "Safety",
     "Shielding",

@@ -8,7 +8,7 @@
 // functions
 void racial_body_parts(struct char_data *ch);
 
-void set_height_and_weight_by_race(struct char_data *ch);
+void set_height_and_weight_by_race(GameWorld *g, struct char_data *ch);
 
 bool invalid_race(struct char_data *ch, struct obj_data *obj);
 
@@ -29,16 +29,16 @@ bool race_rpp_refund(int r);
 bool race_can_transform(int r);
 bool race_can_revert(int r);
 bool race_has_noisy_transformations(int r);
-bool race_check_can_transform(char_data *ch);
+bool race_check_can_transform(GameWorld *g, char_data *ch);
 int race_flag_to_tier(int flag);
 int race_current_trans_tier(const char_data *ch);
-transform_bonus race_current_form(char_data *ch);
+transform_bonus race_current_form(GameWorld *g, char_data *ch);
 bool race_find_form(char_data *ch, const char *arg, transform_bonus *out);
-bool race_check_trans_unlock(char_data *ch, int tier);
-void race_display_forms(char_data *ch);
-void race_display_trans_req(char_data *ch);
-void race_echo_transform(char_data *ch, int tier);
-void race_echo_revert(char_data *ch, int tier);
+bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier);
+void race_display_forms(GameWorld *g, char_data *ch);
+void race_display_trans_req(GameWorld *g, char_data *ch);
+void race_echo_transform(GameWorld *g, char_data *ch, int tier);
+void race_echo_revert(GameWorld *g, char_data *ch, int tier);
 
 const int64_t *race_soft_cap_table(const char_data *ch);
 softcap_type race_soft_cap_type(const char_data *ch);

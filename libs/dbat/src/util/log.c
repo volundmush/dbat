@@ -5,11 +5,12 @@
 #include <unistd.h>
 #include "dbat/room_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* log a death trap hit */
-void log_death_trap(struct char_data *ch)
+void log_death_trap(GameWorld *g, struct char_data *ch)
 {
-  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)), rroom_get_name(char_get_in_room(ch)));
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), rroom_get_name(g, char_get_in_room(ch)));
 }
 
 /* New variable argument log() function.  Works the same as the old for
@@ -47,7 +48,7 @@ void mud_log(const char *format, ...)
 
 /* mudlog -- log mud messages to a file & to online imm's syslogs
  * based on syslog by Fen Jul 3, 1992 */
-void mudlog(int type, int level, int file, const char *str, ...)
+void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
 {
   char buf[MAX_STRING_LENGTH];
   struct descriptor_data *i;
@@ -71,17 +72,17 @@ void mudlog(int type, int level, int file, const char *str, ...)
   va_end(args);
   strcat(buf, " ]\r\n"); /* strcat: OK */
 
-  for (i = descriptor_list; i; i = i->next) {
+  for (i = g->descriptors; i; i = i->next) {
     if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
     if (char_get_admlevel(i->character) < level)
       continue;
     if (char_plr_flagged(i->character, PLR_WRITING))
       continue;
-    if (type > (char_prf_flagged(i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(i->character, PRF_LOG2) ? 2 : 0))
+    if (type > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
-    send_to_char(i->character, "@g%s@n", buf);
+    send_to_char(g, i->character, "@g%s@n", buf);
   }
 }
 

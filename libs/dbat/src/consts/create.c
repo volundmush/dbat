@@ -1,6 +1,6 @@
 #include "dbat/consts/create.h"
 
-const char *creation_methods[NUM_CREATION_METHODS + 1] =
+const char *const creation_methods[NUM_CREATION_METHODS + 1] =
     {
         "[Standard - Random rolls, ordered assignment]",
         "[Player Assigned - Random rolls, player adjust to taste]",

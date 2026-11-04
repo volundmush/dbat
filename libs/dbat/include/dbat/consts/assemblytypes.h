@@ -15,4 +15,4 @@ constexpr int ASSM_FORGE    = 10; // Assembly must be forged.
 
 constexpr int MAX_ASSM = 11;
 
-extern const char *AssemblyTypes[MAX_ASSM + 1];
+extern const char *const AssemblyTypes[MAX_ASSM + 1];

@@ -433,10 +433,4 @@ struct char_data {
   int relax_count;
 };
 
-extern struct char_data *character_list;
-extern struct char_data *affect_list;
 
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern mob_rnum top_of_mobt;
-extern long max_mob_id;

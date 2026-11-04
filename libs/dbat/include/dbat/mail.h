@@ -37,11 +37,11 @@ constexpr int BLOCK_SIZE = 256;
 ***************************************************************************
 **   DON'T TOUCH DEFINES BELOW  */
 
-bool scan_file(void);
-bool has_mail(long recipient);
-void store_mail(long to, long from, char *message_pointer);
-void clear_free_list(void);
-void free_mail_index(void);
+bool scan_file(GameWorld *g);
+bool has_mail(GameWorld *g, long recipient);
+void store_mail(GameWorld *g, long to, long from, char *message_pointer);
+void clear_free_list(GameWorld *g);
+void free_mail_index(GameWorld *g);
 
 constexpr int HEADER_BLOCK  = (-1);
 constexpr int LAST_BLOCK    = (-2);
@@ -98,6 +98,6 @@ struct mail_index_type_d {
 };
 
 typedef struct mail_index_type_d mail_index_type;
-void notify_if_playing(struct char_data *from, int recipient_id);
+void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id);
 
 SPECIAL(postmaster);

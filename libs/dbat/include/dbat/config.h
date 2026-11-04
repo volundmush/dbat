@@ -137,97 +137,96 @@ struct config_data {
   struct creation_data creation;   /* char creation method	 */
 };
 
-extern struct config_data config_info;
 
 /*******************  Config macros *********************/
 
-#define CONFIG_CONFFILE config_info.CONFFILE
+#define CONFIG_CONFFILE g->config_info.CONFFILE
 
-#define CONFIG_PK_ALLOWED             config_info.play.pk_allowed
-#define CONFIG_PT_ALLOWED             config_info.play.pt_allowed
-#define CONFIG_LEVEL_CAN_SHOUT        config_info.play.level_can_shout
-#define CONFIG_HOLLER_MOVE_COST       config_info.play.holler_move_cost
-#define CONFIG_TUNNEL_SIZE            config_info.play.tunnel_size
-#define CONFIG_MAX_EXP_GAIN           config_info.play.max_exp_gain
-#define CONFIG_MAX_EXP_LOSS           config_info.play.max_exp_loss
-#define CONFIG_MAX_NPC_CORPSE_TIME    config_info.play.max_npc_corpse_time
-#define CONFIG_MAX_PC_CORPSE_TIME     config_info.play.max_pc_corpse_time
-#define CONFIG_IDLE_VOID              config_info.play.idle_void
-#define CONFIG_IDLE_RENT_TIME         config_info.play.idle_rent_time
-#define CONFIG_IDLE_MAX_LEVEL         config_info.play.idle_max_level
-#define CONFIG_DTS_ARE_DUMPS          config_info.play.dts_are_dumps
-#define CONFIG_LOAD_INVENTORY         config_info.play.load_into_inventory
-#define CONFIG_TRACK_T_DOORS          config_info.play.track_through_doors
-#define CONFIG_LEVEL_CAP              config_info.play.level_cap
-#define CONFIG_STACK_MOBS             config_info.play.stack_mobs
-#define CONFIG_STACK_OBJS             config_info.play.stack_objs
-#define CONFIG_MOB_FIGHTING           config_info.play.mob_fighting
-#define CONFIG_OK                     config_info.play.OK
-#define CONFIG_NOPERSON               config_info.play.NOPERSON
-#define CONFIG_NOEFFECT               config_info.play.NOEFFECT
-#define CONFIG_DISP_CLOSED_DOORS      config_info.play.disp_closed_doors
-#define CONFIG_REROLL_PLAYER_CREATION config_info.play.reroll_player
-#define CONFIG_INITIAL_POINTS_POOL    config_info.play.initial_points
-#define CONFIG_ENABLE_COMPRESSION     config_info.play.enable_compression
-#define CONFIG_ENABLE_LANGUAGES       config_info.play.enable_languages
-#define CONFIG_ALL_ITEMS_UNIQUE       config_info.play.all_items_unique
-#define CONFIG_EXP_MULTIPLIER         config_info.play.exp_multiplier
+#define CONFIG_PK_ALLOWED             g->config_info.play.pk_allowed
+#define CONFIG_PT_ALLOWED             g->config_info.play.pt_allowed
+#define CONFIG_LEVEL_CAN_SHOUT        g->config_info.play.level_can_shout
+#define CONFIG_HOLLER_MOVE_COST       g->config_info.play.holler_move_cost
+#define CONFIG_TUNNEL_SIZE            g->config_info.play.tunnel_size
+#define CONFIG_MAX_EXP_GAIN           g->config_info.play.max_exp_gain
+#define CONFIG_MAX_EXP_LOSS           g->config_info.play.max_exp_loss
+#define CONFIG_MAX_NPC_CORPSE_TIME    g->config_info.play.max_npc_corpse_time
+#define CONFIG_MAX_PC_CORPSE_TIME     g->config_info.play.max_pc_corpse_time
+#define CONFIG_IDLE_VOID              g->config_info.play.idle_void
+#define CONFIG_IDLE_RENT_TIME         g->config_info.play.idle_rent_time
+#define CONFIG_IDLE_MAX_LEVEL         g->config_info.play.idle_max_level
+#define CONFIG_DTS_ARE_DUMPS          g->config_info.play.dts_are_dumps
+#define CONFIG_LOAD_INVENTORY         g->config_info.play.load_into_inventory
+#define CONFIG_TRACK_T_DOORS          g->config_info.play.track_through_doors
+#define CONFIG_LEVEL_CAP              g->config_info.play.level_cap
+#define CONFIG_STACK_MOBS             g->config_info.play.stack_mobs
+#define CONFIG_STACK_OBJS             g->config_info.play.stack_objs
+#define CONFIG_MOB_FIGHTING           g->config_info.play.mob_fighting
+#define CONFIG_OK                     g->config_info.play.OK
+#define CONFIG_NOPERSON               g->config_info.play.NOPERSON
+#define CONFIG_NOEFFECT               g->config_info.play.NOEFFECT
+#define CONFIG_DISP_CLOSED_DOORS      g->config_info.play.disp_closed_doors
+#define CONFIG_REROLL_PLAYER_CREATION g->config_info.play.reroll_player
+#define CONFIG_INITIAL_POINTS_POOL    g->config_info.play.initial_points
+#define CONFIG_ENABLE_COMPRESSION     g->config_info.play.enable_compression
+#define CONFIG_ENABLE_LANGUAGES       g->config_info.play.enable_languages
+#define CONFIG_ALL_ITEMS_UNIQUE       g->config_info.play.all_items_unique
+#define CONFIG_EXP_MULTIPLIER         g->config_info.play.exp_multiplier
 
 /** Crash Saves **/
-#define CONFIG_FREE_RENT     config_info.csd.free_rent
-#define CONFIG_MAX_OBJ_SAVE  config_info.csd.max_obj_save
-#define CONFIG_MIN_RENT_COST config_info.csd.min_rent_cost
-#define CONFIG_AUTO_SAVE     config_info.csd.auto_save
-#define CONFIG_AUTOSAVE_TIME config_info.csd.autosave_time
-#define CONFIG_CRASH_TIMEOUT config_info.csd.crash_file_timeout
-#define CONFIG_RENT_TIMEOUT  config_info.csd.rent_file_timeout
+#define CONFIG_FREE_RENT     g->config_info.csd.free_rent
+#define CONFIG_MAX_OBJ_SAVE  g->config_info.csd.max_obj_save
+#define CONFIG_MIN_RENT_COST g->config_info.csd.min_rent_cost
+#define CONFIG_AUTO_SAVE     g->config_info.csd.auto_save
+#define CONFIG_AUTOSAVE_TIME g->config_info.csd.autosave_time
+#define CONFIG_CRASH_TIMEOUT g->config_info.csd.crash_file_timeout
+#define CONFIG_RENT_TIMEOUT  g->config_info.csd.rent_file_timeout
 
 /** Room Numbers **/
-#define CONFIG_MORTAL_START   config_info.room_nums.mortal_start_room
-#define CONFIG_IMMORTAL_START config_info.room_nums.immort_start_room
-#define CONFIG_FROZEN_START   config_info.room_nums.frozen_start_room
-#define CONFIG_DON_ROOM_1     config_info.room_nums.donation_room_1
-#define CONFIG_DON_ROOM_2     config_info.room_nums.donation_room_2
-#define CONFIG_DON_ROOM_3     config_info.room_nums.donation_room_3
-#define CONFIG_DEATH_START    config_info.room_nums.death_start_room
+#define CONFIG_MORTAL_START   g->config_info.room_nums.mortal_start_room
+#define CONFIG_IMMORTAL_START g->config_info.room_nums.immort_start_room
+#define CONFIG_FROZEN_START   g->config_info.room_nums.frozen_start_room
+#define CONFIG_DON_ROOM_1     g->config_info.room_nums.donation_room_1
+#define CONFIG_DON_ROOM_2     g->config_info.room_nums.donation_room_2
+#define CONFIG_DON_ROOM_3     g->config_info.room_nums.donation_room_3
+#define CONFIG_DEATH_START    g->config_info.room_nums.death_start_room
 
 /** Game Operation **/
-#define CONFIG_DFLT_PORT    config_info.operation.DFLT_PORT
-#define CONFIG_DFLT_IP      config_info.operation.DFLT_IP
-#define CONFIG_MAX_PLAYING  config_info.operation.max_playing
-#define CONFIG_MAX_FILESIZE config_info.operation.max_filesize
-#define CONFIG_MAX_BAD_PWS  config_info.operation.max_bad_pws
-#define CONFIG_SITEOK_ALL   config_info.operation.siteok_everyone
-#define CONFIG_OLC_SAVE     config_info.operation.auto_save_olc
-#define CONFIG_NEW_SOCIALS  config_info.operation.use_new_socials
-#define CONFIG_NS_IS_SLOW   config_info.operation.nameserver_is_slow
-#define CONFIG_DFLT_DIR     config_info.operation.DFLT_DIR
-#define CONFIG_LOGNAME      config_info.operation.LOGNAME
-#define CONFIG_MENU         config_info.operation.MENU
-#define CONFIG_WELC_MESSG   config_info.operation.WELC_MESSG
-#define CONFIG_START_MESSG  config_info.operation.START_MESSG
+#define CONFIG_DFLT_PORT    g->config_info.operation.DFLT_PORT
+#define CONFIG_DFLT_IP      g->config_info.operation.DFLT_IP
+#define CONFIG_MAX_PLAYING  g->config_info.operation.max_playing
+#define CONFIG_MAX_FILESIZE g->config_info.operation.max_filesize
+#define CONFIG_MAX_BAD_PWS  g->config_info.operation.max_bad_pws
+#define CONFIG_SITEOK_ALL   g->config_info.operation.siteok_everyone
+#define CONFIG_OLC_SAVE     g->config_info.operation.auto_save_olc
+#define CONFIG_NEW_SOCIALS  g->config_info.operation.use_new_socials
+#define CONFIG_NS_IS_SLOW   g->config_info.operation.nameserver_is_slow
+#define CONFIG_DFLT_DIR     g->config_info.operation.DFLT_DIR
+#define CONFIG_LOGNAME      g->config_info.operation.LOGNAME
+#define CONFIG_MENU         g->config_info.operation.MENU
+#define CONFIG_WELC_MESSG   g->config_info.operation.WELC_MESSG
+#define CONFIG_START_MESSG  g->config_info.operation.START_MESSG
 
 /** Autowiz **/
-#define CONFIG_USE_AUTOWIZ     config_info.autowiz.use_autowiz
-#define CONFIG_MIN_WIZLIST_LEV config_info.autowiz.min_wizlist_lev
+#define CONFIG_USE_AUTOWIZ     g->config_info.autowiz.use_autowiz
+#define CONFIG_MIN_WIZLIST_LEV g->config_info.autowiz.min_wizlist_lev
 
 /** Character Advancement **/
-#define CONFIG_ALLOW_MULTICLASS config_info.advance.allow_multiclass
-#define CONFIG_ALLOW_PRESTIGE   config_info.advance.allow_prestige
+#define CONFIG_ALLOW_MULTICLASS g->config_info.advance.allow_multiclass
+#define CONFIG_ALLOW_PRESTIGE   g->config_info.advance.allow_prestige
 
 /** For tick system **/
-#define CONFIG_PULSE_VIOLENCE config_info.ticks.pulse_violence
-#define CONFIG_PULSE_MOBILE   config_info.ticks.pulse_mobile
-#define CONFIG_PULSE_ZONE     config_info.ticks.pulse_zone
-#define CONFIG_PULSE_AUTOSAVE config_info.ticks.pulse_autosave
-#define CONFIG_PULSE_IDLEPWD  config_info.ticks.pulse_idlepwd
-#define CONFIG_PULSE_SANITY   config_info.ticks.pulse_sanity
-#define CONFIG_PULSE_USAGE    config_info.ticks.pulse_usage
-#define CONFIG_PULSE_TIMESAVE config_info.ticks.pulse_timesave
-#define CONFIG_PULSE_CURRENT  config_info.ticks.pulse_current
+#define CONFIG_PULSE_VIOLENCE g->config_info.ticks.pulse_violence
+#define CONFIG_PULSE_MOBILE   g->config_info.ticks.pulse_mobile
+#define CONFIG_PULSE_ZONE     g->config_info.ticks.pulse_zone
+#define CONFIG_PULSE_AUTOSAVE g->config_info.ticks.pulse_autosave
+#define CONFIG_PULSE_IDLEPWD  g->config_info.ticks.pulse_idlepwd
+#define CONFIG_PULSE_SANITY   g->config_info.ticks.pulse_sanity
+#define CONFIG_PULSE_USAGE    g->config_info.ticks.pulse_usage
+#define CONFIG_PULSE_TIMESAVE g->config_info.ticks.pulse_timesave
+#define CONFIG_PULSE_CURRENT  g->config_info.ticks.pulse_current
 
 /** Character Creation Method **/
-#define CONFIG_CREATION_METHOD config_info.creation.method
+#define CONFIG_CREATION_METHOD g->config_info.creation.method
 
 #include "dbat/consts/types.h"
 #include "dbat/consts/maximums.h"
@@ -236,61 +235,49 @@ extern struct config_data config_info;
 /* GAME PLAY OPTIONS */
 
 // global variables
-extern int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;
-extern int mob_specials_used, number_of_assassins, TOPLOADED;
+extern const int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;
 
-extern char *topname[25];
-extern int64_t toppoint[25];
 
-extern int ERAPLAYERS, TOPCOUNTDOWN, HEDITS, WISHTIME, TOP_OF_NEWS, LASTNEWS;
 
-extern time_t BOARDNEWMORT, BOARDNEWIMM, BOARDNEWCOD, BOARDNEWDUO, BOARDNEWBUI, NEWSUPDATE;
-extern time_t INTERESTTIME, LASTINTEREST, LASTPAYOUT;
-extern int LASTPAYTYPE;
 
-extern int SAIYAN_ALLOWED, MAJIN_ALLOWED, MOON_UP, PCOUNT, HIGHPCOUNT;
-extern time_t PCOUNTDATE, PCOUNTDAY;
 
-extern int SELFISHMETER;
-extern room_vnum SHADOW_DRAGON1, SHADOW_DRAGON2, SHADOW_DRAGON3, SHADOW_DRAGON4, SHADOW_DRAGON5;
-extern room_vnum SHADOW_DRAGON6, SHADOW_DRAGON7;
 
-extern int tunnel_size, max_exp_gain, max_exp_loss, max_npc_corpse_time, max_pc_corpse_time;
+extern const int tunnel_size, max_exp_gain, max_exp_loss, max_npc_corpse_time, max_pc_corpse_time;
 
-extern int idle_void, idle_rent_time, idle_max_level, dts_are_dumps, pulse_violence;
+extern const int idle_void, idle_rent_time, idle_max_level, dts_are_dumps, pulse_violence;
 
-extern int pulse_zone, pulse_mobile, pulse_autosave, pulse_idlepwd, pulse_sanity, pulse_usage;
-extern int pulse_timesave, pulse_current, load_into_inventory;
+extern const int pulse_zone, pulse_mobile, pulse_autosave, pulse_idlepwd, pulse_sanity, pulse_usage;
+extern const int pulse_timesave, pulse_current, load_into_inventory;
 
-extern const char *OK, *NOPERSON, *NOEFFECT;
+extern const char *const OK, *const NOPERSON, *const NOEFFECT;
 
-extern int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
+extern const int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
 
-extern int imt_is_enabled, free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
+extern int imt_is_enabled;
+extern const int free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
 
-extern int auto_pwipe, selfdelete_fastwipe;
+extern const int auto_pwipe, selfdelete_fastwipe;
 
 extern const struct pclean_criteria_data pclean_criteria[7];
 
-extern room_vnum mortal_start_room, immort_start_room, frozen_start_room;
+extern const room_vnum mortal_start_room, immort_start_room, frozen_start_room;
 
-extern room_vnum donation_room_1, donation_room_2, donation_room_3;
+extern const room_vnum donation_room_1, donation_room_2, donation_room_3;
 
-extern int bitwarning, bitsavetodisk;
+extern const int bitwarning, bitsavetodisk;
 
-extern uint16_t DFLT_PORT;
+extern const uint16_t DFLT_PORT;
 
-extern const char *DFLT_IP, *DFLT_DIR, *LOGNAME, *MENU, *WELC_MESSG, *START_MESSG;
+extern const char *const DFLT_IP, *const DFLT_DIR, *const LOGNAME, *const MENU, *const WELC_MESSG, *const START_MESSG;
 
-extern int max_playing, max_filesize, max_bad_pws, siteok_everyone, nameserver_is_slow;
+extern const int max_playing, max_filesize, max_bad_pws, siteok_everyone, nameserver_is_slow;
 
-extern int auto_save_olc, use_new_socials, use_autowiz, min_wizlist_lev, initial_points;
+extern const int auto_save_olc, use_new_socials, use_autowiz, min_wizlist_lev, initial_points;
 
-extern obj_vnum portal_object;
+extern const obj_vnum portal_object;
 
-extern int disp_closed_doors, reroll_status, allow_multiclass, allow_prestige;
+extern const int disp_closed_doors, reroll_status, allow_multiclass, allow_prestige;
 
-extern int enable_compression, enable_languages, all_items_unique, method;
+extern const int enable_compression, enable_languages, all_items_unique, method;
 
-extern float exp_multiplier;
-extern int crash_file_timeout, rent_file_timeout;
+extern const int crash_file_timeout, rent_file_timeout;

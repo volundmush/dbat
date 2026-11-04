@@ -5,8 +5,8 @@ constexpr int CONFIG_IMPROVED_EDITOR = 1;
 
 constexpr int using_improved_editor = CONFIG_IMPROVED_EDITOR;
 
-int improved_editor_execute(struct descriptor_data *d, char *string);
-void send_editor_help(struct descriptor_data *d);
+int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *string);
+void send_editor_help(GameWorld *g, struct descriptor_data *d);
 
 /*
  * Action modes for parse_edit_action().

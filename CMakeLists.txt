@@ -12,5 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(BUILD_TESTING OFF)
 
+enable_testing()
+
 add_subdirectory(libs/dbat)
 add_subdirectory(apps/server)

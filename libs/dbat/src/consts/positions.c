@@ -1,7 +1,7 @@
 #include "dbat/consts/positions.h"
 
 /* POS_x */
-const char *position_types[NUM_POSITIONS + 1] = {
+const char *const position_types[NUM_POSITIONS + 1] = {
     "Dead",
     "Mortally wounded",
     "Incapacitated",

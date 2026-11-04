@@ -10,7 +10,7 @@ static bool flag_test(const bitvector_t bitvector[], int flag)
   return (bitvector[array_pos] & (1u << bit_pos)) != 0;
 }
 
-size_t sprintbit(bitvector_t bitvector, const char *names[], char *result, size_t reslen)
+size_t sprintbit(bitvector_t bitvector, const char *const names[], char *result, size_t reslen)
 {
   if (reslen == 0) {
     return 0;
@@ -48,7 +48,7 @@ size_t sprintbit(bitvector_t bitvector, const char *names[], char *result, size_
   return len;
 }
 
-size_t sprinttype(int type, const char *names[], char *result, size_t reslen)
+size_t sprinttype(int type, const char *const names[], char *result, size_t reslen)
 {
   int nr = 0;
 
@@ -61,7 +61,7 @@ size_t sprinttype(int type, const char *names[], char *result, size_t reslen)
   return strlcpy(result, name, reslen);
 }
 
-size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result, size_t reslen)
+size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar, char *result, size_t reslen)
 {
   if (reslen == 0) {
     return 0;
@@ -104,7 +104,7 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, c
   return len;
 }
 
-int get_flag_by_name(const char *flag_list[], char *flag_name)
+int get_flag_by_name(const char *const flag_list[], char *flag_name)
 {
   int i = 0;
   for (; flag_list[i] && *flag_list[i] && strcmp(flag_list[i], "\n") != 0; i++)

@@ -86,4 +86,4 @@ constexpr int NUM_AFF_FLAGS = 79;
 
 constexpr int AF_ARRAY_MAX = 4;
 
-extern const char *affected_bits[NUM_AFF_FLAGS + 1];
+extern const char *const affected_bits[NUM_AFF_FLAGS + 1];

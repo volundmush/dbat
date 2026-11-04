@@ -97,10 +97,10 @@ constexpr int PHASE_GUARDIAN  = 4;
 constexpr int PHASE_LOVE      = 5;
 constexpr int PHASE_STRENGTH  = 6;
 
-extern const char *hairl_types[];
-extern const char *eye_types[];
-extern const char *FHA_types[];
-extern const char *hairc_types[];
-extern const char *hairs_types[];
-extern const char *skin_types[];
-extern const char *aura_types[];
+extern const char *const hairl_types[];
+extern const char *const eye_types[];
+extern const char *const FHA_types[];
+extern const char *const hairc_types[];
+extern const char *const hairs_types[];
+extern const char *const skin_types[];
+extern const char *const aura_types[];

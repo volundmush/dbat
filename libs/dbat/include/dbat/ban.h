@@ -17,15 +17,15 @@ struct ban_list_element {
   struct ban_list_element *next;
 };
 
-extern struct ban_list_element *ban_list;
-extern int num_invalid;
 
-void load_banned(void);
-int isbanned(char *hostname);
-void Free_Invalid_List(void);
-void free_ban_list(void);
-bool Valid_Name(char *newname);
-void Read_Invalid_List(void);
+void load_banned(GameWorld *g);
+int isbanned(GameWorld *g, char *hostname);
+void Free_Invalid_List(GameWorld *g);
+void free_ban_list(GameWorld *g);
+bool Valid_Name(GameWorld *g, char *newname);
+void Read_Invalid_List(GameWorld *g);
 
 ACMD(do_ban);
 ACMD(do_unban);
+
+constexpr int MAX_INVALID_NAMES = 200;

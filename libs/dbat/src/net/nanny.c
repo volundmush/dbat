@@ -32,16 +32,17 @@
 #include <unistd.h>
 #include "nanny_internal.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
-static void payout(int num);
+static void payout(GameWorld *g, int num);
 
 /* Recounts the players online (above level 3) and updates the all-time record.
    Returns the record as it stood before the count raised it. */
-static int update_player_count(void)
+static int update_player_count(GameWorld *g)
 {
-  int count = 0, oldcount = HIGHPCOUNT;
+  int count = 0, oldcount = g->HIGHPCOUNT;
 
-  for (struct descriptor_data *kd = descriptor_list; kd; kd = kd->next) {
+  for (struct descriptor_data *kd = g->descriptors; kd; kd = kd->next) {
     if (!kd->character) {
       continue;
     }
@@ -49,30 +50,30 @@ static int update_player_count(void)
       count += 1;
     }
 
-    if (count > PCOUNT) {
-      PCOUNT = count;
+    if (count > g->PCOUNT) {
+      g->PCOUNT = count;
     }
 
-    if (PCOUNT >= HIGHPCOUNT) {
-      oldcount   = HIGHPCOUNT;
-      HIGHPCOUNT = PCOUNT;
-      PCOUNTDATE = time(0);
+    if (g->PCOUNT >= g->HIGHPCOUNT) {
+      oldcount   = g->HIGHPCOUNT;
+      g->HIGHPCOUNT = g->PCOUNT;
+      g->PCOUNTDATE = time(0);
     }
   }
   return oldcount;
 }
 
 /* RPP rewards for a player count near, at, or above the record. */
-static void pay_player_count_rewards(int oldcount)
+static void pay_player_count_rewards(GameWorld *g, int oldcount)
 {
-  if (PCOUNT < HIGHPCOUNT && PCOUNT >= HIGHPCOUNT - 4) {
-    payout(0);
+  if (g->PCOUNT < g->HIGHPCOUNT && g->PCOUNT >= g->HIGHPCOUNT - 4) {
+    payout(g, 0);
   }
-  if (PCOUNT == HIGHPCOUNT) {
-    payout(1);
+  if (g->PCOUNT == g->HIGHPCOUNT) {
+    payout(g, 1);
   }
-  if (PCOUNT > oldcount) {
-    payout(2);
+  if (g->PCOUNT > oldcount) {
+    payout(g, 2);
   }
 }
 
@@ -101,7 +102,7 @@ constexpr int USURP    = 2;
 constexpr int UNSWITCH = 3;
 
 /* This function seems a bit over-extended. */
-static bool perform_dupe_check(struct descriptor_data *d)
+static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
 {
   struct descriptor_data *k, *next_k;
   struct char_data *target = nullptr, *ch, *next_ch;
@@ -113,7 +114,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
    * other descriptors controlling a character with the same ID number.
    */
 
-  for (k = descriptor_list; k; k = next_k) {
+  for (k = g->descriptors; k; k = next_k) {
     next_k = k->next;
 
     if (k == d)
@@ -122,7 +123,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
     if (k->original && (char_get_idnum(k->original) == id)) {
       /* Original descriptor was switched, booting it and restoring normal body control. */
 
-      write_to_output(d, "\r\nMultiple login detected -- disconnecting.\r\n");
+      write_to_output(g, d, "\r\nMultiple login detected -- disconnecting.\r\n");
       desc_set_connected(k, CON_CLOSE);
       if (!target) {
         target = k->original;
@@ -135,12 +136,12 @@ static bool perform_dupe_check(struct descriptor_data *d)
     } else if (k->character && char_get_idnum(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
 
-      do_return(k->character, nullptr, 0, 0);
+      do_return(g, k->character, nullptr, 0, 0);
     } else if (k->character && char_get_idnum(k->character) == id) {
       /* Character taking over their own body. */
 
       if (!target && desc_get_connected(k) == CON_PLAYING) {
-        write_to_output(k, "\r\nThis body has been usurped!\r\n");
+        write_to_output(g, k, "\r\nThis body has been usurped!\r\n");
         if (k->snoop_by) {
           k->snoop_by->snooping = d;
           d->snoop_by           = k->snoop_by;
@@ -152,7 +153,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
       char_set_desc(k->character, nullptr);
       k->character       = nullptr;
       k->original        = nullptr;
-      write_to_output(k, "\r\nMultiple login detected -- disconnecting.\r\n");
+      write_to_output(g, k, "\r\nMultiple login detected -- disconnecting.\r\n");
       desc_set_connected(k, CON_CLOSE);
     }
   }
@@ -166,7 +167,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
   * duplicates, though theoretically none should be able to exist).
   */
 
-  for (ch = character_list; ch; ch = next_ch) {
+  for (ch = g->characters; ch; ch = next_ch) {
     next_ch = char_get_next(ch);
 
     if (char_is_npc(ch))
@@ -191,9 +192,9 @@ static bool perform_dupe_check(struct descriptor_data *d)
 
     /* we've found a duplicate - blow him away, dumping his eq in limbo. */
     if (char_get_in_room(ch) != NOWHERE)
-      char_from_room(ch);
-    char_to_room(ch, 1);
-    extract_char(ch);
+      char_from_room(g, ch);
+    char_to_room(g, ch, 1);
+    extract_char(g, ch);
   }
 
   /* no target for switching into was found - allow login to continue */
@@ -201,7 +202,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
     return false;
 
   /* Okay, we've found a target.  Connect d to target. */
-  free_char(d->character); /* get rid of the old char */
+  free_char(g, d->character); /* get rid of the old char */
   d->character        = target;
   char_set_desc(d->character, d);
   d->original         = nullptr;
@@ -213,44 +214,44 @@ static bool perform_dupe_check(struct descriptor_data *d)
 
   switch (mode) {
     case RECON:
-      write_to_output(d, "Reconnecting.\r\n");
-      pay_player_count_rewards(update_player_count());
+      write_to_output(g, d, "Reconnecting.\r\n");
+      pay_player_count_rewards(g, update_player_count(g));
       char_set_time_logon(d->character, time(0));
-      act("$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
-      mudlog(LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      act(g, "$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
+      mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       char_set_rp(d->character, d->rpp);
-      if (has_mail(char_get_idnum(d->character)))
-        write_to_output(d, "You have mail waiting.\r\n");
-      board_login_notices(d->character);
-      if (NEWSUPDATE > char_get_lastpl(d->character))
-        send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
+      if (has_mail(g, char_get_idnum(d->character)))
+        write_to_output(g, d, "You have mail waiting.\r\n");
+      board_login_notices(g, d->character);
+      if (g->NEWSUPDATE > char_get_lastpl(d->character))
+        send_to_char(g, d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", g->LASTNEWS);
 
-      if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {
-        int diff = (LASTINTEREST - char_get_lastint(d->character));
+      if (g->LASTINTEREST != 0 && g->LASTINTEREST > char_get_lastint(d->character)) {
+        int diff = (g->LASTINTEREST - char_get_lastint(d->character));
         int days = MAX(1, MIN(3, diff / 86400)); /* one to three days' interest, as at login */
-        char_set_lastint(d->character, LASTINTEREST);
+        char_set_lastint(d->character, g->LASTINTEREST);
         int base_interest = char_get_bank_interest(d->character);
         if (base_interest) {
           int total_interest = base_interest * days;
           char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (total_interest));
-          send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
+          send_to_char(g, d->character, "Interest happened while you were away, %d times.\r\n"
                                      "@cBank Interest@D: @Y%s@n\r\n",
                        days, add_commas(total_interest));
         }
       }
       break;
     case USURP:
-      write_to_output(d, "You take over your own body, already in use!\r\n");
-      act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
+      write_to_output(g, d, "You take over your own body, already in use!\r\n");
+      act(g, "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
           "$n's body has been taken over by a new spirit!",
           true, d->character, 0, 0, TO_ROOM);
       char_set_rp(d->character, d->rpp);
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), true,
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true,
              "%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
       break;
     case UNSWITCH:
-      write_to_output(d, "Reconnecting to unswitched char.");
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      write_to_output(g, d, "Reconnecting to unswitched char.");
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       break;
   }
 
@@ -258,43 +259,43 @@ static bool perform_dupe_check(struct descriptor_data *d)
 }
 
 /* load the player, put them in the right room - used by copyover_recover too */
-int enter_player_game(struct descriptor_data *d)
+int enter_player_game(GameWorld *g, struct descriptor_data *d)
 {
   int load_result;
   IDXTYPE load_room;
   struct char_data *check;
 
-  reset_char(d->character);
-  read_aliases(d->character);
+  reset_char(g, d->character);
+  read_aliases(g, d->character);
 
   racial_body_parts(d->character);
 
   if (char_plr_flagged(d->character, PLR_INVSTART))
-    char_set_invis_level(d->character, char_get_level(d->character));
+    char_set_invis_level(g, d->character, char_get_level(d->character));
 
   /*
        * We have to place the character in a room before equipping them
        * or equip_char() will gripe about the person in NOWHERE.
        */
 
-  if ((load_room = char_get_load_room(d->character)) != NOWHERE)
-    load_room = real_room(load_room);
+  if ((load_room = char_get_load_room(g, d->character)) != NOWHERE)
+    load_room = real_room(g, load_room);
 
   /* If char was saved with NOWHERE, or real_room above failed... */
   if (load_room == NOWHERE) {
     if (char_get_admlevel(d->character))
-      load_room = real_room(CONFIG_IMMORTAL_START);
+      load_room = real_room(g, CONFIG_IMMORTAL_START);
     else
-      load_room = real_room(CONFIG_MORTAL_START);
+      load_room = real_room(g, CONFIG_MORTAL_START);
   }
 
   if (char_plr_flagged(d->character, PLR_FROZEN))
-    load_room = real_room(CONFIG_FROZEN_START);
+    load_room = real_room(g, CONFIG_FROZEN_START);
 
-  char_set_next(d->character, character_list);
-  character_list     = d->character;
-  char_to_room(d->character, load_room);
-  load_result = Crash_load(d->character);
+  char_set_next(d->character, g->characters);
+  g->characters     = d->character;
+  char_to_room(g, d->character, load_room);
+  load_result = Crash_load(g, d->character);
   if (char_get_player_specials(d->character)->host) {
     free(char_get_player_specials(d->character)->host);
     char_get_player_specials(d->character)->host = nullptr;
@@ -302,18 +303,18 @@ int enter_player_game(struct descriptor_data *d)
   char_get_player_specials(d->character)->host = strdup(d->host);
   char_set_id(d->character, char_get_idnum(d->character));
   /* find_char helper */
-  add_to_lookup_table(char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
+  add_to_lookup_table(g, char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
-  for (check = character_list; check; check = char_get_next(check))
+  for (check = g->characters; check; check = char_get_next(check))
     if (!char_get_master(check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
         char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
-      add_follower(check, d->character);
-  save_char(d->character);
+      add_follower(g, check, d->character);
+  save_char(g, d->character);
 
   if (d->customfile != 1) {
     customCreate(d);
-    userWrite(d, 0, 0, 0, "index");
+    userWrite(g, d, 0, 0, 0, "index");
   }
 
   if (char_plr_flagged(d->character, PLR_RARM)) {
@@ -369,7 +370,7 @@ int enter_player_game(struct descriptor_data *d)
     }
   }
   if (char_aff_flagged(d->character, AFF_HAYASA)) {
-    char_set_speedboost(d->character, char_get_speedcalc(d->character) * 0.5);
+    char_set_speedboost(d->character, char_get_speedcalc(g, d->character) * 0.5);
   } else {
     char_set_speedboost(d->character, 0);
   }
@@ -377,8 +378,8 @@ int enter_player_game(struct descriptor_data *d)
     char_set_trp(d->character, char_get_rp(d->character));
   }
 
-  if (char_is_namek(d->character) && char_get_conditions(d->character, HUNGER) >= 0) {
-    char_set_conditions(d->character, HUNGER, -1);
+  if (char_is_namek(d->character) && char_get_conditions(g, d->character, HUNGER) >= 0) {
+    char_set_conditions(g, d->character, HUNGER, -1);
   }
 
   if (char_plr_flagged(d->character, PLR_HEALT)) {
@@ -388,7 +389,7 @@ int enter_player_game(struct descriptor_data *d)
   if (readIntro(d->character, d->character) == 2) {
     introCreate(d->character);
   }
-  if (read_sense_memory(d->character, d->character) == 2) {
+  if (read_sense_memory(g, d->character, d->character) == 2) {
     senseCreate(d->character);
   }
   if (char_get_admlevel(d->character) > 0) {
@@ -397,23 +398,23 @@ int enter_player_game(struct descriptor_data *d)
 
   char_set_rp(d->character, d->rpp);
   char_set_rbank(d->character, d->rbank);
-  if (char_moon_ok(d->character)) {
-    oozaru_transform(d->character);
+  if (char_moon_ok(g, d->character)) {
+    oozaru_transform(g, d->character);
   } else {
-    oozaru_revert(d->character);
+    oozaru_revert(g, d->character);
   }
   if (char_is_hoshijin(d->character)) {
-    if (time_info.day <= 14) {
-      star_phase(d->character, 1);
-    } else if (time_info.day <= 21) {
-      star_phase(d->character, 2);
+    if (g->time_info.day <= 14) {
+      star_phase(g, d->character, 1);
+    } else if (g->time_info.day <= 21) {
+      star_phase(g, d->character, 2);
     } else {
-      star_phase(d->character, 0);
+      star_phase(g, d->character, 0);
     }
   }
 
   if (char_is_icer(d->character) && !char_get_skill(d->character, SKILL_TAILWHIP)) {
-    int numb = rand_number(20, 30);
+    int numb = rand_number(g, 20, 30);
     char_set_skills_base(d->character, SKILL_TAILWHIP, numb);
   } else if (!char_is_icer(d->character) && char_get_skill(d->character, SKILL_TAILWHIP)) {
     char_set_skills_base(d->character, SKILL_TAILWHIP, 0);
@@ -432,88 +433,88 @@ int enter_player_game(struct descriptor_data *d)
   return load_result;
 }
 
-static void payout(int num)
+static void payout(GameWorld *g, int num)
 {
   struct descriptor_data *k;
-  if (LASTPAYOUT == 0) {
-    LASTPAYOUT  = time(0) + 86400;
-    LASTPAYTYPE = num;
-  } else if (num > LASTPAYTYPE) {
-    LASTPAYOUT  = time(0) + 86400;
-    LASTPAYTYPE = num;
-  } else if (LASTPAYOUT <= time(0)) {
-    LASTPAYOUT  = time(0) + 86400;
-    LASTPAYTYPE = num;
+  if (g->LASTPAYOUT == 0) {
+    g->LASTPAYOUT  = time(0) + 86400;
+    g->LASTPAYTYPE = num;
+  } else if (num > g->LASTPAYTYPE) {
+    g->LASTPAYOUT  = time(0) + 86400;
+    g->LASTPAYTYPE = num;
+  } else if (g->LASTPAYOUT <= time(0)) {
+    g->LASTPAYOUT  = time(0) + 86400;
+    g->LASTPAYTYPE = num;
   }
-  for (k = descriptor_list; k; k = k->next) {
-    if (desc_is_playing(k) && char_get_admlevel(k->character) <= 0 && char_get_rewtime(k->character) < LASTPAYOUT) {
+  for (k = g->descriptors; k; k = k->next) {
+    if (desc_is_playing(k) && char_get_admlevel(k->character) <= 0 && char_get_rewtime(k->character) < g->LASTPAYOUT) {
       if (num == 0) {
         k->rpp += 1;
         char_set_rp(k->character, k->rpp);
         char_set_trp(k->character, char_get_trp(k->character) + (1));
-        userWrite(k, 0, 0, 0, "index");
-        send_to_char(k->character, "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
+        userWrite(g, k, 0, 0, 0, "index");
+        send_to_char(g, k->character, "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
       } else if (num == 1) {
         k->rpp += 2;
         char_set_rp(k->character, k->rpp);
         char_set_trp(k->character, char_get_trp(k->character) + (2));
-        userWrite(k, 0, 0, 0, "index");
-        send_to_char(k->character, "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
+        userWrite(g, k, 0, 0, 0, "index");
+        send_to_char(g, k->character, "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
       } else {
         k->rpp += 3;
         char_set_rp(k->character, k->rpp);
         char_set_trp(k->character, char_get_trp(k->character) + (3));
-        userWrite(k, 0, 0, 0, "index");
-        send_to_char(k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
+        userWrite(g, k, 0, 0, 0, "index");
+        send_to_char(g, k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
       }
-      char_set_rewtime(k->character, LASTPAYOUT);
+      char_set_rewtime(k->character, g->LASTPAYOUT);
     }
   }
 }
 
 /* CON_GET_NAME: wait for input of name */
-static void state_get_name(struct descriptor_data *d, char *arg)
+static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int player_i;
 
   if (d->character) {
-    free_char(d->character);
+    free_char(g, d->character);
   }
   if (!d->character) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
     CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
     char_set_desc(d->character, d);
-    char_prf_set(d->character, PRF_COLOR, true);
+    char_prf_set(g, d->character, PRF_COLOR, true);
   }
   /*  Check for other chars already logged in */
   /* Jamdog - 3rd May 2007 */
   char buf[MAX_INPUT_LENGTH], tmp_name[MAX_INPUT_LENGTH];
   if (d->writenew > 0) {
     if (!*arg) {
-      write_to_output(d, "Enter name: ");
+      write_to_output(g, d, "Enter name: ");
       return;
     }
     free(d->loadplay);
     d->loadplay = strdup(arg);
   }
   if ((_parse_name(d->loadplay, tmp_name)) || strlen(tmp_name) < 2 ||
-      strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(tmp_name) ||
+      strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(g, tmp_name) ||
       fill_word(strcpy(buf, tmp_name)) || reserved_word(buf)) { /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
-    write_to_output(d, "Invalid name, please try another.\r\nName: ");
+    write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
     return;
   }
-  if (d->writenew > 0 && (player_i = load_char(tmp_name, d->character)) > -1) {
-    userRead(d);
-    write_to_output(d, "That character is already taken.\r\n");
+  if (d->writenew > 0 && (player_i = load_char(g, tmp_name, d->character)) > -1) {
+    userRead(g, d);
+    write_to_output(g, d, "That character is already taken.\r\n");
     d->writenew = 0;
     desc_set_connected(d, CON_UMENU);
     return;
   } else {
-    if ((player_i = load_char(tmp_name, d->character)) > -1) {
+    if ((player_i = load_char(g, tmp_name, d->character)) > -1) {
       if (d->writenew > 0) {
-        write_to_output(d, "That character is already taken.\r\n");
-        userRead(d);
+        write_to_output(g, d, "That character is already taken.\r\n");
+        userRead(g, d);
         desc_set_connected(d, CON_UMENU);
         return;
       }
@@ -524,14 +525,14 @@ static void state_get_name(struct descriptor_data *d, char *arg)
 	     the deleted player's equipment (this should probably be a
 	     stock behavior)
 	  */
-        if ((player_i = get_ptable_by_name(tmp_name)) >= 0)
-          remove_player(player_i);
+        if ((player_i = get_ptable_by_name(g, tmp_name)) >= 0)
+          remove_player(g, player_i);
 
         /* We get a false positive from the original deleted character. */
-        free_char(d->character);
+        free_char(g, d->character);
         /* Check for multiple creations... */
-        if (!Valid_Name(tmp_name)) {
-          write_to_output(d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
+        if (!Valid_Name(g, tmp_name)) {
+          write_to_output(g, d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
           return;
         }
         CREATE(d->character, struct char_data, 1);
@@ -540,8 +541,8 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         char_set_desc(d->character, d);
         char_set_alias(d->character, strdup(CAP(tmp_name)));
         char_set_pfilepos(d->character, player_i);
-        char_prf_set(d->character, PRF_COLOR, true);
-        display_races(d);
+        char_prf_set(g, d->character, PRF_COLOR, true);
+        display_races(g, d);
         char_set_rp(d->character, d->rpp);
         desc_set_connected(d, CON_QRACE);
       } else {
@@ -550,26 +551,26 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         char_plr_set(d->character, PLR_MAILING, false);
         char_plr_set(d->character, PLR_CRYO, false);
         char_aff_set(d->character, AFF_GROUP, false);
-        if (isbanned(d->host) == BAN_SELECT &&
+        if (isbanned(g, d->host) == BAN_SELECT &&
             !char_plr_flagged(d->character, PLR_SITEOK)) {
-          write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
-          mudlog(LOG_NRM, ADMLVL_GOD, true, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
+          write_to_output(g, d, "Sorry, this char has not been cleared for login from your site!\r\n");
+          mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
           desc_set_connected(d, CON_CLOSE);
           return;
         }
-        if (char_get_level(d->character) < circle_restrict && circle_restrict < 101) {
-          userRead(d);
-          write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
+        if (char_get_level(d->character) < g->circle_restrict && g->circle_restrict < 101) {
+          userRead(g, d);
+          write_to_output(g, d, "The game is temporarily restricted to at least %d level.\r\n", g->circle_restrict);
           desc_set_connected(d, CON_UMENU);
-          mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
+          mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
           return;
         }
         /* check and make sure no other copies of this player are logged in */
-        else if (perform_dupe_check(d)) {
+        else if (perform_dupe_check(g, d)) {
           return;
         } else {
           d->idle_tics = 0;
-          write_to_output(d, "\r\n%s\r\n%s", motd, CONFIG_MENU);
+          write_to_output(g, d, "\r\n%s\r\n%s", g->motd, CONFIG_MENU);
           char_set_rp(d->character, d->rpp);
           desc_set_connected(d, CON_MENU);
         }
@@ -579,24 +580,24 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         empty_account_slots_named(d, d->loadplay);
         free(d->loadplay);
         d->loadplay = nullptr;
-        userWrite(d, 0, 0, 0, "index");
-        userRead(d);
-        write_to_output(d, "Character missing. Emptying slot.\r\n");
+        userWrite(g, d, 0, 0, 0, "index");
+        userRead(g, d);
+        write_to_output(g, d, "Character missing. Emptying slot.\r\n");
         desc_set_connected(d, CON_UMENU);
       } else {
         /* player unknown -- make new character */
 
         /* Check for multiple creations of a character. */
-        if (!Valid_Name(tmp_name)) {
-          write_to_output(d, "Invalid name, please try another.\r\nName: ");
+        if (!Valid_Name(g, tmp_name)) {
+          write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
           return;
         }
         char_set_alias(d->character, strdup(CAP(tmp_name)));
 
-        display_races(d);
+        display_races(g, d);
         char_set_rp(d->character, d->rpp);
         set_account_slot(d, d->writenew, char_get_alias(d->character));
-        userWrite(d, 0, 0, 0, "index");
+        userWrite(g, d, 0, 0, 0, "index");
         desc_set_connected(d, CON_QRACE);
       }
     }
@@ -604,72 +605,72 @@ static void state_get_name(struct descriptor_data *d, char *arg)
 }
 
 /* CON_NAME_CNFRM: wait for conf. of new name */
-static void state_name_cnfrm(struct descriptor_data *d, char *arg)
+static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (toupper(*arg) == 'Y') {
-    if (isbanned(d->host) >= BAN_NEW) {
-      mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (siteban)", char_get_pc_name(d->character), d->host);
-      write_to_output(d, "Sorry, new characters are not allowed from your site!\r\n");
+    if (isbanned(g, d->host) >= BAN_NEW) {
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (siteban)", char_get_pc_name(d->character), d->host);
+      write_to_output(g, d, "Sorry, new characters are not allowed from your site!\r\n");
       desc_set_connected(d, CON_CLOSE);
       return;
     }
-    if (circle_restrict) {
-      write_to_output(d, "Sorry, new players can't be created at the moment.\r\n");
-      mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (wizlock)", char_get_pc_name(d->character), d->host);
+    if (g->circle_restrict) {
+      write_to_output(g, d, "Sorry, new players can't be created at the moment.\r\n");
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (wizlock)", char_get_pc_name(d->character), d->host);
       desc_set_connected(d, CON_CLOSE);
       return;
     }
     d->idle_tics = 0;
-    write_to_output(d, "@MNew character.@n\r\nGive me a @gpassword@n for @C%s@n: ", char_get_pc_name(d->character));
+    write_to_output(g, d, "@MNew character.@n\r\nGive me a @gpassword@n for @C%s@n: ", char_get_pc_name(d->character));
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (*arg == 'n' || *arg == 'N') {
-    write_to_output(d, "Okay, what IS it, then? ");
+    write_to_output(g, d, "Okay, what IS it, then? ");
     free(char_get_alias(d->character));
     char_set_alias(d->character, nullptr);
     desc_set_connected(d, CON_GET_NAME);
   } else
-    write_to_output(d, "Please type Yes or No: ");
+    write_to_output(g, d, "Please type Yes or No: ");
 }
 
 /* CON_GET_USER */
-static void state_get_user(struct descriptor_data *d, char *arg)
+static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  if (isbanned(d->host)) {
-    write_to_output(d, "You have been banned. Have a nice day.\r\n");
+  if (isbanned(g, d->host)) {
+    write_to_output(g, d, "You have been banned. Have a nice day.\r\n");
     desc_set_connected(d, CON_CLOSE);
     return;
   }
   if (!*arg) {
-    write_to_output(d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
+    write_to_output(g, d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
     return;
   }
   if (!strcasecmp(arg, "index")) {
-    write_to_output(d, "Try again, username?\r\n");
+    write_to_output(g, d, "Try again, username?\r\n");
     return;
   }
-  if (!Valid_Name(CAP(arg))) {
-    write_to_output(d, "Invalid name. Username?\r\n");
+  if (!Valid_Name(g, CAP(arg))) {
+    write_to_output(g, d, "Invalid name. Username?\r\n");
     return;
   }
   /* the name becomes a file name under data/user, so letters only */
   for (const char *p = arg; *p; p++)
     if (!isalpha((unsigned char)*p)) {
-      write_to_output(d, "Letters only: no spaces, numbers or punctuation. Username?\r\n");
+      write_to_output(g, d, "Letters only: no spaces, numbers or punctuation. Username?\r\n");
       return;
     }
   if (strlen(arg) < 3) {
-    write_to_output(d, "Name must at least be 3 characters long, username?\r\n");
+    write_to_output(g, d, "Name must at least be 3 characters long, username?\r\n");
     return;
   }
   if (strlen(arg) > 10) {
-    write_to_output(d, "Name must be at most 10 characters long, username?\r\n");
+    write_to_output(g, d, "Name must be at most 10 characters long, username?\r\n");
     return;
   }
   if (!readUserIndex(arg)) {
-    if (circle_restrict == 101) {
-      write_to_output(d, "The mud is locked for mortals at this time.\r\n");
-      write_to_output(d, "Please check: www.advent-truth.com/forum for further details.\r\n");
-      send_to_imm("%s rejected by wizlock", CAP(arg));
+    if (g->circle_restrict == 101) {
+      write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
+      write_to_output(g, d, "Please check: www.advent-truth.com/forum for further details.\r\n");
+      send_to_imm(g, "%s rejected by wizlock", CAP(arg));
       desc_set_connected(d, CON_CLOSE);
     } else {
       if (d->user) {
@@ -677,12 +678,12 @@ static void state_get_user(struct descriptor_data *d, char *arg)
         d->user = nullptr;
       }
       d->user = strdup(arg);
-      write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
-      write_to_output(d, "Yes or no: \n");
+      write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user);
+      write_to_output(g, d, "Yes or no: \n");
       desc_set_connected(d, CON_USER_CONF);
     }
   } else {
-    if (circle_restrict == 101) {
+    if (g->circle_restrict == 101) {
       if (d->user) {
         free(d->user);
         d->user = nullptr;
@@ -690,12 +691,12 @@ static void state_get_user(struct descriptor_data *d, char *arg)
       d->user = strdup(arg);
       userLoad(d, d->user);
       if (d->level == 0) {
-        write_to_output(d, "The mud is locked for mortals at this time.\r\n");
-        send_to_imm("%s rejected by wizlock", d->user);
+        write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
+        send_to_imm(g, "%s rejected by wizlock", d->user);
         desc_set_connected(d, CON_CLOSE);
       } else {
-        write_to_output(d, "Password: \r\n");
-        send_to_imm("Username, %s, logging in.", CAP(arg));
+        write_to_output(g, d, "Password: \r\n");
+        send_to_imm(g, "Username, %s, logging in.", CAP(arg));
         desc_set_connected(d, CON_PASSWORD);
       }
     } else {
@@ -704,26 +705,26 @@ static void state_get_user(struct descriptor_data *d, char *arg)
         d->user = nullptr;
       }
       userLoad(d, arg);
-      write_to_output(d, "Password: \r\n");
-      send_to_imm("Username, %s, logging in.", CAP(arg));
+      write_to_output(g, d, "Password: \r\n");
+      send_to_imm(g, "Username, %s, logging in.", CAP(arg));
       desc_set_connected(d, CON_PASSWORD);
     }
   }
 }
 
 /* CON_USER_CONF */
-static void state_user_conf(struct descriptor_data *d, char *arg)
+static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (!*arg) {
-    write_to_output(d, "You want your user name to be, %s?\r\n", d->user);
-    write_to_output(d, "Yes or no: \n");
+    write_to_output(g, d, "You want your user name to be, %s?\r\n", d->user);
+    write_to_output(g, d, "Yes or no: \n");
     return;
   }
   if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
-    write_to_output(d, "User Account, %s, created.\r\nEnter Email:\n", d->user);
-    write_to_output(d, "Remember your email must be valid and matching the example given.\n");
-    write_to_output(d, "[Example: iovan@@advent-truth.com]\n");
-    send_to_imm("Username, %s, creating.", CAP(d->user));
+    write_to_output(g, d, "User Account, %s, created.\r\nEnter Email:\n", d->user);
+    write_to_output(g, d, "Remember your email must be valid and matching the example given.\n");
+    write_to_output(g, d, "[Example: iovan@@advent-truth.com]\n");
+    send_to_imm(g, "Username, %s, creating.", CAP(d->user));
     desc_set_connected(d, CON_GET_EMAIL);
   } else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
     if (d->user) {
@@ -731,11 +732,11 @@ static void state_user_conf(struct descriptor_data *d, char *arg)
       d->user = nullptr;
     }
     d->user = strdup("Empty");
-    write_to_output(d, "Enter Username: \n");
+    write_to_output(g, d, "Enter Username: \n");
     desc_set_connected(d, CON_GET_USER);
   } else {
-    write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
-    write_to_output(d, "Yes or no: \n");
+    write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user);
+    write_to_output(g, d, "Yes or no: \n");
     return;
   }
 }
@@ -747,24 +748,24 @@ static bool fits_user_file(const char *value, size_t max_length)
 }
 
 /* CON_GET_EMAIL */
-static void state_get_email(struct descriptor_data *d, char *arg)
+static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (readUserIndex(d->user) && !*arg) {
-    write_to_output(d, "Email, or M for menu?\r\n");
+    write_to_output(g, d, "Email, or M for menu?\r\n");
     return;
   }
   if (!*arg) {
-    write_to_output(d, "Email?\r\n");
+    write_to_output(g, d, "Email?\r\n");
     return;
   }
   if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
-    userRead(d);
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
-    write_to_output(d, "Improper email format missing '.com' or '.net' or '.org'. Email?\r\n");
+    write_to_output(g, d, "Improper email format missing '.com' or '.net' or '.org'. Email?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_EMAIL_LENGTH)) {
-    write_to_output(d, "Emails can be at most %d characters, with no spaces, and can't start with '*'. Email?\r\n", MAX_EMAIL_LENGTH);
+    write_to_output(g, d, "Emails can be at most %d characters, with no spaces, and can't start with '*'. Email?\r\n", MAX_EMAIL_LENGTH);
     return;
   } else if (readUserIndex(d->user)) {
     if (strstr(arg, "@")) {
@@ -775,78 +776,78 @@ static void state_get_email(struct descriptor_data *d, char *arg)
       d->email = nullptr;
     }
     d->email = strdup(arg);
-    userWrite(d, 0, 0, 0, "index");
-    userRead(d);
+    userWrite(g, d, 0, 0, 0, "index");
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else {
     if (strstr(arg, "@")) {
       search_replace(arg, "@", "<AT>");
     }
-    write_to_output(d, "Your email is: %s\n", arg);
+    write_to_output(g, d, "Your email is: %s\n", arg);
     if (d->email) {
       free(d->email);
       d->email = nullptr;
     }
     d->email = strdup(arg);
-    write_to_output(d, "Password: \r\n");
+    write_to_output(g, d, "Password: \r\n");
     desc_set_connected(d, CON_NEWPASSWD);
   }
 }
 
 /* CON_NEWPASSWD */
-static void state_newpasswd(struct descriptor_data *d, char *arg)
+static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (readUserIndex(d->user) && !*arg) {
-    write_to_output(d, "Password, or M for menu?\r\n");
+    write_to_output(g, d, "Password, or M for menu?\r\n");
     return;
   }
   if (!*arg) {
-    write_to_output(d, "Password?\r\n");
+    write_to_output(g, d, "Password?\r\n");
     return;
   }
   if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
-    userRead(d);
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
-    write_to_output(d, "Password is too long. Password, or M for menu?\r\n");
+    write_to_output(g, d, "Password is too long. Password, or M for menu?\r\n");
     return;
   } else if (strlen(arg) > MAX_PWD_LENGTH) {
-    write_to_output(d, "Password is too long. Password?\r\n");
+    write_to_output(g, d, "Password is too long. Password?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_PWD_LENGTH)) {
-    write_to_output(d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user) ? ", or M for menu" : "");
+    write_to_output(g, d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user) ? ", or M for menu" : "");
     return;
   } else if (readUserIndex(d->user)) {
-    write_to_output(d, "Your password and user account have been fully saved.\r\n");
+    write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
     if (d->pass) {
       free(d->pass);
       d->pass = nullptr;
     }
     d->pass = strdup(arg);
-    userWrite(d, 0, 0, 0, "index");
-    userRead(d);
+    userWrite(g, d, 0, 0, 0, "index");
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else {
-    write_to_output(d, "Your password and user account have been fully saved.\r\n");
+    write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
     if (d->pass) {
       free(d->pass);
       d->pass = nullptr;
     }
     d->pass = strdup(arg);
     userCreate(d);
-    userRead(d);
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   }
 }
 
 /* CON_PASSWORD */
-static void state_password(struct descriptor_data *d, char *arg)
+static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   struct descriptor_data *k;
 
   if (!*arg) {
-    write_to_output(d, "Enter Password or Return:\r\n");
-    write_to_output(d, "(Return will ask for a different username)\r\n");
+    write_to_output(g, d, "Enter Password or Return:\r\n");
+    write_to_output(g, d, "(Return will ask for a different username)\r\n");
     return;
   }
   if (!strcasecmp("return", arg)) {
@@ -855,12 +856,12 @@ static void state_password(struct descriptor_data *d, char *arg)
       d->user = nullptr;
     }
     d->user = strdup("Empty");
-    write_to_output(d, "Username?\r\n");
+    write_to_output(g, d, "Username?\r\n");
     desc_set_connected(d, CON_GET_USER);
     return;
   }
   if (!strcasecmp(d->pass, arg)) {
-    for (k = descriptor_list; k; k = k->next) {
+    for (k = g->descriptors; k; k = k->next) {
       if (k == d)
         continue;
       if (!k->user)
@@ -870,73 +871,73 @@ static void state_password(struct descriptor_data *d, char *arg)
       if (!strcasecmp(k->user, d->user)) {
         if (desc_get_connected(k) == CON_PLAYING) {
           desc_set_connected(k, CON_DISCONNECT);
-          write_to_output(k, "Your account has been usurped by someone who knows its password!@n");
+          write_to_output(g, k, "Your account has been usurped by someone who knows its password!@n");
         } else {
           desc_set_connected(k, CON_CLOSE);
-          write_to_output(k, "Your account has been usurped by someone who knows its password!@n");
+          write_to_output(g, k, "Your account has been usurped by someone who knows its password!@n");
         }
       }
     }
-    userRead(d);
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else {
-    send_to_imm("Username, %s, password failure!", CAP(d->user));
+    send_to_imm(g, "Username, %s, password failure!", CAP(d->user));
     mud_log("%s BAD PASSWORD from [%s]", CAP(d->user), d->host);
     /* counted per connection, so switching usernames does not reset it */
     if (++d->bad_pws >= CONFIG_MAX_BAD_PWS) {
-      write_to_output(d, "Too many wrong passwords. Disconnecting.\r\n");
-      mudlog(LOG_NRM, ADMLVL_GOD, true, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
+      write_to_output(g, d, "Too many wrong passwords. Disconnecting.\r\n");
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
       desc_set_connected(d, CON_CLOSE);
       return;
     }
-    write_to_output(d, "Password is wrong. Password or Return?\r\n");
-    write_to_output(d, "(Return will ask for a different username)\r\n");
+    write_to_output(g, d, "Password is wrong. Password or Return?\r\n");
+    write_to_output(g, d, "(Return will ask for a different username)\r\n");
     return;
   }
 }
 
 /* Account menu B: a fourth or fifth character slot for 15 RPP. */
-static void buy_slot(struct descriptor_data *d)
+static void buy_slot(GameWorld *g, struct descriptor_data *d)
 {
   if (d->total != 3 && d->total != 4) {
-    userRead(d);
-    write_to_output(d, "You can't have more than 5 character slots.\n");
+    userRead(g, d);
+    write_to_output(g, d, "You can't have more than 5 character slots.\n");
   } else if (d->rpp < 15) {
-    userRead(d);
-    write_to_output(d, "You need at least 15 RPP to purchase a new character slot.\n");
+    userRead(g, d);
+    write_to_output(g, d, "You need at least 15 RPP to purchase a new character slot.\n");
   } else {
     d->rpp -= 15;
     d->total++;
-    userWrite(d, 0, 0, 0, "index");
-    userRead(d);
-    write_to_output(d, "New slot purchased, -15 RPP.\n");
+    userWrite(g, d, 0, 0, 0, "index");
+    userRead(g, d);
+    write_to_output(g, d, "New slot purchased, -15 RPP.\n");
   }
 }
 
 /* Account menu 1-5: create a character in an empty slot, or load the one in it. */
-static void choose_slot(struct descriptor_data *d, int n)
+static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
 {
   const char *name;
 
   if (n < 1 || n > MAX_ACCOUNT_SLOTS) {
-    userRead(d);
-    write_to_output(d, "That is not an option.\n");
+    userRead(g, d);
+    write_to_output(g, d, "That is not an option.\n");
     return;
   }
   if (n > 3 && d->total < n) {
-    userRead(d);
-    write_to_output(d, "You only have %d character slots avaialable!\r\n", d->total);
+    userRead(g, d);
+    write_to_output(g, d, "You only have %d character slots avaialable!\r\n", d->total);
     return;
   }
   name = *account_slot(d, n);
   if (!strcasecmp(name, "Empty")) {
-    write_to_output(d, "Enter New Character Name: \n");
+    write_to_output(g, d, "Enter New Character Name: \n");
     d->writenew = n;
     desc_set_connected(d, CON_GET_NAME);
   } else if (lockRead(name) && d->level <= 0) {
-    write_to_output(d, "That character has been locked out for rule violations. Play another character.\n");
+    write_to_output(g, d, "That character has been locked out for rule violations. Play another character.\n");
   } else {
-    write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", name);
+    write_to_output(g, d, "Loading character, %s.\r\n***Press Return***\n", name);
     free(d->loadplay);
     d->loadplay = strdup(name);
     d->writenew = 0;
@@ -945,93 +946,93 @@ static void choose_slot(struct descriptor_data *d, int n)
 }
 
 /* CON_UMENU */
-static void state_umenu(struct descriptor_data *d, char *arg)
+static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (!*arg) {
-    userRead(d);
+    userRead(g, d);
     return;
   }
   if (!strcasecmp(arg, "Q")) {
-    write_to_output(d, "Thanks for visiting!\n");
+    write_to_output(g, d, "Thanks for visiting!\n");
     desc_set_connected(d, CON_CLOSE);
   } else if (!strcasecmp(arg, "P")) {
-    write_to_output(d, "Enter New Password, or M for menu::\n");
+    write_to_output(g, d, "Enter New Password, or M for menu::\n");
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (!strcasecmp(arg, "C")) {
-    write_to_output(d, "\n");
-    customRead(d, 0, nullptr);
-    write_to_output(d, "\r\n@n--Press Enter--\n@n");
+    write_to_output(g, d, "\n");
+    customRead(g, d, 0, nullptr);
+    write_to_output(g, d, "\r\n@n--Press Enter--\n@n");
     return;
   } else if (!strcasecmp(arg, "E")) {
-    write_to_output(d, "Enter New Email, or M for menu:\n");
+    write_to_output(g, d, "Enter New Email, or M for menu:\n");
     desc_set_connected(d, CON_GET_EMAIL);
   } else if (!strcasecmp(arg, "D")) {
-    write_to_output(d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
+    write_to_output(g, d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
     desc_set_connected(d, CON_DELCNF1);
   } else if (!strcasecmp(arg, "B")) {
-    buy_slot(d);
+    buy_slot(g, d);
   } else {
-    choose_slot(d, atoi(arg));
+    choose_slot(g, d, atoi(arg));
   }
 }
 
 /* CON_RMOTD: read CR after printing motd */
-static void state_rmotd(struct descriptor_data *d, char *arg)
+static void state_rmotd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  write_to_output(d, "%s", CONFIG_MENU);
+  write_to_output(g, d, "%s", CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 
 /* CON_MENU: get selection from main menu */
-static void state_menu(struct descriptor_data *d, char *arg)
+static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int load_result = -1; /* Overloaded variable */
   int oldcount;
 
   switch (*arg) {
     case '0':
-      write_to_output(d, "Goodbye.\r\n");
+      write_to_output(g, d, "Goodbye.\r\n");
       desc_set_connected(d, CON_CLOSE);
       break;
 
     case '1':
       if (lockRead(char_get_name(d->character)) && d->level <= 0) {
-        write_to_output(d, "That character has been locked out for rule violations. Play another character.\n");
+        write_to_output(g, d, "That character has been locked out for rule violations. Play another character.\n");
         return;
       }
-      load_result = enter_player_game(d);
-      send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
-      act("$n has entered the game.", true, d->character, 0, 0, TO_ROOM);
+      load_result = enter_player_game(g, d);
+      send_to_char(g, d->character, "%s", CONFIG_WELC_MESSG);
+      act(g, "$n has entered the game.", true, d->character, 0, 0, TO_ROOM);
 
-      oldcount = update_player_count();
+      oldcount = update_player_count(g);
 
       char_set_time_logon(d->character, time(0));
-      greet_mtrigger(d->character, -1);
-      greet_memory_mtrigger(d->character);
+      greet_mtrigger(g, d->character, -1);
+      greet_memory_mtrigger(g, d->character);
 
       desc_set_connected(d, CON_PLAYING);
-      pay_player_count_rewards(oldcount);
+      pay_player_count_rewards(g, oldcount);
 
       if (char_get_level(d->character) == 0) {
-        do_start(d->character);
-        send_to_char(d->character, "%s", CONFIG_START_MESSG);
+        do_start(g, d->character);
+        send_to_char(g, d->character, "%s", CONFIG_START_MESSG);
       }
-      if (rroom_get_vnum(char_get_in_room(d->character)) <= 1 && char_get_load_room(d->character) != NOWHERE) {
-        char_from_room(d->character);
-        char_to_room(d->character, real_room(char_get_load_room(d->character)));
-      } else if (rroom_get_vnum(char_get_in_room(d->character)) <= 1) {
-        char_from_room(d->character);
-        char_to_room(d->character, real_room(300));
+      if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
+        char_from_room(g, d->character);
+        char_to_room(g, d->character, real_room(g, char_get_load_room(g, d->character)));
+      } else if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1) {
+        char_from_room(g, d->character);
+        char_to_room(g, d->character, real_room(g, 300));
       } else {
-        look_at_room(char_get_in_room(d->character), d->character, 0);
+        look_at_room(g, char_get_in_room(d->character), d->character, 0);
       }
-      if (has_mail(char_get_idnum(d->character)))
-        send_to_char(d->character, "\r\nYou have mail waiting.\r\n");
-      board_login_notices(d->character);
-      if (NEWSUPDATE > char_get_lastpl(d->character))
-        send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
-      if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {
-        int diff = (LASTINTEREST - char_get_lastint(d->character));
+      if (has_mail(g, char_get_idnum(d->character)))
+        send_to_char(g, d->character, "\r\nYou have mail waiting.\r\n");
+      board_login_notices(g, d->character);
+      if (g->NEWSUPDATE > char_get_lastpl(d->character))
+        send_to_char(g, d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", g->LASTNEWS);
+      if (g->LASTINTEREST != 0 && g->LASTINTEREST > char_get_lastint(d->character)) {
+        int diff = (g->LASTINTEREST - char_get_lastint(d->character));
         int mult = 0;
         while (diff > 0) {
           if ((diff - 86400) < 0 && mult == 0) {
@@ -1046,7 +1047,7 @@ static void state_menu(struct descriptor_data *d, char *arg)
         if (mult > 3) {
           mult = 3;
         }
-        char_set_lastint(d->character, LASTINTEREST);
+        char_set_lastint(d->character, g->LASTINTEREST);
         if (char_get_bank_gold(d->character) > 0) {
           int inc = ((char_get_bank_gold(d->character) / 100) * 2);
           if (inc >= 7500) {
@@ -1054,25 +1055,25 @@ static void state_menu(struct descriptor_data *d, char *arg)
           }
           inc *= mult;
           char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (inc));
-          send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
+          send_to_char(g, d->character, "Interest happened while you were away, %d times.\r\n"
                                      "@cBank Interest@D: @Y%s@n\r\n",
                        mult, add_commas(inc));
         }
       }
       if (!char_is_android(d->character)) {
         char buf3[MAX_INPUT_LENGTH];
-        send_to_sense(0, "You sense someone appear suddenly", d->character);
+        send_to_sense(g, 0, "You sense someone appear suddenly", d->character);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
-                add_commas(getCurPL(d->character)));
-        send_to_scouter(buf3, d->character, 0, 0);
+                add_commas(getCurPL(g, d->character)));
+        send_to_scouter(g, buf3, d->character, 0, 0);
       }
       if (load_result == 2) { /* rented items lost */
-        send_to_char(d->character, "\r\n\007You could not afford your rent!\r\n"
+        send_to_char(g, d->character, "\r\n\007You could not afford your rent!\r\n"
                                    "Your possesions have been donated to the Salvation Army!\r\n");
       }
       d->has_prompt = 0;
       /* We've updated to 3.1 - some bits might be set wrongly: */
-      char_prf_set(d->character, PRF_BUILDWALK, false);
+      char_prf_set(g, d->character, PRF_BUILDWALK, false);
       if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
         char_plr_set(d->character, PLR_THANDW, false);
       }
@@ -1080,7 +1081,7 @@ static void state_menu(struct descriptor_data *d, char *arg)
 
     case '2':
       if (char_get_ddesc(d->character)) {
-        write_to_output(d, "Current description:\r\n%s", char_get_ddesc(d->character));
+        write_to_output(g, d, "Current description:\r\n%s", char_get_ddesc(d->character));
         /*
 	 * Don't free this now... so that the old description gets loaded
 	 * as the current buffer in the editor.  Do setup the ABORT buffer
@@ -1091,105 +1092,105 @@ static void state_menu(struct descriptor_data *d, char *arg)
 	 */
         d->backstr = strdup(char_get_ddesc(d->character));
       }
-      write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-      send_editor_help(d);
+      write_to_output(g, d, "Enter the new text you'd like others to see when they look at you.\r\n");
+      send_editor_help(g, d);
       d->str     = char_description_slot(d->character);
       d->max_str = EXDSCR_LENGTH;
       desc_set_connected(d, CON_EXDESC);
       break;
 
     case '3':
-      userRead(d);
+      userRead(g, d);
       desc_set_connected(d, CON_UMENU);
       break;
 
     case '4':
-      write_to_output(d, "\r\nYOU ARE ABOUT TO DELETE THIS CHARACTER PERMANENTLY.\r\n"
+      write_to_output(g, d, "\r\nYOU ARE ABOUT TO DELETE THIS CHARACTER PERMANENTLY.\r\n"
                          "ARE YOU ABSOLUTELY SURE?\r\n\r\n"
                          "Please type \"yes\" to confirm: ");
       desc_set_connected(d, CON_DELCNF2);
       break;
 
     default:
-      write_to_output(d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", motd, CONFIG_MENU);
+      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", g->motd, CONFIG_MENU);
       break;
   }
 }
 
 /* CON_DELCNF1 */
-static void state_delcnf1(struct descriptor_data *d, char *arg)
+static void state_delcnf1(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
-    write_to_output(d, "Your user and character files have been deleted. Good bye.\n");
-    userDelete(d);
+    write_to_output(g, d, "Your user and character files have been deleted. Good bye.\n");
+    userDelete(g, d);
     desc_set_connected(d, CON_CLOSE);
   } else if (!strcmp(arg, "no") || !strcmp(arg, "NO")) {
-    userRead(d);
-    write_to_output(d, "Nothing was deleted. Phew.\n");
+    userRead(g, d);
+    write_to_output(g, d, "Nothing was deleted. Phew.\n");
     desc_set_connected(d, CON_UMENU);
   } else {
-    write_to_output(d, "Clearly type yes or no. Yes to delete and no to return to the menu.\nYes or no:\n");
+    write_to_output(g, d, "Clearly type yes or no. Yes to delete and no to return to the menu.\nYes or no:\n");
     return;
   }
 }
 
 /* CON_DELCNF2 */
-static void state_delcnf2(struct descriptor_data *d, char *arg)
+static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int player_i;
 
   if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
     if (char_plr_flagged(d->character, PLR_FROZEN)) {
-      write_to_output(d, "You try to kill yourself, but the ice stops you.\r\n"
+      write_to_output(g, d, "You try to kill yourself, but the ice stops you.\r\n"
                          "Character not deleted.\r\n\r\n");
       desc_set_connected(d, CON_CLOSE);
       return;
     }
     if (char_get_admlevel(d->character) < ADMLVL_GRGOD)
       char_plr_set(d->character, PLR_DELETED, true);
-    save_char(d->character);
+    save_char(g, d->character);
     Crash_delete_file(char_get_name(d->character));
     /* If the selfdelete_fastwipe flag is set (in config.c), remove all
      the player's immediately
   */
     if (selfdelete_fastwipe)
-      if ((player_i = get_ptable_by_name(char_get_name(d->character))) >= 0) {
-        SET_BIT(player_table[player_i].flags, PINDEX_SELFDELETE);
-        remove_player(player_i);
+      if ((player_i = get_ptable_by_name(g, char_get_name(d->character))) >= 0) {
+        SET_BIT(g->player_table[player_i].flags, PINDEX_SELFDELETE);
+        remove_player(g, player_i);
       }
     delete_aliases(char_get_name(d->character));
     delete_variables(char_get_name(d->character));
     delete_inv_backup(d->character);
-    write_to_output(d, "Character '%s' deleted!\r\n", char_get_name(d->character));
+    write_to_output(g, d, "Character '%s' deleted!\r\n", char_get_name(d->character));
     if (char_get_level(d->character) > 19 && !char_is_restricted_race(d->character) && !char_is_cheap_race(d->character)) {
       int refund = char_get_level(d->character) / 10;
       refund *= 2;
-      write_to_output(d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
+      write_to_output(g, d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
       d->rpp += refund;
     }
     if (char_get_level(d->character) > 40 && char_is_cheap_race(d->character)) {
       int refund = char_get_level(d->character) / 10;
       refund *= 2;
-      write_to_output(d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
+      write_to_output(g, d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
       d->rpp += refund;
     }
     if (char_get_level(d->character) <= 40 && char_is_cheap_race(d->character)) {
-      write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
+      write_to_output(g, d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
     }
     int refund = race_rpp_refund(char_get_race(d->character));
     if (refund && char_get_level(d->character) > 1) {
-      write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
+      write_to_output(g, d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
       d->rpp += refund;
     }
-    mudlog(LOG_NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
 
     empty_account_slots_named(d, char_get_name(d->character));
-    userWrite(d, 0, 0, 0, "index");
-    userRead(d);
+    userWrite(g, d, 0, 0, 0, "index");
+    userRead(g, d);
     desc_set_connected(d, CON_UMENU);
     return;
   }
-  write_to_output(d, "\r\nCharacter not deleted.\r\n%s\r\n%s", motd, CONFIG_MENU);
+  write_to_output(g, d, "\r\nCharacter not deleted.\r\n%s\r\n%s", g->motd, CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 
@@ -1208,12 +1209,12 @@ static const struct nanny_state login_states[] = {
     {CON_DELCNF2,    state_delcnf2   },
 };
 
-void nanny(struct descriptor_data *d, char *arg)
+void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   /* OasisOLC states */
   struct {
     int state;
-    void (*func)(struct descriptor_data *, char *);
+    void (*func)(GameWorld *, struct descriptor_data *, char *);
   } olc_functions[] = {
       {CON_OEDIT,    oedit_parse    },
       {CON_IEDIT,    oedit_parse    },
@@ -1248,18 +1249,18 @@ void nanny(struct descriptor_data *d, char *arg)
   for (int i = 0; olc_functions[i].state >= 0; i++)
     if (desc_get_connected(d) == olc_functions[i].state) {
       /* send context-sensitive help if need be */
-      if (context_help(d, arg)) return;
-      (*olc_functions[i].func)(d, arg);
+      if (context_help(g, d, arg)) return;
+      (*olc_functions[i].func)(g, d, arg);
       return;
     }
 
   /* Not in OLC. */
   for (size_t i = 0; i < countof(login_states); i++)
     if (desc_get_connected(d) == login_states[i].state) {
-      login_states[i].handler(d, arg);
+      login_states[i].handler(g, d, arg);
       return;
     }
-  if (chargen_parse(d, arg))
+  if (chargen_parse(g, d, arg))
     return;
 
   /*

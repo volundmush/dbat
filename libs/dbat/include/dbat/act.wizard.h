@@ -4,10 +4,10 @@
 /* global variables */
 
 // functions
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr);
-void perform_immort_vis(struct char_data *ch);
+room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr);
+void perform_immort_vis(GameWorld *g, struct char_data *ch);
 void snoop_check(struct char_data *ch);
-void copyover_check(void);
+void copyover_check(GameWorld *g);
 
 // commands
 ACMD(do_copyover);

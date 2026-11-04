@@ -16,41 +16,42 @@
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
 #include "dbat/room_utils.h"
+#include "dbat/game_world.h"
 
 /* local functions */
-static void ASSIGNROOM(room_vnum room, SPECIAL(fname));
-static void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
-static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));
+static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fname));
+static void ASSIGNMOB(GameWorld *g, mob_vnum mob, SPECIAL(fname));
+static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fname));
 
 /* functions to perform assignments */
 
-static void ASSIGNMOB(mob_vnum mob, SPECIAL(fn))
+static void ASSIGNMOB(GameWorld *g, mob_vnum mob, SPECIAL(fn))
 {
   mob_rnum rnum;
 
-  if ((rnum = real_mobile(mob)) != NOBODY)
-    mob_index[rnum].func = fn;
-  else if (!mini_mud)
+  if ((rnum = real_mobile(g, mob)) != NOBODY)
+    g->mob_index[rnum].func = fn;
+  else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
 
-static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fn))
+static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
 {
   obj_rnum rnum;
 
-  if ((rnum = real_object(obj)) != NOTHING)
-    obj_index[rnum].func = fn;
-  else if (!mini_mud)
+  if ((rnum = real_object(g, obj)) != NOTHING)
+    g->obj_index[rnum].func = fn;
+  else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }
 
-static void ASSIGNROOM(room_vnum room, SPECIAL(fn))
+static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fn))
 {
   room_rnum rnum;
 
-  if ((rnum = real_room(room)) != NOWHERE)
-    rroom_set_func(rnum, fn);
-  else if (!mini_mud)
+  if ((rnum = real_room(g, room)) != NOWHERE)
+    rroom_set_func(g, rnum, fn);
+  else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
 
@@ -59,39 +60,39 @@ static void ASSIGNROOM(room_vnum room, SPECIAL(fn))
 ******************************************************************** */
 
 /* assign special procedures to mobiles */
-void assign_mobiles(void)
+void assign_mobiles(GameWorld *g)
 {
-  ASSIGNMOB(3010, postmaster);
+  ASSIGNMOB(g, 3010, postmaster);
 }
 
 /* assign special procedures to objects */
-void assign_objects(void)
+void assign_objects(GameWorld *g)
 {
-  ASSIGNOBJ(3034, bank);   /* atm */
-  ASSIGNOBJ(3036, bank);   /* cashcard */
-  ASSIGNOBJ(11, gravity);  /* gravity generator */
-  ASSIGNOBJ(65, healtank); /* Healing Tank */
-  ASSIGNOBJ(3, augmenter); /* Augmenter 9001 */
+  ASSIGNOBJ(g, 3034, bank);   /* atm */
+  ASSIGNOBJ(g, 3036, bank);   /* cashcard */
+  ASSIGNOBJ(g, 11, gravity);  /* gravity generator */
+  ASSIGNOBJ(g, 65, healtank); /* Healing Tank */
+  ASSIGNOBJ(g, 3, augmenter); /* Augmenter 9001 */
 }
 
 /* assign special procedures to rooms */
-void assign_rooms(void)
+void assign_rooms(GameWorld *g)
 {
   room_rnum i;
 
-  ASSIGNROOM(5, dump);
-  ASSIGNROOM(3, pet_shops);
-  ASSIGNROOM(4, pet_shops);
-  ASSIGNROOM(81, auction);
-  ASSIGNROOM(82, auction);
-  ASSIGNROOM(83, auction);
-  ASSIGNROOM(84, auction);
-  ASSIGNROOM(85, auction);
-  ASSIGNROOM(86, auction);
+  ASSIGNROOM(g, 5, dump);
+  ASSIGNROOM(g, 3, pet_shops);
+  ASSIGNROOM(g, 4, pet_shops);
+  ASSIGNROOM(g, 81, auction);
+  ASSIGNROOM(g, 82, auction);
+  ASSIGNROOM(g, 83, auction);
+  ASSIGNROOM(g, 84, auction);
+  ASSIGNROOM(g, 85, auction);
+  ASSIGNROOM(g, 86, auction);
   /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
   if (CONFIG_DTS_ARE_DUMPS)
-    for (i = 0; i <= top_of_world; i++)
-      if (rroom_flagged(i, ROOM_DEATH))
-        rroom_set_func(i, dump);
+    for (i = 0; i <= g->top_room; i++)
+      if (rroom_flagged(g, i, ROOM_DEATH))
+        rroom_set_func(g, i, dump);
 }

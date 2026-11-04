@@ -1,6 +1,6 @@
 #include "dbat/consts/roomflags.h"
 
-const char *room_bits[NUM_ROOM_FLAGS + 1] = {
+const char *const room_bits[NUM_ROOM_FLAGS + 1] = {
     "DARK",
     "DEATH",
     "NO_MOB",

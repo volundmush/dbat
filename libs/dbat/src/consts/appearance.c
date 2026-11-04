@@ -1,7 +1,7 @@
 #include "dbat/consts/appearance.h"
 
 /* For Distinguishing Features */
-const char *eye_types[13] = {
+const char *const eye_types[13] = {
     "blue",
     "black",
     "green",
@@ -16,7 +16,7 @@ const char *eye_types[13] = {
     "emerald",
     "\n"};
 
-const char *aura_types[9] = {
+const char *const aura_types[9] = {
     "white",
     "blue",
     "red",
@@ -27,7 +27,7 @@ const char *aura_types[9] = {
     "black",
     "orange"};
 
-const char *hairl_types[6] = {
+const char *const hairl_types[6] = {
     "bald",
     "short",
     "medium",
@@ -35,7 +35,7 @@ const char *hairl_types[6] = {
     "really long",
     "\n"};
 
-const char *FHA_types[6] = {
+const char *const FHA_types[6] = {
     "stubby",
     "short",
     "medium",
@@ -43,7 +43,7 @@ const char *FHA_types[6] = {
     "really long",
     "\n"};
 
-const char *hairc_types[15] = {
+const char *const hairc_types[15] = {
     "headed",
     "black",
     "brown",
@@ -60,7 +60,7 @@ const char *hairc_types[15] = {
     "white",
     "\n"};
 
-const char *hairs_types[13] = {
+const char *const hairs_types[13] = {
     "",
     "with a plain look",
     "in a mohawk",
@@ -75,7 +75,7 @@ const char *hairs_types[13] = {
     "in dred locks",
     "\n"};
 
-const char *skin_types[13] = {
+const char *const skin_types[13] = {
     "white",
     "black",
     "green",

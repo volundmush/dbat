@@ -26,6 +26,7 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /*
  *  General functions used by several triggers
@@ -126,7 +127,7 @@ static bool word_check(char *str, char *wordlist)
  *  mob triggers
  */
 
-void random_mtrigger(char_data *ch)
+void random_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
 
@@ -139,14 +140,14 @@ void random_mtrigger(char_data *ch)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_RANDOM) &&
-        (rand_number(1, 100) <= t->narg)) {
-      script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-void bribe_mtrigger(char_data *ch, char_data *actor, int amount)
+void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor, int amount)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -159,23 +160,23 @@ void bribe_mtrigger(char_data *ch, char_data *actor, int amount)
       snprintf(buf, sizeof(buf), "%d", amount);
       add_var(&t->var_list, "amount", buf, 0);
       add_char_uid_var(t, "actor", actor, 0);
-      script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-void greet_memory_mtrigger(char_data *actor)
+void greet_memory_mtrigger(GameWorld *g, char_data *actor)
 {
   trig_data *t;
   char_data *ch;
   struct script_memory *mem;
   int command_performed = 0;
 
-  if (!valid_dg_target(actor, DG_ALLOW_GODS))
+  if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
     if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
@@ -183,7 +184,7 @@ void greet_memory_mtrigger(char_data *actor)
     for (mem = char_get_memory(ch); mem && char_get_memory(ch); mem = mem->next) {
       if (char_get_id(actor) != mem->id) continue;
       if (mem->cmd) {
-        command_interpreter(ch, mem->cmd); /* no script */
+        command_interpreter(g, ch, mem->cmd); /* no script */
         command_performed = 1;
         break;
       }
@@ -191,11 +192,11 @@ void greet_memory_mtrigger(char_data *actor)
       if (mem && !command_performed) {
         for (t = char_get_script(ch)->trig_list; t; t = t->next) {
           if (IS_SET(t->trigger_type, MTRIG_MEMORY) &&
-              char_can_see(ch, actor) &&
+              char_can_see(g, ch, actor) &&
               !t->depth &&
-              rand_number(1, 100) <= t->narg) {
+              rand_number(g, 1, 100) <= t->narg) {
             add_char_uid_var(t, "actor", actor, 0);
-            script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+            script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
             break;
           }
         }
@@ -217,16 +218,16 @@ void greet_memory_mtrigger(char_data *actor)
   }
 }
 
-bool greet_mtrigger(char_data *actor, int dir)
+bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
   trig_data *t;
   char_data *ch;
   int intermediate, final = true;
 
-  if (!valid_dg_target(actor, DG_ALLOW_GODS))
+  if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
     if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
@@ -235,15 +236,15 @@ bool greet_mtrigger(char_data *actor, int dir)
       continue;
 
     for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if (((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(ch, actor)) ||
+      if (((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(g, ch, actor)) ||
            IS_SET(t->trigger_type, MTRIG_GREET_ALL)) &&
-          !t->depth && (rand_number(1, 100) <= t->narg)) {
+          !t->depth && (rand_number(g, 1, 100) <= t->narg)) {
         if (dir >= 0 && dir < NUM_OF_DIRS)
           add_var(&t->var_list, "direction", (const char *)dirs[rev_dir[dir]], 0);
         else
           add_var(&t->var_list, "direction", "none", 0);
         add_char_uid_var(t, "actor", actor, 0);
-        intermediate = script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        intermediate = script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
         if (!intermediate) final = false;
         continue;
       }
@@ -252,7 +253,7 @@ bool greet_mtrigger(char_data *actor, int dir)
   return final;
 }
 
-void entry_memory_mtrigger(char_data *ch)
+void entry_memory_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
   char_data *actor;
@@ -261,7 +262,7 @@ void entry_memory_mtrigger(char_data *ch)
   if (!char_get_memory(ch) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (actor = rroom_get_people(char_get_in_room(ch)); actor && char_get_memory(ch);
+  for (actor = rroom_get_people(g, char_get_in_room(ch)); actor && char_get_memory(ch);
        actor = char_get_next_in_room(actor)) {
     if (actor != ch && char_get_memory(ch)) {
       for (mem = char_get_memory(ch); mem; mem = next_mem) {
@@ -274,13 +275,13 @@ void entry_memory_mtrigger(char_data *ch)
         while (*link != mem) link = &(*link)->next;
         *link = mem->next;
 
-        if (mem->cmd) command_interpreter(ch, mem->cmd);
+        if (mem->cmd) command_interpreter(g, ch, mem->cmd);
         else {
           for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-            if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
+            if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(g, 1, 100) <=
                                                    t->narg)) {
               add_char_uid_var(t, "actor", actor, 0);
-              script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+              script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
               break;
             }
           }
@@ -299,7 +300,7 @@ void entry_memory_mtrigger(char_data *ch)
   }
 }
 
-int entry_mtrigger(char_data *ch)
+int entry_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
 
@@ -307,8 +308,8 @@ int entry_mtrigger(char_data *ch)
     return 1;
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(t, MTRIG_ENTRY) && (rand_number(1, 100) <= t->narg)) {
-      return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+    if (trigger_ready(t, MTRIG_ENTRY) && (rand_number(g, 1, 100) <= t->narg)) {
+      return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
@@ -316,16 +317,16 @@ int entry_mtrigger(char_data *ch)
   return 1;
 }
 
-bool command_mtrigger(char_data *actor, char *cmd, char *argument)
+bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
 {
   char_data *ch, *ch_next;
   trig_data *t;
 
   /* prevent people we like from becoming trapped :P */
-  if (!valid_dg_target(actor, 0))
+  if (!valid_dg_target(g, actor, 0))
     return false;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = ch_next) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = ch_next) {
     ch_next = char_get_next_in_room(ch);
 
     if (script_has_type(char_get_script(ch), MTRIG_COMMAND) && !char_aff_flagged(ch, AFF_CHARM) &&
@@ -335,8 +336,8 @@ bool command_mtrigger(char_data *actor, char *cmd, char *argument)
           continue;
 
         if (!t->arglist || !*t->arglist) {
-          mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
-                 trig_get_vnum(t));
+          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
+                 trig_get_vnum(g, t));
           continue;
         }
 
@@ -348,7 +349,7 @@ bool command_mtrigger(char_data *actor, char *cmd, char *argument)
           skip_spaces(&cmd);
           add_var(&t->var_list, "cmd", cmd, 0);
 
-          if (script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW))
+          if (script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW))
             return true;
         }
       }
@@ -358,12 +359,12 @@ bool command_mtrigger(char_data *actor, char *cmd, char *argument)
   return false;
 }
 
-void speech_mtrigger(char_data *actor, char *str)
+void speech_mtrigger(GameWorld *g, char_data *actor, char *str)
 {
   char_data *ch, *ch_next;
   trig_data *t;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = ch_next) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = ch_next) {
     ch_next = char_get_next_in_room(ch);
 
     if (script_has_type(char_get_script(ch), MTRIG_SPEECH) && char_is_awake(ch) &&
@@ -373,8 +374,8 @@ void speech_mtrigger(char_data *actor, char *str)
           continue;
 
         if (!t->arglist || !*t->arglist) {
-          mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
-                 trig_get_vnum(t));
+          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
+                 trig_get_vnum(g, t));
           continue;
         }
 
@@ -382,14 +383,14 @@ void speech_mtrigger(char_data *actor, char *str)
              (!t->narg && is_substring(t->arglist, str)))) {
           add_char_uid_var(t, "actor", actor, 0);
           add_var(&t->var_list, "speech", str, 0);
-          script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+          script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
           break;
         }
       }
   }
 }
 
-void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg)
+void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg)
 {
   trig_data *t;
 
@@ -400,8 +401,8 @@ void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_d
         continue;
 
       if (!t->arglist || !*t->arglist) {
-        mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
-               trig_get_vnum(t));
+        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
+               trig_get_vnum(g, t));
         continue;
       }
 
@@ -423,13 +424,13 @@ void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_d
           add_var(&t->var_list, "arg", nstr, 0);
           free(fstr);
         }
-        script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
         break;
       }
     }
 }
 
-void fight_mtrigger(char_data *ch)
+void fight_mtrigger(GameWorld *g, char_data *ch)
 {
   struct char_data *actor;
   trig_data *t;
@@ -440,20 +441,20 @@ void fight_mtrigger(char_data *ch)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_FIGHT) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       actor = char_get_fighting(ch);
       if (actor)
         add_char_uid_var(t, "actor", actor, 0);
       else
         add_var(&t->var_list, "actor", "nobody", 0);
 
-      script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-void hitprcnt_mtrigger(char_data *ch)
+void hitprcnt_mtrigger(GameWorld *g, char_data *ch)
 {
   struct char_data *actor;
   trig_data *t;
@@ -463,18 +464,18 @@ void hitprcnt_mtrigger(char_data *ch)
     return;
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(t, MTRIG_HITPRCNT) && getEffMaxPL(ch) &&
-        (getCurPL(ch) <= (getEffMaxPL(ch) / 100) * t->narg)) {
+    if (trigger_ready(t, MTRIG_HITPRCNT) && getEffMaxPL(g, ch) &&
+        (getCurPL(g, ch) <= (getEffMaxPL(g, ch) / 100) * t->narg)) {
 
       actor = char_get_fighting(ch);
       add_char_uid_var(t, "actor", actor, 0);
-      script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj)
+int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *obj)
 {
   trig_data *t;
   int ret_val;
@@ -484,11 +485,11 @@ int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_RECEIVE) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
 
       add_char_uid_var(t, "actor", actor, 0);
       add_obj_uid_var(t, "object", obj, 0);
-      ret_val = script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       if (char_is_dead(actor) || char_is_dead(ch) || obj_get_carried_by(obj) != actor)
         return 0;
       else
@@ -499,7 +500,7 @@ int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj)
   return 1;
 }
 
-int death_mtrigger(char_data *ch, char_data *actor)
+int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor)
 {
   trig_data *t;
 
@@ -508,17 +509,17 @@ int death_mtrigger(char_data *ch, char_data *actor)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_DEATH) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       if (actor)
         add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-void load_mtrigger(char_data *ch)
+void load_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
   int result = 0;
@@ -528,8 +529,8 @@ void load_mtrigger(char_data *ch)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_LOAD) &&
-        (rand_number(1, 100) <= t->narg)) {
-      result = script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      result = script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
@@ -537,12 +538,12 @@ void load_mtrigger(char_data *ch)
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
     if (char_get_nr(ch) != NOBODY) {
-      free_proto_script(&mob_proto[char_get_nr(ch)], MOB_TRIGGER);
+      free_proto_script(&g->mob_proto[char_get_nr(ch)], MOB_TRIGGER);
     }
   }
 }
 
-int cast_mtrigger(char_data *actor, char_data *ch, int spellnum)
+int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -555,27 +556,27 @@ int cast_mtrigger(char_data *actor, char_data *ch, int spellnum)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_CAST) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(spellnum), 0);
-      return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-int leave_mtrigger(char_data *actor, int dir)
+int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
   trig_data *t;
   char_data *ch;
 
-  if (!valid_dg_target(actor, DG_ALLOW_GODS))
+  if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return 1;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
     if (!script_has_type(char_get_script(ch), MTRIG_LEAVE) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
@@ -583,47 +584,47 @@ int leave_mtrigger(char_data *actor, int dir)
 
     for (t = char_get_script(ch)->trig_list; t; t = t->next) {
       if ((IS_SET(t->trigger_type, MTRIG_LEAVE)) &&
-          !t->depth && (rand_number(1, 100) <= t->narg)) {
+          !t->depth && (rand_number(g, 1, 100) <= t->narg)) {
         if (dir >= 0 && dir < NUM_OF_DIRS)
           add_var(&t->var_list, "direction", (const char *)dirs[dir], 0);
         else
           add_var(&t->var_list, "direction", "none", 0);
         add_char_uid_var(t, "actor", actor, 0);
-        return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       }
     }
   }
   return 1;
 }
 
-int door_mtrigger(char_data *actor, int subcmd, int dir)
+int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
   trig_data *t;
   char_data *ch;
 
-  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
     if (!script_has_type(char_get_script(ch), MTRIG_DOOR) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
 
     for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if (IS_SET(t->trigger_type, MTRIG_DOOR) && char_can_see(ch, actor) &&
-          !t->depth && (rand_number(1, 100) <= t->narg)) {
+      if (IS_SET(t->trigger_type, MTRIG_DOOR) && char_can_see(g, ch, actor) &&
+          !t->depth && (rand_number(g, 1, 100) <= t->narg)) {
         add_var(&t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
         if (dir >= 0 && dir < NUM_OF_DIRS)
           add_var(&t->var_list, "direction", (const char *)dirs[dir], 0);
         else
           add_var(&t->var_list, "direction", "none", 0);
         add_char_uid_var(t, "actor", actor, 0);
-        return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+        return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       }
     }
   }
   return 1;
 }
 
-void time_mtrigger(char_data *ch)
+void time_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -637,10 +638,10 @@ void time_mtrigger(char_data *ch)
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_TIME) &&
-        (time_info.hours == t->narg)) {
-      sprintf(buf, "%d", time_info.hours);
+        (g->time_info.hours == t->narg)) {
+      sprintf(buf, "%d", g->time_info.hours);
       add_var(&t->var_list, "time", buf, 0);
-      script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+      script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
   }
@@ -650,7 +651,7 @@ void time_mtrigger(char_data *ch)
  *  object triggers
  */
 
-void random_otrigger(obj_data *obj)
+void random_otrigger(GameWorld *g, obj_data *obj)
 {
   trig_data *t;
 
@@ -659,14 +660,14 @@ void random_otrigger(obj_data *obj)
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_RANDOM) &&
-        (rand_number(1, 100) <= t->narg)) {
-      script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-void timer_otrigger(struct obj_data *obj)
+void timer_otrigger(GameWorld *g, struct obj_data *obj)
 {
   trig_data *t;
 
@@ -675,14 +676,14 @@ void timer_otrigger(struct obj_data *obj)
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_TIMER)) {
-      script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
     }
   }
 
   return;
 }
 
-int get_otrigger(obj_data *obj, char_data *actor)
+int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   trig_data *t;
   int ret_val;
@@ -690,9 +691,9 @@ int get_otrigger(obj_data *obj, char_data *actor)
     return 1;
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(t, OTRIG_GET) && (rand_number(1, 100) <= t->narg)) {
+    if (trigger_ready(t, OTRIG_GET) && (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a get to take place, if
        * a) the actor is killed (the mud would choke on obj_to_char).
        * b) the object is purged.
@@ -708,7 +709,7 @@ int get_otrigger(obj_data *obj, char_data *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
+static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
                       char *argument, int type)
 {
   trig_data *t;
@@ -720,8 +721,8 @@ static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
 
       if (IS_SET(t->narg, type) &&
           (!t->arglist || !*t->arglist)) {
-        mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
-               trig_get_vnum(t));
+        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
+               trig_get_vnum(g, t));
         continue;
       }
 
@@ -735,7 +736,7 @@ static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
         skip_spaces(&cmd);
         add_var(&t->var_list, "cmd", cmd, 0);
 
-        if (script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW))
+        if (script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW))
           return true;
       }
     }
@@ -743,32 +744,32 @@ static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
   return false;
 }
 
-bool command_otrigger(char_data *actor, char *cmd, char *argument)
+bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
 {
   obj_data *obj;
   int i;
 
   /* prevent people we like from becoming trapped :P */
-  if (!valid_dg_target(actor, 0))
+  if (!valid_dg_target(g, actor, 0))
     return false;
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(actor, i))
-      if (cmd_otrig(char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
+      if (cmd_otrig(g, char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
         return true;
 
   for (obj = char_get_inventory(actor); obj; obj = obj_get_next_content(obj))
-    if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
+    if (cmd_otrig(g, obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
       return true;
 
-  for (obj = rroom_get_contents(char_get_in_room(actor)); obj; obj = obj_get_next_content(obj))
-    if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
+  for (obj = rroom_get_contents(g, char_get_in_room(actor)); obj; obj = obj_get_next_content(obj))
+    if (cmd_otrig(g, obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
       return true;
 
   return false;
 }
 
-int wear_otrigger(obj_data *obj, char_data *actor, int where)
+int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where)
 {
   trig_data *t;
   int ret_val;
@@ -779,7 +780,7 @@ int wear_otrigger(obj_data *obj, char_data *actor, int where)
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_WEAR)) {
       add_char_uid_var(t, "actor", actor, 0);
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a wear to take place, if
        * the object is purged.
        */
@@ -793,7 +794,7 @@ int wear_otrigger(obj_data *obj, char_data *actor, int where)
   return 1;
 }
 
-int remove_otrigger(obj_data *obj, char_data *actor)
+int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   trig_data *t;
   int ret_val;
@@ -801,13 +802,13 @@ int remove_otrigger(obj_data *obj, char_data *actor)
   if (!script_has_type(obj_get_script(obj), OTRIG_REMOVE))
     return 1;
 
-  if (!valid_dg_target(actor, 0))
+  if (!valid_dg_target(g, actor, 0))
     return 1;
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_REMOVE)) {
       add_char_uid_var(t, "actor", actor, 0);
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a remove to take place, if
        * the object is purged.
        */
@@ -821,7 +822,7 @@ int remove_otrigger(obj_data *obj, char_data *actor)
   return 1;
 }
 
-int drop_otrigger(obj_data *obj, char_data *actor)
+int drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   trig_data *t;
   int ret_val;
@@ -830,9 +831,9 @@ int drop_otrigger(obj_data *obj, char_data *actor)
     return 1;
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(t, OTRIG_DROP) && (rand_number(1, 100) <= t->narg)) {
+    if (trigger_ready(t, OTRIG_DROP) && (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a drop to take place, if
        * the object is purged (nothing to drop).
        */
@@ -846,7 +847,7 @@ int drop_otrigger(obj_data *obj, char_data *actor)
   return 1;
 }
 
-int give_otrigger(obj_data *obj, char_data *actor, char_data *victim)
+int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *victim)
 {
   trig_data *t;
   int ret_val;
@@ -855,10 +856,10 @@ int give_otrigger(obj_data *obj, char_data *actor, char_data *victim)
     return 1;
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(t, OTRIG_GIVE) && (rand_number(1, 100) <= t->narg)) {
+    if (trigger_ready(t, OTRIG_GIVE) && (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       add_char_uid_var(t, "victim", victim, 0);
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a give to take place, if
        * a) the object is purged.
        * b) the object is not carried by the giver.
@@ -873,7 +874,7 @@ int give_otrigger(obj_data *obj, char_data *actor, char_data *victim)
   return 1;
 }
 
-void load_otrigger(obj_data *obj)
+void load_otrigger(GameWorld *g, obj_data *obj)
 {
   trig_data *t;
   int result = 0;
@@ -883,8 +884,8 @@ void load_otrigger(obj_data *obj)
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_LOAD) &&
-        (rand_number(1, 100) <= t->narg)) {
-      result = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      result = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       break;
     }
   }
@@ -892,12 +893,12 @@ void load_otrigger(obj_data *obj)
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
     if (obj_get_item_number(obj) != NOTHING) {
-      free_proto_script(&obj_proto[obj_get_item_number(obj)], OBJ_TRIGGER);
+      free_proto_script(&g->obj_proto[obj_get_item_number(obj)], OBJ_TRIGGER);
     }
   }
 }
 
-int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
+int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -910,25 +911,25 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_CAST) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(spellnum), 0);
-      return script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      return script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-bool leave_otrigger(room_data *room, char_data *actor, int dir)
+bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
   int temp, final = 1;
   obj_data *obj, *obj_next;
 
-  if (!valid_dg_target(actor, DG_ALLOW_GODS))
+  if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
   for (obj = room_get_contents(room); obj; obj = obj_next) {
@@ -938,13 +939,13 @@ bool leave_otrigger(room_data *room, char_data *actor, int dir)
 
     for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
       if (trigger_ready(t, OTRIG_LEAVE) &&
-          (rand_number(1, 100) <= t->narg)) {
+          (rand_number(g, 1, 100) <= t->narg)) {
         if (dir >= 0 && dir < NUM_OF_DIRS)
           add_var(&t->var_list, "direction", (const char *)dirs[dir], 0);
         else
           add_var(&t->var_list, "direction", "none", 0);
         add_char_uid_var(t, "actor", actor, 0);
-        temp = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+        temp = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
         if (temp == 0)
           final = 0;
       }
@@ -954,7 +955,7 @@ bool leave_otrigger(room_data *room, char_data *actor, int dir)
   return final;
 }
 
-int consume_otrigger(obj_data *obj, char_data *actor, int cmd)
+int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd)
 {
   trig_data *t;
   int ret_val;
@@ -976,7 +977,7 @@ int consume_otrigger(obj_data *obj, char_data *actor, int cmd)
           add_var(&t->var_list, "command", "quaff", 0);
           break;
       }
-      ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* don't allow a wear to take place, if
        * the object is purged.
        */
@@ -990,7 +991,7 @@ int consume_otrigger(obj_data *obj, char_data *actor, int cmd)
   return 1;
 }
 
-void time_otrigger(obj_data *obj)
+void time_otrigger(GameWorld *g, obj_data *obj)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -1000,10 +1001,10 @@ void time_otrigger(obj_data *obj)
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_TIME) &&
-        (time_info.hours == t->narg)) {
-      sprintf(buf, "%d", time_info.hours);
+        (g->time_info.hours == t->narg)) {
+      sprintf(buf, "%d", g->time_info.hours);
       add_var(&t->var_list, "time", buf, 0);
-      script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+      script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       break;
     }
   }
@@ -1013,7 +1014,7 @@ void time_otrigger(obj_data *obj)
  *  world triggers
  */
 
-void reset_wtrigger(struct room_data *room)
+void reset_wtrigger(GameWorld *g, struct room_data *room)
 {
   trig_data *t;
 
@@ -1022,14 +1023,14 @@ void reset_wtrigger(struct room_data *room)
 
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_RESET) &&
-        (rand_number(1, 100) <= t->narg)) {
-      script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-void random_wtrigger(struct room_data *room)
+void random_wtrigger(GameWorld *g, struct room_data *room)
 {
   trig_data *t;
 
@@ -1038,14 +1039,14 @@ void random_wtrigger(struct room_data *room)
 
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_RANDOM) &&
-        (rand_number(1, 100) <= t->narg)) {
-      script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+        (rand_number(g, 1, 100) <= t->narg)) {
+      script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-int enter_wtrigger(struct room_data *room, char_data *actor, int dir)
+int enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
 
@@ -1054,39 +1055,39 @@ int enter_wtrigger(struct room_data *room, char_data *actor, int dir)
 
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_ENTER) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       if (dir >= 0 && dir < NUM_OF_DIRS)
         add_var(&t->var_list, "direction", (const char *)dirs[rev_dir[dir]], 0);
       else
         add_var(&t->var_list, "direction", "none", 0);
       add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-int command_wtrigger(char_data *actor, char *cmd, char *argument)
+int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
 {
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_COMMAND))
+  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_COMMAND))
     return 0;
 
   /* prevent people we like from becoming trapped :P */
-  if (!valid_dg_target(actor, 0))
+  if (!valid_dg_target(g, actor, 0))
     return 0;
 
-  room = &world[char_get_in_room(actor)];
+  room = &g->rooms[char_get_in_room(actor)];
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_COMMAND))
       continue;
 
     if (!t->arglist || !*t->arglist) {
-      mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
-             trig_get_vnum(t));
+      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
+             trig_get_vnum(g, t));
       continue;
     }
 
@@ -1098,29 +1099,29 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument)
       skip_spaces(&cmd);
       add_var(&t->var_list, "cmd", cmd, 0);
 
-      return script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
 
   return 0;
 }
 
-void speech_wtrigger(char_data *actor, char *str)
+void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
 {
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_SPEECH))
+  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_SPEECH))
     return;
 
-  room = &world[char_get_in_room(actor)];
+  room = &g->rooms[char_get_in_room(actor)];
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_SPEECH))
       continue;
 
     if (!t->arglist || !*t->arglist) {
-      mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
-             trig_get_vnum(t));
+      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
+             trig_get_vnum(g, t));
       continue;
     }
 
@@ -1129,28 +1130,28 @@ void speech_wtrigger(char_data *actor, char *str)
         (!t->narg && is_substring(t->arglist, str))) {
       add_char_uid_var(t, "actor", actor, 0);
       add_var(&t->var_list, "speech", str, 0);
-      script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       break;
     }
   }
 }
 
-int drop_wtrigger(obj_data *obj, char_data *actor)
+int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   struct room_data *room;
   trig_data *t;
   int ret_val;
 
-  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_DROP))
+  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DROP))
     return 1;
 
-  room = &world[char_get_in_room(actor)];
+  room = &g->rooms[char_get_in_room(actor)];
   for (t = room_get_script(room)->trig_list; t; t = t->next)
     if (trigger_ready(t, WTRIG_DROP) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       add_obj_uid_var(t, "object", obj, 0);
-      ret_val = script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       if (obj_get_carried_by(obj) != actor)
         return 0;
       else
@@ -1161,19 +1162,19 @@ int drop_wtrigger(obj_data *obj, char_data *actor)
   return 1;
 }
 
-int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum)
+int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum)
 {
   room_data *room;
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_CAST))
+  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
     return 1;
 
-  room = &world[char_get_in_room(actor)];
+  room = &g->rooms[char_get_in_room(actor)];
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_CAST) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
 
       add_char_uid_var(t, "actor", actor, 0);
       if (vict)
@@ -1182,19 +1183,19 @@ int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum
         add_obj_uid_var(t, "object", obj, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(spellnum), 0);
-      return script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-int leave_wtrigger(struct room_data *room, char_data *actor, int dir)
+int leave_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
 
-  if (!valid_dg_target(actor, DG_ALLOW_GODS))
+  if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return 1;
 
   if (!script_has_type(room_get_script(room), WTRIG_LEAVE))
@@ -1202,45 +1203,45 @@ int leave_wtrigger(struct room_data *room, char_data *actor, int dir)
 
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_LEAVE) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       if (dir >= 0 && dir < NUM_OF_DIRS)
         add_var(&t->var_list, "direction", (const char *)dirs[dir], 0);
       else
         add_var(&t->var_list, "direction", "none", 0);
       add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-int door_wtrigger(char_data *actor, int subcmd, int dir)
+int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
   room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_DOOR))
+  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DOOR))
     return 1;
 
-  room = &world[char_get_in_room(actor)];
+  room = &g->rooms[char_get_in_room(actor)];
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_DOOR) &&
-        (rand_number(1, 100) <= t->narg)) {
+        (rand_number(g, 1, 100) <= t->narg)) {
       add_var(&t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
       if (dir >= 0 && dir < NUM_OF_DIRS)
         add_var(&t->var_list, "direction", (const char *)dirs[dir], 0);
       else
         add_var(&t->var_list, "direction", "none", 0);
       add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
 
   return 1;
 }
 
-void time_wtrigger(struct room_data *room)
+void time_wtrigger(GameWorld *g, struct room_data *room)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
@@ -1250,10 +1251,10 @@ void time_wtrigger(struct room_data *room)
 
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_TIME) &&
-        (time_info.hours == t->narg)) {
-      sprintf(buf, "%d", time_info.hours);
+        (g->time_info.hours == t->narg)) {
+      sprintf(buf, "%d", g->time_info.hours);
       add_var(&t->var_list, "time", buf, 0);
-      script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+      script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       break;
     }
   }

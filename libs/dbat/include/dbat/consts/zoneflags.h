@@ -41,4 +41,4 @@ constexpr int ZONE_SPARE33  = 35;
 constexpr int NUM_ZONE_FLAGS = 36;
 constexpr int ZF_ARRAY_MAX   = 4;
 
-extern const char *zone_bits[NUM_ZONE_FLAGS + 1];
+extern const char *const zone_bits[NUM_ZONE_FLAGS + 1];

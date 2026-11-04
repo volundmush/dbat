@@ -77,4 +77,4 @@ constexpr int CON_GENOME       = 72;
 
 constexpr int NUM_CON_TYPES = 73;
 
-extern const char *connected_types[NUM_CON_TYPES + 1];
+extern const char *const connected_types[NUM_CON_TYPES + 1];

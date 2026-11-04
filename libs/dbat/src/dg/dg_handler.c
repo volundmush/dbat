@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <linux/limits.h>
 #include <errno.h>
+#include "dbat/game_world.h"
 
 /* frees memory associated with var */
 static void free_var_el(struct trig_var_data *var)
@@ -100,7 +101,7 @@ bool remove_var(struct trig_var_data **var_list, char *name)
  * The command list is free'd when changed and when
  * shutting down.
  */
-void free_trigger(struct trig_data *trig)
+void free_trigger(GameWorld *g, struct trig_data *trig)
 {
   free(trig->name);
   trig->name = nullptr;
@@ -114,31 +115,31 @@ void free_trigger(struct trig_data *trig)
     trig->var_list = nullptr;
   }
   if (trig->wait_event)
-    event_cancel(trig->wait_event);
+    event_cancel(g, trig->wait_event);
 
   free(trig);
 }
 
 /* remove a single trigger from a mob/obj/room */
-void extract_trigger(struct trig_data *trig)
+void extract_trigger(GameWorld *g, struct trig_data *trig)
 {
   struct trig_data *temp;
 
   if (trig->wait_event) {
-    event_cancel(trig->wait_event);
+    event_cancel(g, trig->wait_event);
     trig->wait_event = nullptr;
   }
 
-  trig_index[trig->nr]->number--;
+  g->trig_index[trig->nr]->number--;
 
   /* walk the trigger list and remove this one */
-  REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
+  REMOVE_FROM_LIST(trig, g->trigger_list, next_in_world, temp);
 
-  free_trigger(trig);
+  free_trigger(g, trig);
 }
 
 /* remove all triggers from a mob/obj/room */
-void extract_script(void *thing, int type)
+void extract_script(GameWorld *g, void *thing, int type)
 {
   struct script_data **slot = script_slot(thing, type);
   struct script_data *sc    = *slot;
@@ -150,7 +151,7 @@ void extract_script(void *thing, int type)
 
   for (trig = sc->trig_list; trig; trig = next_trig) {
     next_trig = trig->next;
-    extract_trigger(trig);
+    extract_trigger(g, trig);
   }
   sc->trig_list = nullptr;
 

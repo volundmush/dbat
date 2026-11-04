@@ -17,7 +17,7 @@
 
 /********** Event related section *********/
 
-#define EVENTFUNC(name) long(name)(void *event_obj)
+#define EVENTFUNC(name) long(name)(GameWorld *g, void *event_obj)
 
 /*
 ** define event related structures
@@ -47,11 +47,11 @@ struct q_element {
 /****** End of Queue related info ********/
 
 /* - events - function protos need by other modules */
-void event_init(void);
-struct event *event_create(EVENTFUNC(*func), void *event_obj, long when);
-void event_cancel(struct event *event);
-void event_process(void);
-long event_time(struct event *event);
-void event_free_all(void);
+void event_init(GameWorld *g);
+struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, long when);
+void event_cancel(GameWorld *g, struct event *event);
+void event_process(GameWorld *g);
+long event_time(GameWorld *g, struct event *event);
+void event_free_all(GameWorld *g);
 
 /* - queues - function protos need by other modules */

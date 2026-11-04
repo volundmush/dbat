@@ -16,12 +16,13 @@
 #include "dbat/db.h"
 #include "dbat/oasis.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
-static bool parse_stat_menu(struct descriptor_data *d, char *arg);
-static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
+static bool parse_stat_menu(GameWorld *g, struct descriptor_data *d, char *arg);
+static int stats_assign_stat(GameWorld *g, int abil, char *arg, struct descriptor_data *d);
 
 /* --relistan 2/22/99 for player configurable stats */
-bool parse_stats(struct descriptor_data *d, char *arg)
+bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   struct char_data *ch;
 
@@ -30,43 +31,43 @@ bool parse_stats(struct descriptor_data *d, char *arg)
     case STAT_QUIT:
       return true;
     case STAT_PARSE_MENU:
-      if (parse_stat_menu(d, arg))
+      if (parse_stat_menu(g, d, arg))
         return true;
       break;
     case STAT_GET_STR:
-      char_set_real_abils_str(ch, stats_assign_stat(char_get_real_abils_str(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_str(ch, stats_assign_stat(g, char_get_real_abils_str(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     case STAT_GET_INT:
-      char_set_real_abils_intel(ch, stats_assign_stat(char_get_real_abils_intel(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_intel(ch, stats_assign_stat(g, char_get_real_abils_intel(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     case STAT_GET_WIS:
-      char_set_real_abils_wis(ch, stats_assign_stat(char_get_real_abils_wis(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_wis(ch, stats_assign_stat(g, char_get_real_abils_wis(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     case STAT_GET_DEX:
-      char_set_real_abils_dex(ch, stats_assign_stat(char_get_real_abils_dex(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_dex(ch, stats_assign_stat(g, char_get_real_abils_dex(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     case STAT_GET_CON:
-      char_set_real_abils_con(ch, stats_assign_stat(char_get_real_abils_con(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_con(ch, stats_assign_stat(g, char_get_real_abils_con(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     case STAT_GET_CHA:
-      char_set_real_abils_cha(ch, stats_assign_stat(char_get_real_abils_cha(ch), arg, d));
-      stats_disp_menu(d);
+      char_set_real_abils_cha(ch, stats_assign_stat(g, char_get_real_abils_cha(ch), arg, d));
+      stats_disp_menu(g, d);
       break;
     default:
-      OLC_MODE(d) = stats_disp_menu(d);
+      OLC_MODE(d) = stats_disp_menu(g, d);
       break;
   }
   return false;
 }
 
-bool stats_disp_menu(struct descriptor_data *d)
+bool stats_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char(d->character,
+  send_to_char(g, d->character,
                "\r\n"
                "@W-<[@y==========@B[ @YCWG @B]@y==========@W]>-\r\n"
                " <| Total Points Left: @m%3d@W    |>     You should select the letter of the score you\r\n"
@@ -89,52 +90,52 @@ bool stats_disp_menu(struct descriptor_data *d)
                char_get_real_abils_wis(d->character),
                char_get_real_abils_cha(d->character));
 
-  send_to_char(d->character, "Enter Letter to Change: ");
+  send_to_char(g, d->character, "Enter Letter to Change: ");
 
   OLC_MODE(d) = STAT_PARSE_MENU;
 
   return true;
 }
 
-static bool parse_stat_menu(struct descriptor_data *d, char *arg)
+static bool parse_stat_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   /* Main parse loop */
   *arg = tolower(*arg);
   switch (*arg) {
     case 's':
       OLC_MODE(d) = STAT_GET_STR;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'i':
       OLC_MODE(d) = STAT_GET_INT;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'w':
       OLC_MODE(d) = STAT_GET_WIS;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'd':
       OLC_MODE(d) = STAT_GET_DEX;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'n':
       OLC_MODE(d) = STAT_GET_CON;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'c':
       OLC_MODE(d) = STAT_GET_CHA;
-      send_to_char(d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'q':
       OLC_MODE(d) = STAT_QUIT;
       return true;
     default:
-      stats_disp_menu(d);
+      stats_disp_menu(g, d);
   }
   return false;
 }
 
-static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)
+static int stats_assign_stat(GameWorld *g, int abil, char *arg, struct descriptor_data *d)
 {
   int temp;
 
@@ -159,7 +160,7 @@ static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)
   if (OLC_VAL(d) <= 0) {
     temp       = 0;
     OLC_VAL(d) = 0;
-    mudlog(LOG_NRM, ADMLVL_IMMORT, true, "Stat total below 0: possible code error");
+    mudlog(g, LOG_NRM, ADMLVL_IMMORT, true, "Stat total below 0: possible code error");
   }
   abil = temp;
   OLC_VAL(d) -= temp;

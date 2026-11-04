@@ -3,6 +3,7 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 bool is_name(const char *str, const char *namelist)
 {
@@ -78,7 +79,7 @@ int get_number(char **name)
   if ((ppos = strchr(*name, '.')) != nullptr) {
     *ppos++ = '\0';
     strlcpy(number, *name, sizeof(number));
-    strcpy(*name, ppos); /* strcpy: OK (always smaller) */
+    memmove(*name, ppos, strlen(ppos) + 1); /* the two overlap */
 
     for (i = 0; *(number + i); i++)
       if (!isdigit(*(number + i)))
@@ -102,11 +103,11 @@ struct obj_data *get_obj_in_list_num(obj_vnum num, struct obj_data *list)
 }
 
 /* search the entire world for an object number, and return a pointer  */
-struct obj_data *get_obj_num(obj_rnum nr)
+struct obj_data *get_obj_num(GameWorld *g, obj_rnum nr)
 {
   struct obj_data *i;
 
-  for (i = object_list; i; i = obj_get_next(i))
+  for (i = g->objects; i; i = obj_get_next(i))
     if (obj_get_item_number(i) == nr)
       return (i);
 
@@ -114,7 +115,7 @@ struct obj_data *get_obj_num(obj_rnum nr)
 }
 
 /* search a room for a char, and return a pointer if found..  */
-struct char_data *get_char_room(char *name, int *number, room_rnum room)
+struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_rnum room)
 {
   struct char_data *i;
   int num;
@@ -127,7 +128,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room)
   if (*number == 0)
     return (nullptr);
 
-  for (i = rroom_get_people(room); i && *number; i = char_get_next_in_room(i))
+  for (i = rroom_get_people(g, room); i && *number; i = char_get_next_in_room(i))
     if (isname(name, char_get_alias(i)))
       if (--(*number) == 0)
         return (i);
@@ -136,18 +137,18 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room)
 }
 
 /* search all over the world for a char num, and return a pointer if found */
-struct char_data *get_char_num(mob_rnum nr)
+struct char_data *get_char_num(GameWorld *g, mob_rnum nr)
 {
   struct char_data *i;
 
-  for (i = character_list; i; i = char_get_next(i))
+  for (i = g->characters; i; i = char_get_next(i))
     if (char_get_nr(i) == nr)
       return (i);
 
   return (nullptr);
 }
 
-struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom)
+struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int inroom)
 {
   struct char_data *i;
   int num;
@@ -157,7 +158,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     num    = get_number(&name);
   }
 
-  for (i = character_list; i; i = char_get_next(i)) {
+  for (i = g->characters; i; i = char_get_next(i)) {
     if (char_is_npc(i))
       continue;
     if (inroom == FIND_CHAR_ROOM && char_get_in_room(i) != char_get_in_room(ch))
@@ -186,7 +187,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
         }
       }
     }
-    if (!char_can_see(ch, i))
+    if (!char_can_see(g, ch, i))
       continue;
     if (--(*number) != 0)
       continue;
@@ -196,7 +197,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
   return (nullptr);
 }
 
-struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *number)
+struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
 {
   struct char_data *i;
   int num;
@@ -212,43 +213,43 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
 
   /* 0.<name> means PC with name */
   if (*number == 0)
-    return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
+    return (get_player_vis(g, ch, name, nullptr, FIND_CHAR_ROOM));
 
-  for (i = rroom_get_people(char_get_in_room(ch)); i && *number; i = char_get_next_in_room(i)) {
+  for (i = rroom_get_people(g, char_get_in_room(ch)); i && *number; i = char_get_next_in_room(i)) {
     if (!strcasecmp(name, "last") && char_get_lasthit(i) != 0 && char_get_lasthit(i) == char_get_idnum(ch)) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (isname(name, char_get_alias(i)) && (char_is_npc(i) || char_is_npc(ch) || char_get_admlevel(i) > 0 || char_get_admlevel(ch) > 0) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (isname(name, char_get_alias(i)) && i == ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && !char_is_npc(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && !char_is_npc(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && !(strcmp(juggleRaceName(i, true), CAP(name))) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && strstr(juggleRaceName(i, true), CAP(name)) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && !(strcmp(juggleRaceName(i, true), name)) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     } else if (!char_is_npc(i) && strstr(juggleRaceName(i, true), name) && i != ch) {
-      if (char_can_see(ch, i))
+      if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
     }
@@ -256,7 +257,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
   return (nullptr);
 }
 
-struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *number)
+struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
 {
   struct char_data *i;
   int num;
@@ -266,13 +267,13 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     num    = get_number(&name);
   }
 
-  if ((i = get_char_room_vis(ch, name, number)) != nullptr)
+  if ((i = get_char_room_vis(g, ch, name, number)) != nullptr)
     return (i);
 
   if (*number == 0)
-    return get_player_vis(ch, name, nullptr, 0);
+    return get_player_vis(g, ch, name, nullptr, 0);
 
-  for (i = character_list; i && *number; i = char_get_next(i)) {
+  for (i = g->characters; i && *number; i = char_get_next(i)) {
     if (char_get_in_room(ch) == char_get_in_room(i))
       continue;
     if (char_get_admlevel(ch) < 1 && char_get_admlevel(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
@@ -309,17 +310,17 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
   return (nullptr);
 }
 
-struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, int where)
+struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int where)
 {
   if (where == FIND_CHAR_ROOM)
-    return get_char_room_vis(ch, name, number);
+    return get_char_room_vis(g, ch, name, number);
   else if (where == FIND_CHAR_WORLD)
-    return get_char_world_vis(ch, name, number);
+    return get_char_world_vis(g, ch, name, number);
   else
     return (nullptr);
 }
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, struct obj_data *list)
+struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, struct obj_data *list)
 {
   struct obj_data *i;
   int num;
@@ -334,7 +335,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
 
   for (i = list; i && *number; i = obj_get_next_content(i))
     if (isname(name, obj_get_name(i)))
-      if (char_can_see_obj(ch, i) || (obj_get_type_flag(i) == ITEM_LIGHT))
+      if (char_can_see_obj(g, ch, i) || (obj_get_type_flag(i) == ITEM_LIGHT))
         if (--(*number) == 0)
           return (i);
 
@@ -342,7 +343,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
 }
 
 /* search the entire world for an object, and return a pointer  */
-struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
+struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
 {
   struct obj_data *i;
   int num;
@@ -356,24 +357,24 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
     return (nullptr);
 
   /* scan items carried */
-  if ((i = get_obj_in_list_vis(ch, name, number, char_get_inventory(ch))) != nullptr)
+  if ((i = get_obj_in_list_vis(g, ch, name, number, char_get_inventory(ch))) != nullptr)
     return (i);
 
   /* scan room */
-  if ((i = get_obj_in_list_vis(ch, name, number, rroom_get_contents(char_get_in_room(ch)))) != nullptr)
+  if ((i = get_obj_in_list_vis(g, ch, name, number, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr)
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
-  for (i = object_list; i && *number; i = obj_get_next(i))
+  for (i = g->objects; i && *number; i = obj_get_next(i))
     if (isname(name, obj_get_name(i)))
-      if (char_can_see_obj(ch, i))
+      if (char_can_see_obj(g, ch, i))
         if (--(*number) == 0)
           return (i);
 
   return (nullptr);
 }
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
+struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
 {
   int j, num;
 
@@ -386,14 +387,14 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
     return (nullptr);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
+    if (equipment[j] && char_can_see_obj(g, ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
       if (--(*number) == 0)
         return (equipment[j]);
 
   return (nullptr);
 }
 
-int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
+int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
 {
   int j, num;
 
@@ -406,7 +407,7 @@ int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struc
     return (-1);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
+    if (equipment[j] && char_can_see_obj(g, ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
       if (--(*number) == 0)
         return (j);
 
@@ -444,7 +445,7 @@ int find_all_dots(char *arg)
  * describes what it filled in.
  */
 
-int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
+int generic_find(GameWorld *g, char *arg, bitvector_t bitvector, struct char_data *ch,
                  struct char_data **tar_ch, struct obj_data **tar_obj)
 {
   int i, found, number;
@@ -462,12 +463,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     return (0);
 
   if (IS_SET(bitvector, FIND_CHAR_ROOM)) { /* Find person in room */
-    if ((*tar_ch = get_char_room_vis(ch, name, &number)) != nullptr)
+    if ((*tar_ch = get_char_room_vis(g, ch, name, &number)) != nullptr)
       return (FIND_CHAR_ROOM);
   }
 
   if (IS_SET(bitvector, FIND_CHAR_WORLD)) {
-    if ((*tar_ch = get_char_world_vis(ch, name, &number)) != nullptr)
+    if ((*tar_ch = get_char_world_vis(g, ch, name, &number)) != nullptr)
       return (FIND_CHAR_WORLD);
   }
 
@@ -482,17 +483,17 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   }
 
   if (IS_SET(bitvector, FIND_OBJ_INV)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, char_get_inventory(ch))) != nullptr)
+    if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))) != nullptr)
       return (FIND_OBJ_INV);
   }
 
   if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, rroom_get_contents(char_get_in_room(ch)))) != nullptr)
+    if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr)
       return (FIND_OBJ_ROOM);
   }
 
   if (IS_SET(bitvector, FIND_OBJ_WORLD)) {
-    if ((*tar_obj = get_obj_vis(ch, name, &number)))
+    if ((*tar_obj = get_obj_vis(g, ch, name, &number)))
       return (FIND_OBJ_WORLD);
   }
 

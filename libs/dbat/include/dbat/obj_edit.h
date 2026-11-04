@@ -2,9 +2,9 @@
 #include "dbat/consts/types.h"
 
 /* obj_edit.c functions */
-void pobj_edit_parse(struct descriptor_data *d, char *arg);
-void disp_custom_menu(struct descriptor_data *d);
-void disp_restring_menu(struct descriptor_data *d);
+void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void disp_custom_menu(GameWorld *g, struct descriptor_data *d);
+void disp_restring_menu(GameWorld *g, struct descriptor_data *d);
 
 /*-------------  obj_edit.c defines -------------*/
 

@@ -2,22 +2,22 @@
 #include "dbat/consts/types.h"
 #include "dbat/command.h"
 
-#define CMD_NAME         (complete_cmd_info[cmd].command)
-#define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
-#define IS_MOVE(cmdnum)  (complete_cmd_info[cmdnum].command_pointer == do_move)
+#define CMD_NAME         (g->complete_cmd_info[cmd].command)
+#define CMD_IS(g, cmd_name) (!strcmp(cmd_name, g->complete_cmd_info[cmd].command))
+#define IS_MOVE(g, cmdnum)  (g->complete_cmd_info[cmdnum].command_pointer == do_move)
 
-extern const char *list_bonus[];
+extern const char *const list_bonus[];
 extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, char *name);
-bool perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
+bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen);
 const char *rIntro(struct char_data *ch, char *arg);
-bool special(struct char_data *ch, int cmd, char *arg);
-void fingerUser(struct char_data *ch, char *name);
+bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg);
+void fingerUser(GameWorld *g, struct char_data *ch, char *name);
 bool readUserIndex(char *name);
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name);
-void command_interpreter(struct char_data *ch, char *argument);
-void nanny(struct descriptor_data *d, char *arg);
+void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name);
+void command_interpreter(GameWorld *g, struct char_data *ch, char *argument);
+void nanny(GameWorld *g, struct descriptor_data *d, char *arg);
 
 /*
  * SUBCOMMANDS
@@ -255,4 +255,4 @@ constexpr int SCMD_TEDIT = 0;
 constexpr int SCMD_REDIT = 1;
 constexpr int SCMD_OEDIT = 2;
 constexpr int SCMD_MEDIT = 3;
-int enter_player_game(struct descriptor_data *d);
+int enter_player_game(GameWorld *g, struct descriptor_data *d);

@@ -1,7 +1,7 @@
 #include "dbat/consts/playerflags.h"
 
 /* PLR_x */
-const char *player_bits[NUM_PLR_FLAGS + 1] = {
+const char *const player_bits[NUM_PLR_FLAGS + 1] = {
     "KILLER",
     "ROGUE",
     "FROZEN",

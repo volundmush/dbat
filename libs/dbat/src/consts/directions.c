@@ -1,7 +1,7 @@
 #include "dbat/consts/directions.h"
 
 /* cardinal directions */
-const char *dirs[NUM_OF_DIRS + 1] =
+const char *const dirs[NUM_OF_DIRS + 1] =
     {
         "north",
         "east",
@@ -16,7 +16,7 @@ const char *dirs[NUM_OF_DIRS + 1] =
         "inside",
         "outside",
         "\n"};
-const char *abbr_dirs[NUM_OF_DIRS + 1] =
+const char *const abbr_dirs[NUM_OF_DIRS + 1] =
     {
         "n",
         "e",
@@ -32,7 +32,7 @@ const char *abbr_dirs[NUM_OF_DIRS + 1] =
         "out",
         "\n"};
 
-int rev_dir[NUM_OF_DIRS] =
+const int rev_dir[NUM_OF_DIRS] =
     {
         /* North */ SOUTH,
         /* East  */ WEST,

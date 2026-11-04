@@ -20,6 +20,7 @@
 #include "dbat/config.h"
 #include "dbat/utils.h"
 #include "dbat/oasis.h"
+#include "dbat/game_world.h"
 
 /* Internal Functions */
 
@@ -33,7 +34,7 @@
  ** Parameters  :                                                      **
  **   type - The OLC type constant relating to the data type of data.  **
 \************************************************************************/
-bool free_strings(void *data, int type)
+bool free_strings(GameWorld *g, void *data, int type)
 {
   struct config_data *config;
 
@@ -75,7 +76,7 @@ bool free_strings(void *data, int type)
       return (true);
 
     default:
-      mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: oasis_delete.c: free_strings: Invalid type handled (Type %d).", type);
+      mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: oasis_delete.c: free_strings: Invalid type handled (Type %d).", type);
       return (false);
   }
 }

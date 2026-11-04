@@ -16,6 +16,7 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 /* external vars */
 
 /* local functions */
@@ -39,7 +40,7 @@ static void update_object(struct obj_data *obj, int use)
     update_object(obj_get_next_content(obj), use);
 }
 
-void update_char_objects(struct char_data *ch)
+void update_char_objects(GameWorld *g, struct char_data *ch)
 {
   int i, j;
 
@@ -50,12 +51,12 @@ void update_char_objects(struct char_data *ch)
         j = obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS);
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, 3);
         if (j == 1) {
-          send_to_char(ch, "Your light begins to flicker and fade.\r\n");
-          act("$n's light begins to flicker and fade.", false, ch, 0, 0, TO_ROOM);
+          send_to_char(g, ch, "Your light begins to flicker and fade.\r\n");
+          act(g, "$n's light begins to flicker and fade.", false, ch, 0, 0, TO_ROOM);
         } else if (j == 0) {
-          send_to_char(ch, "Your light sputters out and dies.\r\n");
-          act("$n's light sputters out and dies.", false, ch, 0, 0, TO_ROOM);
-          rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
+          send_to_char(g, ch, "Your light sputters out and dies.\r\n");
+          act(g, "$n's light sputters out and dies.", false, ch, 0, 0, TO_ROOM);
+          rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_TIME) - (1));
@@ -68,34 +69,34 @@ void update_char_objects(struct char_data *ch)
 }
 
 /* check and see if this item is better */
-void item_check(struct obj_data *object, struct char_data *ch)
+void item_check(GameWorld *g, struct obj_data *object, struct char_data *ch)
 {
   int where = 0;
 
-  if (char_is_humanoid(ch) && !(mob_index[char_get_nr(ch)].func == shop_keeper)) {
+  if (char_is_humanoid(ch) && !(g->mob_index[char_get_nr(ch)].func == shop_keeper)) {
     if (invalid_align(ch, object) || invalid_class(ch, object))
       return;
 
     switch (obj_get_type_flag(object)) {
       case ITEM_WEAPON:
         if (!char_get_equipment(ch, WEAR_WIELD1)) {
-          perform_wear(ch, object, WEAR_WIELD1);
+          perform_wear(g, ch, object, WEAR_WIELD1);
         } else {
           if (is_better(object, char_get_equipment(ch, WEAR_WIELD1))) {
-            perform_remove(ch, WEAR_WIELD1);
-            perform_wear(ch, object, WEAR_WIELD1);
+            perform_remove(g, ch, WEAR_WIELD1);
+            perform_wear(g, ch, object, WEAR_WIELD1);
           }
         }
         break;
       case ITEM_ARMOR:
       case ITEM_WORN:
-        where = find_eq_pos(ch, object, 0);
+        where = find_eq_pos(g, ch, object, 0);
         if (!char_get_equipment(ch, where)) {
-          perform_wear(ch, object, where);
+          perform_wear(g, ch, object, where);
         } else {
           if (is_better(object, char_get_equipment(ch, where))) {
-            perform_remove(ch, where);
-            perform_wear(ch, object, where);
+            perform_remove(g, ch, where);
+            perform_wear(g, ch, object, where);
           }
         }
 

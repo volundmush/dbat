@@ -31,28 +31,28 @@
 #include <limits.h>
 #include "dbat/comm.h"
 #include "dbat/log.h"
+#include "dbat/game_world.h"
 
 static void queue_deq(struct queue *q, struct q_element *qe);
 static long queue_elmt_key(struct q_element *qe);
 static struct q_element *queue_enq(struct queue *q, void *data, long key);
 static void queue_free(struct queue *q);
-static void *queue_head(struct queue *q);
+static void *queue_head(GameWorld *g, struct queue *q);
 static struct queue *queue_init(void);
-static long queue_key(struct queue *q);
+static long queue_key(GameWorld *g, struct queue *q);
 
-static struct queue *event_q; /* the event queue */
 
 /* initializes the event queue */
-void event_init(void)
+void event_init(GameWorld *g)
 {
-  event_q = queue_init();
+  g->event_q = queue_init();
 }
 
 /*
 ** Add an event to the current list
 */
 /* creates an event and returns it */
-struct event *event_create(EVENTFUNC(*func), void *event_obj, long when)
+struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, long when)
 {
   struct event *new_event;
 
@@ -62,13 +62,13 @@ struct event *event_create(EVENTFUNC(*func), void *event_obj, long when)
   CREATE(new_event, struct event, 1);
   new_event->func      = func;
   new_event->event_obj = event_obj;
-  new_event->q_el      = queue_enq(event_q, new_event, when + pulse);
+  new_event->q_el      = queue_enq(g->event_q, new_event, when + g->pulse);
 
   return new_event;
 }
 
 /* removes the event from the system */
-void event_cancel(struct event *event)
+void event_cancel(GameWorld *g, struct event *event)
 {
   if (!event) {
     mud_log("SYSERR:  Attempted to cancel a NULL event");
@@ -78,7 +78,7 @@ void event_cancel(struct event *event)
   if (!event->q_el) {
     mud_log("SYSERR:  Attempted to cancel a non-NULL unqueued event, freeing anyway");
   } else
-    queue_deq(event_q, event->q_el);
+    queue_deq(g->event_q, event->q_el);
 
   if (event->event_obj)
     free(event->event_obj);
@@ -86,13 +86,13 @@ void event_cancel(struct event *event)
 }
 
 /* Process any events whose time has come. */
-void event_process(void)
+void event_process(GameWorld *g)
 {
   struct event *the_event;
   long new_time;
 
-  while ((long)pulse >= queue_key(event_q)) {
-    if (!(the_event = (struct event *)queue_head(event_q))) {
+  while ((long)g->pulse >= queue_key(g, g->event_q)) {
+    if (!(the_event = (struct event *)queue_head(g, g->event_q))) {
       mud_log("SYSERR: Attempt to get a NULL event");
       return;
     }
@@ -105,28 +105,28 @@ void event_process(void)
     the_event->q_el = nullptr;
 
     /* call event func, reenqueue event if retval > 0 */
-    if ((new_time = (the_event->func)(the_event->event_obj)) > 0)
-      the_event->q_el = queue_enq(event_q, the_event, new_time + pulse);
+    if ((new_time = (the_event->func)(g, the_event->event_obj)) > 0)
+      the_event->q_el = queue_enq(g->event_q, the_event, new_time + g->pulse);
     else
       free(the_event);
   }
 }
 
 /* returns the time remaining before the event */
-long event_time(struct event *event)
+long event_time(GameWorld *g, struct event *event)
 {
   long when;
 
   when = queue_elmt_key(event->q_el);
 
-  return (when - pulse);
+  return (when - g->pulse);
 }
 
 /* frees all events in the queue */
-void event_free_all(void)
+void event_free_all(GameWorld *g)
 {
-  queue_free(event_q);
-  event_q = nullptr;
+  queue_free(g->event_q);
+  g->event_q = nullptr;
 }
 
 /* ************************************************************************
@@ -214,12 +214,12 @@ static void queue_deq(struct queue *q, struct q_element *qe)
  * removes and returns the data of the
  * first element of the priority queue q
  */
-static void *queue_head(struct queue *q)
+static void *queue_head(GameWorld *g, struct queue *q)
 {
   void *dg_data;
   int i;
 
-  i = pulse % NUM_EVENT_QUEUES;
+  i = g->pulse % NUM_EVENT_QUEUES;
 
   if (!q->head[i])
     return nullptr;
@@ -233,11 +233,11 @@ static void *queue_head(struct queue *q)
  * returns the key of the head element of the priority queue
  * if q is NULL, then return the largest unsigned number
  */
-static long queue_key(struct queue *q)
+static long queue_key(GameWorld *g, struct queue *q)
 {
   int i;
 
-  i = pulse % NUM_EVENT_QUEUES;
+  i = g->pulse % NUM_EVENT_QUEUES;
 
   if (q->head[i])
     return q->head[i]->key;

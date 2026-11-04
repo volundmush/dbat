@@ -1,7 +1,7 @@
 #include "dbat/consts/mobflags.h"
 
 /* MOB_x */
-const char *action_bits[NUM_MOB_FLAGS + 1] = {
+const char *const action_bits[NUM_MOB_FLAGS + 1] = {
     "SPEC",
     "SENTINEL",
     "NOSCAVENGER",

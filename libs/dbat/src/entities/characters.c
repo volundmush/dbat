@@ -1,10 +1,4 @@
 #include "dbat/characters.h"
 #include "dbat/consts/triggers.h"
-struct char_data *character_list;
-struct char_data *affect_list;
 
-struct index_data *mob_index;
-struct char_data *mob_proto;
-mob_rnum top_of_mobt;
 
-long max_mob_id = MOB_ID_BASE;

@@ -10,7 +10,6 @@ struct mapstruct {
 };
 typedef struct mapstruct MapStruct;
 
-void printmap(room_rnum rnum, struct char_data *ch, int type, obj_vnum vnum);
+void printmap(GameWorld *g, room_rnum rnum, struct char_data *ch, int type, obj_vnum vnum);
 
-extern room_rnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
-void update_space(void);
+void update_space(GameWorld *g);

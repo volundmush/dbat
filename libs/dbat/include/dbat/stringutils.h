@@ -25,7 +25,7 @@ bool is_abbrev(const char *arg1, const char *arg2);
 void half_chop(char *string, char *arg1, char *arg2);
 void skip_spaces(char **string);
 char *delete_doubledollar(char *string);
-int search_block(char *arg, const char **list, int exact);
+int search_block(char *arg, const char *const *list, int exact);
 bool is_number(const char *str);
 bool fill_word(char *argument);
 char *fname(const char *namelist);

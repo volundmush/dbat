@@ -1,7 +1,7 @@
 #include "dbat/consts/constates.h"
 
 /* CON_x */
-const char *connected_types[NUM_CON_TYPES + 1] = {
+const char *const connected_types[NUM_CON_TYPES + 1] = {
     "Playing",
     "Disconnecting",
     "Get name",

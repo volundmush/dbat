@@ -41,3 +41,8 @@ target_sources(dbat
       FILES
         ${INCLUDE}
 )
+
+add_executable(dbat_test_game_world tests/test_game_world.c)
+target_compile_options(dbat_test_game_world PRIVATE ${DBAT_C_FLAGS})
+target_link_libraries(dbat_test_game_world PRIVATE dbat::dbat)
+add_test(NAME game_world COMMAND dbat_test_game_world)

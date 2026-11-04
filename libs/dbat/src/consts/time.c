@@ -1,7 +1,7 @@
 #include "dbat/consts/time.h"
 
 /* Not used in sprinttype(). */
-const char *weekdays[NUM_WEEK_DAYS] = {
+const char *const weekdays[NUM_WEEK_DAYS] = {
     "Sunday",
     "Monday",
     "Tuesday",
@@ -11,7 +11,7 @@ const char *weekdays[NUM_WEEK_DAYS] = {
     "Saturday"};
 
 /* Not used in sprinttype(). */
-const char *month_name[NUM_MONTHS] = {
+const char *const month_name[NUM_MONTHS] = {
     "Month of January", /* 0 */
     "Month of February",
     "Month of March",

@@ -14,11 +14,13 @@
 #include "dbat/genolc.h"
 
 #include <unistd.h>
+#include "dbat/game_world.h"
 
 int main(int argc, char **argv)
 {
   int pos = 1;
   const char *dir;
+  GameWorld *g = game_world_create();
 
   /****************************************************************************/
   /** Load the game configuration.                                           **/
@@ -45,9 +47,9 @@ int main(int argc, char **argv)
   if (!CONFIG_CONFFILE)
     CONFIG_CONFFILE = strdup(CONFIG_FILE);
 
-  load_config();
+  load_config(g);
 
-  port = CONFIG_DFLT_PORT;
+  g->port = CONFIG_DFLT_PORT;
   dir  = CONFIG_DFLT_DIR;
 
   while ((pos < argc) && (*(argv[pos]) == '-')) {
@@ -67,8 +69,8 @@ int main(int argc, char **argv)
         }
         break;
       case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
-        fCopyOver   = true;
-        mother_desc = atoi(argv[pos] + 2);
+        g->fCopyOver   = true;
+        g->mother_desc = atoi(argv[pos] + 2);
         break;
       case 'd':
         if (*(argv[pos] + 2))
@@ -81,28 +83,28 @@ int main(int argc, char **argv)
         }
         break;
       case 'm':
-        mini_mud      = 1;
-        no_rent_check = 1;
+        g->mini_mud      = 1;
+        g->no_rent_check = 1;
         puts("Running in minimized mode & with no rent check.");
         break;
       case 'c':
-        scheck = 1;
+        g->scheck = 1;
         puts("Syntax check mode enabled.");
         break;
       case 'q':
-        no_rent_check = 1;
+        g->no_rent_check = 1;
         puts("Quick boot mode -- rent check supressed.");
         break;
       case 'r':
-        circle_restrict = 1;
+        g->circle_restrict = 1;
         puts("Restricting game -- no new players allowed.");
         break;
       case 's':
-        no_specials = 1;
+        g->no_specials = 1;
         puts("Suppressing assignment of special routines.");
         break;
       case 'x':
-        xap_objs = 1;
+        g->xap_objs = 1;
         mud_log("Loading player objects from secondary (ascii) files.");
         break;
       case 'h':
@@ -132,8 +134,8 @@ int main(int argc, char **argv)
     if (!isdigit(*argv[pos])) {
       printf("Usage: %s [-c] [-m] [-q] [-r] [-s] [-d pathname] [port #]\n", argv[0]);
       exit(1);
-    } else if ((port = atoi(argv[pos])) <= 1024) {
-      printf("SYSERR: Illegal port number %d.\n", port);
+    } else if ((g->port = atoi(argv[pos])) <= 1024) {
+      printf("SYSERR: Illegal port number %d.\n", g->port);
       exit(1);
     }
   }
@@ -146,47 +148,49 @@ int main(int argc, char **argv)
      * in the log if stderr is redirected to a file.
      */
   mud_log("Using %s for configuration.", CONFIG_CONFFILE);
-  xap_objs = 1;
+  g->xap_objs = 1;
   if (chdir(dir) < 0) {
     perror("SYSERR: Fatal error changing to data directory");
     exit(1);
   }
   mud_log("Using %s as data directory.", dir);
 
-  if (scheck)
-    boot_world();
+  if (g->scheck)
+    boot_world(g);
   else {
-    mud_log("Running game on port %d.", port);
-    init_game(port);
+    mud_log("Running game on port %d.", g->port);
+    init_game(g, g->port);
   }
 
   mud_log("Clearing game world.");
-  destroy_db();
+  destroy_db(g);
 
-  if (!scheck) {
+  if (!g->scheck) {
     mud_log("Clearing other memory.");
-    free_bufpool();                        /* comm.c */
-    free_player_index();                   /* players.c */
-    clear_free_list();                     /* mail.c */
-    free_mail_index();                     /* mail.c */
-    free_text_files();                     /* db.c */
-    clear_boards();                        /* boards.c */
-    free(cmd_sort_info);                   /* act.informative.c */
-    free_command_list();                   /* act.informative.c */
-    free_social_messages();                /* act.social.c */
-    free_help_table();                     /* db.c */
-    Free_Invalid_List();                   /* ban.c */
-    free_ban_list();                       /* ban.c */
-    free_strings(&config_info, OASIS_CFG); /* oasis_delete.c */
-    free_disabled();                       /* interpreter.c */
-    free_save_list();                      /* genolc.c */
+    free_bufpool(g);                        /* comm.c */
+    free_player_index(g);                   /* players.c */
+    clear_free_list(g);                     /* mail.c */
+    free_mail_index(g);                     /* mail.c */
+    free_text_files(g);                     /* db.c */
+    clear_boards(g);                        /* boards.c */
+    free(g->cmd_sort_info);                   /* act.informative.c */
+    free_command_list(g);                   /* act.informative.c */
+    free_social_messages(g);                /* act.social.c */
+    free_help_table(g);                     /* db.c */
+    Free_Invalid_List(g);                   /* ban.c */
+    free_ban_list(g);                       /* ban.c */
+    free_strings(g, &g->config_info, OASIS_CFG); /* oasis_delete.c */
+    free_disabled(g);                       /* interpreter.c */
+    free_save_list(g);                      /* genolc.c */
   }
 
-  if (last_act_message)
-    free(last_act_message);
+  if (g->last_act_message)
+    free(g->last_act_message);
 
   /* probably should free the entire config here.. */
   free(CONFIG_CONFFILE);
+
+  game_world_destroy(g);
 
   mud_log("Done.");
 

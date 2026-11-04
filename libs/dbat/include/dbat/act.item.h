@@ -3,19 +3,17 @@
 
 /* act.item.c */
 // global variables
-extern struct obj_data *obj_selling;
-extern struct char_data *ch_selling;
 
 // functions
-int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
+int check_saveroom_count(GameWorld *g, struct char_data *ch, struct obj_data *cont);
 int check_insidebag(struct obj_data *cont, double mult);
 
-void weight_change_object(struct obj_data *obj, int weight);
-void name_from_drinkcon(struct obj_data *obj);
-void name_to_drinkcon(struct obj_data *obj, int type);
+void weight_change_object(GameWorld *g, struct obj_data *obj, int weight);
+void name_from_drinkcon(GameWorld *g, struct obj_data *obj);
+void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type);
 
-void stop_auction(int type, struct char_data *ch);
-void check_auction(void);
+void stop_auction(GameWorld *g, int type, struct char_data *ch);
+void check_auction(GameWorld *g);
 
 // commands
 ACMD(do_auction);

@@ -3,7 +3,7 @@
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 
-const char *race_names[NUM_RACES + 1] = {
+const char *const race_names[NUM_RACES + 1] = {
     "human",
     "saiyan",
     "icer",
@@ -30,7 +30,7 @@ const char *race_names[NUM_RACES + 1] = {
     "spirit",
     "\n"};
 
-const char *race_abbrevs[NUM_RACES + 1] = {
+const char *const race_abbrevs[NUM_RACES + 1] = {
     "Hum",
     "Sai",
     "Ice",
@@ -57,7 +57,7 @@ const char *race_abbrevs[NUM_RACES + 1] = {
     "Spi",
     "\n"};
 
-const char *pc_race_types[NUM_RACES + 1] = {
+const char *const pc_race_types[NUM_RACES + 1] = {
     "Human",
     "Saiyan",
     "Icer",

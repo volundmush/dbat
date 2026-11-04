@@ -10,6 +10,7 @@
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 #include "dbat/atomicfile.h"
+#include "dbat/game_world.h"
 
 static void free_guild_strings(struct guild_data *guild);
 
@@ -86,14 +87,14 @@ static int guild_order(const void *key, const void *guild)
   return (k > v) - (k < v);
 }
 
-guild_rnum real_guild(guild_vnum vnum)
+guild_rnum real_guild(GameWorld *g, guild_vnum vnum)
 {
   struct guild_data *found;
 
-  if (top_guild < 0)
+  if (g->top_guild < 0)
     return NOWHERE;
-  found = bsearch(&vnum, guild_index, top_guild + 1, sizeof(*guild_index), guild_order);
-  return found ? found - guild_index : NOWHERE;
+  found = bsearch(&vnum, g->guild_index, g->top_guild + 1, sizeof(*g->guild_index), guild_order);
+  return found ? found - g->guild_index : NOWHERE;
 }
 
 /*-------------------------------------------------------------------*/
@@ -124,54 +125,54 @@ const char *gedit_modify_string(char **str, char *new_g)
 
 /*-------------------------------------------------------------------*/
 
-guild_rnum add_guild(struct guild_data *ngld)
+guild_rnum add_guild(GameWorld *g, struct guild_data *ngld)
 {
   guild_rnum rguild;
   guild_rnum found = 0;
-  zone_rnum rznum  = real_zone_by_thing(guild_get_vnum(ngld));
+  zone_rnum rznum  = real_zone_by_thing(g, guild_get_vnum(ngld));
 
   /*
    * The guild already exists, just update it.
    */
-  if ((rguild = real_guild(guild_get_vnum(ngld))) != NOWHERE) {
-    copy_guild(&guild_index[rguild], ngld);
+  if ((rguild = real_guild(g, guild_get_vnum(ngld))) != NOWHERE) {
+    copy_guild(&g->guild_index[rguild], ngld);
     if (rznum != NOWHERE) {
-      add_to_save_list(zone_table[rznum].number, SL_GLD);
+      add_to_save_list(g, g->zones[rznum].number, SL_GLD);
     } else
-      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
     return rguild;
   }
 
-  mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
+  mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
 
-  top_guild++;
-  RECREATE(guild_index, struct guild_data, top_guild + 1);
+  g->top_guild++;
+  RECREATE(g->guild_index, struct guild_data, g->top_guild + 1);
 
-  for (rguild = top_guild; rguild > 0; rguild--) {
-    if (ngld->vnum > rguild_get_vnum(rguild - 1)) {
+  for (rguild = g->top_guild; rguild > 0; rguild--) {
+    if (ngld->vnum > rguild_get_vnum(g, rguild - 1)) {
       found = rguild;
 
-      copy_guild(&guild_index[rguild], ngld);
+      copy_guild(&g->guild_index[rguild], ngld);
       break;
     }
-    guild_index[rguild] = guild_index[rguild - 1];
+    g->guild_index[rguild] = g->guild_index[rguild - 1];
   }
 
   if (!found) {
-    copy_guild(&guild_index[0], ngld);
+    copy_guild(&g->guild_index[0], ngld);
   }
 
   if (rznum != NOWHERE) {
-    add_to_save_list(zone_table[rznum].number, SL_GLD);
+    add_to_save_list(g, g->zones[rznum].number, SL_GLD);
   } else
-    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
 
   return rguild;
 }
 
 /*-------------------------------------------------------------------*/
 
-bool save_guilds(zone_rnum zone_num)
+bool save_guilds(GameWorld *g, zone_rnum zone_num)
 {
   struct atomic_file af;
   IDXTYPE i;
@@ -181,22 +182,22 @@ bool save_guilds(zone_rnum zone_num)
   char fname[64];
   struct guild_data *guild;
 
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-    mud_log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+  if (zone_num < 0 || zone_num > g->top_zone) {
+    mud_log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_table[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, g->zones[zone_num].number);
   if (!(guild_file = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
     return false;
   }
 
   /*. Search database for guilds in this zone . */
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
-    if ((rguild = real_guild(i)) != NOWHERE) {
+  for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
+    if ((rguild = real_guild(g, i)) != NOWHERE) {
       fprintf(guild_file, "#%d~\n", i);
-      guild = guild_index + rguild;
+      guild = g->guild_index + rguild;
 
       for (j = 0; j < SKILL_TABLE_SIZE; j++)
         if (guild_get_skill(guild, j))
@@ -223,7 +224,7 @@ bool save_guilds(zone_rnum zone_num)
 
       /*. Save the rest . */
       fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-              guild_get_gm(guild) == NOBODY ? -1 : mob_index[guild_get_gm(guild)].vnum,
+              guild_get_gm(guild) == NOBODY ? -1 : g->mob_index[guild_get_gm(guild)].vnum,
               guild_get_with_who(guild)[0],
               guild_get_open(guild),
               guild_get_close(guild));
@@ -235,9 +236,9 @@ bool save_guilds(zone_rnum zone_num)
   fprintf(guild_file, "$~\n");
   atomic_commit(&af);
 
-  if (in_save_list(zone_table[zone_num].number, SL_GLD)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_GLD);
-    create_world_index(zone_table[zone_num].number, "gld");
+  if (in_save_list(g, g->zones[zone_num].number, SL_GLD)) {
+    remove_from_save_list(g, g->zones[zone_num].number, SL_GLD);
+    create_world_index(g, g->zones[zone_num].number, "gld");
     mud_log("GenOLC: save_guilds: Saving guilds '%s'", fname);
   }
   return true;

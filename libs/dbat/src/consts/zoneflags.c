@@ -1,6 +1,6 @@
 #include "dbat/consts/zoneflags.h"
 
-const char *zone_bits[NUM_ZONE_FLAGS + 1] = {
+const char *const zone_bits[NUM_ZONE_FLAGS + 1] = {
     "CLOSED",
     "NO_IMMORT",
     "QUEST",

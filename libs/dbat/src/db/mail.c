@@ -25,52 +25,50 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/atomicfile.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 /* local globals */
-static mail_index_type *mail_index   = nullptr; /* list of recs in the mail file  */
-static position_list_type *free_list = nullptr; /* list of free positions in file */
-static long file_end_pos             = 0;       /* length of file */
 
 /* local functions */
-static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-static void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-static void push_free_list(long pos);
-static long pop_free_list(void);
-static mail_index_type *find_char_in_index(long searchee);
-static void write_to_file(void *buf, int size, long filepos);
-static void read_from_file(void *buf, int size, long filepos);
-static void index_mail(long id_to_index, long pos);
-static bool mail_recip_ok(const char *name);
+static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void push_free_list(GameWorld *g, long pos);
+static long pop_free_list(GameWorld *g);
+static mail_index_type *find_char_in_index(GameWorld *g, long searchee);
+static void write_to_file(GameWorld *g, void *buf, int size, long filepos);
+static void read_from_file(GameWorld *g, void *buf, int size, long filepos);
+static void index_mail(GameWorld *g, long id_to_index, long pos);
+static bool mail_recip_ok(GameWorld *g, const char *name);
 
 /* -------------------------------------------------------------------------- */
 
-void free_mail_index(void)
+void free_mail_index(GameWorld *g)
 {
   mail_index_type *tmp;
 
-  while (mail_index) {
-    tmp = mail_index->next;
-    if (mail_index->list_start) {
+  while (g->mail_index) {
+    tmp = g->mail_index->next;
+    if (g->mail_index->list_start) {
       position_list_type *i, *j;
-      i = mail_index->list_start;
+      i = g->mail_index->list_start;
       while (i) {
         j = i->next;
         free(i);
         i = j;
       }
     }
-    free(mail_index);
-    mail_index = tmp;
+    free(g->mail_index);
+    g->mail_index = tmp;
   }
 }
 
-static bool mail_recip_ok(const char *name)
+static bool mail_recip_ok(GameWorld *g, const char *name)
 {
   int player_i, ret = false;
 
-  if ((player_i = get_ptable_by_name(name)) >= 0) {
-    if (!IS_SET(player_table[player_i].flags, PINDEX_DELETED))
+  if ((player_i = get_ptable_by_name(g, name)) >= 0) {
+    if (!IS_SET(g->player_table[player_i].flags, PINDEX_DELETED))
       ret = true;
   }
   return ret;
@@ -84,14 +82,14 @@ static bool mail_recip_ok(const char *name)
  * list.  This is called when people receive their messages and at startup
  * when the list is created.
  */
-static void push_free_list(long pos)
+static void push_free_list(GameWorld *g, long pos)
 {
   position_list_type *new_pos;
 
   CREATE(new_pos, position_list_type, 1);
   new_pos->position = pos;
-  new_pos->next     = free_list;
-  free_list         = new_pos;
+  new_pos->next     = g->free_list;
+  g->free_list         = new_pos;
 }
 
 /*
@@ -101,7 +99,7 @@ static void push_free_list(long pos)
  * Typically used whenever a person mails a message.  The blocks are not
  * guaranteed to be sequential or in any order at all.
  */
-static long pop_free_list(void)
+static long pop_free_list(GameWorld *g)
 {
   position_list_type *old_pos;
   long return_value;
@@ -109,23 +107,23 @@ static long pop_free_list(void)
   /*
    * If we don't have any free blocks, we append to the file.
    */
-  if ((old_pos = free_list) == nullptr)
-    return (file_end_pos);
+  if ((old_pos = g->free_list) == nullptr)
+    return (g->file_end_pos);
 
   /* Save the offset of the free block. */
-  return_value = free_list->position;
+  return_value = g->free_list->position;
   /* Remove this block from the free list. */
-  free_list = old_pos->next;
+  g->free_list = old_pos->next;
   /* Get rid of the memory the node took. */
   free(old_pos);
   /* Give back the free offset. */
   return (return_value);
 }
 
-void clear_free_list(void)
+void clear_free_list(GameWorld *g)
 {
-  while (free_list)
-    pop_free_list();
+  while (g->free_list)
+    pop_free_list(g);
 }
 
 /*
@@ -135,7 +133,7 @@ void clear_free_list(void)
  *
  * Finds the first mail block for a specific person based on id number.
  */
-static mail_index_type *find_char_in_index(long searchee)
+static mail_index_type *find_char_in_index(GameWorld *g, long searchee)
 {
   mail_index_type *tmp;
 
@@ -143,7 +141,7 @@ static mail_index_type *find_char_in_index(long searchee)
     mud_log("SYSERR: Mail system -- non fatal error #1 (searchee == %ld).", searchee);
     return (nullptr);
   }
-  for (tmp = mail_index; (tmp && tmp->recipient != searchee); tmp = tmp->next);
+  for (tmp = g->mail_index; (tmp && tmp->recipient != searchee); tmp = tmp->next);
 
   return (tmp);
 }
@@ -154,30 +152,27 @@ static mail_index_type *find_char_in_index(long searchee)
  * atomic_open(), so a crash leaves either the old mail file or the new one, never a block chain
  * that is half rewritten. The file is small (BLOCK_SIZE blocks, a few KB).
  */
-static char *mail_buf      = nullptr; /* the mail file while an operation is open */
-static long mail_buf_len   = 0;
-static long mail_buf_alloc = 0;
 
-static bool mail_begin(void)
+static bool mail_begin(GameWorld *g)
 {
   FILE *fl;
 
   if (!(fl = fopen(MAIL_FILE, "rb"))) {
     mud_log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
-    no_mail = true;
+    g->no_mail = true;
     return false;
   }
   fseek(fl, 0L, SEEK_END);
-  mail_buf_len   = ftell(fl);
-  mail_buf_alloc = mail_buf_len + 8 * BLOCK_SIZE;
-  CREATE(mail_buf, char, mail_buf_alloc);
+  g->mail_buf_len   = ftell(fl);
+  g->mail_buf_alloc = g->mail_buf_len + 8 * BLOCK_SIZE;
+  CREATE(g->mail_buf, char, g->mail_buf_alloc);
   rewind(fl);
-  if (mail_buf_len && fread(mail_buf, mail_buf_len, 1, fl) != 1) {
+  if (g->mail_buf_len && fread(g->mail_buf, g->mail_buf_len, 1, fl) != 1) {
     mud_log("SYSERR: Unable to read mail file '%s'.", MAIL_FILE);
     fclose(fl);
-    free(mail_buf);
-    mail_buf = nullptr;
-    no_mail  = true;
+    free(g->mail_buf);
+    g->mail_buf = nullptr;
+    g->no_mail  = true;
     return false;
   }
   fclose(fl);
@@ -185,31 +180,31 @@ static bool mail_begin(void)
 }
 
 /* Ends a mail operation without writing anything. */
-static void mail_end(void)
+static void mail_end(GameWorld *g)
 {
-  free(mail_buf);
-  mail_buf     = nullptr;
-  mail_buf_len = mail_buf_alloc = 0;
+  free(g->mail_buf);
+  g->mail_buf     = nullptr;
+  g->mail_buf_len = g->mail_buf_alloc = 0;
 }
 
-static void mail_commit(void)
+static void mail_commit(GameWorld *g)
 {
   struct atomic_file af;
   FILE *fl;
   bool written = false;
 
   if ((fl = atomic_open(&af, MAIL_FILE, false))) {
-    if (mail_buf_len && fwrite(mail_buf, mail_buf_len, 1, fl) != 1)
+    if (g->mail_buf_len && fwrite(g->mail_buf, g->mail_buf_len, 1, fl) != 1)
       atomic_abort(&af);
     else
       written = atomic_commit(&af);
   }
   if (!written) { /* the in-memory index no longer matches the file */
     mud_log("SYSERR: Mail system disabled! Unable to write mail file '%s'.", MAIL_FILE);
-    no_mail = true;
+    g->no_mail = true;
   }
-  file_end_pos = mail_buf_len;
-  mail_end();
+  g->file_end_pos = g->mail_buf_len;
+  mail_end(g);
 }
 
 /*
@@ -220,32 +215,32 @@ static void mail_commit(void)
  *
  * Writes a mail block into the open mail operation (see mail_begin()).
  */
-static void write_to_file(void *buf, int size, long filepos)
+static void write_to_file(GameWorld *g, void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
-    no_mail = true;
+    g->no_mail = true;
     return;
   }
-  if (!mail_buf) {
+  if (!g->mail_buf) {
     mud_log("SYSERR: Mail system -- write outside a mail operation (position %ld)", filepos);
-    no_mail = true;
+    g->no_mail = true;
     return;
   }
-  if (filepos + size > mail_buf_alloc) {
-    long old_alloc = mail_buf_alloc;
+  if (filepos + size > g->mail_buf_alloc) {
+    long old_alloc = g->mail_buf_alloc;
 
-    mail_buf_alloc = filepos + size + 8 * BLOCK_SIZE;
-    RECREATE(mail_buf, char, mail_buf_alloc);
-    memset(mail_buf + old_alloc, 0, mail_buf_alloc - old_alloc);
+    g->mail_buf_alloc = filepos + size + 8 * BLOCK_SIZE;
+    RECREATE(g->mail_buf, char, g->mail_buf_alloc);
+    memset(g->mail_buf + old_alloc, 0, g->mail_buf_alloc - old_alloc);
   }
-  if (filepos > mail_buf_len) /* as writing past the end of a file would: the gap reads as zeros */
-    memset(mail_buf + mail_buf_len, 0, filepos - mail_buf_len);
-  memcpy(mail_buf + filepos, buf, size);
-  mail_buf_len = MAX(mail_buf_len, filepos + size);
+  if (filepos > g->mail_buf_len) /* as writing past the end of a file would: the gap reads as zeros */
+    memset(g->mail_buf + g->mail_buf_len, 0, filepos - g->mail_buf_len);
+  memcpy(g->mail_buf + filepos, buf, size);
+  g->mail_buf_len = MAX(g->mail_buf_len, filepos + size);
 
   /* new blocks are appended at the end (see pop_free_list()) */
-  file_end_pos = mail_buf_len;
+  g->file_end_pos = g->mail_buf_len;
 }
 
 /*
@@ -256,24 +251,24 @@ static void write_to_file(void *buf, int size, long filepos)
  *
  * This reads a block from the open mail operation (see mail_begin()).
  */
-static void read_from_file(void *buf, int size, long filepos)
+static void read_from_file(GameWorld *g, void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
-    no_mail = true;
+    g->no_mail = true;
     return;
   }
-  if (!mail_buf) {
+  if (!g->mail_buf) {
     mud_log("SYSERR: Mail system -- read outside a mail operation (position %ld)", filepos);
-    no_mail = true;
+    g->no_mail = true;
     return;
   }
   memset(buf, 0, size);
-  if (filepos < mail_buf_len)
-    memcpy(buf, mail_buf + filepos, MIN(size, mail_buf_len - filepos));
+  if (filepos < g->mail_buf_len)
+    memcpy(buf, g->mail_buf + filepos, MIN(size, g->mail_buf_len - filepos));
 }
 
-static void index_mail(long id_to_index, long pos)
+static void index_mail(GameWorld *g, long id_to_index, long pos)
 {
   mail_index_type *new_index;
   position_list_type *new_position;
@@ -282,14 +277,14 @@ static void index_mail(long id_to_index, long pos)
     mud_log("SYSERR: Mail system -- non-fatal error #4. (id_to_index == %ld)", id_to_index);
     return;
   }
-  if (!(new_index = find_char_in_index(id_to_index))) {
+  if (!(new_index = find_char_in_index(g, id_to_index))) {
     /* name not already in index.. add it */
     CREATE(new_index, mail_index_type, 1);
     new_index->recipient = id_to_index;
 
     /* add to front of list */
-    new_index->next = mail_index;
-    mail_index      = new_index;
+    new_index->next = g->mail_index;
+    g->mail_index      = new_index;
   }
   /* now, add this position to front of position list */
   CREATE(new_position, position_list_type, 1);
@@ -305,7 +300,7 @@ static void index_mail(long id_to_index, long pos)
  * This is called once during boot-up.  It scans through the mail file
  * and indexes all entries currently in the mail file.
  */
-bool scan_file(void)
+bool scan_file(GameWorld *g)
 {
   FILE *mail_file;
   header_block_type next_block;
@@ -318,20 +313,20 @@ bool scan_file(void)
   }
   while (fread(&next_block, sizeof(header_block_type), 1, mail_file)) {
     if (next_block.block_type == HEADER_BLOCK) {
-      index_mail(next_block.header_data.to, block_num * BLOCK_SIZE);
+      index_mail(g, next_block.header_data.to, block_num * BLOCK_SIZE);
       total_messages++;
     } else if (next_block.block_type == DELETED_BLOCK) {
-      push_free_list(block_num * BLOCK_SIZE);
+      push_free_list(g, block_num * BLOCK_SIZE);
     }
     /* Anything else is a body block of a stored message (its type is the next block's position or LAST_BLOCK).
      * It must not go on the free list, or new mail would overwrite messages that haven't been read yet. */
     block_num++;
   }
 
-  file_end_pos = ftell(mail_file);
+  g->file_end_pos = ftell(mail_file);
   fclose(mail_file);
-  mud_log("   %ld bytes read.", file_end_pos);
-  if (file_end_pos % BLOCK_SIZE) {
+  mud_log("   %ld bytes read.", g->file_end_pos);
+  if (g->file_end_pos % BLOCK_SIZE) {
     mud_log("SYSERR: Error booting mail system -- Mail file corrupt!");
     mud_log("SYSERR: Mail disabled!");
     return false;
@@ -347,9 +342,9 @@ bool scan_file(void)
  *
  * A simple little function which tells you if the guy has mail or not.
  */
-bool has_mail(long recipient)
+bool has_mail(GameWorld *g, long recipient)
 {
-  return (find_char_in_index(recipient) != nullptr);
+  return (find_char_in_index(g, recipient) != nullptr);
 }
 
 /*
@@ -362,7 +357,7 @@ bool has_mail(long recipient)
  * who the mail is to (long), who it's from (long), and a pointer to the
  * actual message text (char *).
  */
-void store_mail(long to, long from, char *message_pointer)
+void store_mail(GameWorld *g, long to, long from, char *message_pointer)
 {
   header_block_type header;
   data_block_type data;
@@ -389,14 +384,14 @@ void store_mail(long to, long from, char *message_pointer)
   strncpy(header.txt, msg_txt, HEADER_BLOCK_DATASIZE); /* strncpy: OK (h.txt:HEADER_BLOCK_DATASIZE+1) */
   header.txt[HEADER_BLOCK_DATASIZE] = '\0';
 
-  if (!mail_begin())
+  if (!mail_begin(g))
     return;
-  target_address = pop_free_list(); /* find next free block */
-  index_mail(to, target_address);   /* add it to mail index in memory */
-  write_to_file(&header, BLOCK_SIZE, target_address);
+  target_address = pop_free_list(g); /* find next free block */
+  index_mail(g, to, target_address);   /* add it to mail index in memory */
+  write_to_file(g, &header, BLOCK_SIZE, target_address);
 
   if (strlen(msg_txt) <= HEADER_BLOCK_DATASIZE) {
-    mail_commit();
+    mail_commit(g);
     return; /* that was the whole message */
   }
 
@@ -408,16 +403,16 @@ void store_mail(long to, long from, char *message_pointer)
    * the next block is.
    */
   last_address                  = target_address;
-  target_address                = pop_free_list();
+  target_address                = pop_free_list(g);
   header.header_data.next_block = target_address;
-  write_to_file(&header, BLOCK_SIZE, last_address);
+  write_to_file(g, &header, BLOCK_SIZE, last_address);
 
   /* now write the current data block */
   memset((char *)&data, 0, sizeof(data)); /* clear the record */
   data.block_type = LAST_BLOCK;
   strncpy(data.txt, msg_txt, DATA_BLOCK_DATASIZE); /* strncpy: OK (d.txt:DATA_BLOCK_DATASIZE+1) */
   data.txt[DATA_BLOCK_DATASIZE] = '\0';
-  write_to_file(&data, BLOCK_SIZE, target_address);
+  write_to_file(g, &data, BLOCK_SIZE, target_address);
   bytes_written += strlen(data.txt);
   msg_txt += strlen(data.txt);
 
@@ -435,22 +430,22 @@ void store_mail(long to, long from, char *message_pointer)
    */
   while (bytes_written < total_length) {
     last_address   = target_address;
-    target_address = pop_free_list();
+    target_address = pop_free_list(g);
 
     /* rewrite the previous block to link it to the next */
     data.block_type = target_address;
-    write_to_file(&data, BLOCK_SIZE, last_address);
+    write_to_file(g, &data, BLOCK_SIZE, last_address);
 
     /* now write the next block, assuming it's the last.  */
     data.block_type = LAST_BLOCK;
     strncpy(data.txt, msg_txt, DATA_BLOCK_DATASIZE); /* strncpy: OK (d.txt:DATA_BLOCK_DATASIZE+1) */
     data.txt[DATA_BLOCK_DATASIZE] = '\0';
-    write_to_file(&data, BLOCK_SIZE, target_address);
+    write_to_file(g, &data, BLOCK_SIZE, target_address);
 
     bytes_written += strlen(data.txt);
     msg_txt += strlen(data.txt);
   }
-  mail_commit();
+  mail_commit(g);
 } /* store mail */
 
 /*
@@ -461,7 +456,7 @@ void store_mail(long to, long from, char *message_pointer)
  * Retrieves one messsage for a player. The mail is then discarded from
  * the file and the mail index.
  */
-static char *read_delete(long recipient, char **from)
+static char *read_delete(GameWorld *g, long recipient, char **from)
 {
   header_block_type header;
   data_block_type data;
@@ -475,7 +470,7 @@ static char *read_delete(long recipient, char **from)
     mud_log("SYSERR: Mail system -- non-fatal error #6. (recipient: %ld)", recipient);
     return (nullptr);
   }
-  if (!(mail_pointer = find_char_in_index(recipient))) {
+  if (!(mail_pointer = find_char_in_index(g, recipient))) {
     mud_log("SYSERR: Mail system -- post office spec_proc error?  Error #7. (invalid character in index)");
     return (nullptr);
   }
@@ -488,12 +483,12 @@ static char *read_delete(long recipient, char **from)
     free(position_pointer);
 
     /* now free up the actual name entry */
-    if (mail_index == mail_pointer) { /* name is 1st in list */
-      mail_index = mail_pointer->next;
+    if (g->mail_index == mail_pointer) { /* name is 1st in list */
+      g->mail_index = mail_pointer->next;
       free(mail_pointer);
     } else {
       /* find entry before the one we're going to del */
-      for (prev_mail = mail_index;
+      for (prev_mail = g->mail_index;
            prev_mail->next != mail_pointer;
            prev_mail = prev_mail->next);
       prev_mail->next = mail_pointer->next;
@@ -509,14 +504,14 @@ static char *read_delete(long recipient, char **from)
   }
 
   /* ok, now lets do some readin'! */
-  if (!mail_begin())
+  if (!mail_begin(g))
     return (nullptr);
-  read_from_file(&header, BLOCK_SIZE, mail_address);
+  read_from_file(g, &header, BLOCK_SIZE, mail_address);
 
   if (header.block_type != HEADER_BLOCK) {
     mud_log("SYSERR: Oh dear. (Header block %ld != %d)", header.block_type, HEADER_BLOCK);
-    mail_end();
-    no_mail = true;
+    mail_end(g);
+    g->no_mail = true;
     mud_log("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
     return (nullptr);
   }
@@ -524,11 +519,11 @@ static char *read_delete(long recipient, char **from)
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
   if (header.header_data.from != -1337) {
-    *from = get_name_by_id(header.header_data.from);
+    *from = get_name_by_id(g, header.header_data.from);
   } else {
     *from = strdup("Auctioneer");
   }
-  to = get_name_by_id(recipient);
+  to = get_name_by_id(g, recipient);
 
   if (*from == nullptr) {
     *from = strdup("Unknown");
@@ -550,20 +545,20 @@ static char *read_delete(long recipient, char **from)
 
   /* mark the block as deleted */
   header.block_type = DELETED_BLOCK;
-  write_to_file(&header, BLOCK_SIZE, mail_address);
-  push_free_list(mail_address);
+  write_to_file(g, &header, BLOCK_SIZE, mail_address);
+  push_free_list(g, mail_address);
 
   while (following_block != LAST_BLOCK) {
-    read_from_file(&data, BLOCK_SIZE, following_block);
+    read_from_file(g, &data, BLOCK_SIZE, following_block);
 
     strcat(buf, data.txt); /* strcat: OK (data.txt:DATA_BLOCK_DATASIZE < buf:MAX_MAIL_SIZE) */
     mail_address    = following_block;
     following_block = data.block_type;
     data.block_type = DELETED_BLOCK;
-    write_to_file(&data, BLOCK_SIZE, mail_address);
-    push_free_list(mail_address);
+    write_to_file(g, &data, BLOCK_SIZE, mail_address);
+    push_free_list(g, mail_address);
   }
-  mail_commit();
+  mail_commit(g);
 
   return strdup(buf);
 }
@@ -578,30 +573,30 @@ SPECIAL(postmaster)
   if (!char_get_desc(ch) || char_is_npc(ch))
     return (0); /* so mobs don't get caught here */
 
-  if (!(CMD_IS("mail") || CMD_IS("check") || CMD_IS("receive")))
+  if (!(CMD_IS(g, "mail") || CMD_IS(g, "check") || CMD_IS(g, "receive")))
     return (0);
 
-  if (no_mail) {
-    send_to_char(ch, "Sorry, the mail system is having technical difficulties.\r\n");
+  if (g->no_mail) {
+    send_to_char(g, ch, "Sorry, the mail system is having technical difficulties.\r\n");
     return (0);
   }
 
-  if (CMD_IS("mail")) {
-    postmaster_send_mail(ch, (struct char_data *)me, cmd, argument);
+  if (CMD_IS(g, "mail")) {
+    postmaster_send_mail(g, ch, (struct char_data *)me, cmd, argument);
     return (1);
   }
-  if (CMD_IS("check")) {
-    postmaster_check_mail(ch, (struct char_data *)me, cmd, argument);
+  if (CMD_IS(g, "check")) {
+    postmaster_check_mail(g, ch, (struct char_data *)me, cmd, argument);
     return (1);
   }
-  if (CMD_IS("receive")) {
-    postmaster_receive_mail(ch, (struct char_data *)me, cmd, argument);
+  if (CMD_IS(g, "receive")) {
+    postmaster_receive_mail(g, ch, (struct char_data *)me, cmd, argument);
     return (1);
   } else
     return (0);
 }
 
-static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
+static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
                                  int cmd, char *arg)
 {
   long recipient;
@@ -609,13 +604,13 @@ static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
-    act(buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
   one_argument(arg, buf);
 
   if (!*buf) { /* you'll get no argument from me! */
-    act("$n tells you, 'You need to specify an addressee!'",
+    act(g, "$n tells you, 'You need to specify an addressee!'",
         false, mailman, 0, ch, TO_VICT);
     return;
   }
@@ -623,21 +618,21 @@ static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
                                "$n tells you, '...which I see you can't afford.'",
              STAMP_PRICE);
-    act(buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
-  if ((recipient = get_id_by_name(buf)) < 0 || !mail_recip_ok(buf)) {
-    act("$n tells you, 'No one by that name is registered here!'",
+  if ((recipient = get_id_by_name(g, buf)) < 0 || !mail_recip_ok(g, buf)) {
+    act(g, "$n tells you, 'No one by that name is registered here!'",
         false, mailman, 0, ch, TO_VICT);
     return;
   }
-  act("$n starts to write some mail.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n starts to write some mail.", true, ch, 0, 0, TO_ROOM);
   snprintf(buf, sizeof(buf), "$n tells you, 'I'll take %d zenni for the stamp.'\r\n"
                              "$n tells you, 'Write your message. (/s saves /h for help).'",
            STAMP_PRICE);
 
-  act(buf, false, mailman, 0, ch, TO_VICT);
-  act("@C$n@w starts writing a letter.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, buf, false, mailman, 0, ch, TO_VICT);
+  act(g, "@C$n@w starts writing a letter.@n", true, ch, 0, 0, TO_ROOM);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
 
@@ -646,16 +641,16 @@ static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman
   string_write(char_get_desc(ch), mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
 }
 
-static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
+static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
                                   int cmd, char *arg)
 {
-  if (has_mail(char_get_idnum(ch)))
-    act("$n tells you, 'You have mail waiting.'", false, mailman, 0, ch, TO_VICT);
+  if (has_mail(g, char_get_idnum(ch)))
+    act(g, "$n tells you, 'You have mail waiting.'", false, mailman, 0, ch, TO_VICT);
   else
-    act("$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, 0, ch, TO_VICT);
+    act(g, "$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, 0, ch, TO_VICT);
 }
 
-static void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
+static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
                                     int cmd, char *arg)
 {
   char buf[256];
@@ -663,13 +658,13 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
   int y;
   char *from;
 
-  if (!has_mail(char_get_idnum(ch)) && mailman != nullptr) {
+  if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
-    act(buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
-  while (has_mail(char_get_idnum(ch))) {
-    obj              = create_obj();
+  while (has_mail(g, char_get_idnum(ch))) {
+    obj              = create_obj(g);
     obj_set_item_number(obj, NOTHING);
 
     obj_set_type_flag(obj, ITEM_NOTE);
@@ -680,7 +675,7 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
-    obj_set_action_description(obj, read_delete(char_get_idnum(ch), &from));
+    obj_set_action_description(obj, read_delete(g, char_get_idnum(ch), &from));
     char bla[256], blm[256];
     sprintf(bla, "@WA piece of mail@n");
     sprintf(blm, "@WSomeone has left a piece of mail here@n");
@@ -690,7 +685,7 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
     *bla                   = '\0';
     *blm                   = '\0';
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
-    add_unique_id(obj);
+    add_unique_id(g, obj);
     obj_set_value(obj, 7, MATERIAL_PAPER);
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
     obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
@@ -702,22 +697,22 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
 
     if (desc_is_playing(char_get_desc(ch)) && mailman != nullptr) {
-      obj_to_char(obj, ch);
-      act("$n gives you a piece of mail.", false, mailman, 0, ch, TO_VICT);
-      act("$N gives $n a piece of mail.", false, ch, 0, mailman, TO_ROOM);
+      obj_to_char(g, obj, ch);
+      act(g, "$n gives you a piece of mail.", false, mailman, 0, ch, TO_VICT);
+      act(g, "$N gives $n a piece of mail.", false, ch, 0, mailman, TO_ROOM);
     } else {
-      extract_obj(obj);
+      extract_obj(g, obj);
     }
   }
 }
 
-void notify_if_playing(struct char_data *from, int recipient_id)
+void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id)
 {
   struct descriptor_data *d;
 
-  for (d = descriptor_list; d; d = d->next) {
-    if ((desc_is_playing(d)) && (char_get_idnum(d->character) == recipient_id) && (has_mail(char_get_idnum(d->character)))) {
-      send_to_char(d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
+  for (d = g->descriptors; d; d = d->next) {
+    if ((desc_is_playing(d)) && (char_get_idnum(d->character) == recipient_id) && (has_mail(g, char_get_idnum(d->character)))) {
+      send_to_char(g, d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
     }
   }
 }

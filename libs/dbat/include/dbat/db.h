@@ -100,82 +100,66 @@ constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 
 // global variables
 
-extern struct char_data *EDRAGON;
-extern int WISH[2];
-extern room_vnum DRAGONR;
-extern zone_rnum DRAGONZ;
-extern int DRAGONC, SHENRON;
-extern int circle_restrict;
 
-extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
-extern char *policies, *handbook, *motd, *imotd, *GREETANSI;
-extern int dballtime;
-extern int mini_mud, no_rent_check, no_mail;
-extern room_rnum r_mortal_start_room; /* rnum of mortal start room	 */
-extern room_rnum r_immort_start_room; /* rnum of immort start room	 */
-extern room_rnum r_frozen_start_room; /* rnum of frozen start room	 */
 
 void auc_load(struct obj_data *obj);
 /* public procedures in db.c */
-void boot_world(void);
-bool is_empty(zone_rnum zone_nr);
-void index_boot(int mode);
-void boot_db(void);
-void destroy_db(void);
-int create_entry(char *name);
-void zone_update(void);
+void boot_world(GameWorld *g);
+bool is_empty(GameWorld *g, zone_rnum zone_nr);
+void index_boot(GameWorld *g, int mode);
+void boot_db(GameWorld *g);
+void destroy_db(GameWorld *g);
+int create_entry(GameWorld *g, char *name);
+void zone_update(GameWorld *g);
 char *fread_string(FILE *fl, const char *error);
-long get_id_by_name(const char *name);
-char *get_name_by_id(long id);
-void save_mud_time(struct time_info_data *when);
-void free_text_files(void);
-void free_player_index(void);
-void load_disabled(void);
-void free_disabled(void);
-void free_help_table(void);
-void auc_save(void);
-void load_config(void);
+long get_id_by_name(GameWorld *g, const char *name);
+char *get_name_by_id(GameWorld *g, long id);
+void save_mud_time(GameWorld *g, struct time_info_data *when);
+void free_text_files(GameWorld *g);
+void free_player_index(GameWorld *g);
+void load_disabled(GameWorld *g);
+void free_disabled(GameWorld *g);
+void free_help_table(GameWorld *g);
+void auc_save(GameWorld *g);
+void load_config(GameWorld *g);
 
-zone_rnum real_zone(zone_vnum vnum);
-room_rnum real_room(room_vnum vnum);
-mob_rnum real_mobile(mob_vnum vnum);
-obj_rnum real_object(obj_vnum vnum);
+zone_rnum real_zone(GameWorld *g, zone_vnum vnum);
+room_rnum real_room(GameWorld *g, room_vnum vnum);
+mob_rnum real_mobile(GameWorld *g, mob_vnum vnum);
+obj_rnum real_object(GameWorld *g, obj_vnum vnum);
 
-int load_char(const char *name, struct char_data *ch);
-void save_char(struct char_data *ch);
-void init_char(struct char_data *ch);
-struct char_data *read_mobile(mob_vnum nr, int type);
-int vnum_mobile(char *searchname, struct char_data *ch);
+int load_char(GameWorld *g, const char *name, struct char_data *ch);
+void save_char(GameWorld *g, struct char_data *ch);
+void init_char(GameWorld *g, struct char_data *ch);
+struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type);
+int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch);
 void clear_char(struct char_data *ch);
-void reset_char(struct char_data *ch);
-void free_char(struct char_data *ch);
-void save_player_index(void);
-long get_ptable_by_name(const char *name);
+void reset_char(GameWorld *g, struct char_data *ch);
+void free_char(GameWorld *g, struct char_data *ch);
+void save_player_index(GameWorld *g);
+long get_ptable_by_name(GameWorld *g, const char *name);
 
-struct obj_data *create_obj(void);
+struct obj_data *create_obj(GameWorld *g);
 void clear_object(struct obj_data *obj);
-void free_obj(struct obj_data *obj);
-struct obj_data *read_object(obj_vnum nr, int type);
-int vnum_object(char *searchname, struct char_data *ch);
-bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
-void add_unique_id(struct obj_data *obj);
-void check_unique_id(struct obj_data *obj);
-char *sprintuniques(obj_vnum low, obj_vnum high);
-int vnum_material(char *searchname, struct char_data *ch);
-int vnum_weapontype(char *searchname, struct char_data *ch);
-int vnum_armortype(char *searchname, struct char_data *ch);
+void free_obj(GameWorld *g, struct obj_data *obj);
+struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type);
+int vnum_object(GameWorld *g, char *searchname, struct char_data *ch);
+bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);
+void add_unique_id(GameWorld *g, struct obj_data *obj);
+void check_unique_id(GameWorld *g, struct obj_data *obj);
+char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high);
+int vnum_material(GameWorld *g, char *searchname, struct char_data *ch);
+int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch);
+int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch);
 
 constexpr int REAL    = 0;
 constexpr int VIRTUAL = 1;
 
 /* global buffering system */
-extern time_t boot_time;
 
-extern int dg_owner_purged;
-extern int xap_objs;
 
 bitvector_t asciiflag_conv(char *flag);
-void reset_zone(zone_rnum zone);
+void reset_zone(GameWorld *g, zone_rnum zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */
@@ -185,4 +169,4 @@ void reset_zone(zone_rnum zone);
 
 // commands
 ACMD(do_reboot);
-void reboot_wizlists(void);
+void reboot_wizlists(GameWorld *g);

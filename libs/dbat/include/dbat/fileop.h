@@ -19,5 +19,5 @@ constexpr int MAX_FILES        = 12;
 int get_line(FILE *fl, char *buf);
 bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
 int touch(const char *path);
-void topLoad(void);
-void topWrite(struct char_data *ch);
+void topLoad(GameWorld *g);
+void topWrite(GameWorld *g, struct char_data *ch);

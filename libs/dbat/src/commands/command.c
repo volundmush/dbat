@@ -37,6 +37,7 @@
 #include "dbat/vehicles.h"
 #include <stdlib.h>
 #include <string.h>
+#include "dbat/game_world.h"
 
 /*
  * The command table. How a typed word finds its command:
@@ -639,27 +640,27 @@ static bool allowed_while_restrained(const char *cmd, bool liquefied)
 }
 
 /* False (after telling them why) if ch's condition stops them running cmd. */
-static bool command_pass(const char *cmd, struct char_data *ch)
+static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
 {
   if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
     if (!allowed_while_restrained(cmd, true)) {
-      send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
+      send_to_char(g, ch, "You are not capable of performing that action while liquefied!\r\n");
       return false;
     }
   } else if (char_is_affected(ch, AFF_PARALYZE)) {
     if (!allowed_while_restrained(cmd, false)) {
-      send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
+      send_to_char(g, ch, "You are not capable of performing that action while petrified!\r\n");
       return false;
     }
   } else if (char_is_affected(ch, AFF_FROZEN)) {
     if (!allowed_while_restrained(cmd, false)) {
-      send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
+      send_to_char(g, ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
       return false;
     }
-  } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(1, 60)) {
+  } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60)) {
     if (!allowed_while_restrained(cmd, false)) {
-      act("@yYou fail to overcome your paralysis!@n", true, ch, 0, 0, TO_CHAR);
-      act("@Y$n @ystruggles with $s paralysis!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@yYou fail to overcome your paralysis!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, 0, 0, TO_ROOM);
       return false;
     }
   }
@@ -667,7 +668,7 @@ static bool command_pass(const char *cmd, struct char_data *ch)
   return true;
 }
 
-bool special(struct char_data *ch, int cmd, char *arg)
+bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
 {
   struct obj_data *i;
   struct char_data *k;
@@ -675,35 +676,35 @@ bool special(struct char_data *ch, int cmd, char *arg)
   bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
 
   /* special in room? */
-  if (in_a_room && rroom_get_spec(char_get_in_room(ch)) != nullptr)
-    if (rroom_get_spec(char_get_in_room(ch))(ch, world + char_get_in_room(ch), cmd, arg))
+  if (in_a_room && rroom_get_spec(g, char_get_in_room(ch)) != nullptr)
+    if (rroom_get_spec(g, char_get_in_room(ch))(g, ch, g->rooms + char_get_in_room(ch), cmd, arg))
       return true;
 
   /* special in equipment list? */
   for (j = 0; j < NUM_WEARS; j++)
-    if (char_get_equipment(ch, j) && obj_get_spec(char_get_equipment(ch, j)) != nullptr)
-      if (obj_get_spec(char_get_equipment(ch, j))(ch, char_get_equipment(ch, j), cmd, arg))
+    if (char_get_equipment(ch, j) && obj_get_spec(g, char_get_equipment(ch, j)) != nullptr)
+      if (obj_get_spec(g, char_get_equipment(ch, j))(g, ch, char_get_equipment(ch, j), cmd, arg))
         return true;
 
   /* special in inventory? */
   for (i = char_get_inventory(ch); i; i = obj_get_next_content(i))
-    if (obj_get_spec(i) != nullptr)
-      if (obj_get_spec(i)(ch, i, cmd, arg))
+    if (obj_get_spec(g, i) != nullptr)
+      if (obj_get_spec(g, i)(g, ch, i, cmd, arg))
         return true;
 
   if (!in_a_room)
     return false;
 
   /* special in mobile present? */
-  for (k = rroom_get_people(char_get_in_room(ch)); k; k = char_get_next_in_room(k))
+  for (k = rroom_get_people(g, char_get_in_room(ch)); k; k = char_get_next_in_room(k))
     if (!char_mob_flagged(k, MOB_NOTDEADYET))
-      if (char_get_mob_spec(k) && char_get_mob_spec(k)(ch, k, cmd, arg))
+      if (char_get_mob_spec(g, k) && char_get_mob_spec(g, k)(g, ch, k, cmd, arg))
         return true;
 
   /* special in object present? */
-  for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i))
-    if (obj_get_spec(i) != nullptr)
-      if (obj_get_spec(i)(ch, i, cmd, arg))
+  for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i))
+    if (obj_get_spec(g, i) != nullptr)
+      if (obj_get_spec(g, i)(g, ch, i, cmd, arg))
         return true;
 
   return false;
@@ -714,7 +715,7 @@ bool special(struct char_data *ch, int cmd, char *arg)
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void command_interpreter(struct char_data *ch, char *argument)
+void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
 {
   int cmd, length;
   char *line;
@@ -759,65 +760,65 @@ void command_interpreter(struct char_data *ch, char *argument)
   /* otherwise, find the command */
   {
     int cont;                                          /* continue the command checks */
-    cont = command_wtrigger(ch, arg, line);            /* any world triggers ? */
-    if (!cont) cont = command_mtrigger(ch, arg, line); /* any mobile triggers ? */
-    if (!cont) cont = command_otrigger(ch, arg, line); /* any object triggers ? */
+    cont = command_wtrigger(g, ch, arg, line);            /* any world triggers ? */
+    if (!cont) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
+    if (!cont) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
     if (cont) return;                                  /* yes, command trigger took over */
   }
-  for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++) {
-    if (!strncmp(complete_cmd_info[cmd].command, arg, length))
-      if (char_get_level(ch) >= complete_cmd_info[cmd].minimum_level &&
-          char_get_admlevel(ch) >= complete_cmd_info[cmd].minimum_admlevel)
+  for (length = strlen(arg), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++) {
+    if (!strncmp(g->complete_cmd_info[cmd].command, arg, length))
+      if (char_get_level(ch) >= g->complete_cmd_info[cmd].minimum_level &&
+          char_get_admlevel(ch) >= g->complete_cmd_info[cmd].minimum_admlevel)
         break;
   }
 
-  if (*complete_cmd_info[cmd].command == '\n') {
-    send_to_char(ch, "Huh!?!\r\n");
+  if (*g->complete_cmd_info[cmd].command == '\n') {
+    send_to_char(g, ch, "Huh!?!\r\n");
     return;
   }
 
   /* immortals ignore their condition, so don't even test it (it has messages and a die roll) */
-  else if (char_get_admlevel(ch) < 1 && !command_pass(complete_cmd_info[cmd].command, ch))
-    send_to_char(ch, "It's unfortunate...\r\n");
-  else if (check_disabled(&complete_cmd_info[cmd])) /* is it disabled? */
-    send_to_char(ch, "This command has been temporarily disabled.\r\n");
+  else if (char_get_admlevel(ch) < 1 && !command_pass(g, g->complete_cmd_info[cmd].command, ch))
+    send_to_char(g, ch, "It's unfortunate...\r\n");
+  else if (check_disabled(g, &g->complete_cmd_info[cmd])) /* is it disabled? */
+    send_to_char(g, ch, "This command has been temporarily disabled.\r\n");
   else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_GOOP) && char_get_admlevel(ch) < ADMLVL_IMPL)
-    send_to_char(ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
+    send_to_char(g, ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
   else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_FROZEN) && char_get_admlevel(ch) < ADMLVL_IMPL)
-    send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
+    send_to_char(g, ch, "You try, but the mind-numbing cold prevents you...\r\n");
   else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_SPIRAL))
-    send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
-  else if (complete_cmd_info[cmd].command_pointer == nullptr)
-    send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
-  else if (char_is_npc(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
-    send_to_char(ch, "You can't use immortal commands while switched.\r\n");
-  else if (char_get_position(ch) < complete_cmd_info[cmd].minimum_position && char_get_position(ch) != POS_FIGHTING) {
+    send_to_char(g, ch, "You are occupied with your Spiral Comet attack!\r\n");
+  else if (g->complete_cmd_info[cmd].command_pointer == nullptr)
+    send_to_char(g, ch, "Sorry, that command hasn't been implemented yet.\r\n");
+  else if (char_is_npc(ch) && g->complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
+    send_to_char(g, ch, "You can't use immortal commands while switched.\r\n");
+  else if (char_get_position(ch) < g->complete_cmd_info[cmd].minimum_position && char_get_position(ch) != POS_FIGHTING) {
     switch (char_get_position(ch)) {
       case POS_DEAD:
-        send_to_char(ch, "Lie still; you are DEAD!!! :-(\r\n");
+        send_to_char(g, ch, "Lie still; you are DEAD!!! :-(\r\n");
         break;
       case POS_INCAP:
       case POS_MORTALLYW:
-        send_to_char(ch, "You are in a pretty bad shape, unable to do anything!\r\n");
+        send_to_char(g, ch, "You are in a pretty bad shape, unable to do anything!\r\n");
         break;
       case POS_STUNNED:
-        send_to_char(ch, "All you can do right now is think about the stars!\r\n");
+        send_to_char(g, ch, "All you can do right now is think about the stars!\r\n");
         break;
       case POS_SLEEPING:
-        send_to_char(ch, "In your dreams, or what?\r\n");
+        send_to_char(g, ch, "In your dreams, or what?\r\n");
         break;
       case POS_RESTING:
-        send_to_char(ch, "Nah... You feel too relaxed to do that..\r\n");
+        send_to_char(g, ch, "Nah... You feel too relaxed to do that..\r\n");
         break;
       case POS_SITTING:
-        send_to_char(ch, "Maybe you should get on your feet first?\r\n");
+        send_to_char(g, ch, "Maybe you should get on your feet first?\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char(ch, "No way!  You're fighting for your life!\r\n");
+        send_to_char(g, ch, "No way!  You're fighting for your life!\r\n");
         break;
     }
-  } else if (no_specials || !special(ch, cmd, line)) {
-    ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
+  } else if (g->no_specials || !special(g, ch, cmd, line)) {
+    ((*g->complete_cmd_info[cmd].command_pointer)(g, ch, line, cmd, g->complete_cmd_info[cmd].subcmd));
   }
 }
 
@@ -844,13 +845,12 @@ void free_alias(struct alias_data *a)
 }
 
 /* Used in specprocs, mostly.  (Exactly) matches "command" to cmd number */
-int find_command(const char *command)
+int find_command(GameWorld *g, const char *command)
 {
   int cmd;
-  for (cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++)
-    if (!strcmp(complete_cmd_info[cmd].command, command))
+  for (cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
+    if (!strcmp(g->complete_cmd_info[cmd].command, command))
       return (cmd);
   return (-1);
 }
 
-struct command_info *complete_cmd_info;

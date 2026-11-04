@@ -1,7 +1,7 @@
 #include "dbat/consts/prefflags.h"
 
 /* PRF_x */
-const char *preference_bits[NUM_PRF_FLAGS + 1] = {
+const char *const preference_bits[NUM_PRF_FLAGS + 1] = {
     "BRIEF",
     "COMPACT",
     "DEAF",

@@ -25,6 +25,7 @@
 
 #include <unistd.h>
 #include "dbat/character_utils.h"
+#include "dbat/game_world.h"
 
 constexpr int LOAD_HIT  = 0;
 constexpr int LOAD_MANA = 1;
@@ -33,10 +34,10 @@ constexpr int LOAD_KI   = 3;
 constexpr int LOAD_LIFE = 4;
 
 /* local functions */
-void build_player_index(void);
+void build_player_index(GameWorld *g);
 int sprintascii(char *out, bitvector_t bits);
 static void tag_argument(char *argument, char *tag);
-static void load_affects(FILE *fl, struct char_data *ch);
+static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch);
 static void skip_affects(FILE *fl);
 static void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
 static void load_skills(FILE *fl, struct char_data *ch, bool mods);
@@ -46,10 +47,6 @@ static void load_molt(struct char_data *ch, const char *line);
 static void load_majin(struct char_data *ch, const char *line);
 
 /* 'global' vars */
-struct player_index_element *player_table = nullptr; /* index to plr file	 */
-int top_of_p_table                        = 0;       /* ref to top of table		 */
-static int top_of_p_file                  = 0;       /* ref of size of p file	 */
-long top_idnum                            = 0;       /* highest idnum in use		 */
 
 /* external ASCII Player Files vars */
 
@@ -60,7 +57,7 @@ long top_idnum                            = 0;       /* highest idnum in use		 *
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
-void build_player_index(void)
+void build_player_index(GameWorld *g)
 {
   int rec_count = 0, i;
   FILE *plr_index;
@@ -69,7 +66,7 @@ void build_player_index(void)
 
   sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
   if (!(plr_index = fopen(index_name, "r"))) {
-    top_of_p_table = -1;
+    g->top_of_p_table = -1;
     mud_log("No player index file!  First new char will be IMP!");
     return;
   }
@@ -80,28 +77,28 @@ void build_player_index(void)
   rewind(plr_index);
 
   if (rec_count == 0) {
-    player_table   = nullptr;
-    top_of_p_table = -1;
+    g->player_table   = nullptr;
+    g->top_of_p_table = -1;
     return;
   }
 
-  CREATE(player_table, struct player_index_element, rec_count);
+  CREATE(g->player_table, struct player_index_element, rec_count);
   for (i = 0; i < rec_count; i++) {
     get_line(plr_index, line);
-    player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
+    g->player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
     long long last = 0, played = 0;
 
-    sscanf(line, "%ld %79s %d %63s %lld %d %d %d %lld", &player_table[i].id, arg2,
-           &player_table[i].level, bits, &last, &player_table[i].admlevel, &player_table[i].ship, &player_table[i].shiproom, &played);
-    player_table[i].last   = last;
-    player_table[i].played = played;
-    player_table[i].name   = strdup(arg2);
-    player_table[i].flags  = asciiflag_conv(bits);
-    top_idnum              = MAX(top_idnum, player_table[i].id);
+    sscanf(line, "%ld %79s %d %63s %lld %d %d %d %lld", &g->player_table[i].id, arg2,
+           &g->player_table[i].level, bits, &last, &g->player_table[i].admlevel, &g->player_table[i].ship, &g->player_table[i].shiproom, &played);
+    g->player_table[i].last   = last;
+    g->player_table[i].played = played;
+    g->player_table[i].name   = strdup(arg2);
+    g->player_table[i].flags  = asciiflag_conv(bits);
+    g->top_idnum              = MAX(g->top_idnum, g->player_table[i].id);
   }
 
   fclose(plr_index);
-  top_of_p_file = top_of_p_table = i - 1;
+  g->top_of_p_file = g->top_of_p_table = i - 1;
 }
 
 /*
@@ -109,34 +106,34 @@ void build_player_index(void)
  * If the name already exists, by overwriting a deleted character, then
  * we re-use the old position.
  */
-int create_entry(char *name)
+int create_entry(GameWorld *g, char *name)
 {
   int i, pos;
 
-  if (top_of_p_table == -1) { /* no table */
-    CREATE(player_table, struct player_index_element, 1);
-    pos = top_of_p_table = 0;
-  } else if ((pos = get_ptable_by_name(name)) == -1) { /* new name */
-    i = ++top_of_p_table + 1;
+  if (g->top_of_p_table == -1) { /* no table */
+    CREATE(g->player_table, struct player_index_element, 1);
+    pos = g->top_of_p_table = 0;
+  } else if ((pos = get_ptable_by_name(g, name)) == -1) { /* new name */
+    i = ++g->top_of_p_table + 1;
 
-    RECREATE(player_table, struct player_index_element, i);
-    pos = top_of_p_table;
+    RECREATE(g->player_table, struct player_index_element, i);
+    pos = g->top_of_p_table;
   } else
-    free(player_table[pos].name);
+    free(g->player_table[pos].name);
 
   /* RECREATE leaves a new slot uninitialised and a reused one holds the old character's values */
-  player_table[pos] = (struct player_index_element){};
-  CREATE(player_table[pos].name, char, strlen(name) + 1);
+  g->player_table[pos] = (struct player_index_element){};
+  CREATE(g->player_table[pos].name, char, strlen(name) + 1);
 
   /* copy lowercase equivalent of name to table field */
-  for (i = 0; (player_table[pos].name[i] = tolower(name[i])); i++)
+  for (i = 0; (g->player_table[pos].name[i] = tolower(name[i])); i++)
     /* Nothing */;
 
   return (pos);
 }
 
 /* This function necessary to save a seperate ASCII player index */
-void save_player_index(void)
+void save_player_index(GameWorld *g)
 {
   struct atomic_file af;
   int i;
@@ -149,64 +146,64 @@ void save_player_index(void)
     return;
   }
 
-  for (i = 0; i <= top_of_p_table; i++)
-    if (*player_table[i].name) {
-      sprintascii(bits, player_table[i].flags);
-      fprintf(index_file, "%ld %s %d %s %lld %d %d %d %lld\n", player_table[i].id,
-              player_table[i].name, player_table[i].level, *bits ? bits : "0",
-              (long long)player_table[i].last, player_table[i].admlevel, player_table[i].ship, player_table[i].shiproom, (long long)player_table[i].played);
+  for (i = 0; i <= g->top_of_p_table; i++)
+    if (*g->player_table[i].name) {
+      sprintascii(bits, g->player_table[i].flags);
+      fprintf(index_file, "%ld %s %d %s %lld %d %d %d %lld\n", g->player_table[i].id,
+              g->player_table[i].name, g->player_table[i].level, *bits ? bits : "0",
+              (long long)g->player_table[i].last, g->player_table[i].admlevel, g->player_table[i].ship, g->player_table[i].shiproom, (long long)g->player_table[i].played);
     }
   fprintf(index_file, "~\n");
 
   atomic_commit(&af);
 }
 
-void free_player_index(void)
+void free_player_index(GameWorld *g)
 {
   int tp;
 
-  if (!player_table)
+  if (!g->player_table)
     return;
 
-  for (tp = 0; tp <= top_of_p_table; tp++) {
-    if (player_table[tp].name)
-      free(player_table[tp].name);
+  for (tp = 0; tp <= g->top_of_p_table; tp++) {
+    if (g->player_table[tp].name)
+      free(g->player_table[tp].name);
   }
 
-  free(player_table);
-  player_table   = nullptr;
-  top_of_p_table = 0;
+  free(g->player_table);
+  g->player_table   = nullptr;
+  g->top_of_p_table = 0;
 }
 
-long get_ptable_by_name(const char *name)
+long get_ptable_by_name(GameWorld *g, const char *name)
 {
   int i;
 
-  for (i = 0; i <= top_of_p_table; i++)
-    if (!strcasecmp(player_table[i].name, name))
+  for (i = 0; i <= g->top_of_p_table; i++)
+    if (!strcasecmp(g->player_table[i].name, name))
       return (i);
 
   return (-1);
 }
 
-long get_id_by_name(const char *name)
+long get_id_by_name(GameWorld *g, const char *name)
 {
   int i;
 
-  for (i = 0; i <= top_of_p_table; i++)
-    if (!strcasecmp(player_table[i].name, name))
-      return (player_table[i].id);
+  for (i = 0; i <= g->top_of_p_table; i++)
+    if (!strcasecmp(g->player_table[i].name, name))
+      return (g->player_table[i].id);
 
   return (-1);
 }
 
-char *get_name_by_id(long id)
+char *get_name_by_id(GameWorld *g, long id)
 {
   int i;
 
-  for (i = 0; i <= top_of_p_table; i++)
-    if (player_table[i].id == id)
-      return (player_table[i].name);
+  for (i = 0; i <= g->top_of_p_table; i++)
+    if (g->player_table[i].id == id)
+      return (g->player_table[i].name);
 
   return (nullptr);
 }
@@ -217,7 +214,7 @@ char *get_name_by_id(long id)
 
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
-int load_char(const char *name, struct char_data *ch)
+int load_char(GameWorld *g, const char *name, struct char_data *ch)
 {
   int id, i, num = 0, num2 = 0, num3 = 0;
   FILE *fl;
@@ -225,13 +222,13 @@ int load_char(const char *name, struct char_data *ch)
   char buf[128], buf2[128], line[MAX_INPUT_LENGTH + 1], tag[6];
   char f1[128], f2[128], f3[128], f4[128];
 
-  if ((id = get_ptable_by_name(name)) < 0)
+  if ((id = get_ptable_by_name(g, name)) < 0)
     return (-1);
   else {
-    if (!get_filename(fname, sizeof(fname), PLR_FILE, player_table[id].name))
+    if (!get_filename(fname, sizeof(fname), PLR_FILE, g->player_table[id].name))
       return (-1);
     if (!(fl = fopen(fname, "r"))) {
-      mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s", fname);
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s", fname);
       return (-1);
     }
 
@@ -271,7 +268,7 @@ int load_char(const char *name, struct char_data *ch)
     char_set_lifeperc(ch, PFDEF_WEIGHT);
     char_set_position(ch, POS_STANDING);
     char_set_majinizer(ch, PFDEF_BASEPL);
-    char_set_gauntlet(ch, PFDEF_GAUNTLET);
+    char_set_gauntlet(g, ch, PFDEF_GAUNTLET);
     char_set_baseki(ch, PFDEF_BASEKI);
     char_set_energy(ch, 1.0);
     char_set_basest(ch, PFDEF_BASEST);
@@ -292,12 +289,12 @@ int load_char(const char *name, struct char_data *ch)
     char_set_mimic(ch, 0);
     char_set_skill_slots(ch, 0);
     char_set_tail_growth(ch, 0);
-    char_set_trainstr(ch, PFDEF_EYE);
-    char_set_trainspd(ch, PFDEF_EYE);
-    char_set_trainwis(ch, PFDEF_EYE);
-    char_set_trainagl(ch, PFDEF_EYE);
-    char_set_traincon(ch, PFDEF_EYE);
-    char_set_trainint(ch, PFDEF_EYE);
+    char_set_trainstr(g, ch, PFDEF_EYE);
+    char_set_trainspd(g, ch, PFDEF_EYE);
+    char_set_trainwis(g, ch, PFDEF_EYE);
+    char_set_trainagl(g, ch, PFDEF_EYE);
+    char_set_traincon(g, ch, PFDEF_EYE);
+    char_set_trainint(g, ch, PFDEF_EYE);
     char_set_rewtime(ch, PFDEF_LPLAY);
     char_set_dcount(ch, PFDEF_EYE);
     char_set_genome(ch, 0, PFDEF_EYE);
@@ -327,21 +324,21 @@ int load_char(const char *name, struct char_data *ch)
     for (i = 0; i < PM_ARRAY_MAX; i++)
       char_get_act(ch)[i] = PFDEF_PLRFLAGS;
     for (i = 0; i < PR_ARRAY_MAX; i++)
-      char_get_pref(ch)
+      char_get_pref(g, ch)
           [i] = PFDEF_PREFFLAGS;
     for (i = 0; i < AD_ARRAY_MAX; i++)
       char_get_admflags(ch)[i] = 0;
-    char_set_load_room(ch, PFDEF_LOADROOM);
-    char_set_invis_level(ch, PFDEF_INVISLEV);
-    char_set_freeze_level(ch, PFDEF_FREEZELEV);
-    char_set_wimp_level(ch, PFDEF_WIMPLEV);
+    char_set_load_room(g, ch, PFDEF_LOADROOM);
+    char_set_invis_level(g, ch, PFDEF_INVISLEV);
+    char_set_freeze_level(g, ch, PFDEF_FREEZELEV);
+    char_set_wimp_level(g, ch, PFDEF_WIMPLEV);
     char_set_powerattack(ch, PFDEF_POWERATT);
-    char_set_conditions(ch, HUNGER, PFDEF_HUNGER);
-    char_set_conditions(ch, THIRST, PFDEF_THIRST);
-    char_set_conditions(ch, DRUNK, PFDEF_DRUNK);
-    char_set_bad_pws(ch, PFDEF_BADPWS);
+    char_set_conditions(g, ch, HUNGER, PFDEF_HUNGER);
+    char_set_conditions(g, ch, THIRST, PFDEF_THIRST);
+    char_set_conditions(g, ch, DRUNK, PFDEF_DRUNK);
+    char_set_bad_pws(g, ch, PFDEF_BADPWS);
     for (i = 0; i < NUM_CLASSES; i++)
-      char_set_practice_points(ch, PFDEF_PRACTICES);
+      char_set_practice_points(g, ch, PFDEF_PRACTICES);
     char_set_gold(ch, PFDEF_GOLD);
     char_set_backstabcool(ch, 0);
     char_set_con_cooldown(ch, 0);
@@ -349,7 +346,7 @@ int load_char(const char *name, struct char_data *ch)
     char_set_bank_gold(ch, PFDEF_BANK);
     char_set_absorbs(ch, PFDEF_BANK);
     char_set_ingestLearned(ch, PFDEF_BANK);
-    char_set_racial_pref(ch, PFDEF_BANK);
+    char_set_racial_pref(g, ch, PFDEF_BANK);
     char_set_upgrade(ch, PFDEF_BANK);
     char_set_forgeting(ch, PFDEF_BANK);
     char_set_forgetcount(ch, PFDEF_BANK);
@@ -375,8 +372,8 @@ int load_char(const char *name, struct char_data *ch)
     char_set_ki(ch, PFDEF_KI);
     char_set_max_ki(ch, PFDEF_MAXKI);
     char_set_speaking(ch, PFDEF_SPEAKING);
-    char_set_olc_zone(ch, PFDEF_OLC);
-    char_set_host(ch, nullptr);
+    char_set_olc_zone(g, ch, PFDEF_OLC);
+    char_set_host(g, ch, nullptr);
 
     char_set_time_maxage(ch, 0);
     char_set_time_created(ch, 0);
@@ -403,7 +400,7 @@ int load_char(const char *name, struct char_data *ch)
             char_get_affected_by(ch)[1] = asciiflag_conv(f2);
             char_get_affected_by(ch)[2] = asciiflag_conv(f3);
             char_get_affected_by(ch)[3] = asciiflag_conv(f4);
-          } else if (!strcmp(tag, "Affs")) load_affects(fl, ch);
+          } else if (!strcmp(tag, "Affs")) load_affects(g, fl, ch);
           else if (!strcmp(tag, "Affv")) skip_affects(fl);
           else if (!strcmp(tag, "AdmL")) char_set_admlevel(ch, atoi(line));
           else if (!strcmp(tag, "Abso")) char_set_absorbs(ch, atoi(line));
@@ -418,7 +415,7 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'B':
-          if (!strcmp(tag, "Badp")) char_set_bad_pws(ch, atoi(line));
+          if (!strcmp(tag, "Badp")) char_set_bad_pws(g, ch, atoi(line));
           else if (!strcmp(tag, "Bank")) char_set_bank_gold(ch, atoi(line));
           else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
           else if (!strcmp(tag, "Blss")) char_set_blesslvl(ch, atoi(line));
@@ -454,7 +451,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Deac")) char_set_dcount(ch, atoi(line));
           else if (!strcmp(tag, "Desc")) char_set_ddesc(ch, fread_string(fl, buf2));
           else if (!strcmp(tag, "Dex ")) char_set_real_abils_dex(ch, atoi(line));
-          else if (!strcmp(tag, "Drnk")) char_set_conditions(ch, DRUNK, atoi(line));
+          else if (!strcmp(tag, "Drnk")) char_set_conditions(g, ch, DRUNK, atoi(line));
           else if (!strcmp(tag, "Damg"))
             ; /* obsolete damage mod: ignored */
           else if (!strcmp(tag, "Droo")) char_set_droom(ch, atoi(line));
@@ -471,7 +468,7 @@ int load_char(const char *name, struct char_data *ch)
 
         case 'F':
           if (!strcmp(tag, "Fisd")) char_set_accuracy_mod(ch, atoi(line));
-          else if (!strcmp(tag, "Frez")) char_set_freeze_level(ch, atoi(line));
+          else if (!strcmp(tag, "Frez")) char_set_freeze_level(g, ch, atoi(line));
           else if (!strcmp(tag, "Forc")) char_set_forgetcount(ch, atoi(line));
           else if (!strcmp(tag, "Forg")) char_set_forgeting(ch, atoi(line));
           else if (!strcmp(tag, "Fury")) char_set_fury(ch, atoi(line));
@@ -479,7 +476,7 @@ int load_char(const char *name, struct char_data *ch)
 
         case 'G':
           if (!strcmp(tag, "Gold")) char_set_gold(ch, atoi(line));
-          else if (!strcmp(tag, "Gaun")) char_set_gauntlet(ch, atoi(line));
+          else if (!strcmp(tag, "Gaun")) char_set_gauntlet(g, ch, atoi(line));
           else if (!strcmp(tag, "Geno")) char_set_genome(ch, 0, atoi(line));
           else if (!strcmp(tag, "Gen1")) char_set_genome(ch, 1, atoi(line));
           break;
@@ -490,20 +487,20 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Hite")) char_set_height(ch, atoi(line));
           else if (!strcmp(tag, "Home")) char_set_hometown(ch, atoi(line));
           else if (!strcmp(tag, "Host")) {
-            if (char_get_host(ch))
-              free(char_get_host(ch));
-            char_set_host(ch, strdup(line));
+            if (char_get_host(g, ch))
+              free(char_get_host(g, ch));
+            char_set_host(g, ch, strdup(line));
           } else if (!strcmp(tag, "Hrc ")) char_set_hairc(ch, atoi(line));
           else if (!strcmp(tag, "Hrl ")) char_set_hairl(ch, atoi(line));
           else if (!strcmp(tag, "Hrs ")) char_set_hairs(ch, atoi(line));
-          else if (!strcmp(tag, "Hung")) char_set_conditions(ch, HUNGER, atoi(line));
+          else if (!strcmp(tag, "Hung")) char_set_conditions(g, ch, HUNGER, atoi(line));
           break;
 
         case 'I':
           if (!strcmp(tag, "Id  ")) char_set_idnum(ch, atol(line));
           else if (!strcmp(tag, "INGl")) char_set_ingestLearned(ch, atoi(line));
           else if (!strcmp(tag, "Int ")) char_set_real_abils_intel(ch, atoi(line));
-          else if (!strcmp(tag, "Invs")) char_set_invis_level(ch, atoi(line));
+          else if (!strcmp(tag, "Invs")) char_set_invis_level(g, ch, atoi(line));
           break;
 
         case 'K':
@@ -513,7 +510,7 @@ int load_char(const char *name, struct char_data *ch)
 
         case 'L':
           if (!strcmp(tag, "Last")) char_set_time_logon(ch, atoll(line));
-          else if (!strcmp(tag, "Lern")) char_set_practice_points(ch, atoi(line));
+          else if (!strcmp(tag, "Lern")) char_set_practice_points(g, ch, atoi(line));
           else if (!strcmp(tag, "Levl")) char_set_class_level(ch, atoi(line));
           /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
           else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
@@ -545,7 +542,7 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'O':
-          if (!strcmp(tag, "Olc ")) char_set_olc_zone(ch, atoi(line));
+          if (!strcmp(tag, "Olc ")) char_set_olc_zone(g, ch, atoi(line));
           break;
 
         case 'P':
@@ -554,28 +551,28 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Phse")) char_set_starphase(ch, atoi(line));
           else if (!strcmp(tag, "Plyd")) char_set_time_played(ch, atoll(line));
 #ifdef ASCII_SAVE_POOFS
-          else if (!strcmp(tag, "PfIn")) char_set_poofin(ch, strdup(line));
-          else if (!strcmp(tag, "PfOt")) char_set_poofout(ch, strdup(line));
+          else if (!strcmp(tag, "PfIn")) char_set_poofin(g, ch, strdup(line));
+          else if (!strcmp(tag, "PfOt")) char_set_poofout(g, ch, strdup(line));
 #endif
           else if (!strcmp(tag, "Pole")) char_set_accuracy(ch, atoi(line));
           else if (!strcmp(tag, "Posi")) char_set_position(ch, atoi(line));
           else if (!strcmp(tag, "PwrA")) char_set_powerattack(ch, atoi(line));
           else if (!strcmp(tag, "Pref")) {
             sscanf(line, "%127s %127s %127s %127s", f1, f2, f3, f4);
-            char_get_pref(ch)
+            char_get_pref(g, ch)
                 [0] = asciiflag_conv(f1);
-            char_get_pref(ch)
+            char_get_pref(g, ch)
                 [1] = asciiflag_conv(f2);
-            char_get_pref(ch)
+            char_get_pref(g, ch)
                 [2] = asciiflag_conv(f3);
-            char_get_pref(ch)
+            char_get_pref(g, ch)
                 [3] = asciiflag_conv(f4);
           } else if (!strcmp(tag, "Prff")) char_set_preference(ch, atoi(line));
           break;
 
         case 'R':
           if (!strcmp(tag, "Race")) char_set_race(ch, atoi(line));
-          else if (!strcmp(tag, "Raci")) char_set_racial_pref(ch, atoi(line));
+          else if (!strcmp(tag, "Raci")) char_set_racial_pref(g, ch, atoi(line));
           else if (!strcmp(tag, "RBan")) char_set_rbank(ch, atoi(line));
           else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
           else if (!strcmp(tag, "Rela")) char_set_relax_count(ch, atoi(line));
@@ -583,7 +580,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Rad1")) char_set_radar1(ch, atoi(line));
           else if (!strcmp(tag, "Rad2")) char_set_radar2(ch, atoi(line));
           else if (!strcmp(tag, "Rad3")) char_set_radar3(ch, atoi(line));
-          else if (!strcmp(tag, "Room")) char_set_load_room(ch, atoi(line));
+          else if (!strcmp(tag, "Room")) char_set_load_room(g, ch, atoi(line));
           else if (!strcmp(tag, "RPfe")) char_set_feature(ch, line);
           else if (!strcmp(tag, "RPP ")) char_set_rp(ch, atoi(line));
           break;
@@ -603,7 +600,7 @@ int load_char(const char *name, struct char_data *ch)
             ; /* obsolete race practices: ignored */
           else if (!strcmp(tag, "SkCl")) {
             sscanf(line, "%d %d", &num2, &num3);
-            char_set_practice_points(ch, num3);
+            char_set_practice_points(g, ch, num3);
           } else if (!strcmp(tag, "Slot")) char_set_skill_slots(ch, atoi(line));
           else if (!strcmp(tag, "Spek")) char_set_speaking(ch, atoi(line));
           else if (!strcmp(tag, "Str ")) char_set_real_abils_str(ch, atoi(line));
@@ -619,7 +616,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Tcos")) {
             sscanf(line, "%d %d", &num2, &num3);
             char_set_transcost(ch, num2, num3);
-          } else if (!strcmp(tag, "Thir")) char_set_conditions(ch, THIRST, atoi(line));
+          } else if (!strcmp(tag, "Thir")) char_set_conditions(g, ch, THIRST, atoi(line));
           else if (!strcmp(tag, "Thr1"))
             ;
           else if (!strcmp(tag, "Thr2"))
@@ -634,13 +631,13 @@ int load_char(const char *name, struct char_data *ch)
             ;
           else if (!strcmp(tag, "ThB3"))
             ;
-          else if (!strcmp(tag, "Trns")) char_set_ability_trains(ch, atoi(line));
-          else if (!strcmp(tag, "Trag")) char_set_trainagl(ch, atoi(line));
-          else if (!strcmp(tag, "Trco")) char_set_traincon(ch, atoi(line));
-          else if (!strcmp(tag, "Trin")) char_set_trainint(ch, atoi(line));
-          else if (!strcmp(tag, "Trsp")) char_set_trainspd(ch, atoi(line));
-          else if (!strcmp(tag, "Trst")) char_set_trainstr(ch, atoi(line));
-          else if (!strcmp(tag, "Trwi")) char_set_trainwis(ch, atoi(line));
+          else if (!strcmp(tag, "Trns")) char_set_ability_trains(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trag")) char_set_trainagl(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trco")) char_set_traincon(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trin")) char_set_trainint(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trsp")) char_set_trainspd(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trst")) char_set_trainstr(g, ch, atoi(line));
+          else if (!strcmp(tag, "Trwi")) char_set_trainwis(g, ch, atoi(line));
           else if (!strcmp(tag, "Trp ")) char_set_trp(ch, atoi(line));
           break;
         case 'U':
@@ -658,7 +655,7 @@ int load_char(const char *name, struct char_data *ch)
 
         case 'W':
           if (!strcmp(tag, "Wate")) char_set_weight(ch, atoi(line));
-          else if (!strcmp(tag, "Wimp")) char_set_wimp_level(ch, atoi(line));
+          else if (!strcmp(tag, "Wimp")) char_set_wimp_level(g, ch, atoi(line));
           else if (!strcmp(tag, "Wis ")) char_set_real_abils_wis(ch, atoi(line));
           break;
 
@@ -675,7 +672,7 @@ int load_char(const char *name, struct char_data *ch)
 
   if (!char_get_time_birth(ch)) {
     mud_log("No birthday for user %s, using standard starting age determination", char_get_name(ch));
-    char_set_time_birth(ch, time(0) - birth_age(ch));
+    char_set_time_birth(ch, time(0) - birth_age(g, ch));
   }
 
   if (!char_get_time_maxage(ch)) {
@@ -683,21 +680,21 @@ int load_char(const char *name, struct char_data *ch)
     char_set_time_maxage(ch, char_get_time_birth(ch) + max_age(ch));
   }
 
-  affect_total(ch);
+  affect_total(g, ch);
 
   /* initialization for imms */
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < SKILL_TABLE_SIZE; i++)
       char_set_skills_base(ch, i, 100);
-    char_set_conditions(ch, HUNGER, -1);
-    char_set_conditions(ch, THIRST, -1);
-    char_set_conditions(ch, DRUNK, -1);
+    char_set_conditions(g, ch, HUNGER, -1);
+    char_set_conditions(g, ch, THIRST, -1);
+    char_set_conditions(g, ch, DRUNK, -1);
   }
 
   if (char_is_android(ch)) {
-    char_set_conditions(ch, HUNGER, -1);
-    char_set_conditions(ch, THIRST, -1);
-    char_set_conditions(ch, DRUNK, -1);
+    char_set_conditions(g, ch, HUNGER, -1);
+    char_set_conditions(g, ch, THIRST, -1);
+    char_set_conditions(g, ch, DRUNK, -1);
   }
   fclose(fl);
   return (id);
@@ -730,7 +727,7 @@ static void kill_ems(char *str)
  * And that's it! No more fudging around with the load room.
  */
 /* This is the ASCII Player Files save routine */
-void save_char(struct char_data *ch)
+void save_char(GameWorld *g, struct char_data *ch)
 {
   struct atomic_file af;
   FILE *fl;
@@ -750,11 +747,11 @@ void save_char(struct char_data *ch)
    */
   if (char_get_desc(ch)) {
     if (*char_get_desc(ch)->host) {
-      if (!char_get_host(ch))
-        char_set_host(ch, strdup(char_get_desc(ch)->host));
-      else if (char_get_host(ch) && !strcmp(char_get_host(ch), char_get_desc(ch)->host)) {
-        free(char_get_host(ch));
-        char_set_host(ch, strdup(char_get_desc(ch)->host));
+      if (!char_get_host(g, ch))
+        char_set_host(g, ch, strdup(char_get_desc(ch)->host));
+      else if (char_get_host(g, ch) && !strcmp(char_get_host(g, ch), char_get_desc(ch)->host)) {
+        free(char_get_host(g, ch));
+        char_set_host(g, ch, strdup(char_get_desc(ch)->host));
       }
     }
 
@@ -771,7 +768,7 @@ void save_char(struct char_data *ch)
   if (!get_filename(fname, sizeof(fname), PLR_FILE, char_get_name(ch)))
     return;
   if (!(fl = atomic_open(&af, fname, true))) {
-    mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s for write", fname);
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s for write", fname);
     return;
   }
 
@@ -782,12 +779,12 @@ void save_char(struct char_data *ch)
     char_set_trp(ch, char_get_rp(ch));
   }
   if (char_get_desc(ch) != nullptr && char_get_desc(ch)->user != nullptr) {
-    userWrite(char_get_desc(ch), 0, 0, 0, "index");
+    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
   }
 
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i))
-      char_eq[i] = unequip_char(ch, i);
+      char_eq[i] = unequip_char(g, ch, i);
     else
       char_eq[i] = nullptr;
   }
@@ -808,7 +805,7 @@ void save_char(struct char_data *ch)
     }
   }
 
-  save_char_vars(ch);
+  save_char_vars(g, ch);
 
   /*
    * remove the affections so that the raw values are stored; otherwise the
@@ -816,7 +813,7 @@ void save_char(struct char_data *ch)
    */
 
   while (char_get_affected(ch))
-    affect_remove(ch, char_get_affected(ch));
+    affect_remove(g, ch, char_get_affected(ch));
 
   if ((i >= MAX_AFFECT) && aff && aff->next)
     mud_log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
@@ -829,15 +826,15 @@ void save_char(struct char_data *ch)
   if (char_get_user(ch)) fprintf(fl, "User: %s\n", char_get_user(ch));
   if (char_get_voice(ch)) fprintf(fl, "Voic: %s\n", char_get_voice(ch));
   if (char_get_feature(ch)) fprintf(fl, "RPfe: %s\n", char_get_feature(ch));
-  if (char_get_ability_trains(ch)) fprintf(fl, "Trns: %d\n", char_get_ability_trains(ch));
+  if (char_get_ability_trains(g, ch)) fprintf(fl, "Trns: %d\n", char_get_ability_trains(g, ch));
   if (char_get_ddesc(ch) && *char_get_ddesc(ch)) {
     strcpy(buf, char_get_ddesc(ch));
     kill_ems(buf);
     fprintf(fl, "Desc:\n%s~\n", buf);
   }
 #ifdef ASCII_SAVE_POOFS
-  if (char_get_poofin(ch)) fprintf(fl, "PfIn: %s\n", char_get_poofin(ch));
-  if (char_get_poofout(ch)) fprintf(fl, "PfOt: %s\n", char_get_poofout(ch));
+  if (char_get_poofin(g, ch)) fprintf(fl, "PfIn: %s\n", char_get_poofin(g, ch));
+  if (char_get_poofout(g, ch)) fprintf(fl, "PfOt: %s\n", char_get_poofout(g, ch));
 #endif
   if (char_get_sex(ch) != PFDEF_SEX) fprintf(fl, "Sex : %d\n", char_get_sex(ch));
   if (char_get_size(ch) != PFDEF_SIZE) fprintf(fl, "Size: %d\n", char_get_size(ch));
@@ -856,7 +853,7 @@ void save_char(struct char_data *ch)
   fprintf(fl, "Plyd: %lld\n", (long long)char_get_time_played(ch));
   fprintf(fl, "Last: %lld\n", (long long)char_get_time_logon(ch));
 
-  if (char_get_host(ch)) fprintf(fl, "Host: %s\n", char_get_host(ch));
+  if (char_get_host(g, ch)) fprintf(fl, "Host: %s\n", char_get_host(g, ch));
   if (char_get_height(ch) != PFDEF_HEIGHT) fprintf(fl, "Hite: %d\n", char_get_height(ch));
   if (char_get_weight(ch) != PFDEF_HEIGHT) fprintf(fl, "Wate: %d\n", char_get_weight(ch));
   if (char_get_alignment(ch) != PFDEF_ALIGNMENT) fprintf(fl, "Alin: %d\n", char_get_alignment(ch));
@@ -872,10 +869,10 @@ void save_char(struct char_data *ch)
   sprintascii(fbuf3, char_get_affected_by(ch)[2]);
   sprintascii(fbuf4, char_get_affected_by(ch)[3]);
   fprintf(fl, "Aff : %s %s %s %s\n", fbuf1, fbuf2, fbuf3, fbuf4);
-  sprintascii(fbuf1, char_get_pref(ch)[0]);
-  sprintascii(fbuf2, char_get_pref(ch)[1]);
-  sprintascii(fbuf3, char_get_pref(ch)[2]);
-  sprintascii(fbuf4, char_get_pref(ch)[3]);
+  sprintascii(fbuf1, char_get_pref(g, ch)[0]);
+  sprintascii(fbuf2, char_get_pref(g, ch)[1]);
+  sprintascii(fbuf3, char_get_pref(g, ch)[2]);
+  sprintascii(fbuf4, char_get_pref(g, ch)[3]);
   fprintf(fl, "Pref: %s %s %s %s\n", fbuf1, fbuf2, fbuf3, fbuf4);
   sprintascii(fbuf1, char_get_admflags(ch)[0]);
   sprintascii(fbuf2, char_get_admflags(ch)[1]);
@@ -883,28 +880,28 @@ void save_char(struct char_data *ch)
   sprintascii(fbuf4, char_get_admflags(ch)[3]);
   fprintf(fl, "AdmF: %s %s %s %s\n", fbuf1, fbuf2, fbuf3, fbuf4);
 
-  if (char_get_wimp_level(ch) != PFDEF_WIMPLEV) fprintf(fl, "Wimp: %d\n", char_get_wimp_level(ch));
+  if (char_get_wimp_level(g, ch) != PFDEF_WIMPLEV) fprintf(fl, "Wimp: %d\n", char_get_wimp_level(g, ch));
   if (char_get_powerattack(ch) != PFDEF_POWERATT) fprintf(fl, "PwrA: %d\n", char_get_powerattack(ch));
-  if (char_get_freeze_level(ch) != PFDEF_FREEZELEV) fprintf(fl, "Frez: %d\n", char_get_freeze_level(ch));
-  if (char_get_invis_level(ch) != PFDEF_INVISLEV) fprintf(fl, "Invs: %d\n", char_get_invis_level(ch));
-  if (char_get_load_room(ch) != PFDEF_LOADROOM) fprintf(fl, "Room: %d\n", char_get_load_room(ch));
+  if (char_get_freeze_level(g, ch) != PFDEF_FREEZELEV) fprintf(fl, "Frez: %d\n", char_get_freeze_level(g, ch));
+  if (char_get_invis_level(g, ch) != PFDEF_INVISLEV) fprintf(fl, "Invs: %d\n", char_get_invis_level(g, ch));
+  if (char_get_load_room(g, ch) != PFDEF_LOADROOM) fprintf(fl, "Room: %d\n", char_get_load_room(g, ch));
 
-  if (char_get_bad_pws(ch) != PFDEF_BADPWS) fprintf(fl, "Badp: %d\n", char_get_bad_pws(ch));
+  if (char_get_bad_pws(g, ch) != PFDEF_BADPWS) fprintf(fl, "Badp: %d\n", char_get_bad_pws(g, ch));
 
   for (i = 0; i < 6; i++)
     if (char_get_transcost(ch, i) != false)
       fprintf(fl, "Tcos: %d %d\n", i, char_get_transcost(ch, i));
 
   for (i = 0; i < NUM_CLASSES; i++)
-    if (char_get_practice_points(ch) != PFDEF_PRACTICES)
-      fprintf(fl, "SkCl: %d %d\n", i, char_get_practice_points(ch));
+    if (char_get_practice_points(g, ch) != PFDEF_PRACTICES)
+      fprintf(fl, "SkCl: %d %d\n", i, char_get_practice_points(g, ch));
 
-  if (char_get_conditions(ch, HUNGER) != PFDEF_HUNGER && char_get_admlevel(ch) < ADMLVL_IMMORT)
-    fprintf(fl, "Hung: %d\n", char_get_conditions(ch, HUNGER));
-  if (char_get_conditions(ch, THIRST) != PFDEF_THIRST && char_get_admlevel(ch) < ADMLVL_IMMORT)
-    fprintf(fl, "Thir: %d\n", char_get_conditions(ch, THIRST));
-  if (char_get_conditions(ch, DRUNK) != PFDEF_DRUNK && char_get_admlevel(ch) < ADMLVL_IMMORT)
-    fprintf(fl, "Drnk: %d\n", char_get_conditions(ch, DRUNK));
+  if (char_get_conditions(g, ch, HUNGER) != PFDEF_HUNGER && char_get_admlevel(ch) < ADMLVL_IMMORT)
+    fprintf(fl, "Hung: %d\n", char_get_conditions(g, ch, HUNGER));
+  if (char_get_conditions(g, ch, THIRST) != PFDEF_THIRST && char_get_admlevel(ch) < ADMLVL_IMMORT)
+    fprintf(fl, "Thir: %d\n", char_get_conditions(g, ch, THIRST));
+  if (char_get_conditions(g, ch, DRUNK) != PFDEF_DRUNK && char_get_admlevel(ch) < ADMLVL_IMMORT)
+    fprintf(fl, "Drnk: %d\n", char_get_conditions(g, ch, DRUNK));
 
   /*
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
@@ -943,8 +940,8 @@ void save_char(struct char_data *ch)
   if (char_get_accuracy(ch) != PFDEF_ACCURACY) fprintf(fl, "Pole: %d\n", char_get_accuracy(ch));
   if (char_get_preference(ch) != PFDEF_EYE) fprintf(fl, "Prff: %d\n", char_get_preference(ch));
   if (char_get_speaking(ch) != PFDEF_SPEAKING) fprintf(fl, "Spek: %d\n", char_get_speaking(ch));
-  if (char_get_olc_zone(ch) != PFDEF_OLC) fprintf(fl, "Olc : %d\n", char_get_olc_zone(ch));
-  if (char_get_gauntlet(ch) != PFDEF_GAUNTLET) fprintf(fl, "Gaun: %d\n", char_get_gauntlet(ch));
+  if (char_get_olc_zone(g, ch) != PFDEF_OLC) fprintf(fl, "Olc : %d\n", char_get_olc_zone(g, ch));
+  if (char_get_gauntlet(g, ch) != PFDEF_GAUNTLET) fprintf(fl, "Gaun: %d\n", char_get_gauntlet(g, ch));
   if (char_get_genome(ch, 0) != PFDEF_EYE) fprintf(fl, "Geno: %d\n", char_get_genome(ch, 0));
   if (char_get_genome(ch, 1) != PFDEF_EYE) fprintf(fl, "Gen1: %d\n", char_get_genome(ch, 1));
   if (char_get_position(ch) != POS_STANDING) fprintf(fl, "Posi: %d\n", char_get_position(ch));
@@ -986,12 +983,12 @@ void save_char(struct char_data *ch)
   if (char_get_suppressed(ch) != PFDEF_SKIN) fprintf(fl, "Sups: %" PRId64 "\n", char_get_suppressed(ch));
   if (char_get_trp(ch) != PFDEF_SKIN) fprintf(fl, "Trp : %d\n", char_get_trp(ch));
   if (char_get_dcount(ch) != PFDEF_EYE) fprintf(fl, "Deac: %d\n", char_get_dcount(ch));
-  if (char_get_trainagl(ch) != PFDEF_EYE) fprintf(fl, "Trag: %d\n", char_get_trainagl(ch));
-  if (char_get_traincon(ch) != PFDEF_EYE) fprintf(fl, "Trco: %d\n", char_get_traincon(ch));
-  if (char_get_trainint(ch) != PFDEF_EYE) fprintf(fl, "Trin: %d\n", char_get_trainint(ch));
-  if (char_get_trainspd(ch) != PFDEF_EYE) fprintf(fl, "Trsp: %d\n", char_get_trainspd(ch));
-  if (char_get_trainstr(ch) != PFDEF_EYE) fprintf(fl, "Trst: %d\n", char_get_trainstr(ch));
-  if (char_get_trainwis(ch) != PFDEF_EYE) fprintf(fl, "Trwi: %d\n", char_get_trainwis(ch));
+  if (char_get_trainagl(g, ch) != PFDEF_EYE) fprintf(fl, "Trag: %d\n", char_get_trainagl(g, ch));
+  if (char_get_traincon(g, ch) != PFDEF_EYE) fprintf(fl, "Trco: %d\n", char_get_traincon(g, ch));
+  if (char_get_trainint(g, ch) != PFDEF_EYE) fprintf(fl, "Trin: %d\n", char_get_trainint(g, ch));
+  if (char_get_trainspd(g, ch) != PFDEF_EYE) fprintf(fl, "Trsp: %d\n", char_get_trainspd(g, ch));
+  if (char_get_trainstr(g, ch) != PFDEF_EYE) fprintf(fl, "Trst: %d\n", char_get_trainstr(g, ch));
+  if (char_get_trainwis(g, ch) != PFDEF_EYE) fprintf(fl, "Trwi: %d\n", char_get_trainwis(g, ch));
   if (char_get_starphase(ch) != PFDEF_EYE) fprintf(fl, "Phse: %d\n", char_get_starphase(ch));
   if (char_get_mimic(ch)) fprintf(fl, "Mimi: %d\n", char_get_mimic(ch));
   if (char_get_skill_slots(ch) != PFDEF_EYE) fprintf(fl, "Slot: %d\n", char_get_skill_slots(ch));
@@ -1068,53 +1065,53 @@ void save_char(struct char_data *ch)
   /* add spell and eq affections back in now */
   for (i = 0; i < MAX_AFFECT; i++) {
     if (tmp_aff[i].type)
-      affect_to_char(ch, &tmp_aff[i]);
+      affect_to_char(g, ch, &tmp_aff[i]);
   }
 
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_eq[i])
-      equip_char(ch, char_eq[i], i);
+      equip_char(g, ch, char_eq[i], i);
   }
 
   /* end char_to_store code */
 
-  if ((id = get_ptable_by_name(char_get_name(ch))) < 0)
+  if ((id = get_ptable_by_name(g, char_get_name(ch))) < 0)
     return;
 
   /* update the player in the player index */
-  if (player_table[id].level != char_get_level(ch)) {
+  if (g->player_table[id].level != char_get_level(ch)) {
     save_index             = true;
-    player_table[id].level = char_get_level(ch);
+    g->player_table[id].level = char_get_level(ch);
   }
-  if (player_table[id].admlevel != char_get_admlevel(ch)) {
+  if (g->player_table[id].admlevel != char_get_admlevel(ch)) {
     save_index                = true;
-    player_table[id].admlevel = char_get_admlevel(ch);
+    g->player_table[id].admlevel = char_get_admlevel(ch);
   }
-  if (player_table[id].last != char_get_time_logon(ch)) {
+  if (g->player_table[id].last != char_get_time_logon(ch)) {
     save_index            = true;
-    player_table[id].last = char_get_time_logon(ch);
+    g->player_table[id].last = char_get_time_logon(ch);
   }
-  if (player_table[id].played != char_get_lastpl(ch)) {
+  if (g->player_table[id].played != char_get_lastpl(ch)) {
     save_index              = true;
-    player_table[id].played = char_get_lastpl(ch);
+    g->player_table[id].played = char_get_lastpl(ch);
   }
-  i = player_table[id].flags;
+  i = g->player_table[id].flags;
   if (char_plr_flagged(ch, PLR_DELETED))
-    SET_BIT(player_table[id].flags, PINDEX_DELETED);
+    SET_BIT(g->player_table[id].flags, PINDEX_DELETED);
   else
-    REMOVE_BIT(player_table[id].flags, PINDEX_DELETED);
+    REMOVE_BIT(g->player_table[id].flags, PINDEX_DELETED);
   if (char_plr_flagged(ch, PLR_NODELETE) || char_plr_flagged(ch, PLR_CRYO))
-    SET_BIT(player_table[id].flags, PINDEX_NODELETE);
+    SET_BIT(g->player_table[id].flags, PINDEX_NODELETE);
   else
-    REMOVE_BIT(player_table[id].flags, PINDEX_NODELETE);
+    REMOVE_BIT(g->player_table[id].flags, PINDEX_NODELETE);
 
   if (char_plr_flagged(ch, PLR_FROZEN) || char_plr_flagged(ch, PLR_NOWIZLIST))
-    SET_BIT(player_table[id].flags, PINDEX_NOWIZLIST);
+    SET_BIT(g->player_table[id].flags, PINDEX_NOWIZLIST);
   else
-    REMOVE_BIT(player_table[id].flags, PINDEX_NOWIZLIST);
+    REMOVE_BIT(g->player_table[id].flags, PINDEX_NOWIZLIST);
 
-  if (player_table[id].flags != i || save_index)
-    save_player_index();
+  if (g->player_table[id].flags != i || save_index)
+    save_player_index(g);
 }
 
 /*
@@ -1140,7 +1137,7 @@ static void tag_argument(char *argument, char *tag)
   *wrt = '\0';
 }
 
-static void load_affects(FILE *fl, struct char_data *ch)
+static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch)
 {
   int num, num2, num3, num4, num5, num6;
   char line[MAX_INPUT_LENGTH + 1];
@@ -1158,7 +1155,7 @@ static void load_affects(FILE *fl, struct char_data *ch)
       af.location  = num4;
       af.bitvector = num5;
       af.specific  = num6;
-      affect_to_char(ch, &af);
+      affect_to_char(g, ch, &af);
     }
   } while (num != 0);
 }
@@ -1284,56 +1281,56 @@ static void load_molt(struct char_data *ch, const char *line)
  * self-deleted, deleted by an immortal, or deleted by the auto-wipe
  * system (if enabled).
  */
-void remove_player(int pfilepos)
+void remove_player(GameWorld *g, int pfilepos)
 {
   char fname[40];
   int i;
 
-  if (!*player_table[pfilepos].name)
+  if (!*g->player_table[pfilepos].name)
     return;
 
   /* Unlink all player-owned files */
   for (i = 0; i < MAX_FILES; i++) {
-    if (get_filename(fname, sizeof(fname), i, player_table[pfilepos].name))
+    if (get_filename(fname, sizeof(fname), i, g->player_table[pfilepos].name))
       unlink(fname);
-    if (get_filename(fname, sizeof(fname), i, CAP(player_table[pfilepos].name)))
+    if (get_filename(fname, sizeof(fname), i, CAP(g->player_table[pfilepos].name)))
       unlink(fname);
   }
 
   mud_log("PCLEAN: %s Lev: %d Last: %s",
-          player_table[pfilepos].name, player_table[pfilepos].level,
-          asctime(localtime(&player_table[pfilepos].last)));
-  player_table[pfilepos].name[0] = '\0';
-  save_player_index();
+          g->player_table[pfilepos].name, g->player_table[pfilepos].level,
+          asctime(localtime(&g->player_table[pfilepos].last)));
+  g->player_table[pfilepos].name[0] = '\0';
+  save_player_index(g);
 }
 
-void clean_pfiles(void)
+void clean_pfiles(GameWorld *g)
 {
   int i, ci;
 
-  for (i = 0; i <= top_of_p_table; i++) {
+  for (i = 0; i <= g->top_of_p_table; i++) {
     /*
      * We only want to go further if the player isn't protected
      * from deletion and hasn't already been deleted.
      */
-    if (!IS_SET(player_table[i].flags, PINDEX_NODELETE) &&
-        *player_table[i].name) {
+    if (!IS_SET(g->player_table[i].flags, PINDEX_NODELETE) &&
+        *g->player_table[i].name) {
       /*
        * If the player is already flagged for deletion, then go
        * ahead and get rid of him.
        */
-      if (IS_SET(player_table[i].flags, PINDEX_DELETED)) {
-        remove_player(i);
+      if (IS_SET(g->player_table[i].flags, PINDEX_DELETED)) {
+        remove_player(g, i);
       } else {
         /*
          * Now we check to see if the player has overstayed his
          * welcome based on level.
          */
         for (ci = 0; pclean_criteria[ci].level > -1; ci++) {
-          if (player_table[i].admlevel > 1)
+          if (g->player_table[i].admlevel > 1)
             continue;
-          else if (player_table[i].level <= pclean_criteria[ci].level && ((time(0) - player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
-            remove_player(i);
+          else if (g->player_table[i].level <= pclean_criteria[ci].level && ((time(0) - g->player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
+            remove_player(g, i);
             break;
           }
         }

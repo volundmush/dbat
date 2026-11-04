@@ -39,4 +39,4 @@ constexpr int MOB_POWERUP      = 34; /* Is powering up                    */
 
 constexpr int NUM_MOB_FLAGS = 35;
 
-extern const char *action_bits[NUM_MOB_FLAGS + 1];
+extern const char *const action_bits[NUM_MOB_FLAGS + 1];

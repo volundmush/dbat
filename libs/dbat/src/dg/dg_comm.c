@@ -27,9 +27,10 @@
 #include "dbat/descriptor_utils.h"
 #include "dbat/room_utils.h"
 #include "dbat/search.h"
+#include "dbat/game_world.h"
 
 /* local functions */
-static void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
+static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[], void *otokens[], char type[]);
 
 /* same as any_one_arg except that it stops at punctuation */
 static char *any_one_name(char *argument, char *first_arg)
@@ -51,7 +52,7 @@ static char *any_one_name(char *argument, char *first_arg)
   return argument;
 }
 
-static void sub_write_to_char(struct char_data *ch, char *tokens[],
+static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[],
                               void *otokens[], char type[])
 {
   char sb[MAX_STRING_LENGTH];
@@ -69,7 +70,7 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
         else if ((struct char_data *)otokens[i] == ch)
           strcat(sb, "you");
         else
-          strcat(sb, char_pers(((struct char_data *)otokens[i]), ch));
+          strcat(sb, char_pers(g, ((struct char_data *)otokens[i]), ch));
         break;
 
       case '|':
@@ -78,13 +79,13 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
         else if ((struct char_data *)otokens[i] == ch)
           strcat(sb, "your");
         else {
-          strcat(sb, char_pers(((struct char_data *)otokens[i]), ch));
+          strcat(sb, char_pers(g, ((struct char_data *)otokens[i]), ch));
           strcat(sb, "'s");
         }
         break;
 
       case '^':
-        if (!otokens[i] || !char_can_see(ch, (struct char_data *)otokens[i]))
+        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
           strcat(sb, "its");
         else if (otokens[i] == ch)
           strcat(sb, "your");
@@ -93,7 +94,7 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
         break;
 
       case '&':
-        if (!otokens[i] || !char_can_see(ch, (struct char_data *)otokens[i]))
+        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
           strcat(sb, "it");
         else if (otokens[i] == ch)
           strcat(sb, "you");
@@ -102,7 +103,7 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
         break;
 
       case '*':
-        if (!otokens[i] || !char_can_see(ch, (struct char_data *)otokens[i]))
+        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
           strcat(sb, "it");
         else if (otokens[i] == ch)
           strcat(sb, "you");
@@ -114,7 +115,7 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
         if (!otokens[i])
           strcat(sb, "something");
         else
-          strcat(sb, obj_shortdesc_for(((struct obj_data *)otokens[i]), ch));
+          strcat(sb, obj_shortdesc_for(g, ((struct obj_data *)otokens[i]), ch));
         break;
     }
   }
@@ -122,10 +123,10 @@ static void sub_write_to_char(struct char_data *ch, char *tokens[],
   strcat(sb, tokens[i]);
   strcat(sb, "\n\r");
   sb[0] = toupper(sb[0]);
-  send_to_char(ch, "%s", sb);
+  send_to_char(g, ch, "%s", sb);
 }
 
-void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
+void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis, int targets)
 {
   char str[MAX_INPUT_LENGTH * 2];
   char type[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
@@ -153,7 +154,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
         *s      = '\0';
         p       = any_one_name(++p, name);
         otokens[i] =
-            find_invis ? (void *)get_char_in_room(&world[char_get_in_room(ch)], name) : (void *)get_char_room_vis(ch, name, nullptr);
+            find_invis ? (void *)get_char_in_room(g, &g->rooms[char_get_in_room(ch)], name) : (void *)get_char_room_vis(g, ch, name, nullptr);
         tokens[++i] = ++s;
         break;
 
@@ -163,12 +164,12 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
         *s      = '\0';
         p       = any_one_name(++p, name);
 
-        if (find_invis) obj = get_obj_in_room(&world[char_get_in_room(ch)], name);
-        else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, rroom_get_contents(char_get_in_room(ch)))))
+        if (find_invis) obj = get_obj_in_room(&g->rooms[char_get_in_room(ch)], name);
+        else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
           ;
-        else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, char_get_equipment_array(ch))))
+        else if (!(obj = get_obj_in_equip_vis(g, ch, name, &tmp, char_get_equipment_array(ch))))
           ;
-        else obj = get_obj_in_list_vis(ch, name, nullptr, char_get_inventory(ch));
+        else obj = get_obj_in_list_vis(g, ch, name, nullptr, char_get_inventory(ch));
 
         otokens[i]  = (void *)obj;
         tokens[++i] = ++s;
@@ -188,25 +189,25 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
   tokens[++i] = nullptr;
 
   if (IS_SET(targets, TO_CHAR) && sendok(ch, to_sleeping))
-    sub_write_to_char(ch, tokens, otokens, type);
+    sub_write_to_char(g, ch, tokens, otokens, type);
 
   if (IS_SET(targets, TO_ROOM))
-    for (to     = rroom_get_people(char_get_in_room(ch));
+    for (to     = rroom_get_people(g, char_get_in_room(ch));
          to; to = char_get_next_in_room(to))
       if (to != ch && sendok(to, to_sleeping))
-        sub_write_to_char(to, tokens, otokens, type);
+        sub_write_to_char(g, to, tokens, otokens, type);
 }
 
-void send_to_zone(const char *messg, zone_rnum zone)
+void send_to_zone(GameWorld *g, const char *messg, zone_rnum zone)
 {
   struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = descriptor_list; i; i = i->next)
+  for (i = g->descriptors; i; i = i->next)
     if (!i->connected && i->character && char_is_awake(i->character) &&
         (char_get_in_room(i->character) != NOWHERE) &&
-        (rroom_get_zone(char_get_in_room(i->character)) == zone))
-      write_to_output(i, "%s", messg);
+        (rroom_get_zone(g, char_get_in_room(i->character)) == zone))
+      write_to_output(g, i, "%s", messg);
 }

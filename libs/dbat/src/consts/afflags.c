@@ -2,7 +2,7 @@
 
 /* AFF_x */
 /* Many are taken from the SRD under OGL, see ../doc/srd.txt for information */
-const char *affected_bits[NUM_AFF_FLAGS + 1] =
+const char *const affected_bits[NUM_AFF_FLAGS + 1] =
     {
         "\0", /* DO NOT REMOVE!! */
         "BLIND",

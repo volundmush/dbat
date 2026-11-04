@@ -21,22 +21,22 @@
 #include "dbat/atomicfile.h"
 
 #include <errno.h>
+#include "dbat/game_world.h"
 
 /* local globals */
-struct ban_list_element *ban_list = nullptr;
 
 /* local functions */
 static void _write_one_node(FILE *fp, struct ban_list_element *node);
-static void write_ban_list(void);
+static void write_ban_list(GameWorld *g);
 
-static const char *ban_types[] = {
+static const char *const ban_types[] = {
     "no",
     "new",
     "select",
     "all",
     "ERROR"};
 
-void load_banned(void)
+void load_banned(GameWorld *g)
 {
   FILE *fl;
   int i, date;
@@ -44,7 +44,7 @@ void load_banned(void)
   char name[MAX_NAME_LENGTH + 1];
   struct ban_list_element *next_node;
 
-  ban_list = 0;
+  g->ban_list = 0;
 
   if (!(fl = fopen(BAN_FILE, "r"))) {
     if (errno != ENOENT) {
@@ -63,23 +63,23 @@ void load_banned(void)
       if (!strcmp(ban_type, ban_types[i]))
         next_node->type = i;
 
-    next_node->next = ban_list;
-    ban_list        = next_node;
+    next_node->next = g->ban_list;
+    g->ban_list        = next_node;
   }
 
   fclose(fl);
 }
 
-void free_ban_list(void)
+void free_ban_list(GameWorld *g)
 {
-  while (ban_list) {
-    struct ban_list_element *next = ban_list->next;
-    free(ban_list);
-    ban_list = next;
+  while (g->ban_list) {
+    struct ban_list_element *next = g->ban_list->next;
+    free(g->ban_list);
+    g->ban_list = next;
   }
 }
 
-int isbanned(char *hostname)
+int isbanned(GameWorld *g, char *hostname)
 {
   int i;
   struct ban_list_element *banned_node;
@@ -92,7 +92,7 @@ int isbanned(char *hostname)
   for (nextchar = hostname; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
 
-  for (banned_node = ban_list; banned_node; banned_node = banned_node->next)
+  for (banned_node = g->ban_list; banned_node; banned_node = banned_node->next)
     if (strstr(hostname, banned_node->site)) /* if hostname is a substring */
       i = MAX(i, banned_node->type);
 
@@ -108,7 +108,7 @@ static void _write_one_node(FILE *fp, struct ban_list_element *node)
   }
 }
 
-static void write_ban_list(void)
+static void write_ban_list(GameWorld *g)
 {
   struct atomic_file af;
   FILE *fl;
@@ -117,7 +117,7 @@ static void write_ban_list(void)
     perror("SYSERR: Unable to open '" BAN_FILE "' for writing");
     return;
   }
-  _write_one_node(fl, ban_list); /* recursively write from end to start */
+  _write_one_node(fl, g->ban_list); /* recursively write from end to start */
   atomic_commit(&af);
   return;
 }
@@ -131,45 +131,45 @@ ACMD(do_ban)
   struct ban_list_element *ban_node;
 
   if (!*argument) {
-    if (!ban_list) {
-      send_to_char(ch, "No sites are banned.\r\n");
+    if (!g->ban_list) {
+      send_to_char(g, ch, "No sites are banned.\r\n");
       return;
     }
-    send_to_char(ch, BAN_LIST_FORMAT,
+    send_to_char(g, ch, BAN_LIST_FORMAT,
                  "Banned Site Name",
                  "Ban Type",
                  "Banned On",
                  "Banned By");
-    send_to_char(ch, BAN_LIST_FORMAT,
+    send_to_char(g, ch, BAN_LIST_FORMAT,
                  "---------------------------------",
                  "---------------------------------",
                  "---------------------------------",
                  "---------------------------------");
 
-    for (ban_node = ban_list; ban_node; ban_node = ban_node->next) {
+    for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
       if (ban_node->date) {
         strlcpy(timestr, asctime(localtime(&(ban_node->date))), 10);
         timestr[10] = '\0';
       } else
         strcpy(timestr, "Unknown"); /* strcpy: OK (strlen("Unknown") < 16) */
 
-      send_to_char(ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
+      send_to_char(g, ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
     }
     return;
   }
 
   two_arguments(argument, flag, site);
   if (!*site || !*flag) {
-    send_to_char(ch, "Usage: ban {all | select | new} site_name\r\n");
+    send_to_char(g, ch, "Usage: ban {all | select | new} site_name\r\n");
     return;
   }
   if (!(!strcasecmp(flag, "select") || !strcasecmp(flag, "all") || !strcasecmp(flag, "new"))) {
-    send_to_char(ch, "Flag must be ALL, SELECT, or NEW.\r\n");
+    send_to_char(g, ch, "Flag must be ALL, SELECT, or NEW.\r\n");
     return;
   }
-  for (ban_node = ban_list; ban_node; ban_node = ban_node->next) {
+  for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
     if (!strcasecmp(ban_node->site, site)) {
-      send_to_char(ch, "That site has already been banned -- unban it to change the ban type.\r\n");
+      send_to_char(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
   }
@@ -185,13 +185,13 @@ ACMD(do_ban)
     if (!strcasecmp(flag, ban_types[i]))
       ban_node->type = i;
 
-  ban_node->next = ban_list;
-  ban_list       = ban_node;
+  ban_node->next = g->ban_list;
+  g->ban_list       = ban_node;
 
-  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "%s has banned %s for %s players.",
+  mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s has banned %s for %s players.",
          char_get_name(ch), site, ban_types[ban_node->type]);
-  send_to_char(ch, "Site banned.\r\n");
-  write_ban_list();
+  send_to_char(g, ch, "Site banned.\r\n");
+  write_ban_list(g);
 }
 #undef BAN_LIST_FORMAT
 
@@ -203,10 +203,10 @@ ACMD(do_unban)
 
   one_argument(argument, site);
   if (!*site) {
-    send_to_char(ch, "A site to unban might help.\r\n");
+    send_to_char(g, ch, "A site to unban might help.\r\n");
     return;
   }
-  ban_node = ban_list;
+  ban_node = g->ban_list;
   while (ban_node && !found) {
     if (!strcasecmp(ban_node->site, site))
       found = 1;
@@ -215,16 +215,16 @@ ACMD(do_unban)
   }
 
   if (!found) {
-    send_to_char(ch, "That site is not currently banned.\r\n");
+    send_to_char(g, ch, "That site is not currently banned.\r\n");
     return;
   }
-  REMOVE_FROM_LIST(ban_node, ban_list, next, temp);
-  send_to_char(ch, "Site unbanned.\r\n");
-  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "%s removed the %s-player ban on %s.",
+  REMOVE_FROM_LIST(ban_node, g->ban_list, next, temp);
+  send_to_char(g, ch, "Site unbanned.\r\n");
+  mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s removed the %s-player ban on %s.",
          char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
   free(ban_node);
-  write_ban_list();
+  write_ban_list(g);
 }
 
 /**************************************************************************
@@ -232,12 +232,9 @@ ACMD(do_unban)
  *  Written by Sharon P. Goza						  *
  **************************************************************************/
 
-constexpr int MAX_INVALID_NAMES = 200;
 
-static char *invalid_list[MAX_INVALID_NAMES];
-int num_invalid = 0;
 
-bool Valid_Name(char *newname)
+bool Valid_Name(GameWorld *g, char *newname)
 {
   int i, wovels = 0;
   struct descriptor_data *dt;
@@ -255,7 +252,7 @@ bool Valid_Name(char *newname)
    * to prevent character duping.
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
-  for (dt = descriptor_list; dt; dt = dt->next)
+  for (dt = g->descriptors; dt; dt = dt->next)
     if (dt->character && char_get_name(dt->character) && !strcasecmp(char_get_name(dt->character), newname))
       if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));
@@ -271,7 +268,7 @@ bool Valid_Name(char *newname)
     return false;
 
   /* return valid if list doesn't exist */
-  if (num_invalid < 1)
+  if (g->num_invalid < 1)
     return true;
 
   /* change to lowercase */
@@ -280,25 +277,25 @@ bool Valid_Name(char *newname)
     tempname[i] = tolower(tempname[i]);
 
   /* Does the desired name contain a string in the invalid list? */
-  for (i = 0; i < num_invalid; i++)
-    if (strstr(tempname, invalid_list[i]))
+  for (i = 0; i < g->num_invalid; i++)
+    if (strstr(tempname, g->invalid_list[i]))
       return false;
 
   return true;
 }
 
 /* What's with the wacky capitalization in here? */
-void Free_Invalid_List(void)
+void Free_Invalid_List(GameWorld *g)
 {
   int invl;
 
-  for (invl = 0; invl < num_invalid; invl++)
-    free(invalid_list[invl]);
+  for (invl = 0; invl < g->num_invalid; invl++)
+    free(g->invalid_list[invl]);
 
-  num_invalid = 0;
+  g->num_invalid = 0;
 }
 
-void Read_Invalid_List(void)
+void Read_Invalid_List(GameWorld *g)
 {
   FILE *fp;
   char temp[256];
@@ -308,11 +305,11 @@ void Read_Invalid_List(void)
     return;
   }
 
-  num_invalid = 0;
-  while (get_line(fp, temp) && num_invalid < MAX_INVALID_NAMES)
-    invalid_list[num_invalid++] = strdup(temp);
+  g->num_invalid = 0;
+  while (get_line(fp, temp) && g->num_invalid < MAX_INVALID_NAMES)
+    g->invalid_list[g->num_invalid++] = strdup(temp);
 
-  if (num_invalid >= MAX_INVALID_NAMES) {
+  if (g->num_invalid >= MAX_INVALID_NAMES) {
     mud_log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
     exit(1);
   }

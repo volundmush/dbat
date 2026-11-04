@@ -12,17 +12,16 @@ constexpr int SHOW_OBJ_ACTION = 2;
 constexpr int HIST_LENGTH = 100;
 
 // global variables
-extern int *cmd_sort_info;
 
 // functions
 int readIntro(struct char_data *ch, struct char_data *vict);
 void introCreate(struct char_data *ch);
-void sort_commands(void);
+void sort_commands(GameWorld *g);
 char *find_exdesc(char *word, struct extra_descr_data *list);
-void add_history(struct char_data *ch, char *str, int type);
-void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief);
+void add_history(GameWorld *g, struct char_data *ch, char *str, int type);
+void look_at_room(GameWorld *g, room_rnum target_room, struct char_data *ch, int ignore_brief);
 bool perf_skill(int skill);
-int search_help(const char *argument, int level);
+int search_help(GameWorld *g, const char *argument, int level);
 
 // commands
 ACMD(do_rbanktrans);
@@ -70,4 +69,4 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-extern const char *default_color_choices[NUM_COLOR + 1];
+extern const char *const default_color_choices[NUM_COLOR + 1];

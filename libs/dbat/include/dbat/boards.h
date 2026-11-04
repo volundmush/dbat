@@ -37,19 +37,18 @@ struct board_info {
   struct board_memory *memory[BOARD_MEMORY_SLOTS];
 };
 
-extern struct board_info *bboards;
 
-void init_boards(void);
-struct board_info *create_new_board(obj_vnum board_vnum);
-struct board_info *locate_board(obj_vnum board_vnum);
-bool save_board(struct board_info *board);
-void clear_boards(void);
+void init_boards(GameWorld *g);
+struct board_info *create_new_board(GameWorld *g, obj_vnum board_vnum);
+struct board_info *locate_board(GameWorld *g, obj_vnum board_vnum);
+bool save_board(GameWorld *g, struct board_info *board);
+void clear_boards(GameWorld *g);
 
-void show_board(obj_vnum board_vnum, struct char_data *ch);
-void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
-void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg);
-void board_respond(obj_vnum board_vnum, struct char_data *ch, int mnum);
-void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
+void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch);
+void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int arg);
+void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, char *arg);
+void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int mnum);
+void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int arg);
 
 bool board_discard_message(struct board_info *board, char **data);
-void board_login_notices(struct char_data *ch);
+void board_login_notices(GameWorld *g, struct char_data *ch);

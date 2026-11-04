@@ -38,6 +38,6 @@ struct aging_data {
   int maxdice[2];      /* For roll to determine natural death beyond venerable */
 };
 
-extern const char *race_names[NUM_RACES + 1];
-extern const char *pc_race_types[NUM_RACES + 1];
-extern const char *race_abbrevs[NUM_RACES + 1];
+extern const char *const race_names[NUM_RACES + 1];
+extern const char *const pc_race_types[NUM_RACES + 1];
+extern const char *const race_abbrevs[NUM_RACES + 1];
