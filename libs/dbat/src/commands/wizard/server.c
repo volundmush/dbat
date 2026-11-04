@@ -86,10 +86,10 @@ ACMD(do_lag)
   }
 
   for (d = g->descriptors; d; d = d->next) {
-    if (!d->character) {
+    if (!d->character || !char_get_name(d->character)) { /* still at the login menus */
       continue;
     }
-    if (!strcasecmp(CAP(char_get_name(d->character)), CAP(arg))) {
+    if (!strcasecmp(char_get_name(d->character), arg)) {
       if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
         send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
         continue;

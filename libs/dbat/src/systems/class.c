@@ -1121,9 +1121,9 @@ bool invalid_class(struct char_data *ch, struct obj_data *obj)
  */
 
 /* Function to return the exp required for each class/level */
-int level_exp(struct char_data *ch, int level)
+int64_t level_exp(struct char_data *ch, int level)
 {
-  int req = 1;
+  int64_t req = 1;
 
   switch (level) {
     case 0:

@@ -445,6 +445,16 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
   return true;
 }
 
+static struct obj_data *first_object_of_proto(GameWorld *g, const struct obj_data *proto)
+{
+  struct obj_data *obj;
+
+  for (obj = g->objects; obj; obj = obj_get_next(obj))
+    if (obj_get_item_number(obj) == obj_get_item_number(proto))
+      return obj;
+  return nullptr;
+}
+
 obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
 {
   obj_rnum i;
@@ -465,29 +475,23 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
-  for (tmp = g->objects; tmp; tmp = obj_get_next(tmp)) {
-    if (obj_get_item_number(tmp) != obj_get_item_number(obj))
-      continue;
-
+  /* extract_obj() may free more than tmp, so start again from the top each time. */
+  while ((tmp = first_object_of_proto(g, obj))) {
     /* extract_obj() will just axe contents. */
-    if (obj_get_contains(tmp)) {
-      struct obj_data *this_content, *next_content;
-      for (this_content = obj_get_contains(tmp); this_content; this_content = next_content) {
-        next_content = obj_get_next_content(this_content);
-        if (obj_get_in_room(tmp)) {
-          /* Transfer stuff from object to room. */
-          obj_from_obj(g, this_content);
-          obj_to_room(g, this_content, obj_get_in_room(tmp));
-        } else if (obj_get_worn_by(tmp) || obj_get_carried_by(tmp)) {
-          /* Transfer stuff from object to person inventory. */
-          obj_from_char(g, this_content);
-          obj_to_char(g, this_content, obj_get_carried_by(tmp));
-        } else if (obj_get_in_obj(tmp)) {
-          /* Transfer stuff from object to containing object. */
-          obj_from_obj(g, this_content);
-          obj_to_obj(g, this_content, obj_get_in_obj(tmp));
-        }
-      }
+    while (obj_get_contains(tmp)) {
+      struct obj_data *content = obj_get_contains(tmp);
+
+      obj_from_obj(g, content);
+      if (obj_get_in_room(tmp) != NOWHERE)
+        obj_to_room(g, content, obj_get_in_room(tmp));
+      else if (obj_get_carried_by(tmp))
+        obj_to_char(g, content, obj_get_carried_by(tmp));
+      else if (obj_get_worn_by(tmp))
+        obj_to_char(g, content, obj_get_worn_by(tmp));
+      else if (obj_get_in_obj(tmp))
+        obj_to_obj(g, content, obj_get_in_obj(tmp));
+      else
+        extract_obj(g, content); /* tmp is nowhere, so there's nowhere to put it */
     }
     /* Remove from g->objects, etc. - handles weight changes, and similar. */
     extract_obj(g, tmp);
@@ -497,6 +501,10 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   for (tmp = g->objects; tmp; tmp = obj_get_next(tmp)) {
     obj_set_item_number(tmp, obj_get_item_number(tmp) - ((obj_get_item_number(tmp) > rnum)));
   }
+
+  /* No copy is left to share these, now that they have all been extracted. */
+  free_object_strings(g, obj);
+  free_proto_script(obj, OBJ_TRIGGER);
 
   for (i = rnum; i < g->top_obj; i++) {
     g->obj_index[i]             = g->obj_index[i + 1];

@@ -26,32 +26,11 @@
 #include "dbat/character_utils.h"
 #include "dbat/game_world.h"
 
-/* Without a sanitizer a crash leaves no report to recognise it by, so a known bug can't be told from a new one. */
-#if defined(__SANITIZE_ADDRESS__) || (defined(__has_feature) && __has_feature(address_sanitizer))
-constexpr bool HAS_SANITIZER = true;
-#else
-constexpr bool HAS_SANITIZER = false;
-#endif
-
 constexpr int NUM_BOTS       = 4;
 constexpr int STEP_SECONDS   = 10;
 constexpr int AUDIT_FAILED   = 3;
 constexpr time_t START_TIME  = 1800000000;
 constexpr int MAX_SIGNATURES = 100;
-
-/*
- * Bugs nobody has fixed yet, by a function in their stack trace. They still get reported, but don't
- * fail the test, so a new failure stands out. Remove a line when its bug is fixed.
- */
-static const char *const known_failures[] = {
-    "in stop_follower",     /* destroy_db() frees a master before its followers */
-    "in do_lag",            /* CAP() on the nameless character of someone at the login menu */
-    "in add_guild",         /* copy_guild() frees strings in a freshly RECREATEd, uninitialized slot */
-    "in delete_object",     /* the loop reads the next object from the one it just extracted */
-    "in gain_exp",          /* level_exp() * 5 overflows int before it's widened */
-    "in do_gen_comm",       /* com_msgs has no row for gemote */
-    "in do_hayasa",         /* divides by skill / 2, which is 0 at skill 0 or 1 */
-};
 
 static const char *const never_typed[] = {
     "copyover", /* replaces the process */
@@ -237,13 +216,12 @@ struct signature {
   char text[300];
   unsigned long seed;
   int count;
-  bool known;
 };
 
 static struct signature signatures[MAX_SIGNATURES];
 static int num_signatures = 0;
 
-static void record(const char *text, unsigned long seed, bool known)
+static void record(const char *text, unsigned long seed)
 {
   for (int i = 0; i < num_signatures; i++)
     if (!strcmp(signatures[i].text, text)) {
@@ -254,25 +232,20 @@ static void record(const char *text, unsigned long seed, bool known)
     return;
   snprintf(signatures[num_signatures].text, sizeof(signatures[num_signatures].text), "%s", text);
   signatures[num_signatures].seed    = seed;
-  signatures[num_signatures].known   = known;
   signatures[num_signatures++].count = 1;
 }
 
 /* What the report says went wrong: the sanitizer's or audit's own words, and the game's first frame. */
-static void read_report(const char *path, char *text, size_t size, unsigned long *fingerprint_found, bool *known)
+static void read_report(const char *path, char *text, size_t size, unsigned long *fingerprint_found)
 {
   char line[1024], summary[220] = "", frame[60] = "";
   FILE *fl = fopen(path, "r");
 
-  *known = false;
 
   while (fl && fgets(line, sizeof(line), fl)) {
     char *at;
 
     line[strcspn(line, "\n")] = '\0';
-    for (size_t i = 0; i < sizeof(known_failures) / sizeof(*known_failures); i++)
-      if (strstr(line, known_failures[i]))
-        *known = true;
     sscanf(line, "fingerprint %lx", fingerprint_found);
     if (!*summary && !strncmp(line, "AUDIT: ", 7))
       snprintf(summary, sizeof(summary), "%s", line);
@@ -300,7 +273,6 @@ static unsigned long run_seed(const char *base, unsigned long seed, int steps, i
   char dir[512], report[600], journal[600], text[300];
   unsigned long found = 0;
   int status;
-  bool known;
   pid_t pid;
 
   snprintf(dir, sizeof(dir), "%s/seed-%lu-%d", base, seed, attempt);
@@ -326,7 +298,7 @@ static unsigned long run_seed(const char *base, unsigned long seed, int steps, i
   }
 
   waitpid(pid, &status, 0);
-  read_report(report, text, sizeof(text), &found, &known);
+  read_report(report, text, sizeof(text), &found);
   if (WIFEXITED(status) && WEXITSTATUS(status) == 0 && found)
     return found;
 
@@ -334,7 +306,7 @@ static unsigned long run_seed(const char *base, unsigned long seed, int steps, i
     snprintf(text, sizeof(text), "hang: one step ran for over %d seconds", STEP_SECONDS);
   else if (WIFSIGNALED(status) && !strncmp(text, "no report", 9))
     snprintf(text, sizeof(text), "killed by signal %d", WTERMSIG(status));
-  record(text, seed, known);
+  record(text, seed);
   return 0;
 }
 
@@ -345,7 +317,7 @@ int main(int argc, char **argv)
   const char *tmp = getenv("TMPDIR");
   char base[512], cleanup[600];
 
-  /* The sanitizer only reads this at startup, and a stack trace is how known bugs are recognised. */
+  /* The sanitizer only reads this at startup, and a stack trace is what says which code failed. */
   if (!getenv("UBSAN_OPTIONS")) {
     setenv("UBSAN_OPTIONS", "print_stacktrace=1", 1);
     execv("/proc/self/exe", argv);
@@ -387,12 +359,10 @@ int main(int argc, char **argv)
   }
 
   for (int i = 0; i < num_signatures; i++) {
-    printf("%4d %s %s\n      first seen with: test_bot --seed %lu %d\n", signatures[i].count,
-           signatures[i].known ? "known" : "NEW  ", signatures[i].text, signatures[i].seed, steps);
-    if (!signatures[i].known && (HAS_SANITIZER || strncmp(signatures[i].text, "killed by signal", 16)))
-      failures++;
+    printf("%4d  %s\n      first seen with: test_bot --seed %lu %d\n", signatures[i].count, signatures[i].text, signatures[i].seed, steps);
+    failures++;
   }
-  printf("%d seeds of %d steps, %d finished, %d distinct failures, %d of them new\n", seeds, steps, finished, num_signatures, failures);
+  printf("%d seeds of %d steps, %d finished, %d distinct failures\n", seeds, steps, finished, num_signatures);
 
   snprintf(cleanup, sizeof(cleanup), "rm -rf '%s'", base);
   if (system(cleanup) != 0)

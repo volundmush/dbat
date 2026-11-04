@@ -765,6 +765,6 @@ ACMD(do_whois)
     } else {
       send_to_char(g, ch, "There is no such player.\r\n");
     }
-    free(victim);
+    free_char(g, victim);
   }
 }

@@ -6,10 +6,20 @@
 #include "dbat/db.h"
 #include "dbat/extract.h"
 #include "dbat/comm.h"
+#include "dbat/class.h"
 #include "dbat/fight.h"
+#include "dbat/affect.h"
+#include "dbat/config.h"
+#include "dbat/genobj.h"
+#include "dbat/genwld.h"
+#include "dbat/spells.h"
+#include "dbat/gengld.h"
+#include "dbat/local_limits.h"
+#include "dbat/zones.h"
 #include "dbat/guild.h"
 #include "dbat/shop.h"
 #include "dbat/handler.h"
+#include "dbat/interpreter.h"
 #include "dbat/utils.h"
 #include "dbat/world_audit.h"
 #include "dbat/character_utils.h"
@@ -382,6 +392,172 @@ static void check_lookups_past_the_end(GameWorld *g)
   CHECK(count_guilds(g, 0, 99999) == 0);
 }
 
+/* Inserting used to free uninitialized memory, or strings that a neighbouring guild was still using. */
+static void check_new_guilds(GameWorld *g)
+{
+  guild_vnum vnums[] = {320, 310, 330};
+
+  for (size_t i = 0; i < sizeof(vnums) / sizeof(*vnums); i++) {
+    char message[32];
+    struct guild_data guild = {0};
+
+    snprintf(message, sizeof(message), "guild %d", vnums[i]);
+    guild_set_vnum(&guild, vnums[i]);
+    guild_set_no_such_skill(&guild, message);
+    guild_set_not_enough_gold(&guild, message);
+    add_guild(g, &guild);
+  }
+  CHECK(g->top_guild == 2);
+  for (guild_rnum r = 0; r <= g->top_guild; r++) {
+    char message[32];
+
+    snprintf(message, sizeof(message), "guild %d", 310 + r * 10);
+    CHECK(rguild_get_vnum(g, r) == 310 + r * 10);
+    CHECK(!strcmp(guild_get_no_such_skill(&g->guild_index[r]), message));
+  }
+  CHECK(count_guilds(g, 0, 99999) == 3);
+}
+
+/* Deleting a prototype used to read the object it had just freed, and to lose what its copies held. */
+static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
+{
+  obj_rnum chest_rnum = real_object(g, 300);
+  struct obj_data *in_room, *carried, *room_bread, *carried_bread;
+
+  /* no zone command may load the deleted prototype later */
+  for (int i = 0; zone_get_cmd(g, real_zone(g, 3), i)->command != 'S'; i++)
+    zone_get_cmd(g, real_zone(g, 3), i)->if_flag = 1;
+
+  place(g, ch, 301);
+  in_room       = read_object(g, 300, VIRTUAL);
+  carried       = read_object(g, 300, VIRTUAL);
+  room_bread    = read_object(g, 302, VIRTUAL);
+  carried_bread = read_object(g, 302, VIRTUAL);
+  obj_to_room(g, in_room, char_get_in_room(ch));
+  obj_to_char(g, carried, ch);
+  obj_to_obj(g, room_bread, in_room);
+  obj_to_obj(g, carried_bread, carried);
+  CHECK_AUDIT(g);
+
+  delete_object(g, chest_rnum);
+  CHECK(real_object(g, 300) == NOTHING);
+  CHECK(obj_get_in_room(room_bread) == char_get_in_room(ch));
+  CHECK(obj_get_carried_by(carried_bread) == ch);
+  CHECK_AUDIT(g);
+
+  extract_obj(g, room_bread);
+  extract_obj(g, carried_bread);
+  CHECK_AUDIT(g);
+}
+
+/* Each of these used to divide by zero, read outside a table, or follow a null pointer. */
+static void check_awkward_commands(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *admin = th_player(g, "Admin", ADMLVL_IMPL);
+  struct char_data *leaver = th_player(g, "Leaver", ADMLVL_NONE);
+
+  place(g, admin, 300);
+  place(g, ch, 300);
+
+  char_set_skills_base(ch, SKILL_HAYASA, 1);
+  th_type(g, ch, "hayasa");
+  th_take_output(g, ch);
+  char_set_skills_base(ch, SKILL_HAYASA, 0);
+
+  char_plr_set(ch, PLR_NOSHOUT, true);
+  th_type(g, ch, "gemote waves");
+  CHECK(saw(ch, "You cannot gemote"));
+  th_take_output(g, ch);
+  char_plr_set(ch, PLR_NOSHOUT, false);
+
+  /* an NPC has no scouter, and used to be assumed to have one */
+  {
+    struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+
+    char_to_room(g, mob, char_get_in_room(ch));
+    command_interpreter(g, mob, (char[]){"snet 5"});
+    extract_char(g, mob);
+    extract_pending_chars(g);
+  }
+
+  th_type(g, leaver, "quit"); /* leaves a nameless character at the menu */
+  th_pulses(g, 2);
+  th_type(g, admin, "lag Tester 1");
+  CHECK(char_get_wait(ch) > 0);
+  CHECK(!strcmp(char_get_name(admin), "Admin"));
+  char_set_wait(ch, 0);
+  th_take_output(g, admin);
+  CHECK_AUDIT(g);
+
+  extract_char(g, admin);
+  extract_pending_chars(g);
+}
+
+/* Experience is 64 bits wide everywhere: level_exp() * 5 used to overflow int. */
+static void check_experience_width(GameWorld *g, struct char_data *ch)
+{
+  int high_level = 1;
+  int64_t before;
+
+  while (high_level < 99 && level_exp(ch, high_level + 1) < 500000000)
+    high_level++;
+  CHECK(level_exp(ch, high_level + 1) >= 500000000);
+
+  char_set_class_level(ch, high_level);
+  char_set_exp(ch, 0);
+  gain_exp(g, ch, 1000);
+  CHECK(char_get_exp(ch) > 0);
+
+  before = char_get_exp(ch);
+  gain_exp_regardless(g, ch, (int64_t)3000000000);
+  CHECK(char_get_exp(ch) >= before + 2900000000);
+  char_set_exp(ch, 0);
+  char_set_class_level(ch, 1);
+  th_take_output(g, ch);
+}
+
+/* whois used to free a loaded player with free() alone, leaving them in the affect list. */
+static void check_whois_with_affects(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *admin = th_player(g, "Asker", ADMLVL_IMPL);
+  struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_NONE};
+
+  affect_to_char(g, ch, &af);
+  save_char(g, ch);
+  CHECK_AUDIT(g);
+  th_type(g, admin, "whois Tester");
+  CHECK(saw(admin, "Tester"));
+  CHECK_AUDIT(g);
+  affect_from_char(g, ch, SPELL_SLEEP);
+  CHECK_AUDIT(g);
+
+  extract_char(g, admin);
+  extract_pending_chars(g);
+}
+
+/* A new login used to read rooms[-1] after a builder deleted the start room. */
+static void check_login_without_a_start_room(GameWorld *g)
+{
+  struct char_data *late;
+
+  CHECK(delete_room(g, real_room(g, CONFIG_MORTAL_START)));
+  CHECK(real_room(g, CONFIG_MORTAL_START) == NOWHERE);
+  late = th_player(g, "Latecomer", ADMLVL_NONE);
+  CHECK(char_get_in_room(late) == 0);
+  CHECK_AUDIT(g);
+}
+
+/* A master freed before its follower used to be read by the follower's stop_follower(). */
+static void leave_followers_for_shutdown(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *master = read_mobile(g, 300, VIRTUAL); /* newer, so freed first */
+
+  place(g, ch, 301);
+  char_to_room(g, master, char_get_in_room(ch));
+  add_follower(g, ch, master);
+  CHECK_AUDIT(g);
+}
+
 int main(void)
 {
   GameWorld *g = th_boot();
@@ -404,6 +580,13 @@ int main(void)
   check_admin_levels(g, ch);
   check_iedit(g);
   check_lookups_past_the_end(g);
+  check_new_guilds(g);
+  check_awkward_commands(g, ch);
+  check_experience_width(g, ch);
+  check_delete_object_prototype(g, ch);
+  check_whois_with_affects(g, ch);
+  leave_followers_for_shutdown(g, ch);
+  check_login_without_a_start_room(g);
 
   th_shutdown(g);
   if (failures)

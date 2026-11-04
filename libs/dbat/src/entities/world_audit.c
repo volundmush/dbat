@@ -249,6 +249,14 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
   }
 }
 
+static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
+{
+  for (const struct descriptor_data *d = g->descriptors; d; d = d->next)
+    if (d->character == ch || d->original == ch)
+      return true;
+  return false;
+}
+
 int world_audit(GameWorld *g, world_audit_report *report, void *context)
 {
   struct audit a = {.report = report, .context = context};
@@ -273,6 +281,19 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
     }
     if (!char_get_fighting(ch))
       problem(&a, "%s: is in the combat list, but isn't fighting", char_get_name(ch));
+  }
+
+  limit = a.characters.count + 1;
+  for (struct char_data *ch = g->affect_list; ch; ch = char_get_next_affect(ch)) {
+    if (!limit--) {
+      problem(&a, "the affect list loops");
+      break;
+    }
+    /* someone who has just quit stays attached to their connection, affects and all, at the menu */
+    if (!set_has(&a.characters, ch) && !held_by_a_connection(g, ch)) {
+      problem(&a, "the affect list holds someone who isn't in the game");
+      break;
+    }
   }
 
   for (struct descriptor_data *d = g->descriptors; d; d = d->next)

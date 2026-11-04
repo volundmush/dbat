@@ -259,6 +259,14 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
 }
 
 /* load the player, put them in the right room - used by copyover_recover too */
+/* A builder can delete any of the rooms that players get sent to, while the game is running. */
+static room_rnum room_or_void(GameWorld *g, room_vnum vnum)
+{
+  room_rnum room = real_room(g, vnum);
+
+  return room != NOWHERE ? room : 0;
+}
+
 int enter_player_game(GameWorld *g, struct descriptor_data *d)
 {
   int load_result;
@@ -291,6 +299,9 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
 
   if (char_plr_flagged(d->character, PLR_FROZEN))
     load_room = real_room(g, CONFIG_FROZEN_START);
+
+  if (load_room == NOWHERE) /* a builder deleted the start room */
+    load_room = 0;          /* The Void */
 
   char_set_next(d->character, g->characters);
   g->characters     = d->character;
@@ -1019,10 +1030,10 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
         char_from_room(g, d->character);
-        char_to_room(g, d->character, real_room(g, char_get_load_room(g, d->character)));
+        char_to_room(g, d->character, room_or_void(g, char_get_load_room(g, d->character)));
       } else if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1) {
         char_from_room(g, d->character);
-        char_to_room(g, d->character, real_room(g, 300));
+        char_to_room(g, d->character, room_or_void(g, 300));
       } else {
         look_at_room(g, char_get_in_room(d->character), d->character, 0);
       }

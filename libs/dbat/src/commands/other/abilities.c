@@ -892,7 +892,7 @@ ACMD(do_spit)
     return;
   }
 
-  cost = ((getMaxKI(g, ch) / (char_get_skill(ch, SKILL_SPIT) / 4)) + getMaxKI(g, ch) / 100);
+  cost = ((getMaxKI(g, ch) / MAX(char_get_skill(ch, SKILL_SPIT) / 4, 1)) + getMaxKI(g, ch) / 100);
 
   if ((getCurKI(g, ch)) < cost) {
     send_to_char(g, ch, "You do not have enough ki to petrifiy with your spit!\r\n");

@@ -2665,6 +2665,8 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
       }
 
       obj = read_object(g, num, VIRTUAL);
+      if (!obj) /* a builder deleted it */
+        return;
       obj_to_room(g, obj, char_get_in_room(ch));
 
       obj_set_target(obj, vict);
@@ -2710,6 +2712,8 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
     }
 
     obj = read_object(g, num, VIRTUAL);
+    if (!obj) /* a builder deleted it */
+      return;
     obj_to_room(g, obj, char_get_in_room(ch));
 
     obj_set_target(obj, vict);

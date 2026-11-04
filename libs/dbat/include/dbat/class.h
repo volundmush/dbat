@@ -9,7 +9,7 @@
 // functions
 void do_start(GameWorld *g, struct char_data *ch);
 bool invalid_class(struct char_data *ch, struct obj_data *obj);
-int level_exp(struct char_data *ch, int level);
+int64_t level_exp(struct char_data *ch, int level);
 int load_levels(GameWorld *g);
 void cedit_creation(GameWorld *g, struct char_data *ch);
 void advance_level(GameWorld *g, struct char_data *ch, int whichclass);

@@ -938,12 +938,12 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
   }
 }
 
-void gain_exp_regardless(GameWorld *g, struct char_data *ch, int gain)
+void gain_exp_regardless(GameWorld *g, struct char_data *ch, int64_t gain)
 {
   int is_altered = false;
   int num_levels = 0;
 
-  gain = (gain * CONFIG_EXP_MULTIPLIER);
+  gain = (gain * (double)CONFIG_EXP_MULTIPLIER);
 
   char_set_exp(ch, char_get_exp(ch) + (gain));
   if (char_get_exp(ch) < 0)

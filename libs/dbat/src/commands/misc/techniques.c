@@ -1404,7 +1404,7 @@ ACMD(do_hayasa)
   }
 
   int skill = char_get_skill(ch, SKILL_HAYASA), prob = axion_dice(g, 0);
-  int64_t cost = getMaxKI(g, ch) / (skill / 2);
+  int64_t cost = getMaxKI(g, ch) / MAX(skill / 2, 1);
   int duration = 1;
 
   if (skill >= 100) {

@@ -220,7 +220,7 @@ ACMD(do_form)
   }
   reveal_hiding(g, ch, 0);
   if (!(strcmp(arg, "food"))) {
-    cost = getMaxKI(g, ch) / (skill / 2);
+    cost = getMaxKI(g, ch) / MAX(skill / 2, 1);
     cost *= discount;
 
     if ((getCurKI(g, ch)) < cost) {

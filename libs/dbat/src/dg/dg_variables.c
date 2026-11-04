@@ -696,7 +696,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         }
         snprintf(str, slen, "%d", char_get_conditions(g, c, THIRST));
       } else if (!strcasecmp(field, "tnl")) {
-        snprintf(str, slen, "%d", level_exp(c, char_get_level(c) + 1));
+        snprintf(str, slen, "%lld", (long long)level_exp(c, char_get_level(c) + 1));
       }
       break;
     case 'v':

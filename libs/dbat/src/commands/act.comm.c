@@ -1409,7 +1409,12 @@ ACMD(do_gen_comm)
       {"You cannot congratulate!\r\n",
        "congrat",
        "You aren't even on the channel!\r\n",
-       "@[12]"}
+       "@[12]"},
+
+      {"You cannot gemote!!\r\n",
+       "gemote",
+       "You aren't even on the channel!\r\n",
+       "@[10]"}
   };
 
   /* to keep pets, etc from being ordered to shout */

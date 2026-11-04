@@ -403,13 +403,11 @@ ACMD(do_snet)
     return;
   }
 
-  if (!char_is_npc(ch)) {
-    if (char_get_equipment(ch, WEAR_EYE)) {
-      obj = char_get_equipment(ch, WEAR_EYE);
-    } else {
-      send_to_char(g, ch, "You do not have a scouter on.\r\n");
-      return;
-    }
+  if (char_get_equipment(ch, WEAR_EYE)) {
+    obj = char_get_equipment(ch, WEAR_EYE);
+  } else {
+    send_to_char(g, ch, "You do not have a scouter on.\r\n");
+    return;
   }
 
   if (!*arg) {

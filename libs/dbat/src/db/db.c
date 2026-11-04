@@ -520,11 +520,13 @@ void destroy_db(GameWorld *g)
   struct obj_data *objtmp;
 
   /* Active Mobiles & Players */
+  /* stop_follower() reads the master, so everyone must stop before anyone is freed */
+  for (chtmp = g->characters; chtmp; chtmp = char_get_next(chtmp))
+    if (char_get_master(chtmp))
+      stop_follower(g, chtmp);
   while (g->characters) {
     chtmp          = g->characters;
     g->characters = char_get_next(g->characters);
-    if (char_get_master(chtmp))
-      stop_follower(g, chtmp);
     free_char(g, chtmp);
   }
 
