@@ -15,6 +15,7 @@
 #include "dbat/spells.h"
 #include "dbat/gengld.h"
 #include "dbat/local_limits.h"
+#include "dbat/magic.h"
 #include "dbat/zones.h"
 #include "dbat/guild.h"
 #include "dbat/shop.h"
@@ -535,6 +536,47 @@ static void check_whois_with_affects(GameWorld *g, struct char_data *ch)
   extract_pending_chars(g);
 }
 
+/* The walk used to stop at whoever's last affect ended, so everyone after them missed the hour. */
+static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *ending = read_mobile(g, 300, VIRTUAL);
+  struct char_data *other  = read_mobile(g, 300, VIRTUAL);
+  struct affected_type lasting = {.type = SPELL_SLEEP, .duration = 3, .location = APPLY_NONE};
+  struct affected_type short_lived = {.type = SPELL_SLEEP, .duration = 0, .location = APPLY_NONE};
+  struct affected_type permanent = {.type = SPELL_SLEEP, .duration = -1, .location = APPLY_NONE};
+
+  place(g, ch, 301);
+  char_to_room(g, ending, char_get_in_room(ch));
+  char_to_room(g, other, char_get_in_room(ch));
+
+  /* each joins the front of the list, so ending comes before the others */
+  affect_to_char(g, ch, &permanent);
+  affect_to_char(g, other, &lasting);
+  affect_to_char(g, ending, &short_lived);
+  CHECK(g->affect_list == ending);
+  th_take_output(g, ch);
+
+  affect_update(g);
+  CHECK(char_get_affected(ending) == nullptr);
+  CHECK(char_get_affected(other) && char_get_affected(other)->duration == 2);
+  CHECK(char_get_affected(ch) && char_get_affected(ch)->duration == -1);
+
+  /* and it counts down to the end, without touching anyone else */
+  affect_update(g);
+  affect_update(g);
+  CHECK(char_get_affected(other) && char_get_affected(other)->duration == 0);
+  affect_update(g);
+  CHECK(char_get_affected(other) == nullptr);
+  CHECK(char_get_affected(ch) && char_get_affected(ch)->duration == -1);
+  CHECK_AUDIT(g);
+
+  affect_from_char(g, ch, SPELL_SLEEP);
+  extract_char(g, ending);
+  extract_char(g, other);
+  extract_pending_chars(g);
+  CHECK_AUDIT(g);
+}
+
 /* A new login used to read rooms[-1] after a builder deleted the start room. */
 static void check_login_without_a_start_room(GameWorld *g)
 {
@@ -585,6 +627,7 @@ int main(void)
   check_experience_width(g, ch);
   check_delete_object_prototype(g, ch);
   check_whois_with_affects(g, ch);
+  check_affects_all_count_down(g, ch);
   leave_followers_for_shutdown(g, ch);
   check_login_without_a_start_room(g);
 
