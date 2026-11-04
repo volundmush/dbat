@@ -5,7 +5,10 @@
 #include "harness.h"
 #include "dbat/db.h"
 #include "dbat/extract.h"
+#include "dbat/comm.h"
 #include "dbat/fight.h"
+#include "dbat/guild.h"
+#include "dbat/shop.h"
 #include "dbat/handler.h"
 #include "dbat/utils.h"
 #include "dbat/world_audit.h"
@@ -286,6 +289,99 @@ static void check_save_and_reload(GameWorld *g, struct char_data *ch)
   free_char(g, copy);
 }
 
+static int count_objects(const GameWorld *g)
+{
+  int count = 0;
+
+  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+    count++;
+  return count;
+}
+
+/* The first player ever is made an Implementor, which used to crash; th_player() then demoted Tester. */
+static void check_admin_levels(GameWorld *g, struct char_data *ch)
+{
+  admin_set(g, ch, ADMLVL_VICE);
+  CHECK(char_get_admlevel(ch) == ADMLVL_VICE);
+  CHECK(char_adm_flagged(ch, ADM_ALLSHOPS));
+  CHECK(!char_adm_flagged(ch, ADM_TRANSALL));
+
+  admin_set(g, ch, ADMLVL_GRGOD);
+  CHECK(char_adm_flagged(ch, ADM_TRANSALL));
+  CHECK(!char_adm_flagged(ch, ADM_CEDIT));
+
+  admin_set(g, ch, ADMLVL_IMPL);
+  CHECK(char_get_admlevel(ch) == ADMLVL_IMPL);
+  CHECK(char_adm_flagged(ch, ADM_CEDIT));
+
+  admin_set(g, ch, ADMLVL_NONE);
+  CHECK(char_get_admlevel(ch) == ADMLVL_NONE);
+  CHECK(!char_adm_flagged(ch, ADM_CEDIT));
+  CHECK(!char_adm_flagged(ch, ADM_ALLSHOPS));
+}
+
+/* iedit used to cut the object list, and to leave a freed working copy in it on disconnect. */
+static void check_iedit(GameWorld *g)
+{
+  struct char_data *builder = th_player(g, "Builder", ADMLVL_IMPL);
+  struct obj_data *chest    = read_object(g, 300, VIRTUAL);
+  struct obj_data *sword    = read_object(g, 301, VIRTUAL);
+  struct obj_data *bread    = read_object(g, 302, VIRTUAL); /* newer than the sword */
+  int objects;
+
+  place(g, builder, 300);
+  obj_to_char(g, sword, builder);
+  obj_to_char(g, bread, builder);
+  obj_to_room(g, chest, char_get_in_room(builder));
+  objects = count_objects(g);
+
+  /* editing changes nothing in the game until it's committed */
+  th_type(g, builder, "iedit sword");
+  CHECK(count_objects(g) == objects);
+  CHECK_AUDIT(g);
+
+  /* where the object goes meanwhile must survive the commit */
+  obj_from_char(g, sword);
+  obj_to_obj(g, sword, chest);
+  th_type(g, builder, "2");
+  th_type(g, builder, "a renamed sword");
+  th_type(g, builder, "q");
+  CHECK(!strcmp(obj_get_short_description(sword), "a renamed sword"));
+  CHECK(obj_get_in_obj(sword) == chest);
+  CHECK(obj_get_carried_by(sword) == nullptr);
+  CHECK(!strcmp(obj_get_short_description(&g->obj_proto[real_object(g, 301)]), "a plain sword"));
+  CHECK(count_objects(g) == objects);
+  CHECK_AUDIT(g);
+
+  /* the object is gone by the time the edit is committed */
+  th_type(g, builder, "iedit bread");
+  extract_obj(g, bread);
+  objects = count_objects(g);
+  th_type(g, builder, "q");
+  CHECK(count_objects(g) == objects);
+  CHECK_AUDIT(g);
+
+  /* losing the connection mid-edit */
+  th_type(g, builder, "iedit chest");
+  close_socket(g, char_get_desc(builder));
+  th_pulses(g, 5);
+  CHECK(count_objects(g) == objects);
+  CHECK_AUDIT(g);
+
+  extract_obj(g, chest);
+  extract_char(g, builder);
+  extract_pending_chars(g);
+  CHECK_AUDIT(g);
+}
+
+/* Each of these used to read outside its table. */
+static void check_lookups_past_the_end(GameWorld *g)
+{
+  CHECK(count_shops(g, 300, 399) == 1);
+  CHECK(count_shops(g, 400, 99999) == 0);
+  CHECK(count_guilds(g, 0, 99999) == 0);
+}
+
 int main(void)
 {
   GameWorld *g = th_boot();
@@ -305,6 +401,9 @@ int main(void)
   check_zone_reset(g);
   check_shop(g, ch);
   check_save_and_reload(g, ch);
+  check_admin_levels(g, ch);
+  check_iedit(g);
+  check_lookups_past_the_end(g);
 
   th_shutdown(g);
   if (failures)

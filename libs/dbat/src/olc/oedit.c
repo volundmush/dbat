@@ -37,6 +37,8 @@ static void oedit_disp_val4_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val5_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val9_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rnum real_num);
+static bool object_in_game(GameWorld *g, const struct obj_data *obj);
+static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited);
 static void oedit_setup_new(struct descriptor_data *d);
 
 /*------------------------------------------------------------------------*/
@@ -1066,28 +1068,31 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             } else
               cleanup_olc(g, d, CLEANUP_ALL);
           } else {
-            send_to_char(g, d->character, "\r\nCommitting iedit changes.\r\n");
             obj = OLC_IOBJ(d);
+            if (!object_in_game(g, obj)) { /* it was extracted while being edited */
+              send_to_char(g, d->character, "\r\nThat object no longer exists. Changes discarded.\r\n");
+              cleanup_olc(g, d, CLEANUP_ALL);
+              return;
+            }
+            send_to_char(g, d->character, "\r\nCommitting iedit changes.\r\n");
             /* obj gets a new UID below; drop its old lookup entry first */
             remove_from_lookup_table(g, obj_get_id(obj));
-            *obj = *(OLC_OBJ(d));
+            /* remove any old scripts */
+            if (obj_get_script(obj)) {
+              extract_script(g, obj, OBJ_TRIGGER);
+              obj_set_script(obj, nullptr);
+            }
+            commit_iedit(g, obj, OLC_OBJ(d));
             obj_set_id(obj, dg_new_obj_uid(g));
             /* find_obj helper */
             add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
             if (obj_get_vnum(g, obj) != NOTHING) {
-              /* remove any old scripts */
-              if (obj_get_script(obj)) {
-                extract_script(g, obj, OBJ_TRIGGER);
-                obj_set_script(obj, nullptr);
-              }
-
               free_proto_script(obj, OBJ_TRIGGER);
               robj = real_object(g, obj_get_vnum(g, obj));
               copy_proto_script(&g->obj_proto[robj], obj, OBJ_TRIGGER);
               assign_triggers(g, obj, OBJ_TRIGGER);
             }
             obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
-            /* Xap - ought to save the old pointer, free after assignment I suppose */
             mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                    "OLC: %s iedit a unique #%d", char_get_name(d->character), obj_get_vnum(g, obj));
             if (d->character) {
@@ -1095,6 +1100,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               desc_set_connected(d, CON_PLAYING);
               act(g, "$n stops using OLC.", true, d->character, 0, 0, TO_ROOM);
             }
+            free(OLC_OBJ(d)); /* its strings now belong to obj */
             free(d->olc);
             d->olc = nullptr;
           }
@@ -1744,21 +1750,46 @@ void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 }
 
 /* this is all iedit stuff */
+static bool object_in_game(GameWorld *g, const struct obj_data *obj)
+{
+  for (const struct obj_data *k = g->objects; k; k = obj_get_next(k))
+    if (k == obj)
+      return true;
+  return false;
+}
+
+/* Replaces what obj is with what the editor made of it, but not where it is or who is using it. */
+static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited)
+{
+  struct obj_data live = *obj;
+
+  if (obj_get_item_number(obj) != NOTHING)
+    free_object_strings_proto(g, obj);
+  else
+    free_object_strings(g, obj);
+
+  *obj = *edited;
+  obj_set_in_room(obj, obj_get_in_room(&live));
+  obj_set_carried_by(obj, obj_get_carried_by(&live));
+  obj_set_worn_by(obj, obj_get_worn_by(&live));
+  obj_set_worn_on(obj, obj_get_worn_on(&live));
+  obj_set_in_obj(obj, obj_get_in_obj(&live));
+  obj_set_contains(obj, obj_get_contains(&live));
+  obj_set_next_content(obj, obj_get_next_content(&live));
+  obj_set_next(obj, obj_get_next(&live));
+  obj_set_sitting(obj, obj_get_sitting(&live));
+  obj_set_user(obj, obj_get_user(&live));
+  obj_set_target(obj, obj_get_target(&live));
+}
+
 static void iedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct obj_data *real_num)
 {
   struct obj_data *obj;
 
-  OLC_IOBJ(d) = real_num;
-
-  obj = create_obj(g);
+  /* A private copy, as in oedit_setup_existing(): it isn't in the game, and shares no script. */
+  CREATE(obj, struct obj_data, 1);
   copy_object(g, obj, real_num);
-
-  /* free any assigned scripts */
-  if (obj_get_script(obj))
-    extract_script(g, obj, OBJ_TRIGGER);
   obj_set_script(obj, nullptr);
-  /* find_obj helper */
-  remove_from_lookup_table(g, obj_get_id(obj));
 
   OLC_OBJ(d)  = obj;
   OLC_IOBJ(d) = real_num;

@@ -87,7 +87,11 @@ ACMD(do_finddoor)
     send_to_char(g, ch, "Format: finddoor <obj/vnum>\r\n");
   } else if (is_number(arg)) {
     vnum = atoi(arg);
-    obj  = &g->obj_proto[real_object(g, vnum)];
+    if (real_object(g, vnum) == NOTHING) {
+      send_to_char(g, ch, "There is no object with that vnum.\r\n");
+      return;
+    }
+    obj = &g->obj_proto[real_object(g, vnum)];
   } else {
     generic_find(g, arg,
                  FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP,

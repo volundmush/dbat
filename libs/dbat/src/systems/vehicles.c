@@ -1185,9 +1185,6 @@ ACMD(do_drive)
           } else if (!strcasecmp(arg2, "4")) {
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, real_room(g, 4262));
-          } else if (!strcasecmp(arg2, "1337")) {
-            obj_from_room(g, vehicle);
-            obj_to_room(g, vehicle, real_room(g, 18116));
           } else {
             act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, 0, 0, TO_CHAR);
             act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, 0, 0, TO_ROOM);

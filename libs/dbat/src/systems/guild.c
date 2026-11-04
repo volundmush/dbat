@@ -1513,7 +1513,7 @@ int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high)
   guild_rnum i;
   int j;
 
-  for (i = j = 0; (rguild_get_vnum(g, i) <= high && i <= g->top_guild); i++) {
+  for (i = j = 0; i <= g->top_guild && rguild_get_vnum(g, i) <= high; i++) {
     if (rguild_get_vnum(g, i) >= low) {
       j++;
     }

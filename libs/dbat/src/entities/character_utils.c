@@ -3728,6 +3728,9 @@ static const int default_admin_flags_god[] =
     {ADM_ALLSHOPS, ADM_TELLALL, ADM_KNOWWEATHER, ADM_MONEY, ADM_EATANYTHING,
      ADM_NOKEYS, -1};
 
+static const int default_admin_flags_vice[] =
+    {-1};
+
 static const int default_admin_flags_grgod[] =
     {ADM_TRANSALL, ADM_FORCEMASS, ADM_ALLHOUSES, -1};
 
@@ -3739,6 +3742,7 @@ static const int *const default_admin_flags[ADMLVL_IMPL + 1] = {
     default_admin_flags_immortal,
     default_admin_flags_builder,
     default_admin_flags_god,
+    default_admin_flags_vice,
     default_admin_flags_grgod,
     default_admin_flags_impl};
 

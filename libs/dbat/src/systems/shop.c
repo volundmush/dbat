@@ -1810,7 +1810,7 @@ int count_shops(GameWorld *g, shop_vnum low, shop_vnum high)
   shop_rnum i;
   int j;
 
-  for (i = j = 0; rshop_get_vnum(g, i) <= high; i++) {
+  for (i = j = 0; i <= g->top_shop && rshop_get_vnum(g, i) <= high; i++) {
     if (rshop_get_vnum(g, i) >= low) {
       j++;
     }

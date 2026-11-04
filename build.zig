@@ -123,7 +123,7 @@ pub fn build(b: *std.Build) void {
 
     // Tests that boot the fixture world through the harness.
     const commands_step = b.step("test-commands", "Run every command with awkward arguments (slow)");
-    for ([_][]const u8{ "world", "commands" }) |name| {
+    for ([_][]const u8{ "world", "bot", "commands" }) |name| {
         const mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
         mod.addIncludePath(b.path("libs/dbat/include"));
         mod.addIncludePath(b.path("libs/dbat/tests"));

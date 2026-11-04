@@ -29,6 +29,8 @@ To test a whole running game, use `libs/dbat/tests/harness.h`. It copies `libs/d
 - `test_world.c` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
 - `test_commands.c` runs every command with awkward arguments, at three admin levels and in four states, under whichever sanitizers the build uses. Each case forks from the booted game, so one crash can't hide another. `dbat_test_commands <command>` runs one command and prints the full report. Use the ASan preset, because a plain build can't see most memory errors. It takes minutes, so skip it with `ctest -LE slow`; `zig build test` leaves it out, and `zig build test-commands` runs it. Failures in commands listed in `known_failures` are printed but don't fail the test.
 
+- `test_bot.c` has four bots play the fixture world at random, checking the audit after every step. Everything comes from the seed, so when `dbat_test_bot [first seed] [seeds] [steps]` reports a failure, `dbat_test_bot --seed N steps` repeats it and prints every command typed. It also reruns one seed to check that the run really repeats. Use the ASan preset here too. Failures matching `known_failures` are printed but don't fail the test, and without a sanitizer a crash can't be identified, so it's printed and doesn't fail the test either.
+
 `world_audit()` (`dbat/world_audit.h`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
 
 A test can pin the clock with `g->pinned_time`, which is what `game_now()` then returns. Game code should call `game_now(g)` and not `time(0)`.

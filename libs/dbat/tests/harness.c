@@ -34,6 +34,11 @@ static void run(const char *format, const char *a, const char *b)
 
 GameWorld *th_boot(void)
 {
+  return th_boot_at(0);
+}
+
+GameWorld *th_boot_at(time_t when)
+{
   const char *tmp = getenv("TMPDIR");
   GameWorld *g;
 
@@ -54,6 +59,7 @@ GameWorld *th_boot(void)
   }
 
   g = game_world_create();
+  g->pinned_time = when;
   CONFIG_CONFFILE = strdup(CONFIG_FILE);
   load_config(g);
   g->no_rent_check = 1;
@@ -106,10 +112,6 @@ struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
   d->next  = g->descriptors;
   g->descriptors = d;
 
-  /* init_char() promotes the first player ever to Implementor, which crashes: see admin_set(). */
-  if (g->top_of_p_table <= 0)
-    create_entry(g, (char[]){"placeholder"});
-
   CREATE(ch, struct char_data, 1);
   clear_char(ch);
   CREATE(*char_player_specials_slot(ch), struct player_special_data, 1);
@@ -125,19 +127,21 @@ struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
   desc_set_connected(d, CON_PLAYING);
   if (char_get_level(ch) == 0)
     do_start(g, ch);
-  admin_set(g, ch, MIN(admlevel, ADMLVL_GRGOD));
-  if (admlevel > ADMLVL_GRGOD)
-    char_set_admlevel(ch, admlevel); /* admin_set() crashes on the way to Implementor */
+  admin_set(g, ch, admlevel);
   th_take_output(g, ch);
   return ch;
 }
 
 void th_type(GameWorld *g, struct char_data *ch, const char *line)
 {
-  struct descriptor_data *d = char_get_desc(ch);
+  th_type_at(g, char_get_desc(ch), line);
+}
 
+void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line)
+{
   write_to_q(line, &d->input, 0);
-  char_set_wait(ch, 0);
+  if (d->character)
+    char_set_wait(d->character, 0);
   game_process_commands(g);
 }
 
@@ -148,8 +152,11 @@ const char *th_output(struct char_data *ch)
 
 void th_take_output(GameWorld *g, struct char_data *ch)
 {
-  struct descriptor_data *d = char_get_desc(ch);
+  th_take_output_at(g, char_get_desc(ch));
+}
 
+void th_take_output_at(GameWorld *g, struct descriptor_data *d)
+{
   if (d->large_outbuf) {
     d->large_outbuf->next = g->bufpool;
     g->bufpool            = d->large_outbuf;

@@ -32,9 +32,7 @@ static const char *const skipped[] = {
  * fail the test, so a new failure stands out. Remove a command from here when it's fixed.
  */
 static const char *const known_failures[] = {
-    "finddoor", /* reads obj_proto[-1] when the vnum doesn't exist */
-    "iedit",    /* copy_object() overwrites the working copy's next pointer, cutting g->objects */
-    "zlist",    /* count_guilds() and count_shops() read past the end of their tables */
+    "", /* none at the moment */
 };
 
 static const char *const arguments[] = {
