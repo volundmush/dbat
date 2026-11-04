@@ -56,6 +56,7 @@
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/atomicfile.h"
+#include "dbat/world_audit.h"
 #include "dbat/game_world.h"
 
 /* local functions */
@@ -604,7 +605,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
     send_to_char(g, ch, "Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n",
                  buf1, cmbuf2, (int)char_get_time_played(k) / 3600,
-                 (int)((char_get_time_played(k) % 3600) / 60), age(k)->year);
+                 (int)((char_get_time_played(k) % 3600) / 60), age(g, k)->year);
 
     if (char_get_desc(k) != nullptr) {
       send_to_char(g, ch, "@YOwned by User@D: [@C%s@D]@n\r\n", char_get_user(k));
@@ -960,7 +961,7 @@ ACMD(do_date)
   int d, h, m;
 
   if (subcmd == SCMD_DATE)
-    mytime = time(0);
+    mytime = game_now(g);
   else
     mytime = g->boot_time;
 
@@ -970,7 +971,7 @@ ACMD(do_date)
   if (subcmd == SCMD_DATE)
     send_to_char(g, ch, "Current machine time: %s\r\n", tmstr);
   else {
-    mytime = time(0) - g->boot_time;
+    mytime = game_now(g) - g->boot_time;
     d      = mytime / 86400;
     h      = (mytime / 3600) % 24;
     m      = (mytime / 60) % 60;
@@ -1484,7 +1485,7 @@ ACMD(do_plist)
     if (g->player_table[i].level < low || g->player_table[i].level > high)
       continue;
 
-    time_away = *real_time_passed(time(0), g->player_table[i].last);
+    time_away = *real_time_passed(game_now(g), g->player_table[i].last);
 
     if (*name_search && strcasecmp(name_search, g->player_table[i].name))
       continue;
@@ -2261,4 +2262,24 @@ ACMD(do_spells)
   if (qend % 4 != 0)
     send_to_char(g, ch, "\r\n");
   return;
+}
+
+struct audit_reader {
+  GameWorld *g;
+  struct char_data *ch;
+};
+
+static void audit_report_to_char(void *context, const char *problem)
+{
+  struct audit_reader *reader = context;
+
+  send_to_char(reader->g, reader->ch, "%s\r\n", problem);
+}
+
+ACMD(do_audit)
+{
+  struct audit_reader reader = {g, ch};
+  int problems               = world_audit(g, audit_report_to_char, &reader);
+
+  send_to_char(g, ch, "World audit: %d problem%s found.\r\n", problems, problems == 1 ? "" : "s");
 }

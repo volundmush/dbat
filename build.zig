@@ -120,4 +120,22 @@ pub fn build(b: *std.Build) void {
     const test_cmd = b.addRunArtifact(test_exe);
     test_cmd.has_side_effects = true;
     test_step.dependOn(&test_cmd.step);
+
+    // Tests that boot the fixture world through the harness.
+    const commands_step = b.step("test-commands", "Run every command with awkward arguments (slow)");
+    for ([_][]const u8{ "world", "commands" }) |name| {
+        const mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+        mod.addIncludePath(b.path("libs/dbat/include"));
+        mod.addIncludePath(b.path("libs/dbat/tests"));
+        mod.addCSourceFiles(.{
+            .files = &[_][]const u8{ b.fmt("libs/dbat/tests/test_{s}.c", .{name}), "libs/dbat/tests/harness.c" },
+            .flags = &(c_flags ++ [_][]const u8{"-DDBAT_TEST_FIXTURE=\"libs/dbat/tests/fixtures/world\""}),
+        });
+        mod.linkLibrary(dbat_lib);
+        const exe_test = b.addExecutable(.{ .name = b.fmt("dbat_test_{s}", .{name}), .root_module = mod });
+        const run_test = b.addRunArtifact(exe_test);
+        run_test.has_side_effects = true;
+        run_test.setCwd(b.path(".")); // the fixture's path is relative to here
+        (if (std.mem.eql(u8, name, "commands")) commands_step else test_step).dependOn(&run_test.step);
+    }
 }

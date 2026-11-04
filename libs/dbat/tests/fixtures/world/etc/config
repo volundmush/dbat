@@ -1,0 +1,6 @@
+mortal_start_room = 300
+immort_start_room = 2
+frozen_start_room = 2
+auto_save = 1
+autosave_time = 5
+use_autowiz = 0

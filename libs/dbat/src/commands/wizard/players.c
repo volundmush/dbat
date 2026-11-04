@@ -403,8 +403,8 @@ ACMD(do_interest)
     return;
   }
   send_to_char(g, ch, "Interest time has been initiated!\r\n");
-  g->INTERESTTIME = time(0) + 86400;
-  g->LASTINTEREST = time(0) + 86400;
+  g->INTERESTTIME = game_now(g) + 86400;
+  g->LASTINTEREST = game_now(g) + 86400;
   return;
 }
 
@@ -1175,7 +1175,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
      * division used elsewhere in the code.  Seems to only happen for
      * some values below the starting age (17) anyway. -gg 5/27/98
      */
-      char_set_time_birth(vict, time(0) - (value * SECS_PER_MUD_YEAR));
+      char_set_time_birth(vict, game_now(g) - (value * SECS_PER_MUD_YEAR));
       break;
 
     case 49: /* Blame/Thank Rick Glover. :) */

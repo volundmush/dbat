@@ -326,9 +326,9 @@ ACMD(do_score)
     }
     send_to_char(g, ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", char_true_race_name(ch), char_sensei_name(ch), char_sensei_style(ch));
     char hei[300], wei[300];
-    snprintf(hei, sizeof(hei), "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
-    snprintf(wei, sizeof(wei), "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
-    send_to_char(g, ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(char_get_age_years(ch)), hei, wei);
+    snprintf(hei, sizeof(hei), "%dcm", get_measure(ch, char_get_pc_height(g, ch), 0));
+    snprintf(wei, sizeof(wei), "%dkg", get_measure(ch, 0, char_get_pc_weight(g, ch)));
+    send_to_char(g, ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(char_get_age_years(g, ch)), hei, wei);
     send_to_char(g, ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
   }
   if (view == full || view == health) {

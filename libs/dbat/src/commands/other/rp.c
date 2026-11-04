@@ -80,7 +80,7 @@ void log_imm_action(GameWorld *g, const char *messg, ...)
 
     return;
   }
-  time_t ct    = time(0);
+  time_t ct    = game_now(g);
   char *time_s = asctime(localtime(&ct));
 
   va_list args;
@@ -630,12 +630,12 @@ ACMD(do_rpp)
     if (selection == 1) {
       fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "House");
       send_to_imm(g, "RPP Request: %s paid for house", char_get_name(ch));
-      g->BOARDNEWCOD = time(0);
+      g->BOARDNEWCOD = game_now(g);
       save_mud_time(g, &g->time_info);
     } else if (selection == 2) {
       fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "Custom Skill");
       send_to_imm(g, "RPP Request: %s paid for Custom Skill, uhoh spaggettios", char_get_name(ch));
-      g->BOARDNEWCOD = time(0);
+      g->BOARDNEWCOD = game_now(g);
       save_mud_time(g, &g->time_info);
     }
     char_set_rp(ch, char_get_rp(ch) - (pay));

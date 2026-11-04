@@ -238,6 +238,28 @@ static void check_random_color(GameWorld *a, GameWorld *b)
   free(mob);
 }
 
+/* A new world's generator must work without seeding, and a world's clock can be pinned. */
+static void check_defaults(void)
+{
+  GameWorld *a = game_world_create();
+  GameWorld *b = game_world_create();
+  unsigned long first = circle_random(a);
+  time_t before;
+
+  CHECK(first != circle_random(a));
+  (void)circle_random(b);
+  CHECK(first != circle_random(b));
+
+  before = time(nullptr);
+  CHECK(game_now(a) >= before);
+  a->pinned_time = 1000;
+  CHECK(game_now(a) == 1000);
+  CHECK(game_now(b) >= before);
+
+  game_world_destroy(a);
+  game_world_destroy(b);
+}
+
 static EVENTFUNC(count_event)
 {
   ++*(int *)event_obj;
@@ -375,6 +397,7 @@ int main(void)
   logfile = stderr; /* the logger stays global so crash handlers can use it; several checks below log */
 
   check_starting_values();
+  check_defaults();
   check_lookups(a, b);
   check_rooms(a, b);
   check_read_entities(a, b);

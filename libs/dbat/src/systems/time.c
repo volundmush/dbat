@@ -1,3 +1,4 @@
+#include "dbat/game_world.h"
 #include "dbat/time.h"
 #include "dbat/weather.h"
 #include "dbat/consts/pulse.h"
@@ -44,7 +45,7 @@ struct time_info_data *mud_time_passed(time_t t2, time_t t1)
   return (&now);
 }
 
-time_t mud_time_to_secs(struct time_info_data *now)
+time_t mud_time_to_secs(GameWorld *g, struct time_info_data *now)
 {
   time_t when = 0;
 
@@ -53,5 +54,5 @@ time_t mud_time_to_secs(struct time_info_data *now)
   when += now->day * SECS_PER_MUD_DAY;
   when += now->hours * SECS_PER_MUD_HOUR;
 
-  return (time(nullptr) - when);
+  return (game_now(g) - when);
 }

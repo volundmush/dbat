@@ -1547,7 +1547,7 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
   obj_set_value(corpse, VAL_CONTAINER_CAPACITY, 0);                  /* You can't store stuff in a corpse */
   obj_set_value(corpse, VAL_CONTAINER_CORPSE, 1);                    /* corpse identifier */
   obj_set_value(corpse, VAL_CONTAINER_OWNER, char_get_pfilepos(ch)); /* corpse identifier */
-  obj_set_weight(corpse, char_get_pc_weight(ch) + char_get_carry_weight(ch));
+  obj_set_weight(corpse, char_get_pc_weight(g, ch) + char_get_carry_weight(ch));
   obj_set_cost_per_day(corpse, 100000);
   obj_set_timer(corpse, CONFIG_MAX_PC_CORPSE_TIME);
   obj_extra_set(corpse, ITEM_UNIQUE_SAVE, true);
@@ -1750,7 +1750,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
   obj_set_value(corpse, VAL_CONTAINER_CAPACITY, 0);                  /* You can't store stuff in a corpse */
   obj_set_value(corpse, VAL_CONTAINER_CORPSE, 1);                    /* corpse identifier */
   obj_set_value(corpse, VAL_CONTAINER_OWNER, char_get_pfilepos(ch)); /* corpse identifier */
-  obj_set_weight(corpse, char_get_pc_weight(ch) + char_get_carry_weight(ch));
+  obj_set_weight(corpse, char_get_pc_weight(g, ch) + char_get_carry_weight(ch));
   obj_set_cost_per_day(corpse, 100000);
   if (char_is_npc(ch))
     obj_set_timer(corpse, CONFIG_MAX_NPC_CORPSE_TIME);
@@ -2224,19 +2224,19 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
 
   if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && char_get_level(ch) > 8) {
     if (rroom_get_vnum(g, char_get_in_room(ch)) >= 2002 && rroom_get_vnum(g, char_get_in_room(ch)) <= 2011) {
-      char_set_deathtime(ch, time(0));
+      char_set_deathtime(ch, game_now(g));
     } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_AL) || rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
       send_to_char(g, ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
     } else {
       if (killer != nullptr && char_is_npc(killer)) {
-        char_set_deathtime(ch, time(0) + 7200);
+        char_set_deathtime(ch, game_now(g) + 7200);
         char_set_dcount(ch, char_get_dcount(ch) + (1));
       } else if (killer != nullptr && !char_is_npc(killer)) {
-        char_set_deathtime(ch, time(0) + 345600);
+        char_set_deathtime(ch, game_now(g) + 345600);
         char_plr_set(ch, PLR_PDEATH, true);
         char_set_dcount(ch, char_get_dcount(ch) + (1));
       } else {
-        char_set_deathtime(ch, time(0) + 7200);
+        char_set_deathtime(ch, game_now(g) + 7200);
         char_set_dcount(ch, char_get_dcount(ch) + (1));
       }
     }

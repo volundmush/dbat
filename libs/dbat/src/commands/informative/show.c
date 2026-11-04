@@ -842,60 +842,60 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   }
   if (!char_is_npc(i)) {
     if (!char_plr_flagged(i, PLR_OOZARU) && (!char_is_icer(i) || !char_is_transformed(i)) && char_get_genome(i, 0) < 11) {
-      send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], char_get_pc_height(i), char_get_pc_weight(i));
+      send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], char_get_pc_height(g, i), char_get_pc_weight(g, i));
     } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS1)) {
-      int num1 = char_get_pc_height(i) * 3;
-      int num2 = char_get_pc_weight(i) * 4;
+      int num1 = char_get_pc_height(g, i) * 3;
+      int num2 = char_get_pc_weight(g, i) * 4;
       send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
     } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS2)) {
-      int num1 = char_get_pc_height(i) * 3;
-      int num2 = char_get_pc_weight(i) * 4;
+      int num1 = char_get_pc_height(g, i) * 3;
+      int num2 = char_get_pc_weight(g, i) * 4;
       send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
     } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS3)) {
-      int num1 = char_get_pc_height(i) * 1.5;
-      int num2 = char_get_pc_weight(i) * 2;
+      int num1 = char_get_pc_height(g, i) * 1.5;
+      int num2 = char_get_pc_weight(g, i) * 2;
       send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
     } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS4)) {
-      int num1 = char_get_pc_height(i) * 2;
-      int num2 = char_get_pc_weight(i) * 3;
+      int num1 = char_get_pc_height(g, i) * 2;
+      int num2 = char_get_pc_weight(g, i) * 3;
       send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
     } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
-      int num1 = char_get_pc_height(i) * 10;
-      int num2 = char_get_pc_weight(i) * 50;
+      int num1 = char_get_pc_height(g, i) * 10;
+      int num2 = char_get_pc_weight(g, i) * 50;
       send_to_char(g, ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
     }
     if (i == ch) {
       send_to_char(g, ch, " and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 30) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 30) {
       send_to_char(g, ch, " appears to be very much younger than you, and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 25) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 25) {
       send_to_char(g, ch, " appears to be much younger than you, and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 15) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 15) {
       send_to_char(g, ch, " appears to be a good amount younger than you, and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 10) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 10) {
       send_to_char(g, ch, " appears to be about a decade younger than you, and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 5) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 5) {
       send_to_char(g, ch, " appears to be several years younger than you, and ");
-    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 2) {
+    } else if (char_get_age_years(g, ch) >= char_get_age_years(g, i) + 2) {
       send_to_char(g, ch, " appears to be a bit younger than you, and ");
-    } else if (char_get_age_years(ch) > char_get_age_years(i)) {
+    } else if (char_get_age_years(g, ch) > char_get_age_years(g, i)) {
       send_to_char(g, ch, " appears to be slightly younger than you, and ");
-    } else if (char_get_age_years(ch) == char_get_age_years(i)) {
+    } else if (char_get_age_years(g, ch) == char_get_age_years(g, i)) {
       send_to_char(g, ch, " appears to be the same age as you, and ");
     }
-    if (char_get_age_years(i) >= char_get_age_years(ch) + 30) {
+    if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 30) {
       send_to_char(g, ch, " appears to be very much older than you, and ");
-    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 25) {
+    } else if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 25) {
       send_to_char(g, ch, " appears to be much older than you, and ");
-    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 15) {
+    } else if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 15) {
       send_to_char(g, ch, " appears to be a good amount older than you, and ");
-    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 10) {
+    } else if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 10) {
       send_to_char(g, ch, " appears to be about a decade older than you, and ");
-    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 5) {
+    } else if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 5) {
       send_to_char(g, ch, " appears to be several years older than you, and ");
-    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 2) {
+    } else if (char_get_age_years(g, i) >= char_get_age_years(g, ch) + 2) {
       send_to_char(g, ch, " appears to be a bit older than you, and ");
-    } else if (char_get_age_years(i) > char_get_age_years(ch)) {
+    } else if (char_get_age_years(g, i) > char_get_age_years(g, ch)) {
       send_to_char(g, ch, " appears to be slightly older than you, and ");
     }
   }
@@ -1113,33 +1113,33 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       } else if (char_get_distfea(i) == DISTFEA_HEIGHT) {
         char *height;
         if (char_is_truffle(i)) {
-          if (char_get_pc_height(i) > 70) {
+          if (char_get_pc_height(g, i) > 70) {
             height = strdup("very tall");
-          } else if (char_get_pc_height(i) > 55) {
+          } else if (char_get_pc_height(g, i) > 55) {
             height = strdup("tall");
-          } else if (char_get_pc_height(i) > 35) {
+          } else if (char_get_pc_height(g, i) > 35) {
             height = strdup("average height");
           } else {
             height = strdup("short");
           }
         } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
-          if (char_get_pc_height(i) * 10 > 2000) {
+          if (char_get_pc_height(g, i) * 10 > 2000) {
             height = strdup("very tall");
-          } else if (char_get_pc_height(i) * 10 > 1800) {
+          } else if (char_get_pc_height(g, i) * 10 > 1800) {
             height = strdup("tall");
-          } else if (char_get_pc_height(i) * 10 > 1500) {
+          } else if (char_get_pc_height(g, i) * 10 > 1500) {
             height = strdup("average height");
           } else {
             height = strdup("short");
           }
         } else {
-          if (char_get_pc_height(i) > 200) {
+          if (char_get_pc_height(g, i) > 200) {
             height = strdup("very tall");
-          } else if (char_get_pc_height(i) > 180) {
+          } else if (char_get_pc_height(g, i) > 180) {
             height = strdup("tall");
-          } else if (char_get_pc_height(i) > 150) {
+          } else if (char_get_pc_height(g, i) > 150) {
             height = strdup("average height");
-          } else if (char_get_pc_height(i) > 120) {
+          } else if (char_get_pc_height(g, i) > 120) {
             height = strdup("short");
           } else {
             height = strdup("very short");
@@ -1152,35 +1152,35 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       } else if (char_get_distfea(i) == DISTFEA_WEIGHT) {
         char *height;
         if (char_is_truffle(i)) {
-          if (char_get_pc_weight(i) > 35) {
+          if (char_get_pc_weight(g, i) > 35) {
             height = strdup("very heavy");
-          } else if (char_get_pc_weight(i) > 25) {
+          } else if (char_get_pc_weight(g, i) > 25) {
             height = strdup("heavy");
-          } else if (char_get_pc_weight(i) > 15) {
+          } else if (char_get_pc_weight(g, i) > 15) {
             height = strdup("average weight");
           } else {
             height = strdup("welterweight");
           }
         } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
-          if (char_get_pc_weight(i) * 50 > 6000) {
+          if (char_get_pc_weight(g, i) * 50 > 6000) {
             height = strdup("very heavy");
-          } else if (char_get_pc_weight(i) * 50 > 5000) {
+          } else if (char_get_pc_weight(g, i) * 50 > 5000) {
             height = strdup("heavy");
-          } else if (char_get_pc_weight(i) * 50 > 4000) {
+          } else if (char_get_pc_weight(g, i) * 50 > 4000) {
             height = strdup("average weight");
-          } else if (char_get_pc_weight(i) * 50 > 3000) {
+          } else if (char_get_pc_weight(g, i) * 50 > 3000) {
             height = strdup("lightweight");
           } else {
             height = strdup("welterweight");
           }
         } else {
-          if (char_get_pc_weight(i) > 120) {
+          if (char_get_pc_weight(g, i) > 120) {
             height = strdup("very heavy");
-          } else if (char_get_pc_weight(i) > 100) {
+          } else if (char_get_pc_weight(g, i) > 100) {
             height = strdup("heavy");
-          } else if (char_get_pc_weight(i) > 80) {
+          } else if (char_get_pc_weight(g, i) > 80) {
             height = strdup("average weight");
-          } else if (char_get_pc_weight(i) > 60) {
+          } else if (char_get_pc_weight(g, i) > 60) {
             height = strdup("lightweight");
           } else {
             height = strdup("welterweight");

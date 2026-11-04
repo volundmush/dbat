@@ -14,7 +14,13 @@
 #include "dbat/genolc.h"
 
 #include <unistd.h>
+#include "dbat/world_audit.h"
 #include "dbat/game_world.h"
+
+static void log_audit_problem(void *, const char *problem)
+{
+  mud_log("SYSERR: World audit: %s", problem);
+}
 
 int main(int argc, char **argv)
 {
@@ -155,37 +161,15 @@ int main(int argc, char **argv)
   }
   mud_log("Using %s as data directory.", dir);
 
-  if (g->scheck)
+  if (g->scheck) {
     boot_world(g);
-  else {
+    world_audit(g, log_audit_problem, nullptr);
+  } else {
     mud_log("Running game on port %d.", g->port);
     init_game(g, g->port);
   }
 
-  mud_log("Clearing game world.");
-  destroy_db(g);
-
-  if (!g->scheck) {
-    mud_log("Clearing other memory.");
-    free_bufpool(g);                        /* comm.c */
-    free_player_index(g);                   /* players.c */
-    clear_free_list(g);                     /* mail.c */
-    free_mail_index(g);                     /* mail.c */
-    free_text_files(g);                     /* db.c */
-    clear_boards(g);                        /* boards.c */
-    free(g->cmd_sort_info);                   /* act.informative.c */
-    free_command_list(g);                   /* act.informative.c */
-    free_social_messages(g);                /* act.social.c */
-    free_help_table(g);                     /* db.c */
-    Free_Invalid_List(g);                   /* ban.c */
-    free_ban_list(g);                       /* ban.c */
-    free_strings(g, &g->config_info, OASIS_CFG); /* oasis_delete.c */
-    free_disabled(g);                       /* interpreter.c */
-    free_save_list(g);                      /* genolc.c */
-  }
-
-  if (g->last_act_message)
-    free(g->last_act_message);
+  game_world_free_contents(g);
 
   /* probably should free the entire config here.. */
   free(CONFIG_CONFFILE);

@@ -35,7 +35,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         write_to_output(g, d, "The news file couldn't be opened; your entry was not saved.\r\n");
       } else {
         char *tmstr;
-        time_t mytime                = time(0);
+        time_t mytime                = game_now(g);
         tmstr                        = (char *)asctime(localtime(&mytime));
         *(tmstr + strlen(tmstr) - 1) = '\0';
 
@@ -48,7 +48,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         *d->str = nullptr;
         fclose(fl);
 
-        g->NEWSUPDATE = time(0);
+        g->NEWSUPDATE = game_now(g);
         save_mud_time(g, &g->time_info);
         struct descriptor_data *i;
 
@@ -92,7 +92,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
       else {
         if (*d->str && !(strcmp(storage, "text/news"))) {
           char *tmstr;
-          time_t mytime                = time(0);
+          time_t mytime                = game_now(g);
           tmstr                        = (char *)asctime(localtime(&mytime));
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
@@ -110,7 +110,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
         write_to_output(g, d, "Saved.\r\n");
 
         if (!(strcmp(storage, "text/news"))) {
-          g->NEWSUPDATE = time(0);
+          g->NEWSUPDATE = game_now(g);
           save_mud_time(g, &g->time_info);
           struct descriptor_data *i;
 

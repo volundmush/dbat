@@ -1794,7 +1794,7 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
   else
     age = old_ages[long_lived(d->character) ? 0 : char_is_namek(d->character) ? 1
                                                                               : 2][choice - 16];
-  char_set_time_birth(d->character, time(0) - (age * SECS_PER_MUD_YEAR));
+  char_set_time_birth(d->character, game_now(g) - (age * SECS_PER_MUD_YEAR));
 
   char_set_ccpoints(d->character, char_is_hoshijin(d->character) ? 10 : 5);
   write_to_output(g, d, "@C             Alignment Menu@n\r\n");

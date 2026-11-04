@@ -36,6 +36,7 @@ ACMD(do_gecho);
 ACMD(do_poofset);
 ACMD(do_dc);
 ACMD(do_wizlock);
+ACMD(do_audit);
 ACMD(do_date);
 ACMD(do_last);
 ACMD(do_force);

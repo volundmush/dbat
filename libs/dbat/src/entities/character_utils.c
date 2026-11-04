@@ -3793,11 +3793,11 @@ void admin_set(GameWorld *g, struct char_data *ch, int value)
   }
 }
 
-struct time_info_data *age(struct char_data *ch)
+struct time_info_data *age(GameWorld *g, struct char_data *ch)
 {
   static struct time_info_data player_age;
 
-  player_age = *mud_time_passed(time(0), ch->time.birth);
+  player_age = *mud_time_passed(game_now(g), ch->time.birth);
 
   return (&player_age);
 }
@@ -4681,20 +4681,20 @@ int char_get_class_ranks(const struct char_data *ch, int whichclass)
   return char_get_level(ch);
 }
 
-int char_get_pc_height(struct char_data *ch)
+int char_get_pc_height(GameWorld *g, struct char_data *ch)
 {
-  return (!char_is_npc(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72)
-                                                                            : age(ch)->year <= 14   ? (int)((ch)->height * 0.85)
-                                                                            : age(ch)->year <= 16   ? (int)((ch)->height * 0.92)
+  return (!char_is_npc(ch) ? age(g, ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(g, ch)->year <= 12 ? (int)((ch)->height * 0.72)
+                                                                            : age(g, ch)->year <= 14   ? (int)((ch)->height * 0.85)
+                                                                            : age(g, ch)->year <= 16   ? (int)((ch)->height * 0.92)
                                                                                                     : (ch)->height
                            : (ch)->height);
 }
 
-int char_get_pc_weight(struct char_data *ch)
+int char_get_pc_weight(GameWorld *g, struct char_data *ch)
 {
-  return (!char_is_npc(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55)
-                                                                            : age(ch)->year <= 14   ? (int)((ch)->weight * 0.7)
-                                                                            : age(ch)->year <= 16   ? (int)((ch)->weight * 0.85)
+  return (!char_is_npc(ch) ? age(g, ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(g, ch)->year <= 12 ? (int)((ch)->weight * 0.55)
+                                                                            : age(g, ch)->year <= 14   ? (int)((ch)->weight * 0.7)
+                                                                            : age(g, ch)->year <= 16   ? (int)((ch)->weight * 0.85)
                                                                                                     : (ch)->weight
                            : (ch)->weight);
 }
@@ -7276,9 +7276,9 @@ void char_set_feat_points(GameWorld *g, struct char_data *ch, int v)
     ps->feat_points = v;
 }
 
-int char_get_age_years(struct char_data *ch)
+int char_get_age_years(GameWorld *g, struct char_data *ch)
 {
-  return age(ch)->year;
+  return age(g, ch)->year;
 }
 
 int char_can_carry_n(const struct char_data *ch)

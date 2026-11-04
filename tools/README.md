@@ -22,4 +22,13 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 `libs/dbat/tests/` holds self-contained tests that need no `data/` files. Run them with `ctest` from a CMake build directory, or with `zig build test`.
 
-Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.h`), so a test can build as many worlds as it wants. A test only has to set the global `logfile`, which stays global because crash handlers write to it.
+Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.h`), so a test can build as many worlds as it wants. A test that builds a world by hand only has to set the global `logfile`, which stays global because crash handlers write to it.
+
+To test a whole running game, use `libs/dbat/tests/harness.h`. It copies `libs/dbat/tests/fixtures/world/`, a small hand-written world, to a temp directory and boots it there with no sockets, so nothing touches your `data/`. A test can log players in, type commands, read their output and run pulses.
+
+- `test_world.c` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
+- `test_commands.c` runs every command with awkward arguments, at three admin levels and in four states, under whichever sanitizers the build uses. Each case forks from the booted game, so one crash can't hide another. `dbat_test_commands <command>` runs one command and prints the full report. Use the ASan preset, because a plain build can't see most memory errors. It takes minutes, so skip it with `ctest -LE slow`; `zig build test` leaves it out, and `zig build test-commands` runs it. Failures in commands listed in `known_failures` are printed but don't fail the test.
+
+`world_audit()` (`dbat/world_audit.h`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
+
+A test can pin the clock with `g->pinned_time`, which is what `game_now()` then returns. Game code should call `game_now(g)` and not `time(0)`.

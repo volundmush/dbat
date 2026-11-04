@@ -172,7 +172,7 @@ ACMD(do_carry)
       return;
     }
 
-    if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
+    if (char_get_pc_weight(g, vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
       act(g, "@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", true, ch, 0, vict, TO_CHAR);
       act(g, "@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch, 0, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_1SEC);

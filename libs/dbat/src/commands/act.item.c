@@ -1196,11 +1196,11 @@ ACMD(do_bid)
           continue;
         }
         list++;
-        if (obj_get_aucTime(obj) + 86400 > time(0) && obj_get_curBidder(obj) <= -1) {
+        if (obj_get_aucTime(obj) + 86400 > game_now(g) && obj_get_curBidder(obj) <= -1) {
           send_to_char(g, ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n", list, get_name_by_id(g, obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_aucter(obj))) : "Nobody", count_color_chars(obj_get_short_description(obj)) + 30, obj_get_short_description(obj), add_commas(obj_get_bid(obj)));
-        } else if (obj_get_aucTime(obj) + 86400 > time(0) && obj_get_curBidder(obj) > -1) {
+        } else if (obj_get_aucTime(obj) + 86400 > game_now(g) && obj_get_curBidder(obj) > -1) {
           send_to_char(g, ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(g, obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_aucter(obj))) : "Nobody", count_color_chars(obj_get_short_description(obj)) + 30, obj_get_short_description(obj), get_name_by_id(g, obj_get_curBidder(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
-        } else if (obj_get_aucTime(obj) + 86400 < time(0) && obj_get_curBidder(obj) > -1) {
+        } else if (obj_get_aucTime(obj) + 86400 < game_now(g) && obj_get_curBidder(obj) > -1) {
           send_to_char(g, ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(g, obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_aucter(obj))) : "Nobody", count_color_chars(obj_get_short_description(obj)) + 30, obj_get_short_description(obj), get_name_by_id(g, obj_get_curBidder(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
         } else {
           send_to_char(g, ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n", list, get_name_by_id(g, obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(g, obj_get_aucter(obj))) : "Nobody", count_color_chars(obj_get_short_description(obj)) + 30, obj_get_short_description(obj));
@@ -1361,7 +1361,7 @@ ACMD(do_bid)
       send_to_char(g, ch, "You can not bid more than 150%s of your total money (on hand and in the bank).\r\n", "%");
       return;
     }
-    if (obj_get_aucTime(obj2) + 86400 <= time(0)) {
+    if (obj_get_aucTime(obj2) + 86400 <= game_now(g)) {
       send_to_char(g, ch, "Bidding on that object has been closed.\r\n");
       return;
     }

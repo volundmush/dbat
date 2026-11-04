@@ -146,7 +146,7 @@ ACMD(do_news)
     fclose(fl);
 
     if (entries > 0) {
-      char_set_lastpl(ch, time(0));
+      char_set_lastpl(ch, game_now(g));
       char_set_wait(ch, PULSE_1SEC);
       send_to_char(g, ch, "%s", buf);
     } else {
@@ -164,7 +164,7 @@ ACMD(do_news)
 
   if (found == true) {
     send_to_char(g, ch, "%s\r\n", buf);
-    char_set_lastpl(ch, time(0));
+    char_set_lastpl(ch, game_now(g));
     *buf      = '\0';
     *title    = '\0';
     *lastline = '\0';
@@ -237,7 +237,7 @@ ACMD(do_newsedit)
   };
 
   char *tmstr;
-  time_t mytime                = time(0);
+  time_t mytime                = game_now(g);
   tmstr                        = (char *)asctime(localtime(&mytime));
   *(tmstr + strlen(tmstr) - 1) = '\0';
 

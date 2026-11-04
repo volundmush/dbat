@@ -57,7 +57,7 @@ static int update_player_count(GameWorld *g)
     if (g->PCOUNT >= g->HIGHPCOUNT) {
       oldcount   = g->HIGHPCOUNT;
       g->HIGHPCOUNT = g->PCOUNT;
-      g->PCOUNTDATE = time(0);
+      g->PCOUNTDATE = game_now(g);
     }
   }
   return oldcount;
@@ -216,7 +216,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
     case RECON:
       write_to_output(g, d, "Reconnecting.\r\n");
       pay_player_count_rewards(g, update_player_count(g));
-      char_set_time_logon(d->character, time(0));
+      char_set_time_logon(d->character, game_now(g));
       act(g, "$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
       mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       char_set_rp(d->character, d->rpp);
@@ -437,13 +437,13 @@ static void payout(GameWorld *g, int num)
 {
   struct descriptor_data *k;
   if (g->LASTPAYOUT == 0) {
-    g->LASTPAYOUT  = time(0) + 86400;
+    g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
   } else if (num > g->LASTPAYTYPE) {
-    g->LASTPAYOUT  = time(0) + 86400;
+    g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
-  } else if (g->LASTPAYOUT <= time(0)) {
-    g->LASTPAYOUT  = time(0) + 86400;
+  } else if (g->LASTPAYOUT <= game_now(g)) {
+    g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
   }
   for (k = g->descriptors; k; k = k->next) {
@@ -1006,7 +1006,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 
       oldcount = update_player_count(g);
 
-      char_set_time_logon(d->character, time(0));
+      char_set_time_logon(d->character, game_now(g));
       greet_mtrigger(g, d->character, -1);
       greet_memory_mtrigger(g, d->character);
 

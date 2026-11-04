@@ -2774,11 +2774,11 @@ ACMD(do_throw)
       grab = true;
     }
 
-    if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(tch))) {
+    if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch))) {
       send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
       return;
     }
-    if (char_get_pc_weight(tch) + rroom_get_gravity(g, char_get_in_room(ch)) > getMaxCarryWeight(g, ch)) {
+    if (char_get_pc_weight(g, tch) + rroom_get_gravity(g, char_get_in_room(ch)) > getMaxCarryWeight(g, ch)) {
       send_to_char(g, ch, "The gravity has made them too heavy for you to throw!\r\n");
       return;
     }
@@ -2788,12 +2788,12 @@ ACMD(do_throw)
       act(g, "@C$n@W tries to @RGRAB@W @c$N@W and @RTHROW@W $M, but $E manages to dodge the attempt!@n", true, ch, 0, tch, TO_NOTVICT);
       hurt(g, 0, 0, ch, tch, nullptr, 0, 0);
       handle_cooldown(g, ch, 5);
-      decCurST(g, ch, (getEffMaxPL(g, ch) / 200) + char_get_pc_weight(tch), 0);
+      decCurST(g, ch, (getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch), 0);
       return;
     }
     handle_cooldown(g, ch, 5);
     improve_skill(g, ch, SKILL_THROW, 0);
-    damage = ((char_get_pc_weight(tch) * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) / 100);
+    damage = ((char_get_pc_weight(g, tch) * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) / 100);
     damage += rroom_get_gravity(g, char_get_in_room(ch)) * (rroom_get_gravity(g, char_get_in_room(ch)) / 2);
     perc  = init_skill(g, ch, SKILL_THROW);
     perc2 = init_skill(g, vict, SKILL_DODGE);
@@ -2814,7 +2814,7 @@ ACMD(do_throw)
         act(g, "@WThrown through the air, @C$n@W flies at YOU, but the throw is a miss! @C$n@W recovers $s bearings a moment later!@n", true, tch, 0, vict, TO_VICT);
         act(g, "@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n", true, tch, 0, vict, TO_NOTVICT);
       }
-      decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(tch)), 0);
+      decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch)), 0);
       act(g, "@W--@R$N@W--@n", true, ch, 0, vict, TO_CHAR);
       act(g, "@W--@R$N@W--@n", true, tch, 0, vict, TO_CHAR);
       act(g, "@W--@RYOU@W--@n", true, vict, 0, 0, TO_CHAR);
@@ -2846,7 +2846,7 @@ ACMD(do_throw)
       act(g, "@W--@RYOU@W--@n", true, tch, 0, 0, TO_CHAR);
       hurt(g, 0, 0, ch, tch, nullptr, damage, 0);
     }
-    decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + char_get_pc_weight(tch)), 0);
+    decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch)), 0);
     char_set_wait(ch, PULSE_3SEC);
   } /* End throwing character. */
 

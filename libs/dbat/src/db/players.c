@@ -667,12 +667,12 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
 
   if (!char_get_time_created(ch)) {
     mud_log("No creation timestamp for user %s, using current time", char_get_name(ch));
-    char_set_time_created(ch, time(0));
+    char_set_time_created(ch, game_now(g));
   }
 
   if (!char_get_time_birth(ch)) {
     mud_log("No birthday for user %s, using standard starting age determination", char_get_name(ch));
-    char_set_time_birth(ch, time(0) - birth_age(g, ch));
+    char_set_time_birth(ch, game_now(g) - birth_age(g, ch));
   }
 
   if (!char_get_time_maxage(ch)) {
@@ -760,8 +760,8 @@ void save_char(GameWorld *g, struct char_data *ch)
      * is playing.
      */
     if (desc_get_connected(char_get_desc(ch)) == CON_PLAYING) {
-      char_set_time_played(ch, char_get_time_played(ch) + (time(0) - char_get_time_logon(ch)));
-      char_set_time_logon(ch, time(0));
+      char_set_time_played(ch, char_get_time_played(ch) + (game_now(g) - char_get_time_logon(ch)));
+      char_set_time_logon(ch, game_now(g));
     }
   }
 
@@ -1329,7 +1329,7 @@ void clean_pfiles(GameWorld *g)
         for (ci = 0; pclean_criteria[ci].level > -1; ci++) {
           if (g->player_table[i].admlevel > 1)
             continue;
-          else if (g->player_table[i].level <= pclean_criteria[ci].level && ((time(0) - g->player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
+          else if (g->player_table[i].level <= pclean_criteria[ci].level && ((game_now(g) - g->player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
             remove_player(g, i);
             break;
           }

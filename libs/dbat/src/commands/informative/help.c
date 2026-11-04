@@ -220,7 +220,7 @@ ACMD(do_gen_ps)
       break;
     case SCMD_NEWS:
       send_to_char(g, ch, "%s", g->news);
-      char_set_lastpl(ch, time(0));
+      char_set_lastpl(ch, game_now(g));
       break;
     case SCMD_INFO:
       send_to_char(g, ch, "%s", g->info);
@@ -537,7 +537,7 @@ void add_history(GameWorld *g, struct char_data *ch, char *str, int type)
     return;
 
   tmp = char_get_comm_hist(g, ch, type);
-  ct  = time(0);
+  ct  = game_now(g);
   strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
   snprintf(buf, sizeof(buf), "%s%s", time_str, str);

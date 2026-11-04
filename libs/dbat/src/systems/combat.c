@@ -1628,7 +1628,7 @@ void huge_update(GameWorld *g)
   /* Checking the object list for any huge ki attacks */
   for (k = g->objects; k; k = next_k) {
     next_k = obj_get_next(k); /* k may be extracted below */
-    if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= time(0)) {
+    if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= game_now(g)) {
       if (obj_get_in_room(k) && rroom_get_vnum(g, obj_get_in_room(k)) == 80) {
         room_vnum inroom = obj_get_in_room(k);
         rroom_set_flag(g, inroom, ROOM_HOUSE_CRASH, false);

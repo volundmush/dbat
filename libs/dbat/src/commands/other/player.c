@@ -688,7 +688,7 @@ ACMD(do_gen_write)
       return;
   }
 
-  ct  = time(0);
+  ct  = game_now(g);
   tmp = asctime(localtime(&ct));
 
   if (char_is_npc(ch)) {
@@ -1094,7 +1094,7 @@ ACMD(do_file)
   }
 
   if (!strcasecmp(field, "request")) {
-    char_set_lboard(ch, 2, time(0));
+    char_set_lboard(ch, 2, game_now(g));
   }
 
   if (!*value)

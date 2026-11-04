@@ -82,7 +82,7 @@ int char_get_feat_points(GameWorld *g, const struct char_data *ch);
 void char_set_feat_points(GameWorld *g, struct char_data *ch, int v);
 
 /* Derived character values that used to be macros. */
-int char_get_age_years(struct char_data *ch);
+int char_get_age_years(GameWorld *g, struct char_data *ch);
 int char_can_carry_n(const struct char_data *ch);
 const char *char_true_race_name(const struct char_data *ch);
 const char *char_sensei_name(const struct char_data *ch);
@@ -179,8 +179,8 @@ uint8_t char_get_weight(const struct char_data *ch);
 void char_set_weight(struct char_data *ch, uint8_t v);
 uint8_t char_get_height(const struct char_data *ch);
 void char_set_height(struct char_data *ch, uint8_t v);
-int char_get_pc_height(struct char_data *ch);
-int char_get_pc_weight(struct char_data *ch);
+int char_get_pc_height(GameWorld *g, struct char_data *ch);
+int char_get_pc_weight(GameWorld *g, struct char_data *ch);
 int8_t char_get_sex(const struct char_data *ch);
 void char_set_sex(struct char_data *ch, int8_t v);
 int char_get_rp(const struct char_data *ch);
@@ -729,7 +729,7 @@ int64_t physical_cost(GameWorld *g, struct char_data *ch, int skill);
 int init_skill(GameWorld *g, struct char_data *ch, int snum);
 int chance_to_hit(GameWorld *g, struct char_data *ch);
 int handle_speed(GameWorld *g, struct char_data *ch, struct char_data *vict);
-struct time_info_data *age(struct char_data *ch);
+struct time_info_data *age(GameWorld *g, struct char_data *ch);
 const char *get_i_name(struct char_data *ch, struct char_data *vict);
 
 void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);

@@ -1223,21 +1223,21 @@ ACMD(do_ingest)
       char_set_eye(ch, char_get_eye(vict));
     } else if (rand_number(g, 1, 3) == 3) {
       send_to_char(g, ch, "%s changes your height.\r\n", char_get_name(vict));
-      if (char_get_pc_height(ch) > char_get_pc_height(vict)) {
-        char_set_height(ch, char_get_height(ch) - (((char_get_pc_height(ch) - char_get_pc_height(vict)) / 2)));
-      } else if (char_get_pc_height(ch) < char_get_pc_height(vict)) {
-        char_set_height(ch, char_get_height(ch) + (((char_get_pc_height(vict) - char_get_pc_height(ch)) / 2)));
+      if (char_get_pc_height(g, ch) > char_get_pc_height(g, vict)) {
+        char_set_height(ch, char_get_height(ch) - (((char_get_pc_height(g, ch) - char_get_pc_height(g, vict)) / 2)));
+      } else if (char_get_pc_height(g, ch) < char_get_pc_height(g, vict)) {
+        char_set_height(ch, char_get_height(ch) + (((char_get_pc_height(g, vict) - char_get_pc_height(g, ch)) / 2)));
       } else {
-        char_set_height(ch, char_get_pc_height(vict));
+        char_set_height(ch, char_get_pc_height(g, vict));
       }
     } else if (rand_number(g, 1, 3) == 3) {
       send_to_char(g, ch, "%s changes your weight.\r\n", char_get_name(vict));
-      if (char_get_pc_weight(ch) > char_get_pc_weight(vict)) {
-        char_set_weight(ch, char_get_weight(ch) - (((char_get_pc_weight(ch) - char_get_pc_weight(vict)) / 2)));
-      } else if (char_get_pc_weight(ch) < char_get_pc_weight(vict)) {
-        char_set_weight(ch, char_get_weight(ch) + (((char_get_pc_weight(vict) - char_get_pc_weight(ch)) / 2)));
+      if (char_get_pc_weight(g, ch) > char_get_pc_weight(g, vict)) {
+        char_set_weight(ch, char_get_weight(ch) - (((char_get_pc_weight(g, ch) - char_get_pc_weight(g, vict)) / 2)));
+      } else if (char_get_pc_weight(g, ch) < char_get_pc_weight(g, vict)) {
+        char_set_weight(ch, char_get_weight(ch) + (((char_get_pc_weight(g, vict) - char_get_pc_weight(g, ch)) / 2)));
       } else {
-        char_set_weight(ch, char_get_pc_weight(vict));
+        char_set_weight(ch, char_get_pc_weight(g, vict));
       }
     } else {
       send_to_char(g, ch, "Your forelock length changes because of %s.\r\n", char_get_name(vict));

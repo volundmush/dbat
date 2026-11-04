@@ -828,7 +828,7 @@ void boot_db(GameWorld *g)
 
   g->reset_q.head = g->reset_q.tail = nullptr;
 
-  g->boot_time = time(0);
+  g->boot_time = game_now(g);
 
   mud_log("Boot db -- DONE.");
 }
@@ -935,7 +935,7 @@ static void reset_time(GameWorld *g)
   if (beginning_of_time == 0)
     beginning_of_time = 650336715;
 
-  g->time_info = *mud_time_passed(time(0), beginning_of_time);
+  g->time_info = *mud_time_passed(game_now(g), beginning_of_time);
 
   if (g->time_info.hours <= 4)
     g->weather_info.sunlight = SUN_DARK;
@@ -978,7 +978,7 @@ void save_mud_time(GameWorld *g, struct time_info_data *when)
   if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
     mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
   else {
-    fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(when));
+    fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(g, when));
     fprintf(bgtime, "%lld\n", (long long)g->NEWSUPDATE);
     fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWMORT);
     fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWDUO);
@@ -3111,7 +3111,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
       break;
   }
 
-  char_set_lastpl(mob, time(0));
+  char_set_lastpl(mob, game_now(g));
   bool autoset = false;
   if (getBasePL(mob) <= 1) {
     autoset     = true;
@@ -3403,12 +3403,12 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
     }
   }
 
-  char_set_time_birth(mob, time(0) - birth_age(g, mob));
-  char_set_time_logon(mob, time(0));
+  char_set_time_birth(mob, game_now(g) - birth_age(g, mob));
+  char_set_time_logon(mob, game_now(g));
   char_set_time_created(mob, char_get_time_logon(mob)); /* why not */
   char_set_time_maxage(mob, char_get_time_birth(mob) + max_age(mob));
   char_set_time_played(mob, 0);
-  char_set_time_logon(mob, time(0));
+  char_set_time_logon(mob, game_now(g));
   char_set_hometown(mob, NOWHERE);
 
   if (char_is_humanoid(mob)) {
@@ -3612,7 +3612,7 @@ struct obj_data *create_obj(GameWorld *g)
   /* find_obj helper */
   add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
 
-  obj_set_generation(obj, time(0));
+  obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
   assign_triggers(g, obj, OBJ_TRIGGER);
@@ -3645,7 +3645,7 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnu
   /* find_obj helper */
   add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
 
-  obj_set_generation(obj, time(0));
+  obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
   if (obj_get_sbinfo(&g->obj_proto[i])) {
@@ -4374,7 +4374,7 @@ void reset_char(GameWorld *g, struct char_data *ch)
   char_set_mob_specials_default_pos(ch, POS_STANDING);
   char_set_carry_weight(ch, 0);
   char_set_carry_items(ch, 0);
-  char_set_time_logon(ch, time(0));
+  char_set_time_logon(ch, game_now(g));
 
   char_set_last_tell(g, ch, NOBODY);
 }
@@ -4440,7 +4440,7 @@ void init_char(GameWorld *g, struct char_data *ch)
   char_set_ddesc(ch, nullptr);
 
   /*ch->time.birth = time(0) - birth_age(ch);*/
-  char_set_time_created(ch, time(0));
+  char_set_time_created(ch, game_now(g));
   char_set_time_logon(ch, char_get_time_created(ch));
   char_set_time_maxage(ch, char_get_time_birth(ch) + max_age(ch));
   char_set_time_played(ch, 0);

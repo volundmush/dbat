@@ -90,6 +90,7 @@ const struct command_info cmd_info[] = {
     {"ask",           "ask",          POS_RESTING,  do_spec_comm,       0,  ADMLVL_NONE,    SCMD_ASK           },
     {"attack",        "attack",       POS_FIGHTING, do_attack,          0,  ADMLVL_NONE,    0                  },
     {"auction",       "auctio",       POS_RESTING,  do_not_here,        0,  ADMLVL_NONE,    0                  },
+    {"audit",         "audit",        POS_DEAD,     do_audit,           0,  ADMLVL_GOD,     0                  },
     {"augment",       "augmen",       POS_SITTING,  do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"aura",          "aura",         POS_RESTING,  do_aura,            0,  ADMLVL_NONE,    0                  },
     {"autoexit",      "autoex",       POS_DEAD,     do_autoexit,        0,  ADMLVL_NONE,    0                  },

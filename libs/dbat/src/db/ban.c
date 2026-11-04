@@ -179,7 +179,7 @@ ACMD(do_ban)
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
   strlcpy(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
-  ban_node->date = time(0);
+  ban_node->date = game_now(g);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
     if (!strcasecmp(flag, ban_types[i]))

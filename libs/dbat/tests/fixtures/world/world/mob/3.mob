@@ -1,0 +1,56 @@
+#300
+dummy training~
+a training dummy~
+A training dummy stands here.
+~
+It is stuffed with straw.
+~
+d 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+#301
+keeper shopkeeper~
+the shopkeeper~
+The shopkeeper waits behind the counter.
+~
+It looks bored.
+~
+d 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+#302
+stranger~
+a stranger~
+A stranger waits here.
+~
+It vanishes when anyone arrives.
+~
+d 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 301
+$

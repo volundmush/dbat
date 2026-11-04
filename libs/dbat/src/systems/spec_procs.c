@@ -226,9 +226,9 @@ SPECIAL(auction)
         obj2  = obj;
         found = true;
 
-        if (obj_get_curBidder(obj2) != -1 && obj_get_aucTime(obj2) + 518400 > time(0)) {
+        if (obj_get_curBidder(obj2) != -1 && obj_get_aucTime(obj2) + 518400 > game_now(g)) {
           send_to_char(g, ch, "Unable to cancel. Someone has already bid on it and their bid license hasn't expired.\r\n");
-          time_t remain = (obj_get_aucTime(obj2) + 518400) - time(0);
+          time_t remain = (obj_get_aucTime(obj2) + 518400) - game_now(g);
           int day       = (int)((remain % 604800) / 86400);
           int hour      = (int)((remain % 86400) / 3600);
           int minu      = (int)((remain % 3600) / 60);
@@ -280,8 +280,8 @@ SPECIAL(auction)
           continue;
         }
 
-        if (obj_get_aucTime(obj2) + 86400 > time(0)) {
-          time_t remain = (obj_get_aucTime(obj2) + 86400) - time(0);
+        if (obj_get_aucTime(obj2) + 86400 > game_now(g)) {
+          time_t remain = (obj_get_aucTime(obj2) + 86400) - game_now(g);
           int hour      = (int)((remain % 86400) / 3600);
           int minu      = (int)((remain % 3600) / 60);
           send_to_char(g, ch, "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n", obj_get_short_description(obj2), hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
@@ -384,7 +384,7 @@ SPECIAL(auction)
     obj_set_startbid(obj2, obj_get_bid(obj2));
     obj_set_aucter(obj2, char_get_id(ch));
     obj_set_auctname(obj2, strdup(char_get_name(ch)));
-    obj_set_aucTime(obj2, time(0));
+    obj_set_aucTime(obj2, game_now(g));
     obj_set_curBidder(obj2, -1);
     obj_from_char(g, obj2);
     obj_to_room(g, obj2, auct_room);

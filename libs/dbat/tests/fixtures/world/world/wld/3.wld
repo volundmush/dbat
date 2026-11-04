@@ -1,0 +1,78 @@
+#300
+Town Square~
+The middle of a small test town.
+~
+3 0 0 0 0 0
+D0
+~
+~
+0 0 301 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 302 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 303 0 0 0 0 0 0 0 0
+S
+#301
+Training Yard~
+Dummies stand in rows.
+~
+3 0 0 0 0 0
+D2
+~
+~
+0 0 300 0 0 0 0 0 0 0 0
+S
+#302
+Bank~
+A machine hums against the wall.
+~
+3 0 0 0 0 0
+D3
+~
+~
+0 0 300 0 0 0 0 0 0 0 0
+S
+#303
+General Store~
+Shelves line every wall.
+~
+3 0 0 0 0 0
+D0
+~
+~
+0 0 300 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 304 0 0 0 0 0 0 0 0
+S
+#304
+Back Lane~
+A quiet lane with a humming floor.
+~
+3 0 0 0 0 0
+D1
+~
+~
+0 0 305 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 303 0 0 0 0 0 0 0 0
+S
+T 300
+#305
+Dead End~
+Someone is waiting here.
+~
+3 0 0 0 0 0
+D3
+~
+~
+0 0 304 0 0 0 0 0 0 0 0
+S
+$~

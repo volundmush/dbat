@@ -1284,7 +1284,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
         snprintf(str, slen, "%d", ROOM_ID_BASE);
         return;
       } else if (!strcasecmp(var, "ctime"))
-        snprintf(str, slen, "%lld", (long long)time(0));
+        snprintf(str, slen, "%lld", (long long)game_now(g));
       else if (!strcasecmp(var, "door"))
         snprintf(str, slen, "%s", door[type]);
       else if (!strcasecmp(var, "force"))

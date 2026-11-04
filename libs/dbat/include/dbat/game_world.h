@@ -1,4 +1,5 @@
 #pragma once
+#include <time.h>
 #include "consts/types.h"
 #include "ban.h"
 #include "config.h"
@@ -89,6 +90,7 @@ struct GameWorld {
   struct time_info_data time_info;
   struct weather_data weather_info;
   unsigned long rng_seed;
+  time_t pinned_time; /* When non-zero, what game_now() returns. Only tests set it. */
 
   /* Configuration, loaded at boot and edited with cedit */
   struct config_data config_info;
@@ -173,3 +175,9 @@ GameWorld *game_world_create(void);
 
 /* Frees only the GameWorld. Its contents belong to destroy_db() or whoever else built them. */
 void game_world_destroy(GameWorld *g);
+
+/* Frees everything a booted game owns, except the GameWorld itself. */
+void game_world_free_contents(GameWorld *g);
+
+/* The current wall-clock time, as the game sees it. */
+time_t game_now(const GameWorld *g);

@@ -51,7 +51,7 @@ static void hsedit_setup_new(GameWorld *g, struct descriptor_data *d)
   CREATE(OLC_HOUSE(d), struct house_control_rec, 1);
   OLC_HOUSE(d)->vnum     = OLC_NUM(d);
   OLC_HOUSE(d)->exit_num = -1;
-  OLC_HOUSE(d)->built_on = time(0);
+  OLC_HOUSE(d)->built_on = game_now(g);
   OLC_HOUSE(d)->mode     = HOUSE_PRIVATE;
   OLC_VAL(d)             = 0;
   hsedit_disp_menu(g, d);
@@ -633,7 +633,7 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          OLC_HOUSE(d)->built_on = time(0);
+          OLC_HOUSE(d)->built_on = game_now(g);
           break;
         case 'n':
         case 'N':
@@ -672,7 +672,7 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          OLC_HOUSE(d)->last_payment = time(0);
+          OLC_HOUSE(d)->last_payment = game_now(g);
           break;
         case 'n':
         case 'N':

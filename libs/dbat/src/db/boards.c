@@ -61,12 +61,12 @@ static time_t *special_board_newest(GameWorld *g, const struct special_board *sb
 }
 
 /* Records that ch has just looked at a special board. */
-static void mark_board_visited(struct char_data *ch, obj_vnum vnum)
+static void mark_board_visited(GameWorld *g, struct char_data *ch, obj_vnum vnum)
 {
   const struct special_board *sb = find_special_board(vnum);
 
   if (sb)
-    char_set_lboard(ch, sb->lboard, time(0));
+    char_set_lboard(ch, sb->lboard, game_now(g));
 }
 
 /* Records a new post on a special board and tells everyone who hasn't seen it yet. */
@@ -75,7 +75,7 @@ static void announce_new_post(GameWorld *g, obj_vnum vnum)
   const struct special_board *sb = find_special_board(vnum);
 
   if (sb)
-    *special_board_newest(g, sb) = time(0);
+    *special_board_newest(g, sb) = game_now(g);
   save_mud_time(g, &g->time_info);
   if (!sb)
     return;
@@ -203,13 +203,13 @@ static struct board_msg *nth_message(struct board_info *board, int n, bool from_
   return msg;
 }
 
-static struct board_msg *new_message(struct char_data *ch, const char *subject)
+static struct board_msg *new_message(GameWorld *g, struct char_data *ch, const char *subject)
 {
   struct board_msg *msg;
 
   CREATE(msg, struct board_msg, 1);
   msg->name      = strdup(char_get_name(ch));
-  msg->timestamp = time(0);
+  msg->timestamp = game_now(g);
   msg->subject   = strdup(subject);
   return msg;
 }
@@ -615,7 +615,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
   send_to_char(g, ch, "@rO@b============================================================================@rO@n\n");
 
   if (obj)
-    mark_board_visited(ch, board_vnum);
+    mark_board_visited(g, ch, board_vnum);
   save_char(g, ch);
 }
 
@@ -665,7 +665,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
                msg->data ? msg->data : "Looks like this message is empty.");
 
   if (board_proto(g, board_vnum))
-    mark_board_visited(ch, board_vnum);
+    mark_board_visited(g, ch, board_vnum);
   /* really it's not so important to save after each view even if something WAS updated */
   if (added)
     save_board(g, board);
@@ -710,7 +710,7 @@ void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch
   delete_doubledollar(arg);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n");
-  start_post(g, board, new_message(ch, *arg ? arg : "No Subject"), ch);
+  start_post(g, board, new_message(g, ch, *arg ? arg : "No Subject"), ch);
 }
 
 void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int mnum)
@@ -743,7 +743,7 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
 
   /* a subject longer than a board file line can hold would not load back */
   snprintf(subject, sizeof(subject), "Re: %s", other->subject);
-  msg = new_message(ch, subject);
+  msg = new_message(g, ch, subject);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
   act(g, "@C$n@w starts writing on the board.@n", true, ch, 0, 0, TO_ROOM);

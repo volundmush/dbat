@@ -59,6 +59,11 @@ extern const char compress_offer[4];
 // functions
 void init_game(GameWorld *g, uint16_t port);
 
+/* The parts of one game loop pass that need no sockets. */
+void game_process_commands(GameWorld *g);
+void game_finish_descriptors(GameWorld *g);
+void game_heartbeat(GameWorld *g, int heart_pulse);
+
 void free_bufpool(GameWorld *g);
 void setup_log(const char *filename, int fd);
 bool sendok(struct char_data *ch, int to_sleeping);

@@ -380,7 +380,7 @@ void store_mail(GameWorld *g, long to, long from, char *message_pointer)
   header.header_data.next_block = LAST_BLOCK;
   header.header_data.from       = from;
   header.header_data.to         = to;
-  header.header_data.mail_time  = time(0);
+  header.header_data.mail_time  = game_now(g);
   strncpy(header.txt, msg_txt, HEADER_BLOCK_DATASIZE); /* strncpy: OK (h.txt:HEADER_BLOCK_DATASIZE+1) */
   header.txt[HEADER_BLOCK_DATASIZE] = '\0';
 

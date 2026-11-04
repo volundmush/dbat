@@ -572,7 +572,7 @@ ACMD(do_drag)
     }
     return;
   }
-  if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
+  if (char_get_pc_weight(g, vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
     reveal_hiding(g, ch, 0);
     act(g, "@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", true, ch, 0, vict, TO_CHAR);
     act(g, "@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", true, ch, 0, vict, TO_ROOM);

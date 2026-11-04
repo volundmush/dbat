@@ -77,7 +77,6 @@ static void game_loop(GameWorld *g, int cmmother_desc);
 static struct in_addr *get_bind_addr(GameWorld *g);
 static bool get_from_q(struct txt_q *queue, char *dest, int *aliased);
 static int get_max_players(GameWorld *g);
-static void heartbeat(GameWorld *g, int heart_pulse);
 static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc);
 static int init_socket(GameWorld *g, uint16_t cmport);
 static int new_descriptor(GameWorld *g, int s);
@@ -123,7 +122,7 @@ static void copyover_recover(GameWorld *g)
   room_vnum set_loadroom   = NOWHERE;
 
   mud_log("Copyover recovery initiated");
-  g->PCOUNTDAY = time(0) + 60;
+  g->PCOUNTDAY = game_now(g) + 60;
   fp        = fopen(COPYOVER_FILE, "r");
 
   if (!fp) {
@@ -204,7 +203,7 @@ void init_game(GameWorld *g, uint16_t cmport)
   /* We don't want to restart if we crash before we get up. */
   touch(KILLSCRIPT_FILE);
 
-  circle_srandom(g, time(0));
+  circle_srandom(g, game_now(g));
 
   mud_log("Finding player limit.");
   g->max_players = get_max_players(g);
@@ -375,6 +374,84 @@ static int get_max_players(GameWorld *g)
   return (max_descs);
 }
 
+/* Runs one queued line of input for each descriptor that is ready for it. */
+void game_process_commands(GameWorld *g)
+{
+  char comm[MAX_INPUT_LENGTH];
+  struct descriptor_data *d, *next_d;
+  int aliased;
+
+  for (d = g->descriptors; d; d = next_d) {
+    next_d = d->next;
+
+    /*
+     * Not combined to retain --(d->wait) behavior. -gg 2/20/98
+     * If no wait state, no subtraction.  If there is a wait
+     * state then 1 is subtracted. Therefore we don't go less
+     * than 0 ever and don't require an 'if' bracket. -gg 2/27/99
+     */
+
+    if (d->character) {
+      char_set_wait(d->character, char_get_wait(d->character) - ((char_get_wait(d->character) > 0)));
+
+      if (char_get_wait(d->character)) {
+        continue;
+      }
+    }
+
+    if (!get_from_q(&d->input, comm, &aliased))
+      continue;
+
+    if (d->character) {
+      /* Reset the idle timer & pull char back from void if necessary */
+      char_set_timer(d->character, 0);
+      if (desc_get_connected(d) == CON_PLAYING && char_get_was_in_room(d->character) != NOWHERE) {
+        if (char_get_in_room(d->character) != NOWHERE)
+          char_from_room(g, d->character);
+        char_to_room(g, d->character, char_get_was_in_room(d->character));
+        char_set_was_in_room(d->character, NOWHERE);
+        act(g, "$n has returned.", true, d->character, 0, 0, TO_ROOM);
+      }
+      char_set_wait(d->character, 1);
+    }
+    d->has_prompt = false;
+
+    if (d->str) /* Writing boards, mail, etc. */
+      string_add(g, d, comm);
+    else if (desc_get_connected(d) != CON_PLAYING) /* In menus, etc. */
+      nanny(g, d, comm);
+    else {                                           /* else: we're playing normally. */
+      if (aliased)                                   /* To prevent recursive aliases. */
+        d->has_prompt = true;                        /* To get newline before next cmd output. */
+      else if (perform_alias(g, d, comm, sizeof(comm))) /* Run it through aliasing system */
+        get_from_q(&d->input, comm, &aliased);
+      command_interpreter(g, d->character, comm); /* Send it to interpreter */
+    }
+  }
+}
+
+/* Marks the end of a pass over the input: prompts anyone left without output, closes anyone who is leaving. */
+void game_finish_descriptors(GameWorld *g)
+{
+  struct descriptor_data *d, *next_d;
+
+  /* Print prompts for other descriptors who had no other output */
+  for (d = g->descriptors; d; d = d->next) {
+    if (!d->has_prompt) {
+      write_to_output(g, d, "@n");
+      /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
+      d->has_prompt = true;
+    }
+  }
+
+  /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
+  for (d = g->descriptors; d; d = next_d) {
+    next_d = d->next;
+    if (desc_get_connected(d) == CON_CLOSE || desc_get_connected(d) == CON_DISCONNECT)
+      close_socket(g, d);
+  }
+}
+
 /*
  * game_loop contains the main loop which drives the entire MUD.  It
  * cycles once every 0.10 seconds and is responsible for accepting new
@@ -385,9 +462,8 @@ static int get_max_players(GameWorld *g)
 static void game_loop(GameWorld *g, int cmmother_desc)
 {
   int64_t last_time, process_time, now; /* monotonic nanoseconds; last_time is when the last pulse was due */
-  char comm[MAX_INPUT_LENGTH];
   struct descriptor_data *d, *next_d;
-  int missed_pulses, aliased;
+  int missed_pulses;
   struct pollfd *fds = nullptr; /* [0] is the mother socket, then one per descriptor, in list order */
   size_t fds_alloc   = 0, nfds;
 
@@ -487,54 +563,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
           close_socket(g, d);
     }
 
-    /* Process commands we just read from process_input */
-    for (d = g->descriptors; d; d = next_d) {
-      next_d = d->next;
-
-      /*
-       * Not combined to retain --(d->wait) behavior. -gg 2/20/98
-       * If no wait state, no subtraction.  If there is a wait
-       * state then 1 is subtracted. Therefore we don't go less
-       * than 0 ever and don't require an 'if' bracket. -gg 2/27/99
-       */
-
-      if (d->character) {
-        char_set_wait(d->character, char_get_wait(d->character) - ((char_get_wait(d->character) > 0)));
-
-        if (char_get_wait(d->character)) {
-          continue;
-        }
-      }
-
-      if (!get_from_q(&d->input, comm, &aliased))
-        continue;
-
-      if (d->character) {
-        /* Reset the idle timer & pull char back from void if necessary */
-        char_set_timer(d->character, 0);
-        if (desc_get_connected(d) == CON_PLAYING && char_get_was_in_room(d->character) != NOWHERE) {
-          if (char_get_in_room(d->character) != NOWHERE)
-            char_from_room(g, d->character);
-          char_to_room(g, d->character, char_get_was_in_room(d->character));
-          char_set_was_in_room(d->character, NOWHERE);
-          act(g, "$n has returned.", true, d->character, 0, 0, TO_ROOM);
-        }
-        char_set_wait(d->character, 1);
-      }
-      d->has_prompt = false;
-
-      if (d->str) /* Writing boards, mail, etc. */
-        string_add(g, d, comm);
-      else if (desc_get_connected(d) != CON_PLAYING) /* In menus, etc. */
-        nanny(g, d, comm);
-      else {                                           /* else: we're playing normally. */
-        if (aliased)                                   /* To prevent recursive aliases. */
-          d->has_prompt = true;                        /* To get newline before next cmd output. */
-        else if (perform_alias(g, d, comm, sizeof(comm))) /* Run it through aliasing system */
-          get_from_q(&d->input, comm, &aliased);
-        command_interpreter(g, d->character, comm); /* Send it to interpreter */
-      }
-    }
+    game_process_commands(g);
 
     /* Send queued output out to the operating system (ultimately to user). */
     for (d = g->descriptors; d; d = next_d) {
@@ -550,21 +579,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
       }
     }
 
-    /* Print prompts for other descriptors who had no other output */
-    for (d = g->descriptors; d; d = d->next) {
-      if (!d->has_prompt) {
-        write_to_output(g, d, "@n");
-        /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
-        d->has_prompt = true;
-      }
-    }
-
-    /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
-    for (d = g->descriptors; d; d = next_d) {
-      next_d = d->next;
-      if (desc_get_connected(d) == CON_CLOSE || desc_get_connected(d) == CON_DISCONNECT)
-        close_socket(g, d);
-    }
+    game_finish_descriptors(g);
 
     /*
      * Now, we execute as many pulses as necessary--just one if we haven't
@@ -586,7 +601,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
 
     /* Now execute the heartbeat functions */
     while (missed_pulses--)
-      heartbeat(g, ++g->pulse);
+      game_heartbeat(g, ++g->pulse);
 
     /* Check for any signals we may have received. */
     if (reread_wizlist) {
@@ -608,7 +623,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
   free(fds);
 }
 
-static void heartbeat(GameWorld *g, int heart_pulse)
+void game_heartbeat(GameWorld *g, int heart_pulse)
 {
 
   event_process(g);
@@ -1814,7 +1829,7 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->descriptor = desc;
   newd->output     = newd->small_outbuf;
   newd->bufspace   = SMALL_BUFSIZE - 1;
-  newd->login_time = time(0);
+  newd->login_time = game_now(g);
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
   CREATE(newd->history, char *, HISTORY_SIZE);

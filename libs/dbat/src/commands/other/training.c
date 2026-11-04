@@ -1340,9 +1340,9 @@ void base_update(GameWorld *g)
   int cash = false, inc = 0;
   int countch = false, pcoun = 0;
 
-  if (g->INTERESTTIME != 0 && g->INTERESTTIME <= time(0) && time(0) != 0) {
-    g->INTERESTTIME = time(0) + 86400;
-    g->LASTINTEREST = time(0);
+  if (g->INTERESTTIME != 0 && g->INTERESTTIME <= game_now(g) && game_now(g) != 0) {
+    g->INTERESTTIME = game_now(g) + 86400;
+    g->LASTINTEREST = game_now(g);
     save_mud_time(g, &g->time_info);
     cash    = true;
     countch = true;
@@ -1750,7 +1750,7 @@ void base_update(GameWorld *g)
 
   if (countch == true) {
     g->PCOUNT    = pcoun;
-    g->PCOUNTDAY = time(0);
+    g->PCOUNTDAY = game_now(g);
   }
 
   if (g->TOPCOUNTDOWN <= 0) {

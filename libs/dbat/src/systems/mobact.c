@@ -319,14 +319,14 @@ void mobile_activity(GameWorld *g)
     if (char_get_mob_spec(g, ch) == shop_keeper) {
       time_t diff = 0;
 
-      diff = time(0) - char_get_lastpl(ch);
+      diff = game_now(g) - char_get_lastpl(ch);
 
       if (diff > 86400) {
         struct obj_data *sobj, *next_obj;
         shop_rnum shop_nr;
         shop_rnum shopnr = -1;
 
-        char_set_lastpl(ch, time(0));
+        char_set_lastpl(ch, game_now(g));
         for (shop_nr = 0; shop_nr <= g->top_shop; shop_nr++) {
           if (rshop_get_keeper(g, shop_nr) == char_get_nr(ch)) {
             shopnr = shop_nr;

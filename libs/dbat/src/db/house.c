@@ -312,7 +312,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   temp_house.mode          = HOUSE_PRIVATE;
   temp_house.vnum          = virt_house;
   temp_house.exit_num      = exit_num;
-  temp_house.built_on      = time(0);
+  temp_house.built_on      = game_now(g);
   temp_house.last_payment  = 0;
   temp_house.owner         = owner;
   temp_house.num_of_guests = 0;
@@ -382,7 +382,7 @@ static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg)
   else {
     mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house %s collected by %s.", arg, char_get_name(ch));
 
-    g->house_control[i].last_payment = time(0);
+    g->house_control[i].last_payment = game_now(g);
     House_save_control(g);
     send_to_char(g, ch, "Payment recorded.\r\n");
   }

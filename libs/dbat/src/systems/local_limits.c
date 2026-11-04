@@ -1550,7 +1550,7 @@ static void point_update_objects(GameWorld *g)
     if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && g->obj_selling != j && obj_get_vnum(g, j) != 7200) {
       time_t diff = 0;
 
-      diff = time(0) - obj_get_lload(j);
+      diff = game_now(g) - obj_get_lload(j);
       if (diff > 240 && obj_get_lload(j) > 0) {
         mud_log("No rent object (%s) extracted from room (%d)", obj_get_short_description(j), rroom_get_vnum(g, obj_get_in_room(j)));
         extract_obj(g, j);

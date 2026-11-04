@@ -33,7 +33,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_rnum room)
     rroom_set_contents(g, room, object);
     obj_set_in_room(object, room);
     obj_set_carried_by(object, nullptr);
-    obj_set_lload(object, time(0));
+    obj_set_lload(object, game_now(g));
     if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(g, object) > 19199) {
       obj_extra_set(object, ITEM_UNBREAKABLE, true);
     }

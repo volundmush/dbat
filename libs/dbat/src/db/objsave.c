@@ -74,7 +74,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
   if (!(fp = atomic_open(&af, filename, true)))
     return false;
 
-  if (fprintf(fp, "%d %lld %d %d %d %d\r\n", rentcode, (long long)time(0), cost,
+  if (fprintf(fp, "%d %lld %d %d %d %d\r\n", rentcode, (long long)game_now(g), cost,
               char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
     Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
     atomic_abort(&af);
@@ -335,7 +335,7 @@ static bool Crash_clean_file(GameWorld *g, char *name)
 
     if ((rentcode == RENT_CRASH) ||
         (rentcode == RENT_FORCED) || (rentcode == RENT_TIMEDOUT)) {
-      if (timed < time(0) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
+      if (timed < game_now(g) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
         const char *filetype;
 
         Crash_delete_file(name);
@@ -358,7 +358,7 @@ static bool Crash_clean_file(GameWorld *g, char *name)
       }
       /* Must retrieve rented items w/in 30 days */
     } else if (rentcode == RENT_RENTED)
-      if (timed < time(0) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
+      if (timed < game_now(g) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
         Crash_delete_file(name);
         mud_log("    Deleting %s's rent file.", name);
         return true;
