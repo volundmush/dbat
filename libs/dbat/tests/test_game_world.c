@@ -214,6 +214,30 @@ static void check_rng(GameWorld *a, GameWorld *b)
   CHECK(rand_number(a, 1, 100) >= 1);
 }
 
+/* a random colour code rolls on the world's own generator, once */
+static void check_random_color(GameWorld *a, GameWorld *b)
+{
+  struct descriptor_data d = {0};
+  struct char_data *mob    = read_mobile(a, 100, VIRTUAL);
+  unsigned long second;
+
+  d.output    = d.small_outbuf;
+  d.bufspace  = SMALL_BUFSIZE - 1;
+  d.character = mob;
+
+  circle_srandom(a, 42);
+  circle_srandom(b, 42);
+  write_to_output(a, &d, "@xrandom colour");
+  (void)circle_random(b);
+  second = circle_random(b);
+  CHECK(circle_random(a) == second);
+
+  remove_from_lookup_table(a, char_get_id(mob));
+  a->mob_index[0].number--;
+  a->characters = nullptr;
+  free(mob);
+}
+
 static EVENTFUNC(count_event)
 {
   ++*(int *)event_obj;
@@ -355,6 +379,7 @@ int main(void)
   check_rooms(a, b);
   check_read_entities(a, b);
   check_rng(a, b);
+  check_random_color(a, b);
   check_other_state(a, b);
   check_objects_off_the_ground();
   check_get_number();

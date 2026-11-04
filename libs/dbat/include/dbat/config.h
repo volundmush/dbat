@@ -253,7 +253,6 @@ extern const char *const OK, *const NOPERSON, *const NOEFFECT;
 
 extern const int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
 
-extern int imt_is_enabled;
 extern const int free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
 
 extern const int auto_pwipe, selfdelete_fastwipe;

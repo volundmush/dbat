@@ -1557,7 +1557,7 @@ Extra codes:      @l - blink          @o - bold
 static const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 
 #define NEW_STRING_LENGTH (size_t)(dest_char - save_pos)
-static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
+static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, char **choices)
 {
   char *dest_char, *source_char, *save_pos;
   const char *color_char, *replacement = nullptr;
@@ -1585,7 +1585,7 @@ static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 
     /* look for a random color code picks a random number between 1 and 14 */
     if (*source_char == 'x') {
-      temp_color   = (rand() % 14);
+      temp_color   = rand_number(g, 0, 13);
       *source_char = RANDOM_COLORS[temp_color];
     }
 
@@ -1683,7 +1683,7 @@ size_t vwrite_to_output(GameWorld *g, struct descriptor_data *t, const char *for
 
   wantsize = size = vsnprintf(txt, sizeof(txt), format, args);
   if (t->character)
-    wantsize = size = proc_colors(txt, sizeof(txt), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
+    wantsize = size = proc_colors(g, txt, sizeof(txt), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
   /* If exceeding the size of the buffer, truncate it for the overflow message */
   if (size < 0 || wantsize >= sizeof(txt)) {
     size = sizeof(txt) - 1;
@@ -1958,7 +1958,7 @@ static int process_output(GameWorld *g, struct descriptor_data *t)
 
   strcat(i, make_prompt(g, t)); /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
   if (desc_get_connected(t) == CON_PLAYING) {
-    proc_colors(i, sizeof(i), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
+    proc_colors(g, i, sizeof(i), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
   }
 
   /*
