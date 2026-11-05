@@ -193,17 +193,25 @@ void boot_social_messages(GameWorld *g)
   }
 
   mud_log("Social table contains %d socials.", g->top_of_socialt);
+  if (g->top_of_socialt < 0) { /* a game with no socials can still run */
+    fclose(fl);
+    return;
+  }
   rewind(fl);
 
   CREATE(g->soc_mess_list, struct social_messg, g->top_of_socialt + 1);
 
   /* now read 'em */
   for (;;) {
-    fscanf(fl, " %s ", next_soc);
+    fscanf(fl, " %64935s ", next_soc); /* MAX_STRING_LENGTH */
     if (*next_soc == '$') break;
+    if (curr_soc >= g->top_of_socialt) {
+      mud_log("SYSERR: more socials than were counted in the social file, near '%s'", next_soc);
+      exit(1);
+    }
 
     if (CONFIG_NEW_SOCIALS == true) {
-      if (fscanf(fl, " %s %d %d %d %d \n",
+      if (fscanf(fl, " %16383s %d %d %d %d \n", /* MAX_INPUT_LENGTH */
                  sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
         mud_log("SYSERR: format error in social file near social '%s'", next_soc);
         /*  SYSERR_DESC:
@@ -275,7 +283,8 @@ void create_command_list(GameWorld *g)
     free_command_list(g);
 
   /* re check the sort on the socials */
-  qsort(g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_sort_order);
+  if (g->soc_mess_list)
+    qsort(g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_sort_order);
 
   /* count the commands in the command list */
   i = 0;

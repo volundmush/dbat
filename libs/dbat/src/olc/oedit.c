@@ -5,6 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include "dbat/affect.h"
 #include "dbat/shop.h"
 #include "dbat/boards.h"
 #include "dbat/config.h"
@@ -1593,7 +1594,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case OEDIT_APPLYSPEC:
       if (isdigit(*arg))
-        obj_get_affected(OLC_OBJ(d))[OLC_VAL(d)].specific = atoi(arg);
+        obj_get_affected(OLC_OBJ(d))[OLC_VAL(d)].specific = affect_checked_specific(obj_get_affected(OLC_OBJ(d))[OLC_VAL(d)].location, atoi(arg));
       else switch (obj_get_affected(OLC_OBJ(d))[OLC_VAL(d)].location) {
           case APPLY_SKILL:
             number = find_skill_num(g, arg, SKTYPE_SKILL);

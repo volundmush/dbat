@@ -161,7 +161,7 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   char charname[MAX_INPUT_LENGTH], property[MAX_INPUT_LENGTH];
   char value_p[MAX_INPUT_LENGTH], duration_p[MAX_INPUT_LENGTH];
   int i = 0, type = 0;
-  struct affected_type af;
+  struct affected_type af = {};
 
   half_chop(cmd, junk, cmd);
   half_chop(cmd, charname, cmd);

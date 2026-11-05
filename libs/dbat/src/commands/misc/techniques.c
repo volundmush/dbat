@@ -1328,7 +1328,7 @@ ACMD(do_kanso)
   int64_t cost = getMaxKI(g, ch) / char_get_aff_abils_intel(ch);
   int dice = axion_dice(g, -5), skill = char_get_aff_abils_intel(ch), pdice = axion_dice(g, 0);
   int dam = rand_number(g, 1, 4);
-  struct affected_type af;
+  struct affected_type af = {};
 
   /* Bonus based on wisdom */
   if (char_get_aff_abils_wis(ch) > axion_dice(g, -5))
@@ -1430,7 +1430,7 @@ ACMD(do_hayasa)
     improve_skill(g, ch, SKILL_HAYASA, 1);
     char_set_wait(ch, PULSE_2SEC);
   } else {
-    struct affected_type af;
+    struct affected_type af = {};
 
     decCurKI(g, ch, cost, 0);
     af.type      = SPELL_HAYASA;

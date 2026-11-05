@@ -2910,8 +2910,8 @@ void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...)
 static const char *const ACTNULL = "<NULL>";
 
 #define CHECK_NULL(pointer, expression)  \
-  if ((pointer) == nullptr) i = ACTNULL; \
-  else i = (expression);
+  i = (pointer) == nullptr ? nullptr : (expression); \
+  if (i == nullptr) i = ACTNULL;
 
 /* higher-level communication: the act() function */
 static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)

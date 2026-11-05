@@ -19,6 +19,8 @@
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/character_utils.h"
+#include "dbat/genshp.h"
+#include "dbat/gengld.h"
 #include "dbat/game_world.h"
 
 static void zedit_disp_arg2(GameWorld *g, struct descriptor_data *d);
@@ -816,6 +818,40 @@ static void zedit_disp_arg5(GameWorld *g, struct descriptor_data *d)
   The GARGANTAUN event handler
  **************************************************************************/
 
+/*
+ * Saving a zone only writes what's inside its range, so anything left outside would be gone for good
+ * after the next save, along with every copy of it that players have. Says so if a new range would do that.
+ */
+static bool zone_range_loses_something(GameWorld *g, struct descriptor_data *d, int bot, int top)
+{
+  struct zone_data *zone = &g->zones[OLC_ZNUM(d)];
+
+  for (int vnum = genolc_zonep_bottom(zone); vnum <= zone->top; vnum++) {
+    const char *what = nullptr;
+
+    if (vnum >= bot && vnum <= top)
+      continue;
+    if (real_room(g, vnum) != NOWHERE)
+      what = "room";
+    else if (real_mobile(g, vnum) != NOBODY)
+      what = "mob";
+    else if (real_object(g, vnum) != NOTHING)
+      what = "object";
+    else if (real_trigger(g, vnum) != NOTHING)
+      what = "trigger";
+    else if (real_shop(g, vnum) != NOTHING)
+      what = "shop";
+    else if (real_guild(g, vnum) != NOTHING)
+      what = "guild";
+    if (what) {
+      write_to_output(g, d, "That would leave %s %d outside the zone, and the next save would destroy it. "
+                            "Range not changed.\r\n", what, vnum);
+      return true;
+    }
+  }
+  return false;
+}
+
 void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int pos;
@@ -1426,10 +1462,13 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * Parse and add new bottom room in zone and return to main menu.
      */
       if (OLC_ZNUM(d) == 0)
-        OLC_ZONE(d)->bot = LIMIT(atoi(arg), 0, OLC_ZONE(d)->top);
+        number = LIMIT(atoi(arg), 0, OLC_ZONE(d)->top);
       else
-        OLC_ZONE(d)->bot = LIMIT(atoi(arg), g->zones[OLC_ZNUM(d) - 1].top + 1, OLC_ZONE(d)->top);
-      OLC_ZONE(d)->number = 1;
+        number = LIMIT(atoi(arg), g->zones[OLC_ZNUM(d) - 1].top + 1, OLC_ZONE(d)->top);
+      if (!zone_range_loses_something(g, d, number, OLC_ZONE(d)->top)) {
+        OLC_ZONE(d)->bot    = number;
+        OLC_ZONE(d)->number = 1;
+      }
       zedit_disp_menu(g, d);
       break;
 
@@ -1439,10 +1478,13 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * Parse and add new top room in zone and return to main menu.
      */
       if (OLC_ZNUM(d) == g->top_zone)
-        OLC_ZONE(d)->top = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), 65000);
+        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), 65000);
       else
-        OLC_ZONE(d)->top = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), genolc_zone_bottom(g, OLC_ZNUM(d) + 1) - 1);
-      OLC_ZONE(d)->number = 1;
+        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), genolc_zone_bottom(g, OLC_ZNUM(d) + 1) - 1);
+      if (!zone_range_loses_something(g, d, genolc_zonep_bottom(OLC_ZONE(d)), number)) {
+        OLC_ZONE(d)->top    = number;
+        OLC_ZONE(d)->number = 1;
+      }
       zedit_disp_menu(g, d);
       break;
 

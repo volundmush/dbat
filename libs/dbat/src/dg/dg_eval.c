@@ -10,6 +10,7 @@
 static bool is_num(char *arg);
 static void eval_op(const char *op, char *lhs, char *rhs, char *result);
 static char *matching_paren(char *p);
+constexpr int MAX_EVAL_DEPTH = 200;
 static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, struct script_data *sc,
                             trig_data *trig, int type);
 
@@ -166,27 +167,52 @@ static char *matching_paren(char *p)
   return --p;
 }
 
+/* where the part of an expression starting at p ends */
+static char *next_token(char *p)
+{
+  if (*p == '(')
+    return matching_paren(p) + 1;
+  if (*p == '"')
+    return matching_quote(p) + 1;
+  if (isalnum(*p)) {
+    for (p++; *p && (isalnum(*p) || isspace(*p)); p++);
+    return p;
+  }
+  return p + 1;
+}
+
 /* evaluates line, and returns answer in result */
 void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_data *sc,
                trig_data *trig, int type)
 {
-  char expr[MAX_INPUT_LENGTH], *p;
+  char *expr, *p;
 
   while (*line && isspace(*line))
     line++;
+
+  /* each operator or bracket goes one deeper; real scripts reach about 40, and the stack is finite */
+  if (g->dg_eval_depth >= MAX_EVAL_DEPTH) {
+    script_log(g, "Trigger VNum %d has an expression nested too deeply.", trig ? trig_get_vnum(g, trig) : NOTHING);
+    *result = '\0';
+    return;
+  }
+  g->dg_eval_depth++;
 
   if (eval_lhs_op_rhs(g, line, result, go, sc, trig, type))
     ;
 
   else if (*line == '(') {
-    p  = strcpy(expr, line);
-    p  = matching_paren(expr);
-    *p = '\0';
+    expr = strdup(line);
+    p    = matching_paren(expr);
+    *p   = '\0';
     eval_expr(g, expr + 1, result, go, sc, trig, type);
+    free(expr);
   }
 
   else
     var_subst(g, go, sc, trig, type, line, result);
+
+  g->dg_eval_depth--;
 }
 
 /*
@@ -196,12 +222,8 @@ void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_d
 static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, struct script_data *sc,
                             trig_data *trig, int type)
 {
-  char *p, *tokens[MAX_INPUT_LENGTH];
-  char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
-
-  lhr[0] = '\0';
-  rhr[0] = '\0';
-  int i, j;
+  char *p, *line, *lhr, *rhr;
+  int i;
 
   /*
    * valid operands, in order of priority
@@ -224,42 +246,28 @@ static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, st
       "!",
       "\n"};
 
-  p = strcpy(line, expr);
+  line = strdup(expr);
 
-  /*
-   * initialize tokens, an array of pointers to locations
-   * in line where the ops could possibly occur.
-   */
-
-  /* Might be game breaking - Iovan
-  *lhr = '\0'; */
-
-  for (j = 0; *p; j++) {
-    tokens[j] = p;
-    if (*p == '(')
-      p = matching_paren(p) + 1;
-    else if (*p == '"')
-      p = matching_quote(p) + 1;
-    else if (isalnum(*p))
-      for (p++; *p && (isalnum(*p) || isspace(*p)); p++);
-    else
-      p++;
-  }
-  tokens[j] = nullptr;
-
+  /* the places in line where an op could possibly occur */
   for (i = 0; *ops[i] != '\n'; i++)
-    for (j = 0; tokens[j]; j++)
-      if (!strncasecmp(ops[i], tokens[j], strlen(ops[i]))) {
-        *tokens[j] = '\0';
-        p          = tokens[j] + strlen(ops[i]);
+    for (p = line; *p; p = next_token(p))
+      if (!strncasecmp(ops[i], p, strlen(ops[i]))) {
+        *p = '\0';
+        p += strlen(ops[i]);
 
+        CREATE(lhr, char, MAX_INPUT_LENGTH);
+        CREATE(rhr, char, MAX_INPUT_LENGTH);
         eval_expr(g, line, lhr, go, sc, trig, type);
         eval_expr(g, p, rhr, go, sc, trig, type);
         eval_op(ops[i], lhr, rhr, result);
+        free(lhr);
+        free(rhr);
+        free(line);
 
         return true;
       }
 
+  free(line);
   return false;
 }
 
@@ -384,9 +392,11 @@ find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
   for (c = cl->next; c->next; c = c->next) {
     for (p = c->cmd; *p && isspace(*p); p++);
 
-    if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6))
+    if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6)) {
       c = find_done(c);
-    else if (!strncasecmp("case ", p, 5)) {
+      if (!c->next) /* it never ended, and neither does this */
+        return c;
+    } else if (!strncasecmp("case ", p, 5)) {
       eval_op("==", result, p + 5, match);
       if (*match && *match != '0')
         return c;
@@ -415,9 +425,11 @@ struct cmdlist_element *find_done(struct cmdlist_element *cl)
   for (c = cl->next; c && c->next; c = c->next) {
     for (p = c->cmd; *p && isspace(*p); p++);
 
-    if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7))
+    if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
       c = find_done(c);
-    else if (!strncasecmp("done", p, 3))
+      if (!c->next) /* it never ended, and neither does this */
+        return c;
+    } else if (!strncasecmp("done", p, 3))
       return c;
   }
 

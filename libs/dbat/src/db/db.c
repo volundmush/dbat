@@ -1059,6 +1059,15 @@ static int count_hash_records(FILE *fl)
   return (count);
 }
 
+/* The next name in an index file. A file that ends without its "$" ends here anyway. */
+static void read_index_entry(FILE *index, char *entry)
+{
+  if (fscanf(index, "%64935s\n", entry) != 1) { /* MAX_STRING_LENGTH */
+    mud_log("SYSERR: index file ends without a '$'");
+    strcpy(entry, "$");
+  }
+}
+
 void index_boot(GameWorld *g, int mode)
 {
   const char *index_filename, *prefix = nullptr; /* NULL or egcs 1.1 complains */
@@ -1108,13 +1117,13 @@ void index_boot(GameWorld *g, int mode)
   }
 
   /* first, count the number of records in the file so we can malloc */
-  fscanf(db_index, "%s\n", buf1);
+  read_index_entry(db_index, buf1);
   while (*buf1 != '$') {
     snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
     if (!(db_file = fopen(buf2, "r"))) {
       mud_log("SYSERR: File '%s' listed in '%s%s': %s", buf2, prefix,
               index_filename, strerror(errno));
-      fscanf(db_index, "%s\n", buf1);
+      read_index_entry(db_index, buf1);
       continue;
     }
     if (mode == DB_BOOT_ZON)
@@ -1125,7 +1134,7 @@ void index_boot(GameWorld *g, int mode)
       rec_count += count_hash_records(db_file);
 
     fclose(db_file);
-    fscanf(db_index, "%s\n", buf1);
+    read_index_entry(db_index, buf1);
   }
 
   /* Exit if 0 records, unless this is shops */
@@ -1176,7 +1185,7 @@ void index_boot(GameWorld *g, int mode)
   }
 
   rewind(db_index);
-  fscanf(db_index, "%s\n", buf1);
+  read_index_entry(db_index, buf1);
   while (*buf1 != '$') {
     snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
     if (!(db_file = fopen(buf2, "r"))) {
@@ -1205,7 +1214,7 @@ void index_boot(GameWorld *g, int mode)
     }
 
     fclose(db_file);
-    fscanf(db_index, "%s\n", buf1);
+    read_index_entry(db_index, buf1);
   }
   fclose(db_index);
 
@@ -1833,7 +1842,7 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
 {
   int num_arg = 0, matched = false;
   int num, num2, num3, num4, num5, num6;
-  struct affected_type af;
+  struct affected_type af = {};
 
   /*
    * If there isn't a colon, there is no value.  While Boolean options are
@@ -1942,8 +1951,11 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
       af.modifier  = num3;
       af.location  = num4;
       af.bitvector = num5;
-      af.specific  = num6;
-      affect_to_char(g, ch, &af);
+      af.specific  = affect_checked_specific(num4, num6);
+      if (affect_is_loadable(&af))
+        affect_to_char(g, ch, &af);
+      else
+        mud_log("SYSERR: mob %s has an impossible affect: %s", char_get_name(ch), value);
     }
   }
 
@@ -1957,7 +1969,7 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
       af.modifier  = num3;
       af.location  = num4;
       af.bitvector = num5;
-      af.specific  = num6;
+      af.specific  = affect_checked_specific(num4, num6);
     }
   }
 
@@ -2424,7 +2436,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
         }
         obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].location = t[0];
         obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].modifier = t[1];
-        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = t[2];
+        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = affect_checked_specific(t[0], t[2]);
         j++;
         break;
       case 'S': /* Spells for Spellbooks*/

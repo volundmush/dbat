@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/affect.h"
 #include "dbat/house.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -515,12 +516,12 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
 static bool House_load(GameWorld *g, room_vnum rvnum)
 {
   FILE *fl;
-  char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
+  char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
   char cmfname[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  char line[256];
-  int t[21], zwei = 0;
+  char line[256] = "";
+  int t[21] = {}, zwei = 0; /* a damaged line leaves some of these unread */
   struct obj_data *temp;
   int locate = 0, j;
   obj_vnum nr;
@@ -666,10 +667,12 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
-              obj_get_affected(temp)[j].location = t[0];
-              obj_get_affected(temp)[j].modifier = t[1];
-              obj_get_affected(temp)[j].specific = t[2];
-              j++;
+              if (j < MAX_OBJ_AFFECT) {
+                obj_get_affected(temp)[j].location = t[0];
+                obj_get_affected(temp)[j].modifier = t[1];
+                obj_get_affected(temp)[j].specific = affect_checked_specific(t[0], t[2]);
+                j++;
+              }
               get_line(fl, line);
               break;
 

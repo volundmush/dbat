@@ -2830,7 +2830,7 @@ ACMD(do_drink)
 {
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *temp;
-  struct affected_type af;
+  struct affected_type af = {};
   int amount, weight, wasthirsty = 0;
   int on_ground = 0;
 
@@ -3039,7 +3039,7 @@ ACMD(do_eat)
 {
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *food;
-  struct affected_type af;
+  struct affected_type af = {};
   int amount;
 
   one_argument(argument, arg);

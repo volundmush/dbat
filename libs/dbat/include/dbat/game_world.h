@@ -56,6 +56,7 @@ struct GameWorld {
   struct lookup_table_t lookup_table[BUCKET_COUNT];
   long lookup_table_entries;
   int dg_owner_purged;
+  int dg_eval_depth; /* how deeply nested the expression being evaluated is */
   int dg_act_check;
   int script_depth; /* How many scripts are running inside each other */
   bool warned_mob_lookup;

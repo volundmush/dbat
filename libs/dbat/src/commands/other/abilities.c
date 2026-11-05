@@ -858,7 +858,7 @@ ACMD(do_spit)
 {
   int cost = 0;
   struct char_data *vict;
-  struct affected_type af;
+  struct affected_type af = {};
   char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);

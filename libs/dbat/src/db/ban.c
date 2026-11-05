@@ -53,7 +53,7 @@ void load_banned(GameWorld *g)
       mud_log("   Ban file '%s' doesn't exist.", BAN_FILE);
     return;
   }
-  while (fscanf(fl, " %s %s %d %s ", ban_type, site_name, &date, name) == 4) {
+  while (fscanf(fl, " %99s %50s %d %20s ", ban_type, site_name, &date, name) == 4) {
     CREATE(next_node, struct ban_list_element, 1);
     strlcpy(next_node->site, site_name, sizeof(next_node->site));
     strlcpy(next_node->name, name, sizeof(next_node->name));

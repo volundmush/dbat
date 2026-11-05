@@ -50,7 +50,7 @@ static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mo
       break;
 
     case APPLY_AGE:
-      char_set_time_birth(ch, char_get_time_birth(ch) - ((mod * SECS_PER_MUD_YEAR)));
+      char_set_time_birth(ch, char_get_time_birth(ch) - ((time_t)mod * SECS_PER_MUD_YEAR));
       break;
 
     case APPLY_CHAR_WEIGHT:
@@ -165,6 +165,23 @@ static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mo
   } /* switch */
 }
 
+int affect_checked_specific(int location, int specific)
+{
+  if (location == APPLY_SKILL && specific >= 0 && specific < SKILL_TABLE_SIZE)
+    return specific;
+  if (location == APPLY_FEAT && specific >= 0 && specific < NUM_FEATS_DEFINED)
+    return specific;
+  return 0;
+}
+
+bool affect_is_loadable(const struct affected_type *af)
+{
+  constexpr int MAX_LOADED_MODIFIER = 100000000; /* far past any real one, and too small to overflow a stat */
+
+  return af->type >= 0 && af->type < SKILL_TABLE_SIZE && af->bitvector < (bitvector_t)NUM_AFF_FLAGS &&
+         af->location >= 0 && af->location <= APPLY_ALL_STATS && abs(af->modifier) <= MAX_LOADED_MODIFIER;
+}
+
 static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
 {
   if (add) {
@@ -174,8 +191,8 @@ static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, 
   } else {
     if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
       char_aff_set(ch, bitv, false);
-      mod = -mod;
     }
+    mod = -mod;
   }
 
   aff_apply_modify(g, ch, loc, mod, spec, "affect_modify");
@@ -355,7 +372,7 @@ void affect_join(GameWorld *g, struct char_data *ch, struct affected_type *af,
   for (hjp = char_get_affected(ch); !found && hjp; hjp = next) {
     next = hjp->next;
 
-    if ((hjp->type == af->type) && (hjp->location == af->location)) {
+    if ((hjp->type == af->type) && (hjp->location == af->location) && (hjp->specific == af->specific)) {
       if (add_dur)
         af->duration += hjp->duration;
       if (avg_dur)

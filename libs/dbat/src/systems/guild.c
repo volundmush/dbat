@@ -1215,6 +1215,17 @@ static char *read_guild_message(GameWorld *g, FILE *gm_f, const char *why, const
   return msg;
 }
 
+/* The next line of a guild's list of skills, or the end of the game's boot if the file stops there. */
+static void read_guild_skill_line(FILE *gm_f, char *buf, int *t1, int *t2, int *rv, int guild)
+{
+  if (!get_line(gm_f, buf)) {
+    mud_log("SYSERR: Guild file ends in the middle of guild #%d", guild);
+    exit(1);
+  }
+  *t1 = 0;
+  *rv = sscanf(buf, "%d %d", t1, t2);
+}
+
 void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
 {
   char *buf, buf2[256], *p, buf3[READ_SIZE];
@@ -1236,16 +1247,24 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
       rguild_set_vnum(g, g->top_guild, temp);
 
       clear_skills(g, g->top_guild);
-      get_line(gm_f, buf3);
-      rv = sscanf(buf3, "%d %d", &t1, &t2);
+      read_guild_skill_line(gm_f, buf3, &t1, &t2, &rv, temp);
       while (t1 > -1) {
         if (rv == 1) { /* old style guilds, only skills */
-          g->guild_index[g->top_guild].skills[(int)t1] = 1;
+          if (t1 < SKILL_TABLE_SIZE)
+            g->guild_index[g->top_guild].skills[(int)t1] = 1;
+          else
+            mud_log("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
         } else if (rv == 2) { /* new style guilds, skills and feats */
           if (t2 == 1) {
-            g->guild_index[g->top_guild].skills[(int)t1] = 1;
+            if (t1 < SKILL_TABLE_SIZE)
+              g->guild_index[g->top_guild].skills[(int)t1] = 1;
+            else
+              mud_log("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
           } else if (t2 == 2) {
-            g->guild_index[g->top_guild].feats[(int)t1] = 1;
+            if (t1 < NUM_FEATS_DEFINED)
+              g->guild_index[g->top_guild].feats[(int)t1] = 1;
+            else
+              mud_log("SYSERR: Guild #%d teaches impossible feat %d", temp, t1);
           } else {
             mud_log("SYSERR: Invalid 2nd arg in guild file!");
             exit(1);
@@ -1254,8 +1273,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
           mud_log("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
           exit(1);
         }
-        get_line(gm_f, buf3);
-        rv = sscanf(buf3, "%d %d", &t1, &t2);
+        read_guild_skill_line(gm_f, buf3, &t1, &t2, &rv, temp);
       }
       read_guild_line(g, gm_f, "%f", &(g->guild_index[(g->top_guild)].charge), "GM_CHARGE");
       g->guild_index[g->top_guild].no_such_skill   = read_guild_message(g, gm_f, buf2, "no_such_skill", guild_default_no_skill);

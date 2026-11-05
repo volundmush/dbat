@@ -197,7 +197,7 @@ struct char_data {
   struct obj_data *equipment[NUM_WEARS];
   struct obj_data *carrying;
   int carry_weight;   // carried weight
-  int8_t carry_items; // number of carried items
+  int carry_items; // number of carried items
 
   struct descriptor_data *desc; /* NULL for mobiles			*/
   char *loguser;                /* What user was I last saved as?      */

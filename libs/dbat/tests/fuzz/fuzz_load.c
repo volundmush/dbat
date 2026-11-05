@@ -17,6 +17,7 @@
 #include "dbat/world_audit.h"
 
 static GameWorld *g;
+static struct char_data *loading; /* who's left half-loaded if the game refuses their file */
 
 int LLVMFuzzerInitialize(int *, char ***);
 int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
@@ -45,7 +46,9 @@ static void read_player_file(const uint8_t *data, size_t size)
   CREATE(pc, struct char_data, 1);
   clear_char(pc);
   CREATE(*char_player_specials_slot(pc), struct player_special_data, 1);
+  loading = pc;
   load_char(g, "fuzzy", pc);
+  loading = nullptr;
   free_char(g, pc);
 }
 
@@ -87,6 +90,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
       read_player_file(data + 1, size - 1);
     else
       read_file_in_game(data[0] % 4 - 1, data + 1, size - 1);
+  } else if (loading) {
+    free_char(g, loading);
+    loading = nullptr;
   }
   fuzz_can_refuse = false;
   return 0;

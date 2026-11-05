@@ -97,7 +97,7 @@ constexpr int MAX_SPELL_AFFECTS = 5; /* change if more needed */
 void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                  int spellnum)
 {
-  struct affected_type af[MAX_SPELL_AFFECTS];
+  struct affected_type af[MAX_SPELL_AFFECTS] = {};
   bool accum_affect = false, accum_duration = false;
   const char *to_vict = nullptr, *to_room = nullptr;
   int i;
@@ -709,7 +709,7 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
 void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                   int spellnum)
 {
-  struct affected_type af[MAX_SPELL_AFFECTS];
+  struct affected_type af[MAX_SPELL_AFFECTS] = {};
   bool accum_affect = false, accum_duration = false;
   const char *to_vict = nullptr, *to_room = nullptr;
   int i;

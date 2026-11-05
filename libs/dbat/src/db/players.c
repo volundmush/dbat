@@ -20,6 +20,7 @@
 #include "dbat/config.h"
 #include "dbat/fileop.h"
 #include "dbat/affect.h"
+#include <stdckdint.h>
 #include "dbat/interpreter.h"
 #include "dbat/atomicfile.h"
 
@@ -439,8 +440,10 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
             ;
           else if (!strcmp(tag, "Clas")) char_set_class(ch, atoi(line));
           else if (!strcmp(tag, "Colr")) {
-            sscanf(line, "%d %127s", &num, buf2);
-            char_get_player_specials(ch)->color_choices[num] = strdup(buf2);
+            if (sscanf(line, "%d %127s", &num, buf2) == 2 && num >= 0 && num < NUM_COLOR) {
+              free(char_get_player_specials(ch)->color_choices[num]);
+              char_get_player_specials(ch)->color_choices[num] = strdup(buf2);
+            }
           } else if (!strcmp(tag, "Con ")) char_set_real_abils_con(ch, atoi(line));
           else if (!strcmp(tag, "Cool")) char_set_con_cooldown(ch, atoi(line));
           else if (!strcmp(tag, "Crtd")) char_set_time_created(ch, atoll(line));
@@ -570,11 +573,14 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           } else if (!strcmp(tag, "Prff")) char_set_preference(ch, atoi(line));
           break;
 
+        case 'r':
+          if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
+          break;
+
         case 'R':
           if (!strcmp(tag, "Race")) char_set_race(ch, atoi(line));
           else if (!strcmp(tag, "Raci")) char_set_racial_pref(g, ch, atoi(line));
           else if (!strcmp(tag, "RBan")) char_set_rbank(ch, atoi(line));
-          else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
           else if (!strcmp(tag, "Rela")) char_set_relax_count(ch, atoi(line));
           else if (!strcmp(tag, "Rtim")) char_set_rewtime(ch, atoll(line));
           else if (!strcmp(tag, "Rad1")) char_set_radar1(ch, atoi(line));
@@ -614,8 +620,8 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           if (!strcmp(tag, "Tgro")) char_set_tail_growth(ch, atoi(line));
           else if (!strcmp(tag, "Tcla")) char_set_transclass(ch, atoi(line));
           else if (!strcmp(tag, "Tcos")) {
-            sscanf(line, "%d %d", &num2, &num3);
-            char_set_transcost(ch, num2, num3);
+            if (sscanf(line, "%d %d", &num2, &num3) == 2 && num2 >= 0 && num2 < 6)
+              char_set_transcost(ch, num2, num3);
           } else if (!strcmp(tag, "Thir")) char_set_conditions(g, ch, THIRST, atoi(line));
           else if (!strcmp(tag, "Thr1"))
             ;
@@ -677,7 +683,10 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
 
   if (!char_get_time_maxage(ch)) {
     mud_log("No max age for user %s, using standard max age determination", char_get_name(ch));
-    char_set_time_maxage(ch, char_get_time_birth(ch) + max_age(ch));
+    time_t maxage;
+    if (ckd_add(&maxage, char_get_time_birth(ch), max_age(ch)))
+      maxage = char_get_time_birth(ch);
+    char_set_time_maxage(ch, maxage);
   }
 
   affect_total(g, ch);
@@ -812,11 +821,11 @@ void save_char(GameWorld *g, struct char_data *ch)
    * effects are doubled when the char logs back in.
    */
 
-  while (char_get_affected(ch))
-    affect_remove(g, ch, char_get_affected(ch));
-
   if ((i >= MAX_AFFECT) && aff && aff->next)
     mud_log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
+
+  while (char_get_affected(ch))
+    affect_remove(g, ch, char_get_affected(ch));
 
   char_reset_aff_abils(ch);
 
@@ -1141,7 +1150,7 @@ static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch)
 {
   int num, num2, num3, num4, num5, num6;
   char line[MAX_INPUT_LENGTH + 1];
-  struct affected_type af;
+  struct affected_type af = {};
 
   do {
     if (!get_line(fl, line))
@@ -1154,8 +1163,11 @@ static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch)
       af.modifier  = num3;
       af.location  = num4;
       af.bitvector = num5;
-      af.specific  = num6;
-      affect_to_char(g, ch, &af);
+      af.specific  = affect_checked_specific(num4, num6);
+      if (affect_is_loadable(&af))
+        affect_to_char(g, ch, &af);
+      else
+        mud_log("SYSERR: %s has an impossible saved affect: %s", char_get_name(ch), line);
     }
   } while (num != 0);
 }
@@ -1175,7 +1187,8 @@ static void load_skills(FILE *fl, struct char_data *ch, bool mods)
   char line[MAX_INPUT_LENGTH + 1];
 
   do {
-    get_line(fl, line);
+    if (!get_line(fl, line))
+      break;
     sscanf(line, "%d %d %d", &num, &num2, &num3);
     if (num > -1 && num < SKILL_TABLE_SIZE) {
       if (mods) {

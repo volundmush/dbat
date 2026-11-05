@@ -771,6 +771,7 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case SCRIPT_NEW_TRIGGER:
       vnum  = -1;
+      pos   = 0; /* stays that way if arg isn't a number, which aborts the entry */
       count = sscanf(arg, "%d, %d", &pos, &vnum);
       if (count == 1) {
         vnum = pos;
@@ -908,8 +909,8 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
     }
 
     *line = '\0';
-    for (nlen = 0, i = 0; i < indent; i++) {
-      strncat(line, "  ", sizeof(line) - 1);
+    for (nlen = 0, i = 0; i < indent && nlen + 2 < (int)sizeof(line); i++) {
+      strcat(line, "  ");
       nlen += 2;
     }
     llen = snprintf(line + nlen, sizeof(line) - nlen, "%s\r\n", t);

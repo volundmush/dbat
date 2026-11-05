@@ -1199,7 +1199,10 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
       trig->depth--;
     } else if (!strncasecmp("while ", p, 6)) {
       temp = find_done(cl);
-      if (!temp) {
+      char *end = temp->cmd;
+      while (*end && isspace(*end))
+        end++;
+      if (temp == cl || strncasecmp("done", end, 4)) {
         script_log(g, "Trigger VNum %d has 'while' without 'done'.",
                    trig_get_vnum(g, trig));
         break; /* end the run normally, so depth and the trigger's state are reset */

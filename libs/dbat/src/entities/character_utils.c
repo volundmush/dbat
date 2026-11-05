@@ -64,7 +64,7 @@ static double speednar(GameWorld *g, struct char_data *ch);
 
 const char *juggleRaceName(char_data *ch, bool capitalized)
 {
-  static char buf[256];
+  static char buf[2][256];
 
   int apparent = ch->race;
 
@@ -104,12 +104,13 @@ const char *juggleRaceName(char_data *ch, bool capitalized)
       break;
   }
 
+  /* one each, as callers ask for both forms in one argument list */
   if (capitalized) {
-    snprintf(buf, sizeof(buf), "%s", pc_race_types[apparent]);
-    return buf;
+    snprintf(buf[1], sizeof(buf[1]), "%s", pc_race_types[apparent]);
+    return buf[1];
   }
-  snprintf(buf, sizeof(buf), "%s", race_names[apparent]);
-  return buf;
+  snprintf(buf[0], sizeof(buf[0]), "%s", race_names[apparent]);
+  return buf[0];
 }
 
 void restore_by(GameWorld *g, char_data *ch, char_data *healer)
@@ -1412,7 +1413,7 @@ void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 
 void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd)
 {
-  struct affected_type af[6];
+  struct affected_type af[6] = {};
   int num = 0;
 
   if (str == 0 && con == 0 && wis == 0 && intel == 0 && agl == 0 && spd == 0) {
@@ -6429,12 +6430,12 @@ void char_set_carry_weight(struct char_data *ch, int v)
   ch->carry_weight = v;
 }
 
-int8_t char_get_carry_items(const struct char_data *ch)
+int char_get_carry_items(const struct char_data *ch)
 {
   return ch->carry_items;
 }
 
-void char_set_carry_items(struct char_data *ch, int8_t v)
+void char_set_carry_items(struct char_data *ch, int v)
 {
   ch->carry_items = v;
 }

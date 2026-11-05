@@ -198,7 +198,7 @@ ASPELL(spell_locate_object)
 
 ASPELL(spell_charm)
 {
-  struct affected_type af;
+  struct affected_type af = {};
 
   if (victim == nullptr || ch == nullptr)
     return;

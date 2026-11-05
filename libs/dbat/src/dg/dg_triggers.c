@@ -171,7 +171,6 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
   trig_data *t;
   char_data *ch;
   struct script_memory *mem;
-  int command_performed = 0;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return;
@@ -181,39 +180,47 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
         char_aff_flagged(ch, AFF_CHARM))
       continue;
     /* find memory line with command only */
-    for (mem = char_get_memory(ch); mem && char_get_memory(ch); mem = mem->next) {
-      if (char_get_id(actor) != mem->id) continue;
-      if (mem->cmd) {
-        command_interpreter(g, ch, mem->cmd); /* no script */
-        command_performed = 1;
+    for (mem = char_get_memory(ch); mem; mem = mem->next)
+      if (char_get_id(actor) == mem->id)
         break;
-      }
+    if (!mem)
+      continue;
+
+    long id = mem->id;
+    char *cmd = mem->cmd ? strdup(mem->cmd) : nullptr;
+    char_data *self = ch;
+
+    if (cmd) {
+      command_interpreter(g, ch, cmd); /* no script */
+      free(cmd);
+    } else if (char_get_script(ch)) {
       /* if a command was not performed execute the memory script */
-      if (mem && !command_performed) {
-        for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-          if (IS_SET(t->trigger_type, MTRIG_MEMORY) &&
-              char_can_see(g, ch, actor) &&
-              !t->depth &&
-              rand_number(g, 1, 100) <= t->narg) {
-            add_char_uid_var(t, "actor", actor, 0);
-            script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
-            break;
-          }
+      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
+        if (IS_SET(t->trigger_type, MTRIG_MEMORY) &&
+            char_can_see(g, ch, actor) &&
+            !t->depth &&
+            rand_number(g, 1, 100) <= t->narg) {
+          add_char_uid_var(t, "actor", actor, 0);
+          script_driver(g, &self, t, MOB_TRIGGER, TRIG_NEW);
+          break;
         }
       }
-      /* delete the memory */
-      if (mem) {
-        if (char_get_memory(ch) == mem) {
-          char_set_memory(ch, mem->next);
-        } else {
-          struct script_memory *prev;
-          prev = char_get_memory(ch);
-          while (prev->next != mem) prev = prev->next;
-          prev->next = mem->next;
-        }
-        if (mem->cmd) free(mem->cmd);
-        free(mem);
-      }
+      if (!self) /* the script purged the mob */
+        return;
+    }
+
+    /* delete the memory, if what just ran didn't: it can use mforget */
+    struct script_memory *prev = nullptr;
+
+    for (mem = char_get_memory(ch); mem && mem->id != id; mem = mem->next)
+      prev = mem;
+    if (mem) {
+      if (prev)
+        prev->next = mem->next;
+      else
+        char_set_memory(ch, mem->next);
+      if (mem->cmd) free(mem->cmd);
+      free(mem);
     }
   }
 }

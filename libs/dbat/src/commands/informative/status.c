@@ -298,7 +298,7 @@ ACMD(do_score)
     send_to_char(g, ch, "  @cO@D-----------------------------[  @cPersonal  @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "  @D|  @CName@D: @W%15s@D,   @CTitle@D: @W%-38s@D|@n\n", char_get_name(ch), char_get_title(ch));
     if (char_is_android(ch)) {
-      char model[100], version[100];
+      char model[100] = "@WNone", version[100];
       int absorb = 0;
       if (char_plr_flagged(ch, PLR_ABSORB)) {
         snprintf(model, sizeof(model), "@CAbsorption");

@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/affected.h"
 
+/* What an affect's specific can be, given its location: a skill or feat id, otherwise 0. */
+int affect_checked_specific(int location, int specific);
+/* Whether an affect read from a file is one the game could have made. */
+bool affect_is_loadable(const struct affected_type *af);
 void affect_total(GameWorld *g, struct char_data *ch);
 void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af);
 void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af);

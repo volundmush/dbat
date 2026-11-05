@@ -8,6 +8,9 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 
+#include <errno.h>
+#include <unistd.h>
+#include "dbat/affect.h"
 #include "dbat/objsave.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -285,8 +288,8 @@ bool Crash_delete_crashfile(struct char_data *ch)
 {
   char filename[MAX_INPUT_LENGTH];
   FILE *fl;
-  int rentcode, netcost, gold, account, nitems;
-  long long timed;
+  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
+  long long timed = 0;
   char line[MAX_INPUT_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
@@ -314,8 +317,8 @@ static bool Crash_clean_file(GameWorld *g, char *name)
 {
   char filename[MAX_STRING_LENGTH];
   FILE *fl;
-  int rentcode, netcost, gold, account, nitems;
-  long long timed;
+  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
+  long long timed = 0;
   char line[MAX_STRING_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
@@ -617,6 +620,9 @@ int Crash_load(GameWorld *g, struct char_data *ch)
   if ((fl = fopen(cmfname, "rb")))
     return Crash_load_file(g, ch, fl, cmfname);
 
+  if (errno == ENOENT && access(cmfnamebak, F_OK)) /* never had any, or lost them all and saved that */
+    return 1;
+
   snprintf(buf1, sizeof(buf1), "SYSERR: READING OBJECT FILE %s (5)", cmfname);
   perror(buf1);
   send_to_char(g, ch,
@@ -642,8 +648,8 @@ int Crash_load(GameWorld *g, struct char_data *ch)
 static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename)
 {
   char buf2[MAX_STRING_LENGTH];
-  char line[256];
-  int t[30], zwei = 0;
+  char line[256] = "";
+  int t[30] = {}, zwei = 0; /* a damaged line leaves some of these unread */
   int orig_rent_code;
   struct obj_data *temp;
   int locate = 0, j, num_objs = 0;
@@ -651,9 +657,9 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
-  int rentcode, netcost, gold, account, nitems;
-  long long timed;
-  char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
+  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
+  long long timed = 0;
+  char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
 
   if (!feof(fl))
     get_line(fl, line);
@@ -811,11 +817,12 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
-
-              obj_get_affected(temp)[j].location = t[0];
-              obj_get_affected(temp)[j].modifier = t[1];
-              obj_get_affected(temp)[j].specific = t[2];
-              j++;
+              if (j < MAX_OBJ_AFFECT) {
+                obj_get_affected(temp)[j].location = t[0];
+                obj_get_affected(temp)[j].modifier = t[1];
+                obj_get_affected(temp)[j].specific = affect_checked_specific(t[0], t[2]);
+                j++;
+              }
               get_line(fl, line);
               break;
             case 'G': {
@@ -915,14 +922,19 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
           }
         if (cont_row[0]) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
+            /* auto_equip puts it in the inventory if it can't be worn after all */
+            bool worn = locate <= NUM_WEARS && char_get_equipment(ch, locate - 1) == temp;
+
             /* rem item ; fill ; equip again */
-            temp           = unequip_char(g, ch, locate - 1);
+            if (worn)
+              temp = unequip_char(g, ch, locate - 1);
             obj_set_contains(temp, nullptr); /* should be empty - but who knows */
             for (; cont_row[0]; cont_row[0] = obj1) {
               obj1 = obj_get_next_content(cont_row[0]);
               obj_to_obj(g, cont_row[0], temp);
             }
-            equip_char(g, ch, temp, locate - 1);
+            if (worn)
+              equip_char(g, ch, temp, locate - 1);
           } else { /* object isn't container -> empty content list */
             for (; cont_row[0]; cont_row[0] = obj1) {
               obj1 = obj_get_next_content(cont_row[0]);

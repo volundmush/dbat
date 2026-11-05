@@ -57,6 +57,11 @@ target_compile_options(dbat_test_world PRIVATE ${DBAT_C_FLAGS})
 target_link_libraries(dbat_test_world PRIVATE dbat_test_harness)
 add_test(NAME world COMMAND dbat_test_world)
 
+add_executable(dbat_test_bad_data tests/test_bad_data.c)
+target_compile_options(dbat_test_bad_data PRIVATE ${DBAT_C_FLAGS})
+target_link_libraries(dbat_test_bad_data PRIVATE dbat_test_harness)
+add_test(NAME bad_data COMMAND dbat_test_bad_data)
+
 add_executable(dbat_test_commands tests/test_commands.c)
 target_compile_options(dbat_test_commands PRIVATE ${DBAT_C_FLAGS})
 target_link_libraries(dbat_test_commands PRIVATE dbat_test_harness)

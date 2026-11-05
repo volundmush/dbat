@@ -1113,7 +1113,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     if (!room_get_script(r)) {
       *str = '\0';
       script_log(g, "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                 trig->name, trig_get_vnum(g, trig), type);
+                 trig ? trig->name : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
     } else {
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
