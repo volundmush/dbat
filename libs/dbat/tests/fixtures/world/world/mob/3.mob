@@ -53,4 +53,421 @@ Con: 10
 Cha: 10
 E
 T 301
+#310
+critter0 mob~
+critter0~
+The critter0 is here.
+~
+It is critter0.
+~
+b 0 0 0 0 0 0 0 0 E
+1 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 310
+#311
+critter1 mob~
+critter1~
+The critter1 is here.
+~
+It is critter1.
+~
+bc 0 0 0 0 0 0 0 0 E
+6 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 311
+#312
+critter2 mob~
+critter2~
+The critter2 is here.
+~
+It is critter2.
+~
+bd 0 0 0 0 0 0 0 0 E
+11 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 312
+#313
+critter3 mob~
+critter3~
+The critter3 is here.
+~
+It is critter3.
+~
+bf 0 0 0 0 0 0 0 0 E
+16 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 313
+#314
+critter4 mob~
+critter4~
+The critter4 is here.
+~
+It is critter4.
+~
+bg 0 0 0 0 0 0 0 0 E
+21 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 314
+#315
+critter5 mob~
+critter5~
+The critter5 is here.
+~
+It is critter5.
+~
+bh 0 0 0 0 0 0 0 0 E
+26 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 315
+#316
+critter6 mob~
+critter6~
+The critter6 is here.
+~
+It is critter6.
+~
+bl 0 0 0 0 0 0 0 0 E
+31 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 316
+#317
+critter7 mob~
+critter7~
+The critter7 is here.
+~
+It is critter7.
+~
+bo 0 0 0 0 0 0 0 0 E
+36 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 317
+#318
+critter8 mob~
+critter8~
+The critter8 is here.
+~
+It is critter8.
+~
+bq 0 0 0 0 0 0 0 0 E
+41 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 318
+#319
+critter9 mob~
+critter9~
+The critter9 is here.
+~
+It is critter9.
+~
+br 0 0 0 0 0 0 0 0 E
+46 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 319
+#320
+critter10 mob~
+critter10~
+The critter10 is here.
+~
+It is critter10.
+~
+bs 0 0 0 0 0 0 0 0 E
+51 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 320
+#321
+critter11 mob~
+critter11~
+The critter11 is here.
+~
+It is critter11.
+~
+bt 0 0 0 0 0 0 0 0 E
+56 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 321
+#322
+critter12 mob~
+critter12~
+The critter12 is here.
+~
+It is critter12.
+~
+bu 0 0 0 0 0 0 0 0 E
+61 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 322
+#323
+critter13 mob~
+critter13~
+The critter13 is here.
+~
+It is critter13.
+~
+bv 0 0 0 0 0 0 0 0 E
+66 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 323
+#324
+critter14 mob~
+critter14~
+The critter14 is here.
+~
+It is critter14.
+~
+bw 0 0 0 0 0 0 0 0 E
+71 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 324
+#325
+critter15 mob~
+critter15~
+The critter15 is here.
+~
+It is critter15.
+~
+bx 0 0 0 0 0 0 0 0 E
+76 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 325
+#326
+critter16 mob~
+critter16~
+The critter16 is here.
+~
+It is critter16.
+~
+by 0 0 0 0 0 0 0 0 E
+81 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 326
+#327
+critter17 mob~
+critter17~
+The critter17 is here.
+~
+It is critter17.
+~
+bz 0 0 0 0 0 0 0 0 E
+86 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 327
+#328
+critter18 mob~
+critter18~
+The critter18 is here.
+~
+It is critter18.
+~
+bA 0 0 0 0 0 0 0 0 E
+91 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 328
+#329
+critter19 mob~
+critter19~
+The critter19 is here.
+~
+It is critter19.
+~
+bB 0 0 0 0 0 0 0 0 E
+96 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 329
+#330
+vanisher mob~
+vanisher~
+The vanisher is here.
+~
+It is vanisher.
+~
+b 0 0 0 0 0 0 0 0 E
+1 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 380
+#331
+guildmaster mob~
+guildmaster~
+The guildmaster is here.
+~
+It is guildmaster.
+~
+b 0 0 0 0 0 0 0 0 E
+50 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
 $

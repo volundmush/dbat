@@ -1,0 +1,6 @@
+# A carried cashcard runs the bank special, which assumed an ATM in the room: a null pointer.
+seed 1
+spawn Bot0 6 1 0 0
+type Bot0 goto 300
+type Bot0 load obj 3036
+type Bot0 balance

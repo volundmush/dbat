@@ -70,9 +70,1065 @@ Dead End~
 Someone is waiting here.
 ~
 3 0 0 0 0 0
+D1
+~
+~
+0 0 310 0 0 0 0 0 0 0 0
 D3
 ~
 ~
 0 0 304 0 0 0 0 0 0 0 0
+S
+#310
+Room flag 0~
+Room flag 0, for testing.
+~
+3 a 0 0 0 0
+D1
+~
+~
+0 0 311 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 305 0 0 0 0 0 0 0 0
+S
+T 360
+#311
+Room flag 1~
+Room flag 1, for testing.
+~
+3 b 0 0 0 0
+D1
+~
+~
+0 0 312 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 310 0 0 0 0 0 0 0 0
+S
+T 361
+#312
+Room flag 2~
+Room flag 2, for testing.
+~
+3 c 0 0 0 0
+D1
+~
+~
+0 0 313 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 311 0 0 0 0 0 0 0 0
+S
+T 362
+#313
+Room flag 3~
+Room flag 3, for testing.
+~
+3 d 0 0 0 0
+D1
+~
+~
+0 0 314 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 312 0 0 0 0 0 0 0 0
+S
+T 363
+#314
+Room flag 4~
+Room flag 4, for testing.
+~
+3 e 0 0 0 0
+D1
+~
+~
+0 0 315 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 313 0 0 0 0 0 0 0 0
+S
+T 364
+#315
+Room flag 5~
+Room flag 5, for testing.
+~
+3 f 0 0 0 0
+D1
+~
+~
+0 0 316 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 314 0 0 0 0 0 0 0 0
+S
+T 365
+#316
+Room flag 6~
+Room flag 6, for testing.
+~
+3 g 0 0 0 0
+D1
+~
+~
+0 0 317 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 315 0 0 0 0 0 0 0 0
+S
+T 366
+#317
+Room flag 7~
+Room flag 7, for testing.
+~
+3 h 0 0 0 0
+D1
+~
+~
+0 0 318 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 316 0 0 0 0 0 0 0 0
+S
+T 367
+#318
+Room flag 8~
+Room flag 8, for testing.
+~
+3 i 0 0 0 0
+D1
+~
+~
+0 0 319 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 317 0 0 0 0 0 0 0 0
+S
+T 368
+#319
+Room flag 9~
+Room flag 9, for testing.
+~
+3 j 0 0 0 0
+D1
+~
+~
+0 0 320 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 318 0 0 0 0 0 0 0 0
+S
+T 369
+#320
+Room flag 10~
+Room flag 10, for testing.
+~
+3 k 0 0 0 0
+D1
+~
+~
+0 0 321 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 319 0 0 0 0 0 0 0 0
+S
+T 370
+#321
+Room flag 11~
+Room flag 11, for testing.
+~
+3 l 0 0 0 0
+D1
+~
+~
+0 0 322 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 320 0 0 0 0 0 0 0 0
+S
+T 371
+#322
+Room flag 12~
+Room flag 12, for testing.
+~
+3 m 0 0 0 0
+D1
+~
+~
+0 0 323 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 321 0 0 0 0 0 0 0 0
+S
+T 372
+#323
+Room flag 13~
+Room flag 13, for testing.
+~
+3 n 0 0 0 0
+D1
+~
+~
+0 0 324 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 322 0 0 0 0 0 0 0 0
+S
+T 373
+#324
+Room flag 14~
+Room flag 14, for testing.
+~
+3 o 0 0 0 0
+D1
+~
+~
+0 0 325 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 323 0 0 0 0 0 0 0 0
+S
+T 374
+#325
+Room flag 15~
+Room flag 15, for testing.
+~
+3 p 0 0 0 0
+D1
+~
+~
+0 0 326 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 324 0 0 0 0 0 0 0 0
+S
+T 375
+#326
+Room flag 16~
+Room flag 16, for testing.
+~
+3 q 0 0 0 0
+D1
+~
+~
+0 0 327 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 325 0 0 0 0 0 0 0 0
+S
+T 376
+#327
+Room flag 17~
+Room flag 17, for testing.
+~
+3 r 0 0 0 0
+D1
+~
+~
+0 0 328 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 326 0 0 0 0 0 0 0 0
+S
+T 377
+#328
+Room flag 18~
+Room flag 18, for testing.
+~
+3 s 0 0 0 0
+D1
+~
+~
+0 0 329 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 327 0 0 0 0 0 0 0 0
+S
+T 378
+#329
+Room flag 19~
+Room flag 19, for testing.
+~
+3 t 0 0 0 0
+D1
+~
+~
+0 0 330 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 328 0 0 0 0 0 0 0 0
+S
+T 379
+#330
+Room flag 20~
+Room flag 20, for testing.
+~
+3 u 0 0 0 0
+D1
+~
+~
+0 0 331 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 329 0 0 0 0 0 0 0 0
+S
+#331
+Room flag 21~
+Room flag 21, for testing.
+~
+3 v 0 0 0 0
+D1
+~
+~
+0 0 332 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 330 0 0 0 0 0 0 0 0
+S
+#332
+Room flag 22~
+Room flag 22, for testing.
+~
+3 w 0 0 0 0
+D1
+~
+~
+0 0 333 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 331 0 0 0 0 0 0 0 0
+S
+#333
+Room flag 23~
+Room flag 23, for testing.
+~
+3 x 0 0 0 0
+D1
+~
+~
+0 0 334 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 332 0 0 0 0 0 0 0 0
+S
+#334
+Room flag 24~
+Room flag 24, for testing.
+~
+3 y 0 0 0 0
+D1
+~
+~
+0 0 335 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 333 0 0 0 0 0 0 0 0
+S
+#335
+Room flag 25~
+Room flag 25, for testing.
+~
+3 z 0 0 0 0
+D1
+~
+~
+0 0 336 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 334 0 0 0 0 0 0 0 0
+S
+#336
+Room flag 26~
+Room flag 26, for testing.
+~
+3 A 0 0 0 0
+D1
+~
+~
+0 0 337 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 335 0 0 0 0 0 0 0 0
+S
+#337
+Room flag 27~
+Room flag 27, for testing.
+~
+3 B 0 0 0 0
+D1
+~
+~
+0 0 338 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 336 0 0 0 0 0 0 0 0
+S
+#338
+Room flag 28~
+Room flag 28, for testing.
+~
+3 C 0 0 0 0
+D1
+~
+~
+0 0 339 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 337 0 0 0 0 0 0 0 0
+S
+#339
+Room flag 29~
+Room flag 29, for testing.
+~
+3 D 0 0 0 0
+D1
+~
+~
+0 0 340 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 338 0 0 0 0 0 0 0 0
+S
+#340
+Room flag 30~
+Room flag 30, for testing.
+~
+3 E 0 0 0 0
+D1
+~
+~
+0 0 341 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 339 0 0 0 0 0 0 0 0
+S
+#341
+Room flag 31~
+Room flag 31, for testing.
+~
+3 F 0 0 0 0
+D1
+~
+~
+0 0 342 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 340 0 0 0 0 0 0 0 0
+S
+#342
+Room flag 32~
+Room flag 32, for testing.
+~
+3 0 a 0 0 0
+D1
+~
+~
+0 0 343 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 341 0 0 0 0 0 0 0 0
+S
+#343
+Room flag 33~
+Room flag 33, for testing.
+~
+3 0 b 0 0 0
+D1
+~
+~
+0 0 344 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 342 0 0 0 0 0 0 0 0
+S
+#344
+Room flag 34~
+Room flag 34, for testing.
+~
+3 0 c 0 0 0
+D1
+~
+~
+0 0 345 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 343 0 0 0 0 0 0 0 0
+S
+#345
+Room flag 35~
+Room flag 35, for testing.
+~
+3 0 d 0 0 0
+D1
+~
+~
+0 0 346 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 344 0 0 0 0 0 0 0 0
+S
+#346
+Room flag 36~
+Room flag 36, for testing.
+~
+3 0 e 0 0 0
+D1
+~
+~
+0 0 347 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 345 0 0 0 0 0 0 0 0
+S
+#347
+Room flag 37~
+Room flag 37, for testing.
+~
+3 0 f 0 0 0
+D1
+~
+~
+0 0 348 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 346 0 0 0 0 0 0 0 0
+S
+#348
+Room flag 38~
+Room flag 38, for testing.
+~
+3 0 g 0 0 0
+D1
+~
+~
+0 0 349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 347 0 0 0 0 0 0 0 0
+S
+#349
+Room flag 39~
+Room flag 39, for testing.
+~
+3 0 h 0 0 0
+D1
+~
+~
+0 0 350 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 348 0 0 0 0 0 0 0 0
+S
+#350
+Room flag 40~
+Room flag 40, for testing.
+~
+3 0 i 0 0 0
+D1
+~
+~
+0 0 351 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 349 0 0 0 0 0 0 0 0
+S
+#351
+Room flag 41~
+Room flag 41, for testing.
+~
+3 0 j 0 0 0
+D1
+~
+~
+0 0 352 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 350 0 0 0 0 0 0 0 0
+S
+#352
+Room flag 42~
+Room flag 42, for testing.
+~
+3 0 k 0 0 0
+D1
+~
+~
+0 0 353 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 351 0 0 0 0 0 0 0 0
+S
+#353
+Room flag 43~
+Room flag 43, for testing.
+~
+3 0 l 0 0 0
+D1
+~
+~
+0 0 354 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 352 0 0 0 0 0 0 0 0
+S
+#354
+Room flag 44~
+Room flag 44, for testing.
+~
+3 0 m 0 0 0
+D1
+~
+~
+0 0 355 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 353 0 0 0 0 0 0 0 0
+S
+#355
+Room flag 45~
+Room flag 45, for testing.
+~
+3 0 n 0 0 0
+D1
+~
+~
+0 0 356 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 354 0 0 0 0 0 0 0 0
+S
+#356
+Room flag 46~
+Room flag 46, for testing.
+~
+3 0 o 0 0 0
+D1
+~
+~
+0 0 357 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 355 0 0 0 0 0 0 0 0
+S
+#357
+Room flag 47~
+Room flag 47, for testing.
+~
+3 0 p 0 0 0
+D1
+~
+~
+0 0 358 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 356 0 0 0 0 0 0 0 0
+S
+#358
+Room flag 48~
+Room flag 48, for testing.
+~
+3 0 q 0 0 0
+D1
+~
+~
+0 0 359 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 357 0 0 0 0 0 0 0 0
+S
+#359
+Room flag 49~
+Room flag 49, for testing.
+~
+3 0 r 0 0 0
+D1
+~
+~
+0 0 360 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 358 0 0 0 0 0 0 0 0
+S
+#360
+Room flag 50~
+Room flag 50, for testing.
+~
+3 0 s 0 0 0
+D1
+~
+~
+0 0 361 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 359 0 0 0 0 0 0 0 0
+S
+#361
+Room flag 51~
+Room flag 51, for testing.
+~
+3 0 t 0 0 0
+D1
+~
+~
+0 0 362 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 360 0 0 0 0 0 0 0 0
+S
+#362
+Room flag 52~
+Room flag 52, for testing.
+~
+3 0 u 0 0 0
+D1
+~
+~
+0 0 363 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 361 0 0 0 0 0 0 0 0
+S
+#363
+Room flag 53~
+Room flag 53, for testing.
+~
+3 0 v 0 0 0
+D1
+~
+~
+0 0 364 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 362 0 0 0 0 0 0 0 0
+S
+#364
+Room flag 54~
+Room flag 54, for testing.
+~
+3 0 w 0 0 0
+D1
+~
+~
+0 0 365 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 363 0 0 0 0 0 0 0 0
+S
+#365
+Room flag 55~
+Room flag 55, for testing.
+~
+3 0 x 0 0 0
+D1
+~
+~
+0 0 366 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 364 0 0 0 0 0 0 0 0
+S
+#366
+Room flag 56~
+Room flag 56, for testing.
+~
+3 0 y 0 0 0
+D1
+~
+~
+0 0 367 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 365 0 0 0 0 0 0 0 0
+S
+#367
+Room flag 57~
+Room flag 57, for testing.
+~
+3 0 z 0 0 0
+D1
+~
+~
+0 0 368 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 366 0 0 0 0 0 0 0 0
+S
+#368
+Room flag 58~
+Room flag 58, for testing.
+~
+3 0 A 0 0 0
+D1
+~
+~
+0 0 369 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 367 0 0 0 0 0 0 0 0
+S
+#369
+Room sect 0~
+Room sect 0, for testing.
+~
+3 0 0 0 0 0
+D1
+~
+~
+0 0 370 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 368 0 0 0 0 0 0 0 0
+S
+#370
+Room sect 1~
+Room sect 1, for testing.
+~
+3 0 0 0 0 1
+D1
+~
+~
+0 0 371 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 369 0 0 0 0 0 0 0 0
+S
+#371
+Room sect 2~
+Room sect 2, for testing.
+~
+3 0 0 0 0 2
+D1
+~
+~
+0 0 372 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 370 0 0 0 0 0 0 0 0
+S
+#372
+Room sect 3~
+Room sect 3, for testing.
+~
+3 0 0 0 0 3
+D1
+~
+~
+0 0 373 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 371 0 0 0 0 0 0 0 0
+S
+#373
+Room sect 4~
+Room sect 4, for testing.
+~
+3 0 0 0 0 4
+D1
+~
+~
+0 0 374 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 372 0 0 0 0 0 0 0 0
+S
+#374
+Room sect 5~
+Room sect 5, for testing.
+~
+3 0 0 0 0 5
+D1
+~
+~
+0 0 375 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 373 0 0 0 0 0 0 0 0
+S
+#375
+Room sect 6~
+Room sect 6, for testing.
+~
+3 0 0 0 0 6
+D1
+~
+~
+0 0 376 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 374 0 0 0 0 0 0 0 0
+S
+#376
+Room sect 7~
+Room sect 7, for testing.
+~
+3 0 0 0 0 7
+D1
+~
+~
+0 0 377 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 375 0 0 0 0 0 0 0 0
+S
+#377
+Room sect 8~
+Room sect 8, for testing.
+~
+3 0 0 0 0 8
+D1
+~
+~
+0 0 378 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 376 0 0 0 0 0 0 0 0
+S
+#378
+Room sect 9~
+Room sect 9, for testing.
+~
+3 0 0 0 0 9
+D1
+~
+~
+0 0 379 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 377 0 0 0 0 0 0 0 0
+S
+#379
+Room sect 10~
+Room sect 10, for testing.
+~
+3 0 0 0 0 10
+D1
+~
+~
+0 0 380 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 378 0 0 0 0 0 0 0 0
+S
+#380
+Room sect 11~
+Room sect 11, for testing.
+~
+3 0 0 0 0 11
+D1
+~
+~
+0 0 381 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 379 0 0 0 0 0 0 0 0
+S
+#381
+Room sect 12~
+Room sect 12, for testing.
+~
+3 0 0 0 0 12
+D1
+~
+~
+0 0 382 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 380 0 0 0 0 0 0 0 0
+S
+#382
+Room sect 13~
+Room sect 13, for testing.
+~
+3 0 0 0 0 13
+D1
+~
+~
+0 0 383 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 381 0 0 0 0 0 0 0 0
+S
+#383
+Room sect 14~
+Room sect 14, for testing.
+~
+3 0 0 0 0 14
+D3
+~
+~
+0 0 382 0 0 0 0 0 0 0 0
 S
 $~

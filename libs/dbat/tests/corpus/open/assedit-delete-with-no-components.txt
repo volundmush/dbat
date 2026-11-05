@@ -1,0 +1,8 @@
+@27773712 spawn Bot0 6 309807 5 1
+@574535880 type Bot0 assedit 300
+@396552655 type Bot0 dance 331
+@897742882 type Bot0 2
+@803841468 type Bot0 down
+@713631597 type Bot0 1
+@301157178 type Bot0 d
+@295584407 type Bot0 302

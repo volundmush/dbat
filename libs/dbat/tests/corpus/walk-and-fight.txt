@@ -1,0 +1,13 @@
+# A plain session, so the corpus always exercises the replay path.
+seed 42
+spawn Bot0 6 1
+spawn Bot1 0 2
+type Bot1 look
+type Bot1 north
+type Bot1 kill dummy
+pulse 30
+type Bot0 goto 303
+type Bot0 list
+pulse 10
+leave Bot0
+pulse 5

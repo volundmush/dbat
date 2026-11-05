@@ -166,8 +166,7 @@ static void play_case(GameWorld *g, struct char_data *ch, struct char_data *vict
   th_type(g, ch, line);
   th_pulses(g, 3);
   if (world_audit(g, audit_problem, nullptr)) {
-    fflush(nullptr);
-    _exit(AUDIT_FAILED);
+    th_exit(AUDIT_FAILED);
   }
 }
 
@@ -196,8 +195,7 @@ static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victi
     dup2(fd, STDERR_FILENO);
     alarm(CASE_SECONDS);
     play_case(g, ch, victim, state, line);
-    fflush(nullptr);
-    _exit(0);
+    th_exit(0);
   }
 
   waitpid(pid, &status, 0);

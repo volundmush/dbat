@@ -1,0 +1,19 @@
+#3010
+special3010 mob~
+special3010~
+The special3010 is here.
+~
+It is special3010.
+~
+b 0 0 0 0 0 0 0 0 E
+10 0 10 1d6+1 1d4+0
+10 500 0 0
+8 8 0
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+$

@@ -60,6 +60,9 @@ extern const char compress_offer[4];
 void init_game(GameWorld *g, uint16_t port);
 
 /* The parts of one game loop pass that need no sockets. */
+int game_add_connection(GameWorld *g, int desc, const char *host);
+int game_read_input(GameWorld *g, struct descriptor_data *d);
+int game_send_output(GameWorld *g, struct descriptor_data *d);
 void game_process_commands(GameWorld *g);
 void game_finish_descriptors(GameWorld *g);
 void game_heartbeat(GameWorld *g, int heart_pulse);

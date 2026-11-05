@@ -28,14 +28,395 @@ A loaf of bread lies here.~
 1 5 0 0
 Z
 4
+#311
+thing1 thing~
+thing number 1~
+Thing number 1 lies here.~
+~
+1 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 340
+Z
+4
+#312
+thing2 thing~
+thing number 2~
+Thing number 2 lies here.~
+~
+2 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 341
+Z
+4
+#313
+thing3 thing~
+thing number 3~
+Thing number 3 lies here.~
+~
+3 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 342
+Z
+4
+#314
+thing4 thing~
+thing number 4~
+Thing number 4 lies here.~
+~
+4 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 343
+Z
+4
+#315
+thing5 thing~
+thing number 5~
+Thing number 5 lies here.~
+~
+5 0 0 0 0 ag 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 344
+Z
+4
+#316
+thing6 thing~
+thing number 6~
+Thing number 6 lies here.~
+~
+6 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 345
+Z
+4
+#317
+thing7 thing~
+thing number 7~
+Thing number 7 lies here.~
+~
+7 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 346
+Z
+4
+#318
+thing8 thing~
+thing number 8~
+Thing number 8 lies here.~
+~
+8 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 347
+Z
+4
 #319
-item319~
-item 319~
-Item 319 lies here.~
+thing9 thing~
+thing number 9~
+Thing number 9 lies here.~
+~
+9 0 0 0 0 ak 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 348
+Z
+4
+#320
+thing10 thing~
+thing number 10~
+Thing number 10 lies here.~
+~
+10 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 349
+Z
+4
+#321
+thing11 thing~
+thing number 11~
+Thing number 11 lies here.~
+~
+11 0 0 0 0 am 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 350
+Z
+4
+#322
+thing12 thing~
+thing number 12~
+Thing number 12 lies here.~
 ~
 12 0 0 0 0 a 0 0 0 0 0 0 0
-0 0 0 0 100 100 0 9 0 0 0 0 0 0 0 0
-1 1 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 351
+Z
+4
+#323
+thing13 thing~
+thing number 13~
+Thing number 13 lies here.~
+~
+13 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 352
+Z
+4
+#324
+thing14 thing~
+thing number 14~
+Thing number 14 lies here.~
+~
+14 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 353
+Z
+4
+#325
+thing15 thing~
+thing number 15~
+Thing number 15 lies here.~
+~
+15 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 354
+Z
+4
+#326
+thing16 thing~
+thing number 16~
+Thing number 16 lies here.~
+~
+16 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 355
+Z
+4
+#327
+thing17 thing~
+thing number 17~
+Thing number 17 lies here.~
+~
+17 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 356
+Z
+4
+#328
+thing18 thing~
+thing number 18~
+Thing number 18 lies here.~
+~
+18 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 357
+Z
+4
+#329
+thing19 thing~
+thing number 19~
+Thing number 19 lies here.~
+~
+19 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 358
+Z
+4
+#330
+thing20 thing~
+thing number 20~
+Thing number 20 lies here.~
+~
+20 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 359
+Z
+4
+#331
+thing21 thing~
+thing number 21~
+Thing number 21 lies here.~
+~
+21 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#332
+thing22 thing~
+thing number 22~
+Thing number 22 lies here.~
+~
+22 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#333
+thing23 thing~
+thing number 23~
+Thing number 23 lies here.~
+~
+23 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#334
+thing24 thing~
+thing number 24~
+Thing number 24 lies here.~
+~
+24 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#335
+thing25 thing~
+thing number 25~
+Thing number 25 lies here.~
+~
+25 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#336
+thing26 thing~
+thing number 26~
+Thing number 26 lies here.~
+~
+26 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#337
+thing27 thing~
+thing number 27~
+Thing number 27 lies here.~
+~
+27 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#338
+thing28 thing~
+thing number 28~
+Thing number 28 lies here.~
+~
+28 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#339
+thing29 thing~
+thing number 29~
+Thing number 29 lies here.~
+~
+29 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#340
+thing30 thing~
+thing number 30~
+Thing number 30 lies here.~
+~
+30 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#341
+thing31 thing~
+thing number 31~
+Thing number 31 lies here.~
+~
+31 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#342
+thing32 thing~
+thing number 32~
+Thing number 32 lies here.~
+~
+32 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#343
+thing33 thing~
+thing number 33~
+Thing number 33 lies here.~
+~
+33 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#344
+thing34 thing~
+thing number 34~
+Thing number 34 lies here.~
+~
+34 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#345
+thing35 thing~
+thing number 35~
+Thing number 35 lies here.~
+~
+35 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#346
+thing36 thing~
+thing number 36~
+Thing number 36 lies here.~
+~
+36 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+Z
+4
+#350
+thing12 thing~
+thing number 12~
+Thing number 12 lies here.~
+~
+12 0 0 0 0 a 0 0 0 0 0 0 0
+1 2 3 4 100 100 0 9 0 0 0 0 0 0 0 0
+2 20 0 0
+T 381
 Z
 4
 #1120

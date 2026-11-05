@@ -1,0 +1,3 @@
+@88970394 spawn Bot1 0 957161 8 13
+@950766645 type Bot1 rip Bot1 18925 Bot1
+@879032155 type Bot1 look tail

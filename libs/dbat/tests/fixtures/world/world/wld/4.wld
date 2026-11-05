@@ -22,6 +22,12 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#800
+Landing Site 800~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #850
 Hard-coded Room 850~
 The code refers to this room by number.
@@ -34,15 +40,63 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#1150
+Landing Site 1150~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#1180
+Landing Site 1180~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#1287
+Landing Site 1287~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#1428
+Landing Site 1428~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#1456
+Landing Site 1456~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#1506
+Landing Site 1506~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #1561
 Hard-coded Room 1561~
 The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#1636
+Landing Site 1636~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #1659
 Hard-coded Room 1659~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#1710
+Landing Site 1710~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -67,6 +121,18 @@ S
 #2046
 Hard-coded Room 2046~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#2141
+Landing Site 2141~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2226
+Landing Site 2226~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -106,6 +172,48 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#2600
+Landing Site 2600~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2615
+Landing Site 2615~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2616
+Landing Site 2616~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2709
+Landing Site 2709~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2800
+Landing Site 2800~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#2899
+Landing Site 2899~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#3412
+Landing Site 3412~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #3499
 Hard-coded Room 3499~
 The code refers to this room by number.
@@ -115,6 +223,12 @@ S
 #3508
 Hard-coded Room 3508~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#3520
+Landing Site 3520~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -160,9 +274,75 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#4300
+Landing Site 4300~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#4351
+Landing Site 4351~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#4400
+Landing Site 4400~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#4600
+Landing Site 4600~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #4609
 Hard-coded Room 4609~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#4800
+Landing Site 4800~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#4944
+Landing Site 4944~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#5100
+Landing Site 5100~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#5150
+Landing Site 5150~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#5165
+Landing Site 5165~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#5200
+Landing Site 5200~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#5500
+Landing Site 5500~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -178,9 +358,21 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#7950
+Landing Site 7950~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #8003
 Hard-coded Room 8003~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#8006
+Landing Site 8006~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -214,15 +406,129 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#8300
+Landing Site 8300~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8400
+Landing Site 8400~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8447
+Landing Site 8447~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8500
+Landing Site 8500~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8600
+Landing Site 8600~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8700
+Landing Site 8700~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8800
+Landing Site 8800~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8900
+Landing Site 8900~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#8954
+Landing Site 8954~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9200
+Landing Site 9200~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9700
+Landing Site 9700~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9855
+Landing Site 9855~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9864
+Landing Site 9864~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9900
+Landing Site 9900~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#9949
+Landing Site 9949~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #10182
 Hard-coded Room 10182~
 The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#10203
+Landing Site 10203~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#10474
+Landing Site 10474~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #10904
 Hard-coded Room 10904~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#10922
+Landing Site 10922~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#11600
+Landing Site 11600~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -280,6 +586,12 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#12010
+Landing Site 12010~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #12025
 Hard-coded Room 12025~
 The code refers to this room by number.
@@ -292,15 +604,51 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#12103
+Landing Site 12103~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #12252
 Hard-coded Room 12252~
 The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#12300
+Landing Site 12300~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#12400
+Landing Site 12400~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#12480
+Landing Site 12480~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #13009
 Hard-coded Room 13009~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#13020
+Landing Site 13020~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#13300
+Landing Site 13300~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -328,6 +676,30 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#14008
+Landing Site 14008~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#14100
+Landing Site 14100~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#14200
+Landing Site 14200~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#14300
+Landing Site 14300~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #14904
 Hard-coded Room 14904~
 The code refers to this room by number.
@@ -349,6 +721,18 @@ S
 #15100
 Hard-coded Room 15100~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#15655
+Landing Site 15655~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#16009
+Landing Site 16009~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -388,9 +772,27 @@ The code refers to this room by number.
 ~
 3 0 0 0 0 0
 S
+#16544
+Landing Site 16544~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#16600
+Landing Site 16600~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
 #17420
 Hard-coded Room 17420~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#17531
+Landing Site 17531~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S
@@ -427,6 +829,18 @@ S
 #18995
 Hard-coded Room 18995~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#19510
+Landing Site 19510~
+The code lands people here.
+~
+3 0 0 0 0 0
+S
+#19600
+Landing Site 19600~
+The code lands people here.
 ~
 3 0 0 0 0 0
 S

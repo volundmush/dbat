@@ -29,7 +29,14 @@ To test a whole running game, use `libs/dbat/tests/harness.h`. It copies `libs/d
 - `test_world.c` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
 - `test_commands.c` runs every command with awkward arguments, at three admin levels and in four states, under whichever sanitizers the build uses. Each case forks from the booted game, so one crash can't hide another. `dbat_test_commands <command>` runs one command and prints the full report. Use the ASan preset, because a plain build can't see most memory errors. It takes minutes, so skip it with `ctest -LE slow`; `zig build test` leaves it out, and `zig build test-commands` runs it. Failures in commands listed in `known_failures` are printed but don't fail the test.
 
-- `test_bot.c` has four bots play the fixture world at random, checking the audit after every step. Everything comes from the seed, so when `dbat_test_bot [first seed] [seeds] [steps]` reports a failure, `dbat_test_bot --seed N steps` repeats it and prints every command typed. It also reruns one seed to check that the run really repeats. Use the ASan preset here too.
+- `test_bot.c` has four bots play the fixture world at random, checking the audit after every action. They use every race and sensei, editors, real logins over sockets, long input, dropped connections and clock jumps. A run is a journal of actions, so `dbat_test_bot --replay FILE` repeats it exactly. Failures matching `known_failures` in that file are printed but don't fail the test. Journals in `tests/corpus/` run as a test; `tests/corpus/open/` holds short journals for open bugs, to move up once fixed.
+
+To hunt for bugs with everything you have, run `tools/hunt.sh`, and Ctrl-C it when you like. It runs bots at low priority on every core, as memory allows, groups failures by cause, shrinks an example of each, and writes `build-asan/hunt/report.md`. Seeds carry on from where the last hunt stopped. Options:
+
+- `--world data` plays a scratch copy of a real data directory, with your real scripts, shops and players. The directory is only ever read. It's far slower per seed than the fixture, and each worker takes about 750 MB.
+- `-t SECONDS` stops after that long, and `-j N` sets the workers.
+
+`tools/shrink.py BINARY JOURNAL` cuts a failing journal down by hand. `tools/coverage.sh` reports which code the tests reach, and writes `never-run.txt` listing the functions they don't.
 
 `world_audit()` (`dbat/world_audit.h`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
 

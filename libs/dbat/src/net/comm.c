@@ -375,6 +375,16 @@ static int get_max_players(GameWorld *g)
 }
 
 /* Runs one queued line of input for each descriptor that is ready for it. */
+int game_read_input(GameWorld *g, struct descriptor_data *d)
+{
+  return process_input(g, d);
+}
+
+int game_send_output(GameWorld *g, struct descriptor_data *d)
+{
+  return process_output(g, d);
+}
+
 void game_process_commands(GameWorld *g)
 {
   char comm[MAX_INPUT_LENGTH];
@@ -1867,11 +1877,10 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
 static int new_descriptor(GameWorld *g, int s)
 {
   int desc;
-  int sockets_connected = 0;
   socklen_t i;
-  struct descriptor_data *newd;
+  char host[HOST_LENGTH + 1];
   struct sockaddr_in peer;
-  int from_same_ip = 0, keepalive = 1;
+  int keepalive = 1;
 
   /* accept the new connection */
   i = sizeof(peer);
@@ -1891,6 +1900,20 @@ static int new_descriptor(GameWorld *g, int s)
   if (setsockopt(desc, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)) < 0)
     perror("SYSERR: setsockopt SO_KEEPALIVE");
 
+  /* The site is the numeric address. No reverse DNS: the lookup blocks the whole game, and the name it
+     returns is chosen by whoever controls the address, so it is no basis for bans. */
+  if (!inet_ntop(AF_INET, &peer.sin_addr, host, sizeof(host)))
+    strcpy(host, "unknown");
+
+  return game_add_connection(g, desc, host);
+}
+
+/* Takes on a connected socket, unless the game is full or the site isn't welcome. */
+int game_add_connection(GameWorld *g, int desc, const char *host)
+{
+  int sockets_connected = 0, from_same_ip = 0;
+  struct descriptor_data *newd;
+
   /* make sure we have room for it */
   for (newd = g->descriptors; newd; newd = newd->next)
     sockets_connected++;
@@ -1903,10 +1926,7 @@ static int new_descriptor(GameWorld *g, int s)
   /* create a new descriptor */
   CREATE(newd, struct descriptor_data, 1);
 
-  /* The site is the numeric address. No reverse DNS: the lookup blocks the whole game, and the name it
-     returns is chosen by whoever controls the address, so it is no basis for bans. */
-  if (!inet_ntop(AF_INET, &peer.sin_addr, newd->host, sizeof(newd->host)))
-    strcpy(newd->host, "unknown");
+  snprintf(newd->host, sizeof(newd->host), "%s", host);
 
   /* one host may not take all the slots */
   for (struct descriptor_data *other = g->descriptors; other; other = other->next)

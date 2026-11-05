@@ -136,6 +136,13 @@ pub fn build(b: *std.Build) void {
         const run_test = b.addRunArtifact(exe_test);
         run_test.has_side_effects = true;
         run_test.setCwd(b.path(".")); // the fixture's path is relative to here
+        if (std.mem.eql(u8, name, "bot")) {
+            const run_corpus = b.addRunArtifact(exe_test);
+            run_corpus.has_side_effects = true;
+            run_corpus.setCwd(b.path("."));
+            run_corpus.addArgs(&.{ "--corpus", "libs/dbat/tests/corpus" });
+            test_step.dependOn(&run_corpus.step);
+        }
         (if (std.mem.eql(u8, name, "commands")) commands_step else test_step).dependOn(&run_test.step);
     }
 }

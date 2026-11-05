@@ -1,0 +1,3 @@
+# The zone reset queue used to be freed twice at shutdown, whenever a reset was waiting.
+seed 1
+pulse 3100

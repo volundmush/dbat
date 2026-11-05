@@ -891,7 +891,7 @@ SPECIAL(bank)
 {
   int amount, num = 0;
 
-  struct obj_data *i, *obj = nullptr;
+  struct obj_data *i, *obj = nullptr; /* an ATM here, if any: this also runs for a carried cashcard */
 
   for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
     if (obj_get_vnum(g, i) == 3034) {
@@ -902,7 +902,7 @@ SPECIAL(bank)
   }
 
   if (CMD_IS(g, "balance")) {
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if ((obj && obj_extra_flagged(obj, ITEM_BROKEN))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
       return (true);
     }
@@ -919,7 +919,7 @@ SPECIAL(bank)
 
     two_arguments(argument, arg, arg2);
 
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if ((obj && obj_extra_flagged(obj, ITEM_BROKEN))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
       return (true);
     }
@@ -981,7 +981,7 @@ SPECIAL(bank)
   }
   if (CMD_IS(g, "deposit")) {
 
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if ((obj && obj_extra_flagged(obj, ITEM_BROKEN))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
       return (true);
     }
@@ -1002,7 +1002,7 @@ SPECIAL(bank)
   }
   if (CMD_IS(g, "withdraw")) {
 
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if ((obj && obj_extra_flagged(obj, ITEM_BROKEN))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
       return (true);
     }

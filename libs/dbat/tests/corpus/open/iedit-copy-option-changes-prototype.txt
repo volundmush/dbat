@@ -1,0 +1,9 @@
+@15234193 spawn Bot0 6 754664 19 5
+@555919077 type Bot0 iedit chest
+@930097762 type Bot0 8
+@397741839 type Bot0 312
+@403156094 type Bot0 33
+@564896344 type Bot0 324 bot3
+@167219268 type Bot0 w
+@419020321 type Bot0 322
+@468933613 type Bot0 q

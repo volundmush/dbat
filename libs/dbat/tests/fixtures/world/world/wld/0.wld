@@ -16,6 +16,24 @@ Where immortals start.
 ~
 0 0 0 0 0 0
 S
+#3
+Special Room 3~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#4
+Special Room 4~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#5
+Special Room 5~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
 #9
 Hard-coded Room 9~
 The code refers to this room by number.
@@ -91,6 +109,42 @@ S
 #80
 Hard-coded Room 80~
 The code refers to this room by number.
+~
+3 0 0 0 0 0
+S
+#81
+Special Room 81~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#82
+Special Room 82~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#83
+Special Room 83~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#84
+Special Room 84~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#85
+Special Room 85~
+The code gives this room a special.
+~
+3 0 0 0 0 0
+S
+#86
+Special Room 86~
+The code gives this room a special.
 ~
 3 0 0 0 0 0
 S

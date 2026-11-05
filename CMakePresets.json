@@ -21,14 +21,26 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_C_FLAGS": "-O1 -fsanitize=address,undefined -fno-sanitize-recover=undefined",
-        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+        "CMAKE_C_FLAGS": "-O1 -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,float-cast-overflow"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Line coverage (GCC, gcov): see tools/coverage.sh",
+      "binaryDir": "${sourceDir}/build-coverage",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_C_FLAGS": "--coverage -DDBAT_COVERAGE",
+        "CMAKE_EXE_LINKER_FLAGS": "--coverage"
       }
     }
   ],
   "buildPresets": [
     { "name": "debug", "configurePreset": "debug" },
     { "name": "release", "configurePreset": "release" },
-    { "name": "asan", "configurePreset": "asan" }
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "coverage", "configurePreset": "coverage" }
   ]
 }

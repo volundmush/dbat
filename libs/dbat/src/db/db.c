@@ -648,16 +648,6 @@ void destroy_db(GameWorld *g)
 
 #undef THIS_CMD
 
-  /* zone table reset queue */
-  if (g->reset_q.head) {
-    struct reset_q_element *ftemp = g->reset_q.head, *temp;
-    while (ftemp) {
-      temp = ftemp->next;
-      free(ftemp);
-      ftemp = temp;
-    }
-  }
-
   /* Triggers */
   for (cnt = 0; cnt < g->top_of_trigt; cnt++) {
     if (g->trig_index[cnt]->proto) {
@@ -4191,6 +4181,10 @@ void free_char(GameWorld *g, struct char_data *ch)
   mob_rnum nr;
   struct alias_data *a;
 
+  /* first: removing an affect can change skills, which live in the player data freed below */
+  while (char_get_affected(ch))
+    affect_remove(g, ch, char_get_affected(ch));
+
   if (char_get_player_specials(ch)) {
 
     while ((a = char_get_aliases(g, ch)) != nullptr) {
@@ -4249,9 +4243,6 @@ void free_char(GameWorld *g, struct char_data *ch)
     if (char_get_proto_script(ch) && char_get_proto_script(ch) != char_get_proto_script(&g->mob_proto[nr]))
       free_proto_script(ch, MOB_TRIGGER);
   }
-  while (char_get_affected(ch))
-    affect_remove(g, ch, char_get_affected(ch));
-
   /* free any assigned scripts */
   if (char_get_script(ch))
     extract_script(g, ch, MOB_TRIGGER);

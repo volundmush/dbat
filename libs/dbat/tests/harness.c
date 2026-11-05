@@ -1,5 +1,7 @@
 #include "harness.h"
 #include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +21,14 @@
 #include "dbat/character_utils.h"
 #include "dbat/game_world.h"
 
+#ifdef DBAT_COVERAGE
+void __gcov_dump(void);
+#endif
+
+constexpr room_vnum MAP_ROOM = 300;
+
 static char temp_dir[PATH_MAX];
+static const char *world_source = nullptr;
 
 static void run(const char *format, const char *a, const char *b)
 {
@@ -32,6 +41,41 @@ static void run(const char *format, const char *a, const char *b)
   }
 }
 
+/* The real one is 240KB of real rooms, so write one that's all the same room. */
+static void write_surface_map(void)
+{
+  FILE *fl = fopen("surface.map", "w");
+
+  if (!fl) {
+    perror("harness: surface.map");
+    exit(2);
+  }
+  for (int row = 0; row <= MAP_ROWS; row++) {
+    for (int col = 0; col <= MAP_COLS; col++)
+      fprintf(fl, "%d ", MAP_ROOM);
+    fputc('\n', fl);
+  }
+  fclose(fl);
+}
+
+/* As init_game() does. */
+static void read_surface_map(GameWorld *g)
+{
+  FILE *fl = fopen("surface.map", "r");
+  room_vnum vnum;
+
+  for (int row = 0; row <= MAP_ROWS; row++)
+    for (int col = 0; col <= MAP_COLS; col++)
+      g->mapnums[row][col] = fl && fscanf(fl, "%d", &vnum) == 1 ? real_room(g, vnum) : NOWHERE;
+  if (fl)
+    fclose(fl);
+}
+
+void th_use_world(const char *directory)
+{
+  world_source = directory;
+}
+
 GameWorld *th_boot(void)
 {
   return th_boot_at(0);
@@ -40,6 +84,7 @@ GameWorld *th_boot(void)
 GameWorld *th_boot_at(time_t when)
 {
   const char *tmp = getenv("TMPDIR");
+  char data_dir[PATH_MAX + 8];
   GameWorld *g;
 
   snprintf(temp_dir, sizeof(temp_dir), "%s/dbat-test.XXXXXX", tmp ? tmp : "/tmp");
@@ -47,11 +92,23 @@ GameWorld *th_boot_at(time_t when)
     perror("harness: mkdtemp");
     exit(2);
   }
-  run("cp -r '%s/.' '%s'", DBAT_TEST_FIXTURE, temp_dir);
-  if (chdir(temp_dir) < 0) {
+  /* in a directory called data, because the game opens ../data/surface.map */
+  snprintf(data_dir, sizeof(data_dir), "%s/data", temp_dir);
+  if (mkdir(data_dir, 0755) < 0) {
+    perror("harness: mkdir");
+    exit(2);
+  }
+  if (world_source)
+    /* these two are large, and the game doesn't read them */
+    run("tar -C '%s' --exclude=./assets.sqlite3 --exclude=./state -cf - . | tar -C '%s' -xf -", world_source, data_dir);
+  else
+    run("cp -r '%s/.' '%s'", DBAT_TEST_FIXTURE, data_dir);
+  if (chdir(data_dir) < 0) {
     perror("harness: chdir");
     exit(2);
   }
+  if (!world_source)
+    write_surface_map();
   logfile = fopen("test.log", "w");
   if (!logfile) {
     perror("harness: test.log");
@@ -67,9 +124,7 @@ GameWorld *th_boot_at(time_t when)
   init_lookup_table(g);
   boot_db(g);
   topLoad(g);
-  for (int row = 0; row <= MAP_ROWS; row++)
-    for (int col = 0; col <= MAP_COLS; col++)
-      g->mapnums[row][col] = NOWHERE;
+  read_surface_map(g);
   return g;
 }
 
@@ -88,8 +143,12 @@ void th_shutdown(GameWorld *g)
 
 struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
 {
+  return th_player_as(g, name, admlevel, RACE_HUMAN, CLASS_ROSHI);
+}
+
+static struct descriptor_data *new_test_descriptor(GameWorld *g)
+{
   struct descriptor_data *d;
-  struct char_data *ch;
 
   CREATE(d, struct descriptor_data, 1);
   d->descriptor = open("/dev/null", O_RDWR); /* for the few messages that skip the output buffer */
@@ -111,6 +170,33 @@ struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
   d->customfile = 1;
   d->next  = g->descriptors;
   g->descriptors = d;
+  return d;
+}
+
+struct char_data *th_existing_player(GameWorld *g, const char *name)
+{
+  struct descriptor_data *d = new_test_descriptor(g);
+  struct char_data *ch;
+
+  CREATE(ch, struct char_data, 1);
+  clear_char(ch);
+  CREATE(*char_player_specials_slot(ch), struct player_special_data, 1);
+  char_set_desc(ch, d);
+  d->character = ch;
+  if (load_char(g, name, ch) < 0) {
+    close_socket(g, d);
+    return nullptr;
+  }
+  enter_player_game(g, d);
+  desc_set_connected(d, CON_PLAYING);
+  th_take_output(g, ch);
+  return ch;
+}
+
+struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int race, int sensei)
+{
+  struct descriptor_data *d = new_test_descriptor(g);
+  struct char_data *ch;
 
   CREATE(ch, struct char_data, 1);
   clear_char(ch);
@@ -118,6 +204,8 @@ struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
   char_set_desc(ch, d);
   d->character = ch;
   char_set_pc_name(ch, strdup(name));
+  char_set_race(ch, race);
+  char_set_class(ch, sensei);
   char_set_pfilepos(ch, create_entry(g, char_get_pc_name(ch)));
   init_char(g, ch);
   save_char(g, ch);
@@ -132,6 +220,39 @@ struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
   return ch;
 }
 
+struct descriptor_data *th_connect(GameWorld *g, int *peer)
+{
+  int ends[2];
+
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, ends) < 0) {
+    perror("harness: socketpair");
+    exit(2);
+  }
+  fcntl(ends[0], F_SETFL, O_NONBLOCK);
+  fcntl(ends[1], F_SETFL, O_NONBLOCK);
+  game_add_connection(g, ends[0], "127.0.0.1");
+  *peer = ends[1];
+  /* a new connection goes on the front, and a refused one is closed */
+  if (g->descriptors && g->descriptors->descriptor == ends[0])
+    return g->descriptors;
+  close(ends[1]);
+  return nullptr;
+}
+
+bool th_send(GameWorld *g, struct descriptor_data *d, int peer, const char *bytes, size_t length)
+{
+  if (write(peer, bytes, length) < 0)
+    return true; /* the client's buffer is full: as far as the game knows, nothing was sent */
+  if (game_read_input(g, d) < 0) {
+    close_socket(g, d);
+    return false;
+  }
+  if (d->character)
+    char_set_wait(d->character, 0);
+  game_process_commands(g);
+  return true;
+}
+
 void th_type(GameWorld *g, struct char_data *ch, const char *line)
 {
   th_type_at(g, char_get_desc(ch), line);
@@ -139,7 +260,11 @@ void th_type(GameWorld *g, struct char_data *ch, const char *line)
 
 void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line)
 {
-  write_to_q(line, &d->input, 0);
+  char limited[MAX_INPUT_LENGTH];
+
+  /* process_input() never lets a longer line through */
+  snprintf(limited, sizeof(limited), "%s", line);
+  write_to_q(limited, &d->input, 0);
   if (d->character)
     char_set_wait(d->character, 0);
   game_process_commands(g);
@@ -166,6 +291,15 @@ void th_take_output_at(GameWorld *g, struct descriptor_data *d)
   d->bufspace = SMALL_BUFSIZE - 1;
   d->bufptr   = 0;
   *d->output  = '\0';
+}
+
+void th_exit(int status)
+{
+  fflush(nullptr);
+#ifdef DBAT_COVERAGE
+  __gcov_dump();
+#endif
+  _exit(status);
 }
 
 void th_pulses(GameWorld *g, int n)

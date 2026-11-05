@@ -1,0 +1,7 @@
+@944415988 spawn Bot16 6 332590 5 9
+@323012427 type Bot16 iedit sword
+@248451321 type Bot16 302
+@219766949 type Bot16 m
+@734753776 type Bot16 8
+@110334876 type Bot16 7
+@587416621 type Bot16 q

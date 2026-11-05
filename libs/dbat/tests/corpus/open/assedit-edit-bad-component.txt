@@ -1,0 +1,5 @@
+@962085534 spawn Bot0 6 486851 23 0
+@872811902 type Bot0 assedit 300
+@798648550 type Bot0 e
+@514075429 type Bot0 28
+@788369530 type Bot0 n

@@ -93,6 +93,85 @@ static void check_commands_reach_the_player(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
 }
 
+#define CHECK_POINTER_NOTICED(setter, value) \
+  do {                                      \
+    setter(ch, value);                      \
+    CHECK_NOTICED(g);                       \
+    setter(ch, nullptr);                    \
+  } while (0)
+
+static void check_audit_notices_broken_links(GameWorld *g, struct char_data *ch, struct obj_data *obj,
+                                             struct obj_data *chest, struct char_data *stray)
+{
+  struct descriptor_data *d = char_get_desc(ch);
+
+  CHECK_POINTER_NOTICED(char_set_grappling, stray);
+  CHECK_POINTER_NOTICED(char_set_grappled, stray);
+  CHECK_POINTER_NOTICED(char_set_drag, stray);
+  CHECK_POINTER_NOTICED(char_set_dragged, stray);
+  CHECK_POINTER_NOTICED(char_set_absorbing, stray);
+  CHECK_POINTER_NOTICED(char_set_absorbby, stray);
+  CHECK_POINTER_NOTICED(char_set_defender, stray);
+  CHECK_POINTER_NOTICED(char_set_defending, stray);
+  CHECK_POINTER_NOTICED(char_set_blocks, stray);
+  CHECK_POINTER_NOTICED(char_set_blocked, stray);
+  char_set_carrying(g, ch, stray);
+  CHECK_NOTICED(g);
+  char_set_carrying(g, ch, nullptr);
+  char_set_carried_by(g, ch, stray);
+  CHECK_NOTICED(g);
+  char_set_carried_by(g, ch, nullptr);
+  CHECK_POINTER_NOTICED(char_set_mindlink, stray);
+  CHECK_POINTER_NOTICED(char_set_poisonby, stray);
+  CHECK_POINTER_NOTICED(char_set_grappling, ch); /* present, but doesn't point back */
+
+  CHECK_POINTER_NOTICED(char_set_sits, chest);
+  obj_set_sitting(chest, ch);
+  CHECK_NOTICED(g);
+  obj_set_sitting(chest, nullptr);
+
+  obj_set_user(obj, stray);
+  CHECK_NOTICED(g);
+  obj_set_user(obj, nullptr);
+  obj_set_target(obj, stray);
+  CHECK_NOTICED(g);
+  obj_set_target(obj, nullptr);
+  obj_set_fellow_wall(obj, (struct obj_data *)&failures);
+  CHECK_NOTICED(g);
+  obj_set_fellow_wall(obj, nullptr);
+  obj_set_posted_to(obj, (struct obj_data *)&failures);
+  CHECK_NOTICED(g);
+  obj_set_posted_to(obj, nullptr);
+
+  char_set_position(ch, 99);
+  CHECK_NOTICED(g);
+  char_set_position(ch, POS_STANDING);
+  char_set_gold(ch, -1);
+  CHECK_NOTICED(g);
+  char_set_gold(ch, 0);
+  char_set_carry_items(ch, char_get_carry_items(ch) + 1);
+  CHECK_NOTICED(g);
+  char_set_carry_items(ch, char_get_carry_items(ch) - 1);
+  char_set_carry_weight(ch, char_get_carry_weight(ch) + 1);
+  CHECK_NOTICED(g);
+  char_set_carry_weight(ch, char_get_carry_weight(ch) - 1);
+
+  g->obj_index[obj_get_item_number(obj)].number++;
+  CHECK_NOTICED(g);
+  g->obj_index[obj_get_item_number(obj)].number--;
+
+  obj_set_id(obj, obj_get_id(obj) + 1000); /* the lookup table now disagrees */
+  CHECK_NOTICED(g);
+  obj_set_id(obj, obj_get_id(obj) - 1000);
+
+  d->snooping = (struct descriptor_data *)&failures;
+  CHECK_NOTICED(g);
+  d->snooping = nullptr;
+  d->snoop_by = (struct descriptor_data *)&failures;
+  CHECK_NOTICED(g);
+  d->snoop_by = nullptr;
+}
+
 /* The audit is only worth trusting if it notices each kind of damage. */
 static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
 {
@@ -150,6 +229,8 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
     CHECK_NOTICED(g);
     exit->to_room = to;
   }
+
+  check_audit_notices_broken_links(g, ch, obj, chest, stray);
 
   CHECK_AUDIT(g);
   extract_obj(g, obj);
@@ -246,14 +327,15 @@ static void check_atm_in_a_container(GameWorld *g, struct char_data *ch)
 
 static void check_zone_reset(GameWorld *g)
 {
-  int dummies = 0;
+  int masters = 0;
 
   for (int i = 0; i < 3; i++)
     reset_zone(g, real_zone(g, 3));
-  for (struct char_data *ch = rroom_get_people(g, real_room(g, 301)); ch; ch = char_get_next_in_room(ch))
-    if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 300)
-      dummies++;
-  CHECK(dummies >= 1 && dummies <= 2); /* the zone command's limit is 2 in the room */
+  /* nothing else loads this mob, and the zone command's limit is 1 */
+  for (struct char_data *ch = rroom_get_people(g, real_room(g, 303)); ch; ch = char_get_next_in_room(ch))
+    if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 331)
+      masters++;
+  CHECK(masters == 1);
   CHECK_AUDIT(g);
 }
 
@@ -390,13 +472,14 @@ static void check_lookups_past_the_end(GameWorld *g)
 {
   CHECK(count_shops(g, 300, 399) == 1);
   CHECK(count_shops(g, 400, 99999) == 0);
-  CHECK(count_guilds(g, 0, 99999) == 0);
+  CHECK(count_guilds(g, 0, 99999) == 1);
+  CHECK(count_guilds(g, 400, 99999) == 0);
 }
 
 /* Inserting used to free uninitialized memory, or strings that a neighbouring guild was still using. */
 static void check_new_guilds(GameWorld *g)
 {
-  guild_vnum vnums[] = {320, 310, 330};
+  guild_vnum vnums[] = {320, 310, 330}; /* the fixture already has 300 */
 
   for (size_t i = 0; i < sizeof(vnums) / sizeof(*vnums); i++) {
     char message[32];
@@ -408,15 +491,16 @@ static void check_new_guilds(GameWorld *g)
     guild_set_not_enough_gold(&guild, message);
     add_guild(g, &guild);
   }
-  CHECK(g->top_guild == 2);
-  for (guild_rnum r = 0; r <= g->top_guild; r++) {
+  CHECK(g->top_guild == 3);
+  for (guild_rnum r = 1; r <= g->top_guild; r++) {
     char message[32];
 
-    snprintf(message, sizeof(message), "guild %d", 310 + r * 10);
-    CHECK(rguild_get_vnum(g, r) == 310 + r * 10);
+    snprintf(message, sizeof(message), "guild %d", 300 + r * 10);
+    CHECK(rguild_get_vnum(g, r) == 300 + r * 10);
     CHECK(!strcmp(guild_get_no_such_skill(&g->guild_index[r]), message));
   }
-  CHECK(count_guilds(g, 0, 99999) == 3);
+  CHECK(rguild_get_vnum(g, 0) == 300);
+  CHECK(count_guilds(g, 0, 99999) == 4);
 }
 
 /* Deleting a prototype used to read the object it had just freed, and to lose what its copies held. */
@@ -598,6 +682,13 @@ static void leave_followers_for_shutdown(GameWorld *g, struct char_data *ch)
   char_to_room(g, master, char_get_in_room(ch));
   add_follower(g, ch, master);
   CHECK_AUDIT(g);
+
+  /* freeing a player used to free their skills first, then remove this affect, which reads them */
+  {
+    struct affected_type skilled = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_SKILL, .modifier = 1, .specific = SKILL_HAYASA};
+
+    affect_to_char(g, ch, &skilled);
+  }
 }
 
 int main(void)
