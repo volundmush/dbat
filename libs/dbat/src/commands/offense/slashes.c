@@ -40,6 +40,10 @@ ACMD(do_tslash)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -412,6 +416,10 @@ ACMD(do_pslash)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -654,6 +662,10 @@ ACMD(do_ddslash)
   two_arguments(argument, arg, arg2);
 
   /* Can they do the technique? */
+
+  if (playing_song(g, ch)) {
+    return;
+  }
 
   if (!can_grav(g, ch)) {
     return;

@@ -44,6 +44,10 @@ ACMD(do_attack)
   }
   one_argument(argument, arg);
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2)) {
     send_to_char(g, ch, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
     return;

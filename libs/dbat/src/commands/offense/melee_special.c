@@ -248,6 +248,10 @@ ACMD(do_heeldrop)
 
   one_argument(argument, arg);
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!check_skill(g, ch, SKILL_HEELDROP)) {
     return;
   }
@@ -1061,6 +1065,10 @@ ACMD(do_tailwhip)
   double attperc = 0;
 
   one_argument(argument, arg);
+
+  if (playing_song(g, ch)) {
+    return;
+  }
 
   if (!can_grav(g, ch)) {
     return;

@@ -3365,7 +3365,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
     }
   }
   if (char_get_exp(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
-    char_set_exp(mob, char_get_level(mob) * base);
+    char_set_exp(mob, (int64_t)char_get_level(mob) * base);
     char_set_exp(mob, char_get_exp(mob) * .9);
     char_set_exp(mob, char_get_exp(mob) + (char_get_level(mob) / 2));
     char_set_exp(mob, char_get_exp(mob) + (char_get_level(mob) / 3));
@@ -3406,6 +3406,9 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
 
     if (char_get_exp(mob) > 20000000) {
       char_set_exp(mob, 20000000);
+    }
+    if (char_get_exp(mob) < 0) {
+      char_set_exp(mob, 0);
     }
   }
 

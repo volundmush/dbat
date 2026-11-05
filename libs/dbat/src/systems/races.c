@@ -516,7 +516,7 @@ static const trans_table icer_trans_bonus = {
 
 static const trans_table saiyan_trans_bonus_legendary = {
     [1] = {.bonus = 800000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 185000000, .mult = 6, .drain = .2, .flag = PLR_TRANS2}
+    [2] = {.bonus = 185000000, .mult = 5.5, .drain = 0, .flag = PLR_TRANS2}
 };
 
 static const trans_table truffle_trans_bonus = {

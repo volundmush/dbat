@@ -265,8 +265,8 @@ ACMD(do_train)
     return;
   }
 
-  if (*stat_val >= 45 && char_get_bonuses(ch, nega_trait) > 0) {
-    send_to_char(g, ch, "You're not able to withstand increasing your %s beyond 45.\r\n", stat_name);
+  if (*stat_val >= 70 && char_get_bonuses(ch, nega_trait) > 0) {
+    send_to_char(g, ch, "You're not able to withstand increasing your %s beyond 70.\r\n", stat_name);
     return;
   }
 

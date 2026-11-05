@@ -4025,7 +4025,7 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
       send_to_char(g, ch, "You are too busy being absorbed by %s!\r\n", char_get_name(char_get_absorbby(ch)));
       return false;
     }
-    if ((char_get_altitude(vict) - 1 > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch) - 1) && char_is_namek(ch)) {
+    if ((char_get_altitude(vict) > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch)) && char_is_namek(ch)) {
       act(g, "@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_CHAR);
       act(g, "@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, 0, vict, TO_VICT);
       act(g, "@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_NOTVICT);
@@ -4232,6 +4232,16 @@ void pcost(GameWorld *g, struct char_data *ch, double ki, int64_t st)
 }
 
 /* For checking if they have enough free limbs to preform the technique. */
+/* Tells them so, if they're too busy with a song to do anything else. */
+bool playing_song(GameWorld *g, struct char_data *ch)
+{
+  if (char_get_powerattack(ch) > 0) {
+    send_to_char(g, ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+    return true;
+  }
+  return false;
+}
+
 bool limb_ok(GameWorld *g, struct char_data *ch, int type)
 {
   if (char_is_npc(ch)) {
@@ -4248,8 +4258,7 @@ bool limb_ok(GameWorld *g, struct char_data *ch, int type)
     send_to_char(g, ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
     return false;
   }
-  if (char_get_powerattack(ch) > 0) {
-    send_to_char(g, ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+  if (playing_song(g, ch)) {
     return false;
   }
   if (type == 0) {

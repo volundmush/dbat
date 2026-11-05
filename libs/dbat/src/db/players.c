@@ -461,7 +461,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           break;
 
         case 'E':
-          if (!strcmp(tag, "Exp ")) char_set_exp(ch, atoi(line));
+          if (!strcmp(tag, "Exp ")) char_set_exp(ch, atoll(line));
           else if (!strcmp(tag, "Eali"))
             ;
           else if (!strcmp(tag, "Ecls")) {

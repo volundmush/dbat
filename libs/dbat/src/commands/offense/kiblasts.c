@@ -39,6 +39,10 @@ ACMD(do_eraser)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }

@@ -459,10 +459,26 @@ ACMD(do_snet)
       snprintf(voice, sizeof(voice), "A generic voice");
     }
     for (i = g->descriptors; i; i = i->next) {
-      if (desc_get_connected(i) != CON_PLAYING) {
+      if (!i->character) {
         continue;
       }
       if (i->character == ch) {
+        continue;
+      }
+      /* It will always be heard and logged for admin. */
+      if (char_get_admlevel(i->character) > 0) {
+        if (call <= -1 && global == false) {
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
+        } else if (call <= -1) {
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
+        } else {
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, !*arg2 ? "" : CAP(arg2));
+        }
+        send_to_char(g, i->character, "%s", hist);
+        add_history(g, i->character, hist, HIST_SNET);
+        continue;
+      }
+      if (desc_get_connected(i) != CON_PLAYING) {
         continue;
       }
       if (char_get_in_room(i->character) == char_get_in_room(ch)) {
@@ -527,14 +543,6 @@ ACMD(do_snet)
           reached = true;
         }
       } /* They have a scouter */
-      if (char_get_admlevel(i->character) > 0 && call <= -1) {
-        send_to_char(g, i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
-        continue;
-      }
-      if (char_get_admlevel(i->character) > 0) {
-        send_to_char(g, i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, !*arg2 ? "" : CAP(arg2));
-        continue;
-      }
     } /* End switch */
     if (call <= -1) {
       if (global == false) {

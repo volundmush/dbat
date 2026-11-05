@@ -1734,19 +1734,19 @@ ACMD(do_heal)
 
     if (char_is_nail(ch)) {
       if (char_get_skill(ch, SKILL_HEAL) >= 100) {
-        incCurST(g, ch, heal * .4, true);
+        incCurST(g, vict, heal * .4, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
-        incCurST(g, ch, heal * .2, true);
+        incCurST(g, vict, heal * .2, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
-        incCurST(g, ch, heal * .1, true);
+        incCurST(g, vict, heal * .1, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       }
     }
 
-    null_affect(g, ch, AFF_POISON);
-    null_affect(g, ch, AFF_BLIND);
+    null_affect(g, vict, AFF_POISON);
+    null_affect(g, vict, AFF_BLIND);
     if (char_aff_flagged(vict, AFF_BURNED)) {
       send_to_char(g, vict, "Your burns are healed now.\r\n");
       act(g, "$n@w's burns are now healed.@n", true, vict, 0, 0, TO_ROOM);
@@ -1761,8 +1761,14 @@ ACMD(do_heal)
     char_set_limb_condition(vict, (2) - 1, 100);
     char_set_limb_condition(vict, (3) - 1, 100);
     char_set_limb_condition(vict, (4) - 1, 100);
+    if (!char_plr_flagged(vict, PLR_TAIL) && (char_is_bio(vict) || char_is_icer(vict)) && !char_is_npc(vict)) {
+      char_plr_set(vict, PLR_TAIL, true);
+    }
+    if (!char_plr_flagged(vict, PLR_STAIL) && (char_is_saiyan(vict) || char_is_halfbreed(vict)) && !char_is_npc(vict)) {
+      char_plr_set(vict, PLR_STAIL, true);
+    }
     if (getCurLF(g, vict) <= getMaxLF(g, vict) * 0.5 && !char_is_android(vict)) {
-      incCurLF(g, vict, (getMaxLF(g, ch)) * .35, true);
+      incCurLF(g, vict, (getMaxLF(g, vict)) * .35, true);
       send_to_char(g, vict, "You feel that your lifeforce has recovered some!\r\n");
     }
     improve_skill(g, ch, SKILL_HEAL, 0);
@@ -1786,25 +1792,26 @@ ACMD(do_heal)
 
     if (char_is_nail(ch)) {
       if (char_get_skill(ch, SKILL_HEAL) >= 100) {
-        incCurST(g, ch, heal * .4, true);
+        incCurST(g, vict, heal * .4, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
-        incCurST(g, ch, heal * .2, true);
+        incCurST(g, vict, heal * .2, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
-        incCurST(g, ch, heal * .1, true);
+        incCurST(g, vict, heal * .1, true);
         send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       }
     }
-    char_aff_set(vict, AFF_BLIND, false);
+    null_affect(g, vict, AFF_POISON);
+    null_affect(g, vict, AFF_BLIND);
     char_set_limb_condition(vict, (1) - 1, 100);
     char_set_limb_condition(vict, (2) - 1, 100);
     char_set_limb_condition(vict, (3) - 1, 100);
     char_set_limb_condition(vict, (4) - 1, 100);
-    if (!char_plr_flagged(vict, PLR_TAIL) && (char_is_bio(vict) || char_is_icer(vict))) {
+    if (!char_plr_flagged(vict, PLR_TAIL) && (char_is_bio(vict) || char_is_icer(vict)) && !char_is_npc(vict)) {
       char_plr_set(vict, PLR_TAIL, true);
     }
-    if (!char_plr_flagged(vict, PLR_STAIL) && (char_is_saiyan(vict) || char_is_halfbreed(vict))) {
+    if (!char_plr_flagged(vict, PLR_STAIL) && (char_is_saiyan(vict) || char_is_halfbreed(vict)) && !char_is_npc(vict)) {
       char_plr_set(vict, PLR_STAIL, true);
     }
     improve_skill(g, ch, SKILL_HEAL, 0);

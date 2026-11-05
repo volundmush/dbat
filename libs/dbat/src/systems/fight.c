@@ -1014,10 +1014,12 @@ void fight_stack(GameWorld *g)
     if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 6 || char_get_genome(ch, 1) == 6) && rand_number(g, 1, 200) >= 175) {
       mutant_limb_regen(g, ch);
     }
-    if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_skill(ch, SKILL_DISGUISE) < rand_number(g, 1, 125)) {
-      send_to_char(g, ch, "Your disguise comes off because of your swift movements!\r\n");
-      char_plr_set(ch, PLR_DISGUISED, false);
-      act(g, "@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, 0, 0, TO_ROOM);
+    if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_fighting(ch)) {
+      if (char_get_skill(ch, SKILL_DISGUISE) < rand_number(g, 1, 125)) {
+        send_to_char(g, ch, "Your disguise comes off because of your swift movements!\r\n");
+        char_plr_set(ch, PLR_DISGUISED, false);
+        act(g, "@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, 0, 0, TO_ROOM);
+      }
     }
     if (char_is_npc(ch) && char_aff_flagged(ch, AFF_BLIND) && rand_number(g, 1, 200) >= 190) {
       act(g, "@W$n@W is no longer blind.@n", false, ch, 0, 0, TO_ROOM);
@@ -1928,8 +1930,8 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
         if (char_is_human(killer) || (char_is_bio(killer) && (char_get_genome(killer, 0) == 1 || char_get_genome(killer, 1) == 1))) {
           psreward *= 1.25;
         }
-        if (char_is_halfbreed(ch)) {
-          psreward -= psreward * 0.4;
+        if (char_is_halfbreed(killer)) {
+          psreward *= 0.6;
         }
         if (char_is_npc(ch) && char_mob_flagged(ch, MOB_HUSK) && char_get_practice_points(g, killer) > 50 && char_is_bio(ch)) {
           psreward = 0;
@@ -2152,8 +2154,9 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
   // First there are a few mechanics which can prevent death. They are checked first.
 
   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of triggering Zenkai.
+  // Added check for character having AFF_SPIRIT to prevent triggering in Afterlife
   // this is implemented by setting PLR_GOOP with gooptime 0
-  if (char_is_saiyan(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(g, 1, 4) == 4) {
+  if (char_is_saiyan(ch) && !char_aff_flagged(ch, AFF_SPIRIT) && (getCurLFPercent(ch) >= 0.75) && rand_number(g, 1, 4) == 4) {
     char_plr_set(ch, PLR_GOOP, true);
     char_set_gooptime(ch, 0);
     decCurLFPercent(g, ch, 0.5, 0);

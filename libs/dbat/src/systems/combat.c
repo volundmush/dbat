@@ -279,12 +279,46 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
         sprintf(buf, "%s", char_get_name(vict));
         do_attack(g, ch, buf, 0, 0);
       } else {
-        if (rand_number(g, 1, 3) == 2 && char_get_skill(ch, SKILL_KICK) > 0) {
-          sprintf(buf, "%s", char_get_name(vict));
-          do_kick(g, ch, buf, 0, 0);
-        } else {
-          sprintf(buf, "%s", char_get_name(vict));
-          do_punch(g, ch, buf, 0, 0);
+        /* Repeat the last physical attack command that was issued
+           instead of always falling back to punch/kick. */
+        sprintf(buf, "%s", char_get_name(vict));
+        switch (char_get_lastattack(ch)) {
+          case 0:
+            do_punch(g, ch, buf, 0, 0);
+            break;
+          case 1:
+            do_kick(g, ch, buf, 0, 0);
+            break;
+          case 2:
+            do_elbow(g, ch, buf, 0, 0);
+            break;
+          case 3:
+            do_knee(g, ch, buf, 0, 0);
+            break;
+          case 4:
+            do_roundhouse(g, ch, buf, 0, 0);
+            break;
+          case 5:
+            do_uppercut(g, ch, buf, 0, 0);
+            break;
+          case 6:
+            do_slam(g, ch, buf, 0, 0);
+            break;
+          case 8:
+            do_heeldrop(g, ch, buf, 0, 0);
+            break;
+          case 51:
+            do_bash(g, ch, buf, 0, 0);
+            break;
+          case 52:
+            do_head(g, ch, buf, 0, 0);
+            break;
+          case 56:
+            do_tailwhip(g, ch, buf, 0, 0);
+            break;
+          default: /* unknown / weapon attack: fall back to punch */
+            do_punch(g, ch, buf, 0, 0);
+            break;
         }
       }
     }
@@ -1015,6 +1049,9 @@ static int count_physical(struct char_data *ch)
   if (char_get_skill(ch, SKILL_HEADBUTT) >= 1) {
     count += 1;
   }
+  if (char_get_skill(ch, SKILL_HEELDROP) >= 1) {
+    count += 1;
+  }
 
   return (count);
 }
@@ -1052,6 +1089,9 @@ static int physical_mastery(struct char_data *ch)
     count += 1;
   }
   if (char_get_skill(ch, SKILL_HEADBUTT) >= 100) {
+    count += 1;
+  }
+  if (char_get_skill(ch, SKILL_HEELDROP) >= 100) {
     count += 1;
   }
 
@@ -2786,7 +2826,7 @@ static void damtype_unarmed(char_data *ch, int skill, int64_t *dam)
 {
   // General Arlian bonus.
   if (char_is_arlian(ch)) {
-    *dam += *dam * 0.02;
+    *dam += *dam * 0.2;
   }
 
   // Sixteen's Iron Hand Bonus.
@@ -3076,7 +3116,7 @@ int64_t damtype(GameWorld *g, struct char_data *ch, int type, int skill, double 
           char_set_charge(ch, char_get_charge(ch) - (getMaxKI(g, ch) * 0.05));
         } else if (char_get_preference(ch) == PREFERENCE_WEAPON && char_get_charge(ch) > 0) {
           dam += char_get_charge(ch);
-          char_set_charge(ch, char_get_charge(ch) - (0));
+          char_set_charge(ch, 0);
         }
         if (group_bonus(g, ch, 2) == 8) {
           dam += dam * 0.02;
@@ -3868,7 +3908,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       char_set_lastattack(ch, char_get_lastattack(ch) - (1000));
     }
 
-    if (char_get_preference(ch) == PREFERENCE_KI && char_get_charge(ch) > 0) {
+    if (char_get_preference(vict) == PREFERENCE_KI && char_get_charge(vict) > 0) {
       dmg -= dmg * 0.08;
     }
 
@@ -3986,11 +4026,16 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       dmg -= (dmg * 0.0005) * char_get_aff_abils_wis(vict);
     }
 
-    if (char_is_mutant(vict)) {
-      if (type <= 0) {
-        dmg -= dmg * 0.3;
-      } else if (type > 0) {
-        dmg -= dmg * 0.25;
+    // Leech bonus trait reduces damage by 2% per 5 levels, up to 40% at level 100
+    if (char_get_bonuses(vict, BONUS_LEECH)) {
+      if (type > 0) {
+        dmg -= dmg * (((char_get_level(vict) / 5) * 0.02));
+      }
+    }
+    // Fireproof bonus trait reduces damage by 10% from ki attacks
+    if (char_get_bonuses(vict, BONUS_FIREPROOF)) {
+      if (type > 0) {
+        dmg -= dmg * 0.1;
       }
     }
 
@@ -4010,6 +4055,14 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 
     if (char_plr_flagged(vict, PLR_FURY)) {
       dmg -= dmg * 0.1;
+    }
+
+    if (char_is_mutant(vict)) {
+      if (type <= 0) {
+        dmg -= dmg * 0.3;
+      } else {
+        dmg -= dmg * 0.25;
+      }
     }
 
     if (char_is_majin(vict)) {
@@ -4966,6 +5019,10 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
               send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
+            } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 8);
+              success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
               send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
@@ -4992,6 +5049,10 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
               send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
+              success = true;
+            } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 6);
               success = true;
             }
             break;
@@ -5256,11 +5317,41 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 20:
           case 21:
           case 22:
+            if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 56);
+              success = true;
+            }
+            break;
           case 23:
+            if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 51);
+              success = true;
+            }
+            break;
           case 24:
           case 25:
+            if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 52);
+              success = true;
+            }
+            break;
           case 26:
+            if (char_get_skill(ch, SKILL_HEELDROP) > 0 && rand_number(g, 1, 3) == 3) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 8);
+              success = true;
+            }
+            break;
           case 27:
+            if (char_get_skill(ch, SKILL_SLAM) > 0 && rand_number(g, 1, 3) == 3) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 6);
+              success = true;
+            }
+            break;
           case 28:
             if (char_get_skill(ch, SKILL_KICK) > 0) {
               send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
@@ -5307,10 +5398,22 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 8:
           case 9:
           case 10:
+            if (char_get_skill(ch, SKILL_UPPERCUT) > 0 && rand_number(g, 1, 2) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 5);
+              success = true;
+            }
+            break;
           case 11:
           case 12:
           case 13:
           case 14:
+            if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0 && rand_number(g, 1, 2) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 4);
+              success = true;
+            }
+            break;
           case 15:
           case 16:
           case 17:
@@ -5325,6 +5428,28 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 20:
           case 21:
           case 22:
+            if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 51);
+              success = true;
+            } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 56);
+              success = true;
+            } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 52);
+              success = true;
+            } else if (char_get_skill(ch, SKILL_HEELDROP) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 8);
+              success = true;
+            } else if (char_get_skill(ch, SKILL_SLAM) > 0 && rand_number(g, 1, 3) == 2) {
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              char_set_combo(ch, 6);
+              success = true;
+            }
+            break;
           case 23:
           case 24:
           case 25:

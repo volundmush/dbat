@@ -758,6 +758,7 @@ room_vnum sensei_location_id(int s_id);
 int race_get_size(int r_id);
 bool race_is_playable(int r_id);
 bool race_is_people(int r_id);
+bool playing_song(GameWorld *g, struct char_data *ch);
 bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
 
 /* Raw fields, used by OLC and the mob files (formerly genmob.h macros). */

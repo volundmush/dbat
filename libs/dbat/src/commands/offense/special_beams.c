@@ -801,6 +801,10 @@ ACMD(do_kousengan)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -1251,11 +1255,11 @@ ACMD(do_deathbeam)
         break;
     }
     if (char_get_skill(ch, SKILL_DEATHBEAM) >= 100 && getCurPL(g, vict) >= 2) {
-      decCurLF(g, ch, dmg * .4, -1);
+      decCurLF(g, vict, dmg * .4, -1);
     } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 60 && getCurPL(g, vict) >= 2) {
-      decCurLF(g, ch, dmg * .2, -1);
+      decCurLF(g, vict, dmg * .2, -1);
     } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 40 && getCurPL(g, vict) >= 2) {
-      decCurLF(g, ch, dmg * .05, -1);
+      decCurLF(g, vict, dmg * .05, -1);
     }
     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(g, ch, attperc - 0.05, 0);

@@ -847,7 +847,8 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
     return;
 
   if (char_is_npc(ch)) {
-    char_set_exp(ch, char_get_exp(ch) + (gain));
+    /* A kill pays at least 1, which can be more than the mob had. */
+    char_set_exp(ch, MAX(0, char_get_exp(ch) + gain));
     return;
   }
 

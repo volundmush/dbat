@@ -58,6 +58,10 @@ ACMD(do_grapple)
     return;
   }
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (char_plr_flagged(ch, PLR_THANDW)) {
     send_to_char(g, ch, "Your are too busy wielding your weapon with two hands!\r\n");
     return;
@@ -808,6 +812,10 @@ ACMD(do_steal)
   int gold = 0, prob = char_get_skill(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
   two_arguments(argument, arg, arg2);
+
+  if (playing_song(g, ch)) {
+    return;
+  }
 
   if (!*arg) {
     send_to_char(g, ch, "An important basic of theft is actually having a victim!\r\n");

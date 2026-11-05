@@ -894,7 +894,7 @@ ACMD(do_healglow)
     duration += rand_number(g, -2, 1);
     if (duration <= 0)
       duration = 1;
-    assign_affect(g, ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
+    assign_affect(g, vict, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
     decCurKI(g, ch, cost, 0);
   }
 }

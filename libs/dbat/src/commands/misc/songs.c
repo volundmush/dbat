@@ -343,7 +343,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               if (!char_aff_flagged(vict, AFF_SANCTUARY)) {
                 char_aff_set(vict, AFF_SANCTUARY, true);
               }
-              incCurKI(g, ch, getPercentOfMaxKI(g, ch, .02) + skill, true);
+              decCurKI(g, ch, getPercentOfMaxKI(g, ch, .02) + skill, 0);
             }
           }
         }

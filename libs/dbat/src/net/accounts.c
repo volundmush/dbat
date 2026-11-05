@@ -524,8 +524,8 @@ void fingerUser(GameWorld *g, struct char_data *ch, char *name)
   }
   send_to_char(g, ch, "@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", total);
   send_to_char(g, ch, "@D[@gRP Points  @D: @w%-30d@D]@n\r\n", rpp);
-  send_to_char(g, ch, "@D[@gRP Bank    @D: @w%-30d@D]@n\r\n", rbank);
   if (char_get_admlevel(ch) > 0) {
+    send_to_char(g, ch, "@D[@gRP Bank    @D: @w%-30d@D]@n (unused!)\r\n", rbank);
     send_to_char(g, ch, "@D[@gCh. Slot 1 @D: @w%-30s@D]@n\r\n", tmp1);
     send_to_char(g, ch, "@D[@gCh. Slot 2 @D: @w%-30s@D]@n\r\n", tmp2);
     send_to_char(g, ch, "@D[@gCh. Slot 3 @D: @w%-30s@D]@n\r\n", tmp3);
@@ -545,7 +545,6 @@ void userRead(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "@D|@gEmail Address @D: @w%-27s@D|@n\n", d->email);
   write_to_output(g, d, "@D|@gMax Characters@D: @w%-27d@D|@n\n", d->total);
   write_to_output(g, d, "@D|@gRP Points     @D: @w%-27d@D|@n\n", d->rpp);
-  write_to_output(g, d, "@D|@gRP Bank       @D: @w%-27d@D|@n\n", d->rbank);
   write_to_output(g, d, "@D=============================================@n\r\n\r\n");
   write_to_output(g, d, "      @D[@y----@YSelect A Character Slot@y----@D]@n\n");
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)

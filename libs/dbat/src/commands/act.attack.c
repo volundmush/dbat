@@ -1102,6 +1102,10 @@ ACMD(do_zen)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -1451,6 +1455,10 @@ ACMD(do_malice)
   two_arguments(argument, arg, arg2);
 
   /* Can they do the technique? */
+
+  if (playing_song(g, ch)) {
+    return;
+  }
 
   if (!can_grav(g, ch)) {
     return;
@@ -1830,6 +1838,10 @@ ACMD(do_head)
   int mult;
   one_argument(argument, arg);
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -2050,6 +2062,10 @@ ACMD(do_bash)
 
   one_argument(argument, arg);
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -2256,6 +2272,10 @@ ACMD(do_seishou)
 
   /* Can they do the technique? */
 
+  if (playing_song(g, ch)) {
+    return;
+  }
+
   if (!can_grav(g, ch)) {
     return;
   }
@@ -2433,6 +2453,10 @@ ACMD(do_throw)
 
   char_set_throws(ch, rand_number(g, 1, 3)); /* (set by the interpreter before, for any "throw") */
   half_chop(argument, arg, chunk);
+
+  if (playing_song(g, ch)) {
+    return;
+  }
 
   if (!*arg) {
     send_to_char(g, ch, "Throw what?\r\n");

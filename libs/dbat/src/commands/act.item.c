@@ -2907,7 +2907,7 @@ ACMD(do_drink)
       obj_from_char(g, temp);
       extract_obj(g, temp);
       restoreKI(ch, true);
-      char_set_conditions(g, ch, THIRST, char_get_conditions(g, ch, THIRST) + (8));
+      gain_condition(g, ch, THIRST, 8);
       return;
     }
     if (obj_get_vnum(g, temp) == 86 && on_ground == 1) {
