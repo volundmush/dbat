@@ -265,6 +265,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               OLC_ZNUM(d) = g->top_of_helpt + 1;
 
           if (OLC_ZNUM(d) > g->top_of_helpt) {
+            OLC_ZNUM(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
             write_to_output(g, d, "Do you wish to add the '%s' help file? ",
                             OLC_STORAGE(d));
             OLC_MODE(d) = HEDIT_CONFIRM_ADD;

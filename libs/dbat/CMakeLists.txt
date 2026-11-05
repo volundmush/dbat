@@ -68,3 +68,7 @@ target_compile_options(dbat_test_bot PRIVATE ${DBAT_C_FLAGS})
 target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)
 add_test(NAME bot COMMAND dbat_test_bot)
 add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/tests/corpus)
+
+# Real servers and real clients: needs python3, and takes a minute or two.
+add_test(NAME copyover COMMAND python3 ${CMAKE_SOURCE_DIR}/tools/test_copyover.py $<TARGET_FILE:dbat_server>)
+set_tests_properties(copyover PROPERTIES LABELS slow TIMEOUT 1200)

@@ -45,11 +45,33 @@ static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig,
 static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
 static EVENTFUNC(trig_wait_event);
 
+/* By id, because a trigger can purge any object at all, including the next one in the list. */
+static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(GameWorld *g, obj_data *obj))
+{
+  obj_data *obj;
+  long *ids;
+  size_t count = 0;
+
+  for (obj = g->objects; obj; obj = obj_get_next(obj))
+    if (obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
+      count++;
+  if (!count)
+    return;
+  CREATE(ids, long, count);
+  count = 0;
+  for (obj = g->objects; obj; obj = obj_get_next(obj))
+    if (obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
+      ids[count++] = obj_get_id(obj);
+  for (size_t i = 0; i < count; i++)
+    if ((obj = find_obj(g, ids[i])) && obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
+      run(g, obj);
+  free(ids);
+}
+
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(GameWorld *g)
 {
   char_data *ch;
-  obj_data *obj;
   struct room_data *room = nullptr;
   room_rnum nr;
   struct script_data *sc;
@@ -65,14 +87,7 @@ void script_trigger_check(GameWorld *g)
     }
   }
 
-  for (obj = g->objects; obj; obj = obj_get_next(obj)) {
-    if (obj_get_script(obj)) {
-      sc = obj_get_script(obj);
-
-      if (IS_SET(sc->types, OTRIG_RANDOM))
-        random_otrigger(g, obj);
-    }
-  }
+  run_object_triggers(g, OTRIG_RANDOM, random_otrigger);
 
   for (nr = 0; nr <= g->top_room; nr++) {
     if (rroom_get_script(g, nr)) {
@@ -90,7 +105,6 @@ void script_trigger_check(GameWorld *g)
 void check_time_triggers(GameWorld *g)
 {
   char_data *ch;
-  obj_data *obj;
   struct room_data *room = nullptr;
   room_rnum nr;
   struct script_data *sc;
@@ -106,14 +120,7 @@ void check_time_triggers(GameWorld *g)
     }
   }
 
-  for (obj = g->objects; obj; obj = obj_get_next(obj)) {
-    if (obj_get_script(obj)) {
-      sc = obj_get_script(obj);
-
-      if (IS_SET(sc->types, OTRIG_TIME))
-        time_otrigger(g, obj);
-    }
-  }
+  run_object_triggers(g, OTRIG_TIME, time_otrigger);
 
   for (nr = 0; nr <= g->top_room; nr++) {
     if (rroom_get_script(g, nr)) {
@@ -1098,9 +1105,14 @@ int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int 
   void *go                = go_adress ? *(void **)go_adress : nullptr;
   int ret;
 
+  if (trig->extracted) /* an earlier trigger on the same thing removed this one */
+    return 0;
+
   dg_ctx_begin(g, go, trig, type);
   ret    = script_driver_body(g, go_adress, trig, type, mode);
   g->dg_ctx = saved;
+  if (trig->owner_gone && type == OBJ_TRIGGER)
+    *(obj_data **)go_adress = nullptr; /* tell the caller, as dg_run_command() does */
   return ret;
 }
 
@@ -1160,7 +1172,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
   g->dg_owner_purged = 0;
 
   for (cl                    = (mode == TRIG_NEW) ? trig->cmdlist : trig->curr_state;
-       cl && trig->depth; cl = cl->next) {
+       cl && trig->depth && !trig->extracted; cl = cl->next) {
     for (p = cl->cmd; *p && isspace(*p); p++);
     dg_ctx_set_line(g, p);
 
@@ -1254,11 +1266,14 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
     }
   }
 
-  sc = script_of(go, type); /* the script may have been detached */
-  if (sc)
-    free_varlist(trig->var_list);
-  trig->var_list = nullptr;
-  trig->depth    = 0;
+  /* Once extracted, what the trigger belonged to may be gone, and free_trigger() has the rest. */
+  if (!trig->extracted) {
+    sc = script_of(go, type); /* the script may have been detached */
+    if (sc)
+      free_varlist(trig->var_list);
+    trig->var_list = nullptr;
+    trig->depth    = 0;
+  }
 
   g->script_depth--;
   return ret_val;

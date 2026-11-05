@@ -408,6 +408,7 @@ int64_t incCurHealthPercent(GameWorld *g, char_data *ch, double amt, bool limit_
   ch->health += ABS(amt);
   if (limit_max)
     ch->health = MIN(1.0, ch->health);
+  ch->health = fixnan(ch->health);
   return getCurHealth(g, ch);
 }
 
@@ -415,8 +416,8 @@ int64_t decCurHealthPercent(GameWorld *g, char_data *ch, double amt, int64_t flo
 {
   double fl = 0.0;
   if (floor > 0)
-    fl = (double)floor / (double)getEffMaxPL(g, ch);
-  ch->health = MAX(fl, ch->health - ABS(amt));
+    fl = safeDiv((double)floor, (double)getEffMaxPL(g, ch));
+  ch->health = clampHealth(MAX(fl, fixnan(ch->health - ABS(amt))));
   return getCurHealth(g, ch);
 }
 

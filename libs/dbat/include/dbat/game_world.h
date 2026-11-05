@@ -51,6 +51,7 @@ struct GameWorld {
   struct index_data **trig_index;
   int top_of_trigt;
   struct trig_data *trigger_list;
+  struct trig_data *extracted_triggers; /* waiting for free_extracted_triggers() */
   struct dg_run_ctx dg_ctx;
   struct lookup_table_t lookup_table[BUCKET_COUNT];
   long lookup_table_entries;
@@ -75,6 +76,9 @@ struct GameWorld {
   int mother_desc;
   uint16_t port;
   bool fCopyOver;
+  int launch_argc; /* how and where this process started, for a copyover to do the same */
+  char **launch_argv;
+  char *launch_dir;
   int last_desc;
   int circle_shutdown, circle_reboot, circle_restrict;
   int copyover_timer;

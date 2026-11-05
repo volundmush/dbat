@@ -1718,8 +1718,13 @@ static void point_update_objects(GameWorld *g)
     /* note to .rej hand-patchers: make this last in your point-update() */
     else if (obj_get_timer(j) > 0) {
       obj_set_timer(j, obj_get_timer(j) - 1);
-      if (!obj_get_timer(j))
+      if (!obj_get_timer(j)) {
+        /* The script can purge anything. If that's the next object, the rest wait for the next tick. */
+        long next_id = next_thing ? obj_get_id(next_thing) : 0;
+
         timer_otrigger(g, j);
+        next_thing = find_obj(g, next_id);
+      }
     }
   }
 }

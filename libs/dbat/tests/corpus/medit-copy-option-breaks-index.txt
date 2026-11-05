@@ -1,0 +1,15 @@
+@438576050 spawn Bot40 6 726889 10 13
+pulse 63
+@255789946 type Bot40 medit 300
+pulse 46
+@883881558 type Bot40 w
+pulse 37
+@387255489 type Bot40 327
+@730148 type Bot40 26
+@582033357 type Bot40 m
+@129650705 type Bot40 333
+@736353818 type Bot40 3036
+pulse 41
+@119447560 type Bot40 q
+@695636849 type Bot40 y
+pulse 97

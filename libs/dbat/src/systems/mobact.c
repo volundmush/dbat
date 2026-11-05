@@ -334,7 +334,7 @@ void mobile_activity(GameWorld *g)
         }
         for (sobj = char_get_inventory(ch); sobj; sobj = next_obj) {
           next_obj = obj_get_next_content(sobj);
-          if (sobj != nullptr && !shop_producing(g, sobj, shopnr)) {
+          if (shopnr != -1 && !shop_producing(g, sobj, shopnr)) { /* a builder can take a keeper's shop away */
             char_set_gold(ch, char_get_gold(ch) + (obj_get_cost(sobj)));
             extract_obj(g, sobj);
           }

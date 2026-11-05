@@ -12,7 +12,6 @@ struct script_data **script_slot(void *go, int type);
 void dg_context_str(GameWorld *g, char *buf, size_t len);
 
 /* dg_lookup.c */
-obj_data *find_obj(GameWorld *g, long n);
 room_data *find_room(GameWorld *g, long n);
 
 /* dg_eval.c */

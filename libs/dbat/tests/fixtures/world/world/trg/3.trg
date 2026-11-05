@@ -2967,4 +2967,60 @@ Object purges itself~
 %purge% %self%
 %echo% still here
 ~
+#382
+Forces the carrier away~
+1 c 2
+zap~
+%force% %actor% quit
+%echo% still running
+~
+#383
+Purges itself at random~
+1 b 100
+~
+%purge% %self%
+~
+#384
+Purges itself at five~
+1 t 5
+~
+%purge% %self%
+~
+#385
+Clears the room when its timer runs out~
+1 f 100
+~
+%purge%
+~
+#386
+Purges itself when a spell is aimed at it~
+1 p 100
+~
+%purge% %self%
+~
+#387
+Purges itself as it loads~
+1 n 100
+~
+%purge% %self%
+~
+#388
+Purges itself when taken off~
+1 l 100
+~
+%purge% %self%
+~
+#389
+Purges whatever it is given~
+0 j 100
+~
+%purge% %object%
+~
+#390
+Forces whoever types this away, then lets the command through~
+1 c 4
+zop~
+%force% %actor% quit
+return 0
+~
 $~

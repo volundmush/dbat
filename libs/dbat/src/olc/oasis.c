@@ -311,6 +311,10 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     * Therefore it should not be free'd here.
     */
 
+  /* Only one person edits help at a time, and this one has stopped, whichever way they left. */
+  if (desc_get_connected(d) == CON_HEDIT)
+    g->HEDITS = false;
+
   /*
    * Restore descriptor playing status.
    */

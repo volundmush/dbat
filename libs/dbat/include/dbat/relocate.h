@@ -1,6 +1,8 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+/* After changing an object's weight: tells what contains it, and whoever carries it. */
+void obj_weight_changed(GameWorld *g, struct obj_data *obj, int64_t change);
 void obj_from_char(GameWorld *g, struct obj_data *object);
 
 void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int pos);

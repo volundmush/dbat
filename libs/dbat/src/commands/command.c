@@ -762,9 +762,9 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
   {
     int cont;                                          /* continue the command checks */
     cont = command_wtrigger(g, ch, arg, line);            /* any world triggers ? */
-    if (!cont) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
-    if (!cont) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
-    if (cont) return;                                  /* yes, command trigger took over */
+    if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
+    if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
+    if (cont || char_is_dead(ch)) return; /* yes, command trigger took over, or forced them away */
   }
   for (length = strlen(arg), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++) {
     if (!strncmp(g->complete_cmd_info[cmd].command, arg, length))

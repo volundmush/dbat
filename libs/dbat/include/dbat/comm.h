@@ -68,5 +68,5 @@ void game_finish_descriptors(GameWorld *g);
 void game_heartbeat(GameWorld *g, int heart_pulse);
 
 void free_bufpool(GameWorld *g);
-void setup_log(const char *filename, int fd);
+void setup_log(const char *filename, int fd, bool keep_old_log);
 bool sendok(struct char_data *ch, int to_sleeping);

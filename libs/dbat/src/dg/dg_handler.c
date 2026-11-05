@@ -135,7 +135,28 @@ void extract_trigger(GameWorld *g, struct trig_data *trig)
   /* walk the trigger list and remove this one */
   REMOVE_FROM_LIST(trig, g->trigger_list, next_in_world, temp);
 
+  /* A running script may be this trigger, or be about to read it, so it can't go yet. */
+  if (g->script_depth > 0) {
+    trig->extracted     = true;
+    trig->next_in_world = g->extracted_triggers;
+    g->extracted_triggers = trig;
+    return;
+  }
   free_trigger(g, trig);
+}
+
+/* Frees the triggers extract_trigger() left, once no script can be using them. */
+void free_extracted_triggers(GameWorld *g)
+{
+  struct trig_data *next;
+
+  if (g->script_depth > 0)
+    return;
+  for (struct trig_data *trig = g->extracted_triggers; trig; trig = next) {
+    next = trig->next_in_world;
+    free_trigger(g, trig);
+  }
+  g->extracted_triggers = nullptr;
 }
 
 /* remove all triggers from a mob/obj/room */
@@ -151,6 +172,7 @@ void extract_script(GameWorld *g, void *thing, int type)
 
   for (trig = sc->trig_list; trig; trig = next_trig) {
     next_trig = trig->next;
+    trig->owner_gone = true;
     extract_trigger(g, trig);
   }
   sc->trig_list = nullptr;

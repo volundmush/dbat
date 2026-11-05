@@ -276,6 +276,8 @@ static void send_char_pos(GameWorld *g, struct char_data *ch, int dam)
  */
 bool valid_dg_target(GameWorld *g, struct char_data *ch, int bitvector)
 {
+  if (char_get_in_room(ch) == NOWHERE)
+    return false; /* on the way out of the game, such as someone who has just quit */
   if (char_is_npc(ch))
     return true; /* all npcs are allowed as targets */
   else if (char_get_admlevel(ch) < ADMLVL_IMMORT)

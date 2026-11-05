@@ -819,7 +819,8 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       break;
     case SEDIT_COPY:
-      if ((i = real_room(g, atoi(arg))) != NOWHERE) {
+      if ((i = real_shop(g, atoi(arg))) != NOWHERE) {
+        free_shop(OLC_SHOP(d));
         sedit_setup_existing(g, d, i);
       } else
         write_to_output(g, d, "That shop does not exist.\r\n");

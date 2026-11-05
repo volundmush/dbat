@@ -13,6 +13,8 @@
 #include "dbat/ban.h"
 #include "dbat/genolc.h"
 
+#include <signal.h>
+#include <string.h>
 #include <unistd.h>
 #include "dbat/world_audit.h"
 #include "dbat/game_world.h"
@@ -28,6 +30,16 @@ int main(int argc, char **argv)
   const char *dir;
   GameWorld *g = game_world_create();
 
+  /*
+   * Until signal_setup() runs. The deadlock timer outlives a copyover's exec, and an older server won't
+   * have stopped it, so this process could otherwise die part way through booting.
+   */
+  signal(SIGVTALRM, SIG_IGN);
+
+  g->launch_argc = argc;
+  g->launch_argv = argv;
+  g->launch_dir  = getcwd(nullptr, 0);
+
   /****************************************************************************/
   /** Load the game configuration.                                           **/
   /** We must load BEFORE we use any of the constants stored in constants.c. **/
@@ -38,9 +50,9 @@ int main(int argc, char **argv)
   while ((pos < argc) && (*(argv[pos]) == '-')) {
     if (*(argv[pos] + 1) == 'f') {
       if (*(argv[pos] + 2))
-        CONFIG_CONFFILE = argv[pos] + 2;
+        CONFIG_CONFFILE = strdup(argv[pos] + 2);
       else if (++pos < argc)
-        CONFIG_CONFFILE = argv[pos];
+        CONFIG_CONFFILE = strdup(argv[pos]);
       else {
         puts("SYSERR: File name to read from expected after option -f.");
         exit(1);
@@ -65,10 +77,11 @@ int main(int argc, char **argv)
           ++pos;
         break;
       case 'o':
+        /* copies, because the configuration's strings get freed at shutdown */
         if (*(argv[pos] + 2))
-          CONFIG_LOGNAME = argv[pos] + 2;
+          CONFIG_LOGNAME = strdup(argv[pos] + 2);
         else if (++pos < argc)
-          CONFIG_LOGNAME = argv[pos];
+          CONFIG_LOGNAME = strdup(argv[pos]);
         else {
           puts("SYSERR: File name to log to expected after option -o.");
           exit(1);
@@ -147,7 +160,7 @@ int main(int argc, char **argv)
   }
 
   /* All arguments have been parsed, try to open log file. */
-  setup_log(CONFIG_LOGNAME, STDERR_FILENO);
+  setup_log(CONFIG_LOGNAME, STDERR_FILENO, g->fCopyOver);
 
   /*
      * Moved here to distinguish command line options and to show up
@@ -170,6 +183,8 @@ int main(int argc, char **argv)
   }
 
   game_world_free_contents(g);
+
+  free(g->launch_dir);
 
   /* probably should free the entire config here.. */
   free(CONFIG_CONFFILE);

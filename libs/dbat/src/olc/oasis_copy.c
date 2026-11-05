@@ -185,7 +185,7 @@ ACMD(do_dig)
   rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword             = nullptr;
   rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room             = rrnum;
   add_to_save_list(g, g->zones[rroom_get_zone(g, char_get_in_room(ch))].number, SL_WLD);
-  save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
+  save_rooms(g, rroom_get_zone(g, rrnum));
   send_to_char(g, ch, "You make an exit %s to room %d (%s).\r\n",
                dirs[dir], rvnum, rroom_get_name(g, rrnum));
 
@@ -205,7 +205,7 @@ ACMD(do_dig)
     rroom_get_dir_option(g, rrnum, rev_dir[dir])->keyword             = nullptr;
     rroom_get_dir_option(g, rrnum, rev_dir[dir])->to_room             = char_get_in_room(ch);
     add_to_save_list(g, g->zones[rroom_get_zone(g, rrnum)].number, SL_WLD);
-    save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
+    save_rooms(g, rroom_get_zone(g, rrnum));
   }
 }
 
@@ -289,7 +289,7 @@ ACMD(do_rcopy)
   }
   send_to_imm(g, "Log: %s has copied room [%d] to room [%d].", char_get_name(ch), tvnum, rvnum);
   add_to_save_list(g, g->zones[rroom_get_zone(g, rrnum)].number, SL_WLD);
-  save_rooms(g, g->zones[rroom_get_zone(g, rrnum)].number);
+  save_rooms(g, rroom_get_zone(g, rrnum));
   send_to_char(g, ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
 

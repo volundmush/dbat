@@ -19,6 +19,7 @@
 #include "dbat/genobj.h"
 #include "dbat/genzon.h"
 #include "dbat/oasis.h"
+#include "dbat/relocate.h"
 #include "dbat/improved-edit.h"
 #include "dbat/dg_olc.h"
 #include "dbat/feats.h"
@@ -1218,6 +1219,10 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'w':
         case 'W':
+          if (desc_get_connected(d) == CON_IEDIT) { /* it would turn this object into a different prototype */
+            write_to_output(g, d, "\r\nYou can't copy another object onto an individual object.\r\nEnter choice : ");
+            return;
+          }
           write_to_output(g, d, "Copy what object? ");
           OLC_MODE(d) = OEDIT_COPY;
           break;
@@ -1780,6 +1785,7 @@ static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_da
   obj_set_sitting(obj, obj_get_sitting(&live));
   obj_set_user(obj, obj_get_user(&live));
   obj_set_target(obj, obj_get_target(&live));
+  obj_weight_changed(g, obj, obj_get_weight(obj) - obj_get_weight(&live));
 }
 
 static void iedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct obj_data *real_num)

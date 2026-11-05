@@ -23,7 +23,7 @@ The shopkeeper waits behind the counter.
 ~
 It looks bored.
 ~
-d 0 0 0 0 0 0 0 0 E
+bd 0 0 0 0 0 0 0 0 E
 1 0 10 0d0+0 0d0+0
 0 0 0 0
 8 8 0

@@ -750,6 +750,7 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
       snprintf(buf, sizeof(buf), "tail");
       break;
     case 6:
+      snprintf(part, sizeof(part), "@wA %s tail@n", char_true_race_name(vict));
       snprintf(buf, sizeof(buf), "tail");
       break;
     default:
@@ -1457,10 +1458,8 @@ void set_fighting(GameWorld *g, struct char_data *ch, struct char_data *vict)
   if (ch == vict)
     return;
 
-  if (char_get_fighting(ch)) {
-    core_dump();
+  if (char_get_fighting(ch)) /* they carry on with whoever they were already fighting */
     return;
-  }
 
   char_set_next_fighting(ch, g->combat_list);
   g->combat_list       = ch;
@@ -1778,7 +1777,8 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
     for (i = 0; i < NUM_WEARS; i++)
       if (char_get_equipment(ch, i)) {
         remove_otrigger(g, char_get_equipment(ch, i), ch);
-        obj_to_obj(g, unequip_char(g, ch, i), corpse);
+        if (char_get_equipment(ch, i)) /* its script can purge it */
+          obj_to_obj(g, unequip_char(g, ch, i), corpse);
       }
   }
   /* transfer gold */

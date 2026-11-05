@@ -10,6 +10,7 @@
 
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/relocate.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
@@ -1004,11 +1005,13 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
       if (!strcasecmp(field, "weight")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
+          int64_t before = obj_get_weight(o);
           if (addition < 0 || addition > 0) {
             obj_set_weight(o, MAX(0, addition + obj_get_weight(o)));
           } else {
             obj_set_weight(o, 0);
           }
+          obj_weight_changed(g, o, obj_get_weight(o) - before);
         }
         snprintf(str, slen, "%" PRId64 "", obj_get_weight(o));
       }

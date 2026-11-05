@@ -335,6 +335,8 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
 
 void extract_pending_chars(GameWorld *g)
 {
+  free_extracted_triggers(g);
+
   struct char_data *vict, *next_vict, *prev_vict;
 
   if (g->extractions_pending < 0)

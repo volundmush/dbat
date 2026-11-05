@@ -479,6 +479,7 @@ int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *ob
 {
   trig_data *t;
   int ret_val;
+  long id = obj_get_id(obj);
 
   if (!script_has_type(char_get_script(ch), MTRIG_RECEIVE) || char_aff_flagged(ch, AFF_CHARM))
     return 1;
@@ -490,7 +491,8 @@ int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *ob
       add_char_uid_var(t, "actor", actor, 0);
       add_obj_uid_var(t, "object", obj, 0);
       ret_val = script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
-      if (char_is_dead(actor) || char_is_dead(ch) || obj_get_carried_by(obj) != actor)
+      /* by id, because plenty of scripts purge what they're given */
+      if (char_is_dead(actor) || char_is_dead(ch) || !(obj = find_obj(g, id)) || obj_get_carried_by(obj) != actor)
         return 0;
       else
         return ret_val;
@@ -709,8 +711,9 @@ int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
+/* Sets *ran if a script ran, since that can free any object at all, this one included. */
 static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
-                      char *argument, int type)
+                      char *argument, int type, bool *ran)
 {
   trig_data *t;
 
@@ -736,11 +739,30 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
         skip_spaces(&cmd);
         add_var(&t->var_list, "cmd", cmd, 0);
 
-        if (script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW))
+        *ran = true;
+        if (script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW) || !obj)
           return true;
       }
     }
 
+  return false;
+}
+
+/* Runs the command triggers on a list of objects, returning true if one of them took the command. */
+static bool cmd_otrig_list(GameWorld *g, obj_data *obj, char_data *actor, char *cmd, char *argument, int type)
+{
+  while (obj) {
+    obj_data *next = obj_get_next_content(obj);
+    long next_id   = next ? obj_get_id(next) : 0;
+    bool forged    = obj_extra_flagged(obj, ITEM_FORGED);
+    bool ran       = false;
+
+    if (cmd_otrig(g, obj, actor, cmd, argument, type, &ran) && !forged)
+      return true;
+    if (char_is_dead(actor))
+      return true;
+    obj = ran ? find_obj(g, next_id) : next;
+  }
   return false;
 }
 
@@ -754,19 +776,16 @@ bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
     return false;
 
   for (i = 0; i < NUM_WEARS; i++)
-    if (char_get_equipment(actor, i))
-      if (cmd_otrig(g, char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
+    if ((obj = char_get_equipment(actor, i))) {
+      bool forged = obj_extra_flagged(obj, ITEM_FORGED);
+      bool ran    = false;
+
+      if ((cmd_otrig(g, obj, actor, cmd, argument, OCMD_EQUIP, &ran) && !forged) || char_is_dead(actor))
         return true;
+    }
 
-  for (obj = char_get_inventory(actor); obj; obj = obj_get_next_content(obj))
-    if (cmd_otrig(g, obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
-      return true;
-
-  for (obj = rroom_get_contents(g, char_get_in_room(actor)); obj; obj = obj_get_next_content(obj))
-    if (cmd_otrig(g, obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
-      return true;
-
-  return false;
+  return cmd_otrig_list(g, char_get_inventory(actor), actor, cmd, argument, OCMD_INVEN) ||
+         cmd_otrig_list(g, rroom_get_contents(g, char_get_in_room(actor)), actor, cmd, argument, OCMD_ROOM);
 }
 
 int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where)
@@ -874,13 +893,13 @@ int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *vict
   return 1;
 }
 
-void load_otrigger(GameWorld *g, obj_data *obj)
+bool load_otrigger(GameWorld *g, obj_data *obj)
 {
   trig_data *t;
   int result = 0;
 
   if (!script_has_type(obj_get_script(obj), OTRIG_LOAD))
-    return;
+    return true;
 
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_LOAD) &&
@@ -889,6 +908,8 @@ void load_otrigger(GameWorld *g, obj_data *obj)
       break;
     }
   }
+  if (!obj)
+    return false;
   if (result == SCRIPT_ERROR_CODE) {
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
@@ -896,12 +917,14 @@ void load_otrigger(GameWorld *g, obj_data *obj)
       free_proto_script(&g->obj_proto[obj_get_item_number(obj)], OBJ_TRIGGER);
     }
   }
+  return true;
 }
 
 int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
+  int ret_val;
 
   if (obj == nullptr)
     return 1;
@@ -916,7 +939,11 @@ int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
       add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
-      return script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
+      ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
+      /* the spell has nothing left to work on, or nobody left to cast it */
+      if (!obj || char_is_dead(actor))
+        return 0;
+      return ret_val;
     }
   }
 

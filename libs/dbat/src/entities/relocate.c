@@ -293,6 +293,18 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
 }
 
 /* take an object from a char */
+void obj_weight_changed(GameWorld *g, struct obj_data *obj, int64_t change)
+{
+  struct obj_data *outer;
+
+  for (outer = obj_get_in_obj(obj); outer; outer = obj_get_in_obj(outer)) {
+    obj_set_weight(outer, obj_get_weight(outer) + change);
+    obj = outer;
+  }
+  if (obj_get_carried_by(obj))
+    char_set_carry_weight(obj_get_carried_by(obj), char_get_carry_weight(obj_get_carried_by(obj)) + change);
+}
+
 void obj_from_char(GameWorld *g, struct obj_data *object)
 {
   if (object == nullptr) {

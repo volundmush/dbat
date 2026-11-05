@@ -4360,16 +4360,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (suppresso == false) {
         decCurHealth(g, vict, dmg, 0);
       }
-      if (char_get_fighting(ch) == nullptr) {
+      if (char_get_fighting(ch) == nullptr)
         set_fighting(g, ch, vict);
-      } else if (char_get_fighting(ch) != vict) {
-        set_fighting(g, ch, vict);
-      }
-      if (char_get_fighting(vict) == nullptr) {
+      if (char_get_fighting(vict) == nullptr)
         set_fighting(g, vict, ch);
-      } else if (char_get_fighting(vict) != ch) {
-        set_fighting(g, vict, ch);
-      }
       if (dmg > 1 && suppresso == false) {
         if (type == 0 && getCurPL(g, ch) >= getEffMaxPL(g, ch) * 0.5) {
           int64_t raise = (getMaxKI(g, ch) * 0.005) + 1;

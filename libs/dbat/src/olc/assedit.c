@@ -313,7 +313,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case ASSEDIT_EDIT_COMPONENT:
       pos = atoi(arg);
-      if (isdigit(*arg)) {
+      if (isdigit(*arg) && pos >= 1 && pos <= OLC_ASSEDIT(d)->lNumComponents) {
         pos--;
         OLC_VAL(d) = pos;
         assedit_edit_extract(g, d);
@@ -324,11 +324,11 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case ASSEDIT_DELETE_COMPONENT:
 
-      if (isdigit(*arg)) {
+      if (isdigit(*arg) && atoi(arg) >= 1 && atoi(arg) <= OLC_ASSEDIT(d)->lNumComponents) {
         pos = atoi(arg);
         pos -= 1;
 
-        CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents - 1);
+        CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents); /* one spare, as there may be none left */
 
         if (pos > 0)
           memmove(pTComponents, OLC_ASSEDIT(d)->pComponents, pos * sizeof(COMPONENT));

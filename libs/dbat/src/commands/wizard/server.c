@@ -14,6 +14,12 @@
 
 #include <unistd.h>
 #include <limits.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/time.h>
+#include "dbat/atomicfile.h"
+#include "dbat/db.h"
+#include "dbat/objsave.h"
 
 #include "dbat/interpreter.h"
 #include "dbat/time.h"
@@ -168,6 +174,7 @@ static bool copyover_exe_path(char *out, size_t size)
   if (len <= 0)
     return false;
   out[len]           = '\0';
+  /* what a binary rebuilt while running looks like: the new one is what we want */
   const char *suffix = " (deleted)";
   size_t slen        = strlen(suffix);
   if ((size_t)len > slen && !strcmp(out + len - slen, suffix))
@@ -222,7 +229,7 @@ ACMD(do_copyover)
                      "       @ycopyover <seconds>@n - Start a timed copyover\r\n"
                      "       @ycopyover cancel@n    - Stop a timed copyover\r\n\r\n");
     send_to_char(g, ch, "A timed copyover will produce an automatic warning when it starts, and then\r\n");
-    send_to_char(g, ch, "every minute.  During the last minute, there will be a warning every 15 seconds.\r\n");
+    send_to_char(g, ch, "every minute.  During the last minute, there will be more frequent warnings.\r\n");
   } else {
     secs = atoi(arg);
     if (!secs || secs < 0) {
@@ -243,70 +250,126 @@ ACMD(do_copyover)
   }
 }
 
+/* Whoever a connection's player really is: someone switched into a mob is still themselves. */
+static struct char_data *copyover_player(const struct descriptor_data *d)
+{
+  struct char_data *player = d->original ? d->original : d->character;
+
+  return player && !char_is_npc(player) && desc_is_playing(d) ? player : nullptr;
+}
+
+/* Who to bring back, and how. Returns false, having changed nothing, if it can't all be written down. */
+static bool write_copyover_file(GameWorld *g)
+{
+  struct atomic_file af;
+  FILE *fp = atomic_open(&af, COPYOVER_FILE, false);
+
+  if (!fp)
+    return false;
+
+  for (struct descriptor_data *d = g->descriptors; d; d = d->next) {
+    struct char_data *player = copyover_player(d);
+    room_vnum room           = 300;
+
+    if (!player)
+      continue;
+    if (rroom_get_vnum(g, char_get_in_room(player)) > 1)
+      room = rroom_get_vnum(g, char_get_in_room(player));
+    else if (rroom_get_vnum(g, char_get_was_in_room(player)) > 1)
+      room = rroom_get_vnum(g, char_get_was_in_room(player));
+    fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
+            d->user && *d->user ? d->user : "Empty");
+  }
+
+  /* After the end marker, so that an older server ignores it. What else outlives the process goes here. */
+  fprintf(fp, "-1 restrict %d\n", g->circle_restrict);
+  return atomic_commit(&af);
+}
+
+/* Saves everyone in the game who has no connection to bring back: link-dead players. */
+static void save_players_without_connections(GameWorld *g)
+{
+  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
+    bool connected = char_get_desc(ch) != nullptr;
+
+    for (struct descriptor_data *d = g->descriptors; d && !connected; d = d->next)
+      connected = d->original == ch;
+    if (!char_is_npc(ch) && !connected) {
+      Crash_crashsave(g, ch);
+      save_char(g, ch);
+    }
+  }
+}
+
+/*
+ * Everything that can fail comes first, while nothing has changed and the game can simply carry on:
+ * Crash_rentsave() takes each player's objects out of the game, so after that there's no way back.
+ */
 static void execute_copyover(GameWorld *g)
 {
-  FILE *fp;
   struct descriptor_data *d, *d_next;
-  char buf[100], buf2[100];
+  struct itimerval no_timer = {{0, 0}, {0, 0}};
+  char exe[PATH_MAX], fold[120], mother[32];
+  char **args;
+  int num_args = 0;
 
-  fp = fopen(COPYOVER_FILE, "w");
-
-  if (!fp) {
-    send_to_imm(g, "Copyover file not writeable, aborted.\n\r");
+  if (!copyover_exe_path(exe, sizeof(exe)) || access(exe, X_OK) < 0) {
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't run the server binary: %s", strerror(errno));
+    return;
+  }
+  if (!write_copyover_file(g)) {
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't write %s: %s", COPYOVER_FILE, strerror(errno));
     return;
   }
 
   /* Consider changing all saved areas here, if you use OLC */
   save_all(g);
   save_mud_time(g, &g->time_info);
-  snprintf(buf, sizeof(buf), "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
-  /* For each playing descriptor, save its state */
+  House_save_all(g);
+  save_players_without_connections(g);
+
+  snprintf(fold, sizeof(fold), "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
   for (d = g->descriptors; d; d = d_next) {
-    struct char_data *och = d->character;
-    d_next                = d->next; /* We delete from the list , so need to save this */
-    if (!d->character || d->connected > CON_PLAYING) {
+    struct char_data *player = copyover_player(d);
+
+    d_next = d->next; /* We delete from the list , so need to save this */
+    if (!player) {
       write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(g, d); /* throw'em out */
-    } else {
-      if (rroom_get_vnum(g, char_get_in_room(och)) > 1) {
-        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(g, char_get_in_room(och)), d->user);
-      } else if (rroom_get_vnum(g, char_get_in_room(och)) <= 1 && rroom_get_vnum(g, char_get_was_in_room(och)) > 1) {
-        fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(g, char_get_was_in_room(och)), d->user);
-      } else {
-        fprintf(fp, "%d %s %s 300 %s\n", d->descriptor, char_get_name(och), d->host, d->user);
-      }
-      mud_log("printing descriptor name and host of connected players");
-      /* save och */
-      Crash_rentsave(g, och, 0);
-      save_char(g, och);
-      write_to_descriptor(d->descriptor, buf);
+      continue;
     }
+    if (d->output && *d->output)
+      write_to_descriptor(d->descriptor, d->output); /* whatever they haven't been sent yet */
+    if (desc_get_connected(d) != CON_PLAYING)
+      write_to_descriptor(d->descriptor, "\n\rWhatever you were editing has been lost.\n\r");
+    Crash_rentsave(g, player, 0);
+    save_char(g, player);
+    write_to_descriptor(d->descriptor, fold);
   }
 
-  fprintf(fp, "-1\n");
-  fclose(fp);
+  /* Everything the game was started with, so that it comes back the same, and in the same place. */
+  CREATE(args, char *, g->launch_argc + 2);
+  snprintf(mother, sizeof(mother), "-C%d", g->mother_desc);
+  args[num_args++] = g->launch_argv[0];
+  args[num_args++] = mother;
+  for (int i = 1; i < g->launch_argc; i++)
+    if (strncmp(g->launch_argv[i], "-C", 2))
+      args[num_args++] = g->launch_argv[i];
+  args[num_args] = nullptr;
+  if (chdir(g->launch_dir) < 0)
+    perror("do_copyover: chdir");
 
-  /* Close reserve and other always-open files and release other resources
-     since we are now using ASCII pfiles, closing the player_fl would crash
-     the game, since it's no longer around, so I commented it out. I'll
-     leave the code here, for historical reasons -spl
-     fclose(player_fl); */
+  /* The deadlock timer outlives exec, and would kill the new process if it ran out during boot. */
+  setitimer(ITIMER_VIRTUAL, &no_timer, nullptr);
 
-  /* exec - descriptors are inherited */
-
-  snprintf(buf, sizeof(buf), "%d", g->port);
-  snprintf(buf2, sizeof(buf2), "-C%d", g->mother_desc);
-  char exe[PATH_MAX];
-  if (!copyover_exe_path(exe, sizeof(exe)))
-    strlcpy(exe, "zig-out/bin/dbat", sizeof(exe));
-  chdir("..");
-  execl(exe, "dbat", buf2, buf, (char *)nullptr);
+  /* exec - descriptors are inherited, but anything still buffered here would be lost */
+  fflush(nullptr);
+  execv(exe, args);
   /* Failed - sucessful exec will not return */
 
-  perror("do_copyover: execl");
-  send_to_imm(g, "Copyover FAILED!\n\r");
-
-  exit(1); /* too much trouble to try to recover! */
+  perror("do_copyover: execv");
+  mud_log("SYSERR: Copyover failed after saving everyone. Rebooting.");
+  exit(52); /* everything is saved, but objects have left the game: what autorun takes to mean reboot */
 }
 
 void copyover_check(GameWorld *g)
@@ -315,6 +378,7 @@ void copyover_check(GameWorld *g)
   g->copyover_timer--;
   if (!g->copyover_timer) {
     execute_copyover(g);
+    return; /* only if it was aborted */
   }
   if (g->copyover_timer > 59) {
     if (g->copyover_timer % 60 == 0) {

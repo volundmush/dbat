@@ -63,6 +63,8 @@ struct trig_data {
 
   struct trig_data *next;
   struct trig_data *next_in_world; /* next in the global trigger list */
+  bool extracted;                  /* removed while a script was running: see free_extracted_triggers() */
+  bool owner_gone;                 /* and what it belonged to went too */
 };
 
 /* a complete script (composed of several triggers) */
@@ -167,7 +169,7 @@ void random_wtrigger(GameWorld *g, room_data *ch);
 void reset_wtrigger(GameWorld *g, room_data *ch);
 
 void load_mtrigger(GameWorld *g, char_data *ch);
-void load_otrigger(GameWorld *g, obj_data *obj);
+bool load_otrigger(GameWorld *g, obj_data *obj); /* false if its script purged it */
 
 int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum);
 int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum);
@@ -223,6 +225,7 @@ void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode);
 trig_rnum real_trigger(GameWorld *g, trig_vnum vnum);
+obj_data *find_obj(GameWorld *g, long n);
 void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
 void read_saved_vars(struct char_data *ch);
@@ -257,6 +260,7 @@ bool remove_var(struct trig_var_data **var_list, char *name);
 void free_trigger(GameWorld *g, trig_data *trig);
 void extract_trigger(GameWorld *g, struct trig_data *trig);
 void extract_script(GameWorld *g, void *thing, int type);
+void free_extracted_triggers(GameWorld *g);
 void extract_script_mem(struct script_memory *sc);
 void free_proto_script(void *thing, int type);
 void copy_proto_script(void *source, void *dest, int type);

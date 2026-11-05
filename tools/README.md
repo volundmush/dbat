@@ -38,6 +38,8 @@ To hunt for bugs with everything you have, run `tools/hunt.sh`, and Ctrl-C it wh
 
 `tools/shrink.py BINARY JOURNAL` cuts a failing journal down by hand. `tools/coverage.sh` reports which code the tests reach, and writes `never-run.txt` listing the functions they don't.
 
+`tools/test_copyover.py BINARY [SCENARIO...]` runs real servers and clients through copyovers: players coming back with their rooms and objects, switched immortals, builders in editors, link-dead players, wizlock and command line options surviving, a missing binary, damaged copyover files, and the deadlock timer. `ctest` runs it, under the `slow` label.
+
 `world_audit()` (`dbat/world_audit.h`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
 
 A test can pin the clock with `g->pinned_time`, which is what `game_now()` then returns. Game code should call `game_now(g)` and not `time(0)`.

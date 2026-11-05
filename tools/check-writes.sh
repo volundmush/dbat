@@ -16,7 +16,6 @@ commands/other/rp.c log_imm_action            append-only log
 commands/other/rp.c log_custom                append-only log
 commands/other/rp.c do_rpp                    append-only log
 net/comm.c open_logfile                       the syslog
-commands/wizard/server.c execute_copyover     transient: written just before exec and read straight after
 db/db.c auc_save                              auction code, left alone on purpose
 '
 

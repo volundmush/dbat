@@ -64,24 +64,11 @@ constexpr size_t MAX_LINE     = MAX_INPUT_LENGTH + 64;
 
 /*
  * Bugs nobody has fixed yet, by a line of their report. They still get reported, but don't fail the
- * test, so a new failure stands out. tests/corpus/open/ has a short journal for most of them: when
+ * test, so a new failure stands out. tests/corpus/open/ is the place for a short journal of each: when
  * one is fixed, remove its line here and move its journal up into tests/corpus/.
  */
 static const char *const known_failures[] = {
-    "in copy_shop",            /* sedit's copy option looks the shop up with real_room() */
-    "in shop_producing",       /* a shop being edited can be left with no product list */
-    "in assedit_parse",        /* the component number typed isn't checked against the list */
-    "in free_command_list",    /* aedit frees a social's strings while the command list points at them */
-    "in hedit_save_internally", /* a saved help entry's index is past the end of the table */
-    "in script_trigger_check", /* an object's random trigger purges the object the loop is on */
-    "in script_driver_body",   /* a script keeps running after what it belongs to is gone */
-    "in do_obstruct",          /* hyoga's cost overflows int for high ki */
-    "in diag_char_to_char",    /* health is inf when maximum hit is 0 */
-    "in remove_limb",          /* one kind of severed tail gets an empty description, and look reads past it */
-    "lookup table: id",        /* saving in oedit overwrites live copies' ids */
-    "carries a weight of",     /* and their weights */
-    "the index counts",        /* iedit's copy option changes which prototype an object is */
-    "a person here isn't in the game", /* not yet understood */
+    "(none at the moment)",
 };
 
 static const char *const never_typed[] = {

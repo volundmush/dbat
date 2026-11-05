@@ -176,7 +176,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(g, ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), argument);
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), argument);
     }
     for (i = 0; i <= g->top_of_helpt; i++) {
       if (g->help_table[i].min_level > char_get_admlevel(ch))

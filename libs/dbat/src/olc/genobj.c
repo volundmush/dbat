@@ -7,6 +7,7 @@
 #include "dbat/shop.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/genobj.h"
+#include "dbat/relocate.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
@@ -61,6 +62,8 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
   int count = 0;
 
   for (obj = g->objects; obj; obj = obj_get_next(obj)) {
+    int64_t contents = 0, change;
+
     if (obj_get_item_number(obj) != obj_get_item_number(refobj))
       continue;
 
@@ -79,6 +82,28 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     obj_set_contains(obj, obj_get_contains(&swap));
     obj_set_next_content(obj, obj_get_next_content(&swap));
     obj_set_next(obj, obj_get_next(&swap));
+    obj_set_sitting(obj, obj_get_sitting(&swap));
+    obj_set_user(obj, obj_get_user(&swap));
+    obj_set_target(obj, obj_get_target(&swap));
+
+    /* This copy keeps its identity: scripts and the lookup table find it by id. */
+    obj_set_id(obj, obj_get_id(&swap));
+    obj_set_script(obj, obj_get_script(&swap));
+
+    /* Each copy owns its own spellbook pages, as in read_object(), and frees them when it goes. */
+    free(obj_get_sbinfo(&swap));
+    *obj_sbinfo_slot(obj) = nullptr;
+    if (obj_get_sbinfo(refobj)) {
+      CREATE(*obj_sbinfo_slot(obj), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+      memcpy(obj_get_sbinfo(obj), obj_get_sbinfo(refobj), SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
+    }
+
+    /* What it holds still counts towards its weight, and whoever carries it needs to know the change. */
+    for (struct obj_data *inner = obj_get_contains(obj); inner; inner = obj_get_next_content(inner))
+      contents += obj_get_weight(inner);
+    obj_set_weight(obj, obj_get_weight(obj) + contents);
+    change = obj_get_weight(obj) - obj_get_weight(&swap);
+    obj_weight_changed(g, obj, change);
   }
 
   return count;

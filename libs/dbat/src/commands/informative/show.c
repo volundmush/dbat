@@ -727,7 +727,7 @@ void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   };
   int percent, ar_index;
 
-  percent = (int)(char_get_health(i) * 100.0);
+  percent = (int)(clampHealth(char_get_health(i)) * 100.0);
 
   for (ar_index = 0; diagnosis[ar_index].percent >= 0; ar_index++)
     if (percent >= diagnosis[ar_index].percent) {

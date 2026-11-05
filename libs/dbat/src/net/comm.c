@@ -69,6 +69,7 @@
 #include <sys/signal.h>
 #include <sys/fcntl.h>
 #include <poll.h>
+#include <sys/stat.h>
 #include "dbat/game_world.h"
 
 static void check_idle_menu(GameWorld *g);
@@ -81,13 +82,14 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
 static int init_socket(GameWorld *g, uint16_t cmport);
 static int new_descriptor(GameWorld *g, int s);
 static void nonblock(int s);
-static bool open_logfile(const char *filename, FILE *stderr_fp);
+static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode);
 static bool perform_subst(GameWorld *g, struct descriptor_data *t, char *orig, char *subst);
 static int process_input(GameWorld *g, struct descriptor_data *t);
 static int process_output(GameWorld *g, struct descriptor_data *t);
 static void record_usage(GameWorld *g);
 static int set_sendbuf(int s);
 static void signal_setup(void);
+static void set_empty_account(struct descriptor_data *d);
 constexpr int64_t NS_PER_SEC = 1000000000;
 constexpr int64_t PULSE_NS   = OPT_USEC * 1000LL; /* one pass of the game loop */
 
@@ -108,93 +110,133 @@ static const char *const text_overflow = "**OVERFLOW**\r\n";
 *  main game loop and related stuff                                    *
 ***********************************************************************/
 
+/*
+ * The sockets a copyover brings across that nobody claimed, because of a damaged file for instance.
+ * Their players would otherwise wait forever on a game that doesn't know they're there.
+ */
+static void close_orphaned_sockets(GameWorld *g)
+{
+  struct rlimit limit;
+  int closed = 0, highest = 1024;
+
+  if (getrlimit(RLIMIT_NOFILE, &limit) == 0 && limit.rlim_cur != RLIM_INFINITY)
+    highest = limit.rlim_cur;
+  for (int fd = STDERR_FILENO + 1; fd < highest; fd++) {
+    struct stat info;
+    bool claimed = fd == g->mother_desc;
+
+    if (fstat(fd, &info) < 0 || !S_ISSOCK(info.st_mode))
+      continue;
+    for (struct descriptor_data *d = g->descriptors; d && !claimed; d = d->next)
+      claimed = d->descriptor == fd;
+    if (!claimed) {
+      write_to_descriptor(fd, "\n\rSomething went wrong during the folding. Please log back in.\n\r");
+      close(fd);
+      closed++;
+    }
+  }
+  if (closed)
+    mud_log("SYSERR: copyover_recover: closed %d connections that weren't in the copyover file.", closed);
+}
+
+/* Brings one player back from a line of the copyover file. */
+static void copyover_recover_player(GameWorld *g, int desc, char *name, const char *host, room_vnum saved_loadroom, char *username)
+{
+  struct descriptor_data *d;
+  struct stat info;
+  room_vnum set_loadroom;
+  int player_i;
+  bool fOld = true;
+
+  if (fstat(desc, &info) < 0 || !S_ISSOCK(info.st_mode)) {
+    mud_log("SYSERR: copyover_recover: descriptor %d for %s isn't a connection.", desc, name);
+    return;
+  }
+
+  /* Write something, and check if it goes error-free */
+  if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
+    close(desc); /* nope */
+    return;
+  }
+
+  /* create a new descriptor */
+  CREATE(d, struct descriptor_data, 1);
+  init_descriptor(g, d, desc); /* set up various stuff */
+  set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
+
+  snprintf(d->host, sizeof(d->host), "%s", host);
+  d->next         = g->descriptors;
+  g->descriptors = d;
+
+  d->connected = CON_CLOSE;
+
+  /* Now, find the pfile */
+
+  CREATE(d->character, struct char_data, 1);
+  clear_char(d->character);
+  CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+  char_set_desc(d->character, d);
+
+  if ((player_i = load_char(g, name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
+    char_set_pfilepos(d->character, player_i);
+    char_plr_set(d->character, PLR_WRITING, false);
+    char_plr_set(d->character, PLR_MAILING, false);
+    char_plr_set(d->character, PLR_CRYO, false);
+    userLoad(d, username);
+  } else
+    fOld = false;
+
+  if (!fOld) /* Player file not found?! */ {
+    write_to_descriptor(desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r");
+    close_socket(g, d);
+  } else {
+    write_to_descriptor(desc, "\n\rFolding complete.\n\r");
+    set_loadroom = char_get_load_room(g, d->character);
+    char_set_load_room(g, d->character, saved_loadroom);
+    enter_player_game(g, d);
+    char_set_load_room(g, d->character, set_loadroom);
+    d->connected = CON_PLAYING;
+    look_at_room(g, char_get_in_room(d->character), d->character, 0);
+    if (char_aff_flagged(d->character, AFF_HAYASA)) {
+      char_set_speedboost(d->character, char_get_speedcalc(g, d->character) * 0.5);
+    }
+  }
+}
+
 /* Reload players after a copyover */
 static void copyover_recover(GameWorld *g)
 {
-  struct descriptor_data *d;
   FILE *fp;
-  char host[128];
-  int desc, player_i, fields;
-  bool fOld;
-  char name[128];
-  char username[100];
-  room_vnum saved_loadroom = NOWHERE;
-  room_vnum set_loadroom   = NOWHERE;
+  char line[512], name[128], host[128], username[100];
+  int desc, restrict_level;
+  room_vnum saved_loadroom;
 
   mud_log("Copyover recovery initiated");
   g->PCOUNTDAY = game_now(g) + 60;
   fp        = fopen(COPYOVER_FILE, "r");
 
   if (!fp) {
-    perror("copyover_recover:fopen");
-    mud_log("Copyover file not found. Exitting.\n\r");
-    exit(1);
+    /* Carry on: anyone already connected gets told below, and everyone else can still log in. */
+    mud_log("SYSERR: copyover_recover: can't open %s: %s", COPYOVER_FILE, strerror(errno));
+    close_orphaned_sockets(g);
+    return;
   }
 
   unlink(COPYOVER_FILE); /* In case it crashes - doesn't prevent reading */
-  for (;;) {
-    fOld   = true;
-    fields = fscanf(fp, "%d %127s %127s %d %99s\n", &desc, name, host, &saved_loadroom, username);
-    if (fields >= 1 && desc == -1) /* the end marker */
-      break;
-    if (fields != 5) { /* a truncated file: stop rather than reuse the last line forever */
-      mud_log("SYSERR: copyover_recover: malformed or truncated copyover file; stopping after the last complete entry.");
+  while (fgets(line, sizeof(line), fp)) {
+    if (sscanf(line, "%d", &desc) == 1 && desc == -1) { /* the end marker */
+      if (sscanf(line, "%*d restrict %d", &restrict_level) == 1)
+        g->circle_restrict = restrict_level;
       break;
     }
-
-    /* Write something, and check if it goes error-free */
-    if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
-      close(desc); /* nope */
+    if (sscanf(line, "%d %127s %127s %d %99s", &desc, name, host, &saved_loadroom, username) != 5) {
+      mud_log("SYSERR: copyover_recover: skipping a malformed line in %s.", COPYOVER_FILE);
       continue;
     }
-
-    /* create a new descriptor */
-    CREATE(d, struct descriptor_data, 1);
-    init_descriptor(g, d, desc); /* set up various stuff */
-
-    snprintf(d->host, sizeof(d->host), "%s", host);
-    d->next         = g->descriptors;
-    g->descriptors = d;
-
-    d->connected = CON_CLOSE;
-
-    /* Now, find the pfile */
-
-    CREATE(d->character, struct char_data, 1);
-    clear_char(d->character);
-    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
-    char_set_desc(d->character, d);
-
-    if ((player_i = load_char(g, name, d->character)) >= 0) {
-      char_set_pfilepos(d->character, player_i);
-      if (!char_plr_flagged(d->character, PLR_DELETED)) {
-        char_plr_set(d->character, PLR_WRITING, false);
-        char_plr_set(d->character, PLR_MAILING, false);
-        char_plr_set(d->character, PLR_CRYO, false);
-        userLoad(d, username);
-      }
-      /*else
-       fOld = FALSE;*/
-    } else
-      fOld = false;
-
-    if (!fOld) /* Player file not found?! */ {
-      write_to_descriptor(desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r");
-      close_socket(g, d);
-    } else {
-      write_to_descriptor(desc, "\n\rFolding complete.\n\r");
-      set_loadroom = char_get_load_room(g, d->character);
-      char_set_load_room(g, d->character, saved_loadroom);
-      enter_player_game(g, d);
-      char_set_load_room(g, d->character, set_loadroom);
-      d->connected = CON_PLAYING;
-      look_at_room(g, char_get_in_room(d->character), d->character, 0);
-      if (char_aff_flagged(d->character, AFF_HAYASA)) {
-        char_set_speedboost(d->character, char_get_speedcalc(g, d->character) * 0.5);
-      }
-    }
+    copyover_recover_player(g, desc, name, host, saved_loadroom, username);
   }
   fclose(fp);
+  close_orphaned_sockets(g);
 }
 
 /* Init sockets, run game, and cleanup sockets */
@@ -1848,6 +1890,19 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->desc_num = g->last_desc;
 }
 
+/* What a connection holds before it has logged in to an account. */
+static void set_empty_account(struct descriptor_data *d)
+{
+  d->user  = strdup("Empty");
+  d->pass  = strdup("Empty");
+  d->email = strdup("Empty");
+  d->tmp1  = strdup("Empty");
+  d->tmp2  = strdup("Empty");
+  d->tmp3  = strdup("Empty");
+  d->tmp4  = strdup("Empty");
+  d->tmp5  = strdup("Empty");
+}
+
 static void set_color(GameWorld *g, struct descriptor_data *d)
 {
   if (d->character == nullptr) {
@@ -1863,14 +1918,7 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", g->HIGHPCOUNT);
   write_to_output(g, d, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA, add_commas(g->ERAPLAYERS));
   write_to_output(g, d, "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
-  d->user  = strdup("Empty");
-  d->pass  = strdup("Empty");
-  d->email = strdup("Empty");
-  d->tmp1  = strdup("Empty");
-  d->tmp2  = strdup("Empty");
-  d->tmp3  = strdup("Empty");
-  d->tmp4  = strdup("Empty");
-  d->tmp5  = strdup("Empty");
+  set_empty_account(d);
   return;
 }
 
@@ -3063,7 +3111,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
     char buf[MAX_STRING_LENGTH];
     for (i = g->descriptors; i; i = i->next) {
       if (!i->connected && i->character &&
-          !char_prf_flagged(g, i->character, PRF_NOGOSS) &&
+          (char_is_npc(i->character) || !char_prf_flagged(g, i->character, PRF_NOGOSS)) && /* someone switched */
           !char_plr_flagged(i->character, PLR_WRITING) &&
           !rroom_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
 
@@ -3140,8 +3188,9 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
 }
 
 /* Prefer the file over the descriptor. */
-void setup_log(const char *filename, int fd)
+void setup_log(const char *filename, int fd, bool keep_old_log)
 {
+  const char *mode = keep_old_log ? "a" : "w"; /* a copyover carries on the same log */
   FILE *s_fp;
 
   s_fp = stderr;
@@ -3154,15 +3203,15 @@ void setup_log(const char *filename, int fd)
   }
 
   /* We honor the default filename first. */
-  if (open_logfile(filename, s_fp))
+  if (open_logfile(filename, s_fp, mode))
     return;
 
   /* Well, that failed but we want it logged to a file so try a default. */
-  if (open_logfile("log/syslog", s_fp))
+  if (open_logfile("log/syslog", s_fp, mode))
     return;
 
   /* Ok, one last shot at a file. */
-  if (open_logfile("syslog", s_fp))
+  if (open_logfile("syslog", s_fp, mode))
     return;
 
   /* Erp, that didn't work either, just die. */
@@ -3170,12 +3219,12 @@ void setup_log(const char *filename, int fd)
   exit(1);
 }
 
-static bool open_logfile(const char *filename, FILE *stderr_fp)
+static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode)
 {
   if (stderr_fp) /* freopen() the descriptor. */
-    logfile = freopen(filename, "w", stderr_fp);
+    logfile = freopen(filename, mode, stderr_fp);
   else
-    logfile = fopen(filename, "w");
+    logfile = fopen(filename, mode);
 
   if (logfile) {
     printf("Using log file '%s'%s.\n",

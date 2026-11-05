@@ -664,10 +664,10 @@ ACMD(do_mteleport)
       return;
     }
 
-    if (valid_dg_target(g, ch, DG_ALLOW_GODS)) {
+    if (valid_dg_target(g, vict, DG_ALLOW_GODS)) {
       char_from_room(g, vict);
       char_to_room(g, vict, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+      enter_wtrigger(g, &g->rooms[char_get_in_room(vict)], vict, -1);
     }
   }
 }

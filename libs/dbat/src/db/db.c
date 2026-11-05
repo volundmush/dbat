@@ -519,6 +519,8 @@ void destroy_db(GameWorld *g)
   struct char_data *chtmp;
   struct obj_data *objtmp;
 
+  free_extracted_triggers(g);
+
   /* Active Mobiles & Players */
   /* stop_follower() reads the master, so everyone must stop before anyone is freed */
   for (chtmp = g->characters; chtmp; chtmp = char_get_next(chtmp))
@@ -3859,8 +3861,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
               obj_set_room_loaded(obj, rroom_get_vnum(g, ZCMD2.arg3));
 
               last_cmd = 1;
-              load_otrigger(g, obj);
-              tobj     = obj;
+              tobj     = load_otrigger(g, obj) ? obj : nullptr;
               obj_load = true;
             } else {
               obj = read_object(g, ZCMD2.arg1, REAL);
@@ -3887,8 +3888,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
             add_unique_id(g, obj);
             obj_to_obj(g, obj, obj_to);
             last_cmd = 1;
-            load_otrigger(g, obj);
-            tobj = obj;
+            tobj     = load_otrigger(g, obj) ? obj : nullptr;
           } else
             last_cmd = 0;
           tmob = nullptr;
@@ -3909,8 +3909,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
               randomize_eq(g, obj);
             }
             last_cmd = 1;
-            load_otrigger(g, obj);
-            tobj = obj;
+            tobj     = load_otrigger(g, obj) ? obj : nullptr;
           } else
             last_cmd = 0;
           tmob = nullptr;
@@ -3930,13 +3929,19 @@ void reset_zone(GameWorld *g, zone_rnum zone)
               obj = read_object(g, ZCMD2.arg1, REAL);
               add_unique_id(g, obj);
               obj_set_in_room(obj, char_get_in_room(mob));
-              load_otrigger(g, obj);
-              if (wear_otrigger(g, obj, mob, ZCMD2.arg3)) {
-                obj_set_in_room(obj, NOWHERE);
-                equip_char(g, mob, obj, ZCMD2.arg3);
-              } else
-                obj_to_char(g, obj, mob);
-              tobj     = obj;
+              tobj = nullptr;
+              if (load_otrigger(g, obj)) {
+                long id = obj_get_id(obj);
+
+                if (wear_otrigger(g, obj, mob, ZCMD2.arg3)) {
+                  obj_set_in_room(obj, NOWHERE);
+                  equip_char(g, mob, obj, ZCMD2.arg3);
+                  tobj = obj;
+                } else if ((obj = find_obj(g, id))) { /* wear_otrigger also says no if it was purged */
+                  obj_to_char(g, obj, mob);
+                  tobj = obj;
+                }
+              }
               last_cmd = 1;
             }
           } else

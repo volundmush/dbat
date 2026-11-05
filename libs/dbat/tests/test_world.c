@@ -20,6 +20,8 @@
 #include "dbat/guild.h"
 #include "dbat/shop.h"
 #include "dbat/handler.h"
+#include "dbat/relocate.h"
+#include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
 #include "dbat/utils.h"
 #include "dbat/world_audit.h"
@@ -391,6 +393,16 @@ static int count_objects(const GameWorld *g)
   return count;
 }
 
+static int count_objects_of(GameWorld *g, obj_vnum vnum)
+{
+  int count = 0;
+
+  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+    if (obj_get_vnum(g, obj) == vnum)
+      count++;
+  return count;
+}
+
 /* The first player ever is made an Implementor, which used to crash; th_player() then demoted Tester. */
 static void check_admin_levels(GameWorld *g, struct char_data *ch)
 {
@@ -661,6 +673,182 @@ static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
 }
 
+/* A script used to carry on after forcing the player holding its object to quit, which freed it. */
+static void check_script_loses_its_owner(GameWorld *g)
+{
+  struct char_data *holder = th_player(g, "Holder", ADMLVL_NONE);
+  struct obj_data *zapper  = read_object(g, 351, VIRTUAL);
+
+  obj_to_char(g, zapper, holder);
+  CHECK(count_objects_of(g, 351) == 1);
+  th_type(g, holder, "zap");
+  CHECK(count_objects_of(g, 351) == 0);
+  CHECK_AUDIT(g);
+  th_pulses(g, 3);
+  CHECK(g->extracted_triggers == nullptr);
+  CHECK_AUDIT(g);
+}
+
+/* The loop over objects used to read the next one from an object whose trigger had just purged it. */
+static void check_random_trigger_purges_itself(GameWorld *g, struct char_data *ch)
+{
+  for (int i = 0; i < 3; i++)
+    obj_to_room(g, read_object(g, 352, VIRTUAL), char_get_in_room(ch));
+  CHECK(count_objects_of(g, 352) == 3);
+  script_trigger_check(g);
+  th_pulses(g, 1);
+  CHECK(count_objects_of(g, 352) == 0);
+  CHECK_AUDIT(g);
+}
+
+static void attach_trigger(GameWorld *g, struct script_data **slot, trig_vnum vnum)
+{
+  add_trigger(g, dg_ensure_script(slot), read_trigger(g, real_trigger(g, vnum)), -1);
+}
+
+/* A plain object in ch's room that runs the given trigger. */
+static struct obj_data *object_with_trigger(GameWorld *g, struct char_data *ch, trig_vnum vnum)
+{
+  struct obj_data *obj = read_object(g, 350, VIRTUAL);
+
+  obj_to_room(g, obj, char_get_in_room(ch));
+  attach_trigger(g, obj_script_slot(obj), vnum);
+  return obj;
+}
+
+/* The loop over objects used to read the next one from an object whose trigger had just purged it. */
+static void check_time_trigger_purges_itself(GameWorld *g, struct char_data *ch)
+{
+  long ids[3];
+  int hours = g->time_info.hours;
+
+  for (int i = 0; i < 3; i++)
+    ids[i] = obj_get_id(object_with_trigger(g, ch, 384));
+  g->time_info.hours = 5;
+  check_time_triggers(g);
+  g->time_info.hours = hours;
+  for (int i = 0; i < 3; i++)
+    CHECK(find_obj(g, ids[i]) == nullptr);
+  CHECK_AUDIT(g);
+}
+
+/* ...and the timer loop could step onto a neighbour that the trigger had cleared away. */
+static void check_timer_trigger_clears_the_room(GameWorld *g, struct char_data *ch)
+{
+  long neighbour, purger;
+  struct obj_data *obj;
+
+  place(g, ch, 302);
+  obj = read_object(g, 350, VIRTUAL);
+  obj_to_room(g, obj, char_get_in_room(ch));
+  neighbour = obj_get_id(obj);
+  obj = object_with_trigger(g, ch, 385); /* newest first, so the neighbour comes next in the list */
+  purger = obj_get_id(obj);
+  obj_set_timer(obj, 1);
+  point_update(g);
+  CHECK(find_obj(g, neighbour) == nullptr);
+  if ((obj = find_obj(g, purger)))
+    extract_obj(g, obj);
+  CHECK_AUDIT(g);
+}
+
+/* The spell used to go on to work on the object it had just lost. */
+static void check_cast_trigger_purges_its_target(GameWorld *g, struct char_data *ch)
+{
+  struct obj_data *obj = object_with_trigger(g, ch, 386);
+
+  CHECK(cast_otrigger(g, ch, obj, 1) == 0);
+  CHECK_AUDIT(g);
+}
+
+/* A zone reset used to give variables to, or equip, an object that had purged itself as it loaded. */
+static void check_load_trigger_purges_itself(GameWorld *g, struct char_data *ch)
+{
+  struct obj_data *obj = object_with_trigger(g, ch, 387);
+
+  CHECK(!load_otrigger(g, obj));
+  CHECK_AUDIT(g);
+}
+
+/* Taking the equipment off a dead mob used to carry on after the item's trigger had purged it. */
+static void check_remove_trigger_on_a_dying_mob(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+  struct obj_data *obj  = read_object(g, 350, VIRTUAL);
+  long id               = obj_get_id(obj);
+
+  char_to_room(g, mob, char_get_in_room(ch));
+  attach_trigger(g, obj_script_slot(obj), 388);
+  equip_char(g, mob, obj, WEAR_FINGER_R);
+  die(g, mob, nullptr);
+  extract_pending_chars(g);
+  CHECK(find_obj(g, id) == nullptr);
+  CHECK_AUDIT(g);
+}
+
+/* Real scripts do this all the time, and the object used to be read after it was gone. */
+static void check_receive_trigger_purges_the_gift(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+  struct obj_data *obj  = read_object(g, 350, VIRTUAL);
+  long id               = obj_get_id(obj);
+
+  char_to_room(g, mob, char_get_in_room(ch));
+  attach_trigger(g, char_script_slot(mob), 389);
+  obj_to_char(g, obj, ch);
+  CHECK(receive_mtrigger(g, mob, ch, obj) == 0);
+  CHECK(find_obj(g, id) == nullptr);
+  extract_char(g, mob);
+  extract_pending_chars(g);
+  CHECK_AUDIT(g);
+}
+
+/* A script could force someone to quit and then let their command through. */
+static void check_command_runs_for_nobody(GameWorld *g)
+{
+  struct char_data *holder = th_player(g, "Quitter", ADMLVL_NONE);
+  struct obj_data *obj     = object_with_trigger(g, holder, 390);
+
+  th_type(g, holder, "zop");
+  CHECK(saw(holder, "Goodbye"));
+  CHECK(!saw(holder, "Huh"));
+  extract_obj(g, obj);
+  th_pulses(g, 3);
+  CHECK_AUDIT(g);
+}
+
+/* Someone who has just quit is still in the lists for a moment, and used to be teleported back into a room. */
+static void check_scripts_ignore_whoever_has_left(GameWorld *g, struct char_data *ch)
+{
+  room_rnum room = char_get_in_room(ch);
+
+  CHECK(valid_dg_target(g, ch, DG_ALLOW_GODS));
+  char_set_in_room(ch, NOWHERE);
+  CHECK(!valid_dg_target(g, ch, DG_ALLOW_GODS));
+  char_set_in_room(ch, room);
+}
+
+/* Changing an object's weight used to leave whoever carries it with the old total. */
+static void check_weight_changes_reach_the_carrier(GameWorld *g, struct char_data *ch)
+{
+  struct obj_data *chest = read_object(g, 325, VIRTUAL); /* a container: the wooden chest was deleted above */
+  struct obj_data *bread = read_object(g, 302, VIRTUAL);
+  int64_t before;
+
+  obj_to_obj(g, bread, chest);
+  obj_to_char(g, chest, ch);
+  CHECK_AUDIT(g);
+  before = char_get_carry_weight(ch);
+
+  obj_set_weight(bread, obj_get_weight(bread) + 7);
+  obj_weight_changed(g, bread, 7);
+  CHECK(char_get_carry_weight(ch) == before + 7);
+  CHECK_AUDIT(g);
+
+  extract_obj(g, chest);
+  CHECK_AUDIT(g);
+}
+
 /* A new login used to read rooms[-1] after a builder deleted the start room. */
 static void check_login_without_a_start_room(GameWorld *g)
 {
@@ -719,6 +907,17 @@ int main(void)
   check_delete_object_prototype(g, ch);
   check_whois_with_affects(g, ch);
   check_affects_all_count_down(g, ch);
+  check_script_loses_its_owner(g);
+  check_random_trigger_purges_itself(g, ch);
+  check_scripts_ignore_whoever_has_left(g, ch);
+  check_weight_changes_reach_the_carrier(g, ch);
+  check_time_trigger_purges_itself(g, ch);
+  check_cast_trigger_purges_its_target(g, ch);
+  check_load_trigger_purges_itself(g, ch);
+  check_remove_trigger_on_a_dying_mob(g, ch);
+  check_receive_trigger_purges_the_gift(g, ch);
+  check_command_runs_for_nobody(g);
+  check_timer_trigger_clears_the_room(g, ch);
   leave_followers_for_shutdown(g, ch);
   check_login_without_a_start_room(g);
 

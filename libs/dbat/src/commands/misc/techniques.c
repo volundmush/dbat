@@ -1683,7 +1683,8 @@ ACMD(do_warppool)
   }
 
   int perc = char_get_skill(ch, SKILL_WARP);
-  int prob = axion_dice(g, 0), cost = getMaxKI(g, ch) / 20, pass = false;
+  int64_t cost = getMaxKI(g, ch) / 20;
+  int prob = axion_dice(g, 0), pass = false;
   char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);
@@ -1846,7 +1847,8 @@ ACMD(do_obstruct)
 
   char arg[MAX_INPUT_LENGTH];
   int skill = char_get_skill(ch, SKILL_HYOGA_KABE);
-  int prob = axion_dice(g, 0), cost = ((getMaxKI(g, ch) / skill) * 2.5);
+  int prob = axion_dice(g, 0);
+  int64_t cost = (getMaxKI(g, ch) / MAX(skill, 1)) * 2.5;
 
   one_argument(argument, arg);
 

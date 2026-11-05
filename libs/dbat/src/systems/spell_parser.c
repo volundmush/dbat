@@ -107,14 +107,18 @@ int find_skill_num(GameWorld *g, char *name, int sktype)
 int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
                struct obj_data *ovict, int spellnum, int level, int casttype, char *arg)
 {
+  long ovict_id;
+
   if (spellnum < 0 || spellnum >= SKILL_TABLE_SIZE)
     return (0);
 
-  if (!cast_wtrigger(g, caster, cvict, ovict, spellnum))
+  /* Any of these scripts can purge the object or force the caster away. */
+  ovict_id = ovict ? obj_get_id(ovict) : 0;
+  if (!cast_wtrigger(g, caster, cvict, ovict, spellnum) || char_is_dead(caster) || (ovict && !find_obj(g, ovict_id)))
     return 0;
   if (!cast_otrigger(g, caster, ovict, spellnum))
     return 0;
-  if (!cast_mtrigger(g, caster, cvict, spellnum))
+  if (!cast_mtrigger(g, caster, cvict, spellnum) || char_is_dead(caster) || (ovict && !find_obj(g, ovict_id)))
     return 0;
 
   if (rroom_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&

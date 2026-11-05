@@ -308,7 +308,7 @@ ACMD(do_trip)
     return;
   }
 
-  int cost = getEffMaxPL(g, ch) / 200;
+  int64_t cost = getEffMaxPL(g, ch) / 200;
 
   if (cost > (getCurST(g, ch))) {
     send_to_char(g, ch, "You don't have enough stamina.\r\n");

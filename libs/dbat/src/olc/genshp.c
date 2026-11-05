@@ -84,9 +84,9 @@ static void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
     free(*tlist);
 
   /*
-   * Count number of entries.
+   * Count number of entries. A shop still being built might have no list at all.
    */
-  for (i = 0; flist[i] != NOTHING; i++);
+  for (i = 0; flist && flist[i] != NOTHING; i++);
   num_items = i + 1;
 
   /*
