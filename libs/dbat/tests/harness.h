@@ -15,6 +15,16 @@ void th_use_world(const char *directory);
 /* Frees the game and removes the temp directory. */
 void th_shutdown(GameWorld *g);
 
+/* Called once by the next boot, after copying the world and before reading any of it. */
+void th_before_boot(void (*hook)(void));
+
+/* Gets rid of the temp directory after a game that can't be freed, as it never finished booting. */
+void th_abandon(void);
+
+/* Frees the game, leaving the temp directory, from which th_start_again() can boot another. */
+void th_stop(GameWorld *g);
+GameWorld *th_start_again(time_t when);
+
 /* Logs a new player in, the way character creation and the menus do. */
 struct char_data *th_player(GameWorld *g, const char *name, int admlevel);
 

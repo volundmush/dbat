@@ -30,10 +30,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include "harness.h"
+#include "dbat/genzon.h"
+#include "dbat/gengld.h"
+#include "dbat/genshp.h"
+#include "dbat/genobj.h"
+#include "dbat/genmob.h"
+#include "dbat/genwld.h"
+#include "dbat/genolc.h"
+#include "dbat/house.h"
+#include "dbat/objsave.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
 #include "dbat/fight.h"
@@ -200,6 +210,12 @@ static unsigned long fingerprint = 14695981039346656037UL;
 
 static void fingerprint_bytes(const char *bytes, size_t length)
 {
+  static FILE *trace; /* BOT_TRACE names a file for the output itself, to see where two runs part */
+  if (!trace && getenv("BOT_TRACE"))
+    trace = fopen(getenv("BOT_TRACE"), "w");
+  if (trace)
+    fwrite(bytes, 1, length, trace);
+
   for (size_t i = 0; i < length; i++)
     fingerprint = (fingerprint ^ (unsigned char)bytes[i]) * 1099511628211UL;
 }
@@ -261,17 +277,19 @@ static void simplify_message(char *text)
 static void check_log(void)
 {
   static FILE *log_reader;
-  static char seen[128][160];
+  static char seen[1024][160];
   static int num_seen;
   const char *fatal = getenv("DBAT_SYSERR");
   char text[1024];
 
-  /* What goes wrong during boot is mostly what a tiny world lacks, so start from the end of that. */
-  if (!log_reader) {
-    if (!(log_reader = fopen("test.log", "r")))
-      return;
-    fseek(log_reader, 0, SEEK_END);
-  }
+  /*
+   * What goes wrong during the first boot is mostly what a tiny world lacks, so it only counts as seen.
+   * A later boot is held to that: anything new has come from what the game saved.
+   */
+  bool first_boot = !log_reader;
+
+  if (!log_reader && !(log_reader = fopen("test.log", "r")))
+    return;
   while (fgets(text, sizeof(text), log_reader)) {
     char *message = strstr(text, "SYSERR");
     bool is_new = true;
@@ -285,8 +303,10 @@ static void check_log(void)
     message[159] = '\0';
     for (int i = 0; i < num_seen && is_new; i++)
       is_new = strcmp(seen[i], message) != 0;
-    if (is_new && num_seen < 128)
+    if (is_new && num_seen < 1024)
       snprintf(seen[num_seen++], sizeof(seen[0]), "%s", message);
+    if (first_boot)
+      continue;
     if (is_new)
       printf("LOGGED: %s\n", message);
     if (fatal && !strcmp(fatal, message)) {
@@ -647,6 +667,218 @@ static void bot_step(GameWorld *g, int *next_name)
   journal_and_do(g);
 }
 
+static void save_zones(GameWorld *g)
+{
+  for (zone_rnum z = 0; z <= g->top_zone; z++) {
+    save_rooms(g, z);
+    save_mobiles(g, z);
+    save_objects(g, z);
+    save_shops(g, z);
+    save_guilds(g, z);
+    save_zone(g, z);
+  }
+}
+
+/* Saves everything, the way the game does when it shuts down. */
+static void save_everything(GameWorld *g)
+{
+  for (struct descriptor_data *d = g->descriptors; d; d = d->next)
+    if (d->character && desc_is_playing(d)) {
+      Crash_crashsave(g, d->character); /* first, as it clears the flag saying it needs doing */
+      save_char(g, d->character);
+    }
+  Crash_save_all(g);
+  House_save_all(g);
+  save_mud_time(g, &g->time_info);
+  save_zones(g);
+}
+
+/* One changed line of a file, and whether the other side of the comparison has the same line. */
+struct changed_line {
+  char text[240];
+  bool moved;
+};
+
+static char changed_file[96];
+
+static void report_kind(const char *key)
+{
+  static char reported[256][136];
+  static int num_reported;
+  char kind[136];
+  bool is_new = true;
+
+  snprintf(kind, sizeof(kind), "%s %s", changed_file, key);
+  for (int i = 0; i < num_reported && is_new; i++)
+    is_new = strcmp(reported[i], kind) != 0;
+  if (is_new && num_reported < 256) {
+    snprintf(reported[num_reported++], sizeof(reported[0]), "%s", kind);
+    printf("LOGGED: SAVE CHANGED: %s\n", kind);
+  }
+}
+
+/* Whether a line ending a piece of text differs only in case: the game capitalizes some of those as it loads. */
+static bool same_text(const char *a, const char *b)
+{
+  size_t length = strlen(a);
+
+  return length > 0 && a[length - 1] == '~' ? !strcasecmp(a, b) : !strcmp(a, b);
+}
+
+/* A list saved in a different order, as the game's affects are on every load, loses nothing. */
+static void report_changed_lines(struct changed_line *lines, int count)
+{
+  for (int i = 0; i < count; i++)
+    for (int j = i + 1; j < count && !lines[i].moved; j++)
+      if (!lines[j].moved && lines[i].text[0] != lines[j].text[0] && same_text(lines[i].text + 1, lines[j].text + 1))
+        lines[i].moved = lines[j].moved = true;
+  for (int i = 0; i < count; i++)
+    if (!lines[i].moved) {
+      char key[32] = "";
+
+      printf("  %s\n", lines[i].text);
+      sscanf(lines[i].text + 2, "%31[A-Za-z_]", key);
+      report_kind(*key ? key : "(numbers)");
+    }
+}
+
+/* Reports each kind of line that differs, rather than every line, as one mistake can change thousands. */
+static void report_changes(const char *what)
+{
+  static struct changed_line lines[512];
+  int count = 0;
+  char command[256], text[2048];
+  FILE *diff;
+
+  /* User comes from the connection, and the saves restart_and_compare() makes have none. */
+  /* An object file's first line starts with when it was saved. */
+  snprintf(command, sizeof(command), "diff -r -x '*.bak' -x test.log -x time -I '^User: ' -I '^[0-9] 1[0-9]\\{9\\} ' %s",
+           what);
+  if (!(diff = popen(command, "r")))
+    return;
+  while (fgets(text, sizeof(text), diff)) {
+    text[strcspn(text, "\n")] = '\0';
+    if (!strncmp(text, "diff ", 5) || !strncmp(text, "Only in", 7) || !strncmp(text, "Binary", 6)) {
+      /* the file's directory says what it holds: world/wld, plrfiles and so on */
+      char *at = strstr(text, "first/");
+
+      report_changed_lines(lines, count);
+      count = 0;
+      if (at) {
+        char *end;
+
+        snprintf(changed_file, sizeof(changed_file), "%s", at + 6);
+        changed_file[strcspn(changed_file, " :")] = '\0';
+        if ((end = strchr(changed_file, '/')) && !strncmp(changed_file, "world/", 6))
+          end = strchr(end + 1, '/');
+        if (end)
+          *end = '\0';
+      }
+      printf("  %.200s\n", text);
+      if (*text != 'd') {
+        char key[8];
+
+        snprintf(key, sizeof(key), "(%.4s)", text);
+        report_kind(key);
+      }
+    } else if ((*text == '<' || *text == '>') && count < 512) {
+      snprintf(lines[count].text, sizeof(lines[count].text), "%s", text);
+      lines[count++].moved = false;
+    }
+  }
+  report_changed_lines(lines, count);
+  pclose(diff);
+}
+
+/* Brings every player back into the game and saves what they're carrying, leaving them there. */
+static int return_all_players(GameWorld *g)
+{
+  int returned = 0;
+
+  for (int i = 0; i <= g->top_of_p_table; i++) {
+    struct char_data *ch = th_existing_player(g, g->player_table[i].name);
+
+    if (ch) {
+      Crash_crashsave(g, ch);
+      returned++;
+    }
+    take_all_output(g);
+    check_log();
+  }
+  return returned;
+}
+
+/*
+ * Saves everything, boots a new game from those files, and saves it all again. A file that comes out
+ * differently holds something that isn't read back the way it was written.
+ */
+static GameWorld *restart_and_compare(GameWorld *g)
+{
+  int players = 0, returned;
+  time_t when = g->pinned_time;
+  FILE *lost;
+  char text[256];
+
+  alarm(STEP_SECONDS * 20);
+  save_everything(g);
+  th_stop(g); /* which saves whoever has lost their connection */
+  if (system("rm -rf ../first && cp -r . ../first") != 0)
+    th_exit(2);
+  g = th_start_again(when);
+  /* The bot's jumps of the clock make players old enough for the boot to clean them out, as it should. */
+  if (system("sed -n 's/.*PCLEAN: \\([^ ]*\\) .*/\\1/p' test.log | tr A-Z a-z | while read name; do "
+             "find ../first -iname \"$name.*\" -delete; sed -i \"/^[0-9]* $name /d\" ../first/plrfiles/index; done") != 0)
+    th_exit(2);
+  check_log();
+  if (world_audit(g, print_audit_problem, nullptr))
+    th_exit(AUDIT_FAILED);
+
+  for (int i = 0; i <= g->top_of_p_table; i++) {
+    struct char_data *pc;
+    int position;
+
+    CREATE(pc, struct char_data, 1);
+    clear_char(pc);
+    CREATE(*char_player_specials_slot(pc), struct player_special_data, 1);
+    if ((position = load_char(g, g->player_table[i].name, pc)) >= 0) {
+      char_set_pfilepos(pc, position); /* save_char() skips characters without one */
+      save_char(g, pc);
+      players++;
+    }
+    free_char(g, pc);
+  }
+  save_zones(g);
+  report_changes("--exclude=plrobjs ../first .");
+
+  /*
+   * Objects only come back with a player who's actually in the game. The first time, they're given
+   * unique ids, so all that can be compared is whether each is still there; they should stay the same after that.
+   */
+  returned = return_all_players(g);
+  if ((lost = popen("cd ../first/plrobjs && find . -name '*.new' | while read f; do "
+                    "grep -h '^#[0-9]' \"$f\" | sort > \"$TMPDIR/.x$$\"; "
+                    "[ -e \"$OLDPWD/plrobjs/$f\" ] && grep -h '^#[0-9]' \"$OLDPWD/plrobjs/$f\" | sort | comm -23 \"$TMPDIR/.x$$\" - ; "
+                    "done; rm -f \"$TMPDIR/.x$$\"", "r"))) {
+    while (fgets(text, sizeof(text), lost)) {
+      snprintf(changed_file, sizeof(changed_file), "plrobjs");
+      printf("  object lost: %s", text);
+      report_kind("object lost on loading");
+    }
+    pclose(lost);
+  }
+  if (system("rm -rf ../first/plrobjs && cp -r plrobjs ../first/plrobjs") != 0)
+    th_exit(2);
+  th_stop(g);
+  g = th_start_again(when);
+  return_all_players(g);
+  report_changes("../first/plrobjs plrobjs");
+  check_log();
+  if (world_audit(g, print_audit_problem, nullptr))
+    th_exit(AUDIT_FAILED);
+  printf("restart: %d players saved again, %d back in the game\n", players, returned);
+  return g;
+}
+
 static void finish(GameWorld *g)
 {
   alarm(0);
@@ -665,6 +897,9 @@ static void play_seed(unsigned long seed, int steps, FILE *journal_file)
   journal_and_do(g);
   for (int step = 0; step < steps; step++)
     bot_step(g, &next_name);
+  if (journal)
+    fprintf(journal, "restart\n");
+  g = restart_and_compare(g);
   finish(g);
 }
 
@@ -680,7 +915,9 @@ static void play_journal(const char *path)
   g = th_boot_at(START_TIME);
   while (fgets(line, MAX_LINE, fl)) {
     line[strcspn(line, "\r\n")] = '\0';
-    if (*line && *line != '#')
+    if (!strcmp(line, "restart"))
+      g = restart_and_compare(g);
+    else if (*line && *line != '#')
       do_action(g, line);
   }
   fclose(fl);

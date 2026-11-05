@@ -10,6 +10,7 @@ BINARY = os.path.abspath(sys.argv[1])
 ACCOUNTS = [("Zorbexb", "Pa55word"), ("Zorbexc", "Pa55word")]  # both Implementors
 WORK = tempfile.mkdtemp(prefix="dbat-copyover-", dir=os.environ.get("TMPDIR"))
 results = {}
+servers = []
 next_port = 8900 + os.getpid() % 500
 
 
@@ -89,6 +90,7 @@ class Server:
         self.args = args if args is not None else ["-d", os.path.relpath(self.data, self.cwd)]
         self.binary = BINARY
         self.boots_seen = 0
+        servers.append(self)
 
     def start(self, before_exec=None):
         env = dict(os.environ, ASAN_OPTIONS="detect_leaks=0", UBSAN_OPTIONS="print_stacktrace=1")
@@ -412,6 +414,10 @@ def main():
             for key in list(results)[before:]:
                 results[f"{name}: {key}"] = results.pop(key)
     finally:
+        for server in servers:  # a scenario that stopped early won't have finished its own
+            if getattr(server, "process", None) and server.process.poll() is None:
+                server.process.kill()
+                server.process.wait()
         shutil.rmtree(WORK, ignore_errors=True)
     failed = [name for name, ok in results.items() if not ok]
     print(f"{len(results) - len(failed)}/{len(results)} checks passed")

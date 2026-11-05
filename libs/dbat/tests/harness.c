@@ -76,6 +76,9 @@ void th_use_world(const char *directory)
   world_source = directory;
 }
 
+static GameWorld *boot_here(time_t when, const char *log_mode);
+static void (*before_boot)(void);
+
 GameWorld *th_boot(void)
 {
   return th_boot_at(0);
@@ -85,7 +88,6 @@ GameWorld *th_boot_at(time_t when)
 {
   const char *tmp = getenv("TMPDIR");
   char data_dir[PATH_MAX + 8];
-  GameWorld *g;
 
   snprintf(temp_dir, sizeof(temp_dir), "%s/dbat-test.XXXXXX", tmp ? tmp : "/tmp");
   if (!mkdtemp(temp_dir)) {
@@ -109,7 +111,19 @@ GameWorld *th_boot_at(time_t when)
   }
   if (!world_source)
     write_surface_map();
-  logfile = fopen("test.log", "w");
+  if (before_boot) {
+    before_boot();
+    before_boot = nullptr;
+  }
+  return boot_here(when, "w");
+}
+
+/* Boots from the current directory. */
+static GameWorld *boot_here(time_t when, const char *log_mode)
+{
+  GameWorld *g;
+
+  logfile = fopen("test.log", log_mode);
   if (!logfile) {
     perror("harness: test.log");
     exit(2);
@@ -128,7 +142,7 @@ GameWorld *th_boot_at(time_t when)
   return g;
 }
 
-void th_shutdown(GameWorld *g)
+static void free_game(GameWorld *g)
 {
   while (g->descriptors)
     close_socket(g, g->descriptors);
@@ -137,8 +151,42 @@ void th_shutdown(GameWorld *g)
   game_world_destroy(g);
   fclose(logfile);
   logfile = nullptr;
+}
+
+void th_shutdown(GameWorld *g)
+{
+  free_game(g);
+  if (getenv("TH_KEEP")) { /* for looking at what a run left behind */
+    printf("kept %s\n", temp_dir);
+    return;
+  }
   if (chdir("/") == 0)
     run("rm -rf '%s'%s", temp_dir, "");
+}
+
+void th_before_boot(void (*hook)(void))
+{
+  before_boot = hook;
+}
+
+void th_abandon(void)
+{
+  if (logfile) {
+    fclose(logfile);
+    logfile = nullptr;
+  }
+  if (chdir("/") == 0)
+    run("rm -rf '%s'%s", temp_dir, "");
+}
+
+void th_stop(GameWorld *g)
+{
+  free_game(g);
+}
+
+GameWorld *th_start_again(time_t when)
+{
+  return boot_here(when, "a");
 }
 
 struct char_data *th_player(GameWorld *g, const char *name, int admlevel)
@@ -208,6 +256,7 @@ struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int
   char_set_class(ch, sensei);
   char_set_pfilepos(ch, create_entry(g, char_get_pc_name(ch)));
   init_char(g, ch);
+  char_set_time_birth(ch, game_now(g) - birth_age(g, ch)); /* what the first load would do anyway */
   save_char(g, ch);
   save_player_index(g);
 
@@ -296,6 +345,10 @@ void th_take_output_at(GameWorld *g, struct descriptor_data *d)
 void th_exit(int status)
 {
   fflush(nullptr);
+#ifdef DBAT_FUZZ
+  if (status) /* an audit that failed, which a fuzzer only sees as a crash */
+    abort();
+#endif
 #ifdef DBAT_COVERAGE
   __gcov_dump();
 #endif

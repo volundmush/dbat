@@ -10,6 +10,7 @@ Developer checks for refactoring the server. None of this is part of the server 
 | `check-headers.sh` | Every header under `libs/dbat/include` compiles on its own. |
 | `check-writes.sh` | Every file the game rewrites goes through `atomic_open()` (`dbat/atomicfile.h`), so a crash or full disk can't leave it half-written. It lists any raw write, append or update `fopen()` outside the exceptions in the script, such as append-only logs. |
 | `check-members.py` | Direct member access to `struct char_data`, `obj_data` and `room_data` outside the `_utils` file that owns each one, found from clang's syntax tree and counting uses through macros. Use `--enforce char_data obj_data room_data` to fail if any remain, and `--show obj_data.name` to list them. Needs `clang`. |
+| `fuzz.py TARGET` | Coverage-guided fuzzing with libFuzzer (`fuzz` preset): `load` for player files, `boot` for world files, `script` for DG scripts, `bot` for bot journals. Runs for `-t` seconds, then replays each saved failure and writes `report.txt`, grouped by where it happened. |
 | `symbolize.sh [binary]` | Reads a backtrace from the syslog on stdin and prints each frame as `function at file:line`, static functions and inlined frames included. The default binary is `build/bin/dbat`. It must be the exact binary that wrote the log. |
 
 - **Shared pieces:**

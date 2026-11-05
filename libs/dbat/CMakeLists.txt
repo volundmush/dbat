@@ -69,6 +69,18 @@ target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)
 add_test(NAME bot COMMAND dbat_test_bot)
 add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/tests/corpus)
 
+# Coverage-guided fuzzing, for the fuzz preset: see tools/fuzz.sh.
+if(DBAT_FUZZ)
+  target_compile_definitions(dbat_test_harness PRIVATE DBAT_FUZZ)
+  foreach(target load boot script bot)
+    add_executable(dbat_fuzz_${target} tests/fuzz/fuzz_${target}.c tests/fuzz/fuzz.c)
+    target_include_directories(dbat_fuzz_${target} PRIVATE tests tests/fuzz)
+    target_compile_options(dbat_fuzz_${target} PRIVATE -g)
+    target_link_libraries(dbat_fuzz_${target} PRIVATE dbat_test_harness)
+    target_link_options(dbat_fuzz_${target} PRIVATE -fsanitize=fuzzer -Wl,--wrap=exit)
+  endforeach()
+endif()
+
 # Real servers and real clients: needs python3, and takes a minute or two.
 add_test(NAME copyover COMMAND python3 ${CMAKE_SOURCE_DIR}/tools/test_copyover.py $<TARGET_FILE:dbat_server>)
 set_tests_properties(copyover PROPERTIES LABELS slow TIMEOUT 1200)
