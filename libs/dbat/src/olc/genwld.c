@@ -149,15 +149,17 @@ bool delete_room(GameWorld *g, room_rnum rnum)
 
   room = &g->rooms[rnum];
 
+  /* Everyone with nowhere else to go ends up here. */
+  if (rnum == g->r_mortal_start_room || room_get_number(room) == CONFIG_MORTAL_START) {
+    mud_log("GenOLC: delete_room: Refusing to delete the mortal start room, #%d.", room_get_number(room));
+    return false;
+  }
+
   add_to_save_list(g, g->zones[room_get_zone(room)].number, SL_WLD);
 
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room_get_number(room), room_get_name(room));
 
-  if (g->r_mortal_start_room == rnum) {
-    mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
-    g->r_mortal_start_room = 0; /* The Void */
-  }
   if (g->r_immort_start_room == rnum) {
     mud_log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
     g->r_immort_start_room = 0; /* The Void */

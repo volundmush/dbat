@@ -2015,6 +2015,8 @@ void homing_update(GameWorld *g)
       struct char_data *vict = obj_get_target(k);
 
       if (obj_get_vnum(g, k) == 80) { // Tsuihidan
+        if (obj_get_in_room(k) == NOWHERE) /* someone has picked it up, or it's inside something */
+          continue;
         if (obj_get_in_room(k) != char_get_in_room(vict)) {
           act(g, "@wThe $p@w pursues after you!@n", true, vict, k, 0, TO_CHAR);
           act(g, "@wThe $p@W pursues after @C$n@w!@n", true, vict, k, 0, TO_ROOM);

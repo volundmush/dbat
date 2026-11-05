@@ -48,58 +48,33 @@
 #include "other_internal.h"
 #include "dbat/game_world.h"
 
+/* A dragon saved as being somewhere, when it or that room no longer exists, is forgotten. */
+static void load_shadow_dragon(GameWorld *g, int *room, mob_vnum vnum)
+{
+  mob_rnum r_num;
+  room_rnum r_room;
+
+  if (*room <= 0)
+    return;
+  r_num  = real_mobile(g, vnum);
+  r_room = real_room(g, *room);
+  if (r_num == NOBODY || r_room == NOWHERE) {
+    mud_log("SYSERR: Can't put shadow dragon (mob %d) back in room %d: one of them doesn't exist.", vnum, *room);
+    *room = -1;
+    return;
+  }
+  char_to_room(g, read_mobile(g, r_num, REAL), r_room);
+}
+
 void load_shadow_dragons(GameWorld *g)
 {
-  struct char_data *mob = nullptr;
-  mob_rnum r_num;
-
-  if (g->SHADOW_DRAGON1 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON1_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON1));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON2 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON2_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON2));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON3 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON3_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON3));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON4 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON4_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON4));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON5 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON5_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON5));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON6 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON6_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON6));
-    mob = nullptr;
-  }
-
-  if (g->SHADOW_DRAGON7 > 0) {
-    r_num = real_mobile(g, SHADOW_DRAGON7_VNUM);
-    mob   = read_mobile(g, r_num, REAL);
-    char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON7));
-  }
+  load_shadow_dragon(g, &g->SHADOW_DRAGON1, SHADOW_DRAGON1_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON2, SHADOW_DRAGON2_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON3, SHADOW_DRAGON3_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON4, SHADOW_DRAGON4_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON5, SHADOW_DRAGON5_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON6, SHADOW_DRAGON6_VNUM);
+  load_shadow_dragon(g, &g->SHADOW_DRAGON7, SHADOW_DRAGON7_VNUM);
 
   save_mud_time(g, &g->time_info);
 }

@@ -12,15 +12,18 @@
 #include <unistd.h>
 #include "harness.h"
 #include "dbat/affect.h"
+#include "dbat/combat.h"
 #include "dbat/comm.h"
 #include "dbat/consts/applies.h"
 #include "dbat/consts/feats.h"
 #include "dbat/consts/races.h"
+#include "dbat/consts/shadowdragons.h"
 #include "dbat/consts/skills.h"
 #include "dbat/db.h"
 #include "dbat/dg_scripts.h"
 #include "../src/dg/dg_internal.h"
 #include "dbat/game_world.h"
+#include "dbat/genwld.h"
 #include "dbat/handler.h"
 #include "dbat/objsave.h"
 #include "dbat/relocate.h"
@@ -28,6 +31,7 @@
 #include "dbat/character_utils.h"
 #include "dbat/object_utils.h"
 #include "dbat/room_utils.h"
+#include "dbat/shop.h"
 #include "dbat/world_audit.h"
 
 static int failures = 0;
@@ -650,6 +654,201 @@ static void check_message_about_an_object_with_no_description(void)
   th_shutdown(g);
 }
 
+static void move_next_to(GameWorld *g, struct char_data *ch, struct char_data *other)
+{
+  char_from_room(g, ch);
+  char_to_room(g, ch, char_get_in_room(other));
+}
+
+static void check_saying_something_to_someone(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *friend = th_player(g, "Friend", ADMLVL_NONE);
+
+  move_next_to(g, friend, ch);
+  th_take_output(g, friend);
+  th_type(g, ch, "say to Friend hello there");
+  CHECK(saw(friend, "says to"));
+  CHECK(saw(friend, "hello there"));
+  CHECK(!saw(friend, "to Friend hello"));
+  th_shutdown(g);
+}
+
+static void check_defending_someone_else_lets_go_of_the_first(void)
+{
+  /* mortals who haven't been introduced can't pick each other out */
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_IMPL);
+  struct char_data *first = th_player(g, "First", ADMLVL_IMPL);
+  struct char_data *second = th_player(g, "Second", ADMLVL_IMPL);
+  struct char_data *rival = th_player(g, "Rival", ADMLVL_IMPL);
+
+  move_next_to(g, first, ch);
+  move_next_to(g, second, ch);
+  move_next_to(g, rival, ch);
+  th_type(g, ch, "defend first");
+  CHECK(char_get_defender(first) == ch);
+  th_take_output(g, first);
+  th_type(g, ch, "defend second");
+  CHECK(saw(first, "stops defending you"));
+  CHECK(char_get_defender(first) == nullptr);
+  CHECK(char_get_defender(second) == ch);
+  CHECK(char_get_defending(ch) == second);
+  CHECK_AUDIT(g);
+  /* one defender at a time: a second takes over from the first, who may not be there to see it */
+  char_from_room(g, ch);
+  char_to_room(g, ch, real_room(g, 301));
+  th_take_output(g, ch);
+  th_type(g, rival, "defend second");
+  CHECK(saw(ch, "no longer defending"));
+  CHECK(char_get_defender(second) == rival);
+  CHECK(char_get_defending(ch) == nullptr);
+  CHECK_AUDIT(g);
+  th_take_output(g, first);
+  th_type(g, rival, "defend second"); /* nothing has changed, so nothing to tell */
+  CHECK(!saw(first, "stops defending"));
+  CHECK(char_get_defender(second) == rival);
+  th_shutdown(g);
+}
+
+static void check_mob_given_armor_with_no_wear_slot(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+  struct obj_data *armor = read_object(g, 350, VIRTUAL);
+
+  CHECK(mob != nullptr);
+  char_to_room(g, mob, char_get_in_room(ch));
+  obj_set_type_flag(armor, ITEM_WORN);
+  obj_to_char(g, armor, mob); /* only "take", and nowhere to wear it */
+  item_check(g, armor, mob);
+  CHECK(obj_get_carried_by(armor) == mob);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+static void check_start_room_cannot_be_deleted(void)
+{
+  GameWorld *g = th_boot();
+  room_rnum start = real_room(g, CONFIG_MORTAL_START);
+
+  CHECK(start != NOWHERE);
+  CHECK(!delete_room(g, start));
+  CHECK(real_room(g, CONFIG_MORTAL_START) == start);
+  CHECK(g->r_mortal_start_room == start);
+  th_shutdown(g);
+}
+
+static void point_config_at_a_missing_room(void)
+{
+  append_file("etc/config", "mortal_start_room = 99999\n");
+}
+
+static void check_start_room_missing_from_the_world(void)
+{
+  GameWorld *g;
+
+  th_before_boot(point_config_at_a_missing_room);
+  g = th_boot(); /* used to refuse to start */
+  CHECK(g->r_mortal_start_room == 0);
+  CHECK(g->r_immort_start_room != NOWHERE);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+static void give_the_shop_impossible_item_types(void)
+{
+  FILE *fl = fopen("world/shp/3.shp", "w");
+
+  if (!fl)
+    abort();
+  fputs("CircleMUD v3.0 Shop File~\n#300~\n302\n-1\n1.00\n0.50\n"
+        "110\nARMOR potions\n999 ignored keywords\n19\n-1\n"
+        "%s Sorry, I don't stock that item.~\n%s You don't seem to have that.~\n"
+        "%s I don't trade in such items.~\n%s I can't afford that!~\n%s You are too poor!~\n"
+        "%s That'll be %d zenni, thanks.~\n%s I'll give you %d zenni for that.~\n"
+        "0\n0\n301\n0 0 16384 0\n303\n-1\n0\n28\n0\n0\n$~\n", fl);
+  fclose(fl);
+}
+
+static void check_shop_with_impossible_item_types(void)
+{
+  GameWorld *g;
+
+  th_before_boot(give_the_shop_impossible_item_types);
+  g = th_boot();
+  CHECK(g->top_shop == 0); /* the one shop, still there */
+  CHECK(rshop_get_buy_type(g, 0, 0) == ITEM_ARMOR);
+  CHECK(rshop_get_buy_word(g, 0, 0) && !strcmp(rshop_get_buy_word(g, 0, 0), "potions"));
+  CHECK(rshop_get_buy_type(g, 0, 1) == 19);
+  CHECK(rshop_get_buy_word(g, 0, 1) == nullptr);
+  CHECK(rshop_get_buy_type(g, 0, 2) == NOTHING);
+  th_shutdown(g);
+}
+
+static void save_a_shadow_dragon_that_does_not_exist(void)
+{
+  FILE *fl = fopen(TIME_FILE, "w");
+
+  if (!fl)
+    abort();
+  for (int line = 0; line < 17; line++) /* what comes before the dragons */
+    fputs("1\n", fl);
+  fputs("10\n300\n-1\n-1\n-1\n-1\n-1\n-1\n0\n", fl);
+  fclose(fl);
+}
+
+static void check_shadow_dragon_missing_from_the_world(void)
+{
+  GameWorld *g;
+
+  th_before_boot(save_a_shadow_dragon_that_does_not_exist);
+  g = th_boot();
+  CHECK(real_mobile(g, SHADOW_DRAGON1_VNUM) == NOBODY); /* or this checks nothing */
+  CHECK(g->SHADOW_DRAGON1 == -1);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+static void check_homing_ball_that_someone_is_carrying(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *target = th_player(g, "Target", ADMLVL_NONE);
+  struct obj_data *ball = read_object(g, 80, VIRTUAL);
+  struct obj_data *other = read_object(g, 350, VIRTUAL);
+
+  char_from_room(g, target);
+  char_to_room(g, target, real_room(g, 301));
+  obj_to_char(g, other, ch);
+  obj_to_char(g, ball, ch);
+  obj_set_kicharge(ball, 100);
+  obj_set_user(ball, ch);
+  obj_set_target(ball, target);
+  homing_update(g);
+  CHECK(obj_get_carried_by(ball) == ch);
+  CHECK(obj_get_in_room(ball) == NOWHERE);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+static void check_long_name_in_auction_file(void)
+{
+  GameWorld *g = th_boot();
+  struct obj_data *obj = read_object(g, 350, VIRTUAL);
+  char text[400], name[201];
+
+  memset(name, 'x', 200);
+  name[200] = '\0';
+  snprintf(text, sizeof(text), "1 %s 1 1 1 1 1\n", name);
+  write_file(AUCTION_FILE, text);
+  auc_load(obj);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static const struct {
   const char *name;
   void (*check)(void);
@@ -685,6 +884,15 @@ static const struct {
     {"long_word_in_index", check_long_word_in_index},
     {"more_affects_than_a_save_holds", check_more_affects_than_a_save_holds},
     {"message_about_an_object_with_no_description", check_message_about_an_object_with_no_description},
+    {"saying_something_to_someone", check_saying_something_to_someone},
+    {"defending_someone_else_lets_go_of_the_first", check_defending_someone_else_lets_go_of_the_first},
+    {"mob_given_armor_with_no_wear_slot", check_mob_given_armor_with_no_wear_slot},
+    {"start_room_cannot_be_deleted", check_start_room_cannot_be_deleted},
+    {"start_room_missing_from_the_world", check_start_room_missing_from_the_world},
+    {"shop_with_impossible_item_types", check_shop_with_impossible_item_types},
+    {"shadow_dragon_missing_from_the_world", check_shadow_dragon_missing_from_the_world},
+    {"homing_ball_that_someone_is_carrying", check_homing_ball_that_someone_is_carrying},
+    {"long_name_in_auction_file", check_long_name_in_auction_file},
 };
 
 int main(int argc, char **argv)

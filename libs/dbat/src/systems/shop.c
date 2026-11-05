@@ -1318,6 +1318,10 @@ SPECIAL(shop_keeper)
 static bool add_to_list(GameWorld *g, struct shop_buy_data *list, int type, int *len, int *val)
 {
   if (*val != NOTHING && *val >= 0) { /* necessary after changing to unsigned v/rnums -- Welcor */
+    if (type == LIST_TRADE && *val >= NUM_ITEM_TYPES) {
+      mud_log("SYSERR: Shop #%d buys item type %d, which doesn't exist; ignoring it.", rshop_get_vnum(g, g->top_shop), *val);
+      return (false);
+    }
     if (*len < MAX_SHOP_OBJ) {
       if (type == LIST_PRODUCE)
         *val = real_object(g, *val);
@@ -1376,7 +1380,7 @@ static int read_list(GameWorld *g, FILE *shop_f, struct shop_buy_data *list, int
 static int read_type_list(GameWorld *g, FILE *shop_f, struct shop_buy_data *list,
                           int new_format, int max)
 {
-  int tindex, num, len = 0, error = 0;
+  int tindex, num, len = 0, error = 0, before;
   char *ptr;
   char buf[MAX_STRING_LENGTH];
 
@@ -1384,7 +1388,8 @@ static int read_type_list(GameWorld *g, FILE *shop_f, struct shop_buy_data *list
     return (read_list(g, shop_f, list, 0, max, LIST_TRADE));
 
   do {
-    fgets(buf, sizeof(buf), shop_f);
+    if (!fgets(buf, sizeof(buf), shop_f))
+      break;
     if ((ptr = strchr(buf, ';')) != nullptr)
       *ptr = '\0';
     else
@@ -1403,17 +1408,18 @@ static int read_type_list(GameWorld *g, FILE *shop_f, struct shop_buy_data *list
     ptr = buf;
     if (num == -1) {
       sscanf(buf, "%d", &num);
-      while (!isdigit(*ptr))
+      while (*ptr && !isdigit(*ptr))
         ptr++;
       while (isdigit(*ptr))
         ptr++;
     }
     while (isspace(*ptr))
       ptr++;
-    while (isspace(*(END_OF(ptr) - 1)))
+    while (*ptr && isspace(*(END_OF(ptr) - 1)))
       *(END_OF(ptr) - 1) = '\0';
+    before = len;
     error += add_to_list(g, list, LIST_TRADE, &len, &num);
-    if (*ptr)
+    if (*ptr && len > before)
       shop_buy_set_keywords(&(list[len - 1]), strdup(ptr));
   } while (num >= 0);
   return (end_read_list(list, len, error));

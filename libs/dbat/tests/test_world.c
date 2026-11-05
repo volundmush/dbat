@@ -11,7 +11,6 @@
 #include "dbat/affect.h"
 #include "dbat/config.h"
 #include "dbat/genobj.h"
-#include "dbat/genwld.h"
 #include "dbat/spells.h"
 #include "dbat/gengld.h"
 #include "dbat/local_limits.h"
@@ -849,12 +848,12 @@ static void check_weight_changes_reach_the_carrier(GameWorld *g, struct char_dat
   CHECK_AUDIT(g);
 }
 
-/* A new login used to read rooms[-1] after a builder deleted the start room. */
+/* A new login used to read rooms[-1] when the start room didn't exist. */
 static void check_login_without_a_start_room(GameWorld *g)
 {
   struct char_data *late;
 
-  CHECK(delete_room(g, real_room(g, CONFIG_MORTAL_START)));
+  CONFIG_MORTAL_START = 99999;
   CHECK(real_room(g, CONFIG_MORTAL_START) == NOWHERE);
   late = th_player(g, "Latecomer", ADMLVL_NONE);
   CHECK(char_get_in_room(late) == 0);

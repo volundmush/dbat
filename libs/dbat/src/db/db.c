@@ -862,7 +862,7 @@ void auc_load(struct obj_data *obj)
   else {
     while (!feof(fl)) {
       get_line(fl, line);
-      sscanf(line, "%" SCNd64 " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
+      sscanf(line, "%" SCNd64 " %49s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
       if (obj_get_unique_id(obj) == oID) {
         obj_set_auctname(obj, strdup(filler));
         obj_set_aucter(obj, aID);
@@ -1604,7 +1604,7 @@ static void check_start_rooms(GameWorld *g)
 {
   if ((g->r_mortal_start_room = real_room(g, CONFIG_MORTAL_START)) == NOWHERE) {
     mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
-    exit(1);
+    g->r_mortal_start_room = 0; /* The Void */
   }
   if ((g->r_immort_start_room = real_room(g, CONFIG_IMMORTAL_START)) == NOWHERE) {
     if (!g->mini_mud)

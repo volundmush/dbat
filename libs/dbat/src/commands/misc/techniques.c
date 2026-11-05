@@ -591,6 +591,17 @@ ACMD(do_defend)
   act(g, "@YYou start defending @y$N@Y.@n", true, ch, 0, vict, TO_CHAR);
   act(g, "@y$n@Y starts defending you.@n", true, ch, 0, vict, TO_VICT);
   act(g, "@y$n@Y starts defending @y$N@Y.@n", true, ch, 0, vict, TO_NOTVICT);
+  /* Each has only one, so whoever was paired with these two is let go, and told. */
+  if (char_get_defending(ch)) {
+    if (char_get_defending(ch) != vict)
+      act(g, "@y$n@Y stops defending you.@n", false, ch, 0, char_get_defending(ch), TO_VICT);
+    char_set_defender(char_get_defending(ch), nullptr);
+  }
+  if (char_get_defender(vict)) {
+    if (char_get_defender(vict) != ch)
+      act(g, "@YYou are no longer defending @y$n@Y. Someone else has taken over.@n", false, vict, 0, char_get_defender(vict), TO_VICT);
+    char_set_defending(char_get_defender(vict), nullptr);
+  }
   char_set_defender(vict, ch);
   char_set_defending(ch, vict);
   return;

@@ -234,22 +234,14 @@ ACMD(do_say)
         char sayto[100];
         snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
         if (strstr(argument, sayto)) {
-          char saytoo[200];
-          *verb = '\0';
-          snprintf(saytoo, sizeof(saytoo), "says to @g%s@W", char_get_name(tch));
           search_replace(argument, sayto, "");
-          strcpy(verb, saytoo);
           sch = tch;
         } else if (!char_is_npc(tch) && !char_is_npc(ch)) {
           if (readIntro(ch, tch) == 1) {
             snprintf(sayto, sizeof(sayto), "to %s ", get_i_name(ch, tch));
           }
           if (strstr(argument, sayto)) {
-            char saytoo[200];
-            *verb = '\0';
-            snprintf(saytoo, sizeof(saytoo), "says to @g%s@W", char_get_name(tch));
             search_replace(argument, sayto, "");
-            strcpy(verb, saytoo);
             sch = tch;
           }
         }

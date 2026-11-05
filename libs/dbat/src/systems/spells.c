@@ -69,7 +69,7 @@ ASPELL(spell_recall)
 
   act(g, "$n disappears.", true, victim, 0, 0, TO_ROOM);
   char_from_room(g, victim);
-  char_to_room(g, victim, real_room(g, CONFIG_MORTAL_START));
+  char_to_room(g, victim, g->r_mortal_start_room);
   act(g, "$n appears in the middle of the room.", true, victim, 0, 0, TO_ROOM);
   look_at_room(g, char_get_in_room(victim), victim, 0);
   entry_memory_mtrigger(g, victim);
