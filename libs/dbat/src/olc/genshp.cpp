@@ -509,10 +509,10 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
               shop_get_message_buy(shop) ? shop_get_message_buy(shop) : "%s Ke?! %d?",
               shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
               shop_get_temper(shop),
-              shop_get_bitvector(shop),
+              (int)shop_get_bitvector(shop), /* as signed, as always */
               shop_get_keeper(shop) == NOBODY ? -1 : g->mob_index[shop_get_keeper(shop)].vnum);
       for (j = 0; j < SW_ARRAY_MAX; j++)
-        fprintf(shop_file, "%s%d", j ? " " : "", shop_get_with_who(shop)[j]);
+        fprintf(shop_file, "%s%d", j ? " " : "", (int)shop_get_with_who(shop)[j]);
       fprintf(shop_file, "\n");
 
       /*

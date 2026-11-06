@@ -390,7 +390,7 @@ int64_t incCurHealth(GameWorld *g, char_data *ch, int64_t amt, bool limit_max)
     ch->health = newhealth;
   ch->health = clampHealth(ch->health);
   return getCurHealth(g, ch);
-};
+}
 
 int64_t decCurHealth(GameWorld *g, char_data *ch, int64_t amt, int64_t floor)
 {
@@ -553,7 +553,7 @@ int64_t incCurKI(GameWorld *g, char_data *ch, int64_t amt, bool limit_max)
     ch->energy = newenergy;
   ch->energy = clampHealth(ch->energy);
   return getCurKI(g, ch);
-};
+}
 
 int64_t decCurKI(GameWorld *g, char_data *ch, int64_t amt, int64_t floor)
 {
@@ -651,7 +651,7 @@ int64_t incCurST(GameWorld *g, char_data *ch, int64_t amt, bool limit_max)
     ch->stamina = newstamina;
   ch->stamina = clampHealth(ch->stamina);
   return getCurST(g, ch);
-};
+}
 
 int64_t decCurST(GameWorld *g, char_data *ch, int64_t amt, int64_t floor)
 {
@@ -718,7 +718,7 @@ int64_t incCurLF(GameWorld *g, char_data *ch, int64_t amt, bool limit_max)
     ch->life = newlife;
   ch->life = clampHealth(ch->life);
   return getCurLF(g, ch);
-};
+}
 
 int64_t decCurLF(GameWorld *g, char_data *ch, int64_t amt, int64_t floor)
 {
@@ -1380,7 +1380,7 @@ bool is_affected(struct char_data *ch, int aff_flag)
   struct affected_type *af;
 
   for (af = ch->affected; af; af = af->next) {
-    if (af->location == APPLY_NONE && af->bitvector == aff_flag)
+    if (af->location == APPLY_NONE && af->bitvector == (bitvector_t)aff_flag)
       return (true);
   }
 
@@ -1394,7 +1394,7 @@ void null_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 
   for (af = ch->affected; af; af = next_af) {
     next_af = af->next;
-    if (af->location == APPLY_NONE && af->bitvector == aff_flag)
+    if (af->location == APPLY_NONE && af->bitvector == (bitvector_t)aff_flag)
       affect_remove(g, ch, af);
   }
 }
@@ -1406,7 +1406,7 @@ void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 
   for (af = ch->affected; af; af = next_af) {
     next_af = af->next;
-    if (af->bitvector == aff_flag)
+    if (af->bitvector == (bitvector_t)aff_flag)
       affect_remove(g, ch, af);
   }
 }
@@ -5374,17 +5374,17 @@ int char_get_bank_interest(const struct char_data *ch)
 
 bitvector_t *char_get_act(const struct char_data *ch)
 {
-  return (bitvector_t *)ch->act; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(ch->act); /* writable flag array, as the macro allowed */
 }
 
 bitvector_t *char_get_affected_by(const struct char_data *ch)
 {
-  return (bitvector_t *)ch->affected_by; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(ch->affected_by); /* writable flag array, as the macro allowed */
 }
 
 bitvector_t *char_get_admflags(const struct char_data *ch)
 {
-  return (bitvector_t *)ch->admflags; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(ch->admflags); /* writable flag array, as the macro allowed */
 }
 
 room_rnum char_get_in_room(const struct char_data *ch)
@@ -5460,7 +5460,7 @@ const char *char_get_feature(const struct char_data *ch)
 /* Keeps its own copy of v. */
 void char_set_feature(struct char_data *ch, const char *v)
 {
-  free((char *)ch->feature);
+  free(const_cast<char *>(ch->feature));
   ch->feature = v ? strdup(v) : nullptr;
 }
 
@@ -5686,7 +5686,7 @@ const char *char_get_rdisplay(const struct char_data *ch)
 /* Keeps its own copy of v. */
 void char_set_rdisplay(struct char_data *ch, const char *v)
 {
-  free((char *)ch->rdisplay);
+  free(const_cast<char *>(ch->rdisplay));
   ch->rdisplay = v ? strdup(v) : nullptr;
 }
 
@@ -6741,7 +6741,7 @@ void char_set_skills_base(struct char_data *ch, int i, int8_t v)
 
 bitvector_t *char_get_bodyparts(const struct char_data *ch)
 {
-  return (bitvector_t *)ch->bodyparts; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(ch->bodyparts); /* writable flag array, as the macro allowed */
 }
 
 struct obj_data *char_get_equipment(const struct char_data *ch, int i)

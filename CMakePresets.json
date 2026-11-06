@@ -6,7 +6,7 @@
       "name": "debug",
       "displayName": "Debug (GCC, -O0)",
       "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_CXX_COMPILER": "g++" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_CXX_COMPILER": "g++", "CMAKE_CXX_FLAGS": "-D_GLIBCXX_ASSERTIONS", "DBAT_WERROR": "ON" }
     },
     {
       "name": "release",
@@ -21,8 +21,9 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_CXX_FLAGS": "-O1 -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow",
-        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,float-cast-overflow"
+        "CMAKE_CXX_FLAGS": "-O1 -D_GLIBCXX_ASSERTIONS -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,float-cast-overflow",
+        "DBAT_WERROR": "ON"
       }
     },
     {

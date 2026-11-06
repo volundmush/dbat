@@ -18,7 +18,7 @@ guild_rnum real_guild(GameWorld *g, guild_vnum vnum);
  */
 
 #define MSG_TRAINER_NOT_OPEN      "I'm busy! Come back later!"
-#define MSG_TRAINER_NO_SEE_CH     (char[]){"I don't train someone I can't see!"}
+#define MSG_TRAINER_NO_SEE_CH     writable{"I don't train someone I can't see!"}
 #define MSG_TRAINER_DISLIKE_ALIGN "Get out of here before I get angry, you are not aligned with me!"
 #define MSG_TRAINER_DISLIKE_CLASS "I won't train those of your discipline!"
 #define MSG_TRAINER_DISLIKE_RACE  "Get out of here, I don't help your kind!"

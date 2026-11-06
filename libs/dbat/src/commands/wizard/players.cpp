@@ -322,7 +322,7 @@ ACMD(do_interest)
   }
   if (g->INTERESTTIME > 0) {
     char *tmstr;
-    tmstr                        = (char *)asctime(localtime(&g->INTERESTTIME));
+    tmstr                        = asctime(localtime(&g->INTERESTTIME));
     *(tmstr + strlen(tmstr) - 1) = '\0';
     send_to_char(g, ch, "INTEREST TIME: [%s]\r\n", tmstr);
     return;

@@ -3,17 +3,23 @@ add_library(dbat::dbat ALIAS dbat)
 
 target_compile_features(dbat PUBLIC cxx_std_26)
 
+option(DBAT_WERROR "Treat warnings as errors (the debug and asan presets turn this on)" OFF)
+
 # Flags shared by every source file in the server.
 set(DBAT_CXX_FLAGS
     -g -fno-omit-frame-pointer
-    -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wmissing-declarations
+    -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wmissing-declarations
     -Wno-missing-field-initializers  # designated initializers leave the rest zeroed on purpose
     -Wno-format-truncation  # snprintf truncating is the intended, bounded behaviour
     -Wno-unused-result      # 45 unchecked fscanf/fgets/system results; tracked separately
+    -Wformat=2 -Wno-format-nonliteral  # shop, guild and auction formats come from files, checked on load
     -Werror=format-security -Werror=return-type
-    -Wshadow -Wredundant-decls
-    # GCC-only checks for conditions that are always true/false or branches that are identical
-    $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches>
+    -Wshadow -Wredundant-decls -Wcast-qual -Wextra-semi -Wnull-dereference -Wundef -Wvla
+    # GCC-only: conditions that are always true/false, identical branches, and stricter forms of the above
+    $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches
+                             -Wformat-signedness -Wcast-align=strict -Wimplicit-fallthrough=5 -Wuseless-cast>
+    $<$<CXX_COMPILER_ID:Clang>:-Wcast-align -Wimplicit-fallthrough>
+    $<$<BOOL:${DBAT_WERROR}>:-Werror>
     CACHE INTERNAL "")
 target_compile_options(dbat PRIVATE ${DBAT_CXX_FLAGS})
 

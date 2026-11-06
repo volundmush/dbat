@@ -274,7 +274,7 @@ int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxs
       nlen    = snprintf(buf + len, maxsz - len, "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
                          g->spell_info[i].name, count, char_get_skill(ch, i), canknow, char_get_skills_perf(ch, i) > 0 ? (char_get_skills_perf(ch, i) == 1 ? "@ROver Charge" : (char_get_skills_perf(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", char_get_skills_base(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
     }
-    if (len + nlen >= maxsz || nlen < 0)
+    if (nlen < 0 || len + nlen >= (size_t)maxsz)
       break;
     len += nlen;
   }

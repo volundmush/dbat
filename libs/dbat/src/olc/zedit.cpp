@@ -325,7 +325,7 @@ static void zedit_new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_n
     switch (desc_get_connected(dsc)) {
       case CON_REDIT:
         room_set_zone(OLC_ROOM(dsc), room_get_zone(OLC_ROOM(dsc)) + ((OLC_ZNUM(dsc) >= result)));
-        /* Fall through. */
+        [[fallthrough]];
       case CON_ZEDIT:
       case CON_MEDIT:
       case CON_SEDIT:
@@ -876,7 +876,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             write_to_output(g, d, "Saving zone info in memory.\r\n");
 
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: %s edits zone info for room %d.", char_get_name(d->character), OLC_NUM(d));
-          /* FALL THROUGH */
+          [[fallthrough]];
         case 'n':
         case 'N':
           cleanup_olc(g, d, CLEANUP_ALL);

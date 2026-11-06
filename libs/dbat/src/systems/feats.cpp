@@ -231,7 +231,7 @@ int find_feat_num(GameWorld *g, char *name)
 
     ok = true;
     /* It won't be changed, but other uses of this function elsewhere may. */
-    temp  = any_one_arg((char *)g->feat_list[ftindex].name, first);
+    temp  = any_one_arg(const_cast<char *>(g->feat_list[ftindex].name), first); /* only reads it */
     temp2 = any_one_arg(name, first2);
     while (*first && *first2 && ok) {
       if (!is_abbrev(first2, first))

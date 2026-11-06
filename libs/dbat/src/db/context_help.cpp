@@ -283,7 +283,7 @@ void boot_context_help(GameWorld *g)
 
   /* init to 'no help' string */
   for (i = 0; i < NUM_CONTEXTS; i++)
-    g->context_help_list[i] = (char *)NO_HELP;
+    g->context_help_list[i] = const_cast<char *>(NO_HELP); /* never freed: see below */
 
   if (!fl) {
     mud_log("No context help found : %s", strerror(errno));

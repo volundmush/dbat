@@ -706,7 +706,7 @@ bool race_find_form(char_data *ch, const char *arg, transform_bonus *out)
       if (table)
         *out = table[names->tier];
       else
-        *out = (transform_bonus){0};
+        *out = transform_bonus{};
       return true;
     }
   }

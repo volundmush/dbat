@@ -11,7 +11,7 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int ma
 
 int get_flag_by_name(const char *const flag_list[], char *flag_name);
 
-#define Q_FIELD(x) ((int)(x) / 32)
+#define Q_FIELD(x) ((x) / 32)
 #define Q_BIT(x)   (1U << ((x) % 32))
 
 #define IS_SET_AR(var, bit)     ((var)[Q_FIELD(bit)] & Q_BIT(bit))

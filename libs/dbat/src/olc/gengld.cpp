@@ -228,11 +228,11 @@ bool save_guilds(GameWorld *g, zone_rnum zone_num)
       /*. Save the rest . */
       fprintf(guild_file, "%d\n%d\n%d\n%d\n",
               guild_get_gm(guild) == NOBODY ? -1 : g->mob_index[guild_get_gm(guild)].vnum,
-              guild_get_with_who(guild)[0],
+              (int)guild_get_with_who(guild)[0], /* as signed, as always */
               guild_get_open(guild),
               guild_get_close(guild));
       for (j = 1; j < SW_ARRAY_MAX; j++)
-        fprintf(guild_file, "%s%d", j == 1 ? "" : " ", guild_get_with_who(guild)[j]);
+        fprintf(guild_file, "%s%d", j == 1 ? "" : " ", (int)guild_get_with_who(guild)[j]);
       fprintf(guild_file, "\n");
     }
   }

@@ -257,7 +257,7 @@ static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     obj_to_char(g, obj, ch);
 }
 
-bool Crash_delete_file(char *name)
+bool Crash_delete_file(const char *name)
 {
   char filename[50];
   FILE *fl;
@@ -385,7 +385,8 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
   char filename[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   struct obj_data *obj;
-  int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0, len;
+  int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0;
+  size_t len;
   long long timed = 0;
   int t[10];
   obj_vnum nr;

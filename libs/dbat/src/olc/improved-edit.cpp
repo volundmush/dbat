@@ -325,7 +325,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         *t = '\0';
       }
       RECREATE(*d->str, char, strlen(*d->str) + 3);
-      write_to_output(g, d, "%d line%sdeleted.\r\n", total_len, (total_len != 1 ? "s " : " "));
+      write_to_output(g, d, "%u line%sdeleted.\r\n", total_len, (total_len != 1 ? "s " : " "));
       break;
 
     case PARSE_LIST_NORM:
@@ -350,7 +350,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       /*
      * This is kind of annoying...but some people like it.
      */
-      tb_printf(&out, "\r\n%d line%sshown.\r\n", total_len, (total_len != 1) ? "s " : " ");
+      tb_printf(&out, "\r\n%u line%sshown.\r\n", total_len, (total_len != 1) ? "s " : " ");
       write_to_output(g, d, "%s", out.s);
       break;
 

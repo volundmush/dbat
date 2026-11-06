@@ -332,8 +332,8 @@ void free_command_list(GameWorld *g)
   /* entries point at cmd_info's and the socials' strings, except the terminator made by create_command_list() */
   /* by the function pointer: aedit may just have freed the strings of the socials */
   for (k = 1; g->complete_cmd_info[k].command_pointer; k++);
-  free((char *)g->complete_cmd_info[k].command);
-  free((char *)g->complete_cmd_info[k].sort_as);
+  free(const_cast<char *>(g->complete_cmd_info[k].command));
+  free(const_cast<char *>(g->complete_cmd_info[k].sort_as));
   free(g->complete_cmd_info);
   g->complete_cmd_info = nullptr;
 }

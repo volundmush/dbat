@@ -32,6 +32,11 @@
 
 static int failures = 0;
 
+/* Things that aren't in the game, for the audit to notice when something points at them. */
+static struct char_data stray_char;
+static struct obj_data stray_obj;
+static struct descriptor_data stray_desc;
+
 #define CHECK(cond)                                              \
   do {                                                           \
     if (!(cond)) {                                               \
@@ -137,10 +142,10 @@ static void check_audit_notices_broken_links(GameWorld *g, struct char_data *ch,
   obj_set_target(obj, stray);
   CHECK_NOTICED(g);
   obj_set_target(obj, nullptr);
-  obj_set_fellow_wall(obj, (struct obj_data *)&failures);
+  obj_set_fellow_wall(obj, &stray_obj);
   CHECK_NOTICED(g);
   obj_set_fellow_wall(obj, nullptr);
-  obj_set_posted_to(obj, (struct obj_data *)&failures);
+  obj_set_posted_to(obj, &stray_obj);
   CHECK_NOTICED(g);
   obj_set_posted_to(obj, nullptr);
 
@@ -165,10 +170,10 @@ static void check_audit_notices_broken_links(GameWorld *g, struct char_data *ch,
   CHECK_NOTICED(g);
   obj_set_id(obj, obj_get_id(obj) - 1000);
 
-  d->snooping = (struct descriptor_data *)&failures;
+  d->snooping = &stray_desc;
   CHECK_NOTICED(g);
   d->snooping = nullptr;
-  d->snoop_by = (struct descriptor_data *)&failures;
+  d->snoop_by = &stray_desc;
   CHECK_NOTICED(g);
   d->snoop_by = nullptr;
 }
@@ -178,7 +183,7 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
 {
   struct obj_data *obj      = read_object(g, 301, VIRTUAL);
   struct obj_data *chest    = read_object(g, 300, VIRTUAL);
-  struct char_data *stray   = (struct char_data *)&failures; /* never dereferenced: it isn't in the game */
+  struct char_data *stray   = &stray_char;
   room_rnum room            = char_get_in_room(ch);
   struct room_direction_data *exit;
 
@@ -605,7 +610,7 @@ static void check_experience_width(GameWorld *g, struct char_data *ch)
   CHECK(char_get_exp(ch) > 0);
 
   before = char_get_exp(ch);
-  gain_exp_regardless(g, ch, (int64_t)3000000000);
+  gain_exp_regardless(g, ch, INT64_C(3000000000));
   CHECK(char_get_exp(ch) >= before + 2900000000);
   char_set_exp(ch, 0);
   char_set_class_level(ch, 1);

@@ -433,8 +433,10 @@ static void check_sorted(const char *what, const void *table, IDXTYPE count, siz
   const char *t = static_cast<const char *>(table);
 
   for (IDXTYPE i = 1; i < count; i++) {
-    IDXTYPE prev = *(const IDXTYPE *)(t + (i - 1) * size + vnum_offset);
-    IDXTYPE vnum = *(const IDXTYPE *)(t + i * size + vnum_offset);
+    IDXTYPE prev, vnum;
+
+    memcpy(&prev, t + (i - 1) * size + vnum_offset, sizeof(prev));
+    memcpy(&vnum, t + i * size + vnum_offset, sizeof(vnum));
 
     if (vnum <= prev) {
       mud_log("SYSERR: %s #%d comes after #%d: the %s files must be in ascending vnum order, without duplicates.", what, vnum, prev, what);
@@ -4234,8 +4236,8 @@ void free_char(GameWorld *g, struct char_data *ch)
       free(char_get_ldesc(ch));
     if (char_get_ddesc(ch))
       free(char_get_ddesc(ch));
-    free((char *)char_get_feature(ch));
-    free((char *)char_get_rdisplay(ch));
+    free(const_cast<char *>(char_get_feature(ch)));
+    free(const_cast<char *>(char_get_rdisplay(ch)));
     for (i = 0; i < NUM_HIST; i++)
       if (char_get_comm_hist(g, ch, i))
         free(char_get_comm_hist(g, ch, i));
@@ -4576,7 +4578,7 @@ static int check_object(GameWorld *g, struct obj_data *obj)
         //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
       }
     }
-    /* Fall through. */
+    [[fallthrough]];
     case ITEM_FOUNTAIN:
       if ((obj_get_value(obj, 0) > 0) && (obj_get_value(obj, 1) > obj_get_value(obj, 0) && (error = true)))
         mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
@@ -4736,8 +4738,8 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
                         obj_get_name(obj) ? obj_get_name(obj) : "undefined",
                         obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
                         obj_get_description(obj) ? obj_get_description(obj) : "undefined",
-                        buf1, obj_get_type_flag(obj), obj_get_wear_flags(obj)[0],
-                        obj_get_wear_flags(obj)[1], obj_get_wear_flags(obj)[2], obj_get_wear_flags(obj)[3],
+                        buf1, obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
+                        (int)obj_get_wear_flags(obj)[1], (int)obj_get_wear_flags(obj)[2], (int)obj_get_wear_flags(obj)[3],
                         obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
     return false;
 

@@ -349,7 +349,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                  "OLC: %s edits trigger %d", char_get_name(d->character),
                  OLC_NUM(d));
-          /* fall through */
+          [[fallthrough]];
         case 'n':
           cleanup_olc(g, d, CLEANUP_ALL);
           return;

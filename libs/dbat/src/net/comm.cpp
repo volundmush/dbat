@@ -401,7 +401,7 @@ static int get_max_players(GameWorld *g)
     if (limit.rlim_max == RLIM_INFINITY)
       max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
     else
-      max_descs = MIN(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, limit.rlim_max);
+      max_descs = (int)MIN((rlim_t)(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS), limit.rlim_max);
   }
 
   /* now calculate max _players_ based on max descs */
@@ -577,10 +577,10 @@ static void game_loop(GameWorld *g, int cmmother_desc)
       fds_alloc = nfds + 16;
       RECREATE(fds, struct pollfd, fds_alloc);
     }
-    fds[0] = (struct pollfd){.fd = cmmother_desc, .events = POLLIN};
+    fds[0] = pollfd{.fd = cmmother_desc, .events = POLLIN};
     nfds   = 1;
     for (d = g->descriptors; d; d = d->next)
-      fds[nfds++] = (struct pollfd){.fd = d->descriptor, .events = POLLIN | POLLOUT};
+      fds[nfds++] = pollfd{.fd = d->descriptor, .events = POLLIN | POLLOUT};
 
     while (poll(fds, nfds, 0) < 0) {
       if (errno != EINTR) { /* a signal arriving here is no reason to stop */
@@ -2932,7 +2932,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
           i = char_pers(g, ch, to);
           break;
         case 'N':
-          CHECK_NULL(vict_obj, char_pers(g, ((struct char_data *)vict_obj), to));
+          CHECK_NULL(vict_obj, char_pers(g, (struct char_data *)const_cast<void *>(vict_obj), to));
           dg_victim = (const struct char_data *)vict_obj;
           break;
         case 'm':
@@ -3099,7 +3099,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
   }
 
   if (type == TO_VICT) {
-    if ((to = (struct char_data *)vict_obj) != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
+    if ((to = (struct char_data *)const_cast<void *>(vict_obj)) != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, to);
       return g->last_act_message;
     }

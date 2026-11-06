@@ -36,7 +36,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
       } else {
         char *tmstr;
         time_t mytime                = game_now(g);
-        tmstr                        = (char *)asctime(localtime(&mytime));
+        tmstr                        = asctime(localtime(&mytime));
         *(tmstr + strlen(tmstr) - 1) = '\0';
 
         fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
@@ -93,7 +93,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
         if (*d->str && !(strcmp(storage, "text/news"))) {
           char *tmstr;
           time_t mytime                = game_now(g);
-          tmstr                        = (char *)asctime(localtime(&mytime));
+          tmstr                        = asctime(localtime(&mytime));
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
           strip_cr(*d->str);

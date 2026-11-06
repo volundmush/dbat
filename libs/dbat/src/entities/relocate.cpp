@@ -17,7 +17,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_rnum room)
 
   if (!object || room == NOWHERE || room > g->top_room)
     mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
-            room, g->top_room, object);
+            room, g->top_room, (void *)object);
   else {
     if (rroom_flagged(g, room, ROOM_GARDEN1) || rroom_flagged(g, room, ROOM_GARDEN2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
@@ -104,7 +104,7 @@ void obj_from_room(GameWorld *g, struct obj_data *object)
 {
   if (!object || obj_get_in_room(object) == NOWHERE) {
     mud_log("SYSERR: NULL object (%p) or obj not in a room (%d) passed to obj_from_room",
-            object, obj_get_in_room(object));
+            (void *)object, obj_get_in_room(object));
     return;
   }
 
@@ -136,7 +136,7 @@ void obj_to_obj(GameWorld *g, struct obj_data *obj, struct obj_data *obj_to)
 
   if (!obj || !obj_to || obj == obj_to) {
     mud_log("SYSERR: NULL object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
-            obj, obj, obj_to, obj_to ? obj_get_vnum(g, obj_to) : -1);
+            (void *)obj, (void *)obj, (void *)obj_to, obj_to ? obj_get_vnum(g, obj_to) : -1);
     return;
   }
 
@@ -231,7 +231,7 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_rnum room)
 
   if (ch == nullptr || room == NOWHERE || room > g->top_room)
     mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
-            room, g->top_room, ch);
+            room, g->top_room, (void *)ch);
   else {
     char_set_next_in_room(ch, rroom_get_people(g, room));
     rroom_set_people(g, room, ch);
@@ -289,7 +289,7 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
     if (!char_is_npc(ch))
       char_plr_set(ch, PLR_CRASH, true);
   } else
-    mud_log("SYSERR: NULL obj (%p) or char (%p) passed to obj_to_char.", object, ch);
+    mud_log("SYSERR: NULL obj (%p) or char (%p) passed to obj_to_char.", (void *)object, (void *)ch);
 }
 
 /* take an object from a char */

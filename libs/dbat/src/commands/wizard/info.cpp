@@ -370,7 +370,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   if (obj_get_lload(j) > 0) {
     char *tmstr;
     time_t last_load             = obj_get_lload(j);
-    tmstr                        = (char *)asctime(localtime(&last_load));
+    tmstr                        = asctime(localtime(&last_load));
     *(tmstr + strlen(tmstr) - 1) = '\0';
     send_to_char(g, ch, "LOADED DROPPED: [%s]\r\n", tmstr);
   }
@@ -568,7 +568,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   if (char_is_npc(k)) {
     char *tmstr;
     time_t last_played           = char_get_lastpl(k);
-    tmstr                        = (char *)asctime(localtime(&last_played));
+    tmstr                        = asctime(localtime(&last_played));
     *(tmstr + strlen(tmstr) - 1) = '\0';
     send_to_char(g, ch, "LOADED AT: [%s]\r\n", tmstr);
   }
@@ -970,7 +970,7 @@ ACMD(do_date)
   else
     mytime = g->boot_time;
 
-  tmstr                        = (char *)asctime(localtime(&mytime));
+  tmstr                        = asctime(localtime(&mytime));
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
   if (subcmd == SCMD_DATE)
@@ -1010,7 +1010,7 @@ ACMD(do_last)
 
   time_t logon = char_get_time_logon(vict);
   send_to_char(g, ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
-               char_get_idnum(vict), (int)char_get_level(vict),
+               char_get_idnum(vict), char_get_level(vict),
                char_race_abbr(vict), char_class_abbr(vict),
                char_get_name(vict), char_get_player_specials(vict)->host && *char_get_player_specials(vict)->host ? char_get_player_specials(vict)->host : "(NOHOST)",
                ctime(&logon));

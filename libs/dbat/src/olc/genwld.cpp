@@ -98,6 +98,7 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
         case 'D':
         case 'R':
           zone_get_cmd(g, i, j)->arg1 += (zone_get_cmd(g, i, j)->arg1 != NOWHERE && zone_get_cmd(g, i, j)->arg1 >= found);
+          break;
         case 'G':
         case 'P':
         case 'E':
@@ -239,6 +240,7 @@ bool delete_room(GameWorld *g, room_rnum rnum)
             zone_get_cmd(g, i, j)->command = '*'; /* Cancel command. */
           else if (zone_get_cmd(g, i, j)->arg1 > rnum)
             zone_get_cmd(g, i, j)->arg1 -= (zone_get_cmd(g, i, j)->arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
+          break;
         case 'G':
         case 'P':
         case 'E':

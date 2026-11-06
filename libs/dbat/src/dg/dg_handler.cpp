@@ -163,7 +163,7 @@ void free_extracted_triggers(GameWorld *g)
 void extract_script(GameWorld *g, void *thing, int type)
 {
   struct script_data **slot = script_slot(thing, type);
-  struct script_data *sc    = *slot;
+  struct script_data *sc    = slot ? *slot : nullptr; /* no slot for an unknown type */
   struct trig_data *trig, *next_trig;
 
   if (!sc)

@@ -497,7 +497,7 @@ void obj_set_level(struct obj_data *obj, int v)
 
 bitvector_t *obj_get_bitvector(const struct obj_data *obj)
 {
-  return (bitvector_t *)obj->bitvector; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(obj->bitvector); /* writable flag array, as the macro allowed */
 }
 
 int8_t obj_get_type_flag(const struct obj_data *obj)
@@ -532,12 +532,12 @@ void obj_set_cost_per_day(struct obj_data *obj, int v)
 
 bitvector_t *obj_get_extra_flags(const struct obj_data *obj)
 {
-  return (bitvector_t *)obj->extra_flags; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(obj->extra_flags); /* writable flag array, as the macro allowed */
 }
 
 bitvector_t *obj_get_wear_flags(const struct obj_data *obj)
 {
-  return (bitvector_t *)obj->wear_flags; /* writable flag array, as the macro allowed */
+  return const_cast<bitvector_t *>(obj->wear_flags); /* writable flag array, as the macro allowed */
 }
 
 int obj_get_value(const struct obj_data *obj, int i)

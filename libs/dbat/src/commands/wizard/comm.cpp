@@ -238,7 +238,7 @@ ACMD(do_newsedit)
 
   char *tmstr;
   time_t mytime                = game_now(g);
-  tmstr                        = (char *)asctime(localtime(&mytime));
+  tmstr                        = asctime(localtime(&mytime));
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
   if (lastentry == 0) {

@@ -326,7 +326,7 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
             break;
           case 'D':
             OLC_ZONE(dsc)->cmd[j].arg2 += (OLC_ZONE(dsc)->cmd[j].arg2 >= room_num);
-            /* Fall through */
+            [[fallthrough]];
           case 'R':
             OLC_ZONE(dsc)->cmd[j].arg1 += (OLC_ZONE(dsc)->cmd[j].arg1 >= room_num);
             break;

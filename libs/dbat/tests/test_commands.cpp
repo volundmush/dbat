@@ -179,7 +179,7 @@ static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victi
 
   snprintf(line, sizeof(line), "%s %s", command, argument);
   snprintf(example, sizeof(example), "'%s' level %d %s", line, char_get_admlevel(ch), state_names[state]);
-  snprintf(report, sizeof(report), "case-%d.txt", (int)getpid());
+  snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
   cases++;
   fflush(nullptr);
 

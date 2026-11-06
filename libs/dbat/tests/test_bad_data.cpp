@@ -371,7 +371,7 @@ static void check_no_object_file_is_no_problem(void)
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
 
-  Crash_delete_file((char *)"tester");
+  Crash_delete_file("tester");
   th_take_output(g, ch);
   Crash_load(g, ch);
   CHECK(!saw(ch, "problem loading"));

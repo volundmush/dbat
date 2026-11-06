@@ -582,7 +582,7 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
      * if the target isn't afflicted by the 'blindness' spell.
      */
       msg_not_affected = false;
-      /* fall-through */
+      [[fallthrough]];
     case SPELL_REMOVE_BLINDNESS:
       spell   = SPELL_BLINDNESS;
       to_vict = "Your vision returns!";

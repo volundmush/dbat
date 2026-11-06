@@ -36,15 +36,15 @@
 /* Boards whose new posts are announced, and whose last visit is kept in the player's lboard[]. */
 static const struct special_board {
   obj_vnum vnum;
-  int lboard;      /* index into char lboard[] */
-  size_t newest;   /* where in GameWorld the time of the newest post is kept */
-  bool admin_only; /* announce to admins only */
+  int lboard;                /* index into char lboard[] */
+  time_t GameWorld::*newest; /* where in GameWorld the time of the newest post is kept */
+  bool admin_only;           /* announce to admins only */
   const char *label;
 } special_boards[] = {
-    {3092, 0, offsetof(GameWorld, BOARDNEWMORT), false, "Mortal"    },
-    {3098, 1, offsetof(GameWorld, BOARDNEWIMM),  true,  "Immortal"  },
-    {3099, 3, offsetof(GameWorld, BOARDNEWDUO),  true,  "Punishment"},
-    {3090, 4, offsetof(GameWorld, BOARDNEWBUI),  true,  "Builder"   },
+    {3092, 0, &GameWorld::BOARDNEWMORT, false, "Mortal"    },
+    {3098, 1, &GameWorld::BOARDNEWIMM,  true,  "Immortal"  },
+    {3099, 3, &GameWorld::BOARDNEWDUO,  true,  "Punishment"},
+    {3090, 4, &GameWorld::BOARDNEWBUI,  true,  "Builder"   },
 };
 
 static const struct special_board *find_special_board(obj_vnum vnum)
@@ -57,7 +57,7 @@ static const struct special_board *find_special_board(obj_vnum vnum)
 
 static time_t *special_board_newest(GameWorld *g, const struct special_board *sb)
 {
-  return (time_t *)((char *)g + sb->newest);
+  return &(g->*sb->newest);
 }
 
 /* Records that ch has just looked at a special board. */

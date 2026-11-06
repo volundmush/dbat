@@ -1441,7 +1441,7 @@ int64_t level_exp(struct char_data *ch, int level)
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 int8_t ability_mod_value(int abil)
 {
-  return ((int)(abil / 2)) - 5;
+  return abil / 2 - 5;
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

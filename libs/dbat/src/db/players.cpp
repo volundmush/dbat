@@ -122,7 +122,7 @@ int create_entry(GameWorld *g, char *name)
     free(g->player_table[pos].name);
 
   /* RECREATE leaves a new slot uninitialised and a reused one holds the old character's values */
-  g->player_table[pos] = (struct player_index_element){};
+  g->player_table[pos] = player_index_element{};
   CREATE(g->player_table[pos].name, char, strlen(name) + 1);
 
   /* copy lowercase equivalent of name to table field */

@@ -290,6 +290,14 @@ static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int a
    *  Modification of character skills                                 *
    ********************************************************************* */
 
+/* The length of a buffer of size bytes after a write that wanted to add wrote bytes, as snprintf() reports it.
+ * snprintf() returns what it would have written, so adding that up can pass the end of the buffer. */
+static size_t text_used(size_t len, int wrote, size_t size)
+{
+  len += wrote > 0 ? (size_t)wrote : 0;
+  return len < size ? len : size - 1;
+}
+
 ACMD(do_skillset)
 {
   struct char_data *vict;
@@ -326,15 +334,17 @@ ACMD(do_skillset)
 
   /* If there is no chars in argument */
   if (!*argument) {
-    i = snprintf(help_text, sizeof(help_text) - i, "\r\nSkills:\r\n");
-    i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, nullptr);
-    i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nSpells:\r\n");
-    i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, nullptr);
+    size_t len = 0;
+
+    len = text_used(len, snprintf(help_text, sizeof(help_text), "\r\nSkills:\r\n"), sizeof(help_text));
+    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL, nullptr), sizeof(help_text));
+    len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nSpells:\r\n"), sizeof(help_text));
+    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SPELL, nullptr), sizeof(help_text));
     if (CONFIG_ENABLE_LANGUAGES) {
-      i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nLanguages:\r\n");
-      i += print_skills_by_type(g, vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
+      len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nLanguages:\r\n"), sizeof(help_text));
+      len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL | SKTYPE_LANG, nullptr), sizeof(help_text));
     }
-    if (i >= sizeof(help_text))
+    if (len == sizeof(help_text) - 1)
       strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
     send_to_char(g, ch, "%s", help_text);
     return;

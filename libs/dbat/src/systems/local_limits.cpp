@@ -809,8 +809,8 @@ void run_autowiz(GameWorld *g)
     size_t res;
     char buf[256];
 
-    res = snprintf(buf, sizeof(buf), "nice ../bin/autowiz %d %s %d %s %d &",
-                   CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE, (int)getpid());
+    res = snprintf(buf, sizeof(buf), "nice ../bin/autowiz %d %s %d %s %ld &",
+                   CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE, (long)getpid());
 
     /* Abusing signed -> unsigned conversion to avoid '-1' check. */
     if (res < sizeof(buf)) {

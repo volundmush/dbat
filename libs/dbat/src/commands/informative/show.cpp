@@ -125,7 +125,7 @@ void display_scroll(GameWorld *g, struct char_data *ch, struct obj_data *obj)
 void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, int mode)
 {
   if (!obj || !ch) {
-    mud_log("SYSERR: NULL pointer in show_obj_to_char(): obj=%p ch=%p", obj, ch);
+    mud_log("SYSERR: NULL pointer in show_obj_to_char(): obj=%p ch=%p", (const void *)obj, (const void *)ch);
     /*  SYSERR_DESC:
      *  Somehow a NULL pointer was sent to show_obj_to_char() in either the
      *  'obj' or the 'ch' variable.  The error will indicate which was NULL

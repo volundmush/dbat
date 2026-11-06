@@ -93,7 +93,7 @@ ACMD(do_who)
     { "\r\n@GMortal@n\r\n\r\n"        , 0, ADMLVL_IMMORT - 1, 0 }*/
   };
   char *tmstr;
-  tmstr                        = (char *)asctime(localtime(&g->PCOUNTDATE));
+  tmstr                        = asctime(localtime(&g->PCOUNTDATE));
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
   int num_ranks = countof(rank);

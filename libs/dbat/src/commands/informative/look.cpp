@@ -1473,7 +1473,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
             if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_WEAPON) {
               send_to_char(g, ch, "The weapon type of %s is a %s.\r\n",
                            obj_get_short_description(char_get_equipment(ch, j)),
-                           weapon_type[(int)obj_get_value(char_get_equipment(ch, j), VAL_WEAPON_SKILL)]);
+                           weapon_type[obj_get_value(char_get_equipment(ch, j), VAL_WEAPON_SKILL)]);
             }
             if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_SPELLBOOK) {
               display_spells(g, ch, char_get_equipment(ch, j));
@@ -1498,7 +1498,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
             if (isname(arg, obj_get_name(obj))) {
               if (obj_get_type_flag(obj) == ITEM_WEAPON) {
                 send_to_char(g, ch, "The weapon type of %s is a %s.\r\n",
-                             obj_get_short_description(obj), weapon_type[(int)obj_get_value(obj, VAL_WEAPON_SKILL)]);
+                             obj_get_short_description(obj), weapon_type[obj_get_value(obj, VAL_WEAPON_SKILL)]);
               }
               if (obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
                 display_spells(g, ch, obj);
@@ -1544,7 +1544,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
                            add_commas(obj_get_value(obj, 2)));
             }
             if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-              send_to_char(g, ch, "The weapon type of %s is a %s.\r\n", obj_get_short_description(obj), weapon_type[(int)obj_get_value(obj, VAL_WEAPON_SKILL)]);
+              send_to_char(g, ch, "The weapon type of %s is a %s.\r\n", obj_get_short_description(obj), weapon_type[obj_get_value(obj, VAL_WEAPON_SKILL)]);
             }
             diag_obj_to_char(g, obj, ch);
             send_to_char(g, ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));

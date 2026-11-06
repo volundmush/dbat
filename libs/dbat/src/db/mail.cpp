@@ -475,7 +475,7 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
     return (nullptr);
   }
   if (!(position_pointer = mail_pointer->list_start)) {
-    mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer %p)", position_pointer);
+    mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer %p)", (void *)position_pointer);
     return (nullptr);
   }
   if (!(position_pointer->next)) { /* just 1 entry in list. */

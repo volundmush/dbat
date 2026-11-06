@@ -446,7 +446,7 @@ ASPELL(spell_portal)
   obj_set_value(portal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(victim)));
   obj_set_value(portal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(portal, VAL_PORTAL_MAXHEALTH, 100);
-  obj_set_timer(portal, (int)(level / 10));
+  obj_set_timer(portal, level / 10);
   add_unique_id(g, portal);
   obj_to_room(g, portal, char_get_in_room(ch));
   act(g, "$n opens a portal in thin air.",
@@ -458,7 +458,7 @@ ASPELL(spell_portal)
   obj_set_value(tportal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(ch)));
   obj_set_value(tportal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(tportal, VAL_PORTAL_MAXHEALTH, 100);
-  obj_set_timer(tportal, (int)(level / 10));
+  obj_set_timer(tportal, level / 10);
   add_unique_id(g, portal);
   obj_to_room(g, tportal, char_get_in_room(victim));
   act(g, "A shimmering portal appears out of thin air.",

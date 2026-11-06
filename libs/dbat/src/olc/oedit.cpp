@@ -318,7 +318,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
         switch (OLC_ZONE(dsc)->cmd[i].command) {
           case 'P':
             OLC_ZONE(dsc)->cmd[i].arg3 += (OLC_ZONE(dsc)->cmd[i].arg3 >= robj_num);
-            /* Fall through. */
+            [[fallthrough]];
           case 'E':
           case 'G':
           case 'O':
@@ -975,7 +975,7 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   obj_get_value(obj, 8), obj_get_value(obj, 9), obj_get_value(obj, 10),
                   obj_get_value(obj, 11), obj_get_value(obj, 12), obj_get_value(obj, 13),
                   obj_get_value(obj, 14), obj_get_value(obj, 15), obj_get_extra_flags(obj) ? "Set." : "Not Set.",
-                  obj_get_level(obj), material_names[(int)obj_get_value(obj, 7)],
+                  obj_get_level(obj), material_names[obj_get_value(obj, 7)],
                   ebitbuf, OLC_SCRIPT(d) ? "Set." : "Not Set.",
                   size_names[obj_get_size(obj)]);
   OLC_MODE(d) = OEDIT_MAIN_MENU;

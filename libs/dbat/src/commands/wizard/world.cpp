@@ -148,7 +148,7 @@ room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
   }
 
   if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
-    if ((location = real_room(g, (room_vnum)atoi(roomstr))) == NOWHERE) {
+    if ((location = real_room(g, atoi(roomstr))) == NOWHERE) {
       send_to_char(g, ch, "No room exists with that number.\r\n");
       return (NOWHERE);
     }

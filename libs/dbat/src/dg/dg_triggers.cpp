@@ -569,7 +569,7 @@ int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
       add_char_uid_var(t, "actor", actor, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
     }
   }
@@ -945,7 +945,7 @@ int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
       add_char_uid_var(t, "actor", actor, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* the spell has nothing left to work on, or nobody left to cast it */
       if (!obj || char_is_dead(actor))
@@ -1217,7 +1217,7 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
         add_obj_uid_var(t, "object", obj, 0);
       sprintf(buf, "%d", spellnum);
       add_var(&t->var_list, "spell", buf, 0);
-      add_var(&t->var_list, "spellname", (const char *)skill_name(g, spellnum), 0);
+      add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }
   }
