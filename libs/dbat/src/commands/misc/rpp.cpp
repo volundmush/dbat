@@ -202,8 +202,8 @@ ACMD(do_instill)
       }
     }
 
-    act(g, "@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, TO_ROOM);
     raise = obj_get_affected(token)[0].modifier;
     extract_obj(g, token);
 
@@ -296,7 +296,7 @@ ACMD(do_arena)
         if (char_in_arena(g, d->character)) {
           char buf[MAX_INPUT_LENGTH];
           snprintf(buf, sizeof(buf), "@YFighter Number@D: @w%d, $N.@n", char_get_idnum(d->character));
-          act(g, buf, true, ch, 0, d->character, TO_CHAR);
+          act(g, buf, true, ch, nullptr, d->character, TO_CHAR);
           found = true;
         }
       }
@@ -330,8 +330,8 @@ ACMD(do_arena)
       }
 
       if (found == true) {
-        act(g, "@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@C$n@w starts watching the action in the arena.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_prf_set(g, ch, PRF_ARENAWATCH, true);
         char_set_arenawatch(ch, num);
       } else {

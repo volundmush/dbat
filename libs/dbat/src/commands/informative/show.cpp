@@ -908,9 +908,9 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   if (found && (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NOEQSEE))) {
     send_to_char(g, ch, "\r\n"); /* act() does capitalization. */
     if (!char_plr_flagged(i, PLR_DISGUISED)) {
-      act(g, "$n is using:", false, i, 0, ch, TO_VICT);
+      act(g, "$n is using:", false, i, nullptr, ch, TO_VICT);
     } else {
-      act(g, "The disguised person is using:", false, i, 0, ch, TO_VICT);
+      act(g, "The disguised person is using:", false, i, nullptr, ch, TO_VICT);
     }
     for (j = 0; j < NUM_WEARS; j++)
       if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
@@ -948,9 +948,9 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   }
   if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || char_get_admlevel(ch))) {
     found = false;
-    act(g, "\r\nYou attempt to peek at $s inventory:", false, i, 0, ch, TO_VICT);
+    act(g, "\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, TO_VICT);
     if (char_can_see(g, i, ch))
-      act(g, "$n tries to evaluate what you have in your inventory.", true, ch, 0, i, TO_VICT);
+      act(g, "$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
     if (char_get_skill(ch, SKILL_KEEN) > axion_dice(g, 0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
       for (tmp_obj = char_get_inventory(i); tmp_obj; tmp_obj = obj_get_next_content(tmp_obj)) {
         if (char_can_see_obj(g, ch, tmp_obj) &&
@@ -963,9 +963,9 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     } else if (char_is_npc(i) && char_get_admlevel(ch) < 2) {
       return;
     } else {
-      act(g, "You are unsure about $s inventory.", false, i, 0, ch, TO_VICT);
+      act(g, "You are unsure about $s inventory.", false, i, nullptr, ch, TO_VICT);
       if (char_can_see(g, i, ch))
-        act(g, "$n didn't seem to get a good enough look.", true, ch, 0, i, TO_VICT);
+        act(g, "$n didn't seem to get a good enough look.", true, ch, nullptr, i, TO_VICT);
       improve_skill(g, ch, SKILL_KEEN, 1);
       return;
     }
@@ -1000,59 +1000,59 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     if (char_is_npc(i)) {
       double health = char_get_health(i);
       if (health <= 0.1) {
-        act(g, "@R...Should be DEAD soon.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.2) {
-        act(g, "@R...Is on $s last leg.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.3) {
-        act(g, "@R...Is absolutely covered in wounds.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.4) {
-        act(g, "@R...$s body is in terrible shape.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.5) {
-        act(g, "@R...Blood is seeping from the wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.6) {
-        act(g, "@R...Horrible wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.7) {
-        act(g, "@R...Quite a few wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.8) {
-        act(g, "@R...Many wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health <= 0.9) {
-        act(g, "@R...A few wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       } else if (health < 1.0) {
-        act(g, "@R...Some slight wounds on $s body.@w", true, i, 0, ch, TO_VICT);
+        act(g, "@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
       }
     }
 
     if (char_get_listenroom(i) > 0) {
       char eaves[300];
       snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-      act(g, eaves, true, i, 0, ch, TO_VICT);
+      act(g, eaves, true, i, nullptr, ch, TO_VICT);
     }
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-      act(g, "...$e is in the air!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e is in the air!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-      act(g, "...$e is high in the air!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e is high in the air!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-      act(g, "...$e has a barrier around $s body!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e has a barrier around $s body!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_FIRESHIELD))
-      act(g, "...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-      act(g, "...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, nullptr, ch, TO_VICT);
     if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-      act(g, "...$e is spinning in a vortex!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
     if (char_get_charge(i))
-      act(g, "...$e has a bright %s aura around $s body!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e has a bright %s aura around $s body!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_METAMORPH))
-      act(g, "@w...$e has a dark, @rred@w aura and menacing presence.", false, i, 0, ch, TO_VICT);
+      act(g, "@w...$e has a dark, @rred@w aura and menacing presence.", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_HAYASA))
-      act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, 0, ch, TO_VICT);
+      act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_BLIND))
-      act(g, "...$e is groping around blindly!", false, i, 0, ch, TO_VICT);
+      act(g, "...$e is groping around blindly!", false, i, nullptr, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-      act(g, "@m...$e @mis outlined with purple fire!@m", false, i, 0, ch, TO_VICT);
+      act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
     if (char_get_feature(i)) {
       char woo[MAX_STRING_LENGTH];
       snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-      act(g, woo, false, i, 0, ch, TO_VICT);
+      act(g, woo, false, i, nullptr, ch, TO_VICT);
     }
 
     return;
@@ -1335,71 +1335,71 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (char_get_listenroom(i) > 0) {
     char eaves[300];
     snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-    act(g, eaves, true, i, 0, ch, TO_VICT);
+    act(g, eaves, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
     if (char_plr_flagged(i, PLR_FISHING)) {
-      act(g, "@w...$e is @Cfishing@w.@n", true, i, 0, ch, TO_VICT);
+      act(g, "@w...$e is @Cfishing@w.@n", true, i, nullptr, ch, TO_VICT);
     }
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
     char bloom[MAX_INPUT_LENGTH];
     snprintf(bloom, sizeof(bloom), "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
-    act(g, bloom, true, i, 0, ch, TO_VICT);
+    act(g, bloom, true, i, nullptr, ch, TO_VICT);
   }
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-    act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FIRESHIELD))
-    act(g, "@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_HEALGLOW))
-    act(g, "@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_EARMOR))
-    act(g, "@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-    act(g, "@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-    act(g, "@w...$e is in the air!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e is in the air!", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-    act(g, "@w...$e is high in the air!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e is high in the air!", true, i, nullptr, ch, TO_VICT);
   if (char_get_kaioken(i) > 0)
-    act(g, "@w...@r$e has a red aura around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...@r$e has a red aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-    act(g, "@w...$e is spinning in a vortex!", false, i, 0, ch, TO_VICT);
+    act(g, "@w...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
   if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
-    act(g, "@w...$e has energy crackling around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     char aura[MAX_INPUT_LENGTH];
     snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, 0, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     char aura[MAX_INPUT_LENGTH];
     snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, 0, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has energy crackling around $s body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
   if (char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e is in the form of a @rgreat ape@w!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
   if (is_affected(i, AFF_KYODAIKA))
-    act(g, "@w...$e has expanded $s body size@w!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_HAYASA))
-    act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
   if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, 0, ch, TO_VICT);
+    act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
   if (char_get_feature(i)) {
     char woo[MAX_STRING_LENGTH];
     snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-    act(g, woo, false, i, 0, ch, TO_VICT);
+    act(g, woo, false, i, nullptr, ch, TO_VICT);
   }
 
   if (char_get_rdisplay(i)) {
     if (strcmp(char_get_rdisplay(i), "Empty")) {
       char rdis[MAX_STRING_LENGTH];
       snprintf(rdis, sizeof(rdis), "...%s", char_get_rdisplay(i));
-      act(g, rdis, false, i, 0, ch, TO_VICT);
+      act(g, rdis, false, i, nullptr, ch, TO_VICT);
     }
   }
 }

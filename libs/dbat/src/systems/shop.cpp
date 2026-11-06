@@ -899,10 +899,10 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (!char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(keeper, char_get_gold(keeper) + (goldamt));
 
-  strlcpy(tempstr, times_message(char_get_inventory(ch), 0, bought), sizeof(tempstr));
+  strlcpy(tempstr, times_message(char_get_inventory(ch), nullptr, bought), sizeof(tempstr));
 
   snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
-  act(g, tempbuf, false, ch, obj, 0, TO_ROOM);
+  act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
   snprintf(tempbuf, sizeof(tempbuf), g->shops[shop_nr].message_buy, char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
@@ -935,7 +935,7 @@ static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char
     return (obj);
 
   if (!msg)
-    return (0);
+    return (nullptr);
 
   switch (result) {
     case OBJECT_NOVAL:
@@ -1086,9 +1086,9 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
 
     do_tell(g, keeper, buf, g->cmd_tell, 0);
   }
-  strlcpy(tempstr, times_message(0, name, sold), sizeof(tempstr));
+  strlcpy(tempstr, times_message(nullptr, name, sold), sizeof(tempstr));
   snprintf(tempbuf, sizeof(tempbuf), "$n sells something to %s.\r\n", char_get_name(keeper));
-  act(g, tempbuf, false, ch, obj, 0, TO_ROOM);
+  act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
   snprintf(tempbuf, sizeof(tempbuf), g->shops[shop_nr].message_sell, char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
@@ -1282,8 +1282,8 @@ SPECIAL(shop_keeper)
 
     if (!rshop_allows_steal(g, shop_nr)) {
       snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
-      act(g, argm, false, ch, 0, keeper, TO_CHAR);
-      act(g, argm, false, ch, 0, keeper, TO_ROOM);
+      act(g, argm, false, ch, nullptr, keeper, TO_CHAR);
+      act(g, argm, false, ch, nullptr, keeper, TO_ROOM);
       do_action(g, keeper, char_get_name(ch), g->cmd_slap, 0);
 
       return (true);

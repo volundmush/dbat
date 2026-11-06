@@ -1031,7 +1031,7 @@ ACMD(do_oasis_hsedit)
   /** Send the OLC message to the players in the same room as the builder.   **/
 
   /****************************************************************************/
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   /****************************************************************************/

@@ -138,8 +138,8 @@ ACMD(do_telepathy)
       return;
     }
     if (char_get_mindlink(ch)) {
-      act(g, "@CYou remove the link your mind had with @w$N.@n", true, ch, 0, char_get_mindlink(ch), TO_CHAR);
-      act(g, "@w$n@C removes the link $s mind had with yours.@n", true, ch, 0, char_get_mindlink(ch), TO_VICT);
+      act(g, "@CYou remove the link your mind had with @w$N.@n", true, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
+      act(g, "@w$n@C removes the link $s mind had with yours.@n", true, ch, nullptr, char_get_mindlink(ch), TO_VICT);
       char_set_mindlink(char_get_mindlink(ch), nullptr);
       char_set_mindlink(ch, nullptr);
       char_set_linker(ch, 0);
@@ -170,12 +170,12 @@ ACMD(do_telepathy)
       return;
     }
     if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(g, char_get_aff_abils_intel(vict) * 0.1)) {
-      act(g, "@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", false, ch, 0, vict, TO_CHAR);
+      act(g, "@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", false, ch, nullptr, vict, TO_CHAR);
       return;
     }
-    act(g, "@CYou link your mind with @w$N.@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", true, ch, 0, vict, TO_VICT);
+    act(g, "@CYou link your mind with @w$N.@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", true, ch, nullptr, vict, TO_VICT);
     send_to_char(g, vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
     char_set_mindlink(vict, ch);
     char_set_mindlink(ch, vict);
@@ -197,9 +197,9 @@ ACMD(do_telepathy)
     } else {
       if (axion_dice(g, 0) > char_get_skill(ch, SKILL_TELEPATHY)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
-        act(g, "@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", true, ch, 0, vict, TO_CHAR);
+        act(g, "@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", true, ch, nullptr, vict, TO_CHAR);
         if (rand_number(g, 1, 15) >= 14 && !char_aff_flagged(ch, AFF_SHOCKED)) {
-          act(g, "@MYour mind has been shocked!@n", true, ch, 0, 0, TO_CHAR);
+          act(g, "@MYour mind has been shocked!@n", true, ch, nullptr, nullptr, TO_CHAR);
           char_aff_set(ch, AFF_SHOCKED, true);
         } else {
           improve_skill(g, ch, SKILL_TELEPATHY, 0);
@@ -208,8 +208,8 @@ ACMD(do_telepathy)
       }
       if (char_get_skill(vict, SKILL_TELEPATHY) >= char_get_skill(ch, SKILL_TELEPATHY) && rand_number(g, 1, 2) == 2) {
         decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
-        act(g, "@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@w attempts to read your mind, but you resist and force $m out!@n", true, ch, 0, vict, TO_VICT);
+        act(g, "@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@w attempts to read your mind, but you resist and force $m out!@n", true, ch, nullptr, vict, TO_VICT);
         improve_skill(g, ch, SKILL_TELEPATHY, 0);
         return;
       } else {
@@ -334,20 +334,20 @@ void check_eq(GameWorld *g, struct char_data *ch)
     if (char_get_equipment(ch, i)) {
       obj = char_get_equipment(ch, i);
       if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-        act(g, "@W$p@W falls apart and you remove it.@n", false, ch, obj, 0, TO_CHAR);
-        act(g, "@W$p@W falls apart and @C$n@W remove it.@n", false, ch, obj, 0, TO_ROOM);
+        act(g, "@W$p@W falls apart and you remove it.@n", false, ch, obj, nullptr, TO_CHAR);
+        act(g, "@W$p@W falls apart and @C$n@W remove it.@n", false, ch, obj, nullptr, TO_ROOM);
         perform_remove(g, ch, i);
         return;
       }
       if (obj == char_get_equipment(ch, WEAR_WIELD1) && char_get_limb_condition(ch, (1) - 1) <= 0) {
-        act(g, "@WWithout your right arm you let go of @c$p@W!@n", false, ch, obj, 0, TO_CHAR);
-        act(g, "@C$n@W lets go of @c$p@W!@n", false, ch, obj, 0, TO_ROOM);
+        act(g, "@WWithout your right arm you let go of @c$p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+        act(g, "@C$n@W lets go of @c$p@W!@n", false, ch, obj, nullptr, TO_ROOM);
         perform_remove(g, ch, i);
         return;
       }
       if (obj == char_get_equipment(ch, WEAR_WIELD2) && char_get_limb_condition(ch, (2) - 1) <= 0) {
-        act(g, "@WWithout your left arm you let go of @c$p@W!@n", false, ch, obj, 0, TO_CHAR);
-        act(g, "@C$n@W lets go of @c$p@W!@n", false, ch, obj, 0, TO_ROOM);
+        act(g, "@WWithout your left arm you let go of @c$p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+        act(g, "@C$n@W lets go of @c$p@W!@n", false, ch, obj, nullptr, TO_ROOM);
         perform_remove(g, ch, i);
         return;
       }
@@ -438,8 +438,8 @@ ACMD(do_snet)
     if (channel > 999) {
       obj_set_scoutfreq(obj, 999);
     }
-    act(g, "@wYou push some buttons on $p@w and change its channel.", true, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@w pushes some buttons on $p@w and changes its channel.", true, ch, obj, 0, TO_ROOM);
+    act(g, "@wYou push some buttons on $p@w and change its channel.", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@w pushes some buttons on $p@w and changes its channel.", true, ch, obj, nullptr, TO_ROOM);
     return;
   } else {
     if (char_get_bonuses(ch, BONUS_MUTE) > 0) {
@@ -553,7 +553,7 @@ ACMD(do_snet)
         add_history(g, ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
-        act(g, over, true, ch, 0, 0, TO_ROOM);
+        act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
@@ -566,7 +566,7 @@ ACMD(do_snet)
         add_history(g, ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
-        act(g, over, true, ch, 0, 0, TO_ROOM);
+        act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
@@ -579,7 +579,7 @@ ACMD(do_snet)
       add_history(g, ch, hist, HIST_SNET);
       char over[MAX_STRING_LENGTH];
       snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
-      act(g, over, true, ch, 0, 0, TO_ROOM);
+      act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
       if (reached == false) {
         send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
       }
@@ -674,8 +674,8 @@ ACMD(do_scouter)
     return;
   }
   if (char_is_android(vict)) {
-    act(g, "$n points $s scouter at you.", false, ch, 0, vict, TO_VICT);
-    act(g, "$n points $s scouter at $N.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     send_to_char(g, ch, "@D,==================================|@n\r\n");
     send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
     send_to_char(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
@@ -690,31 +690,31 @@ ACMD(do_scouter)
     return;
   }
   if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
-    act(g, "$n points $s scouter at you.", false, ch, 0, vict, TO_VICT);
-    act(g, "$n points $s scouter at $N.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
     send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
-    act(g, "$n's scouter explodes!", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
     return;
   }
   if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, vict) >= 5000000) {
-    act(g, "$n points $s scouter at you.", false, ch, 0, vict, TO_VICT);
-    act(g, "$n points $s scouter at $N.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
     send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
-    act(g, "$n's scouter explodes!", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
     return;
   }
   if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, vict) >= 15000000) {
-    act(g, "$n points $s scouter at you.", false, ch, 0, vict, TO_VICT);
-    act(g, "$n points $s scouter at $N.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
     send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
-    act(g, "$n's scouter explodes!", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
     return;
@@ -730,8 +730,8 @@ ACMD(do_scouter)
   max = (long double)(mstam);
 
   percent = (cur / max) * 100;
-  act(g, "$n points $s scouter at you.", false, ch, 0, vict, TO_VICT);
-  act(g, "$n points $s scouter at $N.", false, ch, 0, vict, TO_NOTVICT);
+  act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+  act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
   send_to_char(g, ch, "@D,==================================|@n\r\n");
   send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
   send_to_char(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");

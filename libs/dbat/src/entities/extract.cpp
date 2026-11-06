@@ -108,16 +108,16 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
 
   if (char_get_grappling(ch)) {
-    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
-    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_ROOM);
+    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
+    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_ROOM);
     char_set_grap(char_get_grappling(ch), -1);
     char_set_grappled(char_get_grappling(ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
   if (char_get_grappled(ch)) {
-    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_CHAR);
-    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_ROOM);
+    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, char_get_grappled(ch), TO_CHAR);
+    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, char_get_grappled(ch), TO_ROOM);
     char_set_grap(char_get_grappled(ch), -1);
     char_set_grappling(char_get_grappled(ch), nullptr);
     char_set_grappled(ch, nullptr);
@@ -136,15 +136,15 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
 
   if (char_get_drag(ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_set_dragged(char_get_drag(ch), nullptr);
     char_set_drag(ch, nullptr);
   }
 
   if (char_get_dragged(ch)) {
-    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_CHAR);
-    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_ROOM);
+    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, char_get_dragged(ch), TO_CHAR);
+    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, char_get_dragged(ch), TO_ROOM);
     char_set_drag(char_get_dragged(ch), nullptr);
     char_set_dragged(ch, nullptr);
   }

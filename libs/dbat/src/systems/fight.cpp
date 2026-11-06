@@ -172,39 +172,39 @@ int group_bonus(GameWorld *g, struct char_data *ch, int type)
 void mutant_limb_regen(GameWorld *g, struct char_data *ch)
 {
   if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50) {
-    act(g, "The bones in your right arm have mended them selves.", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n starts moving $s right arm gingerly for a moment.", true, ch, 0, 0, TO_ROOM);
+    act(g, "The bones in your right arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (1) - 1, 100);
   } else if (char_get_limb_condition(ch, (1) - 1) <= 0) {
-    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (1) - 1, 100);
   }
   if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50) {
-    act(g, "The bones in your left arm have mended them selves.", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n starts moving $s left arm gingerly for a moment.", true, ch, 0, 0, TO_ROOM);
+    act(g, "The bones in your left arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (2) - 1, 100);
   } else if (char_get_limb_condition(ch, (2) - 1) <= 0) {
-    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (2) - 1, 100);
   }
   if (char_get_limb_condition(ch, (3) - 1) > 0 && char_get_limb_condition(ch, (3) - 1) < 50) {
-    act(g, "The bones in your right leg have mended them selves.", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n starts moving $s right leg gingerly for a moment.", true, ch, 0, 0, TO_ROOM);
+    act(g, "The bones in your right leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (3) - 1, 100);
   } else if (char_get_limb_condition(ch, (3) - 1) <= 0) {
-    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (3) - 1, 100);
   }
   if (char_get_limb_condition(ch, (4) - 1) > 0 && char_get_limb_condition(ch, (4) - 1) < 50) {
-    act(g, "The bones in your left leg have mended them selves.", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n starts moving $s left leg gingerly for a moment.", true, ch, 0, 0, TO_ROOM);
+    act(g, "The bones in your left leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (4) - 1, 100);
   } else if (char_get_limb_condition(ch, (4) - 1) <= 0) {
-    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_limb_condition(ch, (4) - 1, 100);
   }
 }
@@ -270,19 +270,19 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
 
   if ((getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.05 && char_is_humanoid(ch) && (!char_is_dragon(ch) || dragonpass == true)) {
     if (char_get_mobcharge(ch) <= 0 && rand_number(g, 1, 10) >= 8) {
-      act(g, "@wAn aura flares up around @R$n@w!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
       if (char_get_level(ch) > 80) {
         char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
       }
     } else if (char_get_mobcharge(ch) <= 5) {
-      act(g, "@wThe aura burns brighter around @R$n@w!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wThe aura burns brighter around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
       if (char_get_level(ch) > 80) {
         char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
       }
     } else if (char_get_mobcharge(ch) == 6) {
-      act(g, "@wThe aura around @R$n@w flashes!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wThe aura around @R$n@w flashes!@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
       special = 100;
     }
@@ -833,17 +833,17 @@ void fight_stack(GameWorld *g)
     }
     if (char_is_npc(ch) && char_mob_flagged(ch, MOB_POWERUP) && axion_dice(g, 0) >= 90) {
       if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
-        act(g, "@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         restoreHealth(ch, false);
         char_mob_set(ch, MOB_POWERUP, false);
       } else if (getCurPL(g, ch) >= getEffMaxPL(g, ch) / 2) {
-        act(g, "@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", true, ch, nullptr, nullptr, TO_ROOM);
         incCurHealthPercent(g, ch, .1, true);
       } else if (getCurPL(g, ch) > getEffMaxPL(g, ch) / 4) {
-        act(g, "@g$n@G powers up as a steady aura around $s body grow brighter.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@g$n@G powers up as a steady aura around $s body grow brighter.@n", true, ch, nullptr, nullptr, TO_ROOM);
         incCurHealthPercent(g, ch, .125, true);
       } else if (getCurPL(g, ch) > 0) {
-        act(g, "@g$n@G powers up, as a weak aura flickers around $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@g$n@G powers up, as a weak aura flickers around $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         incCurHealthPercent(g, ch, .2, true);
       }
     }
@@ -859,8 +859,8 @@ void fight_stack(GameWorld *g)
       stop_fighting(g, ch);
     }
     if (char_get_fighting(ch) && char_get_drag(ch)) {
-      act(g, "@WYou are forced to stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-      act(g, "@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+      act(g, "@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+      act(g, "@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
       char_set_dragged(char_get_drag(ch), nullptr);
       char_set_drag(ch, nullptr);
     }
@@ -898,15 +898,15 @@ void fight_stack(GameWorld *g)
       if (roll_balance(g, ch) > axion_dice(g, 0) && rand_number(g, 1, 10) >= 7) {
         if (char_get_fighting(ch)) {
           if (!char_aff_flagged(char_get_fighting(ch), AFF_POSITION)) {
-            act(g, "@YYou manage to move into an advantageous position!@n", true, ch, 0, 0, TO_CHAR);
-            act(g, "@y$n@Y manages to move into an advantageous position!@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "@YYou manage to move into an advantageous position!@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act(g, "@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr, TO_ROOM);
             char_aff_set(ch, AFF_POSITION, true);
           } else {
             struct char_data *vict = char_get_fighting(ch);
             if (roll_balance(g, ch) > roll_balance(g, vict)) {
-              act(g, "@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@y$n@Y struggles to gain a better position than you and succeeds!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@y$n@Y struggles to gain a better position than you and succeeds!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_POSITION, false);
               char_aff_set(ch, AFF_POSITION, true);
             }
@@ -915,21 +915,21 @@ void fight_stack(GameWorld *g)
       }
     } else {
       if (roll_balance(g, ch) < axion_dice(g, -30) || char_get_position(ch) < POS_STANDING) {
-        act(g, "@YYou are moved out of your position!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@y$n@Y is moved out of $s position!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_aff_set(ch, AFF_POSITION, false);
       }
     }
     if (char_get_grappling(ch) && char_get_grap(ch) == 2 && rand_number(g, 1, 11) >= 8) {
       if ((getCurST(g, char_get_grappling(ch))) >= getMaxST(g, char_get_grappling(ch)) / 8) {
-        act(g, "@WYou choke @C$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
-        act(g, "@C$n@W chokes YOU@W!@n", true, ch, 0, char_get_grappling(ch), TO_VICT);
-        act(g, "@C$n@W chokes @c$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+        act(g, "@WYou choke @C$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
+        act(g, "@C$n@W chokes YOU@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
+        act(g, "@C$n@W chokes @c$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
         decCurST(g, char_get_grappling(ch), (getMaxST(g, char_get_grappling(ch)) / 8), 0);
       } else {
-        act(g, "@WYou choke @C$N@W, and $E passes out!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
-        act(g, "@C$n@W chokes YOU@W, and you pass out!@n", true, ch, 0, char_get_grappling(ch), TO_VICT);
-        act(g, "@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+        act(g, "@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
+        act(g, "@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
+        act(g, "@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
         char_aff_set(char_get_grappling(ch), AFF_KNOCKED, true);
         char_set_position(char_get_grappling(ch), POS_SLEEPING);
         char_set_grap(char_get_grappling(ch), -1);
@@ -938,9 +938,9 @@ void fight_stack(GameWorld *g)
         char_set_grap(ch, -1);
       }
     } else if (char_get_grappling(ch) && char_get_grap(ch) == 4 && rand_number(g, 1, 12) >= 8) {
-      act(g, "@WYou crush @C$N@W some more!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
-      act(g, "@C$n@W crushes YOU@W some more!@n", true, ch, 0, char_get_grappling(ch), TO_VICT);
-      act(g, "@C$n@W crushes @c$N@W some more!@n", true, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+      act(g, "@WYou crush @C$N@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
+      act(g, "@C$n@W crushes YOU@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
+      act(g, "@C$n@W crushes @c$N@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
       int64_t damg = char_get_aff_abils_str(ch) * (10 + (getEffMaxPL(g, ch) * 0.005));
       hurt(g, 0, 0, ch, char_get_grappling(ch), nullptr, damg, 0);
     }
@@ -963,8 +963,8 @@ void fight_stack(GameWorld *g)
 
       if (getCurST(g, ch) < getMaxST(g, ch) / 60) {
         if (!(tier == 1 && char_plr_flagged(ch, PLR_FPSSJ))) {
-          act(g, "@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
           if (char_get_kaioken(ch) < 1)
             do_kaioken(g, ch, writable{"0"}, 0, 0);
           do_transform(g, ch, writable{"revert"}, 0, 0);
@@ -1018,18 +1018,18 @@ void fight_stack(GameWorld *g)
       if (char_get_skill(ch, SKILL_DISGUISE) < rand_number(g, 1, 125)) {
         send_to_char(g, ch, "Your disguise comes off because of your swift movements!\r\n");
         char_plr_set(ch, PLR_DISGUISED, false);
-        act(g, "@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, 0, 0, TO_ROOM);
+        act(g, "@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
       }
     }
     if (char_is_npc(ch) && char_aff_flagged(ch, AFF_BLIND) && rand_number(g, 1, 200) >= 190) {
-      act(g, "@W$n@W is no longer blind.@n", false, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
       char_aff_set(ch, AFF_BLIND, false);
     }
 
     if (char_aff_flagged(ch, AFF_KNOCKED) && rand_number(g, 1, 200) >= 195) {
       cureStatusKnockedOut(g, ch, true);
       if (char_is_npc(ch) && rand_number(g, 1, 20) >= 12) {
-        act(g, "@W$n@W stands up.@n", false, ch, 0, 0, TO_ROOM);
+        act(g, "@W$n@W stands up.@n", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_STANDING);
       }
     }
@@ -1041,16 +1041,16 @@ void fight_stack(GameWorld *g)
     }
     /* Mobile Defense System */
     if (char_is_npc(ch) && char_get_grappled(ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(g, 1, 5) >= 4) {
-      do_escape(g, ch, 0, 0, 0);
+      do_escape(g, ch, nullptr, 0, 0);
       continue;
     }
     if (char_get_fighting(ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
-        do_fly(g, ch, 0, 0, 0);
+        do_fly(g, ch, nullptr, 0, 0);
         continue;
       }
       if (!char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
-        do_fly(g, ch, 0, 0, 0);
+        do_fly(g, ch, nullptr, 0, 0);
         continue;
       }
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(ch))) {
@@ -1059,7 +1059,7 @@ void fight_stack(GameWorld *g)
       }
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
-          act(g, "$n@G flees in terror and you lose sight of $m!", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
             extract_obj(g, char_get_inventory(ch));
 
@@ -1069,7 +1069,7 @@ void fight_stack(GameWorld *g)
       }
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) <= 10) {
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
-          act(g, "$n@G turns and runs away. You lose sight of $m!", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
             extract_obj(g, char_get_inventory(ch));
           extract_char(g, ch);
@@ -1077,21 +1077,21 @@ void fight_stack(GameWorld *g)
         }
       }
       if (char_get_position(ch) == POS_SITTING && sec_roll_check(g, ch) == 1) {
-        do_stand(g, ch, 0, 0, 0);
+        do_stand(g, ch, nullptr, 0, 0);
         continue;
       }
       if (char_get_position(ch) == POS_RESTING && sec_roll_check(g, ch) == 1) {
-        do_stand(g, ch, 0, 0, 0);
+        do_stand(g, ch, nullptr, 0, 0);
         continue;
       }
       if (char_is_affected(ch, AFF_PARA) && char_is_npc(ch) && char_get_aff_abils_intel(ch) + 10 < rand_number(g, 1, 60)) {
-        act(g, "@yYou fail to overcome your paralysis!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
         continue;
       }
       if (char_get_position(ch) == POS_SLEEPING && !char_aff_flagged(ch, AFF_KNOCKED) && sec_roll_check(g, ch) == 1) {
-        do_wake(g, ch, 0, 0, 0);
-        do_stand(g, ch, 0, 0, 0);
+        do_wake(g, ch, nullptr, 0, 0);
+        do_stand(g, ch, nullptr, 0, 0);
         continue;
       }
       struct char_data *vict;
@@ -1134,8 +1134,8 @@ void fight_stack(GameWorld *g)
         restoreHealth(ch, false);
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         dispel_ash(g, ch);
-        act(g, "@RYou have reached your maximum!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
         send_to_scouter(g, buf3, ch, 1, 0);
@@ -1148,8 +1148,8 @@ void fight_stack(GameWorld *g)
         restoreHealth(ch, false);
         decCurKI(g, ch, (gmaxki * 0.0375) + 1, 0);
         dispel_ash(g, ch);
-        act(g, "@RYou have reached your maximum!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
         send_to_scouter(g, buf3, ch, 1, 0);
@@ -1163,16 +1163,16 @@ void fight_stack(GameWorld *g)
 
       if (gki < (gmaxki / 20) && char_get_preference(ch) != PREFERENCE_KI) {
         decCurKI(g, ch, gmaxki / 20, 0);
-        act(g, "@RYou have run out of ki.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
         send_to_scouter(g, buf3, ch, 1, 0);
         char_plr_set(ch, PLR_POWERUP, false);
       } else if (gki < (gmaxki * 0.0375) + 1 && char_get_preference(ch) == PREFERENCE_KI) {
         decCurKI(g, ch, (gmaxki * 0.0375) + 1, 0);
-        act(g, "@RYou have run out of ki.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
         send_to_scouter(g, buf3, ch, 1, 0);
@@ -1202,26 +1202,26 @@ void fight_stack(GameWorld *g)
         gmaxhit = getEffMaxPL(g, ch);
 
         if (gmaxhit < 50000) {
-          act(g, "@RYou continue to powerup, as wind billows out from around you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as wind billows out from around $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as wind billows out from around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as wind billows out from around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (gmaxhit < 500000) {
-          act(g, "@RYou continue to powerup, as the ground splits beneath you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as the ground splits beneath $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as the ground splits beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as the ground splits beneath $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (gmaxhit < 5000000) {
-          act(g, "@RYou continue to powerup, as the ground shudders and splits beneath you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as the ground shudders and splits beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (gmaxhit < 50000000) {
-          act(g, "@RYou continue to powerup, as a huge depression forms beneath you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as a huge depression forms beneath $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as a huge depression forms beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as a huge depression forms beneath $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (gmaxhit < 100000000) {
-          act(g, "@RYou continue to powerup, as the entire area quakes around you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as the entire area quakes around $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as the entire area quakes around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as the entire area quakes around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (gmaxhit < 300000000) {
-          act(g, "@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as huge chunks of ground are ripped apart beanth $m!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as huge chunks of ground are ripped apart beanth $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else {
-          act(g, "@RYou continue to powerup, as the very air around you crackles and burns!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@R$n continues to powerup, as the very air around $m crackles and burns!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYou continue to powerup, as the very air around you crackles and burns!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@R$n continues to powerup, as the very air around $m crackles and burns!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
         send_to_sense(g, 0, "You sense someone powering up", ch);
         send_to_worlds(g, ch);
@@ -1234,16 +1234,16 @@ void fight_stack(GameWorld *g)
       send_to_char(g, ch, "You stop charging and release all your pent up energy!\r\n");
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         default:
-          act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       char_plr_set(ch, PLR_CHARGE, false);
@@ -1255,16 +1255,16 @@ void fight_stack(GameWorld *g)
       send_to_char(g, ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "$n@w's aura fades.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura fades.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura flickers brightly before disappearing.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         default:
-          act(g, "$n@w's aura disappears.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       char_plr_set(ch, PLR_CHARGE, false);
@@ -1281,23 +1281,23 @@ void fight_stack(GameWorld *g)
         send_to_char(g, ch, "You lose some of your energy slowly.\r\n");
         switch (rand_number(g, 1, 3)) {
           case 1:
-            act(g, "$n@w's aura flickers weakly.@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
             break;
           case 2:
-            act(g, "$n@w's aura sheds energy.@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "$n@w's aura sheds energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
             break;
           case 3:
-            act(g, "$n@w's aura flickers brightly before growing dimmer.@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "$n@w's aura flickers brightly before growing dimmer.@n", true, ch, nullptr, nullptr, TO_ROOM);
             break;
           default:
-            act(g, "$n@w's aura shrinks some.@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "$n@w's aura shrinks some.@n", true, ch, nullptr, nullptr, TO_ROOM);
             break;
         }
         loss = char_get_charge(ch) / 20;
         char_set_charge(ch, char_get_charge(ch) - (loss));
       } else if (char_get_charge(ch) < getMaxKI(g, ch) / 100 && char_get_charge(ch) != 0) {
         send_to_char(g, ch, "Your charged energy is completely gone as your aura fades.\r\n");
-        act(g, "$n@w's aura fades away dimmly.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_charge(ch, 0);
       }
     }
@@ -1351,11 +1351,11 @@ void fight_stack(GameWorld *g)
       }
       if ((getCurKI(g, ch)) <= 0) {
         send_to_char(g, ch, "You can not charge anymore, you have charged all your energy!\r\n");
-        act(g, "$n@w's aura grows calm.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_plr_set(ch, PLR_CHARGE, false);
       } else if (((getMaxKI(g, ch) * 0.01) * perc) >= (getCurKI(g, ch))) {
         send_to_char(g, ch, "You have charged the last that you can.\r\n");
-        act(g, "$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_charge(ch, char_get_charge(ch) + ((getCurKI(g, ch))));
         decCurKIPercent(g, ch, 1, 0);
         char_set_chargeto(ch, 0);
@@ -1363,14 +1363,14 @@ void fight_stack(GameWorld *g)
       } else {
         if (char_get_charge(ch) >= char_get_chargeto(ch)) {
           send_to_char(g, ch, "You have already reached the maximum that you wished to charge.\r\n");
-          act(g, "$n@w's aura burns steadily.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_chargeto(ch, 0);
           char_plr_set(ch, PLR_CHARGE, false);
         } else if (char_get_charge(ch) + (((getMaxKI(g, ch) * 0.01) * perc) + 1) >= char_get_chargeto(ch)) {
           decCurKI(g, ch, char_get_chargeto(ch) - char_get_charge(ch), 0);
           char_set_charge(ch, char_get_chargeto(ch));
           send_to_char(g, ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
-          act(g, "$n@w's aura flares up brightly and then burns steadily.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_chargeto(ch, 0);
           char_plr_set(ch, PLR_CHARGE, false);
         } else {
@@ -1378,15 +1378,15 @@ void fight_stack(GameWorld *g)
           char_set_charge(ch, char_get_charge(ch) + (((getMaxKI(g, ch) * 0.01) * perc) + 1));
           switch (rand_number(g, 1, 3)) {
             case 1:
-              act(g, "$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, 0, 0, TO_ROOM);
+              act(g, "$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr, nullptr, TO_ROOM);
               send_to_char(g, ch, "Your aura grows bright as you charge more ki.\r\n");
               break;
             case 2:
-              act(g, "$n@w's aura ripples with power as it grows larger!@n", true, ch, 0, 0, TO_ROOM);
+              act(g, "$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr, TO_ROOM);
               send_to_char(g, ch, "Your aura ripples with power as you charge more ki.\r\n");
               break;
             case 3:
-              act(g, "$n@w's aura throws sparks off violently!.@n", true, ch, 0, 0, TO_ROOM);
+              act(g, "$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
               send_to_char(g, ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
               break;
             default:
@@ -1396,7 +1396,7 @@ void fight_stack(GameWorld *g)
             char_set_charge(ch, char_get_chargeto(ch));
             char_set_charge(ch, char_get_charge(ch) + (char_get_level(ch)));
             send_to_char(g, ch, "You have finished charging!\r\n");
-            act(g, "$n@w's aura burns brightly and then evens out.@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
             char_plr_set(ch, PLR_CHARGE, false);
             char_set_chargeto(ch, 0);
           }
@@ -1420,7 +1420,7 @@ void appear(GameWorld *g, struct char_data *ch)
   if (char_aff_flagged(ch, AFF_HIDE))
     char_aff_set(ch, AFF_HIDE, false);
 
-  act(g, "$n slowly fades into existence.", false, ch, 0, 0, TO_ROOM);
+  act(g, "$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
 
 void update_pos(GameWorld *g, struct char_data *victim)
@@ -1514,7 +1514,7 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
   handle_corpse_condition(corpse, ch);
 
   if (char_aff_flagged(ch, AFF_ASHED)) {
-    act(g, "@WSome ashes fall off the corpse.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
     struct obj_data *ashes;
     if (rand_number(g, 1, 3) == 2) {
       ashes = read_object(g, 1305, VIRTUAL);
@@ -1698,7 +1698,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
   handle_corpse_condition(corpse, ch);
 
   if (char_aff_flagged(ch, AFF_ASHED)) {
-    act(g, "@WSome ashes fall off the corpse.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
     struct obj_data *ashes;
     if (rand_number(g, 1, 3) == 2) {
       ashes = read_object(g, 1305, VIRTUAL);
@@ -2175,8 +2175,8 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
 
   // for players who used the Immortal Wish.
   if (char_plr_flagged(ch, PLR_IMMORTAL)) {
-    act(g, "@c$n@w disappears right before dying. $n appears to be immortal.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@w disappears right before dying. $n appears to be immortal.@n.", true, ch, 0, 0, TO_ROOM);
+    act(g, "@c$n@w disappears right before dying. $n appears to be immortal.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@w disappears right before dying. $n appears to be immortal.@n.", true, ch, nullptr, nullptr, TO_ROOM);
     decCurHealthPercent(g, ch, 1, 1);
     decCurKIPercent(g, ch, 1, 1);
     decCurSTPercent(g, ch, 1, 1);

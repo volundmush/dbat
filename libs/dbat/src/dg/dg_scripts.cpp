@@ -1121,7 +1121,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
   int ret_val      = 1;
   struct cmdlist_element *cl;
   char cmd[MAX_INPUT_LENGTH], *p;
-  struct script_data *sc = 0;
+  struct script_data *sc = nullptr;
   struct cmdlist_element *temp;
   unsigned long loops = 0;
   void *go            = *(void **)go_adress;

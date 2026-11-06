@@ -742,7 +742,7 @@ ACMD(do_whois)
       "[Implementor]",
   };
 
-  struct char_data *victim = 0;
+  struct char_data *victim = nullptr;
   skip_spaces(&argument);
 
   if (!*argument) {

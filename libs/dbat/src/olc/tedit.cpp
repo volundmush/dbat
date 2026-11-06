@@ -65,7 +65,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
       break;
     case STRINGADD_ABORT:
       write_to_output(g, d, "Edit aborted.\r\n");
-      act(g, "$n stops editing the news.", true, d->character, 0, 0, TO_ROOM);
+      act(g, "$n stops editing the news.", true, d->character, nullptr, nullptr, TO_ROOM);
       break;
     default:
       mud_log("SYSERR: news_string_cleanup: Unknown terminator status.");
@@ -128,7 +128,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
       break;
     case STRINGADD_ABORT:
       write_to_output(g, d, "Edit aborted.\r\n");
-      act(g, "$n stops editing some scrolls.", true, d->character, 0, 0, TO_ROOM);
+      act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
       break;
     default:
       mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
@@ -220,7 +220,7 @@ ACMD(do_tedit)
   OLC_STORAGE(char_get_desc(ch)) = strdup(fields[l].filename);
   string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0, backstr);
 
-  act(g, "$n begins editing a text file.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
   desc_set_connected(char_get_desc(ch), CON_TEDIT);
 }

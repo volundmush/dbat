@@ -60,15 +60,15 @@ ACMD(do_tslash)
     send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
-      act(g, "@RYour right arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
     send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
-      act(g, "@RYour left arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
 
@@ -168,9 +168,9 @@ ACMD(do_tslash)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (blk > axion_dice(g, 10)) {
-          act(g, "@C$N@W moves quickly and blocks your twin slash!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W twin slash!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W twin slash!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your twin slash!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W twin slash!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W twin slash!@n", false, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
             pcost(g, ch, attperc - 0.05, 0);
           } else {
@@ -184,9 +184,9 @@ ACMD(do_tslash)
           return;
         }
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
           send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 19, skill, SKILL_TSLASH); /* Effects on the room from dodging a ki attack
@@ -207,9 +207,9 @@ ACMD(do_tslash)
 
           return;
         }
-        act(g, "@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W fires a twin slash at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W fires a twin slash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
 
         if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
           pcost(g, ch, attperc - 0.05, 0);
@@ -220,9 +220,9 @@ ACMD(do_tslash)
 
         return;
       }
-      act(g, "@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W fires a twin slash at you, but misses!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W fires a twin slash at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
       if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
         pcost(g, ch, attperc - 0.05, 0);
       } else {
@@ -243,9 +243,9 @@ ACMD(do_tslash)
     hitspot     = roll_hitloc(g, ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's body as you fly past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR body as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's body as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's body as you fly past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR body as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's body as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -253,21 +253,21 @@ ACMD(do_tslash)
         dam_eq_loc(g, vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         if (char_has_tail(vict)) {
-          act(g, "@rYou cut off $S tail!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour tail is cut off!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r's tail is cut off!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rYou cut off $S tail!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour tail is cut off!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r's tail is cut off!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_lose_tail(g, vict);
         }
         break;
       case 2: /* Critical */
-        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's face as you fly past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR face as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's face as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's face as you fly past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR face as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's face as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 0);
         if (dmg > getEffMaxPL(g, vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou have your head cut off by the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou have your head cut off by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HEAD);
           remove_limb(g, vict, 0);
           die(g, vict, ch);
@@ -284,15 +284,15 @@ ACMD(do_tslash)
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
-            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou have your head cut off by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou have your head cut off by the attack but regenerate a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
             decCurKI(g, vict, getMaxKI(g, vict) / 40, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           } else {
-            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou have your head cut off by the attack!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou have your head cut off by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_death_type(vict, DTYPE_HEAD);
             die(g, vict, ch);
             if (char_aff_flagged(ch, AFF_GROUP)) {
@@ -315,9 +315,9 @@ ACMD(do_tslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as you fly past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR gut as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as you fly past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR gut as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -326,21 +326,21 @@ ACMD(do_tslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's arm as you fly past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR arm as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's arm as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's arm as you fly past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR arm as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's arm as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         if (rand_number(g, 1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
           if (char_get_limb_condition(vict, (2) - 1) > 0 && !is_sparring(ch) && rand_number(g, 1, 2) == 2) {
-            act(g, "@RYour attack severs $N's left arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severs your left arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's left arm is severered in the attack!@n", true, ch, 0, vict, TO_VICT);
+            act(g, "@RYour attack severs $N's left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severs your left arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's left arm is severered in the attack!@n", true, ch, nullptr, vict, TO_VICT);
             char_set_limb_condition(vict, (2) - 1, 0);
             remove_limb(g, vict, 2);
           } else if (char_get_limb_condition(vict, (1) - 1) > 0 && !is_sparring(ch)) {
-            act(g, "@RYour attack severs $N's right arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severs your right arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's right arm is severered in the attack!@n", true, ch, 0, vict, TO_VICT);
+            act(g, "@RYour attack severs $N's right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severs your right arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's right arm is severered in the attack!@n", true, ch, nullptr, vict, TO_VICT);
             char_set_limb_condition(vict, (1) - 1, 0);
             remove_limb(g, vict, 1);
           }
@@ -350,21 +350,21 @@ ACMD(do_tslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's leg as you fly past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR leg as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's leg as $e flies past, leaving a green after-image behind!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's leg as you fly past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR leg as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's leg as $e flies past, leaving a green after-image behind!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         if (rand_number(g, 1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
           if (char_get_limb_condition(vict, (4) - 1) > 0 && !is_sparring(ch) && rand_number(g, 1, 2) == 2) {
-            act(g, "@RYour attack severs $N's left leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severs your left leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's left leg is severered in the attack!@n", true, ch, 0, vict, TO_VICT);
+            act(g, "@RYour attack severs $N's left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severs your left leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's left leg is severered in the attack!@n", true, ch, nullptr, vict, TO_VICT);
             char_set_limb_condition(vict, (4) - 1, 0);
             remove_limb(g, vict, 4);
           } else if (char_get_limb_condition(vict, (3) - 1) > 0 && !is_sparring(ch)) {
-            act(g, "@RYour attack severs $N's right leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severs your right leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's right leg is severered in the attack!@n", true, ch, 0, vict, TO_VICT);
+            act(g, "@RYour attack severs $N's right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severs your right leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's right leg is severered in the attack!@n", true, ch, nullptr, vict, TO_VICT);
             char_set_limb_condition(vict, (3) - 1, 0);
             remove_limb(g, vict, 3);
           }
@@ -392,8 +392,8 @@ ACMD(do_tslash)
     }
     dmg = damtype(g, ch, 19, skill, attperc);
     dmg /= 10;
-    act(g, "@WYou fire a twin slash at $p@W!@n", false, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W fires a twin slash at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou fire a twin slash at $p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W fires a twin slash at $p@W!@n", false, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     pcost(g, ch, attperc, 0);
 
@@ -436,15 +436,15 @@ ACMD(do_pslash)
     send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
-      act(g, "@RYour right arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
     send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
-      act(g, "@RYour left arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
 
@@ -512,9 +512,9 @@ ACMD(do_pslash)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (blk > axion_dice(g, 10)) {
-          act(g, "@C$N@W moves quickly and blocks your Phoenix Slash!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W Phoenix Slash!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W Phoenix Slash!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your Phoenix Slash!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W Phoenix Slash!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W Phoenix Slash!@n", false, ch, nullptr, vict, TO_NOTVICT);
           pcost(g, ch, attperc, 0);
           pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
           dmg = damtype(g, ch, 37, skill, attperc);
@@ -524,27 +524,27 @@ ACMD(do_pslash)
           return;
         }
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your Phoenix Slash, letting it fly harmlessly by!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W Phoenix Slash, letting it letting it fly harmlessly by!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W Phoenix Slash, letting it fly harmlessly by!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your Phoenix Slash, letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W Phoenix Slash, letting it letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W Phoenix Slash, letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_NOTVICT);
 
           pcost(g, ch, attperc, 0);
           hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act(g, "@WYou can't believe it but your Phoenix Slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W fires a Phoenix Slash at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your Phoenix Slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W fires a Phoenix Slash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
 
         pcost(g, ch, attperc, 0);
         hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act(g, "@WYou can't believe it but your Phoenix Slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W fires a Phoenix Slash at you, but misses!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your Phoenix Slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W fires a Phoenix Slash at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
       pcost(g, ch, attperc, 0);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       return;
@@ -563,9 +563,9 @@ ACMD(do_pslash)
     char_aff_set(vict, AFF_ASHED, true);
     switch (hitspot) {
       case 1:
-        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S body in flames a moment later!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR body in flames a moment later!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's body in flames a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S body in flames a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR body in flames a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's body in flames a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -574,18 +574,18 @@ ACMD(do_pslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S head in flames a moment later!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR head in flames a moment later!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's head in flames a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S head in flames a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR head in flames a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's head in flames a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 0);
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S gut in flames a moment later!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR gut in flames a moment later!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's gut in flames a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S gut in flames a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR gut in flames a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's gut in flames a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -594,18 +594,18 @@ ACMD(do_pslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S arm in flames a moment later!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR arm in flames a moment later!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's arm in flames a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S arm in flames a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR arm in flames a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's arm in flames a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         hurt(g, 0, 170, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S leg in flames a moment later!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR leg in flames a moment later!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's leg in flames a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S leg in flames a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR leg in flames a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's leg in flames a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         hurt(g, 1, 170, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 2);
@@ -639,8 +639,8 @@ ACMD(do_pslash)
     dmg /= 10;
     if (obj_get_vnum(g, obj) == 79)
       dmg *= 3;
-    act(g, "@WYou fire a Phoenix Slash at $p@W!@n", false, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W fires a Phoenix Slash at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou fire a Phoenix Slash at $p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W fires a Phoenix Slash at $p@W!@n", false, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     pcost(g, ch, attperc, 0);
 
@@ -683,15 +683,15 @@ ACMD(do_ddslash)
     send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
-      act(g, "@RYour right arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
     send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
-      act(g, "@RYour left arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
 
@@ -760,9 +760,9 @@ ACMD(do_ddslash)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (blk > axion_dice(g, 10)) {
-          act(g, "@C$N@W moves quickly and blocks your Darkness Dragon Slash!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W Darkness Dragon Slash!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your Darkness Dragon Slash!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W Darkness Dragon Slash!@n", false, ch, nullptr, vict, TO_NOTVICT);
           pcost(g, ch, attperc, 0);
           pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
           dmg = damtype(g, ch, 30, skill, attperc);
@@ -772,27 +772,27 @@ ACMD(do_ddslash)
           return;
         }
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your Darkness Dragon Slash, letting it fly harmlessly by!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W Darkness Dragon Slash, letting it letting it fly harmlessly by!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W Darkness Dragon Slash, letting it fly harmlessly by!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your Darkness Dragon Slash, letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W Darkness Dragon Slash, letting it letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W Darkness Dragon Slash, letting it fly harmlessly by!@n", false, ch, nullptr, vict, TO_NOTVICT);
 
           pcost(g, ch, attperc, 0);
           hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act(g, "@WYou can't believe it but your Darkness Dragon Slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W fires a Darkness Dragon Slash at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your Darkness Dragon Slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W fires a Darkness Dragon Slash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
 
         pcost(g, ch, attperc, 0);
         hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act(g, "@WYou can't believe it but your Darkness Dragon Slash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W fires a Darkness Dragon Slash at you, but misses!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your Darkness Dragon Slash misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W fires a Darkness Dragon Slash at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
       pcost(g, ch, attperc, 0);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       return;
@@ -809,9 +809,9 @@ ACMD(do_ddslash)
     hitspot     = roll_hitloc(g, ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR body!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -820,18 +820,18 @@ ACMD(do_ddslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's head!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR head!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's head!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's head!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR head!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's head!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 0);
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR gut!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR gut!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -840,18 +840,18 @@ ACMD(do_ddslash)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         hurt(g, 0, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         hurt(g, 1, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 2);
@@ -859,8 +859,8 @@ ACMD(do_ddslash)
         break;
     }
     if (rand_number(g, 1, 3) == 3 && !char_aff_flagged(vict, AFF_BLIND)) {
-      act(g, "@mYou are struck blind temporarily!@n", true, vict, 0, 0, TO_CHAR);
-      act(g, "@c$n@m is struck blind by the attack!@n", true, vict, 0, 0, TO_ROOM);
+      act(g, "@mYou are struck blind temporarily!@n", true, vict, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@m is struck blind by the attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
       int duration = 1;
       assign_affect(g, vict, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
     }
@@ -878,8 +878,8 @@ ACMD(do_ddslash)
     }
     dmg = damtype(g, ch, 30, skill, attperc);
     dmg /= 10;
-    act(g, "@WYou fire a Darkness Dragon Slash at $p@W!@n", false, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W fires a Darkness Dragon Slash at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou fire a Darkness Dragon Slash at $p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W fires a Darkness Dragon Slash at $p@W!@n", false, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     pcost(g, ch, attperc, 0);
 
@@ -970,9 +970,9 @@ ACMD(do_kienzan)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
           send_to_room(g, char_get_in_room(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
 
           dodge_ki(g, ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
@@ -989,9 +989,9 @@ ACMD(do_kienzan)
 
           return;
         }
-        act(g, "@WYou can't believe it but your kienzan misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W fires a kienzan at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your kienzan misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W fires a kienzan at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
 
         dodge_ki(g, ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                              Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1002,9 +1002,9 @@ ACMD(do_kienzan)
 
         return;
       }
-      act(g, "@WYou can't believe it but your kienzan misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W fires a kienzan at you, but misses!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your kienzan misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W fires a kienzan at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
 
       dodge_ki(g, ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                              Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1026,13 +1026,13 @@ ACMD(do_kienzan)
     hitspot     = roll_hitloc(g, ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's body!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR body!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's body!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's body!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (dmg > getEffMaxPL(g, vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-          act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           die(g, vict, ch);
           if (char_aff_flagged(ch, AFF_GROUP)) {
             group_gain(g, ch, vict);
@@ -1047,15 +1047,15 @@ ACMD(do_kienzan)
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
-            act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
             decCurKI(g, vict, getMaxKI(g, vict) / 40, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           } else {
-            act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             die(g, vict, ch);
             if (char_aff_flagged(ch, AFF_GROUP)) {
               group_gain(g, ch, vict);
@@ -1072,9 +1072,9 @@ ACMD(do_kienzan)
         } else {
           hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           if (char_has_tail(vict)) {
-            act(g, "@rYou cut off $S tail!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYour tail is cut off!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r's tail is cut off!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@rYou cut off $S tail!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYour tail is cut off!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r's tail is cut off!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_lose_tail(g, vict);
           }
         }
@@ -1082,14 +1082,14 @@ ACMD(do_kienzan)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's neck!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR neck!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's neck!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's neck!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR neck!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's neck!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 0);
         if (dmg > getEffMaxPL(g, vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou have your head cut off by the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou have your head cut off by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HEAD);
           remove_limb(g, vict, 0);
           die(g, vict, ch);
@@ -1106,15 +1106,15 @@ ACMD(do_kienzan)
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
-            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou have your head cut off by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou have your head cut off by the attack but regenerate a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
             decCurKI(g, vict, getMaxKI(g, vict) / 40, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           } else {
-            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@rYou have your head cut off by the attack!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@rYou have your head cut off by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r has $S head cut off by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_death_type(vict, DTYPE_HEAD);
             die(g, vict, ch);
             if (char_aff_flagged(ch, AFF_GROUP)) {
@@ -1136,9 +1136,9 @@ ACMD(do_kienzan)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's gut!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR gut!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's gut!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR gut!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's gut!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(g, ch, 2);
         }
@@ -1147,21 +1147,21 @@ ACMD(do_kienzan)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         if (rand_number(g, 1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
           if (char_get_limb_condition(vict, (2) - 1) > 0 && !is_sparring(ch) && rand_number(g, 1, 2) == 2) {
-            act(g, "@RYour attack severes $N's left arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severes your left arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's left arm is severed in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@RYour attack severes $N's left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severes your left arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's left arm is severed in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_limb_condition(vict, (2) - 1, 0);
             remove_limb(g, vict, 2);
           } else if (char_get_limb_condition(vict, (1) - 1) > 0 && !is_sparring(ch)) {
-            act(g, "@RYour attack severes $N's right arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severes your right arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's right arm is severed in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@RYour attack severes $N's right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severes your right arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's right arm is severed in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_limb_condition(vict, (1) - 1, 0);
             remove_limb(g, vict, 1);
           }
@@ -1171,21 +1171,21 @@ ACMD(do_kienzan)
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= calc_critical(g, ch, 1);
         if (rand_number(g, 1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
           if (char_get_limb_condition(vict, (4) - 1) > 0 && !is_sparring(ch) && rand_number(g, 1, 2) == 2) {
-            act(g, "@RYour attack severes $N's left leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severes your left leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's left leg is severed in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@RYour attack severes $N's left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severes your left leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's left leg is severed in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_limb_condition(vict, (4) - 1, 0);
             remove_limb(g, vict, 4);
           } else if (char_get_limb_condition(vict, (3) - 1) > 0 && !is_sparring(ch)) {
-            act(g, "@RYour attack severes $N's right leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@R$n's attack severes your right leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N's right leg is severed in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@RYour attack severes $N's right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@R$n's attack severes your right leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N's right leg is severed in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
             char_set_limb_condition(vict, (3) - 1, 0);
             remove_limb(g, vict, 3);
           }
@@ -1209,8 +1209,8 @@ ACMD(do_kienzan)
     }
     dmg = damtype(g, ch, 25, skill, attperc);
     dmg /= 10;
-    act(g, "@WYou fire a kienzan at $p@W!@n", false, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W fires a kienzan at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou fire a kienzan at $p@W!@n", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W fires a kienzan at $p@W!@n", false, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     pcost(g, ch, attperc, 0);
 

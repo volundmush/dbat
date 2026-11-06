@@ -706,7 +706,7 @@ void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch
     send_to_char(g, ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
     return;
   }
-  act(g, "@C$n@w starts writing on the board.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
   delete_doubledollar(arg);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n");
@@ -746,7 +746,7 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   msg = new_message(g, ch, subject);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
-  act(g, "@C$n@w starts writing on the board.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
   snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data ? other->data : "");
   msg->data = strdup(quote);
@@ -814,6 +814,6 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
   board->num_messages--;
   send_to_char(g, ch, "Message removed.\r\n");
   snprintf(buf, sizeof(buf), "$n just removed message %d.", arg);
-  act(g, buf, false, ch, 0, 0, TO_ROOM);
+  act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
   save_board(g, board);
 }

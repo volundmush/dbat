@@ -619,7 +619,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
 
         obj_set_action_description(temp, fread_string(fl, buf2));
         if (obj_get_action_description(temp) == nullptr) {
-          obj_set_action_description(temp, 0);
+          obj_set_action_description(temp, nullptr);
         }
 
         if (!get_line(fl, line) ||

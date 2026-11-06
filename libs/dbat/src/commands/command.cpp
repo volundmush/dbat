@@ -50,7 +50,7 @@
  *   - a minimum level of -1 marks the mob (DG) commands, which check for a mob themselves.
  */
 const struct command_info cmd_info[] = {
-    {"RESERVED",      "",             0,            0,                  0,  ADMLVL_NONE,    0                  }, /* this must be first -- for specprocs */
+    {"RESERVED",      "",             0,            nullptr,            0,  ADMLVL_NONE,    0                  }, /* this must be first -- for specprocs */
 
     /* directions must come before other commands but after RESERVED */
     {"north",         "n",            POS_RESTING,  do_move,            0,  ADMLVL_NONE,    SCMD_NORTH         },
@@ -618,7 +618,7 @@ const struct command_info cmd_info[] = {
     {"vdelete",       "vdelete",      POS_DEAD,     do_vdelete,         0,  ADMLVL_BUILDER, 0                  },
     {"mfollow",       "mfollow",      POS_DEAD,     do_mfollow,         -1, ADMLVL_NONE,    0                  },
 
-    {"\n",            "zzzzzzz",      0,            0,                  0,  ADMLVL_NONE,    0                  }
+    {"\n",            "zzzzzzz",      0,            nullptr,            0,  ADMLVL_NONE,    0                  }
 }; /* this must be last */
 
 /* What a character can still do while held fast (petrified, frozen, paralysed or liquefied). */
@@ -657,8 +657,8 @@ static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
     }
   } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60)) {
     if (!allowed_while_restrained(cmd, false)) {
-      act(g, "@yYou fail to overcome your paralysis!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
       return false;
     }
   }

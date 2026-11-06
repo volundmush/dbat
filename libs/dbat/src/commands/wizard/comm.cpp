@@ -252,7 +252,7 @@ ACMD(do_newsedit)
     lookup = lastentry + 1;
   }
   char *backstr = nullptr;
-  act(g, "$n begins to edit the news.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
   send_to_char(g, ch, "character will be eaten because it is required for the news\n");
@@ -336,16 +336,16 @@ ACMD(do_echo)
   if (NoName == true) {
     char blom[MAX_INPUT_LENGTH];
     snprintf(blom, sizeof(blom), "@D(@GOOC@W: @gSmote by user %s@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch));
-    act(g, blom, false, ch, 0, 0, TO_ROOM);
+    act(g, blom, false, ch, nullptr, nullptr, TO_ROOM);
   }
   if (found == false) {
-    act(g, buf, false, ch, 0, 0, TO_CHAR);
-    act(g, buf, false, ch, 0, 0, TO_ROOM);
+    act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
   } else {
-    act(g, buf, false, ch, 0, tch, TO_CHAR);
-    act(g, buf, false, ch, 0, tch, TO_NOTVICT);
+    act(g, buf, false, ch, nullptr, tch, TO_CHAR);
+    act(g, buf, false, ch, nullptr, tch, TO_NOTVICT);
     search_replace(buf, "$N", "you");
-    act(g, buf, false, ch, 0, tch, TO_VICT);
+    act(g, buf, false, ch, nullptr, tch, TO_VICT);
   }
 }
 

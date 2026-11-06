@@ -47,7 +47,7 @@ ACMD(do_action)
 
   if (!argument || !*argument) {
     send_to_char(g, ch, "%s\r\n", action->char_no_arg);
-    act(g, action->others_no_arg, action->hide, ch, 0, 0, TO_ROOM);
+    act(g, action->others_no_arg, action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 
@@ -72,8 +72,8 @@ ACMD(do_action)
       targ = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
       if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch)));
       if (targ) {
-        act(g, action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
-        act(g, action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);
+        act(g, action->char_obj_found, action->hide, ch, targ, nullptr, TO_CHAR);
+        act(g, action->others_obj_found, action->hide, ch, targ, nullptr, TO_ROOM);
         return;
       }
     }
@@ -89,21 +89,21 @@ ACMD(do_action)
       send_to_char(g, ch, "%s\r\n", action->char_auto);
     else
       send_to_char(g, ch, "Erm, no.\r\n");
-    act(g, action->others_auto, action->hide, ch, 0, 0, TO_ROOM);
+    act(g, action->others_auto, action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 
   if (char_get_position(vict) < action->min_victim_position)
-    act(g, "$N is not in a proper position for that.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else {
     if (*part) {
       act(g, action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
       act(g, action->others_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_NOTVICT);
       act(g, action->vict_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_VICT);
     } else {
-      act(g, action->char_found, 0, ch, 0, vict, TO_CHAR | TO_SLEEP);
-      act(g, action->others_found, action->hide, ch, 0, vict, TO_NOTVICT);
-      act(g, action->vict_found, action->hide, ch, 0, vict, TO_VICT);
+      act(g, action->char_found, 0, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+      act(g, action->others_found, action->hide, ch, nullptr, vict, TO_NOTVICT);
+      act(g, action->vict_found, action->hide, ch, nullptr, vict, TO_VICT);
     }
   }
 }
@@ -126,27 +126,27 @@ ACMD(do_insult)
           case 0:
             if (char_get_sex(ch) == SEX_MALE) {
               if (char_get_sex(victim) == SEX_MALE)
-                act(g, "$n accuses you of fighting like a woman!", false, ch, 0, victim, TO_VICT);
+                act(g, "$n accuses you of fighting like a woman!", false, ch, nullptr, victim, TO_VICT);
               else
-                act(g, "$n says that women can't fight.", false, ch, 0, victim, TO_VICT);
+                act(g, "$n says that women can't fight.", false, ch, nullptr, victim, TO_VICT);
             } else { /* Ch == Woman */
               if (char_get_sex(victim) == SEX_MALE)
                 act(g, "$n accuses you of having the smallest... (brain?)",
-                    false, ch, 0, victim, TO_VICT);
+                    false, ch, nullptr, victim, TO_VICT);
               else
                 act(g, "$n tells you that you'd lose a beauty contest against a troll.",
-                    false, ch, 0, victim, TO_VICT);
+                    false, ch, nullptr, victim, TO_VICT);
             }
             break;
           case 1:
-            act(g, "$n calls your mother a bitch!", false, ch, 0, victim, TO_VICT);
+            act(g, "$n calls your mother a bitch!", false, ch, nullptr, victim, TO_VICT);
             break;
           default:
-            act(g, "$n tells you to get lost!", false, ch, 0, victim, TO_VICT);
+            act(g, "$n tells you to get lost!", false, ch, nullptr, victim, TO_VICT);
             break;
         } /* end switch */
 
-        act(g, "$n insults $N.", true, ch, 0, victim, TO_NOTVICT);
+        act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
       } else { /* ch == victim */
         send_to_char(g, ch, "You feel insulted.\r\n");
       }
@@ -316,7 +316,7 @@ void create_command_list(GameWorld *g)
   g->complete_cmd_info[k].command          = strdup("\n");
   g->complete_cmd_info[k].sort_as          = strdup("zzzzzzz");
   g->complete_cmd_info[k].minimum_position = 0;
-  g->complete_cmd_info[k].command_pointer  = 0;
+  g->complete_cmd_info[k].command_pointer  = nullptr;
   g->complete_cmd_info[k].minimum_level    = 0;
   g->complete_cmd_info[k].minimum_admlevel = 0;
   g->complete_cmd_info[k].subcmd           = 0;
@@ -430,7 +430,7 @@ ACMD(do_gmote)
 
   if ((act_nr = find_action(g, cmd)) < 0) {
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(g, buf, false, ch, 0, vict, TO_GMOTE);
+    act(g, buf, false, ch, nullptr, vict, TO_GMOTE);
     return;
   }
 
@@ -462,10 +462,10 @@ ACMD(do_gmote)
   } else {
     if (char_get_position(vict) < action->min_victim_position) {
       act(g, "$N is not in a proper position for that.",
-          false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+          false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
   }
-  act(g, buf, false, ch, 0, vict, TO_GMOTE);
+  act(g, buf, false, ch, nullptr, vict, TO_GMOTE);
 }

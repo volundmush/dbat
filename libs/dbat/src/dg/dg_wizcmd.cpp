@@ -399,7 +399,7 @@ ACMD(do_detach)
   obj_data *object  = nullptr;
   struct room_data *room;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-  char *trigger = 0;
+  char *trigger = nullptr;
   IDXTYPE num_arg;
 
   argument = two_arguments(argument, arg1, arg2);

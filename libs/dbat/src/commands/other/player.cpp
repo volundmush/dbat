@@ -58,12 +58,12 @@ ACMD(do_spar)
     return;
   }
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    act(g, "@wYou cease your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
-    act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
+    act(g, "@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!char_plr_flagged(ch, PLR_SPAR)) {
-    act(g, "@wYou move into your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
-    act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
+    act(g, "@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
   }
   char_plr_toggle(ch, PLR_SPAR);
 }
@@ -118,7 +118,7 @@ ACMD(do_quit)
     send_to_char(g, ch, "You die before your time...\r\n");
     die(g, ch, nullptr);
   } else {
-    act(g, "$n has left the game.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n has left the game.", true, ch, nullptr, nullptr, TO_ROOM);
     mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s has quit the game.", char_get_name(ch));
     send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
     if (char_get_followers(ch) || char_get_master(ch))
@@ -272,7 +272,7 @@ static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *
     return false;
 
   if (char_get_bonuses(vict, BONUS_LONER) > 0) {
-    act(g, "$n is the loner type and refuses to be in your group.", true, vict, 0, ch, TO_VICT);
+    act(g, "$n is the loner type and refuses to be in your group.", true, vict, nullptr, ch, TO_VICT);
     return false;
   }
 
@@ -302,9 +302,9 @@ static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *
 
   char_aff_set(vict, AFF_GROUP, true);
   if (ch != vict)
-    act(g, "$N is now a member of your group.", false, ch, 0, vict, TO_CHAR);
-  act(g, "You are now a member of $n's group.", false, ch, 0, vict, TO_VICT);
-  act(g, "$N is now a member of $n's group.", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "$N is now a member of your group.", false, ch, nullptr, vict, TO_CHAR);
+  act(g, "You are now a member of $n's group.", false, ch, nullptr, vict, TO_VICT);
+  act(g, "$N is now a member of $n's group.", false, ch, nullptr, vict, TO_NOTVICT);
   return true;
 }
 
@@ -334,7 +334,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
                  add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
                  char_class_abbr(k), char_race_abbr(k));
       }
-      act(g, buf, false, ch, 0, k, TO_CHAR);
+      act(g, buf, false, ch, nullptr, k, TO_CHAR);
     }
 
     for (f = char_get_followers(k); f; f = f->next) {
@@ -351,7 +351,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
                  add_commas(getCurPL(g, f->follower)), add_commas((getCurKI(g, f->follower))), add_commas((getCurST(g, f->follower))),
                  char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
-      act(g, buf, false, ch, 0, f->follower, TO_CHAR);
+      act(g, buf, false, ch, nullptr, f->follower, TO_CHAR);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }
@@ -379,7 +379,7 @@ ACMD(do_group)
 
   if (char_get_master(ch)) {
     act(g, "You cannot enroll group members without being head of a group.",
-        false, ch, 0, 0, TO_CHAR);
+        false, ch, nullptr, nullptr, TO_CHAR);
     return;
   }
 
@@ -421,7 +421,7 @@ ACMD(do_group)
   if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON);
   else if ((char_get_master(vict) != ch) && (vict != ch))
-    act(g, "$N must follow you to enter your group.", false, ch, 0, vict, TO_CHAR);
+    act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
       if (!char_aff_flagged(ch, AFF_GROUP)) {
@@ -431,9 +431,9 @@ ACMD(do_group)
       perform_group(g, ch, vict, highlvl, lowlvl, highpl, lowpl);
     } else {
       if (ch != vict)
-        act(g, "$N is no longer a member of your group.", false, ch, 0, vict, TO_CHAR);
-      act(g, "You have been kicked out of $n's group!", false, ch, 0, vict, TO_VICT);
-      act(g, "$N has been kicked out of $n's group!", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "$N is no longer a member of your group.", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "You have been kicked out of $n's group!", false, ch, nullptr, vict, TO_VICT);
+      act(g, "$N has been kicked out of $n's group!", false, ch, nullptr, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_GROUP, false);
     }
   }
@@ -486,9 +486,9 @@ ACMD(do_ungroup)
   char_aff_set(tch, AFF_GROUP, false);
   char_set_combatexpertise(tch, 0);
 
-  act(g, "$N is no longer a member of your group.", false, ch, 0, tch, TO_CHAR);
-  act(g, "You have been kicked out of $n's group!", false, ch, 0, tch, TO_VICT);
-  act(g, "$N has been kicked out of $n's group!", false, ch, 0, tch, TO_NOTVICT);
+  act(g, "$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
+  act(g, "You have been kicked out of $n's group!", false, ch, nullptr, tch, TO_VICT);
+  act(g, "$N has been kicked out of $n's group!", false, ch, nullptr, tch, TO_NOTVICT);
 
   if (!char_aff_flagged(tch, AFF_CHARM))
     stop_follower(g, tch);
@@ -891,9 +891,9 @@ ACMD(do_gen_tog)
     case SCMD_AFK:
       result = char_prf_toggle(g, ch, PRF_AFK);
       if (char_prf_flagged(g, ch, PRF_AFK))
-        act(g, "$n has gone AFK.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n has gone AFK.", true, ch, nullptr, nullptr, TO_ROOM);
       else {
-        act(g, "$n has come back from AFK.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
         if (has_mail(g, char_get_idnum(ch)))
           send_to_char(g, ch, "You have mail waiting.\r\n");
       }

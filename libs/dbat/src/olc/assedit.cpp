@@ -136,7 +136,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
   }
 
   desc_set_connected(d, CON_ASSEDIT);
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(d->character, PLR_WRITING, true);
   assedit_disp_menu(g, d);
 }

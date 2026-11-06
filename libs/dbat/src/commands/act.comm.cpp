@@ -192,8 +192,8 @@ ACMD(do_osay)
   if (char_prf_flagged(g, ch, PRF_HIDE)) {
     snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
   }
-  act(g, buf, false, ch, 0, 0, TO_CHAR);
-  act(g, buf2, false, ch, 0, 0, TO_ROOM);
+  act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
+  act(g, buf2, false, ch, nullptr, nullptr, TO_ROOM);
 }
 
 ACMD(do_say)
@@ -250,12 +250,12 @@ ACMD(do_say)
     }
     if (!sch) {
       snprintf(buf, sizeof(buf), "@w$n @W%ss, '@C%s@W'@n", verb, argument);
-      act(g, buf, true, ch, 0, 0, TO_ROOM);
+      act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
     } else {
       snprintf(buf, sizeof(buf), "@w$n @Wsays to @g$N@W, '@C%s@W'@n", argument);
       snprintf(buf2, sizeof(buf2), "@w$n @Wsays to @gyou@W, '@C%s@W'@n", argument);
-      act(g, buf2, true, ch, 0, sch, TO_VICT);
-      act(g, buf, true, ch, 0, sch, TO_NOTVICT);
+      act(g, buf2, true, ch, nullptr, sch, TO_VICT);
+      act(g, buf, true, ch, nullptr, sch, TO_NOTVICT);
     }
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
       send_to_char(g, ch, "%s", CONFIG_OK);
@@ -763,7 +763,7 @@ ACMD(do_gsay)
       if (CONFIG_ENABLE_LANGUAGES) {
         send_to_char(g, k, "%s@W tells the group%s @W'@G%s@W'@n\r\n", char_can_see(g, k, ch) ? char_get_name(ch) : "Someone", char_get_skill(k, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
       } else {
-        act(g, blah, true, ch, 0, k, TO_VICT);
+        act(g, blah, true, ch, nullptr, k, TO_VICT);
       }
     }
     for (f = char_get_followers(k); f; f = f->next)
@@ -776,7 +776,7 @@ ACMD(do_gsay)
         if (CONFIG_ENABLE_LANGUAGES) {
           send_to_char(g, f->follower, "%s@W tells the group%s @W'%s@W'@n\r\n", char_can_see(g, f->follower, ch) ? char_get_name(ch) : "Someone", char_get_skill(f->follower, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
         } else {
-          act(g, blah, true, ch, 0, f->follower, TO_VICT | TO_SLEEP);
+          act(g, blah, true, ch, nullptr, f->follower, TO_VICT | TO_SLEEP);
         }
       }
 
@@ -851,11 +851,11 @@ static bool is_tell_ok(GameWorld *g, struct char_data *ch, struct char_data *vic
   else if (char_is_npc(vict))
     send_to_char(g, ch, "You can't send tells to mobs.\r\n");
   else if (!char_is_npc(vict) && !char_get_desc(vict)) /* linkless */
-    act(g, "$E's linkless at the moment.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$E's linkless at the moment.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else if (char_plr_flagged(vict, PLR_WRITING))
-    act(g, "$E's writing a message right now; try again later.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$E's writing a message right now; try again later.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else if ((!char_is_npc(vict) && char_get_admlevel(ch) < 1 && char_prf_flagged(g, vict, PRF_NOTELL)) || rroom_flagged(g, char_get_in_room(vict), ROOM_SOUNDPROOF))
-    act(g, "$E can't hear you.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$E can't hear you.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else
     return (true);
 
@@ -1001,21 +1001,21 @@ ACMD(do_spec_comm)
       snprintf(buf1, sizeof(buf1), "@c$n @W%s you '@m%s@W'@n", action_plur, buf2);
     }
 
-    act(g, buf1, false, ch, 0, vict, TO_VICT);
+    act(g, buf1, false, ch, nullptr, vict, TO_VICT);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
       send_to_char(g, ch, "%s", CONFIG_OK);
     } else {
       char blum[MAX_INPUT_LENGTH];
       snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
-      act(g, blum, true, ch, 0, vict, TO_CHAR);
+      act(g, blum, true, ch, nullptr, vict, TO_CHAR);
     }
 
     if (subcmd == SCMD_WHISPER) {
-      act(g, action_others, false, ch, 0, vict, TO_NOTVICT);
+      act(g, action_others, false, ch, nullptr, vict, TO_NOTVICT);
       handle_whisper(g, buf2, ch, vict);
     } else {
-      act(g, action_others, false, ch, 0, vict, TO_NOTVICT);
+      act(g, action_others, false, ch, nullptr, vict, TO_NOTVICT);
     }
   }
 }
@@ -1286,9 +1286,9 @@ ACMD(do_write)
 
   /* ok.. now let's see what kind of stuff we've found */
   if (obj_get_type_flag(pen) != ITEM_PEN)
-    act(g, "$p is no good for writing with.", false, ch, pen, 0, TO_CHAR);
+    act(g, "$p is no good for writing with.", false, ch, pen, nullptr, TO_CHAR);
   else if (obj_get_type_flag(paper) != ITEM_NOTE)
-    act(g, "You can't write on $p.", false, ch, paper, 0, TO_CHAR);
+    act(g, "You can't write on $p.", false, ch, paper, nullptr, TO_CHAR);
   else {
     char *backstr = nullptr;
 
@@ -1300,7 +1300,7 @@ ACMD(do_write)
     }
 
     /* we can write - hooray! */
-    act(g, "$n begins to jot down a note.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
     obj_extra_set(paper, ITEM_UNIQUE_SAVE, true);
     send_editor_help(g, char_get_desc(ch));
     string_write(char_get_desc(ch), obj_action_description_slot(paper), MAX_NOTE_LENGTH, 0, backstr);
@@ -1327,17 +1327,17 @@ ACMD(do_page)
       if (char_adm_flagged(ch, ADM_TELLALL)) {
         for (d = g->descriptors; d; d = d->next)
           if (desc_get_connected(d) == CON_PLAYING && d->character)
-            act(g, buf, false, ch, 0, d->character, TO_VICT);
+            act(g, buf, false, ch, nullptr, d->character, TO_VICT);
       } else
         send_to_char(g, ch, "You will never be godly enough to do that!\r\n");
       return;
     }
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) != nullptr) {
-      act(g, buf, false, ch, 0, vict, TO_VICT);
+      act(g, buf, false, ch, nullptr, vict, TO_VICT);
       if (char_prf_flagged(g, ch, PRF_NOREPEAT))
         send_to_char(g, ch, "%s", CONFIG_OK);
       else
-        act(g, buf, false, ch, 0, vict, TO_CHAR);
+        act(g, buf, false, ch, nullptr, vict, TO_CHAR);
     } else
       send_to_char(g, ch, "There is no such person in the game!\r\n");
   }
@@ -1506,7 +1506,7 @@ ACMD(do_gen_comm)
         }
       }
 
-      msg = act(g, buf1, false, ch, 0, i->character, TO_VICT | TO_SLEEP);
+      msg = act(g, buf1, false, ch, nullptr, i->character, TO_VICT | TO_SLEEP);
       add_history(g, i->character, msg, hist_type[subcmd]);
     }
   }

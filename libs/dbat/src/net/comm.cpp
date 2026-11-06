@@ -462,7 +462,7 @@ void game_process_commands(GameWorld *g)
           char_from_room(g, d->character);
         char_to_room(g, d->character, char_get_was_in_room(d->character));
         char_set_was_in_room(d->character, NOWHERE);
-        act(g, "$n has returned.", true, d->character, 0, 0, TO_ROOM);
+        act(g, "$n has returned.", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       char_set_wait(d->character, 1);
     }
@@ -2513,7 +2513,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
       struct char_data *link_challenged = d->original ? d->original : d->character;
 
       /* We are guaranteed to have a person. */
-      act(g, "$n has lost $s link.", true, link_challenged, 0, 0, TO_ROOM);
+      act(g, "$n has lost $s link.", true, link_challenged, nullptr, nullptr, TO_ROOM);
       save_char(g, link_challenged);
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, link_challenged)), true, "Closing link to: %s.", char_get_name(link_challenged));
     } else {

@@ -73,7 +73,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
       copy_mobile_strings(g->mob_proto + i, mob);
       g->mob_index[i].vnum   = vnum;
       g->mob_index[i].number = 0;
-      g->mob_index[i].func   = 0;
+      g->mob_index[i].func   = nullptr;
       found               = i;
       break;
     }
@@ -87,7 +87,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     copy_mobile_strings(&g->mob_proto[0], mob);
     g->mob_index[0].vnum   = vnum;
     g->mob_index[0].number = 0;
-    g->mob_index[0].func   = 0;
+    g->mob_index[0].func   = nullptr;
   }
 
   mud_log("GenOLC: add_mobile: Added mobile %d at index #%d.", vnum, found);

@@ -44,7 +44,7 @@ void load_banned(GameWorld *g)
   char name[MAX_NAME_LENGTH + 1];
   struct ban_list_element *next_node;
 
-  g->ban_list = 0;
+  g->ban_list = nullptr;
 
   if (!(fl = fopen(BAN_FILE, "r"))) {
     if (errno != ENOENT) {

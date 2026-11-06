@@ -1314,7 +1314,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
     else {
       send_to_char(g, ch, "%s", obj_get_short_description(obj));
       if (obj_get_type_flag(obj) == ITEM_CONTAINER && (obj_get_vnum(g, obj) == 697 || obj_get_vnum(g, obj) == 698 || obj_get_vnum(g, obj) == 682 || obj_get_vnum(g, obj) == 683 || obj_get_vnum(g, obj) == 684)) {
-        act(g, "$n looks in $p.", true, ch, obj, 0, TO_ROOM);
+        act(g, "$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
       }
       switch (bits) {
         case FIND_OBJ_INV:
@@ -1445,8 +1445,8 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
       look_at_char(g, found_char, ch);
       if (ch != found_char) {
         if (!char_aff_flagged(ch, AFF_HIDE)) {
-          act(g, "$n looks at you.", true, ch, 0, found_char, TO_VICT);
-          act(g, "$n looks at $N.", true, ch, 0, found_char, TO_NOTVICT);
+          act(g, "$n looks at you.", true, ch, nullptr, found_char, TO_VICT);
+          act(g, "$n looks at $N.", true, ch, nullptr, found_char, TO_NOTVICT);
         }
       }
       return;
@@ -1629,9 +1629,9 @@ void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
       send_to_char(g, ch, "You don't seem to be able to see outside.\r\n");
     } else {
       if (obj_get_action_description(viewport))
-        act(g, obj_get_action_description(viewport), true, ch, viewport, 0, TO_CHAR);
+        act(g, obj_get_action_description(viewport), true, ch, viewport, nullptr, TO_CHAR);
       else
-        act(g, "$n looks out the window.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "You look outside and see:\r\n");
       look_at_room(g, target_room, ch, 0);
     }

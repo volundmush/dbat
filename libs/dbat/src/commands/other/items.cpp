@@ -257,8 +257,8 @@ ACMD(do_form)
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -300,8 +300,8 @@ ACMD(do_form)
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -322,8 +322,8 @@ ACMD(do_form)
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -343,8 +343,8 @@ ACMD(do_form)
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch); // cooldown removed on 10/24/2021
     reveal_hiding(g, ch, 0); //GET_COOLDOWN(ch) = 10;
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -473,8 +473,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -534,8 +534,8 @@ ACMD(do_form)
     do_wear(g, vict, writable{"all"}, 0, 0);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -557,8 +557,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -582,8 +582,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -606,8 +606,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -630,8 +630,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -654,8 +654,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -677,8 +677,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -700,8 +700,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     return;
   }
@@ -731,8 +731,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     decCurHealthPercent(g, ch, 1, 1);
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (10));
@@ -767,8 +767,8 @@ ACMD(do_form)
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
+    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     decCurHealth(g, ch, cost2, 0);
     decCurSTPercent(g, ch, 1, 1);
@@ -810,8 +810,8 @@ ACMD(do_recharge)
   }
   reveal_hiding(g, ch, 0);
   char_set_con_cooldown(ch, 10);
-  act(g, "You focus your ki into your energy reserves, recharging them some.", true, ch, 0, 0, TO_CHAR);
-  act(g, "$n stops and glows green briefly.", true, ch, 0, 0, TO_ROOM);
+  act(g, "You focus your ki into your energy reserves, recharging them some.", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "$n stops and glows green briefly.", true, ch, nullptr, nullptr, TO_ROOM);
   decCurKI(g, ch, cost, 0);
   if ((getCurST(g, ch)) + (cost * 2) < getMaxST(g, ch)) {
     incCurST(g, ch, cost * 2, true);
@@ -854,8 +854,8 @@ ACMD(do_srepair)
   }
   reveal_hiding(g, ch, 0);
   char_set_con_cooldown(ch, 10);
-  act(g, "You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, 0, 0, TO_CHAR);
-  act(g, "$n stops a moment as small glowing particles move across $s body.", true, ch, 0, 0, TO_ROOM);
+  act(g, "You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "$n stops a moment as small glowing particles move across $s body.", true, ch, nullptr, nullptr, TO_ROOM);
 
   int repaired = false;
   if (!char_is_npc(ch)) {
@@ -972,8 +972,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("powerlevel", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
       gainBasePL(ch, gain, true);
       send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -981,8 +981,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("ki", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum ki.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
       gainBaseKI(ch, gain, true);
       send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -990,8 +990,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("stamina", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
       gainBaseST(ch, gain, true);
       send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -1189,23 +1189,23 @@ ACMD(do_ingest)
     }
     reveal_hiding(g, ch, 0);
     if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-      act(g, "@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, nullptr, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_ZANZOKEN, false);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
     if (char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, ch) + rand_number(g, 1, 5)) {
-      act(g, "@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    act(g, "@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
     char_set_absorbs(ch, char_get_absorbs(ch) + (1));
     int64_t pl   = (getBasePL(vict)) / 6;
     int64_t stam = (getBaseST(vict)) / 6;
@@ -1414,7 +1414,7 @@ ACMD(do_forgery)
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, 0, TO_ROOM);
+  act(g, "@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_FORGERY, 1);
   if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(g, 0)) {
     if (rand_number(g, 1, 10) >= 9) { /* Uh oh */
@@ -1424,7 +1424,7 @@ ACMD(do_forgery)
       return;
     }
     send_to_char(g, ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj_get_short_description(obj2));
-    act(g, "@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, 0, TO_ROOM);
+    act(g, "@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, nullptr, TO_ROOM);
     obj_from_char(g, obj4);
     extract_obj(g, obj4);
     char_set_wait(ch, PULSE_2SEC);
@@ -1444,7 +1444,7 @@ ACMD(do_forgery)
   obj_from_char(g, obj4);
   extract_obj(g, obj4);
   send_to_char(g, ch, "You make an excellent forgery of %s@n!\r\n", obj_get_short_description(obj2));
-  act(g, "@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, 0, TO_ROOM);
+  act(g, "@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
 }
 
@@ -1476,25 +1476,25 @@ ACMD(do_appraise)
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, 0, TO_ROOM);
+  act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_APPRAISE, 1);
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(g, -10)) {
     send_to_char(g, ch, "You fail to perceive the worth of %s..\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks stumped about $p.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@c$n@w looks stumped about $p.@n", true, ch, obj, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(g, ch, "%s is broken!\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks at $p and frowns.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@c$n@w looks at $p and frowns.@n", true, ch, obj, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_FORGED)) {
     send_to_char(g, ch, "%s is fake and worthless!\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks at $p with an angry face.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@c$n@w looks at $p with an angry face.@n", true, ch, obj, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
@@ -1531,7 +1531,7 @@ ACMD(do_appraise)
     send_to_char(g, ch, "Token Slots  : @m2/2@n\n");
   }
   send_to_char(g, ch, "Bonuses:");
-  act(g, "@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, 0, TO_ROOM);
+  act(g, "@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, nullptr, TO_ROOM);
   int percent = false;
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj_get_affected(obj)[i].modifier) {
@@ -1572,7 +1572,7 @@ ACMD(do_disguise)
   if (char_plr_flagged(ch, PLR_DISGUISED)) {
     send_to_char(g, ch, "You stop disguising yourself.\r\n");
     char_plr_set(ch, PLR_DISGUISED, false);
-    act(g, "@C$n @wpulls off $s disguise and reveals $mself!", true, ch, 0, 0, TO_ROOM);
+    act(g, "@C$n @wpulls off $s disguise and reveals $mself!", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 
@@ -1595,12 +1595,12 @@ ACMD(do_disguise)
 
   if (skill > roll) {
     send_to_char(g, ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
-    act(g, "@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, 0, 0, TO_ROOM);
+    act(g, "@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_DISGUISED, true);
     return;
   }
   send_to_char(g, ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
-  act(g, "@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, 0, 0, TO_ROOM);
+  act(g, "@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, nullptr, nullptr, TO_ROOM);
   decCurST(g, ch, getMaxST(g, ch) / 50, 0);
   return;
 }
@@ -1677,8 +1677,8 @@ ACMD(do_use)
             send_to_char(g, ch, "Your stamina is full.\r\n");
             return;
           }
-          act(g, "@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, 0, TO_CHAR);
-          act(g, "@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
+          act(g, "@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, nullptr, TO_CHAR);
+          act(g, "@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, nullptr, TO_ROOM);
           if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
             send_to_char(g, ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
             incCurST(g, ch, getMaxST(g, ch) * .25, true);
@@ -1689,8 +1689,8 @@ ACMD(do_use)
           return;
         case 382:
           if (char_aff_flagged(ch, AFF_BURNED)) {
-            act(g, "@WYou gently apply the salve to your burns.@n", true, ch, mag_item, 0, TO_CHAR);
-            act(g, "@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, 0, TO_ROOM);
+            act(g, "@WYou gently apply the salve to your burns.@n", true, ch, mag_item, nullptr, TO_CHAR);
+            act(g, "@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, nullptr, TO_ROOM);
             char_aff_set(ch, AFF_BURNED, false);
             extract_obj(g, mag_item);
           } else {
@@ -1699,8 +1699,8 @@ ACMD(do_use)
           return;
         case 383:
           if (char_aff_flagged(ch, AFF_POISON)) {
-            act(g, "@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, 0, TO_CHAR);
-            act(g, "@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
+            act(g, "@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, nullptr, TO_CHAR);
+            act(g, "@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, nullptr, TO_ROOM);
             null_affect(g, ch, AFF_POISON);
             extract_obj(g, mag_item);
           } else {
@@ -1708,11 +1708,11 @@ ACMD(do_use)
           }
           return;
         case 385:
-          act(g, "@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, 0, TO_CHAR);
-          act(g, "@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, 0, TO_ROOM);
+          act(g, "@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, nullptr, TO_CHAR);
+          act(g, "@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, nullptr, TO_ROOM);
           if (char_aff_flagged(ch, AFF_BLIND)) {
-            act(g, "@WYour eyesight has returned!@n", true, ch, mag_item, 0, TO_CHAR);
-            act(g, "@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, 0, TO_ROOM);
+            act(g, "@WYour eyesight has returned!@n", true, ch, mag_item, nullptr, TO_CHAR);
+            act(g, "@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, nullptr, TO_ROOM);
             null_affect(g, ch, AFF_BLIND);
           }
           refreshed = false;
@@ -1874,7 +1874,7 @@ ACMD(do_break)
 
   /* Ok, break it! */
   send_to_char(g, ch, "You ruin %s.\r\n", obj_get_short_description(obj));
-  act(g, "$n ruins $p.", false, ch, obj, 0, TO_ROOM);
+  act(g, "$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
   obj_extra_toggle(obj, ITEM_BROKEN);
 
@@ -1964,8 +1964,8 @@ ACMD(do_fix)
 
   if (self == false) {
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
-      act(g, "You try to repair $p but screw up..", true, ch, obj, 0, TO_CHAR);
-      act(g, "$n tries to repair $p but screws up..", true, ch, obj, 0, TO_ROOM);
+      act(g, "You try to repair $p but screw up..", true, ch, obj, nullptr, TO_CHAR);
+      act(g, "$n tries to repair $p but screws up..", true, ch, obj, nullptr, TO_ROOM);
       extract_obj(g, obj4);
       improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_2SEC);
@@ -1974,12 +1974,12 @@ ACMD(do_fix)
 
     if (obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
       send_to_char(g, ch, "You repair %s a bit.\r\n", obj_get_short_description(obj));
-      act(g, "$n repairs $p a bit.", false, ch, obj, 0, TO_ROOM);
+      act(g, "$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
       obj_extra_set(obj, ITEM_BROKEN, false);
     } else {
       send_to_char(g, ch, "You repair %s completely.\r\n", obj_get_short_description(obj));
-      act(g, "$n repairs $p completely.", false, ch, obj, 0, TO_ROOM);
+      act(g, "$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, 100);
       obj_extra_set(obj, ITEM_BROKEN, false);
     }
@@ -2003,15 +2003,15 @@ ACMD(do_fix)
       return;
     }
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
-      act(g, "You try to repair your body but screw up..", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n tries to repair $s body but screws up..", true, ch, 0, 0, TO_ROOM);
+      act(g, "You try to repair your body but screw up..", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n tries to repair $s body but screws up..", true, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(g, obj4);
       improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_5SEC);
       return;
     }
-    act(g, "You use the repair kit to fix part of your body...", true, ch, 0, 0, TO_CHAR);
-    act(g, "$n works on their body with a repair kit.", true, ch, 0, 0, TO_ROOM);
+    act(g, "You use the repair kit to fix part of your body...", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n works on their body with a repair kit.", true, ch, nullptr, nullptr, TO_ROOM);
     int64_t mult = char_get_skill(ch, SKILL_REPAIR);
     int64_t add  = (getEffMaxPL(g, ch) * 0.005 + 10) * mult;
 

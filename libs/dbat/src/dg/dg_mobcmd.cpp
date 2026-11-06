@@ -301,7 +301,7 @@ ACMD(do_mechoaround)
 
   sprintf(buf, "%s", p);
   search_replace(buf, char_get_name(victim), "$n");
-  act(g, buf, true, victim, 0, 0, TO_ROOM);
+  act(g, buf, true, victim, nullptr, nullptr, TO_ROOM);
   /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
 

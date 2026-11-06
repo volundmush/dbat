@@ -90,7 +90,7 @@ ACMD(do_transobj)
     obj_vnum num          = obj_get_vnum(g, obj);
     struct obj_data *obj2 = nullptr;
 
-    act(g, "You send $p to everyone in the game.", true, ch, obj, 0, TO_CHAR);
+    act(g, "You send $p to everyone in the game.", true, ch, obj, nullptr, TO_CHAR);
 
     for (d = g->descriptors; d; d = d->next) {
       if (!desc_is_playing(d))
@@ -123,7 +123,7 @@ ACMD(do_recall)
     send_to_char(g, ch, "You are not an immortal!\r\n");
   } else {
     send_to_char(g, ch, "You disappear in a burst of light!\r\n");
-    act(g, "$n disappears in a burst of light!", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
     if (real_room(g, 2) != NOWHERE) {
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 2));
@@ -253,13 +253,13 @@ ACMD(do_goto)
   }
 
   snprintf(buf, sizeof(buf), "$n %s", char_get_poofout(g, ch) ? char_get_poofout(g, ch) : "disappears in a puff of smoke.");
-  act(g, buf, true, ch, 0, 0, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
 
   char_from_room(g, ch);
   char_to_room(g, ch, location);
 
   snprintf(buf, sizeof(buf), "$n %s", char_get_poofin(g, ch) ? char_get_poofin(g, ch) : "appears with an ear-splitting bang.");
-  act(g, buf, true, ch, 0, 0, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(g, char_get_in_room(ch), ch, 0);
   enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
@@ -288,11 +288,11 @@ ACMD(do_trans)
         send_to_char(g, ch, "They are inside a healing tank!\r\n");
         return;
       }
-      act(g, "$n disappears in a mushroom cloud.", false, victim, 0, 0, TO_ROOM);
+      act(g, "$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
       char_from_room(g, victim);
       char_to_room(g, victim, char_get_in_room(ch));
-      act(g, "$n arrives from a puff of smoke.", false, victim, 0, 0, TO_ROOM);
-      act(g, "$n has transferred you!", false, ch, 0, victim, TO_VICT);
+      act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+      act(g, "$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
       look_at_room(g, char_get_in_room(victim), victim, 0);
       enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
     }
@@ -307,11 +307,11 @@ ACMD(do_trans)
         victim = i->character;
         if (char_get_admlevel(victim) >= char_get_admlevel(ch))
           continue;
-        act(g, "$n disappears in a mushroom cloud.", false, victim, 0, 0, TO_ROOM);
+        act(g, "$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
         char_from_room(g, victim);
         char_to_room(g, victim, char_get_in_room(ch));
-        act(g, "$n arrives from a puff of smoke.", false, victim, 0, 0, TO_ROOM);
-        act(g, "$n has transferred you!", false, ch, 0, victim, TO_VICT);
+        act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+        act(g, "$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
         look_at_room(g, char_get_in_room(victim), victim, 0);
         enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
       }
@@ -343,11 +343,11 @@ ACMD(do_teleport)
       return;
     }
     send_to_char(g, ch, "%s", CONFIG_OK);
-    act(g, "$n disappears in a puff of smoke.", false, victim, 0, 0, TO_ROOM);
+    act(g, "$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
     char_from_room(g, victim);
     char_to_room(g, victim, target);
-    act(g, "$n arrives from a puff of smoke.", false, victim, 0, 0, TO_ROOM);
-    act(g, "$n has teleported you!", false, ch, 0, (char *)victim, TO_VICT);
+    act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+    act(g, "$n has teleported you!", false, ch, nullptr, (char *)victim, TO_VICT);
     look_at_room(g, char_get_in_room(victim), victim, 0);
     enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
   }
@@ -527,9 +527,9 @@ ACMD(do_load)
       mob = read_mobile(g, r_num, REAL);
       char_to_room(g, mob, char_get_in_room(ch));
 
-      act(g, "$n makes a quaint, magical gesture with one hand.", true, ch, 0, 0, TO_ROOM);
-      act(g, "$n has created $N!", false, ch, 0, mob, TO_ROOM);
-      act(g, "You create $N.", false, ch, 0, mob, TO_CHAR);
+      act(g, "$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n has created $N!", false, ch, nullptr, mob, TO_ROOM);
+      act(g, "You create $N.", false, ch, nullptr, mob, TO_CHAR);
       load_mtrigger(g, mob);
     }
   } else if (is_abbrev(buf, "obj")) {
@@ -551,9 +551,9 @@ ACMD(do_load)
         obj_to_char(g, obj, ch);
       else
         obj_to_room(g, obj, char_get_in_room(ch));
-      act(g, "$n makes a strange magical gesture.", true, ch, 0, 0, TO_ROOM);
-      act(g, "$n has created $p!", false, ch, obj, 0, TO_ROOM);
-      act(g, "You create $p.", false, ch, obj, 0, TO_CHAR);
+      act(g, "$n makes a strange magical gesture.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n has created $p!", false, ch, obj, nullptr, TO_ROOM);
+      act(g, "You create $p.", false, ch, obj, nullptr, TO_CHAR);
       load_otrigger(g, obj);
     }
   } else
@@ -576,7 +576,7 @@ ACMD(do_purge)
         send_to_char(g, ch, "Fuuuuuuuuu!\r\n");
         return;
       }
-      act(g, "$n disintegrates $N.", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "$n disintegrates $N.", false, ch, nullptr, vict, TO_NOTVICT);
       if (!char_is_npc(vict)) {
         send_to_all(g, "@R%s@r purges @R%s's@r sorry ass right off the MUD!@n\r\n", char_get_name(ch), char_get_name(vict));
       }
@@ -592,7 +592,7 @@ ACMD(do_purge)
       }
       extract_char(g, vict);
     } else if ((obj = get_obj_in_list_vis(g, ch, buf, nullptr, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr) {
-      act(g, "$n destroys $p.", false, ch, obj, 0, TO_ROOM);
+      act(g, "$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
       extract_obj(g, obj);
     } else {
       send_to_char(g, ch, "Nothing here by that name.\r\n");
@@ -604,7 +604,7 @@ ACMD(do_purge)
     int i;
 
     act(g, "$n gestures... You are surrounded by scorching flames!",
-        false, ch, 0, 0, TO_ROOM);
+        false, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "The world seems a little cleaner.\r\n");
 
     for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = char_get_next_in_room(vict)) {

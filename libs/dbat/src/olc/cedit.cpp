@@ -67,7 +67,7 @@ template <typename Field, typename T> consteval size_t checked_offset(size_t off
   static_assert(std::is_same_v<Field, T>, "cedit option has the wrong type for its field");
   return offset;
 }
-#define FIELD(f, T) checked_offset<decltype(((struct config_data *)0)->f), T>(offsetof(struct config_data, f))
+#define FIELD(f, T) checked_offset<decltype(((struct config_data *)nullptr)->f), T>(offsetof(struct config_data, f))
 
 #define BOOL(f)       .type = CT_BOOL, .offset = FIELD(f, int)
 #define INT(f)        .type = CT_INT, .offset = FIELD(f, int)
@@ -310,10 +310,10 @@ ACMD(do_oasis_cedit)
 
   if (!*buf1) {
     CREATE(d->olc, struct oasis_olc_data, 1);
-    OLC_ZONE(d) = 0;
+    OLC_ZONE(d) = nullptr;
     cedit_setup(g, d);
     desc_set_connected(d, CON_CEDIT);
-    act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+    act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_WRITING, true);
 
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,

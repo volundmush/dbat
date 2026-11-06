@@ -800,7 +800,7 @@ void save_char(GameWorld *g, struct char_data *ch)
   for (aff = char_get_affected(ch), i = 0; i < MAX_AFFECT; i++) {
     if (aff) {
       tmp_aff[i]      = *aff;
-      tmp_aff[i].next = 0;
+      tmp_aff[i].next = nullptr;
       aff             = aff->next;
     } else {
       tmp_aff[i].type      = 0; /* Zero signifies not used */
@@ -809,7 +809,7 @@ void save_char(GameWorld *g, struct char_data *ch)
       tmp_aff[i].specific  = 0;
       tmp_aff[i].location  = 0;
       tmp_aff[i].bitvector = 0;
-      tmp_aff[i].next      = 0;
+      tmp_aff[i].next      = nullptr;
     }
   }
 

@@ -432,7 +432,7 @@ ACMD(do_advance)
         "body dissolves to the elements of time and space itself.\r\n\r\n"
         "Suddenly a silent explosion of light snaps you back to reality.\r\n\r\n"
         "You feel slightly different.",
-        false, ch, 0, victim, TO_VICT);
+        false, ch, nullptr, victim, TO_VICT);
   }
 
   send_to_char(g, ch, "%s", CONFIG_OK);
@@ -516,10 +516,10 @@ static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)
     if (tch == ch)
       continue;
     if (char_get_admlevel(tch) >= char_get_invis_level(g, ch) && char_get_admlevel(tch) < level)
-      act(g, "You blink and suddenly realize that $n is gone.", false, ch, 0,
+      act(g, "You blink and suddenly realize that $n is gone.", false, ch, nullptr,
           tch, TO_VICT);
     if (char_get_admlevel(tch) < char_get_invis_level(g, ch) && char_get_admlevel(tch) >= level)
-      act(g, "You suddenly realize that $n is standing beside you.", false, ch, 0,
+      act(g, "You suddenly realize that $n is standing beside you.", false, ch, nullptr,
           tch, TO_VICT);
   }
 
@@ -624,7 +624,7 @@ ACMD(do_wizutil)
         char_set_freeze_level(g, vict, char_get_admlevel(ch));
         send_to_char(g, vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
         send_to_char(g, ch, "Frozen.\r\n");
-        act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, 0, 0, TO_ROOM);
+        act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
         mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s frozen by %s.", char_get_name(vict), char_get_name(ch));
         break;
       case SCMD_THAW:
@@ -641,7 +641,7 @@ ACMD(do_wizutil)
         char_plr_set(vict, PLR_FROZEN, false);
         send_to_char(g, vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
         send_to_char(g, ch, "Thawed.\r\n");
-        act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, 0, 0, TO_ROOM);
+        act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
         break;
       case SCMD_UNAFFECT:
         if (char_get_affected(vict) || char_get_affected_by(vict)) {

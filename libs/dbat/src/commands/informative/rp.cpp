@@ -90,8 +90,8 @@ ACMD(do_mimic)
       send_to_char(g, ch, "You are not imitating another race.\r\n");
       return;
     }
-    act(g, "@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_mimic(ch, 0);
   }
 
@@ -121,8 +121,8 @@ ACMD(do_mimic)
   }
   if (prob < perc) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
   char buf[MAX_STRING_LENGTH];
@@ -130,7 +130,7 @@ ACMD(do_mimic)
   decCurKI(g, ch, cost, 0);
   snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(g, ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-  act(g, buf, true, ch, 0, 0, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
   return;
 }
 
@@ -147,15 +147,15 @@ ACMD(do_kyodaika)
   }
 
   if (!is_affected(ch, AFF_KYODAIKA)) {
-    act(g, "@GYou growl as your body grows to ten times its normal size!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(g, ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
     assign_affect(g, ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
     save_char(g, ch);
     return;
   }
-  act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
   remove_affect(g, ch, AFF_KYODAIKA);
   save_char(g, ch);
@@ -186,7 +186,7 @@ ACMD(do_table)
 
   char buf[200];
   snprintf(buf, sizeof(buf), "$n looks at %s on %s.\r\n", obj_get_short_description(obj2), obj_get_short_description(obj));
-  act(g, buf, true, ch, 0, 0, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "%s", obj_get_action_description(obj2));
 }
 
@@ -222,7 +222,7 @@ ACMD(do_draw)
     send_to_char(g, ch, "You don't have any cards in the case!\r\n");
     return;
   }
-  act(g, "$n draws a card from $s $p.\r\n", true, ch, obj, 0, TO_ROOM);
+  act(g, "$n draws a card from $s $p.\r\n", true, ch, obj, nullptr, TO_ROOM);
   send_to_char(g, ch, "You draw a card.\r\n%s\r\n", obj_get_action_description(obj3));
   return;
 }
@@ -283,7 +283,7 @@ ACMD(do_shuffle)
     }
   }
   send_to_char(g, ch, "You shuffle the cards carefully.\r\n");
-  act(g, "$n shuffles their deck.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n shuffles their deck.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_room(g, char_get_in_room(ch), "There were %d cards in the deck.\r\n", total);
 }
 
@@ -313,21 +313,21 @@ ACMD(do_hand)
         send_to_char(g, ch, "%s\r\n", obj_get_short_description(obj));
       }
     }
-    act(g, "$n looks at $s hand.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n looks at $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     if (count == 0) {
       send_to_char(g, ch, "No cards.");
-      act(g, "There were no cards.", true, ch, 0, 0, TO_ROOM);
+      act(g, "There were no cards.", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (count > 7) {
-      act(g, "You have more than seven cards in your hand.", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n has more than seven cards in $s hand.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
       char buf[200];
       snprintf(buf, sizeof(buf), "There are %d cards in the hand.", count);
-      act(g, buf, true, ch, 0, 0, TO_ROOM);
+      act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (!strcasecmp("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
-    act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
     for (obj = char_get_inventory(ch); obj; obj = next_obj) {
       next_obj = obj_get_next_content(obj);
       if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
@@ -335,15 +335,15 @@ ACMD(do_hand)
       }
       if (obj) {
         count += 1;
-        act(g, "$p", true, ch, obj, 0, TO_ROOM);
+        act(g, "$p", true, ch, obj, nullptr, TO_ROOM);
       }
     }
     if (count == 0) {
-      act(g, "No cards.", true, ch, 0, 0, TO_ROOM);
+      act(g, "No cards.", true, ch, nullptr, nullptr, TO_ROOM);
     }
     if (count > 7) {
-      act(g, "You have more than seven cards in your hand.", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n has more than seven cards in $s hand.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else {
     send_to_char(g, ch, "Syntax: hand (look | show)\r\n");
@@ -386,8 +386,8 @@ ACMD(do_post)
       send_to_char(g, ch, "You are not near any general structure you can post it on.\r\n");
       return;
     }
-    act(g, "@WYou post $p@W on a nearby structure.@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
     obj_from_char(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_posttype(obj, 1);
@@ -408,7 +408,7 @@ ACMD(do_post)
   char buf[MAX_STRING_LENGTH];
   snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj_get_short_description(obj), obj_get_short_description(obj2));
   send_to_char(g, ch, "@WYou post %s@W on %s@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(obj2));
-  act(g, buf, true, ch, 0, 0, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
   obj_from_char(g, obj);
   obj_to_room(g, obj, char_get_in_room(ch));
   obj_set_posttype(obj, 2);
@@ -461,8 +461,8 @@ ACMD(do_play)
     return;
   }
 
-  act(g, "You play $p on your table.", true, ch, obj, 0, TO_CHAR);
-  act(g, "$n plays $p on $s table.", true, ch, obj, 0, TO_ROOM);
+  act(g, "You play $p on your table.", true, ch, obj, nullptr, TO_CHAR);
+  act(g, "$n plays $p on $s table.", true, ch, obj, nullptr, TO_ROOM);
   obj_from_char(g, obj);
   obj_to_obj(g, obj, obj2);
 }
@@ -756,9 +756,9 @@ ACMD(do_intro)
     return;
   }
   introWrite(ch, vict, arg2);
-  act(g, "You decide to call $M, $N.", true, ch, 0, vict, TO_CHAR);
-  act(g, "$n seems to decide something about you.", true, ch, 0, vict, TO_VICT);
-  act(g, "$n seems to decide something about $N.", true, ch, 0, vict, TO_NOTVICT);
+  act(g, "You decide to call $M, $N.", true, ch, nullptr, vict, TO_CHAR);
+  act(g, "$n seems to decide something about you.", true, ch, nullptr, vict, TO_VICT);
+  act(g, "$n seems to decide something about $N.", true, ch, nullptr, vict, TO_NOTVICT);
   return;
 }
 

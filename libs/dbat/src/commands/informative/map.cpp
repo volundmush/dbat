@@ -94,7 +94,7 @@ void search_room(GameWorld *g, struct char_data *ch)
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@y$n@Y begins searching the room carefully.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_1SEC);
 
   for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
@@ -116,9 +116,9 @@ void search_room(GameWorld *g, struct char_data *ch)
       }
       terrain += terrain_bonus(g, vict);
       if (perc * bonus >= prob * terrain) { /* Found them. */
-        act(g, "@YYou find @y$N@Y hiding nearby!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@y$n@Y has found your hiding spot!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@y$n@Y has found @y$N's@Y hiding spot!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@YYou find @y$N@Y hiding nearby!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@y$n@Y has found your hiding spot!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@y$n@Y has found @y$N's@Y hiding spot!@n", true, ch, nullptr, vict, TO_NOTVICT);
         reveal_hiding(g, vict, 4);
         found++;
       }
@@ -129,8 +129,8 @@ void search_room(GameWorld *g, struct char_data *ch)
 
   for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
     if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(g, 50, 200)) {
-      act(g, "@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, 0, TO_CHAR);
-      act(g, "@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, 0, TO_ROOM);
+      act(g, "@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
+      act(g, "@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
       obj_extra_set(obj, ITEM_BURIED, false);
       found++;
     }
@@ -882,7 +882,7 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
   int check = false, skill_lvl, dchide = 20;
 
   send_to_char(g, ch, "You search for secret doors.\r\n");
-  act(g, "$n searches the area intently.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
   skill_lvl = char_get_skill(ch, SKILL_SEARCH);

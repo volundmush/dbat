@@ -210,9 +210,9 @@ ACMD(do_teach)
     sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
     sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
     sprintf(toother, "@y$n@Y instructs @y$N@Y in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
-    act(g, tochar, true, ch, 0, vict, TO_CHAR);
-    act(g, tovict, true, ch, 0, vict, TO_VICT);
-    act(g, toother, true, ch, 0, vict, TO_NOTVICT);
+    act(g, tochar, true, ch, nullptr, vict, TO_CHAR);
+    act(g, tovict, true, ch, nullptr, vict, TO_VICT);
+    act(g, toother, true, ch, nullptr, vict, TO_NOTVICT);
     char_set_skills_base(vict, skill, char_get_skills_base(vict, skill) + 1);
     if (free == false) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (cost));
@@ -1121,8 +1121,8 @@ static void handle_study(GameWorld *g, struct char_data *keeper, int guild_nr, s
   char_set_gold(ch, char_get_gold(ch) - (goldcost));
   char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (25));
 
-  act(g, "@c$N@W spends time lecturing you on various subjects.@n", true, ch, 0, keeper, TO_CHAR);
-  act(g, "@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, 0, keeper, TO_ROOM);
+  act(g, "@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
+  act(g, "@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
   send_to_char(g, ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
 }
 

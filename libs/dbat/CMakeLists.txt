@@ -14,7 +14,7 @@ set(DBAT_CXX_FLAGS
     -Wno-unused-result      # 45 unchecked fscanf/fgets/system results; tracked separately
     -Wformat=2 -Wno-format-nonliteral  # shop, guild and auction formats come from files, checked on load
     -Werror=format-security -Werror=return-type
-    -Wshadow -Wredundant-decls -Wcast-qual -Wextra-semi -Wnull-dereference -Wundef -Wvla
+    -Wshadow -Wredundant-decls -Wcast-qual -Wextra-semi -Wnull-dereference -Wundef -Wvla -Wzero-as-null-pointer-constant
     # GCC-only: conditions that are always true/false, identical branches, and stricter forms of the above
     $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches
                              -Wformat-signedness -Wcast-align=strict -Wimplicit-fallthrough=5 -Wuseless-cast>

@@ -9,7 +9,7 @@
 
 int xdir_scan(const char *dir_name, struct xap_dir *xapdirp)
 {
-  xapdirp->total   = scandir(dir_name, &(xapdirp->namelist), 0, alphasort);
+  xapdirp->total   = scandir(dir_name, &(xapdirp->namelist), nullptr, alphasort);
   xapdirp->current = 0;
 
   return (xapdirp->total);

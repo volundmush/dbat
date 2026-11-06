@@ -29,9 +29,9 @@ bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const ch
       char_aff_set(vict, AFF_ZANZOKEN, false);
       return false;
     }
-    act(g, "@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, 0, vict, TO_CHAR);
-    act(g, "@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, 0, vict, TO_VICT);
-    act(g, "@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, 0, vict, TO_NOTVICT);
+    act(g, "@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, nullptr, vict, TO_CHAR);
+    act(g, "@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_VICT);
+    act(g, "@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_NOTVICT);
     char_aff_set(vict, AFF_ZANZOKEN, false);
     char_aff_set(ch, AFF_ZANZOKEN, false);
   }
@@ -149,9 +149,9 @@ bool tech_handle_android_absorb(GameWorld *g, char_data *ch, char_data *vict)
 void tech_handle_crashdown(GameWorld *g, char_data *ch, char_data *vict)
 {
   if (char_aff_flagged(vict, AFF_FLYING)) {
-    act(g, "@w$N@w is knocked out of the air!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@wYou are knocked out of the air!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@w$N@w is knocked out of the air!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
     char_aff_set(vict, AFF_FLYING, false);
     char_set_altitude(vict, 0);
     char_set_position(vict, POS_SITTING);

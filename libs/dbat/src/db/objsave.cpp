@@ -771,7 +771,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
 
         obj_set_action_description(temp, fread_string(fl, "rented object adesc"));
         if (obj_get_action_description(temp) == nullptr) {
-          obj_set_action_description(temp, 0);
+          obj_set_action_description(temp, nullptr);
         }
 
         if (!get_line(fl, line) ||

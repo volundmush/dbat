@@ -692,16 +692,16 @@ ACMD(do_commune)
   if (prob < perc) {
     decCurKI(g, ch, cost, 0);
     reveal_hiding(g, ch, 0);
-    act(g, "@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
   decCurKI(g, ch, cost, 0);
   decCurST(g, ch, cost, 0);
   reveal_hiding(g, ch, 0);
-  act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
   return;
 }
@@ -742,8 +742,8 @@ ACMD(do_pose)
 
   if (prob < perc) {
     reveal_hiding(g, ch, 0);
-    act(g, "@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurST(g, ch, getMaxST(g, ch) / 40, 0);
     improve_skill(g, ch, SKILL_POSE, 0);
     return;
@@ -751,20 +751,20 @@ ACMD(do_pose)
   reveal_hiding(g, ch, 0);
   switch (rand_number(g, 1, 4)) {
     case 1:
-      act(g, "@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", true, ch, nullptr, nullptr, TO_ROOM);
       break;
     case 2:
-      act(g, "@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", true, ch, nullptr, nullptr, TO_ROOM);
       break;
     case 3:
-      act(g, "@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", true, ch, nullptr, nullptr, TO_ROOM);
       break;
     case 4:
-      act(g, "@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", true, ch, nullptr, nullptr, TO_ROOM);
       break;
   }
   send_to_char(g, ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");

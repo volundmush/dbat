@@ -123,7 +123,7 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
   if (rroom_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
     send_to_char(g, caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
-    act(g, "White light from no particular source suddenly fills the room, then vanishes.", false, caster, 0, 0, TO_ROOM);
+    act(g, "White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr, nullptr, TO_ROOM);
     return (0);
   }
 
@@ -212,15 +212,15 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_STAFF:
-      act(g, "You tap $p three times on the ground.", false, ch, obj, 0, TO_CHAR);
+      act(g, "You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
       if (obj_get_action_description(obj))
-        act(g, obj_get_action_description(obj), false, ch, obj, 0, TO_ROOM);
+        act(g, obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
       else
-        act(g, "$n taps $p three times on the ground.", false, ch, obj, 0, TO_ROOM);
+        act(g, "$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
       if (obj_get_value(obj, VAL_STAFF_CHARGES) <= 0) {
         send_to_char(g, ch, "It seems powerless.\r\n");
-        act(g, "Nothing seems to happen.", false, ch, obj, 0, TO_ROOM);
+        act(g, "Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
       } else {
         obj_set_value(obj, VAL_STAFF_CHARGES, obj_get_value(obj, VAL_STAFF_CHARGES) - 1);
         char_aff_set(ch, AFF_NEXTNOACTION, true);
@@ -250,8 +250,8 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     case ITEM_WAND:
       if (k == FIND_CHAR_ROOM) {
         if (tch == ch) {
-          act(g, "You point $p at yourself.", false, ch, obj, 0, TO_CHAR);
-          act(g, "$n points $p at $mself.", false, ch, obj, 0, TO_ROOM);
+          act(g, "You point $p at yourself.", false, ch, obj, nullptr, TO_CHAR);
+          act(g, "$n points $p at $mself.", false, ch, obj, nullptr, TO_ROOM);
         } else {
           act(g, "You point $p at $N.", false, ch, obj, tch, TO_CHAR);
           if (obj_get_action_description(obj))
@@ -276,7 +276,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 
       if (obj_get_value(obj, VAL_WAND_CHARGES) <= 0) {
         send_to_char(g, ch, "It seems powerless.\r\n");
-        act(g, "Nothing seems to happen.", false, ch, obj, 0, TO_ROOM);
+        act(g, "Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
         return;
       }
       obj_set_value(obj, VAL_WAND_CHARGES, obj_get_value(obj, VAL_WAND_CHARGES) - 1);
@@ -298,7 +298,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
       } else
         tch = ch;
 
-      act(g, "You recite $p which dissolves.", true, ch, obj, 0, TO_CHAR);
+      act(g, "You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
       if (obj_get_action_description(obj))
         act(g, obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
       else

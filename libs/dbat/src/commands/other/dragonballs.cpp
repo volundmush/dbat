@@ -363,8 +363,8 @@ ACMD(do_summon)
 
   if (summoned == true) {
     reveal_hiding(g, ch, 0);
-    act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
     g->SHENRON = true;
     g->DRAGONC = 300;
     g->DRAGONR = rroom_get_vnum(g, char_get_in_room(ch));

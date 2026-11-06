@@ -604,35 +604,35 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
-    act(g, buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   one_argument(arg, buf);
 
   if (!*buf) { /* you'll get no argument from me! */
     act(g, "$n tells you, 'You need to specify an addressee!'",
-        false, mailman, 0, ch, TO_VICT);
+        false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
                                "$n tells you, '...which I see you can't afford.'",
              STAMP_PRICE);
-    act(g, buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   if ((recipient = get_id_by_name(g, buf)) < 0 || !mail_recip_ok(g, buf)) {
     act(g, "$n tells you, 'No one by that name is registered here!'",
-        false, mailman, 0, ch, TO_VICT);
+        false, mailman, nullptr, ch, TO_VICT);
     return;
   }
-  act(g, "$n starts to write some mail.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n starts to write some mail.", true, ch, nullptr, nullptr, TO_ROOM);
   snprintf(buf, sizeof(buf), "$n tells you, 'I'll take %d zenni for the stamp.'\r\n"
                              "$n tells you, 'Write your message. (/s saves /h for help).'",
            STAMP_PRICE);
 
-  act(g, buf, false, mailman, 0, ch, TO_VICT);
-  act(g, "@C$n@w starts writing a letter.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+  act(g, "@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
 
@@ -645,9 +645,9 @@ static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct cha
                                   int cmd, char *arg)
 {
   if (has_mail(g, char_get_idnum(ch)))
-    act(g, "$n tells you, 'You have mail waiting.'", false, mailman, 0, ch, TO_VICT);
+    act(g, "$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
   else
-    act(g, "$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, 0, ch, TO_VICT);
+    act(g, "$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
 }
 
 static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
@@ -660,7 +660,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 
   if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
-    act(g, buf, false, mailman, 0, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   while (has_mail(g, char_get_idnum(ch))) {
@@ -698,8 +698,8 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 
     if (desc_is_playing(char_get_desc(ch)) && mailman != nullptr) {
       obj_to_char(g, obj, ch);
-      act(g, "$n gives you a piece of mail.", false, mailman, 0, ch, TO_VICT);
-      act(g, "$N gives $n a piece of mail.", false, ch, 0, mailman, TO_ROOM);
+      act(g, "$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
+      act(g, "$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
     } else {
       extract_obj(g, obj);
     }

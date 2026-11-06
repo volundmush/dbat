@@ -82,8 +82,8 @@ ACMD(do_oasis_redit)
     return;
   }
   if (char_get_admlevel(ch) < 1) {
-    act(g, "@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, remove);
     remodeling = true;
   }
@@ -183,7 +183,7 @@ ACMD(do_oasis_redit)
 
   redit_disp_menu(g, d);
   desc_set_connected(d, CON_REDIT);
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
@@ -567,7 +567,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             redit_save_to_disk(g, real_zone_by_thing(g, OLC_NUM(d)));
             if (char_get_admlevel(d->character) < 1) {
               write_to_output(g, d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
-              act(g, "@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", true, d->character, 0, 0, TO_ROOM);
+              act(g, "@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", true, d->character, nullptr, nullptr, TO_ROOM);
             } else {
               write_to_output(g, d, "Room saved to disk.\r\n");
             }
@@ -585,7 +585,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           cleanup_olc(g, d, CLEANUP_ALL);
           if (char_get_admlevel(d->character) < 1) {
             write_to_output(g, d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
-            act(g, "@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, d->character, 0, 0, TO_ROOM);
+            act(g, "@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, d->character, nullptr, nullptr, TO_ROOM);
             struct obj_data *obj;
             obj = read_object(g, 19094, VIRTUAL);
             obj_to_char(g, obj, d->character);

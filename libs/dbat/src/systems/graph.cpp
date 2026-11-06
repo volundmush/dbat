@@ -76,7 +76,7 @@ static void bfs_dequeue(GameWorld *g)
   curr = g->bfs_queue_head;
 
   if (!(g->bfs_queue_head = g->bfs_queue_head->next))
-    g->bfs_queue_tail = 0;
+    g->bfs_queue_tail = nullptr;
   free(curr);
 }
 
@@ -330,7 +330,7 @@ ACMD(do_radar)
 
   else {
     char_set_wait(ch, PULSE_2SEC);
-    act(g, "$n holds up a dragon radar and pushes its button.", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     while (num < 20000) {
       if (real_room(g, room) != NOWHERE) {
         for (obj = rroom_get_contents(g, real_room(g, room)); obj; obj = next_obj) {
@@ -432,9 +432,9 @@ ACMD(do_track)
       send_to_char(g, ch, "You will remember their ki signal from now on.\r\n");
       sense_memory_write(g, ch, vict);
     }
-    act(g, "You look at $N@n intently for a moment.", true, ch, 0, vict, TO_CHAR);
-    act(g, "$n looks at you intently for a moment.", true, ch, 0, vict, TO_VICT);
-    act(g, "$n looks at $N@n intently for a moment.", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
+    act(g, "$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
     if (!char_is_android(vict)) {
       if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
         send_to_char(g, ch, "You sense slightly pure and good ki from them.\r\n");
@@ -684,9 +684,9 @@ ACMD(do_track)
         send_to_char(g, ch, "Hmm.. something seems to be wrong.\r\n");
         break;
       case BFS_ALREADY_THERE:
-        act(g, "You look at $N@n intently for a moment.", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n looks at you intently for a moment.", true, ch, 0, vict, TO_VICT);
-        act(g, "$n looks at $N intently for a moment.", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n looks at $N intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
         if (!char_is_android(vict)) {
           if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
             send_to_char(g, ch, "You sense slightly pure and good ki from them.\r\n");

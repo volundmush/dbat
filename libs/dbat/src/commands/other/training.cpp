@@ -315,96 +315,96 @@ ACMD(do_train)
     case 1:
       switch (msg_case) {
         case 1:
-          act(g, "@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n throws a flurry of punches into the air.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n throws a flurry of punches into the air.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou leap into the air and throw a wild kick at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n leaps into the air and throws a wild kick at nothing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and throw a wild kick at an invisible opponent@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n leaps into the air and throws a wild kick at nothing.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
     case 2:
       switch (msg_case) {
         case 1:
-          act(g, "@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n dashes quickly around the surrounding area as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n dashes quickly around the surrounding area as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou dodge to the side as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n dodges to the side as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dodge to the side as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n dodges to the side as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou dash backwards as fast as you can!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n dashes backwards as fast as $e can!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou dash backwards as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n dashes backwards as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
     case 3:
       switch (msg_case) {
         case 1:
-          act(g, "@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou leap into the air and then slam into the ground with your fists!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s fists!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your fists!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s fists!?@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou leap into the air and then slam into the ground with your body!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s body!?@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou leap into the air and then slam into the ground with your body!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n leaps into the air and then slams into the ground with $s body!?@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
     case 4:
       switch (msg_case) {
         case 1:
-          act(g, "@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou flip to the side off one hand and then land on your feet.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n flips to the side off one hand and then lands on $s feet.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou flip to the side off one hand and then land on your feet.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n flips to the side off one hand and then lands on $s feet.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
     case 5:
       switch (msg_case) {
         case 1:
-          act(g, "@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
     case 6:
       switch (msg_case) {
         case 1:
-          act(g, "@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 2:
-          act(g, "@WYou look around and contemplate battle tactics for an imaginary scenario.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n looks around and appears to be imagining things that aren't there.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou look around and contemplate battle tactics for an imaginary scenario.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n looks around and appears to be imagining things that aren't there.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
         case 3:
-          act(g, "@WYou invent a battle plan for a battle that doesn't exist!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@W$n seems to have thought of something.@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@WYou invent a battle plan for a battle that doesn't exist!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n seems to have thought of something.@n", true, ch, nullptr, nullptr, TO_ROOM);
           break;
       }
       break;
@@ -553,9 +553,9 @@ ACMD(do_potential)
       gainBaseST(vict, (getBaseST(vict) / 100) * boost, false);
     }
     reveal_hiding(g, ch, 0);
-    act(g, "You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", true, ch, 0, vict, TO_CHAR);
-    act(g, "$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", true, ch, 0, vict, TO_VICT);
-    act(g, "$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", true, ch, nullptr, vict, TO_VICT);
+    act(g, "$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true, ch, nullptr, vict, TO_NOTVICT);
     improve_skill(g, ch, SKILL_POTENTIAL, 0);
     improve_skill(g, ch, SKILL_POTENTIAL, 0);
     improve_skill(g, ch, SKILL_POTENTIAL, 0);
@@ -655,60 +655,60 @@ ACMD(do_situp)
   }
   if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
     bonus = 1;
-    act(g, "@gYou do a situp.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10) {
     bonus = rand_number(g, 3, 7);
-    act(g, "@gYou do a situp, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, feeling the strain of gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 20) {
     bonus = rand_number(g, 8, 14);
-    act(g, "@gYou do a situp, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and feel gravity's pull.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 30) {
     bonus = rand_number(g, 14, 20);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 40) {
     bonus = rand_number(g, 20, 35);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 50) {
     bonus = rand_number(g, 40, 60);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 100) {
     bonus = rand_number(g, 180, 250);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 200) {
     bonus = rand_number(g, 400, 600);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
     bonus = rand_number(g, 800, 1200);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
     bonus = rand_number(g, 2000, 3000);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
     bonus = rand_number(g, 4000, 6000);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
     bonus = rand_number(g, 9000, 10000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
     bonus = rand_number(g, 15000, 20000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
     bonus = rand_number(g, 25000, 30000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
   }
   if (cost >= getMaxST(g, ch) / 2) {
     send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
@@ -887,8 +887,8 @@ ACMD(do_meditate)
       return;
     }
     if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(char_get_mindlink(ch)) + (char_get_skill(char_get_mindlink(ch), SKILL_TELEPATHY) * 0.1)) {
-      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
-      act(g, "$n closes their eyes for a few seconds.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
+      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
+      act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, char_get_mindlink(ch), TO_ROOM);
       send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target manages to push you out!@n\r\n");
       if (char_get_aff_abils_intel(char_get_mindlink(ch)) < axion_dice(g, -10) && !char_aff_flagged(char_get_mindlink(ch), AFF_SHOCKED)) {
         send_to_char(g, char_get_mindlink(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
@@ -900,8 +900,8 @@ ACMD(do_meditate)
       char_set_mindlink(ch, nullptr);
       return;
     }
-    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, 0, char_get_mindlink(ch), TO_CHAR);
-    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, 0, char_get_mindlink(ch), TO_ROOM);
+    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
+    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, char_get_mindlink(ch), TO_ROOM);
     send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
     decCurKI(g, ch, getMaxKI(g, char_get_mindlink(ch)) * .05, 0);
@@ -972,8 +972,8 @@ ACMD(do_meditate)
 
   else {
     /* Meditate Message */
-    act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, TO_ROOM);
 
     if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
       bonus = 1;
@@ -1187,60 +1187,60 @@ ACMD(do_pushup)
   else {
     if (rroom_get_gravity(g, char_get_in_room(ch)) == 0) {
       bonus = 1;
-      act(g, "@gYou do a pushup.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10) {
       bonus = rand_number(g, 3, 7);
-      act(g, "@gYou do a pushup, feeling the strain of gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, feeling the strain of gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 20) {
       bonus = rand_number(g, 8, 14);
-      act(g, "@gYou do a pushup, and feel gravity's pull.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and feel gravity's pull.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 30) {
       bonus = rand_number(g, 14, 20);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 40) {
       bonus = rand_number(g, 20, 35);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 50) {
       bonus = rand_number(g, 40, 60);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 100) {
       bonus = rand_number(g, 180, 250);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 200) {
       bonus = rand_number(g, 400, 600);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 300) {
       bonus = rand_number(g, 800, 1200);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 400) {
       bonus = rand_number(g, 2000, 3000);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 500) {
       bonus = rand_number(g, 4000, 6000);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 1000) {
       bonus = rand_number(g, 9000, 10000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 5000) {
       bonus = rand_number(g, 15000, 20000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (rroom_get_gravity(g, char_get_in_room(ch)) == 10000) {
       bonus = rand_number(g, 25000, 30000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
     if (cost >= getMaxPLTrans(g, ch) / 2) {
       send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
@@ -1400,35 +1400,35 @@ void base_update(GameWorld *g)
     }
     if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 60) {
       if (char_is_bio(d->character)) {
-        act(g, "@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, 0, 0, TO_CHAR);
+        act(g, "@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, nullptr, nullptr, TO_CHAR);
       } else {
-        act(g, "@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 30) {
       if (char_is_bio(d->character)) {
-        act(g, "@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, nullptr, nullptr, TO_ROOM);
       } else {
-        act(g, "@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 15) {
       if (char_is_bio(d->character)) {
-        act(g, "@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, nullptr, nullptr, TO_ROOM);
       } else {
-        act(g, "@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 0) {
       if (char_is_bio(d->character)) {
         restoreHealth(d->character, true);
-        act(g, "@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       //Zenkai Boost
       else if (char_is_saiyan(d->character)) {
@@ -1458,12 +1458,12 @@ void base_update(GameWorld *g)
           send_to_char(g, d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
           send_to_char(g, d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
         }
-        act(g, "@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, nullptr, nullptr, TO_ROOM);
       } else {
         restoreHealth(d->character, true);
-        act(g, "@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, 0, 0, TO_CHAR);
-        act(g, "@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, 0, 0, TO_ROOM);
+        act(g, "@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, nullptr, nullptr, TO_ROOM);
       }
       char_plr_set(d->character, PLR_GOOP, false);
     } else {
@@ -1549,26 +1549,26 @@ void base_update(GameWorld *g)
       if (rroom_get_geffect(g, char_get_in_room(d->character)) <= 4) {
         switch (rand_number(g, 1, 4)) {
           case 1:
-            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_ROOM);
-            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, TO_ROOM);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, TO_CHAR);
             break;
           case 2:
-            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_ROOM);
-            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, TO_ROOM);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, TO_CHAR);
             break;
           case 3:
-            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_ROOM);
-            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, TO_ROOM);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, TO_CHAR);
             break;
           case 4:
-            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_ROOM);
-            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, 0, 0, TO_CHAR);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, TO_ROOM);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, TO_CHAR);
             break;
         }
         rroom_set_geffect(g, char_get_in_room(d->character), rroom_get_geffect(g, char_get_in_room(d->character)) + (1));
       } else if (rroom_get_geffect(g, char_get_in_room(d->character)) == 5) {
-        act(g, "@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_ROOM);
-        act(g, "@RLava covers the entire area now!@n", false, d->character, 0, 0, TO_CHAR);
+        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_CHAR);
         rroom_set_geffect(g, char_get_in_room(d->character), rroom_get_geffect(g, char_get_in_room(d->character)) + (1));
       }
     }
@@ -1580,9 +1580,9 @@ void base_update(GameWorld *g)
     if (char_is_android(d->character) && char_get_absorbing(d->character)) {
       if (getCurST(g, char_get_absorbing(d->character)) < (getMaxST(g, d->character) / 15) &&
           getCurKI(g, char_get_absorbing(d->character)) < (getMaxKI(g, d->character) / 15)) {
-        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
-        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
+        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
+        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
         if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
           set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
         }
@@ -1603,10 +1603,10 @@ void base_update(GameWorld *g)
         decCurKI(g, char_get_absorbing(d->character), getMaxKI(g, d->character) / 20, 1);
         decCurST(g, char_get_absorbing(d->character), getMaxST(g, d->character) / 20, 1);
 
-        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
+        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
+        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
         send_to_char(g, char_get_absorbing(d->character), "@wTry 'escape'!@n\r\n");
-        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
         if (getCurPL(g, d->character) < getEffMaxPL(g, d->character)) {
           incCurHealth(g, d->character, getMaxKI(g, d->character) * .04, true);
           send_to_char(g, d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
@@ -1614,9 +1614,9 @@ void base_update(GameWorld *g)
 
         if (isFullST(d->character) && isFullKI(d->character)) {
 
-          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
-          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, 0, char_get_absorbing(d->character), TO_VICT);
-          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
+          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
+          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
+          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
           if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
             set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
           }

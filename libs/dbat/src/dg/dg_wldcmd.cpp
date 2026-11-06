@@ -77,8 +77,8 @@ static void act_to_room(GameWorld *g, char *str, room_data *room)
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-  act(g, str, false, room_get_people(room), 0, 0, TO_ROOM);
-  act(g, str, false, room_get_people(room), 0, 0, TO_CHAR);
+  act(g, str, false, room_get_people(room), nullptr, nullptr, TO_ROOM);
+  act(g, str, false, room_get_people(room), nullptr, nullptr, TO_CHAR);
 }
 
 /* World commands */
@@ -559,7 +559,7 @@ static WCMD(do_wat)
 }
 
 static const struct wld_command_info wld_cmd_info[] = {
-    {"RESERVED",     0,            0               }, /* this must be first -- for specprocs */
+    {"RESERVED",     nullptr,      0               }, /* this must be first -- for specprocs */
 
     {"wasound ",     do_wasound,   0               },
     {"wdoor ",       do_wdoor,     0               },
@@ -575,7 +575,7 @@ static const struct wld_command_info wld_cmd_info[] = {
     {"wdamage ",     do_wdamage,   0               },
     {"wat ",         do_wat,       0               },
     {"weffect ",     do_weffect,   0               },
-    {"\n",           0,            0               }  /* this must be last */
+    {"\n",           nullptr,      0               }  /* this must be last */
 };
 
 /*

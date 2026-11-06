@@ -17,7 +17,7 @@ void log_death_trap(GameWorld *g, struct char_data *ch)
  * previously written code but is very nice for new code.  */
 void mud_vlog(const char *format, va_list args)
 {
-  time_t ct    = time(0);
+  time_t ct    = time(nullptr);
   char *time_s = asctime(localtime(&ct));
 
   if (logfile == nullptr) {

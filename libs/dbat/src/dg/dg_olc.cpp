@@ -117,7 +117,7 @@ ACMD(do_oasis_trigedit)
     disp = 1;
   }
 
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",

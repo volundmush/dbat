@@ -240,7 +240,7 @@ static OCMD(do_osend)
 
       sprintf(msgbuf, "%s", msg);
       search_replace(msgbuf, char_get_name(ch), "$n");
-      act(g, msgbuf, true, ch, 0, 0, TO_ROOM);
+      act(g, msgbuf, true, ch, nullptr, nullptr, TO_ROOM);
       /*sub_write(msg, ch, TRUE, TO_ROOM);*/
     }
   }
@@ -716,7 +716,7 @@ static OCMD(do_oat)
 }
 
 static const struct obj_command_info obj_cmd_info[] = {
-    {"RESERVED",     0,             0               }, /* this must be first -- for specprocs */
+    {"RESERVED",     nullptr,       0               }, /* this must be first -- for specprocs */
 
     {"oasound ",     do_oasound,    0               },
     {"oat ",         do_oat,        0               },
@@ -737,7 +737,7 @@ static const struct obj_command_info obj_cmd_info[] = {
     {"otransform ",  do_otransform, 0               },
     {"ozoneecho ",   do_ozoneecho,  0               }, /* fix by Rumble */
 
-    {"\n",           0,             0               }  /* this must be last */
+    {"\n",           nullptr,       0               }  /* this must be last */
 };
 
 /*

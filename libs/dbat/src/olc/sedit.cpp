@@ -176,7 +176,7 @@ ACMD(do_oasis_sedit)
   sedit_disp_menu(g, d);
   desc_set_connected(d, CON_SEDIT);
 
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",

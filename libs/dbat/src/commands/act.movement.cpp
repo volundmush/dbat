@@ -72,30 +72,30 @@ void handle_teleport(GameWorld *g, struct char_data *ch, struct char_data *tar, 
   }
 
   if (success == true) { /* We have made it. */
-    act(g, "@w$n@w appears in an instant out of nowhere!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@w$n@w appears in an instant out of nowhere!@n", true, ch, nullptr, nullptr, TO_ROOM);
     if (char_get_drag(ch) && !char_is_npc(char_get_drag(ch))) {
       char_from_room(g, char_get_drag(ch));
       char_to_room(g, char_get_drag(ch), char_get_in_room(ch));
-      act(g, "@w$n@w appears in an instant out of nowhere being dragged by $N!@n", true, char_get_drag(ch), 0, ch, TO_NOTVICT);
+      act(g, "@w$n@w appears in an instant out of nowhere being dragged by $N!@n", true, char_get_drag(ch), nullptr, ch, TO_NOTVICT);
     }
     if (char_get_grappling(ch) && !char_is_npc(char_get_grappling(ch))) {
       char_from_room(g, char_get_grappling(ch));
       char_to_room(g, char_get_grappling(ch), char_get_in_room(ch));
-      act(g, "@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, char_get_grappling(ch), 0, ch, TO_NOTVICT);
+      act(g, "@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, char_get_grappling(ch), nullptr, ch, TO_NOTVICT);
     }
     if (char_get_carrying(ch)) {
       char_from_room(g, char_get_carrying(ch));
       char_to_room(g, char_get_carrying(ch), char_get_in_room(ch));
-      act(g, "@w$n@w appears in an instant out of nowhere being carried by $N!@n", true, char_get_carrying(ch), 0, ch, TO_NOTVICT);
+      act(g, "@w$n@w appears in an instant out of nowhere being carried by $N!@n", true, char_get_carrying(ch), nullptr, ch, TO_NOTVICT);
     }
     if (char_get_grappled(ch) && !char_is_npc(char_get_grappled(ch))) {
       char_from_room(g, char_get_grappled(ch));
       char_to_room(g, char_get_grappled(ch), char_get_in_room(ch));
-      act(g, "@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, char_get_grappled(ch), 0, ch, TO_NOTVICT);
+      act(g, "@w$n@w appears in an instant out of nowhere being grappled by $N!@n", true, char_get_grappled(ch), nullptr, ch, TO_NOTVICT);
     }
     if (char_get_drag(ch) && char_is_npc(char_get_drag(ch))) {
-      act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-      act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+      act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+      act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
       char_set_dragged(char_get_drag(ch), nullptr);
       char_set_drag(ch, nullptr);
     }
@@ -173,13 +173,13 @@ ACMD(do_carry)
     }
 
     if (char_get_pc_weight(g, vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
-      act(g, "@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch, nullptr, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_1SEC);
       return;
     } else { /* Let's carry that mofo! */
-      act(g, "@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
       if (char_get_sits(vict)) {
         struct obj_data *chair = char_get_sits(vict);
         obj_set_sitting(chair, nullptr);
@@ -204,24 +204,24 @@ void carry_drop(GameWorld *g, struct char_data *ch, int type)
 
   switch (type) {
     case 0: /* Awww we were gentle >.> */
-      act(g, "@WYou gently set @C$N@W down on the ground.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n @Wgently sets you down on the ground.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n @Wgently sets @c$N@W down on the ground.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou gently set @C$N@W down on the ground.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n @Wgently sets you down on the ground.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n @Wgently sets @c$N@W down on the ground.@n", true, ch, nullptr, vict, TO_NOTVICT);
       break;
     case 1: /* We're not super nice. */
-      act(g, "@WYou set @C$N@W hastily onto the ground.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n @Wsets you hastily onto the ground.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n @Wsets @c$N@W hastily onto the ground.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou set @C$N@W hastily onto the ground.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n @Wsets you hastily onto the ground.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n @Wsets @c$N@W hastily onto the ground.@n", true, ch, nullptr, vict, TO_NOTVICT);
       break;
     case 2: /* Uh oh we dropped them from being hit! */
-      act(g, "@WYou have @C$N@W knocked out of your arms and onto the ground!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@WYou are knocked out of @C$n's@W arms and onto the ground!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n @Whas @c$N@W knocked out of $s arms and onto the ground!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou have @C$N@W knocked out of your arms and onto the ground!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@WYou are knocked out of @C$n's@W arms and onto the ground!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n @Whas @c$N@W knocked out of $s arms and onto the ground!@n", true, ch, nullptr, vict, TO_NOTVICT);
       break;
     case 3: /* Uh oh they are being extracted! */
-      act(g, "@WYou stop carrying @C$N@W for some reason.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n @Wstops carrying you for some reason.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n @Wstops carrying @c$N@W for some reason.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou stop carrying @C$N@W for some reason.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n @Wstops carrying you for some reason.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n @Wstops carrying @c$N@W for some reason.@n", true, ch, nullptr, vict, TO_NOTVICT);
       break;
   }
   char_set_carrying(g, ch, nullptr);
@@ -586,7 +586,7 @@ ACMD(do_land)
     char_from_room(g, ch);
     char_to_room(g, ch, real_room(g, was_in));
     snprintf(sendback, sizeof(sendback), "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", blah);
-    act(g, sendback, true, ch, 0, 0, TO_ROOM);
+    act(g, sendback, true, ch, nullptr, nullptr, TO_ROOM);
     char_from_room(g, ch);
     char_to_room(g, ch, real_room(g, landing));
     zone_rnum zone = 0;
@@ -595,7 +595,7 @@ ACMD(do_land)
     }
     send_to_sense(g, 1, "landing on the planet", ch);
     send_to_scouter(g, "A powerlevel signal has been detected landing on the planet", ch, 0, 1);
-    act(g, "$n comes down from high above in the sky and quickly lands on the ground.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 }
@@ -613,8 +613,8 @@ static bool has_flight(GameWorld *g, struct char_data *ch)
     return true;
   }
   if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(g, ch)) < (char_get_level(ch) + (getMaxKI(g, ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
-    act(g, "@WYou crash to the ground, too tired to fly anymore!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n@W crashes to the ground!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_aff_set(ch, AFF_FLYING, false);
     handle_fall(g, ch);
     return false;
@@ -684,7 +684,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   /* charmed? */
   if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(ch) && char_get_in_room(ch) == char_get_in_room(char_get_master(ch))) {
     send_to_char(g, ch, "The thought of leaving your master makes you weep.\r\n");
-    act(g, "$n bursts into tears.", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n bursts into tears.", false, ch, nullptr, nullptr, TO_ROOM);
     return false;
   }
 
@@ -703,17 +703,17 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (((rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) || (rroom_sect(g, char_get_exit(g, ch, dir)->to_room) == SECT_WATER_NOSWIM)) && char_is_humanoid(ch)) {
     if (char_is_kanassan(ch) && !has_flight(g, ch)) {
-      act(g, "@CYou swim swiftly.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C swims swiftly.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou swim swiftly.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C swims swiftly.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (char_is_icer(ch) && !has_flight(g, ch)) {
-      act(g, "@CYou swim swiftly.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C swims swiftly.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou swim swiftly.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C swims swiftly.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (!char_is_kanassan(ch) && !char_is_icer(ch) && !has_flight(g, ch)) {
       if (!check_swim(g, ch)) {
         return false;
       }
-      act(g, "@CYou swim through the cold water.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C swim through the cold water.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou swim through the cold water.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C swim through the cold water.@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_set_wait(ch, PULSE_1SEC);
     }
   }
@@ -792,8 +792,8 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (char_aff_flagged(ch, AFF_FLYING) && ((getCurKI(g, ch)) < flight_cost) && !char_is_android(ch)) {
     decCurKI(g, ch, flight_cost, 0);
-    act(g, "@WYou crash to the ground, too tired to fly anymore!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n@W crashes to the ground!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_aff_set(ch, AFF_FLYING, false);
   } else if (char_aff_flagged(ch, AFF_FLYING) && !char_is_android(ch)) {
     decCurKI(g, ch, flight_cost, 0);
@@ -890,7 +890,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     } else {
       send_to_char(g, ch, "@GYou learn the very basics of moving silently.@n\r\n");
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(g, 5, 10));
-      act(g, buf2, true, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
+      act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(g, 1, 30)) {
         char_set_wait(ch, PULSE_1SEC);
       }
@@ -899,19 +899,19 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (!char_aff_flagged(ch, AFF_SNEAK) && !char_aff_flagged(ch, AFF_FLYING)) {
     snprintf(buf2, sizeof(buf2), "$n leaves %s.", dirs[dir]);
-    act(g, buf2, true, ch, 0, 0, TO_ROOM);
+    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!char_aff_flagged(ch, AFF_SNEAK) && char_aff_flagged(ch, AFF_FLYING)) {
     snprintf(buf2, sizeof(buf2), "$n flies %s.", dirs[dir]);
-    act(g, buf2, true, ch, 0, 0, TO_ROOM);
+    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
   }
 
   was_in = char_get_in_room(ch);
   if (char_get_drag(ch)) {
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
   }
   if (char_get_carrying(ch)) {
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
   }
   char_aff_set(ch, AFF_PURSUIT, true);
   char_from_room(g, ch);
@@ -934,7 +934,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
            ((dir == UP) || (dir == DOWN) ? "" : "the "),
            (dir == UP ? "below" : (dir == DOWN) ? "above"
                                                 : dirs[rev_dir[dir]]));
-  act(g, "$n arrives from $T.", true, ch, 0, buf2, TO_ROOM | TO_SNEAKRESIST);
+  act(g, "$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
   if (char_get_fighting(ch)) {
     if (rroom_sect(g, rroom_get_dir_option(g, was_in, dir)->to_room) != SECT_FLYING && rroom_sect(g, rroom_get_dir_option(g, was_in, dir)->to_room) != SECT_WATER_NOSWIM && rroom_get_geffect(g, rroom_get_dir_option(g, was_in, dir)->to_room) == 0) {
       roll_pursue(g, char_get_fighting(ch), ch);
@@ -942,8 +942,8 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     char_aff_set(ch, AFF_PURSUIT, false);
   }
   if (char_get_drag(ch)) {
-    act(g, "@wYou drag @C$N@w with you.@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@wYou drag @C$N@w with you.@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_from_room(g, char_get_drag(ch));
     char_to_room(g, char_get_drag(ch), char_get_in_room(ch));
     if (char_get_sits(char_get_drag(ch))) {
@@ -958,8 +958,8 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     }
   }
   if (char_get_carrying(ch)) {
-    act(g, "@wYou carry @C$N@w with you.@n", true, ch, 0, char_get_carrying(ch), TO_CHAR);
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@wYou carry @C$N@w with you.@n", true, ch, nullptr, char_get_carrying(ch), TO_CHAR);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
     char_from_room(g, char_get_carrying(ch));
     char_to_room(g, char_get_carrying(ch), char_get_in_room(ch));
     if (!char_aff_flagged(char_get_carrying(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
@@ -971,7 +971,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     look_at_room(g, char_get_in_room(ch), ch, 0);
     if (char_aff_flagged(ch, AFF_SNEAK) && !char_is_npc(ch) && char_get_skill(ch, SKILL_MOVE_SILENTLY) && char_get_skill(ch, SKILL_MOVE_SILENTLY) < rand_number(g, 1, 101)) {
       send_to_char(g, ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
-      act(g, "@c$n@w makes a noise revealing $s sneaking!@n", true, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
+      act(g, "@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       reveal_hiding(g, ch, 0);
       char_aff_set(ch, AFF_SNEAK, false);
     }
@@ -979,25 +979,25 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (rroom_get_geffect(g, char_get_in_room(ch)) == 6 || rroom_get_geffect(g, was_in) == 6) {
     if (!char_is_demon(ch) && !char_aff_flagged(ch, AFF_FLYING) && group_bonus(g, ch, 2) != 14) {
-      act(g, "@rYour legs are burned by the lava!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@R$n@r's legs are burned by the lava!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@rYour legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@R$n@r's legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_is_npc(ch) && char_is_humanoid(ch) && rand_number(g, 1, 2) == 2) {
-        do_fly(g, ch, 0, 0, 0);
+        do_fly(g, ch, nullptr, 0, 0);
       }
       decCurHealth(g, ch, getEffMaxPL(g, ch) / 20, 0);
       if (getCurPL(g, ch) <= 0) {
-        act(g, "@rYou have burned to death!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n@r has burned to death!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@rYou have burned to death!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n@r has burned to death!@n", true, ch, nullptr, nullptr, TO_ROOM);
         die(g, ch, nullptr);
       }
     }
     if (char_get_drag(ch) && !char_is_demon(char_get_drag(ch))) {
-      act(g, "@R$N@r gets burned!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-      act(g, "@R$N@r gets burned!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+      act(g, "@R$N@r gets burned!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+      act(g, "@R$N@r gets burned!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
       decCurHealth(g, char_get_drag(ch), getEffMaxPL(g, char_get_drag(ch)) / 20, 0);
       if (getCurPL(g, char_get_drag(ch)) < 0) {
-        act(g, "@rYou have burned to death!@n", true, char_get_drag(ch), 0, 0, TO_CHAR);
-        act(g, "@R$n@r has burned to death!@n", true, char_get_drag(ch), 0, 0, TO_ROOM);
+        act(g, "@rYou have burned to death!@n", true, char_get_drag(ch), nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n@r has burned to death!@n", true, char_get_drag(ch), nullptr, nullptr, TO_ROOM);
         die(g, char_get_drag(ch), nullptr);
       }
     }
@@ -1083,24 +1083,24 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
           (char_get_position(k->follower) >= POS_STANDING) &&
           (!char_aff_flagged(ch, AFF_ZANZOKEN) ||
            (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
-        act(g, "You follow $N.\r\n", false, k->follower, 0, ch, TO_CHAR);
+        act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
         perform_move(g, k->follower, dir, 1);
       } else if ((char_get_in_room(k->follower) == was_in) &&
                  (char_get_position(k->follower) >= POS_STANDING) &&
                  (char_aff_flagged(ch, AFF_ZANZOKEN) && char_aff_flagged(k->follower, AFF_ZANZOKEN)) &&
                  (!char_aff_flagged(ch, AFF_GROUP) || !char_aff_flagged(k->follower, AFF_GROUP))) {
-        act(g, "$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, 0, ch, TO_CHAR);
-        act(g, "$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, 0, ch, TO_NOTVICT);
-        act(g, "You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, 0, ch, TO_VICT);
+        act(g, "$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr, ch, TO_CHAR);
+        act(g, "$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr, ch, TO_NOTVICT);
+        act(g, "You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr, ch, TO_VICT);
         char_aff_set(ch, AFF_ZANZOKEN, false);
         char_aff_set(k->follower, AFF_ZANZOKEN, false);
         perform_move(g, k->follower, dir, 1);
       } else if ((char_get_in_room(k->follower) == was_in) &&
                  (char_get_position(k->follower) >= POS_STANDING) &&
                  (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_aff_flagged(k->follower, AFF_ZANZOKEN))) {
-        act(g, "You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, 0, ch, TO_CHAR);
-        act(g, "$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, 0, ch, TO_NOTVICT);
-        act(g, "$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, 0, ch, TO_VICT);
+        act(g, "You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, ch, TO_CHAR);
+        act(g, "$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, ch, TO_NOTVICT);
+        act(g, "$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch, TO_VICT);
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
     }
@@ -1146,7 +1146,7 @@ ACMD(do_move)
 
   if (char_get_conditions(g, ch, DRUNK) > 4 && (rand_number(g, 1, 9) + char_get_conditions(g, ch, DRUNK)) >= rand_number(g, 14, 20)) {
     send_to_char(g, ch, "You wobble around and then fall on your ass.\r\n");
-    act(g, "@C$n@W wobbles around before falling on $s ass@n.", true, ch, 0, 0, TO_ROOM);
+    act(g, "@C$n@W wobbles around before falling on $s ass@n.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_position(ch, POS_SITTING);
     return;
   }
@@ -1230,9 +1230,9 @@ ACMD(do_move)
       char_set_wait(ch, PULSE_2SEC);
       return;
     }
-    act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
-    act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), 0, ch, TO_VICT);
-    act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), 0, ch, TO_CHAR);
+    act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_NOTVICT);
+    act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_VICT);
+    act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_CHAR);
     char_set_absorbing(char_get_absorbby(ch), nullptr);
     char_set_absorbby(ch, nullptr);
   }
@@ -1307,76 +1307,76 @@ ACMD(do_move)
       send_to_char(g, ch, "You struggle to cross the vast distance.\r\n");
       char_set_wait(ch, PULSE_6SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && char_get_limb_condition(ch, (1) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
-      act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (2) - 1) < 50) {
         send_to_char(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
-          act(g, "@RYour left arm falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R left arm falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R left arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       char_set_wait(ch, PULSE_5SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && char_get_limb_condition(ch, (2) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
-      act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (1) - 1) < 50) {
         send_to_char(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
-          act(g, "@RYour right arm falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R right arm falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R right arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       char_set_wait(ch, PULSE_5SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && !char_aff_flagged(ch, AFF_FLYING)) {
-      act(g, "@wYou slowly pull yourself along with your arms...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w slowly pulls $mself along with one arms...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou slowly pull yourself along with your arms...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w slowly pulls $mself along with one arms...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (2) - 1) < 50) {
         send_to_char(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (2) - 1) <= 0) {
-          act(g, "@RYour left arm falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R left arm falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R left arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       if (char_get_limb_condition(ch, (1) - 1) < 50) {
         send_to_char(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
-          act(g, "@RYour right arm falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R right arm falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R right arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       char_set_wait(ch, PULSE_3SEC);
     } else if (char_get_limb_condition(ch, (3) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
-      act(g, "@wYou hop on one leg...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w hops on one leg...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (4) - 1) < 50) {
         send_to_char(g, ch, "@RYour left leg is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (4) - 1) <= 0) {
-          act(g, "@RYour left leg falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R left leg falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour left leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R left leg falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_limb_condition(ch, (4) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
-      act(g, "@wYou hop on one leg...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w hops on one leg...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (3) - 1) < 50) {
         send_to_char(g, ch, "@RYour right leg is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (3) - 1) <= 0) {
-          act(g, "@RYour right leg falls apart!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@r$n's@R right leg falls apart!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@RYour right leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@r$n's@R right leg falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
       }
       char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_position(ch) == POS_RESTING) {
-      act(g, "@wYou crawl on your hands and knees.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w crawls on $s hands and knees.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou crawl on your hands and knees.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w crawls on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(ch)) {
         struct obj_data *chair = char_get_sits(ch);
         obj_set_sitting(chair, nullptr);
@@ -1384,8 +1384,8 @@ ACMD(do_move)
       }
       char_set_wait(ch, PULSE_3SEC);
     } else if (char_get_position(ch) == POS_SITTING) {
-      act(g, "@wYou shuffle on your hands and knees.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w shuffles on $s hands and knees.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou shuffle on your hands and knees.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w shuffles on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(ch)) {
         struct obj_data *chair = char_get_sits(ch);
         obj_set_sitting(chair, nullptr);
@@ -1543,8 +1543,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
               send_to_room(g, char_get_in_room(ch), "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
             }
           } else {
-            act(g, "@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
-            act(g, "@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
+            act(g, "@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
+            act(g, "@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
             send_to_room(g, obj_get_in_room(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
@@ -1560,8 +1560,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
               send_to_room(g, num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
             }
           } else {
-            act(g, "@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
-            act(g, "@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
+            act(g, "@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
+            act(g, "@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
             send_to_room(g, obj_get_in_room(hatch), "@wThe door is opened from the other side.\r\n");
           }
           hatch = nullptr;
@@ -1589,8 +1589,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
               send_to_room(g, char_get_in_room(ch), "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
             }
           } else {
-            act(g, "@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
-            act(g, "@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
+            act(g, "@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
+            act(g, "@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
             send_to_room(g, obj_get_in_room(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
@@ -1606,8 +1606,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
               send_to_room(g, num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
             }
           } else {
-            act(g, "@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
-            act(g, "@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
+            act(g, "@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
+            act(g, "@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
             send_to_room(g, obj_get_in_room(hatch), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(hatch));
           }
           hatch = nullptr;
@@ -1692,7 +1692,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
                                                                               : "door",
              obj ? "" : " that leads ", obj ? "" : dbuf);
   if (!obj || obj_get_in_room(obj) != NOWHERE)
-    act(g, buf, false, ch, obj, obj ? 0 : char_get_exit(g, ch, door)->keyword, TO_ROOM);
+    act(g, buf, false, ch, obj, obj ? nullptr : char_get_exit(g, ch, door)->keyword, TO_ROOM);
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {
@@ -1744,7 +1744,7 @@ static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pic
     send_to_char(g, ch, "Odd - you can't seem to find a keyhole.\r\n");
   } else if (pickproof) {
     send_to_char(g, ch, "It resists your attempts to pick it.\r\n");
-    act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, nullptr, nullptr, TO_ROOM);
     /* The -2 is here because that is a penality for not having a set of
    * thieves' tools. If the player has them, that modifier will be accounted
    * for in roll_skill, and negate (or surpass) this. 
@@ -1754,7 +1754,7 @@ static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pic
                      "Not shaking tired hands.\r\n");
   } else if (dclock > (skill_lvl - 2)) {
     send_to_char(g, ch, "You failed to pick the lock...\r\n");
-    act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurST(g, ch, getCurST(g, ch) / 30, 0);
   } else {
     decCurST(g, ch, getCurST(g, ch) / 30, 0);
@@ -1817,7 +1817,7 @@ ACMD(do_gen_door)
       }
     }
     if (!(DOOR_IS_OPENABLE(g, ch, obj, door)))
-      act(g, "You can't $F that!", false, ch, 0, cmd_door[subcmd], TO_CHAR);
+      act(g, "You can't $F that!", false, ch, nullptr, cmd_door[subcmd], TO_CHAR);
     else if (!DOOR_IS_OPEN(g, ch, obj, door) &&
              IS_SET(flags_door[subcmd], NEED_OPEN))
       send_to_char(g, ch, "But it's already closed!\r\n");
@@ -1853,7 +1853,7 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_rnum dest_r
   if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(ch) &&
       char_get_in_room(ch) == char_get_in_room(char_get_master(ch))) {
     send_to_char(g, ch, "The thought of leaving your master makes you weep.\r\n");
-    act(g, "$n bursts into tears.", false, ch, 0, 0, TO_ROOM);
+    act(g, "$n bursts into tears.", false, ch, nullptr, nullptr, TO_ROOM);
     return -1;
   }
 
@@ -1910,13 +1910,13 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
   if (!(char_is_npc(ch) || char_adm_flagged(ch, ADM_WALKANYWHERE)) && !char_aff_flagged(ch, AFF_FLYING))
     decCurST(g, ch, need_movement, 0);
 
-  act(g, "$n enters $p.", true, ch, obj, 0, TO_ROOM | TO_SNEAKRESIST);
+  act(g, "$n enters $p.", true, ch, obj, nullptr, TO_ROOM | TO_SNEAKRESIST);
 
   if (char_get_drag(ch)) {
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
   }
   if (char_get_carrying(ch)) {
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
   }
   char_from_room(g, ch);
   char_to_room(g, ch, dest_room);
@@ -1930,12 +1930,12 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
   }
 
   if (obj_get_type_flag(obj) == ITEM_PORTAL)
-    act(g, "$n arrives from $p.", false, ch, obj, 0, TO_ROOM | TO_SNEAKRESIST);
+    act(g, "$n arrives from $p.", false, ch, obj, nullptr, TO_ROOM | TO_SNEAKRESIST);
   else
-    act(g, "$n arrives from outside.", false, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
+    act(g, "$n arrives from outside.", false, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
   if (char_get_drag(ch)) {
-    act(g, "@wYou drag @C$N@w with you.@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@wYou drag @C$N@w with you.@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     if (!char_aff_flagged(char_get_drag(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_drag(ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
       send_to_char(g, char_get_drag(ch), "You feel your sleeping body being moved.\r\n");
       if (char_is_npc(char_get_drag(ch)) && !char_get_fighting(char_get_drag(ch))) {
@@ -1950,8 +1950,8 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
     }
   }
   if (char_get_carrying(ch)) {
-    act(g, "@wYou carry @C$N@w with you.@n", true, ch, 0, char_get_carrying(ch), TO_CHAR);
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@wYou carry @C$N@w with you.@n", true, ch, nullptr, char_get_carrying(ch), TO_CHAR);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
     if (!char_aff_flagged(char_get_carrying(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
       send_to_char(g, char_get_carrying(ch), "You feel your sleeping body being moved.\r\n");
     }
@@ -2014,7 +2014,7 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
         for (k = char_get_followers(ch); k; k = k->next)
           if ((char_get_in_room(k->follower) == was_in) &&
               (char_get_position(k->follower) >= POS_STANDING)) {
-            act(g, "You follow $N.\r\n", false, k->follower, 0, ch, TO_CHAR);
+            act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
             perform_enter_obj(g, k->follower, obj, 1);
           }
     } else {
@@ -2117,13 +2117,13 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   if (!(char_is_npc(ch) || char_adm_flagged(ch, ADM_WALKANYWHERE)) && !char_aff_flagged(ch, AFF_FLYING))
     decCurST(g, ch, need_movement, 0);
 
-  act(g, "$n leaves $p.", true, ch, vehicle, 0, TO_ROOM | TO_SNEAKRESIST);
+  act(g, "$n leaves $p.", true, ch, vehicle, nullptr, TO_ROOM | TO_SNEAKRESIST);
 
   if (char_get_drag(ch)) {
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
   }
   if (char_get_carrying(ch)) {
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
   }
   char_from_room(g, ch);
   char_to_room(g, ch, dest_room);
@@ -2137,13 +2137,13 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   }
 
   if (vehicle) {
-    act(g, "$n arrives from inside $p.", true, ch, vehicle, 0, TO_ROOM | TO_SNEAKRESIST);
+    act(g, "$n arrives from inside $p.", true, ch, vehicle, nullptr, TO_ROOM | TO_SNEAKRESIST);
   } else {
-    act(g, "$n arrives from inside", true, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
+    act(g, "$n arrives from inside", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
   }
   if (char_get_drag(ch)) {
-    act(g, "@wYou drag @C$N@w with you.@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@wYou drag @C$N@w with you.@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_from_room(g, char_get_drag(ch));
     char_to_room(g, char_get_drag(ch), char_get_in_room(ch));
     if (char_get_sits(char_get_drag(ch))) {
@@ -2158,8 +2158,8 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
     }
   }
   if (char_get_carrying(ch)) {
-    act(g, "@wYou carry @C$N@w with you.@n", true, ch, 0, char_get_carrying(ch), TO_CHAR);
-    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, 0, char_get_carrying(ch), TO_ROOM);
+    act(g, "@wYou carry @C$N@w with you.@n", true, ch, nullptr, char_get_carrying(ch), TO_CHAR);
+    act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(ch), TO_ROOM);
     char_from_room(g, char_get_carrying(ch));
     char_to_room(g, char_get_carrying(ch), char_get_in_room(ch));
     if (char_get_sits(char_get_carrying(ch))) {
@@ -2177,7 +2177,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   send_to_scouter(g, buf3, ch, 0, 0);
 
   if (char_get_desc(ch) != nullptr) {
-    act(g, obj_get_action_description(obj), true, ch, obj, 0, TO_CHAR);
+    act(g, obj_get_action_description(obj), true, ch, obj, nullptr, TO_CHAR);
     look_at_room(g, char_get_in_room(ch), ch, 0);
   }
 
@@ -2213,7 +2213,7 @@ static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data
         for (k = char_get_followers(ch); k; k = k->next)
           if ((char_get_in_room(k->follower) == was_in) &&
               (char_get_position(k->follower) >= POS_STANDING)) {
-            act(g, "You follow $N.\r\n", false, k->follower, 0, ch, TO_CHAR);
+            act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
             perform_leave_obj(g, k->follower, obj, 1);
           }
   }
@@ -2264,25 +2264,25 @@ static void handle_fall(GameWorld *g, struct char_data *ch)
       char_to_room(g, char_get_carrying(ch), real_room(g, room));
     }
     if (!char_get_exit(g, ch, 5) || rroom_sect(g, char_get_in_room(ch)) != SECT_FLYING) {
-      act(g, "@r$n slams into the ground!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurHealth(g, ch, getEffMaxPL(g, ch) / 20, 1);
 
-      act(g, "@rYou slam into the ground!@n", true, ch, 0, 0, TO_CHAR);
+      act(g, "@rYou slam into the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
       look_at_room(g, char_get_in_room(ch), ch, 0);
     } else {
-      act(g, "@r$n pummets down toward the ground below!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@r$n pummets down toward the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
   if (rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM && !char_get_carried_by(ch) && !char_is_kanassan(ch)) {
     if ((getCurST(g, ch)) >= (getCurCarriedWeight(ch))) {
-      act(g, "@bYou swim in place.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@b swims in place.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@bYou swim in place.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@b swims in place.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurST(g, ch, getCurCarriedWeight(ch), 0);
-      act(g, "@RYou are drowning!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (getCurPL(g, ch) - ((getEffMaxPL(g, ch)) / 3) <= 0) {
-        act(g, "@rYou drown!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@R$n@r drowns!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@rYou drown!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@R$n@r drowns!@n", true, ch, nullptr, nullptr, TO_ROOM);
         die(g, ch, nullptr);
         decCurHealthPercent(g, ch, 1, 1);
       } else {
@@ -2329,11 +2329,11 @@ static void fly_to_space(GameWorld *g, struct char_data *ch, room_vnum space)
   }
   send_to_sense(g, 1, "leaving the planet", ch);
   send_to_scouter(g, "A powerlevel signal has left the planet", ch, 0, 2);
-  act(g, "@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_from_room(g, ch);
   char_to_room(g, ch, real_room(g, space));
-  act(g, "@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
   if (!char_is_android(ch)) {
     decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
@@ -2374,24 +2374,24 @@ ACMD(do_fly)
 
   if (!*arg) {
     if (char_aff_flagged(ch, AFF_FLYING) && rroom_sect(g, char_get_in_room(ch)) != SECT_FLYING && rroom_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
-      act(g, "@WYou slowly settle down to the ground.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@W$n slowly settles down to the ground.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_aff_set(ch, AFF_FLYING, false);
       char_set_altitude(ch, 0);
       return;
     }
 
     if (char_aff_flagged(ch, AFF_FLYING) && rroom_sect(g, char_get_in_room(ch)) == SECT_FLYING) {
-      act(g, "@WYou begin to plummet to the ground!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@W$n starts to pummet to the ground below!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou begin to plummet to the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@W$n starts to pummet to the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_aff_set(ch, AFF_FLYING, false);
       char_set_altitude(ch, 0);
       handle_fall(g, ch);
       return;
     }
     if (char_aff_flagged(ch, AFF_FLYING) && rroom_sect(g, char_get_in_room(ch)) == SECT_SPACE) {
-      act(g, "@WYou let yourself drift aimlessly through space.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@W$n starts to drift slowly.!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@W$n starts to drift slowly.!@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_aff_set(ch, AFF_FLYING, false);
       char_set_altitude(ch, 0);
       return;
@@ -2401,8 +2401,8 @@ ACMD(do_fly)
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@WYou slowly take off into the sky.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n slowly takes off into the sky.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou slowly take off into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n slowly takes off into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
     if (char_get_sits(ch)) {
       obj_set_sitting(char_get_sits(ch), nullptr);
       char_set_sits(ch, nullptr);
@@ -2420,8 +2420,8 @@ ACMD(do_fly)
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@WYou rocket high into the sky.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n rockets high into the sky.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou rocket high into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n rockets high into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
     if (char_get_sits(ch)) {
       obj_set_sitting(char_get_sits(ch), nullptr);
       char_set_sits(ch, nullptr);
@@ -2521,13 +2521,13 @@ ACMD(do_stand)
     case POS_SITTING:
       reveal_hiding(g, ch, 0);
       send_to_char(g, ch, "You stand up.\r\n");
-      act(g, "$n clambers to $s feet.", true, ch, 0, 0, TO_ROOM);
+      act(g, "$n clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(ch)) {
         if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && obj_get_type_flag(char_get_sits(ch)) != ITEM_CHAIR && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= getMaxCarryWeight(g, ch)) {
           obj_from_room(g, char_get_sits(ch));
           obj_to_char(g, char_get_sits(ch), ch);
-          act(g, "You pick up $p.", true, ch, char_get_sits(ch), 0, TO_CHAR);
-          act(g, "$n picks up $p.", true, ch, char_get_sits(ch), 0, TO_ROOM);
+          act(g, "You pick up $p.", true, ch, char_get_sits(ch), nullptr, TO_CHAR);
+          act(g, "$n picks up $p.", true, ch, char_get_sits(ch), nullptr, TO_ROOM);
         }
         chair = char_get_sits(ch);
         obj_set_sitting(chair, nullptr);
@@ -2538,13 +2538,13 @@ ACMD(do_stand)
       break;
     case POS_RESTING:
       send_to_char(g, ch, "You stop resting, and stand up.\r\n");
-      act(g, "$n stops resting, and clambers to $s feet.", true, ch, 0, 0, TO_ROOM);
+      act(g, "$n stops resting, and clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(ch)) {
         if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= getMaxCarryWeight(g, ch)) {
           obj_from_room(g, char_get_sits(ch));
           obj_to_char(g, char_get_sits(ch), ch);
-          act(g, "You pick up $p.", true, ch, char_get_sits(ch), 0, TO_CHAR);
-          act(g, "$n picks up $p.", true, ch, char_get_sits(ch), 0, TO_ROOM);
+          act(g, "You pick up $p.", true, ch, char_get_sits(ch), nullptr, TO_CHAR);
+          act(g, "$n picks up $p.", true, ch, char_get_sits(ch), nullptr, TO_ROOM);
         }
         chair = char_get_sits(ch);
         obj_set_sitting(chair, nullptr);
@@ -2558,7 +2558,7 @@ ACMD(do_stand)
     default:
       send_to_char(g, ch, "You stop floating around, and put your feet on the ground.\r\n");
       act(g, "$n stops floating around, and puts $s feet on the ground.",
-          true, ch, 0, 0, TO_ROOM);
+          true, ch, nullptr, nullptr, TO_ROOM);
       char_set_position(ch, POS_STANDING);
       break;
   }
@@ -2580,8 +2580,8 @@ ACMD(do_sit)
   }
 
   if (char_get_drag(ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_set_dragged(char_get_drag(ch), nullptr);
     char_set_drag(ch, nullptr);
   }
@@ -2591,7 +2591,7 @@ ACMD(do_sit)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, 0, 0, 0);
+    do_fly(g, ch, nullptr, 0, 0);
   }
 
   if (!*arg) {
@@ -2599,7 +2599,7 @@ ACMD(do_sit)
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
         send_to_char(g, ch, "You sit down.\r\n");
-        act(g, "$n sits down.", false, ch, 0, 0, TO_ROOM);
+        act(g, "$n sits down.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
       case POS_SITTING:
@@ -2607,7 +2607,7 @@ ACMD(do_sit)
         break;
       case POS_RESTING:
         send_to_char(g, ch, "You stop resting, and sit up.\r\n");
-        act(g, "$n stops resting.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n stops resting.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
       case POS_SLEEPING:
@@ -2618,7 +2618,7 @@ ACMD(do_sit)
         break;
       default:
         send_to_char(g, ch, "You stop floating around, and sit down.\r\n");
-        act(g, "$n stops floating around, and sits down.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
     }
@@ -2650,8 +2650,8 @@ ACMD(do_sit)
     switch (char_get_position(ch)) {
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
-        act(g, "You sit down on $p.", false, ch, chair, 0, TO_CHAR);
-        act(g, "$n sits down on $p.", false, ch, chair, 0, TO_ROOM);
+        act(g, "You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
+        act(g, "$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         char_set_sits(ch, chair);
         obj_set_sitting(chair, ch);
@@ -2670,7 +2670,7 @@ ACMD(do_sit)
         break;
       default:
         send_to_char(g, ch, "You stop floating around, and sit down.\r\n");
-        act(g, "$n stops floating around, and sits down.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
     }
@@ -2714,8 +2714,8 @@ ACMD(do_rest)
   }
 
   if (char_get_drag(ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_set_dragged(char_get_drag(ch), nullptr);
     char_set_drag(ch, nullptr);
   }
@@ -2726,7 +2726,7 @@ ACMD(do_rest)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, 0, 0, 0);
+    do_fly(g, ch, nullptr, 0, 0);
   }
 
   if (!*arg) {
@@ -2741,12 +2741,12 @@ ACMD(do_rest)
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
         send_to_char(g, ch, "You lay down and rest your tired bones.\r\n");
-        act(g, "$n lays down and rests.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n lays down and rests.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
       case POS_SITTING:
         send_to_char(g, ch, "You rest your tired bones.\r\n");
-        act(g, "$n rests.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n rests.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
       case POS_RESTING:
@@ -2760,7 +2760,7 @@ ACMD(do_rest)
         break;
       default:
         send_to_char(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
-        act(g, "$n stops floating around, and rests.", false, ch, 0, 0, TO_ROOM);
+        act(g, "$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
     }
@@ -2792,8 +2792,8 @@ ACMD(do_rest)
     switch (char_get_position(ch)) {
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
-        act(g, "You lay down and rest on $p.", true, ch, chair, 0, TO_CHAR);
-        act(g, "$n lays down and rests on $p.", true, ch, chair, 0, TO_ROOM);
+        act(g, "You lay down and rest on $p.", true, ch, chair, nullptr, TO_CHAR);
+        act(g, "$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
         char_set_sits(ch, chair);
         obj_set_sitting(chair, ch);
         char_set_position(ch, POS_RESTING);
@@ -2812,7 +2812,7 @@ ACMD(do_rest)
         break;
       default:
         send_to_char(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
-        act(g, "$n stops floating around, and rests.", false, ch, 0, 0, TO_ROOM);
+        act(g, "$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
     }
@@ -2876,8 +2876,8 @@ ACMD(do_sleep)
     return;
   }
   if (char_get_drag(ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
     char_set_dragged(char_get_drag(ch), nullptr);
     char_set_drag(ch, nullptr);
   }
@@ -2887,7 +2887,7 @@ ACMD(do_sleep)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, 0, 0, 0);
+    do_fly(g, ch, nullptr, 0, 0);
   }
 
   if (!*arg) {
@@ -2904,7 +2904,7 @@ ACMD(do_sleep)
       case POS_RESTING:
         reveal_hiding(g, ch, 0);
         send_to_char(g, ch, "You go to sleep.\r\n");
-        act(g, "$n lies down and falls asleep.", true, ch, 0, 0, TO_ROOM);
+        act(g, "$n lies down and falls asleep.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
         /* Fury Mode Loss for halfbreeds */
 
@@ -2924,7 +2924,7 @@ ACMD(do_sleep)
       default:
         send_to_char(g, ch, "You stop floating around, and lie down to sleep.\r\n");
         act(g, "$n stops floating around, and lie down to sleep.",
-            true, ch, 0, 0, TO_ROOM);
+            true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
         break;
     }
@@ -2960,8 +2960,8 @@ ACMD(do_sleep)
         break;
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
-        act(g, "You lay down on $p and sleep.", false, ch, chair, 0, TO_CHAR);
-        act(g, "$n lays down on $p and sleeps.", false, ch, chair, 0, TO_ROOM);
+        act(g, "You lay down on $p and sleep.", false, ch, chair, nullptr, TO_CHAR);
+        act(g, "$n lays down on $p and sleeps.", false, ch, chair, nullptr, TO_ROOM);
         /* Fury Mode Loss for halfbreeds */
 
         if (char_plr_flagged(ch, PLR_FURY)) {
@@ -2983,7 +2983,7 @@ ACMD(do_sleep)
       default:
         send_to_char(g, ch, "You stop floating around, and lie down to sleep.\r\n");
         act(g, "$n stops floating around, and lie down to sleep.",
-            true, ch, 0, 0, TO_ROOM);
+            true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
         break;
     }
@@ -3016,22 +3016,22 @@ ACMD(do_wake)
     else if (vict == ch)
       self = 1;
     else if (char_is_awake(vict))
-      act(g, "$E is already awake.", false, ch, 0, vict, TO_CHAR);
+      act(g, "$E is already awake.", false, ch, nullptr, vict, TO_CHAR);
     else if (char_aff_flagged(vict, AFF_SLEEP))
-      act(g, "You can't wake $M up!", false, ch, 0, vict, TO_CHAR);
+      act(g, "You can't wake $M up!", false, ch, nullptr, vict, TO_CHAR);
     else if (char_get_position(vict) < POS_SLEEPING)
-      act(g, "$E's in pretty bad shape!", false, ch, 0, vict, TO_CHAR);
+      act(g, "$E's in pretty bad shape!", false, ch, nullptr, vict, TO_CHAR);
     else if (char_aff_flagged(vict, AFF_KNOCKED))
       send_to_char(g, ch, "They are knocked out cold for right now!\r\n");
     else if (char_get_bonuses(ch, BONUS_LATE))
       send_to_char(g, ch, "They say 'Yeah yeah...' and then roll back over.\r\n");
     else {
-      act(g, "You wake $M up.", false, ch, 0, vict, TO_CHAR);
-      act(g, "You are awakened by $n.", false, ch, 0, vict, TO_VICT | TO_SLEEP);
+      act(g, "You wake $M up.", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "You are awakened by $n.", false, ch, nullptr, vict, TO_VICT | TO_SLEEP);
       char_set_position(vict, POS_SITTING);
       if (char_get_dragged(vict)) {
-        act(g, "@WYou stop dragging @C$N@W!@n", true, char_get_dragged(vict), 0, vict, TO_CHAR);
-        act(g, "@C$n@W stops dragging @c$N@W!@n", true, char_get_dragged(vict), 0, vict, TO_ROOM);
+        act(g, "@WYou stop dragging @C$N@W!@n", true, char_get_dragged(vict), nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W stops dragging @c$N@W!@n", true, char_get_dragged(vict), nullptr, vict, TO_ROOM);
         char_set_drag(char_get_dragged(vict), nullptr);
         char_set_dragged(vict, nullptr);
       }
@@ -3052,11 +3052,11 @@ ACMD(do_wake)
     send_to_char(g, ch, "You are already awake...\r\n");
   else {
     send_to_char(g, ch, "You awaken, and sit up.\r\n");
-    act(g, "$n awakens.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n awakens.", true, ch, nullptr, nullptr, TO_ROOM);
     if (char_get_dragged(ch)) {
-      act(g, "@WYou stop dragging @C$N@W!@n", true, char_get_dragged(ch), 0, ch, TO_CHAR);
-      act(g, "@C$n@W stops dragging you!@n", true, char_get_dragged(ch), 0, ch, TO_VICT);
-      act(g, "@C$n@W stops dragging @c$N@W!@n", true, char_get_dragged(ch), 0, ch, TO_NOTVICT);
+      act(g, "@WYou stop dragging @C$N@W!@n", true, char_get_dragged(ch), nullptr, ch, TO_CHAR);
+      act(g, "@C$n@W stops dragging you!@n", true, char_get_dragged(ch), nullptr, ch, TO_VICT);
+      act(g, "@C$n@W stops dragging @c$N@W!@n", true, char_get_dragged(ch), nullptr, ch, TO_NOTVICT);
       char_set_drag(char_get_dragged(ch), nullptr);
       char_set_dragged(ch, nullptr);
     }
@@ -3094,11 +3094,11 @@ ACMD(do_follow)
   }
 
   if (char_get_master(ch) == leader) {
-    act(g, "You are already following $M.", false, ch, 0, leader, TO_CHAR);
+    act(g, "You are already following $M.", false, ch, nullptr, leader, TO_CHAR);
     return;
   }
   if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(ch))) {
-    act(g, "But you only feel like following $N!", false, ch, 0, char_get_master(ch), TO_CHAR);
+    act(g, "But you only feel like following $N!", false, ch, nullptr, char_get_master(ch), TO_CHAR);
   } else { /* Not Charmed follow person */
     if (leader == ch) {
       if (!char_get_master(ch)) {

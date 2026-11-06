@@ -97,7 +97,7 @@ ACMD(do_oasis_hedit)
 
   desc_set_connected(d, CON_HEDIT);
   /*send_to_room(IN_ROOM(ch), "%s starts using OLC.\r\n", GET_NAME(ch));*/
-  act(g, "$n starts using OLC.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, ch, nullptr, nullptr, TO_ROOM);
   g->HEDITS = true;
   char_plr_set(ch, PLR_WRITING, true);
   mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing help files.", char_get_name(ch));

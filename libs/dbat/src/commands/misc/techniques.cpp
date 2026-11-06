@@ -71,8 +71,8 @@ ACMD(do_spiritcontrol)
     return;
   }
   decCurST(g, ch, cost, 0);
-  act(g, "@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@y$n@Y seems to concentrate hard for a moment.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@y$n@Y seems to concentrate hard for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
   int duration = rand_number(g, 2, 4);
   assign_affect(g, ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
 }
@@ -90,12 +90,12 @@ ACMD(do_tailhide)
 
   if (!(char_plr_flagged(ch, PLR_TAILHIDE))) {
     char_plr_set(ch, PLR_TAILHIDE, true);
-    act(g, "You tuck your tail away, hiding it from view.", false, ch, 0, 0, TO_CHAR);
-    act(g, "$n tucks $s tail away, hiding it from view.", false, ch, 0, 0, TO_ROOM);
+    act(g, "You tuck your tail away, hiding it from view.", false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n tucks $s tail away, hiding it from view.", false, ch, nullptr, nullptr, TO_ROOM);
   } else {
     char_plr_set(ch, PLR_TAILHIDE, false);
-    act(g, "You have decided to display your tail for all to see!", false, ch, 0, 0, TO_CHAR);
-    act(g, "$n has decided to display $s tail for all to see!", false, ch, 0, 0, TO_ROOM);
+    act(g, "You have decided to display your tail for all to see!", false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "$n has decided to display $s tail for all to see!", false, ch, nullptr, nullptr, TO_ROOM);
   }
 }
 
@@ -181,16 +181,16 @@ ACMD(do_multiform)
     improve_skill(g, ch, SKILL_MULTIFORM, 1);
 
     if (char_get_skill(ch, SKILL_MULTIFORM) < roll) {
-      act(g, "@YYou focus your ki into your body while concentrating on the image of your body splitting into two. @yYou lose your concentration and fail to split though...@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@YYou focus your ki into your body while concentrating on the image of your body splitting into two. @yYou lose your concentration and fail to split though...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurST(g, ch, cost, 0);
       decCurKI(g, ch, cost, 0);
       return;
     }
     act(g, "@YYou focus your ki into your body while concentrating on the image of your body splitting into two. Another you splits out of your body!@n",
-        true, ch, 0, 0, TO_CHAR);
+        true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@YSuddenly @y$n@Y seems to concentrates really and after a brief moment splits into two copies of $mself!@n",
-        true, ch, 0, 0, TO_ROOM);
+        true, ch, nullptr, nullptr, TO_ROOM);
     generate_multiform(g, ch, 1);
     return;
   }
@@ -283,7 +283,7 @@ void handle_multi_merge(GameWorld *g, struct char_data *form)
     return;
 
   send_to_char(g, ch, "@YYou merge with one of your forms!@n\r\n");
-  act(g, "@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
 
   char_set_clones(ch, MAX(0, char_get_clones(ch) - 1));
   extract_char(g, form);
@@ -320,8 +320,8 @@ ACMD(do_moondust)
   int chance = axion_dice(g, 0);
 
   if (chance > char_get_aff_abils_wis(ch) + rand_number(g, 1, 10)) {
-    act(g, "@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As you prepare to release a cloud of your charged wing dust you lose focus and the power you had begun to charge into your wings dissipates.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter for a second before fading completely.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As you prepare to release a cloud of your charged wing dust you lose focus and the power you had begun to charge into your wings dissipates.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter for a second before fading completely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurST(g, ch, cost, 0);
     char_set_wait(ch, PULSE_1SEC);
     return;
@@ -330,8 +330,8 @@ ACMD(do_moondust)
   decCurST(g, ch, cost, 0);
   char_set_wait(ch, PULSE_1SEC);
 
-  act(g, "@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As your wings grow brighter you focus your charged bio energy in a shockwave the unleashes a cloud of glowing green dust. You breath in the dust and feel it rejuvinate your body's cells!@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As your wings grow brighter you focus your charged bio energy in a shockwave the unleashes a cloud of glowing green dust. You breath in the dust and feel it rejuvinate your body's cells!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal));
 
   struct char_data *vict = nullptr, *next_v = nullptr;
@@ -344,8 +344,8 @@ ACMD(do_moondust)
     if (char_aff_flagged(vict, AFF_GROUP)) {
       if (char_get_master(ch) == char_get_master(vict) || char_get_master(vict) == ch || char_get_master(ch) == vict) {
         incCurHealth(g, vict, heal, true);
-        act(g, "@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, 0, 0, TO_CHAR);
-        act(g, "@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, 0, 0, TO_ROOM);
+        act(g, "@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, nullptr, nullptr, TO_CHAR);
+        act(g, "@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, nullptr, nullptr, TO_ROOM);
         send_to_char(g, vict, "@RHeal@Y: @C%s@n\r\n", add_commas(heal));
       }
     }
@@ -366,8 +366,8 @@ ACMD(do_shell)
   }
 
   if (char_aff_flagged(ch, AFF_SHELL)) {
-    act(g, "@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@M$n's@m armored carapce retreats back to its original size.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@M$n's@m armored carapce retreats back to its original size.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_aff_set(ch, AFF_SHELL, false);
     return;
   }
@@ -377,12 +377,12 @@ ACMD(do_shell)
     return;
   }
   if (axion_dice(g, 0) > char_get_aff_abils_con(ch) + rand_number(g, 1, 10)) {
-    act(g, "@mYou crouch down and begin to focus on your body's carapace cells encouraging them to multiply! However your control is lacking and you ultimately fail to grow your armor very much.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@M$n@m crouches down and seems to strain for a moment before giving up and resuming $s normal stance.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou crouch down and begin to focus on your body's carapace cells encouraging them to multiply! However your control is lacking and you ultimately fail to grow your armor very much.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@M$n@m crouches down and seems to strain for a moment before giving up and resuming $s normal stance.@n", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
-  act(g, "@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n", true, ch, nullptr, nullptr, TO_ROOM);
   decCurSTPercent(g, ch, .2, 0);
   char_aff_set(ch, AFF_SHELL, true);
   return;
@@ -397,8 +397,8 @@ ACMD(do_liquefy)
   }
 
   if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
-    act(g, "@MSuddenly large chunks of goo start to hover up slowly. These very same chunks quickly begin to fly into each other, piling on as the ball of goo grows. Suddenly @m$n@M emerges as the ball of goo takes $s shape!@n", true, ch, 0, 0, TO_ROOM);
-    act(g, "@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n", true, ch, 0, 0, TO_CHAR);
+    act(g, "@MSuddenly large chunks of goo start to hover up slowly. These very same chunks quickly begin to fly into each other, piling on as the ball of goo grows. Suddenly @m$n@M emerges as the ball of goo takes $s shape!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n", true, ch, nullptr, nullptr, TO_CHAR);
     char_aff_set(ch, AFF_LIQUEFIED, false);
     char_set_wait(ch, PULSE_3SEC);
     char_set_wait(ch, PULSE_3SEC);
@@ -436,14 +436,14 @@ ACMD(do_liquefy)
       char_set_drag(ch, nullptr);
     }
     if (axion_dice(g, 0) > char_get_level(ch)) {
-      act(g, "@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
 
       return;
     }
-    act(g, "@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
     char_aff_set(ch, AFF_LIQUEFIED, true);
     return;
@@ -479,16 +479,16 @@ ACMD(do_liquefy)
       return;
     }
     if (axion_dice(g, 0) > char_get_level(ch)) {
-      act(g, "@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
     if (char_get_speedi(g, ch) < char_get_speedi(g, vict)) {
-      act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids your attempt!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you are faster and managed to dodge the attempt.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids your attempt!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you are faster and managed to dodge the attempt.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n", true, ch, nullptr, vict, TO_NOTVICT);
       decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
       if (!char_get_fighting(ch)) {
         set_fighting(g, ch, vict);
@@ -501,18 +501,18 @@ ACMD(do_liquefy)
       return;
     }
     if (getCurPL(g, ch) < getCurPL(g, vict) * 2) {
-      act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However as you force yourself in through $S mouth $E successfully resists and forces your back out!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you think quickly and force $m out before $e has a chance to get fully into your body!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However as you force yourself in through $S mouth $E successfully resists and forces your back out!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you think quickly and force $m out before $e has a chance to get fully into your body!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n", true, ch, nullptr, vict, TO_NOTVICT);
       decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
       int64_t dmg = getEffMaxPL(g, ch) * 0.08;
       hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! As you fill $S body you expand outward until $s body explodes into a gory mess!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! As you fill $S body you expand outward until $s body explodes into a gory mess!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
     decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
     if (char_aff_flagged(ch, AFF_GROUP)) {
       group_gain(g, ch, vict);
@@ -572,9 +572,9 @@ ACMD(do_defend)
     return;
   }
   if (!*arg && char_get_defending(ch)) {
-    act(g, "@YYou stop defending @y$N@Y.@n", true, ch, 0, char_get_defending(ch), TO_CHAR);
-    act(g, "@y$n@Y stops defending you.@n", true, ch, 0, char_get_defending(ch), TO_VICT);
-    act(g, "@y$n@Y stops defending @y$N@Y.@n", true, ch, 0, char_get_defending(ch), TO_NOTVICT);
+    act(g, "@YYou stop defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(ch), TO_CHAR);
+    act(g, "@y$n@Y stops defending you.@n", true, ch, nullptr, char_get_defending(ch), TO_VICT);
+    act(g, "@y$n@Y stops defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(ch), TO_NOTVICT);
     char_set_defender(char_get_defending(ch), nullptr);
     char_set_defending(ch, nullptr);
     return;
@@ -588,18 +588,18 @@ ACMD(do_defend)
     send_to_char(g, ch, "Well hopefully you are smart enough to defend yourself.\r\n");
     return;
   }
-  act(g, "@YYou start defending @y$N@Y.@n", true, ch, 0, vict, TO_CHAR);
-  act(g, "@y$n@Y starts defending you.@n", true, ch, 0, vict, TO_VICT);
-  act(g, "@y$n@Y starts defending @y$N@Y.@n", true, ch, 0, vict, TO_NOTVICT);
+  act(g, "@YYou start defending @y$N@Y.@n", true, ch, nullptr, vict, TO_CHAR);
+  act(g, "@y$n@Y starts defending you.@n", true, ch, nullptr, vict, TO_VICT);
+  act(g, "@y$n@Y starts defending @y$N@Y.@n", true, ch, nullptr, vict, TO_NOTVICT);
   /* Each has only one, so whoever was paired with these two is let go, and told. */
   if (char_get_defending(ch)) {
     if (char_get_defending(ch) != vict)
-      act(g, "@y$n@Y stops defending you.@n", false, ch, 0, char_get_defending(ch), TO_VICT);
+      act(g, "@y$n@Y stops defending you.@n", false, ch, nullptr, char_get_defending(ch), TO_VICT);
     char_set_defender(char_get_defending(ch), nullptr);
   }
   if (char_get_defender(vict)) {
     if (char_get_defender(vict) != ch)
-      act(g, "@YYou are no longer defending @y$n@Y. Someone else has taken over.@n", false, vict, 0, char_get_defender(vict), TO_VICT);
+      act(g, "@YYou are no longer defending @y$n@Y. Someone else has taken over.@n", false, vict, nullptr, char_get_defender(vict), TO_VICT);
     char_set_defending(char_get_defender(vict), nullptr);
   }
   char_set_defender(vict, ch);
@@ -648,9 +648,9 @@ ACMD(do_scry)
     return;
   }
   reveal_hiding(g, ch, 0);
-  act(g, "@GYou focus your mind and begin to allow the flood of images and energy to roar through your mind. You then allow those thoughts to make their way into the mind of @c$N@G. You can hardly comprehend the vastness of the information flooding in, yet still glimpse bits and pieces of your own destiny.@n", true, ch, 0, vict, TO_CHAR);
-  act(g, "@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", true, ch, 0, vict, TO_VICT);
-  act(g, "@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", true, ch, 0, vict, TO_NOTVICT);
+  act(g, "@GYou focus your mind and begin to allow the flood of images and energy to roar through your mind. You then allow those thoughts to make their way into the mind of @c$N@G. You can hardly comprehend the vastness of the information flooding in, yet still glimpse bits and pieces of your own destiny.@n", true, ch, nullptr, vict, TO_CHAR);
+  act(g, "@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", true, ch, nullptr, vict, TO_VICT);
+  act(g, "@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", true, ch, nullptr, vict, TO_NOTVICT);
   int64_t boost = char_get_aff_abils_intel(ch) * 0.5;
 
   gainBasePL(vict, (getBasePL(vict) * .01) * boost, false);
@@ -687,14 +687,14 @@ void ash_burn(GameWorld *g, struct char_data *ch)
           if (!char_is_android(ch) && !char_is_demon(ch) && !char_is_icer(ch)) {
             reveal_hiding(g, ch, 0);
             decCurST(g, ch, ((getMaxST(g, ch) * 0.005) + 20) * obj_get_cost(obj), 0);
-            act(g, "@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, 0, 0, TO_CHAR);
-            act(g, "@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, 0, 0, TO_ROOM);
+            act(g, "@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act(g, "@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr, nullptr, TO_ROOM);
           }
           if (!char_is_android(ch) && !char_is_demon(ch) && !char_is_npc(ch)) {
             if (!char_plr_flagged(ch, PLR_EYEC) && !char_aff_flagged(ch, AFF_BLIND)) {
               reveal_hiding(g, ch, 0);
-              act(g, "@DYour eyes sting from the hot ash! You can't see!@n", true, ch, 0, 0, TO_CHAR);
-              act(g, "@r$n@D eyes appear to have been hurt by the ash!@n", true, ch, 0, 0, TO_ROOM);
+              act(g, "@DYour eyes sting from the hot ash! You can't see!@n", true, ch, nullptr, nullptr, TO_CHAR);
+              act(g, "@r$n@D eyes appear to have been hurt by the ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
               int duration = 1;
               assign_affect(g, ch, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
             }
@@ -789,8 +789,8 @@ ACMD(do_ashcloud)
   }
   if (char_get_aff_abils_intel(ch) < axion_dice(g, -10)) {
     reveal_hiding(g, ch, 0);
-    act(g, "@RYou take a handful of ashes, and when you go to blow flames at it you lose focus. The ashes are blown from your hands by your huge gust of breath.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@r$n@R takes a handful of ashes from $s belongings and blows it out of $s hands with a strong gust of air. @YStrange.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@RYou take a handful of ashes, and when you go to blow flames at it you lose focus. The ashes are blown from your hands by your huge gust of breath.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@r$n@R takes a handful of ashes from $s belongings and blows it out of $s hands with a strong gust of air. @YStrange.@n", true, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, ash);
     decCurKI(g, ch, cost, 0);
     return;
@@ -799,8 +799,8 @@ ACMD(do_ashcloud)
   reveal_hiding(g, ch, 0);
   if (level == 3) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
     ashcloud = read_object(g, 1306, VIRTUAL);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
@@ -810,8 +810,8 @@ ACMD(do_ashcloud)
     ash_burn(g, ch);
   } else if (level == 2) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
     ashcloud = read_object(g, 1306, VIRTUAL);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
@@ -821,8 +821,8 @@ ACMD(do_ashcloud)
     ash_burn(g, ch);
   } else {
     decCurKI(g, ch, cost, 0);
-    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
     ashcloud = read_object(g, 1306, VIRTUAL);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
     extract_obj(g, ash);
@@ -878,8 +878,8 @@ ACMD(do_healglow)
     return;
   }
   if (vict == ch) {
-    act(g, "@CPlacing your hands on your body you begin to focus your energies. Slowly a strong blue glow glistens and shines across your skin!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CPlacing your hands on your body you begin to focus your energies. Slowly a strong blue glow glistens and shines across your skin!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_aff_set(vict, AFF_HEALGLOW, true);
     int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
     if (duration <= 0)
@@ -887,9 +887,9 @@ ACMD(do_healglow)
     assign_affect(g, ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
     decCurKI(g, ch, cost, 0);
   } else {
-    act(g, "@CPlacing your hands on @c$N's@C body you begin to focus your energies. Slowly a strong blue glow glistens and shines across $S skin!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@c$n@C places $s hands on YOUR body. Slowly a strong blue glow glistens and shines across your skin!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@c$n@C places $s hands on @c$N's@C body. Slowly a strong blue glow glistens and shines across $S skin!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@CPlacing your hands on @c$N's@C body you begin to focus your energies. Slowly a strong blue glow glistens and shines across $S skin!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@c$n@C places $s hands on YOUR body. Slowly a strong blue glow glistens and shines across your skin!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@c$n@C places $s hands on @c$N's@C body. Slowly a strong blue glow glistens and shines across $S skin!@n", true, ch, nullptr, vict, TO_NOTVICT);
     int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
     duration += rand_number(g, -2, 1);
     if (duration <= 0)
@@ -936,13 +936,13 @@ ACMD(do_metamorph)
 
   decCurKI(g, ch, cost / 2, 0);
   if (perc < chance) {
-    act(g, "@WYou focus your energies and prepare your @RDark Metamorphisis@W but screw up your focus!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@WA dark @Rred@W glow starts to surround @C$n@W, but it fades quickly.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou focus your energies and prepare your @RDark Metamorphisis@W but screw up your focus!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@WA dark @Rred@W glow starts to surround @C$n@W, but it fades quickly.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
     return;
   }
-  act(g, "'@RDark@W...' An explosion of sanguine aura erupts over the surface of your body, your eyes darkening to a bleeding crimson. The flaring glow emanating from your body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as you hiss; You complete the transition, relaxing visibly, '...@RMetamorphosis@W'@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "'@RDark@W...' An explosion of sanguine aura erupts over the surface of @C$n@W's body, $s eyes darkening to a bleeding crimson. The flaring glow emanating from $s body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as $e hisses; $e completes the transition, relaxing visibly, '...@RMetamorphosis@W'@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "'@RDark@W...' An explosion of sanguine aura erupts over the surface of your body, your eyes darkening to a bleeding crimson. The flaring glow emanating from your body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as you hiss; You complete the transition, relaxing visibly, '...@RMetamorphosis@W'@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "'@RDark@W...' An explosion of sanguine aura erupts over the surface of @C$n@W's body, $s eyes darkening to a bleeding crimson. The flaring glow emanating from $s body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as $e hisses; $e completes the transition, relaxing visibly, '...@RMetamorphosis@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
 
   int duration = char_get_aff_abils_intel(ch) / 12;
   assign_affect(g, ch, AFF_METAMORPH, SKILL_METAMORPH, duration, 0, 0, 0, 0, 0, 0);
@@ -1072,15 +1072,15 @@ ACMD(do_shimmer)
     }
 
     decCurKI(g, ch, cost, 0);
-    act(g, "@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n", true, ch, 0, tar, TO_CHAR);
-    act(g, "@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, 0, tar, TO_VICT);
-    act(g, "@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n", true, ch, 0, tar, TO_NOTVICT);
+    act(g, "@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n", true, ch, nullptr, tar, TO_CHAR);
+    act(g, "@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
+    act(g, "@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n", true, ch, nullptr, tar, TO_NOTVICT);
     char_plr_set(ch, PLR_TRANSMISSION, true);
     handle_teleport(g, ch, tar, 0);
   } else {
     decCurKI(g, ch, cost, 0);
-    act(g, "@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n", true, ch, 0, tar, TO_CHAR);
-    act(g, "@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n", true, ch, 0, tar, TO_NOTVICT);
+    act(g, "@wYour body begins to fade away almost appearing ghost like, before a ripple passes through your image and your are gone in an instant!@n", true, ch, nullptr, tar, TO_CHAR);
+    act(g, "@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n", true, ch, nullptr, tar, TO_NOTVICT);
     handle_teleport(g, ch, nullptr, location);
   }
 }
@@ -1132,12 +1132,12 @@ ACMD(do_channel)
 
   if (ruby) {
     if (skill < chance) {
-      act(g, "@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You screw up the rate of heating though and cause the ruby to crumble to dust!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. However $e screws up the rate of heating and causes the ruby to crumble to dust!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You screw up the rate of heating though and cause the ruby to crumble to dust!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. However $e screws up the rate of heating and causes the ruby to crumble to dust!@n", true, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(g, ruby);
     } else {
-      act(g, "@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You do so at an even rate and end up with a glowing red hot blood ruby!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You do so at an even rate and end up with a glowing red hot blood ruby!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n", true, ch, nullptr, nullptr, TO_ROOM);
       rroom_set_geffect(g, char_get_in_room(ch), 0);
       obj_extra_set(ruby, ITEM_HOT, true);
     }
@@ -1206,8 +1206,8 @@ ACMD(do_hydromancy)
 
     if (skill < chance) {
       decCurKI(g, ch, cost, 0);
-      act(g, "@CYou press your palms together in front of your body but you fail to produce the proper control to form the spike!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C presses $s palms together and then slowly pulls them apart. Nothing important appears to have happened.", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou press your palms together in front of your body but you fail to produce the proper control to form the spike!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C presses $s palms together and then slowly pulls them apart. Nothing important appears to have happened.", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_STYLE, 2);
       return;
     }
@@ -1226,13 +1226,13 @@ ACMD(do_hydromancy)
     }
 
     decCurKI(g, ch, cost, 0);
-    act(g, "@CYou press your palms together in front of your body and focusing ki you force water up along your body. That water pools between your palms and as pull your palms apart a @c$p@C forms!@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n", true, ch, obj, 0, TO_VICT);
+    act(g, "@CYou press your palms together in front of your body and focusing ki you force water up along your body. That water pools between your palms and as pull your palms apart a @c$p@C forms!@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n", true, ch, obj, nullptr, TO_VICT);
     if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) <= getMaxCarryWeight(g, ch))
       obj_to_char(g, obj, ch);
     else {
       send_to_char(g, ch, "You are unable to hold it and so let it go at your feet.\r\n");
-      act(g, "@C$n@w drops an ice spike.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@C$n@w drops an ice spike.@n", true, ch, nullptr, nullptr, TO_ROOM);
       obj_to_room(g, obj, char_get_in_room(ch));
     }
     improve_skill(g, ch, SKILL_STYLE, 1);
@@ -1255,36 +1255,36 @@ ACMD(do_hydromancy)
       char bun[MAX_STRING_LENGTH], bunn[MAX_STRING_LENGTH];
 
       if (skill < chance) {
-        act(g, "@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", true, ch, nullptr, nullptr, TO_ROOM);
         decCurKI(g, ch, cost, 0);
         char_set_wait(ch, PULSE_2SEC);
       } else {
         decCurKI(g, ch, cost, 0);
         snprintf(bun, sizeof(bun), "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n", dirs[attempt]);
         snprintf(bunn, sizeof(bunn), "@B$n@B uses $s ki to create a rush of water flooding away toward the @C%s@B!@n", dirs[attempt]);
-        act(g, bun, true, ch, 0, 0, TO_CHAR);
-        act(g, bunn, true, ch, 0, 0, TO_ROOM);
+        act(g, bun, true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, bunn, true, ch, nullptr, nullptr, TO_ROOM);
 
         for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
           next_v = char_get_next_in_room(vict);
           if (vict == ch)
             continue;
           if (!can_kill(g, ch, vict, nullptr, 1)) {
-            act(g, "@CYou are protected from the water!@n", true, vict, 0, 0, TO_VICT);
-            act(g, "@C$n@C is protected from the water!@n", true, vict, 0, 0, TO_ROOM);
+            act(g, "@CYou are protected from the water!@n", true, vict, nullptr, nullptr, TO_VICT);
+            act(g, "@C$n@C is protected from the water!@n", true, vict, nullptr, nullptr, TO_ROOM);
           } else if (char_is_kanassan(vict)) {
-            act(g, "@CYou effortlessly swim against the current.@n", true, vict, 0, 0, TO_CHAR);
-            act(g, "@C$n@C effortlessly swims against the current.@n", true, vict, 0, 0, TO_ROOM);
+            act(g, "@CYou effortlessly swim against the current.@n", true, vict, nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@C effortlessly swims against the current.@n", true, vict, nullptr, nullptr, TO_ROOM);
           } else if (char_get_skills_base(vict, SKILL_BALANCE) >= axion_dice(g, -10)) {
-            act(g, "@CYou manage to keep your balance and are not swept away!@n", true, vict, 0, 0, TO_CHAR);
-            act(g, "@C$n@C manages to keep $s balance and is not swept away!@n", true, vict, 0, 0, TO_ROOM);
+            act(g, "@CYou manage to keep your balance and are not swept away!@n", true, vict, nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@C manages to keep $s balance and is not swept away!@n", true, vict, nullptr, nullptr, TO_ROOM);
           } else if (char_aff_flagged(ch, AFF_FLYING)) {
-            act(g, "@CYou fly above the rushing waters and are untouched.@n", true, vict, 0, 0, TO_CHAR);
-            act(g, "@C$n@C flies above the rushing waters and is untouched.@n", true, vict, 0, 0, TO_ROOM);
+            act(g, "@CYou fly above the rushing waters and are untouched.@n", true, vict, nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@C flies above the rushing waters and is untouched.@n", true, vict, nullptr, nullptr, TO_ROOM);
           } else {
-            act(g, "@cYou are caught by the rushing waters and sent tumbling away!@n", true, vict, 0, 0, TO_CHAR);
-            act(g, "@c$n@c is caught by the rushing waters and sent tumbling away!@n", true, vict, 0, 0, TO_ROOM);
+            act(g, "@cYou are caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr, nullptr, TO_CHAR);
+            act(g, "@c$n@c is caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr, nullptr, TO_ROOM);
             do_simple_move(g, vict, attempt, true);
             hurt(g, 0, 0, ch, vict, nullptr, cost * 4, 1);
           }
@@ -1351,17 +1351,17 @@ ACMD(do_kanso)
   }
 
   if (skill < dice) {                                                                                                                                                                            /* Failed the technique, user's fault */
-    act(g, "You close your eyes and focus, before bounding effortlessly toward $N. Closing the distance, you place your hands on $N's chest but nothing happens!\r\n", true, ch, 0, vict, TO_CHAR); /* Message Character $n sees */
-    act(g, "$n closes $s eyes and bounds effortlessly towards you. Closing the distance, $e places $s hands on your chest but nothing happens!\r\n", true, ch, 0, vict, TO_VICT);                   /* Message Vict $N Sees */
-    act(g, "$n closes $s eyes and bounds toward $N. Smirking, $e puts $m hands on $N's chest but nothing seems to happen.\r\n", true, ch, 0, vict, TO_NOTVICT);                                     /* Message everyone else sees */
+    act(g, "You close your eyes and focus, before bounding effortlessly toward $N. Closing the distance, you place your hands on $N's chest but nothing happens!\r\n", true, ch, nullptr, vict, TO_CHAR); /* Message Character $n sees */
+    act(g, "$n closes $s eyes and bounds effortlessly towards you. Closing the distance, $e places $s hands on your chest but nothing happens!\r\n", true, ch, nullptr, vict, TO_VICT);                   /* Message Vict $N Sees */
+    act(g, "$n closes $s eyes and bounds toward $N. Smirking, $e puts $m hands on $N's chest but nothing seems to happen.\r\n", true, ch, nullptr, vict, TO_NOTVICT);                                     /* Message everyone else sees */
     decCurKI(g, ch, cost, 0);
     char_set_wait(ch, PULSE_2SEC); /* 2 second lag for the technique */
     return;
   } else { /* Success! */
     /* Main Attack Success Messages */
-    act(g, "You close your eyes and focus, before effortlessly bounding towards $N. Closing the distance, you smirk at $N and place your hands on their chest. Electricity flows into their body as you draw water out of their very cells!\r\n", true, ch, 0, vict, TO_CHAR);                                               /* Message Character $n sees */
-    act(g, "$n closes $s eyes and focuses, before effortlessly bounding toward you. Closing the distance, $e smirks and places both of $s hands on your chest. Electricity begins to pulse through your body and a great thirst takes hold, as if $n is drawing the water from your body!\r\n", true, ch, 0, vict, TO_VICT); /* Message Vict $N Sees */
-    act(g, "$n closes $s eyes, before effortlessly bounding toward $N. Closing the distance, $n smirks and places both $s hands on $N's chest. Electricity seems to pass from $n's body to $N's!\r\n", true, ch, 0, vict, TO_NOTVICT);                                                                                       /* Message everyone else sees */
+    act(g, "You close your eyes and focus, before effortlessly bounding towards $N. Closing the distance, you smirk at $N and place your hands on their chest. Electricity flows into their body as you draw water out of their very cells!\r\n", true, ch, nullptr, vict, TO_CHAR);                                               /* Message Character $n sees */
+    act(g, "$n closes $s eyes and focuses, before effortlessly bounding toward you. Closing the distance, $e smirks and places both of $s hands on your chest. Electricity begins to pulse through your body and a great thirst takes hold, as if $n is drawing the water from your body!\r\n", true, ch, nullptr, vict, TO_VICT); /* Message Vict $N Sees */
+    act(g, "$n closes $s eyes, before effortlessly bounding toward $N. Closing the distance, $n smirks and places both $s hands on $N's chest. Electricity seems to pass from $n's body to $N's!\r\n", true, ch, nullptr, vict, TO_NOTVICT);                                                                                       /* Message everyone else sees */
                                                                                                                                                                                                                                                                                                                           /* End Main Messages */
 
     decCurKI(g, ch, cost, 0);
@@ -1388,9 +1388,9 @@ ACMD(do_kanso)
     }
 
     if (skill > pdice && !char_aff_flagged(vict, AFF_PARA)) {                    /* Paralyze them too */
-      act(g, "@R$N@W is paralyzed by the attack!@n", true, ch, 0, vict, TO_CHAR);   /* Message Character $n sees */
-      act(g, "@RYou are paralyzed by the attack!@n", true, ch, 0, vict, TO_VICT);   /* Message Vict $N Sees */
-      act(g, "@R$N@Wis paralyzed by the attack!@n", true, ch, 0, vict, TO_NOTVICT); /* Message everyone else sees */
+      act(g, "@R$N@W is paralyzed by the attack!@n", true, ch, nullptr, vict, TO_CHAR);   /* Message Character $n sees */
+      act(g, "@RYou are paralyzed by the attack!@n", true, ch, nullptr, vict, TO_VICT);   /* Message Vict $N Sees */
+      act(g, "@R$N@Wis paralyzed by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT); /* Message everyone else sees */
       af.type      = SKILL_PARALYZE;
       af.duration  = rand_number(g, 1, 3);
       af.modifier  = 0;
@@ -1436,8 +1436,8 @@ ACMD(do_hayasa)
   }
   if (skill < prob) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. The glow disappears though as you fail to maintain the effect...@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow disappears a second later though and $e frowns.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. The glow disappears though as you fail to maintain the effect...@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow disappears a second later though and $e frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
     improve_skill(g, ch, SKILL_HAYASA, 1);
     char_set_wait(ch, PULSE_2SEC);
   } else {
@@ -1452,8 +1452,8 @@ ACMD(do_hayasa)
     affect_join(g, ch, &af, false, false, false, false);
     char_set_speedboost(ch, char_get_speedcalc(g, ch) * 0.5);
     reveal_hiding(g, ch, 0);
-    act(g, "@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. All your movements are faster now!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow pulsates gently as $e opens his eyes and smiles.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. All your movements are faster now!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow pulsates gently as $e opens his eyes and smiles.@n", true, ch, nullptr, nullptr, TO_ROOM);
     improve_skill(g, ch, SKILL_HAYASA, 1);
     char_set_wait(ch, PULSE_2SEC);
   }
@@ -1505,34 +1505,34 @@ ACMD(do_ensnare)
       return;
     }
     if (prob <= perc) {
-      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately you miss and lose the bundle...@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately $e misses and loses the bundle...@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately $e misses and loses the bundle...@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately you miss and lose the bundle...@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately $e misses and loses the bundle...@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately $e misses and loses the bundle...@n", true, ch, nullptr, vict, TO_NOTVICT);
       extract_obj(g, obj);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(g, ch, SKILL_ENSNARE, 0);
     } else if (char_aff_flagged(vict, AFF_ZANZOKEN) && !char_aff_flagged(ch, AFF_ZANZOKEN)) {
-      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W zanzokens away avoiding it and you lose the bundle...@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you zanzoken away avoiding it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W zanzokens away avoiding it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W zanzokens away avoiding it and you lose the bundle...@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you zanzoken away avoiding it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W zanzokens away avoiding it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_NOTVICT);
       extract_obj(g, obj);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(g, ch, SKILL_ENSNARE, 0);
       char_aff_set(vict, AFF_ZANZOKEN, false);
     } else if (char_aff_flagged(vict, AFF_ZANZOKEN) && char_aff_flagged(ch, AFF_ZANZOKEN)) {
       if (char_get_speedi(g, ch) + rand_number(g, 1, 100) < char_get_speedi(g, vict) + rand_number(g, 1, 100)) {
-        act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! You both zanzoken! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! They both zanzoken! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! You both zanzoken! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! They both zanzoken! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_NOTVICT);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_3SEC);
         improve_skill(g, ch, SKILL_ENSNARE, 0);
         char_aff_set(vict, AFF_ZANZOKEN, false);
         char_aff_set(ch, AFF_ZANZOKEN, false);
       } else {
-        act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! You both zanzoken! Quickly $e spins around you and ensnares your arms with the silk!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! You both zanzoken! Quickly $e spins around you and ensnares your arms with the silk!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, nullptr, vict, TO_NOTVICT);
         extract_obj(g, obj);
         char_aff_set(vict, AFF_ENSNARED, true);
         char_set_wait(ch, PULSE_3SEC);
@@ -1541,25 +1541,25 @@ ACMD(do_ensnare)
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
     } else if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_aff_flagged(vict, AFF_ZANZOKEN)) {
-      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! Quickly $e zanzokens and spins around you and ensnares your arms with the silk!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! Quickly $e zanzokens and spins around you and ensnares your arms with the silk!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, nullptr, vict, TO_NOTVICT);
       extract_obj(g, obj);
       char_aff_set(vict, AFF_ENSNARED, true);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(g, ch, SKILL_ENSNARE, 0);
       char_aff_set(ch, AFF_ZANZOKEN, false);
     } else if (char_get_speedi(g, ch) + rand_number(g, 1, 100) < char_get_speedi(g, vict) + rand_number(g, 1, 100)) {
-      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", true, ch, nullptr, vict, TO_NOTVICT);
       extract_obj(g, obj);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(g, ch, SKILL_ENSNARE, 0);
     } else {
-      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you spin around $M and ensnare $S arms with the silk!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! Quickly $e spins around you and ensnares your arms with the silk!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you spin around $M and ensnare $S arms with the silk!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Unfortunately $e manages to hit YOU! Quickly $e spins around you and ensnares your arms with the silk!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", true, ch, nullptr, vict, TO_NOTVICT);
       extract_obj(g, obj);
       char_aff_set(vict, AFF_ENSNARED, true);
       char_set_wait(ch, PULSE_3SEC);
@@ -1598,8 +1598,8 @@ ACMD(do_adrenaline)
       int64_t trade = getBaseST(ch) * percent;
 
       if (!strcasecmp(arg, "pl")) {
-        act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
         if (getCurPL(g, ch) + trade > getEffMaxPL(g, ch))
           send_to_char(g, ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
@@ -1607,8 +1607,8 @@ ACMD(do_adrenaline)
         decCurST(g, ch, trade, 0);
 
       } else if (!strcasecmp(arg, "ki")) {
-        act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@g$n@G seems to concentrate and $e appears energized!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@g$n@G seems to concentrate and $e appears energized!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
         if ((getCurKI(g, ch)) + trade > getMaxKI(g, ch))
           send_to_char(g, ch, "Some of your stamina was wasted because your ki maxed out.\r\n");
@@ -1653,14 +1653,14 @@ ACMD(do_fireshield)
   int skill = init_skill(g, ch, SKILL_FIRESHIELD), prob = axion_dice(g, 0);
 
   if (skill <= prob) {
-    act(g, "@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@Ys@W to cover your body. Yet you screw up and the technique fails!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@Ys@W to cover $s body. Yet $e seems to screw up and the technique fails!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@Ys@W to cover your body. Yet you screw up and the technique fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@Ys@W to cover $s body. Yet $e seems to screw up and the technique fails!@n", true, ch, nullptr, nullptr, TO_ROOM);
     improve_skill(g, ch, SKILL_FIRESHIELD, 0);
     decCurKI(g, ch, cost, 0);
     return;
   }
-  act(g, "@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover your body. The ki you have gathered pours out of your body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover your entire body in a protective layer!", true, ch, 0, 0, TO_CHAR);
-  act(g, "@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover $s body. The ki $e has gathered pours out of $s body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover $s entire body in a protective layer!", true, ch, 0, 0, TO_ROOM);
+  act(g, "@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover your body. The ki you have gathered pours out of your body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover your entire body in a protective layer!", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover $s body. The ki $e has gathered pours out of $s body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover $s entire body in a protective layer!", true, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_FIRESHIELD, 0);
   decCurKI(g, ch, cost, 0);
   char_aff_set(ch, AFF_FIRESHIELD, true);
@@ -1751,77 +1751,77 @@ ACMD(do_warppool)
   }
   if (!strcasecmp("earth", arg)) {
     if (prob > perc) {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_WARP, 1);
     } else {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 850));
-      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
   } else if (!strcasecmp("frigid", arg)) {
     if (prob > perc) {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_WARP, 1);
     } else {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 4609));
-      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
   } else if (!strcasecmp("namek", arg)) {
     if (prob > perc) {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_WARP, 1);
     } else {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 10904));
-      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
   } else if (!strcasecmp("kanassa", arg)) {
     if (prob > perc) {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_WARP, 1);
     } else {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 15100));
-      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
   } else if (!strcasecmp("aether", arg)) {
     if (prob > perc) {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_WARP, 1);
     } else {
-      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, 12252));
-      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
   } else {
@@ -1921,8 +1921,8 @@ ACMD(do_obstruct)
     return;
   }
   if (skill < prob) {
-    act(g, "@CYou channel your ki and start to create a wall of water, but lose your concentration and the water promptly disappears.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C channels $s ki and starts to create a wall of water, but loses $s concentration and the water promptly disappears.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CYou channel your ki and start to create a wall of water, but lose your concentration and the water promptly disappears.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C channels $s ki and starts to create a wall of water, but loses $s concentration and the water promptly disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurKI(g, ch, cost, 0);
     improve_skill(g, ch, SKILL_HYOGA_KABE, 0);
     return;
@@ -1939,12 +1939,12 @@ ACMD(do_obstruct)
     if (obj_get_vnum(g, obj) == 79) {
       if (obj_get_cost(obj) == dir2) {
         if (skill < prob) {
-          act(g, "@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", true, ch, nullptr, nullptr, TO_ROOM);
           decCurKI(g, ch, cost / 2, 0);
         } else {
-          act(g, "@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n", true, ch, nullptr, nullptr, TO_ROOM);
           decCurKI(g, ch, cost / 2, 0);
           extract_obj(g, obj);
         }
@@ -1980,8 +1980,8 @@ ACMD(do_obstruct)
   obj_set_weight(obj3, strength);
   obj_set_fellow_wall(obj2, obj3);
   obj_set_fellow_wall(obj3, obj2);
-  act(g, "@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_room(g, newroom, "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n", dirs[dir2]);
   improve_skill(g, ch, SKILL_HYOGA_KABE, 0);
   decCurKI(g, ch, cost, 0);
@@ -2003,8 +2003,8 @@ ACMD(do_dimizu)
   int prob  = axion_dice(g, 0);
 
   if (rroom_get_geffect(g, char_get_in_room(ch)) < 0) {
-    act(g, "@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.", true, ch, nullptr, nullptr, TO_ROOM);
     rroom_set_geffect(g, char_get_in_room(ch), 0);
     char_set_wait(ch, PULSE_1SEC);
     return;
@@ -2022,14 +2022,14 @@ ACMD(do_dimizu)
     return;
   }
   if (skill < prob) {
-    act(g, "@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area, but you lose your concentration and it all goes flooding away!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area, but $e loses $s concentration and all the water goes flooding away!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area, but you lose your concentration and it all goes flooding away!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area, but $e loses $s concentration and all the water goes flooding away!@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurKI(g, ch, getMaxKI(g, ch) / 12, 0);
     improve_skill(g, ch, SKILL_DIMIZU, 0);
     return;
   }
-  act(g, "@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", true, ch, 0, 0, TO_CHAR);
-  act(g, "@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", true, ch, 0, 0, TO_ROOM);
+  act(g, "@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", true, ch, nullptr, nullptr, TO_ROOM);
   decCurKI(g, ch, getMaxKI(g, ch) / 12, 0);
   rroom_set_geffect(g, char_get_in_room(ch), -3);
   improve_skill(g, ch, SKILL_DIMIZU, 0);

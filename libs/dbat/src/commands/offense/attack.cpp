@@ -267,9 +267,9 @@ ACMD(do_attack)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act(g, "@C$N@W intercepts and parries your attack with $S own!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou intercept and parry @C$n's@W attack with one of your own!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W intercepts and parries @c$n's@W attack with one of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W intercepts and parries your attack with $S own!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou intercept and parry @C$n's@W attack with one of your own!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W intercepts and parries @c$n's@W attack with one of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (wtype != 4)
             handle_disarm(g, ch, vict);
           improve_skill(g, vict, SKILL_PARRY, 0);
@@ -283,9 +283,9 @@ ACMD(do_attack)
           return;
         }
         if (blk > axion_dice(g, 10)) {
-          act(g, "@C$N@W moves quickly and blocks your attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           improve_skill(g, vict, SKILL_BLOCK, 0);
           if ((wielded == 2 && gun == false) || (gun2 == false && gun == false))
             pcost(g, ch, 0, stcost);
@@ -297,9 +297,9 @@ ACMD(do_attack)
           return;
         }
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           improve_skill(g, vict, SKILL_DODGE, 0);
           if ((wielded == 2 && gun == false) || (gun2 == false && gun == false))
             pcost(g, ch, 0, stcost);
@@ -307,18 +307,18 @@ ACMD(do_attack)
 
           return;
         }
-        act(g, "@WYou can't believe it but your attack misses!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your attack misses!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if ((wielded == 2 && gun == false) || (gun2 == false && gun == false))
           pcost(g, ch, 0, stcost / 3);
         hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act(g, "@WYou can't believe it but your attack misses!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your attack misses!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
       if ((wielded == 2 && gun == false) || (gun2 == false && gun == false))
         pcost(g, ch, 0, stcost / 3);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
@@ -424,35 +424,35 @@ ACMD(do_attack)
       case 0:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou slash @C$N@W across the stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou slash @C$N@W across the arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou slash @C$N@W across the leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou slash @C$N@W across the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             if (!char_is_npc(ch)) {
               if (char_plr_flagged(ch, PLR_THANDW) && gun == false && gun2 == false) {
                 if (char_get_skills_base(ch, SKILL_TWOHAND) >= 100) {
@@ -473,9 +473,9 @@ ACMD(do_attack)
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou slash @C$N@W across the chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -488,7 +488,7 @@ ACMD(do_attack)
       case 1:
         if (!char_get_fighting(ch) && backstab(g, ch, vict, wlvl, dmg)) {
           if (vict != nullptr && getCurPL(g, vict) > 1 && axion_dice(g, 0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-            do_attack2(g, ch, 0, 0, 0);
+            do_attack2(g, ch, nullptr, 0, 0);
           }
           pcost(g, ch, 0, stcost);
           return;
@@ -496,44 +496,44 @@ ACMD(do_attack)
         dmg += (dmg * 0.01) * (char_get_aff_abils_dex(ch) * 0.5);
         switch (hitspot) {
           case 1:
-            act(g, "@WYou pierce @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou pierce @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou pierce @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou pierce @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou pierce @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -543,44 +543,44 @@ ACMD(do_attack)
       case 2:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou crush @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W chest@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W chest@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou crush @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou crush @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou crush @C$N@W in the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes you in the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N@W in the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N@W in the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes you in the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N@W in the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou crush @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W stomach@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W stomach@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -591,44 +591,44 @@ ACMD(do_attack)
       case 3:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou stab @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou stab @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou stab @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou stab @C$N@W in the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs you in the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N@W in the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N@W in the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs you in the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N@W in the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou stab @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W stomach@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W stomach@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -638,44 +638,44 @@ ACMD(do_attack)
       case 4:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou blast @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou blast @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou blast @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou blast @C$N@W in the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts you in the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N@W in the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N@W in the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts you in the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N@W in the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou blast @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W stomach@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W stomach@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -685,35 +685,35 @@ ACMD(do_attack)
       case 5:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou whack @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou whack @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou whack @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou whack @C$N@W in the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks you in the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N@W in the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N@W in the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks you in the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N@W in the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             if (char_get_skill(ch, SKILL_BRAWL) >= 100) {
               double mult = calc_critical(g, ch, 0);
               mult += 1.0;
@@ -726,9 +726,9 @@ ACMD(do_attack)
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou whack @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W stomach@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W stomach@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -739,9 +739,9 @@ ACMD(do_attack)
     if ((wielded == 2 && gun == false) || (gun2 == false && gun == false)) {
       if (char_get_equipment(ch, WEAR_WIELD1)) {
         if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
-          act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, nullptr, vict, TO_NOTVICT);
           int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
           hurt(g, 0, 0, vict, nullptr, char_get_equipment(ch, WEAR_WIELD1), damdam, 0);
         } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
@@ -750,9 +750,9 @@ ACMD(do_attack)
         pcost(g, ch, 0, stcost);
       } else {
         if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
-          act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, nullptr, vict, TO_NOTVICT);
           int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
           hurt(g, 0, 0, vict, nullptr, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
         }
@@ -782,7 +782,7 @@ ACMD(do_attack)
         improve_skill(g, ch, SKILL_DUALWIELD, 0);
       }
       if (vict != nullptr && getCurPL(g, vict) > 1 && axion_dice(g, 0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1)) {
-        do_attack2(g, ch, 0, 0, 0);
+        do_attack2(g, ch, nullptr, 0, 0);
       }
     }
     handle_multihit(g, ch, vict);
@@ -795,8 +795,8 @@ ACMD(do_attack)
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     if ((wielded == 2 && gun == false) || (gun2 == false && gun == false))
       pcost(g, ch, 0, stcost);
@@ -841,15 +841,15 @@ static ACMD(do_attack2)
     send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
-      act(g, "@RYour right arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
     send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
-      act(g, "@RYour left arm has fallen apart!@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
 
@@ -996,9 +996,9 @@ static ACMD(do_attack2)
     if (prob < perc - 20) {
       if ((getCurST(g, vict)) > 0) {
         if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act(g, "@C$N@W intercepts and parries your attack with $S own!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou intercept and parry @C$n's@W attack with one of your own!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W intercepts and parries @c$n's@W attack with one of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W intercepts and parries your attack with $S own!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou intercept and parry @C$n's@W attack with one of your own!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W intercepts and parries @c$n's@W attack with one of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (wtype != 4)
             handle_disarm(g, ch, vict);
           improve_skill(g, vict, SKILL_PARRY, 0);
@@ -1012,9 +1012,9 @@ static ACMD(do_attack2)
           return;
         }
         if (blk > axion_dice(g, 10)) {
-          act(g, "@C$N@W moves quickly and blocks your attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           improve_skill(g, vict, SKILL_BLOCK, 0);
           if (gun2 == false)
             pcost(g, ch, 0, stcost);
@@ -1026,9 +1026,9 @@ static ACMD(do_attack2)
           return;
         }
         if (dge > axion_dice(g, 10)) {
-          act(g, "@C$N@W manages to dodge your attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           improve_skill(g, vict, SKILL_DODGE, 0);
           if (gun2 == false)
             pcost(g, ch, 0, stcost);
@@ -1036,18 +1036,18 @@ static ACMD(do_attack2)
 
           return;
         }
-        act(g, "@WYou can't believe it but your attack misses!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your attack misses!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
         if (gun2 == false)
           pcost(g, ch, 0, stcost / 3);
         hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act(g, "@WYou can't believe it but your attack misses!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your attack misses!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W moves to attack you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W moves to attack @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
       if (gun2 == false)
         pcost(g, ch, 0, stcost / 3);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
@@ -1124,44 +1124,44 @@ static ACMD(do_attack2)
       case 0:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou slash @C$N@W across the stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou slash @C$N@W across the arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou slash @C$N@W across the leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou slash @C$N@W across the face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou slash @C$N@W across the chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W slashes you across the chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W slashes @C$N@W across the chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou slash @C$N@W across the chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W slashes you across the chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W slashes @C$N@W across the chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1175,44 +1175,44 @@ static ACMD(do_attack2)
         dmg += (dmg * 0.01) * (char_get_aff_abils_dex(ch) * 0.5);
         switch (hitspot) {
           case 1:
-            act(g, "@WYou pierce @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou pierce @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N'@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N'@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou pierce @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou pierce @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou pierce @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W pierces your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W pierces @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou pierce @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W pierces your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W pierces @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1222,44 +1222,44 @@ static ACMD(do_attack2)
       case 2:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou crush @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou crush @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou crush @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou crush @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N'@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N'@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou crush @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W crushes your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W crushes @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou crush @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W crushes your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W crushes @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1270,44 +1270,44 @@ static ACMD(do_attack2)
       case 3:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou stab @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou stab @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou stab @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou stab @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N'@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N'@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou stab @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W stabs your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W stabs @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou stab @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W stabs your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W stabs @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1317,44 +1317,44 @@ static ACMD(do_attack2)
       case 4:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou blast @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou blast @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou blast @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou blast @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N'@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N'@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 0);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 3);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou blast @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W blasts your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W blasts @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou blast @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W blasts your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W blasts @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1364,35 +1364,35 @@ static ACMD(do_attack2)
       case 5:
         switch (hitspot) {
           case 1:
-            act(g, "@WYou whack @C$N's@W stomach!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your stomach!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W stomach!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your stomach!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W stomach!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 2:
-            act(g, "@WYou whack @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your arm!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W arm!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W arm!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your arm!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 1);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 3:
-            act(g, "@WYou whack @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your leg!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W leg!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your leg!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
             dmg *= calc_critical(g, ch, 1);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 2);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 4:
-            act(g, "@WYou whack @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your face!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N'@W face!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W face!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your face!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N'@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
             if (char_get_skill(ch, SKILL_BRAWL) >= 100) {
               double mult = calc_critical(g, ch, 0);
               mult += 1.0;
@@ -1405,9 +1405,9 @@ static ACMD(do_attack2)
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
             break;
           case 5:
-            act(g, "@WYou whack @C$N's@W chest!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@c$n@W whacks your chest!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@c$n@W whacks @C$N's@W chest!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@WYou whack @C$N's@W chest!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@c$n@W whacks your chest!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@c$n@W whacks @C$N's@W chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
             dam_eq_loc(g, vict, 4);
             /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
@@ -1417,9 +1417,9 @@ static ACMD(do_attack2)
     } /* end switch one*/
     if (gun2 == false) {
       if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
-        act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@c$N's@W fireshield burns your weapon!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n's@W weapon is burned by your fireshield!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n's@W weapon is burned by @C$N's@W fireshield!@n", true, ch, nullptr, vict, TO_NOTVICT);
         int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
         hurt(g, 0, 0, vict, nullptr, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
       } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
@@ -1436,8 +1436,8 @@ static ACMD(do_attack2)
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     if (gun2 == false)
       pcost(g, ch, 0, stcost);

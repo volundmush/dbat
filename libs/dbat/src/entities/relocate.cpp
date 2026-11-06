@@ -75,18 +75,18 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_rnum room)
       }
     }
     if (obj_get_exit(g, object, 5) && (rroom_sect(g, obj_get_in_room(object)) == SECT_UNDERWATER || rroom_sect(g, obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
-      act(g, "$p @Bsinks to deeper waters.@n", true, 0, object, 0, TO_ROOM);
+      act(g, "$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
       room_vnum numb = rroom_get_vnum(g, obj_get_exit(g, object, 5)->to_room);
       obj_from_room(g, object);
       obj_to_room(g, object, real_room(g, numb));
     }
     if (obj_get_exit(g, object, 5) && rroom_sect(g, obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(g, object) < 80 || obj_get_vnum(g, object) > 83)) {
-      act(g, "$p @Cfalls down.@n", true, 0, object, 0, TO_ROOM);
+      act(g, "$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
       room_vnum numb = rroom_get_vnum(g, obj_get_exit(g, object, 5)->to_room);
       obj_from_room(g, object);
       obj_to_room(g, object, real_room(g, numb));
       if (rroom_sect(g, obj_get_in_room(object)) != SECT_FLYING) {
-        act(g, "$p @Cfalls down and smacks the ground.@n", true, 0, object, 0, TO_ROOM);
+        act(g, "$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
       }
     }
     if (obj_get_value(object, 0) != 0) {
@@ -399,8 +399,8 @@ void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int po
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
-    act(g, "You stop wearing $p as something prevents you.", false, ch, obj, 0, TO_CHAR);
-    act(g, "$n stops wearing $p as something prevents $m.", false, ch, obj, 0, TO_ROOM);
+    act(g, "You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
     /* Changed to drop in inventory instead of the ground. */
     obj_to_char(g, obj, ch);
     return;

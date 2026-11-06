@@ -88,16 +88,16 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your skin, but fail in making it tough!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki into $s skin, but fails in making it tough!", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your skin, but fail in making it tough!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki into $s skin, but fails in making it tough!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       int duration = char_get_aff_abils_intel(ch) / 20;
       assign_affect(g, ch, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your skin, making it tough!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki into $s skin, making it tough!", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your skin, making it tough!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki into $s skin, making it tough!", true, ch, nullptr, nullptr, TO_ROOM);
       return;
     } // End of no vict tough skin
 
@@ -128,18 +128,18 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's skin, but fail in making it tough!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your skin, but fails in making it tough!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki into $N's skin, but fails in making it tough!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's skin, but fail in making it tough!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your skin, but fails in making it tough!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki into $N's skin, but fails in making it tough!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 2);
       assign_affect(g, vict, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's skin, making it tough!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your skin, making it tough!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's skin, making it tough!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's skin, making it tough!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your skin, making it tough!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's skin, making it tough!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
 
     } // End of victim of tough skin
@@ -169,8 +169,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your muscles, but fail in making them mighty!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki into $s muscles, but fails in making them mighty!", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your muscles, but fail in making them mighty!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki into $s muscles, but fails in making them mighty!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       char_aff_set(ch, AFF_MIGHT, true);
@@ -179,8 +179,8 @@ ACMD(do_focus)
       /* Str , Con, Int, Agl, Wis, Spd */
       assign_affect(g, ch, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your muscles, making them mighty!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki into $s muscles, making them mighty!", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your muscles, making them mighty!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki into $s muscles, making them mighty!", true, ch, nullptr, nullptr, TO_ROOM);
       return;
     } // End of no vict might
 
@@ -219,9 +219,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's muscles, but fail in making them mighty!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your muscles, but fails in making them mighty!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki into $N's muscles, but fails in making them mighty!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's muscles, but fail in making them mighty!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your muscles, but fails in making them mighty!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki into $N's muscles, but fails in making them mighty!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
@@ -229,9 +229,9 @@ ACMD(do_focus)
       /* Str , Con, Int, Agl, Wis, Spd */
       assign_affect(g, vict, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's muscles, making them mighty!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your muscles, making them mighty!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's muscles, making them mighty!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's muscles, making them mighty!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your muscles, making them mighty!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's muscles, making them mighty!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
 
     } // End of victim of might
@@ -263,18 +263,18 @@ ACMD(do_focus)
     if (char_get_skill(ch, SKILL_WITHER) < axion_dice(g, 0)) {
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's body, but fail in withering it!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your body, but fails in withering it!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's body, but fails in withering it!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's body, but fail in withering it!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your body, but fails in withering it!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's body, but fails in withering it!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
     }
     decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
     assign_affect(g, vict, AFF_WITHER, SKILL_WITHER, -1, -3, 0, 0, 0, 0, -3);
     save_char(g, vict);
     reveal_hiding(g, ch, 0);
-    act(g, "You focus ki into $N's body, and succeed in withering it!", true, ch, 0, vict, TO_CHAR);
-    act(g, "$n focuses ki into your body, and succeeds in withering it!", true, ch, 0, vict, TO_VICT);
-    act(g, "$n focuses ki into $N's body, and succeeds in withering it!", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "You focus ki into $N's body, and succeed in withering it!", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "$n focuses ki into your body, and succeeds in withering it!", true, ch, nullptr, vict, TO_VICT);
+    act(g, "$n focuses ki into $N's body, and succeeds in withering it!", true, ch, nullptr, vict, TO_NOTVICT);
     return;
   } // End of wither
 
@@ -298,8 +298,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your mind, but fail in awakening it to cosmic wisdom!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your mind, but fail in awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 2);
@@ -307,8 +307,8 @@ ACMD(do_focus)
       assign_affect(g, ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki into $s mind, awakening it to cosmic wisdom!", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki into $s mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_is_jinto(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && char_get_practice_points(g, ch) >= 15 && rand_number(g, 1, 4) >= 3) {
         int64_t gain = 0;
         char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (15));
@@ -360,9 +360,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki into $N's mind, but fails in awakening it to cosmic wisdom!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki into $N's mind, but fails in awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 2);
@@ -370,9 +370,9 @@ ACMD(do_focus)
       assign_affect(g, vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's mind, awakening it to cosmic wisdom!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your mind, awakening it to cosmic wisdom!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's mind, awakening it to cosmic wisdom!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict, TO_NOTVICT);
       if (char_is_jinto(ch) && level_exp(vict, char_get_level(vict) + 1) - char_get_exp(vict) > 0 && char_get_practice_points(g, ch) >= 15 && rand_number(g, 1, 4) >= 3) {
         int64_t gain = 0;
         char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (15));
@@ -415,8 +415,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your mind, but fail in making it work faster!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki into $s muscles, but fails in making it work faster!", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your mind, but fail in making it work faster!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki into $s muscles, but fails in making it work faster!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 2);
@@ -424,8 +424,8 @@ ACMD(do_focus)
       assign_affect(g, ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your mind, making it work faster!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki into $s mind, making it work faster!", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your mind, making it work faster!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki into $s mind, making it work faster!", true, ch, nullptr, nullptr, TO_ROOM);
       return;
     } // End of no vict genius
 
@@ -460,9 +460,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's mind, but fail in making it work faster!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your mind, but fails in making it work faster!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki into $N's mind, but fails in making it work faster!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's mind, but fail in making it work faster!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your mind, but fails in making it work faster!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki into $N's mind, but fails in making it work faster!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 2);
@@ -471,9 +471,9 @@ ACMD(do_focus)
       assign_affect(g, vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's mind, making it work faster!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your mind, making it work faster!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's mind, making it work faster!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your mind, making it work faster!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_NOTVICT);
       if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
@@ -504,8 +504,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_FLEX) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your limbs, but fail in making them more flexible!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki into $s muscles, but fails in making them more flexible!", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your limbs, but fail in making them more flexible!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki into $s muscles, but fails in making them more flexible!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
@@ -514,8 +514,8 @@ ACMD(do_focus)
       /* Str , Con, Int, Agl, Wis, Spd */
       assign_affect(g, ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your limbs, making them more flexible!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki into $s limbs, making them more flexible!", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki into $s limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_ROOM);
       return;
     } // End of no vict FLEX
 
@@ -550,9 +550,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_FLEX) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's limbs, but fail in making them more flexible!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your limbs, but fails in making them more flexible!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki into $N's limbs, but fails in making them more flexible!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's limbs, but fail in making them more flexible!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your limbs, but fails in making them more flexible!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki into $N's limbs, but fails in making them more flexible!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
@@ -561,9 +561,9 @@ ACMD(do_focus)
       /* Str , Con, Int, Agl, Wis, Spd */
       assign_affect(g, vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's limbs, making them more flexible!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your limbs, making them more flexible!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki into $N's limbs, making them more flexible!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your limbs, making them more flexible!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_NOTVICT);
       if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
@@ -590,8 +590,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_BLESS) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki while chanting spiritual words. $n seems disappointed.", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki while chanting spiritual words. $n seems disappointed.", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 3);
@@ -605,8 +605,8 @@ ACMD(do_focus)
       } else {
         char_set_blesslvl(ch, 0);
       }
-      act(g, "You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_aff_flagged(ch, AFF_CURSE)) {
         send_to_char(g, ch, "Your cursing was nullified!\r\n");
         null_affect(g, ch, AFF_CURSE);
@@ -641,9 +641,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_BLESS) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki while chanting spiritual words. Your blessing fails!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki while chanting spiritual words. $n places a hand on $N's head, but nothing happens!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki while chanting spiritual words. Your blessing fails!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki while chanting spiritual words. $n places a hand on $N's head, but nothing happens!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 3);
@@ -657,9 +657,9 @@ ACMD(do_focus)
       } else {
         char_set_blesslvl(vict, 0);
       }
-      act(g, "You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", true, ch, nullptr, vict, TO_NOTVICT);
       if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
@@ -694,8 +694,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_CURSE) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki while chanting demonic words. $n seems disappointed.", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki while chanting demonic words. $n seems disappointed.", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 3);
@@ -704,8 +704,8 @@ ACMD(do_focus)
       assign_affect(g, vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_aff_flagged(ch, AFF_BLESS)) {
         send_to_char(g, ch, "Your blessing was nullified!\r\n");
         null_affect(g, ch, AFF_BLESS);
@@ -744,9 +744,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_CURSE) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki while chanting demonic words. Your cursing fails!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki while chanting demonic words. Your cursing fails!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), 3);
@@ -755,9 +755,9 @@ ACMD(do_focus)
       assign_affect(g, vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki while chanting demonic words. cursing $N with slower regeneration!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki while chanting demonic words. cursing $N with slower regeneration!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", true, ch, nullptr, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
         send_to_char(g, vict, "Your blessing was nullified!\r\n");
         null_affect(g, vict, AFF_BLESS);
@@ -797,17 +797,17 @@ ACMD(do_focus)
     if (char_get_bonuses(vict, BONUS_INSOMNIAC)) {
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki while moving your hands in lulling patterns, but $N doesn't look the least bit sleepy!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki while moving your hands in lulling patterns, but $N doesn't look the least bit sleepy!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
     }
     if (char_get_skill(ch, SKILL_YOIK) < axion_dice(g, 0) || (char_get_aff_abils_intel(ch) + rand_number(g, 1, 3) < char_get_aff_abils_intel(vict) + rand_number(g, 1, 5))) {
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but you resist the technique!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but $N resists the technique!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but you resist the technique!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki while moving $s hands in a lulling pattern, but $N resists the technique!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
     }
     int duration = rand_number(g, 1, 2);
@@ -815,9 +815,9 @@ ACMD(do_focus)
     assign_affect(g, vict, AFF_SLEEP, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
     decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
     reveal_hiding(g, ch, 0);
-    act(g, "You focus ki while moving your hands in lulling patterns, putting $N to sleep!", true, ch, 0, vict, TO_CHAR);
-    act(g, "$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", true, ch, 0, vict, TO_VICT);
-    act(g, "$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "You focus ki while moving your hands in lulling patterns, putting $N to sleep!", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", true, ch, nullptr, vict, TO_VICT);
+    act(g, "$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true, ch, nullptr, vict, TO_NOTVICT);
     char_set_position(vict, POS_SLEEPING);
     if (char_aff_flagged(vict, AFF_FLYING)) {
       char_aff_set(vict, AFF_FLYING, false);
@@ -838,8 +838,8 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into your very cells, but fail at re-engerizing them!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki and glows green for a moment, $e then frowns.", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki into your very cells, but fail at re-engerizing them!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki and glows green for a moment, $e then frowns.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_wait(ch, PULSE_2SEC);
         return;
       }
@@ -856,8 +856,8 @@ ACMD(do_focus)
       }
 
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into your very cells, and manage to re-energize them!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki and glows green for a moment, $e then smiles.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki into your very cells, and manage to re-energize them!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki and glows green for a moment, $e then smiles.", true, ch, nullptr, nullptr, TO_ROOM);
       char_set_wait(ch, PULSE_2SEC);
       return;
     } // End of no vict VIGOR
@@ -885,9 +885,9 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki into $N's very cells, and fail at re-energizing them!", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki into your very cells, but nothing happens!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki and $N glows green for a moment, $N frowns.", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki into $N's very cells, and fail at re-energizing them!", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki into your very cells, but nothing happens!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki and $N glows green for a moment, $N frowns.", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_wait(ch, PULSE_2SEC);
         return;
       }
@@ -899,9 +899,9 @@ ACMD(do_focus)
         decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
       }
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki into $N's very cells, and manage to re-energize them!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki into your very cells, and manages to re-energize them!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki and $N glows green for a moment, $N smiles.", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki into $N's very cells, and manage to re-energize them!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki into your very cells, and manages to re-energize them!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki and $N glows green for a moment, $N smiles.", true, ch, nullptr, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_2SEC);
       return;
 
@@ -924,15 +924,15 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_CURE) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki and aim a pulsing light at your body. Nothing happens!", true, ch, 0, 0, TO_CHAR);
-        act(g, "$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen.", true, ch, 0, 0, TO_ROOM);
+        act(g, "You focus ki and aim a pulsing light at your body. Nothing happens!", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen.", true, ch, nullptr, nullptr, TO_ROOM);
         return;
       }
       affect_from_char(g, ch, SPELL_POISON);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", true, ch, 0, 0, TO_CHAR);
-      act(g, "$n focuses ki and aims a pulsing light at $s body. $n smiles.", true, ch, 0, 0, TO_ROOM);
+      act(g, "You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "$n focuses ki and aims a pulsing light at $s body. $n smiles.", true, ch, nullptr, nullptr, TO_ROOM);
       null_affect(g, ch, AFF_POISON);
       return;
     } // End of no vict cure
@@ -960,17 +960,17 @@ ACMD(do_focus)
       if (char_get_skill(ch, SKILL_CURE) < axion_dice(g, 0)) {
         decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
         reveal_hiding(g, ch, 0);
-        act(g, "You focus ki and aim a pulsing light at $N's body. Nothing happens.", true, ch, 0, vict, TO_CHAR);
-        act(g, "$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", true, ch, 0, vict, TO_VICT);
-        act(g, "$n focuses ki and aims a pulsing light at $N's body. $N looks disappointed.", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "You focus ki and aim a pulsing light at $N's body. Nothing happens.", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", true, ch, nullptr, vict, TO_VICT);
+        act(g, "$n focuses ki and aims a pulsing light at $N's body. $N looks disappointed.", true, ch, nullptr, vict, TO_NOTVICT);
         return;
       }
       affect_from_char(g, vict, SPELL_POISON);
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki and aim a pulsing light at $N's body. $e is cured.", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki and aims a pulsing light at $N's body. $N smiles.", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki and aim a pulsing light at $N's body. $e is cured.", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki and aims a pulsing light at $N's body. $N smiles.", true, ch, nullptr, vict, TO_NOTVICT);
       null_affect(g, vict, AFF_POISON);
       return;
 
@@ -1010,23 +1010,23 @@ ACMD(do_focus)
     if (char_get_skill(ch, SKILL_POISON) < axion_dice(g, 0)) {
       decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
       reveal_hiding(g, ch, 0);
-      act(g, "You focus ki and fling poison at $N. You missed!", true, ch, 0, vict, TO_CHAR);
-      act(g, "$n focuses ki and flings poison at you, but misses!", true, ch, 0, vict, TO_VICT);
-      act(g, "$n focuses ki and flings poison at $N, but misses!", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "You focus ki and fling poison at $N. You missed!", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "$n focuses ki and flings poison at you, but misses!", true, ch, nullptr, vict, TO_VICT);
+      act(g, "$n focuses ki and flings poison at $N, but misses!", true, ch, nullptr, vict, TO_NOTVICT);
       return;
     }
     decCurKI(g, ch, getMaxKI(g, ch) / 20, 0);
     reveal_hiding(g, ch, 0);
-    act(g, "You focus ki and fling poison at $N! The poison burns into $s skin!", true, ch, 0, vict, TO_CHAR);
-    act(g, "$n focuses ki and flings poison at you! The poison burns into your skin!", true, ch, 0, vict, TO_VICT);
-    act(g, "$n focuses ki and flings poison at $N! The poison burns into $s skin!", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "You focus ki and fling poison at $N! The poison burns into $s skin!", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "$n focuses ki and flings poison at you! The poison burns into your skin!", true, ch, nullptr, vict, TO_VICT);
+    act(g, "$n focuses ki and flings poison at $N! The poison burns into $s skin!", true, ch, nullptr, vict, TO_NOTVICT);
     if (char_is_npc(vict)) {
       set_fighting(g, vict, ch);
     }
     if (char_is_mutant(vict) && (char_get_genome(vict, 0) == 7 || char_get_genome(vict, 1) == 7)) {
-      act(g, "However $N seems unaffected by the poison.", true, ch, 0, vict, TO_CHAR);
-      act(g, "Your natural immunity to poison prevents it from affecting you.", true, ch, 0, vict, TO_VICT);
-      act(g, "However $N seems unaffected by the poison.", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "Your natural immunity to poison prevents it from affecting you.", true, ch, nullptr, vict, TO_VICT);
+      act(g, "However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_NOTVICT);
     } else {
       char_set_poisonby(vict, ch);
       if (char_get_charge(vict) > 0) {

@@ -127,8 +127,8 @@ void damage_weapon(GameWorld *g, struct char_data *ch, struct obj_data *obj, str
   }
 
   if (char_get_skill(ch, SKILL_HANDLING) >= axion_dice(g, 10)) {
-    act(g, "@GYour superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, 0, TO_CHAR);
-    act(g, "@g$n's@G superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, 0, TO_ROOM);
+    act(g, "@GYour superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@g$n's@G superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, nullptr, TO_ROOM);
     result = 0;
   }
 
@@ -218,9 +218,9 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
   /* Success! */
   if (perc >= prob) {
     char buf[MAX_INPUT_LENGTH];
-    act(g, "@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, nullptr, vict, TO_NOTVICT);
     char_set_throws(ch, char_get_throws(ch) + 1);
     char_plr_set(ch, PLR_MULTIHIT, true);
     if (char_get_combo(ch) > -1) {
@@ -335,14 +335,14 @@ bool handle_defender(GameWorld *g, struct char_data *vict, struct char_data *ch)
     int64_t defnum        = (char_get_speedi(g, def) * 0.01) * rand_number(g, -10, 10);
     int64_t chnum         = (char_get_speedi(g, ch) * 0.01) * rand_number(g, -5, 10);
     if (char_get_speedi(g, def) + defnum > char_get_speedi(g, ch) + chnum && char_get_in_room(def) == char_get_in_room(vict) && char_get_position(def) > POS_SITTING) {
-      act(g, "@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", true, def, 0, vict, TO_CHAR);
-      act(g, "@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", true, def, 0, vict, TO_VICT);
-      act(g, "@y$n@Y moves to and manages to intercept the attack aimed at @y$N@Y!@n", true, def, 0, vict, TO_NOTVICT);
+      act(g, "@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", true, def, nullptr, vict, TO_CHAR);
+      act(g, "@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", true, def, nullptr, vict, TO_VICT);
+      act(g, "@y$n@Y moves to and manages to intercept the attack aimed at @y$N@Y!@n", true, def, nullptr, vict, TO_NOTVICT);
       result = true;
     } else if (char_get_in_room(def) == char_get_in_room(vict) && char_get_position(def) > POS_SITTING) {
-      act(g, "@YYou move to intercept the attack aimed at @y$N@Y, but just not fast enough!@n", true, def, 0, vict, TO_CHAR);
-      act(g, "@y$n@Y moves to intercept the attack aimed at YOU, but $e wasn't fast enough!@n", true, def, 0, vict, TO_VICT);
-      act(g, "@y$n@Y moves to intercept the attack aimed at @y$N@Y, but $e wasn't fast enough!@n", true, def, 0, vict, TO_NOTVICT);
+      act(g, "@YYou move to intercept the attack aimed at @y$N@Y, but just not fast enough!@n", true, def, nullptr, vict, TO_CHAR);
+      act(g, "@y$n@Y moves to intercept the attack aimed at YOU, but $e wasn't fast enough!@n", true, def, nullptr, vict, TO_VICT);
+      act(g, "@y$n@Y moves to intercept the attack aimed at @y$N@Y, but $e wasn't fast enough!@n", true, def, nullptr, vict, TO_NOTVICT);
     }
   }
 
@@ -535,9 +535,9 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   int64_t totki = 0;
 
-  act(g, chbuf, true, ch, 0, vict, TO_CHAR);
-  act(g, victbuf, true, ch, 0, vict, TO_VICT);
-  act(g, rmbuf, true, ch, 0, vict, TO_NOTVICT);
+  act(g, chbuf, true, ch, nullptr, vict, TO_CHAR);
+  act(g, victbuf, true, ch, nullptr, vict, TO_VICT);
+  act(g, rmbuf, true, ch, nullptr, vict, TO_NOTVICT);
 
   if (char_get_charge(ch) >= getMaxKI(g, ch) * maxki) {
     totki += getMaxKI(g, ch) * maxki;
@@ -566,8 +566,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
     char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
     sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
     sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-    act(g, folbuf, true, f->follower, 0, 0, TO_ROOM);
-    act(g, folbuf2, true, f->follower, 0, 0, TO_CHAR);
+    act(g, folbuf, true, f->follower, nullptr, nullptr, TO_ROOM);
+    act(g, folbuf2, true, f->follower, nullptr, nullptr, TO_CHAR);
   }
 
   totki += bonus;
@@ -578,13 +578,13 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   if (char_get_combine(ch) != 5) {
     if (attspd + attsk < char_get_skill(vict, SKILL_DODGE) + (char_get_aff_abils_cha(ch) / 10)) {
-      act(g, "@GYou manage to dodge nimbly through the combined attack of your enemies!@n", true, vict, 0, 0, TO_CHAR);
-      act(g, "@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, 0, 0, TO_ROOM);
+      act(g, "@GYou manage to dodge nimbly through the combined attack of your enemies!@n", true, vict, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
       return;
     }
     if (blockable == true && attspd + attsk < char_get_skill(vict, SKILL_BLOCK) + (char_get_aff_abils_str(ch) / 10)) {
-      act(g, "@GYou manage to effectivly block the combined attack of your enemies with the help of your great strength!@n", true, vict, 0, 0, TO_CHAR);
-      act(g, "@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, 0, 0, TO_ROOM);
+      act(g, "@GYou manage to effectivly block the combined attack of your enemies with the help of your great strength!@n", true, vict, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
       return;
     }
   }
@@ -603,8 +603,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
   }
   if (shocked == true) {
     if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-      act(g, "@MYour mind has been shocked!@n", true, vict, 0, 0, TO_CHAR);
-      act(g, "@M$n@m's mind has been shocked!@n", true, vict, 0, 0, TO_ROOM);
+      act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
+      act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
       char_aff_set(vict, AFF_SHOCKED, true);
     }
   }
@@ -634,8 +634,8 @@ bool check_ruby(GameWorld *g, struct char_data *ch)
   }
 
   if (found > 0) {
-    act(g, "@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, 0, TO_CHAR);
-    act(g, "@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, 0, TO_ROOM);
+    act(g, "@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, nullptr, TO_CHAR);
+    act(g, "@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, nullptr, TO_ROOM);
     extract_obj(g, ruby);
     return true;
   }
@@ -720,11 +720,11 @@ void handle_knockdown(GameWorld *g, struct char_data *ch)
   }
 
   if (chance > axion_dice(g, 0)) {
-    act(g, "@mYou are @GALMOST@m knocked off your feet, but your great balance helps you keep your footing!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n@m is @GALMOST@m knocked off $s feet, but $s great balance helps $m keep $s footing!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou are @GALMOST@m knocked off your feet, but your great balance helps you keep your footing!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n@m is @GALMOST@m knocked off $s feet, but $s great balance helps $m keep $s footing!@n", true, ch, nullptr, nullptr, TO_ROOM);
   } else {
-    act(g, "@mYou are knocked off your feet!@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@W$n@m is knocked off $s feet!@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@mYou are knocked off your feet!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n@m is knocked off $s feet!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_position(ch, POS_SITTING);
   }
 }
@@ -867,9 +867,9 @@ bool backstab(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
     int defender_roll = char_get_skill(vict, SKILL_SPOT) + char_get_skill(vict, SKILL_LISTEN) + char_get_aff_abils_dex(ch) + rand_number(g, -5, 5);
 
     if (attacker_roll > defender_roll) {
-      act(g, "@RYou manage to sneak behind @r$N@R and stab $M in the back!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@RYou feel @r$n's@R dagger thrust into your back unexpectantly!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@RYou manage to sneak behind @r$N@R and stab $M in the back!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@RYou feel @r$n's@R dagger thrust into your back unexpectantly!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n", true, ch, nullptr, vict, TO_NOTVICT);
       dmg += dmg * bonus;
       hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
       return true;
@@ -917,9 +917,9 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
   }
 
   if (decapitate == true) {
-    act(g, "@R$N's@r head is cut off in the attack!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@RYOUR head is cut off in the attack!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@R$N's@rhead is cut off in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@R$N's@r head is cut off in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@RYOUR head is cut off in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@R$N's@rhead is cut off in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
 
     remove_limb(g, vict, 0);
     die(g, vict, ch);
@@ -946,18 +946,18 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
           if (char_plr_flagged(vict, PLR_CLARM)) {
             char_plr_set(vict, PLR_CLARM, false);
           }
-          act(g, "@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your left arm!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
           remove_limb(g, vict, 2);
         } else if (char_get_limb_condition(vict, (1) - 1) > 0) {
           char_set_limb_condition(vict, (1) - 1, 100);
           if (char_plr_flagged(vict, PLR_CRARM)) {
             char_plr_set(vict, PLR_CRARM, false);
           }
-          act(g, "@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your right arm!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
           remove_limb(g, vict, 1);
         }
       } else { /* It's a leg */
@@ -966,18 +966,18 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
           if (char_plr_flagged(vict, PLR_CLLEG)) {
             char_plr_set(vict, PLR_CLLEG, false);
           }
-          act(g, "@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your left leg!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
           remove_limb(g, vict, 4);
         } else if (char_get_limb_condition(vict, (3) - 1) > 0) {
           char_set_limb_condition(vict, (3) - 1, 100);
           if (char_plr_flagged(vict, PLR_CRLEG)) {
             char_plr_set(vict, PLR_CRLEG, false);
           }
-          act(g, "@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your right leg!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
           remove_limb(g, vict, 3);
         }
       }
@@ -986,29 +986,29 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
         if (char_mob_flagged(vict, MOB_LARM)) {
           char_mob_set(vict, MOB_LARM, false);
           remove_limb(g, vict, 2);
-          act(g, "@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your left arm!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         } else if (char_mob_flagged(vict, MOB_RARM)) {
           char_mob_set(vict, MOB_RARM, false);
           remove_limb(g, vict, 1);
-          act(g, "@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your right arm!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         }
       } else {
         if (char_mob_flagged(vict, MOB_LLEG)) {
           char_mob_set(vict, MOB_LLEG, false);
           remove_limb(g, vict, 4);
-          act(g, "@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your left leg!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         } else if (char_mob_flagged(vict, MOB_RLEG)) {
           char_mob_set(vict, MOB_RLEG, false);
           remove_limb(g, vict, 3);
-          act(g, "@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@RYOU lose your right leg!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         }
       }
     }
@@ -1122,15 +1122,15 @@ static int64_t advanced_energy(GameWorld *g, struct char_data *ch, int64_t dmg)
       if (char_get_charge(ch) + add > getMaxKI(g, ch)) {
         if (char_get_charge(ch) < getMaxKI(g, ch)) {
           char_set_charge(ch, getMaxKI(g, ch));
-          act(g, "@MYou leech some of the energy away!@n", true, ch, 0, 0, TO_CHAR);
-          act(g, "@m$n@M leeches some of the energy away!@n", true, ch, 0, 0, TO_ROOM);
+          act(g, "@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
+          act(g, "@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else {
           send_to_char(g, ch, "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
         }
       } else {
         char_set_charge(ch, char_get_charge(ch) + (add));
-        act(g, "@MYou leech some of the energy away!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@m$n@M leeches some of the energy away!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
       }
 
     } /* End of rate check */
@@ -1142,8 +1142,8 @@ static int64_t advanced_energy(GameWorld *g, struct char_data *ch, int64_t dmg)
 
     if (rate > 0.00) {
       if (char_get_charge(ch) > 0 && rand_number(g, 1, 100) <= 10) {
-        act(g, "@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@m$n@M suffers shock from their own charged energy!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@m$n@M suffers shock from their own charged energy!@n", true, ch, nullptr, nullptr, TO_ROOM);
         decCurHealth(g, ch, char_get_charge(ch) / 4, 1);
       }
       add = dmg * rate;
@@ -1429,9 +1429,9 @@ static void hurt_limb(GameWorld *g, struct char_data *ch, struct char_data *vict
   if (!is_sparring(ch)) {
     if (area == 0) { /* Arms */
       if (char_get_limb_condition(vict, (2) - 1) - dmg <= 0) {
-        act(g, "@RYour attack @YDESTROYS @r$N's@R left arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (2) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1442,13 +1442,13 @@ static void hurt_limb(GameWorld *g, struct char_data *ch, struct char_data *vict
         remove_limb(g, vict, 2);
       } else if (char_get_limb_condition(vict, (2) - 1) > 0) {
         char_set_limb_condition(vict, (2) - 1, char_get_limb_condition(vict, (2) - 1) - (dmg));
-        act(g, "@RYour attack hurts @r$N's@R left arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack hurts YOUR left arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack hurts @r$N's@R left arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack hurts @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack hurts YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack hurts @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
       } else if (char_get_limb_condition(vict, (1) - 1) - dmg <= 0) {
-        act(g, "@RYour attack @YDESTROYS @r$N's@R right arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (1) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1459,15 +1459,15 @@ static void hurt_limb(GameWorld *g, struct char_data *ch, struct char_data *vict
         remove_limb(g, vict, 2);
       } else if (char_get_limb_condition(vict, (1) - 1) > 0) {
         char_set_limb_condition(vict, (1) - 1, char_get_limb_condition(vict, (1) - 1) - (dmg));
-        act(g, "@RYour attack hurts @r$N's@R right arm!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack hurts YOUR right arm!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack hurts @r$N's@R right arm!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack hurts @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack hurts YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack hurts @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
       }
     } else if (area == 1) { /* Legs */
       if (char_get_limb_condition(vict, (4) - 1) - dmg <= 0) {
-        act(g, "@RYour attack @YDESTROYS @r$N's@R left leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (4) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1478,13 +1478,13 @@ static void hurt_limb(GameWorld *g, struct char_data *ch, struct char_data *vict
         remove_limb(g, vict, 2);
       } else if (char_get_limb_condition(vict, (4) - 1) > 0) {
         char_set_limb_condition(vict, (4) - 1, char_get_limb_condition(vict, (4) - 1) - (dmg));
-        act(g, "@RYour attack hurts @r$N's@R left leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack hurts YOUR left leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack hurts @r$N's@R left leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack hurts YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
       } else if (char_get_limb_condition(vict, (3) - 1) - dmg <= 0) {
-        act(g, "@RYour attack @YDESTROYS @r$N's@R right leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (3) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1495,9 +1495,9 @@ static void hurt_limb(GameWorld *g, struct char_data *ch, struct char_data *vict
         remove_limb(g, vict, 2);
       } else if (char_get_limb_condition(vict, (3) - 1) > 0) {
         char_set_limb_condition(vict, (3) - 1, char_get_limb_condition(vict, (3) - 1) - (dmg));
-        act(g, "@RYour attack hurts @r$N's@R right leg!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@r$n's@R attack hurts YOUR right leg!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@r$n's@R attack hurts @r$N's@R right leg!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@RYour attack hurts @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@r$n's@R attack hurts YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@r$n's@R attack hurts @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
       }
     }
   }
@@ -1627,30 +1627,30 @@ static void damage_eq(GameWorld *g, struct char_data *vict, int location)
     if (obj_get_value(eq, VAL_ALL_HEALTH) <= 0) {
       obj_set_value(eq, VAL_ALL_HEALTH, 0);
       obj_extra_set(eq, ITEM_BROKEN, true);
-      act(g, "@WYour $p@W completely breaks!@n", false, 0, eq, vict, TO_VICT);
-      act(g, "@C$N's@W $p@W completely breaks!@n", false, 0, eq, vict, TO_NOTVICT);
+      act(g, "@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
+      act(g, "@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
       perform_remove(g, vict, location);
       if (!char_is_npc(vict))
         save_char(g, vict);
     } else if (obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_LEATHER || obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_COTTON || obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_SILK) {
-      act(g, "@WYour $p@W rips a little!@n", false, 0, eq, vict, TO_VICT);
-      act(g, "@C$N's@W $p@W rips a little!@n", false, 0, eq, vict, TO_NOTVICT);
+      act(g, "@WYour $p@W rips a little!@n", false, nullptr, eq, vict, TO_VICT);
+      act(g, "@C$N's@W $p@W rips a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
         send_to_char(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
-        act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, 0, 0, vict, TO_NOTVICT);
+        act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
         send_to_char(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
-        act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, 0, 0, vict, TO_NOTVICT);
+        act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       }
     } else {
-      act(g, "@WYour $p@W cracks a little!@n", false, 0, eq, vict, TO_VICT);
-      act(g, "@C$N's@W $p@W cracks a little!@n", false, 0, eq, vict, TO_NOTVICT);
+      act(g, "@WYour $p@W cracks a little!@n", false, nullptr, eq, vict, TO_VICT);
+      act(g, "@C$N's@W $p@W cracks a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
         send_to_char(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
-        act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, 0, 0, vict, TO_NOTVICT);
+        act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
         send_to_char(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
-        act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, 0, 0, vict, TO_NOTVICT);
+        act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       }
     }
   }
@@ -1691,13 +1691,13 @@ void huge_update(GameWorld *g)
             bonus = 2;
           }
 
-          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
           send_to_room(g, obj_get_in_room(k), "\r\n");
           if (getCurPL(g, obj_get_target(k)) * bonus < obj_get_kicharge(k) * 5) {
 
-            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
             skill = init_skill(g, ch, SKILL_GENKIDAMA); /* Set skill value */
             dmg   = obj_get_kicharge(k) * 1.25;
             hurt(g, 0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
@@ -1736,18 +1736,18 @@ void huge_update(GameWorld *g)
               dge = handle_dodge(g, vict);
               if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                   (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
-                act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
-                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
+                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
+                act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
+                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
                 pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
                 hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
                 continue;
               }
               if (dge + rand_number(g, -10, 5) > skill) {
-                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
-                act(g, "@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
-                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+                act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
                 improve_skill(g, vict, SKILL_DODGE, 0);
                 continue;
@@ -1769,9 +1769,9 @@ void huge_update(GameWorld *g)
                   char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
                 }
               }
-              act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
               hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
@@ -1785,8 +1785,8 @@ void huge_update(GameWorld *g)
             continue;
           } /* It isn't stopped! */
           else {
-            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
             hurt(g, 0, 0, ch, obj_get_target(k), nullptr, 0, 1);
             decCurST(g, obj_get_target(k), obj_get_kicharge(k) / 4, 0);
             extract_obj(g, k);
@@ -1823,25 +1823,25 @@ void huge_update(GameWorld *g)
             dge = handle_dodge(g, vict);
             if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                 (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
-              act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
-              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
+              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
+              act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
+              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
               pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
               hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
               continue;
             }
             if (dge + rand_number(g, -10, 5) > skill) {
-              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
               hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
               improve_skill(g, vict, SKILL_DODGE, 0);
               continue;
             }
-            act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
@@ -1863,13 +1863,13 @@ void huge_update(GameWorld *g)
             bonus = 2;
           }
 
-          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
           send_to_room(g, obj_get_in_room(k), "\r\n");
           if (getCurPL(g, obj_get_target(k)) * bonus < obj_get_kicharge(k) * 10) {
 
-            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
             skill = init_skill(g, ch, SKILL_GENOCIDE); /* Set skill value */
             dmg   = obj_get_kicharge(k);
             hurt(g, 0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
@@ -1908,17 +1908,17 @@ void huge_update(GameWorld *g)
               dge = handle_dodge(g, vict);
               if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                   (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
-                act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
-                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
+                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
+                act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
+                act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
                 pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
                 continue;
               }
               if (dge + rand_number(g, -10, 5) > skill) {
-                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
-                act(g, "@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
-                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+                act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+                act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
                 improve_skill(g, vict, SKILL_DODGE, 0);
                 continue;
@@ -1940,9 +1940,9 @@ void huge_update(GameWorld *g)
                   char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
                 }
               }
-              act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
               hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
@@ -1955,8 +1955,8 @@ void huge_update(GameWorld *g)
             continue;
           } /* It isn't stopped! */
           else {
-            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
-            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
             hurt(g, 0, 0, ch, obj_get_target(k), nullptr, 0, 1);
             decCurST(g, obj_get_target(k), obj_get_kicharge(k) / 4, 0);
             extract_obj(g, k);
@@ -1993,24 +1993,24 @@ void huge_update(GameWorld *g)
             dge = handle_dodge(g, vict);
             if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                 (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
-              act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
-              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
+              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
+              act(g, "@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
+              act(g, "@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
               pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
               continue;
             }
             if (dge + rand_number(g, -10, 5) > skill) {
-              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
               hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
               improve_skill(g, vict, SKILL_DODGE, 0);
               continue;
             }
-            act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
-            act(g, "@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+            act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
@@ -2027,7 +2027,7 @@ void huge_update(GameWorld *g)
       extract_obj(g, k);
       continue;
     }
-    act(g, "$p@W descends slowly towards the ground!@n", true, 0, k, 0, TO_ROOM);
+    act(g, "$p@W descends slowly towards the ground!@n", true, nullptr, k, nullptr, TO_ROOM);
     obj_set_distance(k, obj_get_distance(k) - 1);
   }
 }
@@ -2058,25 +2058,25 @@ void homing_update(GameWorld *g)
         if (obj_get_in_room(k) == NOWHERE) /* someone has picked it up, or it's inside something */
           continue;
         if (obj_get_in_room(k) != char_get_in_room(vict)) {
-          act(g, "@wThe $p@w pursues after you!@n", true, vict, k, 0, TO_CHAR);
-          act(g, "@wThe $p@W pursues after @C$n@w!@n", true, vict, k, 0, TO_ROOM);
+          act(g, "@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
+          act(g, "@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
           obj_from_room(g, k);
           obj_to_room(g, k, char_get_in_room(vict));
           continue;
         }
-        act(g, "@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, 0, TO_CHAR);
-        act(g, "@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, 0, TO_ROOM);
+        act(g, "@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, nullptr, TO_CHAR);
+        act(g, "@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, nullptr, TO_ROOM);
         if (handle_parry(g, vict) < rand_number(g, 1, 140)) {
-          act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
-          act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
+          act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_CHAR);
+          act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_ROOM);
           int64_t dmg = obj_get_kicharge(k);
           extract_obj(g, k);
           hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           continue;
         }
         if (rand_number(g, 1, 3) > 1) {
-          act(g, "@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_CHAR);
-          act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
+          act(g, "@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_CHAR);
+          act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
             send_to_room(g, obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
@@ -2084,8 +2084,8 @@ void homing_update(GameWorld *g)
           }
           continue;
         }
-        act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_CHAR);
-        act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_ROOM);
+        act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_CHAR);
+        act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_ROOM);
         if (rroom_get_dmg(g, char_get_in_room(vict)) <= 95) {
           rroom_set_dmg(g, char_get_in_room(vict), rroom_get_dmg(g, char_get_in_room(vict)) + (5));
         }
@@ -2105,17 +2105,17 @@ void homing_update(GameWorld *g)
         act(g, "@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", true, ch, k, vict, TO_NOTVICT);
         if (handle_parry(g, vict) < rand_number(g, 1, 140)) {
           if (obj_get_vnum(g, k) != 84) {
-            act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
-            act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
+            act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_CHAR);
+            act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_ROOM);
             int64_t dmg = obj_get_kicharge(k);
             extract_obj(g, k);
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
           } else if (obj_get_vnum(g, k) == 84) {
             int64_t dmg = obj_get_kicharge(k);
             if (dmg > getEffMaxPL(g, vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-              act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
-              act(g, "@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
-              act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+              act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+              act(g, "@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
               die(g, vict, ch);
               if (char_aff_flagged(ch, AFF_GROUP)) {
                 group_gain(g, ch, vict);
@@ -2130,22 +2130,22 @@ void homing_update(GameWorld *g)
               }
             } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
               if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
-                act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
-                act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
-                act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+                act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+                act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+                act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 decCurKI(g, vict, getMaxKI(g, vict) / 40, 0);
                 hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
               } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
                 if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
-                  act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
-                  act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
-                  act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
+                  act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_CHAR);
+                  act(g, "@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, nullptr, vict, TO_VICT);
+                  act(g, "@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr, vict, TO_NOTVICT);
                   decCurKI(g, vict, getMaxKI(g, vict) / 40, 0);
                   hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
                 } else {
-                  act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
-                  act(g, "@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
-                  act(g, "@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+                  act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+                  act(g, "@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+                  act(g, "@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
                   die(g, vict, ch);
                   if (char_aff_flagged(ch, AFF_GROUP)) {
                     group_gain(g, ch, vict);
@@ -2161,8 +2161,8 @@ void homing_update(GameWorld *g)
                 }
               }
             } else {
-              act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
-              act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
+              act(g, "@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_CHAR);
+              act(g, "@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, nullptr, TO_ROOM);
               hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
             }
             extract_obj(g, k);
@@ -2170,8 +2170,8 @@ void homing_update(GameWorld *g)
           continue;
         }
         if (rand_number(g, 1, 3) > 1) {
-          act(g, "@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_CHAR);
-          act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
+          act(g, "@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_CHAR);
+          act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
             send_to_room(g, obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
@@ -2179,8 +2179,8 @@ void homing_update(GameWorld *g)
           }
           continue;
         }
-        act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_CHAR);
-        act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_ROOM);
+        act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_CHAR);
+        act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_ROOM);
         if (rroom_get_dmg(g, char_get_in_room(vict)) <= 95) {
           rroom_set_dmg(g, char_get_in_room(vict), rroom_get_dmg(g, char_get_in_room(vict)) + (5));
         }
@@ -2428,18 +2428,18 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
         sprintf(buf, "@C$N@W deflects your %s, sending it flying away!@n", sname);
         sprintf(buf2, "@WYou deflect @C$n's@W %s sending it flying away!@n", sname);
         sprintf(buf3, "@C$N@W deflects @c$n's@W %s sending it flying away!@n", sname);
-        act(g, buf, true, ch, 0, tch, TO_CHAR);
-        act(g, buf2, true, ch, 0, tch, TO_VICT);
-        act(g, buf3, true, ch, 0, tch, TO_NOTVICT);
+        act(g, buf, true, ch, nullptr, tch, TO_CHAR);
+        act(g, buf2, true, ch, nullptr, tch, TO_VICT);
+        act(g, buf3, true, ch, nullptr, tch, TO_NOTVICT);
         foundv = false;
       } else {
         foundv = true;
         sprintf(buf, "@WYou watch as the deflected %s slams into @C$N@W, exploding with a roar of blinding light!@n", sname);
         sprintf(buf2, "@c$n@W watches as the deflected %s slams into you! The %s explodes with a roar of blinding light!@n", sname, sname);
         sprintf(buf3, "@c$n@W watches as the deflected %s slams into @C$N@W! The %s explodes with a roar of blinding light!@n", sname, sname);
-        act(g, buf, true, vict, 0, tch, TO_CHAR);
-        act(g, buf2, true, vict, 0, tch, TO_VICT);
-        act(g, buf3, true, vict, 0, tch, TO_NOTVICT);
+        act(g, buf, true, vict, nullptr, tch, TO_CHAR);
+        act(g, buf2, true, vict, nullptr, tch, TO_VICT);
+        act(g, buf3, true, vict, nullptr, tch, TO_NOTVICT);
         dmg = damtype(g, ch, type, skill, attperc);
         hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
         return;
@@ -2457,8 +2457,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
       foundo = true;
       sprintf(buf, "@WYou watch as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
       sprintf(buf2, "@c$n@W watches as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
-      act(g, buf, true, vict, tob, 0, TO_CHAR);
-      act(g, buf2, true, vict, tob, 0, TO_ROOM);
+      act(g, buf, true, vict, tob, nullptr, TO_CHAR);
+      act(g, buf2, true, vict, tob, nullptr, TO_ROOM);
       hurt(g, 0, 0, ch, nullptr, tob, 25, 1);
       return;
     }
@@ -2467,37 +2467,37 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
   if ((foundo == false || foundv == false) && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
     sprintf(buf, "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
     sprintf(buf2, "@WThe deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
-    act(g, buf, true, vict, 0, 0, TO_CHAR);
-    act(g, buf2, true, vict, 0, 0, TO_ROOM);
+    act(g, buf, true, vict, nullptr, nullptr, TO_CHAR);
+    act(g, buf2, true, vict, nullptr, nullptr, TO_ROOM);
     if (rroom_sect(g, char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
           if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(vict)) == 0) {
             rroom_set_geffect(g, char_get_in_room(vict), 1);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_CHAR);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_ROOM);
+            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_ROOM);
           }
           break;
         case 3:
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 6:
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_CHAR);
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_ROOM);
+          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2507,32 +2507,32 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     if (rroom_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "The water churns violently!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The water churns violently!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "Large bubbles rise from the movement!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Large bubbles rise from the movement!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "The water collapses in on the hole created!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The water collapses in on the hole create!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The water collapses in on the hole created!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The water collapses in on the hole create!", true, ch, nullptr, vict, TO_ROOM);
           break;
       }
     }
     if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "A huge column of water erupts from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A huge column of water erupts from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
       }
     }
@@ -2540,28 +2540,28 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 6:
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2586,31 +2586,31 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
           if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(vict)) == 0) {
             rroom_set_geffect(g, char_get_in_room(vict), 1);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_CHAR);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_ROOM);
+            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_ROOM);
           }
           break;
         case 3:
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 6:
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_CHAR);
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_ROOM);
+          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2620,32 +2620,32 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
     if (rroom_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "The water churns violently!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The water churns violently!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "Large bubbles rise from the movement!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Large bubbles rise from the movement!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "The water collapses in on the hole created!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The water collapses in on the hole create!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The water collapses in on the hole created!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The water collapses in on the hole create!", true, ch, nullptr, vict, TO_ROOM);
           break;
       }
     }
     if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 3)) {
         case 1:
-          act(g, "A huge column of water erupts from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A huge column of water erupts from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
       }
     }
@@ -2653,28 +2653,28 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 3:
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_CHAR);
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_ROOM);
+          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 6:
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_CHAR);
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_ROOM);
+          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2691,9 +2691,9 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
   }
   if (type == 1) {
     if (rand_number(g, 1, 3) != 2) {
-      act(g, "@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@RIt turns around at the last second and begins to pursue YOU!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@RIt turns around at the last second and begins to pursue YOU!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
       struct obj_data *obj;
       obj_vnum num = 0;
 
@@ -2716,9 +2716,9 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
       obj_set_kitype(obj, skill2);
       obj_set_user(obj, ch);
     } else {
-      act(g, "@RIt fails to follow after @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@RIt fails to follow after YOU!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@RIt fails to follow after @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@RIt fails to follow after @r$N@R!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@RIt fails to follow after YOU!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@RIt fails to follow after @r$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
     }
   }
   if (type == 2 && (skill2 != 481 || char_is_frieza(ch))) {
@@ -2735,9 +2735,9 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
         return;
       }
     }
-    act(g, "@RYou turn it around and send it back after @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
-    act(g, "@W$n @Rturns it around and sends it back after YOU!@n", true, ch, 0, vict, TO_VICT);
-    act(g, "@W$n @Rturns it around and sends it back after @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
+    act(g, "@RYou turn it around and send it back after @r$N@R!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@W$n @Rturns it around and sends it back after YOU!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@W$n @Rturns it around and sends it back after @r$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
     struct obj_data *obj;
     obj_vnum num = 0;
 
@@ -3389,16 +3389,16 @@ int64_t damtype(GameWorld *g, struct char_data *ch, int type, int skill, double 
   /* Start of Fury Mode for halfbreeds */
   if (char_plr_flagged(ch, PLR_FURY) && (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5 || type == 6 || type == 8 || type == 51 || type == 52)) {
     dam *= 1.5;
-    act(g, "Your rage magnifies your attack power!", true, ch, 0, 0, TO_CHAR);
-    act(g, "Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr, TO_ROOM);
     if (rand_number(g, 1, 10) >= 7) {
       send_to_char(g, ch, "You feel less angry.\r\n");
       char_plr_set(ch, PLR_FURY, false);
     }
   } else if (char_plr_flagged(ch, PLR_FURY)) {
     dam *= 2;
-    act(g, "Your rage magnifies your attack power!", true, ch, 0, 0, TO_CHAR);
-    act(g, "Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, 0, 0, TO_ROOM);
+    act(g, "Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_FURY, false);
   }
   /* End of Fury Mode for halfbreeds */
@@ -3606,7 +3606,7 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
           if (char_prf_flagged(g, vict, PRF_INSTRUCT)) {
             if (char_get_practice_points(g, vict) > 10) {
               send_to_char(g, vict, "You instruct them in proper fighting techniques and strategies.\r\n");
-              act(g, "You take $N's instruction to heart and gain more experience.\r\n", false, ch, 0, vict, TO_CHAR);
+              act(g, "You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr, vict, TO_CHAR);
               char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (10));
               bonus = 2;
             }
@@ -3808,8 +3808,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         decCurKI(g, ch, infuse_cost, 0);
         send_to_room(g, char_get_in_room(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
       } else {
-        act(g, "@wYou can no longer infuse ki into your attacks!@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@wYou can no longer infuse ki into your attacks!@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_aff_set(ch, AFF_INFUSE, false);
       }
     }
@@ -3835,8 +3835,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       int64_t drain = dmg * 0.1;
       dmg -= drain;
       decCurST(g, ch, drain, 1);
-      act(g, "@Y$N's rubbery body makes hitting it tiring!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", true, ch, 0, vict, TO_VICT);
+      act(g, "@Y$N's rubbery body makes hitting it tiring!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", true, ch, nullptr, vict, TO_VICT);
     }
 
     if (!char_is_npc(ch)) {
@@ -3921,30 +3921,30 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         }
       }
       if (char_get_barrier(vict) - dmg > 0) {
-        act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, 0, vict, TO_CHAR);
+        act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_CHAR);
         char barr[MAX_INPUT_LENGTH];
         sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg));
-        act(g, barr, true, ch, 0, vict, TO_VICT);
-        act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, barr, true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_barrier(vict, char_get_barrier(vict) - (dmg));
         dmg = 0;
       } else if (char_get_barrier(vict) - dmg <= 0) {
         dmg -= char_get_barrier(vict);
         char_set_barrier(vict, 0);
-        act(g, "@c$N's@C barrier bursts!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@CYour barrier bursts!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$N's@C barrier bursts!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@CYour barrier bursts!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_SANCTUARY, false);
       }
     }
     if (char_aff_flagged(vict, AFF_FIRESHIELD) && rand_number(g, 1, 200) < char_get_skill(vict, SKILL_FIRESHIELD)) {
-      act(g, "@c$N's@C fireshield repels the damage!@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@CYour fireshield repels the damage!@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$N's@C fireshield repels the damage!@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@c$N's@C fireshield repels the damage!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@CYour fireshield repels the damage!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$N's@C fireshield repels the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
       if (rand_number(g, 1, 3) == 3) {
-        act(g, "@c$N's@C fireshield disappears...@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@CYour fireshield disappears...@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$N's@C fireshield disappears...@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@CYour fireshield disappears...@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_FIRESHIELD, false);
       }
       dmg = 0;
@@ -4086,32 +4086,32 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       }
       if (nanite >= perc) {
         if (char_plr_flagged(vict, PLR_TRANS6)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 50;
         } else if (char_plr_flagged(vict, PLR_TRANS5)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 40;
         } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 30;
         } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 25;
         } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 20;
         } else if (char_plr_flagged(vict, PLR_TRANS1)) {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 10;
         } else {
-          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, 0, 0, TO_CHAR);
-          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, 0, 0, TO_ROOM);
+          act(g, "@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, nullptr, nullptr, TO_CHAR);
+          act(g, "@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, nullptr, nullptr, TO_ROOM);
           dmg -= (dmg * 0.01) * 5;
         }
       }
@@ -4120,9 +4120,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     if (!char_aff_flagged(vict, AFF_KNOCKED) && (char_get_position(vict) == POS_SITTING || char_get_position(vict) == POS_RESTING) && char_get_skill(vict, SKILL_ROLL) > axion_dice(g, 0)) {
       int64_t rollcost = getMaxHealth(g, vict) / 300 * (char_get_aff_abils_str(ch) / 2);
       if ((getCurST(g, vict)) >= rollcost) {
-        act(g, "@GYou roll to your feet in an agile fashion!@n", true, vict, 0, 0, TO_CHAR);
-        act(g, "@G$n rolls to $s feet in an agile fashion!@n", true, vict, 0, 0, TO_ROOM);
-        do_stand(g, vict, 0, 0, 0);
+        act(g, "@GYou roll to your feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_CHAR);
+        act(g, "@G$n rolls to $s feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_ROOM);
+        do_stand(g, vict, nullptr, 0, 0);
         decCurST(g, vict, rollcost, 0);
       }
     }
@@ -4139,14 +4139,14 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
     if (char_aff_flagged(vict, AFF_SLEEP) && rand_number(g, 1, 2) == 2) {
       affect_from_char(g, vict, SPELL_SLEEP);
-      act(g, "@c$N@W seems to be more aware now.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@WYou are no longer so sleepy.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$N@W seems to be more aware now.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@c$N@W seems to be more aware now.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@WYou are no longer so sleepy.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$N@W seems to be more aware now.@n", true, ch, nullptr, vict, TO_NOTVICT);
     }
     if (char_aff_flagged(vict, AFF_KNOCKED) && rand_number(g, 1, 12) >= 11) {
       cureStatusKnockedOut(g, vict, true);
       if (char_is_npc(vict) && rand_number(g, 1, 20) >= 12) {
-        act(g, "@W$n@W stands up.@n", false, vict, 0, 0, TO_ROOM);
+        act(g, "@W$n@W stands up.@n", false, vict, nullptr, nullptr, TO_ROOM);
         char_set_position(vict, POS_STANDING);
       }
     }
@@ -4199,14 +4199,14 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
 
     if (char_get_position(vict) == POS_SITTING && char_is_npc(vict) && getCurHealth(g, vict) >= ((getEffMaxPL(g, vict))) * .98) {
-      do_stand(g, vict, 0, 0, 0);
+      do_stand(g, vict, nullptr, 0, 0);
     }
     int suppresso = false;
     if (is_sparring(ch) && is_sparring(vict) && (char_get_suppressed(vict) + getCurHealth(g, vict)) - dmg <= 0) {
       if (!char_is_npc(vict)) {
-        act(g, "@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@w stops sparring with you as you fall unconscious.@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@w stops sparring with you as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, nullptr, vict, TO_NOTVICT);
         setCurHealth(vict, 1);
         if (char_get_suppressed(vict) > 0) {
           char_set_suppressed(vict, 0);
@@ -4223,8 +4223,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           char_aff_set(vict, AFF_KNOCKED, true);
         }
       } else {
-        act(g, "@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, TO_NOTVICT);
         solo_gain(g, ch, vict);
         struct obj_data *rew, *next_rew;
         int founded = 0;
@@ -4237,16 +4237,16 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           }
         }
         if (founded == 1) {
-          act(g, "@c$N@w leaves a reward behind out of respect.@n", true, ch, 0, vict, TO_CHAR);
+          act(g, "@c$N@w leaves a reward behind out of respect.@n", true, ch, nullptr, vict, TO_CHAR);
         }
         setCurHealth(vict, 0);
         extract_char(g, vict);
         return;
       }
     } else if (is_sparring(ch) && (char_get_suppressed(vict) + getCurPL(g, vict)) - dmg <= 0) {
-      act(g, "@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@w spares your life as you fall unconscious.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@w spares your life as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, nullptr, vict, TO_NOTVICT);
       setCurHealth(vict, 1);
       if (char_get_fighting(vict)) {
         stop_fighting(g, vict);
@@ -4259,10 +4259,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         char_aff_set(vict, AFF_KNOCKED, true);
       }
     } else if (is_sparring(ch) && !is_sparring(vict) && char_is_npc(ch)) {
-      act(g, "@w$n@w stops sparring!@n", true, ch, 0, vict, TO_ROOM);
+      act(g, "@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
       char_mob_set(ch, MOB_SPAR, false);
     } else if (!is_sparring(ch) && is_sparring(vict) && char_is_npc(vict)) {
-      act(g, "@w$n@w stops sparring!@n", true, ch, 0, vict, TO_ROOM);
+      act(g, "@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
       char_mob_set(vict, MOB_SPAR, false);
     }
     if (char_get_suppressed(vict) > 0 && char_get_suppression(vict) > 0) {
@@ -4295,9 +4295,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         }
         return;
       }
-      act(g, "@c$N@w disappears right before dying. $N appears to be immortal.@n", true, ch, 0, vict, TO_CHAR);
-      act(g, "@CYou disappear right before death, having been saved by your immortality.@n", true, ch, 0, vict, TO_VICT);
-      act(g, "@c$N@w disappears right before dying. $N appears to be immortal.@n.", true, ch, 0, vict, TO_NOTVICT);
+      act(g, "@c$N@w disappears right before dying. $N appears to be immortal.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@CYou disappear right before death, having been saved by your immortality.@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$N@w disappears right before dying. $N appears to be immortal.@n.", true, ch, nullptr, vict, TO_NOTVICT);
       decCurHealthPercent(g, vict, 1, 1);
       decCurSTPercent(g, vict, 1, 1);
       decCurKIPercent(g, vict, 1, 1);
@@ -4315,14 +4315,14 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
 
     if (char_get_grappling(vict) && char_get_grappling(vict) != ch && type == 1) {
-      act(g, "@YThe attack hurts YOU as well because you are grappling with $M!@n", true, vict, 0, char_get_grappling(vict), TO_VICT);
-      act(g, "@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", true, vict, 0, char_get_grappling(vict), TO_NOTVICT);
+      act(g, "@YThe attack hurts YOU as well because you are grappling with $M!@n", true, vict, nullptr, char_get_grappling(vict), TO_VICT);
+      act(g, "@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", true, vict, nullptr, char_get_grappling(vict), TO_NOTVICT);
       maindmg = maindmg / 2;
       hurt(g, 0, 0, ch, char_get_grappling(vict), nullptr, maindmg, 3);
     }
     if (char_get_grappled(vict) && char_get_grappled(vict) != ch && type == 1) {
-      act(g, "@YThe attack hurts YOU as well because you are being grappled by $M!@n", true, vict, 0, char_get_grappled(vict), TO_VICT);
-      act(g, "@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", true, vict, 0, char_get_grappled(vict), TO_NOTVICT);
+      act(g, "@YThe attack hurts YOU as well because you are being grappled by $M!@n", true, vict, nullptr, char_get_grappled(vict), TO_VICT);
+      act(g, "@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", true, vict, nullptr, char_get_grappled(vict), TO_NOTVICT);
       maindmg = maindmg / 2;
       hurt(g, 0, 0, ch, char_get_grappled(vict), nullptr, maindmg, 3);
     }
@@ -4331,9 +4331,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (getCurPL(g, vict) - dmg <= 0 && suppresso == false) {
         decCurHealthPercent(g, vict, 1, 0);
         if (!char_is_npc(vict) && char_get_lifeperc(vict) > 0 && (getCurLF(g, vict)) - (dmg - getCurPL(g, vict)) >= 0) {
-          act(g, "@c$N@w barely clings to life!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@CYou barely cling to life!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@c$N@w barely clings to life!@n.", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@c$N@w barely clings to life!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@CYou barely cling to life!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@c$N@w barely clings to life!@n.", true, ch, nullptr, vict, TO_NOTVICT);
           int64_t lifeloss = dmg - getCurPL(g, vict);
           decCurLF(g, vict, lifeloss, 0);
           send_to_char(g, vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
@@ -4354,8 +4354,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         } else if (type > 0 && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
           handle_death_msg(g, ch, vict, 1);
         } else {
-          act(g, "@R$N@w self destructs with a mild explosion!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@R$N@w self destructs with a mild explosion!@n", true, ch, 0, vict, TO_ROOM);
+          act(g, "@R$N@w self destructs with a mild explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@R$N@w self destructs with a mild explosion!@n", true, ch, nullptr, vict, TO_ROOM);
         }
         if (dmg > 1) {
           if (type <= 0 && getCurPL(g, ch) >= getEffMaxPL(g, ch) * 0.5) {
@@ -4366,8 +4366,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           send_to_char(g, vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
           int64_t healhp = (long double)(getEffMaxPL(g, vict)) * 0.12;
           if (char_aff_flagged(ch, AFF_METAMORPH) && getCurPL(g, ch) <= getEffMaxPL(g, ch)) {
-            act(g, "@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@r$n@R's dark aura saps some of your life energy!@n", true, ch, 0, vict, TO_VICT);
+            act(g, "@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
             incCurHealth(g, ch, healhp, true);
           }
           if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 10 || char_get_genome(ch, 1) == 10)) {
@@ -4386,8 +4386,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
             }
           }
           if (is_affected(vict, AFF_ECHAINS) && type == 0) {
-            act(g, "@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n", true, ch, 0, vict, TO_CHAR);
-            act(g, "@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n", true, ch, 0, vict, TO_ROOM);
+            act(g, "@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n", true, ch, nullptr, vict, TO_CHAR);
+            act(g, "@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n", true, ch, nullptr, vict, TO_ROOM);
             if (char_is_npc(ch))
               assign_affect(g, vict, AFF_ECHAINS, 0, -1, 0, 0, 0, 0, 0, -2);
             else
@@ -4567,61 +4567,61 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       dmg = 1;
     }
     if (obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
-      act(g, "$p@w seems unaffected.@n", true, ch, obj, 0, TO_CHAR);
-      act(g, "$p@w seems unaffected.@n", true, ch, obj, 0, TO_ROOM);
+      act(g, "$p@w seems unaffected.@n", true, ch, obj, nullptr, TO_CHAR);
+      act(g, "$p@w seems unaffected.@n", true, ch, obj, nullptr, TO_ROOM);
     } else if (obj_get_vnum(g, obj) == 79) {
       if (obj_get_weight(obj) - dmg > 0) {
         if (type <= 0) {
           if (char_aff_flagged(ch, AFF_INFUSE))
             dmg *= 10;
-          act(g, "$p@w cracks some.@n", true, ch, obj, 0, TO_CHAR);
-          act(g, "$p@w cracks some.@n", true, ch, obj, 0, TO_ROOM);
+          act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_CHAR);
+          act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
           if (obj_get_fellow_wall(obj)) {
             struct obj_data *wall;
             wall = obj_get_fellow_wall(obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
-            act(g, "$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true, 0, obj, 0, TO_ROOM);
+            act(g, "$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true, nullptr, obj, nullptr, TO_ROOM);
           }
         } else {
           dmg *= 30;
-          act(g, "$p@w melts some.@n", true, ch, obj, 0, TO_CHAR);
-          act(g, "$p@w melts some.@n", true, ch, obj, 0, TO_ROOM);
+          act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_CHAR);
+          act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
           if (obj_get_fellow_wall(obj)) {
             struct obj_data *wall;
             wall = obj_get_fellow_wall(obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
-            act(g, "$p@w melts some.@n", true, ch, obj, 0, TO_ROOM);
+            act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
           }
         }
       } else {
         if (type <= 0) {
-          act(g, "$p@w breaks completely apart and then melts away.@n", true, ch, obj, 0, TO_CHAR);
-          act(g, "$p@w breaks completely apart and then melts away.@n", true, ch, obj, 0, TO_ROOM);
+          act(g, "$p@w breaks completely apart and then melts away.@n", true, ch, obj, nullptr, TO_CHAR);
+          act(g, "$p@w breaks completely apart and then melts away.@n", true, ch, obj, nullptr, TO_ROOM);
           extract_obj(g, obj);
         } else {
-          act(g, "$p@w is blown away into snow and water!@n", true, ch, obj, 0, TO_CHAR);
-          act(g, "$p@w is blown away into snow and water!@n", true, ch, obj, 0, TO_ROOM);
+          act(g, "$p@w is blown away into snow and water!@n", true, ch, obj, nullptr, TO_CHAR);
+          act(g, "$p@w is blown away into snow and water!@n", true, ch, obj, nullptr, TO_ROOM);
           extract_obj(g, obj);
         }
       }
     } else if (obj_get_value(obj, VAL_ALL_HEALTH) - dmg > 0) {
-      act(g, "$p@w cracks some.@n", true, ch, obj, 0, TO_CHAR);
-      act(g, "$p@w cracks some.@n", true, ch, obj, 0, TO_ROOM);
+      act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_CHAR);
+      act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (dmg));
     } else {
       if (type <= 0) {
-        act(g, "$p@w shatters apart!@n", true, ch, obj, 0, TO_CHAR);
-        act(g, "$p@w shatters apart!@n", true, ch, obj, 0, TO_ROOM);
+        act(g, "$p@w shatters apart!@n", true, ch, obj, nullptr, TO_CHAR);
+        act(g, "$p@w shatters apart!@n", true, ch, obj, nullptr, TO_ROOM);
         obj_set_value(obj, VAL_ALL_HEALTH, 0);
         obj_extra_set(obj, ITEM_BROKEN, true);
         if (obj_get_type_flag(obj) == ITEM_DRINKCON && obj_get_type_flag(obj) == ITEM_FOUNTAIN) {
           obj_set_value(obj, VAL_DRINKCON_HOWFULL, 0);
         }
       } else if (type != 0) {
-        act(g, "$p@w is disintegrated!@n", true, ch, obj, 0, TO_CHAR);
-        act(g, "$p@w is disintegrated!@n", true, ch, obj, 0, TO_ROOM);
+        act(g, "$p@w is disintegrated!@n", true, ch, obj, nullptr, TO_CHAR);
+        act(g, "$p@w is disintegrated!@n", true, ch, obj, nullptr, TO_ROOM);
         extract_obj(g, obj);
       }
     }
@@ -5500,15 +5500,15 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
   if (vict == nullptr && char_get_fighting(ch)) {
     vict = char_get_fighting(ch);
   } else if (vict == nullptr) {
-    act(g, "@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@C$n@W slows down until $s vortex disappears.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_SPIRAL, false);
     return;
   }
 
   if (char_get_charge(ch) <= 0) {
-    act(g, "@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", true, ch, 0, 0, TO_CHAR);
-    act(g, "@C$n@W slows down until $s vortex disappears.@n", true, ch, 0, 0, TO_ROOM);
+    act(g, "@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_SPIRAL, false);
     return;
   }
@@ -5541,9 +5541,9 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
     if (prob < perc) {
       if ((getCurST(g, vict)) > 0) {
         if (blk > rand_number(g, 1, 130)) {
-          act(g, "@C$N@W moves quickly and blocks your Spiral Comet blast!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou move quickly and block @C$n's@W Spiral Comet blast!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W Spiral Comet blast!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W moves quickly and blocks your Spiral Comet blast!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou move quickly and block @C$n's@W Spiral Comet blast!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W moves quickly and blocks @c$n's@W Spiral Comet blast!@n", false, ch, nullptr, vict, TO_NOTVICT);
           pcost(g, ch, amount, 0);
           dmg = damtype(g, ch, 10, skill, .05);
           dmg /= 4;
@@ -5551,9 +5551,9 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
           return;
         }
         if (dge > rand_number(g, 1, 130)) {
-          act(g, "@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
-          act(g, "@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
+          act(g, "@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
+          act(g, "@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
+          act(g, "@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
           send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 45, skill, SKILL_SPIRAL); /* Effects on the room from dodging a ki attack
@@ -5568,16 +5568,16 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
           hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
           return;
         }
-        act(g, "@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W fires a Spiral Comet blast at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
-        act(g, "@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W fires a Spiral Comet blast at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
+        act(g, "@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
         pcost(g, ch, amount, 0);
         hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
         return;
       }
-      act(g, "@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
-      act(g, "@C$n@W fires a Spiral Comet blast at you, but misses!@n", false, ch, 0, vict, TO_VICT);
-      act(g, "@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
+      act(g, "@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$n@W fires a Spiral Comet blast at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
+      act(g, "@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
       pcost(g, ch, amount, 0);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       return;
@@ -5589,39 +5589,39 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
     }
     switch (rand_number(g, 1, 5)) {
       case 1:
-        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 4);
         break;
       case 2: /* Critical */
-        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg *= 2;
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 3);
         break;
       case 3:
-        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(g, vict, 4);
         break;
       case 4: /* Weak */
-        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg /= 2;
         dam_eq_loc(g, vict, 1);
         hurt(g, 0, 190, ch, vict, nullptr, dmg, 1);
         break;
       case 5: /* Weak 2 */
-        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_CHAR);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", true, ch, 0, vict, TO_VICT);
-        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        act(g, "@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, nullptr, vict, TO_CHAR);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, nullptr, vict, TO_NOTVICT);
         dmg /= 2;
         dam_eq_loc(g, vict, 2);
         hurt(g, 1, 190, ch, vict, nullptr, dmg, 1);
@@ -5639,32 +5639,32 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     if (!rroom_sunken(g, char_get_in_room(vict)) && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE) && rroom_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cough up blood before falling to the ground dead.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r coughs up blood before falling down dead.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cough up blood before falling to the ground dead.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r coughs up blood before falling down dead.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 2:
-          act(g, "@R$N@r crumples to the ground dead.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou crumple to the ground dead.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r crumples to the ground dead.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r crumples to the ground dead.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou crumple to the ground dead.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r crumples to the ground dead.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 3:
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cry out your last breath before dying.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 4:
-          act(g, "@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou writhe on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou writhe on the ground screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou hit the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou hit the ground dead with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5673,32 +5673,32 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cough up blood and die before falling down to the water. A large splash accompanies your body hitting the water!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cough up blood and die before falling down to the water. A large splash accompanies your body hitting the water!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 2:
-          act(g, "@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou crumple down to the water and die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou crumple down to the water and die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 3:
-          act(g, "@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cry out your last breath before dying.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 4:
-          act(g, "@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou writhe in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou writhe in the water screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act(g, "@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou hit the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou hit the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5707,32 +5707,32 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     } else if (rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cough up blood and die. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cough up blood and die. The blood freezes and floats freely through space...@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 2:
-          act(g, "@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou die and leave your corpse floating freely in space.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou die and leave your corpse floating freely in space.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 3:
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cry out your last breath before dying.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 4:
-          act(g, "@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou writhe in space trying to scream in pain before you finally die!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou writhe in space trying to scream in pain before you finally die!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act(g, "@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou die suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou die suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5741,32 +5741,32 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou coughs up blood before your corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou coughs up blood before your corpse starts to fall to the ground far below.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 2:
-          act(g, "@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou die and your corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou die and your corpse begins to fall to the ground below.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 3:
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cry out your last breath before dying.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 4:
-          act(g, "@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou writhe in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou writhe in midair screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act(g, "@R$N@r snaps back and dies with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou snap back and die with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r snaps back and dies with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou snap back and die with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5775,32 +5775,32 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     } else {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou coughs up blood before your corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou coughs up blood before your corpse starts to float limply in the water.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 2:
-          act(g, "@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou die and your corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou die and your corpse begins to float limply in the water.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 3:
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou cry out your last breath before dying.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r cries out $S last breath before dying.@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 4:
-          act(g, "@R$N@r writhes and thrases in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou writhe and thrash in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r writhes and thrashes in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r writhes and thrases in the water trying to scream before finally dying!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou writhe and thrash in the water trying to scream before finally dying!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r writhes and thrashes in the water trying to scream before finally dying!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act(g, "@R$N@r snaps back and dies with such force that blood floods out of $S body into the water!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou snap back and die with such force that blood floods out of your body into the water!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r hits the ground dead with such force that blood floods out of $S body into the water!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r snaps back and dies with such force that blood floods out of $S body into the water!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou snap back and die with such force that blood floods out of your body into the water!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r hits the ground dead with such force that blood floods out of $S body into the water!@n", true, ch, nullptr, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5811,156 +5811,156 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
     if (!rroom_sunken(g, char_get_in_room(vict)) && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE) && rroom_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 5:
-          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rWhat's left of your body slams into the ground as you die!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rWhat's left of your body slams into the ground as you die!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 5:
-          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rWhat's left of your body slams into the ground as you die!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rWhat's left of your body slams into the ground as you die!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act(g, "@R$N@r floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r floats away as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body floats away as a smoldering corpse!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r floats away as a smoldering corpse!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 5:
-          act(g, "@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rWhat's left of your body floats away through space!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rWhat's left of your body floats away through space!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r explodes and chunks of $M shower toward the ground far below.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r explodes and chunks of $M shower toward the ground far below.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act(g, "@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body falls down toward the ground as a smoldering corpse!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 5:
-          act(g, "@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rWhat's left of yor body falls toward the ground as you die!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rWhat's left of yor body falls toward the ground as you die!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
     } else {
       switch (rand_number(g, 1, 5)) {
         case 1:
-          act(g, "@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rThe bottom half of your body is all that remains as you die.@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act(g, "@R$N@r falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rYour body falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@R$N@r falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@R$N@r falls back as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rYour body falls back as a smoldering corpse!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@R$N@r falls back as a smoldering corpse!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
         case 5:
-          act(g, "@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, 0, vict, TO_CHAR);
-          act(g, "@rWhat's left of yor body floats limply as you die!@n", true, ch, 0, vict, TO_VICT);
-          act(g, "@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
+          act(g, "@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, nullptr, vict, TO_CHAR);
+          act(g, "@rWhat's left of yor body floats limply as you die!@n", true, ch, nullptr, vict, TO_VICT);
+          act(g, "@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
     }

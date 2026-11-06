@@ -246,24 +246,24 @@ static void send_char_pos(GameWorld *g, struct char_data *ch, int dam)
 {
   switch (char_get_position(ch)) {
     case POS_MORTALLYW:
-      act(g, "$n is mortally wounded, and will die soon, if not aided.", true, ch, 0, 0, TO_ROOM);
+      act(g, "$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
       break;
     case POS_INCAP:
-      act(g, "$n is incapacitated and will slowly die, if not aided.", true, ch, 0, 0, TO_ROOM);
+      act(g, "$n is incapacitated and will slowly die, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "You are incapacitated and will slowly die, if not aided.\r\n");
       break;
     case POS_STUNNED:
-      act(g, "$n is stunned, but will probably regain consciousness again.", true, ch, 0, 0, TO_ROOM);
+      act(g, "$n is stunned, but will probably regain consciousness again.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "You're stunned, but will probably regain consciousness again.\r\n");
       break;
     case POS_DEAD:
-      act(g, "$n is dead!  R.I.P.", false, ch, 0, 0, TO_ROOM);
+      act(g, "$n is dead!  R.I.P.", false, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "You are dead!  Sorry...\r\n");
       break;
     default: /* >= POSITION SLEEPING */
       if (dam > (getEffMaxPL(g, ch) >> 2))
-        act(g, "That really did HURT!", false, ch, 0, 0, TO_CHAR);
+        act(g, "That really did HURT!", false, ch, nullptr, nullptr, TO_CHAR);
       if (getCurPL(g, ch) < (getEffMaxPL(g, ch) >> 2))
         send_to_char(g, ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }

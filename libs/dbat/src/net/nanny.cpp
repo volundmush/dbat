@@ -217,7 +217,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
       write_to_output(g, d, "Reconnecting.\r\n");
       pay_player_count_rewards(g, update_player_count(g));
       char_set_time_logon(d->character, game_now(g));
-      act(g, "$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
+      act(g, "$n has reconnected.", true, d->character, nullptr, nullptr, TO_ROOM);
       mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       char_set_rp(d->character, d->rpp);
       if (has_mail(g, char_get_idnum(d->character)))
@@ -244,7 +244,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
       write_to_output(g, d, "You take over your own body, already in use!\r\n");
       act(g, "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
           "$n's body has been taken over by a new spirit!",
-          true, d->character, 0, 0, TO_ROOM);
+          true, d->character, nullptr, nullptr, TO_ROOM);
       char_set_rp(d->character, d->rpp);
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true,
              "%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
@@ -1013,7 +1013,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       load_result = enter_player_game(g, d);
       send_to_char(g, d->character, "%s", CONFIG_WELC_MESSG);
-      act(g, "$n has entered the game.", true, d->character, 0, 0, TO_ROOM);
+      act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
 
       oldcount = update_player_count(g);
 

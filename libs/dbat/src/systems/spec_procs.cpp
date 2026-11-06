@@ -42,7 +42,7 @@ SPECIAL(dump)
   int value = 0;
 
   for (k = rroom_get_contents(g, char_get_in_room(ch)); k; k = rroom_get_contents(g, char_get_in_room(ch))) {
-    act(g, "$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
+    act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     extract_obj(g, k);
   }
 
@@ -52,14 +52,14 @@ SPECIAL(dump)
   do_drop(g, ch, argument, cmd, SCMD_DROP);
 
   for (k = rroom_get_contents(g, char_get_in_room(ch)); k; k = rroom_get_contents(g, char_get_in_room(ch))) {
-    act(g, "$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
+    act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     value += MAX(1, MIN(50, obj_get_cost(k) / 10));
     extract_obj(g, k);
   }
 
   if (value) {
     send_to_char(g, ch, "You are awarded for outstanding performance.\r\n");
-    act(g, "$n has been awarded for being a good citizen.", true, ch, 0, 0, TO_ROOM);
+    act(g, "$n has been awarded for being a good citizen.", true, ch, nullptr, nullptr, TO_ROOM);
 
     if (char_get_level(ch) < 3)
       gain_exp(g, ch, value);
@@ -122,8 +122,8 @@ void npc_steal(GameWorld *g, struct char_data *ch, struct char_data *victim)
     return;
 
   if (char_is_awake(victim) && (rand_number(g, 0, char_get_level(ch)) == 0)) {
-    act(g, "You discover that $n has $s hands in your wallet.", false, ch, 0, victim, TO_VICT);
-    act(g, "$n tries to steal zenni from $N.", true, ch, 0, victim, TO_NOTVICT);
+    act(g, "You discover that $n has $s hands in your wallet.", false, ch, nullptr, victim, TO_VICT);
+    act(g, "$n tries to steal zenni from $N.", true, ch, nullptr, victim, TO_NOTVICT);
   } else {
     /* Steal some gold coins */
     gold = (char_get_gold(victim) * rand_number(g, 1, 10)) / 100;
@@ -200,7 +200,7 @@ SPECIAL(pet_shops)
     char_set_carry_items(pet, 100);
 
     send_to_char(g, ch, "May you enjoy your pet.\r\n");
-    act(g, "$n buys $N as a pet.", false, ch, 0, pet, TO_ROOM);
+    act(g, "$n buys $N as a pet.", false, ch, nullptr, pet, TO_ROOM);
 
     return (true);
   }
@@ -364,12 +364,12 @@ SPECIAL(auction)
     }
 
     if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
-      act(g, "$P is broken and we will not accept it.", false, ch, 0, obj2, TO_CHAR);
+      act(g, "$P is broken and we will not accept it.", false, ch, nullptr, obj2, TO_CHAR);
       return (true);
     }
 
     if (obj_extra_flagged(obj2, ITEM_NODONATE)) {
-      act(g, "$P is junk and we will not accept it.", false, ch, 0, obj2, TO_CHAR);
+      act(g, "$P is junk and we will not accept it.", false, ch, nullptr, obj2, TO_CHAR);
       return (true);
     }
 
@@ -470,8 +470,8 @@ SPECIAL(healtank)
       char_plr_set(ch, PLR_CHARGE, false);
       char_set_chargeto(ch, 0);
       char_set_barrier(ch, 0);
-      act(g, "@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_HEALT, true);
       char_set_sits(ch, htank);
       obj_set_sitting(htank, ch);
@@ -484,8 +484,8 @@ SPECIAL(healtank)
         send_to_char(g, ch, "You are not inside a healing tank.\r\n");
         return (true);
       }
-      act(g, "@wThe healing tank drains and you exit it shortly after.", true, ch, 0, 0, TO_CHAR);
-      act(g, "@C$n@w exits the healing tank after letting it drain.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_HEALT, false);
       obj_set_sitting(htank, nullptr);
       char_set_sits(ch, nullptr);
@@ -554,8 +554,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < strcost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (strcost));
         save_char(g, ch);
@@ -566,8 +566,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < intcost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (intcost));
         save_char(g, ch);
@@ -578,8 +578,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < concost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (concost));
         save_char(g, ch);
@@ -590,8 +590,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < specost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (specost));
         save_char(g, ch);
@@ -602,8 +602,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < agicost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (agicost));
         save_char(g, ch);
@@ -614,8 +614,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < wiscost)
         send_to_char(g, ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
-        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
+        act(g, "@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (wiscost));
         save_char(g, ch);
@@ -661,7 +661,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10)) {
         rroom_set_gravity(g, char_get_in_room(ch), 10);
         obj_set_weight(obj, 0);
@@ -681,7 +681,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("10", arg) && rroom_get_gravity(g, char_get_in_room(ch)) != 10 && (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -691,7 +691,7 @@ SPECIAL(gravity)
       match = true;
     } else if (!strcasecmp("10", arg)) {
       send_to_char(g, ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       rroom_set_gravity(g, char_get_in_room(ch), 10);
       obj_set_weight(obj, 10);
       match = true;
@@ -702,7 +702,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("20", arg)) {
       send_to_char(g, ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -717,7 +717,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("30", arg)) {
       send_to_char(g, ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -732,7 +732,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("40", arg)) {
       send_to_char(g, ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -747,7 +747,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("50", arg)) {
       send_to_char(g, ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -762,7 +762,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("100", arg)) {
       send_to_char(g, ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -777,7 +777,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("200", arg)) {
       send_to_char(g, ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -792,7 +792,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("300", arg)) {
       send_to_char(g, ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -807,7 +807,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("400", arg)) {
       send_to_char(g, ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -822,7 +822,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("500", arg)) {
       send_to_char(g, ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -837,7 +837,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("1000", arg)) {
       send_to_char(g, ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -852,7 +852,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("5000", arg)) {
       send_to_char(g, ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -867,7 +867,7 @@ SPECIAL(gravity)
     }
     if (!strcasecmp("10000", arg)) {
       send_to_char(g, ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
+      act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -976,7 +976,7 @@ SPECIAL(bank)
       send_to_char(g, vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n", add_commas(amount));
     }
     send_to_char(g, ch, "You transfer %s zenni to them.\r\n", add_commas(amount));
-    act(g, "$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
     return (true);
   }
   if (CMD_IS(g, "deposit")) {
@@ -997,7 +997,7 @@ SPECIAL(bank)
     char_set_gold(ch, char_get_gold(ch) - (amount));
     char_set_bank_gold(ch, char_get_bank_gold(ch) + (amount));
     send_to_char(g, ch, "You deposit %d zenni.\r\n", amount);
-    act(g, "$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
     return (true);
   }
   if (CMD_IS(g, "withdraw")) {
@@ -1036,7 +1036,7 @@ SPECIAL(bank)
         char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + 1));
       }
       send_to_char(g, ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount), add_commas(num));
-      act(g, "$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+      act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
       return (true);
     }
     char_set_gold(ch, char_get_gold(ch) + (amount));
@@ -1047,7 +1047,7 @@ SPECIAL(bank)
       char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + 1));
     }
     send_to_char(g, ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount), add_commas(num));
-    act(g, "$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
     return (true);
   } else
     return (false);

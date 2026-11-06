@@ -52,10 +52,10 @@ void update_char_objects(GameWorld *g, struct char_data *ch)
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, 3);
         if (j == 1) {
           send_to_char(g, ch, "Your light begins to flicker and fade.\r\n");
-          act(g, "$n's light begins to flicker and fade.", false, ch, 0, 0, TO_ROOM);
+          act(g, "$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
         } else if (j == 0) {
           send_to_char(g, ch, "Your light sputters out and dies.\r\n");
-          act(g, "$n's light sputters out and dies.", false, ch, 0, 0, TO_ROOM);
+          act(g, "$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
           rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {
@@ -90,7 +90,7 @@ void item_check(GameWorld *g, struct obj_data *object, struct char_data *ch)
         break;
       case ITEM_ARMOR:
       case ITEM_WORN:
-        where = find_eq_pos(g, ch, object, 0);
+        where = find_eq_pos(g, ch, object, nullptr);
         if (where < 0) /* armor with nowhere to wear it */
           break;
         if (!char_get_equipment(ch, where)) {

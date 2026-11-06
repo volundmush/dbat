@@ -187,7 +187,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
   unsigned int total_len;
   char *s, *t;
   char num[MAX_INPUT_LENGTH], text[MAX_INPUT_LENGTH + 2];
-  struct textbuf out = {0};
+  struct textbuf out = {nullptr};
 
   switch (command) {
     case PARSE_HELP:
@@ -438,7 +438,7 @@ static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descri
 {
   int line_chars, cap_next = true, cap_next_next = false, color_chars = 0, i, pass_line = 0;
   char *flow, *start = nullptr, *str, temp;
-  struct textbuf formatted = {0};
+  struct textbuf formatted = {nullptr};
 
   /* XXX: Want to make sure the string doesn't grow either... */
 
@@ -584,7 +584,7 @@ static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descri
    or -1 (text unchanged) if the result would not fit in max_size. */
 static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
 {
-  struct textbuf out = {0};
+  struct textbuf out = {nullptr};
   char *flow         = *string, *match;
   size_t plen        = strlen(pattern);
   int count          = 0;

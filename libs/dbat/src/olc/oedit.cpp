@@ -204,7 +204,7 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
-  act(g, "$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   /****************************************************************************/
@@ -1100,7 +1100,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             if (d->character) {
               char_plr_set(d->character, PLR_WRITING, false);
               desc_set_connected(d, CON_PLAYING);
-              act(g, "$n stops using OLC.", true, d->character, 0, 0, TO_ROOM);
+              act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
             }
             free(OLC_OBJ(d)); /* its strings now belong to obj */
             free(d->olc);
@@ -1839,7 +1839,7 @@ ACMD(do_iedit)
   iedit_setup_existing(g, char_get_desc(ch), k);
   OLC_VAL(char_get_desc(ch)) = 0;
 
-  act(g, "$n starts using OLC.", true, ch, 0, 0, TO_ROOM);
+  act(g, "$n starts using OLC.", true, ch, nullptr, nullptr, TO_ROOM);
 
   desc_set_connected(char_get_desc(ch), CON_IEDIT);
 

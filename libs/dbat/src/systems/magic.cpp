@@ -292,7 +292,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
-        act(g, "$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
+        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -308,7 +308,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
-        act(g, "$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
+        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -369,9 +369,9 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
 
   if (to_vict != nullptr)
-    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(g, to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 
 /*
@@ -483,9 +483,9 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
   }
 
   if (to_char != nullptr)
-    act(g, to_char, false, ch, 0, 0, TO_CHAR);
+    act(g, to_char, false, ch, nullptr, nullptr, TO_CHAR);
   if (to_room != nullptr)
-    act(g, to_room, false, ch, 0, 0, TO_ROOM);
+    act(g, to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
   for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_tch) {
     next_tch = char_get_next_in_room(tch);
@@ -609,9 +609,9 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
 
   affect_from_char(g, victim, spell);
   if (to_vict != nullptr)
-    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(g, to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 
 void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_data *obj,
@@ -667,12 +667,12 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
   if (to_char == nullptr)
     send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
   else
-    act(g, to_char, true, ch, obj, 0, TO_CHAR);
+    act(g, to_char, true, ch, obj, nullptr, TO_CHAR);
 
   if (to_room != nullptr)
-    act(g, to_room, true, ch, obj, 0, TO_ROOM);
+    act(g, to_room, true, ch, obj, nullptr, TO_ROOM);
   else if (to_char != nullptr)
-    act(g, to_char, true, ch, obj, 0, TO_ROOM);
+    act(g, to_char, true, ch, obj, nullptr, TO_ROOM);
 }
 
 void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
@@ -701,8 +701,8 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
   }
   add_unique_id(g, tobj);
   obj_to_char(g, tobj, ch);
-  act(g, "$n creates $p.", false, ch, tobj, 0, TO_ROOM);
-  act(g, "You create $p.", false, ch, tobj, 0, TO_CHAR);
+  act(g, "$n creates $p.", false, ch, tobj, nullptr, TO_ROOM);
+  act(g, "You create $p.", false, ch, tobj, nullptr, TO_CHAR);
   load_otrigger(g, tobj);
 }
 
@@ -837,7 +837,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
   }
 
   if (to_vict != nullptr)
-    act(g, to_vict, false, victim, 0, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
   if (to_room != nullptr)
-    act(g, to_room, true, victim, 0, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }
