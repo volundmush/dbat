@@ -1,5 +1,5 @@
 # 2.9.4 (latest)
-- There was a rollback to C23 with Zig 0.17 support. Gameplay changes were ported. [Volund]
+- There was a rollback to C23 with optional Zig 0.17 support. Gameplay changes were ported. [Volund]
 - Split `CHANGELOG.md` into `CHANGELOG_CODEBASE.md` and `CHANGELOG_GAMEPLAY.md`
 
 # 2.9.3
