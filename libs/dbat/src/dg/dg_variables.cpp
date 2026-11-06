@@ -248,7 +248,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
     *str = '\0';
     if (char_is_npc(c) && char_get_script(c)) {
       find_replacement(g, go, char_get_script(c), nullptr, MOB_TRIGGER,
-                       subfield, (char[]){""}, nullptr, str, slen);
+                       subfield, writable{""}, nullptr, str, slen);
     }
     return;
   }

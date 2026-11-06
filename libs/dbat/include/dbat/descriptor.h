@@ -4,6 +4,10 @@
 #include "consts/constates.h"
 #include <sys/socket.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct txt_block {
   char *text;
   int aliased;
@@ -86,3 +90,6 @@ struct descriptor_data {
   int rbank;
 };
 
+#ifdef __cplusplus
+}
+#endif

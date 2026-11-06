@@ -15,6 +15,10 @@
 #include "dbat/consts/triggers.h"
 #include "dbat/index.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* linked list for mob/object prototype trigger lists */
 struct trig_proto_list {
   trig_vnum vnum;               /* vnum of the trigger   */
@@ -336,3 +340,7 @@ struct lookup_table_t {
   void *c;
   struct lookup_table_t *next;
 };
+
+#ifdef __cplusplus
+}
+#endif

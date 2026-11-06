@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Ingredient vnums for recipes */
 constexpr int RCP_TOMATO      = 17212;
 constexpr int RCP_POTATO      = 17213;
@@ -79,3 +83,7 @@ constexpr obj_vnum MEAL_FBERRY_MUFFIN   = 1236;
 constexpr obj_vnum MEAL_CARAMBOLA_BREAD = 1237;
 
 constexpr int MEAL_LAST = 1234;
+
+#ifdef __cplusplus
+}
+#endif

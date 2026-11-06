@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ****** MUD MAIL SYSTEM HEADER FILE **********************
  ***     written by Jeremy Elson (jelson@circlemud.org) ***
  ********************************************************* */
@@ -101,3 +105,7 @@ typedef struct mail_index_type_d mail_index_type;
 void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id);
 
 SPECIAL(postmaster);
+
+#ifdef __cplusplus
+}
+#endif

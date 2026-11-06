@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 constexpr int HIST_ALL     = 0;
 constexpr int HIST_SAY     = 1;
 constexpr int HIST_GOSSIP  = 2;
@@ -13,3 +17,7 @@ constexpr int HIST_SNET    = 9;
 constexpr int NUM_HIST = 10;
 
 extern const char *const history_types[NUM_HIST + 1];
+
+#ifdef __cplusplus
+}
+#endif

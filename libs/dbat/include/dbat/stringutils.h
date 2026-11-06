@@ -4,6 +4,10 @@
 #include <ctype.h>
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int levenshtein_distance(char *s1, char *s2);
 void trim(char *s);
 char *add_commas(int64_t num);
@@ -33,3 +37,18 @@ bool reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
 /* A new string formatted as by printf(); exits if out of memory, like CREATE(). */
 char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
+#ifdef __cplusplus
+}
+
+/* A writable copy of a fixed string, for passing to a function that may change its argument, as most commands
+ * can: do_barrier(g, ch, writable{"40"}, 0, 0). The copy lasts until the end of the statement. A string
+ * literal, or a compound literal like (char[]){"40"}, can be in read-only memory. */
+extern "C++" { /* this header can be included from inside another one's extern "C" */
+template <size_t N> struct writable {
+  char text[N];
+  operator char *() { return text; }
+};
+template <size_t N> writable(const char (&)[N]) -> writable<N>;
+}
+#endif

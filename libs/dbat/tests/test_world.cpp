@@ -571,7 +571,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
     struct char_data *mob = read_mobile(g, 300, VIRTUAL);
 
     char_to_room(g, mob, char_get_in_room(ch));
-    command_interpreter(g, mob, (char[]){"snet 5"});
+    command_interpreter(g, mob, writable{"snet 5"});
     extract_char(g, mob);
     extract_pending_chars(g);
   }
@@ -872,7 +872,7 @@ static void leave_followers_for_shutdown(GameWorld *g, struct char_data *ch)
 
   /* freeing a player used to free their skills first, then remove this affect, which reads them */
   {
-    struct affected_type skilled = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_SKILL, .modifier = 1, .specific = SKILL_HAYASA};
+    struct affected_type skilled = {.type = SPELL_SLEEP, .duration = 5, .modifier = 1, .location = APPLY_SKILL, .specific = SKILL_HAYASA};
 
     affect_to_char(g, ch, &skilled);
   }

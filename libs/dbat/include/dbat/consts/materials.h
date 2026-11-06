@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Some different kind of liquids for use in values of drink containers */
 constexpr int LIQ_WATER      = 0;
 constexpr int LIQ_BEER       = 1;
@@ -69,3 +73,7 @@ constexpr int MATERIAL_FOOD       = 45;
 constexpr int MATERIAL_OIL        = 46;
 
 constexpr int NUM_MATERIALS = 47;
+
+#ifdef __cplusplus
+}
+#endif

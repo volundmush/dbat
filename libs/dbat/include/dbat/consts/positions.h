@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Positions */
 constexpr int POS_DEAD      = 0; /* dead			*/
 constexpr int POS_MORTALLYW = 1; /* mortally wounded	*/
@@ -13,3 +17,7 @@ constexpr int POS_STANDING  = 8; /* standing		*/
 constexpr int NUM_POSITIONS = 9;
 
 extern const char *const position_types[NUM_POSITIONS + 1];
+
+#ifdef __cplusplus
+}
+#endif

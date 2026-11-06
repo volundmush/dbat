@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Zone info: Used in zone_data.zone_flags */
 constexpr int ZONE_CLOSED   = 0;
 constexpr int ZONE_NOIMMORT = 1;
@@ -42,3 +46,7 @@ constexpr int NUM_ZONE_FLAGS = 36;
 constexpr int ZF_ARRAY_MAX   = 4;
 
 extern const char *const zone_bits[NUM_ZONE_FLAGS + 1];
+
+#ifdef __cplusplus
+}
+#endif

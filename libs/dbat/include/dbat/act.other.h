@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/aligns.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // variables
 
 // functions
@@ -93,3 +97,7 @@ ACMD(do_compare);
 ACMD(do_break);
 ACMD(do_fix);
 ACMD(do_aid);
+
+#ifdef __cplusplus
+}
+#endif

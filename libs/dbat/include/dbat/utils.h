@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")
 
@@ -86,3 +90,7 @@ static inline double fixnan(double val)
 #include "dbat/extract.h"
 #include "dbat/random.h"
 #include "dbat/log.h"
+
+#ifdef __cplusplus
+}
+#endif

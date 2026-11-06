@@ -13,6 +13,10 @@
 #include "dbat/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int NUM_TRIG_TYPE_FLAGS = 20;
 
 /*
@@ -47,3 +51,7 @@ void trigedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int termin
 bool format_script(GameWorld *g, struct descriptor_data *d);
 
 ACMD(do_oasis_trigedit);
+
+#ifdef __cplusplus
+}
+#endif

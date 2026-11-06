@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* arbitrary constants used by index_boot() (must be unique) */
 constexpr int DB_BOOT_WLD = 0;
 constexpr int DB_BOOT_MOB = 1;
@@ -170,3 +174,7 @@ void reset_zone(GameWorld *g, zone_rnum zone);
 // commands
 ACMD(do_reboot);
 void reboot_wizlists(GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

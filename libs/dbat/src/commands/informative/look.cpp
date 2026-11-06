@@ -937,7 +937,7 @@ ACMD(do_autoexit)
     send_to_char(g, ch, "Your current autoexit level is %s.\r\n", exitlevels[char_exit_level(g, ch)]);
     return;
   }
-  if (((tp = search_block(arg, exitlevels, false)) == -1)) {
+  if ((tp = search_block(arg, exitlevels, false)) == -1) {
     send_to_char(g, ch, "Usage: Autoexit { Off | Normal | Complete }\r\n");
     return;
   }

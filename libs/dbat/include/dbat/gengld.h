@@ -3,6 +3,10 @@
 #include "dbat/consts/types.h"
 #include "guild.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void free_guild(struct guild_data *guild);
 guild_rnum add_guild(GameWorld *g, struct guild_data *guild);
@@ -25,3 +29,7 @@ constexpr int MAX_PER_PRAC  = 1; /* max percent gain in skill per practice */
 constexpr int MIN_PER_PRAC  = 2; /* min percent gain in skill per practice */
 constexpr int PRAC_TYPE     = 3; /* should it say 'spell' or 'skill'?	 */
 const char *gedit_modify_string(char **str, char *new_g);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // functions
 void npc_steal(GameWorld *g, struct char_data *ch, struct char_data *victim);
 int num_players_in_room(GameWorld *g, room_vnum room);
@@ -14,3 +18,7 @@ SPECIAL(bank);
 SPECIAL(gravity);
 SPECIAL(augmenter);
 SPECIAL(healtank);
+
+#ifdef __cplusplus
+}
+#endif

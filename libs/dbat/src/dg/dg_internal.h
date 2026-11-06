@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * Functions shared between the DG Scripts source files in src/dg.
  * Not part of the public interface (that is dbat/dg_scripts.h).
@@ -30,3 +34,7 @@ struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
 /* dg_wizcmd.c */
 bool remove_trigger(GameWorld *g, struct script_data *sc, char *name);
+
+#ifdef __cplusplus
+}
+#endif

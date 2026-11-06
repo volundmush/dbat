@@ -12,6 +12,10 @@
 #include "weather.h"
 #include "zones.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The state of one running game. */
 struct GameWorld {
   /* Entities and their prototypes */
@@ -186,3 +190,7 @@ void game_world_free_contents(GameWorld *g);
 
 /* The current wall-clock time, as the game sees it. */
 time_t game_now(const GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

@@ -3,6 +3,10 @@
 #include "materials.h"
 #include "conditions.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Character equipment positions: used as index for char_data.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
    which control the valid places you can wear a piece of equipment */
@@ -483,3 +487,7 @@ extern const char *const drinknames[NUM_LIQ_TYPES + 1];
 extern const char *const color_liquid[NUM_LIQ_TYPES + 1];
 extern const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
 extern const char *const material_names[NUM_MATERIALS + 1];
+
+#ifdef __cplusplus
+}
+#endif

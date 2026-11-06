@@ -10,6 +10,10 @@
 #include "index.h"
 #include "extradesc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct obj_spellbook_spell {
   int spellname; /* Which spell is written */
   int pages;     /* How many pages does it take up */
@@ -96,3 +100,6 @@ struct obj_data {
   struct obj_spellbook_spell *sbinfo; /* For spellbook info */
 };
 
+#ifdef __cplusplus
+}
+#endif

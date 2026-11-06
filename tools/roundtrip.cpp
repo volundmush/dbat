@@ -10,7 +10,7 @@
 #include "dbat/genmob.h"
 #include "dbat/game_world.h"
 
-long roundtrip_dump(GameWorld *g)
+extern "C" long roundtrip_dump(GameWorld *g)
 {
   int players = 0, zones = 0;
 

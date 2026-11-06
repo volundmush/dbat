@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 size_t sprintbit(bitvector_t vector, const char *const names[], char *result, size_t reslen);
 size_t sprinttype(int type, const char *const names[], char *result, size_t reslen);
 size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar, char *result, size_t reslen);
@@ -19,3 +23,7 @@ int get_flag_by_name(const char *const flag_list[], char *flag_name);
 #define SET_BIT(var, bit)    ((var) |= (bit))
 #define REMOVE_BIT(var, bit) ((var) &= ~(bit))
 #define TOGGLE_BIT(var, bit) ((var) ^= (bit))
+
+#ifdef __cplusplus
+}
+#endif

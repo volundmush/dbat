@@ -1,4 +1,3 @@
-#define _GNU_SOURCE /* for qsort_r */
 /* ************************************************************************
  *   File: Guild.c                                                         *
  *  Usage: GuildMaster's: loading files, assigning spec_procs, and handling*
@@ -229,7 +228,7 @@ ACMD(do_teach)
 
 static int compare_spells(const void *x, const void *y, void *world)
 {
-  GameWorld *g = world;
+  GameWorld *g = static_cast<GameWorld *>(world);
   int a = *(const int *)x,
       b = *(const int *)y;
 

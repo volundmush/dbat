@@ -476,102 +476,116 @@ static const struct form_name *race_form_names(char_data *ch)
   }
 }
 
-/* Transformation bonuses, indexed by tier (1-6). Missing tiers are zeroed. */
+/* Transformation bonuses, indexed by tier (1-6); entry 0 is unused. Missing tiers are zeroed. */
 constexpr int MAX_TRANS_TIER = 6;
 typedef transform_bonus trans_table[MAX_TRANS_TIER + 1];
 
 static const trans_table human_trans_bonus = {
-    [1] = {.bonus = 1000000,   .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 12000000,  .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 50000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
-    [4] = {.bonus = 270000000, .mult = 4.5, .drain = .2, .flag = PLR_TRANS4}
+    {},
+    {.bonus = 1000000,   .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 12000000,  .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 50000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
+    {.bonus = 270000000, .mult = 4.5, .drain = .2, .flag = PLR_TRANS4}
 };
 
 static const trans_table saiyan_trans_bonus = {
-    [1] = {.bonus = 800000,    .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 20000000,  .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 80000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
-    [4] = {.bonus = 182000000, .mult = 5.5, .drain = .2, .flag = PLR_TRANS4}
+    {},
+    {.bonus = 800000,    .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 20000000,  .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 80000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
+    {.bonus = 182000000, .mult = 5.5, .drain = .2, .flag = PLR_TRANS4}
 };
 
 static const trans_table namekian_trans_bonus = {
-    [1] = {.bonus = 200000,    .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 4000000,   .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 65000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
-    [4] = {.bonus = 230000000, .mult = 4.5, .drain = .2, .flag = PLR_TRANS4}
+    {},
+    {.bonus = 200000,    .mult = 2,   .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 4000000,   .mult = 3,   .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 65000000,  .mult = 4,   .drain = .2, .flag = PLR_TRANS3},
+    {.bonus = 230000000, .mult = 4.5, .drain = .2, .flag = PLR_TRANS4}
 };
 
 static const trans_table konatsu_trans_bonus = {
-    [1] = {.bonus = 1000000,   .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 56000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 290000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 1000000,   .mult = 2, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 56000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 290000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
 };
 
 static const trans_table icer_trans_bonus = {
-    [1] = {.bonus = 400000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 7000000,   .mult = 3, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 45000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS3},
-    [4] = {.bonus = 200000000, .mult = 5, .drain = .2, .flag = PLR_TRANS4}
+    {},
+    {.bonus = 400000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 7000000,   .mult = 3, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 45000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS3},
+    {.bonus = 200000000, .mult = 5, .drain = .2, .flag = PLR_TRANS4}
 };
 
 static const trans_table saiyan_trans_bonus_legendary = {
-    [1] = {.bonus = 800000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 185000000, .mult = 5.5, .drain = 0, .flag = PLR_TRANS2}
+    {},
+    {.bonus = 800000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 185000000, .mult = 5.5, .drain = 0, .flag = PLR_TRANS2}
 };
 
 static const trans_table truffle_trans_bonus = {
-    [1] = {.bonus = 1300000,   .mult = 3, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 80000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 300000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 1300000,   .mult = 3, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 80000000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 300000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
 };
 
 static const trans_table kai_trans_bonus = {
-    [1] = {.bonus = 1100000,   .mult = 3, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 115000000, .mult = 4, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 270000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 1100000,   .mult = 3, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 115000000, .mult = 4, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 270000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
 };
 
 static const trans_table halfbreed_trans_bonus = {
-    [1] = {.bonus = 900000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 16500000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 240000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 900000,    .mult = 2, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 16500000,  .mult = 4, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 240000000, .mult = 5, .drain = .2, .flag = PLR_TRANS3}
 };
 
 static const trans_table mutant_trans_bonus = {
-    [1] = {.bonus = 100000,   .mult = 2, .drain = .1, .flag = PLR_TRANS1},
-    [2] = {.bonus = 8500000,  .mult = 3, .drain = .2, .flag = PLR_TRANS2},
-    [3] = {.bonus = 80000000, .mult = 4, .drain = .2, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 100000,   .mult = 2, .drain = .1, .flag = PLR_TRANS1},
+    {.bonus = 8500000,  .mult = 3, .drain = .2, .flag = PLR_TRANS2},
+    {.bonus = 80000000, .mult = 4, .drain = .2, .flag = PLR_TRANS3}
 };
 
 static const trans_table majin_trans_bonus = {
-    [1] = {.bonus = 1250000,   .mult = 2,   .drain = 0, .flag = PLR_TRANS1},
-    [2] = {.bonus = 15000000,  .mult = 3,   .drain = 0, .flag = PLR_TRANS2},
-    [3] = {.bonus = 340000000, .mult = 4.5, .drain = 0, .flag = PLR_TRANS3}
+    {},
+    {.bonus = 1250000,   .mult = 2,   .drain = 0, .flag = PLR_TRANS1},
+    {.bonus = 15000000,  .mult = 3,   .drain = 0, .flag = PLR_TRANS2},
+    {.bonus = 340000000, .mult = 4.5, .drain = 0, .flag = PLR_TRANS3}
 };
 
 static const trans_table bio_trans_bonus = {
-    [1] = {.bonus = 1000000,   .mult = 2,   .drain = 0, .flag = PLR_TRANS1},
-    [2] = {.bonus = 8000000,   .mult = 3,   .drain = 0, .flag = PLR_TRANS2},
-    [3] = {.bonus = 70000000,  .mult = 3.5, .drain = 0, .flag = PLR_TRANS3},
-    [4] = {.bonus = 400000000, .mult = 4,   .drain = 0, .flag = PLR_TRANS4}
+    {},
+    {.bonus = 1000000,   .mult = 2,   .drain = 0, .flag = PLR_TRANS1},
+    {.bonus = 8000000,   .mult = 3,   .drain = 0, .flag = PLR_TRANS2},
+    {.bonus = 70000000,  .mult = 3.5, .drain = 0, .flag = PLR_TRANS3},
+    {.bonus = 400000000, .mult = 4,   .drain = 0, .flag = PLR_TRANS4}
 };
 
 static const trans_table android_trans_bonus_sense = {
-    [1] = {.bonus = 12500000,    .mult = 1, .drain = 0, .flag = PLR_TRANS1},
-    [2] = {.bonus = 50000000,    .mult = 1, .drain = 0, .flag = PLR_TRANS2},
-    [3] = {.bonus = 312000000,   .mult = 1, .drain = 0, .flag = PLR_TRANS3},
-    [4] = {.bonus = 2500000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS4},
-    [5] = {.bonus = 5000000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS5},
-    [6] = {.bonus = 10000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS6}
+    {},
+    {.bonus = 12500000,    .mult = 1, .drain = 0, .flag = PLR_TRANS1},
+    {.bonus = 50000000,    .mult = 1, .drain = 0, .flag = PLR_TRANS2},
+    {.bonus = 312000000,   .mult = 1, .drain = 0, .flag = PLR_TRANS3},
+    {.bonus = 2500000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS4},
+    {.bonus = 5000000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS5},
+    {.bonus = 10000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS6}
 };
 
 static const trans_table android_trans_bonus = {
-    [1] = {.bonus = 5000000,    .mult = 1, .drain = 0, .flag = PLR_TRANS1},
-    [2] = {.bonus = 20000000,   .mult = 1, .drain = 0, .flag = PLR_TRANS2},
-    [3] = {.bonus = 125000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS3},
-    [4] = {.bonus = 1000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS4},
-    [5] = {.bonus = 2500000000, .mult = 1, .drain = 0, .flag = PLR_TRANS5},
-    [6] = {.bonus = 5000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS6}
+    {},
+    {.bonus = 5000000,    .mult = 1, .drain = 0, .flag = PLR_TRANS1},
+    {.bonus = 20000000,   .mult = 1, .drain = 0, .flag = PLR_TRANS2},
+    {.bonus = 125000000,  .mult = 1, .drain = 0, .flag = PLR_TRANS3},
+    {.bonus = 1000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS4},
+    {.bonus = 2500000000, .mult = 1, .drain = 0, .flag = PLR_TRANS5},
+    {.bonus = 5000000000, .mult = 1, .drain = 0, .flag = PLR_TRANS6}
 };
 
 static const transform_bonus hoshi_birth = {

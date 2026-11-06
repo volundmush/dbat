@@ -20,14 +20,14 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIB = os.path.join(ROOT, 'libs', 'dbat')
-OWNERS = {'char_data': 'src/entities/character_utils.c', 'obj_data': 'src/entities/object_utils.c',
-          'room_data': 'src/entities/room_utils.c'}
+OWNERS = {'char_data': 'src/entities/character_utils.cpp', 'obj_data': 'src/entities/object_utils.cpp',
+          'room_data': 'src/entities/room_utils.cpp'}
 STRUCTS = re.compile(r'\b(char_data|obj_data|room_data)\b')
 
 
 def scan(path):
     """Returns (struct, field, line) for each access in one source file. Headers are read as part of it."""
-    dump = subprocess.run(['clang', '-std=gnu2x', '-Iinclude', '-Xclang', '-ast-dump=json', '-fsyntax-only', '-w', path],
+    dump = subprocess.run(['clang++', '-x', 'c++', '-std=gnu++2c', '-Iinclude', '-Xclang', '-ast-dump=json', '-fsyntax-only', '-w', path],
                           cwd=LIB, capture_output=True)
     if not dump.stdout:
         sys.exit(f'check-members: clang could not parse {path}: {dump.stderr.decode()[:400]}')
@@ -44,6 +44,8 @@ def scan(path):
             line[0] = loc['line']
 
     def walk(node):
+        if node.get('isImplicit') and node.get('kind', '').endswith('Decl'):
+            return  # e.g. the copy assignment C++ writes for a struct, which touches every member
         track(node.get('loc'))
         extent = node.get('range', {})
         track(extent.get('begin'))
@@ -70,7 +72,7 @@ def main():
     parser.add_argument('--show', default=None)
     args = parser.parse_args()
 
-    files = sorted(os.path.relpath(p, LIB) for p in glob.glob(os.path.join(LIB, 'src', '**', '*.c'), recursive=True))
+    files = sorted(os.path.relpath(p, LIB) for p in glob.glob(os.path.join(LIB, 'src', '**', '*.cpp'), recursive=True))
     with multiprocessing.get_context('fork').Pool(min(os.cpu_count() or 1, 24)) as pool:
         rows = [row for result in pool.imap_unordered(scan, files, chunksize=2) for row in result]
 

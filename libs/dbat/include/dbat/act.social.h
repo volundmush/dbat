@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // functions
 void boot_social_messages(GameWorld *g);
 void free_social_messages(GameWorld *g);
@@ -13,3 +17,7 @@ void create_command_list(GameWorld *g);
 ACMD(do_action);
 ACMD(do_insult);
 ACMD(do_gmote);
+
+#ifdef __cplusplus
+}
+#endif

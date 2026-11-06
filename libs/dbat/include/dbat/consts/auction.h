@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* AUCTIONING STATES */
 constexpr int AUC_NULL_STATE  = 0; /* not doing anything */
 constexpr int AUC_OFFERING    = 1; /* object has been offfered */
@@ -14,3 +18,7 @@ constexpr int AUC_WIZ_CANCEL    = 8; /* auction cancelled by a god */
 /* OTHER JUNK */
 constexpr int AUC_STAT = 9;
 constexpr int AUC_BID  = 10;
+
+#ifdef __cplusplus
+}
+#endif

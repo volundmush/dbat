@@ -1031,7 +1031,7 @@ ACMD(do_focus)
       char_set_poisonby(vict, ch);
       if (char_get_charge(vict) > 0) {
         send_to_char(g, vict, "You lose your concentration and release your charged ki!\r\n");
-        do_charge(g, vict, (char[]){"release"}, 0, 0);
+        do_charge(g, vict, writable{"release"}, 0, 0);
       }
       int duration = char_get_aff_abils_intel(ch) / 20;
       assign_affect(g, vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);

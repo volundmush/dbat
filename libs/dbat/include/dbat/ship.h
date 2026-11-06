@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* external functions   */
 
 /* ship.c functions */
@@ -25,3 +29,7 @@ constexpr int SHIP_SHIELDS  = 5;
 constexpr int SHIP_EXTRAS   = 7;
 constexpr int SHIP_ARMORS   = 5;
 constexpr int SHIP_EQUIP    = 5;
+
+#ifdef __cplusplus
+}
+#endif

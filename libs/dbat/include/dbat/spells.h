@@ -4,6 +4,10 @@
 #include "dbat/consts/senseis.h"
 #include "dbat/consts/skills.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int DEFAULT_STAFF_LVL = 12;
 constexpr int DEFAULT_WAND_LVL  = 12;
 
@@ -348,3 +352,7 @@ const char *skill_name(GameWorld *g, int num);
 int roll_skill(GameWorld *g, const struct char_data *ch, int snum);
 bool roll_resisted(GameWorld *g, const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
 int skill_type(GameWorld *g, int skill);
+
+#ifdef __cplusplus
+}
+#endif

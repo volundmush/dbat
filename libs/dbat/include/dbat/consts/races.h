@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Races */
 constexpr int RACE_UNDEFINED  = -1;
 constexpr int RACE_HUMAN      = 0;
@@ -41,3 +45,7 @@ struct aging_data {
 extern const char *const race_names[NUM_RACES + 1];
 extern const char *const pc_race_types[NUM_RACES + 1];
 extern const char *const race_abbrevs[NUM_RACES + 1];
+
+#ifdef __cplusplus
+}
+#endif

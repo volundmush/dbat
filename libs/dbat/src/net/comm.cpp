@@ -3239,7 +3239,7 @@ static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode
 /* Orders a typed help topic against an entry's keywords: a prefix of them matches. */
 static int help_prefix_order(const void *key, const void *elem)
 {
-  const char *entry = key;
+  const char *entry = static_cast<const char *>(key);
 
   return strncasecmp(entry, ((const struct help_index_element *)elem)->keywords, strlen(entry));
 }
@@ -3250,7 +3250,7 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 
   if (!g->help_table)
     return;
-  if (!(found = bsearch(entry, g->help_table, g->top_of_helpt + 1, sizeof(*g->help_table), help_prefix_order)))
+  if (!(found = (struct help_index_element *)bsearch(entry, g->help_table, g->top_of_helpt + 1, sizeof(*g->help_table), help_prefix_order)))
     return;
   while (found > g->help_table && !help_prefix_order(entry, found - 1)) /* the first of the matches */
     found--;

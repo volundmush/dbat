@@ -4,6 +4,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/room_utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int _OASISOLC = 0x206; /* 2.0.6 */
 /*
  * Used to determine what version of OasisOLC is installed.
@@ -648,3 +652,7 @@ constexpr int STAT_GET_CON    = 4;
 constexpr int STAT_GET_CHA    = 5;
 constexpr int STAT_QUIT       = 6;
 constexpr int STAT_PARSE_MENU = 7;
+
+#ifdef __cplusplus
+}
+#endif

@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESTS = os.path.join(ROOT, "libs/dbat/tests")
 FIXTURE = os.path.join(TESTS, "fixtures")
-# in the order that fuzz_load.c and fuzz_boot.c number them
+# in the order that fuzz_load.cpp and fuzz_boot.cpp number them
 LOAD_FILES = ["accounts/plrfiles/K-O/kelvarin.plr", "accounts/plrobjs/K-O/kelvarin.new", None, None]
 BOOT_FILES = ["world/wld/3.wld", "world/mob/3.mob", "world/obj/3.obj", "world/zon/3.zon", "world/trg/3.trg",
               "world/shp/3.shp", "world/gld/3.gld", "world/wld/index", "world/mob/index", "world/obj/index",
@@ -69,11 +69,11 @@ def make_dictionary(path, target):
     words = set()
     source = os.path.join(ROOT, "libs/dbat/src")
     if target == "bot":
-        with open(os.path.join(source, "commands/command.c"), errors="replace") as f:
+        with open(os.path.join(source, "commands/command.cpp"), errors="replace") as f:
             words |= set(re.findall(r'\{\s*"([a-z][a-z_]{1,15})"', f.read()))
         words |= {"type ", "pulse ", "clock ", "leave ", "connect ", "spawn ", "login ", "Bot0", "Bot1"}
     elif target == "script":
-        for name in ("dg/dg_variables.c", "dg/dg_scripts.c", "dg/dg_mobcmd.c", "dg/dg_objcmd.c", "dg/dg_wldcmd.c"):
+        for name in ("dg/dg_variables.cpp", "dg/dg_scripts.cpp", "dg/dg_mobcmd.cpp", "dg/dg_objcmd.cpp", "dg/dg_wldcmd.cpp"):
             with open(os.path.join(source, name), errors="replace") as f:
                 words |= set(re.findall(r'"([a-z][a-z_]{1,15})"', f.read()))
         words |= {"%actor%", "%self%", "%actor.name%", "%self.room%", "%random.char%", "%echo%", "%purge%", "%force%",
@@ -81,7 +81,7 @@ def make_dictionary(path, target):
                   "break", "return 0", "halt", "eval ", "set ", "global ", "remote ", "rdelete ", "context ", "unset ",
                   "extract ", "dg_letter ", "makeuid ", "nop "}
     elif target == "load":
-        with open(os.path.join(source, "db/players.c"), errors="replace") as f:
+        with open(os.path.join(source, "db/players.cpp"), errors="replace") as f:
             words |= {t + ": " for t in re.findall(r'strcmp\(tag, "([^"]{4})"\)', f.read())}
     with open(path, "w") as f:
         for word in sorted(words):
@@ -116,7 +116,7 @@ def describe(binary, artifact, out):
     kind = re.sub(r"\b\d+\b", "#", kind) if kind.startswith("runtime") else kind
     # the accessors only say where a bad pointer happened to get used
     frames = re.findall(r"#\d+ \S+ in (\S+) (\S*libs/dbat/src/\S+?):(\d+)", text)
-    frames = [frame for frame in frames if "_utils.c" not in frame[1]] or frames
+    frames = [frame for frame in frames if "_utils.cpp" not in frame[1]] or frames
     where = f"{frames[0][0]} {frames[0][1].split('libs/dbat/')[1]}:{frames[0][2]}" if frames else "?"
     return (kind, where)
 

@@ -4,6 +4,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Note, most includes for all platforms are in sysdep.h.  The list of
  * files that is included is controlled by conf.h for that platform.
@@ -70,3 +74,7 @@ void game_heartbeat(GameWorld *g, int heart_pulse);
 void free_bufpool(GameWorld *g);
 void setup_log(const char *filename, int fd, bool keep_old_log);
 bool sendok(struct char_data *ch, int to_sleeping);
+
+#ifdef __cplusplus
+}
+#endif

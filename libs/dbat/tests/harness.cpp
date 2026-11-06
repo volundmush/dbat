@@ -22,7 +22,7 @@
 #include "dbat/game_world.h"
 
 #ifdef DBAT_COVERAGE
-void __gcov_dump(void);
+extern "C" void __gcov_dump(void);
 #endif
 
 constexpr room_vnum MAP_ROOM = 300;

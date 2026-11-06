@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int CONFIG_IMPROVED_EDITOR = 1;
 
 constexpr int using_improved_editor = CONFIG_IMPROVED_EDITOR;
@@ -30,3 +34,7 @@ constexpr int STRINGADD_ACTION = 4; /* Editor action, don't append \r\n.	*/
 
 /* Settings for formatter. */
 constexpr int FORMAT_INDENT = (1 << 0);
+
+#ifdef __cplusplus
+}
+#endif

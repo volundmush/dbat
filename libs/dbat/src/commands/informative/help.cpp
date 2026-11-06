@@ -1,4 +1,3 @@
-#define _GNU_SOURCE /* for qsort_r */
 /* help.c: help, commands, toggles, colour, history, time and weather
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include "dbat/consts/maximums.h"
@@ -283,7 +282,7 @@ ACMD(do_color)
     send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
-  if (((tp = search_block(arg, ctypes, false)) == -1)) {
+  if ((tp = search_block(arg, ctypes, false)) == -1) {
     send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
@@ -402,7 +401,7 @@ ACMD(do_toggle)
 
 static int sort_commands_helper(const void *a, const void *b, void *world)
 {
-  GameWorld *g = world;
+  GameWorld *g = static_cast<GameWorld *>(world);
   return strcmp(g->complete_cmd_info[*(const int *)a].sort_as,
                 g->complete_cmd_info[*(const int *)b].sort_as);
 }

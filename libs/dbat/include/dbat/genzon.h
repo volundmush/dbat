@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "db.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error);
 void remove_room_zone_commands(GameWorld *g, zone_rnum zone, room_rnum room_num);
 bool save_zone(GameWorld *g, zone_rnum zone_num);
@@ -12,3 +16,7 @@ void delete_zone_command(struct zone_data *zone, int pos);
 zone_rnum real_zone_by_thing(GameWorld *g, room_vnum vznum);
 
 /* Make delete_zone() */
+
+#ifdef __cplusplus
+}
+#endif

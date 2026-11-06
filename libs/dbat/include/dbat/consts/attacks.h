@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const char *const attack_names_comp[];
 extern const char *const attack_names[];
 extern const int attack_skills[];
@@ -21,3 +25,7 @@ constexpr int TYPE_PUNCH    = 313;
 constexpr int TYPE_STAB     = 314;
 /* new attack types can be added here - up to TYPE_SUFFERING */
 constexpr int TYPE_SUFFERING = 399;
+
+#ifdef __cplusplus
+}
+#endif

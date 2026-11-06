@@ -35,13 +35,13 @@
 static bool shop_trade_flagged(const struct shop_data *rec, int flag);
 
 const char *const shop_default_msgs[NUM_SHOP_MSGS] = {
-    [SHOP_MSG_NOITEM1] = "%s Sorry, I don't stock that item.",
-    [SHOP_MSG_NOITEM2] = "%s You don't seem to have that.",
-    [SHOP_MSG_NOBUY]   = "%s I don't trade in such items.",
-    [SHOP_MSG_NOCASH1] = "%s I can't afford that!",
-    [SHOP_MSG_NOCASH2] = "%s You are too poor!",
-    [SHOP_MSG_BUY]     = "%s That'll be %d zenni, thanks.",
-    [SHOP_MSG_SELL]    = "%s I'll give you %d zenni for that.",
+    "%s Sorry, I don't stock that item.",  /* SHOP_MSG_NOITEM1 */
+    "%s You don't seem to have that.",     /* SHOP_MSG_NOITEM2 */
+    "%s I don't trade in such items.",     /* SHOP_MSG_NOBUY */
+    "%s I can't afford that!",             /* SHOP_MSG_NOCASH1 */
+    "%s You are too poor!",                /* SHOP_MSG_NOCASH2 */
+    "%s That'll be %d zenni, thanks.",     /* SHOP_MSG_BUY */
+    "%s I'll give you %d zenni for that.", /* SHOP_MSG_SELL */
 };
 
 /* Forward/External function declarations */

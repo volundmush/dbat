@@ -14,6 +14,7 @@
 #include "dbat/command.h"
 
 #include "dbat/act.comm.h"
+#include "dbat/act.social.h"
 #include "dbat/broadcast.h"
 #include "dbat/stringutils.h"
 #include "dbat/comm.h"
@@ -1435,7 +1436,6 @@ ACMD(do_gen_comm)
   }
 
   if (subcmd == SCMD_GEMOTE) {
-    ACMD(do_gmote);
     if (*argument == '*' || *argument == ':')
       do_gmote(g, ch, argument + 1, 0, 1);
     else

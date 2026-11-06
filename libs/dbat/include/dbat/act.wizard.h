@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* global variables */
 
 // functions
@@ -68,3 +72,7 @@ ACMD(do_ginfo);
 ACMD(do_plist);
 ACMD(do_peace);
 ACMD(do_raise);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Modifier constants used with obj affects ('A' fields) */
 constexpr int APPLY_NONE        = 0;  /* No effect			*/
 constexpr int APPLY_STR         = 1;  /* Apply to strength		*/
@@ -50,3 +54,7 @@ constexpr int APPLY_ALL_STATS   = 45; /* Apply to all attributes	*/
 constexpr int NUM_APPLIES = 46;
 
 extern const char *const apply_types[NUM_APPLIES + 1];
+
+#ifdef __cplusplus
+}
+#endif

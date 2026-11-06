@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Runs a whole game inside a test: no sockets, no real data/ files. */
 #include <time.h>
 #include "dbat/consts/types.h"
@@ -60,3 +64,7 @@ void th_take_output_at(GameWorld *g, struct descriptor_data *d);
 
 /* Runs n pulses of the game. */
 void th_pulses(GameWorld *g, int n);
+
+#ifdef __cplusplus
+}
+#endif

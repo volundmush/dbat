@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* combat.c functions */
 void homing_update(GameWorld *g);
 void damage_weapon(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
@@ -34,3 +38,7 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 void handle_disarm(GameWorld *g, struct char_data *ch, struct char_data *vict);
 bool handle_defender(GameWorld *g, struct char_data *vict, struct char_data *ch);
 void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict);
+
+#ifdef __cplusplus
+}
+#endif

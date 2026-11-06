@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Ocarina Songs */
 constexpr int SONG_SAFETY           = 1;
 constexpr int SONG_SHIELDING        = 2;
@@ -14,3 +18,7 @@ constexpr int SONG_TELEPORT_AETHER  = 10;
 constexpr int SONG_TELEPORT_KANASSA = 11;
 
 extern const char *const song_types[];
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,10 @@
 #pragma once
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct disabled_data DISABLED_DATA;
 
 /* one disabled command */
@@ -15,3 +19,7 @@ struct disabled_data {
 #include "dbat/consts/types.h"
 ACMD(do_disable);
 bool check_disabled(GameWorld *g, const struct command_info *command);
+
+#ifdef __cplusplus
+}
+#endif

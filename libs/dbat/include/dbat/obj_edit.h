@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* obj_edit.c functions */
 void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 void disp_custom_menu(GameWorld *g, struct descriptor_data *d);
@@ -30,3 +34,7 @@ constexpr int EDIT_RESTRING_SDESC = 3;
 constexpr int EDIT_RESTRING_LDESC = 4;
 constexpr int EDIT_RESTRING_QUIT  = 5;
 constexpr int EDIT_RESTRING_CONF  = 6;
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct shop_data;
 struct shop_buy_data;
 
@@ -92,3 +96,7 @@ int shop_buy_get_type(const struct shop_buy_data *buy);
 void shop_buy_set_type(struct shop_buy_data *buy, int v);
 char *shop_buy_get_keywords(const struct shop_buy_data *buy);
 void shop_buy_set_keywords(struct shop_buy_data *buy, char *v);
+
+#ifdef __cplusplus
+}
+#endif

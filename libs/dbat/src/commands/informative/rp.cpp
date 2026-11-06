@@ -205,7 +205,7 @@ ACMD(do_draw)
   struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
   int drawn = false;
 
-  if (!(obj = get_obj_in_list_vis(g, ch, (char[]){"case"}, nullptr, char_get_inventory(ch)))) {
+  if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
     send_to_char(g, ch, "You don't have a case.\r\n");
     return;
   }
@@ -243,7 +243,7 @@ ACMD(do_shuffle)
   struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
   int count = 0;
 
-  if (!(obj = get_obj_in_list_vis(g, ch, (char[]){"case"}, nullptr, char_get_inventory(ch)))) {
+  if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
     send_to_char(g, ch, "You don't have a case.\r\n");
     return;
   }

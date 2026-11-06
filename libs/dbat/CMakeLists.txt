@@ -1,20 +1,21 @@
 add_library(dbat STATIC)
 add_library(dbat::dbat ALIAS dbat)
 
-target_compile_features(dbat PUBLIC c_std_23)
+target_compile_features(dbat PUBLIC cxx_std_26)
 
-# Flags shared by every C file in the server. Keep in sync with c_flags in build.zig.
-set(DBAT_C_FLAGS
+# Flags shared by every source file in the server.
+set(DBAT_CXX_FLAGS
     -g -fno-omit-frame-pointer
-    -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wmissing-prototypes
+    -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wmissing-declarations
+    -Wno-missing-field-initializers  # designated initializers leave the rest zeroed on purpose
     -Wno-format-truncation  # snprintf truncating is the intended, bounded behaviour
     -Wno-unused-result      # 45 unchecked fscanf/fgets/system results; tracked separately
-    -Werror=format-security -Werror=return-type -Werror=implicit-function-declaration
-    -Wshadow -Wredundant-decls -Wwrite-strings
+    -Werror=format-security -Werror=return-type
+    -Wshadow -Wredundant-decls
     # GCC-only checks for conditions that are always true/false or branches that are identical
-    $<$<C_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches>
+    $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches>
     CACHE INTERNAL "")
-target_compile_options(dbat PRIVATE ${DBAT_C_FLAGS})
+target_compile_options(dbat PRIVATE ${DBAT_CXX_FLAGS})
 
 target_include_directories(dbat
     PUBLIC
@@ -22,9 +23,9 @@ target_include_directories(dbat
         $<INSTALL_INTERFACE:include>
 )
 
-# Global up src/*.c
+# Global up src/*.cpp
 file(GLOB_RECURSE SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
 # Also glob up include/*.h
@@ -42,39 +43,39 @@ target_sources(dbat
         ${INCLUDE}
 )
 
-add_executable(dbat_test_game_world tests/test_game_world.c)
-target_compile_options(dbat_test_game_world PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_game_world tests/test_game_world.cpp)
+target_compile_options(dbat_test_game_world PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_game_world PRIVATE dbat::dbat)
 add_test(NAME game_world COMMAND dbat_test_game_world)
 
-add_library(dbat_test_harness STATIC tests/harness.c)
-target_compile_options(dbat_test_harness PRIVATE ${DBAT_C_FLAGS})
+add_library(dbat_test_harness STATIC tests/harness.cpp)
+target_compile_options(dbat_test_harness PRIVATE ${DBAT_CXX_FLAGS})
 target_compile_definitions(dbat_test_harness PRIVATE DBAT_TEST_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/world")
 target_link_libraries(dbat_test_harness PUBLIC dbat::dbat)
 
-add_executable(dbat_test_world tests/test_world.c)
-target_compile_options(dbat_test_world PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_world tests/test_world.cpp)
+target_compile_options(dbat_test_world PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_world PRIVATE dbat_test_harness)
 add_test(NAME world COMMAND dbat_test_world)
 
-add_executable(dbat_test_bad_data tests/test_bad_data.c)
-target_compile_options(dbat_test_bad_data PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_bad_data tests/test_bad_data.cpp)
+target_compile_options(dbat_test_bad_data PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_bad_data PRIVATE dbat_test_harness)
 add_test(NAME bad_data COMMAND dbat_test_bad_data)
 
-add_executable(dbat_test_gameplay tests/test_gameplay.c)
-target_compile_options(dbat_test_gameplay PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_gameplay tests/test_gameplay.cpp)
+target_compile_options(dbat_test_gameplay PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_gameplay PRIVATE dbat_test_harness m)
 add_test(NAME gameplay COMMAND dbat_test_gameplay)
 
-add_executable(dbat_test_commands tests/test_commands.c)
-target_compile_options(dbat_test_commands PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_commands tests/test_commands.cpp)
+target_compile_options(dbat_test_commands PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_commands PRIVATE dbat_test_harness)
 add_test(NAME commands COMMAND dbat_test_commands)
 set_tests_properties(commands PROPERTIES LABELS slow TIMEOUT 3600)
 
-add_executable(dbat_test_bot tests/test_bot.c)
-target_compile_options(dbat_test_bot PRIVATE ${DBAT_C_FLAGS})
+add_executable(dbat_test_bot tests/test_bot.cpp)
+target_compile_options(dbat_test_bot PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)
 add_test(NAME bot COMMAND dbat_test_bot)
 add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/tests/corpus)
@@ -83,7 +84,7 @@ add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/
 if(DBAT_FUZZ)
   target_compile_definitions(dbat_test_harness PRIVATE DBAT_FUZZ)
   foreach(target load boot script bot)
-    add_executable(dbat_fuzz_${target} tests/fuzz/fuzz_${target}.c tests/fuzz/fuzz.c)
+    add_executable(dbat_fuzz_${target} tests/fuzz/fuzz_${target}.cpp tests/fuzz/fuzz.cpp)
     target_include_directories(dbat_fuzz_${target} PRIVATE tests tests/fuzz)
     target_compile_options(dbat_fuzz_${target} PRIVATE -g)
     target_link_libraries(dbat_fuzz_${target} PRIVATE dbat_test_harness)

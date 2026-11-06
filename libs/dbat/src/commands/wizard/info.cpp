@@ -602,9 +602,10 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   if (!char_is_npc(k)) {
     char buf1[64], cmbuf2[64];
+    time_t created = char_get_time_created(k), logon = char_get_time_logon(k);
 
-    strlcpy(buf1, asctime(localtime(&(time_t){char_get_time_created(k)})), sizeof(buf1));
-    strlcpy(cmbuf2, asctime(localtime(&(time_t){char_get_time_logon(k)})), sizeof(cmbuf2));
+    strlcpy(buf1, asctime(localtime(&created)), sizeof(buf1));
+    strlcpy(cmbuf2, asctime(localtime(&logon)), sizeof(cmbuf2));
     buf1[10] = cmbuf2[10] = '\0';
 
     send_to_char(g, ch, "Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n",
@@ -1007,11 +1008,12 @@ ACMD(do_last)
     return;
   }
 
+  time_t logon = char_get_time_logon(vict);
   send_to_char(g, ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
                char_get_idnum(vict), (int)char_get_level(vict),
                char_race_abbr(vict), char_class_abbr(vict),
                char_get_name(vict), char_get_player_specials(vict)->host && *char_get_player_specials(vict)->host ? char_get_player_specials(vict)->host : "(NOHOST)",
-               ctime(&(time_t){char_get_time_logon(vict)}));
+               ctime(&logon));
   free_char(g, vict);
 }
 
@@ -1189,11 +1191,14 @@ ACMD(do_show)
         send_to_char(g, ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
 
       /* ctime() uses static buffer: do not combine. */
-      send_to_char(g, ch, "Started: %-20.16s  ", ctime(&(time_t){char_get_time_created(vict)}));
-      send_to_char(g, ch, "Last: %-20.16s  Played: %3dh %2dm\r\n",
-                   ctime(&(time_t){char_get_time_logon(vict)}),
-                   (int)(char_get_time_played(vict) / 3600),
-                   (int)(char_get_time_played(vict) / 60 % 60));
+      {
+        time_t created = char_get_time_created(vict), logon = char_get_time_logon(vict);
+        send_to_char(g, ch, "Started: %-20.16s  ", ctime(&created));
+        send_to_char(g, ch, "Last: %-20.16s  Played: %3dh %2dm\r\n",
+                     ctime(&logon),
+                     (int)(char_get_time_played(vict) / 3600),
+                     (int)(char_get_time_played(vict) / 60 % 60));
+      }
       free_char(g, vict);
       break;
 
@@ -2275,7 +2280,7 @@ struct audit_reader {
 
 static void audit_report_to_char(void *context, const char *problem)
 {
-  struct audit_reader *reader = context;
+  struct audit_reader *reader = static_cast<struct audit_reader *>(context);
 
   send_to_char(reader->g, reader->ch, "%s\r\n", problem);
 }

@@ -20,7 +20,7 @@ def signature(output, returncode):
                 summary = line[line.index("runtime error:"):]
             elif "SUMMARY: " in line:
                 summary = line[line.index("SUMMARY: ") + 9:]
-        if frame is None and "/libs/dbat/src/" in line and "_utils.c" not in line:
+        if frame is None and "/libs/dbat/src/" in line and "_utils.cpp" not in line:
             match = re.search(r" in (\S+)", line)
             if match:
                 frame = match.group(1)

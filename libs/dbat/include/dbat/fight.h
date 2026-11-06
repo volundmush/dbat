@@ -3,6 +3,10 @@
 #include "dbat/consts/maximums.h"
 #include "spells.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // global variables
 extern const struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
 
@@ -22,3 +26,7 @@ void solo_gain(GameWorld *g, struct char_data *ch, struct char_data *victim);
 void mutant_limb_regen(GameWorld *g, struct char_data *ch);
 
 // commands
+
+#ifdef __cplusplus
+}
+#endif

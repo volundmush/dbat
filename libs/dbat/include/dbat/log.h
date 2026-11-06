@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* mudlog() verbosity levels, matched against a player's syslog setting */
 enum log_level { LOG_OFF = 0,
                  LOG_BRF = 1,
@@ -39,3 +43,7 @@ void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...) _
       abort();                                                              \
     }                                                                       \
   } while (0)
+
+#ifdef __cplusplus
+}
+#endif

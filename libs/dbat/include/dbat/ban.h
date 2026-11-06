@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/maximums.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* don't change these */
 constexpr int BAN_NOT    = 0;
 constexpr int BAN_NEW    = 1;
@@ -29,3 +33,7 @@ ACMD(do_ban);
 ACMD(do_unban);
 
 constexpr int MAX_INVALID_NAMES = 200;
+
+#ifdef __cplusplus
+}
+#endif

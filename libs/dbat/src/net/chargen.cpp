@@ -12,6 +12,7 @@
 #include "dbat/config.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/statedit.h"
+#include "dbat/interpreter.h"
 
 #include <unistd.h>
 #include "nanny_internal.h"

@@ -8,13 +8,12 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/db.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
+#include "dbat/dg_olc.h"
 #include "dbat/game_world.h"
 
 static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
 static void parse_edit_action(GameWorld *g, int command, char *string, struct descriptor_data *d);
 static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
-
-bool format_script(GameWorld *g, struct descriptor_data *d);
 
 void send_editor_help(GameWorld *g, struct descriptor_data *d)
 {

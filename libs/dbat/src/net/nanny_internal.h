@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Shared by nanny.c, chargen.c and accounts.c only. */
 #include "dbat/consts/types.h"
 
@@ -21,3 +25,7 @@ bool lockRead(const char *name);
 void userCreate(struct descriptor_data *d);
 void userDelete(GameWorld *g, struct descriptor_data *d);
 void userRead(GameWorld *g, struct descriptor_data *d);
+
+#ifdef __cplusplus
+}
+#endif

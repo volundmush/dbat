@@ -34,7 +34,7 @@ for side in ref new; do
   port_var=port_$side
   # The ref may predate GameWorld; `finish` above leaves gdb in init_game, where g is in scope.
   tree=$root; [ $side = ref ] && tree=$work/ref-src
-  call='roundtrip_dump()'; grep -q 'roundtrip_dump(GameWorld' "$tree/tools/roundtrip.c" && call='roundtrip_dump(g)'
+  call='roundtrip_dump()'; grep -qs 'roundtrip_dump(GameWorld' "$tree"/tools/roundtrip.c* && call='roundtrip_dump(g)'
   srandom='circle_srandom(12345)'; grep -q 'circle_srandom(GameWorld' "$tree/libs/dbat/include/dbat/random.h" && srandom='circle_srandom(g, 12345)'
   sed "s/@PORT@/${!port_var}/; s/@ROUNDTRIP@/$call/; s/@SRANDOM@/$srandom/" "$work/rt.gdb.in" > "$work/$side/rt.gdb"
 done

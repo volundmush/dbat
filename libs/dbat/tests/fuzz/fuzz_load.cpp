@@ -19,8 +19,8 @@
 static GameWorld *g;
 static struct char_data *loading; /* who's left half-loaded if the game refuses their file */
 
-int LLVMFuzzerInitialize(int *, char ***);
-int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
+extern "C" int LLVMFuzzerInitialize(int *, char ***);
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 
 int LLVMFuzzerInitialize(int *, char ***)
 {

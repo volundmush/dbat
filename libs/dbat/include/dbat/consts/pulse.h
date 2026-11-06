@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * OPT_USEC determines how many commands will be processed by the MUD per
  * second and how frequently it does socket I/O.  A low setting will cause
@@ -54,3 +58,7 @@ constexpr int SECS_PER_REAL_MIN  = 60;
 constexpr int SECS_PER_REAL_HOUR = (60 * SECS_PER_REAL_MIN);
 constexpr int SECS_PER_REAL_DAY  = (24 * SECS_PER_REAL_HOUR);
 constexpr int SECS_PER_REAL_YEAR = (365 * SECS_PER_REAL_DAY);
+
+#ifdef __cplusplus
+}
+#endif

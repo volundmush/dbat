@@ -20,6 +20,7 @@
 #include "dbat/config.h"
 #include "dbat/fileop.h"
 #include "dbat/affect.h"
+#include "dbat/genolc.h"
 #include <stdckdint.h>
 #include "dbat/interpreter.h"
 #include "dbat/atomicfile.h"
@@ -35,8 +36,6 @@ constexpr int LOAD_KI   = 3;
 constexpr int LOAD_LIFE = 4;
 
 /* local functions */
-void build_player_index(GameWorld *g);
-int sprintascii(char *out, bitvector_t bits);
 static void tag_argument(char *argument, char *tag);
 static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch);
 static void skip_affects(FILE *fl);
@@ -1002,7 +1001,7 @@ void save_char(GameWorld *g, struct char_data *ch)
   if (char_get_mimic(ch)) fprintf(fl, "Mimi: %d\n", char_get_mimic(ch));
   if (char_get_skill_slots(ch) != PFDEF_EYE) fprintf(fl, "Slot: %d\n", char_get_skill_slots(ch));
   if (char_get_tail_growth(ch) != PFDEF_EYE) fprintf(fl, "Tgro: %d\n", char_get_tail_growth(ch));
-  if (char_get_rdisplay(ch) != PFDEF_EYE) fprintf(fl, "rDis: %s\n", char_get_rdisplay(ch));
+  if (char_get_rdisplay(ch)) fprintf(fl, "rDis: %s\n", char_get_rdisplay(ch));
   if (char_get_relax_count(ch) != PFDEF_EYE) fprintf(fl, "Rela: %d\n", char_get_relax_count(ch));
 
   /* Save skills */

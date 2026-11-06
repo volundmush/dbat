@@ -252,8 +252,8 @@ static void check_affects_on_two_skills_stay_apart(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct affected_type first = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_SKILL, .modifier = 2, .specific = SKILL_HAYASA};
-  struct affected_type second = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_SKILL, .modifier = 3, .specific = SKILL_FOCUS};
+  struct affected_type first = {.type = SPELL_SLEEP, .duration = 5, .modifier = 2, .location = APPLY_SKILL, .specific = SKILL_HAYASA};
+  struct affected_type second = {.type = SPELL_SLEEP, .duration = 5, .modifier = 3, .location = APPLY_SKILL, .specific = SKILL_FOCUS};
   int hayasa = char_get_skills_mod(ch, SKILL_HAYASA), focus = char_get_skills_mod(ch, SKILL_FOCUS);
 
   affect_join(g, ch, &first, false, false, false, false);
@@ -299,7 +299,7 @@ static void check_infravision_comes_off_an_android(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player_as(g, "Tester", ADMLVL_NONE, RACE_ANDROID, 0);
-  struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_ACCURACY, .modifier = 7, .bitvector = AFF_INFRAVISION};
+  struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .modifier = 7, .location = APPLY_ACCURACY, .bitvector = AFF_INFRAVISION};
   int accuracy = char_get_accuracy(ch);
 
   affect_to_char(g, ch, &af);
@@ -598,7 +598,7 @@ static void check_more_affects_than_a_save_holds(void)
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
 
   for (int i = 0; i < MAX_AFFECT + 20; i++) {
-    struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .location = APPLY_ACCURACY, .modifier = 1};
+    struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .modifier = 1, .location = APPLY_ACCURACY};
 
     affect_to_char(g, ch, &af);
   }
@@ -664,14 +664,14 @@ static void check_saying_something_to_someone(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct char_data *friend = th_player(g, "Friend", ADMLVL_NONE);
+  struct char_data *listener = th_player(g, "Friend", ADMLVL_NONE);
 
-  move_next_to(g, friend, ch);
-  th_take_output(g, friend);
+  move_next_to(g, listener, ch);
+  th_take_output(g, listener);
   th_type(g, ch, "say to Friend hello there");
-  CHECK(saw(friend, "says to"));
-  CHECK(saw(friend, "hello there"));
-  CHECK(!saw(friend, "to Friend hello"));
+  CHECK(saw(listener, "says to"));
+  CHECK(saw(listener, "hello there"));
+  CHECK(!saw(listener, "to Friend hello"));
   th_shutdown(g);
 }
 

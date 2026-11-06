@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "db.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int STRING_TERMINATOR = '~';
 
 #define CONFIG_GENOLC_MOBPROG 0
@@ -47,3 +51,7 @@ constexpr int SL_HLP = SL_MAX + 2; /* must be above MAX */
 room_vnum genolc_zone_bottom(GameWorld *g, zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
 void create_world_index(GameWorld *g, zone_vnum znum, const char *type);
+
+#ifdef __cplusplus
+}
+#endif

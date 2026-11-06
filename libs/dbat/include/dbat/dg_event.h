@@ -15,6 +15,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********** Event related section *********/
 
 #define EVENTFUNC(name) long(name)(GameWorld *g, void *event_obj)
@@ -55,3 +59,7 @@ long event_time(GameWorld *g, struct event *event);
 void event_free_all(GameWorld *g);
 
 /* - queues - function protos need by other modules */
+
+#ifdef __cplusplus
+}
+#endif

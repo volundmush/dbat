@@ -5,7 +5,7 @@
 #include <unistd.h>
 #define alarm(seconds) 0 /* libFuzzer has its own, using the same signal */
 #define main bot_main
-#include "../test_bot.c"
+#include "../test_bot.cpp"
 #undef main
 #include "fuzz.h"
 
@@ -39,7 +39,7 @@ static bool possible(const char *line)
   return true;
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

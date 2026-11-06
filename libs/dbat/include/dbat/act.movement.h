@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/maximums.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // global variables
 extern const char *const cmd_door[NUM_DOOR_CMD];
 
@@ -26,3 +30,7 @@ ACMD(do_follow);
 ACMD(do_carry);
 ACMD(do_land);
 ACMD(do_move);
+
+#ifdef __cplusplus
+}
+#endif

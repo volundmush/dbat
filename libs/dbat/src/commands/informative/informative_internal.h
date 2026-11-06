@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Declarations shared by the files split out of act.informative.c. */
 #include "dbat/consts/types.h"
 
@@ -17,3 +21,7 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
 void look_out_window(GameWorld *g, struct char_data *ch, char *arg);
 void trans_check(GameWorld *g, struct char_data *ch, struct char_data *vict);
 void search_in_direction(GameWorld *g, struct char_data *ch, int dir);
+
+#ifdef __cplusplus
+}
+#endif

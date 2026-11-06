@@ -3,6 +3,10 @@
 #include "flags.h"
 #include "dbat/rooms.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int rroom_sect(GameWorld *g, room_rnum room);
 int rroom_get_dmg(GameWorld *g, room_rnum room);
 void rroom_set_dmg(GameWorld *g, room_rnum room, int v);
@@ -97,3 +101,7 @@ struct extra_descr_data **room_ex_description_slot(struct room_data *room);
 char **room_description_slot(struct room_data *room);
 struct obj_data **rroom_contents_slot(GameWorld *g, room_rnum room);
 struct char_data **rroom_people_slot(GameWorld *g, room_rnum room);
+
+#ifdef __cplusplus
+}
+#endif

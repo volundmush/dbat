@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Colors that the player can define */
 constexpr int COLOR_NORMAL     = 0;
 constexpr int COLOR_ROOMNAME   = 1;
@@ -18,3 +22,7 @@ constexpr int COLOR_YOUSAY     = 14;
 constexpr int COLOR_ROOMSAY    = 15;
 
 constexpr int NUM_COLOR = 16;
+
+#ifdef __cplusplus
+}
+#endif

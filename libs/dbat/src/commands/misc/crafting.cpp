@@ -479,7 +479,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
 
   obj_set_value(pole, 0, 0);
   obj_to_room(g, fish, char_get_in_room(ch));
-  do_get(g, ch, (char[]){"fish"}, 0, 0);
+  do_get(g, ch, writable{"fish"}, 0, 0);
   send_to_char(g, ch, "@D[@cFish Weight@D: @G%" PRId64 "@D]@n\r\n", obj_get_weight(fish));
   char_plr_set(ch, PLR_FISHING, false);
   char_set_accuracy_mod(ch, 0);
@@ -1250,7 +1250,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
-        do_get(g, ch, (char[]){"headsash"}, 0, 0);
+        do_get(g, ch, writable{"headsash"}, 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "wrist")) {
@@ -1309,7 +1309,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
-        do_get(g, ch, (char[]){"wristband"}, 0, 0);
+        do_get(g, ch, writable{"wristband"}, 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "belt")) {
@@ -1368,7 +1368,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
-        do_get(g, ch, (char[]){"belt"}, 0, 0);
+        do_get(g, ch, writable{"belt"}, 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else {
@@ -2297,7 +2297,7 @@ ACMD(do_feed)
   act(g, "@WYou take $p@W and pop it into @C$N@W's mouth!@n", true, ch, obj, vict, TO_CHAR);
   act(g, "@C$n@W takes $p@W and pops it into YOUR mouth!@n", true, ch, obj, vict, TO_VICT);
   act(g, "@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", true, ch, obj, vict, TO_NOTVICT);
-  mag_objectmagic(g, vict, obj, (char[]){""});
+  mag_objectmagic(g, vict, obj, writable{""});
 }
 
 /* This allows players to decapitate a corpse for a sick trophy. */

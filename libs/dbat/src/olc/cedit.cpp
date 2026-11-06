@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stddef.h>
+#include <type_traits>
 #include "dbat/utils.h"
 #include "dbat/consts/create.h"
 #include "dbat/config.h"
@@ -61,7 +62,12 @@ struct cedit_option {
 };
 
 /* The field's offset, refusing to compile unless the field has type T. */
-#define FIELD(f, T) (offsetof(struct config_data, f) + 0 * sizeof(_Generic(((struct config_data *)0)->f, T: 1)))
+template <typename Field, typename T> consteval size_t checked_offset(size_t offset)
+{
+  static_assert(std::is_same_v<Field, T>, "cedit option has the wrong type for its field");
+  return offset;
+}
+#define FIELD(f, T) checked_offset<decltype(((struct config_data *)0)->f), T>(offsetof(struct config_data, f))
 
 #define BOOL(f)       .type = CT_BOOL, .offset = FIELD(f, int)
 #define INT(f)        .type = CT_INT, .offset = FIELD(f, int)
@@ -77,194 +83,194 @@ struct cedit_option {
 
 static const struct cedit_option cedit_options[] = {
     /* Game play options: menu G, apart from the two creation options (menu N) */
-    {"pk_allowed", "* Is player killing allowed on the mud?\n", BOOL(play.pk_allowed),
+    {.key = "pk_allowed", .comment = "* Is player killing allowed on the mud?\n", BOOL(play.pk_allowed),
      .section = "Game Play Options", MENU('G', 'A', "Player Killing Allowed  ")},
-    {"pt_allowed", "* Is player thieving allowed on the mud?\n", BOOL(play.pt_allowed),
+    {.key = "pt_allowed", .comment = "* Is player thieving allowed on the mud?\n", BOOL(play.pt_allowed),
      MENU('G', 'B', "Player Thieving Allowed ")},
-    {"level_can_shout", "* What is the minimum level a player can shout/gossip/etc?\n", INT(play.level_can_shout),
+    {.key = "level_can_shout", .comment = "* What is the minimum level a player can shout/gossip/etc?\n", INT(play.level_can_shout),
      MENU('G', 'C', "Minimum Level To Shout  "), .prompt = "Enter the minimum level a player must be to shout, gossip, etc : "},
-    {"holler_move_cost", "* How many movement points does shouting cost the player?\n", INT(play.holler_move_cost),
+    {.key = "holler_move_cost", .comment = "* How many movement points does shouting cost the player?\n", INT(play.holler_move_cost),
      MENU('G', 'D', "Holler Move Cost        "), .prompt = "Enter the amount it costs (in move points) to holler : "},
-    {"tunnel_size", "* How many players can fit in a tunnel?\n", INT(play.tunnel_size),
+    {.key = "tunnel_size", .comment = "* How many players can fit in a tunnel?\n", INT(play.tunnel_size),
      MENU('G', 'E', "Tunnel Size             "), .prompt = "Enter the maximum number of people allowed in a tunnel : "},
-    {"max_exp_gain", "* Maximum experience gainable per kill?\n", INT(play.max_exp_gain),
+    {.key = "max_exp_gain", .comment = "* Maximum experience gainable per kill?\n", INT(play.max_exp_gain),
      MENU('G', 'F', "Maximum Experience Gain "), .prompt = "Enter the maximum gain of experience per kill for players : "},
-    {"max_exp_loss", "* Maximum experience loseable per death?\n", INT(play.max_exp_loss),
+    {.key = "max_exp_loss", .comment = "* Maximum experience loseable per death?\n", INT(play.max_exp_loss),
      MENU('G', 'G', "Maximum Experience Loss "), .prompt = "Enter the maximum loss of experience per death for players : "},
-    {"max_npc_corpse_time", "* Number of tics before NPC corpses decompose.\n", INT(play.max_npc_corpse_time),
+    {.key = "max_npc_corpse_time", .comment = "* Number of tics before NPC corpses decompose.\n", INT(play.max_npc_corpse_time),
      MENU('G', 'H', "Max Time for NPC Corpse "), .prompt = "Enter the number of tics before NPC corpses decompose : "},
-    {"max_pc_corpse_time", "* Number of tics before PC corpses decompose.\n", INT(play.max_pc_corpse_time),
+    {.key = "max_pc_corpse_time", .comment = "* Number of tics before PC corpses decompose.\n", INT(play.max_pc_corpse_time),
      MENU('G', 'I', "Max Time for PC Corpse  "), .prompt = "Enter the number of tics before PC corpses decompose : "},
-    {"idle_void", "* Number of tics before a PC is sent to the void.\n", INT(play.idle_void),
+    {.key = "idle_void", .comment = "* Number of tics before a PC is sent to the void.\n", INT(play.idle_void),
      MENU('G', 'J', "Tics before PC sent to void "), .prompt = "Enter the number of tics before PC's are sent to the void (idle) : "},
-    {"idle_rent_time", "* Number of tics before a PC is autorented.\n", INT(play.idle_rent_time),
+    {.key = "idle_rent_time", .comment = "* Number of tics before a PC is autorented.\n", INT(play.idle_rent_time),
      MENU('G', 'K', "Tics before PC is autosaved "),
      .prompt = "Enter the number of tics before PC's are automatically rented and forced to quit : "},
-    {"idle_max_level", "* Admin level and above of players whom are immune to idle penalties.\n", INT(play.idle_max_level),
+    {.key = "idle_max_level", .comment = "* Admin level and above of players whom are immune to idle penalties.\n", INT(play.idle_max_level),
      .flags  = CO_OLD_ADMLEVEL, MENU('G', 'L', "Level Immune To IDLE        "),
      .prompt = "Enter the level a player must be to become immune to IDLE : "},
-    {"dts_are_dumps", "* Should the items in death traps be junked automatically?\n", BOOL(play.dts_are_dumps),
+    {.key = "dts_are_dumps", .comment = "* Should the items in death traps be junked automatically?\n", BOOL(play.dts_are_dumps),
      MENU('G', 'M', "Death Traps Junk Items      ")},
-    {"load_into_inventory", "* When an immortal loads an object, should it load into their inventory?\n",
+    {.key = "load_into_inventory", .comment = "* When an immortal loads an object, should it load into their inventory?\n",
      BOOL(play.load_into_inventory), MENU('G', 'N', "Objects Load Into Inventory ")},
-    {"track_through_doors", "* Should PC's be able to track through hidden or closed doors?\n", BOOL(play.track_through_doors),
+    {.key = "track_through_doors", .comment = "* Should PC's be able to track through hidden or closed doors?\n", BOOL(play.track_through_doors),
      MENU('G', 'O', "Track Through Doors         ")},
-    {"level_cap", "* What is the level that cannot be attained?\n", INT(play.level_cap),
+    {.key = "level_cap", .comment = "* What is the level that cannot be attained?\n", INT(play.level_cap),
      MENU('G', 'R', "Unattainable Level          "), .prompt = "Enter the number a character cannot level to : "},
-    {"stack_mobs", "* Stack mobiles when showing contents of rooms?\n", BOOL(play.stack_mobs),
+    {.key = "stack_mobs", .comment = "* Stack mobiles when showing contents of rooms?\n", BOOL(play.stack_mobs),
      MENU('G', '1', "Stack Mobiles in room descs ")},
-    {"stack_objs", "* Stack objects when showing contents of rooms?\n", BOOL(play.stack_objs),
+    {.key = "stack_objs", .comment = "* Stack objects when showing contents of rooms?\n", BOOL(play.stack_objs),
      MENU('G', '2', "Stack Objects in room descs ")},
-    {"mob_fighting", "* Allow aggressive mobs to attack other mobs?\n", BOOL(play.mob_fighting),
+    {.key = "mob_fighting", .comment = "* Allow aggressive mobs to attack other mobs?\n", BOOL(play.mob_fighting),
      MENU('G', '3', "Allow mobs to fight mobs    ")},
-    {"disp_closed_doors", "* Should closed doors be shown on autoexit / exit?\n", BOOL(play.disp_closed_doors),
+    {.key = "disp_closed_doors", .comment = "* Should closed doors be shown on autoexit / exit?\n", BOOL(play.disp_closed_doors),
      MENU('G', 'P', "Display Closed Doors        ")},
-    {"reroll_stats", "* Should players be able to reroll stats at creation?\n", BOOL(play.reroll_player),
+    {.key = "reroll_stats", .comment = "* Should players be able to reroll stats at creation?\n", BOOL(play.reroll_player),
      MENU('N', 'B', "Players can reroll stats on creation ")},
-    {"initial_points", "* How many points in players initial points pool if using point pool creation?\n",
+    {.key = "initial_points", .comment = "* How many points in players initial points pool if using point pool creation?\n",
      INT(play.initial_points), RANGE(0, INT_MAX),
      MENU('N', 'C', "Number of points in initial points pool for pool generation methods "), .suffix = " ",
      .prompt = "Enter size of initial points pool. (0 or greater). "},
-    {"compression", "* Should compression be used if the client supports it?\n", BOOL(play.enable_compression),
+    {.key = "compression", .comment = "* Should compression be used if the client supports it?\n", BOOL(play.enable_compression),
      MENU('G', '8', "Allow MCCP2 stream compression (recommended)")},
-    {"enable_languages", "* Should spoken languages be used?\n", BOOL(play.enable_languages),
+    {.key = "enable_languages", .comment = "* Should spoken languages be used?\n", BOOL(play.enable_languages),
      MENU('G', '9', "Allow spoken languages ")},
-    {"all_items_unique", "* Should all items be treated as unique?\n", BOOL(play.all_items_unique),
+    {.key = "all_items_unique", .comment = "* Should all items be treated as unique?\n", BOOL(play.all_items_unique),
      MENU('G', 'S', "Treat all Objects as Unique ")},
-    {"exp_multiplier", "* Amount of in game experience multiplier.\n", FLOAT(play.exp_multiplier),
+    {.key = "exp_multiplier", .comment = "* Amount of in game experience multiplier.\n", FLOAT(play.exp_multiplier),
      MENU('G', 'T', "Experience multiplier       "),
      .prompt = "Enter the multiplier a player will recieve to experience gained : "},
-    {"ok", "* Text sent to players when OK is all that is needed.\n", MSG(play.OK),
+    {.key = "ok", .comment = "* Text sent to players when OK is all that is needed.\n", MSG(play.OK),
      MENU('G', '4', "OK Message Text         "), .prompt = "Enter the OK message : "},
-    {"noperson", "* Text sent to players when noone is available.\n", MSG(play.NOPERSON),
+    {.key = "noperson", .comment = "* Text sent to players when noone is available.\n", MSG(play.NOPERSON),
      MENU('G', '5', "NOPERSON Message Text   "), .prompt = "Enter the NOPERSON message : "},
-    {"noeffect", "* Text sent to players when an effect fails.\n", MSG(play.NOEFFECT), .flags = CO_NOBLANK,
+    {.key = "noeffect", .comment = "* Text sent to players when an effect fails.\n", MSG(play.NOEFFECT), .flags = CO_NOBLANK,
      MENU('G', '6', "NOEFFECT Message Text   "), .prompt = "Enter the NOEFFECT message : "},
 
     /* Rent and crashsave options: menu C */
-    {"free_rent",
-     "* Should the MUD allow you to 'rent' for free?  (i.e. if you just quit,\n"
+    {.key = "free_rent",
+     .comment = "* Should the MUD allow you to 'rent' for free?  (i.e. if you just quit,\n"
      "* your objects are saved at no cost, as in Merc-type MUDs.)\n",
      BOOL(csd.free_rent), .section = "Rent/Crashsave Options", MENU('C', 'A', "Free Rent          ")},
-    {"max_obj_save", "* Maximum number of items players are allowed to rent.\n", INT(csd.max_obj_save),
+    {.key = "max_obj_save", .comment = "* Maximum number of items players are allowed to rent.\n", INT(csd.max_obj_save),
      MENU('C', 'B', "Max Objects Saved  "), .prompt = "Enter the maximum number of items players can rent : "},
-    {"min_rent_cost", "* Receptionist's surcharge on top of item costs.\n", INT(csd.min_rent_cost),
+    {.key = "min_rent_cost", .comment = "* Receptionist's surcharge on top of item costs.\n", INT(csd.min_rent_cost),
      MENU('C', 'C', "Minimum Rent Cost  "), .prompt = "Enter the surcharge on top of item costs : "},
-    {"auto_save", "* Should the game automatically save people?\n", BOOL(csd.auto_save),
+    {.key = "auto_save", .comment = "* Should the game automatically save people?\n", BOOL(csd.auto_save),
      MENU('C', 'D', "Auto Save          ")},
-    {"autosave_time", "* If auto_save = 1, how often (in minutes) should the game save people's objects?\n",
+    {.key = "autosave_time", .comment = "* If auto_save = 1, how often (in minutes) should the game save people's objects?\n",
      INT(csd.autosave_time), MENU('C', 'E', "Auto Save Time     "), .suffix = " minute(s)",
      .prompt = "Enter how often (in minutes) should the MUD save players : "},
-    {"crash_file_timeout", "* Lifetime of crashfiles and force-rent (idlesave) files in days.\n",
+    {.key = "crash_file_timeout", .comment = "* Lifetime of crashfiles and force-rent (idlesave) files in days.\n",
      INT(csd.crash_file_timeout), MENU('C', 'F', "Crash File Timeout "), .suffix = " day(s)",
      .prompt = "Enter the lifetime of crash and idlesave files (days) : "},
-    {"rent_file_timeout", "* Lifetime of normal rent files in days.\n", INT(csd.rent_file_timeout),
+    {.key = "rent_file_timeout", .comment = "* Lifetime of normal rent files in days.\n", INT(csd.rent_file_timeout),
      MENU('C', 'G', "Rent File Timeout  "), .suffix = " day(s)",
      .prompt = "Enter the lifetime of normal rent files (days) : "},
 
     /* Room numbers: menu R */
-    {"mortal_start_room", "* The virtual number of the room that mortals should enter at.\n",
+    {.key = "mortal_start_room", .comment = "* The virtual number of the room that mortals should enter at.\n",
      ROOM(room_nums.mortal_start_room), .section = "Room Numbers", MENU('R', 'A', "Mortal Start Room   "),
      .prompt = "Enter the room's vnum where mortals should load into : "},
-    {"immort_start_room", "* The virtual number of the room that immorts should enter at.\n",
+    {.key = "immort_start_room", .comment = "* The virtual number of the room that immorts should enter at.\n",
      ROOM(room_nums.immort_start_room), MENU('R', 'B', "Immortal Start Room "),
      .prompt = "Enter the room's vnum where immortals should load into : "},
-    {"frozen_start_room", "* The virtual number of the room that frozen people should enter at.\n",
+    {.key = "frozen_start_room", .comment = "* The virtual number of the room that frozen people should enter at.\n",
      ROOM(room_nums.frozen_start_room), MENU('R', 'C', "Frozen Start Room   "),
      .prompt = "Enter the room's vnum where frozen people should load into : "},
-    {"donation_room_1",
-     "* The virtual numbers of the donation rooms.  Note: Add donation rooms\n"
+    {.key = "donation_room_1",
+     .comment = "* The virtual numbers of the donation rooms.  Note: Add donation rooms\n"
      "* sequentially (1 & 2 before 3). If you don't, you might not be able to\n"
      "* donate. Use -1 for 'no such room'.\n",
      ROOM(room_nums.donation_room_1), .flags = CO_NOBLANK, MENU('R', '1', "Donation Room #1    "),
      .prompt = "Enter the vnum for donation room #1 : "},
-    {"donation_room_2", nullptr, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
+    {.key = "donation_room_2", .comment = nullptr, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
      MENU('R', '2', "Donation Room #2    "), .prompt = "Enter the vnum for donation room #2 : "},
-    {"donation_room_3", nullptr, ROOM(room_nums.donation_room_3),
+    {.key = "donation_room_3", .comment = nullptr, ROOM(room_nums.donation_room_3),
      MENU('R', '3', "Donation Room #3    "), .prompt = "Enter the vnum for donation room #3 : "},
 
     /* Game operation options: menu O */
-    {"DFLT_PORT",
-     "* This is the default port on which the game should run if no port is\n"
+    {.key = "DFLT_PORT",
+     .comment = "* This is the default port on which the game should run if no port is\n"
      "* given on the command-line.  NOTE WELL: If you're using the\n"
      "* 'autorun' script, the port number there will override this setting.\n"
      "* Change the PORT= line in autorun instead of (or in addition to)\n"
      "* changing this.\n",
-     PORT(operation.DFLT_PORT), RANGE(1, UINT16_MAX), .section = "Game Operation Options",
+     PORT(operation.DFLT_PORT), .section = "Game Operation Options", RANGE(1, UINT16_MAX),
      MENU('O', 'A', "Default Port "), .prompt = "Enter the default port number : "},
-    {"DFLT_IP", "* IP address to which the MUD should bind.\n", STR(operation.DFLT_IP),
+    {.key = "DFLT_IP", .comment = "* IP address to which the MUD should bind.\n", STR(operation.DFLT_IP),
      MENU('O', 'B', "Default IP   "), .prompt = "Enter the default IP Address : "},
-    {"DFLT_DIR", "* default directory to use as data directory.\n", STR(operation.DFLT_DIR),
+    {.key = "DFLT_DIR", .comment = "* default directory to use as data directory.\n", STR(operation.DFLT_DIR),
      MENU('O', 'C', "Default Directory   "), .prompt = "Enter the default directory : "},
-    {"LOGNAME", "* What file to log messages to (ex: 'log/syslog').\n", STR(operation.LOGNAME),
+    {.key = "LOGNAME", .comment = "* What file to log messages to (ex: 'log/syslog').\n", STR(operation.LOGNAME),
      MENU('O', 'D', "Logfile Name        "), .prompt = "Enter the name of the logfile : "},
-    {"max_playing", "* Maximum number of players allowed before game starts to turn people away.\n",
+    {.key = "max_playing", .comment = "* Maximum number of players allowed before game starts to turn people away.\n",
      INT(operation.max_playing), MENU('O', 'E', "Max Players         "), .prompt = "Enter the maximum number of players : "},
-    {"max_filesize", "* Maximum size of bug, typo, and idea files in bytes (to prevent bombing).\n",
+    {.key = "max_filesize", .comment = "* Maximum size of bug, typo, and idea files in bytes (to prevent bombing).\n",
      INT(operation.max_filesize), MENU('O', 'F', "Max Filesize        "), .prompt = "Enter the maximum size of the logs : "},
-    {"max_bad_pws", "* Maximum number of password attempts before disconnection.\n", INT(operation.max_bad_pws),
+    {.key = "max_bad_pws", .comment = "* Maximum number of password attempts before disconnection.\n", INT(operation.max_bad_pws),
      MENU('O', 'G', "Max Bad Pws         "), .prompt = "Enter the maximum number of password attempts : "},
-    {"siteok_everyone", "* Is the site ok for everyone except those that are banned?\n", BOOL(operation.siteok_everyone),
+    {.key = "siteok_everyone", .comment = "* Is the site ok for everyone except those that are banned?\n", BOOL(operation.siteok_everyone),
      MENU('O', 'H', "Site Ok Everyone    ")},
-    {"use_new_socials",
-     "* If you want to use the original social file format\n"
+    {.key = "use_new_socials",
+     .comment = "* If you want to use the original social file format\n"
      "* and disable Aedit, set to 0, otherwise, 1.\n",
      BOOL(operation.use_new_socials), MENU('O', 'J', "Use new socials file"),
      .note = "Please note that using the stock social file will disable AEDIT.\r\n"},
-    {"nameserver_is_slow", "* Unused: sites are always recorded as numeric addresses.\n",
+    {.key = "nameserver_is_slow", .comment = "* Unused: sites are always recorded as numeric addresses.\n",
      BOOL(operation.nameserver_is_slow), MENU('O', 'I', "Name Server Is Slow ")},
-    {"auto_save_olc", "* Should OLC autosave to disk (1) or save internally (0).\n", BOOL(operation.auto_save_olc),
+    {.key = "auto_save_olc", .comment = "* Should OLC autosave to disk (1) or save internally (0).\n", BOOL(operation.auto_save_olc),
      MENU('O', 'K', "OLC autosave to disk")},
-    {"MENU", "* The entrance/exit menu.\n", TEXT(operation.MENU),
+    {.key = "MENU", .comment = "* The entrance/exit menu.\n", TEXT(operation.MENU),
      MENU('O', 'L', "Main Menu           "), .prompt = "Enter the new MENU :\r\n\r\n"},
-    {"WELC_MESSG", "* The welcome message.\n", TEXT(operation.WELC_MESSG),
+    {.key = "WELC_MESSG", .comment = "* The welcome message.\n", TEXT(operation.WELC_MESSG),
      MENU('O', 'M', "Welcome Message     "), .prompt = "Enter the new welcome message :\r\n\r\n"},
-    {"START_MESSG", "* NEWBIE start message.\n", TEXT(operation.START_MESSG),
+    {.key = "START_MESSG", .comment = "* NEWBIE start message.\n", TEXT(operation.START_MESSG),
      MENU('O', 'N', "Start Message       "), .prompt = "Enter the new newbie start message :\r\n\r\n"},
 
     /* Autowiz options: menu A */
-    {"use_autowiz",
-     "* Should the game automatically create a new wizlist/immlist every time\n"
+    {.key = "use_autowiz",
+     .comment = "* Should the game automatically create a new wizlist/immlist every time\n"
      "* someone immorts, or is promoted to a higher (or lower) god level?\n",
      BOOL(autowiz.use_autowiz), .section = "Autowiz Options", MENU('A', 'A', "Use the autowiz        ")},
-    {"min_wizlist_lev", "* If yes, what is the lowest level which should be on the wizlist?\n",
+    {.key = "min_wizlist_lev", .comment = "* If yes, what is the lowest level which should be on the wizlist?\n",
      INT(autowiz.min_wizlist_lev), .flags = CO_RANGE | CO_OLD_ADMLEVEL, .min = 0, .max = ADMLVL_IMPL,
      MENU('A', 'B', "Minimum wizlist level  "),
      .prompt = "Enter the minimum level for players to appear on the wizlist : "},
 
     /* Character advancement options: menu D */
-    {"allow_multiclass", "* Should characters be allowed to advance in multiple classes?\n",
+    {.key = "allow_multiclass", .comment = "* Should characters be allowed to advance in multiple classes?\n",
      BOOL(advance.allow_multiclass), .section = "Character Advancement Options",
      MENU('D', 'A', "Allow multiclass       ")},
-    {"allow_prestige", "* Should characters be allowed to advance in prestige classes?\n",
+    {.key = "allow_prestige", .comment = "* Should characters be allowed to advance in prestige classes?\n",
      BOOL(advance.allow_prestige), MENU('D', 'B', "Allow Prestige Classes ")},
 
     /*
      * Game speed options: menu T. heartbeat() divides by the zone, mobile, autosave, idle
      * password, sanity and timesave pulses (and by idle password * 10 / 15), so those can't be 0.
      */
-    {"pulse_viol", "*Speed of Violence system. 0 - 10 (10) being the slowest.\n", INT(ticks.pulse_violence),
-     RANGE(0, 10), .section = "Game Speed Options", MENU('T', 'A', "Pulse Violence Time  "),
+    {.key = "pulse_viol", .comment = "*Speed of Violence system. 0 - 10 (10) being the slowest.\n", INT(ticks.pulse_violence),
+     .section = "Game Speed Options", RANGE(0, 10), MENU('T', 'A', "Pulse Violence Time  "),
      .prompt = "Enter the Speed of the violence system (1 - 10) 10 = Slowest : "},
-    {"pulse_mobile", "*Speed of Mobile actions. 0 - 20 (20) being the slowest.\n", INT(ticks.pulse_mobile),
+    {.key = "pulse_mobile", .comment = "*Speed of Mobile actions. 0 - 20 (20) being the slowest.\n", INT(ticks.pulse_mobile),
      RANGE(1, 20), MENU('T', 'B', "Mobile Action Time   "),
      .prompt = "Enter the Speed of the Mobile Actions (1 - 20) 20 = Slowest : "},
-    {"pulse_zone", "*Zone updates. 0 - 20 (20) being the slowest.\n", INT(ticks.pulse_zone),
+    {.key = "pulse_zone", .comment = "*Zone updates. 0 - 20 (20) being the slowest.\n", INT(ticks.pulse_zone),
      RANGE(1, 20), MENU('T', 'C', "Zone Time            "), .prompt = "Enter Zone update time : "},
-    {"pulse_autosave", "*Autosave. 0 - 100 (100) being the slowest.\n", INT(ticks.pulse_autosave),
+    {.key = "pulse_autosave", .comment = "*Autosave. 0 - 100 (100) being the slowest.\n", INT(ticks.pulse_autosave),
      RANGE(1, 100), MENU('T', 'D', "Autosave Time        "), .prompt = "Enter time for autosaving : "},
-    {"pulse_idlepwd", "*Idling passwords. 0 - 30 (30) being the slowest.\n", INT(ticks.pulse_idlepwd),
+    {.key = "pulse_idlepwd", .comment = "*Idling passwords. 0 - 30 (30) being the slowest.\n", INT(ticks.pulse_idlepwd),
      RANGE(2, 30), MENU('T', 'E', "Idle Password Time   "),
      .prompt = "Enter the time to kill connection waiting for password : "},
-    {"pulse_sanity", "*Sanity check time.. 0 - 50 (50) being the slowest.\n", INT(ticks.pulse_sanity),
+    {.key = "pulse_sanity", .comment = "*Sanity check time.. 0 - 50 (50) being the slowest.\n", INT(ticks.pulse_sanity),
      RANGE(1, 50), MENU('T', 'F', "Sanity Check Time    "), .prompt = "Enter the sanity check time : "},
-    {"pulse_usage", "*Usage time.  0 - 10 (10) being the slowest in minutes.\n", INT(ticks.pulse_usage),
+    {.key = "pulse_usage", .comment = "*Usage time.  0 - 10 (10) being the slowest in minutes.\n", INT(ticks.pulse_usage),
      RANGE(0, 10), MENU('T', 'G', "Usage Check Time     "), .prompt = "Enter the usage check time : "},
-    {"pulse_timesave", "*Timesaving. 0 - 50 (50) being the slowest in minutes.\n", INT(ticks.pulse_timesave),
+    {.key = "pulse_timesave", .comment = "*Timesaving. 0 - 50 (50) being the slowest in minutes.\n", INT(ticks.pulse_timesave),
      RANGE(1, 50), MENU('T', 'H', "Timesave Time        "), .prompt = "Enter timesave : "},
-    {"pulse_current", "*Current update time. 0 - 30 (30) being the slowest.\n", INT(ticks.pulse_current),
+    {.key = "pulse_current", .comment = "*Current update time. 0 - 30 (30) being the slowest.\n", INT(ticks.pulse_current),
      RANGE(0, 30), MENU('T', 'I', "Currents Update Time "), .prompt = "Enter Current update time : "},
-    {"method", "*Character creation method.\n", METHOD(creation.method), RANGE(0, NUM_CREATION_METHODS - 1),
+    {.key = "method", .comment = "*Character creation method.\n", METHOD(creation.method), RANGE(0, NUM_CREATION_METHODS - 1),
      MENU('N', 'A', "Character Creation Method ")},
 };
 
@@ -341,7 +347,7 @@ static void cedit_setup(GameWorld *g, struct descriptor_data *d)
 
     if (!is_string_option(o))
       continue;
-    s  = option_field(OLC_CONFIG(d), o);
+    s  = (char **)option_field(OLC_CONFIG(d), o);
     *s = o->type == CT_MSG ? str_udup(*s) : (*s ? strdup(*s) : nullptr);
   }
 
@@ -396,7 +402,7 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
     return;
   }
 
-  s = option_field(&g->config_info, o);
+  s = (char **)option_field(&g->config_info, o);
   switch (o->type) {
     case CT_BOOL:
     case CT_INT:
@@ -620,7 +626,7 @@ static void cedit_prompt(GameWorld *g, struct descriptor_data *d, int i)
       write_to_output(g, d, "@W%d@B) @C%s@n\r\n", m, creation_methods[m]);
     write_to_output(g, d, "Choose character creation type: ");
   } else if (o->type == CT_TEXT) {
-    text = option_field(OLC_CONFIG(d), o);
+    text = (char **)option_field(OLC_CONFIG(d), o);
     clear_screen(g, d);
     send_editor_help(g, d);
     write_to_output(g, d, "%s", o->prompt);
@@ -663,7 +669,7 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
 {
   const struct cedit_option *o = &cedit_options[i];
   void *f                      = option_field(OLC_CONFIG(d), o);
-  char **s                     = f;
+  char **s                     = (char **)f;
   long num;
   char *end;
   float fnum;
@@ -775,7 +781,7 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           cedit_prompt(g, d, i);
           return;
         }
-        flag  = option_field(OLC_CONFIG(d), o);
+        flag  = (int *)option_field(OLC_CONFIG(d), o);
         *flag = *flag == 1 ? 0 : 1;
         if (o->note)
           send_to_char(g, d->character, "%s", o->note);

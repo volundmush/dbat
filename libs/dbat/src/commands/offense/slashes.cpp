@@ -277,10 +277,10 @@ ACMD(do_tslash)
             solo_gain(g, ch, vict);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-            do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+            do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-            do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+            do_get(g, ch, writable{"all corpse"}, 0, 0);
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
@@ -301,10 +301,10 @@ ACMD(do_tslash)
               solo_gain(g, ch, vict);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-              do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+              do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-              do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+              do_get(g, ch, writable{"all corpse"}, 0, 0);
             }
           }
         } else {
@@ -1040,10 +1040,10 @@ ACMD(do_kienzan)
             solo_gain(g, ch, vict);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-            do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+            do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-            do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+            do_get(g, ch, writable{"all corpse"}, 0, 0);
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
@@ -1063,10 +1063,10 @@ ACMD(do_kienzan)
               solo_gain(g, ch, vict);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-              do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+              do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-              do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+              do_get(g, ch, writable{"all corpse"}, 0, 0);
             }
           }
         } else {
@@ -1099,10 +1099,10 @@ ACMD(do_kienzan)
             solo_gain(g, ch, vict);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-            do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+            do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-            do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+            do_get(g, ch, writable{"all corpse"}, 0, 0);
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
@@ -1123,10 +1123,10 @@ ACMD(do_kienzan)
               solo_gain(g, ch, vict);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-              do_get(g, ch, (char[]){"all.zenni corpse"}, 0, 0);
+              do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-              do_get(g, ch, (char[]){"all corpse"}, 0, 0);
+              do_get(g, ch, writable{"all corpse"}, 0, 0);
             }
           }
         } else {

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Sector types: used in room_data.sector_type */
 constexpr int SECT_INSIDE       = 0;  /* Indoors			*/
 constexpr int SECT_CITY         = 1;  /* In a city			*/
@@ -20,3 +24,7 @@ constexpr int SECT_LAVA         = 14; /* This room always has lava */
 constexpr int NUM_ROOM_SECTORS = 15;
 
 extern const char *const sector_types[NUM_ROOM_SECTORS + 1];
+
+#ifdef __cplusplus
+}
+#endif

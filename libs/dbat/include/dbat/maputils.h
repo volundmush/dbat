@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int MAP_ROWS = 199;
 constexpr int MAP_COLS = 199;
 
@@ -13,3 +17,7 @@ typedef struct mapstruct MapStruct;
 void printmap(GameWorld *g, room_rnum rnum, struct char_data *ch, int type, obj_vnum vnum);
 
 void update_space(GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

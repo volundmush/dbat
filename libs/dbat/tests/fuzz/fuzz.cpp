@@ -7,8 +7,8 @@
 jmp_buf fuzz_refused;
 bool fuzz_can_refuse = false;
 
-[[noreturn]] void __real_exit(int status);
-[[noreturn]] void __wrap_exit(int status);
+extern "C" [[noreturn]] void __real_exit(int status);
+extern "C" [[noreturn]] void __wrap_exit(int status);
 
 void __wrap_exit(int status)
 {

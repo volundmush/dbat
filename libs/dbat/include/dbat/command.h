@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct command_info {
   const char *command;
   const char *sort_as;
@@ -29,3 +33,7 @@ void free_alias(struct alias_data *a);
 struct alias_data *find_alias(struct alias_data *alias_list, char *str);
 
 int find_command(GameWorld *g, const char *command);
+
+#ifdef __cplusplus
+}
+#endif

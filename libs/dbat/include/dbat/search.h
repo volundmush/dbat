@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool isname(const char *str, const char *namelist);
 bool is_name(const char *str, const char *namelist);
 int get_number(char **name);
@@ -37,3 +41,7 @@ constexpr int FIND_OBJ_INV    = (1 << 2);
 constexpr int FIND_OBJ_ROOM   = (1 << 3);
 constexpr int FIND_OBJ_WORLD  = (1 << 4);
 constexpr int FIND_OBJ_EQUIP  = (1 << 5);
+
+#ifdef __cplusplus
+}
+#endif

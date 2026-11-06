@@ -25,6 +25,7 @@
 #include "dbat/config.h"
 #include "dbat/broadcast.h"
 #include "dbat/act.informative.h"
+#include "dbat/act.social.h"
 #include "dbat/atomicfile.h"
 #include "dbat/character_utils.h"
 #include "dbat/game_world.h"
@@ -415,8 +416,6 @@ void hedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 
 ACMD(do_helpcheck)
 {
-  ACMD(do_action);
-
   char buf[MAX_STRING_LENGTH];
   int i, count = 0;
   size_t len = 0, nlen;

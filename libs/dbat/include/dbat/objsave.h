@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* these factors should be unique integers */
 constexpr int RENT_FACTOR = 1;
 constexpr int CRYO_FACTOR = 4;
@@ -20,3 +24,7 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name);
 int Crash_load(GameWorld *g, struct char_data *ch);
 void Crash_crashsave(GameWorld *g, struct char_data *ch);
 void Crash_save_all(GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

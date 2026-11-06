@@ -4,6 +4,10 @@
 #include <time.h>
 #include <inttypes.h> /* PRId64 / SCNd64 for int64_t in printf and scanf */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int IDXTYPE;
 constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
 
@@ -102,3 +106,7 @@ typedef struct GameWorld GameWorld;
 #define ACMD(name)    void(name)(GameWorld * g, struct char_data * ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, char *argument)
 typedef SPECIAL((*spec_proc_func));
+
+#ifdef __cplusplus
+}
+#endif

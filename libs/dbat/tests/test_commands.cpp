@@ -143,7 +143,7 @@ static void audit_problem(void *, const char *problem)
 
 static void play_case(GameWorld *g, struct char_data *ch, struct char_data *victim, enum state state, const char *line)
 {
-  struct char_data *dummy = get_char_room_vis(g, ch, (char[]){"dummy"}, nullptr);
+  struct char_data *dummy = get_char_room_vis(g, ch, writable{"dummy"}, nullptr);
 
   switch (state) {
     case STANDING:
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
     for (size_t p = 0; p < num_players; p++)
       for (int s = 0; s < NUM_STATES; s++)
         for (size_t a = 0; a < sizeof(arguments) / sizeof(*arguments); a++)
-          run_case(g, players[p], victim, s, command, arguments[a]);
+          run_case(g, players[p], victim, (enum state)s, command, arguments[a]);
   }
 
   qsort(signatures, num_signatures, sizeof(*signatures), by_count);

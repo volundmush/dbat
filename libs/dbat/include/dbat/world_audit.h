@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void world_audit_report(void *context, const char *problem);
 
 /*
@@ -9,3 +13,7 @@ typedef void world_audit_report(void *context, const char *problem);
  * problem, up to a limit, and returns how many problems it found.
  */
 int world_audit(GameWorld *g, world_audit_report *report, void *context);
+
+#ifdef __cplusplus
+}
+#endif

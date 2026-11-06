@@ -331,7 +331,7 @@ shop_rnum real_shop(GameWorld *g, shop_vnum vnum)
 
   if (g->top_shop < 0)
     return NOWHERE;
-  found = bsearch(&vnum, g->shops, g->top_shop + 1, sizeof(*g->shops), shop_order);
+  found = (struct shop_data *)bsearch(&vnum, g->shops, g->top_shop + 1, sizeof(*g->shops), shop_order);
   return found ? found - g->shops : NOWHERE;
 }
 

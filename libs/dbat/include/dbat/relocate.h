@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* After changing an object's weight: tells what contains it, and whoever carries it. */
 void obj_weight_changed(GameWorld *g, struct obj_data *obj, int64_t change);
 void obj_from_char(GameWorld *g, struct obj_data *object);
@@ -21,3 +25,7 @@ struct char_data *get_char_room(GameWorld *g, char *name, int *num, room_rnum ro
 struct char_data *get_char_num(GameWorld *g, mob_rnum nr);
 void char_from_room(GameWorld *g, struct char_data *ch);
 void char_to_room(GameWorld *g, struct char_data *ch, room_rnum room);
+
+#ifdef __cplusplus
+}
+#endif

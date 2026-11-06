@@ -35,6 +35,9 @@
 
 #ifndef _ARPA_TELNET_H
 #define _ARPA_TELNET_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * Definitions for the TELNET protocol.
@@ -376,4 +379,7 @@ extern char *enctype_names[];
 
 #define ENCTYPE_NAME_OK(x) ((unsigned int)(x) < ENCTYPE_CNT)
 #define ENCTYPE_NAME(x)    enctype_names[x]
+#ifdef __cplusplus
+}
+#endif
 #endif /* _ARPA_TELNET_H */

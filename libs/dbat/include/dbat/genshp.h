@@ -3,6 +3,10 @@
 #include "dbat/consts/types.h"
 #include "shop.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
 void remove_from_type_list(struct shop_buy_data **list, int num);
 void remove_from_int_list(IDXTYPE **list, IDXTYPE num);
@@ -17,3 +21,7 @@ shop_rnum real_shop(GameWorld *g, shop_vnum vnum);
 /*
  * Handy macros.
  */
+
+#ifdef __cplusplus
+}
+#endif

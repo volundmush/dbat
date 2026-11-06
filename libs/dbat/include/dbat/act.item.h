@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* act.item.c */
 // global variables
 
@@ -35,3 +39,7 @@ ACMD(do_deploy);
 ACMD(do_pack);
 ACMD(do_garden);
 ACMD(do_refuel);
+
+#ifdef __cplusplus
+}
+#endif

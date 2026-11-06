@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * The game configuration structure used for configurating the game play 
  * variables.
@@ -280,3 +284,7 @@ extern const int disp_closed_doors, reroll_status, allow_multiclass, allow_prest
 extern const int enable_compression, enable_languages, all_items_unique, method;
 
 extern const int crash_file_timeout, rent_file_timeout;
+
+#ifdef __cplusplus
+}
+#endif

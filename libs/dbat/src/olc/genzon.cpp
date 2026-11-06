@@ -27,9 +27,9 @@ struct zone_range_key {
 
 static int zone_range_order(const void *key_ptr, const void *zone)
 {
-  const struct zone_range_key *key = key_ptr;
+  const struct zone_range_key *key = static_cast<const struct zone_range_key *>(key_ptr);
   GameWorld *g                     = key->g;
-  const struct zone_data *z        = zone;
+  const struct zone_data *z        = static_cast<const struct zone_data *>(zone);
 
   if (key->vnum < genolc_zone_bottom(g, z - g->zones))
     return -1;
@@ -43,7 +43,7 @@ zone_rnum real_zone_by_thing(GameWorld *g, room_vnum vznum)
 
   if (g->top_zone < 0)
     return NOWHERE;
-  found = bsearch(&key, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_range_order);
+  found = (struct zone_data *)bsearch(&key, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_range_order);
   return found ? found - g->zones : NOWHERE;
 }
 

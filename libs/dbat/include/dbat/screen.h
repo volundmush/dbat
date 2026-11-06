@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define KNRM "\x1B[0m"
 #define KRED "\x1B[31m"
 #define KGRN "\x1B[32m"
@@ -73,3 +77,7 @@ constexpr int ANSIEND = 'm';
 #define AB_MAGENTA "45"
 #define AB_CYAN    "46"
 #define AB_WHITE   "47"
+
+#ifdef __cplusplus
+}
+#endif

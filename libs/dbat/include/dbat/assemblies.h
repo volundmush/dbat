@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/assemblytypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct assembly_data ASSEMBLY;
 typedef struct component_data COMPONENT;
 
@@ -43,3 +47,7 @@ ASSEMBLY *assemblyGetAssemblyPtr(GameWorld *g, obj_vnum lVnum);
 
 /* ******************************************************************** */
 void free_assemblies(GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

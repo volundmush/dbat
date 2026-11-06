@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * ADM flags - define admin privs for chars
  */
@@ -24,3 +28,7 @@ constexpr int ADM_CEDIT        = 18; /* Can use cedit IMPL */
 
 constexpr int NUM_ADMFLAGS = 19;
 constexpr int AD_ARRAY_MAX = 4;
+
+#ifdef __cplusplus
+}
+#endif

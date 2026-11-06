@@ -531,7 +531,7 @@ ACMD(do_form)
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    do_wear(g, vict, (char[]){"all"}, 0, 0);
+    do_wear(g, vict, writable{"all"}, 0, 0);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
     act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
@@ -931,7 +931,7 @@ ACMD(do_upgrade)
       send_to_char(g, ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(g, ch, (char[]){"Augmentation"}, nullptr, char_get_inventory(ch)))) {
+    if (!(obj = get_obj_in_list_vis(g, ch, writable{"Augmentation"}, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }

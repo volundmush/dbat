@@ -23,7 +23,7 @@ static const uint8_t *file_data;
 static size_t file_size;
 static const char *file_path;
 
-int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 
 static void damage_file(void)
 {

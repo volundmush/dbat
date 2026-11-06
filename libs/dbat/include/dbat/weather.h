@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include "consts/weather.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct weather_data {
   int pressure; /* How is the pressure ( Mb ) */
   int change;   /* How fast and what way does it change. */
@@ -24,3 +28,7 @@ void star_phase(GameWorld *g, struct char_data *ch, int type);
 void oozaru_transform(GameWorld *g, struct char_data *ch);
 void oozaru_revert(GameWorld *g, struct char_data *ch);
 void weather_and_time(GameWorld *g, int mode);
+
+#ifdef __cplusplus
+}
+#endif

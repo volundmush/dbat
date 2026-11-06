@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * ADMLVL_IMPL should always be the HIGHEST possible admin level, and
  * ADMLVL_IMMORT should always be the LOWEST immortal level.
@@ -12,3 +16,7 @@ constexpr int ADMLVL_GRGOD   = 5;
 constexpr int ADMLVL_IMPL    = 6;
 
 extern const char *const admin_level_names[ADMLVL_IMPL + 2];
+
+#ifdef __cplusplus
+}
+#endif

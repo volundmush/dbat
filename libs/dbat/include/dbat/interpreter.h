@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/command.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CMD_NAME         (g->complete_cmd_info[cmd].command)
 #define CMD_IS(g, cmd_name) (!strcmp(cmd_name, g->complete_cmd_info[cmd].command))
 #define IS_MOVE(g, cmdnum)  (g->complete_cmd_info[cmdnum].command_pointer == do_move)
@@ -256,3 +260,7 @@ constexpr int SCMD_REDIT = 1;
 constexpr int SCMD_OEDIT = 2;
 constexpr int SCMD_MEDIT = 3;
 int enter_player_game(GameWorld *g, struct descriptor_data *d);
+
+#ifdef __cplusplus
+}
+#endif

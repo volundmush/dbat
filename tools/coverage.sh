@@ -9,8 +9,8 @@ out="${TMPDIR:-/tmp}/dbat-coverage"
 if [ "${1:-}" = "-o" ]; then out=$2; shift 2; fi
 build="${TMPDIR:-/tmp}/dbat-coverage-build"
 
-cmake -S "$root" -B "$build" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc \
-  -DCMAKE_C_FLAGS="--coverage -DDBAT_COVERAGE" -DCMAKE_EXE_LINKER_FLAGS="--coverage" > /dev/null
+cmake -S "$root" -B "$build" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ \
+  -DCMAKE_CXX_FLAGS="--coverage -DDBAT_COVERAGE" -DCMAKE_EXE_LINKER_FLAGS="--coverage" > /dev/null
 cmake --build "$build" -j"$(nproc)" -- --no-print-directory 2>&1 | grep -E ' error |\*\*\*' || true
 find "$build" -name '*.gcda' -delete
 

@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
   ascii pfile variable defaults
 
@@ -79,3 +83,7 @@ constexpr int PFDEF_CRANK           = 0;
 constexpr int PFDEF_ETHIC_ALIGNMENT = 0;
 constexpr int PFDEF_MURDER          = 0;
 constexpr int PFDEF_GAUNTLET        = 0;
+
+#ifdef __cplusplus
+}
+#endif

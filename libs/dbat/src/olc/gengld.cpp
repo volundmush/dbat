@@ -93,7 +93,7 @@ guild_rnum real_guild(GameWorld *g, guild_vnum vnum)
 
   if (g->top_guild < 0)
     return NOWHERE;
-  found = bsearch(&vnum, g->guild_index, g->top_guild + 1, sizeof(*g->guild_index), guild_order);
+  found = (struct guild_data *)bsearch(&vnum, g->guild_index, g->top_guild + 1, sizeof(*g->guild_index), guild_order);
   return found ? found - g->guild_index : NOWHERE;
 }
 

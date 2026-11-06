@@ -22,7 +22,7 @@ static const uint8_t *script;
 static size_t script_size;
 static int attach_type;
 
-int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 
 /* A trigger ends at a line with ~ on it, so the script can't run on into whatever comes next in the file. */
 static void add_trigger_to_file(void)

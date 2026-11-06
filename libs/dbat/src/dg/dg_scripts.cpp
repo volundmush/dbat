@@ -1236,7 +1236,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
           loops++;
           trig->loops++;
           if (loops == 40) {
-            process_wait(g, go, trig, type, (char[]){"wait 1"}, cl);
+            process_wait(g, go, trig, type, writable{"wait 1"}, cl);
             g->script_depth--;
             return ret_val;
           }
@@ -1296,7 +1296,7 @@ trig_rnum real_trigger(GameWorld *g, trig_vnum vnum)
 
   if (!g->trig_index || g->top_of_trigt <= 0)
     return NOTHING;
-  found = bsearch(&vnum, g->trig_index, g->top_of_trigt, sizeof(*g->trig_index), trigger_order);
+  found = (struct index_data **)bsearch(&vnum, g->trig_index, g->top_of_trigt, sizeof(*g->trig_index), trigger_order);
   return found ? found - g->trig_index : NOTHING;
 }
 

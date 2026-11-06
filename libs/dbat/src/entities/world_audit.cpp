@@ -405,10 +405,11 @@ static void audit_lookup_table(const GameWorld *g, struct audit *a)
       if (entry->type == OBJ_TRIGGER) {
         if (!set_has(&a->objects, entry->c))
           problem(a, "lookup table: id %ld is an object that isn't in the game", entry->uid);
-        else if (obj_get_id(entry->c) != entry->uid)
-          problem(a, "lookup table: id %ld is an object that says %d", entry->uid, obj_get_id(entry->c));
+        else if (obj_get_id(static_cast<const struct obj_data *>(entry->c)) != entry->uid)
+          problem(a, "lookup table: id %ld is an object that says %d", entry->uid,
+                  obj_get_id(static_cast<const struct obj_data *>(entry->c)));
       } else if (entry->type == MOB_TRIGGER) {
-        if (!set_has(&a->characters, entry->c) && !held_by_a_connection(g, entry->c))
+        if (!set_has(&a->characters, entry->c) && !held_by_a_connection(g, static_cast<const struct char_data *>(entry->c)))
           problem(a, "lookup table: id %ld is someone who isn't in the game", entry->uid);
       }
     }

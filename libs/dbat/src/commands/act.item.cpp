@@ -2544,7 +2544,7 @@ static void perform_give(GameWorld *g, struct char_data *ch, struct char_data *v
   }
   if (char_is_npc(vict) && (obj_extra_flagged(obj, ITEM_FORGED) || obj_extra_flagged(obj, ITEM_FORGED))) {
     act(g, "$n tries to hand $p to $N.", true, ch, obj, vict, TO_NOTVICT);
-    do_say(g, vict, (char[]){"I don't want that piece of junk."}, 0, 0);
+    do_say(g, vict, writable{"I don't want that piece of junk."}, 0, 0);
     return;
   }
   if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {

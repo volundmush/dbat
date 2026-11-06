@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Assembly type: Used in ASSEMBLY.iAssemblyType */
 constexpr int ASSM_MAKE     = 0;  // Assembly must be made.
 constexpr int ASSM_BAKE     = 1;  // Assembly must be baked.
@@ -16,3 +20,7 @@ constexpr int ASSM_FORGE    = 10; // Assembly must be forged.
 constexpr int MAX_ASSM = 11;
 
 extern const char *const AssemblyTypes[MAX_ASSM + 1];
+
+#ifdef __cplusplus
+}
+#endif

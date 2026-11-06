@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct guild_data;
 
 /* Field accessors for guilds: g_* take a pointer, rguild_* a real number (an index into guild_index). */
@@ -38,3 +42,7 @@ int rguild_get_minlvl(GameWorld *g, guild_rnum i);
 bitvector_t *rguild_get_with_who(GameWorld *g, guild_rnum i);
 spec_proc_func rguild_get_func(GameWorld *g, guild_rnum i);
 void rguild_set_func(GameWorld *g, guild_rnum i, spec_proc_func v);
+
+#ifdef __cplusplus
+}
+#endif

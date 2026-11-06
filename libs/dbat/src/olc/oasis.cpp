@@ -345,9 +345,8 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
 void split_argument(char *argument, char *tag)
 {
   char *tmp = argument, *ttag = tag, *wrt = argument;
-  int i;
 
-  for (i = 0; *tmp; tmp++, i++) {
+  for (; *tmp; tmp++) {
     if (*tmp != ' ' && *tmp != '=')
       *(ttag++) = *tmp;
     else if (*tmp == '=')

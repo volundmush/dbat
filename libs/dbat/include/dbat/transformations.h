@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct transform_bonus {
   int64_t bonus;
   long double mult, drain;
@@ -19,3 +23,7 @@ struct transforms_available {
 
 extern const transform_bonus base_form;
 extern const transform_bonus oozaru;
+
+#ifdef __cplusplus
+}
+#endif

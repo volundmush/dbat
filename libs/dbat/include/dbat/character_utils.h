@@ -21,6 +21,10 @@
 #include "class.h"
 #include "weather.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Player-only data (player_specials). On an NPC these log the caller with a backtrace; reads then give
  * 0/NULL and writes are ignored. */
 bitvector_t *char_get_pref(GameWorld *g, const struct char_data *ch);
@@ -895,3 +899,7 @@ void char_unlink_from_combat_list(GameWorld *g, struct char_data *ch);
 /* Resets the affected stats to the raw ones. */
 void char_reset_aff_abils(struct char_data *ch);
 void char_copy_time(struct char_data *to, const struct char_data *from);
+
+#ifdef __cplusplus
+}
+#endif

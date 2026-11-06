@@ -1,4 +1,3 @@
-#define _GNU_SOURCE /* for qsort_r */
 /*****************************************************************************
 ** FEATS.C                                                                  **
 ** Source code for the Gates of Krynn Feats System.                         **
@@ -202,7 +201,7 @@ bool is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
 
 static int compare_feats(const void *x, const void *y, void *world)
 {
-  GameWorld *g = world;
+  GameWorld *g = static_cast<GameWorld *>(world);
   int a = *(const int *)x,
       b = *(const int *)y;
 

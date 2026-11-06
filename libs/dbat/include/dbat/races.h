@@ -3,6 +3,10 @@
 #include "dbat/consts/races.h"
 #include "dbat/transformations.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // global variables
 
 // functions
@@ -45,3 +49,7 @@ softcap_type race_soft_cap_type(const char_data *ch);
 
 int get_size(struct char_data *ch);
 int wield_type(int chsize, const struct obj_data *weap);
+
+#ifdef __cplusplus
+}
+#endif

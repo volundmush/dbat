@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Affect bits: used in char_data.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 constexpr int AFF_DONTUSE        = 0;  /* DON'T USE! 		*/
@@ -87,3 +91,7 @@ constexpr int NUM_AFF_FLAGS = 79;
 constexpr int AF_ARRAY_MAX = 4;
 
 extern const char *const affected_bits[NUM_AFF_FLAGS + 1];
+
+#ifdef __cplusplus
+}
+#endif

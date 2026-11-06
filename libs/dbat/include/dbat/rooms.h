@@ -6,6 +6,10 @@
 #include "consts/exitflags.h"
 #include "extradesc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct room_direction_data {
   char *general_description; /* When look DIR.			*/
 
@@ -51,3 +55,6 @@ struct room_data {
 };
 /* ====================================================================== */
 
+#ifdef __cplusplus
+}
+#endif

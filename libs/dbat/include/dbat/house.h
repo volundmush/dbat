@@ -1,6 +1,10 @@
 #pragma once
 #include "dbat/consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int MAX_HOUSES = 1000;
 constexpr int MAX_GUESTS = 10;
 
@@ -53,3 +57,7 @@ void House_delete_file(room_vnum vnum); /* house.c */
 
 ACMD(do_hcontrol);
 ACMD(do_house);
+
+#ifdef __cplusplus
+}
+#endif

@@ -15,24 +15,24 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 - **Shared pieces:**
   - `build-tree.sh` is the shared builder.
-  - `roundtrip.c` holds `roundtrip_dump()`, which `verify.sh` calls from gdb. For each tree, `verify.sh` checks whether it passes `g` to this and to `circle_srandom()`, so a ref from before `GameWorld` still works. It calls server functions, so each tree is built with its own copy when it has one.
+  - `roundtrip.cpp` holds `roundtrip_dump()`, which `verify.sh` calls from gdb. For each tree, `verify.sh` checks whether it passes `g` to this and to `circle_srandom()`, so a ref from before `GameWorld` still works. It calls server functions, so each tree is built with its own copy when it has one.
 - **Where they work:** the scripts build in `$TMPDIR` and need `gcc`, `gdb`, `objdump` and `python3`.
 - **Typical loop:** make a change, run `tools/objdiff.sh` if it should be code-neutral, and run `tools/verify.sh` before committing.
 
 ## Tests
 
-`libs/dbat/tests/` holds self-contained tests that need no `data/` files. Run them with `ctest` from a CMake build directory, or with `zig build test`.
+`libs/dbat/tests/` holds self-contained tests that need no `data/` files. Run them with `ctest` from a CMake build directory.
 
 Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.h`), so a test can build as many worlds as it wants. A test that builds a world by hand only has to set the global `logfile`, which stays global because crash handlers write to it.
 
 To test a whole running game, use `libs/dbat/tests/harness.h`. It copies `libs/dbat/tests/fixtures/world/`, a small hand-written world, to a temp directory and boots it there with no sockets, so nothing touches your `data/`. A test can log players in, type commands, read their output and run pulses.
 
-- `test_world.c` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
-- `test_bad_data.c` gives the game scripts with mistakes in them, damaged files and edits that would lose something, each in a process of its own.
-- `test_gameplay.c` checks game rules that were once wrong, such as who a heal or healing glow lands on, what playing a song blocks, and what reduces damage.
-- `test_commands.c` runs every command with awkward arguments, at three admin levels and in four states, under whichever sanitizers the build uses. Each case forks from the booted game, so one crash can't hide another. `dbat_test_commands <command>` runs one command and prints the full report. Use the ASan preset, because a plain build can't see most memory errors. It takes minutes, so skip it with `ctest -LE slow`; `zig build test` leaves it out, and `zig build test-commands` runs it. Failures in commands listed in `known_failures` are printed but don't fail the test.
+- `test_world.cpp` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
+- `test_bad_data.cpp` gives the game scripts with mistakes in them, damaged files and edits that would lose something, each in a process of its own.
+- `test_gameplay.cpp` checks game rules that were once wrong, such as who a heal or healing glow lands on, what playing a song blocks, and what reduces damage.
+- `test_commands.cpp` runs every command with awkward arguments, at three admin levels and in four states, under whichever sanitizers the build uses. Each case forks from the booted game, so one crash can't hide another. `dbat_test_commands <command>` runs one command and prints the full report. Use the ASan preset, because a plain build can't see most memory errors. It takes minutes, so skip it with `ctest -LE slow`, or run it alone with `ctest -R commands`. Failures in commands listed in `known_failures` are printed but don't fail the test.
 
-- `test_bot.c` has four bots play the fixture world at random, checking the audit after every action. They use every race and sensei, editors, real logins over sockets, long input, dropped connections and clock jumps. A run is a journal of actions, so `dbat_test_bot --replay FILE` repeats it exactly. Failures matching `known_failures` in that file are printed but don't fail the test. Journals in `tests/corpus/` run as a test; `tests/corpus/open/` holds short journals for open bugs, to move up once fixed.
+- `test_bot.cpp` has four bots play the fixture world at random, checking the audit after every action. They use every race and sensei, editors, real logins over sockets, long input, dropped connections and clock jumps. A run is a journal of actions, so `dbat_test_bot --replay FILE` repeats it exactly. Failures matching `known_failures` in that file are printed but don't fail the test. Journals in `tests/corpus/` run as a test; `tests/corpus/open/` holds short journals for open bugs, to move up once fixed.
 
 To hunt for bugs with everything you have, run `tools/hunt.sh`, and Ctrl-C it when you like. It runs bots at low priority on every core, as memory allows, groups failures by cause, shrinks an example of each, and writes `build-asan/hunt/report.md`. Seeds carry on from where the last hunt stopped. Options:
 

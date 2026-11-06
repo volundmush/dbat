@@ -5,6 +5,10 @@
 #include <time.h>
 #include "flags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // =============================================================================
 // Object Classification
 // =============================================================================
@@ -157,3 +161,7 @@ struct char_data *obj_get_worn_by(const struct obj_data *obj);
 void obj_set_worn_by(struct obj_data *obj, struct char_data *v);
 int16_t obj_get_worn_on(const struct obj_data *obj);
 void obj_set_worn_on(struct obj_data *obj, int16_t v);
+
+#ifdef __cplusplus
+}
+#endif

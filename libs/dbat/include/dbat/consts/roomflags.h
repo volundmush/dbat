@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Room flags: used in room_data.room_flags */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 constexpr int ROOM_DARK        = 0;  /* Dark			*/
@@ -74,3 +78,7 @@ constexpr int NUM_ROOM_FLAGS = 66;
 constexpr int RF_ARRAY_MAX = 4;
 
 extern const char *const room_bits[NUM_ROOM_FLAGS + 1];
+
+#ifdef __cplusplus
+}
+#endif

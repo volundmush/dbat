@@ -4,6 +4,10 @@
 #include "dbat/consts/maximums.h"
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct shop_buy_data {
   int type;
   char *keywords;
@@ -205,3 +209,7 @@ SPECIAL(shop_keeper);
 /* Trade restriction flags (TRADE_*) on a shop_data. */
 void shop_trade_set(struct shop_data *rec, int flag, bool on);
 bool shop_trade_toggle(struct shop_data *rec, int flag);
+
+#ifdef __cplusplus
+}
+#endif

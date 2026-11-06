@@ -32,7 +32,6 @@
 static void mag_nextstrike(int level, struct char_data *caster, int spellnum);
 
 static void unused_spell(GameWorld *g, int spl);
-void mag_assign_spells(GameWorld *g);
 
 /*
  * This arrangement is pretty stupid, but the number of skills is limited by

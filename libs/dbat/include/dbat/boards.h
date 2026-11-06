@@ -1,6 +1,10 @@
 #pragma once
 #include "consts/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY "etc/boards" SLASH
 constexpr int MAX_MESSAGE_LENGTH = 4096;    /* arbitrary -- change if needed */
@@ -52,3 +56,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
 
 bool board_discard_message(struct board_info *board, char **data);
 void board_login_notices(GameWorld *g, struct char_data *ch);
+
+#ifdef __cplusplus
+}
+#endif

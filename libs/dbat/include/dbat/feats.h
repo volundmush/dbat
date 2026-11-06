@@ -10,6 +10,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/feats.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Functions defined in feats.c */
 bool is_proficient_with_armor(const struct char_data *ch, int armor_type);
 bool is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
@@ -216,3 +220,7 @@ constexpr int HRANK_CASTER = 3;
 
 constexpr int BASE_DC = 10;
 void free_feats(void);
+
+#ifdef __cplusplus
+}
+#endif

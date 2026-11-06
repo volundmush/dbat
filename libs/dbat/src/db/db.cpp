@@ -111,9 +111,7 @@ static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-void mag_assign_spells(GameWorld *g);
 static int hsort(const void *a, const void *b);
-void build_player_index(GameWorld *g);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 /* external vars */
@@ -432,7 +430,7 @@ ACMD(do_reboot)
 /* The vnum lookups (real_room() and friends) are binary searches, so each table must be in ascending vnum order. */
 static void check_sorted(const char *what, const void *table, IDXTYPE count, size_t size, size_t vnum_offset)
 {
-  const char *t = table;
+  const char *t = static_cast<const char *>(table);
 
   for (IDXTYPE i = 1; i < count; i++) {
     IDXTYPE prev = *(const IDXTYPE *)(t + (i - 1) * size + vnum_offset);
@@ -4521,7 +4519,7 @@ static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t 
 
   if (!table || count <= 0)
     return NOWHERE;
-  found = bsearch(&vnum, table, count, size, order);
+  found = (const char *)bsearch(&vnum, table, count, size, order);
   return found ? (IDXTYPE)((found - (const char *)table) / size) : NOWHERE;
 }
 

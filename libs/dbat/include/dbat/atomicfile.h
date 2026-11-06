@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Crash-safe file replacement.
  *
  * atomic_open() writes to <path>.tmp; atomic_commit() flushes it to disk and renames it over <path>,
@@ -24,3 +28,7 @@ struct atomic_file {
 FILE *atomic_open(struct atomic_file *af, const char *path, bool backup);
 bool atomic_commit(struct atomic_file *af);
 void atomic_abort(struct atomic_file *af);
+
+#ifdef __cplusplus
+}
+#endif

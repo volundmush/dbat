@@ -4,6 +4,10 @@
 #include "dbat/consts/senseis.h"
 #include "dbat/races.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // global variables
 
 // functions
@@ -26,3 +30,7 @@ const char *sensei_name(int s);
 bool sensei_is_pc_ok(int s);
 bool sensei_available_for_race(int s, int r);
 int sensei_find(const char *arg);
+
+#ifdef __cplusplus
+}
+#endif

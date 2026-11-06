@@ -23,6 +23,10 @@
 #include "consts/sizes.h"
 #include "index.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int PM_ARRAY_MAX = 4;
 
 /* These data contain information about a players time data */
@@ -433,4 +437,6 @@ struct char_data {
   int relax_count;
 };
 
-
+#ifdef __cplusplus
+}
+#endif

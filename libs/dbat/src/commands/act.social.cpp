@@ -410,7 +410,7 @@ static int find_action(GameWorld *g, int cmd)
 
   if (g->top_of_socialt < 0)
     return -1;
-  found = bsearch(&cmd, g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_order);
+  found = (struct social_messg *)bsearch(&cmd, g->soc_mess_list, g->top_of_socialt + 1, sizeof(*g->soc_mess_list), social_order);
   return found ? found - g->soc_mess_list : -1;
 }
 

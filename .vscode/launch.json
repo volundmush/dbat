@@ -5,7 +5,7 @@
             "name": "Debug dbat (LLDB)",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/zig-out/bin/dbat",
+            "program": "${workspaceFolder}/build/bin/dbat",
             "args": [],
             "cwd": "${workspaceFolder}",
             "terminal": "integrated",

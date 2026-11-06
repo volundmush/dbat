@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Player flags: used by char_data.act */
 constexpr int PLR_KILLER       = 0;  /* Player is a player-killer        */
 constexpr int PLR_THIEF        = 1;  /* Player is a player-thief         */
@@ -85,3 +89,7 @@ constexpr int PLR_NOGROW       = 79; /* Halt Growth for S & HB           */
 constexpr int NUM_PLR_FLAGS = 80;
 
 extern const char *const player_bits[NUM_PLR_FLAGS + 1];
+
+#ifdef __cplusplus
+}
+#endif

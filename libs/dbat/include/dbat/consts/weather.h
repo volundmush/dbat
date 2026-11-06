@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Sun state for weather_data */
 constexpr int SUN_DARK  = 0;
 constexpr int SUN_RISE  = 1;
@@ -11,3 +15,7 @@ constexpr int SKY_CLOUDLESS = 0;
 constexpr int SKY_CLOUDY    = 1;
 constexpr int SKY_RAINING   = 2;
 constexpr int SKY_LIGHTNING = 3;
+
+#ifdef __cplusplus
+}
+#endif

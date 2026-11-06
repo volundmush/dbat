@@ -6,7 +6,7 @@ inc="$root/libs/dbat/include"
 fail=0
 while IFS= read -r h; do
   rel=${h#"$inc"/}
-  if ! echo "#include \"$rel\"" | ${CC:-clang} -fsyntax-only -std=gnu23 -I"$inc" -x c - 2> /dev/null; then
+  if ! echo "#include \"$rel\"" | ${CXX:-g++} -fsyntax-only -std=gnu++26 -I"$inc" -x c++ - 2> /dev/null; then
     echo "not self-contained: $rel"; fail=1
   fi
 done < <(find "$inc" -name '*.h' | sort)

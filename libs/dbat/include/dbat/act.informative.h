@@ -2,6 +2,10 @@
 #include "dbat/consts/types.h"
 #include "dbat/consts/colors.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // defines
 constexpr int MAX_PORTAL_TYPES = 6;
 /* For show_obj_to_char 'mode'.	/-- arbitrary */
@@ -68,3 +72,7 @@ ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
 extern const char *const default_color_choices[NUM_COLOR + 1];
+
+#ifdef __cplusplus
+}
+#endif

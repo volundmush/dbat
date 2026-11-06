@@ -2,6 +2,10 @@
 #include "types.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int MOB_TRIGGER = 0;
 constexpr int OBJ_TRIGGER = 1;
 constexpr int WLD_TRIGGER = 2;
@@ -112,3 +116,7 @@ constexpr int DG_ALLOW_GODS = (1 << 0);
 
 /* first character of a UID as it appears in script text, e.g. "}1063303" */
 constexpr char UID_CHAR = '}';
+
+#ifdef __cplusplus
+}
+#endif

@@ -60,7 +60,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
           if (g->NEWSUPDATE > char_get_lastpl(i->character))
             send_to_char(g, i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", char_get_name(d->character), g->TOP_OF_NEWS);
         }
-        do_reboot(g, d->character, (char[]){"news"}, 0, 0);
+        do_reboot(g, d->character, writable{"news"}, 0, 0);
       }
       break;
     case STRINGADD_ABORT:
@@ -122,7 +122,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
             if (g->NEWSUPDATE > char_get_lastpl(i->character))
               send_to_char(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
           }
-          do_reboot(g, d->character, (char[]){"all"}, 0, 0);
+          do_reboot(g, d->character, writable{"all"}, 0, 0);
         }
       }
       break;

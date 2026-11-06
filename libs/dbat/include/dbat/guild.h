@@ -5,6 +5,10 @@
 #include "dbat/consts/skills.h"
 #include "dbat/consts/feats.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int GW_ARRAY_MAX = 4;
 
 /* Default guild messages: used for new guilds and in place of a missing or malformed message. */
@@ -48,3 +52,7 @@ void assign_the_guilds(GameWorld *g);
 void list_guilds(GameWorld *g, struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
 void destroy_guilds(GameWorld *g);
 void sort_spells(GameWorld *g);
+
+#ifdef __cplusplus
+}
+#endif

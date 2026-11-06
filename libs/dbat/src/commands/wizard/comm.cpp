@@ -385,7 +385,7 @@ ACMD(do_syslog)
                  logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
-  if (((tp = search_block(arg, logtypes, false)) == -1)) {
+  if ((tp = search_block(arg, logtypes, false)) == -1) {
     send_to_char(g, ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }

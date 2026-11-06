@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Let's define bonuses/negatives */
 constexpr int BONUS_THRIFTY      = 0;
 constexpr int BONUS_PRODIGY      = 1;
@@ -55,3 +59,7 @@ constexpr int BONUS_LONER        = 50;
 constexpr int BONUS_BMEMORY      = 51;
 
 constexpr int MAX_BONUSES = 52;
+
+#ifdef __cplusplus
+}
+#endif

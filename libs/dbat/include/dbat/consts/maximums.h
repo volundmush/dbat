@@ -1,6 +1,10 @@
 #pragma once
 #include "admlevel.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 constexpr int SG_MIN = 2; /* Skill gain check must be less than this
 			     number in order to be successful. 
 			     IE: 1% of a skill gain */
@@ -53,3 +57,7 @@ constexpr int NUM_DOOR_CMD   = 5;
 
 /* define the largest set of commands for a trigger */
 constexpr int MAX_CMD_LENGTH = 16384; /* 16k should be plenty and then some */
+
+#ifdef __cplusplus
+}
+#endif

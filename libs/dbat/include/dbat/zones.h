@@ -2,6 +2,10 @@
 #include "consts/types.h"
 #include "consts/zoneflags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* structure for the reset commands */
 struct reset_com {
   char command; /* current command                      */
@@ -68,4 +72,6 @@ struct reset_q_type {
   struct reset_q_element *tail;
 };
 
-
+#ifdef __cplusplus
+}
+#endif
