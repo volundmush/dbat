@@ -11,7 +11,13 @@ ACCOUNTS = [("Zorbexb", "Pa55word"), ("Zorbexc", "Pa55word")]  # both Implemento
 WORK = tempfile.mkdtemp(prefix="dbat-copyover-", dir=os.environ.get("TMPDIR"))
 results = {}
 servers = []
-next_port = 8900 + os.getpid() % 500
+
+
+def free_port():
+    """A port nothing is listening on, so that parallel tests and other programs can't collide with us."""
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
 
 
 def check(name, ok, detail=""):
@@ -72,9 +78,7 @@ class Server:
     """A real server on its own copy of the fixture, with two accounts."""
 
     def __init__(self, name, data="data", args=None, cwd=""):
-        global next_port
-        next_port += 1
-        self.port = next_port
+        self.port = free_port()
         self.home = os.path.join(WORK, name)
         self.data = os.path.join(self.home, data)
         self.cwd = os.path.join(self.home, cwd)
@@ -97,7 +101,11 @@ class Server:
         self.output = open(self.log_path, "ab")
         self.process = subprocess.Popen([self.binary, *self.args, str(self.port)], cwd=self.cwd, stdout=self.output,
                                         stderr=subprocess.STDOUT, env=env, preexec_fn=before_exec)
-        return self.wait_up()
+        if self.wait_up():
+            return True
+        state = "running" if self.process.poll() is None else f"exited with {self.process.returncode}"
+        print(f"  server {state} without booting; the end of its log:\n" + self.log()[-2000:], flush=True)
+        return False
 
     def log(self):
         text = ""
