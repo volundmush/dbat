@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
@@ -122,11 +123,9 @@ ACMD(do_multiform)
     return;
   }
 
-  struct char_data *tch = nullptr, *next_v = nullptr;
   int count = 0;
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_v) {
-    next_v = char_get_next_in_room(tch);
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (tch == ch || !char_is_npc(tch)) {
       continue;
     }
@@ -143,8 +142,7 @@ ACMD(do_multiform)
       send_to_char(g, ch, "You have no multiforms present to merge with!\r\n");
       return;
     }
-    for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_v) {
-      next_v = char_get_next_in_room(tch);
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (tch == ch || !char_is_npc(tch)) {
         continue;
       }
@@ -331,10 +329,7 @@ ACMD(do_moondust)
   act(g, "@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal));
 
-  struct char_data *vict = nullptr, *next_v = nullptr;
-
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -674,11 +669,9 @@ ACMD(do_scry)
 
 void ash_burn(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *obj, *next_obj;
 
   if (ch && char_get_in_room(ch) != NOWHERE) {
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_vnum(g, obj) == 1306) {
         if (axion_dice(g, 0) > char_get_aff_abils_con(ch)) {
           if (!char_is_android(ch) && !char_is_demon(ch) && !char_is_icer(ch)) {
@@ -720,18 +713,16 @@ ACMD(do_ashcloud)
     return;
   }
 
-  struct obj_data *ash = nullptr, *obj, *next_obj;
+  struct obj_data *ash = nullptr;
   int there            = false;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj) == 1305) {
       ash = obj;
     }
   }
 
-  for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, obj) == 1306) {
       there = true;
     }
@@ -1104,11 +1095,10 @@ ACMD(do_channel)
     return;
   }
 
-  struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
+  struct obj_data *ruby = nullptr;
   int found = false;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (found == false && obj_get_vnum(g, obj) == 6600) {
       if (!obj_extra_flagged(obj, ITEM_HOT)) {
         found = true;
@@ -1245,7 +1235,6 @@ ACMD(do_hydromancy)
     attempt = search_block(arg2, dirs, false);
 
     if (char_can_go(g, ch, attempt)) {
-      struct char_data *vict, *next_v;
 
       int last = char_get_lastattack(ch);
       char_set_lastattack(ch, 500);
@@ -1263,8 +1252,7 @@ ACMD(do_hydromancy)
         act(g, bun, true, ch, nullptr, nullptr, TO_CHAR);
         act(g, bunn, true, ch, nullptr, nullptr, TO_ROOM);
 
-        for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-          next_v = char_get_next_in_room(vict);
+        for (char_data *vict : room_people(g, char_get_in_room(ch))) {
           if (vict == ch)
             continue;
           if (!can_kill(g, ch, vict, nullptr, 1)) {
@@ -1463,11 +1451,10 @@ ACMD(do_ensnare)
     return;
   }
 
-  struct obj_data *weave, *obj = nullptr, *next_obj;
+  struct obj_data *obj = nullptr;
   int found = false;
 
-  for (weave = char_get_inventory(ch); weave; weave = next_obj) {
-    next_obj = obj_get_next_content(weave);
+  for (obj_data *weave : char_inventory(g, ch)) {
     if (found == false && valid_silk(g, weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
       found = true;
       obj   = weave;
@@ -1924,7 +1911,6 @@ ACMD(do_obstruct)
     improve_skill(g, ch, SKILL_HYOGA_KABE, 0);
     return;
   }
-  struct obj_data *obj;
   room_rnum newroom = rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room;
 
   if (rroom_flagged(g, newroom, ROOM_PEACEFUL)) {
@@ -1932,7 +1918,7 @@ ACMD(do_obstruct)
     return;
   }
 
-  for (obj = rroom_get_contents(g, newroom); obj; obj = obj_get_next_content(obj)) {
+  for (obj_data *obj : room_contents(g, newroom)) {
     if (obj_get_vnum(g, obj) == 79) {
       if (obj_get_cost(obj) == dir2) {
         if (skill < prob) {

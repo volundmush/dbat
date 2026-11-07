@@ -8,6 +8,7 @@
 *****************************************************/
 #include <cerrno>
 
+#include "dbat/iterate.hpp"
 #include "dbat/maputils.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -23,7 +24,6 @@
 static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
 {
 
-  struct char_data *tch, *next_ch;
   struct obj_data *controls = nullptr, *obj = nullptr;
   int found = false;
 
@@ -31,8 +31,7 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
     return;
   }
 
-  for (tch = g->characters; tch; tch = next_ch) {
-    next_ch = char_get_next(tch);
+  for (char_data *tch : each_char(g)) {
     if (found == false) {
       if (!(obj = find_control(g, tch))) {
         continue;
@@ -51,19 +50,16 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
 
 static int checkship(GameWorld *g, room_rnum rnum, obj_vnum vnum)
 {
-  struct obj_data *i = nullptr;
-  int there          = false;
+  int there = false;
 
-  for (i = rroom_get_contents(g, rnum); i; i = obj_get_next_content(i)) {
+  for (obj_data *item : room_contents(g, rnum)) {
     if (!rroom_flagged(g, rnum, ROOM_NEBULA)) {
-      if (obj_get_type_flag(i) == ITEM_VEHICLE && there != true) {
+      if (obj_get_type_flag(item) == ITEM_VEHICLE && there != true) {
         there = true;
-        ping_ship(g, obj_get_vnum(g, i), vnum);
+        ping_ship(g, obj_get_vnum(g, item), vnum);
       }
     }
   }
-
-  i = nullptr;
 
   return there;
 }

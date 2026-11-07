@@ -4,6 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/iterate.hpp"
 #include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -67,12 +68,12 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
     update_wait_events(&g->rooms[i], &g->rooms[i - 1]);
 
     /* People in this room must have their in_rooms moved up one. */
-    for (tch = rroom_get_people(g, i); tch; tch = char_get_next_in_room(tch))
-      char_set_in_room(tch, char_get_in_room(tch) + ((char_get_in_room(tch) != NOWHERE)));
+    for (char_data *vict : room_people(g, i))
+      char_set_in_room(vict, char_get_in_room(vict) + ((char_get_in_room(vict) != NOWHERE)));
 
     /* Move objects too. */
-    for (tobj = rroom_get_contents(g, i); tobj; tobj = obj_get_next_content(tobj))
-      obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
+    for (obj_data *item : room_contents(g, i))
+      obj_set_in_room(item, obj_get_in_room(item) + ((obj_get_in_room(item) != NOWHERE)));
   }
   if (!found) {
     g->rooms[0] = *room; /* Last place, in front. */
@@ -141,8 +142,6 @@ bool delete_room(GameWorld *g, room_rnum rnum)
 {
   room_rnum i;
   int j;
-  struct char_data *ppl, *next_ppl;
-  struct obj_data *obj, *next_obj;
   struct room_data *room;
 
   if (rnum <= 0 || rnum > g->top_room) /* Can't delete void yet. */
@@ -174,13 +173,11 @@ bool delete_room(GameWorld *g, room_rnum rnum)
    * Dump the contents of this room into the Void.  We could also just
    * extract the people, mobs, and objects here.
    */
-  for (obj = rroom_get_contents(g, rnum); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : room_contents(g, rnum)) {
     obj_from_room(g, obj);
     obj_to_room(g, obj, 0);
   }
-  for (ppl = rroom_get_people(g, rnum); ppl; ppl = next_ppl) {
-    next_ppl = char_get_next_in_room(ppl);
+  for (char_data *ppl : room_people(g, rnum)) {
     char_from_room(g, ppl);
     char_to_room(g, ppl, 0);
   }
@@ -269,10 +266,10 @@ bool delete_room(GameWorld *g, room_rnum rnum)
     g->rooms[i] = g->rooms[i + 1];
     update_wait_events(&g->rooms[i], &g->rooms[i + 1]);
 
-    for (ppl = rroom_get_people(g, i); ppl; ppl = char_get_next_in_room(ppl))
+    for (char_data *ppl : room_people(g, i))
       char_set_in_room(ppl, char_get_in_room(ppl) - ((char_get_in_room(ppl) != NOWHERE))); /* Redundant check? */
 
-    for (obj = rroom_get_contents(g, i); obj; obj = obj_get_next_content(obj))
+    for (obj_data *obj : room_contents(g, i))
       obj_set_in_room(obj, obj_get_in_room(obj) - ((obj_get_in_room(obj) != NOWHERE))); /* Redundant check? */
   }
 

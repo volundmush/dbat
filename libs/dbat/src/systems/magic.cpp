@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/config.hpp"
 #include "dbat/magic.hpp"
@@ -408,7 +409,6 @@ static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch,
 void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *k;
-  struct follow_type *f, *f_next;
 
   if (ch == nullptr)
     return;
@@ -419,9 +419,8 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
     k = char_get_master(ch);
   else
     k = ch;
-  for (f = char_get_followers(k); f; f = f_next) {
-    f_next = f->next;
-    tch    = f->follower;
+  for (char_data *fol : char_followers(g, k)) {
+    tch = fol;
     if (char_get_in_room(tch) != char_get_in_room(ch))
       continue;
     if (!char_aff_flagged(tch, AFF_GROUP))
@@ -443,10 +442,8 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
  */
 void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
-  struct char_data *tch, *tch_next;
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = tch_next) {
-    tch_next = char_get_next_in_room(tch);
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (tch == ch)
       continue;
 
@@ -465,7 +462,6 @@ void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum)
  */
 void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
-  struct char_data *tch, *next_tch;
   const char *to_char = nullptr, *to_room = nullptr;
 
   if (ch == nullptr)
@@ -487,8 +483,7 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
   if (to_room != nullptr)
     act(g, to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_tch) {
-    next_tch = char_get_next_in_room(tch);
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
 
     /*
      * The skips: 1: the caster

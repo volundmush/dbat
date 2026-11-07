@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -315,7 +316,6 @@ static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *
 static void print_group(GameWorld *g, struct char_data *ch)
 {
   struct char_data *k;
-  struct follow_type *f;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     send_to_char(g, ch, "But you are not the member of a group!\r\n");
@@ -341,21 +341,21 @@ static void print_group(GameWorld *g, struct char_data *ch)
       act(g, buf, false, ch, nullptr, k, TO_CHAR);
     }
 
-    for (f = char_get_followers(k); f; f = f->next) {
-      if (!char_aff_flagged(f->follower, AFF_GROUP))
+    for (char_data *fol : char_followers(g, k)) {
+      if (!char_aff_flagged(fol, AFF_GROUP))
         continue;
       send_to_char(g, ch, "@D----------------@n\r\n");
-      if (getCurPL(g, f->follower) > (getEffMaxPL(g, f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      if (getCurPL(g, fol) > (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(g, f->follower)), add_commas((getCurKI(g, f->follower))), add_commas((getCurST(g, f->follower))),
-                 char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
+                 add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
+                 char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
       }
-      if (getCurPL(g, f->follower) <= (getEffMaxPL(g, f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      if (getCurPL(g, fol) <= (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(g, f->follower)), add_commas((getCurKI(g, f->follower))), add_commas((getCurST(g, f->follower))),
-                 char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
+                 add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
+                 char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
       }
-      act(g, buf, false, ch, nullptr, f->follower, TO_CHAR);
+      act(g, buf, false, ch, nullptr, fol, TO_CHAR);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }
@@ -365,7 +365,6 @@ ACMD(do_group)
 {
   char buf[MAX_STRING_LENGTH];
   struct char_data *vict;
-  struct follow_type *f;
   int found, highlvl = 0, lowlvl = 0;
   int64_t highpl = 0, lowpl = 0;
 
@@ -392,13 +391,14 @@ ACMD(do_group)
   highpl  = getEffMaxPL(g, ch);
   lowpl   = getEffMaxPL(g, ch);
 
-  for (found = 0, f = char_get_followers(ch); f; f = f->next) {
-    if (char_aff_flagged(f->follower, AFF_GROUP)) {
-      if (char_get_level(f->follower) > highlvl) {
-        highlvl = char_get_level(f->follower);
+  found = 0;
+  for (char_data *fol : char_followers(g, ch)) {
+    if (char_aff_flagged(fol, AFF_GROUP)) {
+      if (char_get_level(fol) > highlvl) {
+        highlvl = char_get_level(fol);
       }
-      if (char_get_level(f->follower) < lowlvl) {
-        lowlvl = char_get_level(f->follower);
+      if (char_get_level(fol) < lowlvl) {
+        lowlvl = char_get_level(fol);
       }
     }
   }
@@ -407,14 +407,15 @@ ACMD(do_group)
 
   if (!strcasecmp(buf, "all")) {
     perform_group(g, ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
-    for (found = 0, f = char_get_followers(ch); f; f = f->next) {
+    found = 0;
+    for (char_data *foll : char_followers(g, ch)) {
       foundwas = found;
-      found += perform_group(g, ch, f->follower, highlvl, lowlvl, highpl, lowpl);
+      found += perform_group(g, ch, foll, highlvl, lowlvl, highpl, lowpl);
       if (found > foundwas) {
-        if (char_get_level(f->follower) > highlvl)
-          highlvl = char_get_level(f->follower);
-        else if (char_get_level(f->follower) < lowlvl)
-          lowlvl = char_get_level(f->follower);
+        if (char_get_level(foll) > highlvl)
+          highlvl = char_get_level(foll);
+        else if (char_get_level(foll) < lowlvl)
+          lowlvl = char_get_level(foll);
       }
     }
     if (!found)
@@ -446,7 +447,6 @@ ACMD(do_group)
 ACMD(do_ungroup)
 {
   char buf[MAX_INPUT_LENGTH];
-  struct follow_type *f, *next_fol;
   struct char_data *tch;
 
   one_argument(argument, buf);
@@ -457,14 +457,13 @@ ACMD(do_ungroup)
       return;
     }
 
-    for (f = char_get_followers(ch); f; f = next_fol) {
-      next_fol = f->next;
-      if (char_aff_flagged(f->follower, AFF_GROUP)) {
-        char_aff_set(f->follower, AFF_GROUP, false);
-        act(g, "$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
-        char_set_combatexpertise(f->follower, 0);
-        if (!char_aff_flagged(f->follower, AFF_CHARM))
-          stop_follower(g, f->follower);
+    for (char_data *fol : char_followers(g, ch)) {
+      if (char_aff_flagged(fol, AFF_GROUP)) {
+        char_aff_set(fol, AFF_GROUP, false);
+        act(g, "$N has disbanded the group.", true, fol, nullptr, ch, TO_CHAR);
+        char_set_combatexpertise(fol, 0);
+        if (!char_aff_flagged(fol, AFF_CHARM))
+          stop_follower(g, fol);
       }
     }
 
@@ -504,7 +503,6 @@ ACMD(do_split)
   int amount, num, share, rest;
   size_t len;
   struct char_data *k;
-  struct follow_type *f;
 
   if (char_is_npc(ch))
     return;
@@ -529,10 +527,10 @@ ACMD(do_split)
     else
       num = 0;
 
-    for (f = char_get_followers(k); f; f = f->next)
-      if (char_aff_flagged(f->follower, AFF_GROUP) &&
-          (!char_is_npc(f->follower)) && f->follower != ch &&
-          (char_get_in_room(f->follower) == char_get_in_room(ch)))
+    for (char_data *fol : char_followers(g, k))
+      if (char_aff_flagged(fol, AFF_GROUP) &&
+          (!char_is_npc(fol)) && fol != ch &&
+          (char_get_in_room(fol) == char_get_in_room(ch)))
         num++;
 
     if (num > 0 && char_aff_flagged(ch, AFF_GROUP)) {
@@ -558,14 +556,14 @@ ACMD(do_split)
       send_to_char(g, k, "%s", buf);
     }
 
-    for (f = char_get_followers(k); f; f = f->next) {
-      if (char_aff_flagged(f->follower, AFF_GROUP) &&
-          (!char_is_npc(f->follower)) &&
-          (char_get_in_room(f->follower) == char_get_in_room(ch)) &&
-          f->follower != ch) {
+    for (char_data *foll : char_followers(g, k)) {
+      if (char_aff_flagged(foll, AFF_GROUP) &&
+          (!char_is_npc(foll)) &&
+          (char_get_in_room(foll) == char_get_in_room(ch)) &&
+          foll != ch) {
 
-        char_set_gold(f->follower, char_get_gold(f->follower) + (share));
-        send_to_char(g, f->follower, "%s", buf);
+        char_set_gold(foll, char_get_gold(foll) + (share));
+        send_to_char(g, foll, "%s", buf);
       }
     }
     send_to_char(g, ch, "You split %d zenni among %d members -- %d zenni each.\r\n",

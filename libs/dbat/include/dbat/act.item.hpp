@@ -6,7 +6,7 @@
 
 // functions
 int check_saveroom_count(GameWorld *g, struct char_data *ch, struct obj_data *cont);
-int check_insidebag(struct obj_data *cont, double mult);
+int check_insidebag(GameWorld *g, struct obj_data *cont, double mult);
 
 void weight_change_object(GameWorld *g, struct obj_data *obj, int weight);
 void name_from_drinkcon(GameWorld *g, struct obj_data *obj);

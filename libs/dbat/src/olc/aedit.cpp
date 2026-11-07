@@ -7,6 +7,7 @@
  */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/aedit.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/social.hpp"
@@ -48,8 +49,8 @@ ACMD(do_oasis_aedit)
     return;
   }
 
-  for (d = g->descriptors; d; d = d->next)
-    if (desc_get_connected(d) == CON_AEDIT) {
+  for (descriptor_data *dd : each_desc(g))
+    if (desc_get_connected(dd) == CON_AEDIT) {
       send_to_char(g, ch, "Sorry, only one can edit socials at a time.\r\n");
       return;
     }

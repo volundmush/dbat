@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
@@ -202,7 +203,6 @@ static void lockWrite(GameWorld *g, struct char_data *ch, char *name)
 ACMD(do_reward)
 {
   struct char_data *vict = nullptr;
-  struct descriptor_data *k;
   int amt = 0;
 
   char arg[MAX_INPUT_LENGTH];
@@ -227,7 +227,7 @@ ACMD(do_reward)
     return;
   }
 
-  for (k = g->descriptors; k; k = k->next) {
+  for (descriptor_data *k : each_desc(g)) {
     if (desc_get_connected(k) != CON_PLAYING)
       continue;
     if (char_is_npc(k->character))
@@ -450,14 +450,13 @@ ACMD(do_advance)
 
 ACMD(do_handout)
 {
-  struct descriptor_data *j;
 
   if (char_get_admlevel(ch) < 3) {
     send_to_char(g, ch, "You can't do that.\r\n");
     return;
   }
 
-  for (j = g->descriptors; j; j = j->next) {
+  for (descriptor_data *j : each_desc(g)) {
     if (!desc_is_playing(j) || ch == j->character || char_get_admlevel(j->character) > 0)
       continue;
     if (char_is_npc(j->character))
@@ -476,7 +475,6 @@ ACMD(do_restore)
 {
   char buf[MAX_INPUT_LENGTH];
   struct char_data *vict;
-  struct descriptor_data *j;
 
   one_argument(argument, buf);
   if (!*buf)
@@ -484,7 +482,7 @@ ACMD(do_restore)
   else if (is_abbrev(buf, "all")) {
     send_to_imm(g, "[Log: %s restored all.]", char_get_name(ch));
     log_imm_action(g, "RESTORE: %s has restored all players.", char_get_name(ch));
-    for (j = g->descriptors; j; j = j->next) {
+    for (descriptor_data *j : each_desc(g)) {
       if (!desc_is_playing(j) || !(vict = j->character))
         continue;
       restore_by(g, vict, ch);
@@ -509,9 +507,8 @@ void perform_immort_vis(GameWorld *g, struct char_data *ch)
 
 static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)
 {
-  struct char_data *tch;
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (tch == ch)
       continue;
     if (char_get_admlevel(tch) >= char_get_invis_level(g, ch) && char_get_admlevel(tch) < level)

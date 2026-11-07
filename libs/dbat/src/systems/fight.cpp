@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/consts/deathtype.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -52,25 +53,23 @@ static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf);
 
 int group_bonus(GameWorld *g, struct char_data *ch, int type)
 {
-  struct follow_type *k, *next;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     return (false);
 
   if (char_get_followers(ch)) {
-    for (k = char_get_followers(ch); k; k = next) {
-      next = k->next;
-      if (!char_aff_flagged(k->follower, AFF_GROUP)) {
+    for (char_data *fol : char_followers(g, ch)) {
+      if (!char_aff_flagged(fol, AFF_GROUP)) {
         continue;
       }
       if (type == 0) {
-        incCurLFPercent(g, k->follower, .25, true);
-        send_to_char(g, k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+        incCurLFPercent(g, fol, .25, true);
+        send_to_char(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
         return (true);
       }
       if (type == 1) {
-        incCurLFPercent(g, k->follower, .4, true);
-        send_to_char(g, k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+        incCurLFPercent(g, fol, .4, true);
+        send_to_char(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
         return (true);
       }
       if (type == 2) {
@@ -211,7 +210,6 @@ void mutant_limb_regen(GameWorld *g, struct char_data *ch)
 
 static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf)
 {
-  struct obj_data *cont;
   char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
   ;
 
@@ -219,7 +217,7 @@ static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf)
     return (false);
   }
 
-  for (cont = rroom_get_contents(g, char_get_in_room(ch)); cont; cont = obj_get_next_content(cont)) {
+  for (obj_data *cont : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_weight(cont) <= getMaxCarryWeight(g, ch) + char_get_carry_weight(ch)) {
       snprintf(buf2, sizeof(buf2), "%s", obj_get_name(cont));
       do_get(g, ch, buf2, 0, 0);
@@ -660,9 +658,8 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
 
 static void cleanup_arena_watch(GameWorld *g, struct char_data *ch)
 {
-  struct descriptor_data *d;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
 
     if (desc_get_connected(d) != CON_PLAYING)
       continue;
@@ -810,10 +807,9 @@ void fight_stack(GameWorld *g)
 {
   int perc = 0;
   struct char_data *ch;
-  struct char_data *tch;
   struct char_data *wch;
 
-  for (tch = g->characters; tch; tch = char_get_next(tch)) {
+  for (char_data *tch : each_char(g)) {
     ch = tch;
 
     if (char_get_position(ch) == POS_FIGHTING) {
@@ -1553,10 +1549,7 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
   obj_set_timer(corpse, CONFIG_MAX_PC_CORPSE_TIME);
   obj_extra_set(corpse, ITEM_UNIQUE_SAVE, true);
 
-  struct obj_data *obj, *next_obj;
-
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
 
     if (obj && obj_get_vnum(g, obj) < 19900 && obj_get_vnum(g, obj) != 17998) {
       if ((obj_get_vnum(g, obj) >= 18800 && obj_get_vnum(g, obj) <= 18999) || (obj_get_vnum(g, obj) >= 19100 && obj_get_vnum(g, obj) <= 19199)) {
@@ -1684,9 +1677,9 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
 static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tch)
 {
-  struct obj_data *corpse, *o;
+  struct obj_data *corpse;
   struct obj_data *money;
-  struct obj_data *obj, *next_obj, *meat;
+  struct obj_data *meat;
   int i, x, y;
 
   corpse = create_obj(g);
@@ -1760,8 +1753,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
   obj_extra_set(corpse, ITEM_UNIQUE_SAVE, true);
 
   if (char_mob_flagged(ch, MOB_HUSK)) {
-    for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : char_inventory(g, ch)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
     }
@@ -1770,7 +1762,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
   if (!char_mob_flagged(ch, MOB_HUSK)) {
     /* transfer character's inventory to the corpse */
     obj_set_contains(corpse, char_get_inventory(ch));
-    for (o = obj_get_contains(corpse); o != nullptr; o = obj_get_next_content(o)) {
+    for (obj_data *o : obj_contents(g, corpse)) {
       obj_set_in_obj(o, corpse);
     }
     object_list_new_owner(corpse, nullptr);
@@ -1839,8 +1831,7 @@ static void final_combat_resolve(GameWorld *g, struct char_data *ch)
     obj_set_sitting(chair, nullptr);
   }
   if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
-    struct char_data *clone = nullptr;
-    for (clone = g->characters; clone; clone = char_get_next(clone)) {
+    for (char_data *clone : each_char(g)) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(g, clone) == 25) {
           if (char_get_original(clone) == ch) {
@@ -2091,7 +2082,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       case Afterlife:
         ghostify(g, ch);
         purge_homing(g, ch);
-        if (char_get_level(ch) > 0 && has_group(ch)) {
+        if (char_get_level(ch) > 0 && has_group(g, ch)) {
           if (char_get_master(ch) != nullptr) {
             group_bonus(g, ch, 1);
           } else {
@@ -2287,10 +2278,9 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
     }
   }
   if (char_get_lasthit(victim) != 0 && char_get_lasthit(victim) != char_get_idnum(ch)) {
-    struct follow_type *f;
     int checkit = false;
-    for (f = char_get_followers(ch); f; f = f->next) {
-      if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(f->follower)) {
+    for (char_data *fol : char_followers(g, ch)) {
+      if (char_aff_flagged(fol, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(fol)) {
         checkit = true;
       }
     }
@@ -2299,9 +2289,9 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
     }
     if (checkit == false && char_get_master(ch) != nullptr) {
       struct char_data *master = char_get_master(ch);
-      for (f = char_get_followers(master); f; f = f->next) {
-        if (f->follower != ch) {
-          if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(f->follower)) {
+      for (char_data *foll : char_followers(g, master)) {
+        if (foll != ch) {
+          if (char_aff_flagged(foll, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(foll)) {
             checkit = true;
           }
         }
@@ -2401,7 +2391,6 @@ void group_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
   int tot_levels, tot_members;
   int64_t tot_gain, base;
   struct char_data *k;
-  struct follow_type *f;
 
   if (!(k = char_get_master(ch)))
     k = ch;
@@ -2414,13 +2403,13 @@ void group_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
     tot_members = 0;
   }
 
-  for (f = char_get_followers(k); f; f = f->next)
-    if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_in_room(f->follower) == char_get_in_room(ch)) {
-      if (!char_is_weighted(g, f->follower)) {
-        tot_levels += char_get_level(f->follower);
+  for (char_data *fol : char_followers(g, k))
+    if (char_aff_flagged(fol, AFF_GROUP) && char_get_in_room(fol) == char_get_in_room(ch)) {
+      if (!char_is_weighted(g, fol)) {
+        tot_levels += char_get_level(fol);
         tot_members++;
-      } else if (getEffMaxPL(g, f->follower) >= getEffMaxPL(g, ch) * 0.5) {
-        tot_levels += char_get_level(f->follower);
+      } else if (getEffMaxPL(g, fol) >= getEffMaxPL(g, ch) * 0.5) {
+        tot_levels += char_get_level(fol);
         tot_members++;
       }
     }
@@ -2466,10 +2455,10 @@ void group_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
    */
   perform_group_gain(g, k, base, victim);
 
-  for (f = char_get_followers(k); f; f = f->next) {
-    if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_in_room(f->follower) == char_get_in_room(ch)) {
-      //if ((getEffMaxPL(f->follower)()) >= GET_MAX_HIT(ch) * 0.5)
-      perform_group_gain(g, f->follower, base, victim);
+  for (char_data *foll : char_followers(g, k)) {
+    if (char_aff_flagged(foll, AFF_GROUP) && char_get_in_room(foll) == char_get_in_room(ch)) {
+      //if ((getEffMaxPL(foll)()) >= GET_MAX_HIT(ch) * 0.5)
+      perform_group_gain(g, foll, base, victim);
     }
   }
 }

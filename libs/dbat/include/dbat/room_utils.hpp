@@ -33,8 +33,7 @@ void rroom_set_dir_option(GameWorld *g, room_rnum room, int i, struct room_direc
 struct room_direction_data *room_get_dir_option(const struct room_data *room, int i);
 void room_set_dir_option(struct room_data *room, int i, struct room_direction_data *v);
 
-
-int num_pc_in_room(struct room_data *room);
+int num_pc_in_room(GameWorld *g, struct room_data *room);
 int cook_element(GameWorld *g, room_rnum room);
 bool room_is_dark(GameWorld *g, room_rnum room);
 

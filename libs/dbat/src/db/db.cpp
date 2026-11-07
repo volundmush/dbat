@@ -13,6 +13,7 @@
 
 #include <linux/limits.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -117,10 +118,9 @@ void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 static void dragon_level(GameWorld *g, struct char_data *ch)
 {
-  struct descriptor_data *d;
   int level = 0, count = 0;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_is_playing(d) && char_get_admlevel(d->character) < 1) {
       level += char_get_level(d->character);
       count += 1;
@@ -522,9 +522,9 @@ void destroy_db(GameWorld *g)
 
   /* Active Mobiles & Players */
   /* stop_follower() reads the master, so everyone must stop before anyone is freed */
-  for (chtmp = g->characters; chtmp; chtmp = char_get_next(chtmp))
-    if (char_get_master(chtmp))
-      stop_follower(g, chtmp);
+  for (char_data *tch : each_char(g))
+    if (char_get_master(tch))
+      stop_follower(g, tch);
   while (g->characters) {
     chtmp          = g->characters;
     g->characters = char_get_next(g->characters);
@@ -834,10 +834,8 @@ void auc_save(GameWorld *g)
   if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
     mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
   else {
-    struct obj_data *obj, *next_obj;
 
-    for (obj = rroom_get_contents(g, real_room(g, 80)); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, real_room(g, 80))) {
       if (obj) {
         fprintf(fl, "%" PRId64 " %s %d %d %d %d %ld\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
       }
@@ -3799,7 +3797,6 @@ void reset_zone(GameWorld *g, zone_rnum zone)
           if ((g->mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             int room_max = 0;
-            struct char_data *i;
             mob = read_mobile(g, ZCMD2.arg1, REAL);
 
             /* First find out how many mobs of VNUM are in the mud with this rooms */
@@ -3807,7 +3804,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
             /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
             if (ZCMD2.arg4 > 0) {
-              for (i = g->characters; i; i = char_get_next(i)) {
+              for (char_data *i : each_char(g)) {
                 if ((char_get_hometown(i) == rroom_get_vnum(g, ZCMD2.arg3)) && (char_get_mob_vnum(g, i) == char_get_mob_vnum(g, mob))) {
                   room_max++;
                 }
@@ -3840,7 +3837,6 @@ void reset_zone(GameWorld *g, zone_rnum zone)
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 != NOWHERE) {
               int room_max = 0;
-              struct obj_data *k;
               obj = read_object(g, ZCMD2.arg1, REAL);
 
               /* First find out how many obj of VNUM are in the mud with this rooms */
@@ -3848,7 +3844,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
               /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
               if (ZCMD2.arg4 > 0) {
-                for (k = g->objects; k; k = obj_get_next(k)) {
+                for (obj_data *k : each_obj(g)) {
                   if (((obj_get_room_loaded(k) == rroom_get_vnum(g, ZCMD2.arg3)) && (obj_get_vnum(g, k) == obj_get_vnum(g, obj))) || (obj_get_vnum(g, k) == obj_get_vnum(g, obj) && rroom_get_vnum(g, ZCMD2.arg3) == rroom_get_vnum(g, obj_get_in_room(k)))) {
                     /*  For objects, lets not count them if they've been removed from the room */
                     /*  We'll let max_in_mud handle those. */
@@ -3964,7 +3960,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
           break;
 
         case 'R': /* rem obj from room */
-          if ((obj = get_obj_in_list_num(ZCMD2.arg2, rroom_get_contents(g, ZCMD2.arg1))) != nullptr)
+          if ((obj = get_obj_in_list_num(g, ZCMD2.arg2, rroom_get_contents(g, ZCMD2.arg1))) != nullptr)
             extract_obj(g, obj);
           last_cmd = 1;
           tmob     = nullptr;
@@ -4115,9 +4111,8 @@ void reset_zone(GameWorld *g, zone_rnum zone)
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 bool is_empty(GameWorld *g, zone_rnum zone_nr)
 {
-  struct descriptor_data *i;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
     if (char_get_in_room(i->character) == NOWHERE)

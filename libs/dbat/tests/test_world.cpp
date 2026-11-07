@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/extract.hpp"
 #include "dbat/comm.hpp"
@@ -66,7 +67,7 @@ static void place(GameWorld *g, struct char_data *ch, room_vnum vnum)
 
 static struct char_data *mob_in(GameWorld *g, room_vnum vnum, mob_vnum mob)
 {
-  for (struct char_data *ch = rroom_get_people(g, real_room(g, vnum)); ch; ch = char_get_next_in_room(ch))
+  for (char_data *ch : room_people(g, real_room(g, vnum)))
     if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == mob)
       return ch;
   return nullptr;
@@ -74,7 +75,7 @@ static struct char_data *mob_in(GameWorld *g, room_vnum vnum, mob_vnum mob)
 
 static struct obj_data *carried(GameWorld *g, struct char_data *ch, obj_vnum vnum)
 {
-  for (struct obj_data *obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj))
+  for (obj_data *obj : char_inventory(g, ch))
     if (obj_get_vnum(g, obj) == vnum)
       return obj;
   return nullptr;
@@ -191,6 +192,11 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
 
   obj_to_char(g, obj, ch);
   obj_to_room(g, chest, room);
+  CHECK_AUDIT(g);
+
+  remove_from_lookup_table(g, obj_get_id(obj)); /* loops over entities would pass it over */
+  CHECK_NOTICED(g);
+  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, obj);
   CHECK_AUDIT(g);
 
   char_set_in_room(ch, room + 1);
@@ -340,7 +346,7 @@ static void check_zone_reset(GameWorld *g)
   for (int i = 0; i < 3; i++)
     reset_zone(g, real_zone(g, 3));
   /* nothing else loads this mob, and the zone command's limit is 1 */
-  for (struct char_data *ch = rroom_get_people(g, real_room(g, 303)); ch; ch = char_get_next_in_room(ch))
+  for (char_data *ch : room_people(g, real_room(g, 303)))
     if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 331)
       masters++;
   CHECK(masters == 1);
@@ -390,20 +396,16 @@ static void check_save_and_reload(GameWorld *g, struct char_data *ch)
   free_char(g, copy);
 }
 
-static int count_objects(const GameWorld *g)
+static int count_objects(GameWorld *g)
 {
-  int count = 0;
-
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
-    count++;
-  return count;
+  return count_members(each_obj(g));
 }
 
 static int count_objects_of(GameWorld *g, obj_vnum vnum)
 {
   int count = 0;
 
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+  for (obj_data *obj : each_obj(g))
     if (obj_get_vnum(g, obj) == vnum)
       count++;
   return count;

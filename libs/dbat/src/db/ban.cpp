@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/ban.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -238,7 +239,6 @@ ACMD(do_unban)
 bool Valid_Name(GameWorld *g, char *newname)
 {
   int i, wovels = 0;
-  struct descriptor_data *dt;
   char tempname[MAX_INPUT_LENGTH];
 
   /*
@@ -253,7 +253,7 @@ bool Valid_Name(GameWorld *g, char *newname)
    * to prevent character duping.
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
-  for (dt = g->descriptors; dt; dt = dt->next)
+  for (descriptor_data *dt : each_desc(g))
     if (dt->character && char_get_name(dt->character) && !strcasecmp(char_get_name(dt->character), newname))
       if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));

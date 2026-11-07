@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
@@ -281,10 +282,9 @@ ACMD(do_echo)
   char buf[MAX_INPUT_LENGTH];
   char name[128];
   int found              = false;
-  struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
+  struct char_data *tch  = nullptr;
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch)
       continue;
     if (found == false) {
@@ -398,7 +398,6 @@ ACMD(do_syslog)
 
 ACMD(do_gecho)
 {
-  struct descriptor_data *pt;
 
   skip_spaces(&argument);
   delete_doubledollar(argument);
@@ -406,7 +405,7 @@ ACMD(do_gecho)
   if (!*argument)
     send_to_char(g, ch, "That must be a mistake...\r\n");
   else {
-    for (pt = g->descriptors; pt; pt = pt->next)
+    for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
         send_to_char(g, pt->character, "%s\r\n", argument);
 
@@ -419,7 +418,6 @@ ACMD(do_gecho)
 
 ACMD(do_ginfo)
 {
-  struct descriptor_data *pt;
 
   skip_spaces(&argument);
   delete_doubledollar(argument);
@@ -427,7 +425,7 @@ ACMD(do_ginfo)
   if (!*argument)
     send_to_char(g, ch, "That must be a mistake...\r\n");
   else {
-    for (pt = g->descriptors; pt; pt = pt->next)
+    for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
         send_to_char(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", argument);
 
@@ -467,7 +465,6 @@ ACMD(do_wiznet)
 {
   char buf1[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32],
       buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32], *msg;
-  struct descriptor_data *d;
   char emote = false;
   int level  = ADMLVL_IMMORT;
 
@@ -497,7 +494,7 @@ ACMD(do_wiznet)
 
     case '@':
       send_to_char(g, ch, "God channel status:\r\n");
-      for (d = g->descriptors; d; d = d->next) {
+      for (descriptor_data *d : each_desc(g)) {
         if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(d->character) < ADMLVL_IMMORT)
           continue;
         if (!char_can_see(g, ch, d->character))
@@ -534,7 +531,7 @@ ACMD(do_wiznet)
     snprintf(buf2, sizeof(buf1), "@cSomeone@D: @G%s%s@n\r\n", emote ? "<--- " : "", argument);
   }
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_is_playing(d) && (char_get_admlevel(d->character) >= level) &&
         (!char_prf_flagged(g, d->character, PRF_NOWIZ)) &&
         (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(g, d->character, PRF_NOREPEAT)))) {

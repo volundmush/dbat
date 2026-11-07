@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/comm.hpp"
@@ -594,8 +595,7 @@ void Crash_rentsave(GameWorld *g, struct char_data *ch, int cost)
 
 void Crash_save_all(GameWorld *g)
 {
-  struct descriptor_data *d;
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if ((desc_get_connected(d) == CON_PLAYING) && !char_is_npc(d->character)) {
       if (char_plr_flagged(d->character, PLR_CRASH)) {
         Crash_crashsave(g, d->character);

@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/medit.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"
@@ -99,11 +100,11 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   /** Check that whatever it is isn't already being edited.                  **/
   /****************************************************************************/
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_MEDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_MEDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That mobile is currently being edited by %s.\r\n",
-                     char_get_name(d->character));
+                     char_get_name(dd->character));
         return;
       }
     }
@@ -290,8 +291,6 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int i;
   mob_rnum new_rnum;
-  struct descriptor_data *dsc;
-  struct char_data *mob;
 
   i = (real_mobile(g, OLC_NUM(d)) == NOBODY);
 
@@ -309,7 +308,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   char_set_proto_script(&g->mob_proto[new_rnum], OLC_SCRIPT(d));
 
   /* this takes care of the mobs currently in-game */
-  for (mob = g->characters; mob; mob = char_get_next(mob)) {
+  for (char_data *mob : each_char(g)) {
     if (char_get_nr(mob) != new_rnum)
       continue;
 
@@ -329,7 +328,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   /*
    * Update keepers in shops being edited and other mobs being edited.
    */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next) {
+  for (descriptor_data *dsc : each_desc(g)) {
     if (desc_get_connected(dsc) == CON_SEDIT) {
       if (shop_get_keeper(OLC_SHOP(dsc)) != NOTHING && shop_get_keeper(OLC_SHOP(dsc)) >= new_rnum)
         shop_set_keeper(OLC_SHOP(dsc), shop_get_keeper(OLC_SHOP(dsc)) + 1);
@@ -340,7 +339,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   /*
    * Update other people in zedit too. From: C.Raehl 4/27/99
    */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next)
+  for (descriptor_data *dsc : each_desc(g))
     if (desc_get_connected(dsc) == CON_ZEDIT)
       for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
         if (OLC_ZONE(dsc)->cmd[i].command == 'M')

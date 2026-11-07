@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/boards.hpp"
@@ -111,11 +112,11 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Check that whatever it is isn't already being edited.                  **/
   /****************************************************************************/
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_OEDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_OEDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That object is currently being edited by %s.\r\n",
-                     char_pers(g, d->character, ch));
+                     char_pers(g, dd->character, ch));
         return;
       }
     }
@@ -269,8 +270,6 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int i;
   obj_rnum robj_num;
-  struct descriptor_data *dsc;
-  struct obj_data *obj;
 
   i = (real_object(g, OLC_NUM(d)) == NOTHING);
 
@@ -288,7 +287,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
   obj_set_proto_script(&g->obj_proto[robj_num], OLC_SCRIPT(d));
 
   /* this takes care of the objects currently in-game */
-  for (obj = g->objects; obj; obj = obj_get_next(obj)) {
+  for (obj_data *obj : each_obj(g)) {
     if (obj_get_item_number(obj) != robj_num)
       continue;
     /* remove any old scripts */
@@ -307,14 +306,14 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
   /*
    * Renumber produce in shops being edited.
    */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next)
+  for (descriptor_data *dsc : each_desc(g))
     if (desc_get_connected(dsc) == CON_SEDIT)
       for (i = 0; shop_get_product(OLC_SHOP(dsc), i) != NOTHING; i++)
         if (shop_get_product(OLC_SHOP(dsc), i) >= robj_num)
           shop_set_product(OLC_SHOP(dsc), i, shop_get_product(OLC_SHOP(dsc), i) + 1);
 
   /* Update other people in zedit too. From: C.Raehl 4/27/99 */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next)
+  for (descriptor_data *dsc : each_desc(g))
     if (desc_get_connected(dsc) == CON_ZEDIT)
       for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
         switch (OLC_ZONE(dsc)->cmd[i].command) {
@@ -1760,10 +1759,8 @@ void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 /* this is all iedit stuff */
 static bool object_in_game(GameWorld *g, const struct obj_data *obj)
 {
-  for (const struct obj_data *k = g->objects; k; k = obj_get_next(k))
-    if (k == obj)
-      return true;
-  return false;
+  /* obj may already be freed: compare the pointer, never read through it */
+  return find_first(each_obj(g), [&](obj_data *k) { return k == obj; }) != nullptr;
 }
 
 /* Replaces what obj is with what the editor made of it, but not where it is or who is using it. */

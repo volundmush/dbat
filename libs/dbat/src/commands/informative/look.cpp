@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -1227,11 +1228,10 @@ static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
     if (char_get_exit(g, ch, dir)->general_description)
       send_to_char(g, ch, "%s", char_get_exit(g, ch, dir)->general_description);
     else {
-      struct obj_data *obj, *next_obj;
+      struct obj_data *obj;
       int founded = false;
-      for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-        next_obj = obj_get_next_content(obj);
-        if (obj_get_vnum(g, obj) == 17) {
+      for (obj_data *item : char_inventory(g, ch)) {
+        if (obj_get_vnum(g, item) == 17) {
           founded = true;
         }
       }
@@ -1403,20 +1403,12 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
   }
 
   if (cmread) {
-    for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
-      if (obj_get_type_flag(obj) == ITEM_BOARD) {
-        found = true;
-        break;
-      }
-    }
-    if (!obj) {
-      for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
-        if (obj_get_type_flag(obj) == ITEM_BOARD) {
-          found = true;
-          break;
-        }
-      }
-    }
+    auto is_board = [&](obj_data *o) { return obj_get_type_flag(o) == ITEM_BOARD; };
+    obj           = find_first(char_inventory(g, ch), is_board);
+    if (!obj)
+      obj = find_first(room_contents(g, char_get_in_room(ch)), is_board);
+    if (obj)
+      found = true;
     if (obj) {
       arg = one_argument(arg, number);
       if (!*number) {
@@ -1491,26 +1483,28 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
         }
 
     /* Does the argument match an extra desc in the char's inventory? */
-    for (obj = char_get_inventory(ch); obj && !found; obj = obj_get_next_content(obj)) {
-      if (char_can_see_obj(g, ch, obj))
-        if ((desc = find_exdesc(arg, obj_get_ex_description(obj))) != nullptr && ++i == fnum) {
-          if (obj_get_type_flag(obj) == ITEM_BOARD) {
-            show_board(g, obj_get_vnum(g, obj), ch);
+    for (obj_data *item : char_inventory(g, ch)) {
+      if (found)
+        break;
+      if (char_can_see_obj(g, ch, item))
+        if ((desc = find_exdesc(arg, obj_get_ex_description(item))) != nullptr && ++i == fnum) {
+          if (obj_get_type_flag(item) == ITEM_BOARD) {
+            show_board(g, obj_get_vnum(g, item), ch);
           } else {
             send_to_char(g, ch, "%s", desc);
-            if (isname(arg, obj_get_name(obj))) {
-              if (obj_get_type_flag(obj) == ITEM_WEAPON) {
+            if (isname(arg, obj_get_name(item))) {
+              if (obj_get_type_flag(item) == ITEM_WEAPON) {
                 send_to_char(g, ch, "The weapon type of %s is a %s.\r\n",
-                             obj_get_short_description(obj), weapon_type[obj_get_value(obj, VAL_WEAPON_SKILL)]);
+                             obj_get_short_description(item), weapon_type[obj_get_value(item, VAL_WEAPON_SKILL)]);
               }
-              if (obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
-                display_spells(g, ch, obj);
+              if (obj_get_type_flag(item) == ITEM_SPELLBOOK) {
+                display_spells(g, ch, item);
               }
-              if (obj_get_type_flag(obj) == ITEM_SCROLL) {
-                display_scroll(g, ch, obj);
+              if (obj_get_type_flag(item) == ITEM_SCROLL) {
+                display_scroll(g, ch, item);
               }
-              diag_obj_to_char(g, obj, ch);
-              send_to_char(g, ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
+              diag_obj_to_char(g, item, ch);
+              send_to_char(g, ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(item, 7)], add_commas(obj_get_weight(item)));
             }
           }
           found = true;
@@ -1518,43 +1512,45 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
     }
 
     /* Does the argument match an extra desc of an object in the room? */
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj && !found; obj = obj_get_next_content(obj))
-      if (char_can_see_obj(g, ch, obj))
-        if ((desc = find_exdesc(arg, obj_get_ex_description(obj))) != nullptr && ++i == fnum) {
-          if (obj_get_type_flag(obj) == ITEM_BOARD) {
-            show_board(g, obj_get_vnum(g, obj), ch);
+    for (obj_data *thing : room_contents(g, char_get_in_room(ch))) {
+      if (found)
+        break;
+      if (char_can_see_obj(g, ch, thing))
+        if ((desc = find_exdesc(arg, obj_get_ex_description(thing))) != nullptr && ++i == fnum) {
+          if (obj_get_type_flag(thing) == ITEM_BOARD) {
+            show_board(g, obj_get_vnum(g, thing), ch);
           } else {
             send_to_char(g, ch, "%s", desc);
-            if (obj_get_type_flag(obj) == ITEM_VEHICLE) {
+            if (obj_get_type_flag(thing) == ITEM_VEHICLE) {
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @COpen hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CClose hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CEnter hatch\r\n");
-            } else if (obj_get_type_flag(obj) == ITEM_HATCH) {
+            } else if (obj_get_type_flag(thing) == ITEM_HATCH) {
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @COpen hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CClose hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CLeave@n\r\n");
-            } else if (obj_get_type_flag(obj) == ITEM_WINDOW) {
-              look_out_window(g, ch, obj_get_name(obj));
+            } else if (obj_get_type_flag(thing) == ITEM_WINDOW) {
+              look_out_window(g, ch, obj_get_name(thing));
             }
 
-            if (obj_get_type_flag(obj) == ITEM_CONTROL) {
-              send_to_char(g, ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(obj, 2) >= 200 ? "@G" : obj_get_value(obj, 2) >= 100 ? "@Y"
-                                                                                                                          : "@r",
-                           add_commas(obj_get_value(obj, 2)));
+            if (obj_get_type_flag(thing) == ITEM_CONTROL) {
+              send_to_char(g, ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(thing, 2) >= 200 ? "@G" : obj_get_value(thing, 2) >= 100 ? "@Y"
+                                                                                                                                 : "@r",
+                           add_commas(obj_get_value(thing, 2)));
             }
-            if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-              send_to_char(g, ch, "The weapon type of %s is a %s.\r\n", obj_get_short_description(obj), weapon_type[obj_get_value(obj, VAL_WEAPON_SKILL)]);
+            if (obj_get_type_flag(thing) == ITEM_WEAPON) {
+              send_to_char(g, ch, "The weapon type of %s is a %s.\r\n", obj_get_short_description(thing), weapon_type[obj_get_value(thing, VAL_WEAPON_SKILL)]);
             }
-            diag_obj_to_char(g, obj, ch);
-            send_to_char(g, ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
+            diag_obj_to_char(g, thing, ch);
+            send_to_char(g, ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(thing, 7)], add_commas(obj_get_weight(thing)));
           }
           found = true;
         }
-
+    }
     /* If an object was found back in generic_find */
     if (bits) {
       if (!found)
@@ -1570,7 +1566,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
 
 void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
 {
-  struct obj_data *i, *viewport = nullptr, *vehicle = nullptr;
+  struct obj_data *viewport = nullptr, *vehicle = nullptr;
   struct char_data *dummy = nullptr;
   room_rnum target_room   = NOWHERE;
   int bits, door;
@@ -1594,7 +1590,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
     return;
   } else {
     /* Look for any old window in the room */
-    for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i))
+    for (obj_data *i : room_contents(g, char_get_in_room(ch)))
       if ((obj_get_type_flag(i) == ITEM_WINDOW) &&
           isname("window", obj_get_name(i))) {
         viewport = i;

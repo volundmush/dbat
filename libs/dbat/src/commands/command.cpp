@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "dbat/iterate.hpp"
 #include "dbat/command.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/character_utils.hpp"
@@ -667,8 +668,6 @@ static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
 
 bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
 {
-  struct obj_data *i;
-  struct char_data *k;
   int j;
   bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
 
@@ -684,7 +683,7 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
         return true;
 
   /* special in inventory? */
-  for (i = char_get_inventory(ch); i; i = obj_get_next_content(i))
+  for (obj_data *i : char_inventory(g, ch))
     if (obj_get_spec(g, i) != nullptr)
       if (obj_get_spec(g, i)(g, ch, i, cmd, arg))
         return true;
@@ -693,13 +692,13 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
     return false;
 
   /* special in mobile present? */
-  for (k = rroom_get_people(g, char_get_in_room(ch)); k; k = char_get_next_in_room(k))
+  for (char_data *k : room_people(g, char_get_in_room(ch)))
     if (!char_mob_flagged(k, MOB_NOTDEADYET))
       if (char_get_mob_spec(g, k) && char_get_mob_spec(g, k)(g, ch, k, cmd, arg))
         return true;
 
   /* special in object present? */
-  for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i))
+  for (obj_data *i : room_contents(g, char_get_in_room(ch)))
     if (obj_get_spec(g, i) != nullptr)
       if (obj_get_spec(g, i)(g, ch, i, cmd, arg))
         return true;

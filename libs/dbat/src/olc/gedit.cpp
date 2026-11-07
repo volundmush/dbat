@@ -8,6 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/config.hpp"
 #include "dbat/gedit.hpp"
@@ -101,11 +102,11 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Check that the guild isn't already being edited.                        **/
   /****************************************************************************/
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_GEDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_GEDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That guild is currently being edited by %s.\r\n",
-                     char_pers(g, d->character, ch));
+                     char_pers(g, dd->character, ch));
         return;
       }
     }

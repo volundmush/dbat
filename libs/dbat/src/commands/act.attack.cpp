@@ -13,6 +13,7 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/act.attack.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -40,7 +41,7 @@ ACMD(do_lightgrenade)
   int perc, dge = 2, skill;
   int64_t dmg;
   double attperc = .35, minimum = .15;
-  struct char_data *vict = nullptr, *targ = nullptr, *next_v = nullptr;
+  struct char_data *targ = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -106,8 +107,7 @@ ACMD(do_lightgrenade)
 
   dmg = damtype(g, ch, 57, skill, attperc);
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -786,12 +786,11 @@ ACMD(do_combine)
 
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   struct char_data *vict;
-  struct follow_type *f;
   int fire = false, temp = -1;
 
   two_arguments(argument, arg, arg2);
 
-  if (!has_group(ch)) {
+  if (!has_group(g, ch)) {
     send_to_char(g, ch, "You need to be in a group!\r\n");
     return;
   }
@@ -807,9 +806,9 @@ ACMD(do_combine)
       }
       send_to_char(g, ch, "You stop your preparations to combine your attack with a group attack.\r\n");
       send_to_char(g, char_get_master(ch), "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(char_get_master(ch), ch));
-      for (f = char_get_followers(char_get_master(ch)); f; f = f->next) {
-        if (ch != f->follower)
-          send_to_char(g, f->follower, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(f->follower, ch));
+      for (char_data *fol : char_followers(g, char_get_master(ch))) {
+        if (ch != fol)
+          send_to_char(g, fol, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(fol, ch));
       }
       char_set_combine(ch, -1);
       return;
@@ -864,11 +863,11 @@ ACMD(do_combine)
         return;
       }
       char_set_combine(ch, temp);
-      for (f = char_get_followers(ch); f; f = f->next) {
-        if (!char_aff_flagged(f->follower, AFF_GROUP)) {
+      for (char_data *foll : char_followers(g, ch)) {
+        if (!char_aff_flagged(foll, AFF_GROUP)) {
           continue;
         }
-        if (char_get_combine(f->follower) != -1 && char_get_charge(f->follower) >= getMaxKI(g, f->follower) * 0.05) {
+        if (char_get_combine(foll) != -1 && char_get_charge(foll) >= getMaxKI(g, foll) * 0.05) {
           fire = true;
         }
       } /* End follow for statement */
@@ -883,9 +882,9 @@ ACMD(do_combine)
       if (char_get_charge(ch) >= getMaxKI(g, ch) * 0.05) {
         act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(g, char_get_master(ch), "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(char_get_master(ch), ch), attack_names[temp]);
-        for (f = char_get_followers(char_get_master(ch)); f; f = f->next) {
-          if (ch != f->follower)
-            send_to_char(g, f->follower, "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f->follower, ch), attack_names[temp]);
+        for (char_data *f_ch : char_followers(g, char_get_master(ch))) {
+          if (ch != f_ch)
+            send_to_char(g, f_ch, "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f_ch, ch), attack_names[temp]);
         }
         char_set_combine(ch, temp);
       } else {
@@ -1667,7 +1666,6 @@ ACMD(do_nova)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .20, minimum = .1;
-  struct char_data *vict = nullptr, *next_v = nullptr;
   char arg2[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg2);
@@ -1717,8 +1715,7 @@ ACMD(do_nova)
     skill += 5;
   }
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -1770,8 +1767,7 @@ ACMD(do_nova)
       dmg *= 1.4;
     }
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-      next_v = char_get_next_in_room(vict);
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (vict == ch) {
         continue;
       }
@@ -2884,7 +2880,7 @@ ACMD(do_throw)
 ACMD(do_selfd)
 {
 
-  struct char_data *tch = nullptr, *next_v = nullptr;
+  struct char_data *tch = nullptr;
   int64_t dmg = 0;
 
   if (char_is_npc(ch))
@@ -2978,21 +2974,20 @@ ACMD(do_selfd)
   char_set_suppression(ch, 0);
   act(g, "@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", true, ch, nullptr, nullptr, TO_ROOM);
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_v) {
-    next_v = char_get_next_in_room(tch);
-    if (tch == ch) {
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+    if (vict == ch) {
       continue;
     }
-    if (!can_kill(g, ch, tch, nullptr, 3)) {
+    if (!can_kill(g, ch, vict, nullptr, 3)) {
       continue;
     }
-    if (char_mob_flagged(tch, MOB_NOKILL)) {
+    if (char_mob_flagged(vict, MOB_NOKILL)) {
       continue;
     }
-    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, tch, TO_CHAR);
-    act(g, "@RYou are caught in the explosion!@n", true, ch, nullptr, tch, TO_VICT);
-    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, tch, TO_NOTVICT);
-    hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
+    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
+    act(g, "@RYou are caught in the explosion!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
+    hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
   }
   if (char_plr_flagged(ch, PLR_IMMORTAL)) {
     char_set_con_sdcooldown(ch, 600);

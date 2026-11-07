@@ -10,6 +10,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/comm.hpp"
@@ -275,7 +276,7 @@ static WCMD(do_wdoor)
 
 static WCMD(do_wteleport)
 {
-  char_data *ch, *next_ch;
+  char_data *ch;
   room_rnum target, nr;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -298,13 +299,12 @@ static WCMD(do_wteleport)
       return;
     }
 
-    for (ch = room_get_people(room); ch; ch = next_ch) {
-      next_ch = char_get_next_in_room(ch);
-      if (!valid_dg_target(g, ch, DG_ALLOW_GODS))
+    for (char_data *tch : room_people(g, room)) {
+      if (!valid_dg_target(g, tch, DG_ALLOW_GODS))
         continue;
-      char_from_room(g, ch);
-      char_to_room(g, ch, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+      char_from_room(g, tch);
+      char_to_room(g, tch, target);
+      enter_wtrigger(g, &g->rooms[char_get_in_room(tch)], tch, -1);
     }
   }
 
@@ -324,7 +324,7 @@ static WCMD(do_wteleport)
 
 static WCMD(do_wforce)
 {
-  char_data *ch, *next_ch;
+  char_data *ch;
   char arg1[MAX_INPUT_LENGTH], *line;
 
   line = one_argument(argument, arg1);
@@ -335,11 +335,10 @@ static WCMD(do_wforce)
   }
 
   if (!strcasecmp(arg1, "all")) {
-    for (ch = room_get_people(room); ch; ch = next_ch) {
-      next_ch = char_get_next_in_room(ch);
+    for (char_data *tch : room_people(g, room)) {
 
-      if (valid_dg_target(g, ch, 0)) {
-        command_interpreter(g, ch, line);
+      if (valid_dg_target(g, tch, 0)) {
+        command_interpreter(g, tch, line);
       }
     }
   }
@@ -360,22 +359,20 @@ static WCMD(do_wforce)
 static WCMD(do_wpurge)
 {
   char arg[MAX_INPUT_LENGTH];
-  char_data *ch, *next_ch;
-  obj_data *obj, *next_obj;
+  char_data *ch;
+  obj_data *obj;
 
   one_argument(argument, arg);
 
   if (!*arg) {
     /* purge all */
-    for (ch = room_get_people(room); ch; ch = next_ch) {
-      next_ch = char_get_next_in_room(ch);
-      if (char_is_npc(ch))
-        extract_char(g, ch);
+    for (char_data *tch : room_people(g, room)) {
+      if (char_is_npc(tch))
+        extract_char(g, tch);
     }
 
-    for (obj = room_get_contents(room); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
-      extract_obj(g, obj);
+    for (obj_data *item : obj_list(g, room_get_contents(room))) {
+      extract_obj(g, item);
     }
 
     return;
@@ -390,7 +387,7 @@ static WCMD(do_wpurge)
     if (*arg == UID_CHAR)
       obj = get_obj(g, arg);
     else
-      obj = get_obj_in_room(room, arg);
+      obj = get_obj_in_room(g, room, arg);
 
     if (obj) {
       extract_obj(g, obj);
@@ -484,7 +481,7 @@ static WCMD(do_wload)
       load_otrigger(g, object);
       return;
     }
-    cnt = get_obj_in_room(room, arg1);
+    cnt = get_obj_in_room(g, room, arg1);
     if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       obj_to_obj(g, object, cnt);
       load_otrigger(g, object);

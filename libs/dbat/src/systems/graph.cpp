@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/graph.hpp"
 #include "dbat/utils.hpp"
@@ -311,11 +312,8 @@ ACMD(do_radar)
 {
   room_vnum room = 0;
   int dir, num = 0, found = false, found2 = false, fcount = 0;
-  struct char_data *tch;
-  struct obj_data *obj, *obj2, *next_obj;
 
-  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj2) == 12 && (!obj_extra_flagged(obj2, ITEM_BROKEN)) && (!obj_extra_flagged(obj2, ITEM_FORGED))) {
       found2 = true;
     }
@@ -335,8 +333,7 @@ ACMD(do_radar)
     act(g, "$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     while (num < 20000) {
       if (real_room(g, room) != NOWHERE) {
-        for (obj = rroom_get_contents(g, real_room(g, room)); obj; obj = next_obj) {
-          next_obj = obj_get_next_content(obj);
+        for (obj_data *obj : room_contents(g, real_room(g, room))) {
           if (obj_extra_flagged(obj, ITEM_FORGED)) {
             continue;
           }
@@ -360,12 +357,11 @@ ACMD(do_radar)
             found = true;
           }
         }
-        for (tch = rroom_get_people(g, real_room(g, room)); tch; tch = char_get_next_in_room(tch)) {
+        for (char_data *tch : room_people(g, real_room(g, room))) {
           if (tch == ch) {
             continue;
           }
-          for (obj = char_get_inventory(tch); obj; obj = next_obj) {
-            next_obj = obj_get_next_content(obj);
+          for (obj_data *obj : char_inventory(g, tch)) {
             if (obj_extra_flagged(obj, ITEM_FORGED)) {
               continue;
             }
@@ -405,7 +401,6 @@ ACMD(do_track)
 {
   char arg[MAX_INPUT_LENGTH];
   struct char_data *vict;
-  struct descriptor_data *i;
   int count = 0, dir;
 
   /* The character must have the track skill. */
@@ -488,7 +483,7 @@ ACMD(do_track)
 
   /* Scanning the entire planet. */
   if (!strcasecmp(arg, "scan")) {
-    for (i = g->descriptors; i; i = i->next) {
+    for (descriptor_data *i : each_desc(g)) {
       if (desc_get_connected(i) != CON_PLAYING) {
         continue;
       }

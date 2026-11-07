@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/boards.hpp"
 #include "dbat/utils.hpp"
@@ -45,7 +46,7 @@ static int update_player_count(GameWorld *g)
 {
   int count = 0, oldcount = g->HIGHPCOUNT;
 
-  for (struct descriptor_data *kd = g->descriptors; kd; kd = kd->next) {
+  for (descriptor_data *kd : each_desc(g)) {
     if (!kd->character) {
       continue;
     }
@@ -107,8 +108,7 @@ constexpr int UNSWITCH = 3;
 /* This function seems a bit over-extended. */
 static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
 {
-  struct descriptor_data *k, *next_k;
-  struct char_data *target = nullptr, *ch, *next_ch;
+  struct char_data *target = nullptr;
   int mode                 = 0;
   int id                   = char_get_idnum(d->character);
 
@@ -117,8 +117,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
    * other descriptors controlling a character with the same ID number.
    */
 
-  for (k = g->descriptors; k; k = next_k) {
-    next_k = k->next;
+  for (descriptor_data *k : each_desc(g)) {
 
     if (k == d)
       continue;
@@ -170,8 +169,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
   * duplicates, though theoretically none should be able to exist).
   */
 
-  for (ch = g->characters; ch; ch = next_ch) {
-    next_ch = char_get_next(ch);
+  for (char_data *ch : each_char(g)) {
 
     if (char_is_npc(ch))
       continue;
@@ -274,7 +272,6 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
 {
   int load_result;
   IDXTYPE load_room;
-  struct char_data *check;
 
   reset_char(g, d->character);
   read_aliases(g, d->character);
@@ -320,7 +317,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   add_to_lookup_table(g, char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
-  for (check = g->characters; check; check = char_get_next(check))
+  for (char_data *check : each_char(g))
     if (!char_get_master(check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
         char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
       add_follower(g, check, d->character);
@@ -449,7 +446,6 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
 
 static void payout(GameWorld *g, int num)
 {
-  struct descriptor_data *k;
   if (g->LASTPAYOUT == 0) {
     g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
@@ -460,7 +456,7 @@ static void payout(GameWorld *g, int num)
     g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
   }
-  for (k = g->descriptors; k; k = k->next) {
+  for (descriptor_data *k : each_desc(g)) {
     if (desc_is_playing(k) && char_get_admlevel(k->character) <= 0 && char_get_rewtime(k->character) < g->LASTPAYOUT) {
       if (num == 0) {
         k->rpp += 1;
@@ -857,7 +853,6 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_PASSWORD */
 static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  struct descriptor_data *k;
 
   if (!*arg) {
     write_to_output(g, d, "Enter Password or Return:\r\n");
@@ -875,7 +870,7 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (!strcasecmp(d->pass, arg)) {
-    for (k = g->descriptors; k; k = k->next) {
+    for (descriptor_data *k : each_desc(g)) {
       if (k == d)
         continue;
       if (!k->user)

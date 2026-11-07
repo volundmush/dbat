@@ -1,6 +1,7 @@
 #include <execinfo.h>
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/room_utils.hpp"
@@ -51,7 +52,6 @@ void mud_log(const char *format, ...)
 void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
 {
   char buf[MAX_STRING_LENGTH];
-  struct descriptor_data *i;
   va_list args;
 
   if (str == nullptr)
@@ -72,7 +72,7 @@ void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
   va_end(args);
   strcat(buf, " ]\r\n"); /* strcat: OK */
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
     if (char_get_admlevel(i->character) < level)

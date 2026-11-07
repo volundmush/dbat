@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/spells.hpp"
@@ -156,7 +157,6 @@ ASPELL(spell_summon)
 
 ASPELL(spell_locate_object)
 {
-  struct obj_data *i;
   char name[MAX_INPUT_LENGTH];
   int j;
 
@@ -174,7 +174,9 @@ ASPELL(spell_locate_object)
   strlcpy(name, fname(obj_get_name(obj)), sizeof(name));
   j = level / 2;
 
-  for (i = g->objects; i && (j > 0); i = obj_get_next(i)) {
+  for (obj_data *i : each_obj(g)) {
+    if (!((j > 0)))
+      break;
     if (!isname(name, obj_get_name(i)))
       continue;
 

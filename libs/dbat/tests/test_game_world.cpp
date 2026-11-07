@@ -1,6 +1,7 @@
 /* Two GameWorlds built by hand must not affect each other. Needs no data/ files. */
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
@@ -12,6 +13,7 @@
 #include "dbat/local_limits.hpp"
 #include "dbat/object_systems.hpp"
 #include "dbat/index.hpp"
+#include "dbat/iterate.hpp"
 #include "dbat/random.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/search.hpp"
@@ -193,6 +195,84 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
   a->objects    = nullptr;
   delete mob;
   delete obj;
+}
+
+/* A loop sees the members of a list as they were when it began, skipping any destroyed or moved before their turn */
+static void check_iteration(GameWorld *g)
+{
+  struct char_data *mob[6];
+  struct obj_data *obj[4];
+  std::vector<struct char_data *> seen;
+
+  for (auto &m : mob)
+    m = read_mobile(g, 100, VIRTUAL);
+  for (int i = 0; i < 5; i++)
+    char_to_room(g, mob[i], 0); /* the list is newest first: 4 3 2 1 0 */
+
+  for (struct char_data *ch : room_people(g, 0)) {
+    seen.push_back(ch);
+    if (ch == mob[4]) {
+      char_from_room(g, mob[2]);
+      char_to_room(g, mob[2], 1);                       /* moved away before its turn */
+      remove_from_lookup_table(g, char_get_id(mob[1])); /* destroyed before its turn */
+      char_to_room(g, mob[5], 0);                       /* added during the loop */
+    }
+  }
+  CHECK((seen == std::vector<struct char_data *>{mob[4], mob[3], mob[0]}));
+
+  int visits = 0;
+  CHECK(!room_people_each(g, 0, [&](struct char_data *) { return ++visits < 2; }));
+  CHECK(visits == 2);
+  visits = 0;
+  CHECK(room_people_each(g, 0, [&](struct char_data *) { visits++; }));
+  CHECK(visits == 4); /* 5 4 3 0 */
+
+  for (auto &o : obj) {
+    o = read_object(g, 100, VIRTUAL);
+    obj_to_room(g, o, 2); /* 3 2 1 0 */
+  }
+  std::vector<struct obj_data *> seen_obj;
+  for (struct obj_data *o : room_contents(g, 2)) {
+    seen_obj.push_back(o);
+    if (o == obj[3]) {
+      obj_from_room(g, obj[2]);
+      obj_to_char(g, obj[2], mob[0]); /* picked up before its turn */
+      obj_from_room(g, obj[1]);
+      obj_to_obj(g, obj[1], obj[3]); /* put in a container before its turn */
+    }
+  }
+  CHECK((seen_obj == std::vector<struct obj_data *>{obj[3], obj[0]}));
+  seen_obj.clear();
+  for (struct obj_data *o : char_inventory(g, mob[0]))
+    seen_obj.push_back(o);
+  CHECK((seen_obj == std::vector<struct obj_data *>{obj[2]}));
+  seen_obj.clear();
+  for (struct obj_data *o : obj_contents(g, obj[3]))
+    seen_obj.push_back(o);
+  CHECK((seen_obj == std::vector<struct obj_data *>{obj[1]}));
+
+  visits = 0;
+  for (struct char_data *ch : each_char(g)) /* everything still registered, wherever it is */
+    visits += ch != nullptr;
+  CHECK(visits == 5);
+
+  obj_from_char(g, obj[2]);
+  obj_from_obj(g, obj[1]);
+  obj_from_room(g, obj[3]);
+  obj_from_room(g, obj[0]);
+  for (auto &o : obj) {
+    remove_from_lookup_table(g, obj_get_id(o));
+    delete o;
+  }
+  for (auto &m : mob) {
+    if (char_get_in_room(m) != NOWHERE)
+      char_from_room(g, m);
+    if (char_by_id(g, char_get_id(m)))
+      remove_from_lookup_table(g, char_get_id(m));
+    delete m;
+  }
+  g->characters = nullptr;
+  g->objects    = nullptr;
 }
 
 /* the same seed gives the same rolls, and rolling in one world leaves the other where it was */
@@ -402,6 +482,7 @@ int main(void)
   check_lookups(a, b);
   check_rooms(a, b);
   check_read_entities(a, b);
+  check_iteration(a);
   check_rng(a, b);
   check_random_color(a, b);
   check_other_state(a, b);

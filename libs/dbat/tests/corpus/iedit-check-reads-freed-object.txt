@@ -1,0 +1,5 @@
+@32501414 spawn Bot0 6 593505 11 0
+@454159557 spawn Bot3 0 33770 1 3
+@891291899 type Bot0 iedit sword
+@616179201 type Bot3 quit
+@476563612 type Bot0 q

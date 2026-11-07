@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/assedit.hpp"
 #include "dbat/assemblies.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -48,8 +49,8 @@ ACMD(do_assedit)
   if (char_is_npc(ch))
     return;
 
-  for (d = g->descriptors; d; d = d->next) {
-    if (d->connected == CON_ASSEDIT) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (dd->connected == CON_ASSEDIT) {
       send_to_char(g, ch, "Assemblies are already being editted by someone.\r\n");
       return;
     }

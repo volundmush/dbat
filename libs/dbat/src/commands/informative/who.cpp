@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -69,7 +70,6 @@ ACMD(do_finger)
 /* Written by Rhade */
 ACMD(do_who)
 {
-  struct descriptor_data *d;
   struct char_data *tch;
   int i, num_can_see = 0;
   char name_search[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
@@ -101,7 +101,9 @@ ACMD(do_who)
 
   int num_ranks = countof(rank);
   send_to_char(g, ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
-  for (d = g->descriptors; d && !short_list; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
+    if (short_list)
+      break;
     if (!desc_is_playing(d))
       continue;
     if (d->original)
@@ -148,17 +150,17 @@ ACMD(do_who)
     else
       send_to_char(g, ch, "%s", rank[i].disp);
 
-    for (d = g->descriptors; d; d = d->next) {
-      if (!desc_is_playing(d))
+    for (descriptor_data *dd : each_desc(g)) {
+      if (!desc_is_playing(dd))
         continue;
-      if (d->original)
-        tch = d->original;
-      else if (!(tch = d->character))
+      if (dd->original)
+        tch = dd->original;
+      else if (!(tch = dd->character))
         continue;
 
       if ((char_get_admlevel(tch) < rank[i].min_level || char_get_admlevel(tch) > rank[i].max_level) && !short_list)
         continue;
-      if (!desc_is_playing(d))
+      if (!desc_is_playing(dd))
         continue;
       if (*name_search && strcasecmp(char_get_name(tch), name_search) &&
           !strstr(char_get_title(tch), name_search))
@@ -197,8 +199,8 @@ ACMD(do_who)
           send_to_char(g, ch, " (%s)", admin_level_names[char_get_admlevel(tch)]);
         }
 
-        if (d->snooping && d->snooping->character != ch && char_get_admlevel(ch) >= 3)
-          send_to_char(g, ch, " (Snoop: %s)", char_get_name(d->snooping->character));
+        if (dd->snooping && dd->snooping->character != ch && char_get_admlevel(ch) >= 3)
+          send_to_char(g, ch, " (Snoop: %s)", char_get_name(dd->snooping->character));
         if (char_get_invis_level(g, tch))
           send_to_char(g, ch, " (i%d)", char_get_invis_level(g, tch));
         else if (char_aff_flagged(tch, AFF_INVISIBLE))
@@ -206,33 +208,33 @@ ACMD(do_who)
 
         if (char_plr_flagged(tch, PLR_MAILING))
           send_to_char(g, ch, " (mailing)");
-        else if (d->olc)
+        else if (dd->olc)
           send_to_char(g, ch, " (OLC)");
         else if (char_plr_flagged(tch, PLR_WRITING))
           send_to_char(g, ch, " (writing)");
 
-        if (d->original)
+        if (dd->original)
           send_to_char(g, ch, " (out of body)");
 
-        if (d->connected == CON_OEDIT)
+        if (dd->connected == CON_OEDIT)
           send_to_char(g, ch, " (O Edit)");
-        if (d->connected == CON_MEDIT)
+        if (dd->connected == CON_MEDIT)
           send_to_char(g, ch, " (M Edit)");
-        if (d->connected == CON_ZEDIT)
+        if (dd->connected == CON_ZEDIT)
           send_to_char(g, ch, " (Z Edit)");
-        if (d->connected == CON_SEDIT)
+        if (dd->connected == CON_SEDIT)
           send_to_char(g, ch, " (S Edit)");
-        if (d->connected == CON_REDIT)
+        if (dd->connected == CON_REDIT)
           send_to_char(g, ch, " (R Edit)");
-        if (d->connected == CON_TEDIT)
+        if (dd->connected == CON_TEDIT)
           send_to_char(g, ch, " (T Edit)");
-        if (d->connected == CON_TRIGEDIT)
+        if (dd->connected == CON_TRIGEDIT)
           send_to_char(g, ch, " (T Edit)");
-        if (d->connected == CON_AEDIT)
+        if (dd->connected == CON_AEDIT)
           send_to_char(g, ch, " (S Edit)");
-        if (d->connected == CON_CEDIT)
+        if (dd->connected == CON_CEDIT)
           send_to_char(g, ch, " (C Edit)");
-        if (d->connected == CON_HEDIT)
+        if (dd->connected == CON_HEDIT)
           send_to_char(g, ch, " (H Edit)");
         if (char_prf_flagged(g, tch, PRF_DEAF))
           send_to_char(g, ch, " (DEAF)");
@@ -295,7 +297,6 @@ ACMD(do_users)
   char state[30], *timeptr, mode;
   char name_search[MAX_INPUT_LENGTH], host_search[MAX_INPUT_LENGTH];
   struct char_data *tch;
-  struct descriptor_data *d;
   int low = 0, high = CONFIG_LEVEL_CAP, num_can_see = 0;
   int showclass = 0, outlaws = 0, playing = 0, deadweight = 0, showrace = 0;
   char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
@@ -353,7 +354,7 @@ ACMD(do_users)
 
   one_argument(argument, arg);
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PLAYING && playing)
       continue;
     if (desc_get_connected(d) == CON_PLAYING && deadweight)
@@ -425,11 +426,10 @@ ACMD(do_users)
 static void perform_mortal_where(GameWorld *g, struct char_data *ch, char *arg)
 {
   struct char_data *i;
-  struct descriptor_data *d;
 
   if (!*arg) {
     send_to_char(g, ch, "Players in your Zone\r\n--------------------\r\n");
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || d->character == ch)
         continue;
       if ((i = (d->original ? d->original : d->character)) == nullptr)
@@ -441,14 +441,14 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, char *arg)
       send_to_char(g, ch, "%-20s - %s\r\n", char_get_name(i), rroom_get_name(g, char_get_in_room(i)));
     }
   } else { /* print only FIRST char, not all. */
-    for (i = g->characters; i; i = char_get_next(i)) {
-      if (char_get_in_room(i) == NOWHERE || i == ch)
+    for (char_data *tch : each_char(g)) {
+      if (char_get_in_room(tch) == NOWHERE || tch == ch)
         continue;
-      if (!char_can_see(g, ch, i) || rroom_get_zone(g, char_get_in_room(i)) != rroom_get_zone(g, char_get_in_room(ch)))
+      if (!char_can_see(g, ch, tch) || rroom_get_zone(g, char_get_in_room(tch)) != rroom_get_zone(g, char_get_in_room(ch)))
         continue;
-      if (!isname(arg, char_get_alias(i)))
+      if (!isname(arg, char_get_alias(tch)))
         continue;
-      send_to_char(g, ch, "%-25s - %s\r\n", char_get_name(i), rroom_get_name(g, char_get_in_room(i)));
+      send_to_char(g, ch, "%-25s - %s\r\n", char_get_name(tch), rroom_get_name(g, char_get_in_room(tch)));
       return;
     }
     send_to_char(g, ch, "Nobody around by that name.\r\n");
@@ -483,8 +483,6 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
 static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
 {
   struct char_data *i;
-  struct obj_data *k;
-  struct descriptor_data *d;
   int num = 0, num2 = 0, found = 0;
 
   const char *planet[11] = {"@GEarth@n",
@@ -502,7 +500,7 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
   if (!*arg) {
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
     send_to_char(g, ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
-    for (d = g->descriptors; d; d = d->next)
+    for (descriptor_data *d : each_desc(g))
       if (desc_is_playing(d)) {
         if (char_get_in_room(d->character) != NOWHERE) {
           if (rroom_flagged(g, char_get_in_room(d->character), ROOM_EARTH)) {
@@ -542,21 +540,21 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
       }
   } else {
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
-    for (i = g->characters; i; i = char_get_next(i)) {
-      if (char_can_see(g, ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, char_get_alias(i))) {
+    for (char_data *tch : each_char(g)) {
+      if (char_can_see(g, ch, tch) && char_get_in_room(tch) != NOWHERE && isname(arg, char_get_alias(tch))) {
         found = 1;
-        send_to_char(g, ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(i),
-                     rroom_get_vnum(g, char_get_in_room(i)), rroom_get_name(g, char_get_in_room(i)));
-        if (char_is_npc(i) && char_get_script(i)) {
-          if (!char_get_script(i)->trig_list->next)
-            send_to_char(g, ch, "[T%5d] ", trig_get_vnum(g, char_get_script(i)->trig_list));
+        send_to_char(g, ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(tch),
+                     rroom_get_vnum(g, char_get_in_room(tch)), rroom_get_name(g, char_get_in_room(tch)));
+        if (char_is_npc(tch) && char_get_script(tch)) {
+          if (!char_get_script(tch)->trig_list->next)
+            send_to_char(g, ch, "[T%5d] ", trig_get_vnum(g, char_get_script(tch)->trig_list));
           else
             send_to_char(g, ch, "[TRIGS] ");
         }
         send_to_char(g, ch, "\r\n");
       }
     }
-    for (k = g->objects; k; k = obj_get_next(k))
+    for (obj_data *k : each_obj(g))
       if (char_can_see_obj(g, ch, k) && isname(arg, obj_get_name(k))) {
         found = 1;
         print_object_location(g, ++num, k, ch, true);

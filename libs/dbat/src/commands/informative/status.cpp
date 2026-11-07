@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -974,7 +975,7 @@ ACMD(do_status)
         break;
     }
 
-    if (has_group(ch)) {
+    if (has_group(g, ch)) {
       send_to_char(g, ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(char_get_combatexpertise(ch)));
     }
 
@@ -1306,29 +1307,25 @@ ACMD(do_equipment)
         show_obj_to_char(g, char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
 
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
-          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
-            next_obj = obj_get_next_content(obj2);
-            if (obj2) {
+          struct obj_data *sheath = char_get_equipment(ch, i);
+          for (obj_data *thing : obj_contents(g, sheath)) {
+            if (thing) {
               send_to_char(g, ch, "@D  ---- @YSheathed@D ----@c> @n");
-              show_obj_to_char(g, obj2, ch, SHOW_OBJ_SHORT);
+              show_obj_to_char(g, thing, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = nullptr;
         }
       } else if (char_can_see_obj(g, ch, char_get_equipment(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(g, ch, "%s", wear_where[i]);
         show_obj_to_char(g, char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
-          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
-            next_obj = obj_get_next_content(obj2);
-            if (obj2) {
+          struct obj_data *sheath = char_get_equipment(ch, i);
+          for (obj_data *item : obj_contents(g, sheath)) {
+            if (item) {
               send_to_char(g, ch, "@D  ---- @YSheathed@D ----> @n");
-              show_obj_to_char(g, obj2, ch, SHOW_OBJ_SHORT);
+              show_obj_to_char(g, item, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = nullptr;
         }
       } else if (char_can_see_obj(g, ch, char_get_equipment(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");

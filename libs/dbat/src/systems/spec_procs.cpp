@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/spec_procs.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -77,10 +78,9 @@ SPECIAL(dump)
 
 int num_players_in_room(GameWorld *g, room_vnum room)
 {
-  struct descriptor_data *i;
   int num_players = 0;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
     if (!(i->character))
@@ -100,10 +100,9 @@ int num_players_in_room(GameWorld *g, room_vnum room)
 
 bool check_mob_in_room(GameWorld *g, mob_vnum mob, room_vnum room)
 {
-  struct char_data *i;
   bool found = false;
 
-  for (i = g->characters; i; i = char_get_next(i))
+  for (char_data *i : each_char(g))
     if (char_get_mob_vnum(g, i) == mob)
       if (rroom_get_vnum(g, char_get_in_room(i)) == room) found = true;
 
@@ -157,11 +156,11 @@ SPECIAL(pet_shops)
 
   if (CMD_IS(g, "list")) {
     send_to_char(g, ch, "Available pets are:\r\n");
-    for (pet = rroom_get_people(g, pet_room); pet; pet = char_get_next_in_room(pet)) {
+    for (char_data *tch : room_people(g, pet_room)) {
       /* No, you can't have the Implementor as a pet if he's in there. */
-      if (!char_is_npc(pet))
+      if (!char_is_npc(tch))
         continue;
-      send_to_char(g, ch, "%8d - %s\r\n", PET_PRICE(pet), char_get_name(pet));
+      send_to_char(g, ch, "%8d - %s\r\n", PET_PRICE(tch), char_get_name(tch));
     }
     return (true);
   }
@@ -214,7 +213,7 @@ SPECIAL(pet_shops)
 SPECIAL(auction)
 {
   room_rnum auct_room;
-  struct obj_data *obj, *next_obj, *obj2 = nullptr;
+  struct obj_data *obj2 = nullptr;
   int found = false;
 
   /* Gross. */
@@ -222,8 +221,7 @@ SPECIAL(auction)
 
   if (CMD_IS(g, "cancel")) {
 
-    for (obj = rroom_get_contents(g, auct_room); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, auct_room)) {
       if (obj && obj_get_aucter(obj) == char_get_id(ch)) {
         obj2  = obj;
         found = true;
@@ -239,9 +237,8 @@ SPECIAL(auction)
         }
 
         send_to_char(g, ch, "@wYou cancel the auction of %s@w and it is returned to you.@n\r\n", obj_get_short_description(obj2));
-        struct descriptor_data *d;
 
-        for (d = g->descriptors; d; d = d->next) {
+        for (descriptor_data *d : each_desc(g)) {
           if (desc_get_connected(d) != CON_PLAYING || char_is_npc(d->character))
             continue;
           if (d->character == ch)
@@ -264,11 +261,9 @@ SPECIAL(auction)
     return (true);
   }
   if (CMD_IS(g, "pickup")) {
-    struct descriptor_data *d;
     int founded = false;
 
-    for (obj = rroom_get_contents(g, auct_room); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, auct_room)) {
       if (obj && obj_get_curBidder(obj) == char_get_id(ch)) {
         obj2  = obj;
         found = true;
@@ -296,7 +291,7 @@ SPECIAL(auction)
         send_to_char(g, ch, "You pay %s zenni and receive the item.\r\n", add_commas(obj_get_bid(obj2)));
         auc_save(g);
 
-        for (d = g->descriptors; d; d = d->next) {
+        for (descriptor_data *d : each_desc(g)) {
           if (desc_get_connected(d) != CON_PLAYING || char_is_npc(d->character))
             continue;
           if (d->character == ch)
@@ -344,7 +339,6 @@ SPECIAL(auction)
   }
   if (CMD_IS(g, "auction")) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct descriptor_data *d;
     int value = 0;
 
     two_arguments(argument, arg, arg2);
@@ -394,7 +388,7 @@ SPECIAL(auction)
     send_to_char(g, ch, "You place %s on auction for %s zenni.\r\n", obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
     mud_log("AUCTION: %s places %s on auction for %s", char_get_name(ch), obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
 
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || char_is_npc(d->character))
         continue;
       if (d->character == ch)
@@ -416,11 +410,11 @@ SPECIAL(auction)
 
 SPECIAL(healtank)
 {
-  struct obj_data *htank = nullptr, *i;
+  struct obj_data *htank = nullptr;
   char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
 
-  for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
+  for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 65) {
       htank = i;
     } else {
@@ -634,12 +628,12 @@ SPECIAL(augmenter)
 /* This controls gravity generator functions */
 SPECIAL(gravity)
 {
-  struct obj_data *i, *obj = nullptr;
+  struct obj_data *obj = nullptr;
   char arg[MAX_INPUT_LENGTH];
   int match = false;
 
   one_argument(argument, arg);
-  for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
+  for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 11) {
       obj = i;
     } else {
@@ -893,9 +887,9 @@ SPECIAL(bank)
 {
   int amount, num = 0;
 
-  struct obj_data *i, *obj = nullptr; /* an ATM here, if any: this also runs for a carried cashcard */
+  struct obj_data *obj = nullptr; /* an ATM here, if any: this also runs for a carried cashcard */
 
-  for (i = rroom_get_contents(g, char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
+  for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 3034) {
       obj = i;
     } else {

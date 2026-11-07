@@ -9,9 +9,11 @@
 ************************************************************************ */
 #include <climits>
 #include <cstdlib>
+#include <vector>
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
@@ -272,8 +274,6 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
   struct extra_descr_data *desc;
   struct room_data *rm = &g->rooms[char_get_in_room(ch)];
   int i, found, column;
-  struct obj_data *j;
-  struct char_data *k;
 
   send_to_char(g, ch, "Room name: @c%s@n\r\n", room_get_name(rm));
 
@@ -297,7 +297,8 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
 
   send_to_char(g, ch, "Chars present:");
   column = 14; /* ^^^ strlen ^^^ */
-  for (found = false, k = room_get_people(rm); k; k = char_get_next_in_room(k)) {
+  found  = false;
+  for (char_data *k : room_people(g, rm)) {
     if (!char_can_see(g, ch, k))
       continue;
 
@@ -314,7 +315,8 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "Contents:@g");
     column = 9; /* ^^^ strlen ^^^ */
 
-    for (found = 0, j = room_get_contents(rm); j; j = obj_get_next_content(j)) {
+    found = 0;
+    for (obj_data *j : room_contents(g, rm)) {
       if (!char_can_see_obj(g, ch, j))
         continue;
 
@@ -360,7 +362,6 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
 {
   int i, found;
   obj_vnum vnum;
-  struct obj_data *j2;
   struct char_data *sitter;
   struct extra_descr_data *desc;
   char buf[MAX_STRING_LENGTH];
@@ -519,7 +520,8 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     send_to_char(g, ch, "\r\nContents:@g");
     column = 9; /* ^^^ strlen ^^^ */
 
-    for (found = 0, j2 = obj_get_contains(j); j2; j2 = obj_get_next_content(j2)) {
+    found = 0;
+    for (obj_data *j2 : obj_contents(g, j)) {
       column += send_to_char(g, ch, "%s %s", found++ ? "," : "", obj_get_short_description(j2));
       if (column >= 62) {
         send_to_char(g, ch, "%s\r\n", obj_get_next_content(j2) ? "," : "");
@@ -559,9 +561,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   int i, i2, column, found = false;
-  struct obj_data *j;
   struct obj_data *chair;
-  struct follow_type *fol;
   struct affected_type *aff;
 
   if (char_is_npc(k)) {
@@ -688,16 +688,18 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   }
 
   int counts = 0, total = 0;
-  for (i = 0, j = char_get_inventory(k); j; j = obj_get_next_content(j), i++) {
-    counts += check_insidebag(j, 0.5);
+  i = 0;
+  for (obj_data *item : char_inventory(g, k)) {
+    counts += check_insidebag(g, item, 0.5);
     counts++;
+    i++;
   }
   total = counts;
   total += i;
   for (i = 0, i2 = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(k, i)) {
       i2++;
-      total += check_insidebag(char_get_equipment(k, i), 0.5) + 1;
+      total += check_insidebag(g, char_get_equipment(k, i), 0.5) + 1;
     }
   send_to_char(g, ch, "Carried: weight: %d, Total Items (includes bagged items): %d, EQ: %d\r\n", char_get_carry_weight(k), total, i2);
 
@@ -708,10 +710,13 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   if (!char_get_followers(k))
     send_to_char(g, ch, " <none>\r\n");
   else {
-    for (fol = char_get_followers(k); fol; fol = fol->next) {
-      column += send_to_char(g, ch, "%s %s", found++ ? "," : "", char_pers(g, fol->follower, ch));
+    std::vector<struct char_data *> followers;
+    for (char_data *f : char_followers(g, k))
+      followers.push_back(f);
+    for (size_t n = 0; n < followers.size(); n++) {
+      column += send_to_char(g, ch, "%s %s", found++ ? "," : "", char_pers(g, followers[n], ch));
       if (column >= 62) {
-        send_to_char(g, ch, "%s\r\n", fol->next ? "," : "");
+        send_to_char(g, ch, "%s\r\n", n + 1 < followers.size() ? "," : "");
         found  = false;
         column = 0;
       }
@@ -1087,8 +1092,6 @@ ACMD(do_show)
   obj_vnum low, high;
   int8_t self            = false;
   struct char_data *vict = nullptr;
-  struct obj_data *obj;
-  struct descriptor_data *d;
   struct affected_type *aff;
   char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], *strp,
       arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
@@ -1216,17 +1219,16 @@ ACMD(do_show)
       j   = 0;
       k   = 0;
       con = 0;
-      for (vict = g->characters; vict; vict = char_get_next(vict)) {
-        if (char_is_npc(vict))
+      for (char_data *tch : each_char(g)) {
+        if (char_is_npc(tch))
           j++;
-        else if (char_can_see(g, ch, vict)) {
+        else if (char_can_see(g, ch, tch)) {
           i++;
-          if (char_get_desc(vict))
+          if (char_get_desc(tch))
             con++;
         }
       }
-      for (obj = g->objects; obj; obj = obj_get_next(obj))
-        k++;
+      k += count_members(each_obj(g));
       send_to_char(g, ch,
                    "             @D---   @CCore Stats   @D---\r\n"
                    "  @Y%5d@W players in game  @y%5d@W connected\r\n"
@@ -1317,7 +1319,7 @@ ACMD(do_show)
     case 10:
       i = 0;
       send_to_char(g, ch, "People currently snooping:\r\n--------------------------\r\n");
-      for (d = g->descriptors; d; d = d->next) {
+      for (descriptor_data *d : each_desc(g)) {
         if (d->snooping == nullptr || d->character == nullptr)
           continue;
         if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(ch) < char_get_admlevel(d->character))

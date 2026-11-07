@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/act.movement.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -600,7 +601,6 @@ ACMD(do_land)
 /* simple function to determine if char can fly */
 static bool has_flight(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *obj;
 
   if (char_adm_flagged(ch, ADM_WALKANYWHERE))
     return true;
@@ -623,7 +623,7 @@ static bool has_flight(GameWorld *g, struct char_data *ch)
   }
 
   /* non-wearable flying items in inventory will do it */
-  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj))
+  for (obj_data *obj : char_inventory(g, ch))
     if (obj_aff_flagged(obj, AFF_FLYING) && (find_eq_pos(g, ch, obj, nullptr) < 0))
       return true;
 
@@ -824,7 +824,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     }
   }
   if (rroom_flagged(g, char_get_exit(g, ch, dir)->to_room, ROOM_TUNNEL) &&
-      (num_pc_in_room(&(g->rooms[char_get_exit(g, ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
+      (num_pc_in_room(g, &(g->rooms[char_get_exit(g, ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -1027,7 +1027,6 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
 {
   room_rnum was_in;
-  struct follow_type *k, *next;
 
   if (char_get_grappling(ch) || char_get_grappled(ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -1056,8 +1055,7 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
     send_to_char(g, ch, "Report this direction, it is illegal.\r\n");
   } else {
 
-    struct obj_data *wall;
-    for (wall = rroom_get_contents(g, char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
+    for (obj_data *wall : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_vnum(g, wall) == 79) {
         if (obj_get_cost(wall) == dir) {
           send_to_char(g, ch, "That direction has a glacial wall blocking it.\r\n");
@@ -1073,30 +1071,29 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
     if (!do_simple_move(g, ch, dir, need_specials_check))
       return false;
 
-    for (k = char_get_followers(ch); k; k = next) {
-      next = k->next;
-      if ((char_get_in_room(k->follower) == was_in) &&
-          (char_get_position(k->follower) >= POS_STANDING) &&
+    for (char_data *fol : char_followers(g, ch)) {
+      if ((char_get_in_room(fol) == was_in) &&
+          (char_get_position(fol) >= POS_STANDING) &&
           (!char_aff_flagged(ch, AFF_ZANZOKEN) ||
-           (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
-        act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-        perform_move(g, k->follower, dir, 1);
-      } else if ((char_get_in_room(k->follower) == was_in) &&
-                 (char_get_position(k->follower) >= POS_STANDING) &&
-                 (char_aff_flagged(ch, AFF_ZANZOKEN) && char_aff_flagged(k->follower, AFF_ZANZOKEN)) &&
-                 (!char_aff_flagged(ch, AFF_GROUP) || !char_aff_flagged(k->follower, AFF_GROUP))) {
-        act(g, "$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-        act(g, "$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr, ch, TO_NOTVICT);
-        act(g, "You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr, ch, TO_VICT);
+           (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(fol, AFF_GROUP)))) {
+        act(g, "You follow $N.\r\n", false, fol, nullptr, ch, TO_CHAR);
+        perform_move(g, fol, dir, 1);
+      } else if ((char_get_in_room(fol) == was_in) &&
+                 (char_get_position(fol) >= POS_STANDING) &&
+                 (char_aff_flagged(ch, AFF_ZANZOKEN) && char_aff_flagged(fol, AFF_ZANZOKEN)) &&
+                 (!char_aff_flagged(ch, AFF_GROUP) || !char_aff_flagged(fol, AFF_GROUP))) {
+        act(g, "$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, fol, nullptr, ch, TO_CHAR);
+        act(g, "$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, fol, nullptr, ch, TO_NOTVICT);
+        act(g, "You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, fol, nullptr, ch, TO_VICT);
         char_aff_set(ch, AFF_ZANZOKEN, false);
-        char_aff_set(k->follower, AFF_ZANZOKEN, false);
-        perform_move(g, k->follower, dir, 1);
-      } else if ((char_get_in_room(k->follower) == was_in) &&
-                 (char_get_position(k->follower) >= POS_STANDING) &&
-                 (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_aff_flagged(k->follower, AFF_ZANZOKEN))) {
-        act(g, "You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-        act(g, "$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, ch, TO_NOTVICT);
-        act(g, "$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch, TO_VICT);
+        char_aff_set(fol, AFF_ZANZOKEN, false);
+        perform_move(g, fol, dir, 1);
+      } else if ((char_get_in_room(fol) == was_in) &&
+                 (char_get_position(fol) >= POS_STANDING) &&
+                 (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_aff_flagged(fol, AFF_ZANZOKEN))) {
+        act(g, "You try to follow $N, but $E disappears in a flash of movement!\r\n", false, fol, nullptr, ch, TO_CHAR);
+        act(g, "$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, fol, nullptr, ch, TO_NOTVICT);
+        act(g, "$n tries to follow you, but you manage to zanzoken away!\r\n", false, fol, nullptr, ch, TO_VICT);
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
     }
@@ -1194,9 +1191,7 @@ ACMD(do_move)
   }
   if (!char_is_npc(ch)) {
     int fail = false;
-    struct obj_data *obj, *next_obj;
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
         fail = true;
       }
@@ -1443,14 +1438,13 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, char 
 
 static bool has_key(GameWorld *g, struct char_data *ch, obj_vnum key)
 {
-  struct obj_data *o;
   int i;
 
   if (key == 1) {
     return true;
   }
 
-  for (o = char_get_inventory(ch); o; o = obj_get_next_content(o))
+  for (obj_data *o : char_inventory(g, ch))
     if (obj_get_vnum(g, o) == key)
       return true;
 
@@ -1496,7 +1490,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   room_rnum num                    = 0;
   room_rnum other_room             = NOWHERE;
   struct room_direction_data *back = nullptr;
-  struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
+  struct obj_data *hatch = nullptr, *vehicle = nullptr;
 
   if ((obj) && obj_get_type_flag(obj) == ITEM_HATCH) {
     vehicle = find_vehicle_by_vnum(g, obj_get_value(obj, VAL_HATCH_DEST));
@@ -1506,13 +1500,11 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
       char_from_room(g, ch);
       char_to_room(g, ch, real_room(g, obj_get_value(obj, VAL_PORTAL_DEST)));
     }
-    for (obj2 = rroom_get_contents(g, char_get_in_room(ch)); obj2; obj2 = next_obj) {
-      next_obj = obj_get_next_content(obj2);
-      if (obj_get_type_flag(obj2) == ITEM_HATCH) {
-        hatch = obj2;
+    for (obj_data *item : room_contents(g, char_get_in_room(ch))) {
+      if (obj_get_type_flag(item) == ITEM_HATCH) {
+        hatch = item;
       }
     }
-    obj2 = nullptr;
   }
 
   if (!door_mtrigger(g, ch, scmd, door))
@@ -1705,10 +1697,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
 {
   int skill_lvl, found = false;
-  struct obj_data *obj, *next_obj;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj) == 18 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
     }
@@ -1878,7 +1868,7 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_rnum dest_r
     }
   }
   if (rroom_flagged(g, dest_room, ROOM_TUNNEL) &&
-      num_pc_in_room(&(g->rooms[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+      num_pc_in_room(g, &(g->rooms[dest_room])) >= CONFIG_TUNNEL_SIZE) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -1979,7 +1969,6 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
 {
   room_rnum was_in = char_get_in_room(ch);
   int could_move   = false;
-  struct follow_type *k;
 
   if (char_get_grappling(ch) || char_get_grappled(ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -1993,10 +1982,8 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
     } else if ((obj_get_value(obj, VAL_PORTAL_DEST) != NOWHERE) &&
                (real_room(g, obj_get_value(obj, VAL_PORTAL_DEST)) != NOWHERE)) {
       if (obj_get_value(obj, VAL_PORTAL_DEST) >= 45000 && obj_get_value(obj, VAL_PORTAL_DEST) <= 45099) {
-        struct char_data *tch, *next_v;
         int filled = false;
-        for (tch = rroom_get_people(g, real_room(g, obj_get_value(obj, VAL_PORTAL_DEST))); tch; tch = next_v) {
-          next_v = char_get_next_in_room(tch);
+        for (char_data *tch : room_people(g, real_room(g, obj_get_value(obj, VAL_PORTAL_DEST)))) {
           if (tch) {
             filled = true;
           }
@@ -2007,11 +1994,11 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
         }
       }
       if ((could_move = do_simple_enter(g, ch, obj, need_specials_check)))
-        for (k = char_get_followers(ch); k; k = k->next)
-          if ((char_get_in_room(k->follower) == was_in) &&
-              (char_get_position(k->follower) >= POS_STANDING)) {
-            act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-            perform_enter_obj(g, k->follower, obj, 1);
+        for (char_data *fol : char_followers(g, ch))
+          if ((char_get_in_room(fol) == was_in) &&
+              (char_get_position(fol) >= POS_STANDING)) {
+            act(g, "You follow $N.\r\n", false, fol, nullptr, ch, TO_CHAR);
+            perform_enter_obj(g, fol, obj, 1);
           }
     } else {
       send_to_char(g, ch,
@@ -2194,7 +2181,6 @@ static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data
 {
   room_rnum was_in = char_get_in_room(ch);
   int could_move   = false;
-  struct follow_type *k;
 
   if (char_get_grappling(ch) || char_get_grappled(ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -2206,11 +2192,11 @@ static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data
   } else {
     if (obj_get_value(obj, VAL_HATCH_DEST) != NOWHERE)
       if ((could_move = do_simple_leave(g, ch, obj, need_specials_check)))
-        for (k = char_get_followers(ch); k; k = k->next)
-          if ((char_get_in_room(k->follower) == was_in) &&
-              (char_get_position(k->follower) >= POS_STANDING)) {
-            act(g, "You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-            perform_leave_obj(g, k->follower, obj, 1);
+        for (char_data *fol : char_followers(g, ch))
+          if ((char_get_in_room(fol) == was_in) &&
+              (char_get_position(fol) >= POS_STANDING)) {
+            act(g, "You follow $N.\r\n", false, fol, nullptr, ch, TO_CHAR);
+            perform_leave_obj(g, fol, obj, 1);
           }
   }
   return could_move;
@@ -2219,14 +2205,13 @@ static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data
 ACMD(do_leave)
 {
   int door;
-  struct obj_data *obj = nullptr;
 
   if (char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
-  for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj))
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch)))
     if (char_can_see_obj(g, ch, obj))
       if (obj_get_type_flag(obj) == ITEM_HATCH || obj_get_type_flag(obj) == ITEM_PORTAL) {
         perform_leave_obj(g, ch, obj, 0);

@@ -15,6 +15,7 @@ Written by Jeremy Elson (jelson@circlemud.org)
 *************************************************************************/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -710,9 +711,8 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 
 void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id)
 {
-  struct descriptor_data *d;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if ((desc_is_playing(d)) && (char_get_idnum(d->character) == recipient_id) && (has_mail(g, char_get_idnum(d->character)))) {
       send_to_char(g, d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
     }

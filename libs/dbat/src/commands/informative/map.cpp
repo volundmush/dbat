@@ -1,5 +1,6 @@
 /* map.c: maps, scanning and searching
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -80,7 +81,6 @@ static double terrain_bonus(GameWorld *g, struct char_data *ch)
 void search_room(GameWorld *g, struct char_data *ch)
 {
 
-  struct char_data *vict, *next_v;
   int perc = (char_get_aff_abils_intel(ch) * 0.6) + char_get_skill(ch, SKILL_SPOT) + char_get_skill(ch, SKILL_SEARCH) + char_get_skill(ch, SKILL_LISTEN);
   int prob = 0, found = 0;
   double bonus = 1.0, terrain = 1.0;
@@ -98,8 +98,7 @@ void search_room(GameWorld *g, struct char_data *ch)
   act(g, "@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_1SEC);
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (char_aff_flagged(vict, AFF_HIDE) && vict != ch) {
       if (char_get_suppression(vict) >= 1) {
         perc *= (char_get_suppression(vict) * 0.01);
@@ -126,9 +125,7 @@ void search_room(GameWorld *g, struct char_data *ch)
     }
   }
 
-  struct obj_data *obj = nullptr;
-
-  for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
     if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(g, 50, 200)) {
       act(g, "@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);

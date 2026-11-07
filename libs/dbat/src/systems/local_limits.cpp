@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/local_limits.hpp"
 #include "dbat/utils.hpp"
@@ -1293,10 +1294,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 
 static void point_update_characters(GameWorld *g)
 {
-  struct char_data *i, *next_char;
   int change = false;
-  for (i = g->characters; i; i = next_char) {
-    next_char = char_get_next(i);
+  for (char_data *i : each_char(g)) {
 
     if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE) {
       if (rroom_flagged(g, char_get_in_room(i), ROOM_HOUSE)) {
@@ -1543,11 +1542,10 @@ static void point_update_characters(GameWorld *g)
 
 static void point_update_objects(GameWorld *g)
 {
-  struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
+  struct obj_data *vehicle = nullptr;
 
   /* objects */
-  for (j = g->objects; j; j = next_thing) {
-    next_thing = obj_get_next(j); /* Next in object list */
+  for (obj_data *j : each_obj(g)) {
 
     /* Let's get rid of dropped norent items. */
     if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && g->obj_selling != j && obj_get_vnum(g, j) != 7200) {
@@ -1619,8 +1617,7 @@ static void point_update_objects(GameWorld *g)
             }
           }
         }
-        for (jj = obj_get_contains(j); jj; jj = next_thing2) {
-          next_thing2 = obj_get_next_content(jj); /* Next in inventory */
+        for (obj_data *jj : obj_contents(g, j)) {
           obj_from_obj(g, jj);
 
           if (obj_get_in_obj(j))
@@ -1722,11 +1719,7 @@ static void point_update_objects(GameWorld *g)
     else if (obj_get_timer(j) > 0) {
       obj_set_timer(j, obj_get_timer(j) - 1);
       if (!obj_get_timer(j)) {
-        /* The script can purge anything. If that's the next object, the rest wait for the next tick. */
-        long next_id = next_thing ? obj_get_id(next_thing) : 0;
-
-        timer_otrigger(g, j);
-        next_thing = find_obj(g, next_id);
+        timer_otrigger(g, j); /* it can purge anything: the loop passes over whatever goes */
       }
     }
   }
@@ -1740,7 +1733,6 @@ void point_update(GameWorld *g)
 
 void timed_dt(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *vict;
   room_rnum rrnum;
 
   if (ch == nullptr) {
@@ -1752,7 +1744,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
     for (rrnum = 0; rrnum < g->top_room; rrnum++)
       rroom_set_timed(g, rrnum, rroom_get_timed(g, rrnum) - ((rroom_get_timed(g, rrnum) != -1)));
 
-    for (vict = g->characters; vict; vict = char_get_next(vict)) {
+    for (char_data *vict : each_char(g)) {
       if (char_is_npc(vict))
         continue;
 
@@ -1782,7 +1774,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
    *
    */
   if (rroom_get_timed(g, char_get_in_room(ch)) == 0) {
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = char_get_next_in_room(vict)) {
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (char_is_npc(vict))
         continue;
       if (char_get_admlevel(vict) >= ADMLVL_IMMORT)

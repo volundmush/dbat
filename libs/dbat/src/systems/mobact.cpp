@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include "dbat/iterate.hpp"
 #include "dbat/mobact.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
@@ -37,14 +38,12 @@ static bool player_present(GameWorld *g, struct char_data *ch);
 static bool player_present(GameWorld *g, struct char_data *ch)
 {
 
-  struct char_data *vict, *next_v;
   int found = false;
 
   if (char_get_in_room(ch) == NOWHERE)
     return false;
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (!char_is_npc(vict)) {
       found = true;
     }
@@ -55,13 +54,11 @@ static bool player_present(GameWorld *g, struct char_data *ch)
 
 void mobile_activity(GameWorld *g)
 {
-  struct char_data *ch, *next_ch, *vict;
-  struct obj_data *obj, *best_obj;
+  struct obj_data *best_obj;
   int door, found, max;
   memory_rec *names;
 
-  for (ch = g->characters; ch; ch = next_ch) {
-    next_ch = char_get_next(ch);
+  for (char_data *ch : each_char(g)) {
 
     if (!char_is_mob(g, ch))
       continue;
@@ -88,7 +85,7 @@ void mobile_activity(GameWorld *g)
       if (rroom_get_contents(g, char_get_in_room(ch)) && rand_number(g, 1, 100) >= 95) {
         max      = 1;
         best_obj = nullptr;
-        for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj))
+        for (obj_data *obj : room_contents(g, char_get_in_room(ch)))
           if (char_can_get_obj(g, ch, obj) && obj_get_cost(obj) > max) {
             best_obj = obj;
             max      = obj_get_cost(obj);
@@ -129,9 +126,7 @@ void mobile_activity(GameWorld *g)
     }
 
     /* RESPOND TO A HUGE ATTACK */
-    struct obj_data *hugeatk = nullptr, *next_huge = nullptr;
-    for (hugeatk = rroom_get_contents(g, char_get_in_room(ch)); hugeatk; hugeatk = next_huge) {
-      next_huge = obj_get_next_content(hugeatk);
+    for (obj_data *hugeatk : room_contents(g, char_get_in_room(ch))) {
       if (char_get_fighting(ch)) {
         continue;
       }
@@ -159,7 +154,9 @@ void mobile_activity(GameWorld *g)
     if (char_mob_flagged(ch, MOB_AGGRESSIVE) && !char_is_affected(ch, AFF_PARALYZE)) {
       int spot_roll = rand_number(g, 1, char_get_level(ch) + 10);
       found         = false;
-      for (vict = rroom_get_people(g, char_get_in_room(ch)); vict && !found; vict = char_get_next_in_room(vict)) {
+      for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+        if (found)
+          break;
         if (vict == ch)
           continue;
         else if (char_get_fighting(ch))
@@ -249,10 +246,8 @@ void mobile_activity(GameWorld *g)
 
     /* Be helpful */ /* - temporarily disabled by the first false check */
     if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
-      struct char_data *ally, *next_v;
       int done = false;
-      for (ally = rroom_get_people(g, char_get_in_room(ch)); ally; ally = next_v) {
-        next_v = char_get_next_in_room(ally);
+      for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
         if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(ally) && done == false) {
@@ -285,10 +280,8 @@ void mobile_activity(GameWorld *g)
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
     if (false && !char_get_fighting(ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
-      struct char_data *ally, *next_v;
       int done = false;
-      for (ally = rroom_get_people(g, char_get_in_room(ch)); ally; ally = next_v) {
-        next_v = char_get_next_in_room(ally);
+      for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
         if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(ally) && done == false) {
@@ -322,7 +315,6 @@ void mobile_activity(GameWorld *g)
       diff = game_now(g) - char_get_lastpl(ch);
 
       if (diff > 86400) {
-        struct obj_data *sobj, *next_obj;
         shop_rnum shop_nr;
         shop_rnum shopnr = -1;
 
@@ -332,8 +324,7 @@ void mobile_activity(GameWorld *g)
             shopnr = shop_nr;
           }
         }
-        for (sobj = char_get_inventory(ch); sobj; sobj = next_obj) {
-          next_obj = obj_get_next_content(sobj);
+        for (obj_data *sobj : char_inventory(g, ch)) {
           if (shopnr != -1 && !shop_producing(g, sobj, shopnr)) { /* a builder can take a keeper's shop away */
             char_set_gold(ch, char_get_gold(ch) + (obj_get_cost(sobj)));
             extract_obj(g, sobj);
@@ -345,7 +336,9 @@ void mobile_activity(GameWorld *g)
     /* Mob Memory */
     if (char_is_humanoid(ch) && char_get_mob_specials_memory(ch) && !char_mob_flagged(ch, MOB_DUMMY) && !char_is_affected(ch, AFF_PARALYZE)) {
       found = false;
-      for (vict = rroom_get_people(g, char_get_in_room(ch)); vict && !found; vict = char_get_next_in_room(vict)) {
+      for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+        if (found)
+          break;
         if (char_is_npc(vict) || !char_can_see(g, ch, vict) || char_prf_flagged(g, vict, PRF_NOHASSLE))
           continue;
         if (char_get_fighting(ch))
@@ -376,7 +369,9 @@ void mobile_activity(GameWorld *g)
         !char_aff_flagged(ch, AFF_BLIND) &&
         !char_aff_flagged(ch, AFF_CHARM)) {
       found = false;
-      for (vict = rroom_get_people(g, char_get_in_room(ch)); vict && !found; vict = char_get_next_in_room(vict)) {
+      for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+        if (found)
+          break;
         if (ch == vict || !char_is_npc(vict) || !char_get_fighting(vict))
           continue;
         if (char_is_npc(char_get_fighting(vict)) || ch == char_get_fighting(vict))
@@ -399,7 +394,9 @@ void mobile_activity(GameWorld *g)
       shop_rnum shop_nr;
       found = false;
       /* Is there a shopkeeper around? */
-      for (vict = rroom_get_people(g, char_get_in_room(ch)); vict && !found; vict = char_get_next_in_room(vict)) {
+      for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+        if (found)
+          break;
         if (char_get_mob_spec(g, vict) == shop_keeper) {
           /* Ok, vict is a shop keeper.  Which shop is his? */
           for (shop_nr = 0; shop_nr <= g->top_shop; shop_nr++)
@@ -417,7 +414,9 @@ void mobile_activity(GameWorld *g)
        * running the next loop, since we can't steal from anyone anyway. 
        */
       }
-      for (vict = rroom_get_people(g, char_get_in_room(ch)); vict && !found; vict = char_get_next_in_room(vict)) {
+      for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+        if (found)
+          break;
         if (vict == ch)
           continue;
         if (char_mob_flagged(ch, MOB_WIMPY) && char_is_awake(vict))

@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/boards.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -82,7 +83,7 @@ static void announce_new_post(GameWorld *g, obj_vnum vnum)
   if (!sb)
     return;
 
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d) || char_plr_flagged(d->character, PLR_WRITING))
       continue;
     if (sb->admin_only && char_get_admlevel(d->character) < 1)
@@ -132,7 +133,7 @@ static int memory_slot(GameWorld *g, const struct board_msg *msg)
 /* True if a player's editor is currently writing into this message. */
 static bool message_being_written(GameWorld *g, const struct board_msg *msg)
 {
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next)
+  for (descriptor_data *d : each_desc(g))
     if (!d->connected && d->str == &msg->data)
       return true;
   return false;

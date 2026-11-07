@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
@@ -65,7 +66,6 @@ ACMD(do_transobj)
 
   struct obj_data *obj;
   struct char_data *vict;
-  struct descriptor_data *d;
   char arg[MAX_INPUT_LENGTH];
   char arg2[MAX_INPUT_LENGTH];
 
@@ -91,7 +91,7 @@ ACMD(do_transobj)
 
     act(g, "You send $p to everyone in the game.", true, ch, obj, nullptr, TO_CHAR);
 
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (!desc_is_playing(d))
         continue;
       if (char_is_npc(d->character))
@@ -267,7 +267,6 @@ ACMD(do_goto)
 ACMD(do_trans)
 {
   char buf[MAX_INPUT_LENGTH];
-  struct descriptor_data *i;
   struct char_data *victim;
 
   one_argument(argument, buf);
@@ -301,7 +300,7 @@ ACMD(do_trans)
       return;
     }
 
-    for (i = g->descriptors; i; i = i->next)
+    for (descriptor_data *i : each_desc(g))
       if (desc_get_connected(i) == CON_PLAYING && i->character && i->character != ch) {
         victim = i->character;
         if (char_get_admlevel(victim) >= char_get_admlevel(ch))
@@ -606,23 +605,23 @@ ACMD(do_purge)
         false, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "The world seems a little cleaner.\r\n");
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = char_get_next_in_room(vict)) {
-      if (!char_is_npc(vict))
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
+      if (!char_is_npc(tch))
         continue;
 
-      delete_inv_backup(vict);
+      delete_inv_backup(tch);
 
       /* Dump inventory. */
-      while (char_get_inventory(vict))
-        extract_obj(g, char_get_inventory(vict));
+      while (char_get_inventory(tch))
+        extract_obj(g, char_get_inventory(tch));
 
       /* Dump equipment. */
       for (i = 0; i < NUM_WEARS; i++)
-        if (char_get_equipment(vict, i))
-          extract_obj(g, char_get_equipment(vict, i));
+        if (char_get_equipment(tch, i))
+          extract_obj(g, char_get_equipment(tch, i));
 
       /* Dump character. */
-      extract_char(g, vict);
+      extract_char(g, tch);
     }
 
     /* Clear the ground. */
@@ -633,8 +632,7 @@ ACMD(do_purge)
 
 ACMD(do_force)
 {
-  struct descriptor_data *i, *next_desc;
-  struct char_data *vict, *next_force;
+  struct char_data *vict;
   char arg[MAX_INPUT_LENGTH], to_force[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH + 32];
 
   half_chop(argument, arg, to_force);
@@ -659,19 +657,17 @@ ACMD(do_force)
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced room %d to %s",
            char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), to_force);
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_force) {
-      next_force = char_get_next_in_room(vict);
-      if (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch))
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
+      if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
-      act(g, buf1, true, ch, nullptr, vict, TO_VICT);
-      command_interpreter(g, vict, to_force);
+      act(g, buf1, true, ch, nullptr, tch, TO_VICT);
+      command_interpreter(g, tch, to_force);
     }
   } else { /* force all */
     send_to_char(g, ch, "%s", CONFIG_OK);
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced all to %s", char_get_name(ch), to_force);
 
-    for (i = g->descriptors; i; i = next_desc) {
-      next_desc = i->next;
+    for (descriptor_data *i : each_desc(g)) {
 
       if (desc_get_connected(i) != CON_PLAYING || !(vict = i->character) || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
         continue;
@@ -722,11 +718,9 @@ ACMD(do_zreset)
 
 ACMD(do_peace)
 {
-  struct char_data *vict, *next_v;
   send_to_room(g, char_get_in_room(ch), "Everything is quite peaceful now.\r\n");
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (char_get_admlevel(vict) > char_get_admlevel(ch))
       continue;
     stop_fighting(g, vict);
@@ -777,8 +771,6 @@ ACMD(do_raise)
 
 ACMD(do_zpurge)
 {
-  struct obj_data *obj, *next_obj;
-  struct char_data *mob, *next_mob;
   IDXTYPE i, zone;
   zone_rnum stored = -1;
   int found        = false;
@@ -807,15 +799,13 @@ ACMD(do_zpurge)
 
   for (room = genolc_zone_bottom(g, stored); room <= g->zones[stored].top; room++) {
     if ((i = real_room(g, room)) != NOWHERE) {
-      for (mob = rroom_get_people(g, i); mob; mob = next_mob) {
-        next_mob = char_get_next_in_room(mob);
+      for (char_data *mob : room_people(g, i)) {
         if (char_is_npc(mob)) {
           extract_char(g, mob);
         }
       }
 
-      for (obj = rroom_get_contents(g, i); obj; obj = next_obj) {
-        next_obj = obj_get_next_content(obj);
+      for (obj_data *obj : room_contents(g, i)) {
         extract_obj(g, obj);
       }
     }

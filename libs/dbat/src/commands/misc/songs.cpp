@@ -11,6 +11,7 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
@@ -51,9 +52,8 @@ static void resolve_song(GameWorld *g, struct char_data *ch);
 
 void handle_songs(GameWorld *g)
 {
-  struct descriptor_data *d;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d))
       continue;
     if (!d->character)
@@ -80,8 +80,6 @@ static void apply_shadow_sitch(GameWorld *g, struct char_data *ch, struct char_d
 static void resolve_song(GameWorld *g, struct char_data *ch)
 {
 
-  struct char_data *vict = nullptr, *next_v = nullptr;
-  struct obj_data *obj2 = nullptr, *next_obj;
   int diceroll          = axion_dice(g, 0);
   int skill             = char_get_skill(ch, SKILL_MYSTICMUSIC);
   obj_vnum instrument   = 0;
@@ -92,8 +90,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj2) == 8802 || obj_get_vnum(g, obj2) == 8807) {
       instrument = obj_get_vnum(g, obj2);
     }
@@ -116,8 +113,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     switch (char_get_powerattack(ch)) {
       case SONG_SAFETY:
         if ((char_get_master(ch) == char_get_master(vict) || ch == char_get_master(vict) || vict == char_get_master(ch)) || vict == ch) {
@@ -414,11 +410,9 @@ ACMD(do_song)
     return;
   }
 
-  struct obj_data *obj2 = nullptr, *next_obj;
   obj_vnum instrument   = 0;
 
-  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj2) == 8802 || obj_get_vnum(g, obj2) == 8807) {
       instrument = obj_get_vnum(g, obj2);
     }

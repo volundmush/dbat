@@ -245,14 +245,14 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
       bOk = false;
     else {
       if (pAssembly->pComponents[i].bInRoom) {
-        if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
+        if ((ppComponentObjects[i] = get_obj_in_list_num(g, lRnum,
                                                          rroom_get_contents(g, char_get_in_room(pCharacter)))) == nullptr)
           bOk = false;
         else {
           obj_from_room(g, ppComponentObjects[i]);
         }
       } else {
-        if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
+        if ((ppComponentObjects[i] = get_obj_in_list_num(g, lRnum,
                                                          char_get_inventory(pCharacter))) == nullptr)
           bOk = false;
         else {

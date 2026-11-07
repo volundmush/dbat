@@ -25,6 +25,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/arrays.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
@@ -127,8 +128,11 @@ static void close_orphaned_sockets(GameWorld *g)
 
     if (fstat(fd, &info) < 0 || !S_ISSOCK(info.st_mode))
       continue;
-    for (struct descriptor_data *d = g->descriptors; d && !claimed; d = d->next)
+    for (descriptor_data *d : each_desc(g)) {
+      if (claimed)
+        break;
       claimed = d->descriptor == fd;
+    }
     if (!claimed) {
       write_to_descriptor(fd, "\n\rSomething went wrong during the folding. Please log back in.\n\r");
       close(fd);
@@ -430,11 +434,9 @@ int game_send_output(GameWorld *g, struct descriptor_data *d)
 void game_process_commands(GameWorld *g)
 {
   char comm[MAX_INPUT_LENGTH];
-  struct descriptor_data *d, *next_d;
   int aliased;
 
-  for (d = g->descriptors; d; d = next_d) {
-    next_d = d->next;
+  for (descriptor_data *d : each_desc(g)) {
 
     /*
      * Not combined to retain --(d->wait) behavior. -gg 2/20/98
@@ -485,10 +487,9 @@ void game_process_commands(GameWorld *g)
 /* Marks the end of a pass over the input: prompts anyone left without output, closes anyone who is leaving. */
 void game_finish_descriptors(GameWorld *g)
 {
-  struct descriptor_data *d, *next_d;
 
   /* Print prompts for other descriptors who had no other output */
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!d->has_prompt) {
       write_to_output(g, d, "@n");
       /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
@@ -497,8 +498,7 @@ void game_finish_descriptors(GameWorld *g)
   }
 
   /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
-  for (d = g->descriptors; d; d = next_d) {
-    next_d = d->next;
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) == CON_CLOSE || desc_get_connected(d) == CON_DISCONNECT)
       close_socket(g, d);
   }
@@ -514,7 +514,6 @@ void game_finish_descriptors(GameWorld *g)
 static void game_loop(GameWorld *g, int cmmother_desc)
 {
   int64_t last_time, process_time, now; /* monotonic nanoseconds; last_time is when the last pulse was due */
-  struct descriptor_data *d, *next_d;
   int missed_pulses;
   struct pollfd *fds = nullptr; /* [0] is the mother socket, then one per descriptor, in list order */
   size_t fds_alloc   = 0, nfds;
@@ -570,16 +569,14 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     sleep_until(last_time);
 
     /* Poll (without blocking) for new connections, input, output and hangups */
-    nfds = 1;
-    for (d = g->descriptors; d; d = d->next)
-      nfds++;
+    nfds = 1 + count_members(each_desc(g));
     if (nfds > fds_alloc) {
       resize_array(fds, fds_alloc, nfds + 16);
       fds_alloc = nfds + 16;
     }
     fds[0] = pollfd{.fd = cmmother_desc, .events = POLLIN};
     nfds   = 1;
-    for (d = g->descriptors; d; d = d->next)
+    for (descriptor_data *d : each_desc(g))
       fds[nfds++] = pollfd{.fd = d->descriptor, .events = POLLIN | POLLOUT};
 
     while (poll(fds, nfds, 0) < 0) {
@@ -590,7 +587,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
       }
     }
     nfds = 1;
-    for (d = g->descriptors; d; d = d->next)
+    for (descriptor_data *d : each_desc(g))
       d->poll_revents = fds[nfds++].revents;
 
     /* If there are new connections waiting, accept them. (They are polled from the next pulse on.) */
@@ -598,8 +595,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
       new_descriptor(g, cmmother_desc);
 
     /* Kick out sockets in an error state, and hung-up ones with nothing left to read */
-    for (d = g->descriptors; d; d = next_d) {
-      next_d = d->next;
+    for (descriptor_data *d : each_desc(g)) {
       if ((d->poll_revents & (POLLERR | POLLNVAL)) ||
           ((d->poll_revents & POLLHUP) && !(d->poll_revents & POLLIN))) {
         d->poll_revents = 0;
@@ -608,8 +604,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     }
 
     /* Process descriptors with input pending */
-    for (d = g->descriptors; d; d = next_d) {
-      next_d = d->next;
+    for (descriptor_data *d : each_desc(g)) {
       if (d->poll_revents & POLLIN)
         if (process_input(g, d) < 0)
           close_socket(g, d);
@@ -618,8 +613,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     game_process_commands(g);
 
     /* Send queued output out to the operating system (ultimately to user). */
-    for (d = g->descriptors; d; d = next_d) {
-      next_d = d->next;
+    for (descriptor_data *d : each_desc(g)) {
       if (*(d->output) && (d->poll_revents & POLLOUT)) {
         /* Output for this player is ready */
         if (process_output(g, d) < 0) {
@@ -787,9 +781,8 @@ static void sleep_until(int64_t when)
 static void record_usage(GameWorld *g)
 {
   int sockets_connected = 0, sockets_playing = 0;
-  struct descriptor_data *d;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     sockets_connected++;
     if (desc_is_playing(d))
       sockets_playing++;
@@ -1464,7 +1457,7 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (len < sizeof(prompt) && has_group(d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
+      if (len < sizeof(prompt) && has_group(g, d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n%s", report_party_health(g, d->character));
         if (char_get_temp_prompt(d->character))
           free(char_get_temp_prompt(d->character));
@@ -1963,8 +1956,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   struct descriptor_data *newd;
 
   /* make sure we have room for it */
-  for (newd = g->descriptors; newd; newd = newd->next)
-    sockets_connected++;
+  sockets_connected += count_members(each_desc(g));
 
   if (sockets_connected >= CONFIG_MAX_PLAYING) {
     write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n");
@@ -1977,7 +1969,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   snprintf(newd->host, sizeof(newd->host), "%s", host);
 
   /* one host may not take all the slots */
-  for (struct descriptor_data *other = g->descriptors; other; other = other->next)
+  for (descriptor_data *other : each_desc(g))
     if (!strcmp(other->host, newd->host))
       from_same_ip++;
   if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
@@ -2556,10 +2548,8 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
 
 static void check_idle_passwords(GameWorld *g)
 {
-  struct descriptor_data *d, *next_d;
 
-  for (d = g->descriptors; d; d = next_d) {
-    next_d = d->next;
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PASSWORD && desc_get_connected(d) != CON_GET_EMAIL && desc_get_connected(d) != CON_NEWPASSWD)
       continue;
     if (!d->idle_tics) {
@@ -2573,10 +2563,8 @@ static void check_idle_passwords(GameWorld *g)
 
 static void check_idle_menu(GameWorld *g)
 {
-  struct descriptor_data *d, *next_d;
 
-  for (d = g->descriptors; d; d = next_d) {
-    next_d = d->next;
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_MENU && desc_get_connected(d) != CON_GET_USER && desc_get_connected(d) != CON_UMENU)
       continue;
     if (!d->idle_tics) {
@@ -2748,11 +2736,10 @@ static void signal_setup(void)
 int arena_watch(GameWorld *g, struct char_data *ch)
 {
 
-  struct descriptor_data *d;
   int found      = false;
   room_vnum room = NOWHERE;
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PLAYING)
       continue;
 
@@ -2774,13 +2761,12 @@ int arena_watch(GameWorld *g, struct char_data *ch)
 
 void send_to_all(GameWorld *g, const char *messg, ...)
 {
-  struct descriptor_data *i;
   va_list args;
 
   if (messg == nullptr)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
 
@@ -2792,12 +2778,11 @@ void send_to_all(GameWorld *g, const char *messg, ...)
 
 void send_to_outdoor(GameWorld *g, const char *messg, ...)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
@@ -2813,12 +2798,11 @@ void send_to_outdoor(GameWorld *g, const char *messg, ...)
 
 void send_to_moon(GameWorld *g, const char *messg, ...)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
@@ -2834,12 +2818,11 @@ void send_to_moon(GameWorld *g, const char *messg, ...)
 
 void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
@@ -2862,13 +2845,12 @@ void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
 
 void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...)
 {
-  struct char_data *i;
   va_list args;
 
   if (messg == nullptr || room == NOWHERE)
     return;
 
-  for (i = rroom_get_people(g, room); i; i = char_get_next_in_room(i)) {
+  for (char_data *i : room_people(g, room)) {
     if (!char_get_desc(i))
       continue;
 
@@ -2877,9 +2859,7 @@ void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...)
     va_end(args);
   }
 
-  struct descriptor_data *d;
-
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PLAYING)
       continue;
 
@@ -3046,7 +3026,6 @@ bool sendok(struct char_data *ch, int to_sleeping)
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type)
 {
-  struct char_data *to;
   int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
   if (!str || !*str)
@@ -3099,7 +3078,8 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
   }
 
   if (type == TO_VICT) {
-    if ((to = (struct char_data *)const_cast<void *>(vict_obj)) != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
+    struct char_data *to = (struct char_data *)const_cast<void *>(vict_obj);
+    if (to != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, to);
       return g->last_act_message;
     }
@@ -3107,9 +3087,8 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
   }
 
   if (type == TO_GMOTE) {
-    struct descriptor_data *i;
     char buf[MAX_STRING_LENGTH];
-    for (i = g->descriptors; i; i = i->next) {
+    for (descriptor_data *i : each_desc(g)) {
       if (!i->connected && i->character &&
           (char_is_npc(i->character) || !char_prf_flagged(g, i->character, PRF_NOGOSS)) && /* someone switched */
           !char_plr_flagged(i->character, PLR_WRITING) &&
@@ -3127,18 +3106,18 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
 
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
+  room_rnum room;
   if (ch && char_get_in_room(ch) != NOWHERE)
-    to = rroom_get_people(g, char_get_in_room(ch));
+    room = char_get_in_room(ch);
   else if (obj && obj_get_in_room(obj) != NOWHERE)
-    to = rroom_get_people(g, obj_get_in_room(obj));
+    room = obj_get_in_room(obj);
   else {
     return nullptr;
   }
 
   if ((type & TO_ROOM)) {
-    struct descriptor_data *d;
 
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING)
         continue;
 
@@ -3173,7 +3152,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
     }
   }
 
-  for (; to; to = char_get_next_in_room(to)) {
+  for (char_data *to : room_people(g, room)) {
     if (!sendok(to, to_sleeping) || (to == ch))
       continue;
     if (hide_invisible && ch && !char_can_see(g, to, ch))
@@ -3260,7 +3239,6 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 /* Thx to Jamie Nelson of 4D for this contribution */
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...)
 {
-  struct char_data *i;
   va_list args;
   room_rnum j;
 
@@ -3273,7 +3251,7 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *
 
   for (j = 0; j < g->top_room; j++) {
     if (rroom_get_vnum(g, j) >= start && rroom_get_vnum(g, j) <= finish) {
-      for (i = rroom_get_people(g, j); i; i = char_get_next_in_room(i)) {
+      for (char_data *i : room_people(g, j)) {
         if (!char_get_desc(i))
           continue;
 

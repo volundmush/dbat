@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "dbat/iterate.hpp"
 #include "dbat/characters.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/consts/aligns.hpp"
@@ -968,10 +969,9 @@ void remove_kaioken(GameWorld *g, char_data *ch, int8_t announce)
 
 void dispel_ash(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *obj, *next_obj, *ash = nullptr;
+  struct obj_data *ash = nullptr;
 
-  for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, obj) == 1306) {
       ash = obj;
     }
@@ -1001,18 +1001,16 @@ void dispel_ash(GameWorld *g, struct char_data *ch)
   }
 }
 
-bool has_group(struct char_data *ch)
+bool has_group(GameWorld *g, struct char_data *ch)
 {
 
-  struct follow_type *k, *next;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     return (false);
 
   if (ch->followers) {
-    for (k = ch->followers; k; k = next) {
-      next = k->next;
-      if (!char_aff_flagged(k->follower, AFF_GROUP)) {
+    for (char_data *fol : char_followers(g, ch)) {
+      if (!char_aff_flagged(fol, AFF_GROUP)) {
         continue;
       }
       return (true);
@@ -1036,7 +1034,6 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
   if (!ch->followers && !ch->master)
     return ("");
 
-  struct follow_type *k, *next;
   int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
   struct char_data *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
   int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
@@ -1070,14 +1067,13 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
                           "@w"};
 
   if (ch->followers) {
-    for (k = ch->followers; k; k = next) {
-      next = k->next;
-      if (!char_aff_flagged(k->follower, AFF_GROUP))
+    for (char_data *fol : char_followers(g, ch)) {
+      if (!char_aff_flagged(fol, AFF_GROUP))
         continue;
-      if (k->follower != ch) {
+      if (fol != ch) {
         count += 1;
         if (count == 1) {
-          party1  = k->follower;
+          party1  = fol;
           plperc1 = (getCurPL(g, party1) * 100) / getEffMaxPL(g, party1);
           kiperc1 = (char_get_charge(party1) * 100) / getMaxKI(g, party1);
 
@@ -1108,7 +1104,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
             stam1 = 0;
           }
         } else if (count == 2) {
-          party2  = k->follower;
+          party2  = fol;
           plperc2 = (getCurPL(g, party2) * 100) / getEffMaxPL(g, party2);
           kiperc2 = (char_get_charge(party2) * 100) / getMaxKI(g, party2);
 
@@ -1139,7 +1135,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
             stam2 = 0;
           }
         } else if (count == 3) {
-          party3  = k->follower;
+          party3  = fol;
           plperc3 = (getCurPL(g, party3) * 100) / getEffMaxPL(g, party3);
           kiperc3 = (char_get_charge(party3) * 100) / getMaxKI(g, party3);
 
@@ -1170,7 +1166,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
             stam3 = 0;
           }
         } else if (count == 4) {
-          party4  = k->follower;
+          party4  = fol;
           plperc4 = (getCurPL(g, party4) * 100) / getEffMaxPL(g, party4);
           kiperc4 = (char_get_charge(party4) * 100) / getMaxKI(g, party4);
 
@@ -1244,14 +1240,13 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
     }
     count = 1;
 
-    for (k = party1->followers; k; k = next) {
-      next = k->next;
-      if (!char_aff_flagged(k->follower, AFF_GROUP))
+    for (char_data *foll : char_followers(g, party1)) {
+      if (!char_aff_flagged(foll, AFF_GROUP))
         continue;
-      if (k->follower != ch) {
+      if (foll != ch) {
         count += 1;
         if (count == 2) {
-          party2  = k->follower;
+          party2  = foll;
           plperc2 = (getCurPL(g, party2) * 100) / getEffMaxPL(g, party2);
           kiperc2 = (char_get_charge(party2) * 100) / getMaxKI(g, party2);
 
@@ -1282,7 +1277,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
             stam2 = 0;
           }
         } else if (count == 3) {
-          party3  = k->follower;
+          party3  = foll;
           plperc3 = (getCurPL(g, party3) * 100) / getEffMaxPL(g, party3);
           kiperc3 = (char_get_charge(party3) * 100) / getMaxKI(g, party3);
 
@@ -1313,7 +1308,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
             stam3 = 0;
           }
         } else if (count == 4) {
-          party4  = k->follower;
+          party4  = foll;
           plperc4 = (getCurPL(g, party4) * 100) / getEffMaxPL(g, party4);
           kiperc4 = (char_get_charge(party4) * 100) / getMaxKI(g, party4);
 
@@ -2271,17 +2266,15 @@ bool roll_pursue(GameWorld *g, struct char_data *ch, struct char_data *vict)
     act(g, "@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
     act(g, "@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
 
-    struct follow_type *k, *next;
 
     if (ch->followers) {
-      for (k = ch->followers; k; k = next) {
-        next = k->next;
-        if ((rroom_get_vnum(g, char_get_in_room(k->follower)) == inroom) && (char_get_position(k->follower) >= POS_STANDING) && (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
-          act(g, "You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
-          act(g, "$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
-          act(g, "$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
-          char_from_room(g, k->follower);
-          char_to_room(g, k->follower, char_get_in_room(ch));
+      for (char_data *fol : char_followers(g, ch)) {
+        if ((rroom_get_vnum(g, char_get_in_room(fol)) == inroom) && (char_get_position(fol) >= POS_STANDING) && (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(fol, AFF_GROUP)))) {
+          act(g, "You follow $N.", true, fol, nullptr, ch, TO_CHAR);
+          act(g, "$n follows after $N.", true, fol, nullptr, ch, TO_NOTVICT);
+          act(g, "$n follows after you.", true, fol, nullptr, ch, TO_VICT);
+          char_from_room(g, fol);
+          char_to_room(g, fol, char_get_in_room(ch));
         }
       }
     }
@@ -2722,9 +2715,8 @@ void reveal_hiding(GameWorld *g, struct char_data *ch, int type)
       char_aff_set(ch, AFF_HIDE, false);
     }
   } else if (type == 2) { /* They were spotted */
-    struct descriptor_data *d;
     struct char_data *tch = nullptr;
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING)
         continue;
       tch = d->character;
@@ -2744,11 +2736,10 @@ void reveal_hiding(GameWorld *g, struct char_data *ch, int type)
       }
     }
   } else if (type == 3) { /* They were heard, reveal with different messages. */
-    struct descriptor_data *d;
     struct char_data *tch = nullptr;
 
     act(g, "@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING)
         continue;
       tch = d->character;
@@ -3463,9 +3454,7 @@ bool planet_check(GameWorld *g, struct char_data *ch, struct char_data *vict)
 void purge_homing(GameWorld *g, struct char_data *ch)
 {
 
-  struct obj_data *obj = nullptr, *next_obj = nullptr;
-  for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, obj) == 80 || obj_get_vnum(g, obj) == 81) {
       if (obj_get_target(obj) == ch || obj_get_user(obj) == ch) {
         act(g, "$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
@@ -3659,7 +3648,7 @@ void stop_follower(GameWorld *g, struct char_data *ch)
   if (!(char_is_dead(ch->master) || (ch->master->desc && desc_get_connected(ch->master->desc) == CON_MENU)))
     act(g, "$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
 
-  if (has_group(ch))
+  if (has_group(g, ch))
     char_set_combatexpertise(ch, 0);
 
   if (ch->master->followers->follower == ch) { /* Head of follower-list? */
@@ -3680,14 +3669,12 @@ void stop_follower(GameWorld *g, struct char_data *ch)
 /* Called when a character that follows/is followed dies */
 void die_follower(GameWorld *g, struct char_data *ch)
 {
-  struct follow_type *j, *k;
 
   if (ch->master)
     stop_follower(g, ch);
 
-  for (k = ch->followers; k; k = j) {
-    j = k->next;
-    stop_follower(g, k->follower);
+  for (char_data *fol : char_followers(g, ch)) {
+    stop_follower(g, fol);
   }
 }
 

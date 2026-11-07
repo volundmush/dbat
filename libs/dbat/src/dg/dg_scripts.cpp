@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_event.hpp"
 #include "dbat/interpreter.hpp"
@@ -55,16 +56,16 @@ static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(Game
   long *ids;
   size_t count = 0;
 
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
-    if (obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
+  for (obj_data *thing : each_obj(g))
+    if (obj_get_script(thing) && IS_SET(obj_get_script(thing)->types, type))
       count++;
   if (!count)
     return;
   ids   = new long[count]();
   count = 0;
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
-    if (obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
-      ids[count++] = obj_get_id(obj);
+  for (obj_data *item : each_obj(g))
+    if (obj_get_script(item) && IS_SET(obj_get_script(item)->types, type))
+      ids[count++] = obj_get_id(item);
   for (size_t i = 0; i < count; i++)
     if ((obj = find_obj(g, ids[i])) && obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
       run(g, obj);
@@ -74,12 +75,11 @@ static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(Game
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(GameWorld *g)
 {
-  char_data *ch;
   struct room_data *room = nullptr;
   room_rnum nr;
   struct script_data *sc;
 
-  for (ch = g->characters; ch; ch = char_get_next(ch)) {
+  for (char_data *ch : each_char(g)) {
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
@@ -107,12 +107,11 @@ void script_trigger_check(GameWorld *g)
 
 void check_time_triggers(GameWorld *g)
 {
-  char_data *ch;
   struct room_data *room = nullptr;
   room_rnum nr;
   struct script_data *sc;
 
-  for (ch = g->characters; ch; ch = char_get_next(ch)) {
+  for (char_data *ch : each_char(g)) {
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
@@ -161,15 +160,19 @@ static EVENTFUNC(trig_wait_event)
   {
     int found = false;
     if (type == MOB_TRIGGER) {
-      struct char_data *tch;
-      for (tch = g->characters; tch && !found; tch = char_get_next(tch))
+      for (char_data *tch : each_char(g)) {
+        if (found)
+          break;
         if (tch == (struct char_data *)go)
           found = true;
+      }
     } else if (type == OBJ_TRIGGER) {
-      struct obj_data *obj;
-      for (obj = g->objects; obj && !found; obj = obj_get_next(obj))
+      for (obj_data *obj : each_obj(g)) {
+        if (found)
+          break;
         if (obj == (struct obj_data *)go)
           found = true;
+      }
     } else {
       room_rnum i;
       for (i = 0; i < g->top_room && !found; i++)
@@ -269,7 +272,6 @@ void script_vlog(GameWorld *g, const char *format, va_list args)
   char output[MAX_STRING_LENGTH];
   char print_to[MAX_STRING_LENGTH];
   char ctx[MAX_STRING_LENGTH];
-  struct descriptor_data *i;
 
   vsnprintf(print_to, sizeof(print_to), format, args);
   dg_context_str(g, ctx, sizeof(ctx));
@@ -279,7 +281,7 @@ void script_vlog(GameWorld *g, const char *format, va_list args)
   /* the rest is mostly a rip from basic_mud_log() */
   snprintf(output, sizeof(output), "[ %s%s ]\r\n", print_to, ctx);
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
     if (char_get_admlevel(i->character) < ADMLVL_BUILDER)
@@ -629,7 +631,7 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       struct obj_data *o = nullptr;
       switch (type) {
         case WLD_TRIGGER:
-          o = get_obj_in_room((struct room_data *)go, name);
+          o = get_obj_in_room(g, (struct room_data *)go, name);
           break;
         case OBJ_TRIGGER:
           o = get_obj_near_obj(g, (struct obj_data *)go, name);

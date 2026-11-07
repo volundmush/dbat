@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/spell_parser.hpp"
 #include "dbat/utils.hpp"
@@ -203,7 +204,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 {
   char arg[MAX_INPUT_LENGTH];
   int i, k;
-  struct char_data *tch = nullptr, *next_tch;
+  struct char_data *tch = nullptr;
   struct obj_data *tobj = nullptr;
 
   one_argument(argument, arg);
@@ -234,15 +235,13 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
        * Solution: We special case the area/mass spells here.
        */
         if (spell_has_routine(g, obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-          for (i = 0, tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch))
-            i++;
+          i = count_members(room_people(g, char_get_in_room(ch)));
           while (i-- > 0)
             call_magic(g, ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
         } else {
-          for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_tch) {
-            next_tch = char_get_next_in_room(tch);
-            if (ch != tch)
-              call_magic(g, ch, tch, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
+          for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+            if (ch != vict)
+              call_magic(g, ch, vict, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
           }
         }
       }

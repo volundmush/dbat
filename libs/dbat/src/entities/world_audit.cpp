@@ -431,10 +431,17 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
 
   collect(g, &a);
   audit_rooms(g, &a);
-  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch))
+  /* Loops over entities (iterate.hpp) find each one again by its id, and pass over any they can't find */
+  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
     audit_character(g, &a, ch);
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+    if (char_by_id(g, char_get_id(ch)) != ch)
+      problem(&a, "%s: id %d doesn't lead back to them", char_get_name(ch), char_get_id(ch));
+  }
+  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj)) {
     audit_object(g, &a, obj);
+    if (obj_by_id(g, obj_get_id(obj)) != obj)
+      problem(&a, "%s: id %d doesn't lead back to it", obj_get_short_description(obj), obj_get_id(obj));
+  }
 
   limit = a.characters.count + 1;
   for (struct char_data *ch = g->combat_list; ch; ch = char_get_next_fighting(ch)) {

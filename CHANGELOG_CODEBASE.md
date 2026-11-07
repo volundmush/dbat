@@ -5,6 +5,8 @@
 - Renamed every source file from `.c` to `.cpp`, and wrapped every header in `extern "C"` so symbols stay unmangled. [Volund]
 - Headers are now C++: renamed from `.h` to `.hpp`, with all `extern "C"` wrapping removed, so the game's symbols use C++ linkage. [Volund]
 - Stricter compiler warnings for C++ (format, sign-compare, cast-qual, cast-align, fall-through, pedantic and others), with `-Werror` in the debug and asan presets. Added `tools/analyze.sh` for GCC's static analyzer. [Volund]
+- Every struct field has a default member initializer, and `CREATE`/`RECREATE` are gone: the game allocates with `new`/`delete`, and grows arrays with `resize_array()` (`dbat/arrays.hpp`). [Volund]
+- Loops over characters, objects, connections, room contents, inventories and followers go through `dbat/iterate.hpp` (`for (char_data *ch : room_people(g, room))`, or closures such as `char_iter_all`). Each loop sees the members as they were when it began and passes over any destroyed or moved before their turn, so scripts that purge things mid-loop are safe. `world_audit` checks that every character and object can be found by its id, which this relies on. [Volund]
 
 # 2.9.3
 - Altered all headers to enclose declarations in `extern "C" {}`, made some minor adjustments to isolate C++ usage in headers to just two files left. This enables seamless Zig integration. [Volund]

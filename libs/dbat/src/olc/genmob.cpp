@@ -3,6 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/iterate.hpp"
 #include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
@@ -46,7 +47,6 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
   guild_rnum guild;
   int cmd_no;
   zone_rnum zone;
-  struct char_data *live_mob;
 
   if ((rnum = real_mobile(g, vnum)) != NOBODY) {
     /* Copy over the mobile and free() the old strings. */
@@ -54,7 +54,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     char_set_nr(&g->mob_proto[rnum], rnum); /* medit's copy option can bring another mob's number */
 
     /* Now re-point all existing mobile strings to here. */
-    for (live_mob = g->characters; live_mob; live_mob = char_get_next(live_mob))
+    for (char_data *live_mob : each_char(g))
       if (rnum == char_get_nr(live_mob))
         update_mobile_strings(live_mob, &g->mob_proto[rnum]);
 
@@ -103,7 +103,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 #endif
 
   /* Update live mobile rnums. */
-  for (live_mob = g->characters; live_mob; live_mob = char_get_next(live_mob))
+  for (char_data *live_mob : each_char(g))
     char_set_nr(live_mob, char_get_nr(live_mob) + ((char_get_nr(live_mob) != NOTHING && char_get_nr(live_mob) >= found)));
 
   /* Update zone table. */
@@ -139,10 +139,8 @@ bool copy_mobile(GameWorld *g, struct char_data *to, struct char_data *from)
 
 static void extract_mobile_all(GameWorld *g, mob_vnum vnum)
 {
-  struct char_data *next, *ch;
 
-  for (ch = g->characters; ch; ch = next) {
-    next = char_get_next(ch);
+  for (char_data *ch : each_char(g)) {
     if (char_get_mob_vnum(g, ch) == vnum)
       extract_char(g, ch);
   }
@@ -150,7 +148,6 @@ static void extract_mobile_all(GameWorld *g, mob_vnum vnum)
 
 mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
 {
-  struct char_data *live_mob;
   IDXTYPE counter;
   int cmd_no;
   mob_vnum vnum;
@@ -177,7 +174,7 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
   add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
 
   /* Update live mobile rnums.  */
-  for (live_mob = g->characters; live_mob; live_mob = char_get_next(live_mob))
+  for (char_data *live_mob : each_char(g))
     char_set_nr(live_mob, char_get_nr(live_mob) - ((char_get_nr(live_mob) >= refpt)));
 
   /* Update zone table.  */

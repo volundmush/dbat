@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -297,7 +298,6 @@ ACMD(do_summon)
   int summoned = false, count = 0;
   int dball[7]  = {20, 21, 22, 23, 24, 25, 26};
   int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
-  struct obj_data *obj, *next_obj;
   struct char_data *mob = nullptr;
   mob_rnum r_num;
 
@@ -315,8 +315,7 @@ ACMD(do_summon)
     return;
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_extra_flagged(obj, ITEM_FORGED)) {
       continue;
     }
@@ -379,8 +378,7 @@ ACMD(do_summon)
       g->DRAGONZ = real_zone_by_thing(g, g->DRAGONR);
     }
 
-    for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : char_inventory(g, ch)) {
 
       if (obj_get_vnum(g, obj) == dball2[0]) {
         obj_from_char(g, obj);
@@ -444,10 +442,8 @@ bool dball_count(GameWorld *g, struct char_data *ch)
 
   int dball[7]         = {20, 21, 22, 23, 24, 25, 26};
   int count            = 0;
-  struct obj_data *obj = nullptr, *next_obj = nullptr;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj) == dball[0]) {
       dball[0] = -1;
       count++;

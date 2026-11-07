@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/combat.hpp"
 #include "dbat/comm.hpp"
@@ -634,7 +635,7 @@ static void check_worn_container_that_cannot_go_back_on(void)
 
   struct obj_data *back = nullptr;
 
-  for (struct obj_data *obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj))
+  for (obj_data *obj : char_inventory(g, ch))
     if (obj_get_vnum(g, obj) == CONTAINER_VNUM)
       back = obj;
   CHECK(back != nullptr);

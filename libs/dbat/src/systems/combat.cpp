@@ -9,6 +9,7 @@
 *  contains code written by Iovan for use with the Real Dragonball Battle *
 *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/consts/deathtype.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/combat.hpp"
@@ -415,7 +416,6 @@ void handle_disarm(GameWorld *g, struct char_data *ch, struct char_data *vict)
 void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
 
-  struct follow_type *f;
   char chbuf[MAX_INPUT_LENGTH], victbuf[MAX_INPUT_LENGTH], rmbuf[MAX_INPUT_LENGTH];
   int64_t bonus = 0;
   double maxki  = 0.0;
@@ -547,27 +547,27 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
     char_set_charge(ch, 0);
   }
 
-  for (f = char_get_followers(ch); f; f = f->next) {
-    if (!char_aff_flagged(f->follower, AFF_GROUP)) {
+  for (char_data *fol : char_followers(g, ch)) {
+    if (!char_aff_flagged(fol, AFF_GROUP)) {
       continue;
     }
-    if (char_get_combine(f->follower) != char_get_combine(ch)) {
+    if (char_get_combine(fol) != char_get_combine(ch)) {
       same = false;
     }
-    if (char_get_charge(f->follower) >= getMaxKI(g, f->follower) * maxki) {
-      totki += getMaxKI(g, f->follower) * maxki;
-      char_set_charge(f->follower, char_get_charge(f->follower) - (getMaxKI(g, f->follower) * maxki));
+    if (char_get_charge(fol) >= getMaxKI(g, fol) * maxki) {
+      totki += getMaxKI(g, fol) * maxki;
+      char_set_charge(fol, char_get_charge(fol) - (getMaxKI(g, fol) * maxki));
     } else {
-      totki += char_get_charge(f->follower);
-      char_set_charge(f->follower, 0);
+      totki += char_get_charge(fol);
+      char_set_charge(fol, 0);
     }
     totalmem += 1;
-    attavg += char_get_skill(f->follower, attack_skills[char_get_combine(f->follower)]);
+    attavg += char_get_skill(fol, attack_skills[char_get_combine(fol)]);
     char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
-    sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-    sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-    act(g, folbuf, true, f->follower, nullptr, nullptr, TO_ROOM);
-    act(g, folbuf2, true, f->follower, nullptr, nullptr, TO_CHAR);
+    sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
+    sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
+    act(g, folbuf, true, fol, nullptr, nullptr, TO_ROOM);
+    act(g, folbuf2, true, fol, nullptr, nullptr, TO_CHAR);
   }
 
   totki += bonus;
@@ -610,8 +610,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
   }
   hurt(g, 0, 0, ch, vict, nullptr, totki, 1);
   if (same == true) {
-    for (f = char_get_followers(ch); f; f = f->next) {
-      send_to_char(g, f->follower, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+    for (char_data *foll : char_followers(g, ch)) {
+      send_to_char(g, foll, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
     send_to_char(g, ch, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
   }
@@ -620,11 +620,10 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 bool check_ruby(GameWorld *g, struct char_data *ch)
 {
 
-  struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
+  struct obj_data *ruby = nullptr;
   int found = 0;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (found == 0 && obj_get_vnum(g, obj) == 6600) {
       if (obj_extra_flagged(obj, ITEM_HOT)) {
         found = 1;
@@ -1662,12 +1661,10 @@ void huge_update(GameWorld *g)
 {
   int dge = 0, skill = 0, bonus = 1, count = 0;
   int64_t dmg = 0;
-  struct obj_data *k, *next_k;
-  struct char_data *ch, *vict, *next_v;
+  struct char_data *ch;
 
   /* Checking the object list for any huge ki attacks */
-  for (k = g->objects; k; k = next_k) {
-    next_k = obj_get_next(k); /* k may be extracted below */
+  for (obj_data *k : each_obj(g)) { /* k may be extracted below */
     if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= game_now(g)) {
       if (obj_get_in_room(k) && rroom_get_vnum(g, obj_get_in_room(k)) == 80) {
         room_vnum inroom = obj_get_in_room(k);
@@ -1704,8 +1701,7 @@ void huge_update(GameWorld *g)
             dmg /= 2;
 
             /* Hit those in the current room. */
-            for (vict = rroom_get_people(g, obj_get_in_room(k)); vict; vict = next_v) {
-              next_v = char_get_next_in_room(vict);
+            for (char_data *vict : room_people(g, obj_get_in_room(k))) {
 
               if (vict == ch) {
                 continue;
@@ -1802,8 +1798,7 @@ void huge_update(GameWorld *g)
           dmg /= 2;
 
           /* Hit those in the current room. */
-          for (vict = rroom_get_people(g, obj_get_in_room(k)); vict; vict = next_v) {
-            next_v = char_get_next_in_room(vict);
+          for (char_data *vict : room_people(g, obj_get_in_room(k))) {
 
             if (vict == ch) {
               continue;
@@ -1876,8 +1871,7 @@ void huge_update(GameWorld *g)
             dmg /= 2;
 
             /* Hit those in the current room. */
-            for (vict = rroom_get_people(g, obj_get_in_room(k)); vict; vict = next_v) {
-              next_v = char_get_next_in_room(vict);
+            for (char_data *vict : room_people(g, obj_get_in_room(k))) {
 
               if (vict == ch) {
                 continue;
@@ -1972,8 +1966,7 @@ void huge_update(GameWorld *g)
           dmg /= 2;
 
           /* Hit those in the current room. */
-          for (vict = rroom_get_people(g, obj_get_in_room(k)); vict; vict = next_v) {
-            next_v = char_get_next_in_room(vict);
+          for (char_data *vict : room_people(g, obj_get_in_room(k))) {
 
             if (vict == ch) {
               continue;
@@ -2036,12 +2029,8 @@ void huge_update(GameWorld *g)
 /* For handling homing attacks */
 void homing_update(GameWorld *g)
 {
-  struct obj_data *k;
-  struct obj_data *next_k;
 
-  for (k = g->objects; k; k = next_k) {
-
-    next_k = obj_get_next(k);
+  for (obj_data *k : each_obj(g)) {
 
     if (obj_get_kicharge(k) <= 0) {
       continue;
@@ -2410,11 +2399,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
   char buf3[200];
   int foundv = false, foundo = false;
   int64_t dmg = 0;
-  struct obj_data *tob, *next_obj;
-  struct char_data *tch, *next_v;
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = next_v) {
-    next_v = char_get_next_in_room(tch);
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
 
     if (tch == ch)
       continue;
@@ -2447,8 +2433,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     }
   }
 
-  for (tob = rroom_get_contents(g, char_get_in_room(ch)); tob; tob = next_obj) {
-    next_obj = obj_get_next_content(tob);
+  for (obj_data *tob : room_contents(g, char_get_in_room(ch))) {
     if (obj_extra_flagged(tob, ITEM_UNBREAKABLE))
       continue;
     if (foundo == true)
@@ -4226,10 +4211,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         act(g, "@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, TO_CHAR);
         act(g, "@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, TO_NOTVICT);
         solo_gain(g, ch, vict);
-        struct obj_data *rew, *next_rew;
         int founded = 0;
-        for (rew = char_get_inventory(vict); rew; rew = next_rew) {
-          next_rew = obj_get_next_content(rew);
+        for (obj_data *rew : char_inventory(g, vict)) {
           if (rew) {
             obj_from_char(g, rew);
             obj_to_room(g, rew, char_get_in_room(vict));

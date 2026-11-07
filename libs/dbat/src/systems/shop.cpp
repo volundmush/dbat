@@ -13,6 +13,7 @@
  ***/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/handler.hpp"
@@ -515,7 +516,7 @@ static char *times_message(struct obj_data *obj, char *name, int num)
 static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name,
                                           struct obj_data *list)
 {
-  struct obj_data *i, *last_match = nullptr;
+  struct obj_data *last_match = nullptr;
   int j, number;
   char tmpname[MAX_INPUT_LENGTH];
   char *tmp;
@@ -525,7 +526,10 @@ static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, ch
   if (!(number = get_number(&tmp)))
     return (nullptr);
 
-  for (i = list, j = 1; i && (j <= number); i = obj_get_next_content(i))
+  j = 1;
+  for (obj_data *i : obj_list(g, list)) {
+    if (j > number)
+      break;
     if (isname(tmp, obj_get_name(i)))
       if (char_can_see_obj(g, ch, i) && !same_obj(last_match, i)) {
         if (j == number)
@@ -533,13 +537,14 @@ static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, ch
         last_match = i;
         j++;
       }
+  }
   return (nullptr);
 }
 
 static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name,
                                          struct obj_data *list)
 {
-  struct obj_data *loop, *last_obj = nullptr;
+  struct obj_data *last_obj = nullptr;
   int qindex;
 
   if (is_number(name))
@@ -549,7 +554,7 @@ static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, cha
   else
     return (nullptr);
 
-  for (loop = list; loop; loop = obj_get_next_content(loop))
+  for (obj_data *loop : obj_list(g, list))
     if (char_can_see_obj(g, ch, loop) && obj_get_cost(loop) > 0)
       if (!same_obj(last_obj, loop)) {
         if (--qindex == 0)
@@ -659,9 +664,8 @@ static int sell_price(GameWorld *g, struct obj_data *obj, shop_rnum shop_nr, str
     sell_cost_modifier = buy_cost_modifier;
 
   double adjust = 1.0;
-  struct obj_data *k;
 
-  for (k = g->objects; k; k = obj_get_next(k)) {
+  for (obj_data *k : each_obj(g)) {
     if (obj_get_vnum(g, k) == obj_get_vnum(g, obj)) {
       adjust -= 0.00025;
     }
@@ -1012,7 +1016,7 @@ static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, shop_rnum s
     temp = list;
     list = obj_get_next_content(list);
     if (shop_producing(g, temp, shop_nr) &&
-        !get_obj_in_list_num(obj_get_item_number(temp), char_get_inventory(keeper))) {
+        !get_obj_in_list_num(g, obj_get_item_number(temp), char_get_inventory(keeper))) {
       obj_to_char(g, temp, keeper);
       rshop_set_lastsort(g, shop_nr, rshop_get_lastsort(g, shop_nr) + 1);
     } else
@@ -1186,7 +1190,7 @@ static char *list_object(GameWorld *g, struct obj_data *obj, int cnt, int aindex
 static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, shop_rnum shop_nr)
 {
   char buf[MAX_STRING_LENGTH * 4], name[MAX_INPUT_LENGTH];
-  struct obj_data *obj, *last_obj = nullptr;
+  struct obj_data *last_obj = nullptr;
   int cnt = 0, lindex = 0, found = false;
   size_t len;
   /* cnt is the number of that particular object available */
@@ -1203,7 +1207,7 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
                      "----------------------------------------------------------------------\r\n",
                 sizeof(buf));
   if (char_get_inventory(keeper))
-    for (obj = char_get_inventory(keeper); obj; obj = obj_get_next_content(obj))
+    for (obj_data *obj : char_inventory(g, keeper))
       if (char_can_see_obj(g, ch, obj) && obj_get_cost(obj) > 0) {
         if (!last_obj) {
           last_obj = obj;

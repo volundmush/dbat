@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
@@ -283,10 +284,9 @@ ACMD(do_arena)
   } else if (!strcasecmp(arg, "scan")) {
     if (rroom_get_vnum(g, char_get_in_room(ch)) == 17875) {
       int found = false;
-      struct descriptor_data *d;
 
       send_to_char(g, ch, "@D---@CFighters in the arena@D---@n\r\n");
-      for (d = g->descriptors; d; d = d->next) {
+      for (descriptor_data *d : each_desc(g)) {
         if (desc_get_connected(d) != CON_PLAYING)
           continue;
 
@@ -312,10 +312,9 @@ ACMD(do_arena)
       send_to_char(g, ch, "That is not a valid fighter number\r\n");
       return;
     } else {
-      struct descriptor_data *d;
       int found = false;
 
-      for (d = g->descriptors; d; d = d->next) {
+      for (descriptor_data *d : each_desc(g)) {
         if (desc_get_connected(d) != CON_PLAYING)
           continue;
 

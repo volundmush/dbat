@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/relocate.hpp"
@@ -104,7 +105,6 @@ static const char *skill_percent(GameWorld *g, struct char_data *ch, char *skill
 
 static int item_in_list(GameWorld *g, char *item, obj_data *list)
 {
-  obj_data *i;
   int count = 0;
 
   if (!item || !*item)
@@ -113,7 +113,7 @@ static int item_in_list(GameWorld *g, char *item, obj_data *list)
   if (*item == UID_CHAR) {
     long id = atol(item + 1);
 
-    for (i = list; i; i = obj_get_next_content(i)) {
+    for (obj_data *i : obj_list(g, list)) {
       if (id == obj_get_id(i))
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
@@ -122,14 +122,14 @@ static int item_in_list(GameWorld *g, char *item, obj_data *list)
   } else if (is_number(item)) { /* check for vnum */
     obj_vnum ovnum = atoi(item);
 
-    for (i = list; i; i = obj_get_next_content(i)) {
+    for (obj_data *i : obj_list(g, list)) {
       if (obj_get_vnum(g, i) == ovnum)
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
         count += item_in_list(g, item, obj_get_contains(i));
     }
   } else {
-    for (i = list; i; i = obj_get_next_content(i)) {
+    for (obj_data *i : obj_list(g, list)) {
       if (isname(item, obj_get_name(i)))
         count++;
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
@@ -241,7 +241,6 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 /* sets str to the value of field on character c (var.field where var names a character) */
 static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
-  obj_data *obj;
   int i, j;
 
   if (text_processed(field, subfield, vd, str, slen)) return;
@@ -465,14 +464,13 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
 
       else if (!strcasecmp(field, "inventory")) {
         if (subfield && *subfield) {
-          for (obj = char_get_inventory(c); obj; obj = obj_get_next_content(obj)) {
+          for (obj_data *obj : char_inventory(g, c)) {
             if (obj_get_vnum(g, obj) == atoi(subfield)) {
               snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj)); /* arg given, found */
               return;
             }
           }
-          if (!obj)
-            *str = '\0'; /* arg given, not found */
+          *str = '\0';   /* arg given, not found */
         } else {         /* no arg given */
           if (char_get_inventory(c)) {
             snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(char_get_inventory(c)));
@@ -1105,7 +1103,6 @@ static int room_exit_field_dir(const char *field)
 /* sets str to the value of field on room r */
 static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
-  obj_data *obj;
   int dir;
 
   if (text_processed(field, subfield, vd, str, slen)) return;
@@ -1144,15 +1141,14 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     }
   } else if (!strcasecmp(field, "contents")) {
     if (subfield && *subfield) {
-      for (obj = room_get_contents(r); obj; obj = obj_get_next_content(obj)) {
+      for (obj_data *obj : obj_list(g, room_get_contents(r))) {
         if (obj_get_vnum(g, obj) == atoi(subfield)) {
           /* arg given, found */
           snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj));
           return;
         }
       }
-      if (!obj)
-        *str = '\0'; /* arg given, not found */
+      *str = '\0';   /* arg given, not found */
     } else {         /* no arg given */
       if (room_get_contents(r)) {
         snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(room_get_contents(r)));
@@ -1335,11 +1331,11 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
           if ((o = get_object_in_equip(g, ch, name)))
             ;
-          else if ((o = get_obj_in_list(name, char_get_inventory(ch))))
+          else if ((o = get_obj_in_list(g, name, char_get_inventory(ch))))
             ;
           else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, &g->rooms[char_get_in_room(ch)], name)))
             ;
-          else if ((o = get_obj_in_list(name, rroom_get_contents(g, char_get_in_room(ch)))))
+          else if ((o = get_obj_in_list(g, name, rroom_get_contents(g, char_get_in_room(ch)))))
             ;
           else if ((c = get_char(g, name)))
             ;
@@ -1456,8 +1452,9 @@ in the vault (vnum: 453) now and then. you can just use
             script_log(g, "findmob.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
-            for (i = 0, ch = rroom_get_people(g, rrnum); ch; ch = char_get_next_in_room(ch))
-              if (char_get_mob_vnum(g, ch) == mvnum)
+            i = 0;
+            for (char_data *vict : room_people(g, rrnum))
+              if (char_get_mob_vnum(g, vict) == mvnum)
                 i++;
 
             snprintf(str, slen, "%d", i);
@@ -1487,32 +1484,30 @@ in the vault (vnum: 453) now and then. you can just use
 
           if (type == MOB_TRIGGER) {
             ch = (char_data *)go;
-            for (c = rroom_get_people(g, char_get_in_room(ch)); c; c = char_get_next_in_room(c))
-              if ((c != ch) && valid_dg_target(g, c, DG_ALLOW_GODS) &&
-                  char_can_see(g, ch, c)) {
+            for (char_data *tch : room_people(g, char_get_in_room(ch)))
+              if ((tch != ch) && valid_dg_target(g, tch, DG_ALLOW_GODS) &&
+                  char_can_see(g, ch, tch)) {
                 if (!rand_number(g, 0, count))
-                  rndm = c;
+                  rndm = tch;
                 count++;
               }
           }
 
           else if (type == OBJ_TRIGGER) {
-            for (c = rroom_get_people(g, obj_room((obj_data *)go)); c;
-                 c = char_get_next_in_room(c))
-              if (valid_dg_target(g, c, DG_ALLOW_GODS)) {
+            for (char_data *other : room_people(g, obj_room((obj_data *)go)))
+              if (valid_dg_target(g, other, DG_ALLOW_GODS)) {
                 if (!rand_number(g, 0, count))
-                  rndm = c;
+                  rndm = other;
                 count++;
               }
           }
 
           else if (type == WLD_TRIGGER) {
-            for (c = room_get_people((struct room_data *)go); c;
-                 c = char_get_next_in_room(c))
-              if (valid_dg_target(g, c, DG_ALLOW_GODS)) {
+            for (char_data *who : room_people(g, (struct room_data *)go))
+              if (valid_dg_target(g, who, DG_ALLOW_GODS)) {
 
                 if (!rand_number(g, 0, count))
-                  rndm = c;
+                  rndm = who;
                 count++;
               }
           }

@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "dbat/iterate.hpp"
 #include "dbat/rooms.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/utils.hpp"
@@ -10,12 +11,11 @@
 
 static bool rroom_is_valid(GameWorld *g, room_rnum rnum);
 
-int num_pc_in_room(struct room_data *room)
+int num_pc_in_room(GameWorld *g, struct room_data *room)
 {
   int i = 0;
-  struct char_data *ch;
 
-  for (ch = room->people; ch != nullptr; ch = char_get_next_in_room(ch))
+  for (char_data *ch : room_people(g, room))
     if (!char_is_npc(ch))
       i++;
 
@@ -25,11 +25,9 @@ int num_pc_in_room(struct room_data *room)
 /* Is there a campfire in the room? */
 int cook_element(GameWorld *g, room_rnum room)
 {
-  struct obj_data *obj, *next_obj;
   int found = false;
 
-  for (obj = g->rooms[room].contents; obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : obj_list(g, g->rooms[room].contents)) {
     if (obj_get_type_flag(obj) == ITEM_CAMPFIRE) {
       found = 1;
     } else if (obj_get_vnum(g, obj) == 19093) {

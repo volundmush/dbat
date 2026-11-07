@@ -1,5 +1,6 @@
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/room_utils.hpp"
@@ -93,11 +94,10 @@ int get_number(char **name)
 }
 
 /* Search a given list for an object number, and return a ptr to that obj */
-struct obj_data *get_obj_in_list_num(obj_vnum num, struct obj_data *list)
+struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, struct obj_data *list)
 {
-  struct obj_data *i;
 
-  for (i = list; i; i = obj_get_next_content(i))
+  for (obj_data *i : obj_list(g, list))
     if (obj_get_item_number(i) == num)
       return (i);
 
@@ -107,9 +107,8 @@ struct obj_data *get_obj_in_list_num(obj_vnum num, struct obj_data *list)
 /* search the entire world for an object number, and return a pointer  */
 struct obj_data *get_obj_num(GameWorld *g, obj_rnum nr)
 {
-  struct obj_data *i;
 
-  for (i = g->objects; i; i = obj_get_next(i))
+  for (obj_data *i : each_obj(g))
     if (obj_get_item_number(i) == nr)
       return (i);
 
@@ -119,7 +118,6 @@ struct obj_data *get_obj_num(GameWorld *g, obj_rnum nr)
 /* search a room for a char, and return a pointer if found..  */
 struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_rnum room)
 {
-  struct char_data *i;
   int num;
 
   if (!number) {
@@ -130,20 +128,21 @@ struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_rnum
   if (*number == 0)
     return (nullptr);
 
-  for (i = rroom_get_people(g, room); i && *number; i = char_get_next_in_room(i))
+  for (char_data *i : room_people(g, room)) {
+    if (!(*number))
+      break;
     if (isname(name, char_get_alias(i)))
       if (--(*number) == 0)
         return (i);
-
+  }
   return (nullptr);
 }
 
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(GameWorld *g, mob_rnum nr)
 {
-  struct char_data *i;
 
-  for (i = g->characters; i; i = char_get_next(i))
+  for (char_data *i : each_char(g))
     if (char_get_nr(i) == nr)
       return (i);
 
@@ -152,7 +151,6 @@ struct char_data *get_char_num(GameWorld *g, mob_rnum nr)
 
 struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int inroom)
 {
-  struct char_data *i;
   int num;
 
   if (!number) {
@@ -160,7 +158,7 @@ struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name,
     num    = get_number(&name);
   }
 
-  for (i = g->characters; i; i = char_get_next(i)) {
+  for (char_data *i : each_char(g)) {
     if (char_is_npc(i))
       continue;
     if (inroom == FIND_CHAR_ROOM && char_get_in_room(i) != char_get_in_room(ch))
@@ -201,7 +199,6 @@ struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name,
 
 struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
 {
-  struct char_data *i;
   int num;
 
   if (!number) {
@@ -217,7 +214,9 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *na
   if (*number == 0)
     return (get_player_vis(g, ch, name, nullptr, FIND_CHAR_ROOM));
 
-  for (i = rroom_get_people(g, char_get_in_room(ch)); i && *number; i = char_get_next_in_room(i)) {
+  for (char_data *i : room_people(g, char_get_in_room(ch))) {
+    if (!(*number))
+      break;
     if (!strcasecmp(name, "last") && char_get_lasthit(i) != 0 && char_get_lasthit(i) == char_get_idnum(ch)) {
       if (char_can_see(g, ch, i))
         if (--(*number) == 0)
@@ -275,13 +274,15 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *n
   if (*number == 0)
     return get_player_vis(g, ch, name, nullptr, 0);
 
-  for (i = g->characters; i && *number; i = char_get_next(i)) {
-    if (char_get_in_room(ch) == char_get_in_room(i))
+  for (char_data *tch : each_char(g)) {
+    if (!(*number))
+      break;
+    if (char_get_in_room(ch) == char_get_in_room(tch))
       continue;
-    if (char_get_admlevel(ch) < 1 && char_get_admlevel(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
-      if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
-        if (readIntro(ch, i) == 1) {
-          if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+    if (char_get_admlevel(ch) < 1 && char_get_admlevel(tch) < 1 && !char_is_npc(ch) && !char_is_npc(tch)) {
+      if (strcasecmp(juggleRaceName(tch, true), name) && !strstr(juggleRaceName(tch, true), name)) {
+        if (readIntro(ch, tch) == 1) {
+          if (strcasecmp(get_i_name(ch, tch), name) && !strstr(get_i_name(ch, tch), name)) {
             continue;
           }
         } else {
@@ -289,11 +290,11 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *n
         }
       }
     }
-    if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
-      if (strcasecmp(char_get_alias(i), name) && !strstr(char_get_alias(i), name)) {
-        if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
-          if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
-            if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+    if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(tch) >= 1 || char_is_npc(ch) || char_is_npc(tch))) {
+      if (strcasecmp(char_get_alias(tch), name) && !strstr(char_get_alias(tch), name)) {
+        if (strcasecmp(juggleRaceName(tch, true), name) && !strstr(juggleRaceName(tch, true), name)) {
+          if (!char_is_npc(ch) && !char_is_npc(tch) && readIntro(ch, tch) == 1) {
+            if (strcasecmp(get_i_name(ch, tch), name) && !strstr(get_i_name(ch, tch), name)) {
               continue;
             }
           } else {
@@ -307,7 +308,7 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *n
     if (--(*number) != 0)
       continue;
 
-    return (i);
+    return (tch);
   }
   return (nullptr);
 }
@@ -322,9 +323,13 @@ struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, char *name, i
     return (nullptr);
 }
 
+bool obj_named_and_visible(GameWorld *g, struct char_data *ch, const char *name, struct obj_data *obj)
+{
+  return isname(name, obj_get_name(obj)) && (char_can_see_obj(g, ch, obj) || obj_get_type_flag(obj) == ITEM_LIGHT);
+}
+
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, struct obj_data *list)
 {
-  struct obj_data *i;
   int num;
 
   if (!number) {
@@ -335,12 +340,13 @@ struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *n
   if (*number == 0)
     return (nullptr);
 
-  for (i = list; i && *number; i = obj_get_next_content(i))
-    if (isname(name, obj_get_name(i)))
-      if (char_can_see_obj(g, ch, i) || (obj_get_type_flag(i) == ITEM_LIGHT))
-        if (--(*number) == 0)
-          return (i);
-
+  for (obj_data *i : obj_list(g, list)) {
+    if (!(*number))
+      break;
+    if (obj_named_and_visible(g, ch, name, i))
+      if (--(*number) == 0)
+        return (i);
+  }
   return (nullptr);
 }
 
@@ -367,12 +373,14 @@ struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, char *name, int
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
-  for (i = g->objects; i && *number; i = obj_get_next(i))
-    if (isname(name, obj_get_name(i)))
-      if (char_can_see_obj(g, ch, i))
+  for (obj_data *item : each_obj(g)) {
+    if (!(*number))
+      break;
+    if (isname(name, obj_get_name(item)))
+      if (char_can_see_obj(g, ch, item))
         if (--(*number) == 0)
-          return (i);
-
+          return (item);
+  }
   return (nullptr);
 }
 

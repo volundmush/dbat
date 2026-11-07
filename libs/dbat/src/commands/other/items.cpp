@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -1341,7 +1342,7 @@ ACMD(do_forgery)
 {
 
   struct obj_data *obj2, *obj3 = nullptr;
-  struct obj_data *obj, *obj4  = nullptr, *next_obj;
+  struct obj_data *obj4 = nullptr;
   int found = false;
   char arg[MAX_INPUT_LENGTH];
 
@@ -1365,8 +1366,7 @@ ACMD(do_forgery)
     return;
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (found == false && obj_get_vnum(g, obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
       obj4  = obj;
@@ -1888,7 +1888,7 @@ ACMD(do_break)
 ACMD(do_fix)
 {
   char arg[MAX_INPUT_LENGTH];
-  struct obj_data *obj, *obj4 = nullptr, *rep, *next_obj;
+  struct obj_data *obj, *obj4 = nullptr;
   struct char_data *dummy = nullptr;
   int cmbrk, found = false, self = false, custom = false;
 
@@ -1942,8 +1942,7 @@ ACMD(do_fix)
     }
   }
 
-  for (rep = char_get_inventory(ch); rep; rep = next_obj) {
-    next_obj = obj_get_next_content(rep);
+  for (obj_data *rep : char_inventory(g, ch)) {
     if (custom == false) {
       if (found == false && obj_get_vnum(g, rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
         found = true;

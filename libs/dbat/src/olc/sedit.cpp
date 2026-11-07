@@ -5,6 +5,7 @@
  ************************************************************************/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/config.hpp"
 #include "dbat/sedit.hpp"
@@ -97,11 +98,11 @@ ACMD(do_oasis_sedit)
   /****************************************************************************/
   /** Check that the shop isn't already being edited.                        **/
   /****************************************************************************/
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_SEDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_SEDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That shop is currently being edited by %s.\r\n",
-                     char_pers(g, d->character, ch));
+                     char_pers(g, dd->character, ch));
         return;
       }
     }

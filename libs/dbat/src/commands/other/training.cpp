@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -1338,7 +1339,6 @@ ACMD(do_pushup)
 /* This handles many player specific routines. It may be a bit too bloated though. */
 void base_update(GameWorld *g)
 {
-  struct descriptor_data *d;
   int cash = false, inc = 0;
   int countch = false, pcoun = 0;
 
@@ -1354,7 +1354,7 @@ void base_update(GameWorld *g)
     g->TOPCOUNTDOWN -= 4;
   }
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d))
       continue;
     if (char_is_npc(d->character)) {

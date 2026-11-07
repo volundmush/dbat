@@ -36,6 +36,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/gengld.hpp"
 #include "dbat/genshp.hpp"
@@ -241,7 +242,7 @@ static void take_all_output(GameWorld *g)
     if (connections[i].peer >= 0)
       send_real_output(g, &connections[i]);
 
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     fingerprint_bytes(d->output, strlen(d->output));
     th_take_output_at(g, d);
   }
@@ -322,12 +323,9 @@ static void check_log(void)
 
 static time_t clock_jumps = 0;
 
-static bool player_in_game(const GameWorld *g, const char *name)
+static bool player_in_game(GameWorld *g, const char *name)
 {
-  for (const struct char_data *ch = g->characters; ch; ch = char_get_next(ch))
-    if (!char_is_npc(ch) && !strcasecmp(char_get_name(ch), name))
-      return true;
-  return false;
+  return find_first(each_char(g), [&](char_data *ch) { return !char_is_npc(ch) && !strcasecmp(char_get_name(ch), name); });
 }
 
 static void add_connection(const char *label, struct descriptor_data *d, int peer)
@@ -431,28 +429,24 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
 
   switch (ch ? bot_dice(6) : 2 + bot_dice(4)) {
     case 0: {
-      int count = 0, chosen;
-      struct char_data *other;
+      int count, chosen;
 
       if (char_get_in_room(ch) == NOWHERE)
         break;
-      for (other = rroom_get_people(g, char_get_in_room(ch)); other; other = char_get_next_in_room(other))
-        count++;
+      count  = count_members(room_people(g, char_get_in_room(ch)));
       chosen = bot_dice(count ? count : 1);
-      for (other = rroom_get_people(g, char_get_in_room(ch)); other; other = char_get_next_in_room(other))
+      for (char_data *other : room_people(g, char_get_in_room(ch)))
         if (chosen-- == 0)
           return first_keyword(char_is_npc(other) ? char_get_alias(other) : char_get_name(other));
       break;
     }
     case 1: {
-      int count = 0, chosen;
-      struct obj_data *obj;
+      int count, chosen;
       struct obj_data *list = char_get_in_room(ch) != NOWHERE && bot_dice(2) ? rroom_get_contents(g, char_get_in_room(ch)) : char_get_inventory(ch);
 
-      for (obj = list; obj; obj = obj_get_next_content(obj))
-        count++;
+      count  = count_members(obj_list(g, list));
       chosen = bot_dice(count ? count : 1);
-      for (obj = list; obj; obj = obj_get_next_content(obj))
+      for (obj_data *obj : obj_list(g, list))
         if (chosen-- == 0)
           return first_keyword(obj_get_name(obj));
       break;
@@ -685,7 +679,7 @@ static void save_zones(GameWorld *g)
 /* Saves everything, the way the game does when it shuts down. */
 static void save_everything(GameWorld *g)
 {
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next)
+  for (descriptor_data *d : each_desc(g))
     if (d->character && desc_is_playing(d)) {
       Crash_crashsave(g, d->character); /* first, as it clears the flag saying it needs doing */
       save_char(g, d->character);

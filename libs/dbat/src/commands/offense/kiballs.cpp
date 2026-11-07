@@ -1,5 +1,6 @@
 /* kiballs.c: ki ball and sphere attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -129,7 +130,7 @@ ACMD(do_genki)
 
   int perc, prob;
   double attperc = .5, minimum = .4;
-  struct char_data *friend_char = nullptr, *vict = nullptr, *next_v = nullptr;
+  struct char_data *vict = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -194,8 +195,7 @@ ACMD(do_genki)
     return;
   }
 
-  for (friend_char = rroom_get_people(g, char_get_in_room(ch)); friend_char; friend_char = next_v) {
-    next_v = char_get_next_in_room(friend_char);
+  for (char_data *friend_char : room_people(g, char_get_in_room(ch))) {
     if (friend_char == ch) {
       continue;
     }
@@ -658,7 +658,6 @@ ACMD(do_hellspear)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .3, minimum = .1;
-  struct char_data *vict = nullptr, *next_v = nullptr;
   char arg2[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg2);
@@ -696,8 +695,7 @@ ACMD(do_hellspear)
 
   skill = init_skill(g, ch, SKILL_HELLSPEAR); /* Set skill value */
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -733,8 +731,7 @@ ACMD(do_hellspear)
 
     dmg = damtype(g, ch, 33, skill, attperc);
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-      next_v = char_get_next_in_room(vict);
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (vict == ch) {
         continue;
       }

@@ -1,5 +1,6 @@
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/comm.hpp"
@@ -20,7 +21,6 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
 {
   struct char_data *k, *temp;
   struct obj_data *chair;
-  struct descriptor_data *d;
   struct obj_data *obj;
   int i;
 
@@ -36,7 +36,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
    * we're checking below this loop to the proper value.
    */
   if (!char_is_npc(ch) && !char_get_desc(ch)) {
-    for (d = g->descriptors; d; d = d->next)
+    for (descriptor_data *d : each_desc(g))
       if (d->original == ch) {
         do_return(g, d->character, nullptr, 0, 0);
         break;
@@ -62,7 +62,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
        * for being link-dead, so we want CON_CLOSE to clean everything up.
        * If we're here, we know it's a player so no IS_NPC check required.
        */
-      for (d = g->descriptors; d; d = d->next) {
+      for (descriptor_data *d : each_desc(g)) {
         if (d == char_get_desc(ch))
           continue;
         if (d->character && char_get_idnum(ch) == char_get_idnum(d->character))
@@ -90,8 +90,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
 
   if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
-    struct char_data *clone = nullptr;
-    for (clone = g->characters; clone; clone = char_get_next(clone)) {
+    for (char_data *clone : each_char(g)) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(g, clone) == 25) {
           if (char_get_original(clone) == ch) {
@@ -233,7 +232,6 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
  */
 void extract_char(GameWorld *g, struct char_data *ch)
 {
-  struct follow_type *foll;
   int i;
   struct obj_data *obj;
 
@@ -251,24 +249,24 @@ void extract_char(GameWorld *g, struct char_data *ch)
 
   /*save_char_pets(ch);*/
 
-  for (foll = char_get_followers(ch); foll; foll = foll->next) {
-    if (char_is_npc(foll->follower) && char_aff_flagged(foll->follower, AFF_CHARM) &&
-        (char_get_in_room(foll->follower) == char_get_in_room(ch) || char_get_in_room(ch) == 1)) {
+  for (char_data *fol : char_followers(g, ch)) {
+    if (char_is_npc(fol) && char_aff_flagged(fol, AFF_CHARM) &&
+        (char_get_in_room(fol) == char_get_in_room(ch) || char_get_in_room(ch) == 1)) {
       /* transfer objects to char, if any */
-      while (char_get_inventory(foll->follower)) {
-        obj = char_get_inventory(foll->follower);
+      while (char_get_inventory(fol)) {
+        obj = char_get_inventory(fol);
         obj_from_char(g, obj);
         obj_to_char(g, obj, ch);
       }
 
       /* transfer equipment to char, if any */
       for (i = 0; i < NUM_WEARS; i++)
-        if (char_get_equipment(foll->follower, i)) {
-          obj = unequip_char(g, foll->follower, i);
+        if (char_get_equipment(fol, i)) {
+          obj = unequip_char(g, fol, i);
           obj_to_char(g, obj, ch);
         }
 
-      extract_char(g, foll->follower);
+      extract_char(g, fol);
     }
   }
 

@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -574,7 +575,7 @@ ACMD(do_hass)
 ACMD(do_implant)
 {
 
-  struct obj_data *limb = nullptr, *obj = nullptr, *next_obj;
+  struct obj_data *limb  = nullptr;
   struct char_data *vict = nullptr;
   char arg[MAX_INPUT_LENGTH];
   char arg2[MAX_INPUT_LENGTH];
@@ -598,8 +599,7 @@ ACMD(do_implant)
     return;
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (found == false && obj_get_vnum(g, obj) == 66 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
       limb  = obj;
@@ -1558,7 +1558,6 @@ ACMD(do_eyec)
 
 ACMD(do_solar)
 {
-  struct char_data *vict = nullptr, *next_v = nullptr;
 
   int prob = 0, perc = 0, cost = 0, bonus = 0;
 
@@ -1603,8 +1602,7 @@ ACMD(do_solar)
   act(g, "@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' as a blinding light fills the area!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
 
     if (vict == ch)
       continue;
@@ -2202,7 +2200,7 @@ ACMD(do_transform)
 ACMD(do_aid)
 {
   struct char_data *vict;
-  struct obj_data *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
+  struct obj_data *aid_obj = nullptr, *aid_prod = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int dc = 0, found = false;
   obj_vnum num = 47, num2 = 0;
@@ -2238,8 +2236,7 @@ ACMD(do_aid)
     num2 = 385;
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (found == false && obj_get_vnum(g, obj) == num && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found   = true;
       aid_obj = obj;

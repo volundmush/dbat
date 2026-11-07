@@ -684,7 +684,7 @@ void apply_kaioken(GameWorld *g, char_data *ch, int times, bool announce);
 void remove_kaioken(GameWorld *g, char_data *ch, int8_t announce);
 
 void dispel_ash(GameWorld *g, struct char_data *ch);
-bool has_group(struct char_data *ch);
+bool has_group(GameWorld *g, struct char_data *ch);
 const char *report_party_health(GameWorld *g, struct char_data *ch);
 bool sec_roll_check(GameWorld *g, struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);

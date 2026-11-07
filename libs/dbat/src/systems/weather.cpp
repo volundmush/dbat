@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include "dbat/iterate.hpp"
 #include "dbat/weather.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -31,9 +32,8 @@ static void grow_plants(GameWorld *g);
 
 static void grow_plants(GameWorld *g)
 {
-  struct obj_data *k;
 
-  for (k = g->objects; k; k = obj_get_next(k)) {
+  for (obj_data *k : each_obj(g)) {
     if (obj_get_in_room(k) == NOWHERE) {
       continue;
     }
@@ -255,7 +255,7 @@ void oozaru_transform(GameWorld *g, char_data *ch)
 
 static void oozaru_add(GameWorld *g)
 {
-  for (descriptor_data *d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d)) {
       continue;
     }
@@ -279,7 +279,7 @@ void oozaru_revert(GameWorld *g, char_data *ch)
 
 static void oozaru_drop(GameWorld *g)
 {
-  for (descriptor_data *d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d))
       continue;
     oozaru_revert(g, d->character);
@@ -322,14 +322,13 @@ static void check_hoshi_phase(GameWorld *g, struct char_data *ch, int type)
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */
 void star_phase(GameWorld *g, struct char_data *ch, int type)
 {
-  struct descriptor_data *d;
 
   if (ch != nullptr) {
     check_hoshi_phase(g, ch, type);
     return;
   }
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d)) {
       continue;
     }

@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
@@ -71,7 +72,6 @@ static void game_info(GameWorld *g, const char *format, ...) __attribute__((form
 ACMD(do_lag)
 {
 
-  struct descriptor_data *d;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -88,7 +88,7 @@ ACMD(do_lag)
     return;
   }
 
-  for (d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     if (!d->character || !char_get_name(d->character)) { /* still at the login menus */
       continue;
     }
@@ -181,7 +181,6 @@ static bool copyover_exe_path(char *out, size_t size)
 
 static void game_info(GameWorld *g, const char *format, ...)
 {
-  struct descriptor_data *i;
   va_list args;
   char messg[MAX_STRING_LENGTH];
 
@@ -190,7 +189,7 @@ static void game_info(GameWorld *g, const char *format, ...)
 
   snprintf(messg, sizeof(messg), "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W");
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING && (desc_get_connected(i) != CON_REDIT && desc_get_connected(i) != CON_OEDIT && desc_get_connected(i) != CON_MEDIT))
       continue;
     if (!(i->character))
@@ -264,7 +263,7 @@ static bool write_copyover_file(GameWorld *g)
   if (!fp)
     return false;
 
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next) {
+  for (descriptor_data *d : each_desc(g)) {
     struct char_data *player = copyover_player(d);
     room_vnum room           = 300;
 
@@ -286,11 +285,14 @@ static bool write_copyover_file(GameWorld *g)
 /* Saves everyone in the game who has no connection to bring back: link-dead players. */
 static void save_players_without_connections(GameWorld *g)
 {
-  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
+  for (char_data *ch : each_char(g)) {
     bool connected = char_get_desc(ch) != nullptr;
 
-    for (struct descriptor_data *d = g->descriptors; d && !connected; d = d->next)
+    for (descriptor_data *d : each_desc(g)) {
+      if (connected)
+        break;
       connected = d->original == ch;
+    }
     if (!char_is_npc(ch) && !connected) {
       Crash_crashsave(g, ch);
       save_char(g, ch);
@@ -304,7 +306,6 @@ static void save_players_without_connections(GameWorld *g)
  */
 static void execute_copyover(GameWorld *g)
 {
-  struct descriptor_data *d, *d_next;
   struct itimerval no_timer = {{0, 0}, {0, 0}};
   char exe[PATH_MAX], fold[120], mother[32];
   char **args;
@@ -326,10 +327,9 @@ static void execute_copyover(GameWorld *g)
   save_players_without_connections(g);
 
   snprintf(fold, sizeof(fold), "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
-  for (d = g->descriptors; d; d = d_next) {
+  for (descriptor_data *d : each_desc(g)) {
     struct char_data *player = copyover_player(d);
 
-    d_next = d->next; /* We delete from the list , so need to save this */
     if (!player) {
       write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(g, d); /* throw'em out */
@@ -402,8 +402,7 @@ ACMD(do_dc)
     send_to_char(g, ch, "Usage: DC <user number> (type USERS for a list)\r\n");
     return;
   }
-  for (d = g->descriptors; d && d->desc_num != num_to_dc; d = d->next);
-
+  d = find_first(each_desc(g), [&](descriptor_data *conn) { return conn->desc_num == num_to_dc; });
   if (!d) {
     send_to_char(g, ch, "No such connection.\r\n");
     return;

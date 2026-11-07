@@ -4,6 +4,7 @@
  * immortal log channel. (These used to live in dg/dg_comm.c, but are not part of
  * DG Scripts.)
  */
+#include "dbat/iterate.hpp"
 #include "dbat/broadcast.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -24,12 +25,11 @@
 
 void fly_zone(GameWorld *g, zone_rnum zone, const char *messg, struct char_data *ch)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(g, i->character) && (char_get_in_room(i->character) != NOWHERE) && (rroom_get_zone(g, char_get_in_room(i->character)) == zone) && i->character != ch) {
       if (char_plr_flagged(i->character, PLR_DISGUISED)) {
         write_to_output(g, i, "A disguised figure %s", messg);
@@ -42,14 +42,13 @@ void fly_zone(GameWorld *g, zone_rnum zone, const char *messg, struct char_data 
 
 void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *ch)
 {
-  struct descriptor_data *i;
   struct char_data *tch;
   struct obj_data *obj;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
     }
@@ -146,14 +145,13 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
 
 void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int num, int type)
 {
-  struct descriptor_data *i;
   struct char_data *tch;
   struct obj_data *obj;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
     }
@@ -265,7 +263,6 @@ void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int 
 
 void send_to_worlds(GameWorld *g, struct char_data *ch)
 {
-  struct descriptor_data *i;
   char message[MAX_INPUT_LENGTH];
 
   if (getEffMaxPL(g, ch) > 2000000000) {
@@ -282,7 +279,7 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
     }
@@ -312,12 +309,11 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
 
 void send_to_imm(GameWorld *g, const char *messg, ...)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
     }

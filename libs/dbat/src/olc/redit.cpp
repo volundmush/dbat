@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/config.hpp"
@@ -66,11 +67,10 @@ ACMD(do_oasis_redit)
     return;
   }
 
-  struct obj_data *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
+  struct obj_data *remove = nullptr;
   int remodeling = false;
 
-  for (capsule = char_get_inventory(ch); capsule; capsule = next_obj) {
-    next_obj = obj_get_next_content(capsule);
+  for (obj_data *capsule : char_inventory(g, ch)) {
     if (remove != nullptr) {
       continue;
     }
@@ -124,11 +124,11 @@ ACMD(do_oasis_redit)
     number = atoi(buf1);
 
   /* Check to make sure the room isn't already being edited. */
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_REDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_REDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That room is currently being edited by %s.\r\n",
-                     char_pers(g, d->character, ch));
+                     char_pers(g, dd->character, ch));
         return;
       }
     }
@@ -283,7 +283,6 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int j, new_room = false;
   room_rnum room_num;
-  struct descriptor_data *dsc;
 
   if (room_get_number(OLC_ROOM(d)) == NOWHERE) {
     new_room = true;
@@ -313,7 +312,7 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
     return;
 
   /* Idea contributed by C.Raehl 4/27/99 */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next) {
+  for (descriptor_data *dsc : each_desc(g)) {
     if (dsc == d)
       continue;
 

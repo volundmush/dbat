@@ -4,6 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/iterate.hpp"
 #include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -59,10 +60,10 @@ obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
  */
 static int update_objects(GameWorld *g, struct obj_data *refobj)
 {
-  struct obj_data *obj, swap;
+  struct obj_data swap;
   int count = 0;
 
-  for (obj = g->objects; obj; obj = obj_get_next(obj)) {
+  for (obj_data *obj : each_obj(g)) {
     int64_t contents = 0, change;
 
     if (obj_get_item_number(obj) != obj_get_item_number(refobj))
@@ -100,7 +101,7 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     }
 
     /* What it holds still counts towards its weight, and whoever carries it needs to know the change. */
-    for (struct obj_data *inner = obj_get_contains(obj); inner; inner = obj_get_next_content(inner))
+    for (obj_data *inner : obj_contents(g, obj))
       contents += obj_get_weight(inner);
     obj_set_weight(obj, obj_get_weight(obj) + contents);
     change = obj_get_weight(obj) - obj_get_weight(&swap);
@@ -121,7 +122,6 @@ static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
   shop_rnum shop;
   int i, cmd_no;
   zone_rnum zone;
-  struct obj_data *obj;
 
   if (refpt < 0 || refpt > g->top_obj)
     return NOTHING;
@@ -129,7 +129,7 @@ static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
   /*
    * Renumber live objects.
    */
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
+  for (obj_data *obj : each_obj(g))
     obj_set_item_number(obj, obj_get_item_number(obj) + ((obj_get_item_number(obj) != NOTHING && obj_get_item_number(obj) >= refpt)));
 
   /*
@@ -473,9 +473,8 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
 
 static struct obj_data *first_object_of_proto(GameWorld *g, const struct obj_data *proto)
 {
-  struct obj_data *obj;
 
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
+  for (obj_data *obj : each_obj(g))
     if (obj_get_item_number(obj) == obj_get_item_number(proto))
       return obj;
   return nullptr;
@@ -524,8 +523,8 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   }
 
   /* Adjust rnums of all other objects. */
-  for (tmp = g->objects; tmp; tmp = obj_get_next(tmp)) {
-    obj_set_item_number(tmp, obj_get_item_number(tmp) - ((obj_get_item_number(tmp) > rnum)));
+  for (obj_data *item : each_obj(g)) {
+    obj_set_item_number(item, obj_get_item_number(item) - ((obj_get_item_number(item) > rnum)));
   }
 
   /* No copy is left to share these, now that they have all been extracted. */

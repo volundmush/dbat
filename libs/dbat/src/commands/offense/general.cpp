@@ -2,6 +2,7 @@
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -330,9 +331,7 @@ ACMD(do_assist)
     if (char_get_fighting(helpee))
       opponent = char_get_fighting(helpee);
     else
-      for (opponent = rroom_get_people(g, char_get_in_room(ch));
-           opponent && (char_get_fighting(opponent) != helpee);
-           opponent = char_get_next_in_room(opponent));
+      opponent = find_first(room_people(g, char_get_in_room(ch)), [&](char_data *c) { return char_get_fighting(c) == helpee; });
 
     if (!opponent)
       act(g, "But nobody is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);
@@ -414,9 +413,7 @@ ACMD(do_flee)
 
   if (!char_is_npc(ch)) {
     int fail = false;
-    struct obj_data *obj, *next_obj;
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
         fail = true;
       }
@@ -447,8 +444,7 @@ ACMD(do_flee)
         return;
       }
 
-      struct obj_data *wall;
-      for (wall = rroom_get_contents(g, char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
+      for (obj_data *wall : room_contents(g, char_get_in_room(ch))) {
         if (obj_get_vnum(g, wall) == 79) {
           if (obj_get_cost(wall) == attempt) {
             send_to_char(g, ch, "That direction has a glacial wall blocking it.\r\n");

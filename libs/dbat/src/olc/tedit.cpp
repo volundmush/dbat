@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"
@@ -52,9 +53,8 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
 
         g->NEWSUPDATE = game_now(g);
         save_mud_time(g, &g->time_info);
-        struct descriptor_data *i;
 
-        for (i = g->descriptors; i; i = i->next) {
+        for (descriptor_data *i : each_desc(g)) {
           if (!desc_is_playing(i))
             continue;
           if (char_plr_flagged(i->character, PLR_WRITING))
@@ -114,9 +114,8 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
         if (!(strcmp(storage, "text/news"))) {
           g->NEWSUPDATE = game_now(g);
           save_mud_time(g, &g->time_info);
-          struct descriptor_data *i;
 
-          for (i = g->descriptors; i; i = i->next) {
+          for (descriptor_data *i : each_desc(g)) {
             if (!desc_is_playing(i))
               continue;
             if (char_plr_flagged(i->character, PLR_WRITING))

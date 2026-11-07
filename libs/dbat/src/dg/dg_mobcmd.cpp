@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/db.hpp"
@@ -233,7 +234,6 @@ ACMD(do_mjunk)
   char arg[MAX_INPUT_LENGTH];
   int pos, junk_all = 0;
   obj_data *obj;
-  obj_data *obj_next;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
@@ -257,10 +257,9 @@ ACMD(do_mjunk)
       extract_obj(g, obj);
     return;
   }
-  for (obj = char_get_inventory(ch); obj != nullptr; obj = obj_next) {
-    obj_next = obj_get_next_content(obj);
-    if (arg[3] == '\0' || isname(arg + 4, obj_get_name(obj))) {
-      extract_obj(g, obj);
+  for (obj_data *item : char_inventory(g, ch)) {
+    if (arg[3] == '\0' || isname(arg + 4, obj_get_name(item))) {
+      extract_obj(g, item);
     }
   }
   /* Thanks to Carlos Myers for fixing the line below */
@@ -500,18 +499,14 @@ ACMD(do_mpurge)
 
   if (!*arg) {
     /* 'purge' */
-    char_data *vnext;
-    obj_data *obj_next;
 
-    for (victim = rroom_get_people(g, char_get_in_room(ch)); victim; victim = vnext) {
-      vnext = char_get_next_in_room(victim);
-      if (char_is_npc(victim) && victim != ch)
-        extract_char(g, victim);
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
+      if (char_is_npc(tch) && tch != ch)
+        extract_char(g, tch);
     }
 
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_next) {
-      obj_next = obj_get_next_content(obj);
-      extract_obj(g, obj);
+    for (obj_data *item : room_contents(g, char_get_in_room(ch))) {
+      extract_obj(g, item);
     }
 
     return;
@@ -619,7 +614,7 @@ ACMD(do_mteleport)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   room_rnum target;
-  char_data *vict, *next_ch;
+  char_data *vict;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
@@ -644,12 +639,11 @@ ACMD(do_mteleport)
       return;
     }
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_ch) {
-      next_ch = char_get_next_in_room(vict);
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
 
-      if (valid_dg_target(g, vict, DG_ALLOW_GODS)) {
-        char_from_room(g, vict);
-        char_to_room(g, vict, target);
+      if (valid_dg_target(g, tch, DG_ALLOW_GODS)) {
+        char_from_room(g, tch);
+        char_to_room(g, tch, target);
         enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
       }
     }
@@ -721,10 +715,9 @@ ACMD(do_mforce)
   }
 
   if (!strcasecmp(arg, "all")) {
-    struct descriptor_data *i;
     char_data *vch;
 
-    for (i = g->descriptors; i; i = i->next) {
+    for (descriptor_data *i : each_desc(g)) {
       if (!i->character) continue;
 
       if ((i->character != ch) && !i->connected &&

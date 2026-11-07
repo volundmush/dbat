@@ -1,3 +1,4 @@
+#include "dbat/iterate.hpp"
 #include "dbat/object_systems.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/handler.hpp"
@@ -9,12 +10,12 @@
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update(GameWorld *g)
 {
-  struct obj_data *k, *money;
+  struct obj_data *money;
 
   int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
   int dice = rand_number(g, 2, 12), grav_roll = 0, grav_change = false, health = 0;
 
-  for (k = g->objects; k; k = obj_get_next(k)) {
+  for (obj_data *k : each_obj(g)) {
     if (obj_get_carried_by(k) != nullptr) {
       continue;
     }

@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
+#include "dbat/iterate.hpp"
 #include "dbat/vehicles.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -380,9 +381,8 @@ static room_vnum ship_land_location(GameWorld *g, struct char_data *ch, struct o
 
 struct obj_data *find_vehicle_by_vnum(GameWorld *g, obj_vnum vnum)
 {
-  struct obj_data *i;
 
-  for (i = g->objects; i; i = obj_get_next(i))
+  for (obj_data *i : each_obj(g))
     if (obj_get_type_flag(i) == ITEM_VEHICLE && obj_get_in_room(i) != NOWHERE)
       if (obj_get_vnum(g, i) == vnum)
         return i;
@@ -391,11 +391,10 @@ struct obj_data *find_vehicle_by_vnum(GameWorld *g, obj_vnum vnum)
 }
 
 /* Search the given list for an object type, and return a ptr to that obj*/
-static struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
+static struct obj_data *get_obj_in_list_type(GameWorld *g, int type, struct obj_data *list)
 {
-  struct obj_data *i;
 
-  for (i = list; i; i = obj_get_next_content(i))
+  for (obj_data *i : obj_list(g, list))
     if (obj_get_type_flag(i) == type)
       return i;
 
@@ -405,14 +404,17 @@ static struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 /* Search the player's room, inventory and equipment for a control */
 struct obj_data *find_control(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *controls, *obj;
+  struct obj_data *controls;
   int j;
 
-  controls = get_obj_in_list_type(ITEM_CONTROL, rroom_get_contents(g, char_get_in_room(ch)));
+  controls = get_obj_in_list_type(g, ITEM_CONTROL, rroom_get_contents(g, char_get_in_room(ch)));
   if (!controls)
-    for (obj = char_get_inventory(ch); obj && !controls; obj = obj_get_next_content(obj))
-      if (char_can_see_obj(g, ch, obj) && obj_get_type_flag(obj) == ITEM_CONTROL)
-        controls = obj;
+    for (obj_data *item : char_inventory(g, ch)) {
+      if (controls)
+        break;
+      if (char_can_see_obj(g, ch, item) && obj_get_type_flag(item) == ITEM_CONTROL)
+        controls = item;
+    }
   if (!controls)
     for (j = 0; j < NUM_WEARS && !controls; j++)
       if (char_get_equipment(ch, j) && char_can_see_obj(g, ch, char_get_equipment(ch, j)) &&
@@ -464,7 +466,7 @@ static void drive_outof_vehicle(GameWorld *g, struct char_data *ch, struct obj_d
   struct obj_data *hatch, *vehicle_in_out;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!(hatch = get_obj_in_list_type(ITEM_HATCH, rroom_get_contents(g, obj_get_in_room(vehicle))))) {
+  if (!(hatch = get_obj_in_list_type(g, ITEM_HATCH, rroom_get_contents(g, obj_get_in_room(vehicle))))) {
     send_to_char(g, ch, "@wNowhere to pilot out of.\r\n");
   } else if (!(vehicle_in_out = find_vehicle_by_vnum(g, obj_get_value(hatch, 0)))) {
     send_to_char(g, ch, "@wYou can't pilot out anywhere!\r\n");
@@ -532,9 +534,7 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
       }
     }
 
-    struct obj_data *hatch = nullptr;
-
-    for (hatch = rroom_get_contents(g, real_room(g, obj_get_value(vehicle, 0))); hatch; hatch = obj_get_next_content(hatch)) {
+    for (obj_data *hatch : room_contents(g, real_room(g, obj_get_value(vehicle, 0)))) {
       if (obj_get_type_flag(hatch) == ITEM_HATCH) {
         obj_set_value(hatch, 3, rroom_get_vnum(g, obj_get_in_room(vehicle)));
       }
@@ -756,7 +756,6 @@ ACMD(do_drive)
       send_to_char(g, ch, "@wYou have nothing to control here!\r\n");
       return;
     }
-    struct descriptor_data *d;
     if (char_plr_flagged(ch, PLR_PILOTING)) {
       send_to_char(g, ch, "@wYou are already piloting the ship, try [pilot unready].\r\n");
       return;
@@ -769,7 +768,7 @@ ACMD(do_drive)
       send_to_char(g, ch, "@wYou are busy dragging someone.\r\n");
       return;
     }
-    for (d = g->descriptors; d; d = d->next) {
+    for (descriptor_data *d : each_desc(g)) {
       if (!desc_is_playing(d)) {
         continue;
       }

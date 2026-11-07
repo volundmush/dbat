@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/screen.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -157,7 +158,7 @@ static OCMD(do_oecho)
 
 static OCMD(do_oforce)
 {
-  char_data *ch, *next_ch;
+  char_data *ch;
   room_rnum room;
   char arg1[MAX_INPUT_LENGTH], *line;
 
@@ -172,10 +173,9 @@ static OCMD(do_oforce)
     if ((room = obj_room(obj)) == NOWHERE)
       obj_log(g, obj, "oforce called by object in NOWHERE");
     else {
-      for (ch = rroom_get_people(g, room); ch; ch = next_ch) {
-        next_ch = char_get_next_in_room(ch);
-        if (valid_dg_target(g, ch, 0)) {
-          command_interpreter(g, ch, line);
+      for (char_data *tch : room_people(g, room)) {
+        if (valid_dg_target(g, tch, 0)) {
+          command_interpreter(g, tch, line);
         }
       }
     }
@@ -342,8 +342,8 @@ static OCMD(do_dupe)
 static OCMD(do_opurge)
 {
   char arg[MAX_INPUT_LENGTH];
-  char_data *ch, *next_ch;
-  obj_data *o, *next_obj;
+  char_data *ch;
+  obj_data *o;
   room_rnum rm;
 
   one_argument(argument, arg);
@@ -351,16 +351,14 @@ static OCMD(do_opurge)
   if (!*arg) {
     /* purge all */
     if ((rm = obj_room(obj)) != NOWHERE) {
-      for (ch = rroom_get_people(g, rm); ch; ch = next_ch) {
-        next_ch = char_get_next_in_room(ch);
-        if (char_is_npc(ch))
-          extract_char(g, ch);
+      for (char_data *tch : room_people(g, rm)) {
+        if (char_is_npc(tch))
+          extract_char(g, tch);
       }
 
-      for (o = rroom_get_contents(g, rm); o; o = next_obj) {
-        next_obj = obj_get_next_content(o);
-        if (o != obj)
-          extract_obj(g, o);
+      for (obj_data *item : room_contents(g, rm)) {
+        if (item != obj)
+          extract_obj(g, item);
       }
     }
 
@@ -417,7 +415,7 @@ static OCMD(do_ogoto)
 
 static OCMD(do_oteleport)
 {
-  char_data *ch, *next_ch;
+  char_data *ch;
   room_rnum target, rm;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -438,13 +436,12 @@ static OCMD(do_oteleport)
     if (target == rm)
       obj_log(g, obj, "oteleport target is itself");
 
-    for (ch = rroom_get_people(g, rm); ch; ch = next_ch) {
-      next_ch = char_get_next_in_room(ch);
-      if (!valid_dg_target(g, ch, DG_ALLOW_GODS))
+    for (char_data *tch : room_people(g, rm)) {
+      if (!valid_dg_target(g, tch, DG_ALLOW_GODS))
         continue;
-      char_from_room(g, ch);
-      char_to_room(g, ch, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+      char_from_room(g, tch);
+      char_to_room(g, tch, target);
+      enter_wtrigger(g, &g->rooms[char_get_in_room(tch)], tch, -1);
     }
   }
 

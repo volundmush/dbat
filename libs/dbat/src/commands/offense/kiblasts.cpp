@@ -1,5 +1,6 @@
 /* kiblasts.c: ki blast attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -963,7 +964,6 @@ ACMD(do_baku)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .15, minimum = .05;
-  struct char_data *vict = nullptr, *next_v = nullptr;
   char arg2[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg2);
@@ -1001,8 +1001,7 @@ ACMD(do_baku)
 
   skill = init_skill(g, ch, SKILL_BAKUHATSUHA); /* Set skill value */
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -1062,8 +1061,7 @@ ACMD(do_baku)
         dmg = (dmg / 100) * 25;
         break;
     }
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-      next_v = char_get_next_in_room(vict);
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (vict == ch) {
         continue;
       }

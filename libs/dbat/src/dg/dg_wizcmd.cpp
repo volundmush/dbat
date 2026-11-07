@@ -4,6 +4,7 @@
  */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/dg_event.hpp"
@@ -226,9 +227,8 @@ ACMD(do_attach)
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
     victim = get_char_vis(g, ch, targ_name, nullptr, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
-      for (victim = rroom_get_people(g, char_get_in_room(ch)); victim; victim = char_get_next_in_room(victim))
-        if (char_get_mob_vnum(g, victim) == num_arg)
-          break;
+      victim = find_first(room_people(g, char_get_in_room(ch)),
+                          [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
 
       if (!victim) {
         send_to_char(g, ch, "That mob does not exist.\r\n");
@@ -259,14 +259,11 @@ ACMD(do_attach)
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
     object = get_obj_vis(g, ch, targ_name, nullptr);
     if (!object) { /* search room for one with this vnum */
-      for (object = rroom_get_contents(g, char_get_in_room(ch)); object; object = obj_get_next_content(object))
-        if (obj_get_vnum(g, object) == num_arg)
-          break;
+      object = find_first(room_contents(g, char_get_in_room(ch)),
+                          [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
       if (!object) { /* search inventory for one with this vnum */
-        for (object = char_get_inventory(ch); object; object = obj_get_next_content(object))
-          if (obj_get_vnum(g, object) == num_arg)
-            break;
+        object = find_first(char_inventory(g, ch), [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
         if (!object) {
           send_to_char(g, ch, "That object does not exist.\r\n");
@@ -441,9 +438,8 @@ ACMD(do_detach)
     if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
       victim = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
-        for (victim = rroom_get_people(g, char_get_in_room(ch)); victim; victim = char_get_next_in_room(victim))
-          if (char_get_mob_vnum(g, victim) == num_arg)
-            break;
+        victim = find_first(room_people(g, char_get_in_room(ch)),
+                            [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
 
         if (!victim) {
           send_to_char(g, ch, "No such mobile around.\r\n");
@@ -460,14 +456,11 @@ ACMD(do_detach)
     else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
       object = get_obj_vis(g, ch, arg2, nullptr);
       if (!object) { /* search room for one with this vnum */
-        for (object = rroom_get_contents(g, char_get_in_room(ch)); object; object = obj_get_next_content(object))
-          if (obj_get_vnum(g, object) == num_arg)
-            break;
+        object = find_first(room_contents(g, char_get_in_room(ch)),
+                            [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
         if (!object) { /* search inventory for one with this vnum */
-          for (object = char_get_inventory(ch); object; object = obj_get_next_content(object))
-            if (obj_get_vnum(g, object) == num_arg)
-              break;
+          object = find_first(char_inventory(g, ch), [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
           if (!object) { /* give up */
             send_to_char(g, ch, "No such object around.\r\n");

@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -199,8 +200,7 @@ ACMD(do_osay)
 
 ACMD(do_say)
 {
-  struct descriptor_data *d;
-  struct char_data *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
+  struct char_data *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *sch = nullptr;
   struct obj_data *obj = nullptr;
   int granted          = false;
   char buf2[MAX_INPUT_LENGTH];
@@ -231,7 +231,7 @@ ACMD(do_say)
       strcpy(verb, "say");
     }
 
-    for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (tch != ch && char_get_desc(tch)) {
         char sayto[100];
         snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
@@ -274,7 +274,7 @@ ACMD(do_say)
         if (rroom_get_vnum(g, char_get_in_room(ch)) == g->DRAGONR && rroom_get_vnum(g, char_get_in_room(g->EDRAGON)) == g->DRAGONR) {
           if (strstr(argument, "wish")) {
 
-            for (d = g->descriptors; d; d = d->next) {
+            for (descriptor_data *d : each_desc(g)) {
               if (desc_get_connected(d) != CON_PLAYING)
                 continue;
 
@@ -733,7 +733,6 @@ ACMD(do_say)
 ACMD(do_gsay)
 {
   struct char_data *k;
-  struct follow_type *f;
   char blah[MAX_INPUT_LENGTH];
 
   skip_spaces(&argument);
@@ -767,17 +766,17 @@ ACMD(do_gsay)
         act(g, blah, true, ch, nullptr, k, TO_VICT);
       }
     }
-    for (f = char_get_followers(k); f; f = f->next)
-      if (char_aff_flagged(f->follower, AFF_GROUP) && (f->follower != ch) && char_is_awake(f->follower)) {
-        if (!char_is_npc(ch) && !char_is_npc(f->follower) && CONFIG_ENABLE_LANGUAGES) {
-          garble_text(g, buf, char_get_skill(f->follower, char_get_speaking(ch)), char_get_speaking(ch));
+    for (char_data *fol : char_followers(g, k))
+      if (char_aff_flagged(fol, AFF_GROUP) && (fol != ch) && char_is_awake(fol)) {
+        if (!char_is_npc(ch) && !char_is_npc(fol) && CONFIG_ENABLE_LANGUAGES) {
+          garble_text(g, buf, char_get_skill(fol, char_get_speaking(ch)), char_get_speaking(ch));
         } else {
           garble_text(g, buf, 1, MIN_LANGUAGES);
         }
         if (CONFIG_ENABLE_LANGUAGES) {
-          send_to_char(g, f->follower, "%s@W tells the group%s @W'%s@W'@n\r\n", char_can_see(g, f->follower, ch) ? char_get_name(ch) : "Someone", char_get_skill(f->follower, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
+          send_to_char(g, fol, "%s@W tells the group%s @W'%s@W'@n\r\n", char_can_see(g, fol, ch) ? char_get_name(ch) : "Someone", char_get_skill(fol, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
         } else {
-          act(g, blah, true, ch, nullptr, f->follower, TO_VICT | TO_SLEEP);
+          act(g, blah, true, ch, nullptr, fol, TO_VICT | TO_SLEEP);
         }
       }
 
@@ -878,11 +877,10 @@ ACMD(do_tell)
     send_to_char(g, ch, "Who do you wish to tell what??\r\n");
     return;
   }
-  struct descriptor_data *k;
   int found = false;
   if (!char_is_npc(ch)) {
     snprintf(buf, sizeof(buf), "%s", CAP(buf));
-    for (k = g->descriptors; k; k = k->next) {
+    for (descriptor_data *k : each_desc(g)) {
       if (desc_get_connected(k) != CON_PLAYING)
         continue;
       if (char_is_npc(k->character))
@@ -908,7 +906,7 @@ ACMD(do_tell)
 
 ACMD(do_reply)
 {
-  struct char_data *tch = g->characters;
+  struct char_data *tch;
 
   if (char_is_npc(ch))
     return;
@@ -941,8 +939,7 @@ ACMD(do_reply)
      *      we could not find link dead people.  Not that they can
      *      hear tells anyway. :) -gg 2/24/98
      */
-    while (tch != nullptr && (char_is_npc(tch) || char_get_idnum(tch) != char_get_last_tell(g, ch)))
-      tch = char_get_next(tch);
+    tch = find_first(each_char(g), [&](char_data *c) { return !char_is_npc(c) && char_get_idnum(c) == char_get_last_tell(g, ch); });
 
     if (tch == nullptr)
       send_to_char(g, ch, "They are no longer playing.\r\n");
@@ -1023,9 +1020,8 @@ ACMD(do_spec_comm)
 
 static void handle_whisper(GameWorld *g, char *buf, struct char_data *ch, struct char_data *vict)
 {
-  struct char_data *tch;
 
-  for (tch = rroom_get_people(g, char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (char_is_npc(tch)) {
       continue;
     }
@@ -1218,19 +1214,10 @@ ACMD(do_write)
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
   /* before we do anything, lets see if there's a board involved. */
-  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
-    if (obj_get_type_flag(obj) == ITEM_BOARD) {
-      break;
-    }
-  }
-
-  if (!obj) {
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
-      if (obj_get_type_flag(obj) == ITEM_BOARD) {
-        break;
-      }
-    }
-  }
+  auto is_board = [&](obj_data *o) { return obj_get_type_flag(o) == ITEM_BOARD; };
+  obj           = find_first(char_inventory(g, ch), is_board);
+  if (!obj)
+    obj = find_first(room_contents(g, char_get_in_room(ch)), is_board);
 
   if (obj) { /* then there IS a board! */
     write_board_message(g, obj_get_vnum(g, obj), ch, argument);
@@ -1310,7 +1297,6 @@ ACMD(do_write)
 
 ACMD(do_page)
 {
-  struct descriptor_data *d;
   struct char_data *vict;
   char buf2[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
@@ -1326,7 +1312,7 @@ ACMD(do_page)
     snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2);
     if (!strcasecmp(arg, "all")) {
       if (char_adm_flagged(ch, ADM_TELLALL)) {
-        for (d = g->descriptors; d; d = d->next)
+        for (descriptor_data *d : each_desc(g))
           if (desc_get_connected(d) == CON_PLAYING && d->character)
             act(g, buf, false, ch, nullptr, d->character, TO_VICT);
       } else
@@ -1350,7 +1336,6 @@ ACMD(do_page)
 
 ACMD(do_gen_comm)
 {
-  struct descriptor_data *i;
   char color_on[24];
   char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], *msg;
 
@@ -1475,7 +1460,7 @@ ACMD(do_gen_comm)
   }
 
   /* now send all the strings out */
-  for (i = g->descriptors; i; i = i->next) {
+  for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) == CON_PLAYING && i != char_get_desc(ch) && i->character &&
         (char_is_npc(i->character) || !char_prf_flagged(g, i->character, channels[subcmd])) &&
         (char_is_npc(i->character) || !char_plr_flagged(i->character, PLR_WRITING)) &&
@@ -1532,20 +1517,12 @@ ACMD(do_respond)
     return;
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
-    if (obj_get_type_flag(obj) == ITEM_BOARD) {
-      found = 1;
-      break;
-    }
-  }
-  if (!obj) {
-    for (obj = rroom_get_contents(g, char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
-      if (obj_get_type_flag(obj) == ITEM_BOARD) {
-        found = 1;
-        break;
-      }
-    }
-  }
+  auto is_board = [&](obj_data *o) { return obj_get_type_flag(o) == ITEM_BOARD; };
+  obj           = find_first(char_inventory(g, ch), is_board);
+  if (!obj)
+    obj = find_first(room_contents(g, char_get_in_room(ch)), is_board);
+  if (obj)
+    found = 1;
   if (obj) {
     argument = one_argument(argument, number);
     if (!*number) {

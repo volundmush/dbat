@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -361,11 +362,9 @@ void check_eq(GameWorld *g, struct char_data *ch)
 
 static bool has_scanner(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *obj, *next_obj;
   int success = 0;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj && obj_get_vnum(g, obj) == 13600) {
       success = 1;
     }
@@ -377,7 +376,6 @@ static bool has_scanner(GameWorld *g, struct char_data *ch)
 ACMD(do_snet)
 {
   int channel = 0, global = false, call = -1, reached = false;
-  struct descriptor_data *i;
   char voice[150], arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   char hist[MAX_INPUT_LENGTH];
 
@@ -462,7 +460,7 @@ ACMD(do_snet)
     if (char_get_voice(ch) == nullptr) {
       snprintf(voice, sizeof(voice), "A generic voice");
     }
-    for (i = g->descriptors; i; i = i->next) {
+    for (descriptor_data *i : each_desc(g)) {
       if (!i->character) {
         continue;
       }
@@ -594,7 +592,6 @@ ACMD(do_snet)
 ACMD(do_scouter)
 {
   struct char_data *vict = nullptr;
-  struct descriptor_data *i;
   int count = 0;
   char arg[MAX_INPUT_LENGTH];
 
@@ -617,7 +614,7 @@ ACMD(do_scouter)
   }
   reveal_hiding(g, ch, 3);
   if (!strcasecmp("scan", arg)) {
-    for (i = g->descriptors; i; i = i->next) {
+    for (descriptor_data *i : each_desc(g)) {
       if (desc_get_connected(i) != CON_PLAYING) {
         continue;
       }

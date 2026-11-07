@@ -1,5 +1,6 @@
 /* barrages.c: multi-hit ki barrages
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -472,7 +473,6 @@ ACMD(do_kakusanha)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .3, minimum = .10;
-  struct char_data *vict = nullptr, *next_v = nullptr;
   char arg2[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg2);
@@ -505,8 +505,7 @@ ACMD(do_kakusanha)
 
   skill = init_skill(g, ch, SKILL_KAKUSANHA); /* Set skill value */
 
-  for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-    next_v = char_get_next_in_room(vict);
+  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
     if (vict == ch) {
       continue;
     }
@@ -563,8 +562,7 @@ ACMD(do_kakusanha)
       dmg = (dmg / 100) * 60;
     }
 
-    for (vict = rroom_get_people(g, char_get_in_room(ch)); vict; vict = next_v) {
-      next_v = char_get_next_in_room(vict);
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (vict == ch) {
         continue;
       }

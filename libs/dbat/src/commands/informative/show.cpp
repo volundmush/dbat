@@ -1,7 +1,10 @@
 /* show.c: showing objects and characters to a viewer
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
+#include <vector>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -626,12 +629,12 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 
 void list_obj_to_char(GameWorld *g, struct obj_data *list, struct char_data *ch, int mode, int show)
 {
-  struct obj_data *i, *j, *d;
+  struct obj_data *d;
   bool found = false;
   int num;
 
   /* Loop through all objects in the list */
-  for (i = list; i; i = obj_get_next_content(i)) {
+  for (obj_data *i : obj_list(g, list)) {
     if (obj_get_description(i) == nullptr)
       continue;
     if (strcasecmp(obj_get_description(i), "undefined") == 0)
@@ -639,34 +642,25 @@ void list_obj_to_char(GameWorld *g, struct obj_data *list, struct char_data *ch,
     num = 0;
     d   = i;
     if (CONFIG_STACK_OBJS) {
-      for (j = list; j != i; j = obj_get_next_content(j))
-        if ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) &&
-            (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
-          if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
-            if (obj_get_value(j, 6) == obj_get_value(i, 6))
-              if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
-                if ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE)))
-                  if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
-                    if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
-                      if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(g, j) == 255 && obj_get_vnum(g, i) == 255) || (obj_get_vnum(g, j) != 255 && obj_get_vnum(g, i) != 255))
-                        break;
-      if (j != i)
+      auto stacks = [&](obj_data *j) {
+        return ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) && (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN)))) &&
+               ((!obj_get_sitting(j) && !obj_get_sitting(i))) &&
+               (obj_get_value(j, 6) == obj_get_value(i, 6)) &&
+               ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL))) &&
+               ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE))) &&
+               (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0) &&
+               (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i)) &&
+               ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(g, j) == 255 && obj_get_vnum(g, i) == 255) || (obj_get_vnum(g, j) != 255 && obj_get_vnum(g, i) != 255));
+      };
+      /* an earlier copy has already been shown, with the count */
+      if (find_first(obj_list(g, list), [&](obj_data *j) { return j == i || stacks(j); }) != i)
         continue;
-      for (d = j = i; j; j = obj_get_next_content(j))
-        if ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) &&
-            (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
-          if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
-            if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
-              if (obj_get_value(j, 6) == obj_get_value(i, 6))
-                if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
-                  if ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE)))
-                    if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
-                      if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(g, i) == 255 && obj_get_vnum(g, j) == 255) || (obj_get_vnum(g, j) != 255 && obj_get_vnum(g, i) != 255))
-                        if (char_can_see_obj(g, ch, j)) {
-                          num++;
-                          if (d == i && !char_can_see_obj(g, ch, d))
-                            d = j;
-                        }
+      for (obj_data *j : obj_list(g, i))
+        if (stacks(j) && char_can_see_obj(g, ch, j)) {
+          num++;
+          if (d == i && !char_can_see_obj(g, ch, d))
+            d = j;
+        }
     }
     if ((char_can_see_obj(g, ch, d) && ((*obj_get_description(d) != '.' && *obj_get_short_description(d) != '.') || char_prf_flagged(g, ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
       if (num > 1)
@@ -743,7 +737,6 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
   int j, found, clan = false;
   char buf[100];
-  struct obj_data *tmp_obj;
 
   if (!char_get_desc(ch)) {
     return;
@@ -920,29 +913,25 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
         send_to_char(g, ch, "%s", wear_where[j]);
         show_obj_to_char(g, char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
-          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
-          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
-            next_obj = obj_get_next_content(obj2);
-            if (obj2) {
+          struct obj_data *sheath = char_get_equipment(i, j);
+          for (obj_data *thing : obj_contents(g, sheath)) {
+            if (thing) {
               send_to_char(g, ch, "@D  ---- @YSheathed@D ----@c> @n");
-              show_obj_to_char(g, obj2, ch, SHOW_OBJ_SHORT);
+              show_obj_to_char(g, thing, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = nullptr;
         }
       } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
         send_to_char(g, ch, "%s", wear_where[j]);
         show_obj_to_char(g, char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
-          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
-          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
-            next_obj = obj_get_next_content(obj2);
-            if (obj2) {
+          struct obj_data *sheath = char_get_equipment(i, j);
+          for (obj_data *item : obj_contents(g, sheath)) {
+            if (item) {
               send_to_char(g, ch, "@D  ---- @YSheathed@D ----@c> @n");
-              show_obj_to_char(g, obj2, ch, SHOW_OBJ_SHORT);
+              show_obj_to_char(g, item, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = nullptr;
         }
       } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
         send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");
@@ -955,7 +944,7 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     if (char_can_see(g, i, ch))
       act(g, "$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
     if (char_get_skill(ch, SKILL_KEEN) > axion_dice(g, 0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
-      for (tmp_obj = char_get_inventory(i); tmp_obj; tmp_obj = obj_get_next_content(tmp_obj)) {
+      for (obj_data *tmp_obj : char_inventory(g, i)) {
         if (char_can_see_obj(g, ch, tmp_obj) &&
             (char_adm_flagged(ch, ADM_SEEINV) || (rand_number(g, 0, 20) < char_get_level(ch)))) {
           show_obj_to_char(g, tmp_obj, ch, SHOW_OBJ_SHORT);
@@ -1409,86 +1398,49 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 
 void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *ch)
 {
-  struct char_data *i, *j;
-  struct hide_node {
-    struct hide_node *next{};
-    struct char_data *hidden{};
-  } *hideinfo, *lasthide, *tmphide;
+  std::vector<struct char_data *> hidden;
   int num;
 
-  hideinfo = lasthide = nullptr;
-
-  for (i = list; i; i = char_get_next_in_room(i)) {
+  for (char_data *i : char_list(g, list)) {
     if (char_aff_flagged(i, AFF_HIDE) && roll_resisted(g, i, SKILL_HIDE, ch, SKILL_SPOT)) {
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(g, i, SKILL_HIDE, 1);
       }
-      tmphide         = new hide_node();
-      tmphide->hidden = i;
-      if (!lasthide) {
-        hideinfo = lasthide = tmphide;
-      } else {
-        lasthide->next = tmphide;
-        lasthide       = tmphide;
-      }
-      continue;
+      hidden.push_back(i);
     }
   }
+  auto is_hidden = [&](const char_data *x) { return std::find(hidden.begin(), hidden.end(), x) != hidden.end(); };
 
-  for (i = list; i; i = char_get_next_in_room(i)) {
+  for (char_data *i : char_list(g, list)) {
     /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
     if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_HOLYLIGHT) && char_is_npc(i) && char_get_ldesc(i) && *char_get_ldesc(i) == '.'))
       continue;
-
-    for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-      if (tmphide->hidden == i)
-        break;
-    if (tmphide)
+    if (is_hidden(i))
       continue;
 
     if (char_can_see(g, ch, i)) {
       num = 0;
       if (CONFIG_STACK_MOBS) {
         /* How many other occurences of this mob are there? */
-        for (j = list; j != i; j = char_get_next_in_room(j))
-          if ((char_get_nr(i) == char_get_nr(j)) &&
-              (char_get_position(i) == char_get_position(j)) &&
-              (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
-              (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&
-              (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
-              (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
-              (!char_get_fighting(i) && !char_get_fighting(j)) &&
-              (getCurPL(g, i) == getEffMaxPL(g, i) && getCurPL(g, j) == getEffMaxPL(g, j)) &&
-              !strcmp(char_get_name(i), char_get_name(j))) {
-            for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-              if (tmphide->hidden == j)
-                break;
-            if (!tmphide)
-              break;
-          }
-        if (j != i)
-          /* This will be true where we have already found this
-	   * mob for an earlier "i".  The continue pops us out of
-	   * the main "i" for loop.
-	   */
+        auto stacks = [&](char_data *j) {
+          return (char_get_nr(i) == char_get_nr(j)) &&
+                 (char_get_position(i) == char_get_position(j)) &&
+                 (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
+                 (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&
+                 (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
+                 (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
+                 (!char_get_fighting(i) && !char_get_fighting(j)) &&
+                 (getCurPL(g, i) == getEffMaxPL(g, i) && getCurPL(g, j) == getEffMaxPL(g, j)) &&
+                 !strcmp(char_get_name(i), char_get_name(j)) &&
+                 !is_hidden(j);
+        };
+        /* an earlier occurrence has already been shown, with the count */
+        if (find_first(char_list(g, list), [&](char_data *j) { return j == i || stacks(j); }) != i)
           continue;
-        for (j = i; j; j = char_get_next_in_room(j))
-          if ((char_get_nr(i) == char_get_nr(j)) &&
-              (char_get_position(i) == char_get_position(j)) &&
-              (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
-              (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&
-              (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
-              (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
-              (!char_get_fighting(i) && !char_get_fighting(j)) &&
-              (getCurPL(g, i) == getEffMaxPL(g, i) && getCurPL(g, j) == getEffMaxPL(g, j)) &&
-              !strcmp(char_get_name(i), char_get_name(j))) {
-            for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-              if (tmphide->hidden == j)
-                break;
-            if (!tmphide)
-              num++;
-          }
+        for (char_data *j : char_list(g, i))
+          if (stacks(j))
+            num++;
       }
       /* Now show this mob's name and other stuff */
       send_to_char(g, ch, "@w");
@@ -1501,9 +1453,4 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
              char_aff_flagged(i, AFF_INFRAVISION))
       send_to_char(g, ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
-
-  for (; hideinfo; hideinfo = tmphide) {
-    tmphide = hideinfo->next;
-    delete hideinfo;
-  }
 }

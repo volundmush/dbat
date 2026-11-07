@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -205,15 +206,14 @@ ACMD(do_draw)
     return;
   }
 
-  struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
+  struct obj_data *obj = nullptr, *obj3 = nullptr;
   int drawn = false;
 
   if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
     send_to_char(g, ch, "You don't have a case.\r\n");
     return;
   }
-  for (obj2 = obj_get_contains(obj); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : obj_contents(g, obj)) {
     if (drawn == false) {
       obj_from_obj(g, obj2);
       obj_to_char(g, obj2, ch);
@@ -243,7 +243,7 @@ ACMD(do_shuffle)
     return;
   }
 
-  struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
+  struct obj_data *obj = nullptr;
   int count = 0;
 
   if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
@@ -251,8 +251,7 @@ ACMD(do_shuffle)
     return;
   }
 
-  for (obj2 = obj_get_contains(obj); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : obj_contents(g, obj)) {
     if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
       continue;
     }
@@ -263,14 +262,12 @@ ACMD(do_shuffle)
     return;
   }
   int total = count;
-  for (obj2 = obj_get_contains(obj); obj2; obj2 = next_obj) {
-    next_obj = obj_get_next_content(obj2);
+  for (obj_data *obj2 : obj_contents(g, obj)) {
     obj_from_obj(g, obj2);
     obj_to_room(g, obj2, real_room(g, 48));
   }
   while (count > 0) {
-    for (obj2 = rroom_get_contents(g, real_room(g, 48)); obj2; obj2 = next_obj) {
-      next_obj = obj_get_next_content(obj2);
+    for (obj_data *obj2 : room_contents(g, real_room(g, 48))) {
       if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
         continue;
       }
@@ -293,7 +290,6 @@ ACMD(do_shuffle)
 ACMD(do_hand)
 {
 
-  struct obj_data *obj, *next_obj;
   char arg[MAX_INPUT_LENGTH];
   int count = 0;
 
@@ -306,8 +302,7 @@ ACMD(do_hand)
 
   if (!strcasecmp("look", arg)) {
     send_to_char(g, ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
-    for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : char_inventory(g, ch)) {
       if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
         continue;
       }
@@ -331,8 +326,7 @@ ACMD(do_hand)
   } else if (!strcasecmp("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
     act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-    for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-      next_obj = obj_get_next_content(obj);
+    for (obj_data *obj : char_inventory(g, ch)) {
       if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
         continue;
       }
@@ -438,7 +432,7 @@ ACMD(do_play)
     return;
   }
 
-  struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
+  struct obj_data *obj = nullptr, *obj2 = nullptr;
   char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
 
@@ -452,8 +446,7 @@ ACMD(do_play)
     return;
   }
 
-  for (obj3 = rroom_get_contents(g, char_get_in_room(ch)); obj3; obj3 = next_obj) {
-    next_obj = obj_get_next_content(obj3);
+  for (obj_data *obj3 : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, obj3) == obj_get_vnum(g, char_get_sits(ch)) - 4) {
       obj2 = obj3;
     }
@@ -496,10 +489,9 @@ ACMD(do_nickname)
   }
 
   if (!strcasecmp(arg, "ship")) {
-    struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
+    struct obj_data *ship2 = nullptr;
     int found = false;
-    for (ship = rroom_get_contents(g, char_get_in_room(ch)); ship; ship = next_obj) {
-      next_obj = obj_get_next_content(ship);
+    for (obj_data *ship : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_vnum(g, ship) >= 45000 && obj_get_vnum(g, ship) <= 45999 && found == false) {
         found = true;
         ship2 = ship;
@@ -513,9 +505,7 @@ ACMD(do_nickname)
       char nick[MAX_INPUT_LENGTH];
       snprintf(nick, sizeof(nick), "%s", CAP(arg2));
       obj_set_action_description(ship2, strdup(nick));
-      struct obj_data *k, *next_k;
-      for (k = g->objects; k; k = next_k) {
-        next_k = obj_get_next(k);
+      for (obj_data *k : each_obj(g)) {
         if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
           extract_obj(g, k);
           room_vnum was_in = rroom_get_vnum(g, obj_get_in_room(ship2));
@@ -768,7 +758,6 @@ ACMD(do_intro)
 ACMD(do_rptrans)
 {
   struct char_data *vict = nullptr;
-  struct descriptor_data *k;
   int amt = 0;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -796,7 +785,7 @@ ACMD(do_rptrans)
     return;
   }
 
-  for (k = g->descriptors; k; k = k->next) {
+  for (descriptor_data *k : each_desc(g)) {
     if (desc_get_connected(k) != CON_PLAYING)
       continue;
     if (char_is_npc(k->character))

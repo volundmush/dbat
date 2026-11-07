@@ -14,6 +14,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/comm.hpp"
@@ -170,13 +171,12 @@ void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor, int amount)
 void greet_memory_mtrigger(GameWorld *g, char_data *actor)
 {
   trig_data *t;
-  char_data *ch;
   struct script_memory *mem;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
@@ -229,13 +229,12 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
 bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
   trig_data *t;
-  char_data *ch;
   int intermediate, final = true;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
@@ -264,14 +263,14 @@ bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
 void entry_memory_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
-  char_data *actor;
   struct script_memory *mem, *next_mem;
 
   if (!char_get_memory(ch) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (actor = rroom_get_people(g, char_get_in_room(ch)); actor && char_get_memory(ch);
-       actor = char_get_next_in_room(actor)) {
+  for (char_data *actor : room_people(g, char_get_in_room(ch))) {
+    if (!char_get_memory(ch))
+      break;
     if (actor != ch && char_get_memory(ch)) {
       for (mem = char_get_memory(ch); mem; mem = next_mem) {
         next_mem = mem->next;
@@ -327,15 +326,13 @@ int entry_mtrigger(GameWorld *g, char_data *ch)
 
 bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
 {
-  char_data *ch, *ch_next;
   trig_data *t;
 
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(g, actor, 0))
     return false;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = ch_next) {
-    ch_next = char_get_next_in_room(ch);
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
 
     if (script_has_type(char_get_script(ch), MTRIG_COMMAND) && !char_aff_flagged(ch, AFF_CHARM) &&
         (actor != ch)) {
@@ -369,11 +366,9 @@ bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
 
 void speech_mtrigger(GameWorld *g, char_data *actor, char *str)
 {
-  char_data *ch, *ch_next;
   trig_data *t;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = ch_next) {
-    ch_next = char_get_next_in_room(ch);
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
 
     if (script_has_type(char_get_script(ch), MTRIG_SPEECH) && char_is_awake(ch) &&
         !char_aff_flagged(ch, AFF_CHARM) && (actor != ch))
@@ -581,12 +576,11 @@ int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
 int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
   trig_data *t;
-  char_data *ch;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return 1;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_LEAVE) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
@@ -610,9 +604,8 @@ int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
   trig_data *t;
-  char_data *ch;
 
-  for (ch = rroom_get_people(g, char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+  for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_DOOR) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
@@ -719,9 +712,8 @@ int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-/* Sets *ran if a script ran, since that can free any object at all, this one included. */
 static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
-                      char *argument, int type, bool *ran)
+                      char *argument, int type)
 {
   trig_data *t;
 
@@ -747,7 +739,6 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
         skip_spaces(&cmd);
         add_var(&t->var_list, "cmd", cmd, 0);
 
-        *ran = true;
         if (script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW) || !obj)
           return true;
       }
@@ -759,17 +750,14 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
 /* Runs the command triggers on a list of objects, returning true if one of them took the command. */
 static bool cmd_otrig_list(GameWorld *g, obj_data *obj, char_data *actor, char *cmd, char *argument, int type)
 {
-  while (obj) {
-    obj_data *next = obj_get_next_content(obj);
-    long next_id   = next ? obj_get_id(next) : 0;
-    bool forged    = obj_extra_flagged(obj, ITEM_FORGED);
-    bool ran       = false;
+  /* a script can purge any object at all: the loop passes over whatever goes */
+  for (obj_data *o : obj_list(g, obj)) {
+    bool forged = obj_extra_flagged(o, ITEM_FORGED);
 
-    if (cmd_otrig(g, obj, actor, cmd, argument, type, &ran) && !forged)
+    if (cmd_otrig(g, o, actor, cmd, argument, type) && !forged)
       return true;
     if (char_is_dead(actor))
       return true;
-    obj = ran ? find_obj(g, next_id) : next;
   }
   return false;
 }
@@ -786,9 +774,8 @@ bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
   for (i = 0; i < NUM_WEARS; i++)
     if ((obj = char_get_equipment(actor, i))) {
       bool forged = obj_extra_flagged(obj, ITEM_FORGED);
-      bool ran    = false;
 
-      if ((cmd_otrig(g, obj, actor, cmd, argument, OCMD_EQUIP, &ran) && !forged) || char_is_dead(actor))
+      if ((cmd_otrig(g, obj, actor, cmd, argument, OCMD_EQUIP) && !forged) || char_is_dead(actor))
         return true;
     }
 
@@ -962,13 +949,11 @@ bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
   int temp, final = 1;
-  obj_data *obj, *obj_next;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
-  for (obj = room_get_contents(room); obj; obj = obj_next) {
-    obj_next = obj_get_next_content(obj);
+  for (obj_data *obj : room_contents(g, room)) {
     if (!script_has_type(obj_get_script(obj), OTRIG_LEAVE))
       continue;
 

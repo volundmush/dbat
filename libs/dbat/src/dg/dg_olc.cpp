@@ -13,6 +13,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/dg_olc.hpp"
@@ -63,11 +64,11 @@ ACMD(do_oasis_trigedit)
   /*
    * Check that it isn't already being edited.
    */
-  for (d = g->descriptors; d; d = d->next) {
-    if (desc_get_connected(d) == CON_TRIGEDIT) {
-      if (d->olc && OLC_NUM(d) == number) {
+  for (descriptor_data *dd : each_desc(g)) {
+    if (desc_get_connected(dd) == CON_TRIGEDIT) {
+      if (dd->olc && OLC_NUM(dd) == number) {
         send_to_char(g, ch, "That trigger is currently being edited by %s.\r\n",
-                     char_get_name(d->character));
+                     char_get_name(dd->character));
         return;
       }
     }
@@ -514,7 +515,6 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
   trig_data *trig = OLC_TRIG(d);
   trig_data *live_trig;
   struct index_data **new_index;
-  struct descriptor_data *dsc;
 
   new_index = new index_data *[g->top_of_trigt + 2]();
 
@@ -571,7 +571,7 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
   /*
    * Update other trigs being edited.
    */
-  for (dsc = g->descriptors; dsc; dsc = dsc->next)
+  for (descriptor_data *dsc : each_desc(g))
     if (desc_get_connected(dsc) == CON_TRIGEDIT)
       if (OLC_TRIG(dsc)->nr >= rnum)
         OLC_TRIG(dsc)->nr++;

@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -532,8 +533,7 @@ ACMD(do_rpp)
         return;
       } else {
         int found          = false;
-        struct obj_data *k = nullptr;
-        for (k = g->objects; k; k = obj_get_next(k)) {
+        for (obj_data *k : each_obj(g)) {
           if (obj_extra_flagged(k, ITEM_FORGED)) {
             continue;
           }

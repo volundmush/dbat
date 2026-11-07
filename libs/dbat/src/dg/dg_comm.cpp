@@ -12,6 +12,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
+#include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/act.informative.hpp"
@@ -132,7 +133,6 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
   char type[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
   char *tokens[MAX_INPUT_LENGTH], *s, *p;
   void *otokens[MAX_INPUT_LENGTH];
-  struct char_data *to;
   struct obj_data *obj;
   int i, tmp;
   int to_sleeping = 1; /* mainly for windows compiles */
@@ -164,7 +164,7 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         *s      = '\0';
         p       = any_one_name(++p, name);
 
-        if (find_invis) obj = get_obj_in_room(&g->rooms[char_get_in_room(ch)], name);
+        if (find_invis) obj = get_obj_in_room(g, &g->rooms[char_get_in_room(ch)], name);
         else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
           ;
         else if (!(obj = get_obj_in_equip_vis(g, ch, name, &tmp, char_get_equipment_array(ch))))
@@ -192,20 +192,18 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
     sub_write_to_char(g, ch, tokens, otokens, type);
 
   if (IS_SET(targets, TO_ROOM))
-    for (to     = rroom_get_people(g, char_get_in_room(ch));
-         to; to = char_get_next_in_room(to))
+    for (char_data *to : room_people(g, char_get_in_room(ch)))
       if (to != ch && sendok(to, to_sleeping))
         sub_write_to_char(g, to, tokens, otokens, type);
 }
 
 void send_to_zone(GameWorld *g, const char *messg, zone_rnum zone)
 {
-  struct descriptor_data *i;
 
   if (!messg || !*messg)
     return;
 
-  for (i = g->descriptors; i; i = i->next)
+  for (descriptor_data *i : each_desc(g))
     if (!i->connected && i->character && char_is_awake(i->character) &&
         (char_get_in_room(i->character) != NOWHERE) &&
         (rroom_get_zone(g, char_get_in_room(i->character)) == zone))

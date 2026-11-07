@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
@@ -257,11 +258,10 @@ static bool has_pole(struct char_data *ch)
 void fish_update(GameWorld *g)
 {
 
-  struct char_data *i, *next_char, *ch = nullptr;
+  struct char_data *ch = nullptr;
   int quality = 0;
 
-  for (i = g->characters; i; i = next_char) {
-    next_char = char_get_next(i);
+  for (char_data *i : each_char(g)) {
     if (rroom_flagged(g, char_get_in_room(i), ROOM_FISHING)) {
       if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == true) {
         ch = i;
@@ -558,11 +558,10 @@ ACMD(do_extract)
       send_to_char(g, ch, "It's not mature enough to extract from!\r\n");
       return;
     }
-    struct obj_data *bottle = nullptr, *next_obj, *item;
+    struct obj_data *bottle = nullptr;
     int found               = false;
 
-    for (item = char_get_inventory(ch); item; item = next_obj) {
-      next_obj = obj_get_next_content(item);
+    for (obj_data *item : char_inventory(g, ch)) {
       if (obj_get_vnum(g, item) == 3423) {
         bottle = item;
         found  = true;
@@ -645,11 +644,10 @@ ACMD(do_runic)
     return;
   }
 
-  struct obj_data *obj, *next_obj, *bottle = nullptr;
+  struct obj_data *bottle = nullptr;
   int found = false, amount = 0, brush = false;
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj) == 3424) {
       if (obj_get_value(obj, 6) > amount) {
         bottle = obj;
@@ -659,8 +657,7 @@ ACMD(do_runic)
     }
   }
 
-  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
-    next_obj = obj_get_next_content(obj);
+  for (obj_data *obj : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj) == 3427) {
       brush = true;
     }
@@ -1081,10 +1078,9 @@ ACMD(do_bury)
     return;
   }
 
-  struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
+  struct obj_data *obj = nullptr, *fobj = nullptr;
 
-  for (buried = rroom_get_contents(g, char_get_in_room(ch)); buried; buried = next_obj) {
-    next_obj = obj_get_next_content(buried);
+  for (obj_data *buried : room_contents(g, char_get_in_room(ch))) {
     if (obj_extra_flagged(buried, ITEM_BURIED)) {
       fobj = buried;
     }
@@ -1158,7 +1154,7 @@ ACMD(do_silk)
     return;
   }
 
-  struct obj_data *obj = nullptr, *weave = nullptr, *next_obj = nullptr, *weaved = nullptr;
+  struct obj_data *obj = nullptr, *weaved = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -1179,8 +1175,7 @@ ACMD(do_silk)
     int found = false, armor = 500, str = 0, intel = 0, olevel = 0;
     double price = 1;
 
-    for (weave = char_get_inventory(ch); weave; weave = next_obj) {
-      next_obj = obj_get_next_content(weave);
+    for (obj_data *weave : char_inventory(g, ch)) {
       if (found == false && valid_silk(g, weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
         found = true;
         obj   = weave;
@@ -1458,7 +1453,6 @@ static bool valid_recipe(GameWorld *g, struct char_data *ch, int recipe, int typ
   /* Store */
   int rice = -1, flour = -1, appleplum = -1, fberry = -1, carambola = -1;
 
-  struct obj_data *obj2, *next_obj;
   int pass = false;
 
   /* Determine ingredients needed for recipe */
@@ -1541,8 +1535,7 @@ static bool valid_recipe(GameWorld *g, struct char_data *ch, int recipe, int typ
 
   if (type == 0) {
     /* Check for ingredients in inventory */
-    for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
-      next_obj = obj_get_next_content(obj2);
+    for (obj_data *obj2 : char_inventory(g, ch)) {
       switch (obj_get_vnum(g, obj2)) {
         case RCP_TOMATO:
           if (tomato > 0) {
@@ -1659,8 +1652,7 @@ static bool valid_recipe(GameWorld *g, struct char_data *ch, int recipe, int typ
       }
     }
   } else { /* We know the ingredients are there, remove and exit. */
-    for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
-      next_obj = obj_get_next_content(obj2);
+    for (obj_data *obj2 : char_inventory(g, ch)) {
       switch (obj_get_vnum(g, obj2)) {
         case RCP_TOMATO:
           if (tomato > 0) {
