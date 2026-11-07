@@ -197,7 +197,7 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         sub_write_to_char(g, to, tokens, otokens, type);
 }
 
-void send_to_zone(GameWorld *g, const char *messg, zone_rnum zone)
+void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone)
 {
 
   if (!messg || !*messg)

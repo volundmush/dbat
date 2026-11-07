@@ -44,7 +44,7 @@ constexpr int SL_HLP = SL_MAX + 2; /* must be above MAX */
 
 #define LIMIT(var, low, high) MIN(high, MAX(var, low))
 
-room_vnum genolc_zone_bottom(GameWorld *g, zone_rnum rznum);
+room_vnum genolc_zone_bottom(GameWorld *g, struct zone_data *rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
 void create_world_index(GameWorld *g, zone_vnum znum, const char *type);
 

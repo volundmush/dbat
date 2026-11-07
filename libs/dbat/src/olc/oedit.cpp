@@ -88,9 +88,9 @@ ACMD(do_oasis_oedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zlok;
 
-      if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(g, zlok);
@@ -140,8 +140,8 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == NOWHERE) {
+  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
 
     /**************************************************************************/
@@ -156,7 +156,7 @@ ACMD(do_oasis_oedit)
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
@@ -171,10 +171,10 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   if (save) {
     send_to_char(g, ch, "Saving all objects in zone %d.\r\n",
-                 g->zones[OLC_ZNUM(d)].number);
+                 OLC_ZNUM(d)->number);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
            "OLC: %s saves object info for zone %d.", char_get_name(ch),
-           g->zones[OLC_ZNUM(d)].number);
+           OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the objects in this zone.                                       **/
@@ -213,7 +213,7 @@ ACMD(do_oasis_oedit)
   /** Log the OLC message.                                                   **/
   /****************************************************************************/
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void oedit_setup_new(struct descriptor_data *d)
@@ -334,7 +334,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void oedit_save_to_disk(GameWorld *g, zone_rnum zone_num)
+static void oedit_save_to_disk(GameWorld *g, struct zone_data *zone_num)
 {
   save_objects(g, zone_num);
 }
@@ -1005,7 +1005,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                  "OLC: %s edits obj %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
-            oedit_save_to_disk(g, real_zone_by_thing(g, OLC_NUM(d)));
+            oedit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d)));
             write_to_output(g, d, "Object saved to disk.\r\n");
           } else
             write_to_output(g, d, "Object saved to memory.\r\n");
@@ -1077,17 +1077,12 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               return;
             }
             send_to_char(g, d->character, "\r\nCommitting iedit changes.\r\n");
-            /* obj gets a new UID below; drop its old lookup entry first */
-            remove_from_lookup_table(g, obj_get_id(obj));
             /* remove any old scripts */
             if (obj_get_script(obj)) {
               extract_script(g, obj, OBJ_TRIGGER);
               obj_set_script(obj, nullptr);
             }
             commit_iedit(g, obj, OLC_OBJ(d));
-            obj_set_id(obj, dg_new_obj_uid(g));
-            /* find_obj helper */
-            add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
             if (obj_get_vnum(g, obj) != NOTHING) {
               free_proto_script(obj, OBJ_TRIGGER);
               robj = real_object(g, obj_get_vnum(g, obj));
@@ -1778,6 +1773,7 @@ static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_da
   obj_set_sitting(obj, obj_get_sitting(g, &live));
   obj_set_user(obj, obj_get_user(g, &live));
   obj_set_target(obj, obj_get_target(g, &live));
+  obj_set_id(obj, obj_get_id(&live)); /* the same object still: whatever refers to it by id keeps it */
   obj_weight_changed(g, obj, obj_get_weight(obj) - obj_get_weight(&live));
 }
 

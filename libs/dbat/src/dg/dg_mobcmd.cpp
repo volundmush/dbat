@@ -355,7 +355,7 @@ ACMD(do_mecho)
 
 ACMD(do_mzoneecho)
 {
-  zone_rnum zone;
+  struct zone_data *zone;
   char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
   if (!mob_cmd_allowed(g, ch, true))
@@ -367,7 +367,7 @@ ACMD(do_mzoneecho)
   if (!*room_number || !*msg)
     mob_log(g, ch, "mzoneecho called with too few args");
 
-  else if ((zone = real_zone_by_thing(g, atoi(room_number))) == NOWHERE)
+  else if ((zone = find_zone_by_thing(g, atoi(room_number))) == nullptr)
     mob_log(g, ch, "mzoneecho called for nonexistant zone");
 
   else {

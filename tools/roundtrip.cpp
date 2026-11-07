@@ -33,7 +33,7 @@ extern "C" long roundtrip_dump(GameWorld *g)
     save_char(g, pc);
     players++;
   }
-  for (zone_rnum z = 0; z <= g->top_zone; z++) {
+  for (struct zone_data *z : g->zones.all()) {
     bool ok = save_mobiles(g, z);
     ok      = save_objects(g, z) && ok;
     ok      = save_rooms(g, z) && ok;

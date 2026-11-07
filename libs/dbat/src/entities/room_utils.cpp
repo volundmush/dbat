@@ -431,22 +431,22 @@ void rroom_set_timed(GameWorld *g, room_rnum room, int v)
   g->rooms[room].timed = v;
 }
 
-zone_rnum room_get_zone(const struct room_data *room)
+struct zone_data *room_get_zone(const struct room_data *room)
 {
   return room->zone;
 }
 
-void room_set_zone(struct room_data *room, zone_rnum v)
+void room_set_zone(struct room_data *room, struct zone_data *v)
 {
   room->zone = v;
 }
 
-zone_rnum rroom_get_zone(GameWorld *g, room_rnum room)
+struct zone_data *rroom_get_zone(GameWorld *g, room_rnum room)
 {
   return g->rooms[room].zone;
 }
 
-void rroom_set_zone(GameWorld *g, room_rnum room, zone_rnum v)
+void rroom_set_zone(GameWorld *g, room_rnum room, struct zone_data *v)
 {
   g->rooms[room].zone = v;
 }

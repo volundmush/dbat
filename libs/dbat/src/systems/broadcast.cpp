@@ -23,7 +23,7 @@
 #include "dbat/search.hpp"
 #include "dbat/game_world.hpp"
 
-void fly_zone(GameWorld *g, zone_rnum zone, const char *messg, struct char_data *ch)
+void fly_zone(GameWorld *g, struct zone_data *zone, const char *messg, struct char_data *ch)
 {
 
   if (!messg || !*messg)

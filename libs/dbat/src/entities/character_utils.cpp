@@ -2297,10 +2297,7 @@ char *sense_location(GameWorld *g, struct char_data *ch)
   char *message;
   message           = str_alloc(MAX_INPUT_LENGTH);
   room_vnum roomnum = rroom_get_vnum(g, char_get_in_room(ch));
-  zone_rnum num     = 0;
-  if ((num = real_zone_by_thing(g, roomnum)) != NOWHERE) {
-    num = real_zone_by_thing(g, roomnum);
-  }
+  int num           = zone_place(g, find_zone_by_thing(g, roomnum)); /* by place, as when zones were an array */
 
   switch (num) {
     case 2:
@@ -4651,7 +4648,7 @@ bool char_is_dead(const struct char_data *ch)
 
 zone_vnum char_in_zone(GameWorld *g, const struct char_data *ch)
 {
-  return (g->zones[(rroom_get_zone(g, (char_get_in_room(ch))))].number);
+  return (((rroom_get_zone(g, (char_get_in_room(ch)))))->number);
 }
 
 char *char_get_name(const struct char_data *ch)

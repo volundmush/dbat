@@ -46,7 +46,7 @@ SPECIAL(guild);
 bool guild_trade_toggle(struct guild_data *rec, int flag);
 void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count);
 void assign_the_guilds(GameWorld *g);
-void list_guilds(GameWorld *g, struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
+void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, guild_vnum vmin, guild_vnum vmax);
 void destroy_guilds(GameWorld *g);
 void sort_spells(GameWorld *g);
 

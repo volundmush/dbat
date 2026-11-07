@@ -527,7 +527,10 @@ static void compose_builder_command(GameWorld *g, char *text, size_t size)
       snprintf(text, size, "%s %d", PICK(with_mob), g->mob_index[bot_dice(g->top_mob + 1)].vnum);
       break;
     case 3:
-      snprintf(text, size, "zedit %d", g->zones[bot_dice(g->top_zone + 1)].number);
+      if (!g->zones.empty()) {
+        int n = bot_dice(g->zones.size()); /* the nth zone, in vnum order */
+        snprintf(text, size, "zedit %d", find_first(g->zones.all(), [&](zone_data *) { return n-- == 0; })->number);
+      }
       break;
     case 4:
       if (!g->shops.empty()) {
@@ -667,7 +670,7 @@ static void bot_step(GameWorld *g, int *next_name)
 
 static void save_zones(GameWorld *g)
 {
-  for (zone_rnum z = 0; z <= g->top_zone; z++) {
+  for (struct zone_data *z : g->zones.all()) {
     save_rooms(g, z);
     save_mobiles(g, z);
     save_objects(g, z);

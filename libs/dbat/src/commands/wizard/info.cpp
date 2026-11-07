@@ -64,7 +64,7 @@
 static void do_stat_room(GameWorld *g, struct char_data *ch);
 static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *j);
 static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_data *k);
-static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, zone_rnum zone, int listall);
+static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct zone_data *zone, int listall);
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum);
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum);
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum);
@@ -158,15 +158,15 @@ ACMD(do_vnum)
       send_to_char(g, ch, "No armor types by that name.\r\n");
 }
 
-#define ZOCMD g->zones[zrnum].cmd[subcmd]
+#define ZOCMD zrnum->cmd[subcmd]
 
 static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnum rvnum)
 {
-  zone_rnum zrnum = real_zone_by_thing(g, rvnum);
+  struct zone_data *zrnum = find_zone_by_thing(g, rvnum);
   room_rnum rrnum = real_room(g, rvnum), cmd_room = NOWHERE;
   int subcmd = 0, count = 0;
 
-  if (zrnum == NOWHERE || rrnum == NOWHERE) {
+  if (zrnum == nullptr || rrnum == NOWHERE) {
     send_to_char(g, ch, "No zone information available.\r\n");
     return;
   }
@@ -279,7 +279,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
 
   sprinttype(room_get_sector_type(rm), sector_types, buf2, sizeof(buf2));
   send_to_char(g, ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-               g->zones[room_get_zone(rm)].number, room_get_number(rm), char_get_in_room(ch),
+               room_get_zone(rm)->number, room_get_number(rm), char_get_in_room(ch),
                (long)room_get_number(rm) + ROOM_ID_BASE, buf2);
 
   sprintbitarray(room_get_room_flags(rm), room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
@@ -1025,7 +1025,7 @@ ACMD(do_last)
    code 3 times ... -je, 4/6/93 */
 
 /* FIXME: overflow possible */
-static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, zone_rnum zone, int listall)
+static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct zone_data *zone, int listall)
 {
   size_t tmp;
 
@@ -1035,31 +1035,31 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, zone_rn
 
     tmp = snprintf(bufptr, left,
                    "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
-                   g->zones[zone].number, g->zones[zone].name, g->zones[zone].builders,
-                   g->zones[zone].age, g->zones[zone].lifespan,
-                   g->zones[zone].reset_mode,
-                   g->zones[zone].bot, g->zones[zone].top);
+                   zone->number, zone->name, zone->builders,
+                   zone->age, zone->lifespan,
+                   zone->reset_mode,
+                   zone->bot, zone->top);
     i = j = k = l = m = n = o = 0;
 
     for (i = 0; i < g->top_room; i++)
-      if (rroom_get_vnum(g, i) >= g->zones[zone].bot && rroom_get_vnum(g, i) <= g->zones[zone].top)
+      if (rroom_get_vnum(g, i) >= zone->bot && rroom_get_vnum(g, i) <= zone->top)
         j++;
 
     for (i = 0; i < g->top_obj; i++)
-      if (g->obj_index[i].vnum >= g->zones[zone].bot && g->obj_index[i].vnum <= g->zones[zone].top)
+      if (g->obj_index[i].vnum >= zone->bot && g->obj_index[i].vnum <= zone->top)
         k++;
 
     for (i = 0; i < g->top_mob; i++)
-      if (g->mob_index[i].vnum >= g->zones[zone].bot && g->mob_index[i].vnum <= g->zones[zone].top)
+      if (g->mob_index[i].vnum >= zone->bot && g->mob_index[i].vnum <= zone->top)
         l++;
 
-    m = count_shops(g, g->zones[zone].bot, g->zones[zone].top);
+    m = count_shops(g, zone->bot, zone->top);
 
     for (i = 0; i < g->top_of_trigt; i++)
-      if (g->trig_index[i]->vnum >= g->zones[zone].bot && g->trig_index[i]->vnum <= g->zones[zone].top)
+      if (g->trig_index[i]->vnum >= zone->bot && g->trig_index[i]->vnum <= zone->top)
         n++;
 
-    o = count_guilds(g, g->zones[zone].bot, g->zones[zone].top);
+    o = count_guilds(g, zone->bot, zone->top);
 
     tmp += snprintf(bufptr + tmp, left - tmp,
                     "       Zone stats:\r\n"
@@ -1076,9 +1076,9 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, zone_rn
   }
 
   return snprintf(bufptr, left,
-                  "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", g->zones[zone].number,
-                  count_color_chars(g->zones[zone].name) + 30, g->zones[zone].name,
-                  g->zones[zone].builders, g->zones[zone].bot, g->zones[zone].top);
+                  "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zone->number,
+                  count_color_chars(zone->name) + 30, zone->name,
+                  zone->builders, zone->bot, zone->top);
 }
 
 ACMD(do_show)
@@ -1087,8 +1087,7 @@ ACMD(do_show)
   int j, k, l, con; /* i, j, k to specifics? */
   size_t len;
   int nlen;
-  zone_rnum zrn;
-  zone_vnum zvn;
+  struct zone_data *zrn;
   obj_vnum low, high;
   int8_t self            = false;
   struct char_data *vict = nullptr;
@@ -1152,20 +1151,21 @@ ACMD(do_show)
       if (self)
         print_zone_to_buf(g, buf, sizeof(buf), rroom_get_zone(g, char_get_in_room(ch)), 1);
       else if (*value && is_number(value)) {
-        for (zvn = atoi(value), zrn = 0; zrn <= g->top_zone && g->zones[zrn].number != zvn; zrn++);
-        if (zrn <= g->top_zone)
+        if ((zrn = find_zone(g, atoi(value))))
           print_zone_to_buf(g, buf, sizeof(buf), zrn, 1);
         else {
           send_to_char(g, ch, "That is not a valid zone.\r\n");
           return;
         }
-      } else
-        for (len = zrn = 0; zrn <= g->top_zone; zrn++) {
-          nlen = print_zone_to_buf(g, buf + len, sizeof(buf) - len, zrn, 0);
+      } else {
+        len = 0;
+        for (struct zone_data *zone : g->zones.all()) {
+          nlen = print_zone_to_buf(g, buf + len, sizeof(buf) - len, zone, 0);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
+      }
       send_to_char(g, ch, "%s", buf);
       break;
 
@@ -1247,7 +1247,7 @@ ACMD(do_show)
                    g->top_of_p_table + 1,
                    j, g->top_mob + 1,
                    k, g->top_obj + 1,
-                   g->top_room + 1, g->top_zone + 1,
+                   g->top_room + 1, (int)g->zones.size(),
                    g->top_of_trigt + 1,
                    g->buf_largecount,
                    g->buf_switches, g->buf_overflows,
@@ -1532,7 +1532,7 @@ constexpr int MAX_LEVEL_ALLOWED = (100);
 /* arbitrary limit for per round dam */
 constexpr int MAX_MOB_DAM_ALLOWED = 500;
 
-#define ZCMD2 g->zones[zone].cmd[cmd_no] /*from DB.C*/
+#define ZCMD2 zone->cmd[cmd_no] /*from DB.C*/
 
 /*item limits*/
 constexpr int MAX_DAM_ALLOWED     = 50; /* for weapons  - avg. dam*/
@@ -1636,7 +1636,7 @@ constexpr int MAX_COLOUMN_WIDTH    = 80;                  /* at most 80 chars pe
 
 ACMD(do_zcheck)
 {
-  zone_rnum zrnum;
+  struct zone_data *zrnum;
   struct obj_data *obj;
   struct char_data *mob = nullptr;
   room_vnum exroom      = 0;
@@ -1653,20 +1653,20 @@ ACMD(do_zcheck)
   if (!*buf || !strcmp(buf, "."))
     zrnum = rroom_get_zone(g, char_get_in_room(ch));
   else
-    zrnum = real_zone(g, atoi(buf));
+    zrnum = find_zone(g, atoi(buf));
 
-  if (zrnum == NOWHERE) {
+  if (zrnum == nullptr) {
     send_to_char(g, ch, "Check what zone ?\r\n");
     return;
   } else
-    send_to_char(g, ch, "Checking zone %d!\r\n", g->zones[zrnum].number);
+    send_to_char(g, ch, "Checking zone %d!\r\n", zrnum->number);
 
   /************** Check mobs *****************/
 
   send_to_char(g, ch, "Checking Mobs for limits...\r\n");
   /*check mobs first*/
   for (i = 0; i < g->top_mob; i++) {
-    if (real_zone_by_thing(g, g->mob_index[i].vnum) == zrnum) { /*is mob in this zone?*/
+    if (find_zone_by_thing(g, g->mob_index[i].vnum) == zrnum) { /*is mob in this zone?*/
       mob = &g->mob_proto[i];
       if (!strcmp(char_get_alias(mob), "mob unfinished") && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
@@ -1756,7 +1756,7 @@ ACMD(do_zcheck)
   /************** Check objects *****************/
   send_to_char(g, ch, "\r\nChecking Objects for limits...\r\n");
   for (i = 0; i < g->top_obj; i++) {
-    if (real_zone_by_thing(g, g->obj_index[i].vnum) == zrnum) { /*is object in this zone?*/
+    if (find_zone_by_thing(g, g->obj_index[i].vnum) == zrnum) { /*is object in this zone?*/
       obj = &g->obj_proto[i];
       switch (obj_get_type_flag(obj)) {
         case ITEM_MONEY:
@@ -1899,7 +1899,7 @@ ACMD(do_zcheck)
           continue;
 
         for (k = 0; offlimit_zones[k] != -1; k++) {
-          if (rroom_get_zone(g, exroom) == real_zone(g, offlimit_zones[k]) && (found = 1))
+          if (rroom_get_zone(g, exroom) == find_zone(g, offlimit_zones[k]) && (found = 1))
             len += snprintf(buf + len, sizeof(buf) - len,
                             "- Exit %s cannot connect to %d (zone off limits).\r\n",
                             dirs[j], rroom_get_vnum(g, exroom));
@@ -1967,7 +1967,6 @@ ACMD(do_zcheck)
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
-  zone_rnum zone;
   mob_rnum mrnum = real_mobile(g, mvnum);
 
   if (mrnum == NOBODY) {
@@ -1978,7 +1977,7 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
   send_to_char(g, ch, "Checking load info for the mob [%d] %s...\r\n",
                mvnum, char_get_sdesc(&g->mob_proto[mrnum]));
 
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       if (ZCMD2.command != 'M')
         continue;
@@ -2000,7 +1999,6 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
-  zone_rnum zone;
   obj_rnum ornum       = real_object(g, ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
@@ -2014,7 +2012,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
   send_to_char(g, ch, "Checking load info for the obj [%d] %s...\r\n",
                ovnum, obj_get_short_description(&g->obj_proto[ornum]));
 
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       switch (ZCMD2.command) {
         case 'M':
@@ -2085,7 +2083,6 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 {
   int cmd_no, found = 0;
-  zone_rnum zone;
   trig_rnum trnum      = real_trigger(g, tvnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
@@ -2102,7 +2099,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
                g->trig_index[trnum]->proto->attach_type == MOB_TRIGGER ? "mobile" : (g->trig_index[trnum]->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
                tvnum, g->trig_index[trnum]->proto->name);
 
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       switch (ZCMD2.command) {
         case 'M':

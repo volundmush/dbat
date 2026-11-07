@@ -269,7 +269,7 @@ void update_wait_events(struct room_data *to, struct room_data *from);
 
 /* from dg_comm.c */
 void sub_write(GameWorld *g, char *arg, char_data *ch, int8_t find_invis, int targets);
-void send_to_zone(GameWorld *g, const char *messg, zone_rnum zone);
+void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone);
 
 /* from dg_misc.c */
 void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,

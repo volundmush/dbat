@@ -331,7 +331,7 @@ ACMD(do_oasis_cedit)
   mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
          "OLC: %s saves the game configuration.", char_get_name(ch));
 
-  save_config(g, NOWHERE);
+  save_config(g, nullptr);
 }
 
 /*-------------------------------------------------------------------*/
@@ -449,7 +449,7 @@ static void put_no_cr(const char *text, FILE *fl)
       fputc(*text, fl);
 }
 
-bool save_config(GameWorld *g, IDXTYPE nowhere)
+bool save_config(GameWorld *g, struct zone_data *unused)
 {
   struct atomic_file af;
   FILE *fl;
@@ -738,7 +738,7 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: %s modifies the game configuration.", char_get_name(d->character));
           cleanup_olc(g, d, CLEANUP_CONFIG);
           if (CONFIG_OLC_SAVE) {
-            save_config(g, NOWHERE);
+            save_config(g, nullptr);
             write_to_output(g, d, "Game configuration saved to disk.\r\n");
           } else
             write_to_output(g, d, "Game configuration saved to memory.\r\n");

@@ -30,7 +30,7 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
 obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
 {
   obj_rnum found  = NOTHING;
-  zone_rnum rznum = real_zone_by_thing(g, ovnum);
+  struct zone_data *rznum = find_zone_by_thing(g, ovnum);
 
   /*
    * Write object to internal tables.
@@ -39,13 +39,13 @@ obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
   if (obj_get_item_number(newobj) != NOTHING) {
     copy_object(g, &g->obj_proto[obj_get_item_number(newobj)], newobj);
     update_objects(g, &g->obj_proto[obj_get_item_number(newobj)]);
-    add_to_save_list(g, g->zones[rznum].number, SL_OBJ);
+    add_to_save_list(g, rznum->number, SL_OBJ);
     return obj_get_item_number(newobj);
   }
 
   found = insert_object(g, newobj, ovnum);
   adjust_objects(g, found);
-  add_to_save_list(g, g->zones[rznum].number, SL_OBJ);
+  add_to_save_list(g, rznum->number, SL_OBJ);
   return found;
 }
 
@@ -120,7 +120,6 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
 static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
 {
   int i, cmd_no;
-  zone_rnum zone;
 
   if (refpt < 0 || refpt > g->top_obj)
     return NOTHING;
@@ -134,7 +133,7 @@ static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
   /*
    * Renumber zone table.
    */
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
       switch (zone_get_cmd(g, zone, cmd_no)->command) {
         case 'P':
@@ -219,7 +218,7 @@ static obj_rnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum,
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-bool save_objects(GameWorld *g, zone_rnum zone_num)
+bool save_objects(GameWorld *g, struct zone_data *zone_num)
 {
   char cmfname[128], buf[MAX_STRING_LENGTH];
   char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
@@ -236,12 +235,12 @@ bool save_objects(GameWorld *g, zone_rnum zone_num)
   struct obj_data *obj;
   struct extra_descr_data *ex_desc;
 
-  if (zone_num < 0 || zone_num > g->top_zone) {
-    mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
+  if (!zone_num) {
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
-  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, g->zones[zone_num].number);
+  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_num->number);
   if (!(fp = atomic_open(&af, cmfname, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
     return false;
@@ -249,7 +248,7 @@ bool save_objects(GameWorld *g, zone_rnum zone_num)
   /*
    * Start running through all objects in this zone.
    */
-  for (counter = genolc_zone_bottom(g, zone_num); counter <= g->zones[zone_num].top; counter++) {
+  for (counter = genolc_zone_bottom(g, zone_num); counter <= zone_num->top; counter++) {
     if ((realcounter = real_object(g, counter)) != NOTHING) {
       if (obj_get_action_description(obj = &g->obj_proto[realcounter])) {
         strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
@@ -358,9 +357,9 @@ bool save_objects(GameWorld *g, zone_rnum zone_num)
     return false;
   snprintf(buf, sizeof(buf), "%s", cmfname);
 
-  if (in_save_list(g, g->zones[zone_num].number, SL_OBJ)) {
-    remove_from_save_list(g, g->zones[zone_num].number, SL_OBJ);
-    create_world_index(g, g->zones[zone_num].number, "obj");
+  if (in_save_list(g, zone_num->number, SL_OBJ)) {
+    remove_from_save_list(g, zone_num->number, SL_OBJ);
+    create_world_index(g, zone_num->number, "obj");
     mud_log("GenOLC: save_objects: Saving objects '%s'", buf);
   }
   return true;
@@ -482,18 +481,17 @@ static struct obj_data *first_object_of_proto(GameWorld *g, const struct obj_dat
 obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
 {
   obj_rnum i;
-  zone_rnum zrnum;
+  struct zone_data *zrnum;
   struct obj_data *obj, *tmp;
   int j, cmd_no;
-  zone_rnum zone;
 
   if (rnum == NOTHING || rnum > g->top_obj)
     return NOTHING;
 
   obj = &g->obj_proto[rnum];
 
-  zrnum = real_zone_by_thing(g, obj_get_vnum(g, obj));
-  add_to_save_list(g, g->zones[zrnum].number, SL_OBJ);
+  zrnum = find_zone_by_thing(g, obj_get_vnum(g, obj));
+  add_to_save_list(g, zrnum->number, SL_OBJ);
 
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(g, obj), obj_get_short_description(obj));
@@ -544,7 +542,7 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
       shop_set_product(shop, j, shop_get_product(shop, j) - (shop_get_product(shop, j) > rnum));
 
   /* Renumber zone table. */
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     bool changed = false;
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
       switch (zone_get_cmd(g, zone, cmd_no)->command) {
@@ -577,7 +575,7 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
       }
       if (changed) {
         // Do something if the command was changed, e.g., save the zone or log the change
-        add_to_save_list(g, g->zones[zone].number, SL_ZON);
+        add_to_save_list(g, zone->number, SL_ZON);
       }
     }
   }

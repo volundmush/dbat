@@ -332,7 +332,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     else if (desc_get_connected(d) == CON_HEDIT)
       mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, d->character));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), OLC_ZNUM(d) ? OLC_ZNUM(d)->number : NOWHERE, char_get_olc_zone(g, d->character));
 
     desc_set_connected(d, CON_PLAYING);
   }
@@ -397,21 +397,18 @@ static void free_config(GameWorld *g, struct config_data *data)
 /**                  FALSE.                                                  **/
 /**                                                                          **/
 /******************************************************************************/
-bool can_edit_zone(GameWorld *g, struct char_data *ch, zone_rnum rnum)
+bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum)
 {
   /* no access if called with bad arguments */
-  if (!char_get_desc(ch) || char_is_npc(ch) || rnum == NOWHERE)
+  if (!char_get_desc(ch) || char_is_npc(ch) || rnum == nullptr)
     return false;
-
-  if (rnum == HEDIT_PERMISSION)
-    return true;
 
   /* always access if ch is high enough level */
   if (char_get_admlevel(ch) >= ADMLVL_GRGOD)
     return (true);
 
   /* always access if a player helped build the zone in the first place */
-  if (is_name(char_get_name(ch), g->zones[rnum].builders))
+  if (is_name(char_get_name(ch), rnum->builders))
     return (true);
 
   /* no access if you haven't been assigned a zone */
@@ -423,7 +420,7 @@ bool can_edit_zone(GameWorld *g, struct char_data *ch, zone_rnum rnum)
     return false;
 
   /* always access if you're assigned to this zone */
-  if (real_zone(g, char_get_olc_zone(g, ch)) == rnum)
+  if (find_zone(g, char_get_olc_zone(g, ch)) == rnum)
     return true;
 
   return (false);

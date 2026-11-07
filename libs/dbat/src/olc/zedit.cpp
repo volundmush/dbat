@@ -30,7 +30,7 @@ static void zedit_disp_arg2(GameWorld *g, struct descriptor_data *d);
 static void zedit_disp_arg5(GameWorld *g, struct descriptor_data *d);
 static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static void zedit_new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
-static void zedit_save_to_disk(GameWorld *g, zone_rnum zone);
+static void zedit_save_to_disk(GameWorld *g, struct zone_data *zone);
 static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_num);
 
 /*
@@ -71,9 +71,9 @@ ACMD(do_oasis_zedit)
       if (is_number(buf2))
         number = atoi(buf2);
       else if (char_get_olc_zone(g, ch) > 0) {
-        zone_rnum zlok;
+        struct zone_data *zlok;
 
-        if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+        if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
           number = NOWHERE;
         else
           number = genolc_zone_bottom(g, zlok);
@@ -155,8 +155,8 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == NOWHERE) {
+  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
 
     /**************************************************************************/
@@ -171,7 +171,7 @@ ACMD(do_oasis_zedit)
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
     delete d->olc;
     d->olc = nullptr;
     return;
@@ -182,10 +182,10 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   if (save) {
     send_to_char(g, ch, "Saving all zone information for zone %d.\r\n",
-                 g->zones[OLC_ZNUM(d)].number);
+                 OLC_ZNUM(d)->number);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
            "OLC: %s saves zone information for zone %d.", char_get_name(ch),
-           g->zones[OLC_ZNUM(d)].number);
+           OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the zone information to the zone file.                          **/
@@ -220,7 +220,7 @@ ACMD(do_oasis_zedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_num)
@@ -237,19 +237,19 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_
   /*
    * Copy all the zone header information over.
    */
-  zone->name = strdup(g->zones[OLC_ZNUM(d)].name);
-  if (g->zones[OLC_ZNUM(d)].builders)
-    zone->builders = strdup(g->zones[OLC_ZNUM(d)].builders);
-  zone->lifespan      = g->zones[OLC_ZNUM(d)].lifespan;
-  zone->bot           = g->zones[OLC_ZNUM(d)].bot;
-  zone->top           = g->zones[OLC_ZNUM(d)].top;
-  zone->reset_mode    = g->zones[OLC_ZNUM(d)].reset_mode;
-  zone->zone_flags[0] = g->zones[OLC_ZNUM(d)].zone_flags[0];
-  zone->zone_flags[1] = g->zones[OLC_ZNUM(d)].zone_flags[1];
-  zone->zone_flags[2] = g->zones[OLC_ZNUM(d)].zone_flags[2];
-  zone->zone_flags[3] = g->zones[OLC_ZNUM(d)].zone_flags[3];
-  zone->min_level     = g->zones[OLC_ZNUM(d)].min_level;
-  zone->max_level     = g->zones[OLC_ZNUM(d)].max_level;
+  zone->name = strdup(OLC_ZNUM(d)->name);
+  if (OLC_ZNUM(d)->builders)
+    zone->builders = strdup(OLC_ZNUM(d)->builders);
+  zone->lifespan      = OLC_ZNUM(d)->lifespan;
+  zone->bot           = OLC_ZNUM(d)->bot;
+  zone->top           = OLC_ZNUM(d)->top;
+  zone->reset_mode    = OLC_ZNUM(d)->reset_mode;
+  zone->zone_flags[0] = OLC_ZNUM(d)->zone_flags[0];
+  zone->zone_flags[1] = OLC_ZNUM(d)->zone_flags[1];
+  zone->zone_flags[2] = OLC_ZNUM(d)->zone_flags[2];
+  zone->zone_flags[3] = OLC_ZNUM(d)->zone_flags[3];
+  zone->min_level     = OLC_ZNUM(d)->min_level;
+  zone->max_level     = OLC_ZNUM(d)->max_level;
   /*
    * The remaining fields are used as a 'has been modified' flag  
    */
@@ -315,10 +315,10 @@ static void zedit_disp_flag_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void zedit_new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
 {
-  zone_rnum result;
+  struct zone_data *result;
   const char *error;
 
-  if ((result = create_new_zone(g, vzone_num, bottom, top, &error)) == NOWHERE) {
+  if ((result = create_new_zone(g, vzone_num, bottom, top, &error)) == nullptr) {
     write_to_output(g, char_get_desc(ch), "%s", error);
     return;
   }
@@ -404,35 +404,35 @@ static void zedit_save_internally(GameWorld *g, struct descriptor_data *d)
         mobloaded = objloaded = false;
         break;
     }
-    add_cmd_to_list(&(g->zones[OLC_ZNUM(d)].cmd), &MYCMD, subcmd);
+    add_cmd_to_list(&OLC_ZNUM(d)->cmd, &MYCMD, subcmd);
   }
 
   /*
    * Finally, if zone headers have been changed, copy over  
    */
   if (OLC_ZONE(d)->number) {
-    free(g->zones[OLC_ZNUM(d)].name);
-    free(g->zones[OLC_ZNUM(d)].builders);
+    free(OLC_ZNUM(d)->name);
+    free(OLC_ZNUM(d)->builders);
 
-    g->zones[OLC_ZNUM(d)].name          = strdup(OLC_ZONE(d)->name);
-    g->zones[OLC_ZNUM(d)].builders      = strdup(OLC_ZONE(d)->builders);
-    g->zones[OLC_ZNUM(d)].bot           = OLC_ZONE(d)->bot;
-    g->zones[OLC_ZNUM(d)].top           = OLC_ZONE(d)->top;
-    g->zones[OLC_ZNUM(d)].reset_mode    = OLC_ZONE(d)->reset_mode;
-    g->zones[OLC_ZNUM(d)].lifespan      = OLC_ZONE(d)->lifespan;
-    g->zones[OLC_ZNUM(d)].zone_flags[0] = OLC_ZONE(d)->zone_flags[0];
-    g->zones[OLC_ZNUM(d)].zone_flags[1] = OLC_ZONE(d)->zone_flags[1];
-    g->zones[OLC_ZNUM(d)].zone_flags[2] = OLC_ZONE(d)->zone_flags[2];
-    g->zones[OLC_ZNUM(d)].zone_flags[3] = OLC_ZONE(d)->zone_flags[3];
-    g->zones[OLC_ZNUM(d)].min_level     = OLC_ZONE(d)->min_level;
-    g->zones[OLC_ZNUM(d)].max_level     = OLC_ZONE(d)->max_level;
+    OLC_ZNUM(d)->name          = strdup(OLC_ZONE(d)->name);
+    OLC_ZNUM(d)->builders      = strdup(OLC_ZONE(d)->builders);
+    OLC_ZNUM(d)->bot           = OLC_ZONE(d)->bot;
+    OLC_ZNUM(d)->top           = OLC_ZONE(d)->top;
+    OLC_ZNUM(d)->reset_mode    = OLC_ZONE(d)->reset_mode;
+    OLC_ZNUM(d)->lifespan      = OLC_ZONE(d)->lifespan;
+    OLC_ZNUM(d)->zone_flags[0] = OLC_ZONE(d)->zone_flags[0];
+    OLC_ZNUM(d)->zone_flags[1] = OLC_ZONE(d)->zone_flags[1];
+    OLC_ZNUM(d)->zone_flags[2] = OLC_ZONE(d)->zone_flags[2];
+    OLC_ZNUM(d)->zone_flags[3] = OLC_ZONE(d)->zone_flags[3];
+    OLC_ZNUM(d)->min_level     = OLC_ZONE(d)->min_level;
+    OLC_ZNUM(d)->max_level     = OLC_ZONE(d)->max_level;
   }
-  add_to_save_list(g, g->zones[OLC_ZNUM(d)].number, SL_ZON);
+  add_to_save_list(g, OLC_ZNUM(d)->number, SL_ZON);
 }
 
 /*-------------------------------------------------------------------*/
 
-static void zedit_save_to_disk(GameWorld *g, zone_rnum zone)
+static void zedit_save_to_disk(GameWorld *g, struct zone_data *zone)
 {
   save_zone(g, zone);
 }
@@ -487,7 +487,7 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                "[Command list]\r\n",
 
                OLC_NUM(d),
-               g->zones[OLC_ZNUM(d)].number,
+               OLC_ZNUM(d)->number,
                OLC_ZONE(d)->builders ? OLC_ZONE(d)->builders : "None.",
                OLC_ZONE(d)->name ? OLC_ZONE(d)->name : "<NONE!>",
                OLC_ZONE(d)->lifespan,
@@ -826,7 +826,7 @@ static void zedit_disp_arg5(GameWorld *g, struct descriptor_data *d)
  */
 static bool zone_range_loses_something(GameWorld *g, struct descriptor_data *d, int bot, int top)
 {
-  struct zone_data *zone = &g->zones[OLC_ZNUM(d)];
+  struct zone_data *zone = OLC_ZNUM(d);
 
   for (int vnum = genolc_zonep_bottom(zone); vnum <= zone->top; vnum++) {
     const char *what = nullptr;
@@ -1463,10 +1463,10 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       /*
      * Parse and add new bottom room in zone and return to main menu.
      */
-      if (OLC_ZNUM(d) == 0)
-        number = LIMIT(atoi(arg), 0, OLC_ZONE(d)->top);
+      if (struct zone_data *previous = g->zones.before(OLC_ZNUM(d)->number))
+        number = LIMIT(atoi(arg), previous->top + 1, OLC_ZONE(d)->top);
       else
-        number = LIMIT(atoi(arg), g->zones[OLC_ZNUM(d) - 1].top + 1, OLC_ZONE(d)->top);
+        number = LIMIT(atoi(arg), 0, OLC_ZONE(d)->top);
       if (!zone_range_loses_something(g, d, number, OLC_ZONE(d)->top)) {
         OLC_ZONE(d)->bot    = number;
         OLC_ZONE(d)->number = 1;
@@ -1479,10 +1479,10 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       /*
      * Parse and add new top room in zone and return to main menu.
      */
-      if (OLC_ZNUM(d) == g->top_zone)
-        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), 65000);
+      if (struct zone_data *next = g->zones.after(OLC_ZNUM(d)->number))
+        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), genolc_zone_bottom(g, next) - 1);
       else
-        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), genolc_zone_bottom(g, OLC_ZNUM(d) + 1) - 1);
+        number = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), 65000);
       if (!zone_range_loses_something(g, d, genolc_zonep_bottom(OLC_ZONE(d)), number)) {
         OLC_ZONE(d)->top    = number;
         OLC_ZONE(d)->number = 1;

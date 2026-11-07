@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <vector>
@@ -48,6 +49,18 @@ public:
     std::unique_ptr<T> taken = std::move(it->second);
     items_.erase(it);
     return taken;
+  }
+
+  /* The neighbours of vnum in vnum order, or null at either end. */
+  T *before(V vnum) const
+  {
+    auto it = items_.lower_bound(vnum);
+    return it == items_.begin() ? nullptr : std::prev(it)->second.get();
+  }
+  T *after(V vnum) const
+  {
+    auto it = items_.upper_bound(vnum);
+    return it == items_.end() ? nullptr : it->second.get();
   }
 
   void clear() { items_.clear(); }

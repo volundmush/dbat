@@ -1187,9 +1187,9 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     else
       snprintf(str, slen, "0");
   } else if (!strcasecmp(field, "zonenumber"))
-    snprintf(str, slen, "%d", g->zones[room_get_zone(r)].number);
+    snprintf(str, slen, "%d", room_get_zone(r)->number);
   else if (!strcasecmp(field, "zonename"))
-    snprintf(str, slen, "%s", g->zones[room_get_zone(r)].name);
+    snprintf(str, slen, "%s", room_get_zone(r)->name);
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
       room_rnum thisroom = real_room(g, room_get_number(r));

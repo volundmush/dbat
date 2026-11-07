@@ -44,7 +44,6 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 {
   mob_rnum rnum, i, found = false;
   int cmd_no;
-  zone_rnum zone;
 
   if ((rnum = real_mobile(g, vnum)) != NOBODY) {
     /* Copy over the mobile and free() the old strings. */
@@ -56,7 +55,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
       if (rnum == char_get_nr(live_mob))
         update_mobile_strings(live_mob, &g->mob_proto[rnum]);
 
-    add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
+    add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
     mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
     return rnum;
   }
@@ -105,7 +104,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     char_set_nr(live_mob, char_get_nr(live_mob) + ((char_get_nr(live_mob) != NOTHING && char_get_nr(live_mob) >= found)));
 
   /* Update zone table. */
-  for (zone = 0; zone <= g->top_zone; zone++)
+  for (struct zone_data *zone : g->zones.all())
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++)
       if (zone_get_cmd(g, zone, cmd_no)->command == 'M')
         zone_get_cmd(g, zone, cmd_no)->arg1 += (zone_get_cmd(g, zone, cmd_no)->arg1 >= found);
@@ -120,7 +119,7 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     if (guild_get_gm(guild) != NOTHING && guild_get_gm(guild) >= found)
       guild_set_gm(guild, guild_get_gm(guild) + 1);
 
-  add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
+  add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
   return found;
 }
 
@@ -147,7 +146,6 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
   IDXTYPE counter;
   int cmd_no;
   mob_vnum vnum;
-  zone_rnum zone;
 
   if (refpt < 0 || refpt > g->top_mob) {
     mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
@@ -167,14 +165,14 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
   resize_array(g->mob_index, g->top_mob + 2, g->top_mob + 1);
   resize_array(g->mob_proto, g->top_mob + 2, g->top_mob + 1);
 
-  add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
+  add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
 
   /* Update live mobile rnums.  */
   for (char_data *live_mob : each_char(g))
     char_set_nr(live_mob, char_get_nr(live_mob) - ((char_get_nr(live_mob) >= refpt)));
 
   /* Update zone table.  */
-  for (zone = 0; zone <= g->top_zone; zone++) {
+  for (struct zone_data *zone : g->zones.all()) {
     bool changed = false;
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
       if (zone_get_cmd(g, zone, cmd_no)->command == 'M' && zone_get_cmd(g, zone, cmd_no)->arg1 == refpt) {
@@ -189,14 +187,14 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
       }
     }
     if (changed) {
-      add_to_save_list(g, g->zones[zone].number, SL_ZON);
+      add_to_save_list(g, zone->number, SL_ZON);
     }
   }
 
   zone_vnum last_saved_zone = NOTHING;
   /* Update shop keepers.  */
   for (struct shop_data *shop : g->shops.all()) {
-    zone_vnum zvnum = g->zones[real_zone_by_thing(g, shop_get_vnum(shop))].number;
+    zone_vnum zvnum = find_zone_by_thing(g, shop_get_vnum(shop))->number;
     /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
     if (shop_get_keeper(shop) == refpt) {
@@ -215,7 +213,7 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
        * -1 to keep the guild so it could be assigned to someone else */
     if (guild_get_gm(guild) == refpt) {
       guild_set_gm(guild, NOTHING);
-      zone_vnum zvnum = g->zones[real_zone_by_thing(g, guild_get_vnum(guild))].number;
+      zone_vnum zvnum = find_zone_by_thing(g, guild_get_vnum(guild))->number;
       if (zvnum != last_saved_zone) {
         add_to_save_list(g, zvnum, SL_GLD);
         last_saved_zone = zvnum;
@@ -311,7 +309,7 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
   return true;
 }
 
-bool save_mobiles(GameWorld *g, zone_rnum zone_num)
+bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
 {
   FILE *mobfd;
   room_vnum i;
@@ -319,18 +317,18 @@ bool save_mobiles(GameWorld *g, zone_rnum zone_num)
   char mobfname[64], usedfname[64];
   struct atomic_file af;
 
-  if (zone_num < 0 || zone_num > g->top_zone) {
-    mud_log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
+  if (!zone_num) {
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
-  snprintf(mobfname, sizeof(mobfname), "%s%d.mob", MOB_PREFIX, g->zones[zone_num].number);
+  snprintf(mobfname, sizeof(mobfname), "%s%d.mob", MOB_PREFIX, zone_num->number);
   if ((mobfd = atomic_open(&af, mobfname, false)) == nullptr) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return false;
   }
 
-  for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
+  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
     if ((rmob = real_mobile(g, i)) == NOBODY)
       continue;
     check_mobile_strings(g, &g->mob_proto[rmob]);
@@ -342,9 +340,9 @@ bool save_mobiles(GameWorld *g, zone_rnum zone_num)
     return false;
   snprintf(usedfname, sizeof(usedfname), "%s", mobfname);
 
-  if (in_save_list(g, g->zones[zone_num].number, SL_MOB)) {
-    remove_from_save_list(g, g->zones[zone_num].number, SL_MOB);
-    create_world_index(g, g->zones[zone_num].number, "mob");
+  if (in_save_list(g, zone_num->number, SL_MOB)) {
+    remove_from_save_list(g, zone_num->number, SL_MOB);
+    create_world_index(g, zone_num->number, "mob");
     mud_log("GenOLC: save_mobiles: Saving mobiles '%s'", usedfname);
   }
   return true;

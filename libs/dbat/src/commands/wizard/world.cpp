@@ -680,7 +680,7 @@ ACMD(do_force)
 ACMD(do_zreset)
 {
   char arg[MAX_INPUT_LENGTH];
-  zone_rnum i;
+  struct zone_data *i;
   zone_vnum j;
 
   one_argument(argument, arg);
@@ -690,11 +690,10 @@ ACMD(do_zreset)
       send_to_char(g, ch, "You do not have permission to reset the entire world.\r\n");
       return;
     }
-    for (i = 0; i <= g->top_zone; i++) {
-      if (i < 200) {
-        reset_zone(g, i);
-      }
-    }
+    int place = 0; /* the first 200 zones in vnum order, as when zones were an array */
+    for (struct zone_data *zone : g->zones.all())
+      if (place++ < 200)
+        reset_zone(g, zone);
     send_to_char(g, ch, "Reset world.\r\n");
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset all MUD zones.", char_get_name(ch));
     log_imm_action(g, "RESET: %s has reset all MUD zones.", char_get_name(ch));
@@ -703,15 +702,13 @@ ACMD(do_zreset)
     i = rroom_get_zone(g, char_get_in_room(ch));
   else {
     j = atoi(arg);
-    for (i = 0; i <= g->top_zone; i++)
-      if (g->zones[i].number == j)
-        break;
+    i = find_zone(g, j);
   }
-  if (i <= g->top_zone && (can_edit_zone(g, ch, i) || char_get_admlevel(ch) > ADMLVL_IMMORT)) {
+  if (i && (can_edit_zone(g, ch, i) || char_get_admlevel(ch) > ADMLVL_IMMORT)) {
     reset_zone(g, i);
-    send_to_char(g, ch, "Reset zone #%d: %s.\r\n", g->zones[i].number, g->zones[i].name);
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset zone %d (%s)", char_get_name(ch), g->zones[i].number, g->zones[i].name);
-    log_imm_action(g, "RESET: %s has reset zone #%d: %s.", char_get_name(ch), g->zones[i].number, g->zones[i].name);
+    send_to_char(g, ch, "Reset zone #%d: %s.\r\n", i->number, i->name);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset zone %d (%s)", char_get_name(ch), i->number, i->name);
+    log_imm_action(g, "RESET: %s has reset zone #%d: %s.", char_get_name(ch), i->number, i->name);
   } else
     send_to_char(g, ch, "You do not have permission to reset this zone. Try %d.\r\n", char_get_olc_zone(g, ch));
 }
@@ -772,7 +769,7 @@ ACMD(do_raise)
 ACMD(do_zpurge)
 {
   IDXTYPE i, zone;
-  zone_rnum stored = -1;
+  struct zone_data *stored = nullptr;
   int found        = false;
   room_vnum room;
   char arg[MAX_INPUT_LENGTH];
@@ -780,24 +777,20 @@ ACMD(do_zpurge)
   one_argument(argument, arg);
 
   if (!*arg) {
-    zone = g->zones[rroom_get_zone(g, char_get_in_room(ch))].number;
+    zone = rroom_get_zone(g, char_get_in_room(ch))->number;
   } else {
     zone = atoi(arg);
   }
 
-  for (i = 0; i <= g->top_zone && !found; i++) {
-    if (g->zones[i].number == zone) {
-      stored = i;
-      found  = true;
-    }
-  }
+  stored = find_zone(g, zone);
+  found  = stored != nullptr;
 
-  if (!found || !can_edit_zone(g, ch, zone)) {
+  if (!found || !can_edit_zone(g, ch, stored)) {
     send_to_char(g, ch, "You cannot purge that zone. Try %d.\r\n", char_get_olc_zone(g, ch));
     return;
   }
 
-  for (room = genolc_zone_bottom(g, stored); room <= g->zones[stored].top; room++) {
+  for (room = genolc_zone_bottom(g, stored); room <= stored->top; room++) {
     if ((i = real_room(g, room)) != NOWHERE) {
       for (char_data *mob : room_people(g, i)) {
         if (char_is_npc(mob)) {

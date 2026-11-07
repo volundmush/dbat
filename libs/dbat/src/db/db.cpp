@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cerrno>
 #include <cstdlib>
+#include <memory>
 
 #include <linux/limits.h>
 
@@ -103,7 +104,7 @@ static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(GameWorld *g);
 static void renum_world(GameWorld *g);
 static void renum_zone_table(GameWorld *g);
-static void log_zone_error(GameWorld *g, zone_rnum zone, int cmd_no, const char *message);
+static void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message);
 static void reset_time(GameWorld *g);
 static int suntzu_weapon_convert(int wp_type);
 static void free_obj_unique_hash(GameWorld *g);
@@ -451,7 +452,6 @@ void boot_world(GameWorld *g)
 
   mud_log("Loading zone table.");
   index_boot(g, DB_BOOT_ZON);
-  check_sorted("zone", g->zones, g->top_zone + 1, sizeof(*g->zones), offsetof(struct zone_data, number));
 
   mud_log("Loading triggers and generating index.");
   index_boot(g, DB_BOOT_TRG);
@@ -625,14 +625,14 @@ void destroy_db(GameWorld *g)
     }
   }
 
-#define THIS_CMD g->zones[cnt].cmd[itr]
+#define THIS_CMD zone->cmd[itr]
 
-  for (cnt = 0; cnt <= g->top_zone; cnt++) {
-    if (g->zones[cnt].name)
-      free(g->zones[cnt].name);
-    if (g->zones[cnt].builders)
-      free(g->zones[cnt].builders);
-    if (g->zones[cnt].cmd) {
+  for (struct zone_data *zone : g->zones.all()) {
+    if (zone->name)
+      free(zone->name);
+    if (zone->builders)
+      free(zone->builders);
+    if (zone->cmd) {
       /* first see if any vars were defined in this zone */
       for (itr = 0; THIS_CMD.command != 'S'; itr++)
         if (THIS_CMD.command == 'V') {
@@ -642,10 +642,10 @@ void destroy_db(GameWorld *g)
             free(THIS_CMD.sarg2);
         }
       /* then free the command list */
-      delete[] g->zones[cnt].cmd;
+      delete[] zone->cmd;
     }
   }
-  delete[] g->zones;
+  g->zones.clear();
 
 #undef THIS_CMD
 
@@ -704,7 +704,6 @@ static void init_obj_unique_hash(GameWorld *g)
 /* body of the booting system */
 void boot_db(GameWorld *g)
 {
-  zone_rnum i;
 
   mud_log("Boot db -- BEGIN.");
 
@@ -813,9 +812,9 @@ void boot_db(GameWorld *g)
     House_boot(g);
   }
 
-  for (i = 0; i <= g->top_zone; i++) {
-    mud_log("Resetting #%d: %s (rooms %d-%d).", g->zones[i].number,
-            g->zones[i].name, g->zones[i].bot, g->zones[i].top);
+  for (struct zone_data *i : g->zones.all()) {
+    mud_log("Resetting #%d: %s (rooms %d-%d).", i->number,
+            i->name, i->bot, i->top);
     reset_zone(g, i);
   }
 
@@ -1170,7 +1169,6 @@ void index_boot(GameWorld *g, int mode)
       mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_ZON:
-      g->zones = new zone_data[rec_count]();
       size[0] = sizeof(struct zone_data) * rec_count;
       mud_log("   %d zones, %d bytes.", rec_count, size[0]);
       break;
@@ -1361,8 +1359,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   /* This really had better fit or there are other problems. */
   snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-  g->parse_room_zone = real_zone_by_thing(g, virtual_nr);
-  if (g->parse_room_zone == NOWHERE) {
+  g->parse_room_zone = find_zone_by_thing(g, virtual_nr);
+  if (g->parse_room_zone == nullptr) {
     mud_log("SYSERR: Room #%d is outside of any zone.", virtual_nr);
     exit(1);
   }
@@ -1398,7 +1396,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
     sprintf(flags, "room #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
     if (bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
-      add_to_save_list(g, g->zones[real_zone_by_thing(g, virtual_nr)].number, 3);
+      add_to_save_list(g, find_zone_by_thing(g, virtual_nr)->number, 3);
       g->converting = true;
     }
 
@@ -1554,7 +1552,7 @@ static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
       rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
       rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 5) {
@@ -1567,7 +1565,7 @@ static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
       rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
       rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 7) {
@@ -1580,7 +1578,7 @@ static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
       rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
       rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, g->zones[rroom_get_zone(g, room)].number, 3);
+        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 11) {
@@ -1629,7 +1627,7 @@ static void renum_world(GameWorld *g)
               real_room(g, rroom_get_dir_option(g, room, door)->to_room);
 }
 
-#define ZCMD2 g->zones[zone].cmd[cmd_no]
+#define ZCMD2 zone->cmd[cmd_no]
 
 /*
  * "resulve vnums into rnums in the zone reset tables"
@@ -1646,10 +1644,9 @@ static void renum_zone_table(GameWorld *g)
 {
   int cmd_no;
   room_rnum a, b, c, olda, oldb, oldc;
-  zone_rnum zone;
   char buf[128];
 
-  for (zone = 0; zone <= g->top_zone; zone++)
+  for (struct zone_data *zone : g->zones.all())
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       a = b = c = 0;
       olda      = ZCMD2.arg1;
@@ -2104,7 +2101,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
     letter = *f4;
 
     if (bitsavetodisk) {
-      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 0);
+      add_to_save_list(g, find_zone_by_thing(g, nr)->number, 0);
       g->converting = true;
     }
 
@@ -2176,7 +2173,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
 
   /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
    * if (bitsavetodisk) {
-   *   add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
+   *   add_to_save_list(zone_table[find_zone_by_thing(nr)].number, 0);
    *   converting = TRUE;
    * } */
 
@@ -2273,7 +2270,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     obj_get_bitvector(g->obj_proto + g->parse_obj_index)[3]   = 0;
 
     if (bitsavetodisk) {
-      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
       g->converting = true;
     }
 
@@ -2326,7 +2323,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCLOCK, 20);
     obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCHIDE, 20);
     if (bitsavetodisk) {
-      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
       g->converting = true;
     }
   }
@@ -2335,7 +2332,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     obj_set_value(g->obj_proto + g->parse_obj_index, 0, suntzu_weapon_convert(t[0]));
 
     if (bitsavetodisk) {
-      add_to_save_list(g, g->zones[real_zone_by_thing(g, nr)].number, 1);
+      add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
       g->converting = true;
     }
   }
@@ -2344,7 +2341,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
    * if (GET_OBJ_TYPE(obj_proto + i) == ITEM_ARMOR) {
    *   if (suntzu_armor_convert(obj_proto + i)) {
    *     if(bitsavetodisk) {
-   *       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+   *       add_to_save_list(zone_table[find_zone_by_thing(nr)].number, 1);
    *       converting = TRUE;
    *     }
    *   }
@@ -2500,12 +2497,13 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   return line;
 }
 
-#define Z g->zones[g->parse_zone_index]
+#define Z (*zone)
 
 /* load the zone table and command tables */
 static void load_zones(GameWorld *g, FILE *fl, char *zonename)
 {
-  zone_rnum zone = g->parse_zone_index; /* ZCMD2 indexes by this */
+  std::unique_ptr<zone_data> made = std::make_unique<zone_data>();
+  struct zone_data *zone          = made.get(); /* Z and ZCMD2 refer to it */
   int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
   char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
   int zone_fix = false;
@@ -2663,7 +2661,11 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     exit(1);
   }
 
-  g->top_zone = g->parse_zone_index++;
+  if (g->zones.find(Z.number)) {
+    mud_log("SYSERR: zone #%d is defined twice.", Z.number);
+    exit(1);
+  }
+  g->zones.insert(Z.number, std::move(made));
 }
 
 #undef Z
@@ -3680,7 +3682,6 @@ constexpr int ZO_DEAD = 999;
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(GameWorld *g)
 {
-  zone_rnum i;
   struct reset_q_element *update_u, *temp;
 
   /* jelson 10/22/92 */
@@ -3694,13 +3695,11 @@ void zone_update(GameWorld *g)
     g->zone_update_timer = 0;
 
     /* since one minute has passed, increment zone ages */
-    for (i = 0; i <= g->top_zone; i++) {
-      if (g->zones[i].age < g->zones[i].lifespan &&
-          g->zones[i].reset_mode)
-        (g->zones[i].age)++;
+    for (struct zone_data *i : g->zones.all()) {
+      if (i->age < i->lifespan && i->reset_mode)
+        (i->age)++;
 
-      if (g->zones[i].age >= g->zones[i].lifespan &&
-          g->zones[i].age < ZO_DEAD && g->zones[i].reset_mode) {
+      if (i->age >= i->lifespan && i->age < ZO_DEAD && i->reset_mode) {
         /* enqueue zone */
 
         update_u = new reset_q_element();
@@ -3714,7 +3713,7 @@ void zone_update(GameWorld *g)
           g->reset_q.tail       = update_u;
         }
 
-        g->zones[i].age = ZO_DEAD;
+        i->age = ZO_DEAD;
       }
     }
   } /* end - one minute has passed */
@@ -3722,11 +3721,11 @@ void zone_update(GameWorld *g)
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
   for (update_u = g->reset_q.head; update_u; update_u = update_u->next)
-    if (g->zones[update_u->zone_to_reset].reset_mode == 2 ||
+    if (update_u->zone_to_reset->reset_mode == 2 ||
         is_empty(g, update_u->zone_to_reset)) {
       reset_zone(g, update_u->zone_to_reset);
       mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-             g->zones[update_u->zone_to_reset].name, g->zones[update_u->zone_to_reset].number);
+             update_u->zone_to_reset->name, update_u->zone_to_reset->number);
       /* dequeue */
       if (update_u == g->reset_q.head)
         g->reset_q.head = g->reset_q.head->next;
@@ -3745,11 +3744,11 @@ void zone_update(GameWorld *g)
     }
 }
 
-static void log_zone_error(GameWorld *g, zone_rnum zone, int cmd_no, const char *message)
+static void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message)
 {
   mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
   mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-         ZCMD2.command, g->zones[zone].number, ZCMD2.line);
+         ZCMD2.command, zone->number, ZCMD2.line);
 }
 
 #define ZONE_ERROR(g, message)                \
@@ -3759,7 +3758,7 @@ static void log_zone_error(GameWorld *g, zone_rnum zone, int cmd_no, const char 
   }
 
 /* execute the reset command table of a given zone */
-void reset_zone(GameWorld *g, zone_rnum zone)
+void reset_zone(GameWorld *g, struct zone_data *zone)
 {
   int cmd_no, last_cmd = 0;
   struct char_data *mob = nullptr;
@@ -3771,7 +3770,7 @@ void reset_zone(GameWorld *g, zone_rnum zone)
   int mob_load           = false;   /* ### */
   int obj_load           = false;   /* ### */
 
-  if (pre_reset(g, g->zones[zone].number) == false) {
+  if (pre_reset(g, zone->number) == false) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
 
       if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
@@ -4053,11 +4052,11 @@ void reset_zone(GameWorld *g, zone_rnum zone)
       }
     }
 
-    g->zones[zone].age = 0;
+    zone->age = 0;
 
     /* handle reset_wtrigger's */
-    rvnum = g->zones[zone].bot;
-    while (rvnum <= g->zones[zone].top) {
+    rvnum = zone->bot;
+    while (rvnum <= zone->top) {
       rrnum = real_room(g, rvnum);
       if (rrnum != NOWHERE) {
         reset_wtrigger(g, &g->rooms[rrnum]);
@@ -4103,13 +4102,13 @@ void reset_zone(GameWorld *g, zone_rnum zone)
     }
   } else {
     /* even if reset is blocked, age should be reset */
-    g->zones[zone].age = 0;
+    zone->age = 0;
   }
-  post_reset(g->zones[zone].number);
+  post_reset(zone->number);
 }
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
-bool is_empty(GameWorld *g, zone_rnum zone_nr)
+bool is_empty(GameWorld *g, struct zone_data *zone_nr)
 {
 
   for (descriptor_data *i : each_desc(g)) {
@@ -4503,11 +4502,6 @@ static int index_order(const void *key, const void *index)
   return vnum_order(*(const IDXTYPE *)key, ((const struct index_data *)index)->vnum);
 }
 
-static int zone_order(const void *key, const void *zone)
-{
-  return vnum_order(*(const zone_vnum *)key, ((const struct zone_data *)zone)->number);
-}
-
 /* The index in table (count entries of size bytes) of the entry for vnum, or NOWHERE. */
 static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t size, int (*order)(const void *, const void *))
 {
@@ -4538,9 +4532,9 @@ obj_rnum real_object(GameWorld *g, obj_vnum vnum)
 }
 
 /* returns the real number of the zone with given virtual number */
-zone_rnum real_zone(GameWorld *g, zone_vnum vnum)
+struct zone_data *find_zone(GameWorld *g, zone_vnum vnum)
 {
-  return find_vnum(vnum, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_order);
+  return g->zones.find(vnum);
 }
 
 /*

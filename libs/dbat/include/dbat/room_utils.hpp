@@ -84,10 +84,10 @@ void room_set_sector_type(struct room_data *room, int v);
 void rroom_set_sector_type(GameWorld *g, room_rnum room, int v);
 int rroom_get_timed(GameWorld *g, room_rnum room);
 void rroom_set_timed(GameWorld *g, room_rnum room, int v);
-zone_rnum room_get_zone(const struct room_data *room);
-void room_set_zone(struct room_data *room, zone_rnum v);
-zone_rnum rroom_get_zone(GameWorld *g, room_rnum room);
-void rroom_set_zone(GameWorld *g, room_rnum room, zone_rnum v);
+struct zone_data *room_get_zone(const struct room_data *room);
+void room_set_zone(struct room_data *room, struct zone_data *v);
+struct zone_data *rroom_get_zone(GameWorld *g, room_rnum room);
+void rroom_set_zone(GameWorld *g, room_rnum room, struct zone_data *v);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct script_data **room_script_slot(struct room_data *room);

@@ -8,6 +8,8 @@
 - Every struct field has a default member initializer, and `CREATE`/`RECREATE` are gone: the game allocates with `new`/`delete`, and grows arrays with `resize_array()` (`dbat/arrays.hpp`). [Volund]
 - Loops over characters, objects, connections, room contents, inventories and followers go through `dbat/iterate.hpp` (`for (char_data *ch : room_people(g, room))`, or closures such as `char_iter_all`). Each loop sees the members as they were when it began and passes over any destroyed or moved before their turn, so scripts that purge things mid-loop are safe. `world_audit` checks that every character and object can be found by its id, which this relies on. [Volund]
 - Characters and objects refer to each other by id rather than by pointer (fighting, master, blocks, grappling, absorbing, defending, dragging, mind links, poisoners, seats, users, targets, walls, posts, carrying players, the summoned dragon, the object being restrung or iedited). The getters take the `GameWorld` and return null once the other entity has gone, where a pointer would have dangled. [Volund]
+- Shops, guilds and zones are kept in `vnum_table`s (`dbat/registry.hpp`): owned, never moving, in vnum order, so a room or editor can hold a pointer to its zone. `shop_rnum`, `guild_rnum` and `zone_rnum` are gone, and with them the `top_*` counters and the OLC code that renumbered tables on insert. [Volund]
+- `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3
 - Altered all headers to enclose declarations in `extern "C" {}`, made some minor adjustments to isolate C++ usage in headers to just two files left. This enables seamless Zig integration. [Volund]

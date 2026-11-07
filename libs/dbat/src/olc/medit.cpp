@@ -77,9 +77,9 @@ ACMD(do_oasis_medit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zlok;
 
-      if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(g, zlok);
@@ -126,8 +126,8 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == NOWHERE) {
+  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
@@ -138,7 +138,7 @@ ACMD(do_oasis_medit)
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
     delete d->olc;
     d->olc = nullptr;
     return;
@@ -149,10 +149,10 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   if (save) {
     send_to_char(g, ch, "Saving all mobiles in zone %d.\r\n",
-                 g->zones[OLC_ZNUM(d)].number);
+                 OLC_ZNUM(d)->number);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
            "OLC: %s saves mobile info for zone %d.",
-           char_get_name(ch), g->zones[OLC_ZNUM(d)].number);
+           char_get_name(ch), OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the mobiles.                                                    **/
@@ -189,12 +189,12 @@ ACMD(do_oasis_medit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void medit_save_to_disk(GameWorld *g, zone_vnum foo)
 {
-  save_mobiles(g, real_zone(g, foo));
+  save_mobiles(g, find_zone(g, foo));
 }
 
 static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
@@ -573,7 +573,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                  "OLC: %s edits mob %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
-            medit_save_to_disk(g, g->zones[real_zone_by_thing(g, OLC_NUM(d))].number);
+            medit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d))->number);
             write_to_output(g, d, "Mobile saved to disk.\r\n");
           } else
             write_to_output(g, d, "Mobile saved to memory.\r\n");

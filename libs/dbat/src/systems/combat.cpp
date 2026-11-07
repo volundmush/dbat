@@ -1772,8 +1772,8 @@ void huge_update(GameWorld *g)
               continue;
             }
             rroom_set_dmg(g, obj_get_in_room(k), 100);
-            zone_rnum zone = 0;
-            if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+            struct zone_data *zone = nullptr;
+            if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
               send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
 
@@ -1841,8 +1841,8 @@ void huge_update(GameWorld *g)
             continue;
           }
           rroom_set_dmg(g, obj_get_in_room(k), 100);
-          zone_rnum zone = 0;
-          if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+          struct zone_data *zone = nullptr;
+          if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
             send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
           extract_obj(g, k);
@@ -1941,8 +1941,8 @@ void huge_update(GameWorld *g)
               continue;
             }
             rroom_set_dmg(g, obj_get_in_room(k), 100);
-            zone_rnum zone = 0;
-            if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+            struct zone_data *zone = nullptr;
+            if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
               send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
             extract_obj(g, k);
@@ -2008,8 +2008,8 @@ void huge_update(GameWorld *g)
             continue;
           }
           rroom_set_dmg(g, obj_get_in_room(k), 100);
-          zone_rnum zone = 0;
-          if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+          struct zone_data *zone = nullptr;
+          if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
             send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
           extract_obj(g, k);
@@ -2556,8 +2556,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
       rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
     }
-    zone_rnum zone = 0;
-    if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+    struct zone_data *zone = nullptr;
+    if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
       send_to_zone(g, "An explosion shakes the entire area!\r\n", zone);
     }
     return;
@@ -2669,8 +2669,8 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
     if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
       rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
     }
-    zone_rnum zone = 0;
-    if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+    struct zone_data *zone = nullptr;
+    if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
       send_to_zone(g, "An explosion shakes the entire area!\r\n", zone);
     }
   }

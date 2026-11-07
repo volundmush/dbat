@@ -378,9 +378,8 @@ ACMD(do_summon)
     }
     send_to_imm(g, "Shenron summoned to room: %d\r\n", g->DRAGONR);
 
-    if ((g->DRAGONZ = real_zone_by_thing(g, g->DRAGONR)) != NOWHERE) {
-      g->DRAGONZ = real_zone_by_thing(g, g->DRAGONR);
-    }
+    if (struct zone_data *zone = find_zone_by_thing(g, g->DRAGONR))
+      g->DRAGONZ = zone->number;
 
     for (obj_data *obj : char_inventory(g, ch)) {
 

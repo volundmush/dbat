@@ -26,11 +26,11 @@
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-static void list_rooms(GameWorld *g, struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
-static void list_mobiles(GameWorld *g, struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
-static void list_objects(GameWorld *g, struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
-static void list_shops(GameWorld *g, struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
-static void list_triggers(GameWorld *g, struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
+static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnum, room_vnum vmin, room_vnum vmax);
+static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *rnum, mob_vnum vmin, mob_vnum vmax);
+static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *rnum, obj_vnum vmin, obj_vnum vmax);
+static void list_shops(GameWorld *g, struct char_data *ch, struct zone_data *rnum, shop_vnum vmin, shop_vnum vmax);
+static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *rnum, trig_vnum vmin, trig_vnum vmax);
 static void list_zones(GameWorld *g, struct char_data *ch);
 
 /******************************************************************************/
@@ -38,7 +38,7 @@ static void list_zones(GameWorld *g, struct char_data *ch);
 /******************************************************************************/
 ACMD(do_oasis_list)
 {
-  zone_rnum rzone = NOWHERE;
+  struct zone_data *rzone = nullptr;
   room_rnum vmin  = NOWHERE;
   room_rnum vmax  = NOWHERE;
   char smin[MAX_INPUT_LENGTH];
@@ -57,9 +57,9 @@ ACMD(do_oasis_list)
   if (!*smin || *smin == '.') {
     rzone = rroom_get_zone(g, char_get_in_room(ch));
   } else if (!*smax) {
-    rzone = real_zone(g, atoi(smin));
+    rzone = find_zone(g, atoi(smin));
 
-    if (rzone == NOWHERE) {
+    if (rzone == nullptr) {
       send_to_char(g, ch, "Sorry, there's no zone with that number\r\n");
       return;
     }
@@ -94,7 +94,7 @@ ACMD(do_oasis_list)
 
 ACMD(do_oasis_links)
 {
-  zone_rnum zrnum;
+  struct zone_data *zrnum;
   zone_vnum zvnum;
   room_rnum nr, to_room;
   room_vnum first, last;
@@ -106,19 +106,19 @@ ACMD(do_oasis_links)
 
   if (!strcmp(arg, ".") || !*arg) {
     zrnum = rroom_get_zone(g, char_get_in_room(ch));
-    zvnum = g->zones[zrnum].number;
+    zvnum = zrnum->number;
   } else {
     zvnum = atoi(arg);
-    zrnum = real_zone(g, zvnum);
+    zrnum = find_zone(g, zvnum);
   }
 
-  if (zrnum == NOWHERE || zvnum == NOWHERE) {
+  if (zrnum == nullptr || zvnum == NOWHERE) {
     send_to_char(g, ch, "No zone was found with that number.\n\r");
     return;
   }
 
-  last  = g->zones[zrnum].top;
-  first = g->zones[zrnum].bot;
+  last  = zrnum->top;
+  first = zrnum->bot;
 
   send_to_char(g, ch, "Zone %d is linked to the following zones:\r\n", zvnum);
   for (nr = 0; nr <= g->top_room && (rroom_get_vnum(g, nr) <= last); nr++) {
@@ -128,8 +128,8 @@ ACMD(do_oasis_links)
           to_room = rroom_get_dir_option(g, nr, j)->to_room;
           if (to_room != NOWHERE && (zrnum != rroom_get_zone(g, to_room)))
             send_to_char(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         g->zones[rroom_get_zone(g, to_room)].number,
-                         g->zones[rroom_get_zone(g, to_room)].name,
+                         rroom_get_zone(g, to_room)->number,
+                         rroom_get_zone(g, to_room)->name,
                          rroom_get_vnum(g, nr), dirs[j], rroom_get_vnum(g, to_room));
         }
       }
@@ -144,7 +144,7 @@ ACMD(do_oasis_links)
 /*
  * List all rooms in a zone.                              
  */
-static void list_rooms(GameWorld *g, struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnum, zone_vnum vmin, zone_vnum vmax)
 {
   room_rnum i;
   int j, counter = 0;
@@ -152,9 +152,9 @@ static void list_rooms(GameWorld *g, struct char_data *ch, zone_rnum rnum, zone_
   /*
    * Expect a minimum / maximum number if the rnum for the zone is NOWHERE. 
    */
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -199,15 +199,15 @@ static void list_rooms(GameWorld *g, struct char_data *ch, zone_rnum rnum, zone_
 /*
  * List all mobiles in a zone.                              
  */
-static void list_mobiles(GameWorld *g, struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *rnum, zone_vnum vmin, zone_vnum vmax)
 {
   mob_rnum i;
   IDXTYPE bottom, top;
   int counter = 0;
 
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -238,15 +238,15 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, zone_rnum rnum, zon
 /*
  * List all objects in a zone.                              
  */
-static void list_objects(GameWorld *g, struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax)
+static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *rnum, room_vnum vmin, room_vnum vmax)
 {
   obj_rnum i;
   IDXTYPE bottom, top;
   int counter = 0;
 
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -278,14 +278,14 @@ static void list_objects(GameWorld *g, struct char_data *ch, zone_rnum rnum, roo
 /*
  * List all shops in a zone.                              
  */
-static void list_shops(GameWorld *g, struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
+static void list_shops(GameWorld *g, struct char_data *ch, struct zone_data *rnum, shop_vnum vmin, shop_vnum vmax)
 {
   int j, counter = 0;
   IDXTYPE bottom, top;
 
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -328,19 +328,18 @@ static void list_shops(GameWorld *g, struct char_data *ch, zone_rnum rnum, shop_
  */
 static void list_zones(GameWorld *g, struct char_data *ch)
 {
-  zone_rnum i;
 
   send_to_char(g, ch,
                "VNum  Zone Name                      Builder(s)\r\n"
                "----- ------------------------------ --------------------------------------\r\n");
 
-  if (!g->top_zone)
+  if (g->zones.empty())
     return;
 
-  for (i = 0; i <= g->top_zone; i++)
+  for (struct zone_data *i : g->zones.all())
     send_to_char(g, ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
-                 g->zones[i].number, count_color_chars(g->zones[i].name) + 30, g->zones[i].name,
-                 g->zones[i].builders ? g->zones[i].builders : "None.");
+                 i->number, count_color_chars(i->name) + 30, i->name,
+                 i->builders ? i->builders : "None.");
 }
 
 /*
@@ -348,7 +347,7 @@ static void list_zones(GameWorld *g, struct char_data *ch)
  */
 void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
 {
-  zone_rnum rnum;
+  struct zone_data *rnum;
   int size_rooms, size_objects, size_mobiles;
   IDXTYPE i;
   int size_guilds, size_triggers, size_shops;
@@ -356,12 +355,12 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   IDXTYPE largest_table;
   char bits[MAX_STRING_LENGTH];
 
-  if ((rnum = real_zone(g, vnum)) == NOWHERE) {
+  if ((rnum = find_zone(g, vnum)) == nullptr) {
     send_to_char(g, ch, "Zone #%d does not exist in the database.\r\n", vnum);
     return;
   }
 
-  sprintbitarray(g->zones[rnum].zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
+  sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
   /****************************************************************************/
   /** Locate the largest of the three, g->top_room, g->top_mob, or           **/
   /** g->top_obj.                                                            **/
@@ -379,8 +378,8 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   size_rooms    = 0;
   size_objects  = 0;
   size_mobiles  = 0;
-  top           = g->zones[rnum].top;
-  bottom        = g->zones[rnum].bot;
+  top           = rnum->top;
+  bottom        = rnum->bot;
   size_shops    = 0;
   size_triggers = 0;
   size_guilds   = 0;
@@ -430,16 +429,16 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
                "@g   Shops       = @c%d\r\n"
                "@g   Triggers    = @c%d\r\n"
                "@g   Guilds      = @c%d@n\r\n",
-               g->zones[rnum].number, g->zones[rnum].name,
-               g->zones[rnum].builders, g->zones[rnum].lifespan,
-               g->zones[rnum].age, g->zones[rnum].bot, g->zones[rnum].top,
-               g->zones[rnum].reset_mode ? ((g->zones[rnum].reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-               g->zones[rnum].min_level, g->zones[rnum].max_level, bits,
+               rnum->number, rnum->name,
+               rnum->builders, rnum->lifespan,
+               rnum->age, rnum->bot, rnum->top,
+               rnum->reset_mode ? ((rnum->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
+               rnum->min_level, rnum->max_level, bits,
                size_rooms, size_objects, size_mobiles, size_shops, size_triggers, size_guilds);
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
-static void list_triggers(GameWorld *g, struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax)
+static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *rnum, trig_vnum vmin, trig_vnum vmax)
 {
   trig_rnum i;
   IDXTYPE bottom, top;
@@ -447,9 +446,9 @@ static void list_triggers(GameWorld *g, struct char_data *ch, zone_rnum rnum, tr
   char trgtypes[256];
 
   /** Expect a minimum / maximum number if the rnum for the zone is NOWHERE. **/
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;

@@ -35,7 +35,7 @@
 
 /* local functions */
 static void hedit_setup_new(GameWorld *g, struct descriptor_data *);
-static void hedit_setup_existing(GameWorld *g, struct descriptor_data *, zone_rnum);
+static void hedit_setup_existing(GameWorld *g, struct descriptor_data *, int);
 static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *);
 static void hedit_save_internally(GameWorld *g, struct descriptor_data *);
 
@@ -86,13 +86,13 @@ ACMD(do_oasis_hedit)
   d->olc         = new oasis_olc_data();
   OLC_NUM(d)     = 0;
   OLC_STORAGE(d) = strdup(arg);
-  OLC_ZNUM(d)    = search_help(g, (const char *)OLC_STORAGE(d), ADMLVL_IMPL);
+  OLC_INDEX(d)   = search_help(g, (const char *)OLC_STORAGE(d), ADMLVL_IMPL);
 
-  if (OLC_ZNUM(d) == NOWHERE) {
+  if (OLC_INDEX(d) == NOWHERE) {
     send_to_char(g, ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
     OLC_MODE(d) = HEDIT_CONFIRM_ADD;
   } else {
-    send_to_char(g, ch, "Do you wish to edit the '%s' help file? ", g->help_table[OLC_ZNUM(d)].keywords);
+    send_to_char(g, ch, "Do you wish to edit the '%s' help file? ", g->help_table[OLC_INDEX(d)].keywords);
     OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
   }
 
@@ -119,7 +119,7 @@ static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
   hedit_disp_menu(g, d);
 }
 
-static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, zone_rnum rnum)
+static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, int rnum)
 {
   OLC_HELP(d) = new help_index_element();
 
@@ -135,8 +135,8 @@ static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, zone_r
 static void hedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   struct help_index_element *new_help_table = nullptr;
-  if (OLC_ZNUM(d) == NOWHERE) {
-    /*if (OLC_ZNUM(d) > top_of_helpt) {*/
+  if (OLC_INDEX(d) == NOWHERE) {
+    /*if (OLC_INDEX(d) > top_of_helpt) {*/
     int i;
     new_help_table = new help_index_element[g->top_of_helpt + 2]();
 
@@ -147,7 +147,7 @@ static void hedit_save_internally(GameWorld *g, struct descriptor_data *d)
     delete[] g->help_table;
     g->help_table = new_help_table;
   } else
-    g->help_table[OLC_ZNUM(d)] = *OLC_HELP(d);
+    g->help_table[OLC_INDEX(d)] = *OLC_HELP(d);
 
   add_to_save_list(g, HEDIT_PERMISSION, SL_HLP);
   hedit_save_to_disk(g, d);
@@ -250,7 +250,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          hedit_setup_existing(g, d, OLC_ZNUM(d));
+          hedit_setup_existing(g, d, OLC_INDEX(d));
           break;
         case 'q':
         case 'Q':
@@ -258,29 +258,29 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'n':
         case 'N':
-          OLC_ZNUM(d)
+          OLC_INDEX(d)
           ++;
-          for (; OLC_ZNUM(d) <= g->top_of_helpt; OLC_ZNUM(d)++)
-            if (is_abbrev(OLC_STORAGE(d), g->help_table[OLC_ZNUM(d)].keywords))
+          for (; OLC_INDEX(d) <= g->top_of_helpt; OLC_INDEX(d)++)
+            if (is_abbrev(OLC_STORAGE(d), g->help_table[OLC_INDEX(d)].keywords))
               break;
             else
-              OLC_ZNUM(d) = g->top_of_helpt + 1;
+              OLC_INDEX(d) = g->top_of_helpt + 1;
 
-          if (OLC_ZNUM(d) > g->top_of_helpt) {
-            OLC_ZNUM(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
+          if (OLC_INDEX(d) > g->top_of_helpt) {
+            OLC_INDEX(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
             write_to_output(g, d, "Do you wish to add the '%s' help file? ",
                             OLC_STORAGE(d));
             OLC_MODE(d) = HEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '%s' help file? ",
-                            g->help_table[OLC_ZNUM(d)].keywords);
+                            g->help_table[OLC_INDEX(d)].keywords);
             OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
           }
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\n"
-                             "Do you wish to edit the '%s' help file? ",
-                          g->help_table[OLC_ZNUM(d)].keywords);
+                                "Do you wish to edit the '%s' help file? ",
+                          g->help_table[OLC_INDEX(d)].keywords);
           break;
       }
       return;

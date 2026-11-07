@@ -499,7 +499,7 @@ ACMD(do_detach)
 
       else if (!char_get_script(victim))
         send_to_char(g, ch, "That mob doesn't have any triggers.\r\n");
-      else if (!can_edit_zone(g, ch, real_zone_by_thing(g, char_get_mob_vnum(g, victim)))) {
+      else if (!can_edit_zone(g, ch, find_zone_by_thing(g, char_get_mob_vnum(g, victim)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && !strcasecmp(trigger, "all")) {
@@ -520,7 +520,7 @@ ACMD(do_detach)
       if (!obj_get_script(object))
         send_to_char(g, ch, "That object doesn't have any triggers.\r\n");
 
-      else if (!can_edit_zone(g, ch, real_zone_by_thing(g, obj_get_vnum(g, object)))) {
+      else if (!can_edit_zone(g, ch, find_zone_by_thing(g, obj_get_vnum(g, object)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && !strcasecmp(trigger, "all")) {

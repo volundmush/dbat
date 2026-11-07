@@ -518,8 +518,8 @@ static void check_zone_range_keeps_what_is_in_it(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_IMPL);
-  zone_rnum zone = real_zone(g, 3);
-  int bot = g->zones[zone].bot, top = g->zones[zone].top;
+  struct zone_data *zone = find_zone(g, 3);
+  int bot = zone->bot, top = zone->top;
 
   th_type(g, ch, "zedit 300");
   th_type(g, ch, "t");
@@ -530,8 +530,8 @@ static void check_zone_range_keeps_what_is_in_it(void)
   CHECK(saw(ch, "Range not changed"));
   th_type(g, ch, "q");
   th_type(g, ch, "y");
-  CHECK(g->zones[zone].bot == bot);
-  CHECK(g->zones[zone].top == top);
+  CHECK(zone->bot == bot);
+  CHECK(zone->top == top);
   CHECK(real_room(g, 301) != NOWHERE);
   th_shutdown(g);
 }

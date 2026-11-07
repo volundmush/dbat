@@ -12,7 +12,7 @@ void free_shop(struct shop_data *shop);
 void free_shop_contents(struct shop_data *shop);
 const char *modify_string(char **str, char *newstr, bool allow_int);
 struct shop_data *add_shop(GameWorld *g, struct shop_data *shop);
-bool save_shops(GameWorld *g, zone_rnum zone_num);
+bool save_shops(GameWorld *g, struct zone_data *zone_num);
 struct shop_data *find_shop(GameWorld *g, shop_vnum vnum);
 
 /*

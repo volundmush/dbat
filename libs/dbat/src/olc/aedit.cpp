@@ -84,11 +84,11 @@ ACMD(do_oasis_aedit)
   OLC_NUM(d)     = 0;
   OLC_STORAGE(d) = strdup(arg);
 
-  for (OLC_ZNUM(d) = 0; (OLC_ZNUM(d) <= g->top_of_socialt); OLC_ZNUM(d)++)
-    if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_ZNUM(d)].command))
+  for (OLC_INDEX(d) = 0; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
+    if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_INDEX(d)].command))
       break;
 
-  if (OLC_ZNUM(d) > g->top_of_socialt) {
+  if (OLC_INDEX(d) > g->top_of_socialt) {
     if ((i = aedit_find_command(g, OLC_STORAGE(d))) != -1) {
       send_to_char(g, ch, "The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), g->complete_cmd_info[i].command);
       cleanup_olc(g, d, CLEANUP_ALL);
@@ -97,7 +97,7 @@ ACMD(do_oasis_aedit)
     send_to_char(g, ch, "Do you wish to add the '%s' action? ", OLC_STORAGE(d));
     OLC_MODE(d) = AEDIT_CONFIRM_ADD;
   } else {
-    send_to_char(g, ch, "Do you wish to edit the '%s' action? ", g->soc_mess_list[OLC_ZNUM(d)].command);
+    send_to_char(g, ch, "Do you wish to edit the '%s' action? ", g->soc_mess_list[OLC_INDEX(d)].command);
     OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
   desc_set_connected(d, CON_AEDIT);
@@ -166,7 +166,7 @@ static void aedit_save_internally(GameWorld *g, struct descriptor_data *d)
   int i;
 
   /* add a new social into the list */
-  if (OLC_ZNUM(d) > g->top_of_socialt) {
+  if (OLC_INDEX(d) > g->top_of_socialt) {
     new_soc_mess_list = new social_messg[g->top_of_socialt + 2]();
     for (i = 0; i <= g->top_of_socialt; i++)
       new_soc_mess_list[i] = g->soc_mess_list[i];
@@ -177,10 +177,10 @@ static void aedit_save_internally(GameWorld *g, struct descriptor_data *d)
   /* pass the editted action back to the list - no need to add */
   else {
     i                     = aedit_find_command(g, OLC_ACTION(d)->command);
-    OLC_ACTION(d)->act_nr = g->soc_mess_list[OLC_ZNUM(d)].act_nr;
+    OLC_ACTION(d)->act_nr = g->soc_mess_list[OLC_INDEX(d)].act_nr;
     /* why did i do this..? hrm */
-    free_action(g->soc_mess_list + OLC_ZNUM(d));
-    g->soc_mess_list[OLC_ZNUM(d)] = *OLC_ACTION(d);
+    free_action(g->soc_mess_list + OLC_INDEX(d));
+    g->soc_mess_list[OLC_INDEX(d)] = *OLC_ACTION(d);
   }
 
   create_command_list(g);
@@ -325,7 +325,7 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          aedit_setup_existing(g, d, OLC_ZNUM(d));
+          aedit_setup_existing(g, d, OLC_INDEX(d));
           break;
         case 'q':
         case 'Q':
@@ -333,13 +333,13 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'n':
         case 'N':
-          OLC_ZNUM(d)
+          OLC_INDEX(d)
           ++;
-          for (; (OLC_ZNUM(d) <= g->top_of_socialt); OLC_ZNUM(d)++)
-            if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_ZNUM(d)].command))
+          for (; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
+            if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_INDEX(d)].command))
               break;
 
-          if (OLC_ZNUM(d) > g->top_of_socialt) {
+          if (OLC_INDEX(d) > g->top_of_socialt) {
             if (aedit_find_command(g, OLC_STORAGE(d)) != -1) {
               cleanup_olc(g, d, CLEANUP_ALL);
               break;
@@ -349,14 +349,14 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             OLC_MODE(d) = AEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '%s' action? ",
-                            g->soc_mess_list[OLC_ZNUM(d)].command);
+                            g->soc_mess_list[OLC_INDEX(d)].command);
             OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
           }
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\n"
-                             "Do you wish to edit the '%s' action? ",
-                          g->soc_mess_list[OLC_ZNUM(d)].command);
+                                "Do you wish to edit the '%s' action? ",
+                          g->soc_mess_list[OLC_INDEX(d)].command);
           break;
       }
       return;

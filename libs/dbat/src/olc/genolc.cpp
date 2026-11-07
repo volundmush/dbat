@@ -26,7 +26,7 @@
 /* Structure defining all known save types.  */
 static struct {
   int save_type;
-  bool (*func)(GameWorld *g, IDXTYPE rnum);
+  bool (*func)(GameWorld *g, struct zone_data *zone);
   const char *message;
 } save_types[] = {
     {SL_MOB, save_mobiles, "mobile"},
@@ -109,7 +109,7 @@ bool save_all(GameWorld *g)
           mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", g->save_list->type);
           break;
       }
-    } else if (!save_types[g->save_list->type].func(g, real_zone(g, g->save_list->zone)))
+    } else if (!save_types[g->save_list->type].func(g, find_zone(g, g->save_list->zone)))
       g->save_list = g->save_list->next; /* Fatal error, skip this one. */
   }
 
@@ -185,15 +185,15 @@ bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
 bool add_to_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *nitem;
-  zone_rnum rznum;
+  struct zone_data *rznum;
 
   if (type == SL_CFG)
     return false;
 
-  rznum = real_zone(g, zone);
-  if (rznum == NOWHERE || rznum > g->top_zone) {
+  rznum = find_zone(g, zone);
+  if (rznum == nullptr) {
     if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, g->top_zone);
+      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
       return false;
     }
   }
@@ -254,9 +254,9 @@ room_vnum genolc_zonep_bottom(struct zone_data *zone)
   return zone->bot;
 }
 
-zone_vnum genolc_zone_bottom(GameWorld *g, zone_rnum rznum)
+zone_vnum genolc_zone_bottom(GameWorld *g, struct zone_data *rznum)
 {
-  return g->zones[rznum].bot;
+  return rznum->bot;
 }
 
 int sprintascii(char *out, bitvector_t bits)

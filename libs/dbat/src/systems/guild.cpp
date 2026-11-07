@@ -1462,14 +1462,14 @@ void show_guild(GameWorld *g, struct char_data *ch, char *arg)
 /*
  * List all guilds in a zone.                              
  */
-void list_guilds(GameWorld *g, struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax)
+void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, guild_vnum vmin, guild_vnum vmax)
 {
   IDXTYPE bottom, top;
   int counter = 0;
 
-  if (rnum != NOWHERE) {
-    bottom = g->zones[rnum].bot;
-    top    = g->zones[rnum].top;
+  if (rnum != nullptr) {
+    bottom = rnum->bot;
+    top    = rnum->top;
   } else {
     bottom = vmin;
     top    = vmax;

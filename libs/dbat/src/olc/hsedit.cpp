@@ -410,7 +410,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
            "@gQ@D)@g Quit\r\n"
            "@gEnter choice : @n",
 
-           OLC_NUM(d), g->zones[OLC_ZNUM(d)].number,
+           OLC_NUM(d), OLC_ZNUM(d)->number,
            house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name : get_name_by_id(g, house->owner),
            house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
            house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(g, house, buf2), buf1);
@@ -895,9 +895,9 @@ ACMD(do_oasis_hsedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zlok;
 
-      if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(g, zlok);
@@ -951,8 +951,8 @@ ACMD(do_oasis_hsedit)
   /** Find the zone.                                                         **/
 
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == NOWHERE) {
+  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
 
     /**************************************************************************/
@@ -969,9 +969,9 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_to_char(g, ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+    send_to_char(g, ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "OLC: %s tried to edit zone %d allowed zone %d",
-           char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+           char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                **/
@@ -988,10 +988,10 @@ ACMD(do_oasis_hsedit)
   /****************************************************************************/
   if (save) {
     send_to_char(g, ch, "Saving all houses in zone %d.\r\n",
-                 g->zones[OLC_ZNUM(d)].number);
+                 OLC_ZNUM(d)->number);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
            "OLC: %s saves house info for zone %d.", char_get_name(ch),
-           g->zones[OLC_ZNUM(d)].number);
+           OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the houses in this zone.                                       **/
@@ -1042,5 +1042,5 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "OLC: (hsedit) %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }

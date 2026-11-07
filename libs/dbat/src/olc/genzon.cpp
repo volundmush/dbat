@@ -18,52 +18,29 @@
 
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 
-/* real zone of room/mobile/object/shop given */
-/* Orders a vnum against the range of vnums a zone covers. */
-/* bsearch() can only pass its comparator two pointers, so the key carries the world too */
-struct zone_range_key {
-  GameWorld *g{};
-  room_vnum vnum{};
-};
-
-static int zone_range_order(const void *key_ptr, const void *zone)
+/* The zone whose rooms include vznum, or null. */
+struct zone_data *find_zone_by_thing(GameWorld *g, room_vnum vznum)
 {
-  const struct zone_range_key *key = static_cast<const struct zone_range_key *>(key_ptr);
-  GameWorld *g                     = key->g;
-  const struct zone_data *z        = static_cast<const struct zone_data *>(zone);
-
-  if (key->vnum < genolc_zone_bottom(g, z - g->zones))
-    return -1;
-  return key->vnum > z->top;
+  for (struct zone_data *zone : g->zones.all())
+    if (vznum >= genolc_zone_bottom(g, zone) && vznum <= zone->top)
+      return zone;
+  return nullptr;
 }
 
-zone_rnum real_zone_by_thing(GameWorld *g, room_vnum vznum)
-{
-  struct zone_range_key key = {g, vznum};
-  struct zone_data *found;
-
-  if (g->top_zone < 0)
-    return NOWHERE;
-  found = (struct zone_data *)bsearch(&key, g->zones, g->top_zone + 1, sizeof(*g->zones), zone_range_order);
-  return found ? found - g->zones : NOWHERE;
-}
-
-zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
+struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
   struct atomic_file af;
   FILE *fp;
   struct zone_data *zone;
-  IDXTYPE i;
-  zone_rnum rznum;
   char buf[MAX_STRING_LENGTH];
 
   if (vzone_num < 0) {
     *error = "You can't make negative zones.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   if (bottom > top) {
     *error = "Bottom room cannot be greater than top room.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -74,17 +51,17 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
    */
   if (vzone_num > 1000) {
     *error = "1000 is the highest zone allowed.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
    * Make sure the zone does not exist.
    */
   room_vnum room = vzone_num * 100; /* Old CircleMUD 100-zones. */
-  for (i = 0; i <= g->top_zone; i++)
-    if (genolc_zone_bottom(g, i) <= room && g->zones[i].top >= room) {
+  for (struct zone_data *i : g->zones.all())
+    if (genolc_zone_bottom(g, i) <= room && i->top >= room) {
       *error = "A zone already covers that area.\r\n";
-      return NOWHERE;
+      return nullptr;
     }
 
   /*
@@ -94,13 +71,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -110,13 +87,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -126,13 +103,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*  
@@ -142,13 +119,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -158,13 +135,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -174,13 +151,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -190,13 +167,13 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
-    return NOWHERE;
+    return nullptr;
   }
 
   /*
@@ -210,37 +187,8 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   create_world_index(g, vzone_num, "trg");
   create_world_index(g, vzone_num, "gld");
 
-  /*
-   * Make a new zone in memory. This was the source of all the zedit new
-   * crashes reported to the CircleMUD list. It was happily overwriting
-   * the stack.  This new loop by Andrew Helm fixes that problem and is
-   * more understandable at the same time.
-   *
-   * The variable is 'top_of_zone_table_table + 2' because we need record 0
-   * through top_of_zone (top_of_zone_table + 1 items) and a new one which
-   * makes it top_of_zone_table + 2 elements large.
-   */
-  resize_array(g->zones, g->top_zone + 1, g->top_zone + 2);
-  g->zones[g->top_zone + 1].number = 32000;
+  zone = g->zones.emplace(vzone_num);
 
-  if (vzone_num > g->zones[g->top_zone].number)
-    rznum = g->top_zone + 1;
-  else {
-    room_vnum j;
-    room_rnum rnum;
-    for (i = g->top_zone + 1; i > 0 && vzone_num < g->zones[i - 1].number; i--) {
-      g->zones[i] = g->zones[i - 1];
-      for (j = g->zones[i].bot; j <= g->zones[i].top; j++)
-        if ((rnum = real_room(g, j)) != NOWHERE)
-          rroom_set_zone(g, rnum, rroom_get_zone(g, rnum) + 1);
-    }
-    rznum = i;
-  }
-  zone = &g->zones[rznum];
-
-  /*
-   * Ok, insert the new zone here.
-   */
   zone->name          = strdup("New Zone");
   zone->number        = vzone_num;
   zone->builders      = strdup("None");
@@ -261,16 +209,12 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   zone->cmd            = new reset_com[1]();
   zone->cmd[0].command = 'S';
 
-  g->top_zone++;
-
-  for (i = g->top_room; i > 0; i--)
-    if (rroom_get_zone(g, i) < real_zone(g, rznum))
-      break;
-    else
-      rroom_set_zone(g, i, real_zone_by_thing(g, rroom_get_vnum(g, i)));
+  for (room_vnum v = bottom; v <= top; v++) /* rooms already in its range now belong to it */
+    if (room_rnum r = real_room(g, v); r != NOWHERE)
+      rroom_set_zone(g, r, zone);
 
   add_to_save_list(g, zone->number, SL_ZON);
-  return rznum;
+  return zone;
 }
 
 /*-------------------------------------------------------------------*/
@@ -358,7 +302,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 
 /*-------------------------------------------------------------------*/
 
-void remove_room_zone_commands(GameWorld *g, zone_rnum zone, room_rnum room_num)
+void remove_room_zone_commands(GameWorld *g, struct zone_data *zone, room_rnum room_num)
 {
   int subcmd         = 0;
   room_rnum cmd_room = -2;
@@ -367,23 +311,23 @@ void remove_room_zone_commands(GameWorld *g, zone_rnum zone, room_rnum room_num)
    * Delete all entries in zone_table that relate to this room so we
    * can add all the ones we have in their place.
    */
-  while (g->zones[zone].cmd[subcmd].command != 'S') {
-    switch (g->zones[zone].cmd[subcmd].command) {
+  while (zone->cmd[subcmd].command != 'S') {
+    switch (zone->cmd[subcmd].command) {
       case 'M':
       case 'O':
       case 'T':
       case 'V':
-        cmd_room = g->zones[zone].cmd[subcmd].arg3;
+        cmd_room = zone->cmd[subcmd].arg3;
         break;
       case 'D':
       case 'R':
-        cmd_room = g->zones[zone].cmd[subcmd].arg1;
+        cmd_room = zone->cmd[subcmd].arg1;
         break;
       default:
         break;
     }
     if (cmd_room == room_num)
-      remove_cmd_from_list(&g->zones[zone].cmd, subcmd);
+      remove_cmd_from_list(&zone->cmd, subcmd);
     else
       subcmd++;
   }
@@ -396,7 +340,7 @@ void remove_room_zone_commands(GameWorld *g, zone_rnum zone, room_rnum room_num)
  * writes simple comments in the form of (<name>) to each record.  A
  * header for each field is also there.
  */
-bool save_zone(GameWorld *g, zone_rnum zone_num)
+bool save_zone(GameWorld *g, struct zone_data *zone_num)
 {
   int subcmd, arg4 = -1, arg5 = -1;
   IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
@@ -409,44 +353,44 @@ bool save_zone(GameWorld *g, zone_rnum zone_num)
   char zbuf3[MAX_STRING_LENGTH];
   char zbuf4[MAX_STRING_LENGTH];
 
-  if (zone_num < 0 || zone_num > g->top_zone) {
-    mud_log("SYSERR: GenOLC: save_zone: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
+  if (!zone_num) {
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, g->zones[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, zone_num->number);
   if (!(zfile = atomic_open(&af, fname, false))) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.", g->zones[zone_num].number);
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.", zone_num->number);
     return false;
   }
 
   /*
    * Print zone header to file	
    */
-  sprintascii(zbuf1, g->zones[zone_num].zone_flags[0]);
-  sprintascii(zbuf2, g->zones[zone_num].zone_flags[1]);
-  sprintascii(zbuf3, g->zones[zone_num].zone_flags[2]);
-  sprintascii(zbuf4, g->zones[zone_num].zone_flags[3]);
+  sprintascii(zbuf1, zone_num->zone_flags[0]);
+  sprintascii(zbuf2, zone_num->zone_flags[1]);
+  sprintascii(zbuf3, zone_num->zone_flags[2]);
+  sprintascii(zbuf4, zone_num->zone_flags[3]);
 
   fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
   fprintf(zfile, "#%d\n"
                  "%s~\n"
                  "%s~\n"
                  "%d %d %d %d %s %s %s %s %d %d\n",
-          g->zones[zone_num].number,
-          (g->zones[zone_num].builders && *g->zones[zone_num].builders)
-              ? g->zones[zone_num].builders
+          zone_num->number,
+          (zone_num->builders && *zone_num->builders)
+              ? zone_num->builders
               : "None.",
-          (g->zones[zone_num].name && *g->zones[zone_num].name)
-              ? g->zones[zone_num].name
+          (zone_num->name && *zone_num->name)
+              ? zone_num->name
               : "undefined",
           genolc_zone_bottom(g, zone_num),
-          g->zones[zone_num].top,
-          g->zones[zone_num].lifespan,
-          g->zones[zone_num].reset_mode,
+          zone_num->top,
+          zone_num->lifespan,
+          zone_num->reset_mode,
           zbuf1, zbuf2, zbuf3, zbuf4,
-          g->zones[zone_num].min_level,
-          g->zones[zone_num].max_level);
+          zone_num->min_level,
+          zone_num->max_level);
 
   /*
 	 * Handy Quick Reference Chart for Zone Values.
@@ -556,9 +500,9 @@ bool save_zone(GameWorld *g, zone_rnum zone_num)
     return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
-  if (in_save_list(g, g->zones[zone_num].number, SL_ZON)) {
-    remove_from_save_list(g, g->zones[zone_num].number, SL_ZON);
-    create_world_index(g, g->zones[zone_num].number, "zon");
+  if (in_save_list(g, zone_num->number, SL_ZON)) {
+    remove_from_save_list(g, zone_num->number, SL_ZON);
+    create_world_index(g, zone_num->number, "zon");
     mud_log("GenOLC: save_zone: Saving zone '%s'", oldname);
   }
   return true;

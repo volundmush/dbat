@@ -84,7 +84,8 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
 
 struct oasis_olc_data {
   int mode{};                        /* how to parse input       */
-  zone_rnum zone_num{};              /* current zone             */
+  int index{};                       /* aedit's social, hedit's help entry */
+  struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
   char *storage{};                   /* used for 'tedit'         */
@@ -115,7 +116,8 @@ struct oasis_olc_data {
 #define OLC_MODE(d) (OLC(d)->mode)     /* Parse input mode.	*/
 #define OLC_NUM(d)  (OLC(d)->number)   /* Room/Obj VNUM.	*/
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
-#define OLC_ZNUM(d) (OLC(d)->zone_num) /* Real zone number.	*/
+#define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
+#define OLC_INDEX(d) (OLC(d)->index)    /* aedit's and hedit's entry. */
 
 #define OLC_STORAGE(d) (OLC(d)->storage)     /* char pointer.	*/
 #define OLC_ROOM(d)    (OLC(d)->room)        /* Room structure.	*/
@@ -462,7 +464,7 @@ bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg);
 
 bool free_strings(GameWorld *g, void *data, int type);
 void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum);
-bool can_edit_zone(GameWorld *g, struct char_data *ch, zone_rnum rnum);
+bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum);
 
 #define CONTEXT_HELP_STRING "help"
 

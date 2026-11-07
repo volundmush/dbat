@@ -48,7 +48,7 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
     copy_room(&g->rooms[i], room);
     rroom_set_people(g, i, tch);
     rroom_set_contents(g, i, tobj);
-    add_to_save_list(g, g->zones[room_get_zone(room)].number, SL_WLD);
+    add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
     mud_log("GenOLC: add_room: Updated existing room #%d.", room_get_number(room));
     return i;
   }
@@ -87,28 +87,29 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
   /*
    * Find what zone that room was in so we can update the loading table.
    */
-  for (i = room_get_zone(room); i <= g->top_zone; i++)
-    for (j = 0; zone_get_cmd(g, i, j)->command != 'S'; j++)
-      switch (zone_get_cmd(g, i, j)->command) {
-        case 'M':
-        case 'O':
-        case 'T':
-        case 'V':
-          zone_get_cmd(g, i, j)->arg3 += (zone_get_cmd(g, i, j)->arg3 != NOWHERE && zone_get_cmd(g, i, j)->arg3 >= found);
-          break;
-        case 'D':
-        case 'R':
-          zone_get_cmd(g, i, j)->arg1 += (zone_get_cmd(g, i, j)->arg1 != NOWHERE && zone_get_cmd(g, i, j)->arg1 >= found);
-          break;
-        case 'G':
-        case 'P':
-        case 'E':
-        case '*':
-          /* Known zone entries we don't care about. */
-          break;
-        default:
-          mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
-      }
+  for (struct zone_data *zone : g->zones.all()) /* from the room's zone on */
+    if (zone->number >= room_get_zone(room)->number)
+      for (j = 0; zone_get_cmd(g, zone, j)->command != 'S'; j++)
+        switch (zone_get_cmd(g, zone, j)->command) {
+          case 'M':
+          case 'O':
+          case 'T':
+          case 'V':
+            zone_get_cmd(g, zone, j)->arg3 += (zone_get_cmd(g, zone, j)->arg3 != NOWHERE && zone_get_cmd(g, zone, j)->arg3 >= found);
+            break;
+          case 'D':
+          case 'R':
+            zone_get_cmd(g, zone, j)->arg1 += (zone_get_cmd(g, zone, j)->arg1 != NOWHERE && zone_get_cmd(g, zone, j)->arg1 >= found);
+            break;
+          case 'G':
+          case 'P':
+          case 'E':
+          case '*':
+            /* Known zone entries we don't care about. */
+            break;
+          default:
+            mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
+        }
 
   /*
    * Update the loadroom table. Adds 1 or 0.
@@ -128,7 +129,7 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
         rroom_get_dir_option(g, i, j)->to_room += (rroom_get_dir_option(g, i, j)->to_room >= found);
   } while (i > 0);
 
-  add_to_save_list(g, g->zones[room_get_zone(room)].number, SL_WLD);
+  add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
 
   /*
    * Return what array entry we placed the new room in.
@@ -155,7 +156,7 @@ bool delete_room(GameWorld *g, room_rnum rnum)
     return false;
   }
 
-  add_to_save_list(g, g->zones[room_get_zone(room)].number, SL_WLD);
+  add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
 
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room_get_number(room), room_get_name(room));
@@ -219,24 +220,24 @@ bool delete_room(GameWorld *g, room_rnum rnum)
   /*
    * Find what zone that room was in so we can update the loading table.
    */
-  for (i = 0; i <= g->top_zone; i++)
-    for (j = 0; zone_get_cmd(g, i, j)->command != 'S'; j++)
-      switch (zone_get_cmd(g, i, j)->command) {
+  for (struct zone_data *zone : g->zones.all())
+    for (j = 0; zone_get_cmd(g, zone, j)->command != 'S'; j++)
+      switch (zone_get_cmd(g, zone, j)->command) {
         case 'M':
         case 'O':
         case 'T':
         case 'V':
-          if (zone_get_cmd(g, i, j)->arg3 == rnum)
-            zone_get_cmd(g, i, j)->command = '*'; /* Cancel command. */
-          else if (zone_get_cmd(g, i, j)->arg3 > rnum)
-            zone_get_cmd(g, i, j)->arg3 -= (zone_get_cmd(g, i, j)->arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
+          if (zone_get_cmd(g, zone, j)->arg3 == rnum)
+            zone_get_cmd(g, zone, j)->command = '*'; /* Cancel command. */
+          else if (zone_get_cmd(g, zone, j)->arg3 > rnum)
+            zone_get_cmd(g, zone, j)->arg3 -= (zone_get_cmd(g, zone, j)->arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
           break;
         case 'D':
         case 'R':
-          if (zone_get_cmd(g, i, j)->arg1 == rnum)
-            zone_get_cmd(g, i, j)->command = '*'; /* Cancel command. */
-          else if (zone_get_cmd(g, i, j)->arg1 > rnum)
-            zone_get_cmd(g, i, j)->arg1 -= (zone_get_cmd(g, i, j)->arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
+          if (zone_get_cmd(g, zone, j)->arg1 == rnum)
+            zone_get_cmd(g, zone, j)->command = '*'; /* Cancel command. */
+          else if (zone_get_cmd(g, zone, j)->arg1 > rnum)
+            zone_get_cmd(g, zone, j)->arg1 -= (zone_get_cmd(g, zone, j)->arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
           break;
         case 'G':
         case 'P':
@@ -279,7 +280,7 @@ bool delete_room(GameWorld *g, room_rnum rnum)
   return true;
 }
 
-bool save_rooms(GameWorld *g, zone_rnum zone_num)
+bool save_rooms(GameWorld *g, struct zone_data *zone_num)
 {
   room_vnum i;
   struct room_data *room;
@@ -290,21 +291,21 @@ bool save_rooms(GameWorld *g, zone_rnum zone_num)
   char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
   char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
 
-  if (zone_num < 0 || zone_num > g->top_zone) {
-    mud_log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed! (0-%d)", zone_num, g->top_zone);
+  if (!zone_num) {
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
   mud_log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
-          g->zones[zone_num].number, genolc_zone_bottom(g, zone_num), g->zones[zone_num].top);
+          zone_num->number, genolc_zone_bottom(g, zone_num), zone_num->top);
 
-  snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, g->zones[zone_num].number);
+  snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, zone_num->number);
   if (!(sf = atomic_open(&af, filename, false))) {
     perror("SYSERR: save_rooms");
     return false;
   }
 
-  for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
+  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
     room_rnum rnum;
 
     if ((rnum = real_room(g, i)) != NOWHERE) {
@@ -332,7 +333,7 @@ bool save_rooms(GameWorld *g, zone_rnum zone_num)
               room_get_number(room),
               room_get_name(room) ? room_get_name(room) : "Untitled", STRING_TERMINATOR,
               buf, STRING_TERMINATOR,
-              g->zones[room_get_zone(room)].number,
+              room_get_zone(room)->number,
               rbuf1, rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
 
       /*
@@ -410,9 +411,9 @@ bool save_rooms(GameWorld *g, zone_rnum zone_num)
     return false;
   snprintf(buf, sizeof(buf), "%s", filename);
 
-  if (in_save_list(g, g->zones[zone_num].number, SL_WLD)) {
-    remove_from_save_list(g, g->zones[zone_num].number, SL_WLD);
-    create_world_index(g, g->zones[zone_num].number, "wld");
+  if (in_save_list(g, zone_num->number, SL_WLD)) {
+    remove_from_save_list(g, zone_num->number, SL_WLD);
+    create_world_index(g, zone_num->number, "wld");
     mud_log("GenOLC: save_rooms: Saving rooms '%s'", buf);
   }
   return true;

@@ -276,7 +276,7 @@ static void check_extract_with_followers(GameWorld *g, struct char_data *ch)
 {
   struct char_data *leader, *follower;
 
-  reset_zone(g, real_zone(g, 3));
+  reset_zone(g, find_zone(g, 3));
   place(g, ch, 301);
   leader   = read_mobile(g, 300, VIRTUAL);
   follower = read_mobile(g, 300, VIRTUAL);
@@ -344,7 +344,7 @@ static void check_zone_reset(GameWorld *g)
   int masters = 0;
 
   for (int i = 0; i < 3; i++)
-    reset_zone(g, real_zone(g, 3));
+    reset_zone(g, find_zone(g, 3));
   /* nothing else loads this mob, and the zone command's limit is 1 */
   for (char_data *ch : room_people(g, real_room(g, 303)))
     if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 331)
@@ -529,8 +529,8 @@ static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
   struct obj_data *in_room, *carried, *room_bread, *carried_bread;
 
   /* no zone command may load the deleted prototype later */
-  for (int i = 0; zone_get_cmd(g, real_zone(g, 3), i)->command != 'S'; i++)
-    zone_get_cmd(g, real_zone(g, 3), i)->if_flag = 1;
+  for (int i = 0; zone_get_cmd(g, find_zone(g, 3), i)->command != 'S'; i++)
+    zone_get_cmd(g, find_zone(g, 3), i)->if_flag = 1;
 
   place(g, ch, 301);
   in_room       = read_object(g, 300, VIRTUAL);

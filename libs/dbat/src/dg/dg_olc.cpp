@@ -87,7 +87,7 @@ ACMD(do_oasis_trigedit)
   /*
    * Find the zone.
    */
-  if ((OLC_ZNUM(d) = real_zone_by_thing(g, number)) == NOWHERE) {
+  if ((OLC_ZNUM(d) = find_zone_by_thing(g, number)) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
@@ -98,7 +98,7 @@ ACMD(do_oasis_trigedit)
    * Everyone but IMPLs can only edit zones they have been assigned.
    */
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
     delete d->olc;
     d->olc = nullptr;
     return;
@@ -124,7 +124,7 @@ ACMD(do_oasis_trigedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 /* called when a mob or object is being saved to disk, so its script can */
@@ -597,8 +597,8 @@ static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
   struct atomic_file af;
   char fname[MAX_INPUT_LENGTH];
 
-  zone = g->zones[OLC_ZNUM(d)].number;
-  top  = g->zones[OLC_ZNUM(d)].top;
+  zone = OLC_ZNUM(d)->number;
+  top  = OLC_ZNUM(d)->top;
 
   snprintf(fname, sizeof(fname), "%s%d.trg", TRG_PREFIX, zone);
   if (!(trig_file = atomic_open(&af, fname, false))) {
@@ -607,7 +607,7 @@ static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
     return;
   }
 
-  for (i = g->zones[OLC_ZNUM(d)].bot; i <= top; i++) {
+  for (i = OLC_ZNUM(d)->bot; i <= top; i++) {
     if ((rnum = real_trigger(g, i)) != NOTHING) {
       trig = g->trig_index[rnum]->proto;
 

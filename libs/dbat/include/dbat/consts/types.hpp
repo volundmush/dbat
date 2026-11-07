@@ -23,7 +23,6 @@ typedef IDXTYPE guild_vnum;
 typedef IDXTYPE room_rnum;
 typedef IDXTYPE obj_rnum;
 typedef IDXTYPE mob_rnum;
-typedef IDXTYPE zone_rnum;
 typedef IDXTYPE trig_rnum;
 
 /*

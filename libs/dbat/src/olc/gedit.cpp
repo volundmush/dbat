@@ -41,7 +41,7 @@ static void gedit_save_internally(GameWorld *g, struct descriptor_data *d)
   add_guild(g, OLC_GUILD(d));
 }
 
-static void gedit_save_to_disk(GameWorld *g, zone_rnum num)
+static void gedit_save_to_disk(GameWorld *g, struct zone_data *num)
 {
   save_guilds(g, num);
 }
@@ -79,9 +79,9 @@ ACMD(do_oasis_gedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zlok;
 
-      if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(g, zlok);
@@ -131,7 +131,7 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  if ((OLC_ZNUM(d) = real_zone_by_thing(g, number)) == NOWHERE) {
+  if ((OLC_ZNUM(d) = find_zone_by_thing(g, number)) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
@@ -142,7 +142,7 @@ ACMD(do_oasis_gedit)
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -154,10 +154,10 @@ ACMD(do_oasis_gedit)
 
   if (save) {
     send_to_char(g, ch, "Saving all guilds in zone %d.\r\n",
-                 g->zones[OLC_ZNUM(d)].number);
+                 OLC_ZNUM(d)->number);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
            "OLC: %s saves guild info for zone %d.",
-           char_get_name(ch), g->zones[OLC_ZNUM(d)].number);
+           char_get_name(ch), OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the guild to the guild file.                                    **/
@@ -185,7 +185,7 @@ ACMD(do_oasis_gedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void gedit_setup_new(GameWorld *g, struct descriptor_data *d)
@@ -498,7 +498,7 @@ void gedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                  "OLC: %s edits guild %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
-            gedit_save_to_disk(g, real_zone_by_thing(g, OLC_NUM(d)));
+            gedit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d)));
             write_to_output(g, d, "Guild %d saved to disk.\r\n", OLC_NUM(d));
           } else
             write_to_output(g, d, "Guild %d saved to memory.\r\n", OLC_NUM(d));

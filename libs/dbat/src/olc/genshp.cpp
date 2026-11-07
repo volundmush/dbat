@@ -364,7 +364,7 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
 
 struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
 {
-  zone_rnum rznum        = real_zone_by_thing(g, shop_get_vnum(nshp));
+  struct zone_data *rznum = find_zone_by_thing(g, shop_get_vnum(nshp));
   struct shop_data *shop = find_shop(g, shop_get_vnum(nshp));
 
   if (shop) /* The shop already exists: just update it, freeing its old strings. */
@@ -374,8 +374,8 @@ struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
     copy_shop(shop, nshp, false);
   }
 
-  if (rznum != NOWHERE)
-    add_to_save_list(g, g->zones[rznum].number, SL_SHP);
+  if (rznum != nullptr)
+    add_to_save_list(g, rznum->number, SL_SHP);
   else
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
@@ -384,7 +384,7 @@ struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
 
 /*-------------------------------------------------------------------*/
 
-bool save_shops(GameWorld *g, zone_rnum zone_num)
+bool save_shops(GameWorld *g, struct zone_data *zone_num)
 {
   IDXTYPE i;
   int j;
@@ -393,12 +393,12 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
   char fname[128], oldname[128];
   struct shop_data *shop;
 
-  if (zone_num < 0 || zone_num > g->top_zone) {
-    mud_log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, g->top_zone);
+  if (!zone_num) {
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, g->zones[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_num->number);
   if (!(shop_file = atomic_open(&af, fname, false))) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
     return false;
@@ -411,7 +411,7 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
   /*
    * Search database for shops in this zone.
    */
-  for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
+  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
     if ((shop = find_shop(g, i)) != nullptr) {
       fprintf(shop_file, "#%d~\n", i);
 
@@ -492,9 +492,9 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
     return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
-  if (in_save_list(g, g->zones[zone_num].number, SL_SHP)) {
-    remove_from_save_list(g, g->zones[zone_num].number, SL_SHP);
-    create_world_index(g, g->zones[zone_num].number, "shp");
+  if (in_save_list(g, zone_num->number, SL_SHP)) {
+    remove_from_save_list(g, zone_num->number, SL_SHP);
+    create_world_index(g, zone_num->number, "shp");
     mud_log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
   return true;

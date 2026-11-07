@@ -60,11 +60,12 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   g->obj_index[0].vnum = first_vnum;
   g->top_obj           = 0;
 
-  g->zones           = new zone_data[1]();
-  g->zones[0].number = first_vnum / 100;
-  g->zones[0].bot    = first_vnum;
-  g->zones[0].top    = first_vnum + 99;
-  g->top_zone        = 0;
+  struct zone_data *zone = g->zones.emplace(first_vnum / 100);
+  zone->number           = first_vnum / 100;
+  zone->bot              = first_vnum;
+  zone->top              = first_vnum + 99;
+  zone->cmd              = new reset_com[1]();
+  zone->cmd[0].command   = 'S';
 
   g->shops.emplace(first_vnum)->vnum = first_vnum;
 
@@ -75,7 +76,9 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 
 static void free_world(GameWorld *g)
 {
-  delete[] g->zones;
+  for (struct zone_data *zone : g->zones.all())
+    delete[] zone->cmd;
+  g->zones.clear();
   delete[] g->obj_index;
   delete[] g->obj_proto;
   delete[] g->mob_index;
@@ -117,10 +120,10 @@ static void check_lookups(GameWorld *a, GameWorld *b)
   CHECK(real_mobile(b, 100) == NOBODY);
   CHECK(real_object(b, 200) == 0);
   CHECK(real_object(a, 200) == NOTHING);
-  CHECK(real_zone(a, 1) == 0);
-  CHECK(real_zone(b, 1) == NOWHERE);
-  CHECK(real_zone_by_thing(a, 150) == 0);
-  CHECK(real_zone_by_thing(b, 150) == NOWHERE);
+  CHECK(find_zone(a, 1) != nullptr);
+  CHECK(find_zone(b, 1) == nullptr);
+  CHECK(find_zone_by_thing(a, 150) == find_zone(a, 1));
+  CHECK(find_zone_by_thing(b, 150) == nullptr);
   CHECK(find_shop(a, 100) != nullptr);
   CHECK(find_shop(b, 100) == nullptr);
 }

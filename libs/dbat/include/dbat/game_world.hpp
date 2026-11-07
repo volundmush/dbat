@@ -40,8 +40,7 @@ struct GameWorld {
   int xap_objs{};
 
   /* Zones */
-  struct zone_data *zones{};
-  zone_rnum top_zone{};
+  vnum_table<zone_data, zone_vnum> zones; /* in vnum order */
   struct reset_q_type reset_q{};
 
   /* Shops and guilds */
@@ -171,10 +170,9 @@ struct GameWorld {
 
   /* Progress of the world file parsers and the zone clock */
   room_rnum parse_room_index{};
-  zone_rnum parse_room_zone{};
+  struct zone_data *parse_room_zone{};
   mob_rnum parse_mob_index{};
   obj_rnum parse_obj_index{};
-  zone_rnum parse_zone_index{};
   int zone_update_timer{};
 };
 

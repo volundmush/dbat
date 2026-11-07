@@ -106,7 +106,7 @@ constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 void auc_load(struct obj_data *obj);
 /* public procedures in db.c */
 void boot_world(GameWorld *g);
-bool is_empty(GameWorld *g, zone_rnum zone_nr);
+bool is_empty(GameWorld *g, struct zone_data *zone_nr);
 void index_boot(GameWorld *g, int mode);
 void boot_db(GameWorld *g);
 void destroy_db(GameWorld *g);
@@ -124,7 +124,7 @@ void free_help_table(GameWorld *g);
 void auc_save(GameWorld *g);
 void load_config(GameWorld *g);
 
-zone_rnum real_zone(GameWorld *g, zone_vnum vnum);
+struct zone_data *find_zone(GameWorld *g, zone_vnum vnum);
 room_rnum real_room(GameWorld *g, room_vnum vnum);
 mob_rnum real_mobile(GameWorld *g, mob_vnum vnum);
 obj_rnum real_object(GameWorld *g, obj_vnum vnum);
@@ -160,7 +160,7 @@ constexpr int VIRTUAL = 1;
 
 
 bitvector_t asciiflag_conv(char *flag);
-void reset_zone(GameWorld *g, zone_rnum zone);
+void reset_zone(GameWorld *g, struct zone_data *zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */

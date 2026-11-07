@@ -586,8 +586,8 @@ ACMD(do_land)
     act(g, sendback, true, ch, nullptr, nullptr, TO_ROOM);
     char_from_room(g, ch);
     char_to_room(g, ch, real_room(g, landing));
-    zone_rnum zone = 0;
-    if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+    struct zone_data *zone = nullptr;
+    if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
       fly_zone(g, zone, "can be seen landing from space nearby!@n\r\n", ch);
     }
     send_to_sense(g, 1, "landing on the planet", ch);
@@ -2304,8 +2304,8 @@ static void fly_to_space(GameWorld *g, struct char_data *ch, room_vnum space)
   }
   char_set_altitude(ch, 0);
   char_aff_set(ch, AFF_FLYING, false);
-  zone_rnum zone = 0;
-  if ((zone = real_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != NOWHERE) {
+  struct zone_data *zone = nullptr;
+  if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
     fly_zone(g, zone, "can be seen blasting off into space!@n\r\n", ch);
   }
   send_to_sense(g, 1, "leaving the planet", ch);

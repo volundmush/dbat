@@ -58,7 +58,7 @@ struct zone_data {
 
 /* for queueing zones for update   */
 struct reset_q_element {
-  zone_rnum zone_to_reset{}; /* ref to zone_data */
+  struct zone_data *zone_to_reset{}; /* ref to zone_data */
   struct reset_q_element *next{};
 };
 

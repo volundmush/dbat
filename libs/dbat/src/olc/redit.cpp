@@ -103,9 +103,9 @@ ACMD(do_oasis_redit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (char_get_olc_zone(g, ch) >= 0) {
-      zone_rnum zlok;
+      struct zone_data *zlok;
 
-      if ((zlok = real_zone(g, char_get_olc_zone(g, ch))) == NOWHERE)
+      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(g, zlok);
@@ -147,8 +147,8 @@ ACMD(do_oasis_redit)
   d->olc = new oasis_olc_data();
 
   /* Find the zone. */
-  OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == NOWHERE) {
+  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
@@ -157,15 +157,15 @@ ACMD(do_oasis_redit)
 
   /* Make sure the builder is allowed to modify this zone. */
   if (!can_edit_zone(g, ch, OLC_ZNUM(d)) && remodeling == false) {
-    send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
+    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
     delete d->olc;
     d->olc = nullptr;
     return;
   }
 
   if (save) {
-    send_to_char(g, ch, "Saving all rooms in zone %d.\r\n", g->zones[OLC_ZNUM(d)].number);
-    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: %s saves room info for zone %d.", char_get_name(ch), g->zones[OLC_ZNUM(d)].number);
+    send_to_char(g, ch, "Saving all rooms in zone %d.\r\n", OLC_ZNUM(d)->number);
+    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: %s saves room info for zone %d.", char_get_name(ch), OLC_ZNUM(d)->number);
 
     /* Save the rooms. */
     save_rooms(g, OLC_ZNUM(d));
@@ -189,7 +189,7 @@ ACMD(do_oasis_redit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), g->zones[OLC_ZNUM(d)].number, char_get_olc_zone(g, ch));
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void redit_setup_new(struct descriptor_data *d)
@@ -343,7 +343,7 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void redit_save_to_disk(GameWorld *g, zone_vnum zone_num)
+static void redit_save_to_disk(GameWorld *g, struct zone_data *zone_num)
 {
   save_rooms(g, zone_num); /* :) */
   update_space(g);
@@ -515,7 +515,7 @@ static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
                     "@gQ@n) Quit\r\n"
                     "Enter choice : ",
 
-                    OLC_NUM(d), g->zones[OLC_ZNUM(d)].number, room_get_name(room),
+                    OLC_NUM(d), OLC_ZNUM(d)->number, room_get_name(room),
                     room_get_description(room), buf1, buf2,
                     room_get_dir_option(room, NORTH) && room_get_dir_option(room, NORTH)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, NORTH)->to_room) : -1,
                     room_get_dir_option(room, NORTHWEST) && room_get_dir_option(room, NORTHWEST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, NORTHWEST)->to_room) : -1,
@@ -539,7 +539,7 @@ static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
                     "@gQ@n) Quit\r\n"
                     "Enter choice : ",
 
-                    OLC_NUM(d), g->zones[OLC_ZNUM(d)].number, room_get_name(room),
+                    OLC_NUM(d), OLC_ZNUM(d)->number, room_get_name(room),
                     room_get_description(room));
   }
 
@@ -565,7 +565,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
                  "OLC: %s edits room %d.", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
-            redit_save_to_disk(g, real_zone_by_thing(g, OLC_NUM(d)));
+            redit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d)));
             if (char_get_admlevel(d->character) < 1) {
               write_to_output(g, d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
               act(g, "@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", true, d->character, nullptr, nullptr, TO_ROOM);

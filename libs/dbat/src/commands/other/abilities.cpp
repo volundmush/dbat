@@ -2185,9 +2185,9 @@ ACMD(do_transform)
   reveal_hiding(g, ch, 0);
 
   // Announce noisy transformations in the zone.
-  zone_rnum zone = 0;
+  struct zone_data *zone = nullptr;
   if (race_has_noisy_transformations(char_get_race(ch))) {
-    if ((zone = real_zone_by_thing(g, char_get_in_room(ch))) != NOWHERE) {
+    if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
       send_to_zone(g, "An explosion of power ripples through the surrounding area!\r\n", zone);
     };
   }
