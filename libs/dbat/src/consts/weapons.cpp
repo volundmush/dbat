@@ -1,4 +1,4 @@
-#include "dbat/consts/weapons.h"
+#include "dbat/consts/weapons.hpp"
 
 /* Armor Types */
 const char *const armor_type[MAX_ARMOR_TYPES + 1] = {

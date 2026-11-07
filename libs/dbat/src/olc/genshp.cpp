@@ -3,16 +3,15 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/shop.h"
-#include "dbat/guild.h"
-#include "dbat/genshp.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+#include "dbat/shop.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/genshp.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 static void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);

@@ -5,21 +5,20 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
-#include "dbat/consts/attacks.h"
-#include "dbat/obj_edit.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/spells.h"
-#include "dbat/screen.h"
-
-#include "dbat/broadcast.h"
-#include "dbat/act.other.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/consts/attacks.hpp"
+#include "dbat/obj_edit.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/screen.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions  */
 

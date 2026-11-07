@@ -13,24 +13,25 @@
    remove levels. A poster can always remove their own messages. Messages
    cannot be removed while someone is still writing them. */
 
-#include <stddef.h>
-#include "dbat/boards.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/broadcast.h"
-#include "dbat/config.h"
-#include "dbat/xdir.h"
-#include "dbat/fileop.h"
-#include "dbat/stringutils.h"
-#include "dbat/log.h"
-#include "dbat/atomicfile.h"
+#include <cstddef>
 
 #include <sys/stat.h>
 #include <unistd.h>
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/boards.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/config.hpp"
+#include "dbat/xdir.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/log.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 
 /* Boards whose new posts are announced, and whose last visit is kept in the player's lboard[]. */

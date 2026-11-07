@@ -1,5 +1,5 @@
-#include "dbat/consts/races.h"
-#include "dbat/consts/sizes.h"
+#include "dbat/consts/races.hpp"
+#include "dbat/consts/sizes.hpp"
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 

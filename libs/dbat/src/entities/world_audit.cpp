@@ -1,15 +1,16 @@
-#include "dbat/world_audit.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "dbat/utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/descriptor.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/index.h"
-#include "dbat/game_world.h"
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+
+#include "dbat/world_audit.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/descriptor.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/index.hpp"
+#include "dbat/game_world.hpp"
 
 constexpr int MAX_REPORTED = 50;
 

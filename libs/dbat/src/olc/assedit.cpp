@@ -6,21 +6,19 @@
  * 1999 July 25 caminturn@earthlink.net                                *
  * ******************************************************************** */
 
-#include "dbat/assedit.h"
-#include "dbat/assemblies.h"
-#include "dbat/consts/maximums.h"
-
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/stringutils.h"
-
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/oasis.h"
-#include "dbat/game_world.h"
+#include "dbat/assedit.hpp"
+#include "dbat/assemblies.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/game_world.hpp"
 
 static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static void assedit_edit_extract(GameWorld *g, struct descriptor_data *d);

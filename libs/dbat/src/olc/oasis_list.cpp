@@ -6,20 +6,20 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
-#include "dbat/shop.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/guild.h"
-#include "dbat/races.h"
-#include "dbat/class.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/db.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/races.hpp"
+#include "dbat/class.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

@@ -2,12 +2,13 @@
  * DG Scripts: finding characters, objects and rooms for scripts, by name or UID, and the UID lookup table.
  * Split out of dg_scripts.c.
  */
-#include "dbat/utils.h"
-#include "dg_internal.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "dg_internal.hpp"
 
 /* Local functions not used elsewhere */
 static struct char_data *find_char_by_uid_in_lookup_table(GameWorld *g, long uid);
@@ -196,7 +197,7 @@ bool can_wear_on_pos(struct obj_data *obj, int pos)
 struct char_data *find_char(GameWorld *g, long n)
 {
   /* Players and legacy mobs live below ROOM_ID_BASE; mobs from MOB_ID_BASE. */
-  if (n < 0 || (n >= ROOM_ID_BASE && n < MOB_ID_BASE)) /* See note in dg_scripts.h */
+  if (n < 0 || (n >= ROOM_ID_BASE && n < MOB_ID_BASE)) /* See note in dg_scripts.hpp */
     return nullptr;
 
   return find_char_by_uid_in_lookup_table(g, n);
@@ -205,7 +206,7 @@ struct char_data *find_char(GameWorld *g, long n)
 /* return object with UID n */
 obj_data *find_obj(GameWorld *g, long n)
 {
-  if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.h */
+  if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.hpp */
     return nullptr;
 
   return find_obj_by_uid_in_lookup_table(g, n);

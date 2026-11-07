@@ -1,4 +1,4 @@
-#include "dbat/consts/positions.h"
+#include "dbat/consts/positions.hpp"
 
 /* POS_x */
 const char *const position_types[NUM_POSITIONS + 1] = {

@@ -7,57 +7,12 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/consts/maximums.h"
-#include "dbat/consts/songs.h"
-#include "dbat/help.h"
-#include "dbat/utils.h"
-#include "dbat/ban.h"
-#include "dbat/stringutils.h"
-#include "dbat/comm.h"
-#include "dbat/config.h"
-#include "dbat/maputils.h"
-#include "dbat/weather.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.misc.h"
-#include "dbat/house.h"
-#include "dbat/act.other.h"
-#include "dbat/broadcast.h"
-#include "dbat/handler.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/act.item.h"
-#include "dbat/interpreter.h"
-#include "dbat/random.h"
-#include "dbat/act.informative.h"
-#include "dbat/dg_event.h"
-#include "dbat/mobact.h"
-#include "dbat/magic.h"
+#include <cerrno>
+#include <csignal>
 
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/object_systems.h"
-#include "dbat/extract.h"
-#include "dbat/fileop.h"
-#include "dbat/relocate.h"
-
-#include "dbat/objsave.h"
-#include "dbat/genolc.h"
-#include "dbat/class.h"
-#include "dbat/combat.h"
-#include "dbat/modify.h"
-#include "dbat/fight.h"
-#include "dbat/local_limits.h"
-#include "dbat/mail.h"
-#include "dbat/races.h"
-#include "dbat/room_utils.h"
-#include "dbat/screen.h"
-#include "nanny_internal.h"
-
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <linux/limits.h>
 #include <sys/resource.h>
 #include <execinfo.h>
@@ -66,11 +21,55 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
-#include <sys/signal.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <poll.h>
 #include <sys/stat.h>
-#include "dbat/game_world.h"
+
+#include "dbat/consts/maximums.hpp"
+#include "dbat/consts/songs.hpp"
+#include "dbat/help.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/ban.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/maputils.hpp"
+#include "dbat/weather.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/act.misc.hpp"
+#include "dbat/house.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/act.item.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/random.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/mobact.hpp"
+#include "dbat/magic.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/object_systems.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/class.hpp"
+#include "dbat/combat.hpp"
+#include "dbat/modify.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/mail.hpp"
+#include "dbat/races.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/screen.hpp"
+#include "dbat/game_world.hpp"
+
+#include "nanny_internal.hpp"
 
 static void check_idle_menu(GameWorld *g);
 static void check_idle_passwords(GameWorld *g);

@@ -1,4 +1,4 @@
-#include "dbat/consts/playerflags.h"
+#include "dbat/consts/playerflags.hpp"
 
 /* PLR_x */
 const char *const player_bits[NUM_PLR_FLAGS + 1] = {

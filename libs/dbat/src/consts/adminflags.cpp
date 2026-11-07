@@ -1,4 +1,4 @@
-#include "dbat/consts/adminflags.h"
+#include "dbat/consts/adminflags.hpp"
 
 /* ADM_x */
 

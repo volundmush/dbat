@@ -1,12 +1,12 @@
-#include "dbat/game_world.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.social.h"
-#include "dbat/boards.h"
-#include "dbat/comm.h"
-#include "dbat/genolc.h"
-#include "dbat/mail.h"
-#include "dbat/random.h"
-#include "dbat/utils.h"
+#include "dbat/game_world.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/boards.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/mail.hpp"
+#include "dbat/random.hpp"
+#include "dbat/utils.hpp"
 
 /* Any non-zero value does: a generator seeded with 0 repeats one value forever. */
 constexpr unsigned long DEFAULT_RNG_SEED = 12345;

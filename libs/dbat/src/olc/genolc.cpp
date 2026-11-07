@@ -5,19 +5,19 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/genolc.h"
-#include "dbat/gengld.h"
-#include "dbat/cedit.h"
-#include "dbat/genmob.h"
-#include "dbat/genobj.h"
-#include "dbat/genshp.h"
-#include "dbat/genwld.h"
-#include "dbat/modify.h"
-#include "dbat/genzon.h"
-#include "dbat/oasis.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/game_world.h"
+#include "dbat/genolc.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/cedit.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/genshp.hpp"
+#include "dbat/genwld.hpp"
+#include "dbat/modify.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/game_world.hpp"
 
 /* List of zones to be saved.  */
 

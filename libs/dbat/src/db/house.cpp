@@ -7,22 +7,22 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/affect.h"
-#include "dbat/house.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/objsave.h"
-#include "dbat/fileop.h"
-#include "dbat/atomicfile.h"
+#include <cerrno>
 
-#include <errno.h>
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/affect.hpp"
+#include "dbat/house.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet);
 

@@ -1,4 +1,4 @@
-#include "dbat/consts/admlevel.h"
+#include "dbat/consts/admlevel.hpp"
 
 const char *const admin_level_names[ADMLVL_IMPL + 2] = {
     "Mortal",

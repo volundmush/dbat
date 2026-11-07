@@ -13,11 +13,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/consts/maximums.h"
-#include "dbat/consts/admlevel.h"
-#include "dbat/characters.h"
-#include "dbat/config.h"
-#include "dbat/interpreter.h" /* alias_data definition for structs.h */
+#include "dbat/consts/maximums.hpp"
+#include "dbat/consts/admlevel.hpp"
+#include "dbat/characters.hpp"
+#include "dbat/config.hpp"
+#include "dbat/interpreter.hpp" /* alias_data definition */
 
 /*
  * Update:  The following constants and variables are now the default values

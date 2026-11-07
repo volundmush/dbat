@@ -3,24 +3,27 @@
  * Each case forks from one booted game, so one crash can't hide another or spoil later cases.
  * test_commands [command]   runs one command only, and shows the sanitizer's whole report.
  */
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "harness.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/fight.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/world_audit.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/world_audit.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "harness.hpp"
 
 static const char *const skipped[] = {
     "copyover", /* replaces the process */

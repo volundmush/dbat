@@ -9,12 +9,12 @@
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */
 
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/reset.h"
-#include "dbat/spec_procs.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/reset.hpp"
+#include "dbat/spec_procs.hpp"
+#include "dbat/game_world.hpp"
 
 static bool prereset_gauntlet_zone(GameWorld *g);
 

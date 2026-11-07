@@ -2,14 +2,15 @@
  * DG Scripts: immortal commands for scripts: attach, detach, vdelete, tstat, and script stat output.
  * Split out of dg_scripts.c.
  */
-#include "dbat/utils.h"
-#include "dbat/act.wizard.h"
-#include "dbat/dg_event.h"
-#include "dg_internal.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "dg_internal.hpp"
 
 /* Local functions not used elsewhere */
 static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig);

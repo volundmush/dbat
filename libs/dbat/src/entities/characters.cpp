@@ -1,4 +1,4 @@
-#include "dbat/characters.h"
-#include "dbat/consts/triggers.h"
+#include "dbat/characters.hpp"
+#include "dbat/consts/triggers.hpp"
 
 

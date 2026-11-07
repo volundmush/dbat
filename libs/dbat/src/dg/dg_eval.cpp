@@ -2,9 +2,10 @@
  * DG Scripts: evaluating script expressions and conditions, and finding the end of if/while/switch blocks.
  * Split out of dg_scripts.c.
  */
-#include "dbat/utils.h"
-#include "dg_internal.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "dg_internal.hpp"
 
 /* Local functions not used elsewhere */
 static bool is_num(char *arg);

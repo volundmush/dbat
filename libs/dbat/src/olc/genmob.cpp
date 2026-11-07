@@ -3,21 +3,21 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/shop.h"
-#include "dbat/guild.h"
-#include "dbat/genmob.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/handler.h"
-#include "dbat/dg_olc.h"
-#include "dbat/class.h"
-#include "dbat/affect.h"
-#include "dbat/atomicfile.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/shop.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_olc.hpp"
+#include "dbat/class.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static bool free_mobile_strings(struct char_data *mob);
 static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *mob, FILE *fd);

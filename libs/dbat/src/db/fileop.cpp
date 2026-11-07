@@ -1,17 +1,18 @@
-#include "dbat/fileop.h"
-#include "dbat/utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/consts/maximums.h"
-#include "dbat/log.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/config.h"
-#include "dbat/atomicfile.h"
+#include <cerrno>
 
 #include <linux/limits.h>
-#include <errno.h>
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/fileop.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/log.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* get_line reads the next non-blank line off of the input stream.
  * The newline character is removed from the input.  Lines which begin

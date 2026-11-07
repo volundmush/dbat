@@ -4,16 +4,16 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/genzon.h"
-#include "dbat/utils.h"
-#include "dbat/fileop.h"
-#include "dbat/genolc.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/atomicfile.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/genzon.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 

@@ -7,27 +7,27 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/players.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/pfdefaults.h"
-#include "dbat/feats.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/genmob.h"
-#include "dbat/class.h"
-#include "dbat/config.h"
-#include "dbat/fileop.h"
-#include "dbat/affect.h"
-#include "dbat/genolc.h"
 #include <stdckdint.h>
-#include "dbat/interpreter.h"
-#include "dbat/atomicfile.h"
-
 #include <unistd.h>
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/players.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/pfdefaults.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/class.hpp"
+#include "dbat/config.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 constexpr int LOAD_HIT  = 0;
 constexpr int LOAD_MANA = 1;

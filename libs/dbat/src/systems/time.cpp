@@ -1,7 +1,7 @@
-#include "dbat/game_world.h"
-#include "dbat/time.h"
-#include "dbat/weather.h"
-#include "dbat/consts/pulse.h"
+#include "dbat/game_world.hpp"
+#include "dbat/time.hpp"
+#include "dbat/weather.hpp"
+#include "dbat/consts/pulse.hpp"
 
 /* Calculate the REAL time passed over the last t2-t1 centuries (secs) */
 struct time_info_data *real_time_passed(time_t t2, time_t t1)

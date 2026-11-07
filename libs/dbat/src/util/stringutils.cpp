@@ -1,9 +1,10 @@
-#include <stdarg.h>
-#include <stdio.h>
-#include "dbat/stringutils.h"
-#include "dbat/utils.h"
-#include "dbat/log.h"
-#include "dbat/consts/maximums.h"
+#include <cstdarg>
+#include <cstdio>
+
+#include "dbat/stringutils.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/log.hpp"
+#include "dbat/consts/maximums.hpp"
 
 int levenshtein_distance(char *s1, char *s2)
 {

@@ -12,21 +12,20 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#include "dbat/utils.h"
-
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
-#include "dbat/spell_parser.h"
-#include "dbat/act.movement.h"
-#include "dbat/spells.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/spell_parser.hpp"
+#include "dbat/act.movement.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /*
  *  General functions used by several triggers

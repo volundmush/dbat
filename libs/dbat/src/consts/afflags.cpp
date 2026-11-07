@@ -1,4 +1,4 @@
-#include "dbat/consts/affflags.h"
+#include "dbat/consts/affflags.hpp"
 
 /* AFF_x */
 /* Many are taken from the SRD under OGL, see ../doc/srd.txt for information */

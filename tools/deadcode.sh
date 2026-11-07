@@ -10,5 +10,5 @@ LDFLAGS_EXTRA="-Wl,--gc-sections,--print-gc-sections" \
   "$root/tools/build-tree.sh" "$root" "$work" -O0 -ffunction-sections -fdata-sections 2> "$work/gc.txt" || { cat "$work/gc.txt" >&2; exit 1; }
 grep -o "removing unused section '\.text\.[^']*' in file '[^']*'" "$work/gc.txt" \
   | sed -E "s/.*'\.text\.([^']*)' in file '.*\/obj\/([^']*)\.o'/\2: \1/; s/^libs_dbat_src_//" \
-  | grep -v 'roundtrip' | sort
+  | grep -v 'roundtrip' | c++filt | sort
 rm -rf "$work"

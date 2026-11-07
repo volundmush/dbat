@@ -13,19 +13,19 @@
 Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
-#include "dbat/mail.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/improved-edit.h"
-#include "dbat/players.h"
-#include "dbat/fileop.h"
-#include "dbat/atomicfile.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/mail.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/improved-edit.hpp"
+#include "dbat/players.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local globals */
 

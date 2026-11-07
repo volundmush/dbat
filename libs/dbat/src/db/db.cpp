@@ -7,65 +7,64 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <stddef.h>
-#include "dbat/db.h"
-#include "dbat/consts/maximums.h"
-#include "dbat/utils.h"
-#include "dbat/help.h"
-#include "dbat/stringutils.h"
+#include <cstddef>
+#include <cerrno>
+#include <cstdlib>
 
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/zone_utils.h"
-#include "dbat/fileop.h"
-#include "dbat/affect.h"
-#include "dbat/weather.h"
-#include "dbat/time.h"
-#include "dbat/xdir.h"
-#include "dbat/search.h"
-#include "dbat/extract.h"
-#include "dbat/relocate.h"
-#include "dbat/players.h"
-
-#include "dbat/feats.h"
-#include "dbat/config.h"
-#include "dbat/cedit.h"
-#include "dbat/spec_assign.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.other.h"
-#include "dbat/act.social.h"
-#include "dbat/random.h"
-#include "dbat/assemblies.h"
-#include "dbat/house.h"
-#include "dbat/dg_event.h"
-#include "dbat/reset.h"
-#include "dbat/class.h"
-#include "dbat/comm.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/interpreter.h"
-#include "dbat/genolc.h"
-#include "dbat/shop.h"
-#include "dbat/handler.h"
-#include "dbat/mail.h"
-#include "dbat/boards.h"
-#include "dbat/log.h"
-#include "dbat/objsave.h"
-#include "dbat/genmob.h"
-#include "dbat/spells.h"
-#include "dbat/races.h"
-#include "dbat/spell_parser.h"
-#include "dbat/genobj.h"
-
-#include <errno.h>
-#include <stdlib.h>
 #include <linux/limits.h>
-#include "dbat/guild.h"
-#include "dbat/context_help.h"
-#include "dbat/local_limits.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+
+#include "dbat/db.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/help.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/zone_utils.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/weather.hpp"
+#include "dbat/time.hpp"
+#include "dbat/xdir.hpp"
+#include "dbat/search.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/players.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/config.hpp"
+#include "dbat/cedit.hpp"
+#include "dbat/spec_assign.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/random.hpp"
+#include "dbat/assemblies.hpp"
+#include "dbat/house.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/reset.hpp"
+#include "dbat/class.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/mail.hpp"
+#include "dbat/boards.hpp"
+#include "dbat/log.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/races.hpp"
+#include "dbat/spell_parser.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/context_help.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 static void load_help(GameWorld *g, FILE *fl, char *name);
 
@@ -1231,7 +1230,7 @@ static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
   char line[READ_SIZE];
 
   const char *modes[] = {"world", "mob", "obj", "ZON", "SHP", "HLP", "trg"};
-  /* modes positions correspond to DB_BOOT_xxx in db.h */
+  /* modes positions correspond to DB_BOOT_xxx in db.hpp */
 
   for (;;) {
     /*

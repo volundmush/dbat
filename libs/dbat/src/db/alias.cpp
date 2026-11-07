@@ -9,21 +9,22 @@
 * CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.		 *
 *********************************************************************** */
 
-#include "dbat/alias.h"
-#include "dbat/consts/maximums.h"
-#include "dbat/utils.h"
+#include <cerrno>
 
 #include <linux/limits.h>
-#include <errno.h>
-#include "dbat/fileop.h"
-#include "dbat/interpreter.h"
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+
+#include "dbat/alias.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 void write_aliases(GameWorld *g, struct char_data *ch)
 {

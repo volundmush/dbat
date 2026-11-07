@@ -8,18 +8,18 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "dbat/weather.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/broadcast.h"
-#include "dbat/act.other.h"
-#include "dbat/config.h"
-#include "dbat/races.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/weather.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/db.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/config.hpp"
+#include "dbat/races.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static void oozaru_add(GameWorld *g);
 static void oozaru_drop(GameWorld *g);

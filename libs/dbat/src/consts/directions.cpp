@@ -1,4 +1,4 @@
-#include "dbat/consts/directions.h"
+#include "dbat/consts/directions.hpp"
 
 /* cardinal directions */
 const char *const dirs[NUM_OF_DIRS + 1] =

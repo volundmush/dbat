@@ -1,9 +1,9 @@
-#include "dbat/zone_utils.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/game_world.h"
+#include "dbat/zone_utils.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/game_world.hpp"
 
-/* Formerly macros in zone_utils.h. */
+/* Formerly macros in zone_utils.hpp. */
 
 bool zone_flagged(GameWorld *g, zone_rnum rnum, int flag)
 {

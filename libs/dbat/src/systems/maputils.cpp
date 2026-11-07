@@ -6,17 +6,18 @@
 *				     		     * 
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
-#include <errno.h>
-#include "dbat/maputils.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/vehicles.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include <cerrno>
+
+#include "dbat/maputils.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/db.hpp"
+#include "dbat/vehicles.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 
 static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)

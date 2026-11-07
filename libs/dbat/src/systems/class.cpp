@@ -14,31 +14,30 @@
  * you should go through this entire file from beginning to end and add
  * the appropriate new special cases for your new class.
  */
-#include "dbat/consts/maximums.h"
-#include "dbat/utils.h"
-#include "dbat/class.h"
+#include <cerrno>
 
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/feats.h"
-#include "dbat/oasis.h"
-#include "dbat/act.wizard.h"
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/broadcast.h"
-#include "dbat/config.h"
-#include "dbat/act.other.h"
-#include "dbat/random.h"
-#include "dbat/relocate.h"
-#include "dbat/stringutils.h"
-#include "dbat/local_limits.h"
-
-#include <errno.h>
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/class.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/config.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/random.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/game_world.hpp"
 
 static const char *sensei_abbr(int s);
 

@@ -8,19 +8,19 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
-#include "dbat/vehicles.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/class.h"
-#include "dbat/races.h"
-#include "dbat/act.informative.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/vehicles.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/class.hpp"
+#include "dbat/races.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static room_vnum ship_land_location(GameWorld *g, struct char_data *ch, struct obj_data *vehicle, char *arg);
 static void disp_ship_locations(GameWorld *g, struct char_data *ch, struct obj_data *vehicle);

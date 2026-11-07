@@ -8,22 +8,23 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/act.social.h"
-#include "dbat/consts/maximums.h"
-#include <errno.h>
-#include "dbat/social.h"
-#include "dbat/config.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/room_utils.h"
-#include "dbat/search.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/random.h"
-#include "dbat/game_world.h"
+#include <cerrno>
+
+#include "dbat/act.social.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/social.hpp"
+#include "dbat/config.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/search.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/random.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions */
 static char *fread_action(FILE *fl, int nr);

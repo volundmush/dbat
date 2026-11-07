@@ -5,18 +5,18 @@
  * XXX: This needs Oasis-ifying.
  */
 
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/genolc.h"
-#include "dbat/oasis.h"
-#include "dbat/improved-edit.h"
-#include "dbat/tedit.h"
-#include "dbat/config.h"
-#include "dbat/atomicfile.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/improved-edit.hpp"
+#include "dbat/tedit.hpp"
+#include "dbat/config.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator)
 {

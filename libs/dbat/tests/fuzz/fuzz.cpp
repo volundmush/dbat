@@ -1,8 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <sys/stat.h>
-#include "fuzz.h"
+
+#include "fuzz.hpp"
 
 jmp_buf fuzz_refused;
 bool fuzz_can_refuse = false;
@@ -32,7 +34,7 @@ void fuzz_write_file(const char *path, const uint8_t *data, size_t size)
   if (!(fl = fopen(path, "w")))
     return;
   for (size_t i = 0; i < size; i++)
-    if (data[i]) /* see fuzz.h */
+    if (data[i]) /* see fuzz.hpp */
       putc(data[i], fl);
   fclose(fl);
 }

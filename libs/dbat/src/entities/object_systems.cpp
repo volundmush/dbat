@@ -1,10 +1,10 @@
-#include "dbat/object_systems.h"
-#include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/comm.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/object_systems.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update(GameWorld *g)

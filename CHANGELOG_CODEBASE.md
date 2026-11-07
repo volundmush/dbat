@@ -3,6 +3,7 @@
 - Split `CHANGELOG.md` into `CHANGELOG_CODEBASE.md` and `CHANGELOG_GAMEPLAY.md`
 - Removed Zig from the build. CMake now builds everything as C++26 (`-std=gnu++26`) with GCC 16; the fuzz preset still uses Clang, for libFuzzer. [Volund]
 - Renamed every source file from `.c` to `.cpp`, and wrapped every header in `extern "C"` so symbols stay unmangled. [Volund]
+- Headers are now C++: renamed from `.h` to `.hpp`, with all `extern "C"` wrapping removed, so the game's symbols use C++ linkage. [Volund]
 - Stricter compiler warnings for C++ (format, sign-compare, cast-qual, cast-align, fall-through, pedantic and others), with `-Werror` in the debug and asan presets. Added `tools/analyze.sh` for GCC's static analyzer. [Volund]
 
 # 2.9.3

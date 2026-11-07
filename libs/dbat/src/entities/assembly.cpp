@@ -1,2 +1,3 @@
-#include "dbat/assemblies.h"
-#include <stdlib.h>
+#include <cstdlib>
+
+#include "dbat/assemblies.hpp"

@@ -7,16 +7,16 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/handler.h"
-#include "dbat/utils.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/shop.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/handler.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 /* external vars */
 
 /* local functions */

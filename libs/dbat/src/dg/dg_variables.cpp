@@ -8,24 +8,24 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dbat/utils.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/relocate.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/db.h"
-#include "dbat/screen.h"
-#include "dbat/spells.h"
-#include "dbat/oasis.h"
-#include "dbat/class.h"
-#include "dbat/races.h"
-#include "dbat/local_limits.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/db.hpp"
+#include "dbat/screen.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/class.hpp"
+#include "dbat/races.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* Utility functions */
 
@@ -629,7 +629,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       break;
     case 'r':
       if (!strcasecmp(field, "room")) { /* in NOWHERE, return the void */
-                                        /* see note in dg_scripts.h */
+                                        /* see note in dg_scripts.hpp */
         snprintf(str, slen, "%c%d", UID_CHAR,
                  (char_get_in_room(c) != NOWHERE) ? rroom_get_vnum(g, char_get_in_room(c)) + ROOM_ID_BASE : ROOM_ID_BASE);
       } else if (!strcasecmp(field, "race")) {

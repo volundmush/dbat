@@ -1,4 +1,4 @@
-#include "dbat/consts/songs.h"
+#include "dbat/consts/songs.hpp"
 
 const char *const song_types[] = {
     "\n",

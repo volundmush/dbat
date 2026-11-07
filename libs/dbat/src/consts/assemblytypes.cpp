@@ -1,4 +1,4 @@
-#include "dbat/consts/assemblytypes.h"
+#include "dbat/consts/assemblytypes.hpp"
 
 const char *const AssemblyTypes[MAX_ASSM + 1] = {
     "Don't Use",

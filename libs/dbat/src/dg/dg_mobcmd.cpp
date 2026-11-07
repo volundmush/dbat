@@ -34,29 +34,28 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#include "dbat/consts/maximums.h"
+#include <cstdarg>
+#include <cstdio>
 
-#include "dbat/dg_scripts.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/act.wizard.h"
-#include "dbat/fight.h"
-#include "dbat/character_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/search.h"
-#include "dbat/relocate.h"
-#include "dbat/extract.h"
-#include "dbat/random.h"
-#include "dbat/stringutils.h"
-#include "dbat/act.offensive.h"
-
-#include <stdarg.h>
-#include <stdio.h>
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/search.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/random.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/act.offensive.hpp"
+#include "dbat/game_world.hpp"
 /*
  * Local functions.
  */

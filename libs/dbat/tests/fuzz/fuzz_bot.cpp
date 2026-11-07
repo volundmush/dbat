@@ -3,11 +3,14 @@
  * bot with a fuzzer steering it, which can find its way down a path a random player wouldn't.
  */
 #include <unistd.h>
+
+#include "fuzz.hpp"
+
+/* test_bot.cpp is compiled in here with its main() renamed and its alarm() switched off, so these wrap it */
 #define alarm(seconds) 0 /* libFuzzer has its own, using the same signal */
 #define main bot_main
 #include "../test_bot.cpp"
 #undef main
-#include "fuzz.h"
 
 constexpr int MAX_ACTIONS = 300; /* so that one input can't take the whole of a timeout */
 constexpr int MAX_PULSES = 1000;

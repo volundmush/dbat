@@ -1,11 +1,12 @@
-#include "dbat/rooms.h"
-#include "dbat/room_utils.h"
-#include "dbat/utils.h"
-#include <stdlib.h>
-#include <string.h>
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include <cstdlib>
+#include <cstring>
+
+#include "dbat/rooms.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static bool rroom_is_valid(GameWorld *g, room_rnum rnum);
 
@@ -83,7 +84,7 @@ bool room_is_dark(GameWorld *g, room_rnum room)
   return (false);
 }
 
-/* Formerly macros in room_utils.h. */
+/* Formerly macros in room_utils.hpp. */
 
 int rroom_sect(GameWorld *g, room_rnum room)
 {

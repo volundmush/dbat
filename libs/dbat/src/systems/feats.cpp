@@ -5,13 +5,12 @@
 ** Created Thursday, September 5, 2002                                      **
 **                                                                          **
 *****************************************************************************/
-#include "dbat/utils.h"
-
-#include "dbat/feats.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/game_world.h"
+#include "dbat/utils.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/game_world.hpp"
 
 /* Local Functions */
 
@@ -52,7 +51,7 @@ void assign_feats(GameWorld *g)
   }
 
   // Below are the various feat initializations.
-  // First parameter is the feat number, defined in feats.h
+  // First parameter is the feat number, defined in feats.hpp
   // Second parameter is the displayed name of the feat and argument used to train it
   // Third parameter defines whether or not the feat is in the game or not, and thus can be learned and displayed
   // Fourth parameter defines whether or not the feat can be learned through a trainer or whether it is

@@ -1,10 +1,11 @@
-#include "dbat/atomicfile.h"
-#include "dbat/log.h"
+#include <cerrno>
+#include <cstring>
 
-#include <errno.h>
 #include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
+
+#include "dbat/atomicfile.hpp"
+#include "dbat/log.hpp"
 
 static void atomic_log(const char *operation, const char *filename)
 {

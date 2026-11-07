@@ -1,4 +1,4 @@
-#include "dbat/consts/triggers.h"
+#include "dbat/consts/triggers.hpp"
 
 /* mob trigger types */
 const char *const trig_types[NUM_MTRIG_TYPES + 1] = {

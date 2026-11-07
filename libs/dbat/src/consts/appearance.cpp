@@ -1,4 +1,4 @@
-#include "dbat/consts/appearance.h"
+#include "dbat/consts/appearance.hpp"
 
 /* For Distinguishing Features */
 const char *const eye_types[13] = {

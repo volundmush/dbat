@@ -1,4 +1,4 @@
-#include "dbat/consts/applies.h"
+#include "dbat/consts/applies.hpp"
 
 /* APPLY_x */
 const char *const apply_types[NUM_APPLIES + 1] = {

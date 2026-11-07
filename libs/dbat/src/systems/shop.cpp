@@ -11,26 +11,26 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
-#include "dbat/shop.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/feats.h"
-#include "dbat/act.comm.h"
-#include "dbat/act.wizard.h"
-#include "dbat/act.social.h"
-#include "dbat/broadcast.h"
-#include "dbat/act.other.h"
-#include "dbat/class.h"
-#include "dbat/fileop.h"
-#include "dbat/genolc.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/shop.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/act.comm.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/class.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static bool shop_trade_flagged(const struct shop_data *rec, int flag);
 
@@ -1340,7 +1340,7 @@ static bool add_to_list(GameWorld *g, struct shop_buy_data *list, int type, int 
 static int end_read_list(struct shop_buy_data *list, int len, int error)
 {
   if (error)
-    mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.h to %d", len + error);
+    mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.hpp to %d", len + error);
   shop_buy_set_keywords(&(list[len]), nullptr);
   shop_buy_set_type(&(list[len++]), NOTHING);
   return (len);

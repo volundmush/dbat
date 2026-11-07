@@ -5,24 +5,22 @@
  * for use with OasisOLC
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
-#include "dbat/aedit.h"
-#include "dbat/consts/maximums.h"
-#include "dbat/social.h"
-#include "dbat/utils.h"
-
-#include "dbat/config.h"
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/stringutils.h"
-
-#include "dbat/act.informative.h"
-#include "dbat/act.social.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/oasis.h"
-#include "dbat/genolc.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+#include "dbat/aedit.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/social.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/config.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 static void aedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static int aedit_find_command(GameWorld *g, const char *txt);

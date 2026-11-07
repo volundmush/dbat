@@ -2,19 +2,21 @@
  * Reads a damaged save file for one player, in one game that keeps running: the first byte picks the
  * kind of file, and the rest is its contents. Everything the player loaded goes before the next.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "../harness.h"
-#include "fuzz.h"
-#include "dbat/alias.h"
-#include "dbat/db.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/extract.h"
-#include "dbat/game_world.h"
-#include "dbat/objsave.h"
-#include "dbat/utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/world_audit.h"
+#include <cstdio>
+#include <cstdlib>
+
+#include "dbat/alias.hpp"
+#include "dbat/db.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/game_world.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/world_audit.hpp"
+
+#include "../harness.hpp"
+#include "fuzz.hpp"
 
 static GameWorld *g;
 static struct char_data *loading; /* who's left half-loaded if the game refuses their file */

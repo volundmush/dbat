@@ -1,4 +1,4 @@
-#include "dbat/consts/roomflags.h"
+#include "dbat/consts/roomflags.hpp"
 
 const char *const room_bits[NUM_ROOM_FLAGS + 1] = {
     "DARK",

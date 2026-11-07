@@ -27,11 +27,12 @@
  * Thomas Arp - Welcor - 2002
  *
  */
-#include "dbat/dg_event.h"
-#include <limits.h>
-#include "dbat/comm.h"
-#include "dbat/log.h"
-#include "dbat/game_world.h"
+#include <climits>
+
+#include "dbat/dg_event.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/log.hpp"
+#include "dbat/game_world.hpp"
 
 static void queue_deq(struct queue *q, struct q_element *qe);
 static long queue_elmt_key(struct q_element *qe);

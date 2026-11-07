@@ -7,32 +7,33 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/interpreter.h"
-#include "dbat/boards.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/config.h"
-#include "dbat/act.informative.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/objsave.h"
-#include "dbat/ban.h"
-#include "dbat/broadcast.h"
-#include "dbat/act.wizard.h"
-#include "dbat/mail.h"
-#include "dbat/alias.h"
-#include "dbat/players.h"
-#include "dbat/assedit.h"
-#include "dbat/obj_edit.h"
-#include "dbat/improved-edit.h"
-#include "dbat/aedit.h"
-#include "dbat/gedit.h"
-#include "dbat/hedit.h"
-#include "dbat/hsedit.h"
-
 #include <unistd.h>
-#include "nanny_internal.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/interpreter.hpp"
+#include "dbat/boards.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/ban.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/mail.hpp"
+#include "dbat/alias.hpp"
+#include "dbat/players.hpp"
+#include "dbat/assedit.hpp"
+#include "dbat/obj_edit.hpp"
+#include "dbat/improved-edit.hpp"
+#include "dbat/aedit.hpp"
+#include "dbat/gedit.hpp"
+#include "dbat/hedit.hpp"
+#include "dbat/hsedit.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "nanny_internal.hpp"
 
 static void payout(GameWorld *g, int num);
 

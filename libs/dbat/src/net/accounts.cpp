@@ -7,19 +7,20 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/fileop.h"
-#include "dbat/broadcast.h"
-#include "dbat/players.h"
-#include "dbat/atomicfile.h"
-
 #include <unistd.h>
-#include "nanny_internal.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/players.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "nanny_internal.hpp"
 
 /* The account's character slots, numbered from 1. */
 char **account_slot(struct descriptor_data *d, int n)

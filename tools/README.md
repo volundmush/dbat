@@ -8,7 +8,7 @@ Developer checks for refactoring the server. None of this is part of the server 
 | `objdiff.sh [ref]` | Generated code against a git ref. Each function's normalised disassembly is compared, matched by name across files, so moving functions between files doesn't count as a change. Use it to show a refactor changed no code. Making a function or variable `static` counts as no change, but the optimisations that `static` enables (a never-written variable folded to a constant, for example) still show up; inspect those with `OBJDIFF_SHOW=fn1,fn2`, which prints the normalised diff. For deliberate renames, set `OBJDIFF_RENAME="old=new,..."`. |
 | `deadcode.sh` | Lists functions that `main()` can never reach, via the linker's `--gc-sections` report. Code disabled by a constant condition (`if (false && ...)`) is invisible to it, so the compiler is the final check when you delete something. |
 | `check-headers.sh` | Every header under `libs/dbat/include` compiles on its own. |
-| `check-writes.sh` | Every file the game rewrites goes through `atomic_open()` (`dbat/atomicfile.h`), so a crash or full disk can't leave it half-written. It lists any raw write, append or update `fopen()` outside the exceptions in the script, such as append-only logs. |
+| `check-writes.sh` | Every file the game rewrites goes through `atomic_open()` (`dbat/atomicfile.hpp`), so a crash or full disk can't leave it half-written. It lists any raw write, append or update `fopen()` outside the exceptions in the script, such as append-only logs. |
 | `check-members.py` | Direct member access to `struct char_data`, `obj_data` and `room_data` outside the `_utils` file that owns each one, found from clang's syntax tree and counting uses through macros. Use `--enforce char_data obj_data room_data` to fail if any remain, and `--show obj_data.name` to list them. Needs `clang`. |
 | `analyze.sh` | Runs GCC's static analyzer (`-fanalyzer`) over the server, about 20 seconds, and lists its findings grouped by kind, rarest first. It can't follow objects handed to global lists or files closed by a helper, so most leak reports, and some others, are false: a list of places to look, not failures. |
 | `fuzz.py TARGET` | Coverage-guided fuzzing with libFuzzer (`fuzz` preset): `load` for player files, `boot` for world files, `script` for DG scripts, `bot` for bot journals. Runs for `-t` seconds, then replays each saved failure and writes `report.txt`, grouped by where it happened. |
@@ -24,9 +24,9 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 `libs/dbat/tests/` holds self-contained tests that need no `data/` files. Run them with `ctest` from a CMake build directory.
 
-Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.h`), so a test can build as many worlds as it wants. A test that builds a world by hand only has to set the global `logfile`, which stays global because crash handlers write to it.
+Game state lives in `GameWorld` (`libs/dbat/include/dbat/game_world.hpp`), so a test can build as many worlds as it wants. A test that builds a world by hand only has to set the global `logfile`, which stays global because crash handlers write to it.
 
-To test a whole running game, use `libs/dbat/tests/harness.h`. It copies `libs/dbat/tests/fixtures/world/`, a small hand-written world, to a temp directory and boots it there with no sockets, so nothing touches your `data/`. A test can log players in, type commands, read their output and run pulses.
+To test a whole running game, use `libs/dbat/tests/harness.hpp`. It copies `libs/dbat/tests/fixtures/world/`, a small hand-written world, to a temp directory and boots it there with no sockets, so nothing touches your `data/`. A test can log players in, type commands, read their output and run pulses.
 
 - `test_world.cpp` plays through game systems: fights, followers, scripts, zone resets, shops and saving.
 - `test_bad_data.cpp` gives the game scripts with mistakes in them, damaged files and edits that would lose something, each in a process of its own.
@@ -44,6 +44,6 @@ To hunt for bugs with everything you have, run `tools/hunt.sh`, and Ctrl-C it wh
 
 `tools/test_copyover.py BINARY [SCENARIO...]` runs real servers and clients through copyovers: players coming back with their rooms and objects, switched immortals, builders in editors, link-dead players, wizlock and command line options surviving, a missing binary, damaged copyover files, and the deadlock timer. `ctest` runs it, under the `slow` label.
 
-`world_audit()` (`dbat/world_audit.h`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
+`world_audit()` (`dbat/world_audit.hpp`) checks that the game's lists agree with each other. The tests call it after every step, `dbat -c` runs it after loading the world, and admins can run it in a live game with the `audit` command.
 
 A test can pin the clock with `g->pinned_time`, which is what `game_now()` then returns. Game code should call `game_now(g)` and not `time(0)`.

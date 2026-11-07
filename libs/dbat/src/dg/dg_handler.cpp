@@ -12,22 +12,24 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
-#include "dbat/utils.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/stringutils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/fileop.h"
-#include "dg_internal.h"
+#include <cstdlib>
+#include <cerrno>
 
-#include <stdlib.h>
 #include <linux/limits.h>
-#include <errno.h>
-#include "dbat/game_world.h"
+
+#include "dbat/utils.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/game_world.hpp"
+
+#include "dg_internal.hpp"
 
 /* frees memory associated with var */
 static void free_var_el(struct trig_var_data *var)

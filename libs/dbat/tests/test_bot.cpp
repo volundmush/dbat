@@ -24,44 +24,47 @@
  * to every line, so that removing a line doesn't change the rolls of all the lines after it, which is
  * what lets a journal shrink.
  */
-#include <ctype.h>
+#include <cctype>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <dirent.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <strings.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "harness.h"
-#include "dbat/genzon.h"
-#include "dbat/gengld.h"
-#include "dbat/genshp.h"
-#include "dbat/genobj.h"
-#include "dbat/genmob.h"
-#include "dbat/genwld.h"
-#include "dbat/genolc.h"
-#include "dbat/house.h"
-#include "dbat/objsave.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/fight.h"
-#include "dbat/players.h"
-#include "dbat/room_utils.h"
-#include "dbat/shop.h"
-#include "dbat/object_utils.h"
-#include "dbat/index.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/zones.h"
-#include "dbat/handler.h"
-#include "dbat/descriptor.h"
-#include "dbat/interpreter.h"
-#include "dbat/random.h"
-#include "dbat/utils.h"
-#include "dbat/world_audit.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/genzon.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/genshp.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/genwld.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/house.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/players.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/index.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/zones.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/descriptor.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/random.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/world_audit.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "harness.hpp"
 
 constexpr int NUM_BOTS        = 4;
 constexpr int NUM_SENSEIS     = 14; /* the ones players can have: the rest of the table is unused */

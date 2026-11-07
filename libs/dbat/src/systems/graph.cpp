@@ -7,21 +7,21 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/config.h"
-#include "dbat/graph.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/spells.h"
-#include "dbat/maputils.h"
-#include "dbat/vehicles.h"
-#include "dbat/act.informative.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/config.hpp"
+#include "dbat/graph.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/maputils.hpp"
+#include "dbat/vehicles.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions */
 static bool VALID_EDGE(GameWorld *g, room_rnum x, int y);

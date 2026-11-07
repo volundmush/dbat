@@ -8,25 +8,24 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#include "dbat/consts/maximums.h"
-#include "dbat/screen.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/character_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/extract.h"
-#include "dbat/relocate.h"
+#include <cstdarg>
+#include <cstdio>
 
-#include "dbat/act.wizard.h"
-
-#include <stdarg.h>
-#include <stdio.h>
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/screen.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/act.wizard.hpp"
+#include "dbat/game_world.hpp"
 
 /*
  * Local functions

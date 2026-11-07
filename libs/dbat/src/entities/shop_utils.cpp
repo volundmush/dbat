@@ -1,7 +1,7 @@
-#include "dbat/shop_utils.h"
-#include "dbat/shop.h"
-#include "dbat/flags.h"
-#include "dbat/game_world.h"
+#include "dbat/shop_utils.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/flags.hpp"
+#include "dbat/game_world.hpp"
 
 room_vnum shop_get_vnum(const struct shop_data *shop)
 {

@@ -9,6 +9,6 @@ while IFS= read -r h; do
   if ! echo "#include \"$rel\"" | ${CXX:-g++} -fsyntax-only -std=gnu++26 -I"$inc" -x c++ - 2> /dev/null; then
     echo "not self-contained: $rel"; fail=1
   fi
-done < <(find "$inc" -name '*.h' | sort)
+done < <(find "$inc" -name '*.hpp' | sort)
 [ $fail -eq 0 ] && echo "check-headers: OK"
 exit $fail

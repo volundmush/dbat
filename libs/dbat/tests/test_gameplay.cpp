@@ -5,36 +5,39 @@
  * test_gameplay         all of them
  * test_gameplay NAME    one of them, here
  */
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <sys/wait.h>
 #include <unistd.h>
-#include "harness.h"
-#include "dbat/act.attack.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.item.h"
-#include "dbat/act.misc.h"
-#include "dbat/act.offensive.h"
-#include "dbat/act.other.h"
-#include "dbat/affect.h"
-#include "dbat/combat.h"
-#include "dbat/consts/bonus.h"
-#include "dbat/consts/races.h"
-#include "dbat/consts/senseis.h"
-#include "dbat/consts/skills.h"
-#include "dbat/consts/songs.h"
-#include "dbat/db.h"
-#include "dbat/fight.h"
-#include "dbat/game_world.h"
-#include "dbat/handler.h"
-#include "dbat/local_limits.h"
-#include "dbat/players.h"
-#include "dbat/relocate.h"
-#include "dbat/utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
+
+#include "dbat/act.attack.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/act.item.hpp"
+#include "dbat/act.misc.hpp"
+#include "dbat/act.offensive.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/combat.hpp"
+#include "dbat/consts/bonus.hpp"
+#include "dbat/consts/races.hpp"
+#include "dbat/consts/senseis.hpp"
+#include "dbat/consts/skills.hpp"
+#include "dbat/consts/songs.hpp"
+#include "dbat/db.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/game_world.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/players.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+
+#include "harness.hpp"
 
 static int failures = 0;
 

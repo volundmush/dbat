@@ -1,4 +1,4 @@
-#include "dbat/consts/aligns.h"
+#include "dbat/consts/aligns.hpp"
 
 /* Alignments */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */

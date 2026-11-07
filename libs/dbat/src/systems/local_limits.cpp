@@ -7,28 +7,28 @@
  *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
-#include "dbat/config.h"
-#include "dbat/local_limits.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/broadcast.h"
-#include "dbat/act.other.h"
-#include "dbat/alias.h"
-#include "dbat/act.item.h"
-#include "dbat/vehicles.h"
-#include "dbat/act.movement.h"
-#include "dbat/class.h"
-#include "dbat/fight.h"
-#include "dbat/objsave.h"
-#include "dbat/handler.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/character_utils.h"
-
 #include <unistd.h>
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/config.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/broadcast.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/alias.hpp"
+#include "dbat/act.item.hpp"
+#include "dbat/vehicles.hpp"
+#include "dbat/act.movement.hpp"
+#include "dbat/class.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local defines */
 constexpr int sick_fail = 2;

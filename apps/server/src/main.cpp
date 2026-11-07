@@ -2,22 +2,23 @@
 // Created by basti on 10/22/2021.
 //
 
-#include "dbat/config.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/mail.h"
-#include "dbat/boards.h"
-#include "dbat/act.informative.h"
-#include "dbat/act.social.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/ban.h"
-#include "dbat/genolc.h"
+#include <csignal>
+#include <cstring>
 
-#include <signal.h>
-#include <string.h>
 #include <unistd.h>
-#include "dbat/world_audit.h"
-#include "dbat/game_world.h"
+
+#include "dbat/config.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/mail.hpp"
+#include "dbat/boards.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/ban.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/world_audit.hpp"
+#include "dbat/game_world.hpp"
 
 static void log_audit_problem(void *, const char *problem)
 {

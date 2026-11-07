@@ -34,9 +34,9 @@ file(GLOB_RECURSE SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# Also glob up include/*.h
+# Also glob up include/*.hpp
 file(GLOB_RECURSE INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dbat/*.hpp
 )
 
 target_sources(dbat

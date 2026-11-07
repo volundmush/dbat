@@ -8,30 +8,29 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 
-#include <errno.h>
-#include <unistd.h>
-#include "dbat/affect.h"
-#include "dbat/objsave.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/spells.h"
-#include "dbat/players.h"
-#include "dbat/class.h"
-#include "dbat/act.social.h"
-#include "dbat/act.item.h"
-#include "dbat/fileop.h"
-#include "dbat/consts/rents.h"
-#include "dbat/config.h"
-#include "dbat/atomicfile.h"
+#include <cerrno>
 
 #include <unistd.h>
-#include <errno.h>
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/affect.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/players.hpp"
+#include "dbat/class.hpp"
+#include "dbat/act.social.hpp"
+#include "dbat/act.item.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/consts/rents.hpp"
+#include "dbat/config.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions */
 

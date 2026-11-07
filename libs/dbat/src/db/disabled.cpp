@@ -1,13 +1,13 @@
-#include "dbat/disabled.h"
-#include "dbat/utils.h"
-#include "dbat/command.h"
-#include "dbat/fileop.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/atomicfile.h"
-
 #include <unistd.h>
-#include "dbat/game_world.h"
+
+#include "dbat/disabled.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/command.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 
 static void save_disabled(GameWorld *g);

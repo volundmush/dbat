@@ -3,14 +3,14 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/guild.h"
-#include "dbat/shop.h"
-#include "dbat/gengld.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/utils.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+#include "dbat/guild.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 static void free_guild_strings(struct guild_data *guild);
 

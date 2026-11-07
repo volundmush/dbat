@@ -1,4 +1,4 @@
-#include "dbat/consts/mobflags.h"
+#include "dbat/consts/mobflags.hpp"
 
 /* MOB_x */
 const char *const action_bits[NUM_MOB_FLAGS + 1] = {

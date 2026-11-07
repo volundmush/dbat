@@ -2,21 +2,23 @@
  * Runs a DG script on a mob, an object or a room, as the first byte says. The rest is the script, which
  * goes in through the game's own trigger file, so that it's parsed and attached as any other would be.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../harness.h"
-#include "fuzz.h"
-#include "dbat/db.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/extract.h"
-#include "dbat/game_world.h"
-#include "dbat/handler.h"
-#include "dbat/relocate.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/world_audit.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include "dbat/db.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/game_world.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/world_audit.hpp"
+
+#include "../harness.hpp"
+#include "fuzz.hpp"
 
 static const uint8_t *script;
 static size_t script_size;

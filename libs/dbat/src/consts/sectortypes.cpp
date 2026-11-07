@@ -1,4 +1,4 @@
-#include "dbat/consts/sectortypes.h"
+#include "dbat/consts/sectortypes.hpp"
 
 /* SECT_ */
 const char *const sector_types[NUM_ROOM_SECTORS + 1] = {

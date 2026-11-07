@@ -12,22 +12,22 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include "dbat/consts/maximums.h"
-#include "dbat/utils.h"
-#include "dbat/act.informative.h"
-#include "dbat/races.h"
-#include "dbat/comm.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/graph.h"
-#include "dbat/spells.h"
-#include "dbat/handler.h"
-#include "dbat/stringutils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/search.h"
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/races.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/graph.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/search.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions */
 static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[], void *otokens[], char type[]);

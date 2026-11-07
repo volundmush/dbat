@@ -7,22 +7,22 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/config.h"
-#include "dbat/spell_parser.h"
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/handler.h"
-#include "dbat/comm.h"
-#include "dbat/db.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/fight.h"
-#include "dbat/act.other.h"
-#include "dbat/class.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/config.hpp"
+#include "dbat/spell_parser.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/db.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/act.other.hpp"
+#include "dbat/class.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* extern globals */
 
@@ -434,7 +434,7 @@ static void skillo(GameWorld *g, int skill, const char *name, int flags)
  * spellnum, maxmana, minmana, manachng, minpos, targets, violent?, routines.
  *
  * spellnum:  Number of the spell.  Usually the symbolic name as defined in
- * spells.h (such as SPELL_HEAL).
+ * spells.hpp (such as SPELL_HEAL).
  *
  * maxmana :  The maximum mana this spell will take (i.e., the mana it
  * will take when the player first gets the spell).

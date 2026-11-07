@@ -1,4 +1,4 @@
-#include "dbat/consts/constates.h"
+#include "dbat/consts/constates.hpp"
 
 /* CON_x */
 const char *const connected_types[NUM_CON_TYPES + 1] = {

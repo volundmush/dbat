@@ -1,41 +1,42 @@
-#include "dbat/characters.h"
-#include "dbat/utils.h"
-#include "dbat/consts/aligns.h"
-#include "dbat/character_utils.h"
-#include "dbat/races.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/class.h"
-#include "dbat/fight.h"
-#include "dbat/act.movement.h"
-#include "dbat/relocate.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/zone_utils.h"
-#include "dbat/db.h"
-#include "dbat/random.h"
-#include "dbat/act.informative.h"
-#include "dbat/stringutils.h"
-#include "dbat/extract.h"
-#include "dbat/affect.h"
-#include "dbat/fileop.h"
-#include "dbat/genzon.h"
-#include "dbat/feats.h"
-#include "dbat/time.h"
-#include "dbat/weather.h"
-#include <stdlib.h>
-#include <string.h>
-#include "dbat/consts/types.h"
-#include "dbat/consts/positions.h"
-#include "dbat/consts/playerflags.h"
-#include "dbat/consts/mobflags.h"
-#include "dbat/consts/sex.h"
-#include "dbat/consts/races.h"
-#include "dbat/consts/shadowdragons.h"
-#include "dbat/local_limits.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+#include <cstdlib>
+#include <cstring>
+
+#include "dbat/characters.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/consts/aligns.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/races.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/class.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/act.movement.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/zone_utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/random.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/time.hpp"
+#include "dbat/weather.hpp"
+#include "dbat/consts/types.hpp"
+#include "dbat/consts/positions.hpp"
+#include "dbat/consts/playerflags.hpp"
+#include "dbat/consts/mobflags.hpp"
+#include "dbat/consts/sex.hpp"
+#include "dbat/consts/races.hpp"
+#include "dbat/consts/shadowdragons.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 static void char_adm_set(struct char_data *ch, int flag, bool on);
 static bool char_has_legs(const struct char_data *ch);
@@ -4590,7 +4591,7 @@ bool MOON_TIMECHECK(GameWorld *g)
   return false;
 }
 
-/* Formerly macros in character_utils.h. */
+/* Formerly macros in character_utils.hpp. */
 
 /* NPCs are exactly the characters without player_specials. (MOB_ISNPC is still set on mobs so mob files and
  * OLC stay compatible, but it is not consulted.) */

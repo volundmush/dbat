@@ -1,11 +1,11 @@
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-
 #include <execinfo.h>
 #include <unistd.h>
-#include "dbat/room_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)

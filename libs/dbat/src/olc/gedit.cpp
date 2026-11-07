@@ -6,25 +6,24 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "dbat/guild.h"
-#include "dbat/config.h"
-
-#include "dbat/gedit.h"
-#include "dbat/genzon.h"
-#include "dbat/act.informative.h"
-#include "dbat/oasis.h"
-#include "dbat/gengld.h"
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/handler.h"
-#include "dbat/races.h"
-#include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/feats.h"
-#include "dbat/genolc.h"
-#include "dbat/shop.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/guild.hpp"
+#include "dbat/config.hpp"
+#include "dbat/gedit.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/races.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static void gedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, guild_rnum rgm_num);

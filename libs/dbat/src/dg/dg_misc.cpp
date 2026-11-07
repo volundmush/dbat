@@ -6,22 +6,22 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#include "dbat/consts/maximums.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/db.h"
-#include "dbat/spells.h"
-#include "dbat/fight.h"
-#include "dbat/character_utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/extract.h"
-#include "dbat/affect.h"
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/db.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/game_world.hpp"
 
 /* copied from spell_parser.c: */
 #define SINFO g->spell_info[spellnum]

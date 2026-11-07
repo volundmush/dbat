@@ -1,4 +1,4 @@
-#include "dbat/consts/itemdata.h"
+#include "dbat/consts/itemdata.hpp"
 
 /*
  * WEAR_x - for eq list

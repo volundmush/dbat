@@ -1,34 +1,36 @@
 /* Plays through whole game systems in the fixture world, checking the world audit after each. */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "harness.h"
-#include "dbat/db.h"
-#include "dbat/extract.h"
-#include "dbat/comm.h"
-#include "dbat/class.h"
-#include "dbat/fight.h"
-#include "dbat/affect.h"
-#include "dbat/config.h"
-#include "dbat/genobj.h"
-#include "dbat/spells.h"
-#include "dbat/gengld.h"
-#include "dbat/local_limits.h"
-#include "dbat/magic.h"
-#include "dbat/zones.h"
-#include "dbat/guild.h"
-#include "dbat/shop.h"
-#include "dbat/handler.h"
-#include "dbat/relocate.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/interpreter.h"
-#include "dbat/utils.h"
-#include "dbat/world_audit.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/rooms.h"
-#include "dbat/game_world.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include "dbat/db.hpp"
+#include "dbat/extract.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/class.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/affect.hpp"
+#include "dbat/config.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/magic.hpp"
+#include "dbat/zones.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/world_audit.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/rooms.hpp"
+#include "dbat/game_world.hpp"
+
+#include "harness.hpp"
 
 static int failures = 0;
 

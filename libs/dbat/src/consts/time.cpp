@@ -1,4 +1,4 @@
-#include "dbat/consts/time.h"
+#include "dbat/consts/time.hpp"
 
 /* Not used in sprinttype(). */
 const char *const weekdays[NUM_WEEK_DAYS] = {

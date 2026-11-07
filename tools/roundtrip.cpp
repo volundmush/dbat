@@ -1,14 +1,15 @@
 /* Verification helper (not part of the server build).
  * Called from gdb after boot by verify.sh: loads every player and saves it back, then saves every
  * zone's mobiles, so the resulting data/ tree can be diffed between two builds. */
-#include <stdio.h>
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/players.h"
-#include "dbat/character_utils.h"
-#include "dbat/genmob.h"
-#include "dbat/game_world.h"
+#include <cstdio>
+
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/players.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/genmob.hpp"
+#include "dbat/game_world.hpp"
 
 extern "C" long roundtrip_dump(GameWorld *g)
 {

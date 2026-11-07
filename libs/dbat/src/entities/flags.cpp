@@ -1,6 +1,7 @@
-#include "dbat/flags.h"
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+
+#include "dbat/flags.hpp"
 
 static bool flag_test(const bitvector_t bitvector[], int flag)
 {

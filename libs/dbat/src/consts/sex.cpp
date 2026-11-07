@@ -1,4 +1,4 @@
-#include "dbat/consts/sex.h"
+#include "dbat/consts/sex.hpp"
 
 const char *const genders[NUM_SEX + 1] =
     {

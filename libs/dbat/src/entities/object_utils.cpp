@@ -1,13 +1,14 @@
-#include "dbat/objects.h"
-#include "dbat/object_utils.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/consts/maximums.h"
-#include "dbat/consts/itemdata.h"
-#include <stdlib.h>
-#include <string.h>
-#include "dbat/room_utils.h"
-#include "dbat/game_world.h"
+#include <cstdlib>
+#include <cstring>
+
+#include "dbat/objects.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/consts/itemdata.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/game_world.hpp"
 
 bool wearable_obj(struct obj_data *obj)
 {
@@ -441,7 +442,7 @@ obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj)
   return g->obj_index[obj->item_number].vnum;
 }
 
-/* Formerly macros in object_utils.h. */
+/* Formerly macros in object_utils.hpp. */
 
 bool obj_aff_flagged(const struct obj_data *obj, int flag)
 {

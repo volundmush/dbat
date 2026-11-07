@@ -2,14 +2,14 @@
 // Created by volund on 11/4/21.
 //
 
-#include "dbat/techniques.h"
-#include "dbat/utils.h"
-#include "dbat/combat.h"
-#include "dbat/comm.h"
-#include "dbat/spells.h"
-#include "dbat/character_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/techniques.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/combat.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/game_world.hpp"
 
 bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const char *name)
 {

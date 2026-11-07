@@ -1,16 +1,15 @@
-#include "dbat/races.h"
-
-#include "dbat/utils.h"
-#include "dbat/interpreter.h"
-#include "dbat/spells.h"
-#include "dbat/comm.h"
-#include "dbat/class.h"
-#include "dbat/fight.h"
-#include "dbat/weather.h"
-#include "dbat/transformations.h"
-#include "dbat/object_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/races.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/class.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/weather.hpp"
+#include "dbat/transformations.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 

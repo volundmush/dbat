@@ -1,13 +1,13 @@
-#include "dbat/descriptor.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/db.h"
-#include "dbat/fileop.h"
-#include "dbat/stringutils.h"
-#include "dbat/comm.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+#include "dbat/descriptor.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 void customWrite(struct char_data *ch, struct obj_data *obj)
 {
@@ -130,7 +130,7 @@ void customCreate(struct descriptor_data *d)
   atomic_commit(&af);
 }
 
-/* Formerly macros in descriptor_utils.h. */
+/* Formerly macros in descriptor_utils.hpp. */
 
 bool desc_is_playing(const struct descriptor_data *d)
 {

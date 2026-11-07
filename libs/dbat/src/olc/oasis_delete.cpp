@@ -17,10 +17,10 @@
    +-----------------------------------------------------------------------+
 */
 
-#include "dbat/config.h"
-#include "dbat/utils.h"
-#include "dbat/oasis.h"
-#include "dbat/game_world.h"
+#include "dbat/config.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/game_world.hpp"
 
 /* Internal Functions */
 

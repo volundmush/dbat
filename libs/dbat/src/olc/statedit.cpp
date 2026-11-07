@@ -9,14 +9,14 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
-#include "dbat/statedit.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/statedit.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static bool parse_stat_menu(GameWorld *g, struct descriptor_data *d, char *arg);
 static int stats_assign_stat(GameWorld *g, int abil, char *arg, struct descriptor_data *d);

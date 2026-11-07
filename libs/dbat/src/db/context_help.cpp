@@ -2,22 +2,21 @@
  * The functions below this point is handling the context sensitive help system
  * If you add more olc options, be sure to add a case for it here. - Welcor
  */
-#include "dbat/descriptor_utils.h"
-#include "dbat/context_help.h"
-#include "dbat/act.informative.h"
-#include "dbat/oasis.h"
-#include "dbat/dg_olc.h"
-#include "dbat/interpreter.h"
-#include "dbat/comm.h"
-#include "dbat/fileop.h"
-#include "dbat/stringutils.h"
-#include "dbat/db.h"
-#include "dbat/log.h"
+#include <cstdlib>
+#include <cerrno>
 
-#include <stdlib.h>
-
-#include <errno.h>
-#include "dbat/game_world.h"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/context_help.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/dg_olc.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/log.hpp"
+#include "dbat/game_world.hpp"
 
 static int find_context_gedit(struct descriptor_data *d);
 static int find_context_medit(struct descriptor_data *d);

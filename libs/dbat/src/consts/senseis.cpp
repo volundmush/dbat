@@ -1,4 +1,4 @@
-#include "dbat/consts/senseis.h"
+#include "dbat/consts/senseis.hpp"
 
 /* Sensei Fighting Style */
 const char *const sensei_style[MAX_SENSEI] = {

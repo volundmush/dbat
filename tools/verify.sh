@@ -35,7 +35,7 @@ for side in ref new; do
   # The ref may predate GameWorld; `finish` above leaves gdb in init_game, where g is in scope.
   tree=$root; [ $side = ref ] && tree=$work/ref-src
   call='roundtrip_dump()'; grep -qs 'roundtrip_dump(GameWorld' "$tree"/tools/roundtrip.c* && call='roundtrip_dump(g)'
-  srandom='circle_srandom(12345)'; grep -q 'circle_srandom(GameWorld' "$tree/libs/dbat/include/dbat/random.h" && srandom='circle_srandom(g, 12345)'
+  srandom='circle_srandom(12345)'; grep -qs 'circle_srandom(GameWorld' "$tree"/libs/dbat/include/dbat/random.h* && srandom='circle_srandom(g, 12345)'
   sed "s/@PORT@/${!port_var}/; s/@ROUNDTRIP@/$call/; s/@SRANDOM@/$srandom/" "$work/rt.gdb.in" > "$work/$side/rt.gdb"
 done
 for side in ref new; do
@@ -55,7 +55,7 @@ for side in ref new; do echo "  $side: -c exit $(cat "$work/$side/check/check.rc
 [ "$(cat "$work/ref/check/check.rc")" = "$(cat "$work/new/check/check.rc")" ] || { echo "FAIL: -c exit status differs"; status=1; }
 diff <(norm "$work/ref/check/check.log") <(norm "$work/new/check/check.log") > "$work/check.diff" || { echo "FAIL: -c logs differ ($work/check.diff)"; status=1; }
 diff <(norm "$work/ref/run/boot.log") <(norm "$work/new/run/boot.log") > "$work/boot.diff" || { echo "FAIL: boot logs differ ($work/boot.diff)"; status=1; }
-# *.bak: atomic saves of player data keep the replaced version beside the file (dbat/atomicfile.h)
+# *.bak: atomic saves of player data keep the replaced version beside the file (dbat/atomicfile.hpp)
 diff -r -x '*.bak' "$work/ref/run/data" "$work/new/run/data" > "$work/data.diff" || { echo "FAIL: saved data differs ($work/data.diff)"; status=1; }
 [ $status -eq 0 ] && { echo "verify: OK"; rm -rf "$work"; } || echo "verify: differences kept in $work"
 exit $status

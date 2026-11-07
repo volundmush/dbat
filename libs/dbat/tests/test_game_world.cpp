@@ -1,26 +1,27 @@
 /* Two GameWorlds built by hand must not affect each other. Needs no data/ files. */
-#include <stdio.h>
-#include <stdlib.h>
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/descriptor.h"
-#include "dbat/dg_event.h"
-#include "dbat/genshp.h"
-#include "dbat/guild.h"
-#include "dbat/handler.h"
-#include "dbat/local_limits.h"
-#include "dbat/object_systems.h"
-#include "dbat/index.h"
-#include "dbat/random.h"
-#include "dbat/relocate.h"
-#include "dbat/search.h"
-#include "dbat/shop.h"
-#include "dbat/vehicles.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/comm.h"
-#include "dbat/game_world.h"
+#include <cstdio>
+#include <cstdlib>
+
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/descriptor.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/genshp.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/local_limits.hpp"
+#include "dbat/object_systems.hpp"
+#include "dbat/index.hpp"
+#include "dbat/random.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/search.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/vehicles.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/game_world.hpp"
 
 static int failures = 0;
 

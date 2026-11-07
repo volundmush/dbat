@@ -3,8 +3,8 @@
 *  Usage: pseudo-random number generator                                  *
 ************************************************************************ */
 
-#include "dbat/random.h"
-#include "dbat/game_world.h"
+#include "dbat/random.hpp"
+#include "dbat/game_world.hpp"
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand

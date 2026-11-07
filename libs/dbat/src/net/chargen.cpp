@@ -7,17 +7,18 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "dbat/utils.h"
-#include "dbat/comm.h"
-#include "dbat/config.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/statedit.h"
-#include "dbat/interpreter.h"
-
 #include <unistd.h>
-#include "nanny_internal.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/statedit.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "nanny_internal.hpp"
 
 static void display_races_sub(GameWorld *g, descriptor_data *d)
 {

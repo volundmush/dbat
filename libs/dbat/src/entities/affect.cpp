@@ -1,12 +1,11 @@
-#include "dbat/affect.h"
-#include "dbat/consts/applies.h"
-#include "dbat/utils.h"
-
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/spells.h"
-#include "dbat/feats.h"
-#include "dbat/game_world.h"
+#include "dbat/affect.hpp"
+#include "dbat/consts/applies.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/spells.hpp"
+#include "dbat/feats.hpp"
+#include "dbat/game_world.hpp"
 
 static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, const char *msg)
 {

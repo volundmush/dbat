@@ -2,12 +2,14 @@
  * Boots a game with one of its files damaged: the first byte picks which, and the rest is its contents.
  * The game may refuse to boot, but if it does boot then its world has to make sense.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "../harness.h"
-#include "fuzz.h"
-#include "dbat/game_world.h"
-#include "dbat/world_audit.h"
+#include <cstdio>
+#include <cstdlib>
+
+#include "dbat/game_world.hpp"
+#include "dbat/world_audit.hpp"
+
+#include "../harness.hpp"
+#include "fuzz.hpp"
 
 static const char *const files[] = {
     "world/wld/3.wld", "world/mob/3.mob", "world/obj/3.obj", "world/zon/3.zon", "world/trg/3.trg",

@@ -1,4 +1,4 @@
-#include "dbat/consts/zoneflags.h"
+#include "dbat/consts/zoneflags.hpp"
 
 const char *const zone_bits[NUM_ZONE_FLAGS + 1] = {
     "CLOSED",

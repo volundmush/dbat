@@ -1,11 +1,12 @@
-#include "dbat/xdir.h"
-#include <stdlib.h>
-#include "dbat/stringutils.h"
-#include <dirent.h>
+#include <cstdlib>
+#include <cerrno>
 
-#include <errno.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "dbat/xdir.hpp"
+#include "dbat/stringutils.hpp"
 
 int xdir_scan(const char *dir_name, struct xap_dir *xapdirp)
 {

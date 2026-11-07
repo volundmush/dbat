@@ -1,4 +1,4 @@
-#include "dbat/consts/npc.h"
+#include "dbat/consts/npc.hpp"
 
 /* NPC Personality Types */
 const char *const npc_personality[MAX_PERSONALITIES + 1] = {

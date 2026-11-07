@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-writes.sh: every file the game rewrites must go through atomic_open() (dbat/atomicfile.h),
+# check-writes.sh: every file the game rewrites must go through atomic_open() (dbat/atomicfile.hpp),
 # so a crash or full disk can never leave it half-written. This lists any fopen() with a write,
 # append or update mode outside the known exceptions below, and fails if it finds one.
 set -uo pipefail

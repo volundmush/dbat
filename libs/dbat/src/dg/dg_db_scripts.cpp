@@ -12,23 +12,22 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-#include "dbat/consts/maximums.h"
-#include "dbat/utils.h"
-#include "dbat/log.h"
+#include <cstdlib>
 
-#include "dbat/dg_scripts.h"
-#include "dbat/db.h"
-#include "dbat/handler.h"
-#include "dbat/dg_event.h"
-#include "dbat/comm.h"
-#include "dbat/fileop.h"
-#include "dbat/stringutils.h"
-#include "dbat/character_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/object_utils.h"
-
-#include <stdlib.h>
-#include "dbat/game_world.h"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/log.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/db.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/game_world.hpp"
 
 /* local functions */
 static void trig_data_init(trig_data *this_data);

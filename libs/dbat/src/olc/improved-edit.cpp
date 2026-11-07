@@ -3,13 +3,13 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
-#include "dbat/improved-edit.h"
-#include "dbat/utils.h"
-#include "dbat/db.h"
-#include "dbat/comm.h"
-#include "dbat/interpreter.h"
-#include "dbat/dg_olc.h"
-#include "dbat/game_world.h"
+#include "dbat/improved-edit.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/db.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/dg_olc.hpp"
+#include "dbat/game_world.hpp"
 
 static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
 static void parse_edit_action(GameWorld *g, int command, char *string, struct descriptor_data *d);

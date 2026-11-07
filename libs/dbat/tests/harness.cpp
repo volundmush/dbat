@@ -1,25 +1,28 @@
-#include "harness.h"
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-#include "dbat/class.h"
-#include "dbat/comm.h"
-#include "dbat/config.h"
-#include "dbat/db.h"
-#include "dbat/descriptor.h"
-#include "dbat/dg_event.h"
-#include "dbat/dg_scripts.h"
-#include "dbat/fileop.h"
-#include "dbat/interpreter.h"
-#include "dbat/players.h"
-#include "dbat/utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+
+#include "dbat/class.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/db.hpp"
+#include "dbat/descriptor.hpp"
+#include "dbat/dg_event.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/players.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
+
+#include "harness.hpp"
 
 #ifdef DBAT_COVERAGE
 extern "C" void __gcov_dump(void);

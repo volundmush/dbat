@@ -1,6 +1,6 @@
-#include "dbat/transformations.h"
-#include "dbat/consts/races.h"
-#include "dbat/consts/playerflags.h"
+#include "dbat/transformations.hpp"
+#include "dbat/consts/races.hpp"
+#include "dbat/consts/playerflags.hpp"
 
 const struct transform_bonus base_form = {
     .bonus                = 0,

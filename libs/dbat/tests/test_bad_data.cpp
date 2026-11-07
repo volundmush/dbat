@@ -5,34 +5,37 @@
  * test_bad_data         all of them
  * test_bad_data NAME    one of them, here
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <sys/wait.h>
 #include <unistd.h>
-#include "harness.h"
-#include "dbat/affect.h"
-#include "dbat/combat.h"
-#include "dbat/comm.h"
-#include "dbat/consts/applies.h"
-#include "dbat/consts/feats.h"
-#include "dbat/consts/races.h"
-#include "dbat/consts/shadowdragons.h"
-#include "dbat/consts/skills.h"
-#include "dbat/db.h"
-#include "dbat/dg_scripts.h"
-#include "../src/dg/dg_internal.h"
-#include "dbat/game_world.h"
-#include "dbat/genwld.h"
-#include "dbat/handler.h"
-#include "dbat/objsave.h"
-#include "dbat/relocate.h"
-#include "dbat/utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/object_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/shop.h"
-#include "dbat/world_audit.h"
+
+#include "dbat/affect.hpp"
+#include "dbat/combat.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/consts/applies.hpp"
+#include "dbat/consts/feats.hpp"
+#include "dbat/consts/races.hpp"
+#include "dbat/consts/shadowdragons.hpp"
+#include "dbat/consts/skills.hpp"
+#include "dbat/db.hpp"
+#include "dbat/dg_scripts.hpp"
+#include "dbat/game_world.hpp"
+#include "dbat/genwld.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/relocate.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/world_audit.hpp"
+
+#include "harness.hpp"
+#include "../src/dg/dg_internal.hpp"
 
 static int failures = 0;
 

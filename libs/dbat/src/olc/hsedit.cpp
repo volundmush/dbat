@@ -6,21 +6,21 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "dbat/hsedit.h"
-#include "dbat/config.h"
-#include "dbat/comm.h"
-#include "dbat/utils.h"
-#include "dbat/handler.h"
-#include "dbat/interpreter.h"
-#include "dbat/db.h"
-#include "dbat/oasis.h"
-#include "dbat/genolc.h"
-#include "dbat/genzon.h"
-#include "dbat/house.h"
-#include "dbat/act.informative.h"
-#include "dbat/room_utils.h"
-#include "dbat/character_utils.h"
-#include "dbat/game_world.h"
+#include "dbat/hsedit.hpp"
+#include "dbat/config.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/utils.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/db.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/genzon.hpp"
+#include "dbat/house.hpp"
+#include "dbat/act.informative.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/game_world.hpp"
 
 static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 

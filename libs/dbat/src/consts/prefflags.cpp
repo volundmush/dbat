@@ -1,4 +1,4 @@
-#include "dbat/consts/prefflags.h"
+#include "dbat/consts/prefflags.hpp"
 
 /* PRF_x */
 const char *const preference_bits[NUM_PRF_FLAGS + 1] = {

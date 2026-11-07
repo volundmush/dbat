@@ -1,3 +1,3 @@
-#include "dbat/objects.h"
-#include "dbat/consts/triggers.h"
+#include "dbat/objects.hpp"
+#include "dbat/consts/triggers.hpp"
 

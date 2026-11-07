@@ -1,4 +1,4 @@
-#include "dbat/consts/attacks.h"
+#include "dbat/consts/attacks.hpp"
 
 /* Combine Attack Names */
 const char *const attack_names_comp[] = {

@@ -3,27 +3,28 @@
  * Copyright 2002-2003 Kip Potter   (kip_potter@hotmail.com)            *
  * A graphical in-game game configuration utility for OasisOLC.         *
  ************************************************************************/
-#include <errno.h>
-#include <limits.h>
-#include <stddef.h>
+#include <cerrno>
+#include <climits>
+#include <cstddef>
 #include <type_traits>
-#include "dbat/utils.h"
-#include "dbat/consts/create.h"
-#include "dbat/config.h"
-#include "dbat/cedit.h"
-#include "dbat/comm.h"
-#include "dbat/oasis.h"
-#include "dbat/spec_assign.h"
-#include "dbat/db.h"
-#include "dbat/interpreter.h"
-#include "dbat/genolc.h"
-#include "dbat/improved-edit.h"
-#include "dbat/character_utils.h"
-#include "dbat/descriptor_utils.h"
-#include "dbat/room_utils.h"
-#include "dbat/stringutils.h"
-#include "dbat/atomicfile.h"
-#include "dbat/game_world.h"
+
+#include "dbat/utils.hpp"
+#include "dbat/consts/create.hpp"
+#include "dbat/config.hpp"
+#include "dbat/cedit.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/spec_assign.hpp"
+#include "dbat/db.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/improved-edit.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/atomicfile.hpp"
+#include "dbat/game_world.hpp"
 
 /*
  * Every configuration option is one row of cedit_options[], in the order the config file
