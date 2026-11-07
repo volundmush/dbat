@@ -83,29 +83,29 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
 /* -------------------------------------------------------------------------- */
 
 struct oasis_olc_data {
-  int mode;                        /* how to parse input       */
-  zone_rnum zone_num;              /* current zone             */
-  room_vnum number;                /* vnum of subject          */
-  int value;                       /* mostly 'has changed' flag*/
-  char *storage;                   /* used for 'tedit'         */
-  struct char_data *mob;           /* used for 'medit'         */
-  struct room_data *room;          /* used for 'redit'         */
-  struct obj_data *obj;            /* used for 'oedit'         */
-  struct obj_data *iobj;           /* used for 'iedit'         */
-  struct zone_data *zone;          /* used for 'zedit'         */
-  struct shop_data *shop;          /* used for 'sedit'         */
-  struct house_control_rec *house; /* used for 'hsedit'      */
-  struct config_data *config;      /* used for 'cedit'         */
-  struct extra_descr_data *desc;   /* used in '[r|o|m]edit'    */
-  struct social_messg *action;     /* Aedit uses this one      */
-  struct trig_data *trig;
-  int script_mode;
-  int trigger_position;
-  int item_type;
-  struct trig_proto_list *script;    /* for assigning triggers in [r|o|m]edit*/
-  struct assembly_data *OlcAssembly; /* used for 'assedit'         */
-  struct guild_data *guild;          /* used for 'gedit'         */
-  struct help_index_element *help;   /* Hedit uses this */
+  int mode{};                        /* how to parse input       */
+  zone_rnum zone_num{};              /* current zone             */
+  room_vnum number{};                /* vnum of subject          */
+  int value{};                       /* mostly 'has changed' flag*/
+  char *storage{};                   /* used for 'tedit'         */
+  struct char_data *mob{};           /* used for 'medit'         */
+  struct room_data *room{};          /* used for 'redit'         */
+  struct obj_data *obj{};            /* used for 'oedit'         */
+  struct obj_data *iobj{};           /* used for 'iedit'         */
+  struct zone_data *zone{};          /* used for 'zedit'         */
+  struct shop_data *shop{};          /* used for 'sedit'         */
+  struct house_control_rec *house{}; /* used for 'hsedit'      */
+  struct config_data *config{};      /* used for 'cedit'         */
+  struct extra_descr_data *desc{};   /* used in '[r|o|m]edit'    */
+  struct social_messg *action{};     /* Aedit uses this one      */
+  struct trig_data *trig{};
+  int script_mode{};
+  int trigger_position{};
+  int item_type{};
+  struct trig_proto_list *script{};    /* for assigning triggers in [r|o|m]edit*/
+  struct assembly_data *OlcAssembly{}; /* used for 'assedit'         */
+  struct guild_data *guild{};          /* used for 'gedit'         */
+  struct help_index_element *help{};   /* Hedit uses this */
 };
 
 /*

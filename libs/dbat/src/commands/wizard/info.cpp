@@ -1093,8 +1093,8 @@ ACMD(do_show)
       arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 
   struct show_struct {
-    const char *cmd;
-    const char level;
+    const char *cmd{};
+    const char level{};
   } fields[] = {
       {"nothing",    0            }, /* 0 */
       {"zones",      ADMLVL_IMMORT}, /* 1 */
@@ -1538,9 +1538,9 @@ constexpr int MAX_AFFECTS_ALLOWED = 3;
 /* Armor class limits*/
 constexpr int TOTAL_WEAR_CHECKS = (NUM_ITEM_WEARS - 2); /*minus Wield and Take*/
 static const struct zcheck_armor {
-  bitvector_t bitvector; /* from Structs.h                       */
-  int ac_allowed;        /* Max. AC allowed for this body part  */
-  const char *message;   /* phrase for error message            */
+  bitvector_t bitvector{}; /* from Structs.h                       */
+  int ac_allowed{};        /* Max. AC allowed for this body part  */
+  const char *message{};   /* phrase for error message            */
 } zarmor[] = {
     {ITEM_WEAR_FINGER, 10, "Ring"         },
     {ITEM_WEAR_NECK,   10, "Necklace"     },
@@ -1568,10 +1568,10 @@ static const struct zcheck_armor {
   These will be ignored if MAX_APPLIES_LIMIT = 0
 */
 static const struct zcheck_affs {
-  int aff_type;        /*from Structs.h*/
-  int min_aff;         /*min. allowed value*/
-  int max_aff;         /*max. allowed value*/
-  const char *message; /*phrase for error message*/
+  int aff_type{};        /*from Structs.h*/
+  int min_aff{};         /*min. allowed value*/
+  int max_aff{};         /*max. allowed value*/
+  const char *message{}; /*phrase for error message*/
 } zaffs[] = {
     {APPLY_NONE,        0,   -99, "unused0"         },
     {APPLY_STR,         -6,  6,   "strength"        },
@@ -2272,8 +2272,8 @@ ACMD(do_spells)
 }
 
 struct audit_reader {
-  GameWorld *g;
-  struct char_data *ch;
+  GameWorld *g{};
+  struct char_data *ch{};
 };
 
 static void audit_report_to_char(void *context, const char *problem)

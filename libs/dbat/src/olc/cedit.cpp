@@ -48,18 +48,18 @@ constexpr int CO_OLD_ADMLEVEL = (1 << 1); /* the file may hold an old-style leve
 constexpr int CO_RANGE        = (1 << 2); /* min/max apply */
 
 struct cedit_option {
-  const char *key;     /* config file key */
-  const char *comment; /* comment lines written before it in the file, or NULL */
-  enum cedit_type type;
-  size_t offset;       /* in struct config_data */
-  const char *section; /* starts this section of the file */
-  unsigned flags;
-  int min, max;       /* with CO_RANGE */
-  char menu, choice;  /* the submenu (its main menu key) and the key in it; 0 if not edited */
-  const char *label;  /* menu text, padded, before the ": " */
-  const char *suffix; /* menu text after the value */
-  const char *prompt;
-  const char *note; /* sent after it is toggled */
+  const char *key{};     /* config file key */
+  const char *comment{}; /* comment lines written before it in the file, or NULL */
+  enum cedit_type type{};
+  size_t offset{};       /* in struct config_data */
+  const char *section{}; /* starts this section of the file */
+  unsigned flags{};
+  int min{}, max{};       /* with CO_RANGE */
+  char menu{}, choice{};  /* the submenu (its main menu key) and the key in it; 0 if not edited */
+  const char *label{};  /* menu text, padded, before the ": " */
+  const char *suffix{}; /* menu text after the value */
+  const char *prompt{};
+  const char *note{}; /* sent after it is toggled */
 };
 
 /* The field's offset, refusing to compile unless the field has type T. */

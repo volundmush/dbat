@@ -43,9 +43,9 @@ static WCMD(do_wat);
 static WCMD(do_weffect);
 
 struct wld_command_info {
-  const char *command;
-  void (*command_pointer)(GameWorld *g, room_data *room, char *argument, int cmd, int subcmd);
-  int subcmd;
+  const char *command{};
+  void (*command_pointer)(GameWorld *g, room_data *room, char *argument, int cmd, int subcmd){};
+  int subcmd{};
 };
 
 /* do_wsend */

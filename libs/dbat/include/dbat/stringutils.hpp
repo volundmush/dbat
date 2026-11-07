@@ -34,7 +34,7 @@ char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
  * can: do_barrier(g, ch, writable{"40"}, 0, 0). The copy lasts until the end of the statement. A string
  * literal, or a compound literal like (char[]){"40"}, can be in read-only memory. */
 template <size_t N> struct writable {
-  char text[N];
+  char text[N]{};
   operator char *() { return text; }
 };
 template <size_t N> writable(const char (&)[N]) -> writable<N>;

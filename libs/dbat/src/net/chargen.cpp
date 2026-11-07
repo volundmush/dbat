@@ -875,7 +875,7 @@ static void show_feature_menu(GameWorld *g, struct descriptor_data *d)
 
 /* Height (cm) and weight (kg) ranges offered at creation. */
 struct size_range {
-  int min_height, max_height, min_weight, max_weight;
+  int min_height{}, max_height{}, min_weight{}, max_weight{};
 };
 
 static const struct size_range normal_sizes[] = {
@@ -1394,8 +1394,8 @@ static void state_android(GameWorld *g, struct descriptor_data *d, char *arg)
 
 /* Starting ability ranges by race, in the order they are rolled. */
 static const struct {
-  bool (*is_race)(const struct char_data *ch);
-  int str[2], con[2], wis[2], intel[2], cha[2], dex[2];
+  bool (*is_race)(const struct char_data *ch){};
+  int str[2]{}, con[2]{}, wis[2]{}, intel[2]{}, cha[2]{}, dex[2]{};
 } starting_abilities[] = {
     {char_is_saiyan,    {12, 18}, {12, 18}, {8, 16},  {8, 14},  {8, 18},  {8, 16} },
     {char_is_halfbreed, {10, 18}, {10, 18}, {8, 18},  {8, 18},  {8, 18},  {8, 18} },
@@ -1509,7 +1509,7 @@ static void state_q2(GameWorld *g, struct descriptor_data *d, char *arg)
 static void state_q3(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   static const struct {
-    int alignment, pl, st, ki;
+    int alignment{}, pl{}, st{}, ki{};
   } answers[] = {
       {-100, 100, 80,  10 },
       {10,   25,  25,  25 },

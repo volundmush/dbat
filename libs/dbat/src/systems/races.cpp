@@ -15,10 +15,10 @@
 
 /* Converted into metric units: cm and kg; SRD has english units. */
 static const struct {
-  int height[NUM_SEX]; /* cm */
-  int heightdie;       /* 2d(heightdie) added to height */
-  int weight[NUM_SEX]; /* kg */
-  int weightfac;       /* added height * weightfac/100 added to weight */
+  int height[NUM_SEX]{}; /* cm */
+  int heightdie{};       /* 2d(heightdie) added to height */
+  int weight[NUM_SEX]{}; /* kg */
+  int weightfac{};       /* added height * weightfac/100 added to weight */
 } hw_info[NUM_RACES] = {
     /* RACE_HUMAN      */ {{141, 147, 135}, 26, {46, 54, 39}, 89 },
     /* RACE_SAIYAN     */
@@ -407,8 +407,8 @@ static int race_max_transform_tier(char_data *ch)
 
 /* Form names accepted by 'transform <form>', mapped to tiers. */
 struct form_name {
-  const char *name;
-  int tier;
+  const char *name{};
+  int tier{};
 };
 
 static const struct form_name two_form_names[] = {

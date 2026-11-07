@@ -70,10 +70,10 @@ constexpr int MAX_SIGNATURES = 500;
 constexpr int AUDIT_FAILED   = 3;
 
 struct signature {
-  char text[300];
-  char example[300];
-  int count;
-  bool known;
+  char text[300]{};
+  char example[300]{};
+  int count{};
+  bool known{};
 };
 
 static struct signature signatures[MAX_SIGNATURES];

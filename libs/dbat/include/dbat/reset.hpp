@@ -12,8 +12,8 @@ constexpr int RESET_GAUNTLET = 328;
 constexpr int NUM_GAUNTLET_ROOMS = 20;
 
 struct gauntlet_mob {
-  room_vnum vroom;
-  mob_vnum vmob;
+  room_vnum vroom{};
+  mob_vnum vmob{};
 };
 
 /* Reset functions */

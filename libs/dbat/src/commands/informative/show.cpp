@@ -680,8 +680,8 @@ void list_obj_to_char(GameWorld *g, struct obj_data *list, struct char_data *ch,
 void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
   struct {
-    int percent;
-    const char *text;
+    int percent{};
+    const char *text{};
   } diagnosis[] = {
       {100, "is in excellent condition."               },
       {90,  "has a few scuffs."                        },
@@ -710,8 +710,8 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
   struct {
-    int percent;
-    const char *text;
+    int percent{};
+    const char *text{};
   } diagnosis[] = {
       {100, "@wis in @Gexcellent@w condition."                  },
       {90,  "@whas a few @Rscratches@w."                        },
@@ -1409,8 +1409,8 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
 {
   struct char_data *i, *j;
   struct hide_node {
-    struct hide_node *next;
-    struct char_data *hidden;
+    struct hide_node *next{};
+    struct char_data *hidden{};
   } *hideinfo, *lasthide, *tmphide;
   int num;
 

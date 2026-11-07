@@ -23,9 +23,9 @@
 ** define event related structures
 */
 struct event {
-  EVENTFUNC(*func);
-  void *event_obj;
-  struct q_element *q_el;
+  EVENTFUNC(*func){};
+  void *event_obj{};
+  struct q_element *q_el{};
 };
 
 /****** End of Event related info ********/
@@ -36,13 +36,13 @@ struct event {
 constexpr int NUM_EVENT_QUEUES = 10;
 
 struct queue {
-  struct q_element *head[NUM_EVENT_QUEUES], *tail[NUM_EVENT_QUEUES];
+  struct q_element *head[NUM_EVENT_QUEUES]{}, *tail[NUM_EVENT_QUEUES]{};
 };
 
 struct q_element {
-  void *data;
-  long key;
-  struct q_element *prev, *next;
+  void *data{};
+  long key{};
+  struct q_element *prev{}, *next{};
 };
 /****** End of Queue related info ********/
 

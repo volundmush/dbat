@@ -81,10 +81,10 @@ ACMD(do_who)
   name_search[0] = '\0';
 
   struct {
-    const char *disp;
-    int min_level;
-    int max_level;
-    int count; /* must always start as 0 */
+    const char *disp{};
+    int min_level{};
+    int max_level{};
+    int count{}; /* must always start as 0 */
   } rank[] = {
       {"\r\n               @c------------  @D[    @gI@Gm@Wm@Do@Gr@Dt@Wa@Gl@gs   @D]  @c------------@n\r\n", ADMLVL_IMMORT,     ADMLVL_IMPL,       0},
       {"\r\n@D[@wx@D]@yxxxxxxxxxx@W  [    @GImmortals   @W]  @yxxxxxxxxxx@D[@wx@D]@n\r\n",                  ADMLVL_IMMORT + 8, ADMLVL_GRGOD + 8,  0},

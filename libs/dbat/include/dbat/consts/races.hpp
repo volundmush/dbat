@@ -30,12 +30,12 @@ constexpr int RACE_SPIRIT     = 23;
 constexpr int NUM_RACES = 24;
 
 struct aging_data {
-  int adult;           /* Adulthood */
-  int classdice[3][2]; /* Dice info for starting age based on class age type */
-  int middle;          /* Middle age */
-  int old;             /* Old age */
-  int venerable;       /* Venerable age */
-  int maxdice[2];      /* For roll to determine natural death beyond venerable */
+  int adult{};           /* Adulthood */
+  int classdice[3][2]{}; /* Dice info for starting age based on class age type */
+  int middle{};          /* Middle age */
+  int old{};             /* Old age */
+  int venerable{};       /* Venerable age */
+  int maxdice[2]{};      /* For roll to determine natural death beyond venerable */
 };
 
 extern const char *const race_names[NUM_RACES + 1];

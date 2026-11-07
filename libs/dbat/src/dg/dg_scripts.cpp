@@ -197,7 +197,7 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
 {
   room_rnum room = NOWHERE;
 
-  memset(&g->dg_ctx, 0, sizeof(g->dg_ctx));
+  g->dg_ctx = {};
   g->dg_ctx.active     = true;
   g->dg_ctx.owner_type = type;
   g->dg_ctx.trig_vnum  = (long long)trig_get_vnum(g, trig);

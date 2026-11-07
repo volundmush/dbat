@@ -30,9 +30,9 @@ static void bfs_dequeue(GameWorld *g);
 static void bfs_clear_queue(GameWorld *g);
 
 struct bfs_queue_struct {
-  room_rnum room;
-  char dir;
-  struct bfs_queue_struct *next;
+  room_rnum room{};
+  char dir{};
+  struct bfs_queue_struct *next{};
 };
 
 

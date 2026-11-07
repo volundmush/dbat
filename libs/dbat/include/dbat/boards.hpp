@@ -10,31 +10,31 @@ constexpr int BOARD_MEMORY_SLOTS = 301;     /* buckets of "who has read what" re
 
 /* One message. Doubly linked, newest first, so forward or back is simple. */
 struct board_msg {
-  time_t timestamp;
-  char *subject;
-  char *data;
-  struct board_msg *next;
-  struct board_msg *prev;
-  char *name; /* poster */
+  time_t timestamp{};
+  char *subject{};
+  char *data{};
+  struct board_msg *next{};
+  struct board_msg *prev{};
+  char *name{}; /* poster */
 };
 
 /* One "reader has read the message with this timestamp" record, hashed by message. */
 struct board_memory {
-  int timestamp;
-  struct board_memory *next;
-  char *name; /* reader */
+  int timestamp{};
+  struct board_memory *next{};
+  char *name{}; /* reader */
 };
 
 struct board_info {
-  int read_lvl;     /* min level to read messages on this board */
-  int write_lvl;    /* min level to write messages on this board */
-  int remove_lvl;   /* min level to remove messages from this board */
-  int num_messages; /* num messages of this board */
-  obj_vnum vnum;
-  struct board_info *next;
-  struct board_msg *messages;
-  int version;
-  struct board_memory *memory[BOARD_MEMORY_SLOTS];
+  int read_lvl{};     /* min level to read messages on this board */
+  int write_lvl{};    /* min level to write messages on this board */
+  int remove_lvl{};   /* min level to remove messages from this board */
+  int num_messages{}; /* num messages of this board */
+  obj_vnum vnum{};
+  struct board_info *next{};
+  struct board_msg *messages{};
+  int version{};
+  struct board_memory *memory[BOARD_MEMORY_SLOTS]{};
 };
 
 

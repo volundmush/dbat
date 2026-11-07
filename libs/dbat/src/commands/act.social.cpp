@@ -389,7 +389,7 @@ void free_action(struct social_messg *mess)
   if (mess->others_auto) free(mess->others_auto);
   if (mess->char_obj_found) free(mess->char_obj_found);
   if (mess->others_obj_found) free(mess->others_obj_found);
-  memset(mess, 0, sizeof(struct social_messg));
+  *mess = {};
 }
 
 static int social_sort_order(const void *a, const void *b)

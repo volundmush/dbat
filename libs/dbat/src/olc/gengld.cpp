@@ -153,7 +153,7 @@ guild_rnum add_guild(GameWorld *g, struct guild_data *ngld)
       found = rguild;
 
       /* whatever this slot holds is uninitialized, or was just copied to the next one up */
-      memset(&g->guild_index[rguild], 0, sizeof(g->guild_index[rguild]));
+      g->guild_index[rguild] = {};
       copy_guild(&g->guild_index[rguild], ngld);
       break;
     }
@@ -161,7 +161,7 @@ guild_rnum add_guild(GameWorld *g, struct guild_data *ngld)
   }
 
   if (!found) {
-    memset(&g->guild_index[0], 0, sizeof(g->guild_index[0]));
+    g->guild_index[0] = {};
     copy_guild(&g->guild_index[0], ngld);
   }
 

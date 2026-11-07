@@ -210,8 +210,8 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
   if (action == STRINGADD_SAVE || action == STRINGADD_ABORT) {
     int i;
     struct {
-      int mode;
-      void (*func)(GameWorld *g, struct descriptor_data *dsc, int todo);
+      int mode{};
+      void (*func)(GameWorld *g, struct descriptor_data *dsc, int todo){};
     } cleanup_modes[] = {
         {CON_CEDIT,    cedit_string_cleanup   },
         {CON_MEDIT,    medit_string_cleanup   },

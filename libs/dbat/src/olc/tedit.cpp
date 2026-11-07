@@ -147,11 +147,11 @@ ACMD(do_tedit)
   char *backstr = nullptr;
 
   struct {
-    const char *cmd;
-    char level;
-    char **buffer;
-    int size;
-    const char *filename;
+    const char *cmd{};
+    char level{};
+    char **buffer{};
+    int size{};
+    const char *filename{};
   } fields[] = {
       /* edit the lvls to your own needs */
       {"credits",    ADMLVL_IMPL,  &g->credits,    24000, CREDITS_FILE   },

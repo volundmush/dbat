@@ -317,8 +317,8 @@ const char *money_desc(int amount)
 {
   int cnt;
   struct {
-    int limit;
-    const char *description;
+    int limit{};
+    const char *description{};
   } money_table[] = {
       {1,     "a single zenni"               },
       {10,    "a tiny pile of zenni"         },

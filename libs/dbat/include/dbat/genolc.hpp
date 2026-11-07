@@ -25,9 +25,9 @@ int sprintascii(char *out, bitvector_t bits);
 void free_save_list(GameWorld *g);
 
 struct save_list_data {
-  zone_vnum zone;
-  int type;
-  struct save_list_data *next;
+  zone_vnum zone{};
+  int type{};
+  struct save_list_data *next{};
 };
 
 /* save_list_data.type */

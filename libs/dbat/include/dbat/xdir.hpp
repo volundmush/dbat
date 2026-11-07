@@ -1,8 +1,8 @@
 #pragma once
 
 struct xap_dir {
-  int total, current;
-  struct dirent **namelist;
+  int total{}, current{};
+  struct dirent **namelist{};
 };
 
 int xdir_scan(const char *dir_name, struct xap_dir *xapdirp);

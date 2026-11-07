@@ -1225,8 +1225,8 @@ void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   /* OasisOLC states */
   struct {
-    int state;
-    void (*func)(GameWorld *, struct descriptor_data *, char *);
+    int state{};
+    void (*func)(GameWorld *, struct descriptor_data *, char *){};
   } olc_functions[] = {
       {CON_OEDIT,    oedit_parse    },
       {CON_IEDIT,    oedit_parse    },

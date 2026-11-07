@@ -223,11 +223,11 @@ ACMD(do_newsedit)
 
   /* Time to write the entry */
   struct {
-    const char *cmd;
-    char level;
-    char **buffer;
-    int size;
-    const char *filename;
+    const char *cmd{};
+    char level{};
+    char **buffer{};
+    int size{};
+    const char *filename{};
   } fields[] = {
       /* edit the lvls to your own needs */
       {"news", ADMLVL_IMMORT, &g->immlist, 2000, IMMLIST_FILE},

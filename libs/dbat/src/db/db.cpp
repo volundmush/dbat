@@ -3444,10 +3444,10 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
 }
 
 struct obj_unique_hash_elem {
-  time_t generation;
-  int64_t unique_id;
-  struct obj_data *obj;
-  struct obj_unique_hash_elem *next_e;
+  time_t generation{};
+  int64_t unique_id{};
+  struct obj_data *obj{};
+  struct obj_unique_hash_elem *next_e{};
 };
 
 static void free_obj_unique_hash(GameWorld *g)

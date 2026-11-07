@@ -54,9 +54,9 @@ static OCMD(do_osetval);
 static OCMD(do_oat);
 
 struct obj_command_info {
-  const char *command;
-  void (*command_pointer)(GameWorld *g, obj_data *obj, char *argument, int cmd, int subcmd);
-  int subcmd;
+  const char *command{};
+  void (*command_pointer)(GameWorld *g, obj_data *obj, char *argument, int cmd, int subcmd){};
+  int subcmd{};
 };
 
 /* do_osend */

@@ -1045,9 +1045,9 @@ ACMD(do_file)
   char buf[MAX_STRING_LENGTH];
 
   struct file_struct {
-    const char *cmd;
-    char level;
-    const char *file;
+    const char *cmd{};
+    char level{};
+    const char *file{};
   } fields[] = {
       {"none",     6,             "Does Nothing"        },
       {"bug",      ADMLVL_IMMORT, "../data/misc/bugs"   },

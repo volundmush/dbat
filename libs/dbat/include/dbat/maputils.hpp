@@ -5,8 +5,8 @@ constexpr int MAP_ROWS = 199;
 constexpr int MAP_COLS = 199;
 
 struct mapstruct {
-  int x;
-  int y;
+  int x{};
+  int y{};
 };
 typedef struct mapstruct MapStruct;
 

@@ -4,8 +4,8 @@
 #include "dbat/consts/types.hpp"
 
 struct nanny_state {
-  int state;
-  void (*handler)(GameWorld *g, struct descriptor_data *d, char *arg);
+  int state{};
+  void (*handler)(GameWorld *g, struct descriptor_data *d, char *arg){};
 };
 
 /* chargen.c */

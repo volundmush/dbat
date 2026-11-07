@@ -15,18 +15,18 @@
 constexpr int MAX_REPORTED = 50;
 
 struct pointer_set {
-  const void **items;
-  size_t count;
+  const void **items{};
+  size_t count{};
 };
 
 static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch);
 
 struct audit {
-  world_audit_report *report;
-  void *context;
-  int problems;
-  struct pointer_set characters;
-  struct pointer_set objects;
+  world_audit_report *report{};
+  void *context{};
+  int problems{};
+  struct pointer_set characters{};
+  struct pointer_set objects{};
 };
 
 __attribute__((format(printf, 2, 3)))

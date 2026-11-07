@@ -121,8 +121,8 @@ int find_eq_pos_script(char *arg)
 {
   int i;
   struct eq_pos_list {
-    const char *pos;
-    int where;
+    const char *pos{};
+    int where{};
   } eq_pos[] = {
       {"hold",      WEAR_WIELD2  },
       {"held",      WEAR_WIELD2  },

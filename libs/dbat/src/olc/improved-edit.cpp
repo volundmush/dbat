@@ -26,8 +26,8 @@ void send_editor_help(GameWorld *g, struct descriptor_data *d)
 /* ---- a growing text buffer, so nothing is assembled in a fixed-size array ---- */
 
 struct textbuf {
-  char *s;
-  size_t len, cap;
+  char *s{};
+  size_t len{}, cap{};
 };
 
 static void tb_add(struct textbuf *b, const char *text, size_t n)

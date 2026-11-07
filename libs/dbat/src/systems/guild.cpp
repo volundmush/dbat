@@ -1133,8 +1133,8 @@ SPECIAL(guild)
   int i;
   struct char_data *keeper = (struct char_data *)me;
   struct {
-    const char *cmd;
-    void (*func)(GameWorld *, struct char_data *, int, struct char_data *, char *);
+    const char *cmd{};
+    void (*func)(GameWorld *, struct char_data *, int, struct char_data *, char *){};
   } guild_cmd_tab[] = {
       {"practice", handle_practice},
       {"gain",     handle_gain    },

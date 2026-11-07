@@ -21,8 +21,8 @@ static void remove_cmd_from_list(struct reset_com **list, int pos);
 /* Orders a vnum against the range of vnums a zone covers. */
 /* bsearch() can only pass its comparator two pointers, so the key carries the world too */
 struct zone_range_key {
-  GameWorld *g;
-  room_vnum vnum;
+  GameWorld *g{};
+  room_vnum vnum{};
 };
 
 static int zone_range_order(const void *key_ptr, const void *zone)

@@ -41,8 +41,8 @@ static void unused_spell(GameWorld *g, int spl);
  */
 
 struct syllable {
-  const char *org;
-  const char *news;
+  const char *org{};
+  const char *news{};
 };
 
 const char *const unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */

@@ -151,9 +151,9 @@ static bool is_never_typed(const char *command)
 
 /* Who is connected, by the label the journal knows them by. */
 struct connection {
-  char label[16];
-  struct descriptor_data *d;
-  int peer; /* the client's end of its socket, or -1 for a player made by spawn */
+  char label[16]{};
+  struct descriptor_data *d{};
+  int peer{}; /* the client's end of its socket, or -1 for a player made by spawn */
 };
 
 static struct connection connections[MAX_CONNECTIONS];
@@ -698,8 +698,8 @@ static void save_everything(GameWorld *g)
 
 /* One changed line of a file, and whether the other side of the comparison has the same line. */
 struct changed_line {
-  char text[240];
-  bool moved;
+  char text[240]{};
+  bool moved{};
 };
 
 static char changed_file[96];
@@ -928,10 +928,10 @@ static void play_journal(const char *path)
 }
 
 struct signature {
-  char text[300];
-  char example[600];
-  int count;
-  bool known;
+  char text[300]{};
+  char example[600]{};
+  int count{};
+  bool known{};
 };
 
 static struct signature signatures[MAX_SIGNATURES];

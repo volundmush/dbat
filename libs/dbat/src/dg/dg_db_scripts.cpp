@@ -34,8 +34,8 @@ static void trig_data_init(trig_data *this_data);
 
 /* the block a script line opens, for dg_lint_trigger() */
 struct dg_lint_block {
-  const char *kind; /* "if", "while" or "switch" */
-  int line;
+  const char *kind{}; /* "if", "while" or "switch" */
+  int line{};
 };
 
 static void dg_lint_warn(GameWorld *g, const trig_data *trig, struct descriptor_data *d, int line, const char *msg)

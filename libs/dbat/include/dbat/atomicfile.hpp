@@ -16,10 +16,10 @@
 #include <cstdio>
 
 struct atomic_file {
-  FILE *fp;
-  bool backup;
-  char path[PATH_MAX];
-  char tmp[PATH_MAX];
+  FILE *fp{};
+  bool backup{};
+  char path[PATH_MAX]{};
+  char tmp[PATH_MAX]{};
 };
 
 FILE *atomic_open(struct atomic_file *af, const char *path, bool backup);
