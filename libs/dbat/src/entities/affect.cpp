@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "dbat/affect.hpp"
 #include "dbat/consts/applies.hpp"
 #include "dbat/utils.hpp"
@@ -297,7 +299,7 @@ void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af
 {
   struct affected_type *affected_alloc;
 
-  CREATE(affected_alloc, struct affected_type, 1);
+  affected_alloc = new affected_type();
 
   if (!char_get_affected(ch)) {
     char_set_next_affect(ch, g->affect_list);
@@ -327,7 +329,7 @@ void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af)
 
   affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, false);
   REMOVE_FROM_LIST(af, *char_affected_slot(ch), next, cmtemp);
-  free(af);
+  delete af;
   affect_total(g, ch);
   if (!char_get_affected(ch)) {
     char_unlink_from_affect_list(g, ch);

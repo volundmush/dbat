@@ -6,6 +6,8 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/oasis_copy.hpp"
 #include "dbat/broadcast.hpp"
 #include "dbat/dg_olc.hpp"
@@ -99,7 +101,7 @@ ACMD(do_dig)
         free(rroom_get_dir_option(g, char_get_in_room(ch), dir)->general_description);
       if (rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword)
         free(rroom_get_dir_option(g, char_get_in_room(ch), dir)->keyword);
-      free(rroom_get_dir_option(g, char_get_in_room(ch), dir));
+      delete rroom_get_dir_option(g, char_get_in_room(ch), dir);
       rroom_set_dir_option(g, char_get_in_room(ch), dir, nullptr);
       add_to_save_list(g, g->zones[rroom_get_zone(g, char_get_in_room(ch))].number, SL_WLD);
       send_to_char(g, ch, "You remove the exit to the %s.\r\n", dirs[dir]);
@@ -139,12 +141,12 @@ ACMD(do_dig)
      */
     if (d->olc) {
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
-      free(d->olc);
+      delete d->olc;
     }
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc      = new oasis_olc_data();
     OLC_ZNUM(d) = zone;
     OLC_NUM(d)  = rvnum;
-    CREATE(OLC_ROOM(d), struct room_data, 1);
+    OLC_ROOM(d) = new room_data();
 
     /* Copy the room's name. */
     if (*new_room_name)
@@ -178,7 +180,7 @@ ACMD(do_dig)
    */
   {
     struct room_direction_data *new_exit;
-    CREATE(new_exit, struct room_direction_data, 1);
+    new_exit = new room_direction_data();
     rroom_set_dir_option(g, char_get_in_room(ch), dir, new_exit);
   }
   rroom_get_dir_option(g, char_get_in_room(ch), dir)->general_description = nullptr;
@@ -198,7 +200,7 @@ ACMD(do_dig)
   else {
     {
       struct room_direction_data *new_exit;
-      CREATE(new_exit, struct room_direction_data, 1);
+      new_exit = new room_direction_data();
       rroom_set_dir_option(g, rrnum, rev_dir[dir], new_exit);
     }
     rroom_get_dir_option(g, rrnum, rev_dir[dir])->general_description = nullptr;
@@ -337,12 +339,12 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
        */
       if (d->olc) {
         mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
-        free(d->olc);
+        delete d->olc;
       }
-      CREATE(d->olc, struct oasis_olc_data, 1);
+      d->olc      = new oasis_olc_data();
       OLC_ZNUM(d) = rroom_get_zone(g, char_get_in_room(ch));
       OLC_NUM(d)  = vnum;
-      CREATE(OLC_ROOM(d), struct room_data, 1);
+      OLC_ROOM(d) = new room_data();
 
       room_set_name(OLC_ROOM(d), strdup("New BuildWalk Room"));
 
@@ -361,12 +363,12 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
       rnum = real_room(g, vnum);
       {
         struct room_direction_data *new_exit;
-        CREATE(new_exit, struct room_direction_data, 1);
+        new_exit = new room_direction_data();
         char_set_exit(g, ch, dir, new_exit);
       }
       char_get_exit(g, ch, dir)->to_room = rnum;
       struct room_direction_data *back_exit;
-      CREATE(back_exit, struct room_direction_data, 1);
+      back_exit = new room_direction_data();
       rroom_set_dir_option(g, rnum, rev_dir[dir], back_exit);
       rroom_get_dir_option(g, rnum, rev_dir[dir])->to_room = char_get_in_room(ch);
 

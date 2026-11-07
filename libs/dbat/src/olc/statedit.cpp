@@ -9,6 +9,8 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
+#include <cstdlib>
+
 #include "dbat/statedit.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"

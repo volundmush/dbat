@@ -10,6 +10,7 @@
 #include <climits>
 #include <cerrno>
 #include <cstring>
+#include <cstdlib>
 
 #include <unistd.h>
 #include <sys/time.h>
@@ -344,7 +345,7 @@ static void execute_copyover(GameWorld *g)
   }
 
   /* Everything the game was started with, so that it comes back the same, and in the same place. */
-  CREATE(args, char *, g->launch_argc + 2);
+  args = new char *[g->launch_argc + 2]();
   snprintf(mother, sizeof(mother), "-C%d", g->mother_desc);
   args[num_args++] = g->launch_argv[0];
   args[num_args++] = mother;

@@ -17,6 +17,8 @@
    +-----------------------------------------------------------------------+
 */
 
+#include <cstdlib>
+
 #include "dbat/config.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/oasis.hpp"

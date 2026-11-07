@@ -6,6 +6,8 @@
  * Based on shop.c.  As such, the CircleMud License applies                *
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/guild.hpp"
 #include "dbat/config.hpp"
 #include "dbat/affect.hpp"
@@ -1242,7 +1244,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
       free(buf); /* Plug memory leak! */
       g->top_guild++;
       if (!g->top_guild)
-        CREATE(g->guild_index, struct guild_data, rec_count);
+        g->guild_index = new guild_data[rec_count]();
       rguild_set_vnum(g, g->top_guild, temp);
 
       clear_skills(g, g->top_guild);
@@ -1288,7 +1290,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
       read_guild_line(g, gm_f, "%d", &(g->guild_index[(g->top_guild)].close), "GM_CLOSE");
 
       rguild_set_func(g, g->top_guild, nullptr);
-      CREATE(buf, char, READ_SIZE);
+      buf = str_alloc(READ_SIZE);
       get_line(gm_f, buf);
       if (buf && *buf != '#' && *buf != '$') {
         p = buf;
@@ -1520,7 +1522,7 @@ void destroy_guilds(GameWorld *g)
       free(g->guild_index[cnt].not_enough_gold);
   }
 
-  free(g->guild_index);
+  delete[] g->guild_index;
   g->guild_index = nullptr;
   g->top_guild   = -1;
 }

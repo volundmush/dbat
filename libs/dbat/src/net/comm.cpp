@@ -25,6 +25,7 @@
 #include <poll.h>
 #include <sys/stat.h>
 
+#include "dbat/arrays.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"
 #include "dbat/help.hpp"
@@ -159,7 +160,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   }
 
   /* create a new descriptor */
-  CREATE(d, struct descriptor_data, 1);
+  d = new descriptor_data();
   init_descriptor(g, d, desc); /* set up various stuff */
   set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
 
@@ -171,9 +172,9 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
 
   /* Now, find the pfile */
 
-  CREATE(d->character, struct char_data, 1);
+  d->character = new char_data();
   clear_char(d->character);
-  CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+  *char_player_specials_slot(d->character) = new player_special_data();
   char_set_desc(d->character, d);
 
   if ((player_i = load_char(g, name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
@@ -573,8 +574,8 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     for (d = g->descriptors; d; d = d->next)
       nfds++;
     if (nfds > fds_alloc) {
+      resize_array(fds, fds_alloc, nfds + 16);
       fds_alloc = nfds + 16;
-      RECREATE(fds, struct pollfd, fds_alloc);
     }
     fds[0] = pollfd{.fd = cmmother_desc, .events = POLLIN};
     nfds   = 1;
@@ -584,7 +585,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     while (poll(fds, nfds, 0) < 0) {
       if (errno != EINTR) { /* a signal arriving here is no reason to stop */
         perror("SYSERR: poll");
-        free(fds);
+        delete[] fds;
         return;
       }
     }
@@ -671,7 +672,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     /* Update tics for deadlock protection */
     tics_passed++;
   }
-  free(fds);
+  delete[] fds;
 }
 
 void game_heartbeat(GameWorld *g, int heart_pulse)
@@ -1491,7 +1492,7 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
 {
   struct txt_block *newt;
 
-  CREATE(newt, struct txt_block, 1);
+  newt          = new txt_block();
   newt->text    = strdup(txt);
   newt->aliased = aliased;
   if (!aliased)
@@ -1525,7 +1526,7 @@ static bool get_from_q(struct txt_q *queue, char *dest, int *aliased)
   tmp         = queue->head;
   queue->head = queue->head->next;
   free(tmp->text);
-  free(tmp);
+  delete tmp;
 
   return true;
 }
@@ -1537,7 +1538,7 @@ static void flush_input_queue(struct descriptor_data *d)
     struct txt_block *tmp = d->input.head;
     d->input.head         = d->input.head->next;
     free(tmp->text);
-    free(tmp);
+    delete tmp;
   }
   d->input.typed = 0;
 }
@@ -1634,7 +1635,7 @@ static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, cha
     return strlen(txt);
 
   source_char = txt;
-  CREATE(dest_char, char, maxlen);
+  dest_char   = str_alloc(maxlen);
   save_pos = dest_char;
   /* Leave room for the terminating NUL: every step below writes at most one byte, except a color substitution,
    * which checks its own length. */
@@ -1789,8 +1790,8 @@ size_t vwrite_to_output(GameWorld *g, struct descriptor_data *t, const char *for
     t->large_outbuf = g->bufpool;
     g->bufpool         = g->bufpool->next;
   } else { /* else create a new one */
-    CREATE(t->large_outbuf, struct txt_block, 1);
-    CREATE(t->large_outbuf->text, char, LARGE_BUFSIZE);
+    t->large_outbuf       = new txt_block();
+    t->large_outbuf->text = str_alloc(LARGE_BUFSIZE);
     g->buf_largecount++;
   }
 
@@ -1815,7 +1816,7 @@ void free_bufpool(GameWorld *g)
     tmp = g->bufpool->next;
     if (g->bufpool->text)
       free(g->bufpool->text);
-    free(g->bufpool);
+    delete g->bufpool;
     g->bufpool = tmp;
   }
 }
@@ -1883,7 +1884,7 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->login_time = game_now(g);
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
-  CREATE(newd->history, char *, HISTORY_SIZE);
+  newd->history = new char *[HISTORY_SIZE]();
   if (++g->last_desc == 1000)
     g->last_desc = 1;
   newd->desc_num = g->last_desc;
@@ -1905,9 +1906,9 @@ static void set_empty_account(struct descriptor_data *d)
 static void set_color(GameWorld *g, struct descriptor_data *d)
 {
   if (d->character == nullptr) {
-    CREATE(d->character, struct char_data, 1);
+    d->character = new char_data();
     clear_char(d->character);
-    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    *char_player_specials_slot(d->character) = new player_special_data();
     char_set_desc(d->character, d);
   }
   char_prf_set(g, d->character, PRF_COLOR, true);
@@ -1971,7 +1972,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
     return (0);
   }
   /* create a new descriptor */
-  CREATE(newd, struct descriptor_data, 1);
+  newd = new descriptor_data();
 
   snprintf(newd->host, sizeof(newd->host), "%s", host);
 
@@ -1983,7 +1984,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
     write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
     close(desc);
     mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [%s] refused: already %d connections from it", newd->host, from_same_ip);
-    free(newd);
+    delete newd;
     return (0);
   }
 
@@ -1991,7 +1992,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   if (isbanned(g, newd->host) == BAN_ALL) {
     close(desc);
     mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [%s]", newd->host);
-    free(newd);
+    delete newd;
     return (0);
   }
 
@@ -2502,7 +2503,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
     if (!char_is_npc(d->character) && char_plr_flagged(d->character, PLR_MAILING) && d->str) {
       if (*(d->str))
         free(*(d->str));
-      free(d->str);
+      delete d->str;
       d->str = nullptr;
     } else if (d->backstr && !char_is_npc(d->character) && !char_plr_flagged(d->character, PLR_WRITING)) {
       free(d->backstr); /* editing description ... not olc */
@@ -2532,7 +2533,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
     for (cnt = 0; cnt < HISTORY_SIZE; cnt++)
       if (d->history[cnt])
         free(d->history[cnt]);
-    free(d->history);
+    delete[] d->history;
   }
 
   if (d->obj_name)
@@ -2550,7 +2551,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
   if (d->olc)
     cleanup_olc(g, d, CLEANUP_ALL);
 
-  free(d);
+  delete d;
 }
 
 static void check_idle_passwords(GameWorld *g)

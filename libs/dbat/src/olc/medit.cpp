@@ -4,6 +4,8 @@
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/medit.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"
@@ -115,10 +117,10 @@ ACMD(do_oasis_medit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_medit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -126,7 +128,7 @@ ACMD(do_oasis_medit)
   OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -136,7 +138,7 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
     send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -159,7 +161,7 @@ ACMD(do_oasis_medit)
     /**************************************************************************/
     /** Free the olc structure stored in the descriptor.                     **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -201,7 +203,7 @@ static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
   /*
    * Allocate a scratch mobile structure.  
    */
-  CREATE(mob, struct char_data, 1);
+  mob = new char_data();
 
   init_mobile(g, mob);
 
@@ -231,7 +233,7 @@ static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_rn
   /*
    * Allocate a scratch mobile structure. 
    */
-  CREATE(mob, struct char_data, 1);
+  mob = new char_data();
 
   copy_mobile(g, mob, g->mob_proto + rmob_num);
 

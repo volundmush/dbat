@@ -1,5 +1,7 @@
 /* show.c: showing objects and characters to a viewer
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -1421,7 +1423,7 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(g, i, SKILL_HIDE, 1);
       }
-      CREATE(tmphide, struct hide_node, 1);
+      tmphide         = new hide_node();
       tmphide->hidden = i;
       if (!lasthide) {
         hideinfo = lasthide = tmphide;
@@ -1502,6 +1504,6 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
 
   for (; hideinfo; hideinfo = tmphide) {
     tmphide = hideinfo->next;
-    free(hideinfo);
+    delete hideinfo;
   }
 }

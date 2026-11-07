@@ -838,7 +838,7 @@ void free_alias(struct alias_data *a)
     free(a->alias);
   if (a->replacement)
     free(a->replacement);
-  free(a);
+  delete a;
 }
 
 /* Used in specprocs, mostly.  (Exactly) matches "command" to cmd number */

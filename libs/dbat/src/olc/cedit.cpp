@@ -7,6 +7,7 @@
 #include <climits>
 #include <cstddef>
 #include <type_traits>
+#include <cstdlib>
 
 #include "dbat/utils.hpp"
 #include "dbat/consts/create.hpp"
@@ -310,7 +311,7 @@ ACMD(do_oasis_cedit)
   d = char_get_desc(ch);
 
   if (!*buf1) {
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc      = new oasis_olc_data();
     OLC_ZONE(d) = nullptr;
     cedit_setup(g, d);
     desc_set_connected(d, CON_CEDIT);
@@ -338,7 +339,7 @@ ACMD(do_oasis_cedit)
 /* The editor works on a copy of config_info, with its own copies of the strings. */
 static void cedit_setup(GameWorld *g, struct descriptor_data *d)
 {
-  CREATE(OLC_CONFIG(d), struct config_data, 1);
+  OLC_CONFIG(d)           = new config_data();
   *OLC_CONFIG(d)          = g->config_info;
   OLC_CONFIG(d)->CONFFILE = nullptr;
 
@@ -422,7 +423,7 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
       break;
     case CT_MSG:
       free(*s);
-      CREATE(*s, char, strlen(line) + 3);
+      *s = str_alloc(strlen(line) + 3);
       sprintf(*s, "%s\r\n", line);
       break;
     case CT_STR:
@@ -657,7 +658,7 @@ static char *message_option(const char *text)
 
   if (!*text)
     text = "undefined"; /* as str_udup() */
-  CREATE(msg, char, strlen(text) + 3);
+  msg = str_alloc(strlen(text) + 3);
   sprintf(msg, "%s\r\n", text);
   return msg;
 }

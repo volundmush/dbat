@@ -6,6 +6,8 @@
  * 1999 July 25 caminturn@earthlink.net                                *
  * ******************************************************************** */
 
+#include <cstdlib>
+
 #include "dbat/assedit.hpp"
 #include "dbat/assemblies.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -90,7 +92,7 @@ ACMD(do_assedit)
     }
   } else if (isdigit(*buf)) {
     d = char_get_desc(ch);
-    CREATE(d->olc, struct oasis_olc_data, 1);
+    d->olc = new oasis_olc_data();
     assedit_setup(g, d, atoi(buf));
   }
   return;
@@ -104,7 +106,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
 {
 
   ASSEMBLY *pOldAssembly = nullptr;
-  CREATE(OLC_ASSEDIT(d), ASSEMBLY, 1);
+  OLC_ASSEDIT(d)         = new ASSEMBLY();
 
   if ((pOldAssembly = assemblyGetAssemblyPtr(g, number)) == nullptr) {
     send_to_char(g, d->character, "That assembly does not exist\r\n");
@@ -117,7 +119,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
   OLC_ASSEDIT(d)->lNumComponents  = pOldAssembly->lNumComponents;
 
   if (OLC_ASSEDIT(d)->lNumComponents > 0) {
-    CREATE(OLC_ASSEDIT(d)->pComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents);
+    OLC_ASSEDIT(d)->pComponents = new COMPONENT[OLC_ASSEDIT(d)->lNumComponents]();
     memmove(OLC_ASSEDIT(d)->pComponents, pOldAssembly->pComponents,
             OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT));
   }
@@ -287,7 +289,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             break;
         }
 
-        CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents + 1);
+        pTComponents = new COMPONENT[OLC_ASSEDIT(d)->lNumComponents + 1]();
 
         if (OLC_ASSEDIT(d)->pComponents != nullptr) { /* Copy from olc to temp */
           memmove(pTComponents, OLC_ASSEDIT(d)->pComponents,
@@ -326,7 +328,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         pos = atoi(arg);
         pos -= 1;
 
-        CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents); /* one spare, as there may be none left */
+        pTComponents = new COMPONENT[OLC_ASSEDIT(d)->lNumComponents](); /* one spare, as there may be none left */
 
         if (pos > 0)
           memmove(pTComponents, OLC_ASSEDIT(d)->pComponents, pos * sizeof(COMPONENT));
@@ -335,7 +337,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           memmove(pTComponents + pos, OLC_ASSEDIT(d)->pComponents + pos + 1,
                   (OLC_ASSEDIT(d)->lNumComponents - pos - 1) * sizeof(COMPONENT));
 
-        free(OLC_ASSEDIT(d)->pComponents);
+        delete[] OLC_ASSEDIT(d)->pComponents;
         OLC_ASSEDIT(d)->pComponents = pTComponents;
         OLC_ASSEDIT(d)->lNumComponents -= 1;
 

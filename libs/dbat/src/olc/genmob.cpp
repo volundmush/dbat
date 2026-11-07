@@ -3,6 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/genmob.hpp"
@@ -62,8 +63,8 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     return rnum;
   }
 
-  RECREATE(g->mob_proto, struct char_data, g->top_mob + 2);
-  RECREATE(g->mob_index, struct index_data, g->top_mob + 2);
+  resize_array(g->mob_proto, g->top_mob + 1, g->top_mob + 2);
+  resize_array(g->mob_index, g->top_mob + 1, g->top_mob + 2);
   g->top_mob++;
 
   for (i = g->top_mob; i > 0; i--) {
@@ -170,8 +171,8 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
   }
 
   g->top_mob--;
-  RECREATE(g->mob_index, struct index_data, g->top_mob + 1);
-  RECREATE(g->mob_proto, struct char_data, g->top_mob + 1);
+  resize_array(g->mob_index, g->top_mob + 2, g->top_mob + 1);
+  resize_array(g->mob_proto, g->top_mob + 2, g->top_mob + 1);
 
   add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
 
@@ -315,7 +316,7 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
   if (char_get_script(mob))
     extract_script(g, mob, MOB_TRIGGER);
 
-  free(mob);
+  delete mob;
   return true;
 }
 

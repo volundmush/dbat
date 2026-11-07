@@ -5,6 +5,8 @@
  * for use with OasisOLC
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
+#include <cstdlib>
+
 #include "dbat/aedit.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/social.hpp"
@@ -74,9 +76,9 @@ ACMD(do_oasis_aedit)
    */
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   OLC_NUM(d)     = 0;
   OLC_STORAGE(d) = strdup(arg);
@@ -105,7 +107,7 @@ ACMD(do_oasis_aedit)
 
 static void aedit_setup_new(GameWorld *g, struct descriptor_data *d)
 {
-  CREATE(OLC_ACTION(d), struct social_messg, 1);
+  OLC_ACTION(d)                      = new social_messg();
   OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d));
   OLC_ACTION(d)->sort_as             = strdup(OLC_STORAGE(d));
   OLC_ACTION(d)->min_victim_position = POS_STANDING;
@@ -120,7 +122,7 @@ static void aedit_setup_new(GameWorld *g, struct descriptor_data *d)
 
 static void aedit_setup_existing(GameWorld *g, struct descriptor_data *d, int real_num)
 {
-  CREATE(OLC_ACTION(d), struct social_messg, 1);
+  OLC_ACTION(d)                      = new social_messg();
   OLC_ACTION(d)->command             = strdup(g->soc_mess_list[real_num].command);
   OLC_ACTION(d)->sort_as             = strdup(g->soc_mess_list[real_num].sort_as);
   OLC_ACTION(d)->hide                = g->soc_mess_list[real_num].hide;
@@ -164,11 +166,11 @@ static void aedit_save_internally(GameWorld *g, struct descriptor_data *d)
 
   /* add a new social into the list */
   if (OLC_ZNUM(d) > g->top_of_socialt) {
-    CREATE(new_soc_mess_list, struct social_messg, g->top_of_socialt + 2);
+    new_soc_mess_list = new social_messg[g->top_of_socialt + 2]();
     for (i = 0; i <= g->top_of_socialt; i++)
       new_soc_mess_list[i] = g->soc_mess_list[i];
     new_soc_mess_list[++g->top_of_socialt] = *OLC_ACTION(d);
-    free(g->soc_mess_list);
+    delete[] g->soc_mess_list;
     g->soc_mess_list = new_soc_mess_list;
   }
   /* pass the editted action back to the list - no need to add */

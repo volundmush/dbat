@@ -2,6 +2,8 @@
 // Created by volund on 11/4/21.
 //
 
+#include <cstdlib>
+
 #include "dbat/techniques.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/combat.hpp"

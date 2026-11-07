@@ -5,6 +5,7 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
+#include "dbat/arrays.hpp"
 #include "dbat/assemblies.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/assemblytypes.hpp"
@@ -198,9 +199,9 @@ bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
 
   /* Create a new component table with room for one more entry. */
   if (pAssembly->pComponents == nullptr)
-    CREATE(pAssembly->pComponents, COMPONENT, pAssembly->lNumComponents + 1);
+    pAssembly->pComponents = new COMPONENT[pAssembly->lNumComponents + 1]();
   else
-    RECREATE(pAssembly->pComponents, COMPONENT, pAssembly->lNumComponents + 1);
+    resize_array(pAssembly->pComponents, pAssembly->lNumComponents, pAssembly->lNumComponents + 1);
 
   /*
    * Assign the new component table and setup the new component entry. Then
@@ -237,7 +238,7 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
   else if (pAssembly->lNumComponents <= 0)
     return (false);
 
-  CREATE(ppComponentObjects, struct obj_data *, pAssembly->lNumComponents);
+  ppComponentObjects = new obj_data *[pAssembly->lNumComponents]();
 
   for (i = 0; i < pAssembly->lNumComponents && bOk; i++) {
     if ((lRnum = real_object(g, pAssembly->pComponents[i].lVnum)) < 0)
@@ -273,7 +274,7 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
       obj_to_char(g, ppComponentObjects[i], pCharacter);
   }
 
-  free(ppComponentObjects);
+  delete[] ppComponentObjects;
 
   return (bOk);
 }
@@ -291,7 +292,7 @@ bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType)
     return (false);
 
   if (g->g_pAssemblyTable == nullptr) {
-    CREATE(g->g_pAssemblyTable, ASSEMBLY, 1);
+    g->g_pAssemblyTable = new ASSEMBLY[1]();
     g->g_lNumAssemblies = 1;
   } else {
     lTop = g->g_lNumAssemblies - 1;
@@ -312,7 +313,7 @@ bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType)
     if (g->g_pAssemblyTable[lMiddle].lVnum <= lVnum)
       lMiddle += 1;
 
-    CREATE(pNewAssemblyTable, ASSEMBLY, g->g_lNumAssemblies + 1);
+    pNewAssemblyTable = new ASSEMBLY[g->g_lNumAssemblies + 1]();
 
     if (lMiddle > 0)
       memmove(pNewAssemblyTable, g->g_pAssemblyTable, lMiddle * sizeof(ASSEMBLY));
@@ -320,7 +321,7 @@ bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType)
     if (lMiddle <= g->g_lNumAssemblies - 1)
       memmove(pNewAssemblyTable + lMiddle + 1, g->g_pAssemblyTable + lMiddle, (g->g_lNumAssemblies - lMiddle) * sizeof(ASSEMBLY));
 
-    free(g->g_pAssemblyTable);
+    delete[] g->g_pAssemblyTable;
     g->g_pAssemblyTable = pNewAssemblyTable;
     g->g_lNumAssemblies += 1;
   }
@@ -345,11 +346,11 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
 
   /* Deallocate component array. */
   if (g->g_pAssemblyTable[lIndex].pComponents != nullptr)
-    free(g->g_pAssemblyTable[lIndex].pComponents);
+    delete[] g->g_pAssemblyTable[lIndex].pComponents;
 
   if (g->g_lNumAssemblies > 1) {
     /* Create a new table, the same size as the old one less one item. */
-    CREATE(pNewAssemblyTable, ASSEMBLY, g->g_lNumAssemblies - 1);
+    pNewAssemblyTable = new ASSEMBLY[g->g_lNumAssemblies - 1]();
 
     /* Copy all assemblies before the one removed into the new table. */
     if (lIndex > 0)
@@ -362,7 +363,7 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
   }
 
   /* Deallocate the old table. */
-  free(g->g_pAssemblyTable);
+  delete[] g->g_pAssemblyTable;
 
   /* Decrement the assembly count and assign the new table. */
   g->g_lNumAssemblies -= 1;
@@ -449,10 +450,10 @@ void free_assemblies(GameWorld *g)
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     if (g->g_pAssemblyTable[i].pComponents)
-      free(g->g_pAssemblyTable[i].pComponents);
+      delete[] g->g_pAssemblyTable[i].pComponents;
 
     g->g_pAssemblyTable[i].lNumComponents = 0;
   }
 
-  free(g->g_pAssemblyTable);
+  delete[] g->g_pAssemblyTable;
 }

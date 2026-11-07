@@ -840,9 +840,9 @@ static GameWorld *restart_and_compare(GameWorld *g)
     struct char_data *pc;
     int position;
 
-    CREATE(pc, struct char_data, 1);
+    pc = new char_data();
     clear_char(pc);
-    CREATE(*char_player_specials_slot(pc), struct player_special_data, 1);
+    *char_player_specials_slot(pc) = new player_special_data();
     if ((position = load_char(g, g->player_table[i].name, pc)) >= 0) {
       char_set_pfilepos(pc, position); /* save_char() skips characters without one */
       save_char(g, pc);

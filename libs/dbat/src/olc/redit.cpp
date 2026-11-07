@@ -5,6 +5,8 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/config.hpp"
@@ -138,17 +140,17 @@ ACMD(do_oasis_redit)
   /* Give the descriptor an OLC structure. */
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_redit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
   /* Create the OLC structure. */
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /* Find the zone. */
   OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -156,7 +158,7 @@ ACMD(do_oasis_redit)
   /* Make sure the builder is allowed to modify this zone. */
   if (!can_edit_zone(g, ch, OLC_ZNUM(d)) && remodeling == false) {
     send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -169,7 +171,7 @@ ACMD(do_oasis_redit)
     save_rooms(g, OLC_ZNUM(d));
 
     /* Free the olc data from the descriptor. */
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -192,7 +194,7 @@ ACMD(do_oasis_redit)
 
 static void redit_setup_new(struct descriptor_data *d)
 {
-  CREATE(OLC_ROOM(d), struct room_data, 1);
+  OLC_ROOM(d) = new room_data();
 
   room_set_name(OLC_ROOM(d), strdup("An unfinished room"));
   room_set_description(OLC_ROOM(d), strdup("You are in an unfinished room.\r\n"));
@@ -213,7 +215,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_r
   /*
    * Build a copy of the room for editing.
    */
-  CREATE(room, struct room_data, 1);
+  room = new room_data();
 
   *room = g->rooms[real_num];
   /*
@@ -228,7 +230,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_r
   for (counter = 0; counter < NUM_OF_DIRS; counter++) {
     if (rroom_get_dir_option(g, real_num, counter)) {
       struct room_direction_data *new_exit;
-      CREATE(new_exit, struct room_direction_data, 1);
+      new_exit = new room_direction_data();
       room_set_dir_option(room, counter, new_exit);
 
       /*
@@ -250,14 +252,14 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_r
    */
   if (rroom_get_ex_description(g, real_num)) {
     struct extra_descr_data *tdesc, *temp, *temp2;
-    CREATE(temp, struct extra_descr_data, 1);
+    temp = new extra_descr_data();
 
     room_set_ex_description(room, temp);
     for (tdesc = rroom_get_ex_description(g, real_num); tdesc; tdesc = tdesc->next) {
       temp->keyword     = strdup(tdesc->keyword);
       temp->description = strdup(tdesc->description);
       if (tdesc->next) {
-        CREATE(temp2, struct extra_descr_data, 1);
+        temp2      = new extra_descr_data();
         temp->next = temp2;
         temp       = temp2;
       }
@@ -360,7 +362,7 @@ void free_room(GameWorld *g, struct room_data *room)
   free_proto_script(room, WLD_TRIGGER);
 
   /* Free the room. */
-  free(room); /* XXX ? */
+  delete room; /* XXX ? */
 }
 
 /**************************************************************************
@@ -399,7 +401,7 @@ static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
    */
   if (OLC_EXIT(d) == nullptr) {
     struct room_direction_data *new_exit;
-    CREATE(new_exit, struct room_direction_data, 1);
+    new_exit = new room_direction_data();
     room_set_dir_option(OLC_ROOM(d), OLC_VAL(d), new_exit);
   }
 
@@ -755,7 +757,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
        * If the extra description doesn't exist.
        */
           if (!room_get_ex_description(OLC_ROOM(d)))
-            CREATE(*room_ex_description_slot(OLC_ROOM(d)), struct extra_descr_data, 1);
+            *room_ex_description_slot(OLC_ROOM(d)) = new extra_descr_data();
           OLC_DESC(d) = room_get_ex_description(OLC_ROOM(d));
           redit_disp_extradesc_menu(g, d);
           break;
@@ -889,7 +891,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           if (OLC_EXIT(d)->general_description)
             free(OLC_EXIT(d)->general_description);
           if (OLC_EXIT(d))
-            free(OLC_EXIT(d));
+            delete OLC_EXIT(d);
           room_set_dir_option(OLC_ROOM(d), OLC_VAL(d), nullptr);
           break;
         case '7':
@@ -1011,7 +1013,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 	 * Clean up pointers.
 	 */
             REMOVE_FROM_LIST(OLC_DESC(d), *room_ex_description_slot(OLC_ROOM(d)), next, temp);
-            free(OLC_DESC(d));
+            delete OLC_DESC(d);
           }
           break;
         case 1:
@@ -1041,7 +1043,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               /*
 	   * Make new extra description and attach at end.
 	   */
-              CREATE(new_extra, struct extra_descr_data, 1);
+              new_extra         = new extra_descr_data();
               OLC_DESC(d)->next = new_extra;
               OLC_DESC(d)       = new_extra;
             }

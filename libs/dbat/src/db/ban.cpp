@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <cerrno>
+#include <cstdlib>
 
 #include "dbat/ban.hpp"
 #include "dbat/utils.hpp"
@@ -54,7 +55,7 @@ void load_banned(GameWorld *g)
     return;
   }
   while (fscanf(fl, " %99s %50s %d %20s ", ban_type, site_name, &date, name) == 4) {
-    CREATE(next_node, struct ban_list_element, 1);
+    next_node = new ban_list_element();
     strlcpy(next_node->site, site_name, sizeof(next_node->site));
     strlcpy(next_node->name, name, sizeof(next_node->name));
     next_node->date = date;
@@ -74,7 +75,7 @@ void free_ban_list(GameWorld *g)
 {
   while (g->ban_list) {
     struct ban_list_element *next = g->ban_list->next;
-    free(g->ban_list);
+    delete g->ban_list;
     g->ban_list = next;
   }
 }
@@ -174,7 +175,7 @@ ACMD(do_ban)
     }
   }
 
-  CREATE(ban_node, struct ban_list_element, 1);
+  ban_node = new ban_list_element();
   strlcpy(ban_node->site, site, sizeof(ban_node->site));
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
@@ -223,7 +224,7 @@ ACMD(do_unban)
   mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s removed the %s-player ban on %s.",
          char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
-  free(ban_node);
+  delete ban_node;
   write_ban_list(g);
 }
 

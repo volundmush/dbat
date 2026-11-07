@@ -10,6 +10,7 @@
 **************************************************************************/
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/screen.hpp"

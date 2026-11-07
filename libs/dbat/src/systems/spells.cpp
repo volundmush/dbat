@@ -8,6 +8,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/spells.hpp"

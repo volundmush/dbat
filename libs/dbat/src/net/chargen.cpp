@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <cstdlib>
+
 #include <unistd.h>
 
 #include "dbat/utils.hpp"
@@ -2045,7 +2047,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
     } else
       cedit_creation(g, d->character);
     if (!d->olc) {
-      CREATE(d->olc, struct oasis_olc_data, 1);
+      d->olc = new oasis_olc_data();
     }
     if (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_3)
       OLC_VAL(d) = CONFIG_INITIAL_POINTS_POOL;
@@ -2069,7 +2071,7 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
   if (!parse_stats(g, d, arg))
     return;
   if (d->olc) {
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
   }
   finish_creation(g, d);

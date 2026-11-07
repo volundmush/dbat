@@ -3,6 +3,8 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
+#include <cstdlib>
+
 #include "dbat/improved-edit.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
@@ -34,7 +36,7 @@ static void tb_add(struct textbuf *b, const char *text, size_t n)
 {
   if (b->len + n + 1 > b->cap) {
     b->cap = MAX(b->cap * 2, b->len + n + 1);
-    RECREATE(b->s, char, b->cap);
+    b->s   = str_realloc(b->s, b->cap);
   }
   memcpy(b->s + b->len, text, n);
   b->len += n;
@@ -324,7 +326,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         total_len--; /* the range ran past the last line: delete to the end */
         *t = '\0';
       }
-      RECREATE(*d->str, char, strlen(*d->str) + 3);
+      *d->str = str_realloc(*d->str, strlen(*d->str) + 3);
       write_to_output(g, d, "%u line%sdeleted.\r\n", total_len, (total_len != 1 ? "s " : " "));
       break;
 

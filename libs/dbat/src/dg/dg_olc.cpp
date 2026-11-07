@@ -11,6 +11,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/dg_olc.hpp"
@@ -77,16 +79,16 @@ ACMD(do_oasis_trigedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_trigedit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /*
    * Find the zone.
    */
   if ((OLC_ZNUM(d) = real_zone_by_thing(g, number)) == NOWHERE) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -96,7 +98,7 @@ ACMD(do_oasis_trigedit)
    */
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
     send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -154,7 +156,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   /*
    * Allocate a scratch trigger structure
    */
-  CREATE(trig, struct trig_data, 1);
+  trig = new trig_data();
 
   trig->nr = NOWHERE;
 
@@ -165,7 +167,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   trig->trigger_type = MTRIG_GREET;
 
   /* cmdlist will be a large char string until the trigger is saved */
-  CREATE(OLC_STORAGE(d), char, MAX_CMD_LENGTH);
+  OLC_STORAGE(d) = str_alloc(MAX_CMD_LENGTH);
   strlcpy(OLC_STORAGE(d), "%echo% This trigger commandlist is not complete!\r\n", MAX_CMD_LENGTH);
   trig->narg = 100;
 
@@ -180,7 +182,7 @@ static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, tri
   /*
    * Allocate a scratch trigger structure
    */
-  CREATE(trig, struct trig_data, 1);
+  trig = new trig_data();
 
   trig_data_copy(trig, g->trig_index[rtrg_num]->proto);
 
@@ -188,7 +190,7 @@ static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, tri
   size_t len = 1;
   for (c = trig->cmdlist; c; c = c->next)
     len += strlen(c->cmd) + 2;
-  CREATE(OLC_STORAGE(d), char, MAX(len, (size_t)MAX_CMD_LENGTH));
+  OLC_STORAGE(d) = str_alloc(MAX(len, (size_t)MAX_CMD_LENGTH));
 
   char *end = OLC_STORAGE(d);
   for (c = trig->cmdlist; c; c = c->next)
@@ -421,7 +423,7 @@ static void trigedit_compile_script(trig_data *trig, char *s)
 {
   struct cmdlist_element *cmd;
 
-  CREATE(trig->cmdlist, struct cmdlist_element, 1);
+  trig->cmdlist = new cmdlist_element();
   if (s) {
     /* strtok returns NULL if s is "\r\n" */
     char *t            = strtok(s, "\n\r");
@@ -429,7 +431,7 @@ static void trigedit_compile_script(trig_data *trig, char *s)
     cmd                = trig->cmdlist;
 
     while ((s = strtok(nullptr, "\n\r"))) {
-      CREATE(cmd->next, struct cmdlist_element, 1);
+      cmd->next = new cmdlist_element();
       cmd      = cmd->next;
       cmd->cmd = strdup(s);
     }
@@ -449,7 +451,7 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, t
     next_cmd = cmd->next;
     if (cmd->cmd)
       free(cmd->cmd);
-    free(cmd);
+    delete cmd;
   }
 
   free(proto->arglist);
@@ -514,7 +516,7 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
   struct index_data **new_index;
   struct descriptor_data *dsc;
 
-  CREATE(new_index, struct index_data *, g->top_of_trigt + 2);
+  new_index = new index_data *[g->top_of_trigt + 2]();
 
   /* Recompile the command list from the new script */
   trigedit_compile_script(trig, OLC_STORAGE(d));
@@ -525,10 +527,10 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
         found = true;
         rnum  = i;
 
-        CREATE(new_index[rnum], struct index_data, 1);
+        new_index[rnum]        = new index_data();
         OLC_TRIG(d)->nr       = rnum;
         new_index[rnum]->vnum = OLC_NUM(d);
-        CREATE(proto, struct trig_data, 1);
+        proto                  = new trig_data();
         new_index[rnum]->proto = proto;
         trig_data_copy(proto, trig);
 
@@ -548,16 +550,16 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
 
   if (!found) {
     rnum = i;
-    CREATE(new_index[rnum], struct index_data, 1);
+    new_index[rnum]       = new index_data();
     OLC_TRIG(d)->nr       = rnum;
     new_index[rnum]->vnum = OLC_NUM(d);
 
-    CREATE(proto, struct trig_data, 1);
+    proto                  = new trig_data();
     new_index[rnum]->proto = proto;
     trig_data_copy(proto, trig);
   }
 
-  free(g->trig_index);
+  delete[] g->trig_index;
 
   g->trig_index = new_index;
   g->top_of_trigt++;
@@ -669,14 +671,14 @@ void dg_olc_script_copy(struct descriptor_data *d)
   else origscript = room_get_proto_script(OLC_ROOM(d));
 
   if (origscript) {
-    CREATE(editscript, struct trig_proto_list, 1);
+    editscript    = new trig_proto_list();
     OLC_SCRIPT(d) = editscript;
 
     while (origscript) {
       editscript->vnum = origscript->vnum;
       origscript       = origscript->next;
       if (origscript)
-        CREATE(editscript->next, struct trig_proto_list, 1);
+        editscript->next = new trig_proto_list();
       editscript = editscript->next;
     }
   } else
@@ -790,7 +792,7 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       /* add the new info in position */
       currtrig = OLC_SCRIPT(d);
-      CREATE(trig, struct trig_proto_list, 1);
+      trig       = new trig_proto_list();
       trig->vnum = vnum;
 
       if (pos == 1 || !currtrig) {
@@ -816,7 +818,7 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         ++;
         currtrig      = OLC_SCRIPT(d);
         OLC_SCRIPT(d) = currtrig->next;
-        free(currtrig);
+        delete currtrig;
         break;
       }
 
@@ -829,7 +831,7 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         ++;
         trig           = currtrig->next;
         currtrig->next = trig->next;
-        free(trig);
+        delete trig;
       }
       break;
   }

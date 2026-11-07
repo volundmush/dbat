@@ -673,7 +673,7 @@ void remember(GameWorld *g, struct char_data *ch, struct char_data *victim)
       present = true;
 
   if (!present && !char_mob_flagged(ch, MOB_SPAR) && !char_plr_flagged(victim, PLR_SPAR)) {
-    CREATE(tmp, memory_rec, 1);
+    tmp       = new memory_rec();
     tmp->next = char_get_mob_specials_memory(ch);
     tmp->id   = char_get_idnum(victim);
     char_set_mob_specials_memory(ch, tmp);
@@ -691,7 +691,7 @@ void clearMemory(struct char_data *ch)
 
   while (curr) {
     next = curr->next;
-    free(curr);
+    delete curr;
     curr = next;
   }
 

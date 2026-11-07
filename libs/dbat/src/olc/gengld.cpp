@@ -3,6 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/arrays.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/gengld.hpp"
@@ -71,7 +72,7 @@ static void free_guild_strings(struct guild_data *guild)
 void free_guild(struct guild_data *guild)
 {
   free_guild_strings(guild);
-  free(guild);
+  delete guild;
 }
 
 /*-------------------------------------------------------------------*/
@@ -146,7 +147,7 @@ guild_rnum add_guild(GameWorld *g, struct guild_data *ngld)
   mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
 
   g->top_guild++;
-  RECREATE(g->guild_index, struct guild_data, g->top_guild + 1);
+  resize_array(g->guild_index, g->top_guild, g->top_guild + 1);
 
   for (rguild = g->top_guild; rguild > 0; rguild--) {
     if (ngld->vnum > rguild_get_vnum(g, rguild - 1)) {

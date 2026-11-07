@@ -6,6 +6,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/comm.hpp"
@@ -339,14 +341,14 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
         free(newexit->general_description);
       if (newexit->keyword)
         free(newexit->keyword);
-      free(newexit);
+      delete newexit;
       room_set_dir_option(rm, dir, nullptr);
     }
     return true;
   }
 
   if (!newexit) {
-    CREATE(newexit, struct room_direction_data, 1);
+    newexit = new room_direction_data();
     room_set_dir_option(rm, dir, newexit);
   }
 
@@ -354,7 +356,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
     case 1: /* description */
       if (newexit->general_description)
         free(newexit->general_description);
-      CREATE(newexit->general_description, char, strlen(value) + 3);
+      newexit->general_description = str_alloc(strlen(value) + 3);
       strcpy(newexit->general_description, value);
       strcat(newexit->general_description, "\r\n");
       break;

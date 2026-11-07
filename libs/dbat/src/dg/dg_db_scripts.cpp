@@ -131,8 +131,8 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   struct index_data *t_index;
   struct trig_data *trig;
 
-  CREATE(trig, struct trig_data, 1);
-  CREATE(t_index, struct index_data, 1);
+  trig    = new trig_data();
+  t_index = new index_data();
 
   t_index->vnum  = nr;
   t_index->proto = trig;
@@ -154,12 +154,12 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   cmds = fread_string(trig_f, errors);
   s    = cmds ? strtok(cmds, "\n\r") : nullptr;
 
-  CREATE(trig->cmdlist, struct cmdlist_element, 1);
+  trig->cmdlist      = new cmdlist_element();
   trig->cmdlist->cmd = strdup(s ? s : "* Empty script");
   cle                = trig->cmdlist;
 
   while (s && (s = strtok(nullptr, "\n\r"))) {
-    CREATE(cle->next, struct cmdlist_element, 1);
+    cle->next = new cmdlist_element();
     cle      = cle->next;
     cle->cmd = strdup(s);
   }
@@ -184,7 +184,7 @@ trig_data *read_trigger(GameWorld *g, trig_rnum nr)
   if ((t_index = g->trig_index[nr]) == nullptr)
     return nullptr;
 
-  CREATE(trig, trig_data, 1);
+  trig = new trig_data();
   trig_data_copy(trig, t_index->proto);
 
   t_index->number++;
@@ -273,7 +273,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
 
   switch (type) {
     case MOB_TRIGGER:
-      CREATE(new_trg, struct trig_proto_list, 1);
+      new_trg       = new trig_proto_list();
       new_trg->vnum = vnum;
 
       mob       = (char_data *)proto;
@@ -287,7 +287,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
       }
       break;
     case WLD_TRIGGER:
-      CREATE(new_trg, struct trig_proto_list, 1);
+      new_trg       = new trig_proto_list();
       new_trg->vnum = vnum;
       room          = (room_data *)proto;
       trg_proto     = room_get_proto_script(room);
@@ -337,7 +337,7 @@ void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
     return;
   }
 
-  CREATE(new_trg, struct trig_proto_list, 1);
+  new_trg       = new trig_proto_list();
   new_trg->vnum = vnum;
 
   trg_proto = obj_get_proto_script(obj);

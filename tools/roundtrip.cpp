@@ -17,9 +17,9 @@ extern "C" long roundtrip_dump(GameWorld *g)
 
   for (int i = 0; i <= g->top_of_p_table; i++) {
     struct char_data *pc;
-    CREATE(pc, struct char_data, 1);
+    pc = new char_data();
     clear_char(pc);
-    CREATE(pc->player_specials, struct player_special_data, 1);
+    pc->player_specials = new player_special_data();
     int pos = load_char(g, g->player_table[i].name, pc);
     if (pos < 0)
       continue;

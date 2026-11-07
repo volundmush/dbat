@@ -3,6 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/genshp.hpp"
@@ -80,7 +81,7 @@ static void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
   int num_items, i;
 
   if (*tlist)
-    free(*tlist);
+    delete[] *tlist;
 
   /*
    * Count number of entries. A shop still being built might have no list at all.
@@ -91,7 +92,7 @@ static void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
   /*
    * Make space for entries.
    */
-  CREATE(*tlist, IDXTYPE, num_items);
+  *tlist = new IDXTYPE[num_items]();
 
   /*
    * Copy entries over.
@@ -122,7 +123,7 @@ static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *f
   /*
    * Make space for entries.
    */
-  CREATE(*tlist, struct shop_buy_data, num_items);
+  *tlist = new shop_buy_data[num_items]();
 
   /*
    * Copy entries over.
@@ -150,13 +151,13 @@ void remove_from_type_list(struct shop_buy_data **list, int num)
     return;
   num_items = i;
 
-  CREATE(nlist, struct shop_buy_data, num_items);
+  nlist = new shop_buy_data[num_items]();
 
   for (i = 0; i < num_items; i++)
     nlist[i] = (i < num) ? (*list)[i] : (*list)[i + 1];
 
   free(shop_buy_get_keywords(&((*list)[num])));
-  free(*list);
+  delete[] *list;
   *list = nlist;
 }
 
@@ -176,7 +177,7 @@ void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl)
   /*
    * Make a new list and slot in the new entry.
    */
-  CREATE(nlist, struct shop_buy_data, num_items + 2);
+  nlist = new shop_buy_data[num_items + 2]();
 
   for (i = 0; i < num_items; i++)
     nlist[i] = (*list)[i];
@@ -186,7 +187,7 @@ void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl)
   /*
    * Out with the old, in with the new.
    */
-  free(*list);
+  delete[] *list;
   *list = nlist;
 }
 
@@ -205,7 +206,7 @@ void add_to_int_list(IDXTYPE **list, IDXTYPE newi)
   /*
    * Make a new list and slot in the new entry.
    */
-  CREATE(nlist, IDXTYPE, num_items + 2);
+  nlist = new IDXTYPE[num_items + 2]();
 
   for (i = 0; i < num_items; i++)
     nlist[i] = (*list)[i];
@@ -215,7 +216,7 @@ void add_to_int_list(IDXTYPE **list, IDXTYPE newi)
   /*
    * Out with the old, in with the new.
    */
-  free(*list);
+  delete[] *list;
   *list = nlist;
 }
 
@@ -234,12 +235,12 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num)
     return;
   num_items = i;
 
-  CREATE(nlist, IDXTYPE, num_items);
+  nlist = new IDXTYPE[num_items]();
 
   for (i = 0; i < num_items; i++)
     nlist[i] = (i < num) ? (*list)[i] : (*list)[i + 1];
 
-  free(*list);
+  delete[] *list;
   *list = nlist;
 }
 
@@ -293,7 +294,7 @@ static void free_type_list(struct shop_buy_data **list)
     if (shop_buy_get_keywords(&((*list)[i])))
       free(shop_buy_get_keywords(&((*list)[i])));
 
-  free(*list);
+  delete[] *list;
   *list = nullptr;
 }
 
@@ -306,9 +307,9 @@ void free_shop(struct shop_data *shop)
 {
   free_shop_strings(shop);
   free_type_list(&(shop)->type);
-  free(shop_get_rooms(shop));
-  free(shop_get_products(shop));
-  free(shop);
+  delete[] shop_get_rooms(shop);
+  delete[] shop_get_products(shop);
+  delete shop;
 }
 
 /*-------------------------------------------------------------------*/
@@ -387,7 +388,7 @@ shop_rnum add_shop(GameWorld *g, struct shop_data *nshp)
   }
 
   g->top_shop++;
-  RECREATE(g->shops, struct shop_data, g->top_shop + 1);
+  resize_array(g->shops, g->top_shop, g->top_shop + 1);
 
   for (rshop = g->top_shop; rshop > 0; rshop--) {
     if (nshp->vnum > rshop_get_vnum(g, rshop - 1)) {

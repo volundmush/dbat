@@ -5,6 +5,8 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/genolc.hpp"
 #include "dbat/gengld.hpp"
 #include "dbat/cedit.hpp"
@@ -133,14 +135,14 @@ void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data 
 {
   struct extra_descr_data *wpos;
 
-  CREATE(*to, struct extra_descr_data, 1);
+  *to  = new extra_descr_data();
   wpos = *to;
 
   for (; from; from = from->next, wpos = wpos->next) {
     wpos->keyword     = str_udup(from->keyword);
     wpos->description = str_udup(from->description);
     if (from->next)
-      CREATE(wpos->next, struct extra_descr_data, 1);
+      wpos->next = new extra_descr_data();
   }
 }
 
@@ -159,7 +161,7 @@ void free_ex_descriptions(struct extra_descr_data *head)
       free(thised->keyword);
     if (thised->description)
       free(thised->description);
-    free(thised);
+    delete thised;
   }
 }
 
@@ -176,7 +178,7 @@ bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
     return false;
   }
   REMOVE_FROM_LIST(ritem, g->save_list, next, temp);
-  free(ritem);
+  delete ritem;
   return true;
 }
 
@@ -200,7 +202,7 @@ bool add_to_save_list(GameWorld *g, zone_vnum zone, int type)
     if (nitem->zone == zone && nitem->type == type)
       return false;
 
-  CREATE(nitem, struct save_list_data, 1);
+  nitem          = new save_list_data();
   nitem->zone = zone;
   nitem->type = type;
   nitem->next = g->save_list;
@@ -225,7 +227,7 @@ void free_save_list(GameWorld *g)
 
   for (sld = g->save_list; sld; sld = next_sld) {
     next_sld = sld->next;
-    free(sld);
+    delete sld;
   }
 }
 

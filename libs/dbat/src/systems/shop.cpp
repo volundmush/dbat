@@ -11,6 +11,8 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
+#include <cstdlib>
+
 #include "dbat/shop.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/handler.hpp"
@@ -1460,10 +1462,10 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       free(buf); /* Plug memory leak! */
       g->top_shop++;
       if (!g->top_shop)
-        CREATE(g->shops, struct shop_data, rec_count);
+        g->shops = new shop_data[rec_count]();
       rshop_set_vnum(g, g->top_shop, temp);
       temp = read_list(g, shop_f, list, new_format, MAX_PROD, LIST_PRODUCE);
-      CREATE(g->shops[g->top_shop].producing, obj_vnum, temp);
+      g->shops[g->top_shop].producing = new obj_vnum[temp]();
       for (count = 0; count < temp; count++)
         rshop_set_product(g, g->top_shop, count, shop_buy_get_type(&(list[count])));
 
@@ -1471,7 +1473,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       read_line(g, shop_f, "%f", &(g->shops[(g->top_shop)].profit_sell));
 
       temp = read_type_list(g, shop_f, list, new_format, MAX_TRADE);
-      CREATE(g->shops[g->top_shop].type, struct shop_buy_data, temp);
+      g->shops[g->top_shop].type = new shop_buy_data[temp]();
       for (count = 0; count < temp; count++) {
         rshop_set_buy_type(g, g->top_shop, count, shop_buy_get_type(&(list[count])));
         rshop_set_buy_word(g, g->top_shop, count, shop_buy_get_keywords(&(list[count])));
@@ -1489,7 +1491,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       read_line(g, shop_f, "%hd", &(g->shops[(g->top_shop)].keeper));
 
       rshop_set_keeper(g, g->top_shop, real_mobile(g, rshop_get_keeper(g, g->top_shop)));
-      CREATE(buf, char, READ_SIZE);
+      buf = str_alloc(READ_SIZE);
       get_line(shop_f, buf);
       p = buf;
       for (temp = 0; temp < SW_ARRAY_MAX; temp++) {
@@ -1514,7 +1516,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
             [temp++] = 0;
 
       temp = read_list(g, shop_f, list, new_format, 1, LIST_ROOM);
-      CREATE(g->shops[g->top_shop].in_room, room_vnum, temp);
+      g->shops[g->top_shop].in_room = new room_vnum[temp]();
       for (count = 0; count < temp; count++)
         rshop_set_room(g, g->top_shop, count, shop_buy_get_type(&(list[count])));
 
@@ -1794,19 +1796,19 @@ void destroy_shops(GameWorld *g)
     if (g->shops[cnt].message_sell)
       free(g->shops[cnt].message_sell);
     if (g->shops[cnt].in_room)
-      free(g->shops[cnt].in_room);
+      delete[] g->shops[cnt].in_room;
     if (g->shops[cnt].producing)
-      free(g->shops[cnt].producing);
+      delete[] g->shops[cnt].producing;
 
     if (g->shops[cnt].type) {
       for (itr = 0; shop_buy_get_type(&(g->shops[cnt].type[itr])) != NOTHING; itr++)
         if (shop_buy_get_keywords(&(g->shops[cnt].type[itr])))
           free(shop_buy_get_keywords(&(g->shops[cnt].type[itr])));
-      free(g->shops[cnt].type);
+      delete[] g->shops[cnt].type;
     }
   }
 
-  free(g->shops);
+  delete[] g->shops;
   g->shops = nullptr;
   g->top_shop   = -1;
 }

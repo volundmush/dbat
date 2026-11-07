@@ -10,6 +10,7 @@
 #include <stdckdint.h>
 #include <unistd.h>
 
+#include "dbat/arrays.hpp"
 #include "dbat/players.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
@@ -82,7 +83,7 @@ void build_player_index(GameWorld *g)
     return;
   }
 
-  CREATE(g->player_table, struct player_index_element, rec_count);
+  g->player_table = new player_index_element[rec_count]();
   for (i = 0; i < rec_count; i++) {
     get_line(plr_index, line);
     g->player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
@@ -111,19 +112,19 @@ int create_entry(GameWorld *g, char *name)
   int i, pos;
 
   if (g->top_of_p_table == -1) { /* no table */
-    CREATE(g->player_table, struct player_index_element, 1);
+    g->player_table = new player_index_element[1]();
     pos = g->top_of_p_table = 0;
   } else if ((pos = get_ptable_by_name(g, name)) == -1) { /* new name */
     i = ++g->top_of_p_table + 1;
 
-    RECREATE(g->player_table, struct player_index_element, i);
+    resize_array(g->player_table, i - 1, i);
     pos = g->top_of_p_table;
   } else
     free(g->player_table[pos].name);
 
-  /* RECREATE leaves a new slot uninitialised and a reused one holds the old character's values */
+  /* a reused slot still holds the old character's values */
   g->player_table[pos] = player_index_element{};
-  CREATE(g->player_table[pos].name, char, strlen(name) + 1);
+  g->player_table[pos].name = str_alloc(strlen(name) + 1);
 
   /* copy lowercase equivalent of name to table field */
   for (i = 0; (g->player_table[pos].name[i] = tolower(name[i])); i++)
@@ -170,7 +171,7 @@ void free_player_index(GameWorld *g)
       free(g->player_table[tp].name);
   }
 
-  free(g->player_table);
+  delete[] g->player_table;
   g->player_table   = nullptr;
   g->top_of_p_table = 0;
 }

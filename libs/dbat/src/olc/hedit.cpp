@@ -9,6 +9,8 @@
 *  InfoTechMUD is based on CircleMUD, Copyright (C) 1993, 1994.           *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
+#include <cstdlib>
+
 #include "dbat/help.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/hedit.hpp"
@@ -78,10 +80,10 @@ ACMD(do_oasis_hedit)
   /* Give descriptor an OLC structure. */
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc         = new oasis_olc_data();
   OLC_NUM(d)     = 0;
   OLC_STORAGE(d) = strdup(arg);
   OLC_ZNUM(d)    = search_help(g, (const char *)OLC_STORAGE(d), ADMLVL_IMPL);
@@ -104,7 +106,7 @@ ACMD(do_oasis_hedit)
 
 static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
 {
-  CREATE(OLC_HELP(d), struct help_index_element, 1);
+  OLC_HELP(d) = new help_index_element();
 
   char buf3[MAX_INPUT_LENGTH];
   sprintf(buf3, "<<X<< Put helpfile keywords here in caps");
@@ -119,7 +121,7 @@ static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
 
 static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, zone_rnum rnum)
 {
-  CREATE(OLC_HELP(d), struct help_index_element, 1);
+  OLC_HELP(d) = new help_index_element();
 
   OLC_HELP(d)->keywords  = str_udup(g->help_table[rnum].keywords);
   OLC_HELP(d)->entry     = str_udup(g->help_table[rnum].entry);
@@ -136,13 +138,13 @@ static void hedit_save_internally(GameWorld *g, struct descriptor_data *d)
   if (OLC_ZNUM(d) == NOWHERE) {
     /*if (OLC_ZNUM(d) > top_of_helpt) {*/
     int i;
-    CREATE(new_help_table, struct help_index_element, g->top_of_helpt + 2);
+    new_help_table = new help_index_element[g->top_of_helpt + 2]();
 
     /* top_of_helpt is the index of the last entry */
     for (i = 0; i <= g->top_of_helpt; i++)
       new_help_table[i] = g->help_table[i];
     new_help_table[++g->top_of_helpt] = *OLC_HELP(d);
-    free(g->help_table);
+    delete[] g->help_table;
     g->help_table = new_help_table;
   } else
     g->help_table[OLC_ZNUM(d)] = *OLC_HELP(d);

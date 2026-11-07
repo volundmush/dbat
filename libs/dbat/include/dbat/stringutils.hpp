@@ -27,8 +27,13 @@ bool fill_word(char *argument);
 char *fname(const char *namelist);
 bool reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
-/* A new string formatted as by printf(); exits if out of memory, like CREATE(). */
+/* A new string formatted as by printf(); aborts if out of memory. */
 char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
+/* A zero-filled buffer of n chars. Like strdup()'s strings, it is released with free(), so that a field can hold
+ * either; both go when strings become std::string. */
+char *str_alloc(size_t n);
+/* realloc() for a str_alloc() or strdup() buffer, aborting if out of memory. */
+char *str_realloc(char *s, size_t n);
 
 /* A writable copy of a fixed string, for passing to a function that may change its argument, as most commands
  * can: do_barrier(g, ch, writable{"40"}, 0, 0). The copy lasts until the end of the statement. A string

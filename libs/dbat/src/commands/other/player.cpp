@@ -1,5 +1,7 @@
 /* player.c: general player commands (quit, save, group, title, toggles...)
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include <sys/stat.h>
 
 #include "dbat/act.other.hpp"

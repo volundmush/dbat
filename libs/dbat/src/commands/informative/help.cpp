@@ -1,5 +1,7 @@
 /* help.c: help, commands, toggles, colour, history, time and weather
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -415,8 +417,8 @@ void sort_commands(GameWorld *g)
     num_of_cmds++;
   num_of_cmds++; /* \n */
 
-  free(g->cmd_sort_info); /* the previous list's, when aedit rebuilds the commands */
-  CREATE(g->cmd_sort_info, int, num_of_cmds);
+  delete[] g->cmd_sort_info; /* the previous list's, when aedit rebuilds the commands */
+  g->cmd_sort_info = new int[num_of_cmds]();
 
   for (a = 0; a < num_of_cmds; a++)
     g->cmd_sort_info[a] = a;
@@ -544,13 +546,13 @@ void add_history(GameWorld *g, struct char_data *ch, char *str, int type)
 
   if (!tmp) {
     struct txt_block *first;
-    CREATE(first, struct txt_block, 1);
+    first       = new txt_block();
     first->text = strdup(buf);
     char_set_comm_hist(g, ch, type, first);
   } else {
     while (tmp->next)
       tmp = tmp->next;
-    CREATE(tmp->next, struct txt_block, 1);
+    tmp->next       = new txt_block();
     tmp->next->text = strdup(buf);
 
     for (tmp = char_get_comm_hist(g, ch, type); tmp; tmp = tmp->next, i++);
@@ -560,7 +562,7 @@ void add_history(GameWorld *g, struct char_data *ch, char *str, int type)
       char_set_comm_hist(g, ch, type, tmp->next);
       if (tmp->text)
         free(tmp->text);
-      free(tmp);
+      delete tmp;
     }
   }
   /* add this history message to ALL */

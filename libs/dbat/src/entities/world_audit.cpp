@@ -74,7 +74,7 @@ static void collect(GameWorld *g, struct audit *a)
 
   for (ch = g->characters; ch; ch = char_get_next(ch))
     n++;
-  CREATE(a->characters.items, const void *, n + 1);
+  a->characters.items = new const void *[n + 1]();
   for (ch = g->characters; ch; ch = char_get_next(ch))
     a->characters.items[a->characters.count++] = ch;
   set_sort(&a->characters);
@@ -82,7 +82,7 @@ static void collect(GameWorld *g, struct audit *a)
   n = 0;
   for (obj = g->objects; obj; obj = obj_get_next(obj))
     n++;
-  CREATE(a->objects.items, const void *, n + 1);
+  a->objects.items = new const void *[n + 1]();
   for (obj = g->objects; obj; obj = obj_get_next(obj))
     a->objects.items[a->objects.count++] = obj;
   set_sort(&a->objects);
@@ -369,7 +369,7 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
 {
   int *counts;
 
-  CREATE(counts, int, g->top_obj + 1);
+  counts = new int[g->top_obj + 1]();
   for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj)) {
     obj_rnum rnum = obj_get_item_number(obj);
 
@@ -381,9 +381,9 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   for (obj_rnum r = 0; r <= g->top_obj; r++)
     if (counts[r] != g->obj_index[r].number)
       problem(a, "object %d: %d exist, but the index counts %d", g->obj_index[r].vnum, counts[r], g->obj_index[r].number);
-  free(counts);
+  delete[] counts;
 
-  CREATE(counts, int, g->top_mob + 1);
+  counts = new int[g->top_mob + 1]();
   for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
     if (!char_is_npc(ch))
       continue;
@@ -395,7 +395,7 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   for (mob_rnum r = 0; r <= g->top_mob; r++)
     if (counts[r] != g->mob_index[r].number)
       problem(a, "mob %d: %d exist, but the index counts %d", g->mob_index[r].vnum, counts[r], g->mob_index[r].number);
-  free(counts);
+  delete[] counts;
 }
 
 /* Scripts find things through this table, by id. */
@@ -471,7 +471,7 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
   audit_index_counts(g, &a);
   audit_lookup_table(g, &a);
 
-  free(a.characters.items);
-  free(a.objects.items);
+  delete[] a.characters.items;
+  delete[] a.objects.items;
   return a.problems;
 }

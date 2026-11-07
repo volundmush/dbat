@@ -361,7 +361,7 @@ struct obj_data *create_money(GameWorld *g, int amount)
     return (nullptr);
   }
   obj = create_obj(g);
-  CREATE(new_descr, struct extra_descr_data, 1);
+  new_descr = new extra_descr_data();
 
   if (amount == 1) {
     obj->name              = strdup("zenni money");

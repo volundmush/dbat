@@ -38,14 +38,14 @@ static void free_var_el(struct trig_var_data *var)
     free(var->name);
   if (var->value)
     free(var->value);
-  free(var);
+  delete var;
 }
 
 /* returns *slot, first creating an empty script there if there is none */
 struct script_data *dg_ensure_script(struct script_data **slot)
 {
   if (!*slot)
-    CREATE(*slot, struct script_data, 1);
+    *slot = new script_data();
   return *slot;
 }
 
@@ -119,7 +119,7 @@ void free_trigger(GameWorld *g, struct trig_data *trig)
   if (trig->wait_event)
     event_cancel(g, trig->wait_event);
 
-  free(trig);
+  delete trig;
 }
 
 /* remove a single trigger from a mob/obj/room */
@@ -182,7 +182,7 @@ void extract_script(GameWorld *g, void *thing, int type)
   /* Thanks to James Long for tracking down this memory leak */
   free_varlist(sc->global_vars);
 
-  free(sc);
+  delete sc;
 }
 
 /* erase the script memory of a mob */
@@ -192,7 +192,7 @@ void extract_script_mem(struct script_memory *sc)
   while (sc) {
     next = sc->next;
     if (sc->cmd) free(sc->cmd);
-    free(sc);
+    delete sc;
     sc = next;
   }
 }
@@ -225,7 +225,7 @@ void free_proto_script(void *thing, int type)
   while (proto) {
     fproto = proto;
     proto  = proto->next;
-    free(fproto);
+    delete fproto;
   }
 }
 
@@ -246,7 +246,7 @@ void copy_proto_script(void *source, void *dest, int type)
   }
 
   if (tp_src) {
-    CREATE(tp_dst, struct trig_proto_list, 1);
+    tp_dst = new trig_proto_list();
     switch (type) {
       case MOB_TRIGGER:
         char_set_proto_script((char_data *)dest, tp_dst);
@@ -263,7 +263,7 @@ void copy_proto_script(void *source, void *dest, int type)
       tp_dst->vnum = tp_src->vnum;
       tp_src       = tp_src->next;
       if (tp_src)
-        CREATE(tp_dst->next, struct trig_proto_list, 1);
+        tp_dst->next = new trig_proto_list();
       tp_dst = tp_dst->next;
     }
   }

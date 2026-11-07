@@ -136,9 +136,9 @@ static struct char_data *load_again(GameWorld *g, const char *name)
 {
   struct char_data *copy;
 
-  CREATE(copy, struct char_data, 1);
+  copy = new char_data();
   clear_char(copy);
-  CREATE(*char_player_specials_slot(copy), struct player_special_data, 1);
+  *char_player_specials_slot(copy) = new player_special_data();
   CHECK(load_char(g, name, copy) >= 0);
   return copy;
 }
@@ -482,7 +482,7 @@ static void check_mob_memory_gets_forgotten(void)
   struct script_memory *mem;
 
   char_to_room(g, mob, char_get_in_room(ch));
-  CREATE(mem, struct script_memory, 1);
+  mem      = new script_memory();
   mem->id  = char_get_id(ch);
   mem->cmd = strdup("say I remember you");
   char_set_memory(mob, mem);

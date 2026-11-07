@@ -14,6 +14,7 @@
    cannot be removed while someone is still writing them. */
 
 #include <cstddef>
+#include <cstdlib>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -148,13 +149,13 @@ static void free_message(struct board_msg *msg)
   free(msg->name);
   free(msg->subject);
   free(msg->data);
-  free(msg);
+  delete msg;
 }
 
 static void free_memory(struct board_memory *mem)
 {
   free(mem->name);
-  free(mem);
+  delete mem;
 }
 
 static void add_message_head(struct board_info *board, struct board_msg *msg)
@@ -208,7 +209,7 @@ static struct board_msg *new_message(GameWorld *g, struct char_data *ch, const c
 {
   struct board_msg *msg;
 
-  CREATE(msg, struct board_msg, 1);
+  msg            = new board_msg();
   msg->name      = strdup(char_get_name(ch));
   msg->timestamp = game_now(g);
   msg->subject   = strdup(subject);
@@ -242,7 +243,7 @@ static bool mark_read(GameWorld *g, struct board_info *board, const struct board
     return false;
 
   slot = memory_slot(g, msg);
-  CREATE(mem, struct board_memory, 1);
+  mem                 = new board_memory();
   mem->name           = strdup(char_get_name(ch));
   mem->timestamp      = msg->timestamp;
   mem->next           = board->memory[slot];
@@ -288,7 +289,7 @@ static void parse_memory_line(GameWorld *g, struct board_info *board, const char
   if (!msg)
     return;
 
-  CREATE(mem, struct board_memory, 1);
+  mem                 = new board_memory();
   mem->name           = strdup(reader);
   mem->timestamp      = timestamp;
   mem->next           = board->memory[slot];
@@ -308,7 +309,7 @@ static bool parse_message(FILE *fl, struct board_info *board, const char *path)
   }
   get_line(fl, subject);
 
-  CREATE(msg, struct board_msg, 1);
+  msg            = new board_msg();
   msg->name      = strdup(poster);
   msg->timestamp = timestamp;
   msg->subject   = strdup(subject);
@@ -349,7 +350,7 @@ static struct board_info *load_board(GameWorld *g, obj_vnum board_vnum)
     return nullptr;
   }
 
-  CREATE(board, struct board_info, 1);
+  board       = new board_info();
   board->vnum = board_vnum;
 
   /* if the object exists, the object trumps the board file settings */
@@ -360,7 +361,7 @@ static struct board_info *load_board(GameWorld *g, obj_vnum board_vnum)
       mud_log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", path, board_vnum);
       unlink(path);
       fclose(fl);
-      free(board);
+      delete board;
       return nullptr;
     }
     board->read_lvl   = t[0];
@@ -461,7 +462,7 @@ struct board_info *create_new_board(GameWorld *g, obj_vnum board_vnum)
     unlink(path);
   }
 
-  CREATE(board, struct board_info, 1);
+  board = new board_info();
   if (!(obj = board_proto(g, board_vnum))) {
     mud_log("Creating board [vnum: %d] though no associated object with that vnum can be found. Using defaults.", board_vnum);
     board->read_lvl   = CONFIG_LEVEL_CAP;
@@ -477,7 +478,7 @@ struct board_info *create_new_board(GameWorld *g, obj_vnum board_vnum)
 
   if (!save_board(g, board)) {
     mud_log("Hm. Error while creating new board file [vnum: %d]. Unable to create new file.", board_vnum);
-    free(board);
+    delete board;
     return nullptr;
   }
   board->next = g->bboards;
@@ -503,7 +504,7 @@ void clear_boards(GameWorld *g)
         next_mem = mem->next;
         free_memory(mem);
       }
-    free(board);
+    delete board;
   }
   g->bboards = nullptr;
 }

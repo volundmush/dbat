@@ -5,6 +5,8 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/consts/attacks.hpp"
 #include "dbat/obj_edit.hpp"
 #include "dbat/utils.hpp"

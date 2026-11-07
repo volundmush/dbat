@@ -10,6 +10,7 @@
 *********************************************************************** */
 
 #include <cerrno>
+#include <cstdlib>
 
 #include <linux/limits.h>
 
@@ -118,11 +119,11 @@ void read_aliases(GameWorld *g, struct char_data *ch)
   for (;;) {
     struct alias_data *a;
 
-    CREATE(a, struct alias_data, 1);
+    a = new alias_data();
     if (!read_alias_record(file, a)) {
       free(a->alias);
       free(a->replacement);
-      free(a);
+      delete a;
       break;
     }
     *tail = a;
@@ -192,7 +193,7 @@ ACMD(do_alias)
         send_to_char(g, ch, "You can't alias 'alias'.\r\n");
         return;
       }
-      CREATE(a, struct alias_data, 1);
+      a        = new alias_data();
       a->alias = strdup(arg);
       delete_doubledollar(repl);
       a->replacement = strdup(repl);

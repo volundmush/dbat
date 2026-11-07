@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include <unistd.h>
 
 #include "dbat/disabled.hpp"
@@ -68,7 +70,7 @@ ACMD(do_disable)
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
            char_get_name(ch), p->command->command);
     free(p->disabled_by);
-    free(p);
+    delete p;
     save_disabled(g); /* save to disk */
 
   } else { /* not a disabled command, check if the command exists */
@@ -91,7 +93,7 @@ ACMD(do_disable)
     }
 
     /* Disable the command */
-    CREATE(p, struct disabled_data, 1);
+    p                 = new disabled_data();
     p->command     = &cmd_info[i];
     p->disabled_by = strdup(char_get_name(ch)); /* save name of disabler  */
     p->level       = char_get_admlevel(ch);     /* save level of disabler */
@@ -135,7 +137,7 @@ void load_disabled(GameWorld *g)
   while (get_line(fp, line)) {
     if (!strcasecmp(line, END_MARKER))
       break; /* break loop if we encounter the END_MARKER */
-    CREATE(p, struct disabled_data, 1);
+    p = new disabled_data();
     sscanf(line, "%s %d %hd %s", name, &(p->subcmd), &(p->level), temp);
     /* Find the command in the table */
     for (i = 0; *cmd_info[i].command != '\n'; i++)
@@ -143,7 +145,7 @@ void load_disabled(GameWorld *g)
         break;
     if (*cmd_info[i].command == '\n') { /* command does not exist? */
       mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
-      free(p);
+      delete p;
     } else { /* add new disabled command */
       p->disabled_by = strdup(temp);
       p->command     = &cmd_info[i];
@@ -187,6 +189,6 @@ void free_disabled(GameWorld *g)
     p              = g->disabled_first;
     g->disabled_first = g->disabled_first->next;
     free(p->disabled_by);
-    free(p);
+    delete p;
   }
 }

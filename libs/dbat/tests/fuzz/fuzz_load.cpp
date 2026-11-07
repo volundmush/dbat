@@ -45,9 +45,9 @@ static void read_player_file(const uint8_t *data, size_t size)
   struct char_data *pc;
 
   fuzz_write_file("plrfiles/F-J/fuzzy.plr", data, size);
-  CREATE(pc, struct char_data, 1);
+  pc = new char_data();
   clear_char(pc);
-  CREATE(*char_player_specials_slot(pc), struct player_special_data, 1);
+  *char_player_specials_slot(pc) = new player_special_data();
   loading = pc;
   load_char(g, "fuzzy", pc);
   loading = nullptr;

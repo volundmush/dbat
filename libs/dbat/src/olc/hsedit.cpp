@@ -6,6 +6,8 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <cstdlib>
+
 #include "dbat/hsedit.hpp"
 #include "dbat/config.hpp"
 #include "dbat/comm.hpp"
@@ -48,7 +50,7 @@ static const char *const house_types[] = {
 
 static void hsedit_setup_new(GameWorld *g, struct descriptor_data *d)
 {
-  CREATE(OLC_HOUSE(d), struct house_control_rec, 1);
+  OLC_HOUSE(d)           = new house_control_rec();
   OLC_HOUSE(d)->vnum     = OLC_NUM(d);
   OLC_HOUSE(d)->exit_num = -1;
   OLC_HOUSE(d)->built_on = game_now(g);
@@ -65,7 +67,7 @@ static void hsedit_setup_existing(GameWorld *g, struct descriptor_data *d, int r
   int i;
 
   /*. Build a copy of the house .*/
-  CREATE(house, struct house_control_rec, 1);
+  house  = new house_control_rec();
   *house = g->house_control[real_num];
 
   /* allocate space for all strings  */
@@ -939,10 +941,10 @@ ACMD(do_oasis_hsedit)
   /****************************************************************************/
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -956,7 +958,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                 **/
 
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -974,7 +976,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                **/
 
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -1000,7 +1002,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                **/
 
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }

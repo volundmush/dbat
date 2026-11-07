@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/act.item.hpp"
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -2777,7 +2779,7 @@ void name_from_drinkcon(GameWorld *g, struct obj_data *obj)
   }
 
   liqlen = strlen(liqname);
-  CREATE(new_name, char, strlen(obj_get_name(obj)) + 1); /* the name without one or more of its words */
+  new_name = str_alloc(strlen(obj_get_name(obj)) + 1); /* the name without one or more of its words */
 
   for (cur_name = obj_get_name(obj); cur_name; cur_name = next) {
     if (*cur_name == ' ')
@@ -2814,7 +2816,7 @@ void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)
     return;
 
   len = strlen(obj_get_name(obj)) + strlen(drinknames[type]) + 2;
-  CREATE(new_name, char, len);
+  new_name = str_alloc(len);
   snprintf(new_name, len, "%s %s", obj_get_name(obj), drinknames[type]);
 
   if (obj_get_item_number(obj) == NOTHING || obj_get_name(obj) != obj_get_name(&g->obj_proto[obj_get_item_number(obj)]))

@@ -5,6 +5,8 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/interpreter.hpp"
@@ -24,6 +26,7 @@
 #include "dbat/medit.hpp"
 #include "dbat/sedit.hpp"
 #include "dbat/act.social.hpp"
+#include "dbat/social.hpp"
 #include "dbat/gengld.hpp"
 #include "dbat/hsedit.hpp"
 #include "dbat/character_utils.hpp"
@@ -179,7 +182,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
         free_room(g, OLC_ROOM(d));
         break;
       case CLEANUP_STRUCTS:
-        free(OLC_ROOM(d));
+        delete OLC_ROOM(d);
         break;
       default: /* The caller has screwed up. */
         mud_log("SYSERR: cleanup_olc: Unknown type!");
@@ -200,7 +203,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
    */
   if (OLC_OBJ(d)) {
     free_object_strings(g, OLC_OBJ(d));
-    free(OLC_OBJ(d));
+    delete OLC_OBJ(d);
   }
 
   /*
@@ -219,8 +222,8 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     if (OLC_ZONE(d)->name)
       free(OLC_ZONE(d)->name);
     if (OLC_ZONE(d)->cmd)
-      free(OLC_ZONE(d)->cmd);
-    free(OLC_ZONE(d));
+      delete[] OLC_ZONE(d)->cmd;
+    delete OLC_ZONE(d);
   }
 
   /*
@@ -249,7 +252,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
         free_guild(OLC_GUILD(d));
         break;
       case CLEANUP_STRUCTS:
-        free(OLC_GUILD(d));
+        delete OLC_GUILD(d);
         break;
       default:
         break;
@@ -260,10 +263,10 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     switch (cleanup_type) {
       case CLEANUP_ALL:
         free_house(OLC_HOUSE(d)); /* (its contents: the house is the editor's own copy) */
-        free(OLC_HOUSE(d));
+        delete OLC_HOUSE(d);
         break;
       case CLEANUP_STRUCTS:
-        free(OLC_HOUSE(d));
+        delete OLC_HOUSE(d);
         break;
       default:
         /*. Caller has screwed up .*/
@@ -276,10 +279,10 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     switch (cleanup_type) {
       case CLEANUP_ALL:
         free_action(OLC_ACTION(d)); /* (its strings: the action is the editor's own copy) */
-        free(OLC_ACTION(d));
+        delete OLC_ACTION(d);
         break;
       case CLEANUP_STRUCTS:
-        free(OLC_ACTION(d));
+        delete OLC_ACTION(d);
         break;
       default:
         /* Caller has screwed up */
@@ -334,7 +337,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     desc_set_connected(d, CON_PLAYING);
   }
 
-  free(d->olc);
+  delete d->olc;
   d->olc = nullptr;
 }
 
@@ -374,7 +377,7 @@ static void free_config(GameWorld *g, struct config_data *data)
   /****************************************************************************/
   /** Free the data structure.                                               **/
   /****************************************************************************/
-  free(data);
+  delete data;
 }
 
 /******************************************************************************/

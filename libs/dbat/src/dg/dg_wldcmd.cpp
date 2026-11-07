@@ -8,6 +8,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/comm.hpp"

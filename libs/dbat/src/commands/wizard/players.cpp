@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <climits>
+#include <cstdlib>
 
 #include <unistd.h>
 
@@ -1359,9 +1360,9 @@ ACMD(do_set)
     }
   } else if (is_file) {
     /* try to load the player off disk */
-    CREATE(cbuf, struct char_data, 1);
+    cbuf = new char_data();
     clear_char(cbuf);
-    CREATE(*char_player_specials_slot(cbuf), struct player_special_data, 1);
+    *char_player_specials_slot(cbuf) = new player_special_data();
     if ((player_i = load_char(g, name, cbuf)) > -1) {
       if (char_get_admlevel(cbuf) >= char_get_admlevel(ch)) {
         free_char(g, cbuf);

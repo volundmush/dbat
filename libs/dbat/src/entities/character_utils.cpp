@@ -2302,7 +2302,7 @@ char *sense_location(GameWorld *g, struct char_data *ch)
 {
 
   char *message;
-  CREATE(message, char, MAX_INPUT_LENGTH);
+  message           = str_alloc(MAX_INPUT_LENGTH);
   room_vnum roomnum = rroom_get_vnum(g, char_get_in_room(ch));
   zone_rnum num     = 0;
   if ((num = real_zone_by_thing(g, roomnum)) != NOWHERE) {
@@ -3665,13 +3665,13 @@ void stop_follower(GameWorld *g, struct char_data *ch)
   if (ch->master->followers->follower == ch) { /* Head of follower-list? */
     k                     = ch->master->followers;
     ch->master->followers = k->next;
-    free(k);
+    delete k;
   } else { /* locate follower who is not head of list */
     for (k = ch->master->followers; k->next->follower != ch; k = k->next);
 
     j       = k->next;
     k->next = j->next;
-    free(j);
+    delete j;
   }
 
   ch->master = nullptr;
@@ -3704,7 +3704,7 @@ void add_follower(GameWorld *g, struct char_data *ch, struct char_data *leader)
 
   ch->master = leader;
 
-  CREATE(k, struct follow_type, 1);
+  k = new follow_type();
 
   k->follower       = ch;
   k->next           = leader->followers;

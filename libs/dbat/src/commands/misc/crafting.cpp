@@ -11,6 +11,8 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/songs.hpp"

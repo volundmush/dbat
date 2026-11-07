@@ -15,6 +15,7 @@
  * the appropriate new special cases for your new class.
  */
 #include <cerrno>
+#include <cstdlib>
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"

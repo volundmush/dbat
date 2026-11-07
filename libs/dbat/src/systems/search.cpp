@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/room_utils.hpp"

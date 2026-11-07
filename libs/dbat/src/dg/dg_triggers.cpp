@@ -12,6 +12,8 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/comm.hpp"
@@ -108,7 +110,7 @@ static bool word_check(char *str, char *wordlist)
    * length limit, so size the copy and the phrase buffer to fit
    */
   len = strlen(wordlist) + 1;
-  CREATE(words, char, 2 * len);
+  words  = str_alloc(2 * len);
   phrase = words + len;
   memcpy(words, wordlist, len);
 
@@ -219,7 +221,7 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
       else
         char_set_memory(ch, mem->next);
       if (mem->cmd) free(mem->cmd);
-      free(mem);
+      delete mem;
     }
   }
 }
@@ -293,7 +295,7 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
           }
         }
         free(mem->cmd);
-        free(mem);
+        delete mem;
         if (!ch || !char_get_memory(ch))
           return;
 

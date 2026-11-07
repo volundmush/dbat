@@ -4,6 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/genwld.hpp"
@@ -51,7 +52,7 @@ room_rnum add_room(GameWorld *g, struct room_data *room)
     return i;
   }
 
-  RECREATE(g->rooms, struct room_data, g->top_room + 2);
+  resize_array(g->rooms, g->top_room + 1, g->top_room + 2);
   g->top_room++;
 
   for (i = g->top_room; i > 0; i--) {
@@ -209,7 +210,7 @@ bool delete_room(GameWorld *g, room_rnum rnum)
             free(rroom_get_dir_option(g, i, j)->keyword);
           if (rroom_get_dir_option(g, i, j)->general_description)
             free(rroom_get_dir_option(g, i, j)->general_description);
-          free(rroom_get_dir_option(g, i, j));
+          delete rroom_get_dir_option(g, i, j);
           rroom_set_dir_option(g, i, j, nullptr);
         } else {
           /* description is set, just point to nowhere */
@@ -276,7 +277,7 @@ bool delete_room(GameWorld *g, room_rnum rnum)
   }
 
   g->top_room--;
-  RECREATE(g->rooms, struct room_data, g->top_room + 1);
+  resize_array(g->rooms, g->top_room + 2, g->top_room + 1);
 
   return true;
 }
@@ -460,7 +461,7 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source)
 
     {
       struct room_direction_data *new_exit;
-      CREATE(new_exit, struct room_direction_data, 1);
+      new_exit = new room_direction_data();
       room_set_dir_option(dest, i, new_exit);
     }
     *room_get_dir_option(dest, i) = *room_get_dir_option(source, i);
@@ -495,7 +496,7 @@ bool free_room_strings(struct room_data *room)
         free(room_get_dir_option(room, i)->general_description);
       if (room_get_dir_option(room, i)->keyword)
         free(room_get_dir_option(room, i)->keyword);
-      free(room_get_dir_option(room, i));
+      delete room_get_dir_option(room, i);
       room_set_dir_option(room, i, nullptr);
     }
   }

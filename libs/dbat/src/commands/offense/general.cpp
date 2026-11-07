@@ -1,5 +1,7 @@
 /* general.c: charge, powerup, rescue, assist, kill, flee
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"

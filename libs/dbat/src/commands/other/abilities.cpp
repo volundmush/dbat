@@ -1,5 +1,7 @@
 /* abilities.c: racial and special abilities
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include <sys/stat.h>
 
 #include "dbat/act.other.hpp"

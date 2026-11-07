@@ -5,6 +5,8 @@
 ** Created Thursday, September 5, 2002                                      **
 **                                                                          **
 *****************************************************************************/
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/feats.hpp"
 #include "dbat/comm.hpp"

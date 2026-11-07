@@ -2,6 +2,8 @@
  * DG Scripts: immortal commands for scripts: attach, detach, vdelete, tstat, and script stat output.
  * Split out of dg_scripts.c.
  */
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/dg_event.hpp"

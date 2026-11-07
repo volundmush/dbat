@@ -381,9 +381,9 @@ static void check_save_and_reload(GameWorld *g, struct char_data *ch)
   char_set_gold(ch, 4321);
   save_char(g, ch);
 
-  CREATE(copy, struct char_data, 1);
+  copy = new char_data();
   clear_char(copy);
-  CREATE(*char_player_specials_slot(copy), struct player_special_data, 1);
+  *char_player_specials_slot(copy) = new player_special_data();
   CHECK(load_char(g, char_get_name(ch), copy) >= 0);
   CHECK(!strcmp(char_get_name(copy), char_get_name(ch)));
   CHECK(char_get_gold(copy) == 4321);

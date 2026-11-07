@@ -802,7 +802,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
         for (j = zwei = 0; !zwei && !feof(fl);) {
           switch (*line) {
             case 'E':
-              CREATE(new_descr, struct extra_descr_data, 1);
+              new_descr = new extra_descr_data();
               sprintf(buf2, "rented object edesc keyword for object #%d", nr);
               new_descr->keyword = fread_string(fl, buf2);
               sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, new_descr->keyword);

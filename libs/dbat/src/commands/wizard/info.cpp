@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <climits>
+#include <cstdlib>
 
 #include <unistd.h>
 
@@ -863,9 +864,9 @@ ACMD(do_stat)
     else if ((victim = get_player_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(g, ch, victim);
     else {
-      CREATE(victim, struct char_data, 1);
+      victim = new char_data();
       clear_char(victim);
-      CREATE(*char_player_specials_slot(victim), struct player_special_data, 1);
+      *char_player_specials_slot(victim) = new player_special_data();
       if (load_char(g, buf2, victim) >= 0) {
         char_to_room(g, victim, 0);
         if (char_get_admlevel(victim) > char_get_admlevel(ch))
@@ -993,9 +994,9 @@ ACMD(do_last)
     send_to_char(g, ch, "For whom do you wish to search?\r\n");
     return;
   }
-  CREATE(vict, struct char_data, 1);
+  vict = new char_data();
   clear_char(vict);
-  CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
+  *char_player_specials_slot(vict) = new player_special_data();
   if (load_char(g, arg, vict) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
     free_char(g, vict);
@@ -1172,9 +1173,9 @@ ACMD(do_show)
         return;
       }
 
-      CREATE(vict, struct char_data, 1);
+      vict = new char_data();
       clear_char(vict);
-      CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
+      *char_player_specials_slot(vict) = new player_special_data();
       if (load_char(g, value, vict) < 0) {
         send_to_char(g, ch, "There is no such player.\r\n");
         free_char(g, vict);
@@ -1374,7 +1375,7 @@ ACMD(do_show)
         }
       }
       k = MAX_STRING_LENGTH;
-      CREATE(strp, char, k);
+      strp    = str_alloc(k);
       strp[0] = j = 0;
       if (!vict) {
         send_to_char(g, ch, "None.\r\n");
@@ -1383,7 +1384,7 @@ ACMD(do_show)
       do {
         if ((k - j) < (MAX_INPUT_LENGTH * 8)) {
           k *= 2;
-          RECREATE(strp, char, k);
+          strp = str_realloc(strp, k);
         }
         j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(vict));
         aff = char_get_affected(vict);

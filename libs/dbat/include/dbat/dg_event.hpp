@@ -25,6 +25,7 @@
 struct event {
   EVENTFUNC(*func){};
   void *event_obj{};
+  void (*free_obj)(void *event_obj){}; /* frees event_obj if the event is dropped before it runs, or null */
   struct q_element *q_el{};
 };
 
@@ -48,7 +49,7 @@ struct q_element {
 
 /* - events - function protos need by other modules */
 void event_init(GameWorld *g);
-struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, long when);
+struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, void (*free_obj)(void *), long when);
 void event_cancel(GameWorld *g, struct event *event);
 void event_process(GameWorld *g);
 long event_time(GameWorld *g, struct event *event);

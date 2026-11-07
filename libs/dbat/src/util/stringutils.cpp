@@ -1,5 +1,6 @@
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 #include "dbat/stringutils.hpp"
 #include "dbat/utils.hpp"
@@ -11,9 +12,9 @@ int levenshtein_distance(char *s1, char *s2)
   int s1_len = strlen(s1), s2_len = strlen(s2);
   int **d, i, j;
 
-  CREATE(d, int *, s1_len + 1);
+  d = new int *[s1_len + 1]();
   for (i = 0; i <= s1_len; i++) {
-    CREATE(d[i], int, s2_len + 1);
+    d[i]    = new int[s2_len + 1]();
     d[i][0] = i;
   }
 
@@ -27,8 +28,8 @@ int levenshtein_distance(char *s1, char *s2)
   i = d[s1_len][s2_len];
 
   for (j = 0; j <= s1_len; j++)
-    free(d[j]);
-  free(d);
+    delete[] d[j];
+  delete[] d;
 
   return i;
 }
@@ -409,4 +410,24 @@ char *str_printf(const char *format, ...)
   }
   va_end(args);
   return s;
+}
+
+char *str_alloc(size_t n)
+{
+  char *s = static_cast<char *>(calloc(n, 1));
+  if (!s) {
+    perror("SYSERR: str_alloc");
+    abort();
+  }
+  return s;
+}
+
+char *str_realloc(char *s, size_t n)
+{
+  char *grown = static_cast<char *>(realloc(s, n));
+  if (!grown) {
+    perror("SYSERR: str_realloc");
+    abort();
+  }
+  return grown;
 }

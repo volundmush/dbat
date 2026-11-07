@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/spec_procs.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -314,9 +316,9 @@ SPECIAL(auction)
           struct char_data *vict = nullptr;
           int is_file = false, player_i = 0;
 
-          CREATE(vict, struct char_data, 1);
+          vict = new char_data();
           clear_char(vict);
-          CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
+          *char_player_specials_slot(vict) = new player_special_data();
           char blam[50];
           sprintf(blam, "%s", obj_get_auctname(obj2));
           if ((player_i = load_char(g, blam, vict)) > -1) {
@@ -940,9 +942,9 @@ SPECIAL(bank)
       int is_file = false, player_i = 0;
       char name[MAX_INPUT_LENGTH];
 
-      CREATE(vict, struct char_data, 1);
+      vict = new char_data();
       clear_char(vict);
-      CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
+      *char_player_specials_slot(vict) = new player_special_data();
 
       sprintf(name, "%s", rIntro(ch, arg2));
 

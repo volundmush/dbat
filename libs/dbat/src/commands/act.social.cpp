@@ -9,6 +9,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <cerrno>
+#include <cstdlib>
 
 #include "dbat/act.social.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -200,7 +201,7 @@ void boot_social_messages(GameWorld *g)
   }
   rewind(fl);
 
-  CREATE(g->soc_mess_list, struct social_messg, g->top_of_socialt + 1);
+  g->soc_mess_list = new social_messg[g->top_of_socialt + 1]();
 
   /* now read 'em */
   for (;;) {
@@ -292,7 +293,7 @@ void create_command_list(GameWorld *g)
   while (*cmd_info[i].command != '\n') i++;
   i++;
 
-  CREATE(g->complete_cmd_info, struct command_info, g->top_of_socialt + i + 2);
+  g->complete_cmd_info = new command_info[g->top_of_socialt + i + 2]();
 
   /* this loop sorts the socials and commands together into one big list */
   i = 0;
@@ -335,7 +336,7 @@ void free_command_list(GameWorld *g)
   for (k = 1; g->complete_cmd_info[k].command_pointer; k++);
   free(const_cast<char *>(g->complete_cmd_info[k].command));
   free(const_cast<char *>(g->complete_cmd_info[k].sort_as));
-  free(g->complete_cmd_info);
+  delete[] g->complete_cmd_info;
   g->complete_cmd_info = nullptr;
 }
 
@@ -369,7 +370,7 @@ void free_social_messages(GameWorld *g)
     mess = &g->soc_mess_list[i];
     free_action(mess);
   }
-  free(g->soc_mess_list);
+  delete[] g->soc_mess_list;
 }
 
 void free_action(struct social_messg *mess)

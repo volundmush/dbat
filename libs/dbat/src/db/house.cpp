@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <cerrno>
+#include <cstdlib>
 
 #include "dbat/affect.hpp"
 #include "dbat/house.hpp"
@@ -654,7 +655,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
         for (j = zwei = 0; !zwei && !feof(fl);) {
           switch (*line) {
             case 'E':
-              CREATE(new_descr, struct extra_descr_data, 1);
+              new_descr              = new extra_descr_data();
               new_descr->keyword     = fread_string(fl, buf2);
               new_descr->description = fread_string(fl, buf2);
               new_descr->next        = obj_get_ex_description(temp);
@@ -702,7 +703,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
               sscanf(line, "%d %d", t, t + 1);
 
               if (!obj_get_sbinfo(temp)) {
-                CREATE(*obj_sbinfo_slot(temp), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+                *obj_sbinfo_slot(temp) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
               }
               obj_get_sbinfo(temp)[j].spellname = t[0];
               obj_get_sbinfo(temp)[j].pages     = t[1];

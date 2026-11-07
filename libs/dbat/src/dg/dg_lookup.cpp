@@ -2,6 +2,8 @@
  * DG Scripts: finding characters, objects and rooms for scripts, by name or UID, and the UID lookup table.
  * Split out of dg_scripts.c.
  */
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
@@ -604,7 +606,7 @@ void add_to_lookup_table(GameWorld *g, long uid, int type, void *c)
   }
 
   head = &g->lookup_table[uid & (BUCKET_COUNT - 1)];
-  CREATE(lt, struct lookup_table_t, 1);
+  lt         = new lookup_table_t();
   lt->uid    = uid;
   lt->type   = type;
   lt->c      = c;
@@ -630,7 +632,7 @@ void remove_from_lookup_table(GameWorld *g, long uid)
   for (lt = prev->next; lt; prev = lt, lt = lt->next)
     if (lt->uid == uid) {
       prev->next = lt->next;
-      free(lt);
+      delete lt;
       g->lookup_table_entries--;
       return;
     }

@@ -1,5 +1,7 @@
 /* who.c: who, users, where, finger, whois, toplist
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -749,9 +751,9 @@ ACMD(do_whois)
   if (!*argument) {
     send_to_char(g, ch, "Who?\r\n");
   } else {
-    CREATE(victim, struct char_data, 1);
+    victim = new char_data();
     clear_char(victim);
-    CREATE(*char_player_specials_slot(victim), struct player_special_data, 1);
+    *char_player_specials_slot(victim) = new player_special_data();
     if (load_char(g, argument, victim) >= 0) {
       clan = false;
       send_to_char(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");

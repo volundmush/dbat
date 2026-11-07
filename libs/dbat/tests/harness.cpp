@@ -201,14 +201,14 @@ static struct descriptor_data *new_test_descriptor(GameWorld *g)
 {
   struct descriptor_data *d;
 
-  CREATE(d, struct descriptor_data, 1);
+  d             = new descriptor_data();
   d->descriptor = open("/dev/null", O_RDWR); /* for the few messages that skip the output buffer */
   d->output     = d->small_outbuf;
   d->bufspace   = SMALL_BUFSIZE - 1;
   d->login_time = game_now(g);
   d->has_prompt = 1;
   d->desc_num   = ++g->last_desc;
-  CREATE(d->history, char *, HISTORY_SIZE);
+  d->history    = new char *[HISTORY_SIZE]();
   strcpy(d->host, "test");
   d->user  = strdup("Test");
   d->pass  = strdup("Test");
@@ -229,9 +229,9 @@ struct char_data *th_existing_player(GameWorld *g, const char *name)
   struct descriptor_data *d = new_test_descriptor(g);
   struct char_data *ch;
 
-  CREATE(ch, struct char_data, 1);
+  ch = new char_data();
   clear_char(ch);
-  CREATE(*char_player_specials_slot(ch), struct player_special_data, 1);
+  *char_player_specials_slot(ch) = new player_special_data();
   char_set_desc(ch, d);
   d->character = ch;
   if (load_char(g, name, ch) < 0) {
@@ -249,9 +249,9 @@ struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int
   struct descriptor_data *d = new_test_descriptor(g);
   struct char_data *ch;
 
-  CREATE(ch, struct char_data, 1);
+  ch = new char_data();
   clear_char(ch);
-  CREATE(*char_player_specials_slot(ch), struct player_special_data, 1);
+  *char_player_specials_slot(ch) = new player_special_data();
   char_set_desc(ch, d);
   d->character = ch;
   char_set_pc_name(ch, strdup(name));

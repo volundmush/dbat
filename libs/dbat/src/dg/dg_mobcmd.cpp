@@ -36,6 +36,7 @@
 **************************************************************************/
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -786,7 +787,7 @@ ACMD(do_mremember)
   }
 
   /* create a structure and add it to the list */
-  CREATE(mem, struct script_memory, 1);
+  mem = new script_memory();
   if (!char_get_memory(ch)) char_set_memory(ch, mem);
   else {
     struct script_memory *tmpmem = char_get_memory(ch);
@@ -835,11 +836,11 @@ ACMD(do_mforget)
       if (mem->cmd) free(mem->cmd);
       if (prev == nullptr) {
         char_set_memory(ch, mem->next);
-        free(mem);
+        delete mem;
         mem = char_get_memory(ch);
       } else {
         prev->next = mem->next;
-        free(mem);
+        delete mem;
         mem = prev->next;
       }
     } else {
@@ -1015,13 +1016,13 @@ ACMD(do_mfollow)
     if (char_get_followers(char_get_master(ch))->follower == ch) { /* Head of follower-list? */
       k                     = char_get_followers(char_get_master(ch));
       char_set_followers(char_get_master(ch), k->next);
-      free(k);
+      delete k;
     } else { /* locate follower who is not head of list */
       for (k = char_get_followers(char_get_master(ch)); k->next->follower != ch; k = k->next);
 
       j       = k->next;
       k->next = j->next;
-      free(j);
+      delete j;
     }
     char_set_master(ch, nullptr);
   }
@@ -1036,7 +1037,7 @@ ACMD(do_mfollow)
 
   char_set_master(ch, leader);
 
-  CREATE(k, struct follow_type, 1);
+  k = new follow_type();
 
   k->follower       = ch;
   k->next           = char_get_followers(leader);

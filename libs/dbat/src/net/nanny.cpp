@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <cstdlib>
+
 #include <unistd.h>
 
 #include "dbat/interpreter.hpp"
@@ -493,9 +495,9 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     free_char(g, d->character);
   }
   if (!d->character) {
-    CREATE(d->character, struct char_data, 1);
+    d->character = new char_data();
     clear_char(d->character);
-    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    *char_player_specials_slot(d->character) = new player_special_data();
     char_set_desc(d->character, d);
     char_prf_set(g, d->character, PRF_COLOR, true);
   }
@@ -547,9 +549,9 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
           return;
         }
-        CREATE(d->character, struct char_data, 1);
+        d->character = new char_data();
         clear_char(d->character);
-        CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+        *char_player_specials_slot(d->character) = new player_special_data();
         char_set_desc(d->character, d);
         char_set_alias(d->character, strdup(CAP(tmp_name)));
         char_set_pfilepos(d->character, player_i);
@@ -1249,9 +1251,9 @@ void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
   skip_spaces(&arg);
 
   if (d->character == nullptr) {
-    CREATE(d->character, struct char_data, 1);
+    d->character = new char_data();
     clear_char(d->character);
-    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    *char_player_specials_slot(d->character) = new player_special_data();
     char_set_desc(d->character, d);
   }
 

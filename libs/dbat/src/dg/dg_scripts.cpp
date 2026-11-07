@@ -8,6 +8,7 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 #include <cerrno>
+#include <cstdlib>
 
 #include <unistd.h>
 
@@ -59,7 +60,7 @@ static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(Game
       count++;
   if (!count)
     return;
-  CREATE(ids, long, count);
+  ids   = new long[count]();
   count = 0;
   for (obj = g->objects; obj; obj = obj_get_next(obj))
     if (obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
@@ -67,7 +68,7 @@ static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(Game
   for (size_t i = 0; i < count; i++)
     if ((obj = find_obj(g, ids[i])) && obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
       run(g, obj);
-  free(ids);
+  delete[] ids;
 }
 
 /* checks every PULSE_SCRIPT for random triggers */
@@ -137,6 +138,11 @@ void check_time_triggers(GameWorld *g)
   }
 }
 
+static void free_wait_event_data(void *event_obj)
+{
+  delete static_cast<struct wait_event_data *>(event_obj);
+}
+
 static EVENTFUNC(trig_wait_event)
 {
   struct wait_event_data *wait_event_obj = (struct wait_event_data *)event_obj;
@@ -148,7 +154,7 @@ static EVENTFUNC(trig_wait_event)
   go   = wait_event_obj->go;
   type = wait_event_obj->type;
 
-  free(wait_event_obj);
+  delete wait_event_obj;
   trig->wait_event = nullptr;
 
 #if 1 /* debugging */
@@ -344,12 +350,12 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
     }
   }
 
-  CREATE(wait_event_obj, struct wait_event_data, 1);
+  wait_event_obj          = new wait_event_data();
   wait_event_obj->trigger = trig;
   wait_event_obj->go      = go;
   wait_event_obj->type    = type;
 
-  trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, when);
+  trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, free_wait_event_data, when);
   trig->curr_state = cl->next;
 }
 
@@ -845,7 +851,7 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
   /* and free up the space */
   free(vd->value);
   free(vd->name);
-  free(vd);
+  delete vd;
 }
 
 /*
@@ -1322,7 +1328,7 @@ void read_saved_vars(struct char_data *ch)
   /* create the space for the script structure which holds the vars */
   /* We need to do this first, because later calls to 'remote' will need */
   /* a script already assigned. */
-  CREATE(*char_script_slot(ch), struct script_data, 1);
+  *char_script_slot(ch) = new script_data();
 
   /* find the file that holds the saved variables and open it*/
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));

@@ -6,6 +6,8 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <cstdlib>
+
 #include "dbat/guild.hpp"
 #include "dbat/config.hpp"
 #include "dbat/gedit.hpp"
@@ -120,17 +122,17 @@ ACMD(do_oasis_gedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_gedit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
   if ((OLC_ZNUM(d) = real_zone_by_thing(g, number)) == NOWHERE) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -144,7 +146,7 @@ ACMD(do_oasis_gedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -164,7 +166,7 @@ ACMD(do_oasis_gedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -191,7 +193,7 @@ static void gedit_setup_new(GameWorld *g, struct descriptor_data *d)
   struct guild_data *guilddata;
 
   /*. Alloc some guild shaped space . */
-  CREATE(guilddata, struct guild_data, 1);
+  guilddata = new guild_data();
 
   /*. Some default values . */
   guild_set_gm(guilddata, -1);
@@ -231,7 +233,7 @@ static void gedit_setup_new(GameWorld *g, struct descriptor_data *d)
 static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, int rgm_num)
 {
   /*. Alloc some guild shaped space . */
-  CREATE(OLC_GUILD(d), struct guild_data, 1);
+  OLC_GUILD(d) = new guild_data();
   copy_guild(OLC_GUILD(d), g->guild_index + rgm_num);
   gedit_disp_menu(g, d);
 }

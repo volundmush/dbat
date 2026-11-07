@@ -4,6 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/genobj.hpp"
@@ -91,10 +92,10 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     obj_set_script(obj, obj_get_script(&swap));
 
     /* Each copy owns its own spellbook pages, as in read_object(), and frees them when it goes. */
-    free(obj_get_sbinfo(&swap));
+    delete[] obj_get_sbinfo(&swap);
     *obj_sbinfo_slot(obj) = nullptr;
     if (obj_get_sbinfo(refobj)) {
-      CREATE(*obj_sbinfo_slot(obj), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+      *obj_sbinfo_slot(obj) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
       memcpy(obj_get_sbinfo(obj), obj_get_sbinfo(refobj), SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
     }
 
@@ -176,8 +177,8 @@ static obj_rnum insert_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum
   obj_rnum i;
 
   g->top_obj++;
-  RECREATE(g->obj_index, struct index_data, g->top_obj + 1);
-  RECREATE(g->obj_proto, struct obj_data, g->top_obj + 1);
+  resize_array(g->obj_index, g->top_obj, g->top_obj + 1);
+  resize_array(g->obj_proto, g->top_obj, g->top_obj + 1);
 
   /*
    * Start counting through both tables.
@@ -434,7 +435,7 @@ void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
       if (thised->description && ok_desc)
         free(thised->description);
       if (ok_item)
-        free(thised);
+        delete thised;
     }
   }
 }
@@ -538,8 +539,8 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   }
 
   g->top_obj--;
-  RECREATE(g->obj_index, struct index_data, g->top_obj + 1);
-  RECREATE(g->obj_proto, struct obj_data, g->top_obj + 1);
+  resize_array(g->obj_index, g->top_obj + 2, g->top_obj + 1);
+  resize_array(g->obj_proto, g->top_obj + 2, g->top_obj + 1);
 
   for (shop = 0; shop <= g->top_shop; shop++)
     for (j = 0; rshop_get_product(g, shop, j) != NOTHING; j++)

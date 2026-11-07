@@ -1,5 +1,7 @@
 /* look.c: look, examine, rooms, exits and targets
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"

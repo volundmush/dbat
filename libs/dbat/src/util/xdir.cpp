@@ -27,7 +27,7 @@ void xdir_cleanup(struct xap_dir *xd)
   if (xd->total < 0)
     return; /* scandir() failed; namelist was never allocated */
   for (int i = 0; i < xd->total; i++)
-    free(xd->namelist[i]);
+    free(xd->namelist[i]); /* scandir() allocated these with malloc */
   free(xd->namelist);
   xd->namelist = nullptr;
   xd->total    = 0;

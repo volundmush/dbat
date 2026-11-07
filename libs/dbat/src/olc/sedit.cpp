@@ -3,6 +3,8 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <cstdlib>
+
 #include "dbat/shop.hpp"
 #include "dbat/config.hpp"
 #include "dbat/sedit.hpp"
@@ -116,10 +118,10 @@ ACMD(do_oasis_sedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_sedit: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -127,7 +129,7 @@ ACMD(do_oasis_sedit)
   OLC_ZNUM(d) = save ? real_zone(g, number) : real_zone_by_thing(g, number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -141,7 +143,7 @@ ACMD(do_oasis_sedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -161,7 +163,7 @@ ACMD(do_oasis_sedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -190,7 +192,7 @@ static void sedit_setup_new(struct descriptor_data *d)
   /*
    * Allocate a scratch shop structure.
    */
-  CREATE(shop, struct shop_data, 1);
+  shop = new shop_data();
 
   /*
    * Fill in some default values.
@@ -216,13 +218,13 @@ static void sedit_setup_new(struct descriptor_data *d)
   room_vnum *rooms;
   struct shop_buy_data *buy_types;
 
-  CREATE(products, obj_vnum, 1);
+  products = new obj_vnum[1]();
   shop_set_products(shop, products);
   shop_set_product(shop, 0, NOTHING);
-  CREATE(rooms, room_vnum, 1);
+  rooms = new room_vnum[1]();
   shop_set_rooms(shop, rooms);
   shop_set_room(shop, 0, NOWHERE);
-  CREATE(buy_types, struct shop_buy_data, 1);
+  buy_types = new shop_buy_data[1]();
   shop_set_buy_types(shop, buy_types);
 
   shop_set_buy_type(shop, 0, NOTHING);
@@ -241,7 +243,7 @@ static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, shop_r
   /*
    * Create a scratch shop structure.
    */
-  CREATE(OLC_SHOP(d), struct shop_data, 1);
+  OLC_SHOP(d) = new shop_data();
 
   /* don't waste time trying to free NULL strings -- Welcor */
   copy_shop(OLC_SHOP(d), g->shops + rshop_num, false);

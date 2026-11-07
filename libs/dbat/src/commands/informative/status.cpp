@@ -1,5 +1,7 @@
 /* status.c: score, status, inventory, equipment, consider
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"

@@ -1,5 +1,7 @@
 /* rp.c: intros, RP bank and display, mimic, nickname, card games
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <cstdlib>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"

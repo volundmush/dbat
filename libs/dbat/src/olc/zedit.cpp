@@ -3,6 +3,8 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <cstdlib>
+
 #include "dbat/config.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/interpreter.hpp"
@@ -144,10 +146,10 @@ ACMD(do_oasis_zedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_zedit: Player already "
                                          "had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -159,7 +161,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -169,7 +171,7 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
     send_cannot_edit(g, ch, g->zones[OLC_ZNUM(d)].number);
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -192,7 +194,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -205,7 +207,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -229,7 +231,7 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_
   /*
    * Allocate one scratch zone structure.  
    */
-  CREATE(zone, struct zone_data, 1);
+  zone = new zone_data();
 
   /*
    * Copy all the zone header information over.
@@ -256,7 +258,7 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_
   /*
    * Start the reset command list with a terminator.
    */
-  CREATE(zone->cmd, struct reset_com, 1);
+  zone->cmd            = new reset_com[1]();
   zone->cmd[0].command = 'S';
 
   /*

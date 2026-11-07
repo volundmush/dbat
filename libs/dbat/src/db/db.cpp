@@ -507,7 +507,7 @@ static void free_extra_descriptions(struct extra_descr_data *edesc)
 
     free(edesc->keyword);
     free(edesc->description);
-    free(edesc);
+    delete edesc;
   }
 }
 
@@ -560,10 +560,10 @@ void destroy_db(GameWorld *g)
         free(rroom_get_dir_option(g, cnt, itr)->general_description);
       if (rroom_get_dir_option(g, cnt, itr)->keyword)
         free(rroom_get_dir_option(g, cnt, itr)->keyword);
-      free(rroom_get_dir_option(g, cnt, itr));
+      delete rroom_get_dir_option(g, cnt, itr);
     }
   }
-  free(g->rooms);
+  delete[] g->rooms;
   g->top_room = 0;
 
   /* Objects */
@@ -578,13 +578,13 @@ void destroy_db(GameWorld *g)
       free(obj_get_action_description(&g->obj_proto[cnt]));
     if (obj_get_ex_description(&g->obj_proto[cnt]))
       free_extra_descriptions(obj_get_ex_description(&g->obj_proto[cnt]));
-    free(obj_get_sbinfo(&g->obj_proto[cnt])); /* spellbook pages */
+    delete[] obj_get_sbinfo(&g->obj_proto[cnt]); /* spellbook pages */
 
     /* free script proto list */
     free_proto_script(&g->obj_proto[cnt], OBJ_TRIGGER);
   }
-  free(g->obj_proto);
-  free(g->obj_index);
+  delete[] g->obj_proto;
+  delete[] g->obj_index;
 
   /* Mobiles */
   for (cnt = 0; cnt <= g->top_mob; cnt++) {
@@ -605,8 +605,8 @@ void destroy_db(GameWorld *g)
     while (char_get_affected(&g->mob_proto[cnt]))
       affect_remove(g, &g->mob_proto[cnt], char_get_affected(&g->mob_proto[cnt]));
   }
-  free(g->mob_proto);
-  free(g->mob_index);
+  delete[] g->mob_proto;
+  delete[] g->mob_index;
 
   /* Shops */
   destroy_shops(g);
@@ -620,7 +620,7 @@ void destroy_db(GameWorld *g)
     struct reset_q_element *ftemp = g->reset_q.head, *temp;
     while (ftemp) {
       temp = ftemp->next;
-      free(ftemp);
+      delete ftemp;
       ftemp = temp;
     }
   }
@@ -642,10 +642,10 @@ void destroy_db(GameWorld *g)
             free(THIS_CMD.sarg2);
         }
       /* then free the command list */
-      free(g->zones[cnt].cmd);
+      delete[] g->zones[cnt].cmd;
     }
   }
-  free(g->zones);
+  delete[] g->zones;
 
 #undef THIS_CMD
 
@@ -661,15 +661,15 @@ void destroy_db(GameWorld *g)
           j = i->next;
           if (i->cmd)
             free(i->cmd);
-          free(i);
+          delete i;
           i = j;
         }
       }
       free_trigger(g, g->trig_index[cnt]->proto);
     }
-    free(g->trig_index[cnt]);
+    delete g->trig_index[cnt];
   }
-  free(g->trig_index);
+  delete[] g->trig_index;
 
   /* Events */
   event_free_all(g);
@@ -698,7 +698,7 @@ constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
 static void init_obj_unique_hash(GameWorld *g)
 {
-  CREATE(g->obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
+  g->obj_unique_hash_pools = new obj_unique_hash_elem *[NUM_OBJ_UNIQUE_POOLS]();
 }
 
 /* body of the booting system */
@@ -1150,34 +1150,34 @@ void index_boot(GameWorld *g, int mode)
    */
   switch (mode) {
     case DB_BOOT_TRG:
-      CREATE(g->trig_index, struct index_data *, rec_count);
+      g->trig_index = new index_data *[rec_count]();
       break;
     case DB_BOOT_WLD:
-      CREATE(g->rooms, struct room_data, rec_count);
+      g->rooms = new room_data[rec_count]();
       size[0] = sizeof(struct room_data) * rec_count;
       mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_MOB:
-      CREATE(g->mob_proto, struct char_data, rec_count);
-      CREATE(g->mob_index, struct index_data, rec_count);
+      g->mob_proto = new char_data[rec_count]();
+      g->mob_index = new index_data[rec_count]();
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct char_data) * rec_count;
       mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_OBJ:
-      CREATE(g->obj_proto, struct obj_data, rec_count);
-      CREATE(g->obj_index, struct index_data, rec_count);
+      g->obj_proto = new obj_data[rec_count]();
+      g->obj_index = new index_data[rec_count]();
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct obj_data) * rec_count;
       mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_ZON:
-      CREATE(g->zones, struct zone_data, rec_count);
+      g->zones = new zone_data[rec_count]();
       size[0] = sizeof(struct zone_data) * rec_count;
       mud_log("   %d zones, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_HLP:
-      CREATE(g->help_table, struct help_index_element, rec_count);
+      g->help_table = new help_index_element[rec_count]();
       size[0] = sizeof(struct help_index_element) * rec_count;
       mud_log("   %d entries, %d bytes.", rec_count, size[0]);
       break;
@@ -1471,7 +1471,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         setup_dir(g, fl, g->parse_room_index, atoi(line + 1));
         break;
       case 'E':
-        CREATE(new_descr, struct extra_descr_data, 1);
+        new_descr              = new extra_descr_data();
         new_descr->keyword     = fread_string(fl, buf2);
         new_descr->description = fread_string(fl, buf2);
         /* fix for crashes in the editor when formatting 
@@ -1481,7 +1481,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         {
           char *tmp = strchr(new_descr->description, '\0');
           if (tmp > new_descr->description && *(tmp - 1) != '\n') {
-            CREATE(tmp, char, strlen(new_descr->description) + 3);
+            tmp = str_alloc(strlen(new_descr->description) + 3);
             sprintf(tmp, "%s\r\n", new_descr->description); /* sprintf ok : size checked above*/
             free(new_descr->description);
             new_descr->description = tmp;
@@ -1517,7 +1517,7 @@ static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
   snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", rroom_get_vnum(g, room) + 1, dir);
 
   struct room_direction_data *new_exit;
-  CREATE(new_exit, struct room_direction_data, 1);
+  new_exit = new room_direction_data();
   rroom_set_dir_option(g, room, dir, new_exit);
   rroom_get_dir_option(g, room, dir)->general_description = fread_string(fl, buf2);
   rroom_get_dir_option(g, room, dir)->keyword             = fread_string(fl, buf2);
@@ -2400,7 +2400,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     }
     switch (*line) {
       case 'E':
-        CREATE(new_descr, struct extra_descr_data, 1);
+        new_descr                   = new extra_descr_data();
         new_descr->keyword          = fread_string(obj_f, buf2);
         new_descr->description      = fread_string(obj_f, buf2);
         new_descr->next             = obj_get_ex_description(&g->obj_proto[g->parse_obj_index]);
@@ -2458,7 +2458,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
           exit(1);
         }
         if (!obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])) {
-          CREATE(*obj_sbinfo_slot(&g->obj_proto[g->parse_obj_index]), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+          *obj_sbinfo_slot(&g->obj_proto[g->parse_obj_index]) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
         }
         obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].spellname = t[0];
         obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].pages     = t[1];
@@ -2533,7 +2533,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     mud_log("SYSERR: %s is empty!", zname);
     exit(1);
   } else
-    CREATE(Z.cmd, struct reset_com, num_of_cmds);
+    Z.cmd = new reset_com[num_of_cmds]();
 
   line_num += get_line(fl, buf);
 
@@ -2690,7 +2690,7 @@ void free_help_table(GameWorld *g)
       if (g->help_table[hp].entry && !g->help_table[hp].duplicate)
         free(g->help_table[hp].entry);
     }
-    free(g->help_table);
+    delete[] g->help_table;
     g->help_table = nullptr;
   }
   g->top_of_helpt = 0;
@@ -2864,7 +2864,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
   } else
     i = nr;
 
-  CREATE(mob, struct char_data, 1);
+  mob = new char_data();
   clear_char(mob);
   *mob             = g->mob_proto[i];
   char_set_next(mob, g->characters);
@@ -3460,11 +3460,11 @@ static void free_obj_unique_hash(GameWorld *g)
       elem = g->obj_unique_hash_pools[i];
       while (elem) {
         next_elem = elem->next_e;
-        free(elem);
+        delete elem;
         elem = next_elem;
       }
     }
-    free(g->obj_unique_hash_pools);
+    delete[] g->obj_unique_hash_pools;
   }
 }
 
@@ -3485,7 +3485,7 @@ void add_unique_id(GameWorld *g, struct obj_data *obj)
     if (!obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))
       obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
   }
-  CREATE(elem, struct obj_unique_hash_elem, 1);
+  elem                        = new obj_unique_hash_elem();
   elem->generation         = obj_get_generation(obj);
   elem->unique_id          = obj_get_unique_id(obj);
   elem->obj                = obj;
@@ -3511,7 +3511,7 @@ static void remove_unique_id(GameWorld *g, struct obj_data *obj)
   while (elem) {
     tmp = elem->next_e;
     if (elem->obj == obj) {
-      free(elem);
+      delete elem;
       *ptr = tmp;
     } else {
       ptr = &(elem->next_e);
@@ -3577,7 +3577,7 @@ char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high)
   if (count < 1) {
     return strdup("No objects in unique hash.\r\n");
   }
-  CREATE(str, char, remain + 1);
+  str   = str_alloc(remain + 1);
   ptr   = str;
   count = snprintf(ptr, remain, "Unique object hashes (vnums %d - %d)\r\n",
                    low, high);
@@ -3611,7 +3611,7 @@ struct obj_data *create_obj(GameWorld *g)
 {
   struct obj_data *obj;
 
-  CREATE(obj, struct obj_data, 1);
+  obj = new obj_data();
   clear_object(obj);
   obj_set_next(obj, g->objects);
   g->objects = obj;
@@ -3640,7 +3640,7 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnu
     return (nullptr);
   }
 
-  CREATE(obj, struct obj_data, 1);
+  obj = new obj_data();
   clear_object(obj);
   *obj        = g->obj_proto[i];
   obj_set_next(obj, g->objects);
@@ -3657,7 +3657,7 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnu
   obj_set_unique_id(obj, -1);
 
   if (obj_get_sbinfo(&g->obj_proto[i])) {
-    CREATE(*obj_sbinfo_slot(obj), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+    *obj_sbinfo_slot(obj) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
     for (j = 0; j < SPELLBOOK_SIZE; j++) {
       obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(&g->obj_proto[i])[j].spellname;
       obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(&g->obj_proto[i])[j].pages;
@@ -3705,7 +3705,7 @@ void zone_update(GameWorld *g)
           g->zones[i].age < ZO_DEAD && g->zones[i].reset_mode) {
         /* enqueue zone */
 
-        CREATE(update_u, struct reset_q_element, 1);
+        update_u = new reset_q_element();
 
         update_u->zone_to_reset = i;
 
@@ -3742,7 +3742,7 @@ void zone_update(GameWorld *g)
         temp->next = update_u->next;
       }
 
-      free(update_u);
+      delete update_u;
       break;
     }
 }
@@ -4190,7 +4190,7 @@ static void free_followers(struct follow_type *k)
     free_followers(k->next);
 
   k->follower = nullptr;
-  free(k);
+  delete k;
 }
 
 /* release memory allocated for a char struct */
@@ -4239,9 +4239,9 @@ void free_char(GameWorld *g, struct char_data *ch)
     free(const_cast<char *>(char_get_rdisplay(ch)));
     for (i = 0; i < NUM_HIST; i++)
       if (char_get_comm_hist(g, ch, i))
-        free(char_get_comm_hist(g, ch, i));
+        delete char_get_comm_hist(g, ch, i);
     if (char_get_player_specials(ch))
-      free(char_get_player_specials(ch));
+      delete char_get_player_specials(ch);
 
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
@@ -4280,7 +4280,7 @@ void free_char(GameWorld *g, struct char_data *ch)
   if (char_get_id(ch) != 0)
     remove_from_lookup_table(g, char_get_id(ch));
 
-  free(ch);
+  delete ch;
 }
 
 /* release memory allocated for an obj struct */
@@ -4310,9 +4310,9 @@ void free_obj(GameWorld *g, struct obj_data *obj)
   remove_from_lookup_table(g, obj_get_id(obj));
 
   if (obj_get_sbinfo(obj))
-    free(obj_get_sbinfo(obj));
+    delete[] obj_get_sbinfo(obj);
 
-  free(obj);
+  delete obj;
 }
 
 /* Read a text file into a freshly allocated string at *buf, replacing (and freeing) what was there. On failure
@@ -4425,7 +4425,7 @@ void init_char(GameWorld *g, struct char_data *ch)
 
   /* create a player_special structure */
   if (char_get_player_specials(ch) == nullptr) {
-    CREATE(*char_player_specials_slot(ch), struct player_special_data, 1);
+    *char_player_specials_slot(ch) = new player_special_data();
   }
 
   char_set_admlevel(ch, ADMLVL_NONE);

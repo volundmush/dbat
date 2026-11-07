@@ -6,6 +6,8 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/interpreter.hpp"

@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/comm.hpp"

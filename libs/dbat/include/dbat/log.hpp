@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdarg>
 #include <cstdio>
-#include <cstdlib>
 
 #include "dbat/consts/types.hpp"
 
@@ -22,22 +21,4 @@ void log_death_trap(GameWorld *g, struct char_data *ch);
 void mud_vlog(const char *format, va_list args) __attribute__((format(printf, 1, 0)));
 void mud_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...) __attribute__((format(printf, 5, 6)));
-
-#define CREATE(result, type, number)                                                 \
-  do {                                                                               \
-    if ((number) * sizeof(type) <= 0)                                                \
-      mud_log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__); \
-    if (!((result) = (type *)calloc((number), sizeof(type)))) {                      \
-      perror("SYSERR: malloc failure");                                              \
-      abort();                                                                       \
-    }                                                                                \
-  } while (0)
-
-#define RECREATE(result, type, number)                                      \
-  do {                                                                      \
-    if (!((result) = (type *)realloc((result), sizeof(type) * (number)))) { \
-      perror("SYSERR: realloc failure");                                    \
-      abort();                                                              \
-    }                                                                       \
-  } while (0)
 

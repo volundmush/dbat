@@ -53,16 +53,17 @@ void event_init(GameWorld *g)
 ** Add an event to the current list
 */
 /* creates an event and returns it */
-struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, long when)
+struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, void (*free_obj)(void *), long when)
 {
   struct event *new_event;
 
   if (when < 1) /* make sure its in the future */
     when = 1;
 
-  CREATE(new_event, struct event, 1);
+  new_event            = new event();
   new_event->func      = func;
   new_event->event_obj = event_obj;
+  new_event->free_obj  = free_obj;
   new_event->q_el      = queue_enq(g->event_q, new_event, when + g->pulse);
 
   return new_event;
@@ -81,9 +82,9 @@ void event_cancel(GameWorld *g, struct event *event)
   } else
     queue_deq(g->event_q, event->q_el);
 
-  if (event->event_obj)
-    free(event->event_obj);
-  free(event);
+  if (event->event_obj && event->free_obj)
+    event->free_obj(event->event_obj);
+  delete event;
 }
 
 /* Process any events whose time has come. */
@@ -109,7 +110,7 @@ void event_process(GameWorld *g)
     if ((new_time = (the_event->func)(g, the_event->event_obj)) > 0)
       the_event->q_el = queue_enq(g->event_q, the_event, new_time + g->pulse);
     else
-      free(the_event);
+      delete the_event;
   }
 }
 
@@ -142,7 +143,7 @@ static struct queue *queue_init(void)
 {
   struct queue *q;
 
-  CREATE(q, struct queue, 1);
+  q = new queue();
 
   return q;
 }
@@ -153,7 +154,7 @@ static struct q_element *queue_enq(struct queue *q, void *data, long key)
   struct q_element *qe, *i;
   int bucket;
 
-  CREATE(qe, struct q_element, 1);
+  qe       = new q_element();
   qe->data = data;
   qe->key  = key;
 
@@ -208,7 +209,7 @@ static void queue_deq(struct queue *q, struct q_element *qe)
   else
     qe->next->prev = qe->prev;
 
-  free(qe);
+  delete qe;
 }
 
 /*
@@ -266,12 +267,12 @@ static void queue_free(struct queue *q)
     for (qe = q->head[i]; qe; qe = next_qe) {
       next_qe = qe->next;
       if ((event = (struct event *)qe->data) != nullptr) {
-        if (event->event_obj)
-          free(event->event_obj);
-        free(event);
+        if (event->event_obj && event->free_obj)
+          event->free_obj(event->event_obj);
+        delete event;
       }
-      free(qe);
+      delete qe;
     }
 
-  free(q);
+  delete q;
 }

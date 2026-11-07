@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <cstdlib>
+
 #include "dbat/config.hpp"
 #include "dbat/graph.hpp"
 #include "dbat/utils.hpp"
@@ -58,7 +60,7 @@ static void bfs_enqueue(GameWorld *g, room_rnum room, int dir)
 {
   struct bfs_queue_struct *curr;
 
-  CREATE(curr, struct bfs_queue_struct, 1);
+  curr       = new bfs_queue_struct();
   curr->room = room;
   curr->dir  = dir;
 
@@ -77,7 +79,7 @@ static void bfs_dequeue(GameWorld *g)
 
   if (!(g->bfs_queue_head = g->bfs_queue_head->next))
     g->bfs_queue_tail = nullptr;
-  free(curr);
+  delete curr;
 }
 
 static void bfs_clear_queue(GameWorld *g)

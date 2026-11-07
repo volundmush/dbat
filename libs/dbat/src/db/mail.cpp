@@ -13,6 +13,8 @@
 Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
+#include <cstdlib>
+
 #include "dbat/mail.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -54,11 +56,11 @@ void free_mail_index(GameWorld *g)
       i = g->mail_index->list_start;
       while (i) {
         j = i->next;
-        free(i);
+        delete i;
         i = j;
       }
     }
-    free(g->mail_index);
+    delete g->mail_index;
     g->mail_index = tmp;
   }
 }
@@ -86,7 +88,7 @@ static void push_free_list(GameWorld *g, long pos)
 {
   position_list_type *new_pos;
 
-  CREATE(new_pos, position_list_type, 1);
+  new_pos              = new position_list_type();
   new_pos->position = pos;
   new_pos->next     = g->free_list;
   g->free_list         = new_pos;
@@ -115,7 +117,7 @@ static long pop_free_list(GameWorld *g)
   /* Remove this block from the free list. */
   g->free_list = old_pos->next;
   /* Get rid of the memory the node took. */
-  free(old_pos);
+  delete old_pos;
   /* Give back the free offset. */
   return (return_value);
 }
@@ -165,7 +167,7 @@ static bool mail_begin(GameWorld *g)
   fseek(fl, 0L, SEEK_END);
   g->mail_buf_len   = ftell(fl);
   g->mail_buf_alloc = g->mail_buf_len + 8 * BLOCK_SIZE;
-  CREATE(g->mail_buf, char, g->mail_buf_alloc);
+  g->mail_buf       = str_alloc(g->mail_buf_alloc);
   rewind(fl);
   if (g->mail_buf_len && fread(g->mail_buf, g->mail_buf_len, 1, fl) != 1) {
     mud_log("SYSERR: Unable to read mail file '%s'.", MAIL_FILE);
@@ -231,7 +233,7 @@ static void write_to_file(GameWorld *g, void *buf, int size, long filepos)
     long old_alloc = g->mail_buf_alloc;
 
     g->mail_buf_alloc = filepos + size + 8 * BLOCK_SIZE;
-    RECREATE(g->mail_buf, char, g->mail_buf_alloc);
+    g->mail_buf       = str_realloc(g->mail_buf, g->mail_buf_alloc);
     memset(g->mail_buf + old_alloc, 0, g->mail_buf_alloc - old_alloc);
   }
   if (filepos > g->mail_buf_len) /* as writing past the end of a file would: the gap reads as zeros */
@@ -279,7 +281,7 @@ static void index_mail(GameWorld *g, long id_to_index, long pos)
   }
   if (!(new_index = find_char_in_index(g, id_to_index))) {
     /* name not already in index.. add it */
-    CREATE(new_index, mail_index_type, 1);
+    new_index            = new mail_index_type();
     new_index->recipient = id_to_index;
 
     /* add to front of list */
@@ -287,7 +289,7 @@ static void index_mail(GameWorld *g, long id_to_index, long pos)
     g->mail_index      = new_index;
   }
   /* now, add this position to front of position list */
-  CREATE(new_position, position_list_type, 1);
+  new_position           = new position_list_type();
   new_position->position = pos;
   new_position->next     = new_index->list_start;
   new_index->list_start  = new_position;
@@ -480,26 +482,26 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   }
   if (!(position_pointer->next)) { /* just 1 entry in list. */
     mail_address = position_pointer->position;
-    free(position_pointer);
+    delete position_pointer;
 
     /* now free up the actual name entry */
     if (g->mail_index == mail_pointer) { /* name is 1st in list */
       g->mail_index = mail_pointer->next;
-      free(mail_pointer);
+      delete mail_pointer;
     } else {
       /* find entry before the one we're going to del */
       for (prev_mail = g->mail_index;
            prev_mail->next != mail_pointer;
            prev_mail = prev_mail->next);
       prev_mail->next = mail_pointer->next;
-      free(mail_pointer);
+      delete mail_pointer;
     }
   } else {
     /* move to next-to-last record */
     while (position_pointer->next->next)
       position_pointer = position_pointer->next;
     mail_address = position_pointer->next->position;
-    free(position_pointer->next);
+    delete position_pointer->next;
     position_pointer->next = nullptr;
   }
 
@@ -637,7 +639,7 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
 
   /* Start writing! */
-  CREATE(mailwrite, char *, 1);
+  mailwrite = new char *();
   string_write(char_get_desc(ch), mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
 }
 

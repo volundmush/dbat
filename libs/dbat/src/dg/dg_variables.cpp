@@ -8,6 +8,8 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/relocate.hpp"
@@ -50,7 +52,7 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
   if (vd && (!vd->context || vd->context == id)) {
     free(vd->value);
   } else {
-    CREATE(vd, struct trig_var_data, 1);
+    vd          = new trig_var_data();
     vd->name    = strdup(name);
     vd->next    = *var_list;
     vd->context = id;

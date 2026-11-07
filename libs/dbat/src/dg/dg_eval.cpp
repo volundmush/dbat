@@ -2,6 +2,8 @@
  * DG Scripts: evaluating script expressions and conditions, and finding the end of if/while/switch blocks.
  * Split out of dg_scripts.c.
  */
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/game_world.hpp"
 
@@ -256,8 +258,8 @@ static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, st
         *p = '\0';
         p += strlen(ops[i]);
 
-        CREATE(lhr, char, MAX_INPUT_LENGTH);
-        CREATE(rhr, char, MAX_INPUT_LENGTH);
+        lhr = str_alloc(MAX_INPUT_LENGTH);
+        rhr = str_alloc(MAX_INPUT_LENGTH);
         eval_expr(g, line, lhr, go, sc, trig, type);
         eval_expr(g, p, rhr, go, sc, trig, type);
         eval_op(ops[i], lhr, rhr, result);

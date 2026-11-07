@@ -38,33 +38,33 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 {
   GameWorld *g = game_world_create();
 
-  CREATE(g->rooms, struct room_data, count);
+  g->rooms    = new room_data[count]();
   g->top_room = count - 1;
   for (room_rnum r = 0; r < count; r++)
     rroom_set_number(g, r, first_vnum + r);
 
-  CREATE(g->mob_proto, struct char_data, 1);
-  CREATE(g->mob_index, struct index_data, 1);
+  g->mob_proto = new char_data[1]();
+  g->mob_index = new index_data[1]();
   clear_char(g->mob_proto);
   char_set_nr(g->mob_proto, 0);
   char_mob_set(g->mob_proto, MOB_ISNPC, true);
   g->mob_index[0].vnum = first_vnum;
   g->top_mob           = 0;
 
-  CREATE(g->obj_proto, struct obj_data, 1);
-  CREATE(g->obj_index, struct index_data, 1);
+  g->obj_proto = new obj_data[1]();
+  g->obj_index = new index_data[1]();
   clear_object(g->obj_proto);
   obj_set_item_number(g->obj_proto, 0);
   g->obj_index[0].vnum = first_vnum;
   g->top_obj           = 0;
 
-  CREATE(g->zones, struct zone_data, 1);
+  g->zones           = new zone_data[1]();
   g->zones[0].number = first_vnum / 100;
   g->zones[0].bot    = first_vnum;
   g->zones[0].top    = first_vnum + 99;
   g->top_zone        = 0;
 
-  CREATE(g->shops, struct shop_data, 1);
+  g->shops         = new shop_data[1]();
   g->shops[0].vnum = first_vnum;
   g->top_shop      = 0;
 
@@ -75,13 +75,13 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 
 static void free_world(GameWorld *g)
 {
-  free(g->shops);
-  free(g->zones);
-  free(g->obj_index);
-  free(g->obj_proto);
-  free(g->mob_index);
-  free(g->mob_proto);
-  free(g->rooms);
+  delete[] g->shops;
+  delete[] g->zones;
+  delete[] g->obj_index;
+  delete[] g->obj_proto;
+  delete[] g->mob_index;
+  delete[] g->mob_proto;
+  delete[] g->rooms;
   game_world_destroy(g);
 }
 
@@ -132,9 +132,9 @@ static void check_rooms(GameWorld *a, GameWorld *b)
   struct char_data *ch;
   struct obj_data *obj;
 
-  CREATE(ch, struct char_data, 1);
+  ch = new char_data();
   clear_char(ch);
-  CREATE(obj, struct obj_data, 1);
+  obj = new obj_data();
   clear_object(obj);
 
   char_to_room(a, ch, 1);
@@ -158,8 +158,8 @@ static void check_rooms(GameWorld *a, GameWorld *b)
 
   char_from_room(a, ch);
   obj_from_room(a, obj);
-  free(obj);
-  free(ch);
+  delete obj;
+  delete ch;
 }
 
 /* entities made from a prototype join only the world they were made in */
@@ -191,8 +191,8 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
   remove_from_lookup_table(a, obj_get_id(obj));
   a->characters = nullptr;
   a->objects    = nullptr;
-  free(mob);
-  free(obj);
+  delete mob;
+  delete obj;
 }
 
 /* the same seed gives the same rolls, and rolling in one world leaves the other where it was */
@@ -236,7 +236,7 @@ static void check_random_color(GameWorld *a, GameWorld *b)
   remove_from_lookup_table(a, char_get_id(mob));
   a->mob_index[0].number--;
   a->characters = nullptr;
-  free(mob);
+  delete mob;
 }
 
 /* A new world's generator must work without seeding, and a world's clock can be pinned. */
@@ -285,7 +285,7 @@ static void check_other_state(GameWorld *a, GameWorld *b)
 
   event_init(a);
   event_init(b);
-  event_create(a, count_event, &ran, 1);
+  event_create(a, count_event, &ran, nullptr, 1);
   a->pulse++;
   b->pulse++;
   event_process(b);
@@ -312,7 +312,7 @@ static void check_objects_off_the_ground(void)
   struct obj_data *obj, *bag;
   GameWorld *g;
 
-  CREATE(holder, struct char_data, 1);
+  holder = new char_data();
   clear_char(holder);
   CHECK(!char_ether_stream(nullptr, holder)); /* no world needed: it never looks a room up */
 
@@ -374,7 +374,7 @@ static void check_objects_off_the_ground(void)
   send_to_room(g, NOWHERE, "unheard");
   free_world(g);
 
-  free(holder);
+  delete holder;
 }
 
 static void check_get_number(void)

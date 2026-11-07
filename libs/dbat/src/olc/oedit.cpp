@@ -5,6 +5,8 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdlib>
+
 #include "dbat/affect.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/boards.hpp"
@@ -130,10 +132,10 @@ ACMD(do_oasis_oedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis: Player already had olc structure.");
-    free(d->olc);
+    delete d->olc;
   }
 
-  CREATE(d->olc, struct oasis_olc_data, 1);
+  d->olc = new oasis_olc_data();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -145,7 +147,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -159,7 +161,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -182,7 +184,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    free(d->olc);
+    delete d->olc;
     d->olc = nullptr;
     return;
   }
@@ -216,7 +218,7 @@ ACMD(do_oasis_oedit)
 
 static void oedit_setup_new(struct descriptor_data *d)
 {
-  CREATE(OLC_OBJ(d), struct obj_data, 1);
+  OLC_OBJ(d) = new obj_data();
 
   clear_object(OLC_OBJ(d));
   obj_set_name(OLC_OBJ(d), strdup("unfinished object"));
@@ -243,7 +245,7 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rn
   /*
    * Allocate object in memory.
    */
-  CREATE(obj, struct obj_data, 1);
+  obj = new obj_data();
   copy_object(g, obj, &g->obj_proto[real_num]);
 
   /*
@@ -1102,8 +1104,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               desc_set_connected(d, CON_PLAYING);
               act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
             }
-            free(OLC_OBJ(d)); /* its strings now belong to obj */
-            free(d->olc);
+            delete OLC_OBJ(d); /* its strings now belong to obj */
+            delete d->olc;
             d->olc = nullptr;
           }
           return;
@@ -1185,7 +1187,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
        * If extra descriptions don't exist.
        */
           if (obj_get_ex_description(OLC_OBJ(d)) == nullptr) {
-            CREATE(*obj_ex_description_slot(OLC_OBJ(d)), struct extra_descr_data, 1);
+            *obj_ex_description_slot(OLC_OBJ(d)) = new extra_descr_data();
           }
           OLC_DESC(d) = obj_get_ex_description(OLC_OBJ(d));
           oedit_disp_extradesc_menu(g, d);
@@ -1637,7 +1639,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 	 * Clean up pointers  
 	 */
             REMOVE_FROM_LIST(OLC_DESC(d), *obj_ex_description_slot(OLC_OBJ(d)), next, temp);
-            free(OLC_DESC(d));
+            delete OLC_DESC(d);
             OLC_DESC(d) = nullptr;
           }
           break;
@@ -1669,7 +1671,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             if (OLC_DESC(d)->next)
               OLC_DESC(d) = OLC_DESC(d)->next;
             else { /* Make new extra description and attach at end. */
-              CREATE(new_extra, struct extra_descr_data, 1);
+              new_extra         = new extra_descr_data();
               OLC_DESC(d)->next = new_extra;
               OLC_DESC(d)       = OLC_DESC(d)->next;
             }
@@ -1702,7 +1704,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].spellname = 0;
           obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].pages     = 0;
         } else {
-          CREATE(*obj_sbinfo_slot(OLC_OBJ(d)), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+          *obj_sbinfo_slot(OLC_OBJ(d)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
         }
         oedit_disp_prompt_spellbook_menu(g, d);
       } else if (number < 0 || number >= SKILL_TABLE_SIZE) {
@@ -1721,7 +1723,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         }
 
         if (!obj_get_sbinfo(OLC_OBJ(d))) {
-          CREATE(*obj_sbinfo_slot(OLC_OBJ(d)), struct obj_spellbook_spell, SPELLBOOK_SIZE);
+          *obj_sbinfo_slot(OLC_OBJ(d)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
         }
 
         obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].spellname = number;
@@ -1794,7 +1796,7 @@ static void iedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct
   struct obj_data *obj;
 
   /* A private copy, as in oedit_setup_existing(): it isn't in the game, and shares no script. */
-  CREATE(obj, struct obj_data, 1);
+  obj = new obj_data();
   copy_object(g, obj, real_num);
   obj_set_script(obj, nullptr);
 
@@ -1832,7 +1834,7 @@ ACMD(do_iedit)
   }
 
   /* set up here */
-  CREATE(OLC(char_get_desc(ch)), struct oasis_olc_data, 1);
+  OLC(char_get_desc(ch)) = new oasis_olc_data();
   obj_extra_set(k, ITEM_UNIQUE_SAVE, true);
 
   char_plr_set(ch, PLR_WRITING, true);

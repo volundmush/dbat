@@ -8,6 +8,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <cstdlib>
+
 #include "dbat/modify.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
@@ -100,13 +102,13 @@ static void smash_numb(char *str)
  * else you may want through it.  The improved editor patch when updated
  * could use it to pass the old text buffer, for instance.
  */
-void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, void *data)
+void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, char *data)
 {
   if (d->character && !char_is_npc(d->character))
     char_plr_set(d->character, PLR_WRITING, true);
 
   if (using_improved_editor)
-    d->backstr = (char *)data;
+    d->backstr = data;
   else if (data)
     free(data);
 
@@ -141,12 +143,12 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
     if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
       send_to_char(g, d->character, "String too long - Truncated.\r\n");
       strcpy(str + (d->max_str - 3), "\r\n");
-      CREATE(*d->str, char, d->max_str);
+      *d->str = str_alloc(d->max_str);
       strcpy(*d->str, str); /* strcpy: OK (size checked) */
       if (!using_improved_editor)
         action = STRINGADD_SAVE;
     } else {
-      CREATE(*d->str, char, strlen(str) + 3);
+      *d->str = str_alloc(strlen(str) + 3);
       strcpy(*d->str, str); /* strcpy: OK (size checked) */
     }
   } else {
@@ -157,7 +159,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
       else if (action == STRINGADD_OK)
         action = STRINGADD_ACTION; /* No appending \r\n\0, but still let them save. */
     } else {
-      RECREATE(*d->str, char, strlen(*d->str) + strlen(str) + 3); /* \r\n\0 */
+      *d->str = str_realloc(*d->str, strlen(*d->str) + strlen(str) + 3); /* \r\n\0 */
       strcat(*d->str, str);                                       /* strcat: OK (size precalculated) */
     }
   }
@@ -255,7 +257,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
     }
     /* store_mail() keeps its own copy; the text and its holder came from postmaster_send_mail() */
     free(*d->str);
-    free(d->str);
+    delete d->str;
   }
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {

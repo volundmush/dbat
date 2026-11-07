@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "dbat/game_world.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/act.social.hpp"
@@ -15,7 +17,7 @@ GameWorld *game_world_create(void)
 {
   GameWorld *g;
 
-  CREATE(g, GameWorld, 1);
+  g                 = new GameWorld();
   g->top_shop       = -1;
   g->top_guild      = -1;
   g->top_of_socialt = -1;
@@ -36,7 +38,7 @@ GameWorld *game_world_create(void)
 
 void game_world_destroy(GameWorld *g)
 {
-  free(g);
+  delete g;
 }
 
 void game_world_free_contents(GameWorld *g)
@@ -52,7 +54,7 @@ void game_world_free_contents(GameWorld *g)
     free_mail_index(g);                     /* mail.c */
     free_text_files(g);                     /* db.c */
     clear_boards(g);                        /* boards.c */
-    free(g->cmd_sort_info);                   /* act.informative.c */
+    delete[] g->cmd_sort_info;              /* act.informative.c */
     free_command_list(g);                   /* act.informative.c */
     free_social_messages(g);                /* act.social.c */
     free_help_table(g);                     /* db.c */

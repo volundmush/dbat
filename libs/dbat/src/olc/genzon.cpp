@@ -4,6 +4,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include "dbat/arrays.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/fileop.hpp"
@@ -219,7 +220,7 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
    * through top_of_zone (top_of_zone_table + 1 items) and a new one which
    * makes it top_of_zone_table + 2 elements large.
    */
-  RECREATE(g->zones, struct zone_data, g->top_zone + 2);
+  resize_array(g->zones, g->top_zone + 1, g->top_zone + 2);
   g->zones[g->top_zone + 1].number = 32000;
 
   if (vzone_num > g->zones[g->top_zone].number)
@@ -257,7 +258,7 @@ zone_rnum create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, r
   /*
    * No zone commands, just terminate it with an 'S'
    */
-  CREATE(zone->cmd, struct reset_com, 1);
+  zone->cmd            = new reset_com[1]();
   zone->cmd[0].command = 'S';
 
   g->top_zone++;
@@ -597,7 +598,7 @@ void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos)
   /*
    * Value is +2 for the terminator and new field to add.
    */
-  CREATE(newlist, struct reset_com, count + 2);
+  newlist = new reset_com[count + 2]();
 
   /*
    * Even tighter loop to copy the old list and insert a new command.
@@ -610,7 +611,7 @@ void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos)
    * Add terminator, then insert new list.
    */
   newlist[count + 1].command = 'S';
-  free(*list);
+  delete[] *list;
   *list = newlist;
 }
 
@@ -634,7 +635,7 @@ static void remove_cmd_from_list(struct reset_com **list, int pos)
    * Value is 'count' because we didn't include the terminator above
    * but since we're deleting one thing anyway we want one less.
    */
-  CREATE(newlist, struct reset_com, count);
+  newlist = new reset_com[count]();
 
   /*
    * Even tighter loop to copy old list and skip unwanted command.
@@ -648,7 +649,7 @@ static void remove_cmd_from_list(struct reset_com **list, int pos)
    * Add the terminator, then insert the new list.
    */
   newlist[count - 1].command = 'S';
-  free(*list);
+  delete[] *list;
   *list = newlist;
 }
 

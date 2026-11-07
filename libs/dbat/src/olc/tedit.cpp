@@ -5,6 +5,8 @@
  * XXX: This needs Oasis-ifying.
  */
 
+#include <cstdlib>
+
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"
@@ -208,9 +210,9 @@ ACMD(do_tedit)
 
   if (char_get_desc(ch)->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
-    free(char_get_desc(ch)->olc);
+    delete char_get_desc(ch)->olc;
   }
-  CREATE(char_get_desc(ch)->olc, struct oasis_olc_data, 1);
+  char_get_desc(ch)->olc = new oasis_olc_data();
 
   if (*fields[l].buffer) {
     send_to_char(g, ch, "%s", *fields[l].buffer);
