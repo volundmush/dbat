@@ -100,7 +100,7 @@ ACMD(do_transobj)
         continue;
       else {
         act(g, "$N sends $p across the universe to you.", true, d->character, obj, ch, TO_CHAR);
-        obj2 = read_object(g, num, VIRTUAL);
+        obj2 = read_object(g, num);
         obj_to_char(g, obj2, d->character);
       }
     }
@@ -123,16 +123,16 @@ ACMD(do_recall)
   } else {
     send_to_char(g, ch, "You disappear in a burst of light!\r\n");
     act(g, "$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
-    if (real_room(g, 2) != NOWHERE) {
+    if (room_of(g, 2)) {
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 2));
+      char_to_room(g, ch, 2);
       look_at_room(g, char_get_in_room(ch), ch, 0);
-      char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
+      char_set_load_room(g, ch, char_get_in_room(ch));
     }
   }
 }
 
-/* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
+/* take a string, and return a room vnum, or NOWHERE.. used for goto, at, etc.  -je 4/6/93 */
 room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
 {
   room_vnum location = NOWHERE;
@@ -147,7 +147,7 @@ room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
   }
 
   if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
-    if ((location = real_room(g, atoi(roomstr))) == NOWHERE) {
+    if (!room_of(g, location = atoi(roomstr))) {
       send_to_char(g, ch, "No room exists with that number.\r\n");
       return (NOWHERE);
     }
@@ -199,7 +199,7 @@ room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
     return (NOWHERE);
   }
 
-  if (rroom_flagged(g, location, ROOM_GODROOM))
+  if (room_flagged(g, location, ROOM_GODROOM))
     send_to_char(g, ch, "You are not godly enough to use that room!\r\n");
   else
     return (location);
@@ -445,7 +445,7 @@ ACMD(do_switch)
     send_to_char(g, ch, "You can't do that, the body is already in use!\r\n");
   else if (!(char_is_npc(victim) || char_adm_flagged(ch, ADM_SWITCHMORTAL)))
     send_to_char(g, ch, "You aren't holy enough to use a mortal's body.\r\n");
-  else if (char_get_admlevel(ch) < ADMLVL_VICE && rroom_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
+  else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
     send_to_char(g, ch, "You are not godly enough to use that room!\r\n");
   else {
     send_to_char(g, ch, "%s", CONFIG_OK);
@@ -517,12 +517,12 @@ ACMD(do_load)
     struct char_data *mob = nullptr;
     mob_vnum r_num;
 
-    if ((r_num = real_mobile(g, atoi(buf2))) == NOBODY) {
+    if (!mob_proto_of(g, r_num = atoi(buf2))) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");
       return;
     }
     for (i = 0; i < n; i++) {
-      mob = read_mobile(g, r_num, REAL);
+      mob = read_mobile(g, r_num);
       char_to_room(g, mob, char_get_in_room(ch));
 
       act(g, "$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -534,12 +534,12 @@ ACMD(do_load)
     struct obj_data *obj;
     obj_vnum r_num;
 
-    if ((r_num = real_object(g, atoi(buf2))) == NOTHING) {
+    if (!obj_proto_of(g, r_num = atoi(buf2))) {
       send_to_char(g, ch, "There is no object with that number.\r\n");
       return;
     }
     for (i = 0; i < n; i++) {
-      obj = read_object(g, r_num, REAL);
+      obj = read_object(g, r_num);
       add_unique_id(g, obj);
       if (char_get_admlevel(ch) > 0) {
         send_to_imm(g, "LOAD: %s has loaded a %s", char_get_name(ch), obj_get_short_description(obj));
@@ -589,7 +589,7 @@ ACMD(do_purge)
         }
       }
       extract_char(g, vict);
-    } else if ((obj = get_obj_in_list_vis(g, ch, buf, nullptr, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr) {
+    } else if ((obj = get_obj_in_list_vis(g, ch, buf, nullptr, room_get_contents(g, char_get_in_room(ch)))) != nullptr) {
       act(g, "$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
       extract_obj(g, obj);
     } else {
@@ -625,8 +625,8 @@ ACMD(do_purge)
     }
 
     /* Clear the ground. */
-    while (rroom_get_contents(g, char_get_in_room(ch)))
-      extract_obj(g, rroom_get_contents(g, char_get_in_room(ch)));
+    while (room_get_contents(g, char_get_in_room(ch)))
+      extract_obj(g, room_get_contents(g, char_get_in_room(ch)));
   }
 }
 
@@ -655,7 +655,7 @@ ACMD(do_force)
   } else if (!strcasecmp("room", arg)) {
     send_to_char(g, ch, "%s", CONFIG_OK);
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced room %d to %s",
-           char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), to_force);
+           char_get_name(ch), char_get_in_room(ch), to_force);
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
@@ -699,7 +699,7 @@ ACMD(do_zreset)
     log_imm_action(g, "RESET: %s has reset all MUD zones.", char_get_name(ch));
     return;
   } else if (*arg == '.' || !*arg)
-    i = rroom_get_zone(g, char_get_in_room(ch));
+    i = room_get_zone(g, char_get_in_room(ch));
   else {
     j = atoi(arg);
     i = find_zone(g, j);
@@ -777,7 +777,7 @@ ACMD(do_zpurge)
   one_argument(argument, arg);
 
   if (!*arg) {
-    zone = rroom_get_zone(g, char_get_in_room(ch))->number;
+    zone = room_get_zone(g, char_get_in_room(ch))->number;
   } else {
     zone = atoi(arg);
   }
@@ -791,7 +791,7 @@ ACMD(do_zpurge)
   }
 
   for (room = genolc_zone_bottom(g, stored); room <= stored->top; room++) {
-    if ((i = real_room(g, room)) != NOWHERE) {
+    if (room_of(g, i = room)) {
       for (char_data *mob : room_people(g, i)) {
         if (char_is_npc(mob)) {
           extract_char(g, mob);

@@ -74,12 +74,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   ch = th_player(g, "Fuzzy", ADMLVL_NONE);
   if ((number = find_trigger(g, 399)) != nullptr) {
     if (attach_type == 0) {
-      struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+      struct char_data *mob = read_mobile(g, 300);
 
       char_to_room(g, mob, char_get_in_room(ch));
       add_trigger(g, dg_ensure_script(char_script_slot(mob)), read_trigger(g, number), -1);
     } else if (attach_type == 1) {
-      struct obj_data *obj = read_object(g, 350, VIRTUAL);
+      struct obj_data *obj = read_object(g, 350);
 
       obj_to_char(g, obj, ch);
       add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, number), -1);

@@ -178,7 +178,7 @@ ACMD(do_table)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
     send_to_char(g, ch, "You don't see that table here.\r\n");
     return;
   }
@@ -264,10 +264,10 @@ ACMD(do_shuffle)
   int total = count;
   for (obj_data *obj2 : obj_contents(g, obj)) {
     obj_from_obj(g, obj2);
-    obj_to_room(g, obj2, real_room(g, 48));
+    obj_to_room(g, obj2, 48);
   }
   while (count > 0) {
-    for (obj_data *obj2 : room_contents(g, real_room(g, 48))) {
+    for (obj_data *obj2 : room_contents(g, 48)) {
       if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
         continue;
       }
@@ -373,13 +373,13 @@ ACMD(do_post)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You can not post on things in a garden.\r\n");
     return;
   }
 
   if (!*arg2) {
-    if (rroom_sect(g, char_get_in_room(ch)) != SECT_INSIDE && rroom_sect(g, char_get_in_room(ch)) != SECT_CITY) {
+    if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE && room_sect(g, char_get_in_room(ch)) != SECT_CITY) {
       send_to_char(g, ch, "You are not near any general structure you can post it on.\r\n");
       return;
     }
@@ -390,7 +390,7 @@ ACMD(do_post)
     obj_set_posttype(obj, 1);
     return;
   }
-  if (!(obj2 = get_obj_in_list_vis(g, ch, arg2, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+  if (!(obj2 = get_obj_in_list_vis(g, ch, arg2, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
     send_to_char(g, ch, "You can't seem to find the thing you want to post it on.\r\n");
     return;
   }
@@ -508,9 +508,9 @@ ACMD(do_nickname)
       for (obj_data *k : each_obj(g)) {
         if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
           extract_obj(g, k);
-          room_vnum was_in = rroom_get_vnum(g, obj_get_in_room(ship2));
+          room_vnum was_in = obj_get_in_room(ship2);
           obj_from_room(g, ship2);
-          obj_to_room(g, ship2, real_room(g, was_in));
+          obj_to_room(g, ship2, was_in);
         }
       }
     } else

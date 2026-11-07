@@ -89,7 +89,7 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, char *arg, char_data **v
       *vict = char_get_fighting(g, ch);
       return true;
     }
-    if (!(*obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    if (!(*obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
       send_to_char(g, ch, "Nothing around here by that name.\r\n");
       return false;
     }

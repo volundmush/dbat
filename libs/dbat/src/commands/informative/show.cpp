@@ -155,7 +155,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
      */
       if (*obj_get_description(obj) == '.' && (char_is_npc(ch) || !char_prf_flagged(g, ch, PRF_HOLYLIGHT)))
         return;
-      if (obj_get_type_flag(obj) == ITEM_VEHICLE && rroom_get_vnum(g, char_get_in_room(ch)) == obj_get_value(obj, 0)) {
+      if (obj_get_type_flag(obj) == ITEM_VEHICLE && char_get_in_room(ch) == obj_get_value(obj, 0)) {
         return;
       }
       if (obj_get_sitting(g, obj) && char_get_admlevel(ch) < 1) {
@@ -164,7 +164,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
       if (obj_get_sitting(g, obj) && char_get_admlevel(ch) >= 1) {
         send_to_char(g, ch, "@D(@YBeing Used@D)@w");
       }
-      if (obj_get_type_flag(obj) == ITEM_PLANT && (rroom_flagged(g, obj_get_in_room(obj), ROOM_GARDEN1) || rroom_flagged(g, obj_get_in_room(obj), ROOM_GARDEN2))) {
+      if (obj_get_type_flag(obj) == ITEM_PLANT && (room_flagged(g, obj_get_in_room(obj), ROOM_GARDEN1) || room_flagged(g, obj_get_in_room(obj), ROOM_GARDEN2))) {
         see_plant(g, obj, ch);
         return;
       }
@@ -183,11 +183,11 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         } else {
           snprintf(bury, sizeof(bury), "recent grave covered by");
         }
-        if (spotted == true && rroom_sect(g, obj_get_in_room(obj)) != SECT_DESERT) {
+        if (spotted == true && room_sect(g, obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(g, ch, "@yA %s soft dirt is here.@n\r\n", bury);
           return;
         }
-        if (spotted == true && rroom_sect(g, obj_get_in_room(obj)) == SECT_DESERT) {
+        if (spotted == true && room_sect(g, obj_get_in_room(obj)) == SECT_DESERT) {
           send_to_char(g, ch, "@YA %s soft sand is here.@n\r\n", bury);
           return;
         }

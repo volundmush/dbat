@@ -269,10 +269,10 @@ static bool write_copyover_file(GameWorld *g)
 
     if (!player)
       continue;
-    if (rroom_get_vnum(g, char_get_in_room(player)) > 1)
-      room = rroom_get_vnum(g, char_get_in_room(player));
-    else if (rroom_get_vnum(g, char_get_was_in_room(player)) > 1)
-      room = rroom_get_vnum(g, char_get_was_in_room(player));
+    if (char_get_in_room(player) > 1)
+      room = char_get_in_room(player);
+    else if (char_get_was_in_room(player) > 1)
+      room = char_get_was_in_room(player);
     fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
             d->user && *d->user ? d->user : "Empty");
   }

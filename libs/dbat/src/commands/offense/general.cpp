@@ -178,7 +178,7 @@ ACMD(do_charge)
       char_set_charge(ch, char_get_charge(ch) + (1));
       char_plr_set(ch, PLR_CHARGE, true);
     }
-  } else if (amt < 1 && rroom_get_vnum(g, char_get_in_room(ch)) != 1562) {
+  } else if (amt < 1 && char_get_in_room(ch) != 1562) {
     send_to_char(g, ch, "You have set it too low!\r\n");
     return;
   } else {
@@ -438,9 +438,9 @@ ACMD(do_flee)
       attempt = rand_number(g, 0, NUM_OF_DIRS - 1); /* Select a random direction */
     }
     if (char_can_go(g, ch, attempt) &&
-        !rroom_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_DEATH)) {
+        !room_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_DEATH)) {
       act(g, "$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
-      if (char_is_npc(ch) && rroom_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_NOMOB)) {
+      if (char_is_npc(ch) && room_flagged(g, char_get_exit(g, ch, attempt)->to_room, ROOM_NOMOB)) {
         return;
       }
 

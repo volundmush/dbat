@@ -87,11 +87,11 @@ ACMD(do_finddoor)
     send_to_char(g, ch, "Format: finddoor <obj/vnum>\r\n");
   } else if (is_number(arg)) {
     vnum = atoi(arg);
-    if (real_object(g, vnum) == NOTHING) {
+    if (!obj_proto_of(g, vnum)) {
       send_to_char(g, ch, "There is no object with that vnum.\r\n");
       return;
     }
-    obj = obj_proto_of(g, real_object(g, vnum));
+    obj = obj_proto_of(g, vnum);
   } else {
     generic_find(g, arg,
                  FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP,
@@ -106,12 +106,12 @@ ACMD(do_finddoor)
                    vnum, obj_get_short_description(obj));
     for (room_vnum i : g->rooms.vnums()) {
       for (d = 0; d < NUM_OF_DIRS; d++) {
-        if (rroom_get_dir_option(g, i, d) && rroom_get_dir_option(g, i, d)->key &&
-            rroom_get_dir_option(g, i, d)->key == vnum) {
+        if (room_get_dir_option(g, i, d) && room_get_dir_option(g, i, d)->key &&
+            room_get_dir_option(g, i, d)->key == vnum) {
           nlen = snprintf(buf + len, sizeof(buf) - len,
                           "[%3d] Room %d, %s (%s)\r\n",
-                          ++num, rroom_get_vnum(g, i),
-                          dirs[d], rroom_get_dir_option(g, i, d)->keyword);
+                          ++num, i,
+                          dirs[d], room_get_dir_option(g, i, d)->keyword);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -162,10 +162,10 @@ ACMD(do_vnum)
 static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnum rvnum)
 {
   struct zone_data *zrnum = find_zone_by_thing(g, rvnum);
-  room_vnum rrnum = real_room(g, rvnum), cmd_room = NOWHERE;
+  room_vnum rrnum = rvnum, cmd_room = NOWHERE;
   int subcmd = 0, count = 0;
 
-  if (zrnum == nullptr || rrnum == NOWHERE) {
+  if (zrnum == nullptr || !room_of(g, rrnum)) {
     send_to_char(g, ch, "No zone information available.\r\n");
     return;
   }
@@ -338,7 +338,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     if (room_get_dir_option(rm, i)->to_room == NOWHERE)
       snprintf(buf1, sizeof(buf1), " @cNONE@n");
     else
-      snprintf(buf1, sizeof(buf1), "@c%5d@n", rroom_get_vnum(g, room_get_dir_option(rm, i)->to_room));
+      snprintf(buf1, sizeof(buf1), "@c%5d@n", room_get_dir_option(rm, i)->to_room);
 
     sprintbit(room_get_dir_option(rm, i)->exit_info, exit_bits, buf2, sizeof(buf2));
 
@@ -421,8 +421,8 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   send_to_char(g, ch, "Weight: %" PRId64 ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
                obj_get_weight(j), obj_get_cost(j), obj_get_cost_per_day(j), obj_get_timer(j), obj_get_level(j));
 
-  send_to_char(g, ch, "In room: %d (%s), ", rroom_get_vnum(g, obj_get_in_room(j)),
-               obj_get_in_room(j) == NOWHERE ? "Nowhere" : rroom_get_name(g, obj_get_in_room(j)));
+  send_to_char(g, ch, "In room: %d (%s), ", obj_get_in_room(j),
+               obj_get_in_room(j) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(j)));
 
   /*
    * NOTE: In order to make it this far, we must already be able to see the
@@ -573,7 +573,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   sprinttype(char_get_sex(k), genders, buf, sizeof(buf));
   send_to_char(g, ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
                buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB")),
-               char_get_name(k), char_is_npc(k) ? char_get_id(k) : char_get_idnum(k), rroom_get_vnum(g, char_get_in_room(k)), char_is_npc(k) ? char_get_hometown(k) : char_get_load_room(g, k));
+               char_get_name(k), char_is_npc(k) ? char_get_id(k) : char_get_idnum(k), char_get_in_room(k), char_is_npc(k) ? char_get_hometown(k) : char_get_load_room(g, k));
 
   send_to_char(g, ch, "DROOM: [%5d]\r\n", char_get_droom(k));
   if (char_is_mob(g, k)) {
@@ -909,7 +909,7 @@ ACMD(do_stat)
       do_stat_object(g, ch, object);
     else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
       do_stat_character(g, ch, victim);
-    else if ((object = get_obj_in_list_vis(g, ch, name, &number, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr)
+    else if ((object = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
       do_stat_object(g, ch, object);
     else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(g, ch, victim);
@@ -939,11 +939,11 @@ ACMD(do_vstat)
     struct char_data *mob;
     mob_vnum r_num;
 
-    if ((r_num = real_mobile(g, atoi(buf2))) == NOBODY) {
+    if (!mob_proto_of(g, r_num = atoi(buf2))) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");
       return;
     }
-    mob = read_mobile(g, r_num, REAL);
+    mob = read_mobile(g, r_num);
     char_to_room(g, mob, 0);
     do_stat_character(g, ch, mob);
     extract_char(g, mob);
@@ -951,11 +951,11 @@ ACMD(do_vstat)
     struct obj_data *obj;
     obj_vnum r_num;
 
-    if ((r_num = real_object(g, atoi(buf2))) == NOTHING) {
+    if (!obj_proto_of(g, r_num = atoi(buf2))) {
       send_to_char(g, ch, "There is no object with that number.\r\n");
       return;
     }
-    obj = read_object(g, r_num, REAL);
+    obj = read_object(g, r_num);
     do_stat_object(g, ch, obj);
     extract_obj(g, obj);
   } else
@@ -1136,7 +1136,7 @@ ACMD(do_show)
     case 1:
       /* tightened up by JE 4/6/93 */
       if (self)
-        print_zone_to_buf(g, buf, sizeof(buf), rroom_get_zone(g, char_get_in_room(ch)), 1);
+        print_zone_to_buf(g, buf, sizeof(buf), room_get_zone(g, char_get_in_room(ch)), 1);
       else if (*value && is_number(value)) {
         if ((zrn = find_zone(g, atoi(value))))
           print_zone_to_buf(g, buf, sizeof(buf), zrn, 1);
@@ -1249,16 +1249,16 @@ ACMD(do_show)
       k   = 0;
       for (room_vnum r : g->rooms.vnums())
         for (j = 0; j < NUM_OF_DIRS; j++) {
-          if (!rroom_get_dir_option(g, r, j))
+          if (!room_get_dir_option(g, r, j))
             continue;
-          if (rroom_get_dir_option(g, r, j)->to_room == 0) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, rroom_get_vnum(g, r), count_color_chars(rroom_get_name(g, r)) + 40, rroom_get_name(g, r), QNRM, dirs[j]);
+          if (room_get_dir_option(g, r, j)->to_room == 0) {
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
             if (len + nlen >= sizeof(buf) || nlen < 0)
               break;
             len += nlen;
           }
-          if (rroom_get_dir_option(g, r, j)->to_room == NOWHERE && !rroom_get_dir_option(g, r, j)->general_description) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, rroom_get_vnum(g, r), count_color_chars(rroom_get_name(g, r)) + 40, rroom_get_name(g, r), QNRM, dirs[j]);
+          if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !room_get_dir_option(g, r, j)->general_description) {
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
             if (len + nlen >= sizeof(buf) || nlen < 0)
               break;
             len += nlen;
@@ -1272,8 +1272,8 @@ ACMD(do_show)
       len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
-        if (rroom_flagged(g, r, ROOM_DEATH)) {
-          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, rroom_get_vnum(g, r), rroom_get_name(g, r));
+        if (room_flagged(g, r, ROOM_DEATH)) {
+          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -1286,8 +1286,8 @@ ACMD(do_show)
       len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
-        if (rroom_flagged(g, r, ROOM_GODROOM)) {
-          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, rroom_get_vnum(g, r), rroom_get_name(g, r));
+        if (room_flagged(g, r, ROOM_GODROOM)) {
+          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -1640,7 +1640,7 @@ ACMD(do_zcheck)
   one_argument(argument, buf);
 
   if (!*buf || !strcmp(buf, "."))
-    zrnum = rroom_get_zone(g, char_get_in_room(ch));
+    zrnum = room_get_zone(g, char_get_in_room(ch));
   else
     zrnum = find_zone(g, atoi(buf));
 
@@ -1874,52 +1874,52 @@ ACMD(do_zcheck)
   /************** Check rooms *****************/
   send_to_char(g, ch, "\r\nChecking Rooms for limits...\r\n");
   for (room_vnum i : g->rooms.vnums()) {
-    if (rroom_get_zone(g, i) == zrnum) {
+    if (room_get_zone(g, i) == zrnum) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
         /*check for exit, but ignore off limits if you're in an offlimit zone*/
-        if (!rroom_get_dir_option(g, i, j))
+        if (!room_get_dir_option(g, i, j))
           continue;
-        exroom = rroom_get_dir_option(g, i, j)->to_room;
+        exroom = room_get_dir_option(g, i, j)->to_room;
         if (exroom == NOWHERE)
           continue;
-        if (rroom_get_zone(g, exroom) == zrnum)
+        if (room_get_zone(g, exroom) == zrnum)
           continue;
-        if (rroom_get_zone(g, exroom) == rroom_get_zone(g, i))
+        if (room_get_zone(g, exroom) == room_get_zone(g, i))
           continue;
 
         for (k = 0; offlimit_zones[k] != -1; k++) {
-          if (rroom_get_zone(g, exroom) == find_zone(g, offlimit_zones[k]) && (found = 1))
+          if (room_get_zone(g, exroom) == find_zone(g, offlimit_zones[k]) && (found = 1))
             len += snprintf(buf + len, sizeof(buf) - len,
                             "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                            dirs[j], rroom_get_vnum(g, exroom));
+                            dirs[j], exroom);
         } /* for (k.. */
       } /* cycle directions */
 
-      if (rroom_flagged(g, i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
+      if (room_flagged(g, i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Has illegal affection bits set (%s %s %s %s %s)\r\n",
-                        rroom_flagged(g, i, ROOM_ATRIUM) ? "ATRIUM" : "",
-                        rroom_flagged(g, i, ROOM_HOUSE) ? "HOUSE" : "",
-                        rroom_flagged(g, i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
-                        rroom_flagged(g, i, ROOM_OLC) ? "OLC" : "",
-                        rroom_flagged(g, i, ROOM_BFS_MARK) ? "*" : "");
+                        room_flagged(g, i, ROOM_ATRIUM) ? "ATRIUM" : "",
+                        room_flagged(g, i, ROOM_HOUSE) ? "HOUSE" : "",
+                        room_flagged(g, i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
+                        room_flagged(g, i, ROOM_OLC) ? "OLC" : "",
+                        room_flagged(g, i, ROOM_BFS_MARK) ? "*" : "");
 
-      if ((MIN_ROOM_DESC_LENGTH) && strlen(rroom_get_description(g, i)) < MIN_ROOM_DESC_LENGTH && (found = 1))
+      if ((MIN_ROOM_DESC_LENGTH) && strlen(room_get_description(g, i)) < MIN_ROOM_DESC_LENGTH && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description is too short. (%4.4zu of min. %d characters).\r\n",
-                        strlen(rroom_get_description(g, i)), MIN_ROOM_DESC_LENGTH);
+                        strlen(room_get_description(g, i)), MIN_ROOM_DESC_LENGTH);
 
-      if (strncmp(rroom_get_description(g, i), "   ", 3) && (found = 1))
+      if (strncmp(room_get_description(g, i), "   ", 3) && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description not formatted with indent (/fi in the editor).\r\n");
 
       /* strcspan = size of text in first arg before any character in second arg */
-      if ((strcspn(rroom_get_description(g, i), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+      if ((strcspn(room_get_description(g, i), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                         MAX_COLOUMN_WIDTH);
 
-      for (ext2 = nullptr, ext = rroom_get_ex_description(g, i); ext; ext = ext->next)
+      for (ext2 = nullptr, ext = room_get_ex_description(g, i); ext; ext = ext->next)
         if (strncmp(ext->description, "   ", 3))
           ext2 = ext;
 
@@ -1929,7 +1929,7 @@ ACMD(do_zcheck)
 
       if (found) {
         send_to_char(g, ch, "[%5d] %-30s: \r\n%s",
-                     rroom_get_vnum(g, i), rroom_get_name(g, i) ? rroom_get_name(g, i) : "An unnamed room", buf);
+                     i, room_get_name(g, i) ? room_get_name(g, i) : "An unnamed room", buf);
         strcpy(buf, "");
         len   = 0;
         found = 0;
@@ -1938,10 +1938,10 @@ ACMD(do_zcheck)
   } /*checking rooms*/
 
   for (room_vnum i : g->rooms.vnums()) {
-    if (rroom_get_zone(g, i) == zrnum) {
+    if (room_get_zone(g, i) == zrnum) {
       m++;
       for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
-        if (!rroom_get_dir_option(g, i, j))
+        if (!room_get_dir_option(g, i, j))
           k++;
 
       if (k == NUM_OF_DIRS)
@@ -1956,9 +1956,9 @@ ACMD(do_zcheck)
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
-  mob_vnum mrnum = real_mobile(g, mvnum);
+  mob_vnum mrnum = mvnum;
 
-  if (mrnum == NOBODY) {
+  if (!mob_proto_of(g, mrnum)) {
     send_to_char(g, ch, "That mob does not exist.\r\n");
     return;
   }
@@ -1974,8 +1974,8 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
       /* read a mobile */
       if (ZCMD2.arg1 == mrnum) {
         send_to_char(g, ch, "  [%5d] %s (%d MAX)\r\n",
-                     rroom_get_vnum(g, ZCMD2.arg3),
-                     rroom_get_name(g, ZCMD2.arg3),
+                     ZCMD2.arg3,
+                     room_get_name(g, ZCMD2.arg3),
                      ZCMD2.arg2);
         count += 1;
       }
@@ -1988,12 +1988,12 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
-  obj_vnum ornum       = real_object(g, ovnum);
+  obj_vnum ornum       = ovnum;
   room_vnum lastroom_v = 0;
   room_vnum lastroom_r = 0;
   mob_vnum lastmob_r   = 0;
 
-  if (ornum == NOTHING) {
+  if (!obj_proto_of(g, ornum)) {
     send_to_char(g, ch, "That object does not exist.\r\n");
     return;
   }
@@ -2005,17 +2005,17 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       switch (ZCMD2.command) {
         case 'M':
-          lastroom_v = rroom_get_vnum(g, ZCMD2.arg3);
+          lastroom_v = ZCMD2.arg3;
           lastroom_r = ZCMD2.arg3;
           lastmob_r  = ZCMD2.arg1;
           break;
         case 'O': /* read an object */
-          lastroom_v = rroom_get_vnum(g, ZCMD2.arg3);
+          lastroom_v = ZCMD2.arg3;
           lastroom_r = ZCMD2.arg3;
           if (ZCMD2.arg1 == ornum) {
             send_to_char(g, ch, "  [%5d] %s (%d Max)\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r),
+                         room_get_name(g, lastroom_r),
                          ZCMD2.arg2);
             count += 1;
           }
@@ -2024,7 +2024,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
           if (ZCMD2.arg1 == ornum) {
             send_to_char(g, ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r),
+                         room_get_name(g, lastroom_r),
                          ZCMD2.arg2);
             count += 1;
           }
@@ -2033,7 +2033,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
           if (ZCMD2.arg1 == ornum) {
             send_to_char(g, ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r),
+                         room_get_name(g, lastroom_r),
                          char_get_sdesc(mob_proto_of(g, lastmob_r)),
                          mob_index_of(g, lastmob_r)->vnum,
                          ZCMD2.arg2);
@@ -2044,7 +2044,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
           if (ZCMD2.arg1 == ornum) {
             send_to_char(g, ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r),
+                         room_get_name(g, lastroom_r),
                          char_get_sdesc(mob_proto_of(g, lastmob_r)),
                          mob_index_of(g, lastmob_r)->vnum,
                          ZCMD2.arg2);
@@ -2052,12 +2052,12 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
           }
           break;
         case 'R': /* rem obj from room */
-          lastroom_v = rroom_get_vnum(g, ZCMD2.arg1);
+          lastroom_v = ZCMD2.arg1;
           lastroom_r = ZCMD2.arg1;
           if (ZCMD2.arg2 == ornum) {
             send_to_char(g, ch, "  [%5d] %s (Removed from room)\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r));
+                         room_get_name(g, lastroom_r));
             count += 1;
           }
           break;
@@ -2092,12 +2092,12 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
       switch (ZCMD2.command) {
         case 'M':
-          lastroom_v = rroom_get_vnum(g, ZCMD2.arg3);
+          lastroom_v = ZCMD2.arg3;
           lastroom_r = ZCMD2.arg3;
           lastmob_r  = ZCMD2.arg1;
           break;
         case 'O': /* read an object */
-          lastroom_v = rroom_get_vnum(g, ZCMD2.arg3);
+          lastroom_v = ZCMD2.arg3;
           lastroom_r = ZCMD2.arg3;
           lastobj_r  = ZCMD2.arg1;
           break;
@@ -2134,7 +2134,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
             send_to_char(g, ch, "room [%5d] %-60s (zedit)\r\n",
                          lastroom_v,
-                         rroom_get_name(g, lastroom_r));
+                         room_get_name(g, lastroom_r));
             found = 1;
           }
           break;
@@ -2169,14 +2169,14 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   }
 
   for (room_vnum k : g->rooms.vnums()) {
-    if (!rroom_get_proto_script(g, k))
+    if (!room_get_proto_script(g, k))
       continue;
 
-    for (tpl = rroom_get_proto_script(g, k); tpl; tpl = tpl->next)
+    for (tpl = room_get_proto_script(g, k); tpl; tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(g, ch, "room[%5d] %s\r\n",
-                     rroom_get_vnum(g, k),
-                     rroom_get_name(g, k));
+                     k,
+                     room_get_name(g, k));
         found = 1;
       }
   }

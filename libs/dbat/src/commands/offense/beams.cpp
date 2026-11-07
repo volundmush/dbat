@@ -153,8 +153,8 @@ ACMD(do_galikgun)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -374,8 +374,8 @@ ACMD(do_final)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 90) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (10));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 90) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (10));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -585,8 +585,8 @@ ACMD(do_tribeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 90) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (10));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 90) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (10));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -818,8 +818,8 @@ ACMD(do_dualbeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-            if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-              rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+            if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+              room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
             }
             improve_skill(g, vict, SKILL_DODGE, 0);
             if (hits == 1) {
@@ -1074,8 +1074,8 @@ ACMD(do_dodonpa)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
@@ -1327,8 +1327,8 @@ ACMD(do_masenko)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
@@ -1617,8 +1617,8 @@ ACMD(do_kamehameha)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
             pcost(g, ch, attperc - 0.05, 0);
@@ -1889,8 +1889,8 @@ ACMD(do_beam)
           /*      User/target/skill name/skill/hurt type */
           pcost(g, ch, attperc, 0);
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
 
           return;
@@ -1917,8 +1917,8 @@ ACMD(do_beam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           pcost(g, ch, attperc, 0);

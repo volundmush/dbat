@@ -688,7 +688,7 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
       return;
   }
 
-  if (!(tobj = read_object(g, z, VIRTUAL))) {
+  if (!(tobj = read_object(g, z))) {
     send_to_char(g, ch, "I seem to have goofed.\r\n");
     mud_log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
             spellnum, z);

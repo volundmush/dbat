@@ -427,7 +427,6 @@ ACMD(do_reboot)
   send_to_char(g, ch, "%s", CONFIG_OK);
 }
 
-/* The vnum lookups (real_room() and friends) are binary searches, so each table must be in ascending vnum order. */
 void boot_world(GameWorld *g)
 {
   mud_log("Loading level tables.");
@@ -520,27 +519,27 @@ void destroy_db(GameWorld *g)
 
   /* Rooms */
   for (room_vnum cnt : g->rooms.vnums()) {
-    if (rroom_get_name(g, cnt))
-      free(rroom_get_name(g, cnt));
-    if (rroom_get_description(g, cnt))
-      free(rroom_get_description(g, cnt));
-    free_extra_descriptions(rroom_get_ex_description(g, cnt));
+    if (room_get_name(g, cnt))
+      free(room_get_name(g, cnt));
+    if (room_get_description(g, cnt))
+      free(room_get_description(g, cnt));
+    free_extra_descriptions(room_get_ex_description(g, cnt));
 
     /* free any assigned scripts */
-    if (rroom_get_script(g, cnt))
+    if (room_get_script(g, cnt))
       extract_script(g, room_of(g, cnt), WLD_TRIGGER);
     /* free script proto list */
     free_proto_script(room_of(g, cnt), WLD_TRIGGER);
 
     for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-      if (!rroom_get_dir_option(g, cnt, itr))
+      if (!room_get_dir_option(g, cnt, itr))
         continue;
 
-      if (rroom_get_dir_option(g, cnt, itr)->general_description)
-        free(rroom_get_dir_option(g, cnt, itr)->general_description);
-      if (rroom_get_dir_option(g, cnt, itr)->keyword)
-        free(rroom_get_dir_option(g, cnt, itr)->keyword);
-      delete rroom_get_dir_option(g, cnt, itr);
+      if (room_get_dir_option(g, cnt, itr)->general_description)
+        free(room_get_dir_option(g, cnt, itr)->general_description);
+      if (room_get_dir_option(g, cnt, itr)->keyword)
+        free(room_get_dir_option(g, cnt, itr)->keyword);
+      delete room_get_dir_option(g, cnt, itr);
     }
   }
   g->rooms.clear();
@@ -812,7 +811,7 @@ void auc_save(GameWorld *g)
     mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
   else {
 
-    for (obj_data *obj : room_contents(g, real_room(g, 80))) {
+    for (obj_data *obj : room_contents(g, 80)) {
       if (obj) {
         fprintf(fl, "%" PRId64 " %s %d %d %d %d %ld\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
       }
@@ -1343,10 +1342,10 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   }
   g->parse_room_index = virtual_nr;
   g->rooms.emplace(virtual_nr);
-  rroom_set_zone(g, g->parse_room_index, g->parse_room_zone);
-  rroom_set_number(g, g->parse_room_index, virtual_nr);
-  rroom_set_name(g, g->parse_room_index, fread_string(fl, buf2));
-  rroom_set_description(g, g->parse_room_index, fread_string(fl, buf2));
+  room_set_zone(g, g->parse_room_index, g->parse_room_zone);
+  room_set_number(g, g->parse_room_index, virtual_nr);
+  room_set_name(g, g->parse_room_index, fread_string(fl, buf2));
+  room_set_description(g, g->parse_room_index, fread_string(fl, buf2));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1366,10 +1365,10 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
    */
 
     mud_log("Converting room #%d to 128bits..", virtual_nr);
-    rroom_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
-    rroom_get_room_flags(g, g->parse_room_index)[1] = 0;
-    rroom_get_room_flags(g, g->parse_room_index)[2] = 0;
-    rroom_get_room_flags(g, g->parse_room_index)[3] = 0;
+    room_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
+    room_get_room_flags(g, g->parse_room_index)[1] = 0;
+    room_get_room_flags(g, g->parse_room_index)[2] = 0;
+    room_get_room_flags(g, g->parse_room_index)[3] = 0;
 
     sprintf(flags, "room #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
@@ -1380,12 +1379,12 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 
     mud_log("   done.");
   } else if (retval == 6) {
-    rroom_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
-    rroom_get_room_flags(g, g->parse_room_index)[1] = asciiflag_conv(flags2);
-    rroom_get_room_flags(g, g->parse_room_index)[2] = asciiflag_conv(flags3);
-    rroom_get_room_flags(g, g->parse_room_index)[3] = asciiflag_conv(flags4);
+    room_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
+    room_get_room_flags(g, g->parse_room_index)[1] = asciiflag_conv(flags2);
+    room_get_room_flags(g, g->parse_room_index)[2] = asciiflag_conv(flags3);
+    room_get_room_flags(g, g->parse_room_index)[3] = asciiflag_conv(flags4);
 
-    rroom_set_sector_type(g, g->parse_room_index, t[2]);
+    room_set_sector_type(g, g->parse_room_index, t[2]);
     sprintf(flags, "object #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
   } else {
@@ -1393,45 +1392,45 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
     exit(1);
   }
 
-  rroom_set_func(g, g->parse_room_index, nullptr);
-  rroom_set_contents(g, g->parse_room_index, nullptr);
-  rroom_set_people(g, g->parse_room_index, nullptr);
-  rroom_set_light(g, g->parse_room_index, 0); /* Zero light sources */
-  rroom_set_timed(g, g->parse_room_index, -1);
-  rroom_set_dmg(g, g->parse_room_index, 0);
-  rroom_set_gravity(g, g->parse_room_index, 0);
+  room_set_func(g, g->parse_room_index, nullptr);
+  room_set_contents(g, g->parse_room_index, nullptr);
+  room_set_people(g, g->parse_room_index, nullptr);
+  room_set_light(g, g->parse_room_index, 0); /* Zero light sources */
+  room_set_timed(g, g->parse_room_index, -1);
+  room_set_dmg(g, g->parse_room_index, 0);
+  room_set_gravity(g, g->parse_room_index, 0);
 
-  if (rroom_flagged(g, g->parse_room_index, ROOM_VEGETA) || rroom_flagged(g, g->parse_room_index, ROOM_GRAVITYX10)) {
-    rroom_set_gravity(g, g->parse_room_index, 10);
+  if (room_flagged(g, g->parse_room_index, ROOM_VEGETA) || room_flagged(g, g->parse_room_index, ROOM_GRAVITYX10)) {
+    room_set_gravity(g, g->parse_room_index, 10);
   }
   if (virtual_nr >= 19800 && virtual_nr <= 19899) {
-    rroom_set_gravity(g, g->parse_room_index, 1000);
+    room_set_gravity(g, g->parse_room_index, 1000);
   }
   if (virtual_nr >= 64000 && virtual_nr <= 64006) {
-    rroom_set_gravity(g, g->parse_room_index, 100);
+    room_set_gravity(g, g->parse_room_index, 100);
   }
   if (virtual_nr >= 64007 && virtual_nr <= 64016) {
-    rroom_set_gravity(g, g->parse_room_index, 300);
+    room_set_gravity(g, g->parse_room_index, 300);
   }
   if (virtual_nr >= 64017 && virtual_nr <= 64030) {
-    rroom_set_gravity(g, g->parse_room_index, 500);
+    room_set_gravity(g, g->parse_room_index, 500);
   }
   if (virtual_nr >= 64031 && virtual_nr <= 64048) {
-    rroom_set_gravity(g, g->parse_room_index, 1000);
+    room_set_gravity(g, g->parse_room_index, 1000);
   }
   if (virtual_nr >= 64049 && virtual_nr <= 64070) {
-    rroom_set_gravity(g, g->parse_room_index, 5000);
+    room_set_gravity(g, g->parse_room_index, 5000);
   }
   if (virtual_nr >= 64071 && virtual_nr <= 64096) {
-    rroom_set_gravity(g, g->parse_room_index, 10000);
+    room_set_gravity(g, g->parse_room_index, 10000);
   }
   if (virtual_nr == 64097) {
-    rroom_set_gravity(g, g->parse_room_index, 1000);
+    room_set_gravity(g, g->parse_room_index, 1000);
   }
   for (i = 0; i < NUM_OF_DIRS; i++)
-    rroom_set_dir_option(g, g->parse_room_index, i, nullptr);
+    room_set_dir_option(g, g->parse_room_index, i, nullptr);
 
-  rroom_set_ex_description(g, g->parse_room_index, nullptr);
+  room_set_ex_description(g, g->parse_room_index, nullptr);
 
   snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1461,8 +1460,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
             new_descr->description = tmp;
           }
         }
-        new_descr->next               = rroom_get_ex_description(g, g->parse_room_index);
-        rroom_set_ex_description(g, g->parse_room_index, new_descr);
+        new_descr->next = room_get_ex_description(g, g->parse_room_index);
+        room_set_ex_description(g, g->parse_room_index, new_descr);
         break;
       case 'S': /* end of room */
         /* DG triggers -- script is defined after the end of the room */
@@ -1487,13 +1486,13 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", rroom_get_vnum(g, room) + 1, dir);
+  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room + 1, dir);
 
   struct room_direction_data *new_exit;
   new_exit = new room_direction_data();
-  rroom_set_dir_option(g, room, dir, new_exit);
-  rroom_get_dir_option(g, room, dir)->general_description = fread_string(fl, buf2);
-  rroom_get_dir_option(g, room, dir)->keyword             = fread_string(fl, buf2);
+  room_set_dir_option(g, room, dir, new_exit);
+  room_get_dir_option(g, room, dir)->general_description = fread_string(fl, buf2);
+  room_get_dir_option(g, room, dir)->keyword             = fread_string(fl, buf2);
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Format error, %s", buf2);
@@ -1505,113 +1504,109 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
   } else if (bitwarning == false) {
 
     if (t[0] == 1)
-      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR;
+      room_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR;
     else if (t[0] == 2)
-      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF;
+      room_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF;
     else if (t[0] == 3)
-      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_SECRET;
+      room_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_SECRET;
     else if (t[0] == 4)
-      rroom_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
+      room_get_dir_option(g, room, dir)->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
     else
-      rroom_get_dir_option(g, room, dir)->exit_info = 0;
+      room_get_dir_option(g, room, dir)->exit_info = 0;
 
-    rroom_get_dir_option(g, room, dir)->key     = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-    rroom_get_dir_option(g, room, dir)->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
+    room_get_dir_option(g, room, dir)->key     = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
+    room_get_dir_option(g, room, dir)->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
 
     if (retval == 3) {
       mud_log("Converting world files to include DC add ons.");
-      rroom_get_dir_option(g, room, dir)->dclock        = 20;
-      rroom_get_dir_option(g, room, dir)->dchide        = 20;
-      rroom_get_dir_option(g, room, dir)->dcskill       = 0;
-      rroom_get_dir_option(g, room, dir)->dcmove        = 0;
-      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
+      room_get_dir_option(g, room, dir)->dclock        = 20;
+      room_get_dir_option(g, room, dir)->dchide        = 20;
+      room_get_dir_option(g, room, dir)->dcskill       = 0;
+      room_get_dir_option(g, room, dir)->dcmove        = 0;
+      room_get_dir_option(g, room, dir)->failsavetype  = 0;
+      room_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      room_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      room_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
+        add_to_save_list(g, room_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 5) {
-      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
-      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
-      rroom_get_dir_option(g, room, dir)->dcskill       = 0;
-      rroom_get_dir_option(g, room, dir)->dcmove        = 0;
-      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
+      room_get_dir_option(g, room, dir)->dclock        = t[3];
+      room_get_dir_option(g, room, dir)->dchide        = t[4];
+      room_get_dir_option(g, room, dir)->dcskill       = 0;
+      room_get_dir_option(g, room, dir)->dcmove        = 0;
+      room_get_dir_option(g, room, dir)->failsavetype  = 0;
+      room_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      room_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      room_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
+        add_to_save_list(g, room_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 7) {
-      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
-      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
-      rroom_get_dir_option(g, room, dir)->dcskill       = t[5];
-      rroom_get_dir_option(g, room, dir)->dcmove        = t[6];
-      rroom_get_dir_option(g, room, dir)->failsavetype  = 0;
-      rroom_get_dir_option(g, room, dir)->dcfailsave    = 0;
-      rroom_get_dir_option(g, room, dir)->failroom      = NOWHERE;
-      rroom_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
+      room_get_dir_option(g, room, dir)->dclock        = t[3];
+      room_get_dir_option(g, room, dir)->dchide        = t[4];
+      room_get_dir_option(g, room, dir)->dcskill       = t[5];
+      room_get_dir_option(g, room, dir)->dcmove        = t[6];
+      room_get_dir_option(g, room, dir)->failsavetype  = 0;
+      room_get_dir_option(g, room, dir)->dcfailsave    = 0;
+      room_get_dir_option(g, room, dir)->failroom      = NOWHERE;
+      room_get_dir_option(g, room, dir)->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
-        add_to_save_list(g, rroom_get_zone(g, room)->number, 3);
+        add_to_save_list(g, room_get_zone(g, room)->number, 3);
         g->converting = true;
       }
     } else if (retval == 11) {
-      rroom_get_dir_option(g, room, dir)->dclock        = t[3];
-      rroom_get_dir_option(g, room, dir)->dchide        = t[4];
-      rroom_get_dir_option(g, room, dir)->dcskill       = t[5];
-      rroom_get_dir_option(g, room, dir)->dcmove        = t[6];
-      rroom_get_dir_option(g, room, dir)->failsavetype  = t[7];
-      rroom_get_dir_option(g, room, dir)->dcfailsave    = t[8];
-      rroom_get_dir_option(g, room, dir)->failroom      = t[9];
-      rroom_get_dir_option(g, room, dir)->totalfailroom = t[10];
+      room_get_dir_option(g, room, dir)->dclock        = t[3];
+      room_get_dir_option(g, room, dir)->dchide        = t[4];
+      room_get_dir_option(g, room, dir)->dcskill       = t[5];
+      room_get_dir_option(g, room, dir)->dcmove        = t[6];
+      room_get_dir_option(g, room, dir)->failsavetype  = t[7];
+      room_get_dir_option(g, room, dir)->dcfailsave    = t[8];
+      room_get_dir_option(g, room, dir)->failroom      = t[9];
+      room_get_dir_option(g, room, dir)->totalfailroom = t[10];
     }
   }
 }
 
-/* make sure the start rooms exist & resolve their vnums to rnums */
+/* make sure the start rooms exist, falling back to the Void */
 static void check_start_rooms(GameWorld *g)
 {
-  if ((g->r_mortal_start_room = real_room(g, CONFIG_MORTAL_START)) == NOWHERE) {
+  if (!room_of(g, g->r_mortal_start_room = CONFIG_MORTAL_START)) {
     mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
     g->r_mortal_start_room = 0; /* The Void */
   }
-  if ((g->r_immort_start_room = real_room(g, CONFIG_IMMORTAL_START)) == NOWHERE) {
+  if (!room_of(g, g->r_immort_start_room = CONFIG_IMMORTAL_START)) {
     if (!g->mini_mud)
       mud_log("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
     g->r_immort_start_room = g->r_mortal_start_room;
   }
-  if ((g->r_frozen_start_room = real_room(g, CONFIG_FROZEN_START)) == NOWHERE) {
+  if (!room_of(g, g->r_frozen_start_room = CONFIG_FROZEN_START)) {
     if (!g->mini_mud)
       mud_log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
     g->r_frozen_start_room = g->r_mortal_start_room;
   }
 }
 
-/* resolve all vnums into rnums in the world */
+/* exits to rooms that don't exist lead nowhere */
 static void renum_world(GameWorld *g)
 {
-  int door;
-
-  for (room_vnum room : g->rooms.vnums())
-    for (door = 0; door < NUM_OF_DIRS; door++)
-      if (rroom_get_dir_option(g, room, door))
-        if (rroom_get_dir_option(g, room, door)->to_room != NOWHERE)
-          rroom_get_dir_option(g, room, door)->to_room =
-              real_room(g, rroom_get_dir_option(g, room, door)->to_room);
+  g->rooms.visit([g](room_vnum, struct room_data *room) {
+    for (int door = 0; door < NUM_OF_DIRS; door++) {
+      struct room_direction_data *exit = room_get_dir_option(room, door);
+      if (exit && !room_of(g, exit->to_room))
+        exit->to_room = NOWHERE;
+    }
+  });
 }
 
 #define ZCMD2 zone->cmd[cmd_no]
 
 /*
- * "resulve vnums into rnums in the zone reset tables"
- *
- * Or in English: Once all of the zone reset tables have been loaded, we
- * resolve the virtual numbers into real numbers all at once so we don't have
- * to do it repeatedly while the game is running.  This does make adding any
- * room, mobile, or object a little more difficult while the game is running.
+ * Once all of the zone reset tables have been loaded, check that every room,
+ * mobile, object and trigger they name exists, and disable the commands that
+ * name one that doesn't.
  *
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
  * NOTE 2: Assumes sizeof(room_vnum) >= (sizeof(mob_vnum) and sizeof(obj_vnum))
@@ -1630,37 +1625,37 @@ static void renum_zone_table(GameWorld *g)
       oldc      = ZCMD2.arg3;
       switch (ZCMD2.command) {
         case 'M':
-          a = ZCMD2.arg1 = real_mobile(g, ZCMD2.arg1);
-          c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
+          a = ZCMD2.arg1 = mob_proto_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOBODY;
+          c = ZCMD2.arg3 = room_of(g, ZCMD2.arg3) ? ZCMD2.arg3 : NOWHERE;
           break;
         case 'O':
-          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
+          a = ZCMD2.arg1 = obj_proto_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOTHING;
           if (ZCMD2.arg3 != NOWHERE)
-            c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
+            c = ZCMD2.arg3 = room_of(g, ZCMD2.arg3) ? ZCMD2.arg3 : NOWHERE;
           break;
         case 'G':
-          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
+          a = ZCMD2.arg1 = obj_proto_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOTHING;
           break;
         case 'E':
-          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
+          a = ZCMD2.arg1 = obj_proto_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOTHING;
           break;
         case 'P':
-          a = ZCMD2.arg1 = real_object(g, ZCMD2.arg1);
-          c = ZCMD2.arg3 = real_object(g, ZCMD2.arg3);
+          a = ZCMD2.arg1 = obj_proto_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOTHING;
+          c = ZCMD2.arg3 = obj_proto_of(g, ZCMD2.arg3) ? ZCMD2.arg3 : NOTHING;
           break;
         case 'D':
-          a = ZCMD2.arg1 = real_room(g, ZCMD2.arg1);
+          a = ZCMD2.arg1 = room_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOWHERE;
           break;
         case 'R': /* rem obj from room */
-          a = ZCMD2.arg1 = real_room(g, ZCMD2.arg1);
-          b = ZCMD2.arg2 = real_object(g, ZCMD2.arg2);
+          a = ZCMD2.arg1 = room_of(g, ZCMD2.arg1) ? ZCMD2.arg1 : NOWHERE;
+          b = ZCMD2.arg2 = obj_proto_of(g, ZCMD2.arg2) ? ZCMD2.arg2 : NOTHING;
           break;
         case 'T': /* a trigger: it keeps the vnum, so check that there is one */
           b = ZCMD2.arg2 = find_trigger(g, ZCMD2.arg2) ? ZCMD2.arg2 : NOTHING;
-          c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
+          c = ZCMD2.arg3 = room_of(g, ZCMD2.arg3) ? ZCMD2.arg3 : NOWHERE;
           break;
         case 'V': /* trigger variable assignment */
-          b = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
+          b = ZCMD2.arg3 = room_of(g, ZCMD2.arg3) ? ZCMD2.arg3 : NOWHERE;
           break;
       }
       if (a == NOWHERE || b == NOWHERE || c == NOWHERE) {
@@ -2834,20 +2829,13 @@ int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch)
 /* create a character, and add it to the char list */
 
 /* create a new mobile from a prototype */
-struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_vnum */
+struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
 {
-  mob_vnum i;
+  mob_vnum i = nr;
   struct char_data *mob;
 
-  if (type == VIRTUAL) {
-    if ((i = real_mobile(g, nr)) == NOBODY) {
-      mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
-      return (nullptr);
-    }
-  } else
-    i = nr;
   if (!mob_proto_of(g, i)) {
-    mud_log("WARNING: Mobile %d does not exist in database.", nr);
+    mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
     return (nullptr);
   }
 
@@ -3513,16 +3501,16 @@ static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_dat
          obj_get_short_description(obj1) ? obj_get_short_description(obj1) : "<No name>",
          obj_get_vnum(g, obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
   mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
-                                    "In object: %s, Carried by: %s, Worn by: %s",
-         rroom_get_vnum(g, obj_get_in_room(obj1)),
-         obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : rroom_get_name(g, obj_get_in_room(obj1)),
+                                       "In object: %s, Carried by: %s, Worn by: %s",
+         obj_get_in_room(obj1),
+         obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj1)),
          obj_get_in_obj(obj1) ? obj_get_short_description(obj_get_in_obj(obj1)) : "None",
          obj_get_carried_by(obj1) ? char_get_name(obj_get_carried_by(obj1)) : "Nobody",
          obj_get_worn_by(obj1) ? char_get_name(obj_get_worn_by(obj1)) : "Nobody");
   mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
-                                    "In object: %s, Carried by: %s, Worn by: %s",
-         rroom_get_vnum(g, obj_get_in_room(obj2)),
-         obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : rroom_get_name(g, obj_get_in_room(obj2)),
+                                       "In object: %s, Carried by: %s, Worn by: %s",
+         obj_get_in_room(obj2),
+         obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj2)),
          obj_get_in_obj(obj2) ? obj_get_short_description(obj_get_in_obj(obj2)) : "None",
          obj_get_carried_by(obj2) ? char_get_name(obj_get_carried_by(obj2)) : "Nobody",
          obj_get_worn_by(obj2) ? char_get_name(obj_get_worn_by(obj2)) : "Nobody");
@@ -3616,14 +3604,14 @@ struct obj_data *create_obj(GameWorld *g)
 }
 
 /* create a new object from a prototype */
-struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_vnum */
+struct obj_data *read_object(GameWorld *g, obj_vnum nr)
 {
   struct obj_data *obj;
-  obj_vnum i = type == VIRTUAL ? real_object(g, nr) : nr;
+  obj_vnum i = nr;
   int j;
 
-  if (i == NOTHING || !obj_proto_of(g, i)) {
-    mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
+  if (!obj_proto_of(g, i)) {
+    mud_log("Object (V) %d does not exist in database.", nr);
     return (nullptr);
   }
 
@@ -3783,7 +3771,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           if ((mob_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             int room_max = 0;
-            mob = read_mobile(g, ZCMD2.arg1, REAL);
+            mob          = read_mobile(g, ZCMD2.arg1);
 
             /* First find out how many mobs of VNUM are in the mud with this rooms */
             /* VNUM as a load point for max from room checks. */
@@ -3791,7 +3779,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
             if (ZCMD2.arg4 > 0) {
               for (char_data *i : each_char(g)) {
-                if ((char_get_hometown(i) == rroom_get_vnum(g, ZCMD2.arg3)) && (char_get_mob_vnum(g, i) == char_get_mob_vnum(g, mob))) {
+                if ((char_get_hometown(i) == ZCMD2.arg3) && (char_get_mob_vnum(g, i) == char_get_mob_vnum(g, mob))) {
                   room_max++;
                 }
               }
@@ -3807,7 +3795,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             }
 
             /*  Set the mobs loadroom for room_max checks. */
-            char_set_hometown(mob, rroom_get_vnum(g, ZCMD2.arg3));
+            char_set_hometown(mob, ZCMD2.arg3);
 
             load_mtrigger(g, mob);
             tmob     = mob;
@@ -3823,7 +3811,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 != NOWHERE) {
               int room_max = 0;
-              obj = read_object(g, ZCMD2.arg1, REAL);
+              obj          = read_object(g, ZCMD2.arg1);
 
               /* First find out how many obj of VNUM are in the mud with this rooms */
               /* VNUM as a load point for max from room checks. */
@@ -3831,10 +3819,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
               if (ZCMD2.arg4 > 0) {
                 for (obj_data *k : each_obj(g)) {
-                  if (((obj_get_room_loaded(k) == rroom_get_vnum(g, ZCMD2.arg3)) && (obj_get_vnum(g, k) == obj_get_vnum(g, obj))) || (obj_get_vnum(g, k) == obj_get_vnum(g, obj) && rroom_get_vnum(g, ZCMD2.arg3) == rroom_get_vnum(g, obj_get_in_room(k)))) {
+                  if (((obj_get_room_loaded(k) == ZCMD2.arg3) && (obj_get_vnum(g, k) == obj_get_vnum(g, obj))) || (obj_get_vnum(g, k) == obj_get_vnum(g, obj) && ZCMD2.arg3 == obj_get_in_room(k))) {
                     /*  For objects, lets not count them if they've been removed from the room */
                     /*  We'll let max_in_mud handle those. */
-                    if (obj_get_in_room(k) == NOWHERE || rroom_get_vnum(g, obj_get_in_room(k)) != rroom_get_vnum(g, ZCMD2.arg3)) {
+                    if (obj_get_in_room(k) == NOWHERE || obj_get_in_room(k) != ZCMD2.arg3) {
                       continue;
                     }
                     room_max++;
@@ -3854,13 +3842,13 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
               /* Set the loadroom for room_max checks */
 
-              obj_set_room_loaded(obj, rroom_get_vnum(g, ZCMD2.arg3));
+              obj_set_room_loaded(obj, ZCMD2.arg3);
 
               last_cmd = 1;
               tobj     = load_otrigger(g, obj) ? obj : nullptr;
               obj_load = true;
             } else {
-              obj = read_object(g, ZCMD2.arg1, REAL);
+              obj = read_object(g, ZCMD2.arg1);
               add_unique_id(g, obj);
               obj_set_in_room(obj, NOWHERE);
               last_cmd = 1;
@@ -3875,7 +3863,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
         case 'P': /* object to object */
           if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               obj_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
-            obj = read_object(g, ZCMD2.arg1, REAL);
+            obj = read_object(g, ZCMD2.arg1);
             if (!(obj_to = get_obj_num(g, ZCMD2.arg3))) {
               ZONE_ERROR(g, "target obj not found, command disabled");
               ZCMD2.command = '*';
@@ -3898,7 +3886,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           }
           if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               mob_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
-            obj = read_object(g, ZCMD2.arg1, REAL);
+            obj = read_object(g, ZCMD2.arg1);
             add_unique_id(g, obj);
             obj_to_char(g, obj, mob);
             if (char_get_mob_spec(g, mob) != shop_keeper) {
@@ -3922,7 +3910,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (ZCMD2.arg3 < 0 || ZCMD2.arg3 >= NUM_WEARS) {
               ZONE_ERROR(g, "invalid equipment pos number");
             } else {
-              obj = read_object(g, ZCMD2.arg1, REAL);
+              obj = read_object(g, ZCMD2.arg1);
               add_unique_id(g, obj);
               obj_set_in_room(obj, char_get_in_room(mob));
               tobj = nullptr;
@@ -3946,7 +3934,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           break;
 
         case 'R': /* rem obj from room */
-          if ((obj = get_obj_in_list_num(g, ZCMD2.arg2, rroom_get_contents(g, ZCMD2.arg1))) != nullptr)
+          if ((obj = get_obj_in_list_num(g, ZCMD2.arg2, room_get_contents(g, ZCMD2.arg1))) != nullptr)
             extract_obj(g, obj);
           last_cmd = 1;
           tmob     = nullptr;
@@ -3955,27 +3943,27 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
         case 'D': /* set state of door */
           if (ZCMD2.arg2 < 0 || ZCMD2.arg2 >= NUM_OF_DIRS ||
-              (rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2) == nullptr)) {
+              (room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2) == nullptr)) {
             ZONE_ERROR(g, "door does not exist, command disabled");
             ZCMD2.command = '*';
           } else
             switch (ZCMD2.arg3) {
               case 0:
-                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_LOCKED);
-                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_CLOSED);
                 break;
               case 1:
-                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_CLOSED);
-                REMOVE_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                            EX_LOCKED);
                 break;
               case 2:
-                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_LOCKED);
-                SET_BIT(rroom_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
+                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
                         EX_CLOSED);
                 break;
             }
@@ -3995,9 +3983,9 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in trigger assignment");
             }
-            if (!rroom_get_script(g, ZCMD2.arg3))
-              dg_ensure_script(rroom_script_slot(g, ZCMD2.arg3));
-            add_trigger(g, rroom_get_script(g, ZCMD2.arg3), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
+            if (!room_get_script(g, ZCMD2.arg3))
+              dg_ensure_script(room_script_slot(g, ZCMD2.arg3));
+            add_trigger(g, room_get_script(g, ZCMD2.arg3), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
             last_cmd = 1;
           }
 
@@ -4022,10 +4010,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in variable assignment");
             } else {
-              if (!(rroom_get_script(g, ZCMD2.arg3))) {
+              if (!(room_get_script(g, ZCMD2.arg3))) {
                 ZONE_ERROR(g, "Attempt to give variable to scriptless object");
               } else
-                add_var(&(rroom_get_script(g, ZCMD2.arg3)->global_vars),
+                add_var(&(room_get_script(g, ZCMD2.arg3)->global_vars),
                         ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
               last_cmd = 1;
             }
@@ -4044,45 +4032,45 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
     /* handle reset_wtrigger's */
     rvnum = zone->bot;
     while (rvnum <= zone->top) {
-      rrnum = real_room(g, rvnum);
-      if (rrnum != NOWHERE) {
+      rrnum = rvnum;
+      if (room_of(g, rrnum)) {
         reset_wtrigger(g, room_of(g, rrnum));
-        if (rroom_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
+        if (room_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
           send_to_room(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-          rroom_set_flag(g, rrnum, ROOM_AURA, false);
+          room_set_flag(g, rrnum, ROOM_AURA, false);
         }
-        if (rroom_sect(g, rrnum) == SECT_LAVA) {
-          rroom_set_geffect(g, rrnum, 5);
+        if (room_sect(g, rrnum) == SECT_LAVA) {
+          room_set_geffect(g, rrnum, 5);
         }
-        if (rroom_get_geffect(g, rrnum) < -1) {
+        if (room_get_geffect(g, rrnum) < -1) {
           send_to_room(g, rrnum, "The area loses some of the water flooding it.\r\n");
-          rroom_set_geffect(g, rrnum, rroom_get_geffect(g, rrnum) + (1));
-        } else if (rroom_get_geffect(g, rrnum) == -1) {
+          room_set_geffect(g, rrnum, room_get_geffect(g, rrnum) + (1));
+        } else if (room_get_geffect(g, rrnum) == -1) {
           send_to_room(g, rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-          rroom_set_geffect(g, rrnum, 0);
+          room_set_geffect(g, rrnum, 0);
         }
-        if (rroom_get_dmg(g, rrnum) >= 100) {
+        if (room_get_dmg(g, rrnum) >= 100) {
           send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 5, 10)));
-        } else if (rroom_get_dmg(g, rrnum) >= 50) {
+          room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 5, 10)));
+        } else if (room_get_dmg(g, rrnum) >= 50) {
           send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
-        } else if (rroom_get_dmg(g, rrnum) >= 10) {
+          room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
+        } else if (room_get_dmg(g, rrnum) >= 10) {
           send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
-        } else if (rroom_get_dmg(g, rrnum) > 1) {
+          room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
+        } else if (room_get_dmg(g, rrnum) > 1) {
           send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - (rand_number(g, 1, rroom_get_dmg(g, rrnum))));
-        } else if (rroom_get_dmg(g, rrnum) > 0) {
+          room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, room_get_dmg(g, rrnum))));
+        } else if (room_get_dmg(g, rrnum) > 0) {
           send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
-          rroom_set_dmg(g, rrnum, rroom_get_dmg(g, rrnum) - 1);
+          room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - 1);
         }
-        if (rroom_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 4) == 4 && !rroom_sunken(g, rrnum) && rroom_sect(g, rrnum) != SECT_LAVA) {
+        if (room_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 4) == 4 && !room_sunken(g, rrnum) && room_sect(g, rrnum) != SECT_LAVA) {
           send_to_room(g, rrnum, "The lava has cooled and become solid rock.\r\n");
-          rroom_set_geffect(g, rrnum, 0);
-        } else if (rroom_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 2) == 2 && rroom_sunken(g, rrnum) && rroom_sect(g, rrnum) != SECT_LAVA) {
+          room_set_geffect(g, rrnum, 0);
+        } else if (room_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 2) == 2 && room_sunken(g, rrnum) && room_sect(g, rrnum) != SECT_LAVA) {
           send_to_room(g, rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-          rroom_set_geffect(g, rrnum, 0);
+          room_set_geffect(g, rrnum, 0);
         }
       }
       rvnum++;
@@ -4103,7 +4091,7 @@ bool is_empty(GameWorld *g, struct zone_data *zone_nr)
       continue;
     if (char_get_in_room(i->character) == NOWHERE)
       continue;
-    if (rroom_get_zone(g, char_get_in_room(i->character)) != zone_nr)
+    if (room_get_zone(g, char_get_in_room(i->character)) != zone_nr)
       continue;
     /*
      * if an immortal has nohassle off, he counts as present 
@@ -4471,26 +4459,7 @@ void init_char(GameWorld *g, struct char_data *ch)
   Crash_crashsave(g, ch);
 }
 
-/* The tables are keyed by vnum, so a "real number" is the vnum itself, when there is such a thing. */
-/* returns the real number of the room with given virtual number */
-room_vnum real_room(GameWorld *g, room_vnum vnum)
-{
-  return g->rooms.find(vnum) ? vnum : NOWHERE; /* rnums are vnums now */
-}
-
-/* returns the real number of the monster with given virtual number */
-mob_vnum real_mobile(GameWorld *g, mob_vnum vnum)
-{
-  return g->mob_index.find(vnum) ? vnum : NOBODY; /* rnums are vnums now */
-}
-
-/* returns the real number of the object with given virtual number */
-obj_vnum real_object(GameWorld *g, obj_vnum vnum)
-{
-  return g->obj_index.find(vnum) ? vnum : NOTHING; /* rnums are vnums now */
-}
-
-/* returns the real number of the zone with given virtual number */
+/* The zone numbered vnum, or null. */
 struct zone_data *find_zone(GameWorld *g, zone_vnum vnum)
 {
   return g->zones.find(vnum);

@@ -863,7 +863,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
     bought++;
     /* Test if producing shop ! */
     if (shop_producing(g, obj, shop)) {
-      obj = read_object(g, obj_get_item_number(obj), REAL);
+      obj = read_object(g, obj_get_item_number(obj));
       add_unique_id(g, obj);
     } else {
       obj_from_char(g, obj);
@@ -1276,7 +1276,7 @@ SPECIAL(shop_keeper)
       shop_set_lastsort(shop, 0); /* Safety in case "drop all" */
     return (false);
   }
-  if (!ok_shop_room(g, shop, rroom_get_vnum(g, char_get_in_room(ch))))
+  if (!ok_shop_room(g, shop, char_get_in_room(ch)))
     return (0);
 
   if (!char_is_awake(keeper))
@@ -1328,8 +1328,8 @@ static bool add_to_list(GameWorld *g, shop_vnum vnum, struct shop_buy_data *list
       return (false);
     }
     if (*len < MAX_SHOP_OBJ) {
-      if (type == LIST_PRODUCE)
-        *val = real_object(g, *val);
+      if (type == LIST_PRODUCE && !obj_proto_of(g, *val))
+        *val = NOTHING;
       if (*val != NOTHING) {
         shop_buy_set_type(&(list[*len]), *val);
         shop_buy_set_keywords(&(list[(*len)++]), nullptr);
@@ -1493,7 +1493,8 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       read_line(g, vnum, shop_f, "%ld", &shop->bitvector);
       read_line(g, vnum, shop_f, "%hd", &shop->keeper);
 
-      shop_set_keeper(shop, real_mobile(g, shop_get_keeper(shop)));
+      if (!mob_proto_of(g, shop_get_keeper(shop)))
+        shop_set_keeper(shop, NOBODY);
       buf = str_alloc(READ_SIZE);
       get_line(shop_f, buf);
       p = buf;
@@ -1656,8 +1657,8 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
       column += 2;
     }
 
-    if ((temp = real_room(g, shop_get_room(shop, sindex))) != NOWHERE)
-      linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", rroom_get_name(g, temp), rroom_get_vnum(g, temp));
+    if (room_of(g, temp = shop_get_room(shop, sindex)))
+      linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room_get_name(g, temp), temp);
     else
       linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", shop_get_room(shop, sindex));
 
@@ -1768,7 +1769,7 @@ void show_shops(GameWorld *g, struct char_data *ch, char *arg)
     list_all_shops(g, ch);
   else {
     if (!strcasecmp(arg, ".")) {
-      shop = find_first(g->shops.all(), [&](shop_data *s) { return ok_shop_room(g, s, rroom_get_vnum(g, char_get_in_room(ch))); });
+      shop = find_first(g->shops.all(), [&](shop_data *s) { return ok_shop_room(g, s, char_get_in_room(ch)); });
       if (!shop) {
         send_to_char(g, ch, "This isn't a shop!\r\n");
         return;

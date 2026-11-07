@@ -65,7 +65,7 @@ static struct char_data *fighter(GameWorld *g, const char *name, int admlevel, i
   char_set_basest(ch, 100000000);
   restore(g, ch, false);
   char_from_room(g, ch);
-  char_to_room(g, ch, real_room(g, 300));
+  char_to_room(g, ch, 300);
   th_take_output(g, ch);
   return ch;
 }
@@ -111,7 +111,7 @@ static void check_song_of_shielding_costs_ki(void)
   obj_set_proto_script(proto, nullptr); /* copy_object() shares the original's trigger list */
   obj_set_item_number(proto, 8802);
   g->obj_index.emplace(8802)->vnum = 8802;
-  instrument                       = read_object(g, 8802, VIRTUAL);
+  instrument                       = read_object(g, 8802);
   obj_to_char(g, instrument, ch);
   char_set_skills_base(ch, SKILL_MYSTICMUSIC, 100);
   char_set_powerattack(ch, SONG_SHIELDING);
@@ -208,7 +208,7 @@ static void check_sacred_vial_stops_at_a_full_stomach(void)
   struct char_data *ch = fighter(g, "Drinker", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
   char argument[] = "item86";
 
-  obj_to_char(g, read_object(g, 86, VIRTUAL), ch);
+  obj_to_char(g, read_object(g, 86), ch);
   char_set_conditions(g, ch, HUNGER, 40);
   char_set_conditions(g, ch, THIRST, 46);
   do_drink(g, ch, argument, 0, 0);
@@ -300,15 +300,15 @@ static void check_staff_log_all_of_snet(void)
   struct char_data *nearby = fighter(g, "Nearby", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
   struct char_data *far = fighter(g, "Faraway", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
   struct char_data *mortal = fighter(g, "Mortal", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
-  struct obj_data *scouter = read_object(g, 350, VIRTUAL);
+  struct obj_data *scouter = read_object(g, 350);
   char ordinary[] = "hello everyone", broadcast[] = "* big news", call[] = "#12345 just you";
 
   obj_wear_set(scouter, ITEM_WEAR_EYE, true);
   equip_char(g, ch, scouter, WEAR_EYE);
   char_from_room(g, far);
-  char_to_room(g, far, real_room(g, 301));
+  char_to_room(g, far, 301);
   char_from_room(g, mortal);
-  char_to_room(g, mortal, real_room(g, 301));
+  char_to_room(g, mortal, 301);
   do_snet(g, ch, ordinary, 0, 0);
   do_snet(g, ch, broadcast, 0, 0);
   do_snet(g, ch, call, 0, 0);
@@ -444,7 +444,7 @@ static void check_mob_experience_stops_at_zero(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Killer", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
-  struct char_data *mob = read_mobile(g, 302, VIRTUAL);
+  struct char_data *mob = read_mobile(g, 302);
   int64_t before = char_get_exp(ch);
 
   char_to_room(g, mob, char_get_in_room(ch));
@@ -482,11 +482,11 @@ static void check_mob_experience_at_impossible_levels(void)
     mob_level = levels[i];
     th_before_boot(change_mob_levels);
     g   = th_boot();
-    mob = read_mobile(g, 302, VIRTUAL);
+    mob = read_mobile(g, 302);
     CHECK(char_get_level(mob) == atoi(levels[i])); /* or this checks nothing */
     CHECK(char_get_exp(mob) >= 0);
     CHECK(char_get_exp(mob) <= 20000000);
-    char_to_room(g, mob, real_room(g, 300));
+    char_to_room(g, mob, 300);
     th_shutdown(g);
   }
 }

@@ -369,7 +369,7 @@ struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, char *name, int
     return (i);
 
   /* scan room */
-  if ((i = get_obj_in_list_vis(g, ch, name, number, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr)
+  if ((i = get_obj_in_list_vis(g, ch, name, number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
@@ -498,7 +498,7 @@ int generic_find(GameWorld *g, char *arg, bitvector_t bitvector, struct char_dat
   }
 
   if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-    if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, rroom_get_contents(g, char_get_in_room(ch)))) != nullptr)
+    if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
       return (FIND_OBJ_ROOM);
   }
 

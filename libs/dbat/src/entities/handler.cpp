@@ -56,7 +56,7 @@ void update_char_objects(GameWorld *g, struct char_data *ch)
         } else if (j == 0) {
           send_to_char(g, ch, "Your light sputters out and dies.\r\n");
           act(g, "$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
-          rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
+          room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_TIME) - (1));

@@ -29,7 +29,7 @@ static void ASSIGNMOB(GameWorld *g, mob_vnum mob, SPECIAL(fn))
 {
   mob_vnum rnum;
 
-  if ((rnum = real_mobile(g, mob)) != NOBODY)
+  if (mob_proto_of(g, rnum = mob))
     mob_index_of(g, rnum)->func = fn;
   else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
@@ -39,7 +39,7 @@ static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
 {
   obj_vnum rnum;
 
-  if ((rnum = real_object(g, obj)) != NOTHING)
+  if (obj_proto_of(g, rnum = obj))
     obj_index_of(g, rnum)->func = fn;
   else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
@@ -49,8 +49,8 @@ static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fn))
 {
   room_vnum rnum;
 
-  if ((rnum = real_room(g, room)) != NOWHERE)
-    rroom_set_func(g, rnum, fn);
+  if (room_of(g, rnum = room))
+    room_set_func(g, rnum, fn);
   else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
@@ -92,6 +92,6 @@ void assign_rooms(GameWorld *g)
 
   if (CONFIG_DTS_ARE_DUMPS)
     for (room_vnum i : g->rooms.vnums())
-      if (rroom_flagged(g, i, ROOM_DEATH))
-        rroom_set_func(g, i, dump);
+      if (room_flagged(g, i, ROOM_DEATH))
+        room_set_func(g, i, dump);
 }

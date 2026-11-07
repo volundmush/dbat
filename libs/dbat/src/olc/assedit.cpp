@@ -69,7 +69,7 @@ ACMD(do_assedit)
     if (strncasecmp("new", buf, 3) == 0) {
       if (!isdigit(*buf2)) {
         nodigit(g, d);
-      } else if (real_object(g, atoi(buf2)) == NOTHING) {
+      } else if (!obj_proto_of(g, atoi(buf2))) {
         send_to_char(g, d->character, "You need to create the assembly object before you can create the new assembly.\r\n");
         return;
       } else {
@@ -130,7 +130,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
      * the data contained in the original assembly structure.
      */
 
-  if ((g->lRnum = real_object(g, OLC_ASSEDIT(d)->lVnum)) < 0) {
+  if (!obj_proto_of(g, g->lRnum = OLC_ASSEDIT(d)->lVnum)) {
     send_to_char(g, d->character, "Assembled item may not exist, check the vnum and assembles (show assemblies). \r\n");
     cleanup_olc(g, d, CLEANUP_ALL); /* for right now we just get out! */
     return;
@@ -159,14 +159,14 @@ static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                "Assembly Type  : @y%s@n\r\n"
                "Components:\r\n",
                OLC_ASSEDIT(d)->lVnum,
-               obj_get_short_description(obj_proto_of(g, real_object(g, OLC_ASSEDIT(d)->lVnum))),
+               obj_get_short_description(obj_proto_of(g, OLC_ASSEDIT(d)->lVnum)),
                szAssmType);
 
   if (OLC_ASSEDIT(d)->lNumComponents <= 0)
     send_to_char(g, d->character, "   < NONE > \r\n");
   else {
     for (i = 0; i < OLC_ASSEDIT(d)->lNumComponents; i++) {
-      if ((g->lRnum = real_object(g, OLC_ASSEDIT(d)->pComponents[i].lVnum)) < 0) {
+      if (!obj_proto_of(g, g->lRnum = OLC_ASSEDIT(d)->pComponents[i].lVnum)) {
         send_to_char(g, d->character, "@g%2d@n) @y ERROR --- Contact an Implementor @n\r\n ", i + 1);
       } else {
         send_to_char(g, d->character,
@@ -282,7 +282,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case ASSEDIT_ADD_COMPONENT: /* add a new component */
       if (isdigit(*arg)) {
         pos = atoi(arg);
-        if ((real_object(g, pos)) <= NOTHING) /* does the object exist? */
+        if ((pos) <= NOTHING) /* does the object exist? */
           break;
 
         for (i = 0; i < OLC_ASSEDIT(d)->lNumComponents; i++) {

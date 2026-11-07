@@ -79,23 +79,23 @@ ACMD(do_quit)
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
     send_to_char(g, ch, "This is the past, you can't quit here!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 2002 && rroom_get_vnum(g, char_get_in_room(ch)) <= 2011) {
+  if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
     send_to_char(g, ch, "You can't quit in the arena!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 101 && rroom_get_vnum(g, char_get_in_room(ch)) <= 139) {
+  if (char_get_in_room(ch) >= 101 && char_get_in_room(ch) <= 139) {
     send_to_char(g, ch, "You can't quit in the mud school!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
     send_to_char(g, ch, "You can't quit in a pocket dimension!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) == 2069) {
+  if (char_get_in_room(ch) == 2069) {
     send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
@@ -107,7 +107,7 @@ ACMD(do_quit)
     }
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) == 2070) {
+  if (char_get_in_room(ch) == 2070) {
     send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
@@ -139,14 +139,14 @@ ACMD(do_quit)
      */
 
     /* If someone is quitting in their house, let them load back here. */
-    if (!rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899)) {
-      if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
+    if (!room_flagged(g, char_get_in_room(ch), ROOM_PAST) && (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899)) {
+      if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
+        char_set_load_room(g, ch, char_get_in_room(ch));
       }
     }
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-      if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1561)));
+    if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+      if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
+        char_set_load_room(g, ch, 1561);
       }
     }
 
@@ -181,9 +181,9 @@ ACMD(do_save)
       write_aliases(g, ch);
       save_char(g, ch);
       Crash_crashsave(g, ch);
-      if (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899) {
-        if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
-          char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
+      if (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899) {
+        if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
+          char_set_load_room(g, ch, char_get_in_room(ch));
         }
       }
       return;
@@ -192,9 +192,9 @@ ACMD(do_save)
   }
 
   write_aliases(g, ch);
-  if (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899) {
-    if (rroom_get_vnum(g, char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(g, char_get_in_room(ch)) != 0 && rroom_get_vnum(g, char_get_in_room(ch)) != 1) {
-      char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
+  if (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899) {
+    if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
+      char_set_load_room(g, ch, char_get_in_room(ch));
     }
   }
   save_char(g, ch);
@@ -732,7 +732,7 @@ ACMD(do_gen_write)
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), (tmp + 4), argument);
+  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), argument);
   fprintf(fl, "@D-------------------------------@n\n");
   fclose(fl);
   send_to_char(g, ch, "Okay.  Thanks!\r\n");

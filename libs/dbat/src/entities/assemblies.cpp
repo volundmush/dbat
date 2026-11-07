@@ -135,7 +135,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
   char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
   long i                            = 0; // Outer iterator.
   long j                            = 0; // Inner iterator.
-  obj_vnum lRnum                    = 0; // Object rnum for obj_proto indexing.
+  obj_vnum lRnum                    = 0; // An object vnum, checked against obj_proto.
 
   if (pCharacter == nullptr) {
     mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
@@ -150,7 +150,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
   send_to_char(g, pCharacter, "The following assemblies exists:\r\n");
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
-    if ((lRnum = real_object(g, g->g_pAssemblyTable[i].lVnum)) < 0) {
+    if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].lVnum)) {
       send_to_char(g, pCharacter, "[-----] ***RESERVED***\r\n");
       mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
     } else {
@@ -160,7 +160,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
       send_to_char(g, pCharacter, "%s", szBuffer);
 
       for (j = 0; j < g->g_pAssemblyTable[i].lNumComponents; j++) {
-        if ((lRnum = real_object(g, g->g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
+        if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].pComponents[j].lVnum)) {
           send_to_char(g, pCharacter, " -----: ***RESERVED***\r\n");
           mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%d in assembly for vnum #%d.",
                   g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
@@ -184,7 +184,7 @@ bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
-  if (real_object(g, lComponentVnum) <= NOTHING) {
+  if (!obj_proto_of(g, lComponentVnum)) {
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%d.",
             lComponentVnum);
     return (false);
@@ -241,12 +241,12 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
   ppComponentObjects = new obj_data *[pAssembly->lNumComponents]();
 
   for (i = 0; i < pAssembly->lNumComponents && bOk; i++) {
-    if ((lRnum = real_object(g, pAssembly->pComponents[i].lVnum)) < 0)
+    if (!obj_proto_of(g, lRnum = pAssembly->pComponents[i].lVnum))
       bOk = false;
     else {
       if (pAssembly->pComponents[i].bInRoom) {
         if ((ppComponentObjects[i] = get_obj_in_list_num(g, lRnum,
-                                                         rroom_get_contents(g, char_get_in_room(pCharacter)))) == nullptr)
+                                                         room_get_contents(g, char_get_in_room(pCharacter)))) == nullptr)
           bOk = false;
         else {
           obj_from_room(g, ppComponentObjects[i]);
@@ -338,7 +338,7 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
   long lIndex                 = 0;
   ASSEMBLY *pNewAssemblyTable = nullptr;
 
-  /* Find the real number of the assembled vnum. */
+  /* Find the assembly with this vnum. */
   if (g->g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex(g, lVnum)) < 0) {
     mud_log("SYSERR: assemblyDestroy(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
@@ -395,7 +395,7 @@ obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
     return (-1);
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
-    if ((lRnum = real_object(g, g->g_pAssemblyTable[i].lVnum)) < 0)
+    if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].lVnum))
       mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
     else if (isname(pszAssemblyName, obj_get_name(obj_proto_of(g, lRnum))))
       return (g->g_pAssemblyTable[i].lVnum);

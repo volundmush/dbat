@@ -434,8 +434,8 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
     if (*line == '#') { /* swell - its an item */
       sscanf(line, "#%d", &nr);
       if (nr != NOTHING) { /* then we can dispense with it easily */
-        if (real_object(g, nr) != NOTHING) {
-          obj = read_object(g, nr, VIRTUAL);
+        if (obj_proto_of(g, nr)) {
+          obj = read_object(g, nr);
           if (len + 255 < sizeof(buf)) {
             len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
                             nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
@@ -712,7 +712,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
         get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       } else {
-        temp = read_object(g, nr, VIRTUAL);
+        temp = read_object(g, nr);
         if (!temp) {
           get_line(fl, line);
           continue;

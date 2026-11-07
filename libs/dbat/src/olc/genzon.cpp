@@ -210,8 +210,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   zone->cmd[0].command = 'S';
 
   for (room_vnum v = bottom; v <= top; v++) /* rooms already in its range now belong to it */
-    if (room_vnum r = real_room(g, v); r != NOWHERE)
-      rroom_set_zone(g, r, zone);
+    if (room_vnum r = v; room_of(g, r))
+      room_set_zone(g, r, zone);
 
   add_to_save_list(g, zone->number, SL_ZON);
   return zone;
@@ -414,7 +414,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
       case 'M':
         arg1    = mob_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
-        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
+        arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
         arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
         comment = char_get_sdesc(mob_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
@@ -422,7 +422,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
       case 'O':
         arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
-        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
+        arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
         arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
         comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
@@ -452,13 +452,13 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'D':
-        arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
+        arg1    = zone_get_cmd(g, zone_num, subcmd)->arg1;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
-        comment = rroom_get_name(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
+        comment = room_get_name(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
         break;
       case 'R':
-        arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
+        arg1    = zone_get_cmd(g, zone_num, subcmd)->arg1;
         arg2    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg2)->vnum;
         comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg2));
         arg3    = -1;
@@ -466,7 +466,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
       case 'T':
         arg1    = zone_get_cmd(g, zone_num, subcmd)->arg1;                   /* trigger type */
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;                   /* trigger vnum */
-        arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);     /* room num */
+        arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;                   /* room num */
         arg4    = -1;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
         comment = find_trigger(g, arg2)->proto->name;
@@ -474,7 +474,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
       case 'V':
         arg1 = zone_get_cmd(g, zone_num, subcmd)->arg1; /* trigger type */
         arg2 = zone_get_cmd(g, zone_num, subcmd)->arg2; /* context */
-        arg3 = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
+        arg3 = zone_get_cmd(g, zone_num, subcmd)->arg3;
         arg4 = -1;
         arg5 = zone_get_cmd(g, zone_num, subcmd)->arg5;
         break;

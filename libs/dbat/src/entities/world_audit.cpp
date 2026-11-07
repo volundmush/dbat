@@ -225,10 +225,10 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
   else if (room != NOWHERE) {
     size_t people = a->characters.count + 1;
 
-    for (other = rroom_get_people(g, room); other && other != ch && people; other = char_get_next_in_room(other))
+    for (other = room_get_people(g, room); other && other != ch && people; other = char_get_next_in_room(other))
       people--;
     if (other != ch)
-      problem(a, "%s: says room %d, but isn't listed there", name, rroom_get_vnum(g, room));
+      problem(a, "%s: says room %d, but isn't listed there", name, room);
   }
 
   for (struct obj_data *obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
@@ -293,8 +293,8 @@ static void audit_object_is_listed(GameWorld *g, struct audit *a, struct obj_dat
   struct char_data *wearer = obj_get_worn_by(obj);
   struct obj_data *outer   = obj_get_in_obj(obj);
 
-  if (room != NOWHERE && valid_room(g, room) && !list_has_object(a, rroom_get_contents(g, room), obj))
-    problem(a, "object %d: says room %d, but isn't listed there", vnum, rroom_get_vnum(g, room));
+  if (room != NOWHERE && valid_room(g, room) && !list_has_object(a, room_get_contents(g, room), obj))
+    problem(a, "object %d: says room %d, but isn't listed there", vnum, room);
   if (owner && set_has(&a->characters, owner) && !list_has_object(a, char_get_inventory(owner), obj))
     problem(a, "object %d: says %s carries it, but isn't in the inventory", vnum, char_get_name(owner));
   if (wearer && set_has(&a->characters, wearer) &&

@@ -817,7 +817,7 @@ void obj_set_in_room(struct obj_data *obj, room_vnum v)
 
 struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *obj, int door)
 {
-  return rroom_get_dir_option(g, obj_get_in_room(obj), door);
+  return room_get_dir_option(g, obj_get_in_room(obj), door);
 }
 
 /* Flag setters and toggles. */

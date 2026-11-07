@@ -11,7 +11,7 @@
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)
 {
-  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(g, char_get_in_room(ch)), rroom_get_name(g, char_get_in_room(ch)));
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), char_get_in_room(ch), room_get_name(g, char_get_in_room(ch)));
 }
 
 /* New variable argument log() function.  Works the same as the old for

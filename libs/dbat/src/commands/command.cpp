@@ -672,8 +672,8 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
   bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
 
   /* special in room? */
-  if (in_a_room && rroom_get_spec(g, char_get_in_room(ch)) != nullptr)
-    if (rroom_get_spec(g, char_get_in_room(ch))(g, ch, room_of(g, char_get_in_room(ch)), cmd, arg))
+  if (in_a_room && room_get_spec(g, char_get_in_room(ch)) != nullptr)
+    if (room_get_spec(g, char_get_in_room(ch))(g, ch, room_of(g, char_get_in_room(ch)), cmd, arg))
       return true;
 
   /* special in equipment list? */

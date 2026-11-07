@@ -112,12 +112,12 @@ ACMD(do_honoo)
         pcost(g, ch, attperc, 0);
       }
       pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-      if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+      if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
         send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-        rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-      } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+        room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+      } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
         send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-        rroom_set_geffect(g, char_get_in_room(ch), 0);
+        room_set_geffect(g, char_get_in_room(ch), 0);
       }
       return;
     }
@@ -142,12 +142,12 @@ ACMD(do_honoo)
           dmg /= 4;
           hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
 
-          if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+          if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
             send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-            rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-          } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+            room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+          } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
             send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-            rroom_set_geffect(g, char_get_in_room(ch), 0);
+            room_set_geffect(g, char_get_in_room(ch), 0);
           }
           return;
         }
@@ -161,8 +161,8 @@ ACMD(do_honoo)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -173,12 +173,12 @@ ACMD(do_honoo)
           }
           hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
-          if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+          if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
             send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-            rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-          } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+            room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+          } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
             send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-            rroom_set_geffect(g, char_get_in_room(ch), 0);
+            room_set_geffect(g, char_get_in_room(ch), 0);
           }
 
           return;
@@ -193,12 +193,12 @@ ACMD(do_honoo)
           pcost(g, ch, attperc, 0);
         }
         hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+        if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
           send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-          rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-        } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+          room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+        } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
           send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-          rroom_set_geffect(g, char_get_in_room(ch), 0);
+          room_set_geffect(g, char_get_in_room(ch), 0);
         }
 
         return;
@@ -211,12 +211,12 @@ ACMD(do_honoo)
       } else {
         pcost(g, ch, attperc, 0);
       }
-      if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+      if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
         send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-        rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-      } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+        room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+      } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
         send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-        rroom_set_geffect(g, char_get_in_room(ch), 0);
+        room_set_geffect(g, char_get_in_room(ch), 0);
       }
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       return;
@@ -300,12 +300,12 @@ ACMD(do_honoo)
     } else {
       pcost(g, ch, attperc, 0);
     }
-    if (rroom_get_geffect(g, char_get_in_room(ch)) < -1) {
+    if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
       send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
-      rroom_set_geffect(g, char_get_in_room(ch), rroom_get_geffect(g, char_get_in_room(ch)) + (1));
-    } else if (rroom_get_geffect(g, char_get_in_room(ch)) == -1) {
+      room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
+    } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
       send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
-      rroom_set_geffect(g, char_get_in_room(ch), 0);
+      room_set_geffect(g, char_get_in_room(ch), 0);
     }
     char_aff_set(vict, AFF_ASHED, false);
     return;
@@ -459,8 +459,8 @@ ACMD(do_psyblast)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -683,8 +683,8 @@ ACMD(do_sbc)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 90) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (10));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 90) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (10));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -892,8 +892,8 @@ ACMD(do_kousengan)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -1140,8 +1140,8 @@ ACMD(do_deathbeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {

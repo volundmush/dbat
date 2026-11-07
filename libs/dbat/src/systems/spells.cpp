@@ -89,7 +89,7 @@ ASPELL(spell_teleport)
 
   do {
     to_room = g->rooms.nth(rand_number(g, 0, (int)g->rooms.size() - 1));
-  } while (rroom_flagged(g, to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
+  } while (room_flagged(g, to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
   act(g, "$n slowly fades out of existence and is gone.",
       false, victim, nullptr, nullptr, TO_ROOM);
@@ -125,13 +125,13 @@ ASPELL(spell_summon)
     if (!char_is_npc(victim) && !char_prf_flagged(g, victim, PRF_SUMMONABLE) &&
         !char_plr_flagged(victim, PLR_KILLER)) {
       send_to_char(g, victim, "%s just tried to summon you to: %s.\r\n"
-                           "%s failed because you have summon protection on.\r\n"
-                           "Type NOSUMMON to allow other players to summon you.\r\n",
-                   char_get_name(ch), rroom_get_name(g, char_get_in_room(ch)),
+                              "%s failed because you have summon protection on.\r\n"
+                              "Type NOSUMMON to allow other players to summon you.\r\n",
+                   char_get_name(ch), room_get_name(g, char_get_in_room(ch)),
                    (char_get_sex(ch) == SEX_MALE) ? "He" : "She");
 
       send_to_char(g, ch, "You failed because %s has summon protection on.\r\n", char_get_name(victim));
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), rroom_get_name(g, char_get_in_room(ch)));
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), room_get_name(g, char_get_in_room(ch)));
       return;
     }
   }
@@ -185,7 +185,7 @@ ASPELL(spell_locate_object)
     if (obj_get_carried_by(i))
       send_to_char(g, ch, " is being carried by %s.\r\n", char_pers(g, obj_get_carried_by(i), ch));
     else if (obj_get_in_room(i) != NOWHERE)
-      send_to_char(g, ch, " is in %s.\r\n", rroom_get_name(g, obj_get_in_room(i)));
+      send_to_char(g, ch, " is in %s.\r\n", room_get_name(g, obj_get_in_room(i)));
     else if (obj_get_in_obj(i))
       send_to_char(g, ch, " is in %s.\r\n", obj_get_short_description(obj_get_in_obj(i)));
     else if (obj_get_worn_by(i))
@@ -446,8 +446,8 @@ ASPELL(spell_portal)
   }
 
   /* create the portal */
-  portal = read_object(g, portal_object, VIRTUAL);
-  obj_set_value(portal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(victim)));
+  portal = read_object(g, portal_object);
+  obj_set_value(portal, VAL_PORTAL_DEST, char_get_in_room(victim));
   obj_set_value(portal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(portal, VAL_PORTAL_MAXHEALTH, 100);
   obj_set_timer(portal, level / 10);
@@ -458,8 +458,8 @@ ASPELL(spell_portal)
   act(g, "You open a portal out of thin air.",
       true, ch, nullptr, nullptr, TO_CHAR);
   /* create the portal at the other end */
-  tportal = read_object(g, portal_object, VIRTUAL);
-  obj_set_value(tportal, VAL_PORTAL_DEST, rroom_get_vnum(g, char_get_in_room(ch)));
+  tportal = read_object(g, portal_object);
+  obj_set_value(tportal, VAL_PORTAL_DEST, char_get_in_room(ch));
   obj_set_value(tportal, VAL_PORTAL_HEALTH, 100);
   obj_set_value(tportal, VAL_PORTAL_MAXHEALTH, 100);
   obj_set_timer(tportal, level / 10);
@@ -515,11 +515,11 @@ ASPELL(art_abundant_step)
       while (rep--) {
         if (++steps > max)
           break;
-        if (!rroom_get_dir_option(g, r, i)) {
+        if (!room_get_dir_option(g, r, i)) {
           send_to_char(g, ch, "Invalid step. Skipping.\r\n");
           break;
         }
-        nextroom = rroom_get_dir_option(g, r, i)->to_room;
+        nextroom = room_get_dir_option(g, r, i)->to_room;
         if (nextroom == NOWHERE)
           break;
         r = nextroom;

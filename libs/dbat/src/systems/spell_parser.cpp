@@ -121,7 +121,7 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
   if (!cast_mtrigger(g, caster, cvict, spellnum) || char_is_dead(caster) || (ovict && !find_obj(g, ovict_id)))
     return 0;
 
-  if (rroom_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
+  if (room_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
     send_to_char(g, caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
     act(g, "White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr, nullptr, TO_ROOM);

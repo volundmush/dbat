@@ -391,7 +391,7 @@ static void free_config(GameWorld *g, struct config_data *data)
 /**   ch                                                                     **/
 /**     The character requesting access to modify this zone.                 **/
 /**   rnum                                                                   **/
-/**     The real number of the zone attempted to be modified.                **/
+/**     The zone attempted to be modified.                                   **/
 /**                                                                          **/
 /** Returns        : Returns TRUE if the builder has access, otherwise       **/
 /**                  FALSE.                                                  **/

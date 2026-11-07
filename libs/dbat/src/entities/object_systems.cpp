@@ -38,7 +38,7 @@ void broken_update(GameWorld *g)
         grav_change = true;
       }
       if (grav_change == true && obj_get_in_room(k) != NOWHERE) {
-        rroom_set_gravity(g, obj_get_in_room(k), rand_gravity[grav_roll]);
+        room_set_gravity(g, obj_get_in_room(k), rand_gravity[grav_roll]);
         obj_set_weight(k, rand_gravity[grav_roll]);
         send_to_room(g, obj_get_in_room(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
       }

@@ -440,7 +440,7 @@ static void trigedit_compile_script(trig_data *trig, char *s)
     trig->cmdlist->cmd = strdup("* No Script");
 }
 
-/* Replaces prototype rnum with the edited trigger, and updates every live copy of it. */
+/* Replaces the trigger prototype with the edited trigger, and updates every live copy of it. */
 static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, struct index_data *rnum)
 {
   trig_data *trig  = OLC_TRIG(d);

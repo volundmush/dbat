@@ -469,7 +469,7 @@ static void check_carrying_more_than_a_byte_can_count(void)
   int before = char_get_carry_items(ch);
 
   for (int i = 0; i < 300; i++)
-    obj_to_char(g, read_object(g, 350, VIRTUAL), ch);
+    obj_to_char(g, read_object(g, 350), ch);
   CHECK(char_get_carry_items(ch) == before + 300);
   CHECK_AUDIT(g);
   th_shutdown(g);
@@ -479,7 +479,7 @@ static void check_mob_memory_gets_forgotten(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+  struct char_data *mob = read_mobile(g, 300);
   struct script_memory *mem;
 
   char_to_room(g, mob, char_get_in_room(ch));
@@ -532,7 +532,7 @@ static void check_zone_range_keeps_what_is_in_it(void)
   th_type(g, ch, "y");
   CHECK(zone->bot == bot);
   CHECK(zone->top == top);
-  CHECK(real_room(g, 301) != NOWHERE);
+  CHECK(room_of(g, 301));
   th_shutdown(g);
 }
 
@@ -615,8 +615,8 @@ static void check_worn_container_that_cannot_go_back_on(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct obj_data *bag = read_object(g, CONTAINER_VNUM, VIRTUAL);
-  struct obj_data *inside = read_object(g, 350, VIRTUAL);
+  struct obj_data *bag    = read_object(g, CONTAINER_VNUM);
+  struct obj_data *inside = read_object(g, 350);
 
   while (char_get_inventory(ch))
     extract_obj(g, char_get_inventory(ch));
@@ -630,7 +630,7 @@ static void check_worn_container_that_cannot_go_back_on(void)
   extract_obj(g, char_get_equipment(ch, WEAR_HEAD));
 
   /* now something else is on that spot, as can happen when a save has two things there */
-  equip_char(g, ch, read_object(g, 350, VIRTUAL), WEAR_HEAD);
+  equip_char(g, ch, read_object(g, 350), WEAR_HEAD);
   Crash_load(g, ch);
 
   struct obj_data *back = nullptr;
@@ -648,7 +648,7 @@ static void check_message_about_an_object_with_no_description(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct obj_data *obj = read_object(g, 350, VIRTUAL);
+  struct obj_data *obj = read_object(g, 350);
   char *description = obj_get_short_description(obj);
 
   obj_set_short_description(obj, nullptr);
@@ -702,7 +702,7 @@ static void check_defending_someone_else_lets_go_of_the_first(void)
   CHECK_AUDIT(g);
   /* one defender at a time: a second takes over from the first, who may not be there to see it */
   char_from_room(g, ch);
-  char_to_room(g, ch, real_room(g, 301));
+  char_to_room(g, ch, 301);
   th_take_output(g, ch);
   th_type(g, rival, "defend second");
   CHECK(saw(ch, "no longer defending"));
@@ -720,8 +720,8 @@ static void check_mob_given_armor_with_no_wear_slot(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
-  struct obj_data *armor = read_object(g, 350, VIRTUAL);
+  struct char_data *mob  = read_mobile(g, 300);
+  struct obj_data *armor = read_object(g, 350);
 
   CHECK(mob != nullptr);
   char_to_room(g, mob, char_get_in_room(ch));
@@ -736,11 +736,11 @@ static void check_mob_given_armor_with_no_wear_slot(void)
 static void check_start_room_cannot_be_deleted(void)
 {
   GameWorld *g = th_boot();
-  room_vnum start = real_room(g, CONFIG_MORTAL_START);
+  room_vnum start = CONFIG_MORTAL_START;
 
-  CHECK(start != NOWHERE);
+  CHECK(room_of(g, start));
   CHECK(!delete_room(g, start));
-  CHECK(real_room(g, CONFIG_MORTAL_START) == start);
+  CHECK(CONFIG_MORTAL_START == start);
   CHECK(g->r_mortal_start_room == start);
   th_shutdown(g);
 }
@@ -811,7 +811,7 @@ static void check_shadow_dragon_missing_from_the_world(void)
 
   th_before_boot(save_a_shadow_dragon_that_does_not_exist);
   g = th_boot();
-  CHECK(real_mobile(g, SHADOW_DRAGON1_VNUM) == NOBODY); /* or this checks nothing */
+  CHECK(!mob_proto_of(g, SHADOW_DRAGON1_VNUM)); /* or this checks nothing */
   CHECK(g->SHADOW_DRAGON1 == -1);
   CHECK_AUDIT(g);
   th_shutdown(g);
@@ -822,11 +822,11 @@ static void check_homing_ball_that_someone_is_carrying(void)
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
   struct char_data *target = th_player(g, "Target", ADMLVL_NONE);
-  struct obj_data *ball = read_object(g, 80, VIRTUAL);
-  struct obj_data *other = read_object(g, 350, VIRTUAL);
+  struct obj_data *ball    = read_object(g, 80);
+  struct obj_data *other   = read_object(g, 350);
 
   char_from_room(g, target);
-  char_to_room(g, target, real_room(g, 301));
+  char_to_room(g, target, 301);
   obj_to_char(g, other, ch);
   obj_to_char(g, ball, ch);
   obj_set_kicharge(ball, 100);
@@ -842,7 +842,7 @@ static void check_homing_ball_that_someone_is_carrying(void)
 static void check_long_name_in_auction_file(void)
 {
   GameWorld *g = th_boot();
-  struct obj_data *obj = read_object(g, 350, VIRTUAL);
+  struct obj_data *obj = read_object(g, 350);
   char text[400], name[201];
 
   memset(name, 'x', 200);

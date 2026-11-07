@@ -195,7 +195,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
     room_vnum rnum;
 
-    if ((rnum = real_room(g, i)) != NOWHERE) {
+    if (room_of(g, rnum = i)) {
       int j;
 
       room = (room_of(g, rnum));
@@ -265,7 +265,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
                       "%d %d %d %d %d %d %d %d %d %d %d\n",
                   j, buf, buf1, dflag,
                   room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
-                  room_get_dir_option(room, j)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, j)->to_room) : -1,
+                  room_get_dir_option(room, j)->to_room != NOWHERE ? room_get_dir_option(room, j)->to_room : -1,
                   room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
                   room_get_dir_option(room, j)->dcskill, room_get_dir_option(room, j)->dcmove,
                   room_get_dir_option(room, j)->failsavetype, room_get_dir_option(room, j)->dcfailsave,

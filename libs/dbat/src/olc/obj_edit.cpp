@@ -408,7 +408,7 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "@wPurchase complete.@n\r\n");
           desc_set_connected(d, CON_PLAYING);
           if (d->obj_weapon == 0) {
-            obj = read_object(g, 20099, VIRTUAL);
+            obj = read_object(g, 20099);
             obj_to_char(g, obj, d->character);
             switch (d->obj_type) {
               case 1:
@@ -464,7 +464,7 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             *buf3                  = '\0';
             obj_set_description(obj, strdup(d->obj_long));
           } else {
-            obj = read_object(g, 20098, VIRTUAL);
+            obj = read_object(g, 20098);
             obj_to_char(g, obj, d->character);
             *buf                   = '\0';
             obj_set_name(obj, strdup(d->obj_name));

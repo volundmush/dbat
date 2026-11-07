@@ -222,7 +222,7 @@ static void equip_bot(GameWorld *g, struct char_data *ch, unsigned long kit)
     char_prf_set(g, ch, roll(&kit, NUM_PRF_FLAGS), true);
   restore(g, ch, false);
   for (unsigned long n = roll(&kit, 8) + 2; n > 0; n--)
-    obj_to_char(g, read_object(g, nth_obj_vnum(g, roll(&kit, g->obj_proto.size())), REAL), ch);
+    obj_to_char(g, read_object(g, nth_obj_vnum(g, roll(&kit, g->obj_proto.size()))), ch);
   char_from_room(g, ch);
   char_to_room(g, ch, g->rooms.nth(roll(&kit, g->rooms.size())));
 }
@@ -460,7 +460,7 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
     }
     case 1: {
       int count, chosen;
-      struct obj_data *list = char_get_in_room(ch) != NOWHERE && bot_dice(2) ? rroom_get_contents(g, char_get_in_room(ch)) : char_get_inventory(ch);
+      struct obj_data *list = char_get_in_room(ch) != NOWHERE && bot_dice(2) ? room_get_contents(g, char_get_in_room(ch)) : char_get_inventory(ch);
 
       count  = count_members(obj_list(g, list));
       chosen = bot_dice(count ? count : 1);

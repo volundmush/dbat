@@ -195,7 +195,7 @@ ACMD(do_oasis_oedit)
   /** If this is a new object, setup a new object, otherwise setup the       **/
   /** existing object.                                                       **/
   /****************************************************************************/
-  if ((real_num = real_object(g, number)) != NOTHING)
+  if (obj_proto_of(g, real_num = number))
     oedit_setup_existing(g, d, real_num);
   else
     oedit_setup_new(d);
@@ -270,7 +270,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
   int i;
   obj_vnum robj_num;
 
-  i = (real_object(g, OLC_NUM(d)) == NOTHING);
+  i = (!obj_proto_of(g, OLC_NUM(d)));
 
   if ((robj_num = add_object(g, OLC_OBJ(d), OLC_NUM(d))) == NOTHING) {
     mud_log("oedit_save_internally: add_object failed.");
@@ -1035,7 +1035,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       }
 
     case OEDIT_COPY:
-      if ((rnum = real_object(g, atoi(arg))) != NOTHING) {
+      if (obj_proto_of(g, rnum = atoi(arg))) {
         oedit_setup_existing(g, d, rnum);
       } else
         write_to_output(g, d, "That object does not exist.\r\n");
@@ -1085,7 +1085,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             commit_iedit(g, obj, OLC_OBJ(d));
             if (obj_get_vnum(g, obj) != NOTHING) {
               free_proto_script(obj, OBJ_TRIGGER);
-              robj = real_object(g, obj_get_vnum(g, obj));
+              robj = obj_get_vnum(g, obj);
               copy_proto_script(obj_proto_of(g, robj), obj, OBJ_TRIGGER);
               assign_triggers(g, obj, OBJ_TRIGGER);
             }
@@ -1808,7 +1808,7 @@ ACMD(do_iedit)
     found = 1;
   } else if ((k = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
     found = 1;
-  } else if ((k = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+  } else if ((k = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
     found = 1;
   } else if ((k = get_obj_vis(g, ch, arg, nullptr))) {
     found = 1;

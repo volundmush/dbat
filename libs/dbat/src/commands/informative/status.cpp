@@ -673,7 +673,7 @@ ACMD(do_status)
     if (char_plr_flagged(ch, PLR_NOSHOUT)) {
       send_to_char(g, ch, "         You have been @rmuted@n on public channels.\r\n");
     }
-    if (char_get_in_room(ch) == real_room(g, 9)) {
+    if (char_get_in_room(ch) == 9) {
       send_to_char(g, ch, "         You are in punishment hell, so sad....\r\n");
     }
     if (!char_prf_flagged(g, ch, PRF_HINTS)) {

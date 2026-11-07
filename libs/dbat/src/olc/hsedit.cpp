@@ -119,11 +119,11 @@ static void hsedit_save_internally(GameWorld *g, struct descriptor_data *d)
     }
   }
   /* The new house is stored - now to ensure the roomsflags are correct */
-  if (real_room(g, OLC_HOUSE(d)->vnum) != NOWHERE)
-    rroom_set_flag(g, real_room(g, OLC_HOUSE(d)->vnum), ROOM_HOUSE, true);
+  if (room_of(g, OLC_HOUSE(d)->vnum))
+    room_set_flag(g, OLC_HOUSE(d)->vnum, ROOM_HOUSE, true);
 
-  if (real_room(g, OLC_HOUSE(d)->atrium) != NOWHERE)
-    rroom_set_flag(g, real_room(g, OLC_HOUSE(d)->atrium), ROOM_ATRIUM, true);
+  if (room_of(g, OLC_HOUSE(d)->atrium))
+    room_set_flag(g, OLC_HOUSE(d)->atrium, ROOM_ATRIUM, true);
 
   //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE);
 }
@@ -157,10 +157,10 @@ static void hedit_delete_house(GameWorld *g, struct descriptor_data *d, room_vnu
     return;
   }
 
-  if ((real_house = real_room(g, g->house_control[i].vnum)) == NOWHERE)
+  if (!room_of(g, real_house = g->house_control[i].vnum))
     mud_log("SYSERR: House %d had invalid vnum %d!", house_vnum, g->house_control[i].vnum);
   else
-    rroom_set_flag(g, real_house, ROOM_HOUSE | ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, real_house, ROOM_HOUSE | ROOM_HOUSE_CRASH, false);
 
   House_delete_file(g->house_control[i].vnum);
 
@@ -227,17 +227,17 @@ static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
   house = OLC_HOUSE(d);
 
   mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum);
-  house_rnum = real_room(g, house->vnum);
+  house_rnum = house->vnum;
 
-  if ((house_rnum < 0) || (house_rnum == NOWHERE)) {
+  if ((house_rnum < 0) || (!room_of(g, house_rnum))) {
     sprintf(buf, "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n"
                  "(Press Enter)\r\n");
     OLC_MODE(d) = HSEDIT_NOVNUM;
   } else {
     /* Grab exit rooms */
     for (i = 0; i < 12; i++) {
-      if (rroom_get_dir_option(g, house_rnum, i))
-        newroom[i] = rroom_get_dir_option(g, house_rnum, i)->to_room;
+      if (room_get_dir_option(g, house_rnum, i))
+        newroom[i] = room_get_dir_option(g, house_rnum, i)->to_room;
       else
         newroom[i] = NOWHERE;
     }
@@ -258,18 +258,18 @@ static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
             "@gQ@D)@g Back to main menu\r\n"
             "@gEnter atrium direction : @n",
 
-            newroom[0] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[0])),
-            newroom[1] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[1])),
-            newroom[2] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[2])),
-            newroom[3] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[3])),
-            newroom[4] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[4])),
-            newroom[5] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[5])),
-            newroom[6] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[6])),
-            newroom[7] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[7])),
-            newroom[8] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[8])),
-            newroom[9] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[9])),
-            newroom[10] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[10])),
-            newroom[11] == NOWHERE ? "NO ROOM" : rroom_get_name(g, (newroom[11])));
+            newroom[0] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[0])),
+            newroom[1] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[1])),
+            newroom[2] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[2])),
+            newroom[3] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[3])),
+            newroom[4] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[4])),
+            newroom[5] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[5])),
+            newroom[6] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[6])),
+            newroom[7] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[7])),
+            newroom[8] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[8])),
+            newroom[9] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[9])),
+            newroom[10] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[10])),
+            newroom[11] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[11])));
     OLC_MODE(d) = HSEDIT_DIR_MENU;
   }
   send_to_char(g, d->character, "%s", buf);
@@ -475,7 +475,7 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
 
         case '2':
-          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(g, OLC_HOUSE(d)->vnum) == NOWHERE)) {
+          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (!room_of(g, OLC_HOUSE(d)->vnum))) {
             send_to_char(g, d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
             mudlog(g, LOG_NRM, ADMLVL_GRGOD, true, "SYSERR: Invalid house VNUM in hsedit");
           } else {
@@ -485,7 +485,7 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
 
         case '3':
-          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(g, OLC_HOUSE(d)->vnum) == NOWHERE)) {
+          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (!room_of(g, OLC_HOUSE(d)->vnum))) {
             send_to_char(g, d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
             mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Invalid house VNUM in hsedit");
           } else {
@@ -577,14 +577,14 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         hsedit_disp_menu(g, d);
         return;
       }
-      rnum = real_room(g, OLC_HOUSE(d)->vnum);
-      if (real_room(g, number) == NOWHERE) {
+      rnum = OLC_HOUSE(d)->vnum;
+      if (!room_of(g, number)) {
         send_to_char(g, d->character, "Room VNUM does not exist.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
         return;
       }
       for (i = 0; i < 12; i++) {
-        if (rroom_get_dir_option(g, rnum, i)) {
-          if (rroom_get_dir_option(g, rnum, i)->to_room == real_room(g, number)) {
+        if (room_get_dir_option(g, rnum, i)) {
+          if (room_get_dir_option(g, rnum, i)->to_room == number) {
             found = true;
             id    = i;
           }
@@ -611,21 +611,21 @@ void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         send_to_char(g, d->character, "Invalid choice, Please select a direction (1-12, Q to quit) : ");
         return;
       }
-      house = real_room(g, OLC_HOUSE(d)->vnum);
-      if (!(rroom_get_dir_option(g, house, number))) {
+      house = OLC_HOUSE(d)->vnum;
+      if (!(room_get_dir_option(g, house, number))) {
         send_to_char(g, d->character, "You cannot set the atrium to a room that doesn't exist!\r\n");
         hsedit_dir_menu(g, d);
         return;
       }
-      if ((rroom_get_dir_option(g, house, number)->to_room) == NOWHERE) {
+      if ((room_get_dir_option(g, house, number)->to_room) == NOWHERE) {
         send_to_char(g, d->character, "You cannot set the atrium to nowhere!\r\n");
         hsedit_dir_menu(g, d);
         return;
       }
       OLC_HOUSE(d)->exit_num = number;
 
-      rnum                 = rroom_get_dir_option(g, house, number)->to_room;
-      OLC_HOUSE(d)->atrium = rroom_get_vnum(g, rnum);
+      rnum                 = room_get_dir_option(g, house, number)->to_room;
+      OLC_HOUSE(d)->atrium = rnum;
       break;
 
     case HSEDIT_NOVNUM:
@@ -884,7 +884,7 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   if (!*buf1) {
-    number = rroom_get_vnum(g, char_get_in_room(ch));
+    number = char_get_in_room(ch);
   } else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");

@@ -165,7 +165,7 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         p       = any_one_name(++p, name);
 
         if (find_invis) obj = get_obj_in_room(g, room_of(g, char_get_in_room(ch)), name);
-        else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
+        else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, room_get_contents(g, char_get_in_room(ch)))))
           ;
         else if (!(obj = get_obj_in_equip_vis(g, ch, name, &tmp, char_get_equipment_array(ch))))
           ;
@@ -206,6 +206,6 @@ void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone)
   for (descriptor_data *i : each_desc(g))
     if (!i->connected && i->character && char_is_awake(i->character) &&
         (char_get_in_room(i->character) != NOWHERE) &&
-        (rroom_get_zone(g, char_get_in_room(i->character)) == zone))
+        (room_get_zone(g, char_get_in_room(i->character)) == zone))
       write_to_output(g, i, "%s", messg);
 }

@@ -269,7 +269,7 @@ ACMD(do_arena)
     char_set_arenawatch(ch, -1);
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) != 17875) {
+  if (char_get_in_room(ch) != 17875) {
     send_to_char(g, ch, "You are not close enough to the arena floor to see it.\r\n");
     return;
   }
@@ -279,10 +279,10 @@ ACMD(do_arena)
       return;
     }
     if (arena_watch(g, ch) != NOWHERE) {
-      look_at_room(g, real_room(g, arena_watch(g, ch)), ch, 0);
+      look_at_room(g, arena_watch(g, ch), ch, 0);
     }
   } else if (!strcasecmp(arg, "scan")) {
-    if (rroom_get_vnum(g, char_get_in_room(ch)) == 17875) {
+    if (char_get_in_room(ch) == 17875) {
       int found = false;
 
       send_to_char(g, ch, "@D---@CFighters in the arena@D---@n\r\n");
@@ -404,16 +404,16 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else {
           for (objnum = 1110; objnum < 1120; objnum++) {
             if (objnum <= 1116) {
-              obj = read_object(g, objnum, VIRTUAL);
+              obj = read_object(g, objnum);
               obj_to_char(g, obj, ch);
               obj_set_size(obj, get_size(ch));
               obj = nullptr;
             } else {
-              obj = read_object(g, objnum, VIRTUAL);
+              obj = read_object(g, objnum);
               obj_to_char(g, obj, ch);
               obj_set_size(obj, get_size(ch));
               obj = nullptr;
-              obj = read_object(g, objnum, VIRTUAL);
+              obj = read_object(g, objnum);
               obj_to_char(g, obj, ch);
               obj_set_size(obj, get_size(ch));
             }
@@ -434,7 +434,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1120, VIRTUAL);
+          obj = read_object(g, 1120);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -453,7 +453,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1121, VIRTUAL);
+          obj = read_object(g, 1121);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -472,7 +472,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1122, VIRTUAL);
+          obj = read_object(g, 1122);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -491,7 +491,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1123, VIRTUAL);
+          obj = read_object(g, 1123);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -510,7 +510,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1124, VIRTUAL);
+          obj = read_object(g, 1124);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -529,7 +529,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_level(ch) < 40) {
           send_to_char(g, ch, "You are below the minimum level to equip it.\r\n");
         } else {
-          obj = read_object(g, 1125, VIRTUAL);
+          obj = read_object(g, 1125);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
@@ -546,7 +546,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(g, ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else {
-          obj = read_object(g, 1126, VIRTUAL);
+          obj = read_object(g, 1126);
           obj_set_weight(obj, 10000000);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
@@ -564,7 +564,7 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
         } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(g, ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else {
-          obj = read_object(g, 1127, VIRTUAL);
+          obj = read_object(g, 1127);
           obj_to_char(g, obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));

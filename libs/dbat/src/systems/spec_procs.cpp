@@ -44,7 +44,7 @@ SPECIAL(dump)
   struct obj_data *k;
   int value = 0;
 
-  for (k = rroom_get_contents(g, char_get_in_room(ch)); k; k = rroom_get_contents(g, char_get_in_room(ch))) {
+  for (k = room_get_contents(g, char_get_in_room(ch)); k; k = room_get_contents(g, char_get_in_room(ch))) {
     act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     extract_obj(g, k);
   }
@@ -54,7 +54,7 @@ SPECIAL(dump)
 
   do_drop(g, ch, argument, cmd, SCMD_DROP);
 
-  for (k = rroom_get_contents(g, char_get_in_room(ch)); k; k = rroom_get_contents(g, char_get_in_room(ch))) {
+  for (k = room_get_contents(g, char_get_in_room(ch)); k; k = room_get_contents(g, char_get_in_room(ch))) {
     act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     value += MAX(1, MIN(50, obj_get_cost(k) / 10));
     extract_obj(g, k);
@@ -87,7 +87,7 @@ int num_players_in_room(GameWorld *g, room_vnum room)
       continue;
     if (!room_of(g, char_get_in_room(i->character)))
       continue;
-    if (rroom_get_vnum(g, char_get_in_room(i->character)) != room)
+    if (char_get_in_room(i->character) != room)
       continue;
     if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(g, i->character, PRF_NOHASSLE))) /* Ignore Imms */
       continue;
@@ -104,7 +104,7 @@ bool check_mob_in_room(GameWorld *g, mob_vnum mob, room_vnum room)
 
   for (char_data *i : each_char(g))
     if (char_get_mob_vnum(g, i) == mob)
-      if (rroom_get_vnum(g, char_get_in_room(i)) == room) found = true;
+      if (char_get_in_room(i) == room) found = true;
 
   return found;
 }
@@ -181,7 +181,7 @@ SPECIAL(pet_shops)
     }
     char_set_gold(ch, char_get_gold(ch) - (PET_PRICE(pet)));
 
-    pet = read_mobile(g, char_get_nr(pet), REAL);
+    pet = read_mobile(g, char_get_nr(pet));
     char_set_exp(pet, 0);
     char_aff_set(pet, AFF_CHARM, true);
 
@@ -220,7 +220,7 @@ SPECIAL(auction)
   int found = false;
 
   /* Gross. */
-  auct_room = real_room(g, 80);
+  auct_room = 80;
 
   if (CMD_IS(g, "cancel")) {
 
@@ -661,11 +661,11 @@ SPECIAL(gravity)
     if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10)) {
-        rroom_set_gravity(g, char_get_in_room(ch), 10);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10)) {
+        room_set_gravity(g, char_get_in_room(ch), 10);
         obj_set_weight(obj, 0);
       } else {
-        rroom_set_gravity(g, char_get_in_room(ch), 0);
+        room_set_gravity(g, char_get_in_room(ch), 0);
         obj_set_weight(obj, 0);
       }
       match = true;
@@ -674,24 +674,24 @@ SPECIAL(gravity)
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("10", arg) && rroom_get_gravity(g, char_get_in_room(ch)) == 10 && (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
+    if (!strcasecmp("10", arg) && room_get_gravity(g, char_get_in_room(ch)) == 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(g, ch, "The gravity around you is already at that.\r\n");
       return (true);
     }
-    if (!strcasecmp("10", arg) && rroom_get_gravity(g, char_get_in_room(ch)) != 10 && (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
+    if (!strcasecmp("10", arg) && room_get_gravity(g, char_get_in_room(ch)) != 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 10);
+      room_set_gravity(g, char_get_in_room(ch), 10);
       obj_set_weight(obj, 0);
       match = true;
     } else if (!strcasecmp("10", arg)) {
       send_to_char(g, ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      rroom_set_gravity(g, char_get_in_room(ch), 10);
+      room_set_gravity(g, char_get_in_room(ch), 10);
       obj_set_weight(obj, 10);
       match = true;
     }
@@ -702,11 +702,11 @@ SPECIAL(gravity)
     if (!strcasecmp("20", arg)) {
       send_to_char(g, ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 20);
+      room_set_gravity(g, char_get_in_room(ch), 20);
       obj_set_weight(obj, 20);
       match = true;
     }
@@ -717,11 +717,11 @@ SPECIAL(gravity)
     if (!strcasecmp("30", arg)) {
       send_to_char(g, ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 30);
+      room_set_gravity(g, char_get_in_room(ch), 30);
       obj_set_weight(obj, 30);
       match = true;
     }
@@ -732,11 +732,11 @@ SPECIAL(gravity)
     if (!strcasecmp("40", arg)) {
       send_to_char(g, ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 40);
+      room_set_gravity(g, char_get_in_room(ch), 40);
       obj_set_weight(obj, 40);
       match = true;
     }
@@ -747,11 +747,11 @@ SPECIAL(gravity)
     if (!strcasecmp("50", arg)) {
       send_to_char(g, ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 50);
+      room_set_gravity(g, char_get_in_room(ch), 50);
       obj_set_weight(obj, 50);
       match = true;
     }
@@ -762,11 +762,11 @@ SPECIAL(gravity)
     if (!strcasecmp("100", arg)) {
       send_to_char(g, ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 100);
+      room_set_gravity(g, char_get_in_room(ch), 100);
       obj_set_weight(obj, 100);
       match = true;
     }
@@ -777,11 +777,11 @@ SPECIAL(gravity)
     if (!strcasecmp("200", arg)) {
       send_to_char(g, ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 200);
+      room_set_gravity(g, char_get_in_room(ch), 200);
       obj_set_weight(obj, 200);
       match = true;
     }
@@ -792,11 +792,11 @@ SPECIAL(gravity)
     if (!strcasecmp("300", arg)) {
       send_to_char(g, ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 300);
+      room_set_gravity(g, char_get_in_room(ch), 300);
       obj_set_weight(obj, 300);
       match = true;
     }
@@ -807,11 +807,11 @@ SPECIAL(gravity)
     if (!strcasecmp("400", arg)) {
       send_to_char(g, ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 400);
+      room_set_gravity(g, char_get_in_room(ch), 400);
       obj_set_weight(obj, 400);
       match = true;
     }
@@ -822,11 +822,11 @@ SPECIAL(gravity)
     if (!strcasecmp("500", arg)) {
       send_to_char(g, ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 500);
+      room_set_gravity(g, char_get_in_room(ch), 500);
       obj_set_weight(obj, 500);
       match = true;
     }
@@ -837,11 +837,11 @@ SPECIAL(gravity)
     if (!strcasecmp("1000", arg)) {
       send_to_char(g, ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 1000);
+      room_set_gravity(g, char_get_in_room(ch), 1000);
       obj_set_weight(obj, 1000);
       match = true;
     }
@@ -852,11 +852,11 @@ SPECIAL(gravity)
     if (!strcasecmp("5000", arg)) {
       send_to_char(g, ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 5000);
+      room_set_gravity(g, char_get_in_room(ch), 5000);
       obj_set_weight(obj, 5000);
       match = true;
     }
@@ -867,11 +867,11 @@ SPECIAL(gravity)
     if (!strcasecmp("10000", arg)) {
       send_to_char(g, ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-        rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+        room_set_flag(g, char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(g, char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
-      rroom_set_gravity(g, char_get_in_room(ch), 10000);
+      room_set_gravity(g, char_get_in_room(ch), 10000);
       obj_set_weight(obj, 10000);
       match = true;
     } else if (match == false) {

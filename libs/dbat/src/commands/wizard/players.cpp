@@ -1008,7 +1008,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
       char_set_class_level(vict, value);
       break;
     case 35:
-      if ((rnum = real_room(g, value)) == NOWHERE) {
+      if (!room_of(g, rnum = value)) {
         send_to_char(g, ch, "No room exists with that number.\r\n");
         return false;
       }
@@ -1045,7 +1045,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
         char_set_load_room(g, vict, NOWHERE);
       } else if (is_number(val_arg)) {
         rvnum = atoi(val_arg);
-        if (real_room(g, rvnum) != NOWHERE) {
+        if (room_of(g, rvnum)) {
           char_plr_set(vict, PLR_LOADROOM, true);
           char_set_load_room(g, vict, rvnum);
           send_to_char(g, ch, "%s will enter at room #%d.\r\n", char_get_name(vict), char_get_load_room(g, vict));

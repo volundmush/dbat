@@ -48,10 +48,10 @@ char *str_str(char *cs, char *ct)
 
 int trgvar_in_room(GameWorld *g, room_vnum vnum)
 {
-  room_vnum rnum = real_room(g, vnum);
+  room_vnum rnum = vnum;
   int i          = 0;
 
-  if (rnum == NOWHERE) {
+  if (!room_of(g, rnum)) {
     script_log(g, "people.vnum: world[rnum] does not exist");
     return (-1);
   }
@@ -220,9 +220,9 @@ room_data *find_room(GameWorld *g, long n)
   n -= ROOM_ID_BASE;
   if (n < 0)
     return nullptr;
-  rnum = real_room(g, (room_vnum)n);
+  rnum = (room_vnum)n;
 
-  if (rnum != NOWHERE)
+  if (room_of(g, rnum))
     return room_of(g, rnum);
 
   return nullptr;
@@ -333,7 +333,7 @@ obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
     return i;
   else if ((rm = obj_room(obj)) != NOWHERE) {
     /* check the floor */
-    if ((i = get_obj_in_list(g, name, rroom_get_contents(g, rm))))
+    if ((i = get_obj_in_list(g, name, room_get_contents(g, rm))))
       return i;
 
     /* check peoples' inventory */
@@ -366,7 +366,7 @@ room_data *get_room(GameWorld *g, char *name)
 
   if (*name == UID_CHAR)
     return find_room(g, atoi(name + 1));
-  else if ((nr = real_room(g, atoi(name))) == NOWHERE)
+  else if (!room_of(g, nr = atoi(name)))
     return nullptr;
   else
     return room_of(g, nr);
@@ -462,7 +462,7 @@ obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name)
     return i;
 
   if (((rm = obj_room(obj)) != NOWHERE) &&
-      (i = get_obj_in_list(g, name, rroom_get_contents(g, rm))))
+      (i = get_obj_in_list(g, name, room_get_contents(g, rm))))
     return i;
 
   return get_obj(g, name);

@@ -109,31 +109,31 @@ static WCMD(do_weffect)
   num = atoi(arg2);
 
   nr     = num;
-  target = real_room(g, nr);
+  target = nr;
 
   if (!strcasecmp(arg, "gravity")) { /* Set gravity */
     if (num < 0 || num > 10000) {
       wld_log(g, room, "weffect setting out of bounds, 0 - 10000 only.");
       return;
     }
-    rroom_set_gravity(g, real_room(g, room_get_number(room)), num);
+    room_set_gravity(g, room_get_number(room), num);
   } else if (!strcasecmp(arg, "light")) {
-    if (target == NOWHERE) {
+    if (!room_of(g, target)) {
       wld_log(g, room, "weffect target is NOWHERE.");
       return;
     }
-    if (!rroom_flagged(g, target, ROOM_INDOORS)) {
-      rroom_set_flag(g, target, ROOM_INDOORS, true);
+    if (!room_flagged(g, target, ROOM_INDOORS)) {
+      room_set_flag(g, target, ROOM_INDOORS, true);
     } else {
-      rroom_set_flag(g, target, ROOM_INDOORS, false);
+      room_set_flag(g, target, ROOM_INDOORS, false);
     }
   } else if (!strcasecmp(arg, "lava")) {
-    if (target == NOWHERE) {
+    if (!room_of(g, target)) {
       wld_log(g, room, "weffect target is NOWHERE.");
       return;
     }
-    if (rroom_get_geffect(g, target) != 0) {
-      rroom_set_geffect(g, target, 5);
+    if (room_get_geffect(g, target) != 0) {
+      room_set_geffect(g, target, 5);
     } else {
       wld_log(g, room, "weffect target already has lava.");
       return;
@@ -288,9 +288,9 @@ static WCMD(do_wteleport)
   }
 
   nr     = atoi(arg2);
-  target = real_room(g, nr);
+  target = nr;
 
-  if (target == NOWHERE)
+  if (!room_of(g, target))
     wld_log(g, room, "wteleport target is an invalid room");
 
   else if (!strcasecmp(arg1, "all")) {
@@ -428,14 +428,14 @@ static WCMD(do_wload)
   if (is_abbrev(arg1, "mob")) {
     room_vnum rnum;
     if (!target || !*target) {
-      rnum = real_room(g, room_get_number(room));
+      rnum = room_get_number(room);
     } else {
-      if (!isdigit(*target) || (rnum = real_room(g, atoi(target))) == NOWHERE) {
+      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
         wld_log(g, room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);
         return;
       }
     }
-    if ((mob = read_mobile(g, number, VIRTUAL)) == nullptr) {
+    if ((mob = read_mobile(g, number)) == nullptr) {
       wld_log(g, room, "mload: bad mob vnum");
       return;
     }
@@ -449,14 +449,14 @@ static WCMD(do_wload)
   }
 
   else if (is_abbrev(arg1, "obj")) {
-    if ((object = read_object(g, number, VIRTUAL)) == nullptr) {
+    if ((object = read_object(g, number)) == nullptr) {
       wld_log(g, room, "wload: bad object vnum");
       return;
     }
     /* special handling to make objects able to load on a person/in a container/worn etc. */
     if (!target || !*target) {
       add_unique_id(g, object);
-      obj_to_room(g, object, real_room(g, room_get_number(room)));
+      obj_to_room(g, object, room_get_number(room));
       if (room_get_script(room)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
@@ -489,7 +489,7 @@ static WCMD(do_wload)
     }
     /* neither char nor container found - just dump it in room */
     add_unique_id(g, object);
-    obj_to_room(g, object, real_room(g, room_get_number(room)));
+    obj_to_room(g, object, room_get_number(room));
     load_otrigger(g, object);
     return;
   }
@@ -544,12 +544,12 @@ static WCMD(do_wat)
   }
 
   if (isdigit(*arg)) {
-    loc = real_room(g, atoi(arg));
+    loc = atoi(arg);
   } else if ((ch = get_char_by_room(g, room, arg))) {
     loc = char_get_in_room(ch);
   }
 
-  if (loc == NOWHERE) {
+  if (!room_of(g, loc)) {
     wld_log(g, room, "wat: location not found (%s)", arg);
     return;
   }

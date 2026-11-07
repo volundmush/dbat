@@ -9,7 +9,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static bool rroom_is_valid(GameWorld *g, room_vnum rnum);
+static bool room_is_valid(GameWorld *g, room_vnum rnum);
 
 int num_pc_in_room(GameWorld *g, struct room_data *room)
 {
@@ -27,7 +27,7 @@ int cook_element(GameWorld *g, room_vnum room)
 {
   int found = false;
 
-  for (obj_data *obj : obj_list(g, room_of(g, room)->contents)) {
+  for (obj_data *obj : room_contents(g, room)) {
     if (obj_get_type_flag(obj) == ITEM_CAMPFIRE) {
       found = 1;
     } else if (obj_get_vnum(g, obj) == 19093) {
@@ -43,7 +43,7 @@ int cook_element(GameWorld *g, room_vnum room)
  * Outside rooms are dark at sunset and night.  */
 bool room_is_dark(GameWorld *g, room_vnum room)
 {
-  if (!rroom_is_valid(g, room)) {
+  if (!room_is_valid(g, room)) {
     mud_log("room_is_dark: Invalid room %d.", room);
     return (false);
   }
@@ -54,23 +54,23 @@ bool room_is_dark(GameWorld *g, room_vnum room)
   if (cook_element(g, room))
     return (false);
 
-  if (rroom_flagged(g, room, ROOM_NOINSTANT) && rroom_flagged(g, room, ROOM_DARK)) {
+  if (room_flagged(g, room, ROOM_NOINSTANT) && room_flagged(g, room, ROOM_DARK)) {
     return (true);
   }
-  if (rroom_flagged(g, room, ROOM_NOINSTANT) && !rroom_flagged(g, room, ROOM_DARK)) {
+  if (room_flagged(g, room, ROOM_NOINSTANT) && !room_flagged(g, room, ROOM_DARK)) {
     return (false);
   }
 
-  if (rroom_flagged(g, room, ROOM_DARK))
+  if (room_flagged(g, room, ROOM_DARK))
     return (true);
 
-  if (rroom_flagged(g, room, ROOM_INDOORS))
+  if (room_flagged(g, room, ROOM_INDOORS))
     return (false);
 
-  if (rroom_sect(g, room) == SECT_INSIDE || rroom_sect(g, room) == SECT_CITY || rroom_sect(g, room) == SECT_IMPORTANT || rroom_sect(g, room) == SECT_SHOP)
+  if (room_sect(g, room) == SECT_INSIDE || room_sect(g, room) == SECT_CITY || room_sect(g, room) == SECT_IMPORTANT || room_sect(g, room) == SECT_SHOP)
     return (false);
 
-  if (rroom_sect(g, room) == SECT_SPACE)
+  if (room_sect(g, room) == SECT_SPACE)
     return (false);
 
   if (g->weather_info.sunlight == SUN_SET)
@@ -84,44 +84,40 @@ bool room_is_dark(GameWorld *g, room_vnum room)
 
 /* Formerly macros in room_utils.hpp. */
 
-int rroom_sect(GameWorld *g, room_vnum room)
+int room_sect(GameWorld *g, room_vnum room)
 {
-  return (rroom_is_valid(g, room) ? room_of(g, (room))->sector_type : SECT_INSIDE);
+  return (room_is_valid(g, room) ? room_of(g, (room))->sector_type : SECT_INSIDE);
 }
 
-bool rroom_sunken(GameWorld *g, room_vnum room)
+bool room_sunken(GameWorld *g, room_vnum room)
 {
-  return (rroom_get_geffect(g, room) < 0 || rroom_sect(g, room) == SECT_UNDERWATER);
+  return (room_get_geffect(g, room) < 0 || room_sect(g, room) == SECT_UNDERWATER);
 }
 
-bool rroom_is_light(GameWorld *g, room_vnum room)
+bool room_is_light(GameWorld *g, room_vnum room)
 {
   return (!room_is_dark(g, room));
 }
 
-static bool rroom_is_valid(GameWorld *g, room_vnum rnum)
+static bool room_is_valid(GameWorld *g, room_vnum rnum)
 {
   return room_of(g, rnum) != nullptr;
 }
 
-room_vnum rroom_get_vnum(GameWorld *g, room_vnum rnum)
+spec_proc_func room_get_spec(GameWorld *g, room_vnum room)
 {
-  return ((room_vnum)(rroom_is_valid(g, rnum) ? room_of(g, (rnum))->number : NOWHERE));
+  return (room_is_valid(g, room) ? room_of(g, (room))->func : nullptr);
 }
 
-spec_proc_func rroom_get_spec(GameWorld *g, room_vnum room)
+bool room_planet_zenith(GameWorld *g, room_vnum room)
 {
-  return (rroom_is_valid(g, room) ? room_of(g, (room))->func : nullptr);
+  return ((room >= 3400 && room <= 3599) || (room >= 62900 && room <= 62999) || (room == 19600));
 }
 
-bool rroom_planet_zenith(GameWorld *g, room_vnum room)
+bool room_flagged(GameWorld *g, room_vnum loc, int flag)
 {
-  return ((rroom_get_vnum(g, room) >= 3400 && rroom_get_vnum(g, room) <= 3599) || (rroom_get_vnum(g, room) >= 62900 && rroom_get_vnum(g, room) <= 62999) || (rroom_get_vnum(g, room) == 19600));
-}
-
-bool rroom_flagged(GameWorld *g, room_vnum loc, int flag)
-{
-  return (IS_SET_AR(rroom_get_room_flags(g, loc), (flag)));
+  struct room_data *r = room_of(g, loc);
+  return r && room_flagged(r, flag);
 }
 
 bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag)
@@ -131,49 +127,63 @@ bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag)
 
 /* Field accessors (formerly accessor macros). */
 
-int rroom_get_dmg(GameWorld *g, room_vnum room)
+int room_get_dmg(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->dmg;
+  if (struct room_data *r = room_of(g, room))
+    return r->dmg;
+  return {};
 }
 
-void rroom_set_dmg(GameWorld *g, room_vnum room, int v)
+void room_set_dmg(GameWorld *g, room_vnum room, int v)
 {
-  room_of(g, room)->dmg = v;
+  if (struct room_data *r = room_of(g, room))
+    r->dmg = v;
 }
 
-int rroom_get_geffect(GameWorld *g, room_vnum room)
+int room_get_geffect(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->geffect;
+  if (struct room_data *r = room_of(g, room))
+    return r->geffect;
+  return {};
 }
 
-void rroom_set_geffect(GameWorld *g, room_vnum room, int v)
+void room_set_geffect(GameWorld *g, room_vnum room, int v)
 {
-  room_of(g, room)->geffect = v;
+  if (struct room_data *r = room_of(g, room))
+    r->geffect = v;
 }
 
-int rroom_get_gravity(GameWorld *g, room_vnum room)
+int room_get_gravity(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->gravity;
+  if (struct room_data *r = room_of(g, room))
+    return r->gravity;
+  return {};
 }
 
-void rroom_set_gravity(GameWorld *g, room_vnum room, int v)
+void room_set_gravity(GameWorld *g, room_vnum room, int v)
 {
-  room_of(g, room)->gravity = v;
+  if (struct room_data *r = room_of(g, room))
+    r->gravity = v;
 }
 
-bitvector_t *rroom_get_room_flags(GameWorld *g, room_vnum room)
+bitvector_t *room_get_room_flags(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->room_flags;
+  if (struct room_data *r = room_of(g, room))
+    return r->room_flags;
+  return {};
 }
 
-struct room_direction_data *rroom_get_dir_option(GameWorld *g, room_vnum room, int i)
+struct room_direction_data *room_get_dir_option(GameWorld *g, room_vnum room, int i)
 {
-  return room_of(g, room)->dir_option[i];
+  if (struct room_data *r = room_of(g, room))
+    return r->dir_option[i];
+  return {};
 }
 
-void rroom_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v)
+void room_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v)
 {
-  room_of(g, room)->dir_option[i] = v;
+  if (struct room_data *r = room_of(g, room))
+    r->dir_option[i] = v;
 }
 
 struct room_direction_data *room_get_dir_option(const struct room_data *room, int i)
@@ -186,7 +196,7 @@ void room_set_dir_option(struct room_data *room, int i, struct room_direction_da
   room->dir_option[i] = v;
 }
 
-/* Room flag setters and toggles; the rroom_ versions take a GameWorld and an rnum. */
+/* Room flag setters and toggles, on the room or on its vnum. */
 
 bool room_flagged(const struct room_data *room, int flag)
 {
@@ -206,14 +216,16 @@ bool room_toggle_flag(struct room_data *room, int flag)
   return (TOGGLE_BIT_AR(room->room_flags, flag) & Q_BIT(flag)) != 0;
 }
 
-void rroom_set_flag(GameWorld *g, room_vnum room, int flag, bool on)
+void room_set_flag(GameWorld *g, room_vnum room, int flag, bool on)
 {
-  room_set_flag(room_of(g, room), flag, on);
+  if (struct room_data *r = room_of(g, room))
+    room_set_flag(r, flag, on);
 }
 
-room_vnum rroom_get_exit_to_room(GameWorld *g, room_vnum room, int dir)
+room_vnum room_get_exit_to_room(GameWorld *g, room_vnum room, int dir)
 {
-  return room_of(g, room)->dir_option[dir] ? room_of(g, room)->dir_option[dir]->to_room : NOWHERE;
+  struct room_data *r = room_of(g, room);
+  return r && r->dir_option[dir] ? r->dir_option[dir]->to_room : NOWHERE;
 }
 
 struct obj_data *room_get_contents(const struct room_data *room)
@@ -226,14 +238,17 @@ void room_set_contents(struct room_data *room, struct obj_data *v)
   room->contents = v;
 }
 
-struct obj_data *rroom_get_contents(GameWorld *g, room_vnum room)
+struct obj_data *room_get_contents(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->contents;
+  if (struct room_data *r = room_of(g, room))
+    return r->contents;
+  return {};
 }
 
-void rroom_set_contents(GameWorld *g, room_vnum room, struct obj_data *v)
+void room_set_contents(GameWorld *g, room_vnum room, struct obj_data *v)
 {
-  room_of(g, room)->contents = v;
+  if (struct room_data *r = room_of(g, room))
+    r->contents = v;
 }
 
 char *room_get_description(const struct room_data *room)
@@ -246,14 +261,17 @@ void room_set_description(struct room_data *room, char *v)
   room->description = v;
 }
 
-char *rroom_get_description(GameWorld *g, room_vnum room)
+char *room_get_description(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->description;
+  if (struct room_data *r = room_of(g, room))
+    return r->description;
+  return {};
 }
 
-void rroom_set_description(GameWorld *g, room_vnum room, char *v)
+void room_set_description(GameWorld *g, room_vnum room, char *v)
 {
-  room_of(g, room)->description = v;
+  if (struct room_data *r = room_of(g, room))
+    r->description = v;
 }
 
 int room_get_dmg(const struct room_data *room)
@@ -271,14 +289,17 @@ void room_set_ex_description(struct room_data *room, struct extra_descr_data *v)
   room->ex_description = v;
 }
 
-struct extra_descr_data *rroom_get_ex_description(GameWorld *g, room_vnum room)
+struct extra_descr_data *room_get_ex_description(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->ex_description;
+  if (struct room_data *r = room_of(g, room))
+    return r->ex_description;
+  return {};
 }
 
-void rroom_set_ex_description(GameWorld *g, room_vnum room, struct extra_descr_data *v)
+void room_set_ex_description(GameWorld *g, room_vnum room, struct extra_descr_data *v)
 {
-  room_of(g, room)->ex_description = v;
+  if (struct room_data *r = room_of(g, room))
+    r->ex_description = v;
 }
 
 spec_proc_func room_get_func(const struct room_data *room)
@@ -286,9 +307,10 @@ spec_proc_func room_get_func(const struct room_data *room)
   return room->func;
 }
 
-void rroom_set_func(GameWorld *g, room_vnum room, spec_proc_func v)
+void room_set_func(GameWorld *g, room_vnum room, spec_proc_func v)
 {
-  room_of(g, room)->func = v;
+  if (struct room_data *r = room_of(g, room))
+    r->func = v;
 }
 
 int room_get_geffect(const struct room_data *room)
@@ -301,14 +323,17 @@ int room_get_gravity(const struct room_data *room)
   return room->gravity;
 }
 
-int8_t rroom_get_light(GameWorld *g, room_vnum room)
+int8_t room_get_light(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->light;
+  if (struct room_data *r = room_of(g, room))
+    return r->light;
+  return {};
 }
 
-void rroom_set_light(GameWorld *g, room_vnum room, int8_t v)
+void room_set_light(GameWorld *g, room_vnum room, int8_t v)
 {
-  room_of(g, room)->light = v;
+  if (struct room_data *r = room_of(g, room))
+    r->light = v;
 }
 
 char *room_get_name(const struct room_data *room)
@@ -321,14 +346,17 @@ void room_set_name(struct room_data *room, char *v)
   room->name = v;
 }
 
-char *rroom_get_name(GameWorld *g, room_vnum room)
+char *room_get_name(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->name;
+  if (struct room_data *r = room_of(g, room))
+    return r->name;
+  return {};
 }
 
-void rroom_set_name(GameWorld *g, room_vnum room, char *v)
+void room_set_name(GameWorld *g, room_vnum room, char *v)
 {
-  room_of(g, room)->name = v;
+  if (struct room_data *r = room_of(g, room))
+    r->name = v;
 }
 
 room_vnum room_get_number(const struct room_data *room)
@@ -341,9 +369,10 @@ void room_set_number(struct room_data *room, room_vnum v)
   room->number = v;
 }
 
-void rroom_set_number(GameWorld *g, room_vnum room, room_vnum v)
+void room_set_number(GameWorld *g, room_vnum room, room_vnum v)
 {
-  room_of(g, room)->number = v;
+  if (struct room_data *r = room_of(g, room))
+    r->number = v;
 }
 
 struct char_data *room_get_people(const struct room_data *room)
@@ -356,14 +385,17 @@ void room_set_people(struct room_data *room, struct char_data *v)
   room->people = v;
 }
 
-struct char_data *rroom_get_people(GameWorld *g, room_vnum room)
+struct char_data *room_get_people(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->people;
+  if (struct room_data *r = room_of(g, room))
+    return r->people;
+  return {};
 }
 
-void rroom_set_people(GameWorld *g, room_vnum room, struct char_data *v)
+void room_set_people(GameWorld *g, room_vnum room, struct char_data *v)
 {
-  room_of(g, room)->people = v;
+  if (struct room_data *r = room_of(g, room))
+    r->people = v;
 }
 
 struct trig_proto_list *room_get_proto_script(const struct room_data *room)
@@ -376,14 +408,17 @@ void room_set_proto_script(struct room_data *room, struct trig_proto_list *v)
   room->proto_script = v;
 }
 
-struct trig_proto_list *rroom_get_proto_script(GameWorld *g, room_vnum room)
+struct trig_proto_list *room_get_proto_script(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->proto_script;
+  if (struct room_data *r = room_of(g, room))
+    return r->proto_script;
+  return {};
 }
 
-void rroom_set_proto_script(GameWorld *g, room_vnum room, struct trig_proto_list *v)
+void room_set_proto_script(GameWorld *g, room_vnum room, struct trig_proto_list *v)
 {
-  room_of(g, room)->proto_script = v;
+  if (struct room_data *r = room_of(g, room))
+    r->proto_script = v;
 }
 
 bitvector_t *room_get_room_flags(struct room_data *room)
@@ -401,9 +436,11 @@ void room_set_script(struct room_data *room, struct script_data *v)
   room->script = v;
 }
 
-struct script_data *rroom_get_script(GameWorld *g, room_vnum room)
+struct script_data *room_get_script(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->script;
+  if (struct room_data *r = room_of(g, room))
+    return r->script;
+  return {};
 }
 
 int room_get_sector_type(const struct room_data *room)
@@ -416,19 +453,23 @@ void room_set_sector_type(struct room_data *room, int v)
   room->sector_type = v;
 }
 
-void rroom_set_sector_type(GameWorld *g, room_vnum room, int v)
+void room_set_sector_type(GameWorld *g, room_vnum room, int v)
 {
-  room_of(g, room)->sector_type = v;
+  if (struct room_data *r = room_of(g, room))
+    r->sector_type = v;
 }
 
-int rroom_get_timed(GameWorld *g, room_vnum room)
+int room_get_timed(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->timed;
+  if (struct room_data *r = room_of(g, room))
+    return r->timed;
+  return {};
 }
 
-void rroom_set_timed(GameWorld *g, room_vnum room, int v)
+void room_set_timed(GameWorld *g, room_vnum room, int v)
 {
-  room_of(g, room)->timed = v;
+  if (struct room_data *r = room_of(g, room))
+    r->timed = v;
 }
 
 struct zone_data *room_get_zone(const struct room_data *room)
@@ -441,14 +482,17 @@ void room_set_zone(struct room_data *room, struct zone_data *v)
   room->zone = v;
 }
 
-struct zone_data *rroom_get_zone(GameWorld *g, room_vnum room)
+struct zone_data *room_get_zone(GameWorld *g, room_vnum room)
 {
-  return room_of(g, room)->zone;
+  if (struct room_data *r = room_of(g, room))
+    return r->zone;
+  return {};
 }
 
-void rroom_set_zone(GameWorld *g, room_vnum room, struct zone_data *v)
+void room_set_zone(GameWorld *g, room_vnum room, struct zone_data *v)
 {
-  room_of(g, room)->zone = v;
+  if (struct room_data *r = room_of(g, room))
+    r->zone = v;
 }
 
 struct script_data **room_script_slot(struct room_data *room)
@@ -456,9 +500,10 @@ struct script_data **room_script_slot(struct room_data *room)
   return &room->script;
 }
 
-struct script_data **rroom_script_slot(GameWorld *g, room_vnum room)
+struct script_data **room_script_slot(GameWorld *g, room_vnum room)
 {
-  return &room_of(g, room)->script;
+  struct room_data *r = room_of(g, room);
+  return r ? &r->script : nullptr;
 }
 
 struct extra_descr_data **room_ex_description_slot(struct room_data *room)
@@ -471,14 +516,16 @@ char **room_description_slot(struct room_data *room)
   return &room->description;
 }
 
-struct obj_data **rroom_contents_slot(GameWorld *g, room_vnum room)
+struct obj_data **room_contents_slot(GameWorld *g, room_vnum room)
 {
-  return &room_of(g, room)->contents;
+  struct room_data *r = room_of(g, room);
+  return r ? &r->contents : nullptr;
 }
 
-struct char_data **rroom_people_slot(GameWorld *g, room_vnum room)
+struct char_data **room_people_slot(GameWorld *g, room_vnum room)
 {
-  return &room_of(g, room)->people;
+  struct room_data *r = room_of(g, room);
+  return r ? &r->people : nullptr;
 }
 
 struct room_data *room_of(GameWorld *g, room_vnum vnum)

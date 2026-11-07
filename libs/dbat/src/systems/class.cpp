@@ -368,37 +368,37 @@ void do_start(GameWorld *g, struct char_data *ch)
   char_set_lifeperc(ch, 75);
 
   /* assign starting items etc...*/
-  obj = read_object(g, 17, VIRTUAL);
+  obj = read_object(g, 17);
   obj_to_char(g, obj, ch);
   if (char_is_hoshijin(ch)) {
-    obj = read_object(g, 3428, VIRTUAL);
+    obj = read_object(g, 3428);
     obj_to_char(g, obj, ch);
   }
   struct obj_data *obj2;
-  obj2 = read_object(g, 17998, VIRTUAL);
+  obj2 = read_object(g, 17998);
   obj_to_char(g, obj2, ch);
 
   if (char_is_tapion(ch) || char_is_ginyu(ch)) {
     struct obj_data *throw_obj;
-    throw_obj = read_object(g, 19050, VIRTUAL);
+    throw_obj = read_object(g, 19050);
     obj_to_char(g, throw_obj, ch);
     if (rand_number(g, 1, 2) == 2) {
       throw_obj = nullptr;
-      throw_obj = read_object(g, 19050, VIRTUAL);
+      throw_obj = read_object(g, 19050);
       obj_to_char(g, throw_obj, ch);
     }
     if (rand_number(g, 1, 2) == 2) {
       throw_obj = nullptr;
-      throw_obj = read_object(g, 19050, VIRTUAL);
+      throw_obj = read_object(g, 19050);
       obj_to_char(g, throw_obj, ch);
     }
 
   } else if (char_is_dabura(ch)) {
     struct obj_data *throw_obj;
-    throw_obj = read_object(g, 19055, VIRTUAL);
+    throw_obj = read_object(g, 19055);
     obj_to_char(g, throw_obj, ch);
     throw_obj = nullptr;
-    throw_obj = read_object(g, 19055, VIRTUAL);
+    throw_obj = read_object(g, 19055);
     obj_to_char(g, throw_obj, ch);
   }
 

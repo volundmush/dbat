@@ -64,7 +64,7 @@ ACMD(do_restring)
 
   one_argument(argument, arg);
 
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 178 && rroom_get_vnum(g, char_get_in_room(ch)) <= 184) {
+  if (char_get_in_room(ch) >= 178 && char_get_in_room(ch) <= 184) {
     pay = 5000;
     if (char_get_gold(ch) < pay) {
       send_to_char(g, ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
@@ -124,7 +124,7 @@ ACMD(do_fish)
       send_to_char(g, ch, "You are already fishing! Syntax: fish stop\r\n");
       return;
     }
-    if (!rroom_flagged(g, char_get_in_room(ch), ROOM_FISHING)) {
+    if (!room_flagged(g, char_get_in_room(ch), ROOM_FISHING)) {
       send_to_char(g, ch, "This is not an area you can fish at.\r\n");
       return;
     }
@@ -262,7 +262,7 @@ void fish_update(GameWorld *g)
   int quality = 0;
 
   for (char_data *i : each_char(g)) {
-    if (rroom_flagged(g, char_get_in_room(i), ROOM_FISHING)) {
+    if (room_flagged(g, char_get_in_room(i), ROOM_FISHING)) {
       if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == true) {
         ch = i;
         if (char_get_accuracy_mod(ch) <= 0 && char_get_fishstate(ch) == FISH_REELING) { /* We've caught it */
@@ -308,7 +308,7 @@ void fish_update(GameWorld *g)
           } else if (char_get_fishstate(ch) == FISH_BITE && rand_number(g, 1, 20) >= 12) {
             act(g, "@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
             char_set_fishstate(ch, FISH_NOFISH);
-          } else if (char_get_fishstate(ch) != FISH_HOOKED && char_get_fishstate(ch) != FISH_BITE && ((rroom_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 10) >= 8) || (!rroom_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 20) >= 18))) {
+          } else if (char_get_fishstate(ch) != FISH_HOOKED && char_get_fishstate(ch) != FISH_BITE && ((room_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 10) >= 8) || (!room_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 20) >= 18))) {
             act(g, "@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr, TO_CHAR);
             char_set_fishstate(ch, FISH_BITE);
           }
@@ -333,8 +333,8 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
   struct obj_data *fish = nullptr;
   obj_vnum num          = 1000;
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH)) {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
       switch (rand_number(g, 1, 10)) {
         case 1:
         case 2:
@@ -355,7 +355,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
           num = 1003;
           break;
       }
-    } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
+    } else if (room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
       switch (rand_number(g, 1, 10)) {
         case 1:
         case 2:
@@ -378,7 +378,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
       }
     }
   } else {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
       switch (rand_number(g, 1, 10)) {
         case 1:
         case 2:
@@ -399,7 +399,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
           num = 1007;
           break;
       }
-    } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
+    } else if (room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
       switch (rand_number(g, 1, 10)) {
         case 1:
         case 2:
@@ -423,7 +423,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
     }
   }
 
-  fish = read_object(g, num, VIRTUAL);
+  fish = read_object(g, num);
 
   if (!fish) {
     send_to_imm(g, "Error: Fish success with no fish! Report to Iovan!\r\n");
@@ -601,7 +601,7 @@ ACMD(do_extract)
     extract_obj(g, obj);
     obj_set_value(bottle, 6, obj_get_value(bottle, 6) + (rand_number(g, 4, 6)));
     if (obj_get_value(bottle, 6) >= 24) {
-      struct obj_data *filled = read_object(g, 3424, VIRTUAL);
+      struct obj_data *filled = read_object(g, 3424);
       extract_obj(g, bottle);
       obj_set_value(filled, 6, 24);
       obj_to_char(g, filled, ch);
@@ -725,7 +725,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -742,7 +742,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -769,7 +769,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -786,7 +786,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -813,7 +813,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -836,7 +836,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -853,7 +853,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -879,7 +879,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -896,7 +896,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -922,7 +922,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -939,7 +939,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -962,7 +962,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     } else {
@@ -976,7 +976,7 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
         extract_obj(g, bottle);
-        struct obj_data *empty = read_object(g, 3423, VIRTUAL);
+        struct obj_data *empty = read_object(g, 3423);
         obj_to_char(g, empty, ch);
       }
     }
@@ -1073,7 +1073,7 @@ ACMD(do_bury)
     return;
   }
 
-  if (rroom_sect(g, char_get_in_room(ch)) != SECT_FIELD && rroom_sect(g, char_get_in_room(ch)) != SECT_HILLS && rroom_sect(g, char_get_in_room(ch)) != SECT_FOREST && rroom_sect(g, char_get_in_room(ch)) != SECT_DESERT && rroom_sect(g, char_get_in_room(ch)) != SECT_MOUNTAIN) {
+  if (room_sect(g, char_get_in_room(ch)) != SECT_FIELD && room_sect(g, char_get_in_room(ch)) != SECT_HILLS && room_sect(g, char_get_in_room(ch)) != SECT_FOREST && room_sect(g, char_get_in_room(ch)) != SECT_DESERT && room_sect(g, char_get_in_room(ch)) != SECT_MOUNTAIN) {
     send_to_char(g, ch, "You are not in a room with enough available dirt or sand to dig.\r\n");
     return;
   }
@@ -1099,7 +1099,7 @@ ACMD(do_bury)
       send_to_char(g, ch, "There is already something buried near here.\r\n");
       return;
     }
-    if (rroom_sect(g, char_get_in_room(ch)) != SECT_DESERT) {
+    if (room_sect(g, char_get_in_room(ch)) != SECT_DESERT) {
       act(g, "@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", true, ch, obj, nullptr, TO_ROOM);
     } else {
@@ -1114,7 +1114,7 @@ ACMD(do_bury)
       send_to_char(g, ch, "There is nothing buried here.\r\n");
       return;
     }
-    if (rroom_sect(g, char_get_in_room(ch)) != SECT_DESERT) {
+    if (room_sect(g, char_get_in_room(ch)) != SECT_DESERT) {
       act(g, "@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_CHAR);
       act(g, "@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_ROOM);
     } else {
@@ -1194,7 +1194,7 @@ ACMD(do_silk)
           char_set_wait(ch, PULSE_4SEC);
           return;
         }
-        weaved = read_object(g, 16705, VIRTUAL);
+        weaved = read_object(g, 16705);
         obj_to_room(g, weaved, char_get_in_room(ch));
         if (obj_get_vnum(g, obj) == 16708) {
           armor *= 20;
@@ -1253,7 +1253,7 @@ ACMD(do_silk)
           char_set_wait(ch, PULSE_4SEC);
           return;
         }
-        weaved = read_object(g, 16706, VIRTUAL);
+        weaved = read_object(g, 16706);
         obj_to_room(g, weaved, char_get_in_room(ch));
         if (obj_get_vnum(g, obj) == 16708) {
           armor *= 20;
@@ -1312,7 +1312,7 @@ ACMD(do_silk)
           char_set_wait(ch, PULSE_4SEC);
           return;
         }
-        weaved = read_object(g, 16707, VIRTUAL);
+        weaved = read_object(g, 16707);
         obj_to_room(g, weaved, char_get_in_room(ch));
         if (obj_get_vnum(g, obj) == 16708) {
           armor *= 20;
@@ -1395,38 +1395,38 @@ ACMD(do_silk)
       }
     }
     if (super == true) {
-      obj = read_object(g, 16708, VIRTUAL);
+      obj = read_object(g, 16708);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       send_to_char(g, ch, "@YIt's SUPER grand!@n\r\n");
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     } else if (prob > perc && prob >= 100) { /* Second Best Quality */
-      obj = read_object(g, 16700, VIRTUAL);
+      obj = read_object(g, 16700);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     } else if (prob > perc && prob >= 90) { /* Great Quality */
-      obj = read_object(g, 16701, VIRTUAL);
+      obj = read_object(g, 16701);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     } else if (prob > perc && prob >= 80) { /* Good Quality */
-      obj = read_object(g, 16702, VIRTUAL);
+      obj = read_object(g, 16702);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     } else if (prob > perc && prob >= 50) { /* Decent Quality */
-      obj = read_object(g, 16703, VIRTUAL);
+      obj = read_object(g, 16703);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     } else if (prob > perc) { /* Bad Quality */
-      obj = read_object(g, 16704, VIRTUAL);
+      obj = read_object(g, 16704);
       obj_to_room(g, obj, char_get_in_room(ch));
       act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
       act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
@@ -2092,103 +2092,103 @@ ACMD(do_cook)
 
     switch (num) {
       case 1:
-        meal = read_object(g, MEAL_STEAK, VIRTUAL);
+        meal = read_object(g, MEAL_STEAK);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 5;
         break;
       case 2:
-        meal = read_object(g, MEAL_TOMATO_SOUP, VIRTUAL);
+        meal = read_object(g, MEAL_TOMATO_SOUP);
         obj_to_char(g, meal, ch);
         psbonus  = 2;
         expbonus = 15;
         break;
       case 3:
-        meal = read_object(g, MEAL_POTATO_SOUP, VIRTUAL);
+        meal = read_object(g, MEAL_POTATO_SOUP);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 20;
         break;
       case 4:
-        meal = read_object(g, MEAL_VEGETABLE_SOUP, VIRTUAL);
+        meal = read_object(g, MEAL_VEGETABLE_SOUP);
         obj_to_char(g, meal, ch);
         psbonus  = 3;
         expbonus = 45;
         break;
       case 5:
-        meal = read_object(g, MEAL_MEAT_STEW, VIRTUAL);
+        meal = read_object(g, MEAL_MEAT_STEW);
         obj_to_char(g, meal, ch);
         psbonus  = 2;
         expbonus = 50;
         break;
       case 6:
-        meal = read_object(g, MEAL_CHILI_SOUP, VIRTUAL);
+        meal = read_object(g, MEAL_CHILI_SOUP);
         obj_to_char(g, meal, ch);
         psbonus  = 0;
         expbonus = 100;
         break;
       case 7:
-        meal = read_object(g, MEAL_NORM_FISH, VIRTUAL);
+        meal = read_object(g, MEAL_NORM_FISH);
         obj_to_char(g, meal, ch);
         psbonus  = 2;
         expbonus = 12;
         break;
       case 8:
-        meal = read_object(g, MEAL_GOOD_FISH, VIRTUAL);
+        meal = read_object(g, MEAL_GOOD_FISH);
         obj_to_char(g, meal, ch);
         psbonus  = 3;
         expbonus = 40;
         break;
       case 9:
-        meal = read_object(g, MEAL_GREAT_FISH, VIRTUAL);
+        meal = read_object(g, MEAL_GREAT_FISH);
         obj_to_char(g, meal, ch);
         psbonus  = 5;
         expbonus = 80;
         break;
       case 10:
-        meal = read_object(g, MEAL_BEST_FISH, VIRTUAL);
+        meal = read_object(g, MEAL_BEST_FISH);
         obj_to_char(g, meal, ch);
         psbonus  = 7;
         expbonus = 125;
         break;
       case 11:
-        meal = read_object(g, MEAL_COOKED_RICE, VIRTUAL);
+        meal = read_object(g, MEAL_COOKED_RICE);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 8;
         break;
       case 12:
-        meal = read_object(g, MEAL_SUSHI, VIRTUAL);
+        meal = read_object(g, MEAL_SUSHI);
         obj_to_char(g, meal, ch);
         psbonus  = 2;
         expbonus = 20;
         break;
       case 13:
-        meal = read_object(g, MEAL_BREAD, VIRTUAL);
+        meal = read_object(g, MEAL_BREAD);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 8;
         break;
       case 14:
-        meal = read_object(g, MEAL_SALAD, VIRTUAL);
+        meal = read_object(g, MEAL_SALAD);
         obj_to_char(g, meal, ch);
         psbonus  = 5;
         expbonus = 8;
         break;
       case 15:
-        meal = read_object(g, MEAL_APPLEPLUM, VIRTUAL);
+        meal = read_object(g, MEAL_APPLEPLUM);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 9;
         break;
       case 16:
-        meal = read_object(g, MEAL_FBERRY_MUFFIN, VIRTUAL);
+        meal = read_object(g, MEAL_FBERRY_MUFFIN);
         obj_to_char(g, meal, ch);
         psbonus  = 3;
         expbonus = 12;
         break;
       case 17:
-        meal = read_object(g, MEAL_CARAMBOLA_BREAD, VIRTUAL);
+        meal = read_object(g, MEAL_CARAMBOLA_BREAD);
         obj_to_char(g, meal, ch);
         psbonus  = 1;
         expbonus = 9;
@@ -2307,7 +2307,7 @@ ACMD(do_spoil)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
     send_to_char(g, ch, "No corpse around here by that name.\r\n");
     return;
   }

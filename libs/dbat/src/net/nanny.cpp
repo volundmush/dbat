@@ -263,9 +263,9 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
 /* A builder can delete any of the rooms that players get sent to, while the game is running. */
 static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
 {
-  room_vnum room = real_room(g, vnum);
+  room_vnum room = vnum;
 
-  return room != NOWHERE ? room : 0;
+  return room_of(g, room) ? room : 0;
 }
 
 int enter_player_game(GameWorld *g, struct descriptor_data *d)
@@ -286,21 +286,20 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
        * or equip_char() will gripe about the person in NOWHERE.
        */
 
-  if ((load_room = char_get_load_room(g, d->character)) != NOWHERE)
-    load_room = real_room(g, load_room);
+  load_room = char_get_load_room(g, d->character);
 
-  /* If char was saved with NOWHERE, or real_room above failed... */
-  if (load_room == NOWHERE) {
+  /* If char was saved with NOWHERE, or the room is gone... */
+  if (!room_of(g, load_room)) {
     if (char_get_admlevel(d->character))
-      load_room = real_room(g, CONFIG_IMMORTAL_START);
+      load_room = CONFIG_IMMORTAL_START;
     else
-      load_room = real_room(g, CONFIG_MORTAL_START);
+      load_room = CONFIG_MORTAL_START;
   }
 
   if (char_plr_flagged(d->character, PLR_FROZEN))
-    load_room = real_room(g, CONFIG_FROZEN_START);
+    load_room = CONFIG_FROZEN_START;
 
-  if (load_room == NOWHERE) /* a builder deleted the start room */
+  if (!room_of(g, load_room)) /* a builder deleted the start room */
     load_room = 0;          /* The Void */
 
   char_set_next(d->character, g->characters);
@@ -1026,10 +1025,10 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
         do_start(g, d->character);
         send_to_char(g, d->character, "%s", CONFIG_START_MESSG);
       }
-      if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
+      if (char_get_in_room(d->character) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
         char_from_room(g, d->character);
         char_to_room(g, d->character, room_or_void(g, char_get_load_room(g, d->character)));
-      } else if (rroom_get_vnum(g, char_get_in_room(d->character)) <= 1) {
+      } else if (char_get_in_room(d->character) <= 1) {
         char_from_room(g, d->character);
         char_to_room(g, d->character, room_or_void(g, 300));
       } else {

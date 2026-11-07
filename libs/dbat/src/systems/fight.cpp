@@ -692,7 +692,7 @@ void impact_sound(GameWorld *g, struct char_data *ch, const char *mssg)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(g, ch, door))
-      send_to_room(g, rroom_get_dir_option(g, char_get_in_room(ch), door)->to_room, "%s", mssg);
+      send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "%s", mssg);
 }
 
 /* For removing body parts */
@@ -1513,19 +1513,19 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
     act(g, "@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
     struct obj_data *ashes;
     if (rand_number(g, 1, 3) == 2) {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     } else if (rand_number(g, 1, 2) == 2) {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     } else {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     }
   }
@@ -1694,19 +1694,19 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
     act(g, "@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
     struct obj_data *ashes;
     if (rand_number(g, 1, 3) == 2) {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     } else if (rand_number(g, 1, 2) == 2) {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     } else {
-      ashes = read_object(g, 1305, VIRTUAL);
+      ashes = read_object(g, 1305);
       obj_to_room(g, ashes, char_get_in_room(ch));
     }
   }
@@ -1717,7 +1717,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
       int skill = char_get_skill(tch, SKILL_SURVIVAL);
       if (!char_is_humanoid(ch) && char_prf_flagged(g, tch, PRF_CARVE) && axion_dice(g, 0) < skill) {
         send_to_char(g, tch, "The choice edible meat is preserved because of your skill.\r\n");
-        meat = read_object(g, 1612, VIRTUAL);
+        meat = read_object(g, 1612);
         obj_to_char(g, meat, ch);
         char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
         sprintf(nick, "@RRaw %s@R Steak@n", char_get_name(ch));
@@ -1805,7 +1805,7 @@ static void loadmap(GameWorld *g, struct char_data *ch)
 {
   struct obj_data *obj;
   if (!char_is_npc(ch)) {
-    obj = read_object(g, 17, VIRTUAL);
+    obj = read_object(g, 17);
     obj_to_char(g, obj, ch);
   }
 }
@@ -1817,7 +1817,7 @@ void death_cry(GameWorld *g, struct char_data *ch)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(g, ch, door))
-      send_to_room(g, rroom_get_dir_option(g, char_get_in_room(ch), door)->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+      send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
 }
 
 /* Let's clean up necessary things after "death" */
@@ -1908,7 +1908,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
 
   if (killer && !char_is_npc(killer)) {
     if (!char_is_npc(killer) && !char_is_npc(ch)) {
-      send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(killer), char_get_name(ch), rroom_get_vnum(g, char_get_in_room(killer)));
+      send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(killer), char_get_name(ch), char_get_in_room(killer));
     }
     if ((char_is_saiyan(killer) && rand_number(g, 1, 2) == 2) || !char_is_saiyan(killer)) {
       if (rand_number(g, 1, 6) >= 5 && (level_exp(killer, char_get_level(killer) + 1) - char_get_exp(killer) > 0 || char_get_level(killer) == 100)) {
@@ -1989,7 +1989,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON1       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 20, VIRTUAL);
+      obj = read_object(g, 20);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon2(g, ch)) {
@@ -1997,7 +1997,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON2       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 21, VIRTUAL);
+      obj = read_object(g, 21);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon3(g, ch)) {
@@ -2005,7 +2005,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON3       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 22, VIRTUAL);
+      obj = read_object(g, 22);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon4(g, ch)) {
@@ -2013,7 +2013,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON4       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 23, VIRTUAL);
+      obj = read_object(g, 23);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon5(g, ch)) {
@@ -2021,7 +2021,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON5       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 24, VIRTUAL);
+      obj = read_object(g, 24);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon6(g, ch)) {
@@ -2029,7 +2029,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON6       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 25, VIRTUAL);
+      obj = read_object(g, 25);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     } else if (char_is_shadow_dragon7(g, ch)) {
@@ -2037,7 +2037,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       g->SHADOW_DRAGON7       = -1;
       send_to_room(g, char_get_in_room(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
-      obj = read_object(g, 26, VIRTUAL);
+      obj = read_object(g, 26);
       obj_to_room(g, obj, char_get_in_room(ch));
       shadowed = true;
     }
@@ -2051,7 +2051,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     decCurHealthPercent(g, ch, 1, 0);
     extract_char(g, ch);
   } else {
-    if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(g, char_get_in_room(ch)) < 17900 || rroom_get_vnum(g, char_get_in_room(ch)) > 17999)) {
+    if (!char_aff_flagged(ch, AFF_SPIRIT) && !room_flagged(g, char_get_in_room(ch), ROOM_PAST) && (char_get_in_room(ch) < 17900 || char_get_in_room(ch) > 17999)) {
       if (!char_plr_flagged(ch, PLR_ABSORBED)) {
         make_pcorpse(g, ch);
         loadmap(g, ch);
@@ -2206,7 +2206,7 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
       send_to_all(g, "@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", char_get_name(ch));
     }
     char_from_room(g, ch);
-    char_to_room(g, ch, real_room(g, 17875));
+    char_to_room(g, ch, 17875);
     decCurHealthPercent(g, ch, 1, 1);
     look_at_room(g, char_get_in_room(ch), ch, 0);
     final_combat_resolve(g, ch);
@@ -2216,10 +2216,10 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
   // For code below this, some kind of 'death' is performed.
   // it will leave a corpse.
 
-  if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && char_get_level(ch) > 8) {
-    if (rroom_get_vnum(g, char_get_in_room(ch)) >= 2002 && rroom_get_vnum(g, char_get_in_room(ch)) <= 2011) {
+  if (!char_aff_flagged(ch, AFF_SPIRIT) && !room_flagged(g, char_get_in_room(ch), ROOM_PAST) && char_get_level(ch) > 8) {
+    if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
       char_set_deathtime(ch, game_now(g));
-    } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_AL) || rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+    } else if (room_flagged(g, char_get_in_room(ch), ROOM_AL) || room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
       send_to_char(g, ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
     } else {
       if (killer != nullptr && char_is_npc(killer)) {

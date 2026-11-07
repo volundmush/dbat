@@ -211,12 +211,12 @@ ACMD(do_taisha)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
     send_to_char(g, ch, "This area already has an aura of regeneration around it.\r\n");
     return;
   }
 
-  if (rroom_get_gravity(g, char_get_in_room(ch)) > 0) {
+  if (room_get_gravity(g, char_get_in_room(ch)) > 0) {
     send_to_char(g, ch, "This area's gravity is too hostile to an aura.\r\n");
     return;
   }
@@ -240,7 +240,7 @@ ACMD(do_taisha)
   act(g, "@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", true, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_TAISHA, 1);
-  rroom_set_flag(g, char_get_in_room(ch), ROOM_AURA, true);
+  room_set_flag(g, char_get_in_room(ch), ROOM_AURA, true);
   return;
 }
 
@@ -372,19 +372,19 @@ ACMD(do_candy)
   act(g, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", true, ch, nullptr, vict, TO_NOTVICT);
   if (vict_max >= ch_max * 1.5) {
     send_to_char(g, ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(g, 95, VIRTUAL);
+    obj = read_object(g, 95);
     obj_to_char(g, obj, ch);
   } else if (vict_max >= ch_max) {
     send_to_char(g, ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(g, 94, VIRTUAL);
+    obj = read_object(g, 94);
     obj_to_char(g, obj, ch);
   } else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && char_get_level(ch) < 100) || ((vict_max >= ch_max * .1) && char_get_level(ch) >= 100))) {
     send_to_char(g, ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(g, 93, VIRTUAL);
+    obj = read_object(g, 93);
     obj_to_char(g, obj, ch);
   } else if (vict_max < ch_max && (((vict_max < ch_max * .5) && char_get_level(ch) < 100) || ((vict_max < ch_max * .1) && char_get_level(ch) >= 100))) {
     send_to_char(g, ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(g, 53, VIRTUAL);
+    obj = read_object(g, 53);
     obj_to_char(g, obj, ch);
   }
   char_mob_set(vict, MOB_HUSK, true);
@@ -1118,7 +1118,7 @@ ACMD(do_absorb)
       gainBaseKI(ch, ki, true);
 
       if (!char_is_npc(vict) && !char_is_npc(ch)) {
-        send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(g, char_get_in_room(vict)));
+        send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
         char_plr_set(vict, PLR_ABSORBED, true);
       }
 
@@ -1954,11 +1954,11 @@ ACMD(do_instant)
     send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
     send_to_char(g, ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(g, char_get_in_room(ch), ROOM_AL) || rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL) || room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
     send_to_char(g, ch, "You can not leave where you are at!\r\n");
     return;
   }
@@ -2048,15 +2048,15 @@ ACMD(do_instant)
       send_to_char(g, ch, "You can't sense them well enough.\r\n");
       return;
     }
-    if (!rroom_flagged(g, char_get_in_room(ch), ROOM_AL) && rroom_flagged(g, char_get_in_room(tar), ROOM_AL)) {
+    if (!room_flagged(g, char_get_in_room(ch), ROOM_AL) && room_flagged(g, char_get_in_room(tar), ROOM_AL)) {
       send_to_char(g, ch, "They are dead and can't be reached.\r\n");
       return;
     }
-    if (!rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) && rroom_flagged(g, char_get_in_room(tar), ROOM_RHELL)) {
+    if (!room_flagged(g, char_get_in_room(ch), ROOM_RHELL) && room_flagged(g, char_get_in_room(tar), ROOM_RHELL)) {
       send_to_char(g, ch, "They are dead and can't be reached.\r\n");
       return;
     }
-    if (rroom_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT)) {
+    if (room_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT)) {
       send_to_char(g, ch, "You can not go there as it is a protected area!\r\n");
       return;
     }
@@ -2314,7 +2314,7 @@ ACMD(do_aid)
     } else {
       act(g, "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      aid_prod = read_object(g, num2, VIRTUAL);
+      aid_prod = read_object(g, num2);
       add_unique_id(g, aid_prod);
       obj_to_char(g, aid_prod, ch);
       extract_obj(g, aid_obj);
@@ -2332,7 +2332,7 @@ ACMD(do_aid)
     } else {
       act(g, "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      aid_prod = read_object(g, num2, VIRTUAL);
+      aid_prod = read_object(g, num2);
       add_unique_id(g, aid_prod);
       obj_to_char(g, aid_prod, ch);
       extract_obj(g, aid_obj);
@@ -2350,7 +2350,7 @@ ACMD(do_aid)
     } else {
       act(g, "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      aid_prod = read_object(g, num2, VIRTUAL);
+      aid_prod = read_object(g, num2);
       add_unique_id(g, aid_prod);
       obj_to_char(g, aid_prod, ch);
       extract_obj(g, aid_obj);
@@ -2368,7 +2368,7 @@ ACMD(do_aid)
     } else {
       act(g, "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      aid_prod = read_object(g, num2, VIRTUAL);
+      aid_prod = read_object(g, num2);
       add_unique_id(g, aid_prod);
       obj_to_char(g, aid_prod, ch);
       extract_obj(g, aid_obj);
@@ -2409,11 +2409,11 @@ ACMD(do_aura)
       send_to_char(g, ch, "Your aura fades as you stop shining light.\r\n");
       act(g, "$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_AURALIGHT, false);
-      rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
+      room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
     } else if ((getCurKI(g, ch)) > getMaxKI(g, ch) * 0.12) {
       if (char_get_in_room(ch) != NOWHERE) {
-        rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) + 1);
+        room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) + 1);
       }
       reveal_hiding(g, ch, 0);
       decCurKIPercent(g, ch, .12, 0);

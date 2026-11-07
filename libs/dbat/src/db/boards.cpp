@@ -112,9 +112,7 @@ void board_login_notices(GameWorld *g, struct char_data *ch)
 /* The prototype of a board's object, or NULL if it has none. */
 static struct obj_data *board_proto(GameWorld *g, obj_vnum vnum)
 {
-  obj_vnum rnum = real_object(g, vnum);
-
-  return rnum == NOTHING ? nullptr : obj_proto_of(g, rnum);
+  return obj_proto_of(g, vnum);
 }
 
 static void board_path(char *buf, size_t size, obj_vnum vnum)

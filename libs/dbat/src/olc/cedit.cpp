@@ -710,7 +710,7 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
         cedit_prompt(g, d, i);
         return false;
       }
-      if (o->type == CT_ROOM && real_room(g, num) == NOWHERE) {
+      if (o->type == CT_ROOM && !room_of(g, num)) {
         write_to_output(g, d, "That room doesn't exist!\r\n");
         cedit_prompt(g, d, i);
         return false;
@@ -816,7 +816,7 @@ static void reassign_rooms(GameWorld *g)
 
   /* remove old funcs */
   for (room_vnum i : g->rooms.vnums())
-    rroom_set_func(g, i, nullptr);
+    room_set_func(g, i, nullptr);
 
   /* reassign spec_procs */
   assign_rooms(g);

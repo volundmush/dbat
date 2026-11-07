@@ -40,7 +40,7 @@ static void grow_plants(GameWorld *g)
     if (obj_get_carried_by(k) || obj_get_in_obj(k)) {
       continue;
     }
-    if (rroom_flagged(g, obj_get_in_room(k), ROOM_GARDEN1) || rroom_flagged(g, obj_get_in_room(k), ROOM_GARDEN2)) {
+    if (room_flagged(g, obj_get_in_room(k), ROOM_GARDEN1) || room_flagged(g, obj_get_in_room(k), ROOM_GARDEN2)) {
       if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
         if (obj_get_value(k, VAL_WATERLEVEL) > -10) {

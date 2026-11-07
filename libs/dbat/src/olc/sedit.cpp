@@ -313,8 +313,8 @@ static void sedit_rooms_menu(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
   write_to_output(g, d, "##     VNUM     Room\r\n\r\n");
   for (i = 0; shop_get_room(shop, i) != NOWHERE; i++) {
-    if (real_room(g, shop_get_room(shop, i)) != NOWHERE) {
-      write_to_output(g, d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, shop_get_room(shop, i), rroom_get_name(g, real_room(g, shop_get_room(shop, i))));
+    if (room_of(g, shop_get_room(shop, i))) {
+      write_to_output(g, d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, shop_get_room(shop, i), room_get_name(g, shop_get_room(shop, i)));
     } else {
       write_to_output(g, d, "%2d - [@R!Removed Room!@n]\r\n", i);
     }
@@ -739,7 +739,7 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case SEDIT_KEEPER:
       i = atoi(arg);
       if ((i = atoi(arg)) != -1)
-        if ((i = real_mobile(g, i)) == NOBODY) {
+        if (!mob_proto_of(g, i)) {
           write_to_output(g, d, "That mobile does not exist, try again : ");
           return;
         }
@@ -781,7 +781,7 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       return;
     case SEDIT_NEW_PRODUCT:
       if ((i = atoi(arg)) != -1)
-        if ((i = real_object(g, i)) == NOTHING) {
+        if (!obj_proto_of(g, i)) {
           write_to_output(g, d, "That object does not exist, try again : ");
           return;
         }
@@ -795,7 +795,7 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       return;
     case SEDIT_NEW_ROOM:
       if ((i = atoi(arg)) != -1)
-        if ((i = real_room(g, i)) == NOWHERE) {
+        if (!room_of(g, i)) {
           write_to_output(g, d, "That room does not exist, try again : ");
           return;
         }

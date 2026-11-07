@@ -199,7 +199,7 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
   snprintf(blamo, sizeof(blamo), "p.%s", char_get_name(ch));
 
   mob_vnum r_num;
-  if ((r_num = real_mobile(g, 25)) == NOBODY) {
+  if (!mob_proto_of(g, r_num = 25)) {
     send_to_imm(g, "Multiform Clone doesn't exist!");
     return;
   }
@@ -214,7 +214,7 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
 
   for (int i = 0; i < count; i++) {
     char_data *clone = nullptr;
-    clone            = read_mobile(g, r_num, REAL);
+    clone            = read_mobile(g, r_num);
 
     char_set_alias(clone, strdup(clone_name));
     char_set_sdesc(clone, strdup(clone_sdesc));
@@ -767,11 +767,11 @@ ACMD(do_ashcloud)
     send_to_char(g, ch, "You do not have enough ki!\r\n");
     return;
   }
-  if (rroom_sunken(g, char_get_in_room(ch))) {
+  if (room_sunken(g, char_get_in_room(ch))) {
     send_to_char(g, ch, "You can not create an ashcloud here, because it is too wet.\r\n");
     return;
   }
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_SPACE) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_SPACE) {
     send_to_char(g, ch, "You can not create an ashcloud in space.\r\n");
     return;
   }
@@ -790,7 +790,7 @@ ACMD(do_ashcloud)
     act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
-    ashcloud = read_object(g, 1306, VIRTUAL);
+    ashcloud = read_object(g, 1306);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
     extract_obj(g, ash);
     obj_set_timer(ashcloud, 4);
@@ -801,7 +801,7 @@ ACMD(do_ashcloud)
     act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(g, char_get_in_room(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
-    ashcloud = read_object(g, 1306, VIRTUAL);
+    ashcloud = read_object(g, 1306);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
     obj_set_timer(ashcloud, 2);
     obj_set_cost(ashcloud, 2);
@@ -811,7 +811,7 @@ ACMD(do_ashcloud)
     decCurKI(g, ch, cost, 0);
     act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
-    ashcloud = read_object(g, 1306, VIRTUAL);
+    ashcloud = read_object(g, 1306);
     obj_to_room(g, ashcloud, char_get_in_room(ch));
     extract_obj(g, ash);
     obj_set_timer(ashcloud, 1);
@@ -969,7 +969,7 @@ ACMD(do_shimmer)
     send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
     send_to_char(g, ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
   }
@@ -1042,7 +1042,7 @@ ACMD(do_shimmer)
       send_to_char(g, ch, "That immortal prevents you from reaching them.\r\n");
       return;
     }
-    if (rroom_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT)) {
+    if (room_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT)) {
       send_to_char(g, ch, "You can not go there as it is a protected area!\r\n");
       return;
     }
@@ -1112,7 +1112,7 @@ ACMD(do_channel)
     return;
   }
 
-  if (rroom_get_geffect(g, char_get_in_room(ch)) <= 0) {
+  if (room_get_geffect(g, char_get_in_room(ch)) <= 0) {
     send_to_char(g, ch, "There is no lava here!\r\n");
     return;
   }
@@ -1125,7 +1125,7 @@ ACMD(do_channel)
     } else {
       act(g, "@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You do so at an even rate and end up with a glowing red hot blood ruby!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      rroom_set_geffect(g, char_get_in_room(ch), 0);
+      room_set_geffect(g, char_get_in_room(ch), 0);
       obj_extra_set(ruby, ITEM_HOT, true);
     }
     decCurKI(g, ch, cost, 0);
@@ -1146,8 +1146,8 @@ ACMD(do_hydromancy)
 
   cost = (getMaxKI(g, ch) / 12) - (char_get_aff_abils_intel(ch) * char_get_level(ch));
 
-  if (rroom_get_geffect(g, char_get_in_room(ch)) >= 0 && rroom_sect(g, char_get_in_room(ch)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(ch)) != SECT_WATER_NOSWIM) {
-    if (rroom_sect(g, char_get_in_room(ch)) != SECT_UNDERWATER) {
+  if (room_get_geffect(g, char_get_in_room(ch)) >= 0 && room_sect(g, char_get_in_room(ch)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(ch)) != SECT_WATER_NOSWIM) {
+    if (room_sect(g, char_get_in_room(ch)) != SECT_UNDERWATER) {
       send_to_char(g, ch, "There is not sufficient water here.\r\n");
       return;
     }
@@ -1200,11 +1200,11 @@ ACMD(do_hydromancy)
     }
 
     if (skill >= 100) {
-      obj = read_object(g, 19058, VIRTUAL);
+      obj = read_object(g, 19058);
     } else if (skill >= 50) {
-      obj = read_object(g, 19057, VIRTUAL);
+      obj = read_object(g, 19057);
     } else if (skill >= 1) {
-      obj = read_object(g, 19056, VIRTUAL);
+      obj = read_object(g, 19056);
     }
 
     if (!obj) {
@@ -1274,7 +1274,7 @@ ACMD(do_hydromancy)
             hurt(g, 0, 0, ch, vict, nullptr, cost * 4, 1);
           }
         }
-        rroom_set_geffect(g, char_get_exit(g, ch, attempt)->to_room, -3);
+        room_set_geffect(g, char_get_exit(g, ch, attempt)->to_room, -3);
         char_set_lastattack(ch, last);
         char_set_wait(ch, PULSE_2SEC);
         char_set_con_cooldown(ch, 15);
@@ -1622,7 +1622,7 @@ ACMD(do_fireshield)
     return;
   }
 
-  if (rroom_sunken(g, char_get_in_room(ch))) {
+  if (room_sunken(g, char_get_in_room(ch))) {
     send_to_char(g, ch, "There is way too much water here!\r\n");
     return;
   }
@@ -1694,17 +1694,17 @@ ACMD(do_warppool)
     return;
   }
 
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 4600 && rroom_get_vnum(g, char_get_in_room(ch)) < 4700) {
+  if (char_get_in_room(ch) >= 4600 && char_get_in_room(ch) < 4700) {
     pass = true;
-  } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 795 && rroom_get_vnum(g, char_get_in_room(ch)) < 1099) {
+  } else if (char_get_in_room(ch) >= 795 && char_get_in_room(ch) < 1099) {
     pass = true;
-  } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 15100 && rroom_get_vnum(g, char_get_in_room(ch)) < 15299) {
+  } else if (char_get_in_room(ch) >= 15100 && char_get_in_room(ch) < 15299) {
     pass = true;
-  } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 13155 && rroom_get_vnum(g, char_get_in_room(ch)) < 13199) {
+  } else if (char_get_in_room(ch) >= 13155 && char_get_in_room(ch) < 13199) {
     pass = true;
-  } else if (rroom_flagged(g, char_get_in_room(ch), ROOM_NAMEK) && rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
+  } else if (room_flagged(g, char_get_in_room(ch), ROOM_NAMEK) && room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
     pass = true;
-  } else if (rroom_get_vnum(g, char_get_in_room(ch)) >= 12103 && rroom_get_vnum(g, char_get_in_room(ch)) < 12289) {
+  } else if (char_get_in_room(ch) >= 12103 && char_get_in_room(ch) < 12289) {
     pass = true;
   }
 
@@ -1713,23 +1713,23 @@ ACMD(do_warppool)
     return;
   }
 
-  if (!strcasecmp("earth", arg) && rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+  if (!strcasecmp("earth", arg) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
     send_to_char(g, ch, "You are already on Earth!\r\n");
     return;
   }
-  if (!strcasecmp("frigid", arg) && rroom_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
+  if (!strcasecmp("frigid", arg) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
     send_to_char(g, ch, "You are already on Frigid!\r\n");
     return;
   }
-  if (!strcasecmp("kanassa", arg) && rroom_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
+  if (!strcasecmp("kanassa", arg) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
     send_to_char(g, ch, "You are already on Kanasssa!\r\n");
     return;
   }
-  if (!strcasecmp("namek", arg) && rroom_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
+  if (!strcasecmp("namek", arg) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
     send_to_char(g, ch, "You are already on Namek!\r\n");
     return;
   }
-  if (!strcasecmp("aether", arg) && rroom_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
+  if (!strcasecmp("aether", arg) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
     send_to_char(g, ch, "You are already on Aether!\r\n");
     return;
   }
@@ -1744,7 +1744,7 @@ ACMD(do_warppool)
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 850));
+      char_to_room(g, ch, 850);
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
@@ -1759,7 +1759,7 @@ ACMD(do_warppool)
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 4609));
+      char_to_room(g, ch, 4609);
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
@@ -1774,7 +1774,7 @@ ACMD(do_warppool)
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 10904));
+      char_to_room(g, ch, 10904);
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
@@ -1789,7 +1789,7 @@ ACMD(do_warppool)
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 15100));
+      char_to_room(g, ch, 15100);
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
@@ -1804,7 +1804,7 @@ ACMD(do_warppool)
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
       improve_skill(g, ch, SKILL_WARP, 1);
       char_from_room(g, ch);
-      char_to_room(g, ch, real_room(g, 12252));
+      char_to_room(g, ch, 12252);
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
@@ -1825,17 +1825,17 @@ ACMD(do_obstruct)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "You can not use this in such a peaceful area.\r\n");
     return;
   }
 
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_SPACE || rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_SPACE || room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
     send_to_char(g, ch, "You can not wall off the vastness of space.\r\n");
     return;
   }
 
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_FLYING) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_FLYING) {
     send_to_char(g, ch, "You can not create gravity defying glacial walls.\r\n");
     return;
   }
@@ -1911,9 +1911,9 @@ ACMD(do_obstruct)
     improve_skill(g, ch, SKILL_HYOGA_KABE, 0);
     return;
   }
-  room_vnum newroom = rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room;
+  room_vnum newroom = room_get_dir_option(g, char_get_in_room(ch), dir)->to_room;
 
-  if (rroom_flagged(g, newroom, ROOM_PEACEFUL)) {
+  if (room_flagged(g, newroom, ROOM_PEACEFUL)) {
     send_to_char(g, ch, "You can not block off a peaceful area.\r\n");
     return;
   }
@@ -1938,9 +1938,9 @@ ACMD(do_obstruct)
 
   struct obj_data *obj2, *obj3;
 
-  obj2 = read_object(g, 79, VIRTUAL);
+  obj2 = read_object(g, 79);
   obj_to_room(g, obj2, newroom);
-  obj3 = read_object(g, 79, VIRTUAL);
+  obj3 = read_object(g, 79);
   obj_to_room(g, obj3, char_get_in_room(ch));
 
   int64_t strength = (((char_get_aff_abils_intel(ch) * skill) * char_get_aff_abils_wis(ch)) * 20) + (getMaxKI(g, ch) * 0.001);
@@ -1985,18 +1985,18 @@ ACMD(do_dimizu)
   int skill = char_get_skill(ch, SKILL_DIMIZU);
   int prob  = axion_dice(g, 0);
 
-  if (rroom_get_geffect(g, char_get_in_room(ch)) < 0) {
+  if (room_get_geffect(g, char_get_in_room(ch)) < 0) {
     act(g, "@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.", true, ch, nullptr, nullptr, TO_ROOM);
-    rroom_set_geffect(g, char_get_in_room(ch), 0);
+    room_set_geffect(g, char_get_in_room(ch), 0);
     char_set_wait(ch, PULSE_1SEC);
     return;
   }
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_UNDERWATER) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_UNDERWATER) {
     send_to_char(g, ch, "The area is already underwater!\r\n");
     return;
   }
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_SPACE || rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_SPACE || room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
     send_to_char(g, ch, "You can't flood space!\r\n");
     return;
   }
@@ -2014,7 +2014,7 @@ ACMD(do_dimizu)
   act(g, "@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", true, ch, nullptr, nullptr, TO_ROOM);
   decCurKI(g, ch, getMaxKI(g, ch) / 12, 0);
-  rroom_set_geffect(g, char_get_in_room(ch), -3);
+  room_set_geffect(g, char_get_in_room(ch), -3);
   improve_skill(g, ch, SKILL_DIMIZU, 0);
   return;
 }
@@ -2031,11 +2031,11 @@ ACMD(do_beacon)
     send_to_char(g, ch, "You are dead. You can not stake out a room to return to upon revival.\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 0 && rroom_get_vnum(g, char_get_in_room(ch)) <= 14) {
+  if (char_get_in_room(ch) >= 0 && char_get_in_room(ch) <= 14) {
     send_to_char(g, ch, "You can not stake out an immortal room to be revived in.\r\n");
     return;
   }
   send_to_char(g, ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
-  char_set_droom(ch, rroom_get_vnum(g, char_get_in_room(ch)));
+  char_set_droom(ch, char_get_in_room(ch));
   return;
 }

@@ -552,7 +552,7 @@ ACMD(do_bite)
   if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
-    } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
       return;
     }
   }
@@ -891,11 +891,11 @@ ACMD(do_slam)
         } else if ((char_get_position(vict) == POS_STANDING || char_get_position(vict) == POS_FIGHTING) && !char_aff_flagged(vict, AFF_KNOCKED)) {
           char_set_position(vict, POS_SITTING);
         }
-        if (rroom_get_dmg(g, char_get_in_room(vict)) <= 95 && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
+        if (room_get_dmg(g, char_get_in_room(vict)) <= 95 && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
           act(g, "@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou slam into the ground forming a large crater with your body!@n", true, ch, nullptr, vict, TO_VICT);
           act(g, "@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          if (rroom_sect(g, char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
+          if (room_sect(g, char_get_in_room(vict)) != SECT_INSIDE && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
             impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(g, 1, 8)) {
               case 1:
@@ -903,8 +903,8 @@ ACMD(do_slam)
                 act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
                 break;
               case 2:
-                if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(vict)) == 0) {
-                  rroom_set_geffect(g, char_get_in_room(vict), 1);
+                if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(vict)) == 0) {
+                  room_set_geffect(g, char_get_in_room(vict), 1);
                   act(g, "Lava leaks up through cracks in the crater!", true, ch, nullptr, vict, TO_CHAR);
                   act(g, "Lava leaks up through cracks in the crater!", true, ch, nullptr, vict, TO_ROOM);
                 }
@@ -929,7 +929,7 @@ ACMD(do_slam)
                 break;
             }
           }
-          if (rroom_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
+          if (room_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
             switch (rand_number(g, 1, 3)) {
               case 1:
                 act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -945,7 +945,7 @@ ACMD(do_slam)
                 break;
             }
           }
-          if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
+          if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
             switch (rand_number(g, 1, 3)) {
               case 1:
                 act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -961,7 +961,7 @@ ACMD(do_slam)
                 break;
             }
           }
-          if (rroom_sect(g, char_get_in_room(vict)) == SECT_INSIDE) {
+          if (room_sect(g, char_get_in_room(vict)) == SECT_INSIDE) {
             impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(g, 1, 8)) {
               case 1:
@@ -993,7 +993,7 @@ ACMD(do_slam)
                 break;
             }
           }
-          rroom_set_dmg(g, char_get_in_room(vict), rroom_get_dmg(g, char_get_in_room(vict)) + (5));
+          room_set_dmg(g, char_get_in_room(vict), room_get_dmg(g, char_get_in_room(vict)) + (5));
         }
         hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(g, vict, 3);

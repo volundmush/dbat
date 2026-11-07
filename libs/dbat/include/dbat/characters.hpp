@@ -142,7 +142,7 @@ struct char_data {
   int32_t idnum{}; /* player's idnum; -1 for mobiles	*/
 
   int pfilepos{};          /* playerfile pos			*/
-  mob_vnum nr{};           /* Mob's rnum				*/
+  mob_vnum nr{};           /* Mob's prototype vnum			*/
   room_vnum in_room{};     /* Location (real room number)		*/
   room_vnum was_in_room{}; /* location for linkdead people		*/
   int wait{};              /* wait for how many loops		*/

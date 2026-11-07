@@ -63,7 +63,7 @@ ACMD(do_oasis_zedit)
   /** If no argument was given, use the zone the builder is standing in.     **/
   /****************************************************************************/
   if (!*buf1)
-    number = rroom_get_vnum(g, char_get_in_room(ch));
+    number = char_get_in_room(ch);
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) == 0) {
       save = true;
@@ -202,7 +202,7 @@ ACMD(do_oasis_zedit)
 
   OLC_NUM(d) = number;
 
-  if ((real_num = real_room(g, number)) == NOWHERE) {
+  if (!room_of(g, real_num = number)) {
     write_to_output(g, d, "That room does not exist.\r\n");
 
     /**************************************************************************/
@@ -358,9 +358,9 @@ static void zedit_save_internally(GameWorld *g, struct descriptor_data *d)
   int mobloaded = false,
       objloaded = false,
       subcmd;
-  room_vnum room_num = real_room(g, OLC_NUM(d));
+  room_vnum room_num = OLC_NUM(d);
 
-  if (room_num == NOWHERE) {
+  if (!room_of(g, room_num)) {
     mud_log("SYSERR: zedit_save_internally: OLC_NUM(d) room %d not found.", OLC_NUM(d));
     return;
   }
@@ -636,7 +636,7 @@ static void zedit_disp_arg1(GameWorld *g, struct descriptor_data *d)
       /*
      * Arg1 for these is the room number, skip to arg2  
      */
-      OLC_CMD(d).arg1 = real_room(g, OLC_NUM(d));
+      OLC_CMD(d).arg1 = OLC_NUM(d);
       zedit_disp_arg2(g, d);
       break;
     case 'T':
@@ -833,11 +833,11 @@ static bool zone_range_loses_something(GameWorld *g, struct descriptor_data *d, 
 
     if (vnum >= bot && vnum <= top)
       continue;
-    if (real_room(g, vnum) != NOWHERE)
+    if (room_of(g, vnum))
       what = "room";
-    else if (real_mobile(g, vnum) != NOBODY)
+    else if (mob_proto_of(g, vnum))
       what = "mob";
-    else if (real_object(g, vnum) != NOTHING)
+    else if (obj_proto_of(g, vnum))
       what = "object";
     else if (find_trigger(g, vnum) != nullptr)
       what = "trigger";
@@ -1139,7 +1139,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       switch (OLC_CMD(d).command) {
         case 'M':
-          if ((rnum = real_mobile(g, atoi(arg))) != NOBODY) {
+          if (mob_proto_of(g, rnum = atoi(arg))) {
             OLC_CMD(d).arg1 = rnum;
             zedit_disp_arg2(g, d);
           } else
@@ -1149,7 +1149,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'P':
         case 'E':
         case 'G':
-          if ((rnum = real_object(g, atoi(arg))) != NOTHING) {
+          if (obj_proto_of(g, rnum = atoi(arg))) {
             OLC_CMD(d).arg1 = rnum;
             zedit_disp_arg2(g, d);
           } else
@@ -1190,7 +1190,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'M':
         case 'O':
           OLC_CMD(d).arg2 = MIN(MAX_DUPLICATES, atoi(arg));
-          OLC_CMD(d).arg3 = real_room(g, OLC_NUM(d));
+          OLC_CMD(d).arg3 = OLC_NUM(d);
           zedit_disp_arg4(g, d);
           break;
         case 'G':
@@ -1204,14 +1204,14 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'V':
           OLC_CMD(d).arg2 = atoi(arg); /* context */
-          OLC_CMD(d).arg3 = real_room(g, OLC_NUM(d));
+          OLC_CMD(d).arg3 = OLC_NUM(d);
           write_to_output(g, d, "Enter the global name : ");
           OLC_MODE(d) = ZEDIT_SARG1;
           break;
         case 'T':
           if (find_trigger(g, atoi(arg))) {
             OLC_CMD(d).arg2 = atoi(arg); /* trigger vnum */
-            OLC_CMD(d).arg3 = real_room(g, OLC_NUM(d));
+            OLC_CMD(d).arg3 = OLC_NUM(d);
             zedit_disp_menu(g, d);
           } else
             write_to_output(g, d, "That trigger does not exist, try again : ");
@@ -1229,7 +1229,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           }
           break;
         case 'R':
-          if ((rnum = real_object(g, atoi(arg))) != NOTHING) {
+          if (obj_proto_of(g, rnum = atoi(arg))) {
             OLC_CMD(d).arg2 = rnum;
             zedit_disp_menu(g, d);
           } else
@@ -1272,7 +1272,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           }
           break;
         case 'P':
-          if ((rnum = real_object(g, atoi(arg))) != NOTHING) {
+          if (obj_proto_of(g, rnum = atoi(arg))) {
             OLC_CMD(d).arg3 = rnum;
             zedit_disp_arg5(g, d);
           } else

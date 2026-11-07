@@ -40,18 +40,18 @@ struct bfs_queue_struct {
 
 
 /* Utility macros */
-#define MARK(g, room)      (rroom_set_flag(g, room, ROOM_BFS_MARK, true))
-#define UNMARK(g, room)    (rroom_set_flag(g, room, ROOM_BFS_MARK, false))
-#define IS_MARKED(g, room) (rroom_flagged(g, room, ROOM_BFS_MARK))
-#define IS_CLOSED(g, x, y) (room_exit_flagged(rroom_get_dir_option(g, (x), (y)), EX_CLOSED))
+#define MARK(g, room)      (room_set_flag(g, room, ROOM_BFS_MARK, true))
+#define UNMARK(g, room)    (room_set_flag(g, room, ROOM_BFS_MARK, false))
+#define IS_MARKED(g, room) (room_flagged(g, room, ROOM_BFS_MARK))
+#define IS_CLOSED(g, x, y) (room_exit_flagged(room_get_dir_option(g, (x), (y)), EX_CLOSED))
 
 static bool VALID_EDGE(GameWorld *g, room_vnum x, int y)
 {
-  if (rroom_get_dir_option(g, x, y) == nullptr || rroom_get_exit_to_room(g, x, y) == NOWHERE)
+  if (room_get_dir_option(g, x, y) == nullptr || room_get_exit_to_room(g, x, y) == NOWHERE)
     return false;
   if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(g, x, y))
     return false;
-  if (rroom_flagged(g, rroom_get_exit_to_room(g, x, y), ROOM_NOTRACK) || IS_MARKED(g, rroom_get_exit_to_room(g, x, y)))
+  if (room_flagged(g, room_get_exit_to_room(g, x, y), ROOM_NOTRACK) || IS_MARKED(g, room_get_exit_to_room(g, x, y)))
     return false;
 
   return true;
@@ -113,8 +113,8 @@ int find_first_step(GameWorld *g, room_vnum src, room_vnum target)
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
     if (VALID_EDGE(g, src, curr_dir)) {
-      MARK(g, rroom_get_exit_to_room(g, src, curr_dir));
-      bfs_enqueue(g, rroom_get_exit_to_room(g, src, curr_dir), curr_dir);
+      MARK(g, room_get_exit_to_room(g, src, curr_dir));
+      bfs_enqueue(g, room_get_exit_to_room(g, src, curr_dir), curr_dir);
     }
   }
   /* now, do the classic BFS. */
@@ -126,8 +126,8 @@ int find_first_step(GameWorld *g, room_vnum src, room_vnum target)
     }
     for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
       if (VALID_EDGE(g, g->bfs_queue_head->room, curr_dir)) {
-        MARK(g, rroom_get_exit_to_room(g, g->bfs_queue_head->room, curr_dir));
-        bfs_enqueue(g, rroom_get_exit_to_room(g, g->bfs_queue_head->room, curr_dir), g->bfs_queue_head->dir);
+        MARK(g, room_get_exit_to_room(g, g->bfs_queue_head->room, curr_dir));
+        bfs_enqueue(g, room_get_exit_to_room(g, g->bfs_queue_head->room, curr_dir), g->bfs_queue_head->dir);
       }
     bfs_dequeue(g);
   }
@@ -165,11 +165,11 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == false && rroom_sect(g, obj_get_in_room(vehicle)) != SECT_SPACE) {
+  if (noship == false && room_sect(g, obj_get_in_room(vehicle)) != SECT_SPACE) {
     send_to_char(g, ch, "@wYour ship is not in space!\r\n");
     return;
   }
-  if (noship == true && rroom_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
+  if (noship == true && room_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
     send_to_char(g, ch, "@wYou are not even in space!\r\n");
     return;
   }
@@ -198,22 +198,22 @@ ACMD(do_sradar)
 
   if (noship == false) {
     if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 40979));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 40979);
       sprintf(planet, "Earth");
     } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 30889));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 30889);
       sprintf(planet, "Frigid");
     } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 27065));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 27065);
       sprintf(planet, "Konack");
     } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 32365));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 32365);
       sprintf(planet, "Vegeta");
     } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 41959));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 41959);
       sprintf(planet, "Aether");
     } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-      dir = find_first_step(g, obj_get_in_room(vehicle), real_room(g, 42880));
+      dir = find_first_step(g, obj_get_in_room(vehicle), 42880);
       sprintf(planet, "Namek");
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
@@ -226,15 +226,15 @@ ACMD(do_sradar)
       return;
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
-      dir           = find_first_step(g, obj_get_in_room(vehicle), real_room(g, rad));
+      dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy One");
     } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
-      dir           = find_first_step(g, obj_get_in_room(vehicle), real_room(g, rad));
+      dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy Two");
     } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
-      dir           = find_first_step(g, obj_get_in_room(vehicle), real_room(g, rad));
+      dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy Three");
     } else {
       send_to_char(g, ch, "@wThat is not an existing planet.@n\r\n");
@@ -244,22 +244,22 @@ ACMD(do_sradar)
 
   if (noship == true) {
     if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 40979));
+      dir = find_first_step(g, char_get_in_room(ch), 40979);
       sprintf(planet, "Earth");
     } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 30889));
+      dir = find_first_step(g, char_get_in_room(ch), 30889);
       sprintf(planet, "Frigid");
     } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 27065));
+      dir = find_first_step(g, char_get_in_room(ch), 27065);
       sprintf(planet, "Konack");
     } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 32365));
+      dir = find_first_step(g, char_get_in_room(ch), 32365);
       sprintf(planet, "Vegeta");
     } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 41959));
+      dir = find_first_step(g, char_get_in_room(ch), 41959);
       sprintf(planet, "Aether");
     } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-      dir = find_first_step(g, char_get_in_room(ch), real_room(g, 42880));
+      dir = find_first_step(g, char_get_in_room(ch), 42880);
       sprintf(planet, "Namek");
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
@@ -272,15 +272,15 @@ ACMD(do_sradar)
       return;
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
-      dir           = find_first_step(g, char_get_in_room(ch), real_room(g, rad));
+      dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy One");
     } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
-      dir           = find_first_step(g, char_get_in_room(ch), real_room(g, rad));
+      dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy Two");
     } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
-      dir           = find_first_step(g, char_get_in_room(ch), real_room(g, rad));
+      dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy Three");
     } else {
       send_to_char(g, ch, "@wThat is not an existing planet.@n\r\n");
@@ -329,8 +329,8 @@ ACMD(do_radar)
     char_set_wait(ch, PULSE_2SEC);
     act(g, "$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     while (num < 20000) {
-      if (real_room(g, room) != NOWHERE) {
-        for (obj_data *obj : room_contents(g, real_room(g, room))) {
+      if (room_of(g, room)) {
+        for (obj_data *obj : room_contents(g, room)) {
           if (obj_extra_flagged(obj, ITEM_FORGED)) {
             continue;
           }
@@ -354,7 +354,7 @@ ACMD(do_radar)
             found = true;
           }
         }
-        for (char_data *tch : room_people(g, real_room(g, room))) {
+        for (char_data *tch : room_people(g, room)) {
           if (tch == ch) {
             continue;
           }
@@ -585,70 +585,70 @@ ACMD(do_track)
     return;
   }
 
-  if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_YARDRAT)))) {
+  if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) && (room_flagged(g, char_get_in_room(vict), ROOM_YARDRAT)))) {
     send_to_char(g, ch, "@WSense@D: @YYardrat@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_EARTH)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) && (room_flagged(g, char_get_in_room(vict), ROOM_EARTH)))) {
     send_to_char(g, ch, "@WSense@D: @GEarth@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_VEGETA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) && (room_flagged(g, char_get_in_room(vict), ROOM_VEGETA)))) {
     send_to_char(g, ch, "@WSense@D: @YVegeta@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_NAMEK)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) && (room_flagged(g, char_get_in_room(vict), ROOM_NAMEK)))) {
     send_to_char(g, ch, "@WSense@D: @gNamek@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_FRIGID)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) && (room_flagged(g, char_get_in_room(vict), ROOM_FRIGID)))) {
     send_to_char(g, ch, "@WSense@D: @CFrigid@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_AETHER)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_AETHER)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) && (room_flagged(g, char_get_in_room(vict), ROOM_AETHER)))) {
     send_to_char(g, ch, "@WSense@D: @mAetherh@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_KONACK)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_KONACK)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) && (room_flagged(g, char_get_in_room(vict), ROOM_KONACK)))) {
     send_to_char(g, ch, "@WSense@D: @MKonack@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_KANASSA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) && (room_flagged(g, char_get_in_room(vict), ROOM_KANASSA)))) {
     send_to_char(g, ch, "@WSense@D: @cKanassa@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) && (rroom_flagged(g, char_get_in_room(vict), ROOM_ARLIA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) && (room_flagged(g, char_get_in_room(vict), ROOM_ARLIA)))) {
     send_to_char(g, ch, "@WSense@D: @yArlia@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y%s@n\r\n", blah);
       free(blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_planet_zenith(g, char_get_in_room(ch))) && (rroom_planet_zenith(g, char_get_in_room(vict))))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_planet_zenith(g, char_get_in_room(ch))) && (room_planet_zenith(g, char_get_in_room(vict))))) {
     send_to_char(g, ch, "@WSense@D: @CZenith@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       char *blah = sense_location(g, vict);

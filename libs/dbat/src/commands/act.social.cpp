@@ -72,7 +72,7 @@ ACMD(do_action)
   if (!vict) {
     if (action->char_obj_found) {
       targ = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
-      if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch)));
+      if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)));
       if (targ) {
         act(g, action->char_obj_found, action->hide, ch, targ, nullptr, TO_CHAR);
         act(g, action->others_obj_found, action->hide, ch, targ, nullptr, TO_ROOM);
@@ -436,7 +436,7 @@ ACMD(do_gmote)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
     send_to_char(g, ch, "The walls seem to absorb your actions.\r\n");
     return;
   }

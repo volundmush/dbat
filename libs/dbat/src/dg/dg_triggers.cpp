@@ -780,7 +780,7 @@ bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
     }
 
   return cmd_otrig_list(g, char_get_inventory(actor), actor, cmd, argument, OCMD_INVEN) ||
-         cmd_otrig_list(g, rroom_get_contents(g, char_get_in_room(actor)), actor, cmd, argument, OCMD_ROOM);
+         cmd_otrig_list(g, room_get_contents(g, char_get_in_room(actor)), actor, cmd, argument, OCMD_ROOM);
 }
 
 int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where)
@@ -1093,7 +1093,7 @@ int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_COMMAND))
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_COMMAND))
     return 0;
 
   /* prevent people we like from becoming trapped :P */
@@ -1131,7 +1131,7 @@ void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_SPEECH))
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_SPEECH))
     return;
 
   room = room_of(g, char_get_in_room(actor));
@@ -1162,7 +1162,7 @@ int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
   trig_data *t;
   int ret_val;
 
-  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DROP))
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_DROP))
     return 1;
 
   room = room_of(g, char_get_in_room(actor));
@@ -1188,7 +1188,7 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
     return 1;
 
   room = room_of(g, char_get_in_room(actor));
@@ -1241,7 +1241,7 @@ int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
   room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DOOR))
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_DOOR))
     return 1;
 
   room = room_of(g, char_get_in_room(actor));

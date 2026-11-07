@@ -609,7 +609,7 @@ void gedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if (isdigit(*arg)) {
         i = atoi(arg);
         if ((i = atoi(arg)) != -1)
-          if ((i = real_mobile(g, i)) == NOBODY) {
+          if (!mob_proto_of(g, i)) {
             write_to_output(g, d, "That mobile does not exist, try again : ");
             return;
           }

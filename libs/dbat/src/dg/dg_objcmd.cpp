@@ -109,7 +109,7 @@ static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroom
 
   if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
     tmp = atoi(roomstr);
-    if ((location = real_room(g, tmp)) == NOWHERE)
+    if (!room_of(g, location = tmp))
       return NOWHERE;
   }
 
@@ -124,11 +124,11 @@ static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroom
     return NOWHERE;
 
   /* a room has been found.  Check for permission */
-  if (rroom_flagged(g, location, ROOM_GODROOM) ||
+  if (room_flagged(g, location, ROOM_GODROOM) ||
 #ifdef ROOM_IMPROOM
-      rroom_flagged(g, location, ROOM_IMPROOM) ||
+      room_flagged(g, location, ROOM_IMPROOM) ||
 #endif
-      rroom_flagged(g, location, ROOM_PRIVATE))
+      room_flagged(g, location, ROOM_PRIVATE))
     return NOWHERE;
 
   return location;
@@ -146,9 +146,9 @@ static OCMD(do_oecho)
     obj_log(g, obj, "oecho called with no args");
 
   else if ((room = obj_room(obj)) != NOWHERE) {
-    if (rroom_get_people(g, room)) {
-      sub_write(g, argument, rroom_get_people(g, room), true, TO_ROOM);
-      sub_write(g, argument, rroom_get_people(g, room), true, TO_CHAR);
+    if (room_get_people(g, room)) {
+      sub_write(g, argument, room_get_people(g, room), true, TO_ROOM);
+      sub_write(g, argument, room_get_people(g, room), true, TO_CHAR);
     }
   }
 
@@ -297,7 +297,7 @@ static OCMD(do_otransform)
   else if (!isdigit(*arg))
     obj_log(g, obj, "otransform: bad argument");
   else {
-    o = read_object(g, atoi(arg), VIRTUAL);
+    o = read_object(g, atoi(arg));
     if (o == nullptr) {
       obj_log(g, obj, "otransform: bad object vnum");
       return;
@@ -489,14 +489,14 @@ static OCMD(do_dgoload)
     if (!target || !*target) {
       rnum = room;
     } else {
-      if (!isdigit(*target) || (rnum = real_room(g, atoi(target))) == NOWHERE) {
+      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
         obj_log(g, obj, "oload: room target vnum doesn't exist "
                      "(loading mob vnum %d to room %s)",
                 number, target);
         return;
       }
     }
-    if ((mob = read_mobile(g, number, VIRTUAL)) == nullptr) {
+    if ((mob = read_mobile(g, number)) == nullptr) {
       obj_log(g, obj, "oload: bad mob vnum");
       return;
     }
@@ -512,7 +512,7 @@ static OCMD(do_dgoload)
   }
 
   else if (is_abbrev(arg1, "obj")) {
-    if ((object = read_object(g, number, VIRTUAL)) == nullptr) {
+    if ((object = read_object(g, number)) == nullptr) {
       obj_log(g, obj, "oload: bad object vnum");
       return;
     }
@@ -604,12 +604,12 @@ static OCMD(do_oasound)
   }
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (rroom_get_dir_option(g, room, door) != nullptr &&
-        (rroom_get_dir_option(g, room, door))->to_room != NOWHERE &&
-        (rroom_get_dir_option(g, room, door))->to_room != room &&
-        rroom_get_people(g, (rroom_get_dir_option(g, room, door))->to_room)) {
-      sub_write(g, argument, rroom_get_people(g, (rroom_get_dir_option(g, room, door))->to_room), true, TO_ROOM);
-      sub_write(g, argument, rroom_get_people(g, (rroom_get_dir_option(g, room, door))->to_room), true, TO_CHAR);
+    if (room_get_dir_option(g, room, door) != nullptr &&
+        (room_get_dir_option(g, room, door))->to_room != NOWHERE &&
+        (room_get_dir_option(g, room, door))->to_room != room &&
+        room_get_people(g, (room_get_dir_option(g, room, door))->to_room)) {
+      sub_write(g, argument, room_get_people(g, (room_get_dir_option(g, room, door))->to_room), true, TO_ROOM);
+      sub_write(g, argument, room_get_people(g, (room_get_dir_option(g, room, door))->to_room), true, TO_CHAR);
     }
   }
 }
@@ -692,16 +692,16 @@ static OCMD(do_oat)
   }
 
   if (isdigit(*arg))
-    loc = real_room(g, atoi(arg));
+    loc = atoi(arg);
   else if ((ch = get_char_by_obj(g, obj, arg)))
     loc = char_get_in_room(ch);
 
-  if (loc == NOWHERE) {
+  if (!room_of(g, loc)) {
     obj_log(g, obj, "oat: location not found (%s)", arg);
     return;
   }
 
-  if (!(object = read_object(g, obj_get_vnum(g, obj), VIRTUAL)))
+  if (!(object = read_object(g, obj_get_vnum(g, obj))))
     return;
 
   add_unique_id(g, object);

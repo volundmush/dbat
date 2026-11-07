@@ -587,7 +587,7 @@ ACMD(do_rpp)
         return;
       }
       send_to_char(g, ch, "You now have an Excel House Capsule!\r\n");
-      struct obj_data *hobj = read_object(g, 6, VIRTUAL);
+      struct obj_data *hobj = read_object(g, 6);
       obj_to_char(g, hobj, ch);
       char_set_rp(ch, char_get_rp(ch) - (pay));
       char_get_desc(ch)->rpp = char_get_rp(ch);

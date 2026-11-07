@@ -62,12 +62,12 @@ static void quiet(void *, const char *) {}
 static void place(GameWorld *g, struct char_data *ch, room_vnum vnum)
 {
   char_from_room(g, ch);
-  char_to_room(g, ch, real_room(g, vnum));
+  char_to_room(g, ch, vnum);
 }
 
 static struct char_data *mob_in(GameWorld *g, room_vnum vnum, mob_vnum mob)
 {
-  for (char_data *ch : room_people(g, real_room(g, vnum)))
+  for (char_data *ch : room_people(g, vnum))
     if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == mob)
       return ch;
   return nullptr;
@@ -95,7 +95,7 @@ static void check_commands_reach_the_player(GameWorld *g, struct char_data *ch)
   th_take_output(g, ch);
   th_type(g, ch, "north");
   CHECK(saw(ch, "Training Yard"));
-  CHECK(char_get_in_room(ch) == real_room(g, 301));
+  CHECK(char_get_in_room(ch) == 301);
   th_take_output(g, ch);
   th_type(g, ch, "nosuchcommand");
   CHECK(!saw(ch, "Training Yard"));
@@ -184,8 +184,8 @@ static void check_audit_notices_broken_links(GameWorld *g, struct char_data *ch,
 /* The audit is only worth trusting if it notices each kind of damage. */
 static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *obj      = read_object(g, 301, VIRTUAL);
-  struct obj_data *chest    = read_object(g, 300, VIRTUAL);
+  struct obj_data *obj      = read_object(g, 301);
+  struct obj_data *chest    = read_object(g, 300);
   struct char_data *stray   = &stray_char;
   room_vnum room            = char_get_in_room(ch);
   struct room_direction_data *exit;
@@ -234,7 +234,7 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
   CHECK_NOTICED(g);
   char_set_master(ch, nullptr);
 
-  exit = rroom_get_dir_option(g, room, SOUTH);
+  exit = room_get_dir_option(g, room, SOUTH);
   CHECK(exit != nullptr);
   if (exit) {
     room_vnum to = exit->to_room;
@@ -278,8 +278,8 @@ static void check_extract_with_followers(GameWorld *g, struct char_data *ch)
 
   reset_zone(g, find_zone(g, 3));
   place(g, ch, 301);
-  leader   = read_mobile(g, 300, VIRTUAL);
-  follower = read_mobile(g, 300, VIRTUAL);
+  leader   = read_mobile(g, 300);
+  follower = read_mobile(g, 300);
   char_to_room(g, leader, char_get_in_room(ch));
   char_to_room(g, follower, char_get_in_room(ch));
   add_follower(g, follower, leader);
@@ -302,7 +302,7 @@ static void check_script_purges_its_owner(GameWorld *g, struct char_data *ch)
   th_take_output(g, ch);
   CHECK(mob_in(g, 305, 302) != nullptr);
   th_type(g, ch, "east");
-  CHECK(char_get_in_room(ch) == real_room(g, 305));
+  CHECK(char_get_in_room(ch) == 305);
   CHECK(saw(ch, "The stranger vanishes."));
   extract_pending_chars(g);
   CHECK(mob_in(g, 305, 302) == nullptr);
@@ -316,7 +316,7 @@ static void check_room_trigger_runs(GameWorld *g, struct char_data *ch)
   place(g, ch, 303);
   th_take_output(g, ch);
   th_type(g, ch, "east");
-  CHECK(char_get_in_room(ch) == real_room(g, 304));
+  CHECK(char_get_in_room(ch) == 304);
   CHECK(saw(ch, "The floor hums."));
   CHECK_AUDIT(g);
 }
@@ -324,8 +324,8 @@ static void check_room_trigger_runs(GameWorld *g, struct char_data *ch)
 /* The damaged-ATM messages used to send to rooms[-1] when the ATM was in a container. */
 static void check_atm_in_a_container(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *atm   = read_object(g, 3034, VIRTUAL);
-  struct obj_data *chest = read_object(g, 300, VIRTUAL);
+  struct obj_data *atm   = read_object(g, 3034);
+  struct obj_data *chest = read_object(g, 300);
 
   place(g, ch, 300);
   obj_to_room(g, chest, char_get_in_room(ch));
@@ -346,7 +346,7 @@ static void check_zone_reset(GameWorld *g)
   for (int i = 0; i < 3; i++)
     reset_zone(g, find_zone(g, 3));
   /* nothing else loads this mob, and the zone command's limit is 1 */
-  for (char_data *ch : room_people(g, real_room(g, 303)))
+  for (char_data *ch : room_people(g, 303))
     if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 331)
       masters++;
   CHECK(masters == 1);
@@ -437,9 +437,9 @@ static void check_admin_levels(GameWorld *g, struct char_data *ch)
 static void check_iedit(GameWorld *g)
 {
   struct char_data *builder = th_player(g, "Builder", ADMLVL_IMPL);
-  struct obj_data *chest    = read_object(g, 300, VIRTUAL);
-  struct obj_data *sword    = read_object(g, 301, VIRTUAL);
-  struct obj_data *bread    = read_object(g, 302, VIRTUAL); /* newer than the sword */
+  struct obj_data *chest    = read_object(g, 300);
+  struct obj_data *sword    = read_object(g, 301);
+  struct obj_data *bread    = read_object(g, 302); /* newer than the sword */
   int objects;
 
   place(g, builder, 300);
@@ -462,7 +462,7 @@ static void check_iedit(GameWorld *g)
   CHECK(!strcmp(obj_get_short_description(sword), "a renamed sword"));
   CHECK(obj_get_in_obj(sword) == chest);
   CHECK(obj_get_carried_by(sword) == nullptr);
-  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, real_object(g, 301))), "a plain sword"));
+  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, 301)), "a plain sword"));
   CHECK(count_objects(g) == objects);
   CHECK_AUDIT(g);
 
@@ -525,7 +525,7 @@ static void check_new_guilds(GameWorld *g)
 /* Deleting a prototype used to read the object it had just freed, and to lose what its copies held. */
 static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
 {
-  obj_vnum chest_rnum = real_object(g, 300);
+  obj_vnum chest_vnum = 300;
   struct obj_data *in_room, *carried, *room_bread, *carried_bread;
 
   /* no zone command may load the deleted prototype later */
@@ -533,18 +533,18 @@ static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
     zone_get_cmd(g, find_zone(g, 3), i)->if_flag = 1;
 
   place(g, ch, 301);
-  in_room       = read_object(g, 300, VIRTUAL);
-  carried       = read_object(g, 300, VIRTUAL);
-  room_bread    = read_object(g, 302, VIRTUAL);
-  carried_bread = read_object(g, 302, VIRTUAL);
+  in_room       = read_object(g, 300);
+  carried       = read_object(g, 300);
+  room_bread    = read_object(g, 302);
+  carried_bread = read_object(g, 302);
   obj_to_room(g, in_room, char_get_in_room(ch));
   obj_to_char(g, carried, ch);
   obj_to_obj(g, room_bread, in_room);
   obj_to_obj(g, carried_bread, carried);
   CHECK_AUDIT(g);
 
-  delete_object(g, chest_rnum);
-  CHECK(real_object(g, 300) == NOTHING);
+  delete_object(g, chest_vnum);
+  CHECK(!obj_proto_of(g, 300));
   CHECK(obj_get_in_room(room_bread) == char_get_in_room(ch));
   CHECK(obj_get_carried_by(carried_bread) == ch);
   CHECK_AUDIT(g);
@@ -576,7 +576,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
 
   /* an NPC has no scouter, and used to be assumed to have one */
   {
-    struct char_data *mob = read_mobile(g, 300, VIRTUAL);
+    struct char_data *mob = read_mobile(g, 300);
 
     char_to_room(g, mob, char_get_in_room(ch));
     command_interpreter(g, mob, writable{"snet 5"});
@@ -642,8 +642,8 @@ static void check_whois_with_affects(GameWorld *g, struct char_data *ch)
 /* The walk used to stop at whoever's last affect ended, so everyone after them missed the hour. */
 static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *ending = read_mobile(g, 300, VIRTUAL);
-  struct char_data *other  = read_mobile(g, 300, VIRTUAL);
+  struct char_data *ending         = read_mobile(g, 300);
+  struct char_data *other          = read_mobile(g, 300);
   struct affected_type lasting = {.type = SPELL_SLEEP, .duration = 3, .location = APPLY_NONE};
   struct affected_type short_lived = {.type = SPELL_SLEEP, .duration = 0, .location = APPLY_NONE};
   struct affected_type permanent = {.type = SPELL_SLEEP, .duration = -1, .location = APPLY_NONE};
@@ -684,7 +684,7 @@ static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
 static void check_script_loses_its_owner(GameWorld *g)
 {
   struct char_data *holder = th_player(g, "Holder", ADMLVL_NONE);
-  struct obj_data *zapper  = read_object(g, 351, VIRTUAL);
+  struct obj_data *zapper  = read_object(g, 351);
 
   obj_to_char(g, zapper, holder);
   CHECK(count_objects_of(g, 351) == 1);
@@ -700,7 +700,7 @@ static void check_script_loses_its_owner(GameWorld *g)
 static void check_random_trigger_purges_itself(GameWorld *g, struct char_data *ch)
 {
   for (int i = 0; i < 3; i++)
-    obj_to_room(g, read_object(g, 352, VIRTUAL), char_get_in_room(ch));
+    obj_to_room(g, read_object(g, 352), char_get_in_room(ch));
   CHECK(count_objects_of(g, 352) == 3);
   script_trigger_check(g);
   th_pulses(g, 1);
@@ -716,7 +716,7 @@ static void attach_trigger(GameWorld *g, struct script_data **slot, trig_vnum vn
 /* A plain object in ch's room that runs the given trigger. */
 static struct obj_data *object_with_trigger(GameWorld *g, struct char_data *ch, trig_vnum vnum)
 {
-  struct obj_data *obj = read_object(g, 350, VIRTUAL);
+  struct obj_data *obj = read_object(g, 350);
 
   obj_to_room(g, obj, char_get_in_room(ch));
   attach_trigger(g, obj_script_slot(obj), vnum);
@@ -746,7 +746,7 @@ static void check_timer_trigger_clears_the_room(GameWorld *g, struct char_data *
   struct obj_data *obj;
 
   place(g, ch, 302);
-  obj = read_object(g, 350, VIRTUAL);
+  obj = read_object(g, 350);
   obj_to_room(g, obj, char_get_in_room(ch));
   neighbour = obj_get_id(obj);
   obj = object_with_trigger(g, ch, 385); /* newest first, so the neighbour comes next in the list */
@@ -780,8 +780,8 @@ static void check_load_trigger_purges_itself(GameWorld *g, struct char_data *ch)
 /* Taking the equipment off a dead mob used to carry on after the item's trigger had purged it. */
 static void check_remove_trigger_on_a_dying_mob(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
-  struct obj_data *obj  = read_object(g, 350, VIRTUAL);
+  struct char_data *mob = read_mobile(g, 300);
+  struct obj_data *obj  = read_object(g, 350);
   long id               = obj_get_id(obj);
 
   char_to_room(g, mob, char_get_in_room(ch));
@@ -796,8 +796,8 @@ static void check_remove_trigger_on_a_dying_mob(GameWorld *g, struct char_data *
 /* Real scripts do this all the time, and the object used to be read after it was gone. */
 static void check_receive_trigger_purges_the_gift(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *mob = read_mobile(g, 300, VIRTUAL);
-  struct obj_data *obj  = read_object(g, 350, VIRTUAL);
+  struct char_data *mob = read_mobile(g, 300);
+  struct obj_data *obj  = read_object(g, 350);
   long id               = obj_get_id(obj);
 
   char_to_room(g, mob, char_get_in_room(ch));
@@ -838,8 +838,8 @@ static void check_scripts_ignore_whoever_has_left(GameWorld *g, struct char_data
 /* Changing an object's weight used to leave whoever carries it with the old total. */
 static void check_weight_changes_reach_the_carrier(GameWorld *g, struct char_data *ch)
 {
-  struct obj_data *chest = read_object(g, 325, VIRTUAL); /* a container: the wooden chest was deleted above */
-  struct obj_data *bread = read_object(g, 302, VIRTUAL);
+  struct obj_data *chest = read_object(g, 325); /* a container: the wooden chest was deleted above */
+  struct obj_data *bread = read_object(g, 302);
   int64_t before;
 
   obj_to_obj(g, bread, chest);
@@ -862,7 +862,7 @@ static void check_login_without_a_start_room(GameWorld *g)
   struct char_data *late;
 
   CONFIG_MORTAL_START = 99999;
-  CHECK(real_room(g, CONFIG_MORTAL_START) == NOWHERE);
+  CHECK(!room_of(g, CONFIG_MORTAL_START));
   late = th_player(g, "Latecomer", ADMLVL_NONE);
   CHECK(char_get_in_room(late) == 0);
   CHECK_AUDIT(g);
@@ -871,7 +871,7 @@ static void check_login_without_a_start_room(GameWorld *g)
 /* A master freed before its follower used to be read by the follower's stop_follower(). */
 static void leave_followers_for_shutdown(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *master = read_mobile(g, 300, VIRTUAL); /* newer, so freed first */
+  struct char_data *master = read_mobile(g, 300); /* newer, so freed first */
 
   place(g, ch, 301);
   char_to_room(g, master, char_get_in_room(ch));

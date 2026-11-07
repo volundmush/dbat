@@ -543,7 +543,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM) {
+  if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM) {
     send_to_char(g, ch, "You decide to not be a tugboat instead.\r\n");
     return;
   }

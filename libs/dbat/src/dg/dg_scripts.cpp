@@ -83,7 +83,7 @@ void script_trigger_check(GameWorld *g)
       sc = char_get_script(ch);
 
       if (IS_SET(sc->types, WTRIG_RANDOM) &&
-          (!is_empty(g, rroom_get_zone(g, char_get_in_room(ch))) ||
+          (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         random_mtrigger(g, ch);
     }
@@ -92,7 +92,7 @@ void script_trigger_check(GameWorld *g)
   run_object_triggers(g, OTRIG_RANDOM, random_otrigger);
 
   for (room_vnum nr : g->rooms.vnums()) {
-    if (rroom_get_script(g, nr)) {
+    if (room_get_script(g, nr)) {
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
@@ -114,7 +114,7 @@ void check_time_triggers(GameWorld *g)
       sc = char_get_script(ch);
 
       if (IS_SET(sc->types, WTRIG_TIME) &&
-          (!is_empty(g, rroom_get_zone(g, char_get_in_room(ch))) ||
+          (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         time_mtrigger(g, ch);
     }
@@ -123,7 +123,7 @@ void check_time_triggers(GameWorld *g)
   run_object_triggers(g, OTRIG_TIME, time_otrigger);
 
   for (room_vnum nr : g->rooms.vnums()) {
-    if (rroom_get_script(g, nr)) {
+    if (room_get_script(g, nr)) {
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
@@ -236,7 +236,7 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
   }
 
   if (room_of(g, room))
-    g->dg_ctx.room_vnum = (long long)rroom_get_vnum(g, room);
+    g->dg_ctx.room_vnum = (long long)room;
 }
 
 static void dg_ctx_set_line(GameWorld *g, const char *cmd)
@@ -638,7 +638,7 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
           if ((o = get_obj_in_list_vis(g, (struct char_data *)go, name, nullptr,
                                        char_get_inventory((struct char_data *)go))) == nullptr)
             o = get_obj_in_list_vis(g, (struct char_data *)go, name, nullptr,
-                                    rroom_get_contents(g, char_get_in_room((struct char_data *)go)));
+                                    room_get_contents(g, char_get_in_room((struct char_data *)go)));
           break;
       }
       if (o)
@@ -647,7 +647,7 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       room_vnum r = NOWHERE;
       switch (type) {
         case WLD_TRIGGER:
-          r = real_room(g, room_get_number((struct room_data *)go));
+          r = room_get_number((struct room_data *)go);
           break;
         case OBJ_TRIGGER:
           r = obj_room((struct obj_data *)go);
@@ -656,8 +656,8 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
           r = char_get_in_room((struct char_data *)go);
           break;
       }
-      if (r != NOWHERE)
-        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, rroom_get_vnum(g, r) + ROOM_ID_BASE);
+      if (room_of(g, r))
+        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, r + ROOM_ID_BASE);
     } else {
       script_log(g, "Trigger: %s, VNum %d. makeuid syntax error: '%s'",
                  trig->name, trig_get_vnum(g, trig), cmd);

@@ -283,7 +283,7 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-      g->mapnums[rowcounter][colcounter] = fscanf(mapfile, "%d", &vnum_read) == 1 ? real_room(g, vnum_read) : NOWHERE;
+      g->mapnums[rowcounter][colcounter] = fscanf(mapfile, "%d", &vnum_read) == 1 && room_of(g, vnum_read) ? vnum_read : NOWHERE;
     }
   }
 
@@ -2746,7 +2746,7 @@ int arena_watch(GameWorld *g, struct char_data *ch)
     if (char_in_arena(g, d->character)) {
       if (char_get_arenawatch(ch) == char_get_idnum(d->character)) {
         found = true;
-        room  = rroom_get_vnum(g, char_get_in_room(d->character));
+        room  = char_get_in_room(d->character);
       }
     }
   }
@@ -2827,7 +2827,7 @@ void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
       continue;
-    if (!char_is_awake(i->character) || !rroom_flagged(g, char_get_in_room(i->character), planet))
+    if (!char_is_awake(i->character) || !room_flagged(g, char_get_in_room(i->character), planet))
       continue;
     else {
       if (type == 0) {
@@ -3092,7 +3092,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
       if (!i->connected && i->character &&
           (char_is_npc(i->character) || !char_prf_flagged(g, i->character, PRF_NOGOSS)) && /* someone switched */
           !char_plr_flagged(i->character, PLR_WRITING) &&
-          !rroom_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
+          !room_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
 
         sprintf(buf, "@y%s@n", str);
         perform_act(g, buf, ch, obj, vict_obj, i->character);
@@ -3124,7 +3124,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
       if (ch != nullptr) {
         if (char_in_arena(g, ch)) {
           if (char_prf_flagged(g, d->character, PRF_ARENAWATCH)) {
-            if (arena_watch(g, d->character) == rroom_get_vnum(g, char_get_in_room(ch))) {
+            if (arena_watch(g, d->character) == char_get_in_room(ch)) {
               char buf3[2000];
               *buf3 = '\0';
               sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -3136,12 +3136,12 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
       if (char_get_listenroom(d->character) > 0) {
         int roll = rand_number(g, 1, 101);
         if (!resskill || (roll_skill(g, d->character, resskill) >= dcval)) {
-          if (ch != nullptr && char_get_listenroom(d->character) == rroom_get_vnum(g, char_get_in_room(ch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+          if (ch != nullptr && char_get_listenroom(d->character) == char_get_in_room(ch) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
             char buf3[1000];
             *buf3 = '\0';
             sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
             perform_act(g, buf3, ch, obj, vict_obj, d->character);
-          } else if (obj != nullptr && char_get_listenroom(d->character) == rroom_get_vnum(g, obj_get_in_room(obj)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+          } else if (obj != nullptr && char_get_listenroom(d->character) == obj_get_in_room(obj) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
             char buf3[1000];
             *buf3 = '\0';
             sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
@@ -3249,7 +3249,7 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *
     return;
 
   for (room_vnum j : g->rooms.vnums()) {
-    if (rroom_get_vnum(g, j) >= start && rroom_get_vnum(g, j) <= finish) {
+    if (j >= start && j <= finish) {
       for (char_data *i : room_people(g, j)) {
         if (!char_get_desc(i))
           continue;

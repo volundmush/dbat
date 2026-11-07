@@ -69,7 +69,7 @@ static void read_surface_map(GameWorld *g)
 
   for (int row = 0; row <= MAP_ROWS; row++)
     for (int col = 0; col <= MAP_COLS; col++)
-      g->mapnums[row][col] = fl && fscanf(fl, "%d", &vnum) == 1 ? real_room(g, vnum) : NOWHERE;
+      g->mapnums[row][col] = fl && fscanf(fl, "%d", &vnum) == 1 && room_of(g, vnum) ? vnum : NOWHERE;
   if (fl)
     fclose(fl);
 }

@@ -44,7 +44,7 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 {
   mob_vnum rnum, found = false;
 
-  if ((rnum = real_mobile(g, vnum)) != NOBODY) {
+  if (mob_proto_of(g, rnum = vnum)) {
     /* Copy over the mobile and free() the old strings. */
     copy_mobile(g, mob_proto_of(g, rnum), mob);
     char_set_nr(mob_proto_of(g, rnum), rnum); /* medit's copy option can bring another mob's number */
@@ -273,7 +273,7 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
   }
 
   for (mob_vnum i : g->mob_proto.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
-    if ((rmob = real_mobile(g, i)) == NOBODY)
+    if (!mob_proto_of(g, rmob = i))
       continue;
     check_mobile_strings(g, mob_proto_of(g, rmob));
     if (!write_mobile_record(g, i, mob_proto_of(g, rmob), mobfd))
@@ -334,7 +334,7 @@ static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *m
     fprintf(fd, "Con: %d\n", char_get_aff_abils_con(mob));
   if (char_get_aff_abils_cha(mob) != 0)
     fprintf(fd, "Cha: %d\n", char_get_aff_abils_cha(mob));
-  if (mob_proto_of(g, real_mobile(g, mvnum)) != mob) { /* Not saving a prototype */
+  if (mob_proto_of(g, mvnum) != mob) { /* Not saving a prototype */
     fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
             getCurPL(g, mob), getEffMaxPL(g, mob), (getCurKI(g, mob)), getMaxKI(g, mob),
             (getCurST(g, mob)), getMaxST(g, mob));

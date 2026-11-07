@@ -630,8 +630,8 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
     case 'r':
       if (!strcasecmp(field, "room")) { /* in NOWHERE, return the void */
                                         /* see note in dg_scripts.hpp */
-        snprintf(str, slen, "%c%d", UID_CHAR,
-                 (char_get_in_room(c) != NOWHERE) ? rroom_get_vnum(g, char_get_in_room(c)) + ROOM_ID_BASE : ROOM_ID_BASE);
+                                        snprintf(str, slen, "%c%d", UID_CHAR,
+                                                 (char_get_in_room(c) != NOWHERE) ? char_get_in_room(c) + ROOM_ID_BASE : ROOM_ID_BASE);
       } else if (!strcasecmp(field, "race")) {
         snprintf(str, slen, "%s", char_true_race_name(c));
       } else if (!strcasecmp(field, "rpp")) {
@@ -877,7 +877,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
 
       else if (!strcasecmp(field, "is_inroom")) {
         if (obj_get_in_room(o) != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, obj_get_in_room(o)) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, obj_get_in_room(o) + ROOM_ID_BASE);
         else
           *str = '\0';
       } else if (!strcasecmp(field, "is_pc")) {
@@ -919,7 +919,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
     case 'r':
       if (!strcasecmp(field, "room")) {
         if (obj_room(o) != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, obj_room(o)) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, obj_room(o) + ROOM_ID_BASE);
         else
           *str = '\0';
       }
@@ -1055,14 +1055,14 @@ static void room_exit_field(GameWorld *g, struct room_data *r, int dir, char *su
   if (room_get_dir_option(r, dir)) {
     if (subfield && *subfield) {
       if (!strcasecmp(subfield, "vnum"))
-        snprintf(str, slen, "%d", rroom_get_vnum(g, room_get_dir_option(r, dir)->to_room));
+        snprintf(str, slen, "%d", room_get_dir_option(r, dir)->to_room);
       else if (!strcasecmp(subfield, "key"))
         snprintf(str, slen, "%d", room_get_dir_option(r, dir)->key);
       else if (!strcasecmp(subfield, "bits"))
         sprintbit(room_get_dir_option(r, dir)->exit_info, exit_bits, str, slen);
       else if (!strcasecmp(subfield, "room")) {
         if (room_get_dir_option(r, dir)->to_room != NOWHERE)
-          snprintf(str, slen, "%c%d", UID_CHAR, rroom_get_vnum(g, room_get_dir_option(r, dir)->to_room) + ROOM_ID_BASE);
+          snprintf(str, slen, "%c%d", UID_CHAR, room_get_dir_option(r, dir)->to_room + ROOM_ID_BASE);
         else
           *str = '\0';
       }
@@ -1164,9 +1164,9 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     else
       *str = '\0';
   } else if (!strcasecmp(field, "id")) {
-    room_vnum rnum = real_room(g, room_get_number(r));
-    if (rnum != NOWHERE)
-      snprintf(str, slen, "%d", rroom_get_vnum(g, rnum) + ROOM_ID_BASE);
+    room_vnum rnum = room_get_number(r);
+    if (room_of(g, rnum))
+      snprintf(str, slen, "%d", rnum + ROOM_ID_BASE);
     else
       *str = '\0';
   } else if (!strcasecmp(field, "weather")) {
@@ -1181,8 +1181,8 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     else
       *str = '\0';
   } else if (!strcasecmp(field, "fishing")) {
-    room_vnum thisroom = real_room(g, room_get_number(r));
-    if (rroom_flagged(g, thisroom, ROOM_FISHING))
+    room_vnum thisroom = room_get_number(r);
+    if (room_flagged(g, thisroom, ROOM_FISHING))
       snprintf(str, slen, "1");
     else
       snprintf(str, slen, "0");
@@ -1192,8 +1192,8 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     snprintf(str, slen, "%s", room_get_zone(r)->name);
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
-      room_vnum thisroom = real_room(g, room_get_number(r));
-      if (check_flags_by_name_ar(rroom_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+      room_vnum thisroom = room_get_number(r);
+      if (check_flags_by_name_ar(room_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
         snprintf(str, slen, "1");
       else
         snprintf(str, slen, "0");
@@ -1335,7 +1335,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
             ;
           else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, room_of(g, char_get_in_room(ch)), name)))
             ;
-          else if ((o = get_obj_in_list(g, name, rroom_get_contents(g, char_get_in_room(ch)))))
+          else if ((o = get_obj_in_list(g, name, room_get_contents(g, char_get_in_room(ch)))))
             ;
           else if ((c = get_char(g, name)))
             ;
@@ -1389,7 +1389,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
       }
 
       else if (!strcasecmp(var, "global")) {
-        struct script_data *thescript = rroom_get_script(g, 0);
+        struct script_data *thescript = room_get_script(g, 0);
         *str                          = '\0';
         if (!thescript) {
           script_log(g, "Attempt to find global var. Apparently the void has no script.");
@@ -1445,10 +1445,10 @@ in the vault (vnum: 453) now and then. you can just use
           script_log(g, "findmob.vnum(mvnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_vnum rrnum = real_room(g, atoi(field));
+          room_vnum rrnum = atoi(field);
           mob_vnum mvnum  = atoi(subfield);
 
-          if (rrnum == NOWHERE) {
+          if (!room_of(g, rrnum)) {
             script_log(g, "findmob.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
@@ -1467,14 +1467,14 @@ in the vault (vnum: 453) now and then. you can just use
           script_log(g, "findobj.vnum(ovnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_vnum rrnum = real_room(g, atoi(field));
+          room_vnum rrnum = atoi(field);
 
-          if (rrnum == NOWHERE) {
+          if (!room_of(g, rrnum)) {
             script_log(g, "findobj.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
             /* item_in_list looks within containers as well. */
-            snprintf(str, slen, "%d", item_in_list(g, subfield, rroom_get_contents(g, rrnum)));
+            snprintf(str, slen, "%d", item_in_list(g, subfield, room_get_contents(g, rrnum)));
           }
         }
       } else if (!strcasecmp(var, "random")) {
@@ -1523,7 +1523,7 @@ in the vault (vnum: 453) now and then. you can just use
 
           switch (type) {
             case WLD_TRIGGER:
-              in_room = real_room(g, room_get_number((struct room_data *)go));
+              in_room = room_get_number((struct room_data *)go);
               break;
             case OBJ_TRIGGER:
               in_room = obj_room((struct obj_data *)go);
@@ -1532,7 +1532,7 @@ in the vault (vnum: 453) now and then. you can just use
               in_room = char_get_in_room((struct char_data *)go);
               break;
           }
-          if (in_room == NOWHERE) {
+          if (!room_of(g, in_room)) {
             *str = '\0';
           } else {
             doors = 0;

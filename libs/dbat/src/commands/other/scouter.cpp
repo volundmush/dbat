@@ -302,7 +302,7 @@ ACMD(do_eavesdrop)
 
   if (char_get_listenroom(ch) > 0) {
     send_to_char(g, ch, "You stop eavesdropping.\r\n");
-    char_set_listenroom(ch, real_room(g, 0));
+    char_set_listenroom(ch, 0);
     char_set_eavesdir(ch, -1);
     return;
   }
@@ -323,7 +323,7 @@ ACMD(do_eavesdrop)
       snprintf(buf, sizeof(buf), "The %s is closed.\r\n", fname(char_get_exit(g, ch, dir)->keyword));
       send_to_char(g, ch, "%s", buf);
     } else {
-      char_set_listenroom(ch, rroom_get_vnum(g, char_get_exit(g, ch, dir)->to_room));
+      char_set_listenroom(ch, char_get_exit(g, ch, dir)->to_room);
       char_set_eavesdir(ch, dir);
       send_to_char(g, ch, "Okay.\r\n");
     }
@@ -384,7 +384,7 @@ ACMD(do_snet)
   struct obj_data *obj  = nullptr;
   struct obj_data *obj2 = nullptr;
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     send_to_char(g, ch, "This is a different dimension!\r\n");
     return;
   }
@@ -392,15 +392,15 @@ ACMD(do_snet)
     send_to_char(g, ch, "Lol, no.\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
     send_to_char(g, ch, "This is the past, you can't talk on scouter net!\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
     send_to_char(g, ch, "The fire eats your transmission!\r\n");
     return;
   }
-  if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19800 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19899) {
+  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
     send_to_char(g, ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
     return;
   }
@@ -486,22 +486,22 @@ ACMD(do_snet)
       if (char_get_in_room(i->character) == char_get_in_room(ch)) {
         continue;
       }
-      if (rroom_flagged(g, char_get_in_room(i->character), ROOM_HBTC)) {
+      if (room_flagged(g, char_get_in_room(i->character), ROOM_HBTC)) {
         continue;
       }
-      if (rroom_flagged(g, char_get_in_room(i->character), ROOM_PAST)) {
+      if (room_flagged(g, char_get_in_room(i->character), ROOM_PAST)) {
         continue;
       }
-      if ((rroom_flagged(g, char_get_in_room(i->character), ROOM_RHELL) && !rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL)) || (rroom_flagged(g, char_get_in_room(i->character), ROOM_AL) && !rroom_flagged(g, char_get_in_room(ch), ROOM_AL))) {
+      if ((room_flagged(g, char_get_in_room(i->character), ROOM_RHELL) && !room_flagged(g, char_get_in_room(ch), ROOM_RHELL)) || (room_flagged(g, char_get_in_room(i->character), ROOM_AL) && !room_flagged(g, char_get_in_room(ch), ROOM_AL))) {
         continue;
       }
-      if ((!rroom_flagged(g, char_get_in_room(i->character), ROOM_RHELL) && rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL)) || (!rroom_flagged(g, char_get_in_room(i->character), ROOM_AL) && rroom_flagged(g, char_get_in_room(ch), ROOM_AL))) {
+      if ((!room_flagged(g, char_get_in_room(i->character), ROOM_RHELL) && room_flagged(g, char_get_in_room(ch), ROOM_RHELL)) || (!room_flagged(g, char_get_in_room(i->character), ROOM_AL) && room_flagged(g, char_get_in_room(ch), ROOM_AL))) {
         continue;
       }
       if (char_get_position(i->character) == POS_SLEEPING) {
         continue;
       }
-      if (rroom_get_vnum(g, char_get_in_room(i->character)) >= 19800 && rroom_get_vnum(g, char_get_in_room(i->character)) <= 19899) {
+      if (char_get_in_room(i->character) >= 19800 && char_get_in_room(i->character) <= 19899) {
         continue;
       }
       if (char_get_equipment(i->character, WEAR_EYE)) {
@@ -556,7 +556,7 @@ ACMD(do_snet)
         char over[MAX_STRING_LENGTH];
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
-        if (rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(g, char_get_in_room(ch), ROOM_AL)) {
+        if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
       }
@@ -569,7 +569,7 @@ ACMD(do_snet)
         char over[MAX_STRING_LENGTH];
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
-        if (rroom_flagged(g, char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(g, char_get_in_room(ch), ROOM_AL)) {
+        if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
       }

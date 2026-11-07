@@ -125,14 +125,11 @@ void auc_save(GameWorld *g);
 void load_config(GameWorld *g);
 
 struct zone_data *find_zone(GameWorld *g, zone_vnum vnum);
-room_vnum real_room(GameWorld *g, room_vnum vnum);
-mob_vnum real_mobile(GameWorld *g, mob_vnum vnum);
-obj_vnum real_object(GameWorld *g, obj_vnum vnum);
 
 int load_char(GameWorld *g, const char *name, struct char_data *ch);
 void save_char(GameWorld *g, struct char_data *ch);
 void init_char(GameWorld *g, struct char_data *ch);
-struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type);
+struct char_data *read_mobile(GameWorld *g, mob_vnum nr);
 int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch);
 void clear_char(struct char_data *ch);
 void reset_char(GameWorld *g, struct char_data *ch);
@@ -143,7 +140,7 @@ long get_ptable_by_name(GameWorld *g, const char *name);
 struct obj_data *create_obj(GameWorld *g);
 void clear_object(struct obj_data *obj);
 void free_obj(GameWorld *g, struct obj_data *obj);
-struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type);
+struct obj_data *read_object(GameWorld *g, obj_vnum nr);
 int vnum_object(GameWorld *g, char *searchname, struct char_data *ch);
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(GameWorld *g, struct obj_data *obj);
@@ -152,9 +149,6 @@ char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high);
 int vnum_material(GameWorld *g, char *searchname, struct char_data *ch);
 int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch);
 int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch);
-
-constexpr int REAL    = 0;
-constexpr int VIRTUAL = 1;
 
 /* global buffering system */
 

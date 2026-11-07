@@ -129,7 +129,7 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   }
 
   if (!caster) {
-    caster = read_mobile(g, DG_CASTER_PROXY, VIRTUAL);
+    caster = read_mobile(g, DG_CASTER_PROXY);
     if (!caster) {
       script_log(g, "dg_cast: Cannot load the caster mob!");
       return;
@@ -141,7 +141,7 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
       char_set_sdesc(caster, strdup("The gods"));
     char_set_next_in_room(caster, room_get_people(caster_room));
     room_set_people(caster_room, caster);
-    char_set_in_room(caster, real_room(g, room_get_number(caster_room)));
+    char_set_in_room(caster, room_get_number(caster_room));
     call_magic(g, caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
     extract_char(g, caster);
   } else
@@ -309,7 +309,7 @@ void script_damage(GameWorld *g, struct char_data *vict, int dam)
   if (char_get_position(vict) == POS_DEAD) {
     if (!char_is_npc(vict))
       mudlog(g, LOG_BRF, 0, true, "%s killed by script at %s",
-             char_get_name(vict), rroom_get_name(g, char_get_in_room(vict)));
+             char_get_name(vict), room_get_name(g, char_get_in_room(vict)));
     die(g, vict, nullptr);
   }
 }
@@ -372,7 +372,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
       newexit->keyword = strdup(value);
       break;
     case 5: /* room        */
-      if ((to_room = real_room(g, atoi(value))) != NOWHERE)
+      if (room_of(g, to_room = atoi(value)))
         newexit->to_room = to_room;
       else
         return false;

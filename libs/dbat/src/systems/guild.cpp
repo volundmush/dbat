@@ -1282,7 +1282,8 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
       read_guild_line(g, vnum, gm_f, "%d", &guild->minlvl, "GM_MINLVL");
       read_guild_line(g, vnum, gm_f, "%d", &guild->gm, "GM_TRAINER");
 
-      guild_set_gm(guild, real_mobile(g, guild_get_gm(guild)));
+      if (!mob_proto_of(g, guild_get_gm(guild)))
+        guild_set_gm(guild, NOBODY);
       read_guild_line(g, vnum, gm_f, "%d", &guild->with_who[0], "GM_WITH_WHO");
 
       read_guild_line(g, vnum, gm_f, "%d", &guild->open, "GM_OPEN");

@@ -173,7 +173,7 @@ ACMD(do_oasis_medit)
   /** If this is a new mobile, setup a new one, otherwise, setup the         **/
   /** existing mobile.                                                       **/
   /****************************************************************************/
-  if ((real_num = real_mobile(g, number)) == NOBODY)
+  if (!mob_proto_of(g, real_num = number))
     medit_setup_new(g, d);
   else
     medit_setup_existing(g, d, real_num);
@@ -292,7 +292,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   int i;
   mob_vnum new_rnum;
 
-  i = (real_mobile(g, OLC_NUM(d)) == NOBODY);
+  i = (!mob_proto_of(g, OLC_NUM(d)));
 
   if ((new_rnum = add_mobile(g, OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
     mud_log("medit_save_internally: add_mobile failed.");
@@ -932,7 +932,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case MEDIT_COPY:
-      if ((rnum = real_mobile(g, atoi(arg))) != NOBODY) {
+      if (mob_proto_of(g, rnum = atoi(arg))) {
         medit_setup_existing(g, d, rnum);
       } else
         write_to_output(g, d, "That mob does not exist.\r\n");

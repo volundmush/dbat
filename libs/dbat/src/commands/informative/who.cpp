@@ -123,7 +123,7 @@ ACMD(do_who)
         continue;
       if (questwho && !char_prf_flagged(g, tch, PRF_QUEST))
         continue;
-      if (localwho && rroom_get_zone(g, char_get_in_room(ch)) != rroom_get_zone(g, char_get_in_room(tch)))
+      if (localwho && room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(tch)))
         continue;
       if (char_prf_flagged(g, tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT) {
         hide += 1;
@@ -171,7 +171,7 @@ ACMD(do_who)
         continue;
       if (questwho && !char_prf_flagged(g, tch, PRF_QUEST))
         continue;
-      if (localwho && rroom_get_zone(g, char_get_in_room(ch)) != rroom_get_zone(g, char_get_in_room(tch)))
+      if (localwho && room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(tch)))
         continue;
       if (who_room && (char_get_in_room(tch) != char_get_in_room(ch)))
         continue;
@@ -436,19 +436,19 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, char *arg)
         continue;
       if (char_get_in_room(i) == NOWHERE || !char_can_see(g, ch, i))
         continue;
-      if (rroom_get_zone(g, char_get_in_room(ch)) != rroom_get_zone(g, char_get_in_room(i)))
+      if (room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(i)))
         continue;
-      send_to_char(g, ch, "%-20s - %s\r\n", char_get_name(i), rroom_get_name(g, char_get_in_room(i)));
+      send_to_char(g, ch, "%-20s - %s\r\n", char_get_name(i), room_get_name(g, char_get_in_room(i)));
     }
   } else { /* print only FIRST char, not all. */
     for (char_data *tch : each_char(g)) {
       if (char_get_in_room(tch) == NOWHERE || tch == ch)
         continue;
-      if (!char_can_see(g, ch, tch) || rroom_get_zone(g, char_get_in_room(tch)) != rroom_get_zone(g, char_get_in_room(ch)))
+      if (!char_can_see(g, ch, tch) || room_get_zone(g, char_get_in_room(tch)) != room_get_zone(g, char_get_in_room(ch)))
         continue;
       if (!isname(arg, char_get_alias(tch)))
         continue;
-      send_to_char(g, ch, "%-25s - %s\r\n", char_get_name(tch), rroom_get_name(g, char_get_in_room(tch)));
+      send_to_char(g, ch, "%-25s - %s\r\n", char_get_name(tch), room_get_name(g, char_get_in_room(tch)));
       return;
     }
     send_to_char(g, ch, "Nobody around by that name.\r\n");
@@ -467,11 +467,11 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
     send_to_char(g, ch, "[T%d]", obj_get_proto_script(obj)->vnum);
 
   if (obj_get_in_room(obj) != NOWHERE)
-    send_to_char(g, ch, "[%5d] %s\r\n", rroom_get_vnum(g, obj_get_in_room(obj)), rroom_get_name(g, obj_get_in_room(obj)));
+    send_to_char(g, ch, "[%5d] %s\r\n", obj_get_in_room(obj), room_get_name(g, obj_get_in_room(obj)));
   else if (obj_get_carried_by(obj))
-    send_to_char(g, ch, "carried by %s in room [%d]\r\n", char_pers(g, obj_get_carried_by(obj), ch), rroom_get_vnum(g, char_get_in_room(obj_get_carried_by(obj))));
+    send_to_char(g, ch, "carried by %s in room [%d]\r\n", char_pers(g, obj_get_carried_by(obj), ch), char_get_in_room(obj_get_carried_by(obj)));
   else if (obj_get_worn_by(obj))
-    send_to_char(g, ch, "worn by %s in room [%d]\r\n", char_pers(g, obj_get_worn_by(obj), ch), rroom_get_vnum(g, char_get_in_room(obj_get_worn_by(obj))));
+    send_to_char(g, ch, "worn by %s in room [%d]\r\n", char_pers(g, obj_get_worn_by(obj), ch), char_get_in_room(obj_get_worn_by(obj)));
   else if (obj_get_in_obj(obj)) {
     send_to_char(g, ch, "inside %s%s\r\n", obj_get_short_description(obj_get_in_obj(obj)), (recur ? ", which is" : " "));
     if (recur)
@@ -503,25 +503,25 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
     for (descriptor_data *d : each_desc(g))
       if (desc_is_playing(d)) {
         if (char_get_in_room(d->character) != NOWHERE) {
-          if (rroom_flagged(g, char_get_in_room(d->character), ROOM_EARTH)) {
+          if (room_flagged(g, char_get_in_room(d->character), ROOM_EARTH)) {
             num2 = 0;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_FRIGID)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_FRIGID)) {
             num2 = 1;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_VEGETA)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_VEGETA)) {
             num2 = 2;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_KONACK)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_KONACK)) {
             num2 = 3;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_NAMEK)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_NAMEK)) {
             num2 = 4;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_AETHER)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_AETHER)) {
             num2 = 5;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_ARLIA)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_ARLIA)) {
             num2 = 6;
-          } else if (rroom_planet_zenith(g, char_get_in_room(d->character))) {
+          } else if (room_planet_zenith(g, char_get_in_room(d->character))) {
             num2 = 7;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_YARDRAT)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_YARDRAT)) {
             num2 = 8;
-          } else if (rroom_flagged(g, char_get_in_room(d->character), ROOM_KANASSA)) {
+          } else if (room_flagged(g, char_get_in_room(d->character), ROOM_KANASSA)) {
             num2 = 9;
           } else {
             num2 = 10;
@@ -531,10 +531,10 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
         if (i && char_can_see(g, ch, i) && (char_get_in_room(i) != NOWHERE)) {
           if (d->original)
             send_to_char(g, ch, "%-20s - [%5d]   %s (in %s)\r\n",
-                         char_get_name(i), rroom_get_vnum(g, char_get_in_room(d->character)),
-                         rroom_get_name(g, char_get_in_room(d->character)), char_get_name(d->character));
+                         char_get_name(i), char_get_in_room(d->character),
+                         room_get_name(g, char_get_in_room(d->character)), char_get_name(d->character));
           else {
-            send_to_char(g, ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(g, char_get_in_room(i)), planet[num2], rroom_get_name(g, char_get_in_room(i)));
+            send_to_char(g, ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), char_get_in_room(i), planet[num2], room_get_name(g, char_get_in_room(i)));
           }
         }
       }
@@ -544,7 +544,7 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
       if (char_can_see(g, ch, tch) && char_get_in_room(tch) != NOWHERE && isname(arg, char_get_alias(tch))) {
         found = 1;
         send_to_char(g, ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(tch),
-                     rroom_get_vnum(g, char_get_in_room(tch)), rroom_get_name(g, char_get_in_room(tch)));
+                     char_get_in_room(tch), room_get_name(g, char_get_in_room(tch)));
         if (char_is_npc(tch) && char_get_script(tch)) {
           if (!char_get_script(tch)->trig_list->next)
             send_to_char(g, ch, "[T%5d] ", trig_get_vnum(g, char_get_script(tch)->trig_list));

@@ -206,7 +206,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 300));
+              char_to_room(g, vict, 300);
             }
           }
         }
@@ -221,7 +221,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 2234));
+              char_to_room(g, vict, 2234);
             }
           }
         }
@@ -236,7 +236,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 4047));
+              char_to_room(g, vict, 4047);
             }
           }
         }
@@ -251,7 +251,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 8003));
+              char_to_room(g, vict, 8003);
             }
           }
         }
@@ -266,7 +266,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 10182));
+              char_to_room(g, vict, 10182);
             }
           }
         }
@@ -281,7 +281,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 16087));
+              char_to_room(g, vict, 16087);
             }
           }
         }
@@ -296,7 +296,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 12025));
+              char_to_room(g, vict, 12025);
             }
           }
         }
@@ -311,7 +311,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
               act(g, "@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, nullptr, vict, TO_NOTVICT);
               char_from_room(g, vict);
-              char_to_room(g, vict, real_room(g, 14910));
+              char_to_room(g, vict, 14910);
             }
           }
         }
@@ -352,49 +352,49 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
     switch (char_get_powerattack(ch)) {
       case SONG_TELEPORT_EARTH:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 300));
+        char_to_room(g, ch, 300);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_VEGETA:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 2234));
+        char_to_room(g, ch, 2234);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_FRIGID:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 4047));
+        char_to_room(g, ch, 4047);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_NAMEK:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 10182));
+        char_to_room(g, ch, 10182);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_KANASSA:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 14910));
+        char_to_room(g, ch, 14910);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_AETHER:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 12025));
+        char_to_room(g, ch, 12025);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_ARLIA:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 16087));
+        char_to_room(g, ch, 16087);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;
       case SONG_TELEPORT_KONACK:
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 8003));
+        char_to_room(g, ch, 8003);
         char_set_powerattack(ch, 0);
         act(g, "@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
         break;

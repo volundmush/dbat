@@ -266,7 +266,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
       case WLD_TRIGGER:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-               vnum, rroom_get_vnum(g, room_get_number((room_data *)proto)));
+               vnum, room_get_number((room_data *)proto));
         break;
       default:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,

@@ -1666,9 +1666,9 @@ void huge_update(GameWorld *g)
   /* Checking the object list for any huge ki attacks */
   for (obj_data *k : each_obj(g)) { /* k may be extracted below */
     if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= game_now(g)) {
-      if (obj_get_in_room(k) && rroom_get_vnum(g, obj_get_in_room(k)) == 80) {
+      if (obj_get_in_room(k) && obj_get_in_room(k) == 80) {
         room_vnum inroom = obj_get_in_room(k);
-        rroom_set_flag(g, inroom, ROOM_HOUSE_CRASH, false);
+        room_set_flag(g, inroom, ROOM_HOUSE_CRASH, false);
         extract_obj(g, k);
         continue;
       }
@@ -1684,7 +1684,7 @@ void huge_update(GameWorld *g)
       if (obj_get_kitype(k) == 497) {
         if (char_get_in_room(obj_get_target(g, k)) == obj_get_in_room(k)) {
           ch = obj_get_user(g, k);
-          if (rroom_get_vnum(g, char_get_in_room(ch)) == rroom_get_vnum(g, obj_get_in_room(k))) {
+          if (char_get_in_room(ch) == obj_get_in_room(k)) {
             bonus = 2;
           }
 
@@ -1771,9 +1771,9 @@ void huge_update(GameWorld *g)
               hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
-            rroom_set_dmg(g, obj_get_in_room(k), 100);
+            room_set_dmg(g, obj_get_in_room(k), 100);
             struct zone_data *zone = nullptr;
-            if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+            if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
               send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
 
@@ -1840,9 +1840,9 @@ void huge_update(GameWorld *g)
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
-          rroom_set_dmg(g, obj_get_in_room(k), 100);
+          room_set_dmg(g, obj_get_in_room(k), 100);
           struct zone_data *zone = nullptr;
-          if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+          if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
             send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
           extract_obj(g, k);
@@ -1854,7 +1854,7 @@ void huge_update(GameWorld *g)
       if (obj_get_kitype(k) == 498) {
         if (char_get_in_room(obj_get_target(g, k)) == obj_get_in_room(k)) {
           ch = obj_get_user(g, k);
-          if (rroom_get_vnum(g, char_get_in_room(ch)) == rroom_get_vnum(g, obj_get_in_room(k))) {
+          if (char_get_in_room(ch) == obj_get_in_room(k)) {
             bonus = 2;
           }
 
@@ -1940,9 +1940,9 @@ void huge_update(GameWorld *g)
               hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
-            rroom_set_dmg(g, obj_get_in_room(k), 100);
+            room_set_dmg(g, obj_get_in_room(k), 100);
             struct zone_data *zone = nullptr;
-            if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+            if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
               send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
             extract_obj(g, k);
@@ -2007,9 +2007,9 @@ void huge_update(GameWorld *g)
             hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
-          rroom_set_dmg(g, obj_get_in_room(k), 100);
+          room_set_dmg(g, obj_get_in_room(k), 100);
           struct zone_data *zone = nullptr;
-          if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+          if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
             send_to_zone(g, "A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
           extract_obj(g, k);
@@ -2075,8 +2075,8 @@ void homing_update(GameWorld *g)
         }
         act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_CHAR);
         act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_ROOM);
-        if (rroom_get_dmg(g, char_get_in_room(vict)) <= 95) {
-          rroom_set_dmg(g, char_get_in_room(vict), rroom_get_dmg(g, char_get_in_room(vict)) + (5));
+        if (room_get_dmg(g, char_get_in_room(vict)) <= 95) {
+          room_set_dmg(g, char_get_in_room(vict), room_get_dmg(g, char_get_in_room(vict)) + (5));
         }
         extract_obj(g, k);
         continue;
@@ -2170,8 +2170,8 @@ void homing_update(GameWorld *g)
         }
         act(g, "@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_CHAR);
         act(g, "@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, nullptr, TO_ROOM);
-        if (rroom_get_dmg(g, char_get_in_room(vict)) <= 95) {
-          rroom_set_dmg(g, char_get_in_room(vict), rroom_get_dmg(g, char_get_in_room(vict)) + (5));
+        if (room_get_dmg(g, char_get_in_room(vict)) <= 95) {
+          room_set_dmg(g, char_get_in_room(vict), room_get_dmg(g, char_get_in_room(vict)) + (5));
         }
         extract_obj(g, k);
         continue;
@@ -2449,12 +2449,12 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     }
   }
 
-  if ((foundo == false || foundv == false) && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
+  if ((foundo == false || foundv == false) && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
     sprintf(buf, "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
     sprintf(buf2, "@WThe deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
     act(g, buf, true, vict, nullptr, nullptr, TO_CHAR);
     act(g, buf2, true, vict, nullptr, nullptr, TO_ROOM);
-    if (rroom_sect(g, char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
+    if (room_sect(g, char_get_in_room(vict)) != SECT_INSIDE && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
@@ -2462,8 +2462,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
           act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(vict)) == 0) {
-            rroom_set_geffect(g, char_get_in_room(vict), 1);
+          if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(vict)) == 0) {
+            room_set_geffect(g, char_get_in_room(vict), 1);
             act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_CHAR);
             act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_ROOM);
           }
@@ -2489,7 +2489,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
+    if (room_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -2505,7 +2505,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
+    if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -2521,7 +2521,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(vict)) == SECT_INSIDE) {
+    if (room_sect(g, char_get_in_room(vict)) == SECT_INSIDE) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
@@ -2553,11 +2553,11 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
           break;
       }
     }
-    if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-      rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+    if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+      room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
     }
     struct zone_data *zone = nullptr;
-    if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+    if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
       send_to_zone(g, "An explosion shakes the entire area!\r\n", zone);
     }
     return;
@@ -2566,8 +2566,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
 
 void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2)
 {
-  if (type == 0 && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
-    if (rroom_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
+  if (type == 0 && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
+    if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
@@ -2575,8 +2575,8 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
           break;
         case 2:
-          if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(vict)) == 0) {
-            rroom_set_geffect(g, char_get_in_room(vict), 1);
+          if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(vict)) == 0) {
+            room_set_geffect(g, char_get_in_room(vict), 1);
             act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_CHAR);
             act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_ROOM);
           }
@@ -2602,7 +2602,7 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
+    if (room_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -2618,7 +2618,7 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
+    if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -2634,7 +2634,7 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           break;
       }
     }
-    if (rroom_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
+    if (room_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
         case 1:
@@ -2666,11 +2666,11 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           break;
       }
     }
-    if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-      rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+    if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+      room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
     }
     struct zone_data *zone = nullptr;
-    if ((zone = find_zone_by_thing(g, rroom_get_vnum(g, char_get_in_room(ch)))) != nullptr) {
+    if ((zone = find_zone_by_thing(g, char_get_in_room(ch))) != nullptr) {
       send_to_zone(g, "An explosion shakes the entire area!\r\n", zone);
     }
   }
@@ -2691,7 +2691,7 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
           break;
       }
 
-      obj = read_object(g, num, VIRTUAL);
+      obj = read_object(g, num);
       if (!obj) /* a builder deleted it */
         return;
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2738,7 +2738,7 @@ void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int ty
         break;
     }
 
-    obj = read_object(g, num, VIRTUAL);
+    obj = read_object(g, num);
     if (!obj) /* a builder deleted it */
       return;
     obj_to_room(g, obj, char_get_in_room(ch));
@@ -3497,7 +3497,7 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       chance -= chance * 0.2;
     }
 
-    gravity = rroom_get_gravity(g, char_get_in_room(ch));
+    gravity = room_get_gravity(g, char_get_in_room(ch));
     gmult   = char_get_level(ch) * ((gravity / 5) + 6);
 
     if (char_get_equipment(ch, WEAR_SH)) {
@@ -3507,8 +3507,8 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       }
     }
 
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
-      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
+      if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
         gmult *= 1.75;
         pscost += 2;
       } else {
@@ -3608,8 +3608,8 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       if (char_is_icer(ch) || (char_is_bio(ch) && (char_get_genome(ch, 0) == 4 || char_get_genome(ch, 1) == 4))) {
         gaincalc = gaincalc - (gaincalc * .20);
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
-        if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
+      if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
+        if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
           gaincalc *= 1.5;
         } else {
           gaincalc *= 1.25;
@@ -3651,10 +3651,10 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       chance -= chance * 0.2;
     }
 
-    gravity = rroom_get_gravity(g, char_get_in_room(ch));
+    gravity = room_get_gravity(g, char_get_in_room(ch));
     gmult   = char_get_level(vict) * ((gravity / 5) + 6);
-    if (rroom_flagged(g, char_get_in_room(vict), ROOM_WORKOUT) || (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
-      if (rroom_get_vnum(g, char_get_in_room(vict)) >= 19100 && rroom_get_vnum(g, char_get_in_room(vict)) <= 19199) {
+    if (room_flagged(g, char_get_in_room(vict), ROOM_WORKOUT) || (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
+      if (char_get_in_room(vict) >= 19100 && char_get_in_room(vict) <= 19199) {
         gmult *= 1.75;
       } else {
         gmult *= 1.25;
@@ -3723,8 +3723,8 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       if (char_is_icer(vict)) {
         gain = gain - (gain * .10);
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
-        if (rroom_get_vnum(g, char_get_in_room(ch)) >= 19100 && rroom_get_vnum(g, char_get_in_room(ch)) <= 19199) {
+      if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT) || (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))) {
+        if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
           gain *= 1.5;
         } else {
           gain *= 1.25;
@@ -3802,7 +3802,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 
   if (vict) {
 
-    if (rroom_get_vnum(g, char_get_in_room(vict)) == 17875) {
+    if (char_get_in_room(vict) == 17875) {
       return;
     }
 
@@ -3899,7 +3899,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 
     if (char_aff_flagged(vict, AFF_SANCTUARY)) {
       if (char_get_skill(vict, SKILL_AQUA_BARRIER)) {
-        if (!rroom_sunken(g, char_get_in_room(ch))) {
+        if (!room_sunken(g, char_get_in_room(ch))) {
           dmg = dmg * 0.85;
         } else {
           dmg = dmg * 0.75;
@@ -4264,10 +4264,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (char_in_arena(g, vict)) {
         send_to_all(g, "@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", char_get_name(ch), char_get_name(vict));
         char_from_room(g, ch);
-        char_to_room(g, ch, real_room(g, 17875));
+        char_to_room(g, ch, 17875);
         look_at_room(g, char_get_in_room(ch), ch, 0);
         char_from_room(g, vict);
-        char_to_room(g, vict, real_room(g, 17875));
+        char_to_room(g, vict, 17875);
         setCurHealth(vict, 1);
         look_at_room(g, char_get_in_room(vict), vict, 0);
         if (char_get_fighting(g, vict)) {
@@ -4293,7 +4293,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       }
       char_set_position(vict, POS_SITTING);
       char_from_room(g, vict);
-      char_to_room(g, vict, real_room(g, sensei_start_room(char_get_class(vict))));
+      char_to_room(g, vict, sensei_start_room(char_get_class(vict)));
       return;
     }
 
@@ -5543,8 +5543,8 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
 
           pcost(g, ch, amount, 0);
@@ -5619,7 +5619,7 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
 static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_data *vict, int type)
 {
   if (type == 0) {
-    if (!rroom_sunken(g, char_get_in_room(vict)) && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE) && rroom_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
+    if (!room_sunken(g, char_get_in_room(vict)) && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE) && room_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5653,7 +5653,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           }
           break;
       }
-    } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
+    } else if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5687,7 +5687,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           }
           break;
       }
-    } else if (rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
+    } else if (room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5721,7 +5721,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           }
           break;
       }
-    } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
+    } else if (room_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5791,7 +5791,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
       }
     }
   } else {
-    if (!rroom_sunken(g, char_get_in_room(vict)) && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE) && rroom_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
+    if (!room_sunken(g, char_get_in_room(vict)) && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE) && room_sect(g, char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5822,7 +5822,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
-    } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
+    } else if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5853,7 +5853,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           act(g, "@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
-    } else if (rroom_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
+    } else if (room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -5884,7 +5884,7 @@ static void handle_death_msg(GameWorld *g, struct char_data *ch, struct char_dat
           act(g, "@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, nullptr, vict, TO_NOTVICT);
           break;
       }
-    } else if (rroom_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
+    } else if (room_sect(g, char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(g, 1, 5)) {
         case 1:
           act(g, "@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, nullptr, vict, TO_CHAR);

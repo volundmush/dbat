@@ -179,13 +179,13 @@ inline auto each_desc(GameWorld *g)
 /* The characters in a room. */
 inline auto room_people(GameWorld *g, room_vnum room)
 {
-  return dbat_iter::chars_in_room_list(g, room == NOWHERE ? nullptr : rroom_get_people(g, room));
+  return dbat_iter::chars_in_room_list(g, room == NOWHERE ? nullptr : room_get_people(g, room));
 }
 
 /* The objects lying in a room. */
 inline auto room_contents(GameWorld *g, room_vnum room)
 {
-  return dbat_iter::objs_in_content_list(g, room == NOWHERE ? nullptr : rroom_get_contents(g, room));
+  return dbat_iter::objs_in_content_list(g, room == NOWHERE ? nullptr : room_get_contents(g, room));
 }
 
 /* The same, for code holding the room itself */

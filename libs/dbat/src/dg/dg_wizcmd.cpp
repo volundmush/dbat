@@ -239,7 +239,7 @@ ACMD(do_attach)
       send_to_char(g, ch, "Players can't have scripts.\r\n");
       return;
     }
-    if (!can_edit_zone(g, ch, rroom_get_zone(g, char_get_in_room(ch)))) {
+    if (!can_edit_zone(g, ch, room_get_zone(g, char_get_in_room(ch)))) {
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -272,7 +272,7 @@ ACMD(do_attach)
       }
     }
 
-    if (!can_edit_zone(g, ch, rroom_get_zone(g, char_get_in_room(ch)))) {
+    if (!can_edit_zone(g, ch, room_get_zone(g, char_get_in_room(ch)))) {
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -304,7 +304,7 @@ ACMD(do_attach)
       return;
     }
 
-    if (!can_edit_zone(g, ch, rroom_get_zone(g, rnum))) {
+    if (!can_edit_zone(g, ch, room_get_zone(g, rnum))) {
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -320,7 +320,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
     send_to_char(g, ch, "Trigger %d (%s) attached to room %d.\r\n",
-                 tn, trig->name, rroom_get_vnum(g, rnum));
+                 tn, trig->name, rnum);
   }
 
   else
@@ -481,7 +481,7 @@ ACMD(do_detach)
         ;
       else if ((victim = get_char_room_vis(g, ch, arg1, nullptr)))
         ;
-      else if ((object = get_obj_in_list_vis(g, ch, arg1, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
+      else if ((object = get_obj_in_list_vis(g, ch, arg1, nullptr, room_get_contents(g, char_get_in_room(ch)))))
         ;
       else if ((victim = get_char_vis(g, ch, arg1, nullptr, FIND_CHAR_WORLD)))
         ;

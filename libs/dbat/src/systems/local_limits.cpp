@@ -217,7 +217,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getMaxKI(g, ch) / 70;
   } else {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_konatsu(ch)) {
         gain = getMaxKI(g, ch) / 12;
       }
@@ -230,7 +230,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
         gain = getMaxKI(g, ch) / 10;
       }
-    } else if (!rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_konatsu(ch)) {
         gain = getMaxKI(g, ch) / 15;
       }
@@ -240,7 +240,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
         gain = getMaxKI(g, ch) / 12;
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
       }
       if (char_is_arlian(ch)) {
@@ -312,7 +312,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
   if (char_is_kanassan(ch) && g->weather_info.sky == SKY_RAINING && char_is_outside(g, ch)) {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(g, char_get_in_room(ch))) {
+  if (char_is_kanassan(ch) && room_sunken(g, char_get_in_room(ch))) {
     gain *= 16;
   }
 
@@ -378,7 +378,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getEffMaxPL(g, ch) / 70;
   } else {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_human(ch)) {
         gain = getEffMaxPL(g, ch) / 20;
       }
@@ -394,7 +394,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
         gain = getEffMaxPL(g, ch) / 10;
       }
-    } else if (!rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_human(ch)) {
         gain = getEffMaxPL(g, ch) / 30;
       }
@@ -410,7 +410,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
         gain = getEffMaxPL(g, ch) / 15;
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
       }
     }
@@ -473,7 +473,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
   if (char_is_kanassan(ch) && g->weather_info.sky == SKY_RAINING && char_is_outside(g, ch)) {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(g, char_get_in_room(ch))) {
+  if (char_is_kanassan(ch) && room_sunken(g, char_get_in_room(ch))) {
     gain *= 16;
   }
 
@@ -527,7 +527,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getMaxST(g, ch) / 70;
   } else {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 7;
       }
@@ -537,14 +537,14 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 6;
       }
-    } else if (!rroom_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 9;
       }
       if (!char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 8;
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
       }
     }
@@ -609,7 +609,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
   if (char_is_kanassan(ch) && g->weather_info.sky == SKY_RAINING && char_is_outside(g, ch)) {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(g, char_get_in_room(ch))) {
+  if (char_is_kanassan(ch) && room_sunken(g, char_get_in_room(ch))) {
     gain *= 16;
   }
 
@@ -635,7 +635,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
     gain /= 4;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
     gain = getMaxST(g, ch) - (getCurST(g, ch));
   }
   if (cook_element(g, char_get_in_room(ch)) == 1)
@@ -990,7 +990,7 @@ void gain_condition(GameWorld *g, struct char_data *ch, int condition, int value
     return;
   }
 
-  if (rroom_get_vnum(g, char_get_in_room(ch)) <= 1) {
+  if (char_get_in_room(ch) <= 1) {
     return;
   }
 
@@ -1092,58 +1092,58 @@ static void check_idling(GameWorld *g, struct char_data *ch)
       if (char_get_in_room(ch) == 0 || char_get_in_room(ch) == 1) {
         char_set_load_room(g, ch, char_get_load_room(g, ch));
       }
-      if (!rroom_flagged(g, char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(g, char_get_in_room(ch)) < 19800 || rroom_get_vnum(g, char_get_in_room(ch)) > 19899)) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, char_get_in_room(ch)));
+      if (!room_flagged(g, char_get_in_room(ch), ROOM_PAST) && (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899)) {
+        char_set_load_room(g, ch, char_get_in_room(ch));
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1561)));
+      if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+        char_set_load_room(g, ch, 1561);
       }
-      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 2002 && rroom_get_vnum(g, char_get_in_room(ch)) <= 2011) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1960)));
+      if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
+        char_set_load_room(g, ch, 1960);
       }
-      if (rroom_get_vnum(g, char_get_in_room(ch)) == 2069) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 2017)));
+      if (char_get_in_room(ch) == 2069) {
+        char_set_load_room(g, ch, 2017);
       }
-      if (rroom_get_vnum(g, char_get_in_room(ch)) == 2070) {
-        char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 2046)));
+      if (char_get_in_room(ch) == 2070) {
+        char_set_load_room(g, ch, 2046);
       }
-      if (rroom_get_vnum(g, char_get_in_room(ch)) >= 101 && rroom_get_vnum(g, char_get_in_room(ch)) <= 139) {
+      if (char_get_in_room(ch) >= 101 && char_get_in_room(ch) <= 139) {
         if (char_get_level(ch) == 1) {
-          char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 100)));
+          char_set_load_room(g, ch, 100);
           char_set_exp(ch, 0);
         } else {
           if (char_is_roshi(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1130)));
+            char_set_load_room(g, ch, 1130);
           }
           if (char_is_kabito(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 12098)));
+            char_set_load_room(g, ch, 12098);
           }
           if (char_is_nail(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 11683)));
+            char_set_load_room(g, ch, 11683);
           }
           if (char_is_bardock(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 2268)));
+            char_set_load_room(g, ch, 2268);
           }
           if (char_is_krane(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 13009)));
+            char_set_load_room(g, ch, 13009);
           }
           if (char_is_tapion(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 8231)));
+            char_set_load_room(g, ch, 8231);
           }
           if (char_is_piccolo(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1659)));
+            char_set_load_room(g, ch, 1659);
           }
           if (char_is_andsix(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 1713)));
+            char_set_load_room(g, ch, 1713);
           }
           if (char_is_dabura(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 6486)));
+            char_set_load_room(g, ch, 6486);
           }
           if (char_is_frieza(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 4282)));
+            char_set_load_room(g, ch, 4282);
           }
           if (char_is_ginyu(ch)) {
-            char_set_load_room(g, ch, rroom_get_vnum(g, real_room(g, 4289)));
+            char_set_load_room(g, ch, 4289);
           }
         }
       }
@@ -1299,7 +1299,7 @@ static void point_update_characters(GameWorld *g)
   for (char_data *i : each_char(g)) {
 
     if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE) {
-      if (rroom_flagged(g, char_get_in_room(i), ROOM_HOUSE)) {
+      if (room_flagged(g, char_get_in_room(i), ROOM_HOUSE)) {
         char_set_relax_count(i, char_get_relax_count(i) + (1));
       } else if (char_get_relax_count(i) >= 464) {
         char_set_relax_count(i, char_get_relax_count(i) - (4));
@@ -1345,7 +1345,7 @@ static void point_update_characters(GameWorld *g)
           send_to_char(g, i, "You don't have enough energy to keep the aura active.\r\n");
           act(g, "$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
           char_plr_set(i, PLR_AURALIGHT, false);
-          rroom_set_light(g, char_get_in_room(i), rroom_get_light(g, char_get_in_room(i)) - 1);
+          room_set_light(g, char_get_in_room(i), room_get_light(g, char_get_in_room(i)) - 1);
         }
       }
       if (char_is_mutant(i) && (char_get_genome(i, 0) == 6 || char_get_genome(i, 1) == 6)) {
@@ -1386,7 +1386,7 @@ static void point_update_characters(GameWorld *g)
         heal_limb(g, i);
       }
 
-      if (rroom_sect(g, char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(g, i) && !char_is_kanassan(i)) {
+      if (room_sect(g, char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(g, i) && !char_is_kanassan(i)) {
         if ((getCurST(g, i)) >= (getCurCarriedWeight(i))) {
           act(g, "@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
           act(g, "@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1404,7 +1404,7 @@ static void point_update_characters(GameWorld *g)
           }
         }
       }
-      if (!has_o2(i) && rroom_sunken(g, char_get_in_room(i)) && !rroom_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
+      if (!has_o2(i) && room_sunken(g, char_get_in_room(i)) && !room_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
         if (((getCurKI(g, i)) - mana_gain(g, i)) > getMaxKI(g, i) / 200) {
           send_to_char(g, i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(g, i, mana_gain(g, i) + getPercentOfMaxKI(g, i, .005), 0);
@@ -1419,7 +1419,7 @@ static void point_update_characters(GameWorld *g)
           }
         }
       }
-      if (!has_o2(i) && rroom_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
+      if (!has_o2(i) && room_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
         if (((getCurKI(g, i)) - mana_gain(g, i)) > getMaxKI(g, i) * 0.005) {
           send_to_char(g, i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(g, i, mana_gain(g, i) + getPercentOfMaxKI(g, i, .005), 0);
@@ -1435,7 +1435,7 @@ static void point_update_characters(GameWorld *g)
           }
         }
       }
-      if (!char_aff_flagged(i, AFF_FLYING) && rroom_get_geffect(g, char_get_in_room(i)) == 6 && !char_mob_flagged(i, MOB_NOKILL) && !char_is_demon(i)) {
+      if (!char_aff_flagged(i, AFF_FLYING) && room_get_geffect(g, char_get_in_room(i)) == 6 && !char_mob_flagged(i, MOB_NOKILL) && !char_is_demon(i)) {
         act(g, "@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
         if (char_is_npc(i) && char_is_humanoid(i) && rand_number(g, 1, 2) == 2) {
@@ -1554,7 +1554,7 @@ static void point_update_objects(GameWorld *g)
 
       diff = game_now(g) - obj_get_lload(j);
       if (diff > 240 && obj_get_lload(j) > 0) {
-        mud_log("No rent object (%s) extracted from room (%d)", obj_get_short_description(j), rroom_get_vnum(g, obj_get_in_room(j)));
+        mud_log("No rent object (%s) extracted from room (%d)", obj_get_short_description(j), obj_get_in_room(j));
         extract_obj(g, j);
         continue;
       }
@@ -1562,7 +1562,7 @@ static void point_update_objects(GameWorld *g)
 
     if (obj_get_type_flag(j) == ITEM_HATCH) {
       if ((vehicle = find_vehicle_by_vnum(g, obj_get_value(j, VAL_HATCH_DEST)))) {
-        obj_set_value(j, 3, rroom_get_vnum(g, obj_get_in_room(vehicle)));
+        obj_set_value(j, 3, obj_get_in_room(vehicle));
       }
     }
 
@@ -1573,27 +1573,27 @@ static void point_update_objects(GameWorld *g)
         obj_set_timer(j, obj_get_timer(j) - 1);
       if (!strstr(obj_get_name(j), "android") && !strstr(obj_get_name(j), "Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
         if (obj_get_timer(j) == 5) {
-          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DFlies start to gather around $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DFlies start to gather around $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
+            act(g, "@DFlies start to gather around $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+            act(g, "@DFlies start to gather around $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 3) {
-          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 2) {
-          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 1) {
-          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           }
         }
       }
@@ -1602,19 +1602,19 @@ static void point_update_objects(GameWorld *g)
         if (obj_get_carried_by(j)) {
           if (!strstr(obj_get_name(j), "android")) {
             act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
-            if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
+            if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
             }
           } else {
             act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
-            if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(g, obj_get_in_room(j)))) {
+            if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
             }
           }
         }
@@ -1647,9 +1647,9 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "A glowing portal fades from existence.",
-              true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           act(g, "A glowing portal fades from existence.",
-              true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
         }
         extract_obj(g, j);
         continue;
@@ -1661,18 +1661,18 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "The $p@n settles to the ground and goes out.",
-              true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
           act(g, "A $p@n settles to the ground and goes out.",
-              true, rroom_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
         }
         extract_obj(g, j);
         continue;
       }
     } else if (obj_extra_flagged(j, ITEM_ICE)) {
       if (obj_get_vnum(g, j) == 79 && obj_get_in_room(j) != NOWHERE && rand_number(g, 1, 2) == 2) {
-        if (rroom_get_geffect(g, obj_get_in_room(j)) >= 1 && rroom_get_geffect(g, obj_get_in_room(j)) <= 5) {
+        if (room_get_geffect(g, obj_get_in_room(j)) >= 1 && room_get_geffect(g, obj_get_in_room(j)) <= 5) {
           send_to_room(g, obj_get_in_room(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-          rroom_set_geffect(g, obj_get_in_room(j), rroom_get_geffect(g, obj_get_in_room(j)) - (1));
+          room_set_geffect(g, obj_get_in_room(j), room_get_geffect(g, obj_get_in_room(j)) - (1));
           if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)) > 0) {
             obj_set_weight(j, obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)));
           } else {
@@ -1742,7 +1742,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
       */
 
     for (room_vnum rrnum : g->rooms.vnums())
-      rroom_set_timed(g, rrnum, rroom_get_timed(g, rrnum) - ((rroom_get_timed(g, rrnum) != -1)));
+      room_set_timed(g, rrnum, room_get_timed(g, rrnum) - ((room_get_timed(g, rrnum) != -1)));
 
     for (char_data *vict : each_char(g)) {
       if (char_is_npc(vict))
@@ -1751,7 +1751,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
       if (char_get_in_room(vict) == NOWHERE)
         continue;
 
-      if (!rroom_flagged(g, char_get_in_room(vict), ROOM_TIMED_DT))
+      if (!room_flagged(g, char_get_in_room(vict), ROOM_TIMED_DT))
         continue;
 
       timed_dt(g, vict);
@@ -1765,15 +1765,15 @@ void timed_dt(GameWorld *g, struct char_data *ch)
     and return again.
   */
 
-  if (rroom_get_timed(g, char_get_in_room(ch)) < 0) {
-    rroom_set_timed(g, char_get_in_room(ch), rand_number(g, 2, 5));
+  if (room_get_timed(g, char_get_in_room(ch)) < 0) {
+    room_set_timed(g, char_get_in_room(ch), rand_number(g, 2, 5));
     return;
   }
 
   /* We know ch is in a dt room with timed >= 0 - see if its the end.
    *
    */
-  if (rroom_get_timed(g, char_get_in_room(ch)) == 0) {
+  if (room_get_timed(g, char_get_in_room(ch)) == 0) {
     for (char_data *vict : room_people(g, char_get_in_room(ch))) {
       if (char_is_npc(vict))
         continue;

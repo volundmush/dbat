@@ -231,7 +231,7 @@ static bool is_skipped(const char *command)
 static void place(GameWorld *g, struct char_data *ch, room_vnum vnum)
 {
   char_from_room(g, ch);
-  char_to_room(g, ch, real_room(g, vnum));
+  char_to_room(g, ch, vnum);
 }
 
 static int by_count(const void *a, const void *b)
@@ -256,9 +256,9 @@ int main(int argc, char **argv)
     snprintf(name, sizeof(name), "Tester%c", (char)('A' + i));
     players[i] = th_player(g, name, levels[i]);
     place(g, players[i], 301);
-    obj_to_char(g, read_object(g, 301, VIRTUAL), players[i]);
-    obj_to_char(g, read_object(g, 302, VIRTUAL), players[i]);
-    obj_to_char(g, read_object(g, 300, VIRTUAL), players[i]);
+    obj_to_char(g, read_object(g, 301), players[i]);
+    obj_to_char(g, read_object(g, 302), players[i]);
+    obj_to_char(g, read_object(g, 300), players[i]);
   }
 
   for (int c = 1; g->complete_cmd_info[c].command[0] != '\n'; c++) {

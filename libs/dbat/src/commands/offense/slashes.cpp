@@ -193,8 +193,8 @@ ACMD(do_tslash)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -979,8 +979,8 @@ ACMD(do_kienzan)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 

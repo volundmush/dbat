@@ -247,16 +247,16 @@ ACMD(do_form)
       }
     }
     if (level == 4) {
-      obj = read_object(g, 1512, VIRTUAL);
+      obj = read_object(g, 1512);
       add_unique_id(g, obj);
     } else if (level == 3) {
-      obj = read_object(g, 1511, VIRTUAL);
+      obj = read_object(g, 1511);
       add_unique_id(g, obj);
     } else if (level == 2) {
-      obj = read_object(g, 1510, VIRTUAL);
+      obj = read_object(g, 1510);
       add_unique_id(g, obj);
     } else {
-      obj = read_object(g, 70, VIRTUAL);
+      obj = read_object(g, 70);
       add_unique_id(g, obj);
     }
     obj_to_char(g, obj, ch);
@@ -290,16 +290,16 @@ ACMD(do_form)
       }
     }
     if (level == 4) {
-      obj = read_object(g, 1515, VIRTUAL);
+      obj = read_object(g, 1515);
       add_unique_id(g, obj);
     } else if (level == 3) {
-      obj = read_object(g, 1514, VIRTUAL);
+      obj = read_object(g, 1514);
       add_unique_id(g, obj);
     } else if (level == 2) {
-      obj = read_object(g, 1513, VIRTUAL);
+      obj = read_object(g, 1513);
       add_unique_id(g, obj);
     } else {
-      obj = read_object(g, 71, VIRTUAL);
+      obj = read_object(g, 71);
       add_unique_id(g, obj);
     }
     obj_to_char(g, obj, ch);
@@ -322,7 +322,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 319, VIRTUAL);
+    obj = read_object(g, 319);
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
@@ -344,7 +344,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 16, VIRTUAL);
+    obj = read_object(g, 16);
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch); // cooldown removed on 10/24/2021
     reveal_hiding(g, ch, 0); //GET_COOLDOWN(ch) = 10;
@@ -387,87 +387,87 @@ ACMD(do_form)
     }
     if (!strcasecmp(arg2, "sword")) {
       if (level == 5) {
-        obj = read_object(g, 1519, VIRTUAL);
+        obj = read_object(g, 1519);
         add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(g, 1518, VIRTUAL);
+        obj = read_object(g, 1518);
         add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(g, 1517, VIRTUAL);
+        obj = read_object(g, 1517);
         add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(g, 1516, VIRTUAL);
+        obj = read_object(g, 1516);
         add_unique_id(g, obj);
       } else {
-        obj = read_object(g, 90, VIRTUAL);
+        obj = read_object(g, 90);
         add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "dagger")) {
       if (level == 5) {
-        obj = read_object(g, 1540, VIRTUAL);
+        obj = read_object(g, 1540);
         add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(g, 1539, VIRTUAL);
+        obj = read_object(g, 1539);
         add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(g, 1538, VIRTUAL);
+        obj = read_object(g, 1538);
         add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(g, 1537, VIRTUAL);
+        obj = read_object(g, 1537);
         add_unique_id(g, obj);
       } else {
-        obj = read_object(g, 1536, VIRTUAL);
+        obj = read_object(g, 1536);
         add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "club")) {
       if (level == 5) {
-        obj = read_object(g, 1545, VIRTUAL);
+        obj = read_object(g, 1545);
         add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(g, 1544, VIRTUAL);
+        obj = read_object(g, 1544);
         add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(g, 1543, VIRTUAL);
+        obj = read_object(g, 1543);
         add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(g, 1542, VIRTUAL);
+        obj = read_object(g, 1542);
         add_unique_id(g, obj);
       } else {
-        obj = read_object(g, 1541, VIRTUAL);
+        obj = read_object(g, 1541);
         add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "spear")) {
       if (level == 5) {
-        obj = read_object(g, 1550, VIRTUAL);
+        obj = read_object(g, 1550);
         add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(g, 1549, VIRTUAL);
+        obj = read_object(g, 1549);
         add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(g, 1548, VIRTUAL);
+        obj = read_object(g, 1548);
         add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(g, 1547, VIRTUAL);
+        obj = read_object(g, 1547);
         add_unique_id(g, obj);
       } else {
-        obj = read_object(g, 1546, VIRTUAL);
+        obj = read_object(g, 1546);
         add_unique_id(g, obj);
       }
     } else if (!strcasecmp(arg2, "gun")) {
       if (level == 5) {
-        obj = read_object(g, 1555, VIRTUAL);
+        obj = read_object(g, 1555);
         add_unique_id(g, obj);
       } else if (level == 4) {
-        obj = read_object(g, 1554, VIRTUAL);
+        obj = read_object(g, 1554);
         add_unique_id(g, obj);
       } else if (level == 3) {
-        obj = read_object(g, 1553, VIRTUAL);
+        obj = read_object(g, 1553);
         add_unique_id(g, obj);
       } else if (level == 2) {
-        obj = read_object(g, 1552, VIRTUAL);
+        obj = read_object(g, 1552);
         add_unique_id(g, obj);
       } else {
-        obj = read_object(g, 1551, VIRTUAL);
+        obj = read_object(g, 1551);
         add_unique_id(g, obj);
       }
     } else {
@@ -511,27 +511,27 @@ ACMD(do_form)
       send_to_char(g, ch, "They must be following you first.\r\n");
       return;
     }
-    obj = read_object(g, 92, VIRTUAL); /* gi */
+    obj = read_object(g, 92); /* gi */
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 91, VIRTUAL); /* pants */
+    obj = read_object(g, 91); /* pants */
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1528, VIRTUAL); /* wrist */
+    obj = read_object(g, 1528); /* wrist */
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1528, VIRTUAL); /* wrist */
+    obj = read_object(g, 1528); /* wrist */
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1532, VIRTUAL); /* boots */
+    obj = read_object(g, 1532); /* boots */
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
@@ -555,7 +555,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 92, VIRTUAL);
+    obj = read_object(g, 92);
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, ch);
@@ -579,7 +579,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 19053, VIRTUAL);
+    obj = read_object(g, 19053);
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch);
     obj_extra_set(obj, ITEM_NORENT, true);
@@ -604,7 +604,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 91, VIRTUAL);
+    obj = read_object(g, 91);
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, ch);
@@ -628,7 +628,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 1528, VIRTUAL);
+    obj = read_object(g, 1528);
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, ch);
@@ -652,7 +652,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 1532, VIRTUAL);
+    obj = read_object(g, 1532);
     add_unique_id(g, obj);
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, ch);
@@ -676,7 +676,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 72, VIRTUAL);
+    obj = read_object(g, 72);
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch);
     obj_set_size(obj, get_size(ch));
@@ -699,7 +699,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
       return;
     }
-    obj = read_object(g, 87, VIRTUAL);
+    obj = read_object(g, 87);
     add_unique_id(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_size(obj, get_size(ch));
@@ -730,7 +730,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
       return;
     }
-    obj = read_object(g, 86, VIRTUAL);
+    obj = read_object(g, 86);
     add_unique_id(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_size(obj, get_size(ch));
@@ -767,7 +767,7 @@ ACMD(do_form)
       send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
       return;
     }
-    obj = read_object(g, 1, VIRTUAL);
+    obj = read_object(g, 1);
     add_unique_id(g, obj);
     obj_to_char(g, obj, ch);
     reveal_hiding(g, ch, 0);
@@ -1219,7 +1219,7 @@ ACMD(do_ingest)
     gainBaseST(ch, stam, true);
     gainBaseKI(ch, ki, true);
     if (!char_is_npc(vict) && !char_is_npc(ch)) {
-      send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(g, char_get_in_room(vict)));
+      send_to_imm(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
       char_plr_set(vict, PLR_ABSORBED, true);
     }
     send_to_char(g, ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
@@ -1266,7 +1266,7 @@ ACMD(do_plant)
   char vict_name[MAX_INPUT_LENGTH], obj_name[MAX_INPUT_LENGTH];
   int roll = 0, detect = 0, fail = 0;
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
@@ -1437,7 +1437,7 @@ ACMD(do_forgery)
 
   obj_vnum loadn = obj_get_vnum(g, obj2);
 
-  obj3 = read_object(g, loadn, VIRTUAL);
+  obj3 = read_object(g, loadn);
   add_unique_id(g, obj3);
   obj_to_char(g, obj3, ch);
 

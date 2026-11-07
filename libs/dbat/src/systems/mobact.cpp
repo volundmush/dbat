@@ -82,7 +82,7 @@ void mobile_activity(GameWorld *g)
 
     /* Scavenger (picking up objects) */
     if (char_is_humanoid(ch) && !char_get_fighting(g, ch) && char_is_awake(ch) && !char_mob_flagged(ch, MOB_NOSCAVENGER) && !char_mob_flagged(ch, MOB_NOKILL) && (!player_present(g, ch) || axion_dice(g, 0) > 118))
-      if (rroom_get_contents(g, char_get_in_room(ch)) && rand_number(g, 1, 100) >= 95) {
+      if (room_get_contents(g, char_get_in_room(ch)) && rand_number(g, 1, 100) >= 95) {
         max      = 1;
         best_obj = nullptr;
         for (obj_data *obj : room_contents(g, char_get_in_room(ch)))
@@ -116,10 +116,10 @@ void mobile_activity(GameWorld *g)
     if (!char_mob_flagged(ch, MOB_SENTINEL) && (char_get_position(ch) == POS_STANDING) && !char_get_fighting(g, ch) &&
         (!char_aff_flagged(ch, AFF_TAMED)) && !char_get_absorbby(g, ch) &&
         ((door = rand_number(g, 0, 18)) < NUM_OF_DIRS) && char_can_go(g, ch, door) &&
-        !rroom_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_NOMOB) &&
-        !rroom_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_DEATH) &&
+        !room_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_NOMOB) &&
+        !room_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_DEATH) &&
         (!char_mob_flagged(ch, MOB_STAY_ZONE) ||
-         (rroom_get_zone(g, char_get_exit(g, ch, door)->to_room) == rroom_get_zone(g, char_get_in_room(ch))))) {
+         (room_get_zone(g, char_get_exit(g, ch, door)->to_room) == room_get_zone(g, char_get_in_room(ch))))) {
       if (rand_number(g, 1, 2) == 2 && !char_is_affected(ch, AFF_PARALYZE) && block_calc(g, ch)) {
         perform_move(g, ch, door, 1);
       }
@@ -442,7 +442,7 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
 
   int message = 1;
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
+  if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
     return;
   }
 
@@ -456,7 +456,7 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  if (!char_is_humanoid(ch) && !rroom_sunken(g, char_get_in_room(ch))) { /* They are an animal and they are not in the water. */
+  if (!char_is_humanoid(ch) && !room_sunken(g, char_get_in_room(ch))) { /* They are an animal and they are not in the water. */
     message = rand_number(g, 1, 12);
     switch (message) { /* Display the appropriate message. */
       case 1:
@@ -542,7 +542,7 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
     }
   } else if (!char_mob_flagged(ch, MOB_DUMMY)) { /* They are intelligent */
     message = rand_number(g, 1, 10);
-    if (!rroom_sunken(g, char_get_in_room(ch))) {
+    if (!room_sunken(g, char_get_in_room(ch))) {
       if (char_aff_flagged(ch, AFF_FLYING)) { /* They are flying */
         switch (message) {
           case 1:

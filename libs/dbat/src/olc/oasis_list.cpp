@@ -55,7 +55,7 @@ ACMD(do_oasis_list)
   }
 
   if (!*smin || *smin == '.') {
-    rzone = rroom_get_zone(g, char_get_in_room(ch));
+    rzone = room_get_zone(g, char_get_in_room(ch));
   } else if (!*smax) {
     rzone = find_zone(g, atoi(smin));
 
@@ -105,7 +105,7 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || !*arg) {
-    zrnum = rroom_get_zone(g, char_get_in_room(ch));
+    zrnum = room_get_zone(g, char_get_in_room(ch));
     zvnum = zrnum->number;
   } else {
     zvnum = atoi(arg);
@@ -123,13 +123,13 @@ ACMD(do_oasis_links)
   send_to_char(g, ch, "Zone %d is linked to the following zones:\r\n", zvnum);
   for (room_vnum nr : g->rooms.vnums_in(first, last)) {
     for (j = 0; j < NUM_OF_DIRS; j++) {
-      if (rroom_get_dir_option(g, nr, j)) {
-        to_room = rroom_get_dir_option(g, nr, j)->to_room;
-        if (to_room != NOWHERE && (zrnum != rroom_get_zone(g, to_room)))
+      if (room_get_dir_option(g, nr, j)) {
+        to_room = room_get_dir_option(g, nr, j)->to_room;
+        if (to_room != NOWHERE && (zrnum != room_get_zone(g, to_room)))
           send_to_char(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                       rroom_get_zone(g, to_room)->number,
-                       rroom_get_zone(g, to_room)->name,
-                       rroom_get_vnum(g, nr), dirs[j], rroom_get_vnum(g, to_room));
+                       room_get_zone(g, to_room)->number,
+                       room_get_zone(g, to_room)->name,
+                       nr, dirs[j], to_room);
       }
     }
   }
@@ -164,21 +164,21 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
   for (room_vnum i : g->rooms.vnums_in(bottom, top)) {
 
     /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((rroom_get_vnum(g, i) >= bottom) && (rroom_get_vnum(g, i) <= top)) {
+    if ((i >= bottom) && (i <= top)) {
       counter++;
 
       send_to_char(g, ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                   counter, rroom_get_vnum(g, i), count_color_chars(rroom_get_name(g, i)) + 44,
-                   rroom_get_name(g, i), rroom_get_proto_script(g, i) ? "[TRIG] " : "");
+                   counter, i, count_color_chars(room_get_name(g, i)) + 44,
+                   room_get_name(g, i), room_get_proto_script(g, i) ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (rroom_get_dir_option(g, i, j) == nullptr)
+        if (room_get_dir_option(g, i, j) == nullptr)
           continue;
-        if (rroom_get_dir_option(g, i, j)->to_room == NOWHERE)
+        if (room_get_dir_option(g, i, j)->to_room == NOWHERE)
           continue;
 
-        if (rroom_get_zone(g, rroom_get_dir_option(g, i, j)->to_room) != rroom_get_zone(g, i))
-          send_to_char(g, ch, "(@y%d@n)", rroom_get_vnum(g, rroom_get_dir_option(g, i, j)->to_room));
+        if (room_get_zone(g, room_get_dir_option(g, i, j)->to_room) != room_get_zone(g, i))
+          send_to_char(g, ch, "(@y%d@n)", room_get_dir_option(g, i, j)->to_room);
       }
 
       send_to_char(g, ch, "\r\n");
@@ -419,7 +419,7 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
   int counter = 0;
   char trgtypes[256];
 
-  /** Expect a minimum / maximum number if the rnum for the zone is NOWHERE. **/
+  /** Expect a minimum / maximum number if no zone was given.               **/
   if (rnum != nullptr) {
     bottom = rnum->bot;
     top    = rnum->top;

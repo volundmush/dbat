@@ -120,7 +120,7 @@ ACMD(do_masound)
   for (door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *newexit;
 
-    if (((newexit = rroom_get_dir_option(g, was_in_room, door)) != nullptr) &&
+    if (((newexit = room_get_dir_option(g, was_in_room, door)) != nullptr) &&
         newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
       char_set_in_room(ch, newexit->to_room);
       sub_write(g, argument, ch, true, TO_ROOM);
@@ -407,14 +407,14 @@ ACMD(do_mload)
     if (!target || !*target) {
       rnum = char_get_in_room(ch);
     } else {
-      if (!isdigit(*target) || (rnum = real_room(g, atoi(target))) == NOWHERE) {
+      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
         mob_log(g, ch, "mload: room target vnum doesn't exist "
                     "(loading mob vnum %d to room %s)",
                 number, target);
         return;
       }
     }
-    if ((mob = read_mobile(g, number, VIRTUAL)) == nullptr) {
+    if ((mob = read_mobile(g, number)) == nullptr) {
       mob_log(g, ch, "mload: bad mob vnum");
       return;
     }
@@ -428,7 +428,7 @@ ACMD(do_mload)
   }
 
   else if (is_abbrev(arg1, "obj")) {
-    if ((object = read_object(g, number, VIRTUAL)) == nullptr) {
+    if ((object = read_object(g, number)) == nullptr) {
       mob_log(g, ch, "mload: bad object vnum");
       return;
     }
@@ -868,9 +868,9 @@ ACMD(do_mtransform)
     mob_log(g, ch, "mtransform: bad argument");
   else {
     if (isdigit(*arg))
-      m = read_mobile(g, atoi(arg), VIRTUAL);
+      m = read_mobile(g, atoi(arg));
     else {
-      m = read_mobile(g, atoi(arg + 1), VIRTUAL);
+      m = read_mobile(g, atoi(arg + 1));
     }
     if (m == nullptr) {
       mob_log(g, ch, "mtransform: bad mobile vnum");

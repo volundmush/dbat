@@ -130,8 +130,8 @@ ACMD(do_pbarrage)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -362,8 +362,8 @@ ACMD(do_scatter)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 80) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (20));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 80) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (20));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -613,11 +613,11 @@ ACMD(do_kakusanha)
       continue;
     } /* Hitting targets! */
 
-    if (count < 5 && !rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+    if (count < 5 && !room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
       send_to_room(g, char_get_in_room(ch), "The rest of the beams slam into the ground!@n\r\n");
       send_to_room(g, char_get_in_room(ch), "@wBright explosions erupt from the impacts!\r\n");
 
-      if (rroom_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
+      if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
         impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
         switch (rand_number(g, 1, 8)) {
           case 1:
@@ -625,8 +625,8 @@ ACMD(do_kakusanha)
             act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_ROOM);
             break;
           case 2:
-            if (rand_number(g, 1, 4) == 4 && rroom_get_geffect(g, char_get_in_room(ch)) == 0) {
-              rroom_set_geffect(g, char_get_in_room(ch), 5);
+            if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(ch)) == 0) {
+              room_set_geffect(g, char_get_in_room(ch), 5);
               act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, nullptr, TO_CHAR);
               act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -652,7 +652,7 @@ ACMD(do_kakusanha)
             break;
         }
       }
-      if (rroom_sect(g, char_get_in_room(ch)) == SECT_UNDERWATER) {
+      if (room_sect(g, char_get_in_room(ch)) == SECT_UNDERWATER) {
         switch (rand_number(g, 1, 3)) {
           case 1:
             act(g, "The water churns violently!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -668,7 +668,7 @@ ACMD(do_kakusanha)
             break;
         }
       }
-      if (rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
+      if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
         switch (rand_number(g, 1, 3)) {
           case 1:
             act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -684,7 +684,7 @@ ACMD(do_kakusanha)
             break;
         }
       }
-      if (rroom_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
+      if (room_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
         impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
         switch (rand_number(g, 1, 8)) {
           case 1:
@@ -717,8 +717,8 @@ ACMD(do_kakusanha)
         }
       }
 
-      if (rroom_get_dmg(g, char_get_in_room(ch)) <= (100 - ((5 - count) * 5))) {
-        rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + ((5 - count) * 5));
+      if (room_get_dmg(g, char_get_in_room(ch)) <= (100 - ((5 - count) * 5))) {
+        room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + ((5 - count) * 5));
       }
     }
 

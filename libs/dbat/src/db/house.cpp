@@ -94,7 +94,7 @@ static void House_crashsave(GameWorld *g, room_vnum vnum)
   char buf[MAX_STRING_LENGTH];
   FILE *fp;
 
-  if ((rnum = real_room(g, vnum)) == NOWHERE)
+  if (!room_of(g, rnum = vnum))
     return;
   if (!House_get_filename(vnum, buf, sizeof(buf)))
     return;
@@ -102,14 +102,14 @@ static void House_crashsave(GameWorld *g, room_vnum vnum)
     perror("SYSERR: Error saving house file");
     return;
   }
-  if (!House_save(g, rroom_get_contents(g, rnum), fp, 0)) {
+  if (!House_save(g, room_get_contents(g, rnum), fp, 0)) {
     atomic_abort(&af); /* keep the last good house file */
     return;
   }
   bool saved = atomic_commit(&af);
-  House_restore_weight(rroom_get_contents(g, rnum));
+  House_restore_weight(room_get_contents(g, rnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
-    rroom_set_flag(g, rnum, ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, rnum, ROOM_HOUSE_CRASH, false);
 }
 
 /* Delete a house save file */
@@ -187,7 +187,7 @@ void House_boot(GameWorld *g)
     if (get_name_by_id(g, temp_house.owner) == nullptr)
       continue; /* owner no longer exists -- skip */
 
-    if ((real_house = real_room(g, temp_house.vnum)) == NOWHERE)
+    if (!room_of(g, real_house = temp_house.vnum))
       continue; /* this vnum doesn't exist -- skip */
 
     if (find_house(g, temp_house.vnum) != NOWHERE)
@@ -195,7 +195,7 @@ void House_boot(GameWorld *g)
 
     g->house_control[g->num_of_houses++] = temp_house;
 
-    rroom_set_flag(g, real_house, ROOM_HOUSE, true);
+    room_set_flag(g, real_house, ROOM_HOUSE, true);
     House_load(g, temp_house.vnum);
   }
 
@@ -275,7 +275,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
     return;
   }
   virt_house = atoi(arg1);
-  if ((real_house = real_room(g, virt_house)) == NOWHERE) {
+  if (!room_of(g, real_house = virt_house)) {
     send_to_char(g, ch, "No such room exists.\r\n");
     return;
   }
@@ -295,7 +295,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
     send_to_char(g, ch, "'%s' is not a valid direction.\r\n", arg1);
     return;
   }
-  if (rroom_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
+  if (room_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
     send_to_char(g, ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
     return;
   }
@@ -321,7 +321,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
 
   g->house_control[g->num_of_houses++] = temp_house;
 
-  rroom_set_flag(g, real_house, ROOM_HOUSE, true);
+  room_set_flag(g, real_house, ROOM_HOUSE, true);
   House_crashsave(g, virt_house);
 
   send_to_char(g, ch, "House built.  Mazel tov!\r\n");
@@ -341,16 +341,16 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg
     send_to_char(g, ch, "Unknown house.\r\n");
     return;
   }
-  if ((real_atrium = real_room(g, g->house_control[i].atrium)) == NOWHERE)
+  if (!room_of(g, real_atrium = g->house_control[i].atrium))
     mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), g->house_control[i].atrium);
   else
-    rroom_set_flag(g, real_atrium, ROOM_ATRIUM, false);
+    room_set_flag(g, real_atrium, ROOM_ATRIUM, false);
 
-  if ((real_house = real_room(g, g->house_control[i].vnum)) == NOWHERE)
+  if (!room_of(g, real_house = g->house_control[i].vnum))
     mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), g->house_control[i].vnum);
   else {
-    rroom_set_flag(g, real_house, ROOM_HOUSE, false);
-    rroom_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, real_house, ROOM_HOUSE, false);
+    room_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
   }
 
   House_delete_file(g->house_control[i].vnum);
@@ -369,8 +369,8 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg
    * house.  --JE 9/19/94
    */
   for (i = 0; i < g->num_of_houses; i++)
-    if ((real_atrium = real_room(g, g->house_control[i].atrium)) != NOWHERE)
-      rroom_set_flag(g, real_atrium, ROOM_ATRIUM, true);
+    if (room_of(g, real_atrium = g->house_control[i].atrium))
+      room_set_flag(g, real_atrium, ROOM_ATRIUM, true);
 }
 
 static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg)
@@ -417,9 +417,9 @@ ACMD(do_house)
 
   one_argument(argument, arg);
 
-  if (!rroom_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
+  if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
     send_to_char(g, ch, "You must be in your house to set guests.\r\n");
-  else if ((i = find_house(g, rroom_get_vnum(g, char_get_in_room(ch)))) == NOWHERE)
+  else if ((i = find_house(g, char_get_in_room(ch))) == NOWHERE)
     send_to_char(g, ch, "Um.. this house seems to be screwed up.\r\n");
   else if (char_get_idnum(ch) != g->house_control[i].owner)
     send_to_char(g, ch, "Only the primary owner can set guests.\r\n");
@@ -459,7 +459,7 @@ void House_save_all(GameWorld *g)
   room_vnum real_house;
 
   for (i = 0; i < g->num_of_houses; i++)
-    if ((real_house = real_room(g, g->house_control[i].vnum)) != NOWHERE)
+    if (room_of(g, real_house = g->house_control[i].vnum))
       House_crashsave(g, g->house_control[i].vnum);
 }
 
@@ -531,7 +531,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   struct extra_descr_data *new_descr;
   room_vnum rrnum;
 
-  if ((rrnum = real_room(g, rvnum)) == NOWHERE)
+  if (!room_of(g, rrnum = rvnum))
     return false;
 
   if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
@@ -566,7 +566,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
         get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       } else {
-        temp = read_object(g, nr, VIRTUAL);
+        temp = read_object(g, nr);
         if (!temp) {
           get_line(fl, line);
           continue;

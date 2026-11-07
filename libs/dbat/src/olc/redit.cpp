@@ -62,7 +62,7 @@ ACMD(do_oasis_redit)
     two_arguments(argument, buf1, buf2);
   }
 
-  if (char_get_admlevel(ch) < 1 && !rroom_flagged(g, char_get_in_room(ch), ROOM_CANREMODEL)) {
+  if (char_get_admlevel(ch) < 1 && !room_flagged(g, char_get_in_room(ch), ROOM_CANREMODEL)) {
     send_to_char(g, ch, "You can not remodel this room.\r\n");
     return;
   }
@@ -91,7 +91,7 @@ ACMD(do_oasis_redit)
   }
 
   if (!*buf1 || char_get_admlevel(ch) < 1)
-    number = rroom_get_vnum(g, char_get_in_room(ch));
+    number = char_get_in_room(ch);
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -178,7 +178,7 @@ ACMD(do_oasis_redit)
 
   OLC_NUM(d) = number;
 
-  if ((real_num = real_room(g, number)) != NOWHERE)
+  if (room_of(g, real_num = number))
     redit_setup_existing(g, d, real_num);
   else
     redit_setup_new(d);
@@ -221,14 +221,14 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
   /*
    * Allocate space for all strings.
    */
-  room_set_name(room, str_udup(rroom_get_name(g, real_num)));
-  room_set_description(room, str_udup(rroom_get_description(g, real_num)));
+  room_set_name(room, str_udup(room_get_name(g, real_num)));
+  room_set_description(room, str_udup(room_get_description(g, real_num)));
 
   /*
    * Exits - We allocate only if necessary.
    */
   for (counter = 0; counter < NUM_OF_DIRS; counter++) {
-    if (rroom_get_dir_option(g, real_num, counter)) {
+    if (room_get_dir_option(g, real_num, counter)) {
       struct room_direction_data *new_exit;
       new_exit = new room_direction_data();
       room_set_dir_option(room, counter, new_exit);
@@ -236,26 +236,26 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
       /*
        * Copy the numbers over.
        */
-      *room_get_dir_option(room, counter) = *rroom_get_dir_option(g, real_num, counter);
+      *room_get_dir_option(room, counter) = *room_get_dir_option(g, real_num, counter);
       /*
        * Allocate the strings.
        */
-      if (rroom_get_dir_option(g, real_num, counter)->general_description)
-        room_get_dir_option(room, counter)->general_description = strdup(rroom_get_dir_option(g, real_num, counter)->general_description);
-      if (rroom_get_dir_option(g, real_num, counter)->keyword)
-        room_get_dir_option(room, counter)->keyword = strdup(rroom_get_dir_option(g, real_num, counter)->keyword);
+      if (room_get_dir_option(g, real_num, counter)->general_description)
+        room_get_dir_option(room, counter)->general_description = strdup(room_get_dir_option(g, real_num, counter)->general_description);
+      if (room_get_dir_option(g, real_num, counter)->keyword)
+        room_get_dir_option(room, counter)->keyword = strdup(room_get_dir_option(g, real_num, counter)->keyword);
     }
   }
 
   /*
    * Extra descriptions, if necessary.
    */
-  if (rroom_get_ex_description(g, real_num)) {
+  if (room_get_ex_description(g, real_num)) {
     struct extra_descr_data *tdesc, *temp, *temp2;
     temp = new extra_descr_data();
 
     room_set_ex_description(room, temp);
-    for (tdesc = rroom_get_ex_description(g, real_num); tdesc; tdesc = tdesc->next) {
+    for (tdesc = room_get_ex_description(g, real_num); tdesc; tdesc = tdesc->next) {
       temp->keyword     = strdup(tdesc->keyword);
       temp->description = strdup(tdesc->description);
       if (tdesc->next) {
@@ -299,11 +299,11 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
 
   /* Update triggers */
   /* Free old proto list */
-  if (rroom_get_proto_script(g, room_num) &&
-      rroom_get_proto_script(g, room_num) != OLC_SCRIPT(d))
+  if (room_get_proto_script(g, room_num) &&
+      room_get_proto_script(g, room_num) != OLC_SCRIPT(d))
     free_proto_script(room_of(g, room_num), WLD_TRIGGER);
 
-  rroom_set_proto_script(g, room_num, OLC_SCRIPT(d));
+  room_set_proto_script(g, room_num, OLC_SCRIPT(d));
   assign_triggers(g, room_of(g, room_num), WLD_TRIGGER);
   /* end trigger update */
 
@@ -424,7 +424,7 @@ static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
                   "@gE@n) Major Fail Dest. Room	: @c%d@n\r\n"
                   "Enter choice, 0 to quit : ",
 
-                  OLC_EXIT(d)->to_room != NOWHERE ? rroom_get_vnum(g, OLC_EXIT(d)->to_room) : -1,
+                  OLC_EXIT(d)->to_room != NOWHERE ? OLC_EXIT(d)->to_room : -1,
                   OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
                   OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
                   OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
@@ -517,18 +517,18 @@ static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
 
                     OLC_NUM(d), OLC_ZNUM(d)->number, room_get_name(room),
                     room_get_description(room), buf1, buf2,
-                    room_get_dir_option(room, NORTH) && room_get_dir_option(room, NORTH)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, NORTH)->to_room) : -1,
-                    room_get_dir_option(room, NORTHWEST) && room_get_dir_option(room, NORTHWEST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, NORTHWEST)->to_room) : -1,
-                    room_get_dir_option(room, EAST) && room_get_dir_option(room, EAST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, EAST)->to_room) : -1,
-                    room_get_dir_option(room, NORTHEAST) && room_get_dir_option(room, NORTHEAST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, NORTHEAST)->to_room) : -1,
-                    room_get_dir_option(room, SOUTH) && room_get_dir_option(room, SOUTH)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, SOUTH)->to_room) : -1,
-                    room_get_dir_option(room, SOUTHEAST) && room_get_dir_option(room, SOUTHEAST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, SOUTHEAST)->to_room) : -1,
-                    room_get_dir_option(room, WEST) && room_get_dir_option(room, WEST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, WEST)->to_room) : -1,
-                    room_get_dir_option(room, SOUTHWEST) && room_get_dir_option(room, SOUTHWEST)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, SOUTHWEST)->to_room) : -1,
-                    room_get_dir_option(room, UP) && room_get_dir_option(room, UP)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, UP)->to_room) : -1,
-                    room_get_dir_option(room, INDIR) && room_get_dir_option(room, INDIR)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, INDIR)->to_room) : -1,
-                    room_get_dir_option(room, DOWN) && room_get_dir_option(room, DOWN)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, DOWN)->to_room) : -1,
-                    room_get_dir_option(room, OUTDIR) && room_get_dir_option(room, OUTDIR)->to_room != NOWHERE ? rroom_get_vnum(g, room_get_dir_option(room, OUTDIR)->to_room) : -1,
+                    room_get_dir_option(room, NORTH) && room_get_dir_option(room, NORTH)->to_room != NOWHERE ? room_get_dir_option(room, NORTH)->to_room : -1,
+                    room_get_dir_option(room, NORTHWEST) && room_get_dir_option(room, NORTHWEST)->to_room != NOWHERE ? room_get_dir_option(room, NORTHWEST)->to_room : -1,
+                    room_get_dir_option(room, EAST) && room_get_dir_option(room, EAST)->to_room != NOWHERE ? room_get_dir_option(room, EAST)->to_room : -1,
+                    room_get_dir_option(room, NORTHEAST) && room_get_dir_option(room, NORTHEAST)->to_room != NOWHERE ? room_get_dir_option(room, NORTHEAST)->to_room : -1,
+                    room_get_dir_option(room, SOUTH) && room_get_dir_option(room, SOUTH)->to_room != NOWHERE ? room_get_dir_option(room, SOUTH)->to_room : -1,
+                    room_get_dir_option(room, SOUTHEAST) && room_get_dir_option(room, SOUTHEAST)->to_room != NOWHERE ? room_get_dir_option(room, SOUTHEAST)->to_room : -1,
+                    room_get_dir_option(room, WEST) && room_get_dir_option(room, WEST)->to_room != NOWHERE ? room_get_dir_option(room, WEST)->to_room : -1,
+                    room_get_dir_option(room, SOUTHWEST) && room_get_dir_option(room, SOUTHWEST)->to_room != NOWHERE ? room_get_dir_option(room, SOUTHWEST)->to_room : -1,
+                    room_get_dir_option(room, UP) && room_get_dir_option(room, UP)->to_room != NOWHERE ? room_get_dir_option(room, UP)->to_room : -1,
+                    room_get_dir_option(room, INDIR) && room_get_dir_option(room, INDIR)->to_room != NOWHERE ? room_get_dir_option(room, INDIR)->to_room : -1,
+                    room_get_dir_option(room, DOWN) && room_get_dir_option(room, DOWN)->to_room != NOWHERE ? room_get_dir_option(room, DOWN)->to_room : -1,
+                    room_get_dir_option(room, OUTDIR) && room_get_dir_option(room, OUTDIR)->to_room != NOWHERE ? room_get_dir_option(room, OUTDIR)->to_room : -1,
                     OLC_SCRIPT(d) ? "Set." : "Not Set.");
   } else {
     write_to_output(g, d,
@@ -588,7 +588,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             write_to_output(g, d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
             act(g, "@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, d->character, nullptr, nullptr, TO_ROOM);
             struct obj_data *obj;
-            obj = read_object(g, 19094, VIRTUAL);
+            obj = read_object(g, 19094);
             obj_to_char(g, obj, d->character);
           }
           break;
@@ -939,7 +939,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case REDIT_EXIT_NUMBER:
       rnum = NOWHERE;
       if ((number = atoi(arg)) != -1)
-        if ((rnum = real_room(g, number)) == NOWHERE) {
+        if (!room_of(g, rnum = number)) {
           write_to_output(g, d, "That room does not exist, try again : ");
           return;
         }
@@ -1053,7 +1053,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case REDIT_COPY:
-      if ((rnum = real_room(g, atoi(arg))) != NOWHERE) {
+      if (room_of(g, rnum = atoi(arg))) {
         redit_setup_existing(g, d, rnum);
       } else
         write_to_output(g, d, "That room does not exist.\r\n");
@@ -1061,7 +1061,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case REDIT_DELETE:
       if (*arg == 'y' || *arg == 'Y') {
-        if (delete_room(g, real_room(g, room_get_number(OLC_ROOM(d)))))
+        if (delete_room(g, room_get_number(OLC_ROOM(d))))
           write_to_output(g, d, "Room deleted.\r\n");
         else
           write_to_output(g, d, "Couldn't delete the room!\r\n");

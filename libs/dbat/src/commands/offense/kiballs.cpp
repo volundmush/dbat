@@ -108,7 +108,7 @@ ACMD(do_geno)
     dista -= 1;
   }
 
-  obj = read_object(g, 83, VIRTUAL);
+  obj = read_object(g, 83);
   obj_to_room(g, obj, char_get_in_room(vict));
 
   char_set_charge(ch, char_get_charge(ch) + (getEffMaxPL(g, ch) / 10));
@@ -217,7 +217,7 @@ ACMD(do_genki)
 
   struct obj_data *obj;
 
-  obj = read_object(g, 82, VIRTUAL);
+  obj = read_object(g, 82);
   obj_to_room(g, obj, char_get_in_room(vict));
 
   obj_set_target(obj, vict);
@@ -548,8 +548,8 @@ ACMD(do_deathball)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 80) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (20));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 80) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (20));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -686,7 +686,7 @@ ACMD(do_hellspear)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
@@ -904,8 +904,8 @@ ACMD(do_crusher)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 90) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (10));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 90) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (10));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
@@ -1127,8 +1127,8 @@ ACMD(do_blessedhammer)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 95) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (5));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
 
@@ -1371,8 +1371,8 @@ ACMD(do_kiball)
           /*      User/target/skill name/skill/hurt type */
           pcost(g, ch, attperc, 0);
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 98) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (2));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 98) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (2));
           }
 
           return;
@@ -1399,8 +1399,8 @@ ACMD(do_kiball)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-          if (rroom_get_dmg(g, char_get_in_room(ch)) <= 98) {
-            rroom_set_dmg(g, char_get_in_room(ch), rroom_get_dmg(g, char_get_in_room(ch)) + (2));
+          if (room_get_dmg(g, char_get_in_room(ch)) <= 98) {
+            room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (2));
           }
           improve_skill(g, vict, SKILL_DODGE, 0);
           pcost(g, ch, attperc, 0);

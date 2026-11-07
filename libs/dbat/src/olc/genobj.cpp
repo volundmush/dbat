@@ -33,7 +33,7 @@ obj_vnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
   /*
    * Write object to internal tables.
    */
-  obj_set_item_number(newobj, real_object(g, ovnum));
+  obj_set_item_number(newobj, obj_proto_of(g, ovnum) ? ovnum : NOTHING);
   if (obj_get_item_number(newobj) != NOTHING) {
     copy_object(g, obj_proto_of(g, obj_get_item_number(newobj)), newobj);
     update_objects(g, obj_proto_of(g, obj_get_item_number(newobj)));
@@ -162,7 +162,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
    * Start running through all objects in this zone.
    */
   for (obj_vnum counter : g->obj_proto.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
-    if ((realcounter = real_object(g, counter)) != NOTHING) {
+    if (obj_proto_of(g, realcounter = counter)) {
       if (obj_get_action_description(obj = obj_proto_of(g, realcounter))) {
         strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
         strip_cr(buf);

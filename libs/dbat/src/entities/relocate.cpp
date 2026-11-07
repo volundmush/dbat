@@ -18,18 +18,18 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
   if (!object || !room_of(g, room))
     mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)", room, (void *)object);
   else {
-    if (rroom_flagged(g, room, ROOM_GARDEN1) || rroom_flagged(g, room, ROOM_GARDEN2)) {
+    if (room_flagged(g, room, ROOM_GARDEN1) || room_flagged(g, room, ROOM_GARDEN2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
         send_to_room(g, room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", obj_get_short_description(object));
         extract_obj(g, object);
         return;
       }
     }
-    if (room == real_room(g, 80)) {
+    if (room == 80) {
       auc_load(object);
     }
-    obj_set_next_content(object, rroom_get_contents(g, room));
-    rroom_set_contents(g, room, object);
+    obj_set_next_content(object, room_get_contents(g, room));
+    room_set_contents(g, room, object);
     obj_set_in_room(object, room);
     obj_set_carried_by(object, nullptr);
     obj_set_lload(object, game_now(g));
@@ -39,17 +39,17 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_vnum(g, object) <= 19199) {
       if ((obj_get_vnum(g, object) <= 18999 && obj_get_vnum(g, object) >= 18800) || (obj_get_vnum(g, object) <= 19199 && obj_get_vnum(g, object) >= 19100)) {
         obj_vnum hnum          = obj_get_value(object, 0);
-        struct obj_data *house = read_object(g, hnum, VIRTUAL);
-        obj_to_room(g, house, real_room(g, obj_get_value(object, 6)));
+        struct obj_data *house = read_object(g, hnum);
+        obj_to_room(g, house, obj_get_value(object, 6));
         obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
         obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_LOCKED));
       }
     }
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_value(object, 0) > 1 && obj_get_vnum(g, object) > 19199) {
       if (!(vehicle = find_vehicle_by_vnum(g, obj_get_value(object, VAL_HATCH_DEST)))) {
-        if (real_room(g, obj_get_value(object, 3)) != NOWHERE) {
-          vehicle = read_object(g, obj_get_value(object, 0), VIRTUAL);
-          obj_to_room(g, vehicle, real_room(g, obj_get_value(object, 3)));
+        if (room_of(g, obj_get_value(object, 3))) {
+          vehicle = read_object(g, obj_get_value(object, 0));
+          obj_to_room(g, vehicle, obj_get_value(object, 3));
           if (obj_get_action_description(object)) {
             if (strlen(obj_get_action_description(object))) {
               char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -73,18 +73,18 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
         }
       }
     }
-    if (obj_get_exit(g, object, 5) && (rroom_sect(g, obj_get_in_room(object)) == SECT_UNDERWATER || rroom_sect(g, obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
+    if (obj_get_exit(g, object, 5) && (room_sect(g, obj_get_in_room(object)) == SECT_UNDERWATER || room_sect(g, obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
       act(g, "$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
-      room_vnum numb = rroom_get_vnum(g, obj_get_exit(g, object, 5)->to_room);
+      room_vnum numb = obj_get_exit(g, object, 5)->to_room;
       obj_from_room(g, object);
-      obj_to_room(g, object, real_room(g, numb));
+      obj_to_room(g, object, numb);
     }
-    if (obj_get_exit(g, object, 5) && rroom_sect(g, obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(g, object) < 80 || obj_get_vnum(g, object) > 83)) {
+    if (obj_get_exit(g, object, 5) && room_sect(g, obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(g, object) < 80 || obj_get_vnum(g, object) > 83)) {
       act(g, "$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
-      room_vnum numb = rroom_get_vnum(g, obj_get_exit(g, object, 5)->to_room);
+      room_vnum numb = obj_get_exit(g, object, 5)->to_room;
       obj_from_room(g, object);
-      obj_to_room(g, object, real_room(g, numb));
-      if (rroom_sect(g, obj_get_in_room(object)) != SECT_FLYING) {
+      obj_to_room(g, object, numb);
+      if (room_sect(g, obj_get_in_room(object)) != SECT_FLYING) {
         act(g, "$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
       }
     }
@@ -93,8 +93,8 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
         obj_set_level(object, obj_get_value(object, 0));
       }
     }
-    if (rroom_flagged(g, room, ROOM_HOUSE))
-      rroom_set_flag(g, room, ROOM_HOUSE_CRASH, true);
+    if (room_flagged(g, room, ROOM_HOUSE))
+      room_set_flag(g, room, ROOM_HOUSE_CRASH, true);
   }
 }
 
@@ -120,10 +120,10 @@ void obj_from_room(GameWorld *g, struct obj_data *object)
     obj_set_posttype(object, 0);
   }
 
-  obj_unlink_content(rroom_contents_slot(g, obj_get_in_room(object)), object);
+  obj_unlink_content(room_contents_slot(g, obj_get_in_room(object)), object);
 
-  if (rroom_flagged(g, obj_get_in_room(object), ROOM_HOUSE))
-    rroom_set_flag(g, obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
+  if (room_flagged(g, obj_get_in_room(object), ROOM_HOUSE))
+    room_set_flag(g, obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
   obj_set_in_room(object, NOWHERE);
   obj_set_next_content(object, nullptr);
 }
@@ -155,8 +155,8 @@ void obj_to_obj(GameWorld *g, struct obj_data *obj, struct obj_data *obj_to)
     if (obj_get_carried_by(tmp_obj))
       char_set_carry_weight(obj_get_carried_by(tmp_obj), char_get_carry_weight(obj_get_carried_by(tmp_obj)) + (obj_get_weight(obj)));
   }
-  if (obj_get_in_room(obj_to) != NOWHERE && rroom_flagged(g, obj_get_in_room(obj_to), ROOM_HOUSE)) {
-    rroom_set_flag(g, obj_get_in_room(obj_to), ROOM_HOUSE_CRASH, true);
+  if (obj_get_in_room(obj_to) != NOWHERE && room_flagged(g, obj_get_in_room(obj_to), ROOM_HOUSE)) {
+    room_set_flag(g, obj_get_in_room(obj_to), ROOM_HOUSE_CRASH, true);
   }
 }
 
@@ -186,8 +186,8 @@ void obj_from_obj(GameWorld *g, struct obj_data *obj)
       char_set_carry_weight(obj_get_carried_by(temp), char_get_carry_weight(obj_get_carried_by(temp)) - (obj_get_weight(obj)));
   }
 
-  if (obj_get_in_room(obj_from) != NOWHERE && rroom_flagged(g, obj_get_in_room(obj_from), ROOM_HOUSE)) {
-    rroom_set_flag(g, obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
+  if (obj_get_in_room(obj_from) != NOWHERE && room_flagged(g, obj_get_in_room(obj_from), ROOM_HOUSE)) {
+    room_set_flag(g, obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
   }
 
   obj_set_in_obj(obj, nullptr);
@@ -213,12 +213,12 @@ void char_from_room(GameWorld *g, struct char_data *ch)
     if (char_get_equipment(ch, i) != nullptr)
       if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
         if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
-          rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
+          room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
   if (char_plr_flagged(ch, PLR_AURALIGHT))
-    rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
+    room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
-  char_unlink_person(rroom_people_slot(g, char_get_in_room(ch)), ch);
+  char_unlink_person(room_people_slot(g, char_get_in_room(ch)), ch);
   char_set_in_room(ch, NOWHERE);
   char_set_next_in_room(ch, nullptr);
 }
@@ -231,18 +231,18 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
   if (ch == nullptr || !room_of(g, room))
     mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d Ch: %p", room, (void *)ch);
   else {
-    char_set_next_in_room(ch, rroom_get_people(g, room));
-    rroom_set_people(g, room, ch);
+    char_set_next_in_room(ch, room_get_people(g, room));
+    room_set_people(g, room, ch);
     char_set_in_room(ch, room);
 
     for (i = 0; i < NUM_WEARS; i++)
       if (char_get_equipment(ch, i))
         if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
           if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
-            rroom_set_light(g, room, rroom_get_light(g, room) + 1);
+            room_set_light(g, room, room_get_light(g, room) + 1);
 
     if (char_plr_flagged(ch, PLR_AURALIGHT))
-      rroom_set_light(g, room, rroom_get_light(g, room) + 1);
+      room_set_light(g, room, room_get_light(g, room) + 1);
 
     /* Stop fighting now, if we left. */
     if (char_get_fighting(g, ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(g, ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
@@ -414,7 +414,7 @@ void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int po
   if (char_get_in_room(ch) != NOWHERE) {
     if (obj_get_type_flag(obj) == ITEM_LIGHT)
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
-        rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) + 1);
+        room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) + 1);
   } else
     mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char %s.", char_get_name(ch));
 
@@ -447,7 +447,7 @@ struct obj_data *unequip_char(GameWorld *g, struct char_data *ch, int pos)
   if (char_get_in_room(ch) != NOWHERE) {
     if (obj_get_type_flag(obj) == ITEM_LIGHT)
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
-        rroom_set_light(g, char_get_in_room(ch), rroom_get_light(g, char_get_in_room(ch)) - 1);
+        room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
   } else
     mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", char_get_name(ch));
 

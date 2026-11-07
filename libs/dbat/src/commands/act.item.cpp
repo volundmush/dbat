@@ -245,7 +245,7 @@ static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *p
     reward = 1;
 
   for (count = 0; count < reward; count++) {
-    if (!(fruit = read_object(g, h->fruit, VIRTUAL))) {
+    if (!(fruit = read_object(g, h->fruit))) {
       send_to_imm(g, "ERROR: Harvest plant %d yields missing object %d.", h->plant, h->fruit);
       return;
     }
@@ -293,12 +293,12 @@ ACMD(do_garden)
         send_to_char(g, ch, "You need a shovel in order to collect soil.\r\n");
         return;
       }
-      if (rroom_sect(g, char_get_in_room(ch)) != SECT_FOREST && rroom_sect(g, char_get_in_room(ch)) != SECT_FIELD && rroom_sect(g, char_get_in_room(ch)) != SECT_MOUNTAIN && rroom_sect(g, char_get_in_room(ch)) != SECT_HILLS) {
+      if (room_sect(g, char_get_in_room(ch)) != SECT_FOREST && room_sect(g, char_get_in_room(ch)) != SECT_FIELD && room_sect(g, char_get_in_room(ch)) != SECT_MOUNTAIN && room_sect(g, char_get_in_room(ch)) != SECT_HILLS) {
         send_to_char(g, ch, "You can not collect soil from this area.\r\n");
         return;
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_FERTILE1)) {
-        struct obj_data *soil = read_object(g, 255, VIRTUAL);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_FERTILE1)) {
+        struct obj_data *soil = read_object(g, 255);
         obj_to_char(g, soil, ch);
         act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -306,8 +306,8 @@ ACMD(do_garden)
         char_set_wait(ch, PULSE_4SEC);
         return;
       }
-      if (rroom_flagged(g, char_get_in_room(ch), ROOM_FERTILE2)) {
-        struct obj_data *soil = read_object(g, 255, VIRTUAL);
+      if (room_flagged(g, char_get_in_room(ch), ROOM_FERTILE2)) {
+        struct obj_data *soil = read_object(g, 255);
         obj_to_char(g, soil, ch);
         act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -315,7 +315,7 @@ ACMD(do_garden)
         char_set_wait(ch, PULSE_4SEC);
         return;
       }
-      struct obj_data *soil = read_object(g, 255, VIRTUAL);
+      struct obj_data *soil = read_object(g, 255);
       obj_to_char(g, soil, ch);
       act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -331,7 +331,7 @@ ACMD(do_garden)
     return;
   }
 
-  if (!rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) && !rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+  if (!room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) && !room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You are not even in a garden!\r\n");
     return;
   }
@@ -343,7 +343,7 @@ ACMD(do_garden)
       return;
     }
   } else {
-    if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
       send_to_char(g, ch, "That plant doesn't seem to be here.\r\n");
       return;
     }
@@ -504,10 +504,10 @@ ACMD(do_garden)
     }
     if (found == false) {
       send_to_char(g, ch, "You don't have any real soil.\r\n");
-    } else if (check_saveroom_count(g, ch, nullptr) > 7 && rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1)) {
+    } else if (check_saveroom_count(g, ch, nullptr) > 7 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1)) {
       send_to_char(g, ch, "This room already has all its planters full. Try digging up some plants.\r\n");
       return;
-    } else if (check_saveroom_count(g, ch, nullptr) > 19 && rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+    } else if (check_saveroom_count(g, ch, nullptr) > 19 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
       send_to_char(g, ch, "This room already has all its planters full. Try digging up some plants.\r\n");
       return;
     } else if (skill < axion_dice(g, -5)) {
@@ -618,7 +618,7 @@ ACMD(do_pack)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
     send_to_char(g, ch, "That house item doesn't seem to be around.\r\n");
     return;
   }
@@ -628,11 +628,11 @@ ACMD(do_pack)
     act(g, "@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n", true, ch, obj, nullptr, TO_ROOM);
     if (obj_get_vnum(g, obj) == 11) {
       extract_obj(g, obj);
-      packed = read_object(g, 19085, VIRTUAL);
+      packed = read_object(g, 19085);
       obj_to_room(g, packed, char_get_in_room(ch));
     } else {
       obj_vnum fnum = obj_get_vnum(g, obj) - 10;
-      packed        = read_object(g, fnum, VIRTUAL);
+      packed        = read_object(g, fnum);
       extract_obj(g, obj);
       obj_to_room(g, packed, char_get_in_room(ch));
     }
@@ -663,8 +663,8 @@ ACMD(do_pack)
       }
       money = 65000;
       while (count < 4) {
-        while (rroom_get_contents(g, real_room(g, rnum)))
-          extract_obj(g, rroom_get_contents(g, real_room(g, rnum)));
+        while (room_get_contents(g, rnum))
+          extract_obj(g, room_get_contents(g, rnum));
         count++;
         rnum++;
       }
@@ -672,8 +672,8 @@ ACMD(do_pack)
       rnum  = rnum - 1;
       money = 150000;
       while (count < 4) {
-        while (rroom_get_contents(g, real_room(g, rnum)))
-          extract_obj(g, rroom_get_contents(g, real_room(g, rnum)));
+        while (room_get_contents(g, rnum))
+          extract_obj(g, room_get_contents(g, rnum));
         count++;
         rnum++;
       }
@@ -681,8 +681,8 @@ ACMD(do_pack)
       rnum  = rnum - 1;
       money = 1000000;
       while (count < 4) {
-        while (rroom_get_contents(g, real_room(g, rnum)))
-          extract_obj(g, rroom_get_contents(g, real_room(g, rnum)));
+        while (room_get_contents(g, rnum))
+          extract_obj(g, room_get_contents(g, rnum));
         count++;
         rnum++;
       }
@@ -734,7 +734,7 @@ int check_saveroom_count(GameWorld *g, struct char_data *ch, struct obj_data *co
 
   if (char_get_in_room(ch) == NOWHERE)
     return 0;
-  else if (!rroom_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
+  else if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
     return 0;
 
   for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
@@ -794,15 +794,15 @@ ACMD(do_deploy)
     send_to_char(g, ch, "You are required to have (not spend) 10 RPP in order to place a house.\r\n");
     return;
   }
-  if (furniture == true && (!rroom_flagged(g, char_get_in_room(ch), ROOM_HOUSE) || rroom_flagged(g, char_get_in_room(ch), ROOM_SHIP))) {
+  if (furniture == true && (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE) || room_flagged(g, char_get_in_room(ch), ROOM_SHIP))) {
     send_to_char(g, ch, "You can't deploy house furniture capsules here.\r\n");
     return;
   }
-  if (furniture == true && (rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2))) {
+  if (furniture == true && (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2))) {
     send_to_char(g, ch, "You can't deploy house furniture capsules here.\r\n");
     return;
   }
-  if (furniture == false && (rroom_sect(g, char_get_in_room(ch)) == SECT_INSIDE || rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM || rroom_sect(g, char_get_in_room(ch)) == SECT_SPACE)) {
+  if (furniture == false && (room_sect(g, char_get_in_room(ch)) == SECT_INSIDE || room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(ch)) == SECT_SPACE)) {
     send_to_char(g, ch, "You can not deploy that in this kind of area. Try an area more suitable for a house.\r\n");
     return;
   }
@@ -821,14 +821,14 @@ ACMD(do_deploy)
       fnum = 11;
     }
     if (fnum != 0) {
-      struct obj_data *furn = read_object(g, fnum, VIRTUAL);
+      struct obj_data *furn = read_object(g, fnum);
       act(g, "@CYou click the capsule's button and toss it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", true, ch, furn, nullptr, TO_CHAR);
       act(g, "@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", true, ch, furn, nullptr, TO_ROOM);
       obj_to_room(g, furn, char_get_in_room(ch));
       extract_obj(g, obj);
       return;
     }
-    send_to_imm(g, "ERROR: Furniture failed to deploy at %d.", rroom_get_vnum(g, char_get_in_room(ch)));
+    send_to_imm(g, "ERROR: Furniture failed to deploy at %d.", char_get_in_room(ch));
     return;
   }
 
@@ -848,7 +848,7 @@ ACMD(do_deploy)
   room_vnum final = rnum + 99;
 
   while (giveup == false && cont == false) {
-    for (obj_data *obj3 : room_contents(g, real_room(g, rnum))) {
+    for (obj_data *obj3 : room_contents(g, rnum)) {
       if (obj_get_vnum(g, obj3) == 18801) {
         found = true;
       }
@@ -868,21 +868,21 @@ ACMD(do_deploy)
   } /* End while */
 
   if (cont == true) {
-    struct obj_data *door = read_object(g, 18801, VIRTUAL);
+    struct obj_data *door = read_object(g, 18801);
 
-    obj_set_value(door, 6, rroom_get_vnum(g, char_get_in_room(ch)));
+    obj_set_value(door, 6, char_get_in_room(ch));
     if (rnum != 18800)
       obj_set_value(door, 0, rnum + 1);
     else
       obj_set_value(door, 0, 18802);
     obj_set_value(door, 2, rnum);
-    obj_to_room(g, door, real_room(g, rnum));
-    struct obj_data *key = read_object(g, rnum, VIRTUAL);
+    obj_to_room(g, door, rnum);
+    struct obj_data *key = read_object(g, rnum);
     obj_to_char(g, key, ch);
     act(g, "@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", true, ch, nullptr, nullptr, TO_ROOM);
-    struct obj_data *foun = read_object(g, 18803, VIRTUAL);
-    obj_to_room(g, foun, real_room(g, rnum + 1));
+    struct obj_data *foun = read_object(g, 18803);
+    obj_to_room(g, foun, rnum + 1);
     extract_obj(g, obj);
   } else {
     send_to_char(g, ch, "@ROOC@D: @wSorry for the inconvenience, but it appears there are no houses available. Please contact Iovan.@n\r\n");
@@ -1073,11 +1073,11 @@ ACMD(do_auction)
 
   two_arguments(argument, arg1, arg2);
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     send_to_char(g, ch, "This is a different dimension!\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
     send_to_char(g, ch, "You are in the past!\r\n");
     return;
   }
@@ -1140,7 +1140,7 @@ ACMD(do_bid)
   int found = false, list = 0, masterList = 0;
   room_vnum auct_room;
 
-  auct_room = real_room(g, 80);
+  auct_room = 80;
 
   if (char_is_npc(ch))
     return;
@@ -1150,11 +1150,11 @@ ACMD(do_bid)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     send_to_char(g, ch, "This is a different dimension!\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
     send_to_char(g, ch, "This is the past, nothing is being auctioned!\r\n");
     return;
   }
@@ -1461,9 +1461,9 @@ static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer)
   for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
-    if (rroom_flagged(g, char_get_in_room(i->character), ROOM_HBTC))
+    if (room_flagged(g, char_get_in_room(i->character), ROOM_HBTC))
       continue;
-    if (rroom_flagged(g, char_get_in_room(i->character), ROOM_PAST))
+    if (room_flagged(g, char_get_in_room(i->character), ROOM_PAST))
       continue;
     if (buyer)
       act(g, messg, true, auction_buyer(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
@@ -1508,7 +1508,7 @@ ACMD(do_assemble)
     send_to_char(g, ch, "You haven't got all the things you need.\r\n");
     return;
   }
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
     send_to_char(g, ch, "You can't do that in space.");
     return;
   }
@@ -1530,7 +1530,7 @@ ACMD(do_assemble)
   }
 
   if (strcasecmp(argument, "campfire")) {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE) || rroom_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || rroom_sunken(g, char_get_in_room(ch))) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE) || room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sunken(g, char_get_in_room(ch))) {
       send_to_char(g, ch, "This area will not allow a fire to burn properly.\r\n");
       return;
     }
@@ -1542,7 +1542,7 @@ ACMD(do_assemble)
     }
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_BUILD) <= roll) {
-      if ((pObject = read_object(g, lVnum, VIRTUAL)) == nullptr) {
+      if ((pObject = read_object(g, lVnum)) == nullptr) {
         send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
         return;
       }
@@ -1563,7 +1563,7 @@ ACMD(do_assemble)
     }
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_SURVIVAL) <= roll) {
-      if ((pObject = read_object(g, lVnum, VIRTUAL)) == nullptr) {
+      if ((pObject = read_object(g, lVnum)) == nullptr) {
         send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
         return;
       }
@@ -1586,7 +1586,7 @@ ACMD(do_assemble)
   }
 
   if (axion_dice(g, 0) - (char_get_aff_abils_intel(ch) / 5) > 95) {
-    if ((pObject = read_object(g, lVnum, VIRTUAL)) == nullptr) {
+    if ((pObject = read_object(g, lVnum)) == nullptr) {
       send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
       return;
     }
@@ -1597,7 +1597,7 @@ ACMD(do_assemble)
     return;
   }
   if (rand_number(g, 1, 100) >= 92) {
-    if ((pObject = read_object(g, lVnum, VIRTUAL)) == nullptr) {
+    if ((pObject = read_object(g, lVnum)) == nullptr) {
       send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
       return;
     }
@@ -1609,7 +1609,7 @@ ACMD(do_assemble)
   }
 
   /* Create the assembled object. */
-  if ((pObject = read_object(g, lVnum, VIRTUAL)) == nullptr) {
+  if ((pObject = read_object(g, lVnum)) == nullptr) {
     send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
     return;
   }
@@ -1761,7 +1761,7 @@ static void perform_put(GameWorld *g, struct char_data *ch, struct obj_data *obj
     if ((obj_get_type_flag(cont) == ITEM_PORTAL) ||
         (obj_get_type_flag(cont) == ITEM_VEHICLE)) {
       obj_from_obj(g, obj);
-      obj_to_room(g, obj, real_room(g, obj_get_value(cont, VAL_CONTAINER_CAPACITY)));
+      obj_to_room(g, obj, obj_get_value(cont, VAL_CONTAINER_CAPACITY));
       if (obj_get_type_flag(cont) == ITEM_PORTAL) {
         act(g, "What? $U$p disappears from $P in a puff of smoke!",
             true, ch, obj, cont, TO_ROOM);
@@ -1877,7 +1877,7 @@ static bool can_take_obj(GameWorld *g, struct char_data *ch, struct obj_data *ob
     act(g, "$p: you can't carry that much weight.", false, ch, obj, nullptr, TO_CHAR);
     return false;
   }
-  if ((obj_get_weight(obj) + rroom_get_gravity(g, char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(g, ch)) {
+  if ((obj_get_weight(obj) + room_get_gravity(g, char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(g, ch)) {
     act(g, "$p: you can't carry that much weight because of the gravity.", false, ch, obj, nullptr, TO_CHAR);
     return false;
   }
@@ -2022,7 +2022,7 @@ bool perform_get_from_room(GameWorld *g, struct char_data *ch, struct obj_data *
     return false;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You can't get things from a garden. Help garden.\r\n");
     return false;
   }
@@ -2070,7 +2070,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
   char *descword;
 
   /* Are they trying to take something in a room extra description? */
-  if (find_exdesc(arg, rroom_get_ex_description(g, char_get_in_room(ch))) != nullptr) {
+  if (find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch))) != nullptr) {
     send_to_char(g, ch, "You can't take %s %s.\r\n", AN(arg), arg);
     return;
   }
@@ -2078,9 +2078,9 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
   dotmode = find_all_dots(arg);
 
   if (dotmode == FIND_INDIV) {
-    if ((descword = find_exdesc_keywords(arg, rroom_get_ex_description(g, char_get_in_room(ch)))) != nullptr)
+    if ((descword = find_exdesc_keywords(arg, room_get_ex_description(g, char_get_in_room(ch)))) != nullptr)
       send_to_char(g, ch, "%s: you can't take that!\r\n", fname(descword));
-    else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
+    else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
       send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(arg), arg);
     else {
       for (obj_data *match : obj_list(g, obj)) {
@@ -2224,8 +2224,8 @@ static void perform_drop_gold(GameWorld *g, struct char_data *ch, int amount,
         send_to_char(g, ch, "You drop some zenni.\r\n");
         obj_to_room(g, obj, char_get_in_room(ch));
         if (char_get_admlevel(ch) > 0) {
-          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
-          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
+          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
+          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
           if (check_insidebag(g, obj, 0.0) > 1) {
             send_to_imm(g, "IMM DROP: Object contains %d other items.", check_insidebag(g, obj, 0.0));
             log_imm_action(g, "IMM DROP: Object contains %d other items.", check_insidebag(g, obj, 0.0));
@@ -2264,12 +2264,12 @@ static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj
     return (0);
   }
   if (obj_get_vnum(g, obj) == 20 || obj_get_vnum(g, obj) == 21 || obj_get_vnum(g, obj) == 22 || obj_get_vnum(g, obj) == 23 || obj_get_vnum(g, obj) == 24 || obj_get_vnum(g, obj) == 25 || obj_get_vnum(g, obj) == 26) {
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
       snprintf(out, sizeof(out), "You can't %s $p in space!", sname);
       act(g, out, false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
       snprintf(out, sizeof(out), "You can't %s $p in here. Read help garden.", sname);
       act(g, out, false, ch, obj, nullptr, TO_CHAR);
       return (0);
@@ -2281,17 +2281,17 @@ static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj
       extract_obj(g, obj);
       return (0);
     }
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT)) {
       snprintf(out, sizeof(out), "You can't %s $p in this protected area!", sname);
       act(g, out, false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_SHIP)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_SHIP)) {
       snprintf(out, sizeof(out), "You can't %s $p on a private ship!", sname);
       act(g, out, false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
-    if (rroom_flagged(g, char_get_in_room(ch), ROOM_HOUSE)) {
+    if (room_flagged(g, char_get_in_room(ch), ROOM_HOUSE)) {
       snprintf(out, sizeof(out), "You can't %s $p in a private house!", sname);
       act(g, out, false, ch, obj, nullptr, TO_CHAR);
       return (0);
@@ -2318,23 +2318,23 @@ static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj
 
   switch (mode) {
     case SCMD_DROP:
-      if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE) && rroom_get_geffect(g, char_get_in_room(ch)) == 6) {
+      if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE) && room_get_geffect(g, char_get_in_room(ch)) == 6) {
         act(g, "$p melts in the lava!", false, ch, obj, nullptr, TO_CHAR);
         act(g, "$p melts in the lava!", false, ch, obj, nullptr, TO_ROOM);
         extract_obj(g, obj);
-      } else if (rroom_get_geffect(g, char_get_in_room(ch)) == 6) {
+      } else if (room_get_geffect(g, char_get_in_room(ch)) == 6) {
         act(g, "$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
         act(g, "$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
         obj_to_room(g, obj, char_get_in_room(ch));
         if (char_get_admlevel(ch) > 0) {
-          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
-          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
+          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
+          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
         }
       } else {
         obj_to_room(g, obj, char_get_in_room(ch));
         if (char_get_admlevel(ch) > 0) {
-          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
-          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), rroom_get_vnum(g, obj_get_in_room(obj)));
+          send_to_imm(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
+          log_imm_action(g, "IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj_get_short_description(obj), obj_get_in_room(obj));
         }
       }
       return (0);
@@ -2372,7 +2372,7 @@ ACMD(do_drop)
     return;
   }
 
-  if (rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You can not do that in a garden.\r\n");
     return;
   }
@@ -2395,12 +2395,12 @@ ACMD(do_drop)
           break;
         case 1:
         case 2:
-          RDR = real_room(g, CONFIG_DON_ROOM_1);
+          RDR = CONFIG_DON_ROOM_1;
           break;
-        case 3: RDR = real_room(g, CONFIG_DON_ROOM_2); break;
-        case 4: RDR = real_room(g, CONFIG_DON_ROOM_3); break;
+        case 3: RDR = CONFIG_DON_ROOM_2; break;
+        case 4: RDR = CONFIG_DON_ROOM_3; break;
       }
-      if (RDR == NOWHERE) {
+      if (!room_of(g, RDR)) {
         send_to_char(g, ch, "Sorry, you can't donate anything right now.\r\n");
         return;
       }
@@ -2538,7 +2538,7 @@ static void perform_give(GameWorld *g, struct char_data *ch, struct char_data *v
     }
     return;
   }
-  if ((obj_get_weight(obj) + rroom_get_gravity(g, char_get_in_room(vict))) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {
+  if ((obj_get_weight(obj) + room_get_gravity(g, char_get_in_room(vict))) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {
     act(g, "$E can't carry that much weight because of the gravity.", false, ch, nullptr, vict, TO_CHAR);
     if (char_is_npc(ch)) {
       act(g, "$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
@@ -2836,7 +2836,7 @@ ACMD(do_drink)
   wasthirsty = char_get_conditions(g, ch, THIRST);
   if (!*arg && !char_is_npc(ch)) {
     char out[MAX_STRING_LENGTH];
-    switch (rroom_sect(g, char_get_in_room(ch))) {
+    switch (room_sect(g, char_get_in_room(ch))) {
       case SECT_WATER_SWIM:
       case SECT_WATER_NOSWIM:
       case SECT_UNDERWATER:
@@ -2854,7 +2854,7 @@ ACMD(do_drink)
           send_to_char(g, ch, "You don't feel thirsty anymore.\r\n");
         return;
       default:
-        if (!rroom_sunken(g, char_get_in_room(ch))) {
+        if (!room_sunken(g, char_get_in_room(ch))) {
           send_to_char(g, ch, "Drink from what?\r\n");
           return;
         }
@@ -2876,7 +2876,7 @@ ACMD(do_drink)
     }
   }
   if (!(temp = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    if (!(temp = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    if (!(temp = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
       send_to_char(g, ch, "You can't find it!\r\n");
       return;
     } else
@@ -3272,7 +3272,7 @@ ACMD(do_pour)
       act(g, "What do you want to fill $p from?", false, ch, to_obj, nullptr, TO_CHAR);
       return;
     }
-    if (!(from_obj = get_obj_in_list_vis(g, ch, arg2, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
+    if (!(from_obj = get_obj_in_list_vis(g, ch, arg2, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
       send_to_char(g, ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
       return;
     }

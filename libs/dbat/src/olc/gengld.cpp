@@ -77,10 +77,6 @@ void free_guild(struct guild_data *guild)
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the guild with given virtual number 
- *
- * We take so good care to keep it sorted - let's use it :) - Welcor
- */
 /* The guild numbered vnum, or null. */
 struct guild_data *find_guild(GameWorld *g, guild_vnum vnum)
 {
