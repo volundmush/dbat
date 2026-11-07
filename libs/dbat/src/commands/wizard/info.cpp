@@ -92,7 +92,7 @@ ACMD(do_finddoor)
       send_to_char(g, ch, "There is no object with that vnum.\r\n");
       return;
     }
-    obj = &g->obj_proto[real_object(g, vnum)];
+    obj = obj_proto_of(g, real_object(g, vnum));
   } else {
     generic_find(g, arg,
                  FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP,
@@ -201,39 +201,39 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
         case 'G':
           send_to_char(g, ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg1]),
-                       g->obj_index[ZOCMD.arg1].vnum,
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg1)),
+                       obj_index_of(g, ZOCMD.arg1)->vnum,
                        ZOCMD.arg2, ZOCMD.arg5);
           break;
         case 'O':
           send_to_char(g, ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg1]),
-                       g->obj_index[ZOCMD.arg1].vnum,
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg1)),
+                       obj_index_of(g, ZOCMD.arg1)->vnum,
                        ZOCMD.arg2, ZOCMD.arg4, ZOCMD.arg5);
           break;
         case 'E':
           send_to_char(g, ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg1]),
-                       g->obj_index[ZOCMD.arg1].vnum,
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg1)),
+                       obj_index_of(g, ZOCMD.arg1)->vnum,
                        equipment_types[ZOCMD.arg3],
                        ZOCMD.arg2, ZOCMD.arg5);
           break;
         case 'P':
           send_to_char(g, ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg1]),
-                       g->obj_index[ZOCMD.arg1].vnum,
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg3]),
-                       g->obj_index[ZOCMD.arg3].vnum,
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg1)),
+                       obj_index_of(g, ZOCMD.arg1)->vnum,
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg3)),
+                       obj_index_of(g, ZOCMD.arg3)->vnum,
                        ZOCMD.arg2, ZOCMD.arg5);
           break;
         case 'R':
           send_to_char(g, ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       obj_get_short_description(&g->obj_proto[ZOCMD.arg2]),
-                       g->obj_index[ZOCMD.arg2].vnum);
+                       obj_get_short_description(obj_proto_of(g, ZOCMD.arg2)),
+                       obj_index_of(g, ZOCMD.arg2)->vnum);
           break;
         case 'D':
           send_to_char(g, ch, "%sSet door %s as %s.\r\n",
@@ -950,7 +950,7 @@ ACMD(do_vstat)
     extract_char(g, mob);
   } else if (is_abbrev(buf, "obj")) {
     struct obj_data *obj;
-    obj_rnum r_num;
+    obj_vnum r_num;
 
     if ((r_num = real_object(g, atoi(buf2))) == NOTHING) {
       send_to_char(g, ch, "There is no object with that number.\r\n");
@@ -1045,8 +1045,8 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
       if (rroom_get_vnum(g, i) >= zone->bot && rroom_get_vnum(g, i) <= zone->top)
         j++;
 
-    for (i = 0; i < g->top_obj; i++)
-      if (g->obj_index[i].vnum >= zone->bot && g->obj_index[i].vnum <= zone->top)
+    for (obj_vnum ovnum : g->obj_proto.vnums())
+      if (obj_index_of(g, ovnum)->vnum >= zone->bot && obj_index_of(g, ovnum)->vnum <= zone->top)
         k++;
 
     for (i = 0; i < g->top_mob; i++)
@@ -1246,7 +1246,7 @@ ACMD(do_show)
                    i, con,
                    g->top_of_p_table + 1,
                    j, g->top_mob + 1,
-                   k, g->top_obj + 1,
+                   k, (int)g->obj_proto.size(),
                    g->top_room + 1, (int)g->zones.size(),
                    (int)g->trig_index.size(),
                    g->buf_largecount,
@@ -1755,9 +1755,9 @@ ACMD(do_zcheck)
 
   /************** Check objects *****************/
   send_to_char(g, ch, "\r\nChecking Objects for limits...\r\n");
-  for (i = 0; i < g->top_obj; i++) {
-    if (find_zone_by_thing(g, g->obj_index[i].vnum) == zrnum) { /*is object in this zone?*/
-      obj = &g->obj_proto[i];
+  for (obj_vnum ovnum : g->obj_proto.vnums()) {
+    if (find_zone_by_thing(g, obj_index_of(g, ovnum)->vnum) == zrnum) { /*is object in this zone?*/
+      obj = obj_proto_of(g, ovnum);
       switch (obj_get_type_flag(obj)) {
         case ITEM_MONEY:
           if ((value = obj_get_value(obj, 1)) > MAX_GOLD_ALLOWED && (found = 1))
@@ -1999,7 +1999,7 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
-  obj_rnum ornum       = real_object(g, ovnum);
+  obj_vnum ornum       = real_object(g, ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
   mob_rnum lastmob_r   = 0;
@@ -2010,7 +2010,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
   }
 
   send_to_char(g, ch, "Checking load info for the obj [%d] %s...\r\n",
-               ovnum, obj_get_short_description(&g->obj_proto[ornum]));
+               ovnum, obj_get_short_description(obj_proto_of(g, ornum)));
 
   for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -2087,7 +2087,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
   mob_rnum lastmob_r   = 0, i;
-  obj_rnum lastobj_r   = 0, j;
+  obj_vnum lastobj_r       = 0;
   struct trig_proto_list *tpl;
 
   if (trnum == nullptr) {
@@ -2138,8 +2138,8 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
             found = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER) {
             send_to_char(g, ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
-                         g->obj_index[lastobj_r].vnum,
-                         obj_get_short_description(&g->obj_proto[lastobj_r]),
+                         obj_index_of(g, lastobj_r)->vnum,
+                         obj_get_short_description(obj_proto_of(g, lastobj_r)),
                          lastroom_v);
             found = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
@@ -2166,15 +2166,15 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
       }
   }
 
-  for (j = 0; j < g->top_obj; j++) {
-    if (!obj_get_proto_script(&g->obj_proto[j]))
+  for (obj_vnum j : g->obj_proto.vnums()) {
+    if (!obj_get_proto_script(obj_proto_of(g, j)))
       continue;
 
-    for (tpl = obj_get_proto_script(&g->obj_proto[j]); tpl; tpl = tpl->next)
+    for (tpl = obj_get_proto_script(obj_proto_of(g, j)); tpl; tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(g, ch, "obj [%5d] %s\r\n",
-                     g->obj_index[j].vnum,
-                     obj_get_short_description(&g->obj_proto[j]));
+                     obj_index_of(g, j)->vnum,
+                     obj_get_short_description(obj_proto_of(g, j)));
         found = 1;
       }
   }

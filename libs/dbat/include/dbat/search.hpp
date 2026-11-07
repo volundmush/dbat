@@ -11,7 +11,7 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *na
 struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *name, int *number);
 
 struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, struct obj_data *list);
-struct obj_data *get_obj_num(GameWorld *g, obj_rnum nr);
+struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr);
 /* Whether obj answers to name and ch can see it (a light always shows), as get_obj_in_list_vis() requires */
 bool obj_named_and_visible(GameWorld *g, struct char_data *ch, const char *name, struct obj_data *obj);
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, struct obj_data *list);

@@ -135,7 +135,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
   char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
   long i                            = 0; // Outer iterator.
   long j                            = 0; // Inner iterator.
-  obj_rnum lRnum                    = 0; // Object rnum for obj_proto indexing.
+  obj_vnum lRnum                    = 0; // Object rnum for obj_proto indexing.
 
   if (pCharacter == nullptr) {
     mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
@@ -156,7 +156,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
     } else {
       sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
       sprintf(szBuffer, "[%5d] %s (%s)\r\n", g->g_pAssemblyTable[i].lVnum,
-              obj_get_short_description(&g->obj_proto[lRnum]), szAssmType);
+              obj_get_short_description(obj_proto_of(g, lRnum)), szAssmType);
       send_to_char(g, pCharacter, "%s", szBuffer);
 
       for (j = 0; j < g->g_pAssemblyTable[i].lNumComponents; j++) {
@@ -166,7 +166,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
                   g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
         } else {
           sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g->g_pAssemblyTable[i].pComponents[j].lVnum,
-                  obj_get_short_description(&g->obj_proto[lRnum]),
+                  obj_get_short_description(obj_proto_of(g, lRnum)),
                   (g->g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                   (g->g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
           send_to_char(g, pCharacter, "%s", szBuffer);
@@ -220,7 +220,7 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
 {
   bool bOk                             = true;
   long i                               = 0;
-  obj_rnum lRnum                       = 0;
+  obj_vnum lRnum                       = 0;
   struct obj_data **ppComponentObjects = nullptr;
   ASSEMBLY *pAssembly                  = nullptr;
 
@@ -387,7 +387,7 @@ int assemblyGetType(GameWorld *g, obj_vnum lVnum)
 obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
 {
   long i         = 0;
-  obj_rnum lRnum = NOTHING;
+  obj_vnum lRnum = NOTHING;
 
   if (g->g_pAssemblyTable == nullptr)
     return (-1);
@@ -397,7 +397,7 @@ obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     if ((lRnum = real_object(g, g->g_pAssemblyTable[i].lVnum)) < 0)
       mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
-    else if (isname(pszAssemblyName, obj_get_name(&g->obj_proto[lRnum])))
+    else if (isname(pszAssemblyName, obj_get_name(obj_proto_of(g, lRnum))))
       return (g->g_pAssemblyTable[i].lVnum);
   }
 

@@ -532,7 +532,7 @@ ACMD(do_load)
     }
   } else if (is_abbrev(buf, "obj")) {
     struct obj_data *obj;
-    obj_rnum r_num;
+    obj_vnum r_num;
 
     if ((r_num = real_object(g, atoi(buf2))) == NOTHING) {
       send_to_char(g, ch, "There is no object with that number.\r\n");

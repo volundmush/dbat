@@ -1,6 +1,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+#include <map>
 
 #include "dbat/world_audit.hpp"
 #include "dbat/utils.hpp"
@@ -374,35 +375,33 @@ static void audit_connections(const GameWorld *g, struct audit *a)
 /* The index counts how many of each thing exist, and zone resets and limits go by it. */
 static void audit_index_counts(GameWorld *g, struct audit *a)
 {
-  int *counts;
+  std::map<obj_vnum, int> counts;
 
-  counts = new int[g->top_obj + 1]();
   for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj)) {
-    obj_rnum rnum = obj_get_item_number(obj);
+    obj_vnum vnum = obj_get_item_number(obj);
 
-    if (rnum != NOTHING && (rnum < 0 || rnum > g->top_obj))
-      problem(a, "object: prototype index %d doesn't exist", rnum);
-    else if (rnum != NOTHING)
-      counts[rnum]++;
+    if (vnum != NOTHING && !obj_index_of(g, vnum))
+      problem(a, "object: prototype %d doesn't exist", vnum);
+    else if (vnum != NOTHING)
+      counts[vnum]++;
   }
-  for (obj_rnum r = 0; r <= g->top_obj; r++)
-    if (counts[r] != g->obj_index[r].number)
-      problem(a, "object %d: %d exist, but the index counts %d", g->obj_index[r].vnum, counts[r], g->obj_index[r].number);
-  delete[] counts;
+  for (obj_vnum r : g->obj_index.vnums())
+    if (counts[r] != obj_index_of(g, r)->number)
+      problem(a, "object %d: %d exist, but the index counts %d", r, counts[r], obj_index_of(g, r)->number);
 
-  counts = new int[g->top_mob + 1]();
+  int *mob_counts = new int[g->top_mob + 1]();
   for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
     if (!char_is_npc(ch))
       continue;
     if (char_get_nr(ch) != NOBODY && (char_get_nr(ch) < 0 || char_get_nr(ch) > g->top_mob))
       problem(a, "%s: prototype index %d doesn't exist", char_get_name(ch), char_get_nr(ch));
     else if (char_get_nr(ch) != NOBODY)
-      counts[char_get_nr(ch)]++;
+      mob_counts[char_get_nr(ch)]++;
   }
   for (mob_rnum r = 0; r <= g->top_mob; r++)
-    if (counts[r] != g->mob_index[r].number)
-      problem(a, "mob %d: %d exist, but the index counts %d", g->mob_index[r].vnum, counts[r], g->mob_index[r].number);
-  delete[] counts;
+    if (mob_counts[r] != g->mob_index[r].number)
+      problem(a, "mob %d: %d exist, but the index counts %d", g->mob_index[r].vnum, mob_counts[r], g->mob_index[r].number);
+  delete[] mob_counts;
 }
 
 /* Scripts find things through this table, by id. */

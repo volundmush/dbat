@@ -320,13 +320,13 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
   obj_unlink_from_list(g, obj);
 
   if (obj_get_item_number(obj) != NOTHING)
-    (g->obj_index[obj_get_item_number(obj)].number)--;
+    (obj_index_of(g, obj_get_item_number(obj))->number)--;
 
   if (obj_get_script(obj))
     extract_script(g, obj, OBJ_TRIGGER);
 
   if (obj_get_vnum(g, obj) != 80 && obj_get_vnum(g, obj) != 81) {
-    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(&g->obj_proto[obj_get_item_number(obj)]))
+    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
       free_proto_script(obj, OBJ_TRIGGER);
   }
 

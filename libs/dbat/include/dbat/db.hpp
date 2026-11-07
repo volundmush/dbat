@@ -127,7 +127,7 @@ void load_config(GameWorld *g);
 struct zone_data *find_zone(GameWorld *g, zone_vnum vnum);
 room_rnum real_room(GameWorld *g, room_vnum vnum);
 mob_rnum real_mobile(GameWorld *g, mob_vnum vnum);
-obj_rnum real_object(GameWorld *g, obj_vnum vnum);
+obj_vnum real_object(GameWorld *g, obj_vnum vnum);
 
 int load_char(GameWorld *g, const char *name, struct char_data *ch);
 void save_char(GameWorld *g, struct char_data *ch);

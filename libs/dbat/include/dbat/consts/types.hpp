@@ -21,7 +21,6 @@ typedef IDXTYPE guild_vnum;
 
 /* Various real (array-reference) number types. */
 typedef IDXTYPE room_rnum;
-typedef IDXTYPE obj_rnum;
 typedef IDXTYPE mob_rnum;
 
 /*

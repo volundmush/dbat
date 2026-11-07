@@ -19,17 +19,15 @@
 #include "dbat/object_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt);
 static bool copy_object_preserve(struct obj_data *to, struct obj_data *from);
-static obj_rnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
-static obj_rnum insert_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum);
+static obj_vnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_vnum ornum);
 static int update_objects(GameWorld *g, struct obj_data *refobj);
 
 static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
-obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
+obj_vnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
 {
-  obj_rnum found  = NOTHING;
+  obj_vnum found          = NOTHING;
   struct zone_data *rznum = find_zone_by_thing(g, ovnum);
 
   /*
@@ -37,14 +35,15 @@ obj_rnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
    */
   obj_set_item_number(newobj, real_object(g, ovnum));
   if (obj_get_item_number(newobj) != NOTHING) {
-    copy_object(g, &g->obj_proto[obj_get_item_number(newobj)], newobj);
-    update_objects(g, &g->obj_proto[obj_get_item_number(newobj)]);
+    copy_object(g, obj_proto_of(g, obj_get_item_number(newobj)), newobj);
+    update_objects(g, obj_proto_of(g, obj_get_item_number(newobj)));
     add_to_save_list(g, rznum->number, SL_OBJ);
     return obj_get_item_number(newobj);
   }
 
-  found = insert_object(g, newobj, ovnum);
-  adjust_objects(g, found);
+  g->obj_index.emplace(ovnum);
+  g->obj_proto.emplace(ovnum);
+  found = index_object(g, newobj, ovnum, ovnum);
   add_to_save_list(g, rznum->number, SL_OBJ);
   return found;
 }
@@ -113,105 +112,20 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-/*
- * Adjust the internal values of other objects as if something was inserted at the given array index.
- * Might also be useful to make 'holes' in the array for some reason.
- */
-static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
-{
-  int i, cmd_no;
-
-  if (refpt < 0 || refpt > g->top_obj)
-    return NOTHING;
-
-  /*
-   * Renumber live objects.
-   */
-  for (obj_data *obj : each_obj(g))
-    obj_set_item_number(obj, obj_get_item_number(obj) + ((obj_get_item_number(obj) != NOTHING && obj_get_item_number(obj) >= refpt)));
-
-  /*
-   * Renumber zone table.
-   */
-  for (struct zone_data *zone : g->zones.all()) {
-    for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
-      switch (zone_get_cmd(g, zone, cmd_no)->command) {
-        case 'P':
-          zone_get_cmd(g, zone, cmd_no)->arg3 += (zone_get_cmd(g, zone, cmd_no)->arg3 >= refpt);
-          /*
-         * No break here - drop into next case.
-         */
-          [[fallthrough]];
-        case 'O':
-        case 'G':
-        case 'E':
-          zone_get_cmd(g, zone, cmd_no)->arg1 += (zone_get_cmd(g, zone, cmd_no)->arg1 >= refpt);
-          break;
-        case 'R':
-          zone_get_cmd(g, zone, cmd_no)->arg2 += (zone_get_cmd(g, zone, cmd_no)->arg2 >= refpt);
-          break;
-      }
-    }
-  }
-
-  /*
-   * Renumber shop produce.
-   */
-  for (struct shop_data *shop : g->shops.all())
-    for (i = 0; shop_get_product(shop, i) != NOTHING; i++)
-      shop_set_product(shop, i, shop_get_product(shop, i) + (shop_get_product(shop, i) >= refpt));
-
-  return refpt;
-}
-
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-/*
- * Function handle the insertion of an object within the prototype framework.  Note that this does not adjust internal values
- * of other objects, use add_object() for that.
- */
-static obj_rnum insert_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum)
+static obj_vnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_vnum ornum)
 {
-  obj_rnum i;
-
-  g->top_obj++;
-  resize_array(g->obj_index, g->top_obj, g->top_obj + 1);
-  resize_array(g->obj_proto, g->top_obj, g->top_obj + 1);
-
-  /*
-   * Start counting through both tables.
-   */
-  for (i = g->top_obj; i > 0; i--) {
-    /*
-     * Check if current virtual is bigger than our virtual number.
-     */
-    if (ovnum > g->obj_index[i - 1].vnum)
-      return index_object(g, obj, ovnum, i);
-
-    /* Copy over the object that should be here. */
-    g->obj_index[i]             = g->obj_index[i - 1];
-    g->obj_proto[i]             = g->obj_proto[i - 1];
-    obj_set_item_number(&g->obj_proto[i], i);
-  }
-
-  /* Not found, place at 0. */
-  return index_object(g, obj, ovnum, 0);
-}
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-static obj_rnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
-{
-  if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > g->top_obj)
+  if (obj == nullptr || ovnum < 0 || !obj_proto_of(g, ornum))
     return NOWHERE;
 
   obj_set_item_number(obj, ornum);
-  g->obj_index[ornum].vnum   = ovnum;
-  g->obj_index[ornum].number = 0;
-  g->obj_index[ornum].func   = nullptr;
+  obj_index_of(g, ornum)->vnum   = ovnum;
+  obj_index_of(g, ornum)->number = 0;
+  obj_index_of(g, ornum)->func   = nullptr;
 
-  copy_object_preserve(&g->obj_proto[ornum], obj);
-  obj_set_in_room(&g->obj_proto[ornum], NOWHERE);
+  copy_object_preserve(obj_proto_of(g, ornum), obj);
+  obj_set_in_room(obj_proto_of(g, ornum), NOWHERE);
 
   return ornum;
 }
@@ -229,7 +143,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
   IDXTYPE counter;
   int counter2;
-  obj_rnum realcounter;
+  obj_vnum realcounter;
   struct atomic_file af;
   FILE *fp;
   struct obj_data *obj;
@@ -250,7 +164,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
    */
   for (counter = genolc_zone_bottom(g, zone_num); counter <= zone_num->top; counter++) {
     if ((realcounter = real_object(g, counter)) != NOTHING) {
-      if (obj_get_action_description(obj = &g->obj_proto[realcounter])) {
+      if (obj_get_action_description(obj = obj_proto_of(g, realcounter))) {
         strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
         strip_cr(buf);
       } else
@@ -405,22 +319,22 @@ void free_object_strings(GameWorld *g, struct obj_data *obj)
  */
 void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
 {
-  obj_rnum robj_num = obj_get_item_number(obj);
+  obj_vnum robj_num = obj_get_item_number(obj);
 
-  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(&g->obj_proto[robj_num]))
+  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(obj_proto_of(g, robj_num)))
     free(obj_get_name(obj));
-  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(&g->obj_proto[robj_num]))
+  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(obj_proto_of(g, robj_num)))
     free(obj_get_description(obj));
-  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(&g->obj_proto[robj_num]))
+  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(obj_proto_of(g, robj_num)))
     free(obj_get_short_description(obj));
-  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(&g->obj_proto[robj_num]))
+  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(obj_proto_of(g, robj_num)))
     free(obj_get_action_description(obj));
   if (obj_get_ex_description(obj)) {
     struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
     int ok_key, ok_desc, ok_item;
     for (thised = obj_get_ex_description(obj); thised; thised = next_one) {
       next_one = thised->next;
-      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(&g->obj_proto[robj_num]); plist; plist = plist->next) {
+      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(obj_proto_of(g, robj_num)); plist; plist = plist->next) {
         if (plist->keyword == thised->keyword)
           ok_key = 0;
         if (plist->description == thised->description)
@@ -478,17 +392,14 @@ static struct obj_data *first_object_of_proto(GameWorld *g, const struct obj_dat
   return nullptr;
 }
 
-obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
+obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 {
-  obj_rnum i;
   struct zone_data *zrnum;
   struct obj_data *obj, *tmp;
   int j, cmd_no;
 
-  if (rnum == NOTHING || rnum > g->top_obj)
+  if (rnum == NOTHING || !(obj = obj_proto_of(g, rnum)))
     return NOTHING;
-
-  obj = &g->obj_proto[rnum];
 
   zrnum = find_zone_by_thing(g, obj_get_vnum(g, obj));
   add_to_save_list(g, zrnum->number, SL_OBJ);
@@ -518,30 +429,24 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
     extract_obj(g, tmp);
   }
 
-  /* Adjust rnums of all other objects. */
-  for (obj_data *item : each_obj(g)) {
-    obj_set_item_number(item, obj_get_item_number(item) - ((obj_get_item_number(item) > rnum)));
-  }
-
   /* No copy is left to share these, now that they have all been extracted. */
   free_object_strings(g, obj);
   free_proto_script(obj, OBJ_TRIGGER);
 
-  for (i = rnum; i < g->top_obj; i++) {
-    g->obj_index[i]             = g->obj_index[i + 1];
-    g->obj_proto[i]             = g->obj_proto[i + 1];
-    obj_set_item_number(&g->obj_proto[i], i);
+  /* Shops stop producing it. */
+  for (struct shop_data *shop : g->shops.all()) {
+    int kept = 0;
+    for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
+      if (shop_get_product(shop, j) != rnum)
+        shop_set_product(shop, kept++, shop_get_product(shop, j));
+    if (kept != j) {
+      shop_set_product(shop, kept, NOTHING);
+      if (struct zone_data *zone = find_zone_by_thing(g, shop_get_vnum(shop)))
+        add_to_save_list(g, zone->number, SL_SHP);
+    }
   }
 
-  g->top_obj--;
-  resize_array(g->obj_index, g->top_obj + 2, g->top_obj + 1);
-  resize_array(g->obj_proto, g->top_obj + 2, g->top_obj + 1);
-
-  for (struct shop_data *shop : g->shops.all())
-    for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
-      shop_set_product(shop, j, shop_get_product(shop, j) - (shop_get_product(shop, j) > rnum));
-
-  /* Renumber zone table. */
+  /* Zone commands that load it are turned into comments. */
   for (struct zone_data *zone : g->zones.all()) {
     bool changed = false;
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
@@ -551,8 +456,7 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
             zone_get_cmd(g, zone, cmd_no)->command = '*';
             zone_get_cmd(g, zone, cmd_no)->arg3    = NOTHING;
             changed                             = true;
-          } else
-            zone_get_cmd(g, zone, cmd_no)->arg3 -= (zone_get_cmd(g, zone, cmd_no)->arg3 > rnum);
+          }
           break;
         case 'O':
         case 'G':
@@ -561,16 +465,14 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
             zone_get_cmd(g, zone, cmd_no)->command = '*';
             zone_get_cmd(g, zone, cmd_no)->arg1    = NOTHING;
             changed                             = true;
-          } else
-            zone_get_cmd(g, zone, cmd_no)->arg1 -= (zone_get_cmd(g, zone, cmd_no)->arg1 > rnum);
+          }
           break;
         case 'R':
           if (zone_get_cmd(g, zone, cmd_no)->arg2 == rnum) {
             zone_get_cmd(g, zone, cmd_no)->command = '*';
             zone_get_cmd(g, zone, cmd_no)->arg2    = NOTHING;
             changed                             = true;
-          } else
-            zone_get_cmd(g, zone, cmd_no)->arg2 -= (zone_get_cmd(g, zone, cmd_no)->arg2 > rnum);
+          }
           break;
       }
       if (changed) {
@@ -579,5 +481,7 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
       }
     }
   }
+  g->obj_proto.take(rnum);
+  g->obj_index.take(rnum);
   return rnum;
 }

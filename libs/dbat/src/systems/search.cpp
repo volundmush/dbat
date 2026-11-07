@@ -105,7 +105,7 @@ struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, struct obj_data
 }
 
 /* search the entire world for an object number, and return a pointer  */
-struct obj_data *get_obj_num(GameWorld *g, obj_rnum nr)
+struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr)
 {
 
   for (obj_data *i : each_obj(g))

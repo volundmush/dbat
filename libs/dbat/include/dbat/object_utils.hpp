@@ -11,6 +11,9 @@
 // =============================================================================
 
 obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj);
+/* The prototype, and its index entry, of the objects numbered vnum, or null. */
+struct obj_data *obj_proto_of(GameWorld *g, obj_vnum vnum);
+struct index_data *obj_index_of(GameWorld *g, obj_vnum vnum);
 
 // =============================================================================
 // Misc

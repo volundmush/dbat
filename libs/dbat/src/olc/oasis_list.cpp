@@ -240,7 +240,6 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *r
  */
 static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *rnum, room_vnum vmin, room_vnum vmax)
 {
-  obj_rnum i;
   IDXTYPE bottom, top;
   int counter = 0;
 
@@ -256,17 +255,17 @@ static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *r
                "@nIndex VNum    Object Name                                  Object Type\r\n"
                "----- ------- -------------------------------------------- ----------------\r\n");
 
-  if (!g->top_obj)
+  if (g->obj_proto.empty())
     return;
 
-  for (i = 0; i <= g->top_obj; i++) {
-    if (g->obj_index[i].vnum >= bottom && g->obj_index[i].vnum <= top) {
+  for (obj_vnum i : g->obj_proto.vnums()) {
+    if (obj_index_of(g, i)->vnum >= bottom && obj_index_of(g, i)->vnum <= top) {
       counter++;
 
       send_to_char(g, ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                   counter, g->obj_index[i].vnum, count_color_chars(obj_get_short_description(&g->obj_proto[i])) + 44,
-                   obj_get_short_description(&g->obj_proto[i]), item_types[obj_get_type_flag(&g->obj_proto[i])],
-                   obj_get_proto_script(&g->obj_proto[i]) ? " [TRIG]" : "");
+                   counter, obj_index_of(g, i)->vnum, count_color_chars(obj_get_short_description(obj_proto_of(g, i))) + 44,
+                   obj_get_short_description(obj_proto_of(g, i)), item_types[obj_get_type_flag(obj_proto_of(g, i))],
+                   obj_get_proto_script(obj_proto_of(g, i)) ? " [TRIG]" : "");
     }
   }
 
@@ -363,12 +362,9 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
   /****************************************************************************/
   /** Locate the largest of the three, g->top_room, g->top_mob, or           **/
-  /** g->top_obj.                                                            **/
   /****************************************************************************/
-  if (g->top_room >= g->top_obj && g->top_room >= g->top_mob)
+  if (g->top_room >= g->top_mob)
     largest_table = g->top_room;
-  else if (g->top_obj >= g->top_mob && g->top_obj >= g->top_room)
-    largest_table = g->top_obj;
   else
     largest_table = g->top_mob;
 
@@ -390,10 +386,6 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
       if (rroom_get_zone(g, i) == rnum)
         size_rooms++;
 
-    if (i <= g->top_obj)
-      if (g->obj_index[i].vnum >= bottom && g->obj_index[i].vnum <= top)
-        size_objects++;
-
     if (i <= g->top_mob)
       if (g->mob_index[i].vnum >= bottom && g->mob_index[i].vnum <= top)
         size_mobiles++;
@@ -403,6 +395,9 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
     size_guilds = count_guilds(g, bottom, top);
   }
 
+  for (obj_vnum ovnum : g->obj_index.vnums())
+    if (ovnum >= bottom && ovnum <= top)
+      size_objects++;
   for (struct index_data *trig : g->trig_index.all())
     if (trig->vnum >= bottom && trig->vnum <= top)
       size_triggers++;

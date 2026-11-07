@@ -27,6 +27,7 @@
 #include "dbat/consts/skills.hpp"
 #include "dbat/consts/songs.hpp"
 #include "dbat/db.hpp"
+#include "dbat/genobj.hpp"
 #include "dbat/fight.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/handler.hpp"
@@ -101,11 +102,16 @@ static void check_song_of_shielding_costs_ki(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Singer", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
-  struct obj_data *instrument = read_object(g, 350, VIRTUAL);
+  struct obj_data *instrument;
   bool shielded = false;
 
-  /* the fixture has no instrument, and adding one would shift what bots pick from it */
-  g->obj_index[obj_get_item_number(instrument)].vnum = 8802;
+  /* the fixture has no instrument, and adding one would shift what bots pick from it: make one here */
+  struct obj_data *proto = g->obj_proto.emplace(8802);
+  copy_object(g, proto, obj_proto_of(g, 350));
+  obj_set_proto_script(proto, nullptr); /* copy_object() shares the original's trigger list */
+  obj_set_item_number(proto, 8802);
+  g->obj_index.emplace(8802)->vnum = 8802;
+  instrument                       = read_object(g, 8802, VIRTUAL);
   obj_to_char(g, instrument, ch);
   char_set_skills_base(ch, SKILL_MYSTICMUSIC, 100);
   char_set_powerattack(ch, SONG_SHIELDING);

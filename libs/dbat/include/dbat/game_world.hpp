@@ -5,6 +5,7 @@
 #include "dbat/registry.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/index.hpp"
+#include "dbat/objects.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/ban.hpp"
 #include "dbat/config.hpp"
@@ -31,9 +32,8 @@ struct GameWorld {
   struct char_data *mob_proto{};
   mob_rnum top_mob{};
   long max_mob_id{};
-  struct index_data *obj_index{};
-  struct obj_data *obj_proto{};
-  obj_rnum top_obj{};
+  vnum_table<index_data, obj_vnum> obj_index; /* object prototypes, by vnum */
+  vnum_table<obj_data, obj_vnum> obj_proto;
   long max_obj_id{};
   struct obj_unique_hash_elem **obj_unique_hash_pools{};
   int mob_specials_used{};
@@ -165,14 +165,14 @@ struct GameWorld {
 
   /* OLC and bookkeeping */
   struct save_list_data *save_list{};
-  obj_rnum lRnum{};
+  obj_vnum lRnum{};
   int extractions_pending{};
 
   /* Progress of the world file parsers and the zone clock */
   room_rnum parse_room_index{};
   struct zone_data *parse_room_zone{};
   mob_rnum parse_mob_index{};
-  obj_rnum parse_obj_index{};
+  obj_vnum parse_obj_index{};
   int zone_update_timer{};
 };
 

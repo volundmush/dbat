@@ -99,9 +99,9 @@ ACMD(do_action)
     act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else {
     if (*part) {
-      act(g, action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
-      act(g, action->others_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_NOTVICT);
-      act(g, action->vict_body_found, action->hide, ch, (struct obj_data *)part, vict, TO_VICT);
+      act(g, action->char_body_found, 0, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_CHAR | TO_SLEEP);
+      act(g, action->others_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_NOTVICT);
+      act(g, action->vict_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_VICT);
     } else {
       act(g, action->char_found, 0, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       act(g, action->others_found, action->hide, ch, nullptr, vict, TO_NOTVICT);

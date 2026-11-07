@@ -472,7 +472,6 @@ void boot_world(GameWorld *g)
 
   mud_log("Loading objs and generating index.");
   index_boot(g, DB_BOOT_OBJ);
-  check_sorted("object", g->obj_index, g->top_obj + 1, sizeof(*g->obj_index), offsetof(struct index_data, vnum));
 
   mud_log("Renumbering zone table.");
   renum_zone_table(g);
@@ -567,24 +566,24 @@ void destroy_db(GameWorld *g)
   g->top_room = 0;
 
   /* Objects */
-  for (cnt = 0; cnt <= g->top_obj; cnt++) {
-    if (obj_get_name(&g->obj_proto[cnt]))
-      free(obj_get_name(&g->obj_proto[cnt]));
-    if (obj_get_description(&g->obj_proto[cnt]))
-      free(obj_get_description(&g->obj_proto[cnt]));
-    if (obj_get_short_description(&g->obj_proto[cnt]))
-      free(obj_get_short_description(&g->obj_proto[cnt]));
-    if (obj_get_action_description(&g->obj_proto[cnt]))
-      free(obj_get_action_description(&g->obj_proto[cnt]));
-    if (obj_get_ex_description(&g->obj_proto[cnt]))
-      free_extra_descriptions(obj_get_ex_description(&g->obj_proto[cnt]));
-    delete[] obj_get_sbinfo(&g->obj_proto[cnt]); /* spellbook pages */
+  for (obj_vnum ovnum : g->obj_proto.vnums()) {
+    if (obj_get_name(obj_proto_of(g, ovnum)))
+      free(obj_get_name(obj_proto_of(g, ovnum)));
+    if (obj_get_description(obj_proto_of(g, ovnum)))
+      free(obj_get_description(obj_proto_of(g, ovnum)));
+    if (obj_get_short_description(obj_proto_of(g, ovnum)))
+      free(obj_get_short_description(obj_proto_of(g, ovnum)));
+    if (obj_get_action_description(obj_proto_of(g, ovnum)))
+      free(obj_get_action_description(obj_proto_of(g, ovnum)));
+    if (obj_get_ex_description(obj_proto_of(g, ovnum)))
+      free_extra_descriptions(obj_get_ex_description(obj_proto_of(g, ovnum)));
+    delete[] obj_get_sbinfo(obj_proto_of(g, ovnum)); /* spellbook pages */
 
     /* free script proto list */
-    free_proto_script(&g->obj_proto[cnt], OBJ_TRIGGER);
+    free_proto_script(obj_proto_of(g, ovnum), OBJ_TRIGGER);
   }
-  delete[] g->obj_proto;
-  delete[] g->obj_index;
+  g->obj_proto.clear();
+  g->obj_index.clear();
 
   /* Mobiles */
   for (cnt = 0; cnt <= g->top_mob; cnt++) {
@@ -1160,8 +1159,6 @@ void index_boot(GameWorld *g, int mode)
       mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_OBJ:
-      g->obj_proto = new obj_data[rec_count]();
-      g->obj_index = new index_data[rec_count]();
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct obj_data) * rec_count;
       mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
@@ -1636,7 +1633,7 @@ static void renum_world(GameWorld *g)
  * room, mobile, or object a little more difficult while the game is running.
  *
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
+ * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_vnum))
  */
 static void renum_zone_table(GameWorld *g)
 {
@@ -2208,33 +2205,40 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
 
-  g->obj_index[g->parse_obj_index].vnum   = nr;
-  g->obj_index[g->parse_obj_index].number = 0;
-  g->obj_index[g->parse_obj_index].func   = nullptr;
+  if (g->obj_index.find(nr)) {
+    mud_log("SYSERR: object #%d is defined twice.", nr);
+    exit(1);
+  }
+  g->parse_obj_index = nr;
+  g->obj_index.emplace(nr);
+  g->obj_proto.emplace(nr);
+  obj_index_of(g, g->parse_obj_index)->vnum   = nr;
+  obj_index_of(g, g->parse_obj_index)->number = 0;
+  obj_index_of(g, g->parse_obj_index)->func   = nullptr;
 
-  clear_object(g->obj_proto + g->parse_obj_index);
-  obj_set_item_number(&g->obj_proto[g->parse_obj_index], g->parse_obj_index);
+  clear_object(obj_proto_of(g, g->parse_obj_index));
+  obj_set_item_number(obj_proto_of(g, g->parse_obj_index), g->parse_obj_index);
 
   sprintf(buf2, "object #%d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  obj_set_name(&g->obj_proto[g->parse_obj_index], fread_string(obj_f, buf2));
-  if (obj_get_name(&g->obj_proto[g->parse_obj_index]) == nullptr) {
+  obj_set_name(obj_proto_of(g, g->parse_obj_index), fread_string(obj_f, buf2));
+  if (obj_get_name(obj_proto_of(g, g->parse_obj_index)) == nullptr) {
     mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_short_description(&g->obj_proto[g->parse_obj_index], tmpptr);
+  obj_set_short_description(obj_proto_of(g, g->parse_obj_index), tmpptr);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
 
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_description(&g->obj_proto[g->parse_obj_index], tmpptr);
+  obj_set_description(obj_proto_of(g, g->parse_obj_index), tmpptr);
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
-  obj_set_action_description(&g->obj_proto[g->parse_obj_index], fread_string(obj_f, buf2));
+  obj_set_action_description(obj_proto_of(g, g->parse_obj_index), fread_string(obj_f, buf2));
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -2254,18 +2258,18 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       t[3] = asciiflag_conv_aff(f3);
 
     mud_log("Converting object #%d to 128bits..", nr);
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f1);
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[1] = 0;
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[2] = 0;
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[3] = 0;
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[0]  = asciiflag_conv(f2);
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[1]  = 0;
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[2]  = 0;
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[3]  = 0;
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[0]   = asciiflag_conv_aff(f3);
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[1]   = 0;
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[2]   = 0;
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[3]   = 0;
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f1);
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[1] = 0;
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[2] = 0;
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[3] = 0;
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[0]  = asciiflag_conv(f2);
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[1]  = 0;
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[2]  = 0;
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[3]  = 0;
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[0]   = asciiflag_conv_aff(f3);
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[1]   = 0;
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[2]   = 0;
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[3]   = 0;
 
     if (bitsavetodisk) {
       add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
@@ -2275,20 +2279,20 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     mud_log("   done.");
   } else if (retval == 13) {
 
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f1);
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f2);
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f3);
-    obj_get_extra_flags(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f4);
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f1);
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[1] = asciiflag_conv(f2);
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[2] = asciiflag_conv(f3);
+    obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[3] = asciiflag_conv(f4);
 
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f5);
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f6);
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f7);
-    obj_get_wear_flags(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f8);
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f5);
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[1] = asciiflag_conv(f6);
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[2] = asciiflag_conv(f7);
+    obj_get_wear_flags(obj_proto_of(g, g->parse_obj_index))[3] = asciiflag_conv(f8);
 
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[0] = asciiflag_conv(f9);
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[1] = asciiflag_conv(f10);
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[2] = asciiflag_conv(f11);
-    obj_get_bitvector(g->obj_proto + g->parse_obj_index)[3] = asciiflag_conv(f12);
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f9);
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[1] = asciiflag_conv(f10);
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[2] = asciiflag_conv(f11);
+    obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[3] = asciiflag_conv(f12);
 
   } else {
     mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -2296,7 +2300,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   }
 
   /* Object flags checked in check_object(). */
-  obj_set_type_flag(g->obj_proto + g->parse_obj_index, t[0]);
+  obj_set_type_flag(obj_proto_of(g, g->parse_obj_index), t[0]);
 
   if (!get_line(obj_f, line)) {
     mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -2312,22 +2316,22 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   }
 
   for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-    obj_set_value(g->obj_proto + g->parse_obj_index, j, t[j]);
+    obj_set_value(obj_proto_of(g, g->parse_obj_index), j, t[j]);
 
-  if ((obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_PORTAL ||
-       obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_HATCH) &&
-      (!obj_get_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCLOCK) ||
-       !obj_get_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCHIDE))) {
-    obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCLOCK, 20);
-    obj_set_value(g->obj_proto + g->parse_obj_index, VAL_DOOR_DCHIDE, 20);
+  if ((obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_PORTAL ||
+       obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_HATCH) &&
+      (!obj_get_value(obj_proto_of(g, g->parse_obj_index), VAL_DOOR_DCLOCK) ||
+       !obj_get_value(obj_proto_of(g, g->parse_obj_index), VAL_DOOR_DCHIDE))) {
+    obj_set_value(obj_proto_of(g, g->parse_obj_index), VAL_DOOR_DCLOCK, 20);
+    obj_set_value(obj_proto_of(g, g->parse_obj_index), VAL_DOOR_DCHIDE, 20);
     if (bitsavetodisk) {
       add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
       g->converting = true;
     }
   }
 
-  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_WEAPON && obj_get_value(g->obj_proto + g->parse_obj_index, 0) > 169) {
-    obj_set_value(g->obj_proto + g->parse_obj_index, 0, suntzu_weapon_convert(t[0]));
+  if (obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_WEAPON && obj_get_value(obj_proto_of(g, g->parse_obj_index), 0) > 169) {
+    obj_set_value(obj_proto_of(g, g->parse_obj_index), 0, suntzu_weapon_convert(t[0]));
 
     if (bitsavetodisk) {
       add_to_save_list(g, find_zone_by_thing(g, nr)->number, 1);
@@ -2357,29 +2361,29 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       exit(1);
     }
   }
-  obj_set_weight(g->obj_proto + g->parse_obj_index, t[0]);
-  obj_set_cost(g->obj_proto + g->parse_obj_index, t[1]);
-  obj_set_cost_per_day(g->obj_proto + g->parse_obj_index, t[2]);
-  obj_set_level(g->obj_proto + g->parse_obj_index, t[3]);
-  obj_set_size(g->obj_proto + g->parse_obj_index, SIZE_MEDIUM);
+  obj_set_weight(obj_proto_of(g, g->parse_obj_index), t[0]);
+  obj_set_cost(obj_proto_of(g, g->parse_obj_index), t[1]);
+  obj_set_cost_per_day(obj_proto_of(g, g->parse_obj_index), t[2]);
+  obj_set_level(obj_proto_of(g, g->parse_obj_index), t[3]);
+  obj_set_size(obj_proto_of(g, g->parse_obj_index), SIZE_MEDIUM);
 
   /* check to make sure that weight of containers exceeds curr. quantity */
-  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_DRINKCON ||
-      obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_FOUNTAIN) {
-    if (obj_get_weight(g->obj_proto + g->parse_obj_index) < obj_get_value(g->obj_proto + g->parse_obj_index, 1))
-      obj_set_weight(g->obj_proto + g->parse_obj_index, obj_get_value(g->obj_proto + g->parse_obj_index, 1) + 5);
+  if (obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_DRINKCON ||
+      obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_FOUNTAIN) {
+    if (obj_get_weight(obj_proto_of(g, g->parse_obj_index)) < obj_get_value(obj_proto_of(g, g->parse_obj_index), 1))
+      obj_set_weight(obj_proto_of(g, g->parse_obj_index), obj_get_value(obj_proto_of(g, g->parse_obj_index), 1) + 5);
   }
   /* *** make sure portal objects have their timer set correctly *** */
-  if (obj_get_type_flag(g->obj_proto + g->parse_obj_index) == ITEM_PORTAL) {
-    obj_set_timer(g->obj_proto + g->parse_obj_index, -1);
+  if (obj_get_type_flag(obj_proto_of(g, g->parse_obj_index)) == ITEM_PORTAL) {
+    obj_set_timer(obj_proto_of(g, g->parse_obj_index), -1);
   }
 
   /* *** extra descriptions and affect fields *** */
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].location = APPLY_NONE;
-    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].modifier = 0;
-    obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = 0;
+    obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].location = APPLY_NONE;
+    obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].modifier = 0;
+    obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].specific = 0;
   }
 
   strcat(buf2, ", after numeric constants\n" /* strcat: OK (for 'buf2 >= 87') */
@@ -2396,8 +2400,8 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
         new_descr                   = new extra_descr_data();
         new_descr->keyword          = fread_string(obj_f, buf2);
         new_descr->description      = fread_string(obj_f, buf2);
-        new_descr->next             = obj_get_ex_description(&g->obj_proto[g->parse_obj_index]);
-        obj_set_ex_description(&g->obj_proto[g->parse_obj_index], new_descr);
+        new_descr->next             = obj_get_ex_description(obj_proto_of(g, g->parse_obj_index));
+        obj_set_ex_description(obj_proto_of(g, g->parse_obj_index), new_descr);
         break;
       case 'A':
         if (j >= MAX_OBJ_AFFECT) {
@@ -2424,11 +2428,11 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 
         if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
           mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                  nr, obj_get_short_description(g->obj_proto + g->parse_obj_index));
+                  nr, obj_get_short_description(obj_proto_of(g, g->parse_obj_index)));
         }
-        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].location = t[0];
-        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].modifier = t[1];
-        obj_get_affected(&g->obj_proto[g->parse_obj_index])[j].specific = affect_checked_specific(t[0], t[2]);
+        obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].location = t[0];
+        obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].modifier = t[1];
+        obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].specific = affect_checked_specific(t[0], t[2]);
         j++;
         break;
       case 'S': /* Spells for Spellbooks*/
@@ -2450,15 +2454,15 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
                   buf2, retval, line);
           exit(1);
         }
-        if (!obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])) {
-          *obj_sbinfo_slot(&g->obj_proto[g->parse_obj_index]) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
+        if (!obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))) {
+          *obj_sbinfo_slot(obj_proto_of(g, g->parse_obj_index)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
         }
-        obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].spellname = t[0];
-        obj_get_sbinfo(&g->obj_proto[g->parse_obj_index])[j].pages     = t[1];
+        obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))[j].spellname = t[0];
+        obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))[j].pages     = t[1];
         j++;
         break;
       case 'T': /* DG triggers */
-        dg_obj_trigger(g, line, &g->obj_proto[g->parse_obj_index]);
+        dg_obj_trigger(g, line, obj_proto_of(g, g->parse_obj_index));
         break;
       case 'Z':
         if (!get_line(obj_f, line)) {
@@ -2474,18 +2478,16 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
                   buf2, line);
           exit(1);
         }
-        obj_set_size(g->obj_proto + g->parse_obj_index, t[0]);
+        obj_set_size(obj_proto_of(g, g->parse_obj_index), t[0]);
         break;
       case '$':
       case '#':
         /* Objects that set CHARM on players are bad. */
-        if (obj_aff_flagged(g->obj_proto + g->parse_obj_index, AFF_CHARM)) {
+        if (obj_aff_flagged(obj_proto_of(g, g->parse_obj_index), AFF_CHARM)) {
           mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-          obj_aff_set(g->obj_proto + g->parse_obj_index, AFF_CHARM, false);
+          obj_aff_set(obj_proto_of(g, g->parse_obj_index), AFF_CHARM, false);
         }
-        g->top_obj = g->parse_obj_index;
-        check_object(g, g->obj_proto + g->parse_obj_index);
-        g->parse_obj_index++;
+        check_object(g, obj_proto_of(g, g->parse_obj_index));
         return (line);
       default:
         mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -2785,28 +2787,26 @@ int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch)
 
 int vnum_object(GameWorld *g, char *searchname, struct char_data *ch)
 {
-  obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= g->top_obj; nr++)
-    if (isname(searchname, obj_get_name(&g->obj_proto[nr])))
+  for (obj_vnum nr : g->obj_proto.vnums())
+    if (isname(searchname, obj_get_name(obj_proto_of(g, nr))))
       send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
-                   obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
+                   ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
 
   return (found);
 }
 
 int vnum_material(GameWorld *g, char *searchname, struct char_data *ch)
 {
-  obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= g->top_obj; nr++)
-    if (isname(searchname, material_names[obj_get_value(&g->obj_proto[nr], VAL_ALL_MATERIAL)])) {
+  for (obj_vnum nr : g->obj_proto.vnums())
+    if (isname(searchname, material_names[obj_get_value(obj_proto_of(g, nr), VAL_ALL_MATERIAL)])) {
       send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
-                   obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
+                   ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
     }
 
   return (found);
@@ -2814,15 +2814,14 @@ int vnum_material(GameWorld *g, char *searchname, struct char_data *ch)
 
 int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch)
 {
-  obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= g->top_obj; nr++)
-    if (obj_get_type_flag(&g->obj_proto[nr]) == ITEM_WEAPON) {
-      if (isname(searchname, weapon_type[obj_get_value(&g->obj_proto[nr], VAL_WEAPON_SKILL)])) {
+  for (obj_vnum nr : g->obj_proto.vnums())
+    if (obj_get_type_flag(obj_proto_of(g, nr)) == ITEM_WEAPON) {
+      if (isname(searchname, weapon_type[obj_get_value(obj_proto_of(g, nr), VAL_WEAPON_SKILL)])) {
         send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                     ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
-                     obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
+                     ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
       }
     }
 
@@ -2831,15 +2830,14 @@ int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch)
 
 int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch)
 {
-  obj_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= g->top_obj; nr++)
-    if (obj_get_type_flag(&g->obj_proto[nr]) == ITEM_ARMOR) {
-      if (isname(searchname, armor_type[obj_get_value(&g->obj_proto[nr], VAL_ARMOR_SKILL)])) {
+  for (obj_vnum nr : g->obj_proto.vnums())
+    if (obj_get_type_flag(obj_proto_of(g, nr)) == ITEM_ARMOR) {
+      if (isname(searchname, armor_type[obj_get_value(obj_proto_of(g, nr), VAL_ARMOR_SKILL)])) {
         send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                     ++found, g->obj_index[nr].vnum, obj_get_short_description(&g->obj_proto[nr]),
-                     obj_get_proto_script(&g->obj_proto[nr]) ? "[TRIG]" : "");
+                     ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
       }
     }
 
@@ -3627,25 +3625,25 @@ struct obj_data *create_obj(GameWorld *g)
 }
 
 /* create a new object from a prototype */
-struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnum */
+struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_vnum */
 {
   struct obj_data *obj;
-  obj_rnum i = type == VIRTUAL ? real_object(g, nr) : nr;
+  obj_vnum i = type == VIRTUAL ? real_object(g, nr) : nr;
   int j;
 
-  if (i == NOTHING || i > g->top_obj) {
+  if (i == NOTHING || !obj_proto_of(g, i)) {
     mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
     return (nullptr);
   }
 
   obj = new obj_data();
   clear_object(obj);
-  *obj        = g->obj_proto[i];
+  *obj = (*obj_proto_of(g, i));
   obj_set_next(obj, g->objects);
   g->objects = obj;
   obj_set_room_loaded(obj, NOWHERE);
 
-  g->obj_index[i].number++;
+  obj_index_of(g, i)->number++;
 
   obj_set_id(obj, dg_new_obj_uid(g));
   /* find_obj helper */
@@ -3654,14 +3652,14 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr, int type) /* and obj_rnu
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
-  if (obj_get_sbinfo(&g->obj_proto[i])) {
+  if (obj_get_sbinfo(obj_proto_of(g, i))) {
     *obj_sbinfo_slot(obj) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
     for (j = 0; j < SPELLBOOK_SIZE; j++) {
-      obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(&g->obj_proto[i])[j].spellname;
-      obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(&g->obj_proto[i])[j].pages;
+      obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(obj_proto_of(g, i))[j].spellname;
+      obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(obj_proto_of(g, i))[j].pages;
     }
   }
-  copy_proto_script(&g->obj_proto[i], obj, OBJ_TRIGGER);
+  copy_proto_script(obj_proto_of(g, i), obj, OBJ_TRIGGER);
   assign_triggers(g, obj, OBJ_TRIGGER);
   if (obj_get_vnum(g, obj) == 65) {
     obj_set_healcharge(obj, 20);
@@ -3830,7 +3828,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           break;
 
         case 'O': /* read an object */
-          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+          if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 != NOWHERE) {
               int room_max = 0;
@@ -3884,7 +3882,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           break;
 
         case 'P': /* object to object */
-          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+          if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               obj_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             obj = read_object(g, ZCMD2.arg1, REAL);
             if (!(obj_to = get_obj_num(g, ZCMD2.arg3))) {
@@ -3907,7 +3905,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             ZCMD2.command = '*';
             break;
           }
-          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+          if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               mob_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             obj = read_object(g, ZCMD2.arg1, REAL);
             add_unique_id(g, obj);
@@ -3928,7 +3926,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             ZCMD2.command = '*';
             break;
           }
-          if ((g->obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+          if ((obj_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               mob_load && (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             if (ZCMD2.arg3 < 0 || ZCMD2.arg3 >= NUM_WEARS) {
               ZONE_ERROR(g, "invalid equipment pos number");
@@ -4285,7 +4283,7 @@ void free_obj(GameWorld *g, struct obj_data *obj)
     free_proto_script(obj, OBJ_TRIGGER);
   } else {
     free_object_strings_proto(g, obj);
-    if (obj_get_proto_script(obj) != obj_get_proto_script(&g->obj_proto[obj_get_item_number(obj)]))
+    if (obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
       free_proto_script(obj, OBJ_TRIGGER);
   }
 
@@ -4524,9 +4522,9 @@ mob_rnum real_mobile(GameWorld *g, mob_vnum vnum)
 }
 
 /* returns the real number of the object with given virtual number */
-obj_rnum real_object(GameWorld *g, obj_vnum vnum)
+obj_vnum real_object(GameWorld *g, obj_vnum vnum)
 {
-  return find_vnum(vnum, g->obj_index, g->top_obj + 1, sizeof(*g->obj_index), index_order);
+  return g->obj_index.find(vnum) ? vnum : NOTHING; /* rnums are vnums now */
 }
 
 /* returns the real number of the zone with given virtual number */

@@ -37,10 +37,10 @@ static void ASSIGNMOB(GameWorld *g, mob_vnum mob, SPECIAL(fn))
 
 static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
 {
-  obj_rnum rnum;
+  obj_vnum rnum;
 
   if ((rnum = real_object(g, obj)) != NOTHING)
-    g->obj_index[rnum].func = fn;
+    obj_index_of(g, rnum)->func = fn;
   else if (!g->mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }

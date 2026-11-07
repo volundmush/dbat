@@ -780,8 +780,8 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
  */
 static bool obj_string_is_proto(GameWorld *g, const obj_data *o, const char *s)
 {
-  obj_rnum rnum = obj_get_item_number(o);
-  return rnum != NOTHING && (s == obj_get_name(&g->obj_proto[rnum]) || s == obj_get_short_description(&g->obj_proto[rnum]));
+  obj_vnum rnum = obj_get_item_number(o);
+  return rnum != NOTHING && (s == obj_get_name(obj_proto_of(g, rnum)) || s == obj_get_short_description(obj_proto_of(g, rnum)));
 }
 
 /* sets str to the value of field on object o */

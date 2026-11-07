@@ -438,8 +438,7 @@ static bool obj_is_valid(const struct obj_data *obj)
 obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj)
 {
   if (!obj_is_valid(obj)) return NOTHING;
-  if (obj->item_number < 0 || obj->item_number > g->top_obj) return NOTHING;
-  return g->obj_index[obj->item_number].vnum;
+  return obj_index_of(g, obj->item_number) ? obj->item_number : NOTHING; /* item_number is the prototype's vnum */
 }
 
 /* Formerly macros in object_utils.hpp. */
@@ -461,12 +460,12 @@ bool obj_extra_flagged(const struct obj_data *obj, int flag)
 
 static bool obj_valid_rnum(GameWorld *g, const struct obj_data *obj)
 {
-  return (obj_get_item_number(obj) <= g->top_obj && obj_get_item_number(obj) != NOTHING);
+  return obj_get_item_number(obj) != NOTHING && obj_proto_of(g, obj_get_item_number(obj));
 }
 
 spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj)
 {
-  return (obj_valid_rnum(g, obj) ? g->obj_index[obj_get_item_number(obj)].func : nullptr);
+  return (obj_valid_rnum(g, obj) ? obj_index_of(g, obj_get_item_number(obj))->func : nullptr);
 }
 
 bool obj_is_corpse(const struct obj_data *obj)
@@ -1068,4 +1067,14 @@ int16_t obj_get_worn_on(const struct obj_data *obj)
 void obj_set_worn_on(struct obj_data *obj, int16_t v)
 {
   obj->worn_on = v;
+}
+
+struct obj_data *obj_proto_of(GameWorld *g, obj_vnum vnum)
+{
+  return g->obj_proto.find(vnum);
+}
+
+struct index_data *obj_index_of(GameWorld *g, obj_vnum vnum)
+{
+  return g->obj_index.find(vnum);
 }

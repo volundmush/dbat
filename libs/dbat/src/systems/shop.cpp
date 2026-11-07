@@ -469,7 +469,7 @@ bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop)
     return (false);
 
   for (counter = 0; shop_get_product(shop, counter) != NOTHING; counter++)
-    if (same_obj(item, &g->obj_proto[shop_get_product(shop, counter)]))
+    if (same_obj(item, obj_proto_of(g, shop_get_product(shop, counter))))
       return (true);
   return (false);
 }
@@ -985,7 +985,7 @@ static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct cha
   if (shop_producing(g, obj, shop)) {
     temp = obj_get_item_number(obj);
     extract_obj(g, obj);
-    return (&g->obj_proto[temp]);
+    return (obj_proto_of(g, temp));
   }
   shop_set_lastsort(shop, shop_get_lastsort(shop) + 1);
   loop = char_get_inventory(keeper);
@@ -1319,7 +1319,7 @@ SPECIAL(shop_keeper)
   return (false);
 }
 
-/* val == obj_vnum and obj_rnum (?) */
+/* val == obj_vnum and obj_vnum (?) */
 static bool add_to_list(GameWorld *g, shop_vnum vnum, struct shop_buy_data *list, int type, int *len, int *val)
 {
   if (*val != NOTHING && *val >= 0) { /* necessary after changing to unsigned v/rnums -- Welcor */
@@ -1701,8 +1701,8 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
       column += 2;
     }
     linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                       obj_get_short_description(&g->obj_proto[shop_get_product(shop, sindex)]),
-                       g->obj_index[shop_get_product(shop, sindex)].vnum);
+                       obj_get_short_description(obj_proto_of(g, shop_get_product(shop, sindex))),
+                       obj_index_of(g, shop_get_product(shop, sindex))->vnum);
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {

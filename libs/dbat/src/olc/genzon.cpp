@@ -420,36 +420,36 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         comment = char_get_sdesc(&g->mob_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
         break;
       case 'O':
-        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
         arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
+        comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'G':
-        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = -1;
         arg4    = -1;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
+        comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'E':
-        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = zone_get_cmd(g, zone_num, subcmd)->arg3;
         arg4    = -1;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
+        comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'P':
-        arg1    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
-        arg3    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg3].vnum;
+        arg3    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg3)->vnum;
         arg4    = -1;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
+        comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'D':
         arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
@@ -459,8 +459,8 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         break;
       case 'R':
         arg1    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg1);
-        arg2    = g->obj_index[zone_get_cmd(g, zone_num, subcmd)->arg2].vnum;
-        comment = obj_get_short_description(&g->obj_proto[zone_get_cmd(g, zone_num, subcmd)->arg2]);
+        arg2    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg2)->vnum;
+        comment = obj_get_short_description(obj_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg2));
         arg3    = -1;
         break;
       case 'T':

@@ -159,7 +159,7 @@ static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                "Assembly Type  : @y%s@n\r\n"
                "Components:\r\n",
                OLC_ASSEDIT(d)->lVnum,
-               obj_get_short_description(&g->obj_proto[real_object(g, OLC_ASSEDIT(d)->lVnum)]),
+               obj_get_short_description(obj_proto_of(g, real_object(g, OLC_ASSEDIT(d)->lVnum))),
                szAssmType);
 
   if (OLC_ASSEDIT(d)->lNumComponents <= 0)
@@ -172,7 +172,7 @@ static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d)
         send_to_char(g, d->character,
                      "@g%2d@n) [@c%5d@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
                      i + 1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
-                     obj_get_short_description(&g->obj_proto[g->lRnum]),
+                     obj_get_short_description(obj_proto_of(g, g->lRnum)),
                      (OLC_ASSEDIT(d)->pComponents[i].bInRoom ? "Yes" : "No"),
                      (OLC_ASSEDIT(d)->pComponents[i].bExtract ? "Yes" : "No"));
       }

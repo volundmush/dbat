@@ -909,7 +909,7 @@ bool load_otrigger(GameWorld *g, obj_data *obj)
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
     if (obj_get_item_number(obj) != NOTHING) {
-      free_proto_script(&g->obj_proto[obj_get_item_number(obj)], OBJ_TRIGGER);
+      free_proto_script(obj_proto_of(g, obj_get_item_number(obj)), OBJ_TRIGGER);
     }
   }
   return true;

@@ -265,8 +265,8 @@ static void sedit_products_menu(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "##     VNUM     Product\r\n");
   for (i = 0; shop_get_product(shop, i) != NOTHING; i++) {
     write_to_output(g, d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
-                    g->obj_index[shop_get_product(shop, i)].vnum,
-                    obj_get_short_description(&g->obj_proto[shop_get_product(shop, i)]));
+                    obj_index_of(g, shop_get_product(shop, i))->vnum,
+                    obj_get_short_description(obj_proto_of(g, shop_get_product(shop, i))));
   }
   write_to_output(g, d, "\r\n"
                      "@gA@n) Add a new product.\r\n"

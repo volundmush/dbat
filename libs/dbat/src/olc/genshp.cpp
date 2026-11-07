@@ -419,7 +419,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
        * Save the products.
        */
       for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
-        fprintf(shop_file, "%d\n", g->obj_index[shop_get_product(shop, j)].vnum);
+        fprintf(shop_file, "%d\n", obj_index_of(g, shop_get_product(shop, j))->vnum);
       fprintf(shop_file, "-1\n");
 
       /*

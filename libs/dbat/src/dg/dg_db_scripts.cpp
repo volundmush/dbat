@@ -385,7 +385,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
         rnum = find_trigger(g, trg_proto->vnum);
         if (rnum == nullptr) {
           mud_log("SYSERR: trigger #%d non-existant, for obj #%d",
-                  trg_proto->vnum, g->obj_index[obj_get_item_number(obj)].vnum);
+                  trg_proto->vnum, obj_index_of(g, obj_get_item_number(obj))->vnum);
         } else {
           add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, rnum), -1);
         }

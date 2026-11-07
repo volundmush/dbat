@@ -53,12 +53,10 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   g->mob_index[0].vnum = first_vnum;
   g->top_mob           = 0;
 
-  g->obj_proto = new obj_data[1]();
-  g->obj_index = new index_data[1]();
-  clear_object(g->obj_proto);
-  obj_set_item_number(g->obj_proto, 0);
-  g->obj_index[0].vnum = first_vnum;
-  g->top_obj           = 0;
+  struct obj_data *proto = g->obj_proto.emplace(first_vnum);
+  clear_object(proto);
+  obj_set_item_number(proto, first_vnum);
+  g->obj_index.emplace(first_vnum)->vnum = first_vnum;
 
   struct zone_data *zone = g->zones.emplace(first_vnum / 100);
   zone->number           = first_vnum / 100;
@@ -79,8 +77,8 @@ static void free_world(GameWorld *g)
   for (struct zone_data *zone : g->zones.all())
     delete[] zone->cmd;
   g->zones.clear();
-  delete[] g->obj_index;
-  delete[] g->obj_proto;
+  g->obj_index.clear();
+  g->obj_proto.clear();
   delete[] g->mob_index;
   delete[] g->mob_proto;
   delete[] g->rooms;
@@ -118,7 +116,7 @@ static void check_lookups(GameWorld *a, GameWorld *b)
 
   CHECK(real_mobile(a, 100) == 0);
   CHECK(real_mobile(b, 100) == NOBODY);
-  CHECK(real_object(b, 200) == 0);
+  CHECK(real_object(b, 200) == 200); /* real numbers are vnums now */
   CHECK(real_object(a, 200) == NOTHING);
   CHECK(find_zone(a, 1) != nullptr);
   CHECK(find_zone(b, 1) == nullptr);
@@ -175,14 +173,14 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
   CHECK(a->characters == mob);
   CHECK(a->objects == obj);
   CHECK(a->mob_index[0].number == 1);
-  CHECK(a->obj_index[0].number == 1);
+  CHECK(obj_index_of(a, 100)->number == 1);
   CHECK(char_get_mob_vnum(a, mob) == 100);
   CHECK(obj_get_vnum(a, obj) == 100);
 
   CHECK(b->characters == nullptr);
   CHECK(b->objects == nullptr);
   CHECK(b->mob_index[0].number == 0);
-  CHECK(b->obj_index[0].number == 0);
+  CHECK(obj_index_of(b, 200)->number == 0);
   CHECK(read_mobile(b, 100, VIRTUAL) == nullptr);
   CHECK(read_object(b, 100, VIRTUAL) == nullptr);
 
@@ -409,7 +407,7 @@ static void check_other_state(GameWorld *a, GameWorld *b)
 /* An object in a world where its vnum exists, carried by holder. The caller frees the world. */
 static struct obj_data *carried_object(GameWorld *g, struct char_data *holder)
 {
-  struct obj_data *obj = read_object(g, g->obj_index[0].vnum, VIRTUAL);
+  struct obj_data *obj = read_object(g, g->obj_index.vnums().front(), VIRTUAL);
 
   obj_to_char(g, obj, holder);
   return obj;

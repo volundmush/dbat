@@ -514,39 +514,39 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
       case 'G':
         write_to_output(g, d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg1]),
-                        g->obj_index[MYCMD.arg1].vnum,
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg1)),
+                        obj_index_of(g, MYCMD.arg1)->vnum,
                         MYCMD.arg2, MYCMD.arg5);
         break;
       case 'O':
         write_to_output(g, d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg1]),
-                        g->obj_index[MYCMD.arg1].vnum,
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg1)),
+                        obj_index_of(g, MYCMD.arg1)->vnum,
                         MYCMD.arg2, MYCMD.arg4, MYCMD.arg5);
         break;
       case 'E':
         write_to_output(g, d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg1]),
-                        g->obj_index[MYCMD.arg1].vnum,
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg1)),
+                        obj_index_of(g, MYCMD.arg1)->vnum,
                         equipment_types[MYCMD.arg3],
                         MYCMD.arg2, MYCMD.arg5);
         break;
       case 'P':
         write_to_output(g, d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg1]),
-                        g->obj_index[MYCMD.arg1].vnum,
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg3]),
-                        g->obj_index[MYCMD.arg3].vnum,
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg1)),
+                        obj_index_of(g, MYCMD.arg1)->vnum,
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg3)),
+                        obj_index_of(g, MYCMD.arg3)->vnum,
                         MYCMD.arg2, MYCMD.arg5);
         break;
       case 'R':
         write_to_output(g, d, "%sRemove %s@y [@c%d@n] from room.",
                         MYCMD.if_flag ? " then " : "",
-                        obj_get_short_description(&g->obj_proto[MYCMD.arg2]),
-                        g->obj_index[MYCMD.arg2].vnum);
+                        obj_get_short_description(obj_proto_of(g, MYCMD.arg2)),
+                        obj_index_of(g, MYCMD.arg2)->vnum);
         break;
       case 'D':
         write_to_output(g, d, "%sSet door %s@y as %s.",

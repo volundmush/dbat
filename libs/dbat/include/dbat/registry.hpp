@@ -115,6 +115,16 @@ public:
     iterator end() const { return {this, vnums_.size()}; }
   };
 
+  /* Every vnum, in order, as they are now. */
+  std::vector<V> vnums() const
+  {
+    std::vector<V> out;
+    out.reserve(items_.size());
+    for (const auto &[vnum, item] : items_)
+      out.push_back(vnum);
+    return out;
+  }
+
   /* Every entity, in vnum order. */
   members all() const { return members(this); }
 };

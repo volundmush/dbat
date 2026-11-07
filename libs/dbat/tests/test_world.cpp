@@ -165,9 +165,9 @@ static void check_audit_notices_broken_links(GameWorld *g, struct char_data *ch,
   CHECK_NOTICED(g);
   char_set_carry_weight(ch, char_get_carry_weight(ch) - 1);
 
-  g->obj_index[obj_get_item_number(obj)].number++;
+  obj_index_of(g, obj_get_item_number(obj))->number++;
   CHECK_NOTICED(g);
-  g->obj_index[obj_get_item_number(obj)].number--;
+  obj_index_of(g, obj_get_item_number(obj))->number--;
 
   obj_set_id(obj, obj_get_id(obj) + 1000); /* the lookup table now disagrees */
   CHECK_NOTICED(g);
@@ -462,7 +462,7 @@ static void check_iedit(GameWorld *g)
   CHECK(!strcmp(obj_get_short_description(sword), "a renamed sword"));
   CHECK(obj_get_in_obj(sword) == chest);
   CHECK(obj_get_carried_by(sword) == nullptr);
-  CHECK(!strcmp(obj_get_short_description(&g->obj_proto[real_object(g, 301)]), "a plain sword"));
+  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, real_object(g, 301))), "a plain sword"));
   CHECK(count_objects(g) == objects);
   CHECK_AUDIT(g);
 
@@ -525,7 +525,7 @@ static void check_new_guilds(GameWorld *g)
 /* Deleting a prototype used to read the object it had just freed, and to lose what its copies held. */
 static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
 {
-  obj_rnum chest_rnum = real_object(g, 300);
+  obj_vnum chest_rnum = real_object(g, 300);
   struct obj_data *in_room, *carried, *room_bread, *carried_bread;
 
   /* no zone command may load the deleted prototype later */

@@ -41,7 +41,7 @@ static void oedit_disp_val3_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val4_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val5_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val9_menu(GameWorld *g, struct descriptor_data *d);
-static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rnum real_num);
+static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_vnum real_num);
 static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited);
 static void oedit_setup_new(struct descriptor_data *d);
 
@@ -59,7 +59,7 @@ ACMD(do_oasis_oedit)
 {
   IDXTYPE number = NOWHERE;
   int save       = 0;
-  obj_rnum real_num;
+  obj_vnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -238,7 +238,7 @@ static void oedit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rnum real_num)
+static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_vnum real_num)
 {
   struct obj_data *obj;
 
@@ -246,7 +246,7 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rn
    * Allocate object in memory.
    */
   obj = new obj_data();
-  copy_object(g, obj, &g->obj_proto[real_num]);
+  copy_object(g, obj, obj_proto_of(g, real_num));
 
   /*
    * Attach new object to player's descriptor.
@@ -268,7 +268,7 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rn
 static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int i;
-  obj_rnum robj_num;
+  obj_vnum robj_num;
 
   i = (real_object(g, OLC_NUM(d)) == NOTHING);
 
@@ -279,11 +279,11 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 
   /* Update triggers : */
   /* Free old proto list  */
-  if (obj_get_proto_script(&g->obj_proto[robj_num]) &&
-      obj_get_proto_script(&g->obj_proto[robj_num]) != OLC_SCRIPT(d))
-    free_proto_script(&g->obj_proto[robj_num], OBJ_TRIGGER);
+  if (obj_get_proto_script(obj_proto_of(g, robj_num)) &&
+      obj_get_proto_script(obj_proto_of(g, robj_num)) != OLC_SCRIPT(d))
+    free_proto_script(obj_proto_of(g, robj_num), OBJ_TRIGGER);
   /* this will handle new instances of the object: */
-  obj_set_proto_script(&g->obj_proto[robj_num], OLC_SCRIPT(d));
+  obj_set_proto_script(obj_proto_of(g, robj_num), OLC_SCRIPT(d));
 
   /* this takes care of the objects currently in-game */
   for (obj_data *obj : each_obj(g)) {
@@ -294,7 +294,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
       extract_script(g, obj, OBJ_TRIGGER);
 
     free_proto_script(obj, OBJ_TRIGGER);
-    copy_proto_script(&g->obj_proto[robj_num], obj, OBJ_TRIGGER);
+    copy_proto_script(obj_proto_of(g, robj_num), obj, OBJ_TRIGGER);
     assign_triggers(g, obj, OBJ_TRIGGER);
   }
   /* end trigger update */
@@ -988,12 +988,12 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int number;
-  obj_rnum rnum;
+  obj_vnum rnum;
   int max_val, min_val;
   char *oldtext = nullptr;
   struct board_info *tmp;
   struct obj_data *obj;
-  obj_rnum robj;
+  obj_vnum robj;
 
   switch (OLC_MODE(d)) {
 
@@ -1086,7 +1086,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             if (obj_get_vnum(g, obj) != NOTHING) {
               free_proto_script(obj, OBJ_TRIGGER);
               robj = real_object(g, obj_get_vnum(g, obj));
-              copy_proto_script(&g->obj_proto[robj], obj, OBJ_TRIGGER);
+              copy_proto_script(obj_proto_of(g, robj), obj, OBJ_TRIGGER);
               assign_triggers(g, obj, OBJ_TRIGGER);
             }
             obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
