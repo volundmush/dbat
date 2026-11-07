@@ -23,7 +23,6 @@ typedef IDXTYPE guild_vnum;
 typedef IDXTYPE room_rnum;
 typedef IDXTYPE obj_rnum;
 typedef IDXTYPE mob_rnum;
-typedef IDXTYPE trig_rnum;
 
 /*
  * Bitvector type for 32 bit unsigned long bitvectors.

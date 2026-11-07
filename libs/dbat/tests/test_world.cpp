@@ -710,7 +710,7 @@ static void check_random_trigger_purges_itself(GameWorld *g, struct char_data *c
 
 static void attach_trigger(GameWorld *g, struct script_data **slot, trig_vnum vnum)
 {
-  add_trigger(g, dg_ensure_script(slot), read_trigger(g, real_trigger(g, vnum)), -1);
+  add_trigger(g, dg_ensure_script(slot), read_trigger(g, find_trigger(g, vnum)), -1);
 }
 
 /* A plain object in ch's room that runs the given trigger. */

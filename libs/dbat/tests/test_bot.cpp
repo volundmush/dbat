@@ -540,8 +540,9 @@ static void compose_builder_command(GameWorld *g, char *text, size_t size)
       }
       [[fallthrough]];
     case 5:
-      if (g->top_of_trigt > 0) {
-        snprintf(text, size, "trigedit %d", g->trig_index[bot_dice(g->top_of_trigt)]->vnum);
+      if (!g->trig_index.empty()) {
+        int n = bot_dice(g->trig_index.size()); /* the nth trigger, in vnum order */
+        snprintf(text, size, "trigedit %d", find_first(g->trig_index.all(), [&](index_data *) { return n-- == 0; })->vnum);
         break;
       }
       [[fallthrough]];

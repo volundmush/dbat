@@ -31,7 +31,7 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
   }
 
   len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-                  trig->name, trig_get_vnum(g, trig), trig->nr);
+                  trig->name, trig_get_vnum(g, trig), g->trig_index.place(trig_get_vnum(g, trig)));
 
   if (trig->attach_type == OBJ_TRIGGER) {
     len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Objects\r\n");
@@ -104,7 +104,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
   for (t = sc->trig_list; t; t = t->next) {
     send_to_char(g, ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-                 t->name, trig_get_vnum(g, t), t->nr);
+                 t->name, trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
 
     if (t->attach_type == OBJ_TRIGGER) {
       send_to_char(g, ch, "  Trigger Intended Assignment: Objects\r\n");
@@ -208,7 +208,7 @@ ACMD(do_attach)
   char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   int loc;
   trig_vnum tn;
-  trig_rnum rn;
+  struct index_data *rn;
   IDXTYPE num_arg;
   room_rnum rnum;
 
@@ -244,8 +244,8 @@ ACMD(do_attach)
       return;
     }
     /* have a valid mob, now get trigger */
-    rn = real_trigger(g, tn);
-    if ((rn == NOTHING) || !(trig = read_trigger(g, rn))) {
+    rn = find_trigger(g, tn);
+    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
       send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
@@ -277,8 +277,8 @@ ACMD(do_attach)
       return;
     }
     /* have a valid obj, now get trigger */
-    rn = real_trigger(g, tn);
-    if ((rn == NOTHING) || !(trig = read_trigger(g, rn))) {
+    rn = find_trigger(g, tn);
+    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
       send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
@@ -309,8 +309,8 @@ ACMD(do_attach)
       return;
     }
     /* have a valid room, now get trigger */
-    rn = real_trigger(g, tn);
-    if ((rn == NOTHING) || !(trig = read_trigger(g, rn))) {
+    rn = find_trigger(g, tn);
+    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
       send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
@@ -367,7 +367,7 @@ bool remove_trigger(GameWorld *g, struct script_data *sc, char *name)
     /* is found. originally the number was position-only */
     else if (++n >= num)
       break;
-    else if (g->trig_index[i->nr]->vnum == num)
+    else if (i->index->vnum == num)
       break;
   }
 
@@ -608,18 +608,18 @@ ACMD(do_vdelete)
 }
 ACMD(do_tstat)
 {
-  trig_rnum rnum;
+  struct index_data *rnum;
   char str[MAX_INPUT_LENGTH];
 
   half_chop(argument, str, argument);
   if (*str) {
-    rnum = real_trigger(g, atoi(str));
-    if (rnum == NOTHING) {
+    rnum = find_trigger(g, atoi(str));
+    if (rnum == nullptr) {
       send_to_char(g, ch, "That vnum does not exist.\r\n");
       return;
     }
 
-    do_stat_trigger(g, ch, g->trig_index[rnum]->proto);
+    do_stat_trigger(g, ch, rnum->proto);
   } else
     send_to_char(g, ch, "Usage: tstat <vnum>\r\n");
 }

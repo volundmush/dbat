@@ -49,7 +49,7 @@ struct trig_var_data {
 
 /* structure for triggers */
 struct trig_data {
-  IDXTYPE nr{};                         /* trigger's rnum                  */
+  struct index_data *index{};           /* its prototype's entry */
   uint8_t attach_type{};                /* mob/obj/wld intentions          */
   uint8_t data_type{};                  /* type of game_data for trig      */
   char *name{};                         /* name of trigger                 */
@@ -224,7 +224,7 @@ void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode);
-trig_rnum real_trigger(GameWorld *g, trig_vnum vnum);
+struct index_data *find_trigger(GameWorld *g, trig_vnum vnum);
 obj_data *find_obj(GameWorld *g, long n);
 void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
@@ -240,7 +240,7 @@ void remove_from_lookup_table(GameWorld *g, long uid);
 /* from dg_db_scripts.c */
 void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
 int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d);
-trig_data *read_trigger(GameWorld *g, trig_rnum nr);
+trig_data *read_trigger(GameWorld *g, struct index_data *nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type);
 void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj);

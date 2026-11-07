@@ -4,6 +4,7 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/guild.hpp"
+#include "dbat/index.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/ban.hpp"
 #include "dbat/config.hpp"
@@ -49,8 +50,7 @@ struct GameWorld {
   int cmd_say{}, cmd_tell{}, cmd_emote{}, cmd_slap{}, cmd_puke{};
 
   /* Scripts */
-  struct index_data **trig_index{};
-  int top_of_trigt{};
+  vnum_table<index_data, trig_vnum> trig_index; /* each entry holds its trigger as proto */
   struct trig_data *trigger_list{};
   struct trig_data *extracted_triggers{}; /* waiting for free_extracted_triggers() */
   struct dg_run_ctx dg_ctx{};

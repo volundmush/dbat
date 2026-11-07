@@ -132,7 +132,7 @@ void extract_trigger(GameWorld *g, struct trig_data *trig)
     trig->wait_event = nullptr;
   }
 
-  g->trig_index[trig->nr]->number--;
+  trig->index->number--;
 
   /* walk the trigger list and remove this one */
   REMOVE_FROM_LIST(trig, g->trigger_list, next_in_world, temp);

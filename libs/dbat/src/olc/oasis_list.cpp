@@ -400,12 +400,12 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
 
     size_shops = count_shops(g, bottom, top);
 
-    if (i < g->top_of_trigt)
-      if (g->trig_index[i]->vnum >= bottom && g->trig_index[i]->vnum <= top)
-        size_triggers++;
-
     size_guilds = count_guilds(g, bottom, top);
   }
+
+  for (struct index_data *trig : g->trig_index.all())
+    if (trig->vnum >= bottom && trig->vnum <= top)
+      size_triggers++;
 
   /****************************************************************************/
   /** Display all of the zone information at once.                           **/
@@ -440,7 +440,6 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
 /* List code by Ronald Evers - dlanor@xs4all.nl */
 static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *rnum, trig_vnum vmin, trig_vnum vmax)
 {
-  trig_rnum i;
   IDXTYPE bottom, top;
   int counter = 0;
   char trgtypes[256];
@@ -460,22 +459,22 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
                "----- ------- -------------------------------------------------------\r\n");
 
   /** Loop through the world and find each room. **/
-  for (i = 0; i < g->top_of_trigt; i++) {
+  for (struct index_data *i : g->trig_index.all()) {
     /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((g->trig_index[i]->vnum >= bottom) && (g->trig_index[i]->vnum <= top)) {
+    if ((i->vnum >= bottom) && (i->vnum <= top)) {
       counter++;
 
       send_to_char(g, ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-                   counter, g->trig_index[i]->vnum, g->trig_index[i]->proto->name);
+                   counter, i->vnum, i->proto->name);
 
-      if (g->trig_index[i]->proto->attach_type == OBJ_TRIGGER) {
-        sprintbit(g->trig_index[i]->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
+      if (i->proto->attach_type == OBJ_TRIGGER) {
+        sprintbit(i->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(g, ch, "obj @y%s@n\r\n", trgtypes);
-      } else if (g->trig_index[i]->proto->attach_type == WLD_TRIGGER) {
-        sprintbit(g->trig_index[i]->proto->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
+      } else if (i->proto->attach_type == WLD_TRIGGER) {
+        sprintbit(i->proto->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(g, ch, "wld @y%s@n\r\n", trgtypes);
       } else {
-        sprintbit(g->trig_index[i]->proto->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
+        sprintbit(i->proto->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
         send_to_char(g, ch, "mob @y%s@n\r\n", trgtypes);
       }
     }

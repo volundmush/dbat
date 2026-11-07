@@ -650,13 +650,13 @@ void destroy_db(GameWorld *g)
 #undef THIS_CMD
 
   /* Triggers */
-  for (cnt = 0; cnt < g->top_of_trigt; cnt++) {
-    if (g->trig_index[cnt]->proto) {
+  for (struct index_data *entry : g->trig_index.all()) {
+    if (entry->proto) {
       /* make sure to nuke the command list (memory leak) */
       /* free_trigger() doesn't free the command list */
-      if (g->trig_index[cnt]->proto->cmdlist) {
+      if (entry->proto->cmdlist) {
         struct cmdlist_element *i, *j;
-        i = g->trig_index[cnt]->proto->cmdlist;
+        i = entry->proto->cmdlist;
         while (i) {
           j = i->next;
           if (i->cmd)
@@ -665,11 +665,10 @@ void destroy_db(GameWorld *g)
           i = j;
         }
       }
-      free_trigger(g, g->trig_index[cnt]->proto);
+      free_trigger(g, entry->proto);
     }
-    delete g->trig_index[cnt];
   }
-  delete[] g->trig_index;
+  g->trig_index.clear();
 
   /* Events */
   event_free_all(g);
@@ -1147,7 +1146,6 @@ void index_boot(GameWorld *g, int mode)
    */
   switch (mode) {
     case DB_BOOT_TRG:
-      g->trig_index = new index_data *[rec_count]();
       break;
     case DB_BOOT_WLD:
       g->rooms = new room_data[rec_count]();
@@ -1679,8 +1677,8 @@ static void renum_zone_table(GameWorld *g)
           a = ZCMD2.arg1 = real_room(g, ZCMD2.arg1);
           b = ZCMD2.arg2 = real_object(g, ZCMD2.arg2);
           break;
-        case 'T': /* a trigger */
-          b = ZCMD2.arg2 = real_trigger(g, ZCMD2.arg2);
+        case 'T': /* a trigger: it keeps the vnum, so check that there is one */
+          b = ZCMD2.arg2 = find_trigger(g, ZCMD2.arg2) ? ZCMD2.arg2 : NOTHING;
           c = ZCMD2.arg3 = real_room(g, ZCMD2.arg3);
           break;
         case 'V': /* trigger variable assignment */
@@ -3999,10 +3997,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
         case 'T': /* trigger command */
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
-            add_trigger(g, dg_ensure_script(char_script_slot(tmob)), read_trigger(g, ZCMD2.arg2), -1);
+            add_trigger(g, dg_ensure_script(char_script_slot(tmob)), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
-            add_trigger(g, dg_ensure_script(obj_script_slot(tobj)), read_trigger(g, ZCMD2.arg2), -1);
+            add_trigger(g, dg_ensure_script(obj_script_slot(tobj)), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
             if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > g->top_room) {
@@ -4010,7 +4008,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             }
             if (!rroom_get_script(g, ZCMD2.arg3))
               dg_ensure_script(rroom_script_slot(g, ZCMD2.arg3));
-            add_trigger(g, rroom_get_script(g, ZCMD2.arg3), read_trigger(g, ZCMD2.arg2), -1);
+            add_trigger(g, rroom_get_script(g, ZCMD2.arg3), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
             last_cmd = 1;
           }
 

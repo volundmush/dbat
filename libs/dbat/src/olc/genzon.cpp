@@ -465,11 +465,11 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         break;
       case 'T':
         arg1    = zone_get_cmd(g, zone_num, subcmd)->arg1;                   /* trigger type */
-        arg2    = g->trig_index[zone_get_cmd(g, zone_num, subcmd)->arg2]->vnum; /* trigger vnum */
+        arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;                   /* trigger vnum */
         arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);     /* room num */
         arg4    = -1;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = g->trig_index[real_trigger(g, arg2)]->proto->name;
+        comment = find_trigger(g, arg2)->proto->name;
         break;
       case 'V':
         arg1 = zone_get_cmd(g, zone_num, subcmd)->arg1; /* trigger type */

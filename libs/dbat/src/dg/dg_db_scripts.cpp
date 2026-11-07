@@ -13,6 +13,7 @@
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
 #include <cstdlib>
+#include <memory>
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -131,15 +132,16 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   struct index_data *t_index;
   struct trig_data *trig;
 
-  trig    = new trig_data();
-  t_index = new index_data();
+  trig                             = new trig_data();
+  std::unique_ptr<index_data> made = std::make_unique<index_data>();
+  t_index                          = made.get();
 
   t_index->vnum  = nr;
   t_index->proto = trig;
 
   snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
-  trig->nr   = g->top_of_trigt;
+  trig->index = t_index;
   trig->name = fread_string(trig_f, errors);
 
   get_line(trig_f, line);
@@ -166,22 +168,25 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
 
   free(cmds);
 
-  g->trig_index[g->top_of_trigt++] = t_index;
+  if (g->trig_index.find(nr)) {
+    mud_log("SYSERR: trigger #%d is defined twice; ignoring the second one.", nr);
+    free_trigger(g, trig);
+    return;
+  }
+  g->trig_index.insert(nr, std::move(made));
 
   dg_lint_trigger(g, trig, nullptr);
 }
 
 /*
- * create a new trigger from a prototype.
- * nr is the real number of the trigger.
+ * create a new trigger from a prototype, given its entry in the trigger index (or null).
  */
-trig_data *read_trigger(GameWorld *g, trig_rnum nr)
+trig_data *read_trigger(GameWorld *g, struct index_data *nr)
 {
   index_data *t_index;
   trig_data *trig;
 
-  if (nr >= g->top_of_trigt) return nullptr;
-  if ((t_index = g->trig_index[nr]) == nullptr)
+  if ((t_index = nr) == nullptr)
     return nullptr;
 
   trig = new trig_data();
@@ -194,7 +199,7 @@ trig_data *read_trigger(GameWorld *g, trig_rnum nr)
 
 static void trig_data_init(trig_data *this_data)
 {
-  this_data->nr           = NOTHING;
+  this_data->index        = nullptr;
   this_data->data_type    = 0;
   this_data->name         = nullptr;
   this_data->trigger_type = 0;
@@ -214,14 +219,14 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 {
   trig_data_init(this_data);
 
-  this_data->nr          = trg->nr;
+  this_data->index       = trg->index;
   this_data->attach_type = trg->attach_type;
   this_data->data_type   = trg->data_type;
   if (trg->name)
     this_data->name = strdup(trg->name);
   else {
     this_data->name = strdup("unnamed trigger");
-    mud_log("Trigger with no name! (%d)", trg->nr);
+    mud_log("Trigger with no name! (%d)", trg->index ? trg->index->vnum : NOTHING);
   }
   this_data->trigger_type = trg->trigger_type;
   this_data->cmdlist      = trg->cmdlist;
@@ -235,7 +240,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
   char line[READ_SIZE];
   char junk[8];
   trig_vnum vnum;
-  trig_rnum rnum;
+  struct index_data *rnum;
   int count;
   char_data *mob;
   room_data *room;
@@ -250,8 +255,8 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
     return;
   }
 
-  rnum = real_trigger(g, vnum);
-  if (rnum == NOTHING) {
+  rnum = find_trigger(g, vnum);
+  if (rnum == nullptr) {
     switch (type) {
       case MOB_TRIGGER:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
@@ -299,7 +304,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
         trg_proto->next = new_trg;
       }
 
-      if (rnum != NOTHING) {
+      if (rnum != nullptr) {
         add_trigger(g, dg_ensure_script(room_script_slot(room)), read_trigger(g, rnum), -1);
       } else {
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
@@ -317,7 +322,7 @@ void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
 {
   char junk[8];
   trig_vnum vnum;
-  trig_rnum rnum;
+  struct index_data *rnum;
   int count;
   struct trig_proto_list *trg_proto, *new_trg;
 
@@ -329,8 +334,8 @@ void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
     return;
   }
 
-  rnum = real_trigger(g, vnum);
-  if (rnum == NOTHING) {
+  rnum = find_trigger(g, vnum);
+  if (rnum == nullptr) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
            vnum, obj_get_short_description(obj), obj_get_vnum(g, obj));
@@ -354,7 +359,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
   struct char_data *mob  = nullptr;
   struct obj_data *obj   = nullptr;
   struct room_data *room = nullptr;
-  trig_rnum rnum;
+  struct index_data *rnum;
   struct trig_proto_list *trg_proto;
 
   switch (type) {
@@ -362,8 +367,8 @@ void assign_triggers(GameWorld *g, void *i, int type)
       mob       = (char_data *)i;
       trg_proto = char_get_proto_script(mob);
       while (trg_proto) {
-        rnum = real_trigger(g, trg_proto->vnum);
-        if (rnum == NOTHING) {
+        rnum = find_trigger(g, trg_proto->vnum);
+        if (rnum == nullptr) {
           mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
                  trg_proto->vnum, g->mob_index[char_get_nr(mob)].vnum);
@@ -377,8 +382,8 @@ void assign_triggers(GameWorld *g, void *i, int type)
       obj       = (obj_data *)i;
       trg_proto = obj_get_proto_script(obj);
       while (trg_proto) {
-        rnum = real_trigger(g, trg_proto->vnum);
-        if (rnum == NOTHING) {
+        rnum = find_trigger(g, trg_proto->vnum);
+        if (rnum == nullptr) {
           mud_log("SYSERR: trigger #%d non-existant, for obj #%d",
                   trg_proto->vnum, g->obj_index[obj_get_item_number(obj)].vnum);
         } else {
@@ -391,8 +396,8 @@ void assign_triggers(GameWorld *g, void *i, int type)
       room      = (struct room_data *)i;
       trg_proto = room_get_proto_script(room);
       while (trg_proto) {
-        rnum = real_trigger(g, trg_proto->vnum);
-        if (rnum == NOTHING) {
+        rnum = find_trigger(g, trg_proto->vnum);
+        if (rnum == nullptr) {
           mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for room #%d",
                  trg_proto->vnum, room_get_number(room));

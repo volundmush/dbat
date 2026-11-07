@@ -56,7 +56,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
   GameWorld *g;
   struct char_data *ch;
-  trig_rnum number;
+  struct index_data *number;
 
   if (size < 1)
     return 0;
@@ -72,7 +72,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   th_before_boot(add_trigger_to_file);
   g = th_boot_at(1800000000);
   ch = th_player(g, "Fuzzy", ADMLVL_NONE);
-  if ((number = real_trigger(g, 399)) != NOTHING) {
+  if ((number = find_trigger(g, 399)) != nullptr) {
     if (attach_type == 0) {
       struct char_data *mob = read_mobile(g, 300, VIRTUAL);
 

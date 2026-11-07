@@ -244,8 +244,8 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
         case 'T':
           send_to_char(g, ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       g->trig_index[ZOCMD.arg2]->proto->name,
-                       g->trig_index[ZOCMD.arg2]->vnum,
+                       find_trigger(g, ZOCMD.arg2)->proto->name,
+                       ZOCMD.arg2,
                        ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" : ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
           break;
         case 'V':
@@ -1055,8 +1055,8 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
 
     m = count_shops(g, zone->bot, zone->top);
 
-    for (i = 0; i < g->top_of_trigt; i++)
-      if (g->trig_index[i]->vnum >= zone->bot && g->trig_index[i]->vnum <= zone->top)
+    for (struct index_data *entry : g->trig_index.all())
+      if (entry->vnum >= zone->bot && entry->vnum <= zone->top)
         n++;
 
     o = count_guilds(g, zone->bot, zone->top);
@@ -1248,7 +1248,7 @@ ACMD(do_show)
                    j, g->top_mob + 1,
                    k, g->top_obj + 1,
                    g->top_room + 1, (int)g->zones.size(),
-                   g->top_of_trigt + 1,
+                   (int)g->trig_index.size(),
                    g->buf_largecount,
                    g->buf_switches, g->buf_overflows,
                    add_commas(g->mob_specials_used),
@@ -2083,21 +2083,21 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 {
   int cmd_no, found = 0;
-  trig_rnum trnum      = real_trigger(g, tvnum);
+  struct index_data *trnum = find_trigger(g, tvnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
   mob_rnum lastmob_r   = 0, i;
   obj_rnum lastobj_r   = 0, j;
   struct trig_proto_list *tpl;
 
-  if (trnum == NOTHING) {
+  if (trnum == nullptr) {
     send_to_char(g, ch, "That trigger does not exist.\r\n");
     return;
   }
 
   send_to_char(g, ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
-               g->trig_index[trnum]->proto->attach_type == MOB_TRIGGER ? "mobile" : (g->trig_index[trnum]->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-               tvnum, g->trig_index[trnum]->proto->name);
+               trnum->proto->attach_type == MOB_TRIGGER ? "mobile" : (trnum->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
+               tvnum, trnum->proto->name);
 
   for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -2128,7 +2128,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
           lastmob_r  = 0;
           break;
         case 'T': /* trigger to something */
-          if (ZCMD2.arg2 != trnum)
+          if (ZCMD2.arg2 != tvnum)
             break;
           if (ZCMD2.arg1 == MOB_TRIGGER) {
             send_to_char(g, ch, "mob [%5d] %-60s (zedit room %5d)\r\n",

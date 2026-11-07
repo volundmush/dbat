@@ -33,7 +33,7 @@
 #include "dbat/game_world.hpp"
 
 static void trigedit_save(GameWorld *g, struct descriptor_data *d);
-static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, trig_rnum rtrg_num);
+static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct index_data *rtrg_num);
 static void trigedit_setup_new(struct descriptor_data *d);
 
 /* local functions */
@@ -47,7 +47,7 @@ static void trigedit_disp_types(GameWorld *g, struct descriptor_data *d);
 ACMD(do_oasis_trigedit)
 {
   IDXTYPE number;
-  trig_rnum real_num;
+  struct index_data *real_num;
   struct descriptor_data *d;
 
   /*
@@ -109,7 +109,7 @@ ACMD(do_oasis_trigedit)
    *  If this is a new trigger, setup a new one,
    *  otherwise, setup the a copy of the existing trigger
    */
-  if ((real_num = real_trigger(g, number)) == NOTHING)
+  if ((real_num = find_trigger(g, number)) == nullptr)
     trigedit_setup_new(d);
   else
     trigedit_setup_existing(g, d, real_num);
@@ -159,7 +159,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
    */
   trig = new trig_data();
 
-  trig->nr = NOWHERE;
+  trig->index = nullptr;
 
   /*
    * Set up some defaults
@@ -176,7 +176,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   OLC_VAL(d)  = 0; /* Has changed flag. (It hasn't so far, we just made it.) */
 }
 
-static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, trig_rnum rtrg_num)
+static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct index_data *rtrg_num)
 {
   struct trig_data *trig;
   struct cmdlist_element *c;
@@ -185,7 +185,7 @@ static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, tri
    */
   trig = new trig_data();
 
-  trig_data_copy(trig, g->trig_index[rtrg_num]->proto);
+  trig_data_copy(trig, rtrg_num->proto);
 
   /* convert cmdlist to a char string, sized to fit: some loaded scripts exceed MAX_CMD_LENGTH */
   size_t len = 1;
@@ -280,7 +280,7 @@ static void trigedit_disp_types(GameWorld *g, struct descriptor_data *d)
 void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int i = 0;
-  trig_rnum rnum;
+  struct index_data *rnum;
 
   switch (OLC_MODE(d)) {
     case TRIGEDIT_MAIN_MENU:
@@ -408,7 +408,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case TRIGEDIT_COPY:
-      if ((rnum = real_trigger(g, atoi(arg))) != NOTHING) {
+      if ((rnum = find_trigger(g, atoi(arg))) != nullptr) {
         trigedit_setup_existing(g, d, rnum);
       } else
         write_to_output(g, d, "That trigger does not exist.\r\n");
@@ -441,10 +441,10 @@ static void trigedit_compile_script(trig_data *trig, char *s)
 }
 
 /* Replaces prototype rnum with the edited trigger, and updates every live copy of it. */
-static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, trig_rnum rnum)
+static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, struct index_data *rnum)
 {
   trig_data *trig  = OLC_TRIG(d);
-  trig_data *proto = g->trig_index[rnum]->proto;
+  trig_data *proto = rnum->proto;
   trig_data *live_trig;
   struct cmdlist_element *cmd, *next_cmd;
 
@@ -467,7 +467,7 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, t
   /* go through the mud and replace existing triggers         */
   live_trig = g->trigger_list;
   while (live_trig) {
-    if (live_trig->nr == rnum) {
+    if (live_trig->index == rnum) {
       if (live_trig->arglist) {
         free(live_trig->arglist);
         live_trig->arglist = nullptr;
@@ -505,76 +505,19 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, t
   }
 }
 
-/* Inserts the edited trigger into trig_index in vnum order, renumbering everything after it. */
+/* Adds the edited trigger to the trigger index. */
 static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
 {
-  trig_rnum i;
-  trig_rnum rnum = NOTHING;
-  int found      = 0;
-  trig_data *proto;
-  trig_data *trig = OLC_TRIG(d);
-  trig_data *live_trig;
-  struct index_data **new_index;
-
-  new_index = new index_data *[g->top_of_trigt + 2]();
+  trig_data *trig          = OLC_TRIG(d);
+  struct index_data *index = g->trig_index.emplace(OLC_NUM(d));
 
   /* Recompile the command list from the new script */
   trigedit_compile_script(trig, OLC_STORAGE(d));
 
-  for (i = 0; i < g->top_of_trigt; i++) {
-    if (!found) {
-      if (g->trig_index[i]->vnum > OLC_NUM(d)) {
-        found = true;
-        rnum  = i;
-
-        new_index[rnum]        = new index_data();
-        OLC_TRIG(d)->nr       = rnum;
-        new_index[rnum]->vnum = OLC_NUM(d);
-        proto                  = new trig_data();
-        new_index[rnum]->proto = proto;
-        trig_data_copy(proto, trig);
-
-        new_index[rnum + 1] = g->trig_index[rnum];
-
-        proto     = g->trig_index[rnum]->proto;
-        proto->nr = rnum + 1;
-      } else {
-        new_index[i] = g->trig_index[i];
-      }
-    } else {
-      new_index[i + 1] = g->trig_index[i];
-      proto            = g->trig_index[i]->proto;
-      proto->nr        = i + 1;
-    }
-  }
-
-  if (!found) {
-    rnum = i;
-    new_index[rnum]       = new index_data();
-    OLC_TRIG(d)->nr       = rnum;
-    new_index[rnum]->vnum = OLC_NUM(d);
-
-    proto                  = new trig_data();
-    new_index[rnum]->proto = proto;
-    trig_data_copy(proto, trig);
-  }
-
-  delete[] g->trig_index;
-
-  g->trig_index = new_index;
-  g->top_of_trigt++;
-
-  /* HERE IT HAS TO GO THROUGH AND FIX ALL SCRIPTS/TRIGS OF HIGHER RNUM */
-  for (live_trig = g->trigger_list; live_trig; live_trig = live_trig->next_in_world)
-    live_trig->nr += (live_trig->nr != NOTHING && live_trig->nr > rnum);
-
-  /*
-   * Update other trigs being edited.
-   */
-  for (descriptor_data *dsc : each_desc(g))
-    if (desc_get_connected(dsc) == CON_TRIGEDIT)
-      if (OLC_TRIG(dsc)->nr >= rnum)
-        OLC_TRIG(dsc)->nr++;
+  trig->index  = index;
+  index->vnum  = OLC_NUM(d);
+  index->proto = new trig_data();
+  trig_data_copy(index->proto, trig);
 }
 
 /*
@@ -587,7 +530,7 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
 static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
 {
   IDXTYPE i;
-  trig_rnum rnum;
+  struct index_data *rnum;
   trig_data *trig;
   struct cmdlist_element *cmd;
   FILE *trig_file;
@@ -608,8 +551,8 @@ static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
   }
 
   for (i = OLC_ZNUM(d)->bot; i <= top; i++) {
-    if ((rnum = real_trigger(g, i)) != NOTHING) {
-      trig = g->trig_index[rnum]->proto;
+    if ((rnum = find_trigger(g, i)) != nullptr) {
+      trig = rnum->proto;
 
       if (fprintf(trig_file, "#%d\n", i) < 0) {
         mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, d->character)), true,
@@ -649,14 +592,14 @@ static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
 /* save the zone's triggers to internal memory and to disk */
 static void trigedit_save(GameWorld *g, struct descriptor_data *d)
 {
-  trig_rnum rnum;
+  struct index_data *rnum;
 
-  if ((rnum = real_trigger(g, OLC_NUM(d))) != NOTHING)
+  if ((rnum = find_trigger(g, OLC_NUM(d))) != nullptr)
     trigedit_replace_existing(g, d, rnum);
   else
     trigedit_insert_new(g, d);
 
-  dg_lint_trigger(g, g->trig_index[real_trigger(g, OLC_NUM(d))]->proto, d);
+  dg_lint_trigger(g, find_trigger(g, OLC_NUM(d))->proto, d);
   trigedit_write_zone_file(g, d);
 }
 
@@ -701,8 +644,8 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
 
   while (editscript) {
     write_to_output(g, d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
-                    g->trig_index[real_trigger(g, editscript->vnum)]->proto->name);
-    if (g->trig_index[real_trigger(g, editscript->vnum)]->proto->attach_type != OLC_ITEM_TYPE(d))
+                    find_trigger(g, editscript->vnum)->proto->name);
+    if (find_trigger(g, editscript->vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
       write_to_output(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
     else
       write_to_output(g, d, "\r\n");
@@ -784,7 +727,7 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       if (vnum == 0) break; /* this aborts a new trigger entry */
 
-      if (real_trigger(g, vnum) == NOTHING) {
+      if (find_trigger(g, vnum) == nullptr) {
         write_to_output(g, d, "Invalid Trigger VNUM!\r\n"
                            "Please enter position, vnum   (ex: 1, 200):");
         return true;

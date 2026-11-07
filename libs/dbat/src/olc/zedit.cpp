@@ -557,8 +557,8 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
       case 'T':
         write_to_output(g, d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        g->trig_index[MYCMD.arg2]->proto->name,
-                        g->trig_index[MYCMD.arg2]->vnum,
+                        find_trigger(g, MYCMD.arg2)->proto->name,
+                        MYCMD.arg2,
                         ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" : ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);
         break;
       case 'V':
@@ -839,7 +839,7 @@ static bool zone_range_loses_something(GameWorld *g, struct descriptor_data *d, 
       what = "mob";
     else if (real_object(g, vnum) != NOTHING)
       what = "object";
-    else if (real_trigger(g, vnum) != NOTHING)
+    else if (find_trigger(g, vnum) != nullptr)
       what = "trigger";
     else if (find_shop(g, vnum))
       what = "shop";
@@ -1209,8 +1209,8 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_MODE(d) = ZEDIT_SARG1;
           break;
         case 'T':
-          if (real_trigger(g, atoi(arg)) != NOTHING) {
-            OLC_CMD(d).arg2 = real_trigger(g, atoi(arg)); /* trigger */
+          if (find_trigger(g, atoi(arg))) {
+            OLC_CMD(d).arg2 = atoi(arg); /* trigger vnum */
             OLC_CMD(d).arg3 = real_room(g, OLC_NUM(d));
             zedit_disp_menu(g, d);
           } else

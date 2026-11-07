@@ -118,8 +118,8 @@ static GameWorld *run_script(const char *script, struct char_data **player)
   th_before_boot(add_script_to_trigger_file);
   g  = th_boot();
   ch = th_player(g, "Tester", ADMLVL_NONE);
-  CHECK(real_trigger(g, 399) != NOTHING);
-  add_trigger(g, dg_ensure_script(room_script_slot(&g->rooms[char_get_in_room(ch)])), read_trigger(g, real_trigger(g, 399)), -1);
+  CHECK(find_trigger(g, 399) != nullptr);
+  add_trigger(g, dg_ensure_script(room_script_slot(&g->rooms[char_get_in_room(ch)])), read_trigger(g, find_trigger(g, 399)), -1);
   th_type(g, ch, "runit");
   th_pulses(g, 20);
   *player = ch;

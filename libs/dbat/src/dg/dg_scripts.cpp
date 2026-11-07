@@ -183,7 +183,7 @@ static EVENTFUNC(trig_wait_event)
       mud_log("Trigger restarted on unknown entity. Vnum: %d", trig_get_vnum(g, trig));
       mud_log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj"
                                                                                     : "Room");
-      mud_log("attached %d places", g->trig_index[trig->nr]->number);
+      mud_log("attached %d places", trig->index->number);
       script_log(g, "Trigger restart attempt on unknown entity.");
       return 0;
     }
@@ -199,7 +199,7 @@ static EVENTFUNC(trig_wait_event)
 
 trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t)
 {
-  return g->trig_index[t->nr]->vnum;
+  return t->index->vnum;
 }
 
 static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
@@ -411,7 +411,7 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   char_data *c = nullptr;
   obj_data *o  = nullptr;
   room_data *r = nullptr;
-  trig_rnum trignum;
+  struct index_data *trignum;
   long id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
@@ -450,8 +450,8 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   }
 
   /* locate and load the trigger specified */
-  trignum = real_trigger(g, atoi(trignum_s));
-  if (trignum == NOTHING || !(newtrig = read_trigger(g, trignum))) {
+  trignum = find_trigger(g, atoi(trignum_s));
+  if (trignum == nullptr || !(newtrig = read_trigger(g, trignum))) {
     script_log(g, "Trigger: %s, VNum %d. attach invalid trigger: '%s'",
                trig->name, trig_get_vnum(g, trig), trignum_s);
     return;
@@ -1292,22 +1292,10 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
   return ret_val;
 }
 
-/* returns the real number of the trigger with given virtual number */
-static int trigger_order(const void *key, const void *trig)
+/* The trigger index entry for vnum, or null. */
+struct index_data *find_trigger(GameWorld *g, trig_vnum vnum)
 {
-  trig_vnum k = *(const trig_vnum *)key, v = (*(struct index_data *const *)trig)->vnum;
-
-  return (k > v) - (k < v);
-}
-
-trig_rnum real_trigger(GameWorld *g, trig_vnum vnum)
-{
-  struct index_data **found;
-
-  if (!g->trig_index || g->top_of_trigt <= 0)
-    return NOTHING;
-  found = (struct index_data **)bsearch(&vnum, g->trig_index, g->top_of_trigt, sizeof(*g->trig_index), trigger_order);
-  return found ? found - g->trig_index : NOTHING;
+  return g->trig_index.find(vnum);
 }
 
 /* load in a character's saved variables */

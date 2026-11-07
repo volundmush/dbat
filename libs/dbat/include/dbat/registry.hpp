@@ -63,6 +63,13 @@ public:
     return it == items_.end() ? nullptr : it->second.get();
   }
 
+  /* vnum's place in vnum order, from 0 (what its index in a sorted array would have been), or -1 */
+  int place(V vnum) const
+  {
+    auto it = items_.find(vnum);
+    return it == items_.end() ? -1 : static_cast<int>(std::distance(items_.begin(), it));
+  }
+
   void clear() { items_.clear(); }
   std::size_t size() const { return items_.size(); }
   bool empty() const { return items_.empty(); }
