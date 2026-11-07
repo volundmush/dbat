@@ -119,7 +119,7 @@ static GameWorld *run_script(const char *script, struct char_data **player)
   g  = th_boot();
   ch = th_player(g, "Tester", ADMLVL_NONE);
   CHECK(find_trigger(g, 399) != nullptr);
-  add_trigger(g, dg_ensure_script(room_script_slot(&g->rooms[char_get_in_room(ch)])), read_trigger(g, find_trigger(g, 399)), -1);
+  add_trigger(g, dg_ensure_script(room_script_slot(room_of(g, char_get_in_room(ch)))), read_trigger(g, find_trigger(g, 399)), -1);
   th_type(g, ch, "runit");
   th_pulses(g, 20);
   *player = ch;
@@ -736,7 +736,7 @@ static void check_mob_given_armor_with_no_wear_slot(void)
 static void check_start_room_cannot_be_deleted(void)
 {
   GameWorld *g = th_boot();
-  room_rnum start = real_room(g, CONFIG_MORTAL_START);
+  room_vnum start = real_room(g, CONFIG_MORTAL_START);
 
   CHECK(start != NOWHERE);
   CHECK(!delete_room(g, start));

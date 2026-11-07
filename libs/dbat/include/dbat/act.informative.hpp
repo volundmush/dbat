@@ -19,7 +19,7 @@ void introCreate(struct char_data *ch);
 void sort_commands(GameWorld *g);
 char *find_exdesc(char *word, struct extra_descr_data *list);
 void add_history(GameWorld *g, struct char_data *ch, char *str, int type);
-void look_at_room(GameWorld *g, room_rnum target_room, struct char_data *ch, int ignore_brief);
+void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int ignore_brief);
 bool perf_skill(int skill);
 int search_help(GameWorld *g, const char *argument, int level);
 

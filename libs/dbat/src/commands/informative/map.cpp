@@ -43,7 +43,7 @@
 #include "informative_internal.hpp"
 
 static double terrain_bonus(GameWorld *g, struct char_data *ch);
-static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_rnum rnum,
+static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum,
                           struct char_data *ch);
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
@@ -141,7 +141,7 @@ void search_room(GameWorld *g, struct char_data *ch)
   }
 }
 
-static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_rnum rnum,
+static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum,
                           struct char_data *ch)
 {
   int door;
@@ -803,7 +803,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 ACMD(do_scan)
 {
   int i;
-  room_rnum newroom;
+  room_vnum newroom;
   const char *dirnames[] = {
       "North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
 

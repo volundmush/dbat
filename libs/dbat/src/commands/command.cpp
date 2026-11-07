@@ -673,7 +673,7 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
 
   /* special in room? */
   if (in_a_room && rroom_get_spec(g, char_get_in_room(ch)) != nullptr)
-    if (rroom_get_spec(g, char_get_in_room(ch))(g, ch, g->rooms + char_get_in_room(ch), cmd, arg))
+    if (rroom_get_spec(g, char_get_in_room(ch))(g, ch, room_of(g, char_get_in_room(ch)), cmd, arg))
       return true;
 
   /* special in equipment list? */

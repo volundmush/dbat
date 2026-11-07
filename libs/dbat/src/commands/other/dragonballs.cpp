@@ -55,7 +55,7 @@
 static void load_shadow_dragon(GameWorld *g, int *room, mob_vnum vnum)
 {
   mob_vnum r_num;
-  room_rnum r_room;
+  room_vnum r_room;
 
   if (*room <= 0)
     return;

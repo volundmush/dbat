@@ -24,7 +24,7 @@ constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run bef
 /* comm.c */
 int arena_watch(GameWorld *g, struct char_data *ch);
 void send_to_all(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
+void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
 void send_to_outdoor(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void send_to_moon(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));

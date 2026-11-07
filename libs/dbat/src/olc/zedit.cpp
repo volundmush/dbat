@@ -31,7 +31,7 @@ static void zedit_disp_arg5(GameWorld *g, struct descriptor_data *d);
 static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static void zedit_new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
 static void zedit_save_to_disk(GameWorld *g, struct zone_data *zone);
-static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_num);
+static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_vnum room_num);
 
 /*
  * Nasty internal macros to clean up the code.
@@ -48,7 +48,7 @@ ACMD(do_oasis_zedit)
 {
   IDXTYPE number = NOWHERE;
   int save       = 0;
-  room_rnum real_num;
+  room_vnum real_num;
   struct descriptor_data *d;
   char *buf3;
   char buf1[MAX_STRING_LENGTH];
@@ -223,11 +223,11 @@ ACMD(do_oasis_zedit)
          char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
-static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_rnum room_num)
+static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_vnum room_num)
 {
   struct zone_data *zone;
   int subcmd = 0, count = 0;
-  room_rnum cmd_room = NOWHERE;
+  room_vnum cmd_room = NOWHERE;
 
   /*
    * Allocate one scratch zone structure.  
@@ -358,7 +358,7 @@ static void zedit_save_internally(GameWorld *g, struct descriptor_data *d)
   int mobloaded = false,
       objloaded = false,
       subcmd;
-  room_rnum room_num = real_room(g, OLC_NUM(d));
+  room_vnum room_num = real_room(g, OLC_NUM(d));
 
   if (room_num == NOWHERE) {
     mud_log("SYSERR: zedit_save_internally: OLC_NUM(d) room %d not found.", OLC_NUM(d));

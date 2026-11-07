@@ -427,7 +427,7 @@ struct obj_data *find_control(GameWorld *g, struct char_data *ch)
 static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
   struct obj_data *vehicle_in_out;
-  room_rnum is_in, is_going_to;
+  room_vnum is_in, is_going_to;
   char buf[MAX_INPUT_LENGTH];
 
   if (!*arg) {
@@ -513,7 +513,7 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
     send_to_char(g, ch, "@wThe ship can't fit there!\r\n");
   } else {
     /* But nothing!  Let's go that way! */
-    room_rnum was_in, is_in;
+    room_vnum was_in, is_in;
 
     sprintf(buf, "%s @wflies %s.\n\r", obj_get_short_description(vehicle), dirs[dir]);
     send_to_room(g, obj_get_in_room(vehicle), "%s", buf);
@@ -1244,7 +1244,7 @@ ACMD(do_drive)
         }
       } else if (!strcasecmp(arg, "launch")) {
         int lnum       = 0;
-        room_rnum rnum = 0;
+        room_vnum rnum = 0;
         if (rroom_flagged(g, obj_get_in_room(vehicle), ROOM_EARTH)) {
           lnum = 1;
         } else if (rroom_flagged(g, obj_get_in_room(vehicle), ROOM_FRIGID)) {

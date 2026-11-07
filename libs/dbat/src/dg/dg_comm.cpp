@@ -154,7 +154,7 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         *s      = '\0';
         p       = any_one_name(++p, name);
         otokens[i] =
-            find_invis ? (void *)get_char_in_room(g, &g->rooms[char_get_in_room(ch)], name) : (void *)get_char_room_vis(g, ch, name, nullptr);
+            find_invis ? (void *)get_char_in_room(g, room_of(g, char_get_in_room(ch)), name) : (void *)get_char_room_vis(g, ch, name, nullptr);
         tokens[++i] = ++s;
         break;
 
@@ -164,7 +164,7 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         *s      = '\0';
         p       = any_one_name(++p, name);
 
-        if (find_invis) obj = get_obj_in_room(g, &g->rooms[char_get_in_room(ch)], name);
+        if (find_invis) obj = get_obj_in_room(g, room_of(g, char_get_in_room(ch)), name);
         else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, rroom_get_contents(g, char_get_in_room(ch)))))
           ;
         else if (!(obj = get_obj_in_equip_vis(g, ch, name, &tmp, char_get_equipment_array(ch))))

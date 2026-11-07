@@ -1100,7 +1100,7 @@ int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
   if (!valid_dg_target(g, actor, 0))
     return 0;
 
-  room = &g->rooms[char_get_in_room(actor)];
+  room = room_of(g, char_get_in_room(actor));
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_COMMAND))
       continue;
@@ -1134,7 +1134,7 @@ void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
   if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_SPEECH))
     return;
 
-  room = &g->rooms[char_get_in_room(actor)];
+  room = room_of(g, char_get_in_room(actor));
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_SPEECH))
       continue;
@@ -1165,7 +1165,7 @@ int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
   if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DROP))
     return 1;
 
-  room = &g->rooms[char_get_in_room(actor)];
+  room = room_of(g, char_get_in_room(actor));
   for (t = room_get_script(room)->trig_list; t; t = t->next)
     if (trigger_ready(t, WTRIG_DROP) &&
         (rand_number(g, 1, 100) <= t->narg)) {
@@ -1191,7 +1191,7 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
   if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
     return 1;
 
-  room = &g->rooms[char_get_in_room(actor)];
+  room = room_of(g, char_get_in_room(actor));
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_CAST) &&
         (rand_number(g, 1, 100) <= t->narg)) {
@@ -1244,7 +1244,7 @@ int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
   if (!actor || !script_has_type(rroom_get_script(g, char_get_in_room(actor)), WTRIG_DOOR))
     return 1;
 
-  room = &g->rooms[char_get_in_room(actor)];
+  room = room_of(g, char_get_in_room(actor));
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_DOOR) &&
         (rand_number(g, 1, 100) <= t->narg)) {

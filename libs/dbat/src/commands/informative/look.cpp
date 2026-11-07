@@ -47,8 +47,8 @@
 static void look_in_direction(GameWorld *g, struct char_data *ch, int dir);
 static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg);
 static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int read);
-static void do_auto_exits(GameWorld *g, room_rnum target_room, struct char_data *ch, int exit_mode);
-static void do_auto_exits2(GameWorld *g, room_rnum target_room, struct char_data *ch);
+static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data *ch, int exit_mode);
+static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch);
 
 /* Portal appearance types */
 static const char *const portal_appearance[] = {
@@ -351,7 +351,7 @@ void bringdesc(GameWorld *g, struct char_data *ch, struct char_data *tch)
   }
 }
 
-static void do_auto_exits(GameWorld *g, room_rnum target_room, struct char_data *ch, int exit_mode)
+static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data *ch, int exit_mode)
 {
   int door, door_found = 0, has_light = false, i;
   char dlist1[500];
@@ -895,7 +895,7 @@ static void do_auto_exits(GameWorld *g, room_rnum target_room, struct char_data 
   }
 }
 
-static void do_auto_exits2(GameWorld *g, room_rnum target_room, struct char_data *ch)
+static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch)
 {
   int door, slen = 0;
 
@@ -962,9 +962,9 @@ ACMD(do_autoexit)
   send_to_char(g, ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[char_exit_level(g, ch)]);
 }
 
-void look_at_room(GameWorld *g, room_rnum target_room, struct char_data *ch, int ignore_brief)
+void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int ignore_brief)
 {
-  struct room_data *rm = &g->rooms[char_get_in_room(ch)];
+  struct room_data *rm = room_of(g, char_get_in_room(ch));
   trig_data *t;
 
   if (!char_get_desc(ch))
@@ -1269,7 +1269,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
     if (obj_get_value(obj, VAL_PORTAL_APPEAR) < 0) {
       /* You can look through the portal to the destination */
       /* where does this lead to? */
-      room_rnum portal_dest = real_room(g, obj_get_value(obj, VAL_PORTAL_DEST));
+      room_vnum portal_dest = real_room(g, obj_get_value(obj, VAL_PORTAL_DEST));
       if (portal_dest == NOWHERE) {
         send_to_char(g, ch, "You see nothing but infinite darkness...\r\n");
       } else if (room_is_dark(g, portal_dest) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -1291,7 +1291,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
     else if (obj_get_value(obj, VAL_VEHICLE_APPEAR) < 0) {
       /* You can look inside the vehicle */
       /* where does this lead to? */
-      room_rnum vehicle_inside = real_room(g, obj_get_value(obj, VAL_VEHICLE_ROOM));
+      room_vnum vehicle_inside = real_room(g, obj_get_value(obj, VAL_VEHICLE_ROOM));
       if (vehicle_inside == NOWHERE) {
         send_to_char(g, ch, "You cannot see inside that.\r\n");
       } else if (room_is_dark(g, vehicle_inside) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -1568,7 +1568,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
 {
   struct obj_data *viewport = nullptr, *vehicle = nullptr;
   struct char_data *dummy = nullptr;
-  room_rnum target_room   = NOWHERE;
+  room_vnum target_room   = NOWHERE;
   int bits, door;
 
   /* First, lets find something to look out of or through. */

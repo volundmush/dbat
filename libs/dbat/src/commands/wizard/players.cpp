@@ -780,7 +780,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
 {
   int i, on = 0, off = 0;
   int64_t value = 0;
-  room_rnum rnum;
+  room_vnum rnum;
   room_vnum rvnum;
   int chosen_race;
   int chosen_sensei;

@@ -27,13 +27,13 @@
 #include "dbat/game_world.hpp"
 
 /* local functions */
-static bool VALID_EDGE(GameWorld *g, room_rnum x, int y);
-static void bfs_enqueue(GameWorld *g, room_rnum room, int dir);
+static bool VALID_EDGE(GameWorld *g, room_vnum x, int y);
+static void bfs_enqueue(GameWorld *g, room_vnum room, int dir);
 static void bfs_dequeue(GameWorld *g);
 static void bfs_clear_queue(GameWorld *g);
 
 struct bfs_queue_struct {
-  room_rnum room{};
+  room_vnum room{};
   char dir{};
   struct bfs_queue_struct *next{};
 };
@@ -45,7 +45,7 @@ struct bfs_queue_struct {
 #define IS_MARKED(g, room) (rroom_flagged(g, room, ROOM_BFS_MARK))
 #define IS_CLOSED(g, x, y) (room_exit_flagged(rroom_get_dir_option(g, (x), (y)), EX_CLOSED))
 
-static bool VALID_EDGE(GameWorld *g, room_rnum x, int y)
+static bool VALID_EDGE(GameWorld *g, room_vnum x, int y)
 {
   if (rroom_get_dir_option(g, x, y) == nullptr || rroom_get_exit_to_room(g, x, y) == NOWHERE)
     return false;
@@ -57,7 +57,7 @@ static bool VALID_EDGE(GameWorld *g, room_rnum x, int y)
   return true;
 }
 
-static void bfs_enqueue(GameWorld *g, room_rnum room, int dir)
+static void bfs_enqueue(GameWorld *g, room_vnum room, int dir)
 {
   struct bfs_queue_struct *curr;
 
@@ -96,12 +96,11 @@ static void bfs_clear_queue(GameWorld *g)
  * Intended usage: in mobile_activity, give a mob a dir to go if they're
  * tracking another mob or a PC.  Or, a 'track' skill for PCs.
  */
-int find_first_step(GameWorld *g, room_rnum src, room_rnum target)
+int find_first_step(GameWorld *g, room_vnum src, room_vnum target)
 {
   int curr_dir;
-  room_rnum curr_room;
 
-  if (src == NOWHERE || target == NOWHERE || src > g->top_room || target > g->top_room) {
+  if (!room_of(g, src) || !room_of(g, target)) {
     mud_log("SYSERR: Illegal value %d or %d passed to find_first_step. (%s)", src, target, __FILE__);
     return (BFS_ERROR);
   }
@@ -109,9 +108,7 @@ int find_first_step(GameWorld *g, room_rnum src, room_rnum target)
     return (BFS_ALREADY_THERE);
 
   /* clear marks first, some OLC systems will save the mark. */
-  for (curr_room = 0; curr_room <= g->top_room; curr_room++) {
-    UNMARK(g, curr_room);
-  }
+  g->rooms.visit([](room_vnum, struct room_data *room) { room_set_flag(room, ROOM_BFS_MARK, false); });
   MARK(g, src);
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {

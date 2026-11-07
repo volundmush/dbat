@@ -121,11 +121,11 @@ void char_body_set(struct char_data *ch, int flag, bool on);
 /* new define for quick check */
 bool char_is_dead(const struct char_data *ch);
 
-room_rnum char_get_in_room(const struct char_data *ch);
-void char_set_in_room(struct char_data *ch, room_rnum v);
+room_vnum char_get_in_room(const struct char_data *ch);
+void char_set_in_room(struct char_data *ch, room_vnum v);
 zone_vnum char_in_zone(GameWorld *g, const struct char_data *ch);
-room_rnum char_get_was_in_room(const struct char_data *ch);
-void char_set_was_in_room(struct char_data *ch, room_rnum v);
+room_vnum char_get_was_in_room(const struct char_data *ch);
+void char_set_was_in_room(struct char_data *ch, room_vnum v);
 
 char *char_get_pc_name(const struct char_data *ch);
 void char_set_pc_name(struct char_data *ch, char *v);

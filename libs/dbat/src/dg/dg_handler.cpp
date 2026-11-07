@@ -279,18 +279,3 @@ void delete_variables(const char *charname)
   if (remove(filename) < 0 && errno != ENOENT)
     mud_log("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
 }
-
-void update_wait_events(struct room_data *to, struct room_data *from)
-{
-  struct trig_data *trig;
-
-  if (!room_get_script(from))
-    return;
-
-  for (trig = room_get_script(from)->trig_list; trig; trig = trig->next) {
-    if (!trig->wait_event)
-      continue;
-
-    ((struct wait_event_data *)trig->wait_event->event_obj)->go = to;
-  }
-}

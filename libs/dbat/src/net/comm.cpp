@@ -2843,7 +2843,7 @@ void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
   }
 }
 
-void send_to_room(GameWorld *g, room_rnum room, const char *messg, ...)
+void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...)
 {
   va_list args;
 
@@ -3106,7 +3106,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
 
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
-  room_rnum room;
+  room_vnum room;
   if (ch && char_get_in_room(ch) != NOWHERE)
     room = char_get_in_room(ch);
   else if (obj && obj_get_in_room(obj) != NOWHERE)
@@ -3240,7 +3240,6 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...)
 {
   va_list args;
-  room_rnum j;
 
   if (start > finish) {
     mud_log("send_to_range passed start room value greater then finish.");
@@ -3249,7 +3248,7 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *
   if (messg == nullptr)
     return;
 
-  for (j = 0; j < g->top_room; j++) {
+  for (room_vnum j : g->rooms.vnums()) {
     if (rroom_get_vnum(g, j) >= start && rroom_get_vnum(g, j) <= finish) {
       for (char_data *i : room_people(g, j)) {
         if (!char_get_desc(i))

@@ -11,13 +11,12 @@
 #include "dbat/game_world.hpp"
 
 /* put an object in a room */
-void obj_to_room(GameWorld *g, struct obj_data *object, room_rnum room)
+void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
 {
   struct obj_data *vehicle = nullptr;
 
-  if (!object || room == NOWHERE || room > g->top_room)
-    mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
-            room, g->top_room, (void *)object);
+  if (!object || !room_of(g, room))
+    mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)", room, (void *)object);
   else {
     if (rroom_flagged(g, room, ROOM_GARDEN1) || rroom_flagged(g, room, ROOM_GARDEN2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
@@ -225,13 +224,12 @@ void char_from_room(GameWorld *g, struct char_data *ch)
 }
 
 /* place a character in a room */
-void char_to_room(GameWorld *g, struct char_data *ch, room_rnum room)
+void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
 {
   int i;
 
-  if (ch == nullptr || room == NOWHERE || room > g->top_room)
-    mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
-            room, g->top_room, (void *)ch);
+  if (ch == nullptr || !room_of(g, room))
+    mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d Ch: %p", room, (void *)ch);
   else {
     char_set_next_in_room(ch, rroom_get_people(g, room));
     rroom_set_people(g, room, ch);

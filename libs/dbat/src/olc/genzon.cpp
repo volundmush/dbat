@@ -210,7 +210,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   zone->cmd[0].command = 'S';
 
   for (room_vnum v = bottom; v <= top; v++) /* rooms already in its range now belong to it */
-    if (room_rnum r = real_room(g, v); r != NOWHERE)
+    if (room_vnum r = real_room(g, v); r != NOWHERE)
       rroom_set_zone(g, r, zone);
 
   add_to_save_list(g, zone->number, SL_ZON);
@@ -302,10 +302,10 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 
 /*-------------------------------------------------------------------*/
 
-void remove_room_zone_commands(GameWorld *g, struct zone_data *zone, room_rnum room_num)
+void remove_room_zone_commands(GameWorld *g, struct zone_data *zone, room_vnum room_num)
 {
   int subcmd         = 0;
-  room_rnum cmd_room = -2;
+  room_vnum cmd_room = -2;
 
   /*
    * Delete all entries in zone_table that relate to this room so we

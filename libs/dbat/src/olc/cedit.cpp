@@ -813,10 +813,9 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
 static void reassign_rooms(GameWorld *g)
 {
-  room_rnum i;
 
   /* remove old funcs */
-  for (i = 0; i <= g->top_room; i++)
+  for (room_vnum i : g->rooms.vnums())
     rroom_set_func(g, i, nullptr);
 
   /* reassign spec_procs */

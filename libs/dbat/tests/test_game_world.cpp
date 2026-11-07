@@ -40,10 +40,8 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 {
   GameWorld *g = game_world_create();
 
-  g->rooms    = new room_data[count]();
-  g->top_room = count - 1;
-  for (room_rnum r = 0; r < count; r++)
-    rroom_set_number(g, r, first_vnum + r);
+  for (room_vnum r = first_vnum; r < first_vnum + count; r++)
+    room_set_number(g->rooms.emplace(r), r);
 
   struct char_data *mob_proto = g->mob_proto.emplace(first_vnum);
   clear_char(mob_proto);
@@ -79,7 +77,7 @@ static void free_world(GameWorld *g)
   g->obj_proto.clear();
   g->mob_index.clear();
   g->mob_proto.clear();
-  delete[] g->rooms;
+  g->rooms.clear();
   game_world_destroy(g);
 }
 
@@ -107,9 +105,9 @@ static void check_starting_values(void)
 /* each world searches only its own tables */
 static void check_lookups(GameWorld *a, GameWorld *b)
 {
-  CHECK(real_room(a, 101) == 1);
+  CHECK(real_room(a, 101) == 101); /* real numbers are vnums now */
   CHECK(real_room(b, 101) == NOWHERE);
-  CHECK(real_room(b, 201) == 1);
+  CHECK(real_room(b, 201) == 201);
   CHECK(real_room(a, 201) == NOWHERE);
 
   CHECK(real_mobile(a, 100) == 100); /* real numbers are vnums now */
@@ -135,24 +133,24 @@ static void check_rooms(GameWorld *a, GameWorld *b)
   obj = new obj_data();
   clear_object(obj);
 
-  char_to_room(a, ch, 1);
-  obj_to_room(a, obj, 2);
-  CHECK(char_get_in_room(ch) == 1);
-  CHECK(obj_get_in_room(obj) == 2);
-  CHECK(rroom_get_people(a, 1) == ch);
-  CHECK(rroom_get_contents(a, 2) == obj);
-  CHECK(rroom_get_people(b, 1) == nullptr);
-  CHECK(rroom_get_contents(a, 1) == nullptr);
+  char_to_room(a, ch, 101);
+  obj_to_room(a, obj, 102);
+  CHECK(char_get_in_room(ch) == 101);
+  CHECK(obj_get_in_room(obj) == 102);
+  CHECK(rroom_get_people(a, 101) == ch);
+  CHECK(rroom_get_contents(a, 102) == obj);
+  CHECK(rroom_get_people(b, 201) == nullptr);
+  CHECK(rroom_get_contents(a, 101) == nullptr);
 
-  /* the room count is per world too: room 2 exists in A but not in B */
+  /* the room count is per world too: room 102 exists in A, but B has no room 202 */
   char_from_room(a, ch);
-  CHECK(rroom_get_people(a, 1) == nullptr);
+  CHECK(rroom_get_people(a, 101) == nullptr);
   CHECK(char_get_in_room(ch) == NOWHERE);
-  char_to_room(b, ch, 2);
+  char_to_room(b, ch, 202);
   CHECK(char_get_in_room(ch) == NOWHERE);
-  char_to_room(a, ch, 2);
-  CHECK(rroom_get_people(a, 2) == ch);
-  CHECK(rroom_get_people(b, 1) == nullptr);
+  char_to_room(a, ch, 102);
+  CHECK(rroom_get_people(a, 102) == ch);
+  CHECK(rroom_get_people(b, 201) == nullptr);
 
   char_from_room(a, ch);
   obj_from_room(a, obj);
@@ -203,32 +201,32 @@ static void check_iteration(GameWorld *g)
   for (auto &m : mob)
     m = read_mobile(g, 100, VIRTUAL);
   for (int i = 0; i < 5; i++)
-    char_to_room(g, mob[i], 0); /* the list is newest first: 4 3 2 1 0 */
+    char_to_room(g, mob[i], 100); /* the list is newest first: 4 3 2 1 0 */
 
-  for (struct char_data *ch : room_people(g, 0)) {
+  for (struct char_data *ch : room_people(g, 100)) {
     seen.push_back(ch);
     if (ch == mob[4]) {
       char_from_room(g, mob[2]);
-      char_to_room(g, mob[2], 1);                       /* moved away before its turn */
+      char_to_room(g, mob[2], 101);                     /* moved away before its turn */
       remove_from_lookup_table(g, char_get_id(mob[1])); /* destroyed before its turn */
-      char_to_room(g, mob[5], 0);                       /* added during the loop */
+      char_to_room(g, mob[5], 100);                     /* added during the loop */
     }
   }
   CHECK((seen == std::vector<struct char_data *>{mob[4], mob[3], mob[0]}));
 
   int visits = 0;
-  CHECK(!room_people_each(g, 0, [&](struct char_data *) { return ++visits < 2; }));
+  CHECK(!room_people_each(g, 100, [&](struct char_data *) { return ++visits < 2; }));
   CHECK(visits == 2);
   visits = 0;
-  CHECK(room_people_each(g, 0, [&](struct char_data *) { visits++; }));
+  CHECK(room_people_each(g, 100, [&](struct char_data *) { visits++; }));
   CHECK(visits == 4); /* 5 4 3 0 */
 
   for (auto &o : obj) {
     o = read_object(g, 100, VIRTUAL);
-    obj_to_room(g, o, 2); /* 3 2 1 0 */
+    obj_to_room(g, o, 102); /* 3 2 1 0 */
   }
   std::vector<struct obj_data *> seen_obj;
-  for (struct obj_data *o : room_contents(g, 2)) {
+  for (struct obj_data *o : room_contents(g, 102)) {
     seen_obj.push_back(o);
     if (o == obj[3]) {
       obj_from_room(g, obj[2]);
@@ -454,7 +452,7 @@ static void check_objects_off_the_ground(void)
   g   = make_world(11, 1);
   bag = read_object(g, 11, VIRTUAL);
   obj = read_object(g, 11, VIRTUAL);
-  obj_to_room(g, bag, 0);
+  obj_to_room(g, bag, 11);
   obj_to_obj(g, obj, bag);
   obj_set_weight(obj, 7);
   obj_set_value(bag, VAL_ALL_HEALTH, 100);
@@ -470,7 +468,7 @@ static void check_objects_off_the_ground(void)
   obj_set_type_flag(obj, ITEM_VEHICLE);
   CHECK(find_vehicle_by_vnum(g, 600) == nullptr);
   obj_from_char(g, obj);
-  obj_to_room(g, obj, 0);
+  obj_to_room(g, obj, 600);
   CHECK(find_vehicle_by_vnum(g, 600) == obj);
   extract_obj(g, obj);
   free_world(g);

@@ -1649,7 +1649,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
   for (sindex = 0; shop_get_room(shop, sindex) != NOWHERE; sindex++) {
     char buf1[128];
     int linelen;
-    room_rnum temp;
+    room_vnum temp;
 
     if (sindex) {
       send_to_char(g, ch, ", ");

@@ -48,7 +48,7 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
   }
 }
 
-static int checkship(GameWorld *g, room_rnum rnum, obj_vnum vnum)
+static int checkship(GameWorld *g, room_vnum rnum, obj_vnum vnum)
 {
   int there = false;
 
@@ -64,7 +64,7 @@ static int checkship(GameWorld *g, room_rnum rnum, obj_vnum vnum)
   return there;
 }
 
-static char *getmapchar(GameWorld *g, room_rnum rnum, struct char_data *ch, room_rnum start, obj_vnum vnum)
+static char *getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch, room_vnum start, obj_vnum vnum)
 {
   static char mapchar[50];
   int there = false, enemy = false;
@@ -257,7 +257,7 @@ static char *getmapchar(GameWorld *g, room_rnum rnum, struct char_data *ch, room
   return mapchar;
 }
 
-static MapStruct findcoord(GameWorld *g, room_rnum rnum)
+static MapStruct findcoord(GameWorld *g, room_vnum rnum)
 {
   int x, y;
   MapStruct coords;
@@ -279,7 +279,7 @@ static MapStruct findcoord(GameWorld *g, room_rnum rnum)
   return coords;
 }
 
-void printmap(GameWorld *g, room_rnum rnum, struct char_data *ch, int type, obj_vnum vnum)
+void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_vnum vnum)
 {
   int x = 0, lasty = -1;
   int y = 0;
@@ -289,7 +289,7 @@ void printmap(GameWorld *g, room_rnum rnum, struct char_data *ch, int type, obj_
   char buf2[512];
   MapStruct coord;
 
-  room_rnum start = rnum;
+  room_vnum start = rnum;
 
   coord = findcoord(g, rnum);
   strcpy(buf, "\n");

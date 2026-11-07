@@ -13,7 +13,7 @@ struct room_direction_data {
 
   int16_t exit_info{};       /* Exit info			*/
   obj_vnum key{};            /* Key's number (-1 for no key)		*/
-  room_rnum to_room{};       /* Where direction leads (NOWHERE)	*/
+  room_vnum to_room{};       /* Where direction leads (NOWHERE)	*/
   int dclock{};              /* DC to pick the lock			*/
   int dchide{};              /* DC to find hidden			*/
   int dcskill{};             /* Skill req. to move through exit	*/

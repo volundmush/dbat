@@ -29,143 +29,65 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source);
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
-room_rnum add_room(GameWorld *g, struct room_data *room)
+room_vnum add_room(GameWorld *g, struct room_data *room)
 {
   struct char_data *tch;
   struct obj_data *tobj;
-  int j;
-  room_rnum found = false;
-  room_rnum i;
+  struct room_data *slot;
+  room_vnum vnum;
 
   if (room == nullptr)
     return NOWHERE;
 
-  if ((i = real_room(g, room_get_number(room))) != NOWHERE) {
-    if (rroom_get_script(g, i))
-      extract_script(g, &g->rooms[i], WLD_TRIGGER);
-    tch  = rroom_get_people(g, i);
-    tobj = rroom_get_contents(g, i);
-    copy_room(&g->rooms[i], room);
-    rroom_set_people(g, i, tch);
-    rroom_set_contents(g, i, tobj);
+  vnum = room_get_number(room);
+  if ((slot = room_of(g, vnum))) {
+    if (room_get_script(slot))
+      extract_script(g, slot, WLD_TRIGGER);
+    tch  = room_get_people(slot);
+    tobj = room_get_contents(slot);
+    copy_room(slot, room);
+    room_set_people(slot, tch);
+    room_set_contents(slot, tobj);
     add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
-    mud_log("GenOLC: add_room: Updated existing room #%d.", room_get_number(room));
-    return i;
+    mud_log("GenOLC: add_room: Updated existing room #%d.", vnum);
+    return vnum;
   }
 
-  resize_array(g->rooms, g->top_room + 1, g->top_room + 2);
-  g->top_room++;
-
-  for (i = g->top_room; i > 0; i--) {
-    if (room_get_number(room) > rroom_get_vnum(g, i - 1)) {
-      g->rooms[i] = *room;
-      copy_room_strings(&g->rooms[i], room);
-      found = i;
-      break;
-    }
-    /* Copy the room over now. */
-    g->rooms[i] = g->rooms[i - 1];
-    update_wait_events(&g->rooms[i], &g->rooms[i - 1]);
-
-    /* People in this room must have their in_rooms moved up one. */
-    for (char_data *vict : room_people(g, i))
-      char_set_in_room(vict, char_get_in_room(vict) + ((char_get_in_room(vict) != NOWHERE)));
-
-    /* Move objects too. */
-    for (obj_data *item : room_contents(g, i))
-      obj_set_in_room(item, obj_get_in_room(item) + ((obj_get_in_room(item) != NOWHERE)));
-  }
-  if (!found) {
-    g->rooms[0] = *room; /* Last place, in front. */
-    copy_room_strings(&g->rooms[0], room);
-  }
-
-  mud_log("GenOLC: add_room: Added room %d at index #%d.", room_get_number(room), found);
-
-  /* found is equal to the array index where we added the room. */
-
-  /*
-   * Find what zone that room was in so we can update the loading table.
-   */
-  for (struct zone_data *zone : g->zones.all()) /* from the room's zone on */
-    if (zone->number >= room_get_zone(room)->number)
-      for (j = 0; zone_get_cmd(g, zone, j)->command != 'S'; j++)
-        switch (zone_get_cmd(g, zone, j)->command) {
-          case 'M':
-          case 'O':
-          case 'T':
-          case 'V':
-            zone_get_cmd(g, zone, j)->arg3 += (zone_get_cmd(g, zone, j)->arg3 != NOWHERE && zone_get_cmd(g, zone, j)->arg3 >= found);
-            break;
-          case 'D':
-          case 'R':
-            zone_get_cmd(g, zone, j)->arg1 += (zone_get_cmd(g, zone, j)->arg1 != NOWHERE && zone_get_cmd(g, zone, j)->arg1 >= found);
-            break;
-          case 'G':
-          case 'P':
-          case 'E':
-          case '*':
-            /* Known zone entries we don't care about. */
-            break;
-          default:
-            mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
-        }
-
-  /*
-   * Update the loadroom table. Adds 1 or 0.
-   */
-  g->r_mortal_start_room += (g->r_mortal_start_room >= found);
-  g->r_immort_start_room += (g->r_immort_start_room >= found);
-  g->r_frozen_start_room += (g->r_frozen_start_room >= found);
-
-  /*
-   * Update world exits.
-   */
-  i = g->top_room + 1;
-  do {
-    i--;
-    for (j = 0; j < NUM_OF_DIRS; j++)
-      if (rroom_get_dir_option(g, i, j) && rroom_get_dir_option(g, i, j)->to_room != NOWHERE)
-        rroom_get_dir_option(g, i, j)->to_room += (rroom_get_dir_option(g, i, j)->to_room >= found);
-  } while (i > 0);
+  slot  = g->rooms.emplace(vnum);
+  *slot = *room;
+  copy_room_strings(slot, room);
+  mud_log("GenOLC: add_room: Added room %d.", vnum);
 
   add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
-
-  /*
-   * Return what array entry we placed the new room in.
-   */
-  return found;
+  return vnum;
 }
 
 /* -------------------------------------------------------------------------- */
 
-bool delete_room(GameWorld *g, room_rnum rnum)
+bool delete_room(GameWorld *g, room_vnum vnum)
 {
-  room_rnum i;
   int j;
   struct room_data *room;
 
-  if (rnum <= 0 || rnum > g->top_room) /* Can't delete void yet. */
+  if (vnum <= 0 || !(room = room_of(g, vnum))) /* Can't delete void yet. */
     return false;
 
-  room = &g->rooms[rnum];
-
   /* Everyone with nowhere else to go ends up here. */
-  if (rnum == g->r_mortal_start_room || room_get_number(room) == CONFIG_MORTAL_START) {
-    mud_log("GenOLC: delete_room: Refusing to delete the mortal start room, #%d.", room_get_number(room));
+  if (vnum == g->r_mortal_start_room || vnum == CONFIG_MORTAL_START) {
+    mud_log("GenOLC: delete_room: Refusing to delete the mortal start room, #%d.", vnum);
     return false;
   }
 
   add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room_get_number(room), room_get_name(room));
+  mud_log("GenOLC: delete_room: Deleting room #%d (%s).", vnum, room_get_name(room));
 
-  if (g->r_immort_start_room == rnum) {
+  if (g->r_immort_start_room == vnum) {
     mud_log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
     g->r_immort_start_room = 0; /* The Void */
   }
-  if (g->r_frozen_start_room == rnum) {
+  if (g->r_frozen_start_room == vnum) {
     mud_log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
     g->r_frozen_start_room = 0; /* The Void */
   }
@@ -174,11 +96,11 @@ bool delete_room(GameWorld *g, room_rnum rnum)
    * Dump the contents of this room into the Void.  We could also just
    * extract the people, mobs, and objects here.
    */
-  for (obj_data *obj : room_contents(g, rnum)) {
+  for (obj_data *obj : room_contents(g, vnum)) {
     obj_from_room(g, obj);
     obj_to_room(g, obj, 0);
   }
-  for (char_data *ppl : room_people(g, rnum)) {
+  for (char_data *ppl : room_people(g, vnum)) {
     char_from_room(g, ppl);
     char_to_room(g, ppl, 0);
   }
@@ -188,38 +110,28 @@ bool delete_room(GameWorld *g, room_rnum rnum)
     extract_script(g, room, WLD_TRIGGER);
   free_proto_script(room, WLD_TRIGGER);
 
-  /*
-   * Change any exit going to this room to go the void.
-   * Also fix all the exits pointing to rooms above this.
-   */
-  i = g->top_room + 1;
-  do {
-    i--;
-    for (j = 0; j < NUM_OF_DIRS; j++)
-      if (rroom_get_dir_option(g, i, j) == nullptr)
-        continue;
-      else if (rroom_get_dir_option(g, i, j)->to_room > rnum)
-        rroom_get_dir_option(g, i, j)->to_room -= (rroom_get_dir_option(g, i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
-      else if (rroom_get_dir_option(g, i, j)->to_room == rnum) {
-        if ((!rroom_get_dir_option(g, i, j)->keyword || !*rroom_get_dir_option(g, i, j)->keyword) &&
-            (!rroom_get_dir_option(g, i, j)->general_description || !*rroom_get_dir_option(g, i, j)->general_description)) {
-          /* no description, remove exit completely */
-          if (rroom_get_dir_option(g, i, j)->keyword)
-            free(rroom_get_dir_option(g, i, j)->keyword);
-          if (rroom_get_dir_option(g, i, j)->general_description)
-            free(rroom_get_dir_option(g, i, j)->general_description);
-          delete rroom_get_dir_option(g, i, j);
-          rroom_set_dir_option(g, i, j, nullptr);
-        } else {
-          /* description is set, just point to nowhere */
-          rroom_get_dir_option(g, i, j)->to_room = NOWHERE;
-        }
-      }
-  } while (i > 0);
+  /* Exits to this room go nowhere, or are removed if they had nothing to show. */
+  for (struct room_data *other : g->rooms.all())
+    for (j = 0; j < NUM_OF_DIRS; j++) {
+      struct room_direction_data *exit = room_get_dir_option(other, j);
 
-  /*
-   * Find what zone that room was in so we can update the loading table.
-   */
+      if (!exit || exit->to_room != vnum)
+        continue;
+      if ((!exit->keyword || !*exit->keyword) && (!exit->general_description || !*exit->general_description)) {
+        /* no description, remove exit completely */
+        if (exit->keyword)
+          free(exit->keyword);
+        if (exit->general_description)
+          free(exit->general_description);
+        delete exit;
+        room_set_dir_option(other, j, nullptr);
+      } else {
+        /* description is set, just point to nowhere */
+        exit->to_room = NOWHERE;
+      }
+    }
+
+  /* Cancel the zone commands that used this room. */
   for (struct zone_data *zone : g->zones.all())
     for (j = 0; zone_get_cmd(g, zone, j)->command != 'S'; j++)
       switch (zone_get_cmd(g, zone, j)->command) {
@@ -227,17 +139,13 @@ bool delete_room(GameWorld *g, room_rnum rnum)
         case 'O':
         case 'T':
         case 'V':
-          if (zone_get_cmd(g, zone, j)->arg3 == rnum)
+          if (zone_get_cmd(g, zone, j)->arg3 == vnum)
             zone_get_cmd(g, zone, j)->command = '*'; /* Cancel command. */
-          else if (zone_get_cmd(g, zone, j)->arg3 > rnum)
-            zone_get_cmd(g, zone, j)->arg3 -= (zone_get_cmd(g, zone, j)->arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
           break;
         case 'D':
         case 'R':
-          if (zone_get_cmd(g, zone, j)->arg1 == rnum)
+          if (zone_get_cmd(g, zone, j)->arg1 == vnum)
             zone_get_cmd(g, zone, j)->command = '*'; /* Cancel command. */
-          else if (zone_get_cmd(g, zone, j)->arg1 > rnum)
-            zone_get_cmd(g, zone, j)->arg1 -= (zone_get_cmd(g, zone, j)->arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
           break;
         case 'G':
         case 'P':
@@ -249,34 +157,13 @@ bool delete_room(GameWorld *g, room_rnum rnum)
           mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
       }
 
-  /*
-   * Remove this room from all shop lists.
-   */
-  {
-    for (struct shop_data *shop : g->shops.all()) {
-      for (j = 0; shop_get_room(shop, j) != NOWHERE; j++) {
-        if (shop_get_room(shop, j) == rroom_get_vnum(g, rnum))
-          shop_set_room(shop, j, 0); /* set to the void */
-      }
-    }
-  }
-  /*
-   * Now we actually move the rooms down.
-   */
-  for (i = rnum; i < g->top_room; i++) {
-    g->rooms[i] = g->rooms[i + 1];
-    update_wait_events(&g->rooms[i], &g->rooms[i + 1]);
+  /* Remove this room from all shop lists. */
+  for (struct shop_data *shop : g->shops.all())
+    for (j = 0; shop_get_room(shop, j) != NOWHERE; j++)
+      if (shop_get_room(shop, j) == vnum)
+        shop_set_room(shop, j, 0); /* set to the void */
 
-    for (char_data *ppl : room_people(g, i))
-      char_set_in_room(ppl, char_get_in_room(ppl) - ((char_get_in_room(ppl) != NOWHERE))); /* Redundant check? */
-
-    for (obj_data *obj : room_contents(g, i))
-      obj_set_in_room(obj, obj_get_in_room(obj) - ((obj_get_in_room(obj) != NOWHERE))); /* Redundant check? */
-  }
-
-  g->top_room--;
-  resize_array(g->rooms, g->top_room + 2, g->top_room + 1);
-
+  g->rooms.take(vnum);
   return true;
 }
 
@@ -306,12 +193,12 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   }
 
   for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
-    room_rnum rnum;
+    room_vnum rnum;
 
     if ((rnum = real_room(g, i)) != NOWHERE) {
       int j;
 
-      room = (g->rooms + rnum);
+      room = (room_of(g, rnum));
 
       /*
        * Copy the description and strip off trailing newlines.

@@ -103,7 +103,7 @@ static bool mob_cmd_allowed(GameWorld *g, char_data *ch, bool check_charm)
 /* prints the argument to all the rooms aroud the mobile */
 ACMD(do_masound)
 {
-  room_rnum was_in_room;
+  room_vnum was_in_room;
   int door;
 
   if (!mob_cmd_allowed(g, ch, true))
@@ -403,7 +403,7 @@ ACMD(do_mload)
 
   /* load mob to target room - Jamie Nelson, April 13 2004 */
   if (is_abbrev(arg1, "mob")) {
-    room_rnum rnum;
+    room_vnum rnum;
     if (!target || !*target) {
       rnum = char_get_in_room(ch);
     } else {
@@ -545,7 +545,7 @@ ACMD(do_mpurge)
 ACMD(do_mgoto)
 {
   char arg[MAX_INPUT_LENGTH];
-  room_rnum location;
+  room_vnum location;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
@@ -570,14 +570,14 @@ ACMD(do_mgoto)
 
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+  enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
 }
 
 /* lets the mobile do a command at another location. Very useful */
 ACMD(do_mat)
 {
   char arg[MAX_INPUT_LENGTH];
-  room_rnum location, original;
+  room_vnum location, original;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
@@ -613,7 +613,7 @@ ACMD(do_mat)
 ACMD(do_mteleport)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  room_rnum target;
+  room_vnum target;
   char_data *vict;
 
   if (!mob_cmd_allowed(g, ch, true))
@@ -644,7 +644,7 @@ ACMD(do_mteleport)
       if (valid_dg_target(g, tch, DG_ALLOW_GODS)) {
         char_from_room(g, tch);
         char_to_room(g, tch, target);
-        enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+        enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
       }
     }
   } else {
@@ -661,7 +661,7 @@ ACMD(do_mteleport)
     if (valid_dg_target(g, vict, DG_ALLOW_GODS)) {
       char_from_room(g, vict);
       char_to_room(g, vict, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(vict)], vict, -1);
+      enter_wtrigger(g, room_of(g, char_get_in_room(vict)), vict, -1);
     }
   }
 }

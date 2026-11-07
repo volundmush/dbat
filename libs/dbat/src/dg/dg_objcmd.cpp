@@ -36,7 +36,7 @@
   void(name)(GameWorld * g, obj_data * obj, char *argument, int cmd, int subcmd)
 
 static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...) __attribute__((format(printf, 3, 4)));
-static room_rnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr);
+static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr);
 static OCMD(do_oecho);
 static OCMD(do_oforce);
 static OCMD(do_ozoneecho);
@@ -79,7 +79,7 @@ static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...)
 }
 
 /* returns the real room number that the object or object's carrier is in */
-room_rnum obj_room(obj_data *obj)
+room_vnum obj_room(obj_data *obj)
 {
   if (obj_get_in_room(obj) != NOWHERE)
     return obj_get_in_room(obj);
@@ -94,10 +94,10 @@ room_rnum obj_room(obj_data *obj)
 }
 
 /* returns the real room number, or NOWHERE if not found or invalid */
-static room_rnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr)
+static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr)
 {
   room_vnum tmp;
-  room_rnum location;
+  room_vnum location;
   char_data *target_mob;
   obj_data *target_obj;
   char roomstr[MAX_INPUT_LENGTH];
@@ -138,7 +138,7 @@ static room_rnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroom
 
 static OCMD(do_oecho)
 {
-  room_rnum room;
+  room_vnum room;
 
   skip_spaces(&argument);
 
@@ -159,7 +159,7 @@ static OCMD(do_oecho)
 static OCMD(do_oforce)
 {
   char_data *ch;
-  room_rnum room;
+  room_vnum room;
   char arg1[MAX_INPUT_LENGTH], *line;
 
   line = one_argument(argument, arg1);
@@ -344,7 +344,7 @@ static OCMD(do_opurge)
   char arg[MAX_INPUT_LENGTH];
   char_data *ch;
   obj_data *o;
-  room_rnum rm;
+  room_vnum rm;
 
   one_argument(argument, arg);
 
@@ -391,7 +391,7 @@ static OCMD(do_opurge)
    on their own.                             */
 static OCMD(do_ogoto)
 {
-  room_rnum target;
+  room_vnum target;
   char arg1[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg1);
@@ -416,7 +416,7 @@ static OCMD(do_ogoto)
 static OCMD(do_oteleport)
 {
   char_data *ch;
-  room_rnum target, rm;
+  room_vnum target, rm;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg1, arg2);
@@ -441,7 +441,7 @@ static OCMD(do_oteleport)
         continue;
       char_from_room(g, tch);
       char_to_room(g, tch, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(tch)], tch, -1);
+      enter_wtrigger(g, room_of(g, char_get_in_room(tch)), tch, -1);
     }
   }
 
@@ -450,7 +450,7 @@ static OCMD(do_oteleport)
       if (valid_dg_target(g, ch, DG_ALLOW_GODS)) {
         char_from_room(g, ch);
         char_to_room(g, ch, target);
-        enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+        enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
       }
     }
 
@@ -463,7 +463,7 @@ static OCMD(do_dgoload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   IDXTYPE number = 0;
-  room_rnum room;
+  room_vnum room;
   char_data *mob;
   obj_data *object;
   char *target;
@@ -485,7 +485,7 @@ static OCMD(do_dgoload)
 
   /* load mob to target room - Jamie Nelson, April 13 2004 */
   if (is_abbrev(arg1, "mob")) {
-    room_rnum rnum;
+    room_vnum rnum;
     if (!target || !*target) {
       rnum = room;
     } else {
@@ -588,7 +588,7 @@ static OCMD(do_odamage)
 
 static OCMD(do_oasound)
 {
-  room_rnum room;
+  room_vnum room;
   int door;
 
   skip_spaces(&argument);
@@ -672,7 +672,7 @@ static OCMD(do_osetval)
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
 static OCMD(do_oat)
 {
-  room_rnum loc = NOWHERE;
+  room_vnum loc = NOWHERE;
   struct char_data *ch;
   struct obj_data *object;
   char arg[MAX_INPUT_LENGTH], *command;

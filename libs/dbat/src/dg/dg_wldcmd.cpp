@@ -92,7 +92,7 @@ static WCMD(do_weffect)
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int num = 0;
   room_vnum nr;
-  room_rnum target;
+  room_vnum target;
 
   two_arguments(argument, arg, arg2);
 
@@ -157,8 +157,8 @@ static WCMD(do_wasound)
     struct room_direction_data *newexit;
 
     if ((newexit = room_get_dir_option(room, door)) && (newexit->to_room != NOWHERE) &&
-        room != &g->rooms[newexit->to_room])
-      act_to_room(g, argument, &g->rooms[newexit->to_room]);
+        room != room_of(g, newexit->to_room))
+      act_to_room(g, argument, room_of(g, newexit->to_room));
   }
 }
 
@@ -277,7 +277,7 @@ static WCMD(do_wdoor)
 static WCMD(do_wteleport)
 {
   char_data *ch;
-  room_rnum target, nr;
+  room_vnum target, nr;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg1, arg2);
@@ -304,7 +304,7 @@ static WCMD(do_wteleport)
         continue;
       char_from_room(g, tch);
       char_to_room(g, tch, target);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(tch)], tch, -1);
+      enter_wtrigger(g, room_of(g, char_get_in_room(tch)), tch, -1);
     }
   }
 
@@ -313,7 +313,7 @@ static WCMD(do_wteleport)
       if (valid_dg_target(g, ch, DG_ALLOW_GODS)) {
         char_from_room(g, ch);
         char_to_room(g, ch, target);
-        enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+        enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
       }
     }
 
@@ -426,7 +426,7 @@ static WCMD(do_wload)
 
   /* load mob to target room - Jamie Nelson, April 13 2004 */
   if (is_abbrev(arg1, "mob")) {
-    room_rnum rnum;
+    room_vnum rnum;
     if (!target || !*target) {
       rnum = real_room(g, room_get_number(room));
     } else {
@@ -525,7 +525,7 @@ static WCMD(do_wdamage)
 
 static WCMD(do_wat)
 {
-  room_rnum loc = NOWHERE;
+  room_vnum loc = NOWHERE;
   struct char_data *ch;
   char arg[MAX_INPUT_LENGTH], *command;
 
@@ -554,7 +554,7 @@ static WCMD(do_wat)
     return;
   }
 
-  wld_command_interpreter(g, &g->rooms[loc], command);
+  wld_command_interpreter(g, room_of(g, loc), command);
 }
 
 static const struct wld_command_info wld_cmd_info[] = {

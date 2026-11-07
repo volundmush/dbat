@@ -4,7 +4,7 @@
 /* global variables */
 
 // functions
-room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr);
+room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr);
 void perform_immort_vis(GameWorld *g, struct char_data *ch);
 void snoop_check(struct char_data *ch);
 void copyover_check(GameWorld *g);

@@ -76,7 +76,6 @@ static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(Game
 void script_trigger_check(GameWorld *g)
 {
   struct room_data *room = nullptr;
-  room_rnum nr;
   struct script_data *sc;
 
   for (char_data *ch : each_char(g)) {
@@ -92,9 +91,9 @@ void script_trigger_check(GameWorld *g)
 
   run_object_triggers(g, OTRIG_RANDOM, random_otrigger);
 
-  for (nr = 0; nr <= g->top_room; nr++) {
+  for (room_vnum nr : g->rooms.vnums()) {
     if (rroom_get_script(g, nr)) {
-      room = &g->rooms[nr];
+      room = room_of(g, nr);
       sc   = room_get_script(room);
 
       if (IS_SET(sc->types, WTRIG_RANDOM) &&
@@ -108,7 +107,6 @@ void script_trigger_check(GameWorld *g)
 void check_time_triggers(GameWorld *g)
 {
   struct room_data *room = nullptr;
-  room_rnum nr;
   struct script_data *sc;
 
   for (char_data *ch : each_char(g)) {
@@ -124,9 +122,9 @@ void check_time_triggers(GameWorld *g)
 
   run_object_triggers(g, OTRIG_TIME, time_otrigger);
 
-  for (nr = 0; nr <= g->top_room; nr++) {
+  for (room_vnum nr : g->rooms.vnums()) {
     if (rroom_get_script(g, nr)) {
-      room = &g->rooms[nr];
+      room = room_of(g, nr);
       sc   = room_get_script(room);
 
       if (IS_SET(sc->types, WTRIG_TIME) &&
@@ -174,10 +172,10 @@ static EVENTFUNC(trig_wait_event)
           found = true;
       }
     } else {
-      room_rnum i;
-      for (i = 0; i < g->top_room && !found; i++)
-        if (&g->rooms[i] == (struct room_data *)go)
+      g->rooms.visit([&](room_vnum, struct room_data *room) {
+        if (room == (struct room_data *)go)
           found = true;
+      });
     }
     if (!found) {
       mud_log("Trigger restarted on unknown entity. Vnum: %d", trig_get_vnum(g, trig));
@@ -204,7 +202,7 @@ trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t)
 
 static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
 {
-  room_rnum room = NOWHERE;
+  room_vnum room = NOWHERE;
 
   g->dg_ctx = {};
   g->dg_ctx.active     = true;
@@ -237,7 +235,7 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
       return;
   }
 
-  if (room != NOWHERE && room >= 0 && room <= g->top_room)
+  if (room_of(g, room))
     g->dg_ctx.room_vnum = (long long)rroom_get_vnum(g, room);
 }
 
@@ -566,9 +564,9 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
 
 struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj)
 {
-  if (obj_get_in_room(obj) != NOWHERE) return &g->rooms[obj_get_in_room(obj)];
-  if (obj_get_carried_by(obj)) return &g->rooms[char_get_in_room(obj_get_carried_by(obj))];
-  if (obj_get_worn_by(obj)) return &g->rooms[char_get_in_room(obj_get_worn_by(obj))];
+  if (obj_get_in_room(obj) != NOWHERE) return room_of(g, obj_get_in_room(obj));
+  if (obj_get_carried_by(obj)) return room_of(g, char_get_in_room(obj_get_carried_by(obj)));
+  if (obj_get_worn_by(obj)) return room_of(g, char_get_in_room(obj_get_worn_by(obj)));
   if (obj_get_in_obj(obj)) return (dg_room_of_obj(g, obj_get_in_obj(obj)));
   return nullptr;
 }
@@ -646,7 +644,7 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       if (o)
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, obj_get_id(o));
     } else if (is_abbrev(arg, "room")) {
-      room_rnum r = NOWHERE;
+      room_vnum r = NOWHERE;
       switch (type) {
         case WLD_TRIGGER:
           r = real_room(g, room_get_number((struct room_data *)go));

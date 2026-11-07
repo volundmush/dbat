@@ -33,7 +33,7 @@
 #include "dbat/game_world.hpp"
 
 static void redit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_rnum real_num);
+static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_vnum real_num);
 static void redit_setup_new(struct descriptor_data *d);
 
 /*------------------------------------------------------------------------*/
@@ -54,7 +54,7 @@ ACMD(do_oasis_redit)
   char buf2[MAX_STRING_LENGTH];
   IDXTYPE number = NOWHERE;
   int save       = 0;
-  room_rnum real_num;
+  room_vnum real_num;
   struct descriptor_data *d;
 
   /* Parse any arguments. */
@@ -207,7 +207,7 @@ static void redit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_rnum real_num)
+static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_vnum real_num)
 {
   struct room_data *room;
   int counter;
@@ -217,7 +217,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_r
    */
   room = new room_data();
 
-  *room = g->rooms[real_num];
+  *room = (*room_of(g, real_num));
   /*
    * Allocate space for all strings.
    */
@@ -282,7 +282,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_r
 void redit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int j, new_room = false;
-  room_rnum room_num;
+  room_vnum room_num;
 
   if (room_get_number(OLC_ROOM(d)) == NOWHERE) {
     new_room = true;
@@ -301,10 +301,10 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
   /* Free old proto list */
   if (rroom_get_proto_script(g, room_num) &&
       rroom_get_proto_script(g, room_num) != OLC_SCRIPT(d))
-    free_proto_script(&g->rooms[room_num], WLD_TRIGGER);
+    free_proto_script(room_of(g, room_num), WLD_TRIGGER);
 
   rroom_set_proto_script(g, room_num, OLC_SCRIPT(d));
-  assign_triggers(g, &g->rooms[room_num], WLD_TRIGGER);
+  assign_triggers(g, room_of(g, room_num), WLD_TRIGGER);
   /* end trigger update */
 
   /* Don't adjust numbers on a room update. */
@@ -553,7 +553,7 @@ static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
 void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int number;
-  room_rnum rnum;
+  room_vnum rnum;
   char *oldtext = nullptr;
 
   switch (OLC_MODE(d)) {

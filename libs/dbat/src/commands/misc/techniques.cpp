@@ -1911,7 +1911,7 @@ ACMD(do_obstruct)
     improve_skill(g, ch, SKILL_HYOGA_KABE, 0);
     return;
   }
-  room_rnum newroom = rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room;
+  room_vnum newroom = rroom_get_dir_option(g, char_get_in_room(ch), dir)->to_room;
 
   if (rroom_flagged(g, newroom, ROOM_PEACEFUL)) {
     send_to_char(g, ch, "You can not block off a peaceful area.\r\n");

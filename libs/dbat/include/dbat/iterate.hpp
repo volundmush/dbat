@@ -29,7 +29,7 @@ namespace dbat_iter {
 
 /* Where an object is. An object is still in the list being walked if this hasn't changed. */
 struct obj_place {
-  room_rnum room{};
+  room_vnum room{};
   long carried_by{}, worn_by{}, in_obj{};
   bool operator==(const obj_place &) const = default;
 };
@@ -94,8 +94,8 @@ template <typename T, typename Key, typename Resolve, typename Where> auto make_
 
 inline auto char_snapshot(GameWorld *g)
 {
-  return make_snapshot<char_data, room_rnum>([g](long id) { return char_by_id(g, id); },
-                                              [](const char_data *ch) { return char_get_in_room(ch); });
+  return make_snapshot<char_data, room_vnum>([g](long id) { return char_by_id(g, id); },
+                                             [](const char_data *ch) { return char_get_in_room(ch); });
 }
 
 inline auto obj_snapshot(GameWorld *g)
@@ -177,13 +177,13 @@ inline auto each_desc(GameWorld *g)
 }
 
 /* The characters in a room. */
-inline auto room_people(GameWorld *g, room_rnum room)
+inline auto room_people(GameWorld *g, room_vnum room)
 {
   return dbat_iter::chars_in_room_list(g, room == NOWHERE ? nullptr : rroom_get_people(g, room));
 }
 
 /* The objects lying in a room. */
-inline auto room_contents(GameWorld *g, room_rnum room)
+inline auto room_contents(GameWorld *g, room_vnum room)
 {
   return dbat_iter::objs_in_content_list(g, room == NOWHERE ? nullptr : rroom_get_contents(g, room));
 }
@@ -258,11 +258,13 @@ template <typename Range, typename Pred> auto find_first(Range &&range, Pred &&p
 template <typename Fn> bool char_iter_all(GameWorld *g, Fn &&fn) { return dbat_iter::each(each_char(g), fn); }
 template <typename Fn> bool obj_iter_all(GameWorld *g, Fn &&fn) { return dbat_iter::each(each_obj(g), fn); }
 template <typename Fn> bool desc_iter_all(GameWorld *g, Fn &&fn) { return dbat_iter::each(each_desc(g), fn); }
-template <typename Fn> bool room_people_each(GameWorld *g, room_rnum room, Fn &&fn)
+template <typename Fn>
+bool room_people_each(GameWorld *g, room_vnum room, Fn &&fn)
 {
   return dbat_iter::each(room_people(g, room), fn);
 }
-template <typename Fn> bool room_contents_each(GameWorld *g, room_rnum room, Fn &&fn)
+template <typename Fn>
+bool room_contents_each(GameWorld *g, room_vnum room, Fn &&fn)
 {
   return dbat_iter::each(room_contents(g, room), fn);
 }

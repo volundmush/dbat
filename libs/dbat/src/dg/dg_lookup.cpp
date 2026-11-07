@@ -48,7 +48,7 @@ char *str_str(char *cs, char *ct)
 
 int trgvar_in_room(GameWorld *g, room_vnum vnum)
 {
-  room_rnum rnum = real_room(g, vnum);
+  room_vnum rnum = real_room(g, vnum);
   int i          = 0;
 
   if (rnum == NOWHERE) {
@@ -215,7 +215,7 @@ obj_data *find_obj(GameWorld *g, long n)
 /* return room with UID n */
 room_data *find_room(GameWorld *g, long n)
 {
-  room_rnum rnum;
+  room_vnum rnum;
 
   n -= ROOM_ID_BASE;
   if (n < 0)
@@ -223,7 +223,7 @@ room_data *find_room(GameWorld *g, long n)
   rnum = real_room(g, (room_vnum)n);
 
   if (rnum != NOWHERE)
-    return &g->rooms[rnum];
+    return room_of(g, rnum);
 
   return nullptr;
 }
@@ -265,7 +265,7 @@ char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name)
     if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
   } else {
-    room_rnum num;
+    room_vnum num;
     if ((num = obj_room(obj)) != NOWHERE)
       for (char_data *tch : room_people(g, num))
         if (isname(name, char_get_alias(tch)) &&
@@ -304,7 +304,7 @@ char_data *get_char_in_room(GameWorld *g, room_data *room, char *name)
 obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
-  room_rnum rm;
+  room_vnum rm;
   long id;
 
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -362,14 +362,14 @@ obj_data *get_obj(GameWorld *g, char *name)
 /* finds room by id or vnum.  returns NULL if not found */
 room_data *get_room(GameWorld *g, char *name)
 {
-  room_rnum nr;
+  room_vnum nr;
 
   if (*name == UID_CHAR)
     return find_room(g, atoi(name + 1));
   else if ((nr = real_room(g, atoi(name))) == NOWHERE)
     return nullptr;
   else
-    return &g->rooms[nr];
+    return room_of(g, nr);
 }
 
 /*
@@ -440,7 +440,7 @@ char_data *get_char_by_room(GameWorld *g, room_data *room, char *name)
 obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
-  room_rnum rm;
+  room_vnum rm;
 
   if (*name == UID_CHAR)
     return find_obj(g, atoi(name + 1));

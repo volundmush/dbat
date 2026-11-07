@@ -125,7 +125,7 @@ void auc_save(GameWorld *g);
 void load_config(GameWorld *g);
 
 struct zone_data *find_zone(GameWorld *g, zone_vnum vnum);
-room_rnum real_room(GameWorld *g, room_vnum vnum);
+room_vnum real_room(GameWorld *g, room_vnum vnum);
 mob_vnum real_mobile(GameWorld *g, mob_vnum vnum);
 obj_vnum real_object(GameWorld *g, obj_vnum vnum);
 

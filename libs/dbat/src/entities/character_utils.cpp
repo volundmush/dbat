@@ -5372,22 +5372,22 @@ bitvector_t *char_get_admflags(const struct char_data *ch)
   return const_cast<bitvector_t *>(ch->admflags); /* writable flag array, as the macro allowed */
 }
 
-room_rnum char_get_in_room(const struct char_data *ch)
+room_vnum char_get_in_room(const struct char_data *ch)
 {
   return ch->in_room;
 }
 
-void char_set_in_room(struct char_data *ch, room_rnum v)
+void char_set_in_room(struct char_data *ch, room_vnum v)
 {
   ch->in_room = v;
 }
 
-room_rnum char_get_was_in_room(const struct char_data *ch)
+room_vnum char_get_was_in_room(const struct char_data *ch)
 {
   return ch->was_in_room;
 }
 
-void char_set_was_in_room(struct char_data *ch, room_rnum v)
+void char_set_was_in_room(struct char_data *ch, room_vnum v)
 {
   ch->was_in_room = v;
 }

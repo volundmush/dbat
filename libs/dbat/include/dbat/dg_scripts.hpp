@@ -265,7 +265,6 @@ void extract_script_mem(struct script_memory *sc);
 void free_proto_script(void *thing, int type);
 void copy_proto_script(void *source, void *dest, int type);
 void delete_variables(const char *charname);
-void update_wait_events(struct room_data *to, struct room_data *from);
 
 /* from dg_comm.c */
 void sub_write(GameWorld *g, char *arg, char_data *ch, int8_t find_invis, int targets);
@@ -284,7 +283,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[]);
 
 /* from dg_objcmd.c */
-room_rnum obj_room(obj_data *obj);
+room_vnum obj_room(obj_data *obj);
 
 /* player id's: 0 to PLAYER_ID_MAX - 1            */
 /* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1      */

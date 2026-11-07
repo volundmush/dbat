@@ -133,9 +133,9 @@ ACMD(do_recall)
 }
 
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
-room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
+room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
 {
-  room_rnum location = NOWHERE;
+  room_vnum location = NOWHERE;
   char roomstr[MAX_INPUT_LENGTH];
   struct room_data *rm;
 
@@ -187,7 +187,7 @@ room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
   if (char_get_admlevel(ch) >= ADMLVL_VICE)
     return (location);
 
-  rm = &g->rooms[location];
+  rm = room_of(g, location);
 
   if ((!can_edit_zone(g, ch, room_get_zone(rm)) && char_get_admlevel(ch) < ADMLVL_GOD) && zone_flagged(g, room_get_zone(rm), ZONE_QUEST)) {
     send_to_char(g, ch, "This target is in a quest zone.\r\n");
@@ -210,7 +210,7 @@ room_rnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
 ACMD(do_at)
 {
   char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-  room_rnum location, original_loc;
+  room_vnum location, original_loc;
 
   half_chop(argument, buf, command);
   if (!*buf) {
@@ -242,7 +242,7 @@ ACMD(do_at)
 ACMD(do_goto)
 {
   char buf[MAX_STRING_LENGTH];
-  room_rnum location;
+  room_vnum location;
 
   if ((location = find_target_room(g, ch, argument)) == NOWHERE)
     return;
@@ -261,7 +261,7 @@ ACMD(do_goto)
   act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(g, char_get_in_room(ch), ch, 0);
-  enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, -1);
+  enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
 }
 
 ACMD(do_trans)
@@ -292,7 +292,7 @@ ACMD(do_trans)
       act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
       act(g, "$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
       look_at_room(g, char_get_in_room(victim), victim, 0);
-      enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
+      enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
     }
   } else { /* Trans All */
     if (!char_adm_flagged(ch, ADM_TRANSALL)) {
@@ -311,7 +311,7 @@ ACMD(do_trans)
         act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act(g, "$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
         look_at_room(g, char_get_in_room(victim), victim, 0);
-        enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
+        enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
       }
     send_to_char(g, ch, "%s", CONFIG_OK);
   }
@@ -321,7 +321,7 @@ ACMD(do_teleport)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   struct char_data *victim;
-  room_rnum target;
+  room_vnum target;
 
   two_arguments(argument, buf, buf2);
 
@@ -347,7 +347,7 @@ ACMD(do_teleport)
     act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
     act(g, "$n has teleported you!", false, ch, nullptr, (char *)victim, TO_VICT);
     look_at_room(g, char_get_in_room(victim), victim, 0);
-    enter_wtrigger(g, &g->rooms[char_get_in_room(victim)], victim, -1);
+    enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
   }
 }
 

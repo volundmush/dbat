@@ -82,13 +82,13 @@ ASPELL(spell_recall)
 
 ASPELL(spell_teleport)
 {
-  room_rnum to_room;
+  room_vnum to_room;
 
   if (victim == nullptr || char_is_npc(victim))
     return;
 
   do {
-    to_room = rand_number(g, 0, g->top_room);
+    to_room = g->rooms.nth(rand_number(g, 0, (int)g->rooms.size() - 1));
   } while (rroom_flagged(g, to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
   act(g, "$n slowly fades out of existence and is gone.",
@@ -425,7 +425,7 @@ ASPELL(spell_portal)
 {
   struct obj_data *portal, *tportal;
   struct room_data *rm;
-  rm = &g->rooms[char_get_in_room(victim)];
+  rm = room_of(g, char_get_in_room(victim));
 
   if (ch == nullptr || victim == nullptr)
     return;
@@ -474,7 +474,7 @@ ASPELL(spell_portal)
 ASPELL(art_abundant_step)
 {
   int steps, i = 0, j, rep, max;
-  room_rnum r, nextroom;
+  room_vnum r, nextroom;
   char buf[MAX_INPUT_LENGTH], tc;
   const char *p;
 

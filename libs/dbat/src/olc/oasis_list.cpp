@@ -39,8 +39,8 @@ static void list_zones(GameWorld *g, struct char_data *ch);
 ACMD(do_oasis_list)
 {
   struct zone_data *rzone = nullptr;
-  room_rnum vmin  = NOWHERE;
-  room_rnum vmax  = NOWHERE;
+  room_vnum vmin          = NOWHERE;
+  room_vnum vmax          = NOWHERE;
   char smin[MAX_INPUT_LENGTH];
   char smax[MAX_INPUT_LENGTH];
 
@@ -96,7 +96,7 @@ ACMD(do_oasis_links)
 {
   struct zone_data *zrnum;
   zone_vnum zvnum;
-  room_rnum nr, to_room;
+  room_vnum to_room;
   room_vnum first, last;
   int j;
   char arg[MAX_INPUT_LENGTH];
@@ -121,17 +121,15 @@ ACMD(do_oasis_links)
   first = zrnum->bot;
 
   send_to_char(g, ch, "Zone %d is linked to the following zones:\r\n", zvnum);
-  for (nr = 0; nr <= g->top_room && (rroom_get_vnum(g, nr) <= last); nr++) {
-    if (rroom_get_vnum(g, nr) >= first) {
-      for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (rroom_get_dir_option(g, nr, j)) {
-          to_room = rroom_get_dir_option(g, nr, j)->to_room;
-          if (to_room != NOWHERE && (zrnum != rroom_get_zone(g, to_room)))
-            send_to_char(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         rroom_get_zone(g, to_room)->number,
-                         rroom_get_zone(g, to_room)->name,
-                         rroom_get_vnum(g, nr), dirs[j], rroom_get_vnum(g, to_room));
-        }
+  for (room_vnum nr : g->rooms.vnums_in(first, last)) {
+    for (j = 0; j < NUM_OF_DIRS; j++) {
+      if (rroom_get_dir_option(g, nr, j)) {
+        to_room = rroom_get_dir_option(g, nr, j)->to_room;
+        if (to_room != NOWHERE && (zrnum != rroom_get_zone(g, to_room)))
+          send_to_char(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
+                       rroom_get_zone(g, to_room)->number,
+                       rroom_get_zone(g, to_room)->name,
+                       rroom_get_vnum(g, nr), dirs[j], rroom_get_vnum(g, to_room));
       }
     }
   }
@@ -146,7 +144,6 @@ ACMD(do_oasis_links)
  */
 static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnum, zone_vnum vmin, zone_vnum vmax)
 {
-  room_rnum i;
   int j, counter = 0;
   IDXTYPE bottom, top;
   /*
@@ -164,10 +161,7 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
                "@nIndex VNum    Room Name                                Exits\r\n"
                "----- ------- ---------------------------------------- -----@n\r\n");
 
-  if (!g->top_room)
-    return;
-
-  for (i = 0; i <= g->top_room; i++) {
+  for (room_vnum i : g->rooms.vnums_in(bottom, top)) {
 
     /** Check to see if this room is one of the ones needed to be listed.    **/
     if ((rroom_get_vnum(g, i) >= bottom) && (rroom_get_vnum(g, i) <= top)) {
@@ -347,10 +341,8 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
 {
   struct zone_data *rnum;
   int size_rooms, size_objects, size_mobiles;
-  IDXTYPE i;
   int size_guilds, size_triggers, size_shops;
   room_vnum top, bottom;
-  IDXTYPE largest_table;
   char bits[MAX_STRING_LENGTH];
 
   if ((rnum = find_zone(g, vnum)) == nullptr) {
@@ -359,7 +351,6 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   }
 
   sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
-  largest_table = g->top_room; /* only rooms are still counted by real number */
 
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
@@ -374,16 +365,12 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   size_guilds   = 0;
   size_shops    = 0;
 
-  for (i = 0; i <= largest_table; i++) {
-    if (i <= g->top_room)
-      if (rroom_get_zone(g, i) == rnum)
-        size_rooms++;
-
-
-    size_shops = count_shops(g, bottom, top);
-
-    size_guilds = count_guilds(g, bottom, top);
-  }
+  g->rooms.visit([&](room_vnum, struct room_data *room) {
+    if (room_get_zone(room) == rnum)
+      size_rooms++;
+  });
+  size_shops  = count_shops(g, bottom, top);
+  size_guilds = count_guilds(g, bottom, top);
 
   for (mob_vnum mvnum : g->mob_index.vnums())
     if (mvnum >= bottom && mvnum <= top)

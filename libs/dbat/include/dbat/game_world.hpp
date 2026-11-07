@@ -3,6 +3,7 @@
 
 #include "dbat/consts/types.hpp"
 #include "dbat/registry.hpp"
+#include "dbat/rooms.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/characters.hpp"
 #include "dbat/index.hpp"
@@ -22,8 +23,7 @@
 /* The state of one running game. */
 struct GameWorld {
   /* Entities and their prototypes */
-  struct room_data *rooms{};      /* All rooms, sorted by vnum         */
-  room_rnum top_room{};           /* Highest valid index into rooms    */
+  vnum_table<room_data, room_vnum> rooms; /* all rooms, by vnum */
   struct char_data *characters{}; /* All NPCs and PCs in the game      */
   struct obj_data *objects{};     /* All objects in the game           */
   struct char_data *affect_list{};
@@ -101,7 +101,7 @@ struct GameWorld {
   /* Configuration, loaded at boot and edited with cedit */
   struct config_data config_info{};
   float exp_multiplier{};
-  room_rnum r_mortal_start_room{}, r_immort_start_room{}, r_frozen_start_room{};
+  room_vnum r_mortal_start_room{}, r_immort_start_room{}, r_frozen_start_room{};
   char level_version[READ_SIZE]{};
   int level_vernum{};
   int save_classes[SAVING_WILL + 1][NUM_CLASSES]{};
@@ -161,7 +161,7 @@ struct GameWorld {
 
   /* Pathfinding and map display */
   struct bfs_queue_struct *bfs_queue_head{}, *bfs_queue_tail{};
-  room_rnum mapnums[MAP_ROWS + 1][MAP_COLS + 1]{};
+  room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1]{};
 
   /* OLC and bookkeeping */
   struct save_list_data *save_list{};
@@ -169,7 +169,7 @@ struct GameWorld {
   int extractions_pending{};
 
   /* Progress of the world file parsers and the zone clock */
-  room_rnum parse_room_index{};
+  room_vnum parse_room_index{};
   struct zone_data *parse_room_zone{};
   mob_vnum parse_mob_index{};
   obj_vnum parse_obj_index{};

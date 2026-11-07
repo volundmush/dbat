@@ -1164,7 +1164,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     else
       *str = '\0';
   } else if (!strcasecmp(field, "id")) {
-    room_rnum rnum = real_room(g, room_get_number(r));
+    room_vnum rnum = real_room(g, room_get_number(r));
     if (rnum != NOWHERE)
       snprintf(str, slen, "%d", rroom_get_vnum(g, rnum) + ROOM_ID_BASE);
     else
@@ -1181,7 +1181,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     else
       *str = '\0';
   } else if (!strcasecmp(field, "fishing")) {
-    room_rnum thisroom = real_room(g, room_get_number(r));
+    room_vnum thisroom = real_room(g, room_get_number(r));
     if (rroom_flagged(g, thisroom, ROOM_FISHING))
       snprintf(str, slen, "1");
     else
@@ -1192,7 +1192,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     snprintf(str, slen, "%s", room_get_zone(r)->name);
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
-      room_rnum thisroom = real_room(g, room_get_number(r));
+      room_vnum thisroom = real_room(g, room_get_number(r));
       if (check_flags_by_name_ar(rroom_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
         snprintf(str, slen, "1");
       else
@@ -1333,7 +1333,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
             ;
           else if ((o = get_obj_in_list(g, name, char_get_inventory(ch))))
             ;
-          else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, &g->rooms[char_get_in_room(ch)], name)))
+          else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, room_of(g, char_get_in_room(ch)), name)))
             ;
           else if ((o = get_obj_in_list(g, name, rroom_get_contents(g, char_get_in_room(ch)))))
             ;
@@ -1445,7 +1445,7 @@ in the vault (vnum: 453) now and then. you can just use
           script_log(g, "findmob.vnum(mvnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(g, atoi(field));
+          room_vnum rrnum = real_room(g, atoi(field));
           mob_vnum mvnum  = atoi(subfield);
 
           if (rrnum == NOWHERE) {
@@ -1467,7 +1467,7 @@ in the vault (vnum: 453) now and then. you can just use
           script_log(g, "findobj.vnum(ovnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(g, atoi(field));
+          room_vnum rrnum = real_room(g, atoi(field));
 
           if (rrnum == NOWHERE) {
             script_log(g, "findobj.vnum(ovnum): No room with vnum %d", atoi(field));
@@ -1519,7 +1519,7 @@ in the vault (vnum: 453) now and then. you can just use
         }
 
         else if (!strcasecmp(field, "dir")) {
-          room_rnum in_room = NOWHERE;
+          room_vnum in_room = NOWHERE;
 
           switch (type) {
             case WLD_TRIGGER:
@@ -1536,7 +1536,7 @@ in the vault (vnum: 453) now and then. you can just use
             *str = '\0';
           } else {
             doors = 0;
-            room  = &g->rooms[in_room];
+            room  = room_of(g, in_room);
             for (i = 0; i < NUM_OF_DIRS; i++)
               if (room_get_dir_option(room, i))
                 doors++;

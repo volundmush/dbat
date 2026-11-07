@@ -84,7 +84,7 @@ static void mob_stats(GameWorld *g, struct char_data *mob);
 static void dragon_level(GameWorld *g, struct char_data *ch);
 static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val);
 static int check_object_level(GameWorld *g, struct obj_data *obj, int val);
-static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir);
+static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir);
 static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename);
 static int check_object(GameWorld *g, struct obj_data *);
 static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr);
@@ -428,23 +428,6 @@ ACMD(do_reboot)
 }
 
 /* The vnum lookups (real_room() and friends) are binary searches, so each table must be in ascending vnum order. */
-static void check_sorted(const char *what, const void *table, IDXTYPE count, size_t size, size_t vnum_offset)
-{
-  const char *t = static_cast<const char *>(table);
-
-  for (IDXTYPE i = 1; i < count; i++) {
-    IDXTYPE prev, vnum;
-
-    memcpy(&prev, t + (i - 1) * size + vnum_offset, sizeof(prev));
-    memcpy(&vnum, t + i * size + vnum_offset, sizeof(vnum));
-
-    if (vnum <= prev) {
-      mud_log("SYSERR: %s #%d comes after #%d: the %s files must be in ascending vnum order, without duplicates.", what, vnum, prev, what);
-      exit(1);
-    }
-  }
-}
-
 void boot_world(GameWorld *g)
 {
   mud_log("Loading level tables.");
@@ -458,7 +441,6 @@ void boot_world(GameWorld *g)
 
   mud_log("Loading rooms.");
   index_boot(g, DB_BOOT_WLD);
-  check_sorted("room", g->rooms, g->top_room + 1, sizeof(*g->rooms), offsetof(struct room_data, number));
 
   mud_log("Renumbering rooms.");
   renum_world(g);
@@ -512,7 +494,7 @@ static void free_extra_descriptions(struct extra_descr_data *edesc)
 /* Free the world, in a memory allocation sense. */
 void destroy_db(GameWorld *g)
 {
-  ssize_t cnt, itr;
+  ssize_t itr;
   struct char_data *chtmp;
   struct obj_data *objtmp;
 
@@ -537,7 +519,7 @@ void destroy_db(GameWorld *g)
   }
 
   /* Rooms */
-  for (cnt = 0; cnt <= g->top_room; cnt++) {
+  for (room_vnum cnt : g->rooms.vnums()) {
     if (rroom_get_name(g, cnt))
       free(rroom_get_name(g, cnt));
     if (rroom_get_description(g, cnt))
@@ -546,9 +528,9 @@ void destroy_db(GameWorld *g)
 
     /* free any assigned scripts */
     if (rroom_get_script(g, cnt))
-      extract_script(g, &g->rooms[cnt], WLD_TRIGGER);
+      extract_script(g, room_of(g, cnt), WLD_TRIGGER);
     /* free script proto list */
-    free_proto_script(&g->rooms[cnt], WLD_TRIGGER);
+    free_proto_script(room_of(g, cnt), WLD_TRIGGER);
 
     for (itr = 0; itr < NUM_OF_DIRS; itr++) {
       if (!rroom_get_dir_option(g, cnt, itr))
@@ -561,8 +543,7 @@ void destroy_db(GameWorld *g)
       delete rroom_get_dir_option(g, cnt, itr);
     }
   }
-  delete[] g->rooms;
-  g->top_room = 0;
+  g->rooms.clear();
 
   /* Objects */
   for (obj_vnum ovnum : g->obj_proto.vnums()) {
@@ -1146,7 +1127,6 @@ void index_boot(GameWorld *g, int mode)
     case DB_BOOT_TRG:
       break;
     case DB_BOOT_WLD:
-      g->rooms = new room_data[rec_count]();
       size[0] = sizeof(struct room_data) * rec_count;
       mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
       break;
@@ -1357,6 +1337,12 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
     exit(1);
   }
 
+  if (g->rooms.find(virtual_nr)) {
+    mud_log("SYSERR: room #%d is defined twice.", virtual_nr);
+    exit(1);
+  }
+  g->parse_room_index = virtual_nr;
+  g->rooms.emplace(virtual_nr);
   rroom_set_zone(g, g->parse_room_index, g->parse_room_zone);
   rroom_set_number(g, g->parse_room_index, virtual_nr);
   rroom_set_name(g, g->parse_room_index, fread_string(fl, buf2));
@@ -1483,11 +1469,10 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         letter = fread_letter(fl);
         ungetc(letter, fl);
         while (letter == 'T') {
-          dg_read_trigger(g, fl, &g->rooms[g->parse_room_index], WLD_TRIGGER);
+          dg_read_trigger(g, fl, room_of(g, g->parse_room_index), WLD_TRIGGER);
           letter = fread_letter(fl);
           ungetc(letter, fl);
         }
-        g->top_room = g->parse_room_index++;
         return;
       default:
         mud_log("%s", buf);
@@ -1497,7 +1482,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 }
 
 /* read direction data */
-static void setup_dir(GameWorld *g, FILE *fl, room_rnum room, int dir)
+static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
@@ -1608,10 +1593,9 @@ static void check_start_rooms(GameWorld *g)
 /* resolve all vnums into rnums in the world */
 static void renum_world(GameWorld *g)
 {
-  room_rnum room;
   int door;
 
-  for (room = 0; room <= g->top_room; room++)
+  for (room_vnum room : g->rooms.vnums())
     for (door = 0; door < NUM_OF_DIRS; door++)
       if (rroom_get_dir_option(g, room, door))
         if (rroom_get_dir_option(g, room, door)->to_room != NOWHERE)
@@ -1630,12 +1614,12 @@ static void renum_world(GameWorld *g)
  * room, mobile, or object a little more difficult while the game is running.
  *
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_vnum) and sizeof(obj_vnum))
+ * NOTE 2: Assumes sizeof(room_vnum) >= (sizeof(mob_vnum) and sizeof(obj_vnum))
  */
 static void renum_zone_table(GameWorld *g)
 {
   int cmd_no;
-  room_rnum a, b, c, olda, oldb, oldc;
+  room_vnum a, b, c, olda, oldb, oldc;
   char buf[128];
 
   for (struct zone_data *zone : g->zones.all())
@@ -3767,7 +3751,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
   struct char_data *mob = nullptr;
   struct obj_data *obj, *obj_to;
   room_vnum rvnum;
-  room_rnum rrnum;
+  room_vnum rrnum;
   struct char_data *tmob = nullptr; /* for trigger assignment */
   struct obj_data *tobj  = nullptr; /* for trigger assignment */
   int mob_load           = false;   /* ### */
@@ -4008,7 +3992,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             add_trigger(g, dg_ensure_script(obj_script_slot(tobj)), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
-            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > g->top_room) {
+            if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in trigger assignment");
             }
             if (!rroom_get_script(g, ZCMD2.arg3))
@@ -4035,7 +4019,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
-            if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > g->top_room) {
+            if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in variable assignment");
             } else {
               if (!(rroom_get_script(g, ZCMD2.arg3))) {
@@ -4062,7 +4046,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
     while (rvnum <= zone->top) {
       rrnum = real_room(g, rvnum);
       if (rrnum != NOWHERE) {
-        reset_wtrigger(g, &g->rooms[rrnum]);
+        reset_wtrigger(g, room_of(g, rrnum));
         if (rroom_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
           send_to_room(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
           rroom_set_flag(g, rrnum, ROOM_AURA, false);
@@ -4487,35 +4471,11 @@ void init_char(GameWorld *g, struct char_data *ch)
   Crash_crashsave(g, ch);
 }
 
-/*
- * The world, mobile, object and zone tables are sorted by vnum (check_sorted() makes sure at boot,
- * and OLC inserts in order), so lookups are binary searches.
- */
-static int vnum_order(IDXTYPE key, IDXTYPE vnum)
-{
-  return (key > vnum) - (key < vnum);
-}
-
-static int room_order(const void *key, const void *room)
-{
-  return vnum_order(*(const room_vnum *)key, room_get_number((const struct room_data *)room));
-}
-
-/* The index in table (count entries of size bytes) of the entry for vnum, or NOWHERE. */
-static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t size, int (*order)(const void *, const void *))
-{
-  const char *found;
-
-  if (!table || count <= 0)
-    return NOWHERE;
-  found = (const char *)bsearch(&vnum, table, count, size, order);
-  return found ? (IDXTYPE)((found - (const char *)table) / size) : NOWHERE;
-}
-
+/* The tables are keyed by vnum, so a "real number" is the vnum itself, when there is such a thing. */
 /* returns the real number of the room with given virtual number */
-room_rnum real_room(GameWorld *g, room_vnum vnum)
+room_vnum real_room(GameWorld *g, room_vnum vnum)
 {
-  return find_vnum(vnum, g->rooms, g->top_room + 1, sizeof(*g->rooms), room_order);
+  return g->rooms.find(vnum) ? vnum : NOWHERE; /* rnums are vnums now */
 }
 
 /* returns the real number of the monster with given virtual number */

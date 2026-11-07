@@ -187,7 +187,7 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
   struct obj_data *obj      = read_object(g, 301, VIRTUAL);
   struct obj_data *chest    = read_object(g, 300, VIRTUAL);
   struct char_data *stray   = &stray_char;
-  room_rnum room            = char_get_in_room(ch);
+  room_vnum room            = char_get_in_room(ch);
   struct room_direction_data *exit;
 
   obj_to_char(g, obj, ch);
@@ -203,7 +203,7 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
   CHECK_NOTICED(g);
   char_set_in_room(ch, room);
 
-  char_set_in_room(ch, g->top_room + 5);
+  char_set_in_room(ch, g->rooms.nth(g->rooms.size() - 1) + 5); /* past the last room */
   CHECK_NOTICED(g);
   char_set_in_room(ch, room);
 
@@ -237,9 +237,9 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
   exit = rroom_get_dir_option(g, room, SOUTH);
   CHECK(exit != nullptr);
   if (exit) {
-    room_rnum to = exit->to_room;
+    room_vnum to = exit->to_room;
 
-    exit->to_room = g->top_room + 5;
+    exit->to_room = g->rooms.nth(g->rooms.size() - 1) + 5;
     CHECK_NOTICED(g);
     exit->to_room = to;
   }
@@ -827,7 +827,7 @@ static void check_command_runs_for_nobody(GameWorld *g)
 /* Someone who has just quit is still in the lists for a moment, and used to be teleported back into a room. */
 static void check_scripts_ignore_whoever_has_left(GameWorld *g, struct char_data *ch)
 {
-  room_rnum room = char_get_in_room(ch);
+  room_vnum room = char_get_in_room(ch);
 
   CHECK(valid_dg_target(g, ch, DG_ALLOW_GODS));
   char_set_in_room(ch, NOWHERE);

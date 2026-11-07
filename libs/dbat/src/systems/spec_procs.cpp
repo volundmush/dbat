@@ -85,7 +85,7 @@ int num_players_in_room(GameWorld *g, room_vnum room)
       continue;
     if (!(i->character))
       continue;
-    if (char_get_in_room(i->character) == NOWHERE || char_get_in_room(i->character) > g->top_room)
+    if (!room_of(g, char_get_in_room(i->character)))
       continue;
     if (rroom_get_vnum(g, char_get_in_room(i->character)) != room)
       continue;
@@ -148,11 +148,14 @@ void npc_steal(GameWorld *g, struct char_data *ch, struct char_data *victim)
 SPECIAL(pet_shops)
 {
   char buf[MAX_STRING_LENGTH], pet_name[MAX_INPUT_LENGTH];
-  room_rnum pet_room;
+  room_vnum pet_room;
   struct char_data *pet;
 
-  /* Gross. */
-  pet_room = char_get_in_room(ch) + 1;
+  /* The pets wait in the room after this one. */
+  {
+    struct room_data *next = g->rooms.after(char_get_in_room(ch));
+    pet_room               = next ? room_get_number(next) : NOWHERE;
+  }
 
   if (CMD_IS(g, "list")) {
     send_to_char(g, ch, "Available pets are:\r\n");
@@ -212,7 +215,7 @@ SPECIAL(pet_shops)
 
 SPECIAL(auction)
 {
-  room_rnum auct_room;
+  room_vnum auct_room;
   struct obj_data *obj2 = nullptr;
   int found = false;
 

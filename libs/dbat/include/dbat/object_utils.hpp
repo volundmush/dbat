@@ -107,8 +107,8 @@ bool is_better(struct obj_data *object, struct obj_data *object2);
 
 int32_t obj_get_id(const struct obj_data *obj);
 void obj_set_id(struct obj_data *obj, int32_t v);
-room_rnum obj_get_in_room(const struct obj_data *obj);
-void obj_set_in_room(struct obj_data *obj, room_rnum v);
+room_vnum obj_get_in_room(const struct obj_data *obj);
+void obj_set_in_room(struct obj_data *obj, room_vnum v);
 struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *obj, int door);
 const char *money_desc(int amount);
 struct obj_data *create_money(GameWorld *g, int amount);

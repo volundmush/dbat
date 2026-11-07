@@ -63,9 +63,9 @@ static bool set_has(const struct pointer_set *set, const void *item)
   return set->count && bsearch(&item, set->items, set->count, sizeof(*set->items), compare_pointers);
 }
 
-static bool valid_room(const GameWorld *g, room_rnum room)
+static bool valid_room(const GameWorld *g, room_vnum room)
 {
-  return room >= 0 && room <= g->top_room;
+  return g->rooms.find(room) != nullptr;
 }
 
 static void collect(GameWorld *g, struct audit *a)
@@ -90,21 +90,22 @@ static void collect(GameWorld *g, struct audit *a)
   set_sort(&a->objects);
 }
 
+/* This runs after every step of the bot tests, so it reads each room's fields directly rather than looking the room
+ * up for every one. */
 static void audit_rooms(GameWorld *g, struct audit *a)
 {
-  for (room_rnum r = 0; r <= g->top_room; r++) {
-    room_vnum vnum = rroom_get_vnum(g, r);
+  g->rooms.visit([&](room_vnum vnum, const struct room_data *room) {
     size_t limit;
 
     for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
-      struct room_direction_data *exit = rroom_get_dir_option(g, r, dir);
+      const struct room_direction_data *exit = room->dir_option[dir];
 
       if (exit && exit->to_room != NOWHERE && !valid_room(g, exit->to_room))
-        problem(a, "room %d: exit %d leads to room index %d, which doesn't exist", vnum, dir, exit->to_room);
+        problem(a, "room %d: exit %d leads to room %d, which doesn't exist", vnum, dir, exit->to_room);
     }
 
     limit = a->characters.count + 1;
-    for (struct char_data *ch = rroom_get_people(g, r); ch; ch = char_get_next_in_room(ch)) {
+    for (struct char_data *ch = room->people; ch; ch = char_get_next_in_room(ch)) {
       if (!limit--) {
         problem(a, "room %d: the list of people loops", vnum);
         break;
@@ -113,12 +114,12 @@ static void audit_rooms(GameWorld *g, struct audit *a)
         problem(a, "room %d: a person here isn't in the game", vnum);
         break;
       }
-      if (char_get_in_room(ch) != r)
-        problem(a, "room %d: %s is listed here, but says room index %d", vnum, char_get_name(ch), char_get_in_room(ch));
+      if (char_get_in_room(ch) != vnum)
+        problem(a, "room %d: %s is listed here, but says room %d", vnum, char_get_name(ch), char_get_in_room(ch));
     }
 
     limit = a->objects.count + 1;
-    for (struct obj_data *obj = rroom_get_contents(g, r); obj; obj = obj_get_next_content(obj)) {
+    for (struct obj_data *obj = room->contents; obj; obj = obj_get_next_content(obj)) {
       if (!limit--) {
         problem(a, "room %d: the list of contents loops", vnum);
         break;
@@ -127,10 +128,10 @@ static void audit_rooms(GameWorld *g, struct audit *a)
         problem(a, "room %d: an object here isn't in the game", vnum);
         break;
       }
-      if (obj_get_in_room(obj) != r)
-        problem(a, "room %d: object %d is listed here, but says room index %d", vnum, obj_get_vnum(g, obj), obj_get_in_room(obj));
+      if (obj_get_in_room(obj) != vnum)
+        problem(a, "room %d: object %d is listed here, but says room %d", vnum, obj_get_vnum(g, obj), obj_get_in_room(obj));
     }
-  }
+  });
 }
 
 /* References between entities are ids. One that is set but leads nowhere is the id of something that has gone. */
@@ -215,7 +216,7 @@ static void audit_character_values(GameWorld *g, struct audit *a, struct char_da
 static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
 {
   const char *name = char_get_name(ch);
-  room_rnum room   = char_get_in_room(ch);
+  room_vnum room   = char_get_in_room(ch);
   size_t limit     = a->objects.count + 1;
   struct char_data *other;
 
@@ -287,7 +288,7 @@ static bool list_has_object(const struct audit *a, struct obj_data *list, const 
 static void audit_object_is_listed(GameWorld *g, struct audit *a, struct obj_data *obj)
 {
   obj_vnum vnum            = obj_get_vnum(g, obj);
-  room_rnum room           = obj_get_in_room(obj);
+  room_vnum room           = obj_get_in_room(obj);
   struct char_data *owner  = obj_get_carried_by(obj);
   struct char_data *wearer = obj_get_worn_by(obj);
   struct obj_data *outer   = obj_get_in_obj(obj);

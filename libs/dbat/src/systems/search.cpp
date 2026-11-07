@@ -116,7 +116,7 @@ struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr)
 }
 
 /* search a room for a char, and return a pointer if found..  */
-struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_rnum room)
+struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_vnum room)
 {
   int num;
 

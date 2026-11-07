@@ -805,12 +805,12 @@ void obj_set_id(struct obj_data *obj, int32_t v)
   obj->id = v;
 }
 
-room_rnum obj_get_in_room(const struct obj_data *obj)
+room_vnum obj_get_in_room(const struct obj_data *obj)
 {
   return obj->in_room;
 }
 
-void obj_set_in_room(struct obj_data *obj, room_rnum v)
+void obj_set_in_room(struct obj_data *obj, room_vnum v)
 {
   obj->in_room = v;
 }

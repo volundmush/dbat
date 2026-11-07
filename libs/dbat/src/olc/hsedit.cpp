@@ -149,7 +149,7 @@ void free_house(struct house_control_rec *house)
 static void hedit_delete_house(GameWorld *g, struct descriptor_data *d, room_vnum house_vnum)
 {
   int i, j;
-  room_rnum real_house;
+  room_vnum real_house;
 
   if ((i = find_house(g, house_vnum)) == NOWHERE) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
@@ -221,7 +221,7 @@ static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
 {
   char buf[MAX_STRING_LENGTH];
   struct house_control_rec *house;
-  room_rnum house_rnum, newroom[12];
+  room_vnum house_rnum, newroom[12];
   int i;
 
   house = OLC_HOUSE(d);
@@ -427,7 +427,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int number = 0, id = 0, i;
-  room_rnum house, rnum;
+  room_vnum house, rnum;
   char *tmp;
   bool found = false;
 

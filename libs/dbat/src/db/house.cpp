@@ -90,7 +90,7 @@ static void House_restore_weight(struct obj_data *obj)
 static void House_crashsave(GameWorld *g, room_vnum vnum)
 {
   struct atomic_file af;
-  room_rnum rnum;
+  room_vnum rnum;
   char buf[MAX_STRING_LENGTH];
   FILE *fp;
 
@@ -166,7 +166,7 @@ void House_save_control(GameWorld *g)
 void House_boot(GameWorld *g)
 {
   struct house_control_rec temp_house;
-  room_rnum real_house;
+  room_vnum real_house;
   FILE *fl;
 
   memset((char *)g->house_control, 0, sizeof(struct house_control_rec) * MAX_HOUSES);
@@ -259,7 +259,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   char arg1[MAX_INPUT_LENGTH];
   struct house_control_rec temp_house;
   room_vnum virt_house;
-  room_rnum real_house;
+  room_vnum real_house;
   int16_t exit_num;
   long owner;
 
@@ -331,7 +331,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
 static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg)
 {
   int i, j;
-  room_rnum real_atrium, real_house;
+  room_vnum real_atrium, real_house;
 
   if (!*arg) {
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
@@ -456,7 +456,7 @@ ACMD(do_house)
 void House_save_all(GameWorld *g)
 {
   int i;
-  room_rnum real_house;
+  room_vnum real_house;
 
   for (i = 0; i < g->num_of_houses; i++)
     if ((real_house = real_room(g, g->house_control[i].vnum)) != NOWHERE)
@@ -529,7 +529,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
-  room_rnum rrnum;
+  room_vnum rrnum;
 
   if ((rrnum = real_room(g, rvnum)) == NOWHERE)
     return false;

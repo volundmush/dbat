@@ -15,11 +15,29 @@
  */
 template <typename T, typename V> class vnum_table {
   std::map<V, std::unique_ptr<T>> items_;
+  /* The same entities by vnum, for lookups that cost one load: find() runs millions of times a minute, and a map is
+   * slow in unoptimised builds. Vnums past DENSE_LIMIT are only in the map. */
+  std::vector<T *> dense_;
+  static constexpr V DENSE_LIMIT = 1 << 20;
+
+  void index(V vnum, T *item)
+  {
+    if (vnum < 0 || vnum >= DENSE_LIMIT)
+      return;
+    if (static_cast<std::size_t>(vnum) >= dense_.size())
+      dense_.resize(static_cast<std::size_t>(vnum) + 1, nullptr);
+    dense_[static_cast<std::size_t>(vnum)] = item;
+  }
 
 public:
   /* The entity numbered vnum, or null. */
   T *find(V vnum) const
   {
+    auto i = static_cast<std::size_t>(vnum); /* a negative vnum becomes too large */
+    if (i < dense_.size())
+      return dense_[i];
+    if (vnum >= 0 && vnum < DENSE_LIMIT)
+      return nullptr;
     auto it = items_.find(vnum);
     return it == items_.end() ? nullptr : it->second.get();
   }
@@ -28,8 +46,10 @@ public:
   T *emplace(V vnum)
   {
     std::unique_ptr<T> &slot = items_[vnum];
-    if (!slot)
+    if (!slot) {
       slot = std::make_unique<T>();
+      index(vnum, slot.get());
+    }
     return slot.get();
   }
 
@@ -37,7 +57,10 @@ public:
   T *insert(V vnum, std::unique_ptr<T> item)
   {
     auto [it, added] = items_.try_emplace(vnum, std::move(item));
-    return added ? it->second.get() : nullptr;
+    if (!added)
+      return nullptr;
+    index(vnum, it->second.get());
+    return it->second.get();
   }
 
   /* Removes the entity numbered vnum, handing it to the caller. */
@@ -48,6 +71,7 @@ public:
       return nullptr;
     std::unique_ptr<T> taken = std::move(it->second);
     items_.erase(it);
+    index(vnum, nullptr);
     return taken;
   }
 
@@ -63,6 +87,9 @@ public:
     return it == items_.end() ? nullptr : it->second.get();
   }
 
+  /* The vnum in place n of vnum order, from 0; n must be less than size(). */
+  V nth(std::size_t n) const { return std::next(items_.begin(), static_cast<std::ptrdiff_t>(n))->first; }
+
   /* vnum's place in vnum order, from 0 (what its index in a sorted array would have been), or -1 */
   int place(V vnum) const
   {
@@ -70,7 +97,11 @@ public:
     return it == items_.end() ? -1 : static_cast<int>(std::distance(items_.begin(), it));
   }
 
-  void clear() { items_.clear(); }
+  void clear()
+  {
+    items_.clear();
+    dense_.clear();
+  }
   std::size_t size() const { return items_.size(); }
   bool empty() const { return items_.empty(); }
 

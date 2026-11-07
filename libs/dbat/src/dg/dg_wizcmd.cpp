@@ -210,7 +210,7 @@ ACMD(do_attach)
   trig_vnum tn;
   struct index_data *rn;
   IDXTYPE num_arg;
-  room_rnum rnum;
+  room_vnum rnum;
 
   argument = two_arguments(argument, arg, trig_name);
   two_arguments(argument, targ_name, loc_name);
@@ -315,7 +315,7 @@ ACMD(do_attach)
       return;
     }
 
-    room = &g->rooms[rnum];
+    room = room_of(g, rnum);
 
     add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
@@ -415,7 +415,7 @@ ACMD(do_detach)
   num_arg = atoi(arg2);
 
   if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
-    room = &g->rooms[char_get_in_room(ch)];
+    room = room_of(g, char_get_in_room(ch));
     if (!can_edit_zone(g, ch, room_get_zone(room))) {
       send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
       return;

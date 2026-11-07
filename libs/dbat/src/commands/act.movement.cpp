@@ -659,7 +659,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
-  room_rnum was_in = char_get_in_room(ch);
+  room_vnum was_in = char_get_in_room(ch);
   int need_movement;
   struct room_data *rm;
 
@@ -673,9 +673,9 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   /* blocked by a leave trigger ? */
   if (!leave_mtrigger(g, ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
     return false;
-  if (!leave_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
     return false;
-  if (!leave_otrigger(g, &g->rooms[char_get_in_room(ch)], ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
+  if (!leave_otrigger(g, room_of(g, char_get_in_room(ch)), ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
     return false;
   /* charmed? */
   if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(g, ch) && char_get_in_room(ch) == char_get_in_room(char_get_master(g, ch))) {
@@ -824,7 +824,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     }
   }
   if (rroom_flagged(g, char_get_exit(g, ch, dir)->to_room, ROOM_TUNNEL) &&
-      (num_pc_in_room(g, &(g->rooms[char_get_exit(g, ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
+      (num_pc_in_room(g, room_of(g, char_get_exit(g, ch, dir)->to_room)) >= CONFIG_TUNNEL_SIZE)) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -840,7 +840,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   /******* Zone flag checks *******/
 
-  rm = &g->rooms[char_get_exit(g, ch, dir)->to_room];
+  rm = room_of(g, char_get_exit(g, ch, dir)->to_room);
 
   if (!char_is_npc(ch) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
       (char_get_level(ch) < zone_get_min_level(g, room_get_zone(rm))) && (zone_get_min_level(g, room_get_zone(rm)) > 0)) {
@@ -919,7 +919,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   }
   /* move them first, then move them back if they aren't allowed to go. */
   /* see if an entry trigger disallows the move */
-  if (!entry_mtrigger(g, ch) || !enter_wtrigger(g, &g->rooms[char_get_in_room(ch)], ch, dir)) {
+  if (!entry_mtrigger(g, ch) || !enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, dir)) {
     char_from_room(g, ch);
     char_to_room(g, ch, was_in);
     char_aff_set(ch, AFF_PURSUIT, false);
@@ -1026,7 +1026,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
 bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
 {
-  room_rnum was_in;
+  room_vnum was_in;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -1487,8 +1487,8 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 {
   char buf[MAX_STRING_LENGTH];
   size_t len;
-  room_rnum num                    = 0;
-  room_rnum other_room             = NOWHERE;
+  room_vnum num                    = 0;
+  room_vnum other_room             = NOWHERE;
   struct room_direction_data *back = nullptr;
   struct obj_data *hatch = nullptr, *vehicle = nullptr;
 
@@ -1831,7 +1831,7 @@ ACMD(do_gen_door)
  * The checks entering and leaving an object share. Returns the movement points it costs, or -1
  * (after telling ch why) when ch can't go.
  */
-static int portal_move_cost(GameWorld *g, struct char_data *ch, room_rnum dest_room, int need_specials_check)
+static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_room, int need_specials_check)
 {
   int need_movement;
 
@@ -1868,7 +1868,7 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_rnum dest_r
     }
   }
   if (rroom_flagged(g, dest_room, ROOM_TUNNEL) &&
-      num_pc_in_room(g, &(g->rooms[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+      num_pc_in_room(g, room_of(g, dest_room)) >= CONFIG_TUNNEL_SIZE) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -1880,8 +1880,8 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_rnum dest_r
 
 static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
-  room_rnum dest_room = real_room(g, obj_get_value(obj, VAL_PORTAL_DEST));
-  room_rnum was_in    = char_get_in_room(ch);
+  room_vnum dest_room = real_room(g, obj_get_value(obj, VAL_PORTAL_DEST));
+  room_vnum was_in    = char_get_in_room(ch);
   int need_movement   = 0;
 
   if ((need_movement = portal_move_cost(g, ch, dest_room, need_specials_check)) < 0)
@@ -1967,7 +1967,7 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
 
 static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
-  room_rnum was_in = char_get_in_room(ch);
+  room_vnum was_in = char_get_in_room(ch);
   int could_move   = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
@@ -2063,7 +2063,7 @@ ACMD(do_enter)
 static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 
 {
-  room_rnum was_in = char_get_in_room(ch), dest_room = NOWHERE;
+  room_vnum was_in = char_get_in_room(ch), dest_room = NOWHERE;
   int need_movement        = 0;
   struct obj_data *vehicle = nullptr;
 
@@ -2179,7 +2179,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
 
 static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
-  room_rnum was_in = char_get_in_room(ch);
+  room_vnum was_in = char_get_in_room(ch);
   int could_move   = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {

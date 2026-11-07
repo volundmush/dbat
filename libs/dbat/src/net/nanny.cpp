@@ -261,9 +261,9 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
 
 /* load the player, put them in the right room - used by copyover_recover too */
 /* A builder can delete any of the rooms that players get sent to, while the game is running. */
-static room_rnum room_or_void(GameWorld *g, room_vnum vnum)
+static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
 {
-  room_rnum room = real_room(g, vnum);
+  room_vnum room = real_room(g, vnum);
 
   return room != NOWHERE ? room : 0;
 }

@@ -332,7 +332,7 @@ const char *const dg_door_fields[] = {
 bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
 {
   struct room_direction_data *newexit = room_get_dir_option(rm, dir);
-  room_rnum to_room;
+  room_vnum to_room;
 
   /* purge exit */
   if (field == 0) {

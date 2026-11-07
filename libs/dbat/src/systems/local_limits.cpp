@@ -1734,7 +1734,6 @@ void point_update(GameWorld *g)
 
 void timed_dt(GameWorld *g, struct char_data *ch)
 {
-  room_rnum rrnum;
 
   if (ch == nullptr) {
     /* BY -WELCOR
@@ -1742,7 +1741,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
       value decreased if its not -1.
       */
 
-    for (rrnum = 0; rrnum < g->top_room; rrnum++)
+    for (room_vnum rrnum : g->rooms.vnums())
       rroom_set_timed(g, rrnum, rroom_get_timed(g, rrnum) - ((rroom_get_timed(g, rrnum) != -1)));
 
     for (char_data *vict : each_char(g)) {

@@ -84,7 +84,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
       obj_to_char(g, obj, ch);
       add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, number), -1);
     } else {
-      add_trigger(g, dg_ensure_script(room_script_slot(&g->rooms[char_get_in_room(ch)])), read_trigger(g, number), -1);
+      add_trigger(g, dg_ensure_script(room_script_slot(room_of(g, char_get_in_room(ch)))), read_trigger(g, number), -1);
     }
     th_type(g, ch, "fuzz");
     if (world_audit(g, audit_problem, nullptr))

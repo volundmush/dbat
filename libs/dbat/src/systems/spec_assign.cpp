@@ -47,7 +47,7 @@ static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
 
 static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fn))
 {
-  room_rnum rnum;
+  room_vnum rnum;
 
   if ((rnum = real_room(g, room)) != NOWHERE)
     rroom_set_func(g, rnum, fn);
@@ -78,7 +78,6 @@ void assign_objects(GameWorld *g)
 /* assign special procedures to rooms */
 void assign_rooms(GameWorld *g)
 {
-  room_rnum i;
 
   ASSIGNROOM(g, 5, dump);
   ASSIGNROOM(g, 3, pet_shops);
@@ -92,7 +91,7 @@ void assign_rooms(GameWorld *g)
   /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
   if (CONFIG_DTS_ARE_DUMPS)
-    for (i = 0; i <= g->top_room; i++)
+    for (room_vnum i : g->rooms.vnums())
       if (rroom_flagged(g, i, ROOM_DEATH))
         rroom_set_func(g, i, dump);
 }

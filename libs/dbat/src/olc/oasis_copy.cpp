@@ -48,7 +48,7 @@ ACMD(do_dig)
 {
   char sdir[MAX_INPUT_LENGTH], sroom[MAX_INPUT_LENGTH], *new_room_name;
   room_vnum rvnum = NOWHERE;
-  room_rnum rrnum = NOWHERE;
+  room_vnum rrnum = NOWHERE;
   struct zone_data *zone;
   int dir                   = 0, rawvnum;
   struct descriptor_data *d = char_get_desc(ch); /* will save us some typing */
@@ -214,9 +214,9 @@ ACMD(do_dig)
 ACMD(do_rcopy)
 {
   room_vnum rvnum;
-  room_rnum rrnum;
-  room_rnum trnum;
-  room_rnum tvnum;
+  room_vnum rrnum;
+  room_vnum trnum;
+  room_vnum tvnum;
   struct zone_data *zone;
 
   char arg[MAX_INPUT_LENGTH];
@@ -281,7 +281,7 @@ ACMD(do_rcopy)
 
   /* Copy over any existings extra descriptions */
   if (rroom_get_ex_description(g, trnum))
-    copy_ex_descriptions(room_ex_description_slot(&g->rooms[rrnum]), rroom_get_ex_description(g, trnum));
+    copy_ex_descriptions(room_ex_description_slot(room_of(g, rrnum)), rroom_get_ex_description(g, trnum));
   else
     rroom_set_ex_description(g, rrnum, nullptr);
 
@@ -303,26 +303,19 @@ ACMD(do_rcopy)
 static room_vnum redit_find_new_vnum(GameWorld *g, struct zone_data *zone)
 {
   room_vnum vnum = genolc_zone_bottom(g, zone);
-  room_rnum rnum = real_room(g, vnum);
 
-  if (rnum == NOWHERE)
+  if (!room_of(g, vnum))
     return NOWHERE;
 
-  for (;;) {
-    if (vnum > zone->top)
-      return (NOWHERE);
-    if (rnum > g->top_room || rroom_get_vnum(g, rnum) > vnum)
-      break;
-    rnum++;
+  while (room_of(g, vnum))
     vnum++;
-  }
-  return (vnum);
+  return vnum > zone->top ? NOWHERE : vnum;
 }
 
 bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
 {
   room_vnum vnum;
-  room_rnum rnum;
+  room_vnum rnum;
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_BUILDWALK) &&
       char_get_admlevel(ch) >= ADMLVL_IMMORT) {

@@ -224,7 +224,7 @@ static void equip_bot(GameWorld *g, struct char_data *ch, unsigned long kit)
   for (unsigned long n = roll(&kit, 8) + 2; n > 0; n--)
     obj_to_char(g, read_object(g, nth_obj_vnum(g, roll(&kit, g->obj_proto.size())), REAL), ch);
   char_from_room(g, ch);
-  char_to_room(g, ch, roll(&kit, g->top_room + 1));
+  char_to_room(g, ch, g->rooms.nth(roll(&kit, g->rooms.size())));
 }
 
 /* A running fingerprint of all the output, to compare two runs. */
@@ -470,7 +470,7 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
       break;
     }
     case 2:
-      snprintf(number, sizeof(number), "%d", rroom_get_vnum(g, bot_dice(g->top_room + 1)));
+      snprintf(number, sizeof(number), "%d", g->rooms.nth(bot_dice(g->rooms.size())));
       return number;
     case 3:
       snprintf(number, sizeof(number), "%d", nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
@@ -536,7 +536,7 @@ static void compose_builder_command(GameWorld *g, char *text, size_t size)
 
   switch (bot_dice(7)) {
     case 0:
-      snprintf(text, size, "%s %d", PICK(with_room), rroom_get_vnum(g, bot_dice(g->top_room + 1)));
+      snprintf(text, size, "%s %d", PICK(with_room), g->rooms.nth(bot_dice(g->rooms.size())));
       break;
     case 1:
       snprintf(text, size, "%s %d", PICK(with_object), nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
