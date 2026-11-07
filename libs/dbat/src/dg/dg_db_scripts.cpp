@@ -371,7 +371,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
         if (rnum == nullptr) {
           mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
-                 trg_proto->vnum, g->mob_index[char_get_nr(mob)].vnum);
+                 trg_proto->vnum, mob_index_of(g, char_get_nr(mob))->vnum);
         } else {
           add_trigger(g, dg_ensure_script(char_script_slot(mob)), read_trigger(g, rnum), -1);
         }

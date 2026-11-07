@@ -40,53 +40,34 @@ bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 /* local functions */
 static void extract_mobile_all(GameWorld *g, mob_vnum vnum);
 
-mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
+mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 {
-  mob_rnum rnum, i, found = false;
-  int cmd_no;
+  mob_vnum rnum, found = false;
 
   if ((rnum = real_mobile(g, vnum)) != NOBODY) {
     /* Copy over the mobile and free() the old strings. */
-    copy_mobile(g, &g->mob_proto[rnum], mob);
-    char_set_nr(&g->mob_proto[rnum], rnum); /* medit's copy option can bring another mob's number */
+    copy_mobile(g, mob_proto_of(g, rnum), mob);
+    char_set_nr(mob_proto_of(g, rnum), rnum); /* medit's copy option can bring another mob's number */
 
     /* Now re-point all existing mobile strings to here. */
     for (char_data *live_mob : each_char(g))
       if (rnum == char_get_nr(live_mob))
-        update_mobile_strings(live_mob, &g->mob_proto[rnum]);
+        update_mobile_strings(live_mob, mob_proto_of(g, rnum));
 
     add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
     mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
     return rnum;
   }
 
-  resize_array(g->mob_proto, g->top_mob + 1, g->top_mob + 2);
-  resize_array(g->mob_index, g->top_mob + 1, g->top_mob + 2);
-  g->top_mob++;
-
-  for (i = g->top_mob; i > 0; i--) {
-    if (vnum > g->mob_index[i - 1].vnum) {
-      g->mob_proto[i]    = *mob;
-      char_set_nr(&g->mob_proto[i], i);
-      copy_mobile_strings(g->mob_proto + i, mob);
-      g->mob_index[i].vnum   = vnum;
-      g->mob_index[i].number = 0;
-      g->mob_index[i].func   = nullptr;
-      found               = i;
-      break;
-    }
-    g->mob_index[i] = g->mob_index[i - 1];
-    g->mob_proto[i] = g->mob_proto[i - 1];
-    char_set_nr(&g->mob_proto[i], char_get_nr(&g->mob_proto[i]) + 1);
-  }
-  if (!found) {
-    g->mob_proto[0]    = *mob;
-    char_set_nr(&g->mob_proto[0], 0);
-    copy_mobile_strings(&g->mob_proto[0], mob);
-    g->mob_index[0].vnum   = vnum;
-    g->mob_index[0].number = 0;
-    g->mob_index[0].func   = nullptr;
-  }
+  struct char_data *proto  = g->mob_proto.emplace(vnum);
+  struct index_data *index = g->mob_index.emplace(vnum);
+  *proto                   = *mob;
+  char_set_nr(proto, vnum);
+  copy_mobile_strings(proto, mob);
+  index->vnum   = vnum;
+  index->number = 0;
+  index->func   = nullptr;
+  found         = vnum;
 
   mud_log("GenOLC: add_mobile: Added mobile %d at index #%d.", vnum, found);
 
@@ -98,26 +79,6 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
     OLC_MPROGL(d) = OLC_MPROGL(d)->next;
   }
 #endif
-
-  /* Update live mobile rnums. */
-  for (char_data *live_mob : each_char(g))
-    char_set_nr(live_mob, char_get_nr(live_mob) + ((char_get_nr(live_mob) != NOTHING && char_get_nr(live_mob) >= found)));
-
-  /* Update zone table. */
-  for (struct zone_data *zone : g->zones.all())
-    for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++)
-      if (zone_get_cmd(g, zone, cmd_no)->command == 'M')
-        zone_get_cmd(g, zone, cmd_no)->arg1 += (zone_get_cmd(g, zone, cmd_no)->arg1 >= found);
-
-  /* Update shop keepers. */
-  for (struct shop_data *shop : g->shops.all())
-    if (shop_get_keeper(shop) != NOTHING && shop_get_keeper(shop) >= found)
-      shop_set_keeper(shop, shop_get_keeper(shop) + 1);
-
-  /* Update guild masters */
-  for (struct guild_data *guild : g->guilds.all())
-    if (guild_get_gm(guild) != NOTHING && guild_get_gm(guild) >= found)
-      guild_set_gm(guild, guild_get_gm(guild) + 1);
 
   add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
   return found;
@@ -141,35 +102,20 @@ static void extract_mobile_all(GameWorld *g, mob_vnum vnum)
   }
 }
 
-mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
+mob_vnum delete_mobile(GameWorld *g, mob_vnum refpt)
 {
-  IDXTYPE counter;
   int cmd_no;
   mob_vnum vnum;
 
-  if (refpt < 0 || refpt > g->top_mob) {
+  if (refpt == NOBODY || !mob_index_of(g, refpt)) {
     mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
     return NOBODY;
   }
 
-  vnum = g->mob_index[refpt].vnum;
+  vnum = refpt;
   extract_mobile_all(g, vnum);
 
-  for (counter = refpt; counter < g->top_mob; counter++) {
-    g->mob_index[counter]    = g->mob_index[counter + 1];
-    g->mob_proto[counter]    = g->mob_proto[counter + 1];
-    char_set_nr(&g->mob_proto[counter], counter);
-  }
-
-  g->top_mob--;
-  resize_array(g->mob_index, g->top_mob + 2, g->top_mob + 1);
-  resize_array(g->mob_proto, g->top_mob + 2, g->top_mob + 1);
-
   add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
-
-  /* Update live mobile rnums.  */
-  for (char_data *live_mob : each_char(g))
-    char_set_nr(live_mob, char_get_nr(live_mob) - ((char_get_nr(live_mob) >= refpt)));
 
   /* Update zone table.  */
   for (struct zone_data *zone : g->zones.all()) {
@@ -181,10 +127,6 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
         changed                             = true;
       }
 
-      if (zone_get_cmd(g, zone, cmd_no)->command == 'M' && zone_get_cmd(g, zone, cmd_no)->arg1 > refpt) {
-        zone_get_cmd(g, zone, cmd_no)->arg1 -= 1;
-        changed = true;
-      }
     }
     if (changed) {
       add_to_save_list(g, zone->number, SL_ZON);
@@ -221,6 +163,9 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
     }
   }
 
+  /* Copies being extracted keep its strings, and free them themselves now that it has gone. */
+  g->mob_proto.take(refpt);
+  g->mob_index.take(refpt);
   return refpt;
 }
 
@@ -273,7 +218,7 @@ static bool free_mobile_strings(struct char_data *mob)
  * and their mob_proto!  */
 bool free_mobile(GameWorld *g, struct char_data *mob)
 {
-  mob_rnum i;
+  mob_vnum i;
 
   if (mob == nullptr)
     return false;
@@ -284,18 +229,18 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
     /* free script proto list */
     free_proto_script(mob, MOB_TRIGGER);
   } else { /* Prototyped mobile. */
-    if (char_get_alias(mob) && char_get_alias(mob) != char_get_alias(&g->mob_proto[i]))
+    if (char_get_alias(mob) && char_get_alias(mob) != char_get_alias(mob_proto_of(g, i)))
       free(char_get_alias(mob));
-    if (char_get_raw_title(mob) && char_get_raw_title(mob) != char_get_raw_title(&g->mob_proto[i]))
+    if (char_get_raw_title(mob) && char_get_raw_title(mob) != char_get_raw_title(mob_proto_of(g, i)))
       free(char_get_raw_title(mob));
-    if (char_get_sdesc(mob) && char_get_sdesc(mob) != char_get_sdesc(&g->mob_proto[i]))
+    if (char_get_sdesc(mob) && char_get_sdesc(mob) != char_get_sdesc(mob_proto_of(g, i)))
       free(char_get_sdesc(mob));
-    if (char_get_ldesc(mob) && char_get_ldesc(mob) != char_get_ldesc(&g->mob_proto[i]))
+    if (char_get_ldesc(mob) && char_get_ldesc(mob) != char_get_ldesc(mob_proto_of(g, i)))
       free(char_get_ldesc(mob));
-    if (char_get_ddesc(mob) && char_get_ddesc(mob) != char_get_ddesc(&g->mob_proto[i]))
+    if (char_get_ddesc(mob) && char_get_ddesc(mob) != char_get_ddesc(mob_proto_of(g, i)))
       free(char_get_ddesc(mob));
     /* free script proto list if it's not the prototype */
-    if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(&g->mob_proto[i]))
+    if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(mob_proto_of(g, i)))
       free_proto_script(mob, MOB_TRIGGER);
   }
   while (char_get_affected(mob))
@@ -312,8 +257,7 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
 bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
 {
   FILE *mobfd;
-  room_vnum i;
-  mob_rnum rmob;
+  mob_vnum rmob;
   char mobfname[64], usedfname[64];
   struct atomic_file af;
 
@@ -328,11 +272,11 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
+  for (mob_vnum i : g->mob_proto.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((rmob = real_mobile(g, i)) == NOBODY)
       continue;
-    check_mobile_strings(g, &g->mob_proto[rmob]);
-    if (!write_mobile_record(g, i, &g->mob_proto[rmob], mobfd))
+    check_mobile_strings(g, mob_proto_of(g, rmob));
+    if (!write_mobile_record(g, i, mob_proto_of(g, rmob), mobfd))
       mud_log("SYSERR: GenOLC: Error writing mobile #%d.", i);
   }
   fputs("$\n", mobfd);
@@ -390,7 +334,7 @@ static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *m
     fprintf(fd, "Con: %d\n", char_get_aff_abils_con(mob));
   if (char_get_aff_abils_cha(mob) != 0)
     fprintf(fd, "Cha: %d\n", char_get_aff_abils_cha(mob));
-  if (g->mob_proto + real_mobile(g, mvnum) != mob) { /* Not saving a prototype */
+  if (mob_proto_of(g, real_mobile(g, mvnum)) != mob) { /* Not saving a prototype */
     fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
             getCurPL(g, mob), getEffMaxPL(g, mob), (getCurKI(g, mob)), getMaxKI(g, mob),
             (getCurST(g, mob)), getMaxST(g, mob));
@@ -466,7 +410,7 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
 
 static void check_mobile_strings(GameWorld *g, struct char_data *mob)
 {
-  mob_vnum mvnum = g->mob_index[char_get_nr(mob)].vnum;
+  mob_vnum mvnum = mob_index_of(g, char_get_nr(mob))->vnum;
   check_mobile_string(g, mvnum, char_long_descr_slot(mob), "long description");
   check_mobile_string(g, mvnum, char_description_slot(mob), "detailed description");
   check_mobile_string(g, mvnum, char_name_slot(mob), "alias list");

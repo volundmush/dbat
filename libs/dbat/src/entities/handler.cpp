@@ -73,7 +73,7 @@ void item_check(GameWorld *g, struct obj_data *object, struct char_data *ch)
 {
   int where = 0;
 
-  if (char_is_humanoid(ch) && !(g->mob_index[char_get_nr(ch)].func == shop_keeper)) {
+  if (char_is_humanoid(ch) && !(mob_index_of(g, char_get_nr(ch))->func == shop_keeper)) {
     if (invalid_align(ch, object) || invalid_class(ch, object))
       return;
 

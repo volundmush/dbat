@@ -4,6 +4,7 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/guild.hpp"
+#include "dbat/characters.hpp"
 #include "dbat/index.hpp"
 #include "dbat/objects.hpp"
 #include "dbat/shop.hpp"
@@ -28,9 +29,8 @@ struct GameWorld {
   struct char_data *affect_list{};
   struct char_data *combat_list{};
   struct char_data *next_combat_list{};
-  struct index_data *mob_index{};
-  struct char_data *mob_proto{};
-  mob_rnum top_mob{};
+  vnum_table<index_data, mob_vnum> mob_index; /* mob prototypes, by vnum */
+  vnum_table<char_data, mob_vnum> mob_proto;
   long max_mob_id{};
   vnum_table<index_data, obj_vnum> obj_index; /* object prototypes, by vnum */
   vnum_table<obj_data, obj_vnum> obj_proto;
@@ -171,7 +171,7 @@ struct GameWorld {
   /* Progress of the world file parsers and the zone clock */
   room_rnum parse_room_index{};
   struct zone_data *parse_room_zone{};
-  mob_rnum parse_mob_index{};
+  mob_vnum parse_mob_index{};
   obj_vnum parse_obj_index{};
   int zone_update_timer{};
 };

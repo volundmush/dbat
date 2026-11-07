@@ -543,7 +543,7 @@ void load_mtrigger(GameWorld *g, char_data *ch)
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
     if (char_get_nr(ch) != NOBODY) {
-      free_proto_script(&g->mob_proto[char_get_nr(ch)], MOB_TRIGGER);
+      free_proto_script(mob_proto_of(g, char_get_nr(ch)), MOB_TRIGGER);
     }
   }
 }

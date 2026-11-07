@@ -1560,10 +1560,10 @@ void assign_the_shopkeepers(GameWorld *g)
       continue;
 
     /* Having rshop_get_func() as 'shop_keeper' will cause infinite recursion. */
-    if (g->mob_index[shop_get_keeper(cindex)].func && g->mob_index[shop_get_keeper(cindex)].func != shop_keeper)
-      shop_set_func(cindex, g->mob_index[shop_get_keeper(cindex)].func);
+    if (mob_index_of(g, shop_get_keeper(cindex))->func && mob_index_of(g, shop_get_keeper(cindex))->func != shop_keeper)
+      shop_set_func(cindex, mob_index_of(g, shop_get_keeper(cindex))->func);
 
-    g->mob_index[shop_get_keeper(cindex)].func = shop_keeper;
+    mob_index_of(g, shop_get_keeper(cindex))->func = shop_keeper;
   }
 }
 
@@ -1618,7 +1618,7 @@ static void list_all_shops(GameWorld *g, struct char_data *ch)
     if (shop_get_keeper(shop) == NOBODY)
       strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", g->mob_index[shop_get_keeper(shop)].vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+      sprintf(buf1, "%6d", mob_index_of(g, shop_get_keeper(shop))->vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
     len += snprintf(buf + len, sizeof(buf) - len,
                     "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
@@ -1678,8 +1678,8 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
   send_to_char(g, ch, "\r\nShopkeeper: ");
   if (shop_get_keeper(shop) != NOBODY) {
     send_to_char(g, ch, "%s (#%d), Special Function: %s\r\n",
-                 char_get_name(&g->mob_proto[shop_get_keeper(shop)]),
-                 g->mob_index[shop_get_keeper(shop)].vnum,
+                 char_get_name(mob_proto_of(g, shop_get_keeper(shop))),
+                 mob_index_of(g, shop_get_keeper(shop))->vnum,
                  YESNO(shop_get_func(shop)));
 
     if ((k = get_char_num(g, shop_get_keeper(shop))))

@@ -19,7 +19,7 @@ struct guild_data {
   char *no_such_skill{};                /* message when we don't teach that skill */
   char *not_enough_gold{};              /* message when the student doesn't have enough gold */
   int minlvl{};                         /* Minumum level guildmaster will train */
-  mob_rnum gm{};                        /* GM's vnum */
+  mob_vnum gm{};                        /* GM's vnum */
   bitvector_t with_who[GW_ARRAY_MAX]{}; /* whom we dislike */
   int open{}, close{};                    /* when we will train */
   SPECIAL(*func){};                     /* secondary spec_proc for the GM */

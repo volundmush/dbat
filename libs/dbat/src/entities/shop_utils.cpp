@@ -13,12 +13,12 @@ void shop_set_vnum(struct shop_data *shop, room_vnum v)
   shop->vnum = v;
 }
 
-mob_rnum shop_get_keeper(const struct shop_data *shop)
+mob_vnum shop_get_keeper(const struct shop_data *shop)
 {
   return shop->keeper;
 }
 
-void shop_set_keeper(struct shop_data *shop, mob_rnum v)
+void shop_set_keeper(struct shop_data *shop, mob_vnum v)
 {
   shop->keeper = v;
 }

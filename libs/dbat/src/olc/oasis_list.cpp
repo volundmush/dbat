@@ -201,7 +201,6 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
  */
 static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *rnum, zone_vnum vmin, zone_vnum vmax)
 {
-  mob_rnum i;
   IDXTYPE bottom, top;
   int counter = 0;
 
@@ -217,16 +216,16 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *r
                "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
                "----- ------- -------------------------      --------- --------- -----\r\n");
 
-  if (!g->top_mob)
+  if (g->mob_proto.empty())
     return;
 
-  for (i = 0; i <= g->top_mob; i++) {
-    if (g->mob_index[i].vnum >= bottom && g->mob_index[i].vnum <= top) {
+  for (mob_vnum i : g->mob_proto.vnums()) {
+    if (mob_index_of(g, i)->vnum >= bottom && mob_index_of(g, i)->vnum <= top) {
       counter++;
 
       send_to_char(g, ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, g->mob_index[i].vnum, count_color_chars(char_get_sdesc(&g->mob_proto[i])) + 30, char_get_sdesc(&g->mob_proto[i]), char_true_race_name((&g->mob_proto[i])), char_sensei_name((&g->mob_proto[i])),
-                   char_get_class_level(&g->mob_proto[i]) + char_get_level_adj(&g->mob_proto[i]) + char_get_race_level(&g->mob_proto[i]), char_get_proto_script(&g->mob_proto[i]) ? " [TRIG]" : "");
+                   counter, mob_index_of(g, i)->vnum, count_color_chars(char_get_sdesc(mob_proto_of(g, i))) + 30, char_get_sdesc(mob_proto_of(g, i)), char_true_race_name((mob_proto_of(g, i))), char_sensei_name((mob_proto_of(g, i))),
+                   char_get_class_level(mob_proto_of(g, i)) + char_get_level_adj(mob_proto_of(g, i)) + char_get_race_level(mob_proto_of(g, i)), char_get_proto_script(mob_proto_of(g, i)) ? " [TRIG]" : "");
     }
   }
 
@@ -360,13 +359,7 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   }
 
   sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
-  /****************************************************************************/
-  /** Locate the largest of the three, g->top_room, g->top_mob, or           **/
-  /****************************************************************************/
-  if (g->top_room >= g->top_mob)
-    largest_table = g->top_room;
-  else
-    largest_table = g->top_mob;
+  largest_table = g->top_room; /* only rooms are still counted by real number */
 
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
@@ -386,15 +379,15 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
       if (rroom_get_zone(g, i) == rnum)
         size_rooms++;
 
-    if (i <= g->top_mob)
-      if (g->mob_index[i].vnum >= bottom && g->mob_index[i].vnum <= top)
-        size_mobiles++;
 
     size_shops = count_shops(g, bottom, top);
 
     size_guilds = count_guilds(g, bottom, top);
   }
 
+  for (mob_vnum mvnum : g->mob_index.vnums())
+    if (mvnum >= bottom && mvnum <= top)
+      size_mobiles++;
   for (obj_vnum ovnum : g->obj_index.vnums())
     if (ovnum >= bottom && ovnum <= top)
       size_objects++;

@@ -3,9 +3,9 @@
 
 #include "dbat/consts/types.hpp"
 
-mob_rnum delete_mobile(GameWorld *g, mob_rnum);
+mob_vnum delete_mobile(GameWorld *g, mob_vnum);
 bool copy_mobile(GameWorld *g, struct char_data *to, struct char_data *from);
-mob_rnum add_mobile(GameWorld *g, struct char_data *, mob_vnum);
+mob_vnum add_mobile(GameWorld *g, struct char_data *, mob_vnum);
 bool free_mobile(GameWorld *g, struct char_data *mob);
 bool save_mobiles(GameWorld *g, struct zone_data *rznum);
 

@@ -115,6 +115,24 @@ public:
     iterator end() const { return {this, vnums_.size()}; }
   };
 
+  /* Calls f(vnum, entity) for each, in order, without taking a snapshot: f must not add or remove entities. For
+   * read-only walks that run often, like the audit's. */
+  template <typename F>
+  void visit(F &&f) const
+  {
+    for (const auto &[vnum, item] : items_)
+      f(vnum, item.get());
+  }
+
+  /* The vnums from lo to hi that are in use, in order. */
+  std::vector<V> vnums_in(V lo, V hi) const
+  {
+    std::vector<V> out;
+    for (auto it = items_.lower_bound(lo); it != items_.end() && it->first <= hi; ++it)
+      out.push_back(it->first);
+    return out;
+  }
+
   /* Every vnum, in order, as they are now. */
   std::vector<V> vnums() const
   {

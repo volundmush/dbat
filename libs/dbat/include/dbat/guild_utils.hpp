@@ -6,8 +6,8 @@ struct guild_data;
 /* Field accessors for guilds. */
 room_vnum guild_get_vnum(const struct guild_data *guild);
 void guild_set_vnum(struct guild_data *guild, room_vnum v);
-mob_rnum guild_get_gm(const struct guild_data *guild);
-void guild_set_gm(struct guild_data *guild, mob_rnum v);
+mob_vnum guild_get_gm(const struct guild_data *guild);
+void guild_set_gm(struct guild_data *guild, mob_vnum v);
 int guild_get_open(const struct guild_data *guild);
 void guild_set_open(struct guild_data *guild, int v);
 int guild_get_close(const struct guild_data *guild);

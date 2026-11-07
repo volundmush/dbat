@@ -515,7 +515,7 @@ ACMD(do_load)
 
   if (is_abbrev(buf, "mob")) {
     struct char_data *mob = nullptr;
-    mob_rnum r_num;
+    mob_vnum r_num;
 
     if ((r_num = real_mobile(g, atoi(buf2))) == NOBODY) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");

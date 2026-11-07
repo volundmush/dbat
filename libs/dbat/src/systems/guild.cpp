@@ -1339,10 +1339,10 @@ void assign_the_guilds(GameWorld *g)
     if (guild_get_gm(gdindex) == NOBODY)
       continue;
 
-    if (g->mob_index[guild_get_gm(gdindex)].func && g->mob_index[guild_get_gm(gdindex)].func != guild)
-      guild_set_func(gdindex, g->mob_index[guild_get_gm(gdindex)].func);
+    if (mob_index_of(g, guild_get_gm(gdindex))->func && mob_index_of(g, guild_get_gm(gdindex))->func != guild)
+      guild_set_func(gdindex, mob_index_of(g, guild_get_gm(gdindex))->func);
 
-    g->mob_index[guild_get_gm(gdindex)].func = guild;
+    mob_index_of(g, guild_get_gm(gdindex))->func = guild;
   }
 }
 
@@ -1394,7 +1394,7 @@ static void list_all_guilds(GameWorld *g, struct char_data *ch)
     if (guild_get_gm(gm_nr) == NOBODY)
       strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", g->mob_index[guild_get_gm(gm_nr)].vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+      sprintf(buf1, "%6d", mob_index_of(g, guild_get_gm(gm_nr))->vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
                     guild_get_vnum(gm_nr), buf1, guild_get_charge(gm_nr), guild_customer_string(g, gm_nr, false));
@@ -1412,7 +1412,7 @@ static void list_detailed_guild(GameWorld *g, struct char_data *ch, struct guild
   if (guild_get_gm(gm_nr) < NOBODY)
     strcpy(buf1, "<NONE>");
   else
-    sprintf(buf1, "%6d   ", g->mob_index[guild_get_gm(gm_nr)].vnum);
+    sprintf(buf1, "%6d   ", mob_index_of(g, guild_get_gm(gm_nr))->vnum);
 
   snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Hours: %4d to %4d,  Surcharge: %5.2f\r\n",
@@ -1496,8 +1496,8 @@ void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, gui
       /************************************************************************/
 
       send_to_char(g, ch, " @c[@y%d@c]@y %s@n",
-                   (guild_get_gm(i) == NOBODY) ? -1 : g->mob_index[guild_get_gm(i)].vnum,
-                   (guild_get_gm(i) == NOBODY) ? "" : char_get_sdesc(&g->mob_proto[guild_get_gm(i)]));
+                   (guild_get_gm(i) == NOBODY) ? -1 : mob_index_of(g, guild_get_gm(i))->vnum,
+                   (guild_get_gm(i) == NOBODY) ? "" : char_get_sdesc(mob_proto_of(g, guild_get_gm(i))));
 
       send_to_char(g, ch, "\r\n");
     }

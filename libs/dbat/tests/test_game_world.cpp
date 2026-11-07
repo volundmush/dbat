@@ -45,13 +45,11 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   for (room_rnum r = 0; r < count; r++)
     rroom_set_number(g, r, first_vnum + r);
 
-  g->mob_proto = new char_data[1]();
-  g->mob_index = new index_data[1]();
-  clear_char(g->mob_proto);
-  char_set_nr(g->mob_proto, 0);
-  char_mob_set(g->mob_proto, MOB_ISNPC, true);
-  g->mob_index[0].vnum = first_vnum;
-  g->top_mob           = 0;
+  struct char_data *mob_proto = g->mob_proto.emplace(first_vnum);
+  clear_char(mob_proto);
+  char_set_nr(mob_proto, first_vnum);
+  char_mob_set(mob_proto, MOB_ISNPC, true);
+  g->mob_index.emplace(first_vnum)->vnum = first_vnum;
 
   struct obj_data *proto = g->obj_proto.emplace(first_vnum);
   clear_object(proto);
@@ -79,8 +77,8 @@ static void free_world(GameWorld *g)
   g->zones.clear();
   g->obj_index.clear();
   g->obj_proto.clear();
-  delete[] g->mob_index;
-  delete[] g->mob_proto;
+  g->mob_index.clear();
+  g->mob_proto.clear();
   delete[] g->rooms;
   game_world_destroy(g);
 }
@@ -114,7 +112,7 @@ static void check_lookups(GameWorld *a, GameWorld *b)
   CHECK(real_room(b, 201) == 1);
   CHECK(real_room(a, 201) == NOWHERE);
 
-  CHECK(real_mobile(a, 100) == 0);
+  CHECK(real_mobile(a, 100) == 100); /* real numbers are vnums now */
   CHECK(real_mobile(b, 100) == NOBODY);
   CHECK(real_object(b, 200) == 200); /* real numbers are vnums now */
   CHECK(real_object(a, 200) == NOTHING);
@@ -172,14 +170,14 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
   CHECK(obj != nullptr);
   CHECK(a->characters == mob);
   CHECK(a->objects == obj);
-  CHECK(a->mob_index[0].number == 1);
+  CHECK(mob_index_of(a, 100)->number == 1);
   CHECK(obj_index_of(a, 100)->number == 1);
   CHECK(char_get_mob_vnum(a, mob) == 100);
   CHECK(obj_get_vnum(a, obj) == 100);
 
   CHECK(b->characters == nullptr);
   CHECK(b->objects == nullptr);
-  CHECK(b->mob_index[0].number == 0);
+  CHECK(mob_index_of(b, 200)->number == 0);
   CHECK(obj_index_of(b, 200)->number == 0);
   CHECK(read_mobile(b, 100, VIRTUAL) == nullptr);
   CHECK(read_object(b, 100, VIRTUAL) == nullptr);
@@ -342,7 +340,7 @@ static void check_random_color(GameWorld *a, GameWorld *b)
   CHECK(circle_random(a) == second);
 
   remove_from_lookup_table(a, char_get_id(mob));
-  a->mob_index[0].number--;
+  mob_index_of(a, 100)->number--;
   a->characters = nullptr;
   delete mob;
 }

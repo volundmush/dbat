@@ -137,7 +137,6 @@ struct guild_data *add_guild(GameWorld *g, struct guild_data *ngld)
 bool save_guilds(GameWorld *g, struct zone_data *zone_num)
 {
   struct atomic_file af;
-  IDXTYPE i;
   int j;
   FILE *guild_file;
   char fname[64];
@@ -155,7 +154,7 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
   }
 
   /*. Search database for guilds in this zone . */
-  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
+  for (guild_vnum i : g->guilds.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((guild = find_guild(g, i)) != nullptr) {
       fprintf(guild_file, "#%d~\n", i);
 
@@ -184,7 +183,7 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
 
       /*. Save the rest . */
       fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-              guild_get_gm(guild) == NOBODY ? -1 : g->mob_index[guild_get_gm(guild)].vnum,
+              guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
               (int)guild_get_with_who(guild)[0], /* as signed, as always */
               guild_get_open(guild),
               guild_get_close(guild));

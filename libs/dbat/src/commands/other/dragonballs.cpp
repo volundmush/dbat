@@ -54,7 +54,7 @@
 /* A dragon saved as being somewhere, when it or that room no longer exists, is forgotten. */
 static void load_shadow_dragon(GameWorld *g, int *room, mob_vnum vnum)
 {
-  mob_rnum r_num;
+  mob_vnum r_num;
   room_rnum r_room;
 
   if (*room <= 0)
@@ -251,7 +251,7 @@ void wishSYS(GameWorld *g)
         save_mud_time(g, &g->time_info);
       } /* End while */
       struct char_data *mob = nullptr;
-      mob_rnum r_num;
+      mob_vnum r_num;
 
       r_num = real_mobile(g, SHADOW_DRAGON1_VNUM);
       mob   = read_mobile(g, r_num, REAL);
@@ -303,7 +303,7 @@ ACMD(do_summon)
   int dball[7]  = {20, 21, 22, 23, 24, 25, 26};
   int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
   struct char_data *mob = nullptr;
-  mob_rnum r_num;
+  mob_vnum r_num;
 
   if (!rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
     send_to_char(g, ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");

@@ -448,8 +448,8 @@ static void gedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   "Enter Choice : ",
 
                   OLC_NUM(d),
-                  guild_get_gm(guilddata) == NOBODY ? -1 : g->mob_index[guild_get_gm(guilddata)].vnum,
-                  guild_get_gm(guilddata) == NOBODY ? "None" : char_get_sdesc(&g->mob_proto[guild_get_gm(guilddata)]),
+                  guild_get_gm(guilddata) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guilddata))->vnum,
+                  guild_get_gm(guilddata) == NOBODY ? "None" : char_get_sdesc(mob_proto_of(g, guild_get_gm(guilddata))),
                   guild_get_no_such_skill(guilddata),
                   guild_get_not_enough_gold(guilddata),
                   guild_get_open(guilddata),
@@ -617,8 +617,8 @@ void gedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         if (i == -1)
           break;
         /*. Fiddle with special procs . */
-        guild_set_func(OLC_GUILD(d), g->mob_index[i].func != guild ? g->mob_index[i].func : nullptr);
-        g->mob_index[i].func = guild;
+        guild_set_func(OLC_GUILD(d), mob_index_of(g, i)->func != guild ? mob_index_of(g, i)->func : nullptr);
+        mob_index_of(g, i)->func = guild;
         break;
       }
       write_to_output(g, d, "Invalid response.\r\n");

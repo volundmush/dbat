@@ -4586,7 +4586,7 @@ bool char_is_npc(const struct char_data *ch)
 
 bool char_is_mob(GameWorld *g, const struct char_data *ch)
 {
-  return (char_is_npc(ch) && char_get_nr(ch) <= g->top_mob && char_get_nr(ch) != NOBODY);
+  return (char_is_npc(ch) && char_get_nr(ch) != NOBODY); /* a prototype goes only after every copy of it */
 }
 
 bool char_mob_flagged(const struct char_data *ch, int flag)
@@ -4798,12 +4798,12 @@ int char_get_skill(const struct char_data *ch, int i)
 
 spec_proc_func char_get_mob_spec(GameWorld *g, const struct char_data *ch)
 {
-  return (char_is_mob(g, ch) ? g->mob_index[(ch)->nr].func : nullptr);
+  return (char_is_mob(g, ch) ? mob_index_of(g, (ch)->nr)->func : nullptr);
 }
 
 mob_vnum char_get_mob_vnum(GameWorld *g, const struct char_data *mob)
 {
-  return (char_is_mob(g, mob) ? g->mob_index[char_get_nr(mob)].vnum : NOBODY);
+  return (char_is_mob(g, mob) ? char_get_nr(mob) : NOBODY); /* nr is the prototype's vnum */
 }
 
 bool char_is_awake(const struct char_data *ch)
@@ -6739,12 +6739,12 @@ void char_set_equipment(struct char_data *ch, int i, struct obj_data *v)
   ch->equipment[i] = v;
 }
 
-mob_rnum char_get_nr(const struct char_data *ch)
+mob_vnum char_get_nr(const struct char_data *ch)
 {
   return ch->nr;
 }
 
-void char_set_nr(struct char_data *ch, mob_rnum v)
+void char_set_nr(struct char_data *ch, mob_vnum v)
 {
   ch->nr = v;
 }
@@ -7935,4 +7935,14 @@ void char_reset_aff_abils(struct char_data *ch)
 void char_copy_time(struct char_data *to, const struct char_data *from)
 {
   to->time = from->time;
+}
+
+struct char_data *mob_proto_of(GameWorld *g, mob_vnum vnum)
+{
+  return g->mob_proto.find(vnum);
+}
+
+struct index_data *mob_index_of(GameWorld *g, mob_vnum vnum)
+{
+  return g->mob_index.find(vnum);
 }

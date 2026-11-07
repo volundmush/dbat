@@ -1,7 +1,8 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <map>
+#include <algorithm>
+#include <vector>
 
 #include "dbat/world_audit.hpp"
 #include "dbat/utils.hpp"
@@ -375,33 +376,43 @@ static void audit_connections(const GameWorld *g, struct audit *a)
 /* The index counts how many of each thing exist, and zone resets and limits go by it. */
 static void audit_index_counts(GameWorld *g, struct audit *a)
 {
-  std::map<obj_vnum, int> counts;
+  /* Both sides sorted by vnum, so one pass compares them: this runs after every step of every bot. */
+  std::vector<obj_vnum> vnums;
+  size_t i = 0;
 
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj)) {
-    obj_vnum vnum = obj_get_item_number(obj);
+  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+    if (obj_get_item_number(obj) != NOTHING)
+      vnums.push_back(obj_get_item_number(obj));
+  std::sort(vnums.begin(), vnums.end());
+  g->obj_index.visit([&](obj_vnum r, const index_data *index) {
+    int found = 0;
+    for (; i < vnums.size() && vnums[i] < r; i++)
+      problem(a, "object: prototype %d doesn't exist", vnums[i]);
+    for (; i < vnums.size() && vnums[i] == r; i++)
+      found++;
+    if (found != index->number)
+      problem(a, "object %d: %d exist, but the index counts %d", r, found, index->number);
+  });
+  for (; i < vnums.size(); i++)
+    problem(a, "object: prototype %d doesn't exist", vnums[i]);
 
-    if (vnum != NOTHING && !obj_index_of(g, vnum))
-      problem(a, "object: prototype %d doesn't exist", vnum);
-    else if (vnum != NOTHING)
-      counts[vnum]++;
-  }
-  for (obj_vnum r : g->obj_index.vnums())
-    if (counts[r] != obj_index_of(g, r)->number)
-      problem(a, "object %d: %d exist, but the index counts %d", r, counts[r], obj_index_of(g, r)->number);
-
-  int *mob_counts = new int[g->top_mob + 1]();
-  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
-    if (!char_is_npc(ch))
-      continue;
-    if (char_get_nr(ch) != NOBODY && (char_get_nr(ch) < 0 || char_get_nr(ch) > g->top_mob))
-      problem(a, "%s: prototype index %d doesn't exist", char_get_name(ch), char_get_nr(ch));
-    else if (char_get_nr(ch) != NOBODY)
-      mob_counts[char_get_nr(ch)]++;
-  }
-  for (mob_rnum r = 0; r <= g->top_mob; r++)
-    if (mob_counts[r] != g->mob_index[r].number)
-      problem(a, "mob %d: %d exist, but the index counts %d", g->mob_index[r].vnum, mob_counts[r], g->mob_index[r].number);
-  delete[] mob_counts;
+  vnums.clear();
+  i = 0;
+  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch))
+    if (char_is_npc(ch) && char_get_nr(ch) != NOBODY)
+      vnums.push_back(char_get_nr(ch));
+  std::sort(vnums.begin(), vnums.end());
+  g->mob_index.visit([&](mob_vnum r, const index_data *index) {
+    int found = 0;
+    for (; i < vnums.size() && vnums[i] < r; i++)
+      problem(a, "mob: prototype %d doesn't exist", vnums[i]);
+    for (; i < vnums.size() && vnums[i] == r; i++)
+      found++;
+    if (found != index->number)
+      problem(a, "mob %d: %d exist, but the index counts %d", r, found, index->number);
+  });
+  for (; i < vnums.size(); i++)
+    problem(a, "mob: prototype %d doesn't exist", vnums[i]);
 }
 
 /* Scripts find things through this table, by id. */

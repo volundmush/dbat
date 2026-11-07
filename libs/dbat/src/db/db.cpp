@@ -468,7 +468,6 @@ void boot_world(GameWorld *g)
 
   mud_log("Loading mobs and generating index.");
   index_boot(g, DB_BOOT_MOB);
-  check_sorted("mobile", g->mob_index, g->top_mob + 1, sizeof(*g->mob_index), offsetof(struct index_data, vnum));
 
   mud_log("Loading objs and generating index.");
   index_boot(g, DB_BOOT_OBJ);
@@ -586,26 +585,26 @@ void destroy_db(GameWorld *g)
   g->obj_index.clear();
 
   /* Mobiles */
-  for (cnt = 0; cnt <= g->top_mob; cnt++) {
-    if (char_get_alias(&g->mob_proto[cnt]))
-      free(char_get_alias(&g->mob_proto[cnt]));
-    if (char_get_raw_title(&g->mob_proto[cnt]))
-      free(char_get_raw_title(&g->mob_proto[cnt]));
-    if (char_get_sdesc(&g->mob_proto[cnt]))
-      free(char_get_sdesc(&g->mob_proto[cnt]));
-    if (char_get_ldesc(&g->mob_proto[cnt]))
-      free(char_get_ldesc(&g->mob_proto[cnt]));
-    if (char_get_ddesc(&g->mob_proto[cnt]))
-      free(char_get_ddesc(&g->mob_proto[cnt]));
+  for (mob_vnum mvnum : g->mob_proto.vnums()) {
+    if (char_get_alias(mob_proto_of(g, mvnum)))
+      free(char_get_alias(mob_proto_of(g, mvnum)));
+    if (char_get_raw_title(mob_proto_of(g, mvnum)))
+      free(char_get_raw_title(mob_proto_of(g, mvnum)));
+    if (char_get_sdesc(mob_proto_of(g, mvnum)))
+      free(char_get_sdesc(mob_proto_of(g, mvnum)));
+    if (char_get_ldesc(mob_proto_of(g, mvnum)))
+      free(char_get_ldesc(mob_proto_of(g, mvnum)));
+    if (char_get_ddesc(mob_proto_of(g, mvnum)))
+      free(char_get_ddesc(mob_proto_of(g, mvnum)));
 
     /* free script proto list */
-    free_proto_script(&g->mob_proto[cnt], MOB_TRIGGER);
+    free_proto_script(mob_proto_of(g, mvnum), MOB_TRIGGER);
 
-    while (char_get_affected(&g->mob_proto[cnt]))
-      affect_remove(g, &g->mob_proto[cnt], char_get_affected(&g->mob_proto[cnt]));
+    while (char_get_affected(mob_proto_of(g, mvnum)))
+      affect_remove(g, mob_proto_of(g, mvnum), char_get_affected(mob_proto_of(g, mvnum)));
   }
-  delete[] g->mob_proto;
-  delete[] g->mob_index;
+  g->mob_proto.clear();
+  g->mob_index.clear();
 
   /* Shops */
   destroy_shops(g);
@@ -1152,8 +1151,6 @@ void index_boot(GameWorld *g, int mode)
       mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_MOB:
-      g->mob_proto = new char_data[rec_count]();
-      g->mob_index = new index_data[rec_count]();
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct char_data) * rec_count;
       mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
@@ -1633,7 +1630,7 @@ static void renum_world(GameWorld *g)
  * room, mobile, or object a little more difficult while the game is running.
  *
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_vnum))
+ * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_vnum) and sizeof(obj_vnum))
  */
 static void renum_zone_table(GameWorld *g)
 {
@@ -2030,7 +2027,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
   char line[READ_SIZE], *tmpptr, letter;
   char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
   char f7[128], f8[128], buf2[128];
-  mob_vnum nr = g->mob_index[char_get_nr(ch)].vnum;
+  mob_vnum nr = mob_index_of(g, char_get_nr(ch))->vnum;
 
   /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
   char_set_player_specials(ch, nullptr);
@@ -2178,17 +2175,24 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
 static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr)
 {
 
-  g->mob_index[g->parse_mob_index].vnum   = nr;
-  g->mob_index[g->parse_mob_index].number = 0;
-  g->mob_index[g->parse_mob_index].func   = nullptr;
+  if (g->mob_index.find(nr)) {
+    mud_log("SYSERR: mobile #%d is defined twice.", nr);
+    exit(1);
+  }
+  g->parse_mob_index = nr;
+  g->mob_index.emplace(nr);
+  g->mob_proto.emplace(nr);
+  mob_index_of(g, g->parse_mob_index)->vnum   = nr;
+  mob_index_of(g, g->parse_mob_index)->number = 0;
+  mob_index_of(g, g->parse_mob_index)->func   = nullptr;
 
-  clear_char(g->mob_proto + g->parse_mob_index);
+  clear_char(mob_proto_of(g, g->parse_mob_index));
 
-  char_set_nr(&g->mob_proto[g->parse_mob_index], g->parse_mob_index);
-  char_set_desc(&g->mob_proto[g->parse_mob_index], nullptr);
+  char_set_nr(mob_proto_of(g, g->parse_mob_index), g->parse_mob_index);
+  char_set_desc(mob_proto_of(g, g->parse_mob_index), nullptr);
 
-  if (parse_mobile_from_file(g, mob_f, g->mob_proto + g->parse_mob_index)) {
-    g->top_mob = g->parse_mob_index++;
+  if (parse_mobile_from_file(g, mob_f, mob_proto_of(g, g->parse_mob_index))) {
+    /* the prototype is in the tables already */
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
   }
@@ -2773,14 +2777,13 @@ static int hsort(const void *a, const void *b)
 
 int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch)
 {
-  mob_rnum nr;
   int found = 0;
 
-  for (nr = 0; nr <= g->top_mob; nr++)
-    if (isname(searchname, char_get_alias(&g->mob_proto[nr])))
+  for (mob_vnum nr : g->mob_proto.vnums())
+    if (isname(searchname, char_get_alias(mob_proto_of(g, nr))))
       send_to_char(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, g->mob_index[nr].vnum, char_get_sdesc(&g->mob_proto[nr]),
-                   char_get_proto_script(&g->mob_proto[nr]) ? "[TRIG]" : "");
+                   ++found, mob_index_of(g, nr)->vnum, char_get_sdesc(mob_proto_of(g, nr)),
+                   char_get_proto_script(mob_proto_of(g, nr)) ? "[TRIG]" : "");
 
   return (found);
 }
@@ -2847,9 +2850,9 @@ int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch)
 /* create a character, and add it to the char list */
 
 /* create a new mobile from a prototype */
-struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rnum */
+struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_vnum */
 {
-  mob_rnum i;
+  mob_vnum i;
   struct char_data *mob;
 
   if (type == VIRTUAL) {
@@ -2859,10 +2862,14 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
     }
   } else
     i = nr;
+  if (!mob_proto_of(g, i)) {
+    mud_log("WARNING: Mobile %d does not exist in database.", nr);
+    return (nullptr);
+  }
 
   mob = new char_data();
   clear_char(mob);
-  *mob             = g->mob_proto[i];
+  *mob = (*mob_proto_of(g, i));
   char_set_next(mob, g->characters);
   g->characters   = mob;
   char_set_next_affect(mob, nullptr);
@@ -3422,13 +3429,13 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr, int type) /* and mob_rn
     char_mob_set(mob, MOB_LLEG, true);
   }
 
-  g->mob_index[i].number++;
+  mob_index_of(g, i)->number++;
 
   char_set_id(mob, dg_new_mob_uid(g));
   /* find_char helper */
   add_to_lookup_table(g, char_get_id(mob), MOB_TRIGGER, (void *)mob);
 
-  copy_proto_script(&g->mob_proto[i], mob, MOB_TRIGGER);
+  copy_proto_script(mob_proto_of(g, i), mob, MOB_TRIGGER);
   assign_triggers(g, mob, MOB_TRIGGER);
   racial_body_parts(mob);
 
@@ -3789,7 +3796,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
         case 'M': /* read a mobile */
 
-          if ((g->mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
+          if ((mob_index_of(g, ZCMD2.arg1)->number < ZCMD2.arg2) &&
               (rand_number(g, 1, 100) >= ZCMD2.arg5)) {
             int room_max = 0;
             mob = read_mobile(g, ZCMD2.arg1, REAL);
@@ -4187,7 +4194,7 @@ static void free_followers(struct follow_type *k)
 void free_char(GameWorld *g, struct char_data *ch)
 {
   int i;
-  mob_rnum nr;
+  mob_vnum nr;
   struct alias_data *a;
 
   /* first: removing an affect can change skills, which live in the player data freed below */
@@ -4237,19 +4244,20 @@ void free_char(GameWorld *g, struct char_data *ch)
     free_proto_script(ch, MOB_TRIGGER);
 
   } else if ((nr = char_get_nr(ch)) != NOBODY) {
-    /* otherwise, free strings only if the string is not pointing at proto */
-    if (char_get_alias(ch) && char_get_alias(ch) != char_get_alias(&g->mob_proto[nr]))
+    /* otherwise, free strings only if the string is not pointing at proto (none, once OLC has deleted it) */
+    struct char_data *proto = mob_proto_of(g, nr);
+    if (char_get_alias(ch) && char_get_alias(ch) != (proto ? char_get_alias(proto) : nullptr))
       free(char_get_alias(ch));
-    if (char_get_raw_title(ch) && char_get_raw_title(ch) != char_get_raw_title(&g->mob_proto[nr]))
+    if (char_get_raw_title(ch) && char_get_raw_title(ch) != (proto ? char_get_raw_title(proto) : nullptr))
       free(char_get_raw_title(ch));
-    if (char_get_sdesc(ch) && char_get_sdesc(ch) != char_get_sdesc(&g->mob_proto[nr]))
+    if (char_get_sdesc(ch) && char_get_sdesc(ch) != (proto ? char_get_sdesc(proto) : nullptr))
       free(char_get_sdesc(ch));
-    if (char_get_ldesc(ch) && char_get_ldesc(ch) != char_get_ldesc(&g->mob_proto[nr]))
+    if (char_get_ldesc(ch) && char_get_ldesc(ch) != (proto ? char_get_ldesc(proto) : nullptr))
       free(char_get_ldesc(ch));
-    if (char_get_ddesc(ch) && char_get_ddesc(ch) != char_get_ddesc(&g->mob_proto[nr]))
+    if (char_get_ddesc(ch) && char_get_ddesc(ch) != (proto ? char_get_ddesc(proto) : nullptr))
       free(char_get_ddesc(ch));
     /* free script proto list if it's not the prototype */
-    if (char_get_proto_script(ch) && char_get_proto_script(ch) != char_get_proto_script(&g->mob_proto[nr]))
+    if (char_get_proto_script(ch) && char_get_proto_script(ch) != (proto ? char_get_proto_script(proto) : nullptr))
       free_proto_script(ch, MOB_TRIGGER);
   }
   /* free any assigned scripts */
@@ -4493,11 +4501,6 @@ static int room_order(const void *key, const void *room)
   return vnum_order(*(const room_vnum *)key, room_get_number((const struct room_data *)room));
 }
 
-static int index_order(const void *key, const void *index)
-{
-  return vnum_order(*(const IDXTYPE *)key, ((const struct index_data *)index)->vnum);
-}
-
 /* The index in table (count entries of size bytes) of the entry for vnum, or NOWHERE. */
 static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t size, int (*order)(const void *, const void *))
 {
@@ -4516,9 +4519,9 @@ room_rnum real_room(GameWorld *g, room_vnum vnum)
 }
 
 /* returns the real number of the monster with given virtual number */
-mob_rnum real_mobile(GameWorld *g, mob_vnum vnum)
+mob_vnum real_mobile(GameWorld *g, mob_vnum vnum)
 {
-  return find_vnum(vnum, g->mob_index, g->top_mob + 1, sizeof(*g->mob_index), index_order);
+  return g->mob_index.find(vnum) ? vnum : NOBODY; /* rnums are vnums now */
 }
 
 /* returns the real number of the object with given virtual number */

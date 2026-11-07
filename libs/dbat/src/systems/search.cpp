@@ -139,7 +139,7 @@ struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_rnum
 }
 
 /* search all over the world for a char num, and return a pointer if found */
-struct char_data *get_char_num(GameWorld *g, mob_rnum nr)
+struct char_data *get_char_num(GameWorld *g, mob_vnum nr)
 {
 
   for (char_data *i : each_char(g))

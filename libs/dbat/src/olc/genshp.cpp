@@ -386,7 +386,6 @@ struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
 
 bool save_shops(GameWorld *g, struct zone_data *zone_num)
 {
-  IDXTYPE i;
   int j;
   struct atomic_file af;
   FILE *shop_file;
@@ -411,7 +410,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
   /*
    * Search database for shops in this zone.
    */
-  for (i = genolc_zone_bottom(g, zone_num); i <= zone_num->top; i++) {
+  for (shop_vnum i : g->shops.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((shop = find_shop(g, i)) != nullptr) {
       fprintf(shop_file, "#%d~\n", i);
 
@@ -468,7 +467,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
               shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
               shop_get_temper(shop),
               (int)shop_get_bitvector(shop), /* as signed, as always */
-              shop_get_keeper(shop) == NOBODY ? -1 : g->mob_index[shop_get_keeper(shop)].vnum);
+              shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
       for (j = 0; j < SW_ARRAY_MAX; j++)
         fprintf(shop_file, "%s%d", j ? " " : "", (int)shop_get_with_who(shop)[j]);
       fprintf(shop_file, "\n");

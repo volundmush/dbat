@@ -440,9 +440,12 @@ struct obj_data *char_get_equipment(const struct char_data *ch, int i);
 void char_set_equipment(struct char_data *ch, int i, struct obj_data *v);
 
 spec_proc_func char_get_mob_spec(GameWorld *g, const struct char_data *ch);
-mob_rnum char_get_nr(const struct char_data *ch);
-void char_set_nr(struct char_data *ch, mob_rnum v);
+mob_vnum char_get_nr(const struct char_data *ch);
+void char_set_nr(struct char_data *ch, mob_vnum v);
 mob_vnum char_get_mob_vnum(GameWorld *g, const struct char_data *mob);
+/* The prototype, and its index entry, of the mobs numbered vnum, or null. */
+struct char_data *mob_proto_of(GameWorld *g, mob_vnum vnum);
+struct index_data *mob_index_of(GameWorld *g, mob_vnum vnum);
 
 int8_t char_get_mob_specials_default_pos(const struct char_data *ch);
 void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v);

@@ -200,8 +200,8 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   char_from_room(g, ch);
 
   if (char_is_npc(ch)) {
-    if (char_get_nr(ch) != NOTHING) /* prototyped */
-      g->mob_index[char_get_nr(ch)].number--;
+    if (struct index_data *index = mob_index_of(g, char_get_nr(ch))) /* prototyped, and still is */
+      index->number--;
     clearMemory(ch);
     if (char_get_script(ch))
       extract_script(g, ch, MOB_TRIGGER);

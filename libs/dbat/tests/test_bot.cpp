@@ -81,6 +81,15 @@ constexpr size_t MAX_LINE     = MAX_INPUT_LENGTH + 64;
  * test, so a new failure stands out. tests/corpus/open/ is the place for a short journal of each: when
  * one is fixed, remove its line here and move its journal up into tests/corpus/.
  */
+/* The nth mob prototype's vnum, in vnum order: bots pick one at random. */
+static mob_vnum nth_mob_vnum(GameWorld *g, size_t n)
+{
+  for (mob_vnum vnum : g->mob_proto.vnums())
+    if (n-- == 0)
+      return vnum;
+  return NOBODY;
+}
+
 /* The nth object prototype's vnum, in vnum order: bots pick one at random. */
 static obj_vnum nth_obj_vnum(GameWorld *g, size_t n)
 {
@@ -467,7 +476,7 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
       snprintf(number, sizeof(number), "%d", nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
       return number;
     case 4:
-      snprintf(number, sizeof(number), "%d", g->mob_index[bot_dice(g->top_mob + 1)].vnum);
+      snprintf(number, sizeof(number), "%d", nth_mob_vnum(g, bot_dice(g->mob_proto.size())));
       return number;
     default:
       break;
@@ -533,7 +542,7 @@ static void compose_builder_command(GameWorld *g, char *text, size_t size)
       snprintf(text, size, "%s %d", PICK(with_object), nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
       break;
     case 2:
-      snprintf(text, size, "%s %d", PICK(with_mob), g->mob_index[bot_dice(g->top_mob + 1)].vnum);
+      snprintf(text, size, "%s %d", PICK(with_mob), nth_mob_vnum(g, bot_dice(g->mob_proto.size())));
       break;
     case 3:
       if (!g->zones.empty()) {

@@ -13,12 +13,12 @@ void guild_set_vnum(struct guild_data *guild, room_vnum v)
   guild->vnum = v;
 }
 
-mob_rnum guild_get_gm(const struct guild_data *guild)
+mob_vnum guild_get_gm(const struct guild_data *guild)
 {
   return guild->gm;
 }
 
-void guild_set_gm(struct guild_data *guild, mob_rnum v)
+void guild_set_gm(struct guild_data *guild, mob_vnum v)
 {
   guild->gm = v;
 }

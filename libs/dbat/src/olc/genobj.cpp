@@ -141,7 +141,6 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   char wbuf3[MAX_STRING_LENGTH], wbuf4[MAX_STRING_LENGTH];
   char pbuf1[MAX_STRING_LENGTH], pbuf2[MAX_STRING_LENGTH];
   char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
-  IDXTYPE counter;
   int counter2;
   obj_vnum realcounter;
   struct atomic_file af;
@@ -162,7 +161,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   /*
    * Start running through all objects in this zone.
    */
-  for (counter = genolc_zone_bottom(g, zone_num); counter <= zone_num->top; counter++) {
+  for (obj_vnum counter : g->obj_proto.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((realcounter = real_object(g, counter)) != NOTHING) {
       if (obj_get_action_description(obj = obj_proto_of(g, realcounter))) {
         strlcpy(buf, obj_get_action_description(obj), sizeof(buf));

@@ -18,7 +18,7 @@ void object_list_new_owner(struct obj_data *list, struct char_data *ch);
 void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch);
 
 struct char_data *get_char_room(GameWorld *g, char *name, int *num, room_rnum room);
-struct char_data *get_char_num(GameWorld *g, mob_rnum nr);
+struct char_data *get_char_num(GameWorld *g, mob_vnum nr);
 void char_from_room(GameWorld *g, struct char_data *ch);
 void char_to_room(GameWorld *g, struct char_data *ch, room_rnum room);
 

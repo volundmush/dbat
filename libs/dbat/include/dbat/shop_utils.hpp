@@ -7,8 +7,8 @@ struct shop_buy_data;
 /* Field accessors for shops. */
 room_vnum shop_get_vnum(const struct shop_data *shop);
 void shop_set_vnum(struct shop_data *shop, room_vnum v);
-mob_rnum shop_get_keeper(const struct shop_data *shop);
-void shop_set_keeper(struct shop_data *shop, mob_rnum v);
+mob_vnum shop_get_keeper(const struct shop_data *shop);
+void shop_set_keeper(struct shop_data *shop, mob_vnum v);
 int shop_get_open1(const struct shop_data *shop);
 void shop_set_open1(struct shop_data *shop, int v);
 int shop_get_close1(const struct shop_data *shop);

@@ -508,8 +508,8 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
       case 'M':
         write_to_output(g, d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        char_get_sdesc(&g->mob_proto[MYCMD.arg1]),
-                        g->mob_index[MYCMD.arg1].vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5);
+                        char_get_sdesc(mob_proto_of(g, MYCMD.arg1)),
+                        mob_index_of(g, MYCMD.arg1)->vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5);
         break;
       case 'G':
         write_to_output(g, d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",

@@ -849,7 +849,7 @@ ACMD(do_mtransform)
   char arg[MAX_INPUT_LENGTH];
   char_data *m, tmpmob;
   obj_data *obj[NUM_WEARS];
-  mob_rnum this_rnum = char_get_nr(ch);
+  mob_vnum this_rnum = char_get_nr(ch);
   int pos;
 
   if (!mob_cmd_allowed(g, ch, true))

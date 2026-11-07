@@ -412,12 +412,12 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
   for (subcmd = 0; zone_get_cmd(g, zone_num, subcmd)->command != 'S'; subcmd++) {
     switch (zone_get_cmd(g, zone_num, subcmd)->command) {
       case 'M':
-        arg1    = g->mob_index[zone_get_cmd(g, zone_num, subcmd)->arg1].vnum;
+        arg1    = mob_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;
         arg2    = zone_get_cmd(g, zone_num, subcmd)->arg2;
         arg3    = rroom_get_vnum(g, zone_get_cmd(g, zone_num, subcmd)->arg3);
         arg4    = zone_get_cmd(g, zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(g, zone_num, subcmd)->arg5;
-        comment = char_get_sdesc(&g->mob_proto[zone_get_cmd(g, zone_num, subcmd)->arg1]);
+        comment = char_get_sdesc(mob_proto_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1));
         break;
       case 'O':
         arg1    = obj_index_of(g, zone_get_cmd(g, zone_num, subcmd)->arg1)->vnum;

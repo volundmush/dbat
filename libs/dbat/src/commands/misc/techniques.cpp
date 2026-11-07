@@ -198,7 +198,7 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
   char blamo[MAX_INPUT_LENGTH];
   snprintf(blamo, sizeof(blamo), "p.%s", char_get_name(ch));
 
-  mob_rnum r_num;
+  mob_vnum r_num;
   if ((r_num = real_mobile(g, 25)) == NOBODY) {
     send_to_imm(g, "Multiform Clone doesn't exist!");
     return;

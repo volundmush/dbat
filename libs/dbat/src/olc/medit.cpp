@@ -35,7 +35,7 @@
 
 static void init_mobile(GameWorld *g, struct char_data *mob);
 static void medit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_rnum rmob_num);
+static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_vnum rmob_num);
 static void medit_setup_new(GameWorld *g, struct descriptor_data *d);
 
 /*-------------------------------------------------------------------*/
@@ -52,7 +52,7 @@ ACMD(do_oasis_medit)
 {
   IDXTYPE number = NOBODY;
   int save       = 0;
-  mob_rnum real_num;
+  mob_vnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -227,7 +227,7 @@ static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_rnum rmob_num)
+static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_vnum rmob_num)
 {
   struct char_data *mob;
 
@@ -236,7 +236,7 @@ static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_rn
    */
   mob = new char_data();
 
-  copy_mobile(g, mob, g->mob_proto + rmob_num);
+  copy_mobile(g, mob, mob_proto_of(g, rmob_num));
 
   OLC_MOB(d)       = mob;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -290,7 +290,7 @@ static void init_mobile(GameWorld *g, struct char_data *mob)
 static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   int i;
-  mob_rnum new_rnum;
+  mob_vnum new_rnum;
 
   i = (real_mobile(g, OLC_NUM(d)) == NOBODY);
 
@@ -301,11 +301,11 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
 
   /* Update triggers */
   /* Free old proto list  */
-  if (char_get_proto_script(&g->mob_proto[new_rnum]) &&
-      char_get_proto_script(&g->mob_proto[new_rnum]) != OLC_SCRIPT(d))
-    free_proto_script(&g->mob_proto[new_rnum], MOB_TRIGGER);
+  if (char_get_proto_script(mob_proto_of(g, new_rnum)) &&
+      char_get_proto_script(mob_proto_of(g, new_rnum)) != OLC_SCRIPT(d))
+    free_proto_script(mob_proto_of(g, new_rnum), MOB_TRIGGER);
 
-  char_set_proto_script(&g->mob_proto[new_rnum], OLC_SCRIPT(d));
+  char_set_proto_script(mob_proto_of(g, new_rnum), OLC_SCRIPT(d));
 
   /* this takes care of the mobs currently in-game */
   for (char_data *mob : each_char(g)) {
@@ -317,7 +317,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
       extract_script(g, mob, MOB_TRIGGER);
 
     free_proto_script(mob, MOB_TRIGGER);
-    copy_proto_script(&g->mob_proto[new_rnum], mob, MOB_TRIGGER);
+    copy_proto_script(mob_proto_of(g, new_rnum), mob, MOB_TRIGGER);
     assign_triggers(g, mob, MOB_TRIGGER);
   }
   /* end trigger update */
@@ -542,7 +542,7 @@ static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
 void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int i         = -1;
-  mob_rnum rnum;
+  mob_vnum rnum;
   char *oldtext = nullptr;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {

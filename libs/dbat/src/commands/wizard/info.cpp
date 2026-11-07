@@ -194,8 +194,8 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
         case 'M':
           send_to_char(g, ch, "%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       char_get_sdesc(&g->mob_proto[ZOCMD.arg1]),
-                       g->mob_index[ZOCMD.arg1].vnum, ZOCMD.arg2,
+                       char_get_sdesc(mob_proto_of(g, ZOCMD.arg1)),
+                       mob_index_of(g, ZOCMD.arg1)->vnum, ZOCMD.arg2,
                        ZOCMD.arg4, ZOCMD.arg5);
           break;
         case 'G':
@@ -682,7 +682,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   if (char_is_mob(g, k)) {
     send_to_char(g, ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
-                 (g->mob_index[char_get_nr(k)].func ? "Exists" : "None"),
+                 (mob_index_of(g, char_get_nr(k))->func ? "Exists" : "None"),
                  char_get_mob_specials_damnodice(k), char_get_mob_specials_damsizedice(k));
     send_to_char(g, ch, "Average damage per round %.1f (%.1f [BHD] + %d [STR MOD])\r\n", (((char_get_mob_specials_damsizedice(k)) + 1) / 2.0) * (char_get_mob_specials_damnodice(k)) + ability_mod_value(char_get_aff_abils_str(k)), (((char_get_mob_specials_damsizedice(k)) + 1) / 2.0) * (char_get_mob_specials_damnodice(k)), ability_mod_value(char_get_aff_abils_str(k)));
   }
@@ -938,7 +938,7 @@ ACMD(do_vstat)
 
   if (is_abbrev(buf, "mob")) {
     struct char_data *mob;
-    mob_rnum r_num;
+    mob_vnum r_num;
 
     if ((r_num = real_mobile(g, atoi(buf2))) == NOBODY) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");
@@ -1049,8 +1049,8 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
       if (obj_index_of(g, ovnum)->vnum >= zone->bot && obj_index_of(g, ovnum)->vnum <= zone->top)
         k++;
 
-    for (i = 0; i < g->top_mob; i++)
-      if (g->mob_index[i].vnum >= zone->bot && g->mob_index[i].vnum <= zone->top)
+    for (mob_vnum mvnum : g->mob_proto.vnums())
+      if (mob_index_of(g, mvnum)->vnum >= zone->bot && mob_index_of(g, mvnum)->vnum <= zone->top)
         l++;
 
     m = count_shops(g, zone->bot, zone->top);
@@ -1245,7 +1245,7 @@ ACMD(do_show)
                    "  @Y%5d@W Wish Selfishness Meter@n\r\n",
                    i, con,
                    g->top_of_p_table + 1,
-                   j, g->top_mob + 1,
+                   j, (int)g->mob_proto.size(),
                    k, (int)g->obj_proto.size(),
                    g->top_room + 1, (int)g->zones.size(),
                    (int)g->trig_index.size(),
@@ -1665,9 +1665,9 @@ ACMD(do_zcheck)
 
   send_to_char(g, ch, "Checking Mobs for limits...\r\n");
   /*check mobs first*/
-  for (i = 0; i < g->top_mob; i++) {
-    if (find_zone_by_thing(g, g->mob_index[i].vnum) == zrnum) { /*is mob in this zone?*/
-      mob = &g->mob_proto[i];
+  for (mob_vnum mvnum : g->mob_proto.vnums()) {
+    if (find_zone_by_thing(g, mob_index_of(g, mvnum)->vnum) == zrnum) { /*is mob in this zone?*/
+      mob = mob_proto_of(g, mvnum);
       if (!strcmp(char_get_alias(mob), "mob unfinished") && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- Alias hasn't been set.\r\n");
@@ -1967,7 +1967,7 @@ ACMD(do_zcheck)
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
-  mob_rnum mrnum = real_mobile(g, mvnum);
+  mob_vnum mrnum = real_mobile(g, mvnum);
 
   if (mrnum == NOBODY) {
     send_to_char(g, ch, "That mob does not exist.\r\n");
@@ -1975,7 +1975,7 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum)
   }
 
   send_to_char(g, ch, "Checking load info for the mob [%d] %s...\r\n",
-               mvnum, char_get_sdesc(&g->mob_proto[mrnum]));
+               mvnum, char_get_sdesc(mob_proto_of(g, mrnum)));
 
   for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -2002,7 +2002,7 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
   obj_vnum ornum       = real_object(g, ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
-  mob_rnum lastmob_r   = 0;
+  mob_vnum lastmob_r   = 0;
 
   if (ornum == NOTHING) {
     send_to_char(g, ch, "That object does not exist.\r\n");
@@ -2045,8 +2045,8 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
             send_to_char(g, ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                          lastroom_v,
                          rroom_get_name(g, lastroom_r),
-                         char_get_sdesc(&g->mob_proto[lastmob_r]),
-                         g->mob_index[lastmob_r].vnum,
+                         char_get_sdesc(mob_proto_of(g, lastmob_r)),
+                         mob_index_of(g, lastmob_r)->vnum,
                          ZCMD2.arg2);
             count += 1;
           }
@@ -2056,8 +2056,8 @@ static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum)
             send_to_char(g, ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
                          lastroom_v,
                          rroom_get_name(g, lastroom_r),
-                         char_get_sdesc(&g->mob_proto[lastmob_r]),
-                         g->mob_index[lastmob_r].vnum,
+                         char_get_sdesc(mob_proto_of(g, lastmob_r)),
+                         mob_index_of(g, lastmob_r)->vnum,
                          ZCMD2.arg2);
             count += 1;
           }
@@ -2086,7 +2086,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   struct index_data *trnum = find_trigger(g, tvnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
-  mob_rnum lastmob_r   = 0, i;
+  mob_vnum lastmob_r       = 0;
   obj_vnum lastobj_r       = 0;
   struct trig_proto_list *tpl;
 
@@ -2132,8 +2132,8 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
             break;
           if (ZCMD2.arg1 == MOB_TRIGGER) {
             send_to_char(g, ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
-                         g->mob_index[lastmob_r].vnum,
-                         char_get_sdesc(&g->mob_proto[lastmob_r]),
+                         mob_index_of(g, lastmob_r)->vnum,
+                         char_get_sdesc(mob_proto_of(g, lastmob_r)),
                          lastroom_v);
             found = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER) {
@@ -2153,15 +2153,15 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
     } /*for cmd_no......*/
   } /*for zone...*/
 
-  for (i = 0; i < g->top_mob; i++) {
-    if (!char_get_proto_script(&g->mob_proto[i]))
+  for (mob_vnum i : g->mob_proto.vnums()) {
+    if (!char_get_proto_script(mob_proto_of(g, i)))
       continue;
 
-    for (tpl = char_get_proto_script(&g->mob_proto[i]); tpl; tpl = tpl->next)
+    for (tpl = char_get_proto_script(mob_proto_of(g, i)); tpl; tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(g, ch, "mob [%5d] %s\r\n",
-                     g->mob_index[i].vnum,
-                     char_get_sdesc(&g->mob_proto[i]));
+                     mob_index_of(g, i)->vnum,
+                     char_get_sdesc(mob_proto_of(g, i)));
         found = 1;
       }
   }

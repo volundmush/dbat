@@ -438,7 +438,7 @@ static bool obj_is_valid(const struct obj_data *obj)
 obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj)
 {
   if (!obj_is_valid(obj)) return NOTHING;
-  return obj_index_of(g, obj->item_number) ? obj->item_number : NOTHING; /* item_number is the prototype's vnum */
+  return obj->item_number; /* the prototype's vnum: a prototype goes only after every copy of it */
 }
 
 /* Formerly macros in object_utils.hpp. */

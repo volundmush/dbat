@@ -444,8 +444,8 @@ static void sedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   "Enter Choice : ",
 
                   OLC_NUM(d),
-                  shop_get_keeper(shop) == NOBODY ? -1 : g->mob_index[shop_get_keeper(shop)].vnum,
-                  shop_get_keeper(shop) == NOBODY ? "None" : char_get_sdesc(&g->mob_proto[shop_get_keeper(shop)]),
+                  shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum,
+                  shop_get_keeper(shop) == NOBODY ? "None" : char_get_sdesc(mob_proto_of(g, shop_get_keeper(shop))),
                   shop_get_open1(shop),
                   shop_get_close1(shop),
                   shop_get_open2(shop),
@@ -749,8 +749,8 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       /*
      * Fiddle with special procs.
      */
-      shop_set_func(OLC_SHOP(d), g->mob_index[i].func != shop_keeper ? g->mob_index[i].func : nullptr);
-      g->mob_index[i].func = shop_keeper;
+      shop_set_func(OLC_SHOP(d), mob_index_of(g, i)->func != shop_keeper ? mob_index_of(g, i)->func : nullptr);
+      mob_index_of(g, i)->func = shop_keeper;
       break;
     case SEDIT_OPEN1:
       shop_set_open1(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
