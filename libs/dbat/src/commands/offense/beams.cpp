@@ -53,7 +53,7 @@ ACMD(do_galikgun)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -91,7 +91,7 @@ ACMD(do_galikgun)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_GALIKGUN, 0);
@@ -297,7 +297,7 @@ ACMD(do_final)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -325,7 +325,7 @@ ACMD(do_final)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_FINALFLASH, 0);
@@ -508,7 +508,7 @@ ACMD(do_tribeam)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -536,7 +536,7 @@ ACMD(do_tribeam)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_TRIBEAM, 0);
@@ -726,7 +726,7 @@ ACMD(do_dualbeam)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -754,7 +754,7 @@ ACMD(do_dualbeam)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_DUALBEAM, 0);
@@ -974,7 +974,7 @@ ACMD(do_dodonpa)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1010,7 +1010,7 @@ ACMD(do_dodonpa)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_DODONPA, 0);
@@ -1221,7 +1221,7 @@ ACMD(do_masenko)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1258,7 +1258,7 @@ ACMD(do_masenko)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_MASENKO, 0);
@@ -1490,7 +1490,7 @@ ACMD(do_kamehameha)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1527,7 +1527,7 @@ ACMD(do_kamehameha)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KAMEHAMEHA, 0);
@@ -1825,7 +1825,7 @@ ACMD(do_beam)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1850,7 +1850,7 @@ ACMD(do_beam)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_BEAM, 0);

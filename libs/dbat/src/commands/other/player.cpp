@@ -98,10 +98,10 @@ ACMD(do_quit)
     send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
-  if (char_get_mindlink(ch) && char_get_linker(ch) == 0) {
+  if (char_get_mindlink(g, ch) && char_get_linker(ch) == 0) {
     send_to_char(g, ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
-    if (char_get_in_room(char_get_mindlink(ch)) != NOWHERE) {
-      look_at_room(g, char_get_in_room(char_get_mindlink(ch)), ch, 0);
+    if (char_get_in_room(char_get_mindlink(g, ch)) != NOWHERE) {
+      look_at_room(g, char_get_in_room(char_get_mindlink(g, ch)), ch, 0);
       send_to_char(g, ch, "You get an impression of where this interference is originating from.\r\n");
     }
     return;
@@ -126,7 +126,7 @@ ACMD(do_quit)
     act(g, "$n has left the game.", true, ch, nullptr, nullptr, TO_ROOM);
     mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s has quit the game.", char_get_name(ch));
     send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
-    if (char_get_followers(ch) || char_get_master(ch))
+    if (char_get_followers(ch) || char_get_master(g, ch))
       die_follower(g, ch);
     if (ch == g->ch_selling)
       stop_auction(g, AUC_QUIT_CANCEL, nullptr);
@@ -324,7 +324,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
 
     send_to_char(g, ch, "Your group consists of:\r\n");
 
-    k = (char_get_master(ch) ? char_get_master(ch) : ch);
+    k = (char_get_master(g, ch) ? char_get_master(g, ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(g, ch, "@D----------------@n\r\n");
@@ -380,7 +380,7 @@ ACMD(do_group)
     return;
   }
 
-  if (char_get_master(ch)) {
+  if (char_get_master(g, ch)) {
     act(g, "You cannot enroll group members without being head of a group.",
         false, ch, nullptr, nullptr, TO_CHAR);
     return;
@@ -425,7 +425,7 @@ ACMD(do_group)
 
   if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON);
-  else if ((char_get_master(vict) != ch) && (vict != ch))
+  else if ((char_get_master(g, vict) != ch) && (vict != ch))
     act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
@@ -452,7 +452,7 @@ ACMD(do_ungroup)
   one_argument(argument, buf);
 
   if (!*buf) {
-    if (char_get_master(ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
+    if (char_get_master(g, ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
       send_to_char(g, ch, "But you lead no group!\r\n");
       return;
     }
@@ -476,7 +476,7 @@ ACMD(do_ungroup)
     send_to_char(g, ch, "There is no such person!\r\n");
     return;
   }
-  if (char_get_master(tch) != ch) {
+  if (char_get_master(g, tch) != ch) {
     send_to_char(g, ch, "That person is not following you!\r\n");
     return;
   }
@@ -520,7 +520,7 @@ ACMD(do_split)
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
-    k = (char_get_master(ch) ? char_get_master(ch) : ch);
+    k = (char_get_master(g, ch) ? char_get_master(g, ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP) && (char_get_in_room(k) == char_get_in_room(ch)))
       num = 1;

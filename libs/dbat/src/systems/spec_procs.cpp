@@ -438,7 +438,7 @@ SPECIAL(healtank)
         send_to_char(g, ch, "You are already inside a healing tank!\r\n");
         return (true);
       }
-      if (char_get_master(ch) && char_get_master(ch) != ch) {
+      if (char_get_master(g, ch) && char_get_master(g, ch) != ch) {
         send_to_char(g, ch, "You can't enter it while following someone!\r\n");
         return (true);
       }
@@ -454,11 +454,11 @@ SPECIAL(healtank)
         send_to_char(g, ch, "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
         return (true);
       }
-      if (char_get_sits(ch)) {
+      if (char_get_sits(g, ch)) {
         send_to_char(g, ch, "You are already on something.\r\n");
         return (true);
       }
-      if (obj_get_sitting(htank)) {
+      if (obj_get_sitting(g, htank)) {
         send_to_char(g, ch, "Someone else is already inside that healing tank!\r\n");
         return (true);
       }

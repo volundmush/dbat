@@ -565,7 +565,7 @@ ACMD(do_mgoto)
     return;
   }
 
-  if (char_get_fighting(ch))
+  if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
 
   char_from_room(g, ch);
@@ -914,14 +914,14 @@ ACMD(do_mtransform)
     char_set_next(&tmpmob, char_get_next(ch));
     char_set_next_fighting(&tmpmob, char_get_next_fighting(ch));
     char_set_followers(&tmpmob, char_get_followers(ch));
-    char_set_master(&tmpmob, char_get_master(ch));
+    char_set_master(&tmpmob, char_get_master(g, ch));
 
     char_set_was_in_room(&tmpmob, char_get_was_in_room(ch));
     char_set_gold(&tmpmob, char_get_gold(ch));
     char_set_position(&tmpmob, char_get_position(ch));
     char_set_carry_weight(&tmpmob, char_get_carry_weight(ch));
     char_set_carry_items(&tmpmob, char_get_carry_items(ch));
-    char_set_fighting(&tmpmob, char_get_fighting(ch));
+    char_set_fighting(&tmpmob, char_get_fighting(g, ch));
     memcpy(ch, &tmpmob, sizeof(*ch));
 
     for (pos = 0; pos < NUM_WEARS; pos++) {
@@ -998,20 +998,20 @@ ACMD(do_mfollow)
     return;
   }
 
-  if (char_get_master(ch) == leader) /* already following */
+  if (char_get_master(g, ch) == leader) /* already following */
     return;
 
-  if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(ch))) /* can't override charm */
+  if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(g, ch))) /* can't override charm */
     return;
 
   /* stop following someone else first */
-  if (char_get_master(ch)) {
-    if (char_get_followers(char_get_master(ch))->follower == ch) { /* Head of follower-list? */
-      k                     = char_get_followers(char_get_master(ch));
-      char_set_followers(char_get_master(ch), k->next);
+  if (char_get_master(g, ch)) {
+    if (char_get_followers(char_get_master(g, ch))->follower == ch) { /* Head of follower-list? */
+      k = char_get_followers(char_get_master(g, ch));
+      char_set_followers(char_get_master(g, ch), k->next);
       delete k;
     } else { /* locate follower who is not head of list */
-      for (k = char_get_followers(char_get_master(ch)); k->next->follower != ch; k = k->next);
+      for (k = char_get_followers(char_get_master(g, ch)); k->next->follower != ch; k = k->next);
 
       j       = k->next;
       k->next = j->next;
@@ -1023,7 +1023,7 @@ ACMD(do_mfollow)
   if (ch == leader)
     return;
 
-  if (circle_follow(ch, leader)) {
+  if (circle_follow(g, ch, leader)) {
     mob_log(g, ch, "mfollow: Following in circles.");
     return;
   }

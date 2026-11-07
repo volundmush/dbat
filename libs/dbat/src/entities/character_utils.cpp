@@ -40,9 +40,9 @@
 #include "dbat/game_world.hpp"
 
 static void char_adm_set(struct char_data *ch, int flag, bool on);
-static bool char_has_legs(const struct char_data *ch);
+static bool char_has_legs(GameWorld *g, const struct char_data *ch);
 static bool char_is_fullpssj(const struct char_data *ch);
-static bool char_is_grap(const struct char_data *ch);
+static bool char_is_grap(GameWorld *g, const struct char_data *ch);
 static bool char_is_inferior(const struct char_data *ch);
 static bool char_is_male(const struct char_data *ch);
 static bool char_is_oozaru_race(const struct char_data *ch);
@@ -50,7 +50,7 @@ static bool char_not_hidden(const struct char_data *ch);
 static bool char_oozaru_ok(const struct char_data *ch);
 static bool char_outside_roomflag(GameWorld *g, const struct char_data *ch);
 static bool char_outside_secttype(GameWorld *g, const struct char_data *ch);
-static bool char_spar_train(const struct char_data *ch);
+static bool char_spar_train(GameWorld *g, const struct char_data *ch);
 static void cureStatusBurn(GameWorld *g, char_data *ch, bool announce);
 static void cureStatusPoison(GameWorld *g, char_data *ch, bool announce);
 static double getCurPLPercent(GameWorld *g, char_data *ch);
@@ -434,9 +434,9 @@ int64_t getMaxPLTrans(GameWorld *g, char_data *ch)
   transform_bonus form = race_current_form(g, ch);
   int64_t total        = 0;
   if (form.flag) {
-    total = (form.bonus + getEffBasePL(ch)) * form.mult;
+    total = (form.bonus + getEffBasePL(g, ch)) * form.mult;
   } else {
-    total = getEffBasePL(ch) * form.mult;
+    total = getEffBasePL(g, ch) * form.mult;
   }
   total += ch->max_hit;
   return total;
@@ -463,9 +463,9 @@ int64_t getCurPL(GameWorld *g, char_data *ch)
   return (int64_t)(getEffMaxPL(g, ch) * health);
 }
 
-int64_t getEffBasePL(char_data *ch)
+int64_t getEffBasePL(GameWorld *g, char_data *ch)
 {
-  if (ch->original) return getEffBasePL(ch->original);
+  if (char_get_original(g, ch)) return getEffBasePL(g, char_get_original(g, ch));
   if (ch->clones) {
     return getBasePL(ch) / (ch->clones + 1);
   }
@@ -502,17 +502,17 @@ int64_t getMaxKI(GameWorld *g, char_data *ch)
   transform_bonus form = race_current_form(g, ch);
   int64_t total        = 0;
   if (form.flag) {
-    total = (form.bonus + getEffBaseKI(ch)) * form.mult;
+    total = (form.bonus + getEffBaseKI(g, ch)) * form.mult;
   } else {
-    total = getEffBaseKI(ch);
+    total = getEffBaseKI(g, ch);
   }
   total += ch->max_ki;
   return total;
 }
 
-int64_t getEffBaseKI(char_data *ch)
+int64_t getEffBaseKI(GameWorld *g, char_data *ch)
 {
-  if (ch->original) return getEffBaseKI(ch->original);
+  if (char_get_original(g, ch)) return getEffBaseKI(g, char_get_original(g, ch));
   if (ch->clones) {
     return getBaseKI(ch) / (ch->clones + 1);
   }
@@ -605,17 +605,17 @@ int64_t getMaxST(GameWorld *g, char_data *ch)
   transform_bonus form = race_current_form(g, ch);
   int64_t total        = 0;
   if (form.flag) {
-    total = (form.bonus + getEffBaseST(ch)) * form.mult;
+    total = (form.bonus + getEffBaseST(g, ch)) * form.mult;
   } else {
-    total = getEffBaseST(ch);
+    total = getEffBaseST(g, ch);
   }
   total += ch->max_move;
   return total;
 }
 
-int64_t getEffBaseST(char_data *ch)
+int64_t getEffBaseST(GameWorld *g, char_data *ch)
 {
-  if (ch->original) return getEffBaseST(ch->original);
+  if (char_get_original(g, ch)) return getEffBaseST(g, char_get_original(g, ch));
   if (ch->clones) {
     return getBaseST(ch) / (ch->clones + 1);
   }
@@ -794,11 +794,11 @@ void cureStatusKnockedOut(GameWorld *g, char_data *ch, bool announce)
       send_to_char(g, ch, "You are no longer knocked out, and wake up!@n\r\n");
     }
 
-    if (char_get_carried_by(ch)) {
-      if (char_get_alignment(char_get_carried_by(ch)) > 50) {
-        carry_drop(g, char_get_carried_by(ch), 0);
+    if (char_get_carried_by(g, ch)) {
+      if (char_get_alignment(char_get_carried_by(g, ch)) > 50) {
+        carry_drop(g, char_get_carried_by(g, ch), 0);
       } else {
-        carry_drop(g, char_get_carried_by(ch), 1);
+        carry_drop(g, char_get_carried_by(g, ch), 1);
       }
     }
 
@@ -1015,8 +1015,8 @@ bool has_group(GameWorld *g, struct char_data *ch)
       }
       return (true);
     }
-  } else if (ch->master) {
-    if (!char_aff_flagged(ch->master, AFF_GROUP))
+  } else if (char_get_master(g, ch)) {
+    if (!char_aff_flagged(char_get_master(g, ch), AFF_GROUP))
       return (false);
     else
       return (true);
@@ -1031,7 +1031,7 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
   if (!char_aff_flagged(ch, AFF_GROUP))
     return ("");
 
-  if (!ch->followers && !ch->master)
+  if (!ch->followers && !char_get_master(g, ch))
     return ("");
 
   int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
@@ -1207,8 +1207,8 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
     ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
     return (ch->temp_prompt);
   }
-  if (ch->master && char_aff_flagged(ch->master, AFF_GROUP)) {
-    party1  = ch->master;
+  if (char_get_master(g, ch) && char_aff_flagged(char_get_master(g, ch), AFF_GROUP)) {
+    party1  = char_get_master(g, ch);
     plperc1 = (getCurPL(g, party1) * 100) / getEffMaxPL(g, party1);
     kiperc1 = (char_get_charge(party1) * 100) / getMaxKI(g, party1);
 
@@ -2282,10 +2282,10 @@ bool roll_pursue(GameWorld *g, struct char_data *ch, struct char_data *vict)
     return (true);
   }
   send_to_char(g, ch, "@RYou fail to pursue after them!@n\r\n");
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     stop_fighting(g, ch);
   }
-  if (char_get_fighting(vict)) {
+  if (char_get_fighting(g, vict)) {
     stop_fighting(g, vict);
   }
   return (false);
@@ -2770,8 +2770,8 @@ bool block_calc(GameWorld *g, struct char_data *ch)
 {
   struct char_data *blocker = nullptr;
 
-  if (char_get_blocked(ch)) {
-    blocker = char_get_blocked(ch);
+  if (char_get_blocked(g, ch)) {
+    blocker = char_get_blocked(g, ch);
   } else {
     return true;
   }
@@ -2992,7 +2992,7 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
 {
   if (ch != nullptr && vict != nullptr) {
     if (!char_is_npc(ch) && char_is_npc(vict)) {
-      if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !char_get_fighting(vict)) {
+      if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !char_get_fighting(g, vict)) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
         if (char_is_human(vict) || char_is_halfbreed(vict)) {
           switch (rand_number(g, 1, 4)) {
@@ -3133,10 +3133,10 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
         }
       } /* End Hello Section */
 
-      if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !char_get_fighting(vict)) {
+      if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !char_get_fighting(g, vict)) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
 
-        if (vict->original == ch) {
+        if (char_get_original(g, vict) == ch) {
           act(g, "@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, nullptr, ch, TO_ROOM);
           char_mob_set(vict, MOB_SPAR, true);
           return false;
@@ -3456,7 +3456,7 @@ void purge_homing(GameWorld *g, struct char_data *ch)
 
   for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, obj) == 80 || obj_get_vnum(g, obj) == 81) {
-      if (obj_get_target(obj) == ch || obj_get_user(obj) == ch) {
+      if (obj_get_target(g, obj) == ch || obj_get_user(g, obj) == ch) {
         act(g, "$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
         extract_obj(g, obj);
         continue;
@@ -3498,7 +3498,7 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
     }
   }
 
-  if (!char_spar_train(ch)) {
+  if (!char_spar_train(g, ch)) {
     if (num == 0) {
       roll -= 400;
     } else if (num == 1) {
@@ -3514,7 +3514,7 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
     }
   }
 
-  if (char_get_fighting(ch) != nullptr && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
+  if (char_get_fighting(g, ch) != nullptr && char_is_npc(char_get_fighting(g, ch)) && char_mob_flagged(char_get_fighting(g, ch), MOB_DUMMY)) {
     roll -= 100;
   }
 
@@ -3528,7 +3528,7 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
     roll = roll * 0.30;
   }
 
-  if (char_get_fighting(ch) != nullptr && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
+  if (char_get_fighting(g, ch) != nullptr && char_is_npc(char_get_fighting(g, ch)) && char_mob_flagged(char_get_fighting(g, ch), MOB_DUMMY)) {
     roll -= 100;
   }
 
@@ -3620,11 +3620,11 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
 
 /* Check if making CH follow VICTIM will create an illegal */
 /* Follow "Loop/circle"                                    */
-bool circle_follow(struct char_data *ch, struct char_data *victim)
+bool circle_follow(GameWorld *g, struct char_data *ch, struct char_data *victim)
 {
   struct char_data *k;
 
-  for (k = victim; k; k = k->master) {
+  for (k = victim; k; k = char_get_master(g, k)) {
     if (k == ch)
       return (true);
   }
@@ -3638,39 +3638,39 @@ void stop_follower(GameWorld *g, struct char_data *ch)
 {
   struct follow_type *j, *k;
 
-  if (ch->master == nullptr) {
+  if (char_get_master(g, ch) == nullptr) {
     core_dump();
     return;
   }
 
-  act(g, "You stop following $N.", false, ch, nullptr, ch->master, TO_CHAR);
-  act(g, "$n stops following $N.", true, ch, nullptr, ch->master, TO_NOTVICT);
-  if (!(char_is_dead(ch->master) || (ch->master->desc && desc_get_connected(ch->master->desc) == CON_MENU)))
-    act(g, "$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
+  act(g, "You stop following $N.", false, ch, nullptr, char_get_master(g, ch), TO_CHAR);
+  act(g, "$n stops following $N.", true, ch, nullptr, char_get_master(g, ch), TO_NOTVICT);
+  if (!(char_is_dead(char_get_master(g, ch)) || (char_get_master(g, ch)->desc && desc_get_connected(char_get_master(g, ch)->desc) == CON_MENU)))
+    act(g, "$n stops following you.", true, ch, nullptr, char_get_master(g, ch), TO_VICT);
 
   if (has_group(g, ch))
     char_set_combatexpertise(ch, 0);
 
-  if (ch->master->followers->follower == ch) { /* Head of follower-list? */
-    k                     = ch->master->followers;
-    ch->master->followers = k->next;
+  if (char_get_master(g, ch)->followers->follower == ch) { /* Head of follower-list? */
+    k                                 = char_get_master(g, ch)->followers;
+    char_get_master(g, ch)->followers = k->next;
     delete k;
   } else { /* locate follower who is not head of list */
-    for (k = ch->master->followers; k->next->follower != ch; k = k->next);
+    for (k = char_get_master(g, ch)->followers; k->next->follower != ch; k = k->next);
 
     j       = k->next;
     k->next = j->next;
     delete j;
   }
 
-  ch->master = nullptr;
+  char_set_master(ch, nullptr);
 }
 
 /* Called when a character that follows/is followed dies */
 void die_follower(GameWorld *g, struct char_data *ch)
 {
 
-  if (ch->master)
+  if (char_get_master(g, ch))
     stop_follower(g, ch);
 
   for (char_data *fol : char_followers(g, ch)) {
@@ -3684,12 +3684,12 @@ void add_follower(GameWorld *g, struct char_data *ch, struct char_data *leader)
 {
   struct follow_type *k;
 
-  if (ch->master) {
+  if (char_get_master(g, ch)) {
     core_dump();
     return;
   }
 
-  ch->master = leader;
+  char_set_master(ch, leader);
 
   k = new follow_type();
 
@@ -3934,7 +3934,7 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
     return false;
   }
   if (vict) {
-    if (getCurPL(g, vict) <= 0 && char_get_fighting(vict)) {
+    if (getCurPL(g, vict) <= 0 && char_get_fighting(g, vict)) {
       return false;
     }
     if (rroom_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
@@ -3949,11 +3949,11 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
       send_to_char(g, ch, "It seems like it'll be hard to kill them right now...\r\n");
       return false;
     }
-    if (char_get_carrying(ch)) {
+    if (char_get_carrying(g, ch)) {
       send_to_char(g, ch, "You are too busy protecting the person on your shoulder!\r\n");
       return false;
     }
-    if (char_get_carried_by(vict)) {
+    if (char_get_carried_by(g, vict)) {
       send_to_char(g, ch, "They are being protected by someone else!\r\n");
       return false;
     }
@@ -3969,7 +3969,7 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
       send_to_char(g, ch, "You can not harm your master!\r\n");
       return false;
     }
-    if (char_get_bonuses(ch, BONUS_COWARD) > 0 && getEffMaxPL(g, vict) > getEffMaxPL(g, ch) + (getEffMaxPL(g, ch) * .5) && !char_get_fighting(ch)) {
+    if (char_get_bonuses(ch, BONUS_COWARD) > 0 && getEffMaxPL(g, vict) > getEffMaxPL(g, ch) + (getEffMaxPL(g, ch) * .5) && !char_get_fighting(g, ch)) {
       send_to_char(g, ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
       return false;
     }
@@ -3977,15 +3977,15 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
       send_to_char(g, ch, "You can not harm your servant.\r\n");
       return false;
     }
-    if ((char_get_grappling(ch) && char_get_grap(ch) != 3) || (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4))) {
-      send_to_char(g, ch, "You are too busy grappling!%s\r\n", char_get_grappled(ch) != nullptr ? " Try 'escape'!" : "");
+    if ((char_get_grappling(g, ch) && char_get_grap(ch) != 3) || (char_get_grappled(g, ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4))) {
+      send_to_char(g, ch, "You are too busy grappling!%s\r\n", char_get_grappled(g, ch) != nullptr ? " Try 'escape'!" : "");
       return false;
     }
-    if (char_get_grappling(ch) && char_get_grappling(ch) != vict) {
+    if (char_get_grappling(g, ch) && char_get_grappling(g, ch) != vict) {
       send_to_char(g, ch, "You can't reach that far in your current position!\r\n");
       return false;
     }
-    if (char_get_grappled(ch) && char_get_grappled(ch) != vict) {
+    if (char_get_grappled(g, ch) && char_get_grappled(g, ch) != vict) {
       send_to_char(g, ch, "You can't reach that far in your current position!\r\n");
       return false;
     }
@@ -4005,12 +4005,12 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
       send_to_char(g, ch, "Due to the nature of their current technique anything less than a Tier 4 or AOE attack will not work on them.\r\n");
       return false;
     }
-    if (char_get_absorbing(ch)) {
-      send_to_char(g, ch, "You are too busy absorbing %s!\r\n", char_get_name(char_get_absorbing(ch)));
+    if (char_get_absorbing(g, ch)) {
+      send_to_char(g, ch, "You are too busy absorbing %s!\r\n", char_get_name(char_get_absorbing(g, ch)));
       return false;
     }
-    if (char_get_absorbby(ch)) {
-      send_to_char(g, ch, "You are too busy being absorbed by %s!\r\n", char_get_name(char_get_absorbby(ch)));
+    if (char_get_absorbby(g, ch)) {
+      send_to_char(g, ch, "You are too busy being absorbed by %s!\r\n", char_get_name(char_get_absorbby(g, ch)));
       return false;
     }
     if ((char_get_altitude(vict) > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch)) && char_is_namek(ch)) {
@@ -4238,11 +4238,11 @@ bool limb_ok(GameWorld *g, struct char_data *ch, int type)
     }
     return true;
   }
-  if (char_get_grappling(ch) && char_get_grap(ch) != 3) {
+  if (char_get_grappling(g, ch) && char_get_grap(ch) != 3) {
     send_to_char(g, ch, "You are too busy grappling!\r\n");
     return false;
   }
-  if (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4)) {
+  if (char_get_grappled(g, ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4)) {
     send_to_char(g, ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
     return false;
   }
@@ -4250,7 +4250,7 @@ bool limb_ok(GameWorld *g, struct char_data *ch, int type)
     return false;
   }
   if (type == 0) {
-    if (!char_has_arms(ch)) {
+    if (!char_has_arms(g, ch)) {
       send_to_char(g, ch, "You have no available arms!\r\n");
       return false;
     }
@@ -4270,7 +4270,7 @@ bool limb_ok(GameWorld *g, struct char_data *ch, int type)
     }
   } // Arms
   else if (type > 0) {
-    if (!char_has_legs(ch)) {
+    if (!char_has_legs(g, ch)) {
       send_to_char(g, ch, "You have no working legs!\r\n");
       return false;
     }
@@ -4714,7 +4714,7 @@ double char_get_speedi(GameWorld *g, struct char_data *ch)
 
 double char_get_speedcalc(GameWorld *g, struct char_data *ch)
 {
-  return (char_is_grap(ch) ? char_get_aff_abils_cha(ch) : (char_is_inferior(ch) ? (char_aff_flagged(ch, AFF_FLYING) ? (char_get_speedvar(g, ch) * 1.25) : char_get_speedvar(g, ch)) : char_get_speedvar(g, ch)));
+  return (char_is_grap(g, ch) ? char_get_aff_abils_cha(ch) : (char_is_inferior(ch) ? (char_aff_flagged(ch, AFF_FLYING) ? (char_get_speedvar(g, ch) * 1.25) : char_get_speedvar(g, ch)) : char_get_speedvar(g, ch)));
 }
 
 double char_get_speedbonus(GameWorld *g, struct char_data *ch)
@@ -4732,9 +4732,9 @@ double char_get_speedvem(GameWorld *g, struct char_data *ch)
   return (char_get_speedint(g, ch) - (char_get_speedint(g, ch) * speednar(g, ch)));
 }
 
-static bool char_is_grap(const struct char_data *ch)
+static bool char_is_grap(GameWorld *g, const struct char_data *ch)
 {
-  return (char_get_grappling(ch) || char_get_grappled(ch));
+  return (char_get_grappling(g, ch) || char_get_grappled(g, ch));
 }
 
 long char_get_speedint(GameWorld *g, struct char_data *ch)
@@ -4901,7 +4901,7 @@ static bool char_can_carry_obj(GameWorld *g, struct char_data *ch, struct obj_da
 
 bool char_can_get_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj)
 {
-  return (obj_wear_flagged((obj), ITEM_WEAR_TAKE) && !obj_get_sitting(obj) && char_can_carry_obj(g, (ch), (obj)) && char_can_see_obj(g, (ch), (obj)));
+  return (obj_wear_flagged((obj), ITEM_WEAR_TAKE) && !obj_get_sitting(g, obj) && char_can_carry_obj(g, (ch), (obj)) && char_can_see_obj(g, (ch), (obj)));
 }
 
 static bool char_disg(const struct char_data *ch, const struct char_data *vict)
@@ -5129,9 +5129,9 @@ bool char_is_cheap_race(const struct char_data *ch)
   return (char_is_truffle(ch) || char_is_mutant(ch) || char_is_konatsu(ch) || char_is_demon(ch) || char_is_kanassan(ch));
 }
 
-static bool char_spar_train(const struct char_data *ch)
+static bool char_spar_train(GameWorld *g, const struct char_data *ch)
 {
-  return (char_get_fighting(ch) && !char_is_npc(ch) && char_plr_flagged(ch, PLR_SPAR) && !char_is_npc(char_get_fighting(ch)) && char_plr_flagged(char_get_fighting(ch), PLR_SPAR));
+  return (char_get_fighting(g, ch) && !char_is_npc(ch) && char_plr_flagged(ch, PLR_SPAR) && !char_is_npc(char_get_fighting(g, ch)) && char_plr_flagged(char_get_fighting(g, ch), PLR_SPAR));
 }
 
 bool char_is_nonptrans(const struct char_data *ch)
@@ -5178,14 +5178,14 @@ bool char_has_moon(GameWorld *g, const struct char_data *ch)
   return (rroom_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(g, char_get_in_room(ch), ROOM_EARTH) || rroom_flagged(g, char_get_in_room(ch), ROOM_FRIGID) || rroom_flagged(g, char_get_in_room(ch), ROOM_AETHER));
 }
 
-bool char_has_arms(const struct char_data *ch)
+bool char_has_arms(GameWorld *g, const struct char_data *ch)
 {
-  return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LARM) || char_mob_flagged(ch, MOB_RARM))) || char_get_limb_condition(ch, (1) - 1) > 0 || char_get_limb_condition(ch, (2) - 1) > 0 || char_plr_flagged(ch, PLR_CRARM) || char_plr_flagged(ch, PLR_CLARM)) && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1 && char_get_grap(ch) != 4)));
+  return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LARM) || char_mob_flagged(ch, MOB_RARM))) || char_get_limb_condition(ch, (1) - 1) > 0 || char_get_limb_condition(ch, (2) - 1) > 0 || char_plr_flagged(ch, PLR_CRARM) || char_plr_flagged(ch, PLR_CLARM)) && ((!char_get_grappling(g, ch) && !char_get_grappled(g, ch)) || (char_get_grappling(g, ch) && char_get_grap(ch) == 3) || (char_get_grappled(g, ch) && char_get_grap(ch) != 1 && char_get_grap(ch) != 4)));
 }
 
-static bool char_has_legs(const struct char_data *ch)
+static bool char_has_legs(GameWorld *g, const struct char_data *ch)
 {
-  return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LLEG) || char_mob_flagged(ch, MOB_RLEG))) || char_get_limb_condition(ch, (3) - 1) > 0 || char_get_limb_condition(ch, (4) - 1) > 0 || char_plr_flagged(ch, PLR_CRLEG) || char_plr_flagged(ch, PLR_CLLEG)) && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1)));
+  return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LLEG) || char_mob_flagged(ch, MOB_RLEG))) || char_get_limb_condition(ch, (3) - 1) > 0 || char_get_limb_condition(ch, (4) - 1) > 0 || char_plr_flagged(ch, PLR_CRLEG) || char_plr_flagged(ch, PLR_CLLEG)) && ((!char_get_grappling(g, ch) && !char_get_grappled(g, ch)) || (char_get_grappling(g, ch) && char_get_grap(ch) == 3) || (char_get_grappled(g, ch) && char_get_grap(ch) != 1)));
 }
 
 bool char_is_human(const struct char_data *ch)
@@ -6437,14 +6437,14 @@ void char_set_carry_items(struct char_data *ch, int v)
   ch->carry_items = v;
 }
 
-struct char_data *char_get_fighting(const struct char_data *ch)
+struct char_data *char_get_fighting(GameWorld *g, const struct char_data *ch)
 {
-  return ch->fighting;
+  return ch->fighting_uid ? char_by_id(g, ch->fighting_uid) : nullptr;
 }
 
 void char_set_fighting(struct char_data *ch, struct char_data *v)
 {
-  ch->fighting = v;
+  ch->fighting_uid = v ? char_get_id(v) : 0;
 }
 
 int char_get_combatexpertise(const struct char_data *ch)
@@ -6467,24 +6467,24 @@ void char_set_alignment(struct char_data *ch, int v)
   ch->alignment = v;
 }
 
-struct obj_data *char_get_sits(const struct char_data *ch)
+struct obj_data *char_get_sits(GameWorld *g, const struct char_data *ch)
 {
-  return ch->sits;
+  return ch->sits_uid ? obj_by_id(g, ch->sits_uid) : nullptr;
 }
 
 void char_set_sits(struct char_data *ch, struct obj_data *v)
 {
-  ch->sits = v;
+  ch->sits_uid = v ? obj_get_id(v) : 0;
 }
 
-struct char_data *char_get_mindlink(const struct char_data *ch)
+struct char_data *char_get_mindlink(GameWorld *g, const struct char_data *ch)
 {
-  return ch->mindlink;
+  return ch->mindlink_uid ? char_by_id(g, ch->mindlink_uid) : nullptr;
 }
 
 void char_set_mindlink(struct char_data *ch, struct char_data *v)
 {
-  ch->mindlink = v;
+  ch->mindlink_uid = v ? char_get_id(v) : 0;
 }
 
 int char_get_linker(const struct char_data *ch)
@@ -6507,44 +6507,44 @@ void char_set_lasthit(struct char_data *ch, int v)
   ch->lasthit = v;
 }
 
-struct char_data *char_get_drag(const struct char_data *ch)
+struct char_data *char_get_drag(GameWorld *g, const struct char_data *ch)
 {
-  return ch->drag;
+  return ch->drag_uid ? char_by_id(g, ch->drag_uid) : nullptr;
 }
 
 void char_set_drag(struct char_data *ch, struct char_data *v)
 {
-  ch->drag = v;
+  ch->drag_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_dragged(const struct char_data *ch)
+struct char_data *char_get_dragged(GameWorld *g, const struct char_data *ch)
 {
-  return ch->dragged;
+  return ch->dragged_uid ? char_by_id(g, ch->dragged_uid) : nullptr;
 }
 
 void char_set_dragged(struct char_data *ch, struct char_data *v)
 {
-  ch->dragged = v;
+  ch->dragged_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_grappling(const struct char_data *ch)
+struct char_data *char_get_grappling(GameWorld *g, const struct char_data *ch)
 {
-  return ch->grappling;
+  return ch->grappling_uid ? char_by_id(g, ch->grappling_uid) : nullptr;
 }
 
 void char_set_grappling(struct char_data *ch, struct char_data *v)
 {
-  ch->grappling = v;
+  ch->grappling_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_grappled(const struct char_data *ch)
+struct char_data *char_get_grappled(GameWorld *g, const struct char_data *ch)
 {
-  return ch->grappled;
+  return ch->grappled_uid ? char_by_id(g, ch->grappled_uid) : nullptr;
 }
 
 void char_set_grappled(struct char_data *ch, struct char_data *v)
 {
-  ch->grappled = v;
+  ch->grappled_uid = v ? char_get_id(v) : 0;
 }
 
 int char_get_grap(const struct char_data *ch)
@@ -6557,14 +6557,14 @@ void char_set_grap(struct char_data *ch, int v)
   ch->grap = v;
 }
 
-struct char_data *char_get_original(const struct char_data *ch)
+struct char_data *char_get_original(GameWorld *g, const struct char_data *ch)
 {
-  return ch->original;
+  return ch->original_uid ? char_by_id(g, ch->original_uid) : nullptr;
 }
 
 void char_set_original(struct char_data *ch, struct char_data *v)
 {
-  ch->original = v;
+  ch->original_uid = v ? char_get_id(v) : 0;
 }
 
 short char_get_clones(const struct char_data *ch)
@@ -6577,64 +6577,64 @@ void char_set_clones(struct char_data *ch, short v)
   ch->clones = v;
 }
 
-struct char_data *char_get_defender(const struct char_data *ch)
+struct char_data *char_get_defender(GameWorld *g, const struct char_data *ch)
 {
-  return ch->defender;
+  return ch->defender_uid ? char_by_id(g, ch->defender_uid) : nullptr;
 }
 
 void char_set_defender(struct char_data *ch, struct char_data *v)
 {
-  ch->defender = v;
+  ch->defender_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_defending(const struct char_data *ch)
+struct char_data *char_get_defending(GameWorld *g, const struct char_data *ch)
 {
-  return ch->defending;
+  return ch->defending_uid ? char_by_id(g, ch->defending_uid) : nullptr;
 }
 
 void char_set_defending(struct char_data *ch, struct char_data *v)
 {
-  ch->defending = v;
+  ch->defending_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_blocks(const struct char_data *ch)
+struct char_data *char_get_blocks(GameWorld *g, const struct char_data *ch)
 {
-  return ch->blocks;
+  return ch->blocks_uid ? char_by_id(g, ch->blocks_uid) : nullptr;
 }
 
 void char_set_blocks(struct char_data *ch, struct char_data *v)
 {
-  ch->blocks = v;
+  ch->blocks_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_blocked(const struct char_data *ch)
+struct char_data *char_get_blocked(GameWorld *g, const struct char_data *ch)
 {
-  return ch->blocked;
+  return ch->blocked_uid ? char_by_id(g, ch->blocked_uid) : nullptr;
 }
 
 void char_set_blocked(struct char_data *ch, struct char_data *v)
 {
-  ch->blocked = v;
+  ch->blocked_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_absorbing(const struct char_data *ch)
+struct char_data *char_get_absorbing(GameWorld *g, const struct char_data *ch)
 {
-  return ch->absorbing;
+  return ch->absorbing_uid ? char_by_id(g, ch->absorbing_uid) : nullptr;
 }
 
 void char_set_absorbing(struct char_data *ch, struct char_data *v)
 {
-  ch->absorbing = v;
+  ch->absorbing_uid = v ? char_get_id(v) : 0;
 }
 
-struct char_data *char_get_absorbby(const struct char_data *ch)
+struct char_data *char_get_absorbby(GameWorld *g, const struct char_data *ch)
 {
-  return ch->absorbby;
+  return ch->absorbby_uid ? char_by_id(g, ch->absorbby_uid) : nullptr;
 }
 
 void char_set_absorbby(struct char_data *ch, struct char_data *v)
 {
-  ch->absorbby = v;
+  ch->absorbby_uid = v ? char_get_id(v) : 0;
 }
 
 room_vnum char_get_listenroom(const struct char_data *ch)
@@ -6941,30 +6941,30 @@ void char_set_tlevel(GameWorld *g, struct char_data *ch, int v)
 
 /* Position and movement code asks this of any character; NPCs never carry or get carried (do_carry
  * refuses them), so for them it is simply NULL. Setting it on an NPC is still logged. */
-struct char_data *char_get_carrying(const struct char_data *ch)
+struct char_data *char_get_carrying(GameWorld *g, const struct char_data *ch)
 {
-  return ch->player_specials ? ch->player_specials->carrying : nullptr;
+  return ch->player_specials && ch->player_specials->carrying_uid ? char_by_id(g, ch->player_specials->carrying_uid) : nullptr;
 }
 
 void char_set_carrying(GameWorld *g, struct char_data *ch, struct char_data *v)
 {
   struct player_special_data *ps = ps_of(g, ch, "carrying");
   if (ps)
-    ps->carrying = v;
+    ps->carrying_uid = v ? char_get_id(v) : 0;
 }
 
 /* Position and movement code asks this of any character; NPCs never carry or get carried (do_carry
  * refuses them), so for them it is simply NULL. Setting it on an NPC is still logged. */
-struct char_data *char_get_carried_by(const struct char_data *ch)
+struct char_data *char_get_carried_by(GameWorld *g, const struct char_data *ch)
 {
-  return ch->player_specials ? ch->player_specials->carried_by : nullptr;
+  return ch->player_specials && ch->player_specials->carried_by_uid ? char_by_id(g, ch->player_specials->carried_by_uid) : nullptr;
 }
 
 void char_set_carried_by(GameWorld *g, struct char_data *ch, struct char_data *v)
 {
   struct player_special_data *ps = ps_of(g, ch, "carried_by");
   if (ps)
-    ps->carried_by = v;
+    ps->carried_by_uid = v ? char_get_id(v) : 0;
 }
 
 /* Asked of any character when naming its race (juggleRaceName); NPCs have no preference (0). */
@@ -7514,14 +7514,14 @@ int *char_get_limbs(struct char_data *ch)
   return ch->limbs;
 }
 
-struct char_data *char_get_master(const struct char_data *ch)
+struct char_data *char_get_master(GameWorld *g, const struct char_data *ch)
 {
-  return ch->master;
+  return ch->master_uid ? char_by_id(g, ch->master_uid) : nullptr;
 }
 
 void char_set_master(struct char_data *ch, struct char_data *v)
 {
-  ch->master = v;
+  ch->master_uid = v ? char_get_id(v) : 0;
 }
 
 int32_t char_get_master_id(const struct char_data *ch)
@@ -7634,14 +7634,14 @@ void char_set_player_specials(struct char_data *ch, struct player_special_data *
   ch->player_specials = v;
 }
 
-struct char_data *char_get_poisonby(const struct char_data *ch)
+struct char_data *char_get_poisonby(GameWorld *g, const struct char_data *ch)
 {
-  return ch->poisonby;
+  return ch->poisonby_uid ? char_by_id(g, ch->poisonby_uid) : nullptr;
 }
 
 void char_set_poisonby(struct char_data *ch, struct char_data *v)
 {
-  ch->poisonby = v;
+  ch->poisonby_uid = v ? char_get_id(v) : 0;
 }
 
 struct trig_proto_list *char_get_proto_script(const struct char_data *ch)

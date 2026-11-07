@@ -187,11 +187,11 @@ ACMD(do_teach)
   if (cost == 0) /* Just to be sure */
     cost = 1;
 
-  if (!char_get_master(vict)) {
+  if (!char_get_master(g, vict)) {
     send_to_char(g, ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }
-  if (char_get_master(vict) != ch) {
+  if (char_get_master(g, vict) != ch) {
     send_to_char(g, ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }

@@ -275,6 +275,36 @@ static void check_iteration(GameWorld *g)
   g->objects    = nullptr;
 }
 
+/* References between entities are ids: one to something that has gone reads as nobody, not a dangling pointer */
+static void check_references(GameWorld *g)
+{
+  struct char_data *a = read_mobile(g, 100, VIRTUAL), *b = read_mobile(g, 100, VIRTUAL);
+  struct obj_data *seat = read_object(g, 100, VIRTUAL);
+
+  char_set_fighting(a, b);
+  char_set_master(b, a);
+  char_set_sits(a, seat);
+  CHECK(char_get_fighting(g, a) == b);
+  CHECK(char_get_master(g, b) == a);
+  CHECK(char_get_sits(g, a) == seat);
+
+  remove_from_lookup_table(g, char_get_id(b)); /* b and the seat go */
+  remove_from_lookup_table(g, obj_get_id(seat));
+  CHECK(char_get_fighting(g, a) == nullptr);
+  CHECK(char_get_sits(g, a) == nullptr);
+  CHECK(char_get_master(g, b) == a); /* what b pointed at is still there */
+
+  char_set_fighting(a, nullptr);
+  CHECK(a->fighting_uid == 0);
+
+  remove_from_lookup_table(g, char_get_id(a));
+  g->characters = nullptr;
+  g->objects    = nullptr;
+  delete a;
+  delete b;
+  delete seat;
+}
+
 /* the same seed gives the same rolls, and rolling in one world leaves the other where it was */
 static void check_rng(GameWorld *a, GameWorld *b)
 {
@@ -483,6 +513,7 @@ int main(void)
   check_rooms(a, b);
   check_read_entities(a, b);
   check_iteration(a);
+  check_references(a);
   check_rng(a, b);
   check_random_color(a, b);
   check_other_state(a, b);

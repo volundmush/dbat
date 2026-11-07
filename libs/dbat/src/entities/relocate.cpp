@@ -108,8 +108,8 @@ void obj_from_room(GameWorld *g, struct obj_data *object)
     return;
   }
 
-  if (obj_get_posted_to(object) && obj_get_in_obj(object) == nullptr) {
-    struct obj_data *obj = obj_get_posted_to(object);
+  if (obj_get_posted_to(g, object) && obj_get_in_obj(object) == nullptr) {
+    struct obj_data *obj = obj_get_posted_to(g, object);
     if (obj_get_posttype(object) <= 0) {
       send_to_room(g, obj_get_in_room(obj), "%s@W shakes loose from %s@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(object));
     } else {
@@ -205,9 +205,9 @@ void char_from_room(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  if (char_get_fighting(ch) != nullptr && !char_aff_flagged(ch, AFF_PURSUIT))
+  if (char_get_fighting(g, ch) != nullptr && !char_aff_flagged(ch, AFF_PURSUIT))
     stop_fighting(g, ch);
-  if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(ch) == nullptr)
+  if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(g, ch) == nullptr)
     char_aff_set(ch, AFF_PURSUIT, false);
 
   for (i = 0; i < NUM_WEARS; i++)
@@ -247,8 +247,8 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_rnum room)
       rroom_set_light(g, room, rroom_get_light(g, room) + 1);
 
     /* Stop fighting now, if we left. */
-    if (char_get_fighting(ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
-      stop_fighting(g, char_get_fighting(ch));
+    if (char_get_fighting(g, ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(g, ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
+      stop_fighting(g, char_get_fighting(g, ch));
       stop_fighting(g, ch);
     }
     if (!char_is_npc(ch)) {

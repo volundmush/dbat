@@ -259,39 +259,39 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
         gain = gain / 4;
         break;
       case POS_SLEEPING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain *= 2;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090) {
           gain *= 3;
           gain += gain * 0.1;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19092) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19092) {
           gain *= 3;
           gain += gain * 0.3;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain *= 3;
         }
         break;
       case POS_RESTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 2);
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain *= 2;
           gain += gain * 0.1;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19092 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19092 && !char_is_arlian(ch)) {
           gain *= 2;
           gain += gain * 0.3;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain *= 2;
         }
         break;
       case POS_SITTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 4);
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090) {
           gain += gain * 0.6;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19092) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19092) {
           gain += gain * 0.8;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain += gain * 0.5;
         }
         break;
@@ -319,7 +319,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     gain *= 2;
   }
 
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != nullptr) {
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
   if (is_affected(ch, AFF_SPECIAL_POSE) && axion_dice(g, 0) > char_get_skill(ch, SKILL_POSE)) {
@@ -431,34 +431,34 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       case POS_SLEEPING:
         if (char_is_arlian(ch)) {
           gain *= 3;
-        } else if (!char_get_sits(ch)) {
+        } else if (!char_get_sits(g, ch)) {
           gain *= 2;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090) {
           gain *= 3;
           gain += gain * 0.1;
-        } else if (char_get_sits(ch)) {
+        } else if (char_get_sits(g, ch)) {
           gain *= 3;
         }
         break;
       case POS_RESTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 2);
         } else if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
           gain = gain * 1.5;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 1.1;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain *= 2;
         }
         break;
       case POS_SITTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 4);
         } else if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
           gain = gain * 0.5;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 0.6;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain += (gain * 0.5);
         }
     }
@@ -479,7 +479,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
   if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0) {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != nullptr) {
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
 
@@ -561,37 +561,37 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
         gain = gain / 4;
         break;
       case POS_SLEEPING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain *= 2;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain *= 3;
           gain += gain * 0.1;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19091 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19091 && !char_is_arlian(ch)) {
           gain *= 3;
           gain += gain * 0.3;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain *= 3;
         }
         break;
       case POS_RESTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 2);
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 1.1;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19091 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19091 && !char_is_arlian(ch)) {
           gain += gain * 1.3;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain += gain;
         }
         break;
       case POS_SITTING:
-        if (!char_get_sits(ch)) {
+        if (!char_get_sits(g, ch)) {
           gain += (gain / 4);
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19090 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 0.6;
-        } else if (obj_get_vnum(g, char_get_sits(ch)) == 19091 && !char_is_arlian(ch)) {
+        } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19091 && !char_is_arlian(ch)) {
           gain += gain * 0.8;
-        } else if (char_get_sits(ch) || char_is_arlian(ch)) {
+        } else if (char_get_sits(g, ch) || char_is_arlian(ch)) {
           gain += (gain / 2);
         }
     }
@@ -615,7 +615,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
   if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0) {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != nullptr) {
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
 
@@ -662,17 +662,17 @@ static void update_flags(GameWorld *g, struct char_data *ch)
     }
   }
 
-  if (char_aff_flagged(ch, AFF_KNOCKED) && !char_get_fighting(ch)) {
+  if (char_aff_flagged(ch, AFF_KNOCKED) && !char_get_fighting(g, ch)) {
     cureStatusKnockedOut(g, ch, true);
   }
 
   barrier_shed(g, ch);
 
-  if (char_aff_flagged(ch, AFF_FIRESHIELD) && !char_get_fighting(ch) && rand_number(g, 1, 101) > char_get_skill(ch, SKILL_FIRESHIELD)) {
+  if (char_aff_flagged(ch, AFF_FIRESHIELD) && !char_get_fighting(g, ch) && rand_number(g, 1, 101) > char_get_skill(ch, SKILL_FIRESHIELD)) {
     send_to_char(g, ch, "Your fireshield disappears.\r\n");
     char_aff_set(ch, AFF_FIRESHIELD, false);
   }
-  if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_get_fighting(ch) && rand_number(g, 1, 3) == 2) {
+  if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_get_fighting(g, ch) && rand_number(g, 1, 3) == 2) {
     send_to_char(g, ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
     char_aff_set(ch, AFF_ZANZOKEN, false);
   }
@@ -867,17 +867,17 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
       }
     }
     if (char_get_level(ch) < 100) {
-      if (char_get_mindlink(ch) && gain > 0 && char_get_linker(ch) == 0) {
-        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(ch))) {
-          send_to_char(g, char_get_mindlink(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
+      if (char_get_mindlink(g, ch) && gain > 0 && char_get_linker(ch) == 0) {
+        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
+          send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {
-          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(ch), TO_VICT);
+          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_VICT);
           int read = gain * 0.12;
           gain -= read;
           if (read == 0)
             read = 1;
-          gain_exp(g, char_get_mindlink(ch), read);
-          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
+          gain_exp(g, char_get_mindlink(g, ch), read);
+          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
         }
       }
       int64_t difff = level_exp(ch, char_get_level(ch) + 1) * 5;
@@ -899,18 +899,18 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
       if (char_is_android(ch)) {
         diff = diff * 1.2;
       }
-      if (char_get_mindlink(ch) && gain > 0 && char_get_linker(ch) == 0) {
-        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(ch))) {
-          send_to_char(g, char_get_mindlink(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
+      if (char_get_mindlink(g, ch) && gain > 0 && char_get_linker(ch) == 0) {
+        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
+          send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {
-          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(ch), TO_VICT);
+          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_VICT);
           int64_t read = gain * 0.12;
           diff -= (read * 0.15);
           gain -= read;
           if (read == 0)
             read = 1;
-          gain_exp(g, char_get_mindlink(ch), read);
-          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
+          gain_exp(g, char_get_mindlink(g, ch), read);
+          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
         }
       }
       if (rand_number(g, 1, 5) >= 2) {
@@ -1084,8 +1084,8 @@ static void check_idling(GameWorld *g, struct char_data *ch)
   if (char_get_timer(ch) > CONFIG_IDLE_VOID) {
     if (char_get_was_in_room(ch) == NOWHERE && char_get_in_room(ch) != NOWHERE) {
       char_set_was_in_room(ch, char_get_in_room(ch));
-      if (char_get_fighting(ch)) {
-        stop_fighting(g, char_get_fighting(ch));
+      if (char_get_fighting(g, ch)) {
+        stop_fighting(g, char_get_fighting(g, ch));
         stop_fighting(g, ch);
       }
       if (char_get_in_room(ch) == 0 || char_get_in_room(ch) == 1) {
@@ -1385,7 +1385,7 @@ static void point_update_characters(GameWorld *g)
         heal_limb(g, i);
       }
 
-      if (rroom_sect(g, char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(i) && !char_is_kanassan(i)) {
+      if (rroom_sect(g, char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(g, i) && !char_is_kanassan(i)) {
         if ((getCurST(g, i)) >= (getCurCarriedWeight(i))) {
           act(g, "@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
           act(g, "@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1448,34 +1448,34 @@ static void point_update_characters(GameWorld *g)
         }
       }
       if (change && !char_aff_flagged(i, AFF_POISON)) {
-        if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(i) != nullptr) {
+        if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(g, i) != nullptr) {
           send_to_char(g, i, "@wThe healing tank works wonders on your injuries.@n\r\n");
-          obj_set_healcharge(char_get_sits(i), obj_get_healcharge(char_get_sits(i)) - (rand_number(g, 1, 2)));
-          if (obj_get_healcharge(char_get_sits(i)) == 0) {
+          obj_set_healcharge(char_get_sits(g, i), obj_get_healcharge(char_get_sits(g, i)) - (rand_number(g, 1, 2)));
+          if (obj_get_healcharge(char_get_sits(g, i)) == 0) {
             send_to_char(g, i, "@wThe healing tank is now too low on energy to heal you.\r\n");
             act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
             act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
             char_plr_set(i, PLR_HEALT, false);
-            obj_set_sitting(char_get_sits(i), nullptr);
+            obj_set_sitting(char_get_sits(g, i), nullptr);
             char_set_sits(i, nullptr);
           } else if (isFullVitals(i)) {
             send_to_char(g, i, "@wYou are fully recovered now.\r\n");
             act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
             act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
             char_plr_set(i, PLR_HEALT, false);
-            obj_set_sitting(char_get_sits(i), nullptr);
+            obj_set_sitting(char_get_sits(g, i), nullptr);
             char_set_sits(i, nullptr);
           }
-        } else if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(i) == nullptr) {
+        } else if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(g, i) == nullptr) {
           char_plr_set(i, PLR_HEALT, false);
         } else if (char_get_position(i) == POS_SLEEPING) {
           send_to_char(g, i, "@wYour sleep does you some good.@n\r\n");
-          if (!char_is_android(i) && !char_get_fighting(i))
+          if (!char_is_android(i) && !char_get_fighting(g, i))
             restoreLF(i, false);
         } else if (char_get_position(i) == POS_RESTING) {
           send_to_char(g, i, "@wYou feel relaxed and better.@n\r\n");
           if (!isFullLF(i)) {
-            if (!char_is_android(i) && !char_get_fighting(i) && char_get_suppression(i) <= 0 && getCurPL(g, i) != (getEffMaxPL(g, i))) {
+            if (!char_is_android(i) && !char_get_fighting(g, i) && char_get_suppression(i) <= 0 && getCurPL(g, i) != (getEffMaxPL(g, i))) {
               incCurLFPercent(g, i, .15, true);
               send_to_char(g, i, "@CYou feel more lively.@n\r\n");
             }
@@ -1507,13 +1507,13 @@ static void point_update_characters(GameWorld *g)
         } else {
           send_to_char(g, i, "The poison claims your life!\r\n");
           act(g, "$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
-          if (char_get_poisonby(i)) {
-            if (char_aff_flagged(char_get_poisonby(i), AFF_GROUP)) {
-              group_gain(g, char_get_poisonby(i), i);
+          if (char_get_poisonby(g, i)) {
+            if (char_aff_flagged(char_get_poisonby(g, i), AFF_GROUP)) {
+              group_gain(g, char_get_poisonby(g, i), i);
             } else {
-              solo_gain(g, char_get_poisonby(i), i);
+              solo_gain(g, char_get_poisonby(g, i), i);
             }
-            die(g, i, char_get_poisonby(i));
+            die(g, i, char_get_poisonby(g, i));
           } else {
             die(g, i, nullptr);
           }
@@ -1635,7 +1635,7 @@ static void point_update_objects(GameWorld *g)
     }
 
     if (obj_get_vnum(g, j) == 65) {
-      if (obj_get_healcharge(j) < 20 && !obj_get_sitting(j)) {
+      if (obj_get_healcharge(j) < 20 && !obj_get_sitting(g, j)) {
         obj_set_healcharge(j, obj_get_healcharge(j) + (rand_number(g, 0, 1)));
       }
     }

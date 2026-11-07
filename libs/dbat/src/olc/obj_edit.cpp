@@ -198,7 +198,12 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         }
         if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
-          obj = d->obj_point;
+          if (!(obj = obj_by_id(g, d->obj_point_uid))) { /* it went while being restrung */
+            write_to_output(g, d, "That item no longer exists. Canceling purchase at no cost.\r\n");
+            d->obj_editval = EDIT_NONE;
+            desc_set_connected(d, CON_PLAYING);
+            break;
+          }
 
           *buf      = '\0';
           obj_set_name(obj, strdup(d->obj_name));

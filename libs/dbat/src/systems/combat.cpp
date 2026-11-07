@@ -331,8 +331,8 @@ bool handle_defender(GameWorld *g, struct char_data *vict, struct char_data *ch)
 
   int result = false;
 
-  if (char_get_defender(vict)) {
-    struct char_data *def = char_get_defender(vict);
+  if (char_get_defender(g, vict)) {
+    struct char_data *def = char_get_defender(g, vict);
     int64_t defnum        = (char_get_speedi(g, def) * 0.01) * rand_number(g, -10, 10);
     int64_t chnum         = (char_get_speedi(g, ch) * 0.01) * rand_number(g, -5, 10);
     if (char_get_speedi(g, def) + defnum > char_get_speedi(g, ch) + chnum && char_get_in_room(def) == char_get_in_room(vict) && char_get_position(def) > POS_SITTING) {
@@ -939,7 +939,7 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
     return;
   } else { /* We've only succeeded in removing a limb. */
     if (!char_is_npc(vict)) {
-      if (char_has_arms(vict) && rand_number(g, 1, 2) == 2) {
+      if (char_has_arms(g, vict) && rand_number(g, 1, 2) == 2) {
         if (char_get_limb_condition(vict, (2) - 1) > 0) {
           char_set_limb_condition(vict, (2) - 1, 0);
           if (char_plr_flagged(vict, PLR_CLARM)) {
@@ -981,7 +981,7 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
         }
       }
     } else { /* It's a npc */
-      if (char_has_arms(vict) && rand_number(g, 1, 2) == 2) {
+      if (char_has_arms(g, vict) && rand_number(g, 1, 2) == 2) {
         if (char_mob_flagged(vict, MOB_LARM)) {
           char_mob_set(vict, MOB_LARM, false);
           remove_limb(g, vict, 2);
@@ -1682,22 +1682,22 @@ void huge_update(GameWorld *g)
     if (obj_get_distance(k) <= 0) {
       /* Genki Dama Section */
       if (obj_get_kitype(k) == 497) {
-        if (char_get_in_room(obj_get_target(k)) == obj_get_in_room(k)) {
-          ch = obj_get_user(k);
+        if (char_get_in_room(obj_get_target(g, k)) == obj_get_in_room(k)) {
+          ch = obj_get_user(g, k);
           if (rroom_get_vnum(g, char_get_in_room(ch)) == rroom_get_vnum(g, obj_get_in_room(k))) {
             bonus = 2;
           }
 
-          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
+          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+          act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
           send_to_room(g, obj_get_in_room(k), "\r\n");
-          if (getCurPL(g, obj_get_target(k)) * bonus < obj_get_kicharge(k) * 5) {
+          if (getCurPL(g, obj_get_target(g, k)) * bonus < obj_get_kicharge(k) * 5) {
 
-            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
+            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
             skill = init_skill(g, ch, SKILL_GENKIDAMA); /* Set skill value */
             dmg   = obj_get_kicharge(k) * 1.25;
-            hurt(g, 0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
+            hurt(g, 0, 0, ch, obj_get_target(g, k), nullptr, dmg, 1);
             dmg /= 2;
 
             /* Hit those in the current room. */
@@ -1709,17 +1709,17 @@ void huge_update(GameWorld *g)
               if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
                 continue;
               }
-              if (vict == obj_get_target(k)) {
+              if (vict == obj_get_target(g, k)) {
                 continue;
               }
               if (char_aff_flagged(vict, AFF_GROUP)) {
-                if (char_get_master(vict) == ch) {
+                if (char_get_master(g, vict) == ch) {
                   continue;
                 }
-                if (char_get_master(ch) == vict) {
+                if (char_get_master(g, ch) == vict) {
                   continue;
                 }
-                if (char_get_master(vict) == char_get_master(ch)) {
+                if (char_get_master(g, vict) == char_get_master(g, ch)) {
                   continue;
                 }
               }
@@ -1781,15 +1781,15 @@ void huge_update(GameWorld *g)
             continue;
           } /* It isn't stopped! */
           else {
-            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
-            hurt(g, 0, 0, ch, obj_get_target(k), nullptr, 0, 1);
-            decCurST(g, obj_get_target(k), obj_get_kicharge(k) / 4, 0);
+            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
+            hurt(g, 0, 0, ch, obj_get_target(g, k), nullptr, 0, 1);
+            decCurST(g, obj_get_target(g, k), obj_get_kicharge(k) / 4, 0);
             extract_obj(g, k);
             continue;
           }
-        } else if (char_get_in_room(obj_get_target(k)) != obj_get_in_room(k)) {
-          ch = obj_get_user(k);
+        } else if (char_get_in_room(obj_get_target(g, k)) != obj_get_in_room(k)) {
+          ch = obj_get_user(g, k);
 
           send_to_room(g, obj_get_in_room(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
 
@@ -1806,7 +1806,7 @@ void huge_update(GameWorld *g)
             if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
               continue;
             }
-            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
               continue;
             }
             if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1852,22 +1852,22 @@ void huge_update(GameWorld *g)
       }
       /* Genocide Section */
       if (obj_get_kitype(k) == 498) {
-        if (char_get_in_room(obj_get_target(k)) == obj_get_in_room(k)) {
-          ch = obj_get_user(k);
+        if (char_get_in_room(obj_get_target(g, k)) == obj_get_in_room(k)) {
+          ch = obj_get_user(g, k);
           if (rroom_get_vnum(g, char_get_in_room(ch)) == rroom_get_vnum(g, obj_get_in_room(k))) {
             bonus = 2;
           }
 
-          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
+          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+          act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
           send_to_room(g, obj_get_in_room(k), "\r\n");
-          if (getCurPL(g, obj_get_target(k)) * bonus < obj_get_kicharge(k) * 10) {
+          if (getCurPL(g, obj_get_target(g, k)) * bonus < obj_get_kicharge(k) * 10) {
 
-            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
+            act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
             skill = init_skill(g, ch, SKILL_GENOCIDE); /* Set skill value */
             dmg   = obj_get_kicharge(k);
-            hurt(g, 0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
+            hurt(g, 0, 0, ch, obj_get_target(g, k), nullptr, dmg, 1);
             dmg /= 2;
 
             /* Hit those in the current room. */
@@ -1879,17 +1879,17 @@ void huge_update(GameWorld *g)
               if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
                 continue;
               }
-              if (vict == obj_get_target(k)) {
+              if (vict == obj_get_target(g, k)) {
                 continue;
               }
               if (char_aff_flagged(vict, AFF_GROUP)) {
-                if (char_get_master(vict) == ch) {
+                if (char_get_master(g, vict) == ch) {
                   continue;
                 }
-                if (char_get_master(ch) == vict) {
+                if (char_get_master(g, ch) == vict) {
                   continue;
                 }
-                if (char_get_master(vict) == char_get_master(ch)) {
+                if (char_get_master(g, vict) == char_get_master(g, ch)) {
                   continue;
                 }
               }
@@ -1949,15 +1949,15 @@ void huge_update(GameWorld *g)
             continue;
           } /* It isn't stopped! */
           else {
-            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), nullptr, nullptr, TO_ROOM);
-            hurt(g, 0, 0, ch, obj_get_target(k), nullptr, 0, 1);
-            decCurST(g, obj_get_target(k), obj_get_kicharge(k) / 4, 0);
+            act(g, "@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
+            act(g, "@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
+            hurt(g, 0, 0, ch, obj_get_target(g, k), nullptr, 0, 1);
+            decCurST(g, obj_get_target(g, k), obj_get_kicharge(k) / 4, 0);
             extract_obj(g, k);
             continue;
           }
-        } else if (char_get_in_room(obj_get_target(k)) != obj_get_in_room(k)) {
-          ch = obj_get_user(k);
+        } else if (char_get_in_room(obj_get_target(g, k)) != obj_get_in_room(k)) {
+          ch = obj_get_user(g, k);
 
           send_to_room(g, obj_get_in_room(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
 
@@ -1974,7 +1974,7 @@ void huge_update(GameWorld *g)
             if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
               continue;
             }
-            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
               continue;
             }
             if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -2039,9 +2039,9 @@ void homing_update(GameWorld *g)
     if (obj_get_vnum(g, k) != 80 && obj_get_vnum(g, k) != 81 && obj_get_vnum(g, k) != 84) {
       continue;
     }
-    if (obj_get_target(k) && obj_get_user(k)) {
-      struct char_data *ch   = obj_get_user(k);
-      struct char_data *vict = obj_get_target(k);
+    if (obj_get_target(g, k) && obj_get_user(g, k)) {
+      struct char_data *ch   = obj_get_user(g, k);
+      struct char_data *vict = obj_get_target(g, k);
 
       if (obj_get_vnum(g, k) == 80) { // Tsuihidan
         if (obj_get_in_room(k) == NOWHERE) /* someone has picked it up, or it's inside something */
@@ -4060,7 +4060,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       dmg += dmg * 0.15;
     }
 
-    if (char_get_grappling(ch) == vict && char_get_grap(ch) == 3) {
+    if (char_get_grappling(g, ch) == vict && char_get_grap(ch) == 3) {
       dmg += (dmg / 100) * 20;
     }
 
@@ -4179,7 +4179,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       char_set_exp(vict, char_get_exp(vict) / (2));
     }
 
-    if (char_get_carrying(vict) && dmg > (((getEffMaxPL(g, vict))) * 0.01) && rand_number(g, 1, 10) >= 8) {
+    if (char_get_carrying(g, vict) && dmg > (((getEffMaxPL(g, vict))) * 0.01) && rand_number(g, 1, 10) >= 8) {
       carry_drop(g, vict, 2);
     }
 
@@ -4197,10 +4197,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           char_set_suppressed(vict, 0);
           char_set_suppression(vict, 0);
         }
-        if (char_get_fighting(vict)) {
+        if (char_get_fighting(g, vict)) {
           stop_fighting(g, vict);
         }
-        if (char_get_fighting(ch)) {
+        if (char_get_fighting(g, ch)) {
           stop_fighting(g, ch);
         }
         char_set_position(vict, POS_SLEEPING);
@@ -4231,10 +4231,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       act(g, "@C$n@w spares your life as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
       act(g, "@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, nullptr, vict, TO_NOTVICT);
       setCurHealth(vict, 1);
-      if (char_get_fighting(vict)) {
+      if (char_get_fighting(g, vict)) {
         stop_fighting(g, vict);
       }
-      if (char_get_fighting(ch)) {
+      if (char_get_fighting(g, ch)) {
         stop_fighting(g, ch);
       }
       char_set_position(vict, POS_SLEEPING);
@@ -4270,10 +4270,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         char_to_room(g, vict, real_room(g, 17875));
         setCurHealth(vict, 1);
         look_at_room(g, char_get_in_room(vict), vict, 0);
-        if (char_get_fighting(vict)) {
+        if (char_get_fighting(g, vict)) {
           stop_fighting(g, vict);
         }
-        if (char_get_fighting(ch)) {
+        if (char_get_fighting(g, ch)) {
           stop_fighting(g, ch);
         }
         return;
@@ -4285,10 +4285,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       decCurSTPercent(g, vict, 1, 1);
       decCurKIPercent(g, vict, 1, 1);
 
-      if (char_get_fighting(vict)) {
+      if (char_get_fighting(g, vict)) {
         stop_fighting(g, vict);
       }
-      if (char_get_fighting(ch)) {
+      if (char_get_fighting(g, ch)) {
         stop_fighting(g, ch);
       }
       char_set_position(vict, POS_SITTING);
@@ -4297,17 +4297,17 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       return;
     }
 
-    if (char_get_grappling(vict) && char_get_grappling(vict) != ch && type == 1) {
-      act(g, "@YThe attack hurts YOU as well because you are grappling with $M!@n", true, vict, nullptr, char_get_grappling(vict), TO_VICT);
-      act(g, "@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", true, vict, nullptr, char_get_grappling(vict), TO_NOTVICT);
+    if (char_get_grappling(g, vict) && char_get_grappling(g, vict) != ch && type == 1) {
+      act(g, "@YThe attack hurts YOU as well because you are grappling with $M!@n", true, vict, nullptr, char_get_grappling(g, vict), TO_VICT);
+      act(g, "@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", true, vict, nullptr, char_get_grappling(g, vict), TO_NOTVICT);
       maindmg = maindmg / 2;
-      hurt(g, 0, 0, ch, char_get_grappling(vict), nullptr, maindmg, 3);
+      hurt(g, 0, 0, ch, char_get_grappling(g, vict), nullptr, maindmg, 3);
     }
-    if (char_get_grappled(vict) && char_get_grappled(vict) != ch && type == 1) {
-      act(g, "@YThe attack hurts YOU as well because you are being grappled by $M!@n", true, vict, nullptr, char_get_grappled(vict), TO_VICT);
-      act(g, "@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", true, vict, nullptr, char_get_grappled(vict), TO_NOTVICT);
+    if (char_get_grappled(g, vict) && char_get_grappled(g, vict) != ch && type == 1) {
+      act(g, "@YThe attack hurts YOU as well because you are being grappled by $M!@n", true, vict, nullptr, char_get_grappled(g, vict), TO_VICT);
+      act(g, "@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", true, vict, nullptr, char_get_grappled(g, vict), TO_NOTVICT);
       maindmg = maindmg / 2;
-      hurt(g, 0, 0, ch, char_get_grappled(vict), nullptr, maindmg, 3);
+      hurt(g, 0, 0, ch, char_get_grappled(g, vict), nullptr, maindmg, 3);
     }
     if (!is_sparring(ch) && !char_plr_flagged(vict, PLR_IMMORTAL) && getCurPL(g, vict) - dmg <= 0) {
 
@@ -4398,9 +4398,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (suppresso == false) {
         decCurHealth(g, vict, dmg, 0);
       }
-      if (char_get_fighting(ch) == nullptr)
+      if (char_get_fighting(g, ch) == nullptr)
         set_fighting(g, ch, vict);
-      if (char_get_fighting(vict) == nullptr)
+      if (char_get_fighting(g, vict) == nullptr)
         set_fighting(g, vict, ch);
       if (dmg > 1 && suppresso == false) {
         if (type == 0 && getCurPL(g, ch) >= getEffMaxPL(g, ch) * 0.5) {
@@ -4560,9 +4560,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_CHAR);
           act(g, "$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
-          if (obj_get_fellow_wall(obj)) {
+          if (obj_get_fellow_wall(g, obj)) {
             struct obj_data *wall;
-            wall = obj_get_fellow_wall(obj);
+            wall = obj_get_fellow_wall(g, obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
             act(g, "$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true, nullptr, obj, nullptr, TO_ROOM);
           }
@@ -4571,9 +4571,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_CHAR);
           act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
-          if (obj_get_fellow_wall(obj)) {
+          if (obj_get_fellow_wall(g, obj)) {
             struct obj_data *wall;
-            wall = obj_get_fellow_wall(obj);
+            wall = obj_get_fellow_wall(g, obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
             act(g, "$p@w melts some.@n", true, ch, obj, nullptr, TO_ROOM);
           }
@@ -5480,8 +5480,8 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
     amount = 0.5;
   }
 
-  if (vict == nullptr && char_get_fighting(ch)) {
-    vict = char_get_fighting(ch);
+  if (vict == nullptr && char_get_fighting(g, ch)) {
+    vict = char_get_fighting(g, ch);
   } else if (vict == nullptr) {
     act(g, "@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);

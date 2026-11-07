@@ -115,50 +115,50 @@ int group_bonus(GameWorld *g, struct char_data *ch, int type)
       }
       return (false);
     }
-  } else if (char_get_master(ch)) {
-    if (!char_aff_flagged(char_get_master(ch), AFF_GROUP))
+  } else if (char_get_master(g, ch)) {
+    if (!char_aff_flagged(char_get_master(g, ch), AFF_GROUP))
       return (false);
     else {
       if (type == 0) {
-        group_bonus(g, char_get_master(ch), 0);
+        group_bonus(g, char_get_master(g, ch), 0);
       } else if (type == 2) {
-        if (char_is_roshi(char_get_master(ch))) {
+        if (char_is_roshi(char_get_master(g, ch))) {
           return (2);
         }
-        if (char_is_krane(char_get_master(ch))) {
+        if (char_is_krane(char_get_master(g, ch))) {
           return (3);
         }
-        if (char_is_bardock(char_get_master(ch))) {
+        if (char_is_bardock(char_get_master(g, ch))) {
           return (4);
         }
-        if (char_is_nail(char_get_master(ch))) {
+        if (char_is_nail(char_get_master(g, ch))) {
           return (5);
         }
-        if (char_is_kabito(char_get_master(ch))) {
+        if (char_is_kabito(char_get_master(g, ch))) {
           return (6);
         }
-        if (char_is_andsix(char_get_master(ch))) {
+        if (char_is_andsix(char_get_master(g, ch))) {
           return (7);
         }
-        if (char_is_tapion(char_get_master(ch))) {
+        if (char_is_tapion(char_get_master(g, ch))) {
           return (8);
         }
-        if (char_is_frieza(char_get_master(ch))) {
+        if (char_is_frieza(char_get_master(g, ch))) {
           return (9);
         }
-        if (char_is_tsuna(char_get_master(ch))) {
+        if (char_is_tsuna(char_get_master(g, ch))) {
           return (10);
         }
-        if (char_is_piccolo(char_get_master(ch))) {
+        if (char_is_piccolo(char_get_master(g, ch))) {
           return (11);
         }
-        if (char_is_kurzak(char_get_master(ch))) {
+        if (char_is_kurzak(char_get_master(g, ch))) {
           return (12);
         }
-        if (char_is_jinto(char_get_master(ch))) {
+        if (char_is_jinto(char_get_master(g, ch))) {
           return (13);
         }
-        if (char_is_dabura(char_get_master(ch))) {
+        if (char_is_dabura(char_get_master(g, ch))) {
           return (14);
         }
       }
@@ -846,18 +846,18 @@ void fight_stack(GameWorld *g)
     if (char_is_npc(ch) && char_is_affected(ch, AFF_FROZEN)) {
       continue;
     }
-    if (!char_get_grappling(ch) && !char_get_grappled(ch) && !char_get_fighting(ch) && !char_plr_flagged(ch, PLR_CHARGE) && !char_plr_flagged(ch, PLR_POWERUP) && char_get_charge(ch) <= 0 && !char_is_transformed(ch)) {
+    if (!char_get_grappling(g, ch) && !char_get_grappled(g, ch) && !char_get_fighting(g, ch) && !char_plr_flagged(ch, PLR_CHARGE) && !char_plr_flagged(ch, PLR_POWERUP) && char_get_charge(ch) <= 0 && !char_is_transformed(ch)) {
       continue;
     }
-    if (char_get_fighting(ch) && (char_get_in_room(char_get_fighting(ch)) != char_get_in_room(ch))) {
-      wch = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && (char_get_in_room(char_get_fighting(g, ch)) != char_get_in_room(ch))) {
+      wch = char_get_fighting(g, ch);
       stop_fighting(g, wch);
       stop_fighting(g, ch);
     }
-    if (char_get_fighting(ch) && char_get_drag(ch)) {
-      act(g, "@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
-      act(g, "@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
-      char_set_dragged(char_get_drag(ch), nullptr);
+    if (char_get_fighting(g, ch) && char_get_drag(g, ch)) {
+      act(g, "@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_CHAR);
+      act(g, "@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_ROOM);
+      char_set_dragged(char_get_drag(g, ch), nullptr);
       char_set_drag(ch, nullptr);
     }
 
@@ -892,13 +892,13 @@ void fight_stack(GameWorld *g)
 
     if (!char_aff_flagged(ch, AFF_POSITION)) {
       if (roll_balance(g, ch) > axion_dice(g, 0) && rand_number(g, 1, 10) >= 7) {
-        if (char_get_fighting(ch)) {
-          if (!char_aff_flagged(char_get_fighting(ch), AFF_POSITION)) {
+        if (char_get_fighting(g, ch)) {
+          if (!char_aff_flagged(char_get_fighting(g, ch), AFF_POSITION)) {
             act(g, "@YYou manage to move into an advantageous position!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act(g, "@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr, TO_ROOM);
             char_aff_set(ch, AFF_POSITION, true);
           } else {
-            struct char_data *vict = char_get_fighting(ch);
+            struct char_data *vict = char_get_fighting(g, ch);
             if (roll_balance(g, ch) > roll_balance(g, vict)) {
               act(g, "@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch, nullptr, vict, TO_CHAR);
               act(g, "@y$n@Y struggles to gain a better position than you and succeeds!@n", true, ch, nullptr, vict, TO_VICT);
@@ -916,31 +916,31 @@ void fight_stack(GameWorld *g)
         char_aff_set(ch, AFF_POSITION, false);
       }
     }
-    if (char_get_grappling(ch) && char_get_grap(ch) == 2 && rand_number(g, 1, 11) >= 8) {
-      if ((getCurST(g, char_get_grappling(ch))) >= getMaxST(g, char_get_grappling(ch)) / 8) {
-        act(g, "@WYou choke @C$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
-        act(g, "@C$n@W chokes YOU@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
-        act(g, "@C$n@W chokes @c$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
-        decCurST(g, char_get_grappling(ch), (getMaxST(g, char_get_grappling(ch)) / 8), 0);
+    if (char_get_grappling(g, ch) && char_get_grap(ch) == 2 && rand_number(g, 1, 11) >= 8) {
+      if ((getCurST(g, char_get_grappling(g, ch))) >= getMaxST(g, char_get_grappling(g, ch)) / 8) {
+        act(g, "@WYou choke @C$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
+        act(g, "@C$n@W chokes YOU@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_VICT);
+        act(g, "@C$n@W chokes @c$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_NOTVICT);
+        decCurST(g, char_get_grappling(g, ch), (getMaxST(g, char_get_grappling(g, ch)) / 8), 0);
       } else {
-        act(g, "@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
-        act(g, "@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
-        act(g, "@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
-        char_aff_set(char_get_grappling(ch), AFF_KNOCKED, true);
-        char_set_position(char_get_grappling(ch), POS_SLEEPING);
-        char_set_grap(char_get_grappling(ch), -1);
-        char_set_grappled(char_get_grappling(ch), nullptr);
+        act(g, "@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
+        act(g, "@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_VICT);
+        act(g, "@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_NOTVICT);
+        char_aff_set(char_get_grappling(g, ch), AFF_KNOCKED, true);
+        char_set_position(char_get_grappling(g, ch), POS_SLEEPING);
+        char_set_grap(char_get_grappling(g, ch), -1);
+        char_set_grappled(char_get_grappling(g, ch), nullptr);
         char_set_grappling(ch, nullptr);
         char_set_grap(ch, -1);
       }
-    } else if (char_get_grappling(ch) && char_get_grap(ch) == 4 && rand_number(g, 1, 12) >= 8) {
-      act(g, "@WYou crush @C$N@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
-      act(g, "@C$n@W crushes YOU@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
-      act(g, "@C$n@W crushes @c$N@W some more!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
+    } else if (char_get_grappling(g, ch) && char_get_grap(ch) == 4 && rand_number(g, 1, 12) >= 8) {
+      act(g, "@WYou crush @C$N@W some more!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
+      act(g, "@C$n@W crushes YOU@W some more!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_VICT);
+      act(g, "@C$n@W crushes @c$N@W some more!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_NOTVICT);
       int64_t damg = char_get_aff_abils_str(ch) * (10 + (getEffMaxPL(g, ch) * 0.005));
-      hurt(g, 0, 0, ch, char_get_grappling(ch), nullptr, damg, 0);
+      hurt(g, 0, 0, ch, char_get_grappling(g, ch), nullptr, damg, 0);
     }
-    if (char_get_grappled(ch) && rand_number(g, 1, 2) == 2) {
+    if (char_get_grappled(g, ch) && rand_number(g, 1, 2) == 2) {
       send_to_char(g, ch, "@CTry 'escape' to break free from the hold!@n\r\n");
     }
     if (char_is_halfbreed(ch) && char_plr_flagged(ch, PLR_FURY)) {
@@ -998,11 +998,11 @@ void fight_stack(GameWorld *g)
       }
     }
 
-    if (!char_is_npc(ch) && char_get_wimp_level(g, ch) && getCurPL(g, ch) < char_get_wimp_level(g, ch) && getCurPL(g, ch) > 0 && char_get_fighting(ch)) {
+    if (!char_is_npc(ch) && char_get_wimp_level(g, ch) && getCurPL(g, ch) < char_get_wimp_level(g, ch) && getCurPL(g, ch) > 0 && char_get_fighting(g, ch)) {
       send_to_char(g, ch, "You wimp out, and attempt to flee!\r\n");
       do_flee(g, ch, nullptr, 0, 0);
     }
-    if (char_is_npc(ch) && getCurPL(g, ch) < getEffMaxPL(g, ch) / 10 && getCurPL(g, ch) > 0 && char_get_fighting(ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
+    if (char_is_npc(ch) && getCurPL(g, ch) < getEffMaxPL(g, ch) / 10 && getCurPL(g, ch) > 0 && char_get_fighting(g, ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
       if (rand_number(g, 1, 30) >= 25 && char_get_position(ch) > POS_SITTING) {
         do_flee(g, ch, nullptr, 0, 0);
       }
@@ -1010,7 +1010,7 @@ void fight_stack(GameWorld *g)
     if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 6 || char_get_genome(ch, 1) == 6) && rand_number(g, 1, 200) >= 175) {
       mutant_limb_regen(g, ch);
     }
-    if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_fighting(ch)) {
+    if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_fighting(g, ch)) {
       if (char_get_skill(ch, SKILL_DISGUISE) < rand_number(g, 1, 125)) {
         send_to_char(g, ch, "Your disguise comes off because of your swift movements!\r\n");
         char_plr_set(ch, PLR_DISGUISED, false);
@@ -1031,29 +1031,29 @@ void fight_stack(GameWorld *g)
     }
 
     if (!char_is_npc(ch) && !(char_get_desc(ch)) && char_get_position(ch) > POS_STUNNED && !char_is_affected(ch, AFF_FROZEN)) {
-      if (char_get_fighting(ch)) {
+      if (char_get_fighting(g, ch)) {
         do_flee(g, ch, nullptr, 0, 0);
       }
     }
     /* Mobile Defense System */
-    if (char_is_npc(ch) && char_get_grappled(ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(g, 1, 5) >= 4) {
+    if (char_is_npc(ch) && char_get_grappled(g, ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(g, 1, 5) >= 4) {
       do_escape(g, ch, nullptr, 0, 0);
       continue;
     }
-    if (char_get_fighting(ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
-      if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
+    if (char_get_fighting(g, ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
+      if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
         do_fly(g, ch, nullptr, 0, 0);
         continue;
       }
-      if (!char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
+      if (!char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
         do_fly(g, ch, nullptr, 0, 0);
         continue;
       }
-      if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(ch))) {
+      if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(g, ch))) {
         do_fly(g, ch, writable{"high"}, 0, 0);
         continue;
       }
-      if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {
+      if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
           act(g, "$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
@@ -1063,7 +1063,7 @@ void fight_stack(GameWorld *g)
           continue;
         }
       }
-      if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) <= 10) {
+      if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) <= 10) {
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
           act(g, "$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
@@ -1093,7 +1093,7 @@ void fight_stack(GameWorld *g)
       struct char_data *vict;
       char buf[100];
 
-      vict = char_get_fighting(ch);
+      vict = char_get_fighting(g, ch);
       sprintf(buf, "%s", char_get_name(vict));
       if (char_get_in_room(ch) == char_get_in_room(vict) && !char_mob_flagged(ch, MOB_DUMMY) && !char_aff_flagged(ch, AFF_KNOCKED) && char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_RESTING && char_get_position(ch) != POS_SLEEPING) {
 
@@ -1271,7 +1271,7 @@ void fight_stack(GameWorld *g)
     if (char_get_charge(ch) >= getMaxKI(g, ch) / 2) {
       improve_skill(g, ch, SKILL_CONCENTRATION, 1);
     }
-    if (!char_plr_flagged(ch, PLR_CHARGE) && rand_number(g, 1, 40) >= 38 && !char_get_fighting(ch) && (char_get_preference(ch) != PREFERENCE_KI || char_get_charge(ch) > getMaxKI(g, ch) * 0.1)) {
+    if (!char_plr_flagged(ch, PLR_CHARGE) && rand_number(g, 1, 40) >= 38 && !char_get_fighting(g, ch) && (char_get_preference(ch) != PREFERENCE_KI || char_get_charge(ch) > getMaxKI(g, ch) * 0.1)) {
       if (char_get_charge(ch) >= getMaxKI(g, ch) / 100) {
         int64_t loss = 0;
         send_to_char(g, ch, "You lose some of your energy slowly.\r\n");
@@ -1426,9 +1426,9 @@ void update_pos(GameWorld *g, struct char_data *victim)
   }
   if ((getCurPL(g, victim) > 0) && (char_get_position(victim) > POS_STUNNED))
     return;
-  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(victim))
+  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(g, victim))
     return;
-  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(victim))
+  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(g, victim))
     return;
   else if (getCurPL(g, victim) > 0)
     char_set_position(victim, POS_STANDING);
@@ -1456,7 +1456,7 @@ void set_fighting(GameWorld *g, struct char_data *ch, struct char_data *vict)
   if (ch == vict)
     return;
 
-  if (char_get_fighting(ch)) /* they carry on with whoever they were already fighting */
+  if (char_get_fighting(g, ch)) /* they carry on with whoever they were already fighting */
     return;
 
   char_set_next_fighting(ch, g->combat_list);
@@ -1825,8 +1825,8 @@ static void final_combat_resolve(GameWorld *g, struct char_data *ch)
 {
   struct obj_data *chair;
 
-  if (char_get_sits(ch)) {
-    chair = char_get_sits(ch);
+  if (char_get_sits(g, ch)) {
+    chair = char_get_sits(g, ch);
     char_set_sits(ch, nullptr);
     obj_set_sitting(chair, nullptr);
   }
@@ -1834,53 +1834,53 @@ static void final_combat_resolve(GameWorld *g, struct char_data *ch)
     for (char_data *clone : each_char(g)) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(g, clone) == 25) {
-          if (char_get_original(clone) == ch) {
+          if (char_get_original(g, clone) == ch) {
             handle_multi_merge(g, clone);
           }
         }
       }
     }
   }
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     carry_drop(g, ch, 2);
   }
-  if (char_get_carried_by(ch)) {
-    carry_drop(g, char_get_carried_by(ch), 2);
+  if (char_get_carried_by(g, ch)) {
+    carry_drop(g, char_get_carried_by(g, ch), 2);
   }
-  if (char_get_drag(ch)) {
-    char_set_dragged(char_get_drag(ch), nullptr);
+  if (char_get_drag(g, ch)) {
+    char_set_dragged(char_get_drag(g, ch), nullptr);
     char_set_drag(ch, nullptr);
   }
-  if (char_get_dragged(ch)) {
-    char_set_drag(char_get_dragged(ch), nullptr);
+  if (char_get_dragged(g, ch)) {
+    char_set_drag(char_get_dragged(g, ch), nullptr);
     char_set_dragged(ch, nullptr);
   }
-  if (char_get_grappling(ch)) {
-    char_set_grap(char_get_grappling(ch), -1);
-    char_set_grappled(char_get_grappling(ch), nullptr);
+  if (char_get_grappling(g, ch)) {
+    char_set_grap(char_get_grappling(g, ch), -1);
+    char_set_grappled(char_get_grappling(g, ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
-  if (char_get_grappled(ch)) {
-    char_set_grap(char_get_grappled(ch), -1);
-    char_set_grappling(char_get_grappled(ch), nullptr);
+  if (char_get_grappled(g, ch)) {
+    char_set_grap(char_get_grappled(g, ch), -1);
+    char_set_grappling(char_get_grappled(g, ch), nullptr);
     char_set_grappled(ch, nullptr);
     char_set_grap(ch, -1);
   }
-  if (char_get_blocked(ch)) {
-    char_set_blocks(char_get_blocked(ch), nullptr);
+  if (char_get_blocked(g, ch)) {
+    char_set_blocks(char_get_blocked(g, ch), nullptr);
     char_set_blocked(ch, nullptr);
   }
-  if (char_get_blocks(ch)) {
-    char_set_blocked(char_get_blocks(ch), nullptr);
+  if (char_get_blocks(g, ch)) {
+    char_set_blocked(char_get_blocks(g, ch), nullptr);
     char_set_blocks(ch, nullptr);
   }
-  if (char_get_absorbing(ch)) {
-    char_set_absorbby(char_get_absorbing(ch), nullptr);
+  if (char_get_absorbing(g, ch)) {
+    char_set_absorbby(char_get_absorbing(g, ch), nullptr);
     char_set_absorbing(ch, nullptr);
   }
-  if (char_get_absorbby(ch)) {
-    char_set_absorbing(char_get_absorbby(ch), nullptr);
+  if (char_get_absorbby(g, ch)) {
+    char_set_absorbing(char_get_absorbby(g, ch), nullptr);
     char_set_absorbby(ch, nullptr);
   }
 }
@@ -1896,7 +1896,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
 {
   struct char_data *k, *temp;
 
-  if (char_get_fighting(ch))
+  if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
 
   while (char_get_affected(ch))
@@ -2060,12 +2060,12 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       }
     }
     final_combat_resolve(g, ch);
-    if (char_get_fighting(ch))
+    if (char_get_fighting(g, ch))
       stop_fighting(g, ch);
 
     for (k = g->combat_list; k; k = temp) {
       temp = char_get_next_fighting(k);
-      if (char_get_fighting(k) == ch)
+      if (char_get_fighting(g, k) == ch)
         stop_fighting(g, k);
     }
 
@@ -2083,7 +2083,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
         ghostify(g, ch);
         purge_homing(g, ch);
         if (char_get_level(ch) > 0 && has_group(g, ch)) {
-          if (char_get_master(ch) != nullptr) {
+          if (char_get_master(g, ch) != nullptr) {
             group_bonus(g, ch, 1);
           } else {
             group_bonus(g, ch, 0);
@@ -2178,7 +2178,7 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
     if (char_get_conditions(g, ch, THIRST) >= 0) {
       char_set_conditions(g, ch, THIRST, 48);
     }
-    if (char_get_fighting(ch)) {
+    if (char_get_fighting(g, ch)) {
       stop_fighting(g, ch);
     }
     char_set_position(ch, POS_SITTING);
@@ -2252,7 +2252,7 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
   if (char_in_arena(g, ch)) {
     return;
   }
-  struct char_data *leader = char_get_master(ch) ? char_get_master(ch) : ch;
+  struct char_data *leader = char_get_master(g, ch) ? char_get_master(g, ch) : ch;
 
   /*share = MIN(CONFIG_MAX_EXP_GAIN, MAX(1, base * GET_LEVEL(ch)));*/
   share = MIN(2000000, base * char_get_level(ch));
@@ -2284,11 +2284,11 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
         checkit = true;
       }
     }
-    if (checkit == false && char_get_master(ch) != nullptr && char_get_idnum(char_get_master(ch)) == char_get_lasthit(victim)) {
+    if (checkit == false && char_get_master(g, ch) != nullptr && char_get_idnum(char_get_master(g, ch)) == char_get_lasthit(victim)) {
       checkit = true;
     }
-    if (checkit == false && char_get_master(ch) != nullptr) {
-      struct char_data *master = char_get_master(ch);
+    if (checkit == false && char_get_master(g, ch) != nullptr) {
+      struct char_data *master = char_get_master(g, ch);
       for (char_data *foll : char_followers(g, master)) {
         if (foll != ch) {
           if (char_aff_flagged(foll, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(foll)) {
@@ -2317,10 +2317,10 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
   if (char_is_icer(ch)) {
     share = share - (share * .20);
   }
-  if (char_get_bonuses(ch, BONUS_LOYAL) > 0 && char_get_master(ch) != nullptr) {
+  if (char_get_bonuses(ch, BONUS_LOYAL) > 0 && char_get_master(g, ch) != nullptr) {
     share += share * 0.2;
   }
-  if (char_get_master(ch) != nullptr && char_get_master(ch) != ch) {
+  if (char_get_master(g, ch) != nullptr && char_get_master(g, ch) != ch) {
     share += share * 0.15;
   }
   if (char_mob_flagged(victim, MOB_KNOWKAIO)) {
@@ -2392,7 +2392,7 @@ void group_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
   int64_t tot_gain, base;
   struct char_data *k;
 
-  if (!(k = char_get_master(ch)))
+  if (!(k = char_get_master(g, ch)))
     k = ch;
 
   if (char_aff_flagged(k, AFF_GROUP) && (char_get_in_room(k) == char_get_in_room(ch))) {
@@ -2467,8 +2467,8 @@ void solo_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
 {
 
   if (char_is_npc(ch)) {
-    if (char_get_original(ch)) {
-      ch = char_get_original(ch);
+    if (char_get_original(g, ch)) {
+      ch = char_get_original(g, ch);
     }
   }
   int64_t exp;

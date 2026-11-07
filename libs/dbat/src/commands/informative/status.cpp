@@ -340,7 +340,7 @@ ACMD(do_score)
     send_to_char(g, ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
     send_to_char(g, ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(getCurPL(g, ch)), add_commas((getCurKI(g, ch))), add_commas((getCurST(g, ch))));
     send_to_char(g, ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(getEffMaxPL(g, ch)), add_commas(getMaxKI(g, ch)), add_commas(getMaxST(g, ch)));
-    send_to_char(g, ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((getEffBasePL(ch))), add_commas((getEffBaseKI(ch))), add_commas((getEffBaseST(ch))));
+    send_to_char(g, ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((getEffBasePL(g, ch))), add_commas((getEffBaseKI(g, ch))), add_commas((getEffBaseST(g, ch))));
     if (!char_is_android(ch) && (getCurLF(g, ch)) > 0) {
       send_to_char(g, ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas((getCurLF(g, ch))), "/", add_commas((getMaxLF(g, ch))), char_get_lifeperc(ch), "%");
     } else if (!char_is_android(ch)) {
@@ -965,7 +965,7 @@ ACMD(do_status)
         send_to_char(g, ch, "You are sitting.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char(g, ch, "You are fighting %s.\r\n", char_get_fighting(ch) ? char_pers(g, char_get_fighting(ch), ch) : "thin air");
+        send_to_char(g, ch, "You are fighting %s.\r\n", char_get_fighting(g, ch) ? char_pers(g, char_get_fighting(g, ch), ch) : "thin air");
         break;
       case POS_STANDING:
         send_to_char(g, ch, "You are standing.\r\n");
@@ -1428,9 +1428,9 @@ ACMD(do_diagnose)
       diag_char_to_char(g, vict, ch);
     }
   } else {
-    if (char_get_fighting(ch)) {
-      send_to_char(g, ch, "%s", char_get_sex(char_get_fighting(ch)) == SEX_MALE ? "He " : (char_get_sex(char_get_fighting(ch)) == SEX_FEMALE ? "She " : "It "));
-      diag_char_to_char(g, char_get_fighting(ch), ch);
+    if (char_get_fighting(g, ch)) {
+      send_to_char(g, ch, "%s", char_get_sex(char_get_fighting(g, ch)) == SEX_MALE ? "He " : (char_get_sex(char_get_fighting(g, ch)) == SEX_FEMALE ? "She " : "It "));
+      diag_char_to_char(g, char_get_fighting(g, ch), ch);
     } else {
       send_to_char(g, ch, "Diagnose who?\r\n");
     }

@@ -499,7 +499,7 @@ ACMD(do_rpp)
       char_get_desc(ch)->obj_was    = strdup(theshort);
       char_get_desc(ch)->obj_short  = strdup(theshort);
       char_get_desc(ch)->obj_long   = strdup(thelong);
-      char_get_desc(ch)->obj_point  = obj;
+      char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
       char_get_desc(ch)->obj_type   = 1;
       char_get_desc(ch)->obj_weapon = 0;
       disp_restring_menu(g, char_get_desc(ch));
@@ -727,7 +727,7 @@ ACMD(do_pose)
     return;
   }
 
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are too busy to pose right now!\r\n");
     return;
   }
@@ -837,7 +837,7 @@ ACMD(do_think)
     send_to_char(g, ch, "You can just use telepathy.\r\n");
     return;
   }
-  if (!char_get_mindlink(ch)) {
+  if (!char_get_mindlink(g, ch)) {
     send_to_char(g, ch, "No one has linked with your mind.\r\n");
     return;
   }
@@ -846,7 +846,7 @@ ACMD(do_think)
     return;
   }
   struct char_data *tch;
-  tch = char_get_mindlink(ch);
+  tch = char_get_mindlink(g, ch);
   send_to_char(g, ch, "@c%s@w reads your thoughts, '@C%s@w'@n\r\n", char_get_name(tch), argument);
   send_to_char(g, tch, "@c%s@w thinks, '@C%s@w'@n\r\n", char_get_name(ch), argument);
   send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);

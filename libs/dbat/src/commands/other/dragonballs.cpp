@@ -99,8 +99,10 @@ void wishSYS(GameWorld *g)
           break;
         case 290:
           send_to_room(g, real_room(g, g->DRAGONR), "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
-          char_from_room(g, g->EDRAGON);
-          char_to_room(g, g->EDRAGON, real_room(g, g->DRAGONR));
+          if (char_data *dragon = char_by_id(g, g->EDRAGON_uid)) {
+            char_from_room(g, dragon);
+            char_to_room(g, dragon, real_room(g, g->DRAGONR));
+          }
           g->DRAGONC -= 1;
           break;
         case 285:
@@ -130,7 +132,8 @@ void wishSYS(GameWorld *g)
         case 0:
           send_to_room(g, real_room(g, g->DRAGONR), "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
           send_to_planet(g, 0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
-          extract_char(g, g->EDRAGON);
+          if (char_data *dragon = char_by_id(g, g->EDRAGON_uid))
+            extract_char(g, dragon);
           g->SHENRON = false;
           g->DRAGONC -= 1;
           save_mud_time(g, &g->time_info);
@@ -285,7 +288,8 @@ void wishSYS(GameWorld *g)
       char_to_room(g, mob, real_room(g, g->SHADOW_DRAGON7));
       mob = nullptr;
 
-      extract_char(g, g->EDRAGON);
+      if (char_data *dragon = char_by_id(g, g->EDRAGON_uid))
+        extract_char(g, dragon);
       g->SHENRON = false;
       g->DRAGONC = 0;
     } /* End else */
@@ -430,7 +434,7 @@ ACMD(do_summon)
     }
     mob = read_mobile(g, r_num, REAL);
     char_to_room(g, mob, 0);
-    g->EDRAGON = mob;
+    g->EDRAGON_uid = char_get_id(mob);
     return;
   }
   send_to_char(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");

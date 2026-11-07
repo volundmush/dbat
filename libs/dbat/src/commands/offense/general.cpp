@@ -280,12 +280,12 @@ ACMD(do_rescue)
     send_to_char(g, ch, "%s", CONFIG_NOPERSON);
   else if (helpee == ch)
     send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
-  else if (!char_get_fighting(helpee))
+  else if (!char_get_fighting(g, helpee))
     send_to_char(g, ch, "They are not fighting anyone!\r\n");
-  else if (char_get_fighting(ch) && !char_is_npc(ch))
+  else if (char_get_fighting(g, ch) && !char_is_npc(ch))
     send_to_char(g, ch, "You are a little too busy fighting for yourself!\r\n");
   else {
-    opponent     = char_get_fighting(helpee);
+    opponent     = char_get_fighting(g, helpee);
     int mobbonus = 0;
 
     if (char_is_npc(ch)) {
@@ -312,7 +312,7 @@ ACMD(do_assist)
   char arg[MAX_INPUT_LENGTH];
   struct char_data *helpee, *opponent;
 
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You're already fighting!  How can you assist someone else?\r\n");
     return;
   }
@@ -328,10 +328,10 @@ ACMD(do_assist)
     /*
      * Hit the same enemy the person you're helping is.
      */
-    if (char_get_fighting(helpee))
-      opponent = char_get_fighting(helpee);
+    if (char_get_fighting(g, helpee))
+      opponent = char_get_fighting(g, helpee);
     else
-      opponent = find_first(room_people(g, char_get_in_room(ch)), [&](char_data *c) { return char_get_fighting(c) == helpee; });
+      opponent = find_first(room_people(g, char_get_in_room(ch)), [&](char_data *c) { return char_get_fighting(g, c) == helpee; });
 
     if (!opponent)
       act(g, "But nobody is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);
@@ -343,10 +343,10 @@ ACMD(do_assist)
       send_to_char(g, ch, "You join the fight!\r\n");
       act(g, "$N assists you!", 0, helpee, nullptr, ch, TO_CHAR);
       act(g, "$n assists $N.", true, ch, nullptr, helpee, TO_NOTVICT);
-      if (!char_get_fighting(ch)) {
+      if (!char_get_fighting(g, ch)) {
         set_fighting(g, ch, opponent);
       }
-      if (!char_get_fighting(opponent)) {
+      if (!char_get_fighting(g, opponent)) {
         set_fighting(g, opponent, ch);
       }
     }
@@ -391,22 +391,22 @@ ACMD(do_flee)
     return;
   }
 
-  if (char_get_grappling(ch)) {
+  if (char_get_grappling(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_grappled(ch)) {
+  if (char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_absorbing(ch)) {
+  if (char_get_absorbing(g, ch)) {
     send_to_char(g, ch, "You are absorbing from someone!\r\n");
     return;
   }
 
-  if (char_get_absorbby(ch)) {
+  if (char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You are being absorbed from by someone!\r\n");
     return;
   }
@@ -414,7 +414,7 @@ ACMD(do_flee)
   if (!char_is_npc(ch)) {
     int fail = false;
     for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
-      if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
+      if (obj_get_kicharge(obj) > 0 && obj_get_user(g, obj) == ch) {
         fail = true;
       }
     }
@@ -457,21 +457,21 @@ ACMD(do_flee)
         return;
       }
 
-      if (char_get_absorbing(ch)) {
-        send_to_char(g, ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(ch)));
+      if (char_get_absorbing(g, ch)) {
+        send_to_char(g, ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(g, ch)));
         return;
       }
-      if (char_get_absorbby(ch)) {
-        if (axion_dice(g, 0) < char_get_skill(char_get_absorbing(ch), SKILL_ABSORB)) {
-          send_to_char(g, ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
-          send_to_char(g, char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
+      if (char_get_absorbby(g, ch)) {
+        if (axion_dice(g, 0) < char_get_skill(char_get_absorbing(g, ch), SKILL_ABSORB)) {
+          send_to_char(g, ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(g, ch)));
+          send_to_char(g, char_get_absorbby(g, ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
           char_set_wait(ch, PULSE_2SEC);
           return;
         }
-        act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_NOTVICT);
-        act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_VICT);
-        act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_CHAR);
-        char_set_absorbing(char_get_absorbby(ch), nullptr);
+        act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_NOTVICT);
+        act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_VICT);
+        act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_CHAR);
+        char_set_absorbing(char_get_absorbby(g, ch), nullptr);
         char_set_absorbby(ch, nullptr);
       }
       if (do_simple_move(g, ch, attempt, true)) {

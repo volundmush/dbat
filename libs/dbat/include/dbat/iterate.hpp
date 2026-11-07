@@ -225,8 +225,8 @@ inline auto char_list(GameWorld *g, char_data *head)
 /* The characters following ch. */
 inline auto char_followers(GameWorld *g, const char_data *ch)
 {
-  auto master_id = [](const char_data *f) {
-    const char_data *m = char_get_master(f);
+  auto master_id = [g](const char_data *f) {
+    const char_data *m = char_get_master(g, f);
     return m ? static_cast<long>(char_get_id(m)) : 0L;
   };
   auto s = dbat_iter::make_snapshot<char_data, long>([g](long id) { return char_by_id(g, id); }, master_id);

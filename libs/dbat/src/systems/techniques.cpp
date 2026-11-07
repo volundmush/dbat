@@ -85,8 +85,8 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, char *arg, char_data **v
   *vict = nullptr;
   *obj  = nullptr;
   if (!*arg || !(*vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      *vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      *vict = char_get_fighting(g, ch);
       return true;
     }
     if (!(*obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
@@ -129,7 +129,7 @@ void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const 
 
 bool tech_handle_android_absorb(GameWorld *g, char_data *ch, char_data *vict)
 {
-  if (char_is_android(vict) && char_has_arms(vict) && char_get_skill(vict, SKILL_ABSORB) > rand_number(g, 1, 140)) {
+  if (char_is_android(vict) && char_has_arms(g, vict) && char_get_skill(vict, SKILL_ABSORB) > rand_number(g, 1, 140)) {
     act(g, "@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
     act(g, "@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict, TO_VICT);
     act(g, "@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", true, ch, nullptr, vict, TO_NOTVICT);

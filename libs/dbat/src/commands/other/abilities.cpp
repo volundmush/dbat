@@ -357,10 +357,10 @@ ACMD(do_candy)
     reveal_hiding(g, ch, 0);
     act(g, "@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", true, ch, nullptr, vict, TO_CHAR);
     act(g, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", true, ch, nullptr, vict, TO_NOTVICT);
-    if (!char_get_fighting(ch)) {
+    if (!char_get_fighting(g, ch)) {
       set_fighting(g, ch, vict);
     }
-    if (!char_get_fighting(vict)) {
+    if (!char_get_fighting(g, vict)) {
       set_fighting(g, vict, ch);
     }
     char_set_wait(ch, PULSE_3SEC);
@@ -806,7 +806,7 @@ ACMD(do_majinize)
     send_to_char(g, ch, "They are already majinized before by someone else.\r\n");
     return;
   }
-  if ((char_get_master(vict) != ch)) {
+  if ((char_get_master(g, vict) != ch)) {
     send_to_char(g, ch, "They must be following you in order for you to majinize them.\r\n");
     return;
   }
@@ -870,7 +870,7 @@ ACMD(do_spit)
   if (!know_skill(g, ch, SKILL_SPIT)) {
     return;
   }
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You can't manage to spit in this fight!\r\n");
     return;
   }
@@ -891,7 +891,7 @@ ACMD(do_spit)
     act(g, "$N has already been turned to stone.", true, ch, nullptr, vict, TO_CHAR);
     return;
   }
-  if (char_get_fighting(vict)) {
+  if (char_get_fighting(g, vict)) {
     send_to_char(g, vict, "You can't manage to spit on them, they are moving around too much!\r\n");
     return;
   }
@@ -970,28 +970,28 @@ ACMD(do_absorb)
     return;
   }
 
-  if (char_get_fighting(ch) && !char_is_android(ch)) {
+  if (char_get_fighting(g, ch) && !char_is_android(ch)) {
     send_to_char(g, ch, "You are too busy fighting!\r\n");
     return;
   }
 
-  if (char_get_grappled(ch)) {
+  if (char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are currently being grappled with! Try 'escape'!\r\n");
     return;
   }
-  if (char_get_grappling(ch)) {
+  if (char_get_grappling(g, ch)) {
     send_to_char(g, ch, "You are currently grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_absorbing(ch)) {
-    act(g, "@WYou stop absorbing from @c$N@W!@n", true, ch, nullptr, char_get_absorbing(ch), TO_CHAR);
-    act(g, "$n stops absorbing from you!", true, ch, nullptr, char_get_absorbing(ch), TO_VICT);
-    act(g, "$n stops absorbing from $N!", true, ch, nullptr, char_get_absorbing(ch), TO_NOTVICT);
-    if (char_is_npc(char_get_absorbing(ch)) && !char_get_fighting(char_get_absorbing(ch))) {
-      set_fighting(g, char_get_absorbing(ch), ch);
+  if (char_get_absorbing(g, ch)) {
+    act(g, "@WYou stop absorbing from @c$N@W!@n", true, ch, nullptr, char_get_absorbing(g, ch), TO_CHAR);
+    act(g, "$n stops absorbing from you!", true, ch, nullptr, char_get_absorbing(g, ch), TO_VICT);
+    act(g, "$n stops absorbing from $N!", true, ch, nullptr, char_get_absorbing(g, ch), TO_NOTVICT);
+    if (char_is_npc(char_get_absorbing(g, ch)) && !char_get_fighting(g, char_get_absorbing(g, ch))) {
+      set_fighting(g, char_get_absorbing(g, ch), ch);
     }
-    char_set_absorbby(char_get_absorbing(ch), nullptr);
+    char_set_absorbby(char_get_absorbing(g, ch), nullptr);
     char_set_absorbing(ch, nullptr);
   }
 
@@ -1031,8 +1031,8 @@ ACMD(do_absorb)
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
-    if (char_get_absorbby(vict)) {
-      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
+    if (char_get_absorbby(g, vict)) {
+      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (getEffMaxPL(g, vict) > getEffMaxPL(g, ch) * 2) {
@@ -1054,10 +1054,10 @@ ACMD(do_absorb)
       act(g, "@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
       improve_skill(g, ch, SKILL_ABSORB, 1);
       if (char_is_npc(vict) && char_is_humanoid(vict) && rand_number(g, 1, 3) == 3) {
-        if (char_get_fighting(ch) == nullptr) {
+        if (char_get_fighting(g, ch) == nullptr) {
           set_fighting(g, ch, vict);
         }
-        if (char_get_fighting(vict) == nullptr) {
+        if (char_get_fighting(g, vict) == nullptr) {
           set_fighting(g, vict, ch);
         }
       }
@@ -1075,8 +1075,8 @@ ACMD(do_absorb)
   } // End of android absorb
 
   else if (char_is_bio(ch) && !(strcmp(arg, "swallow"))) {
-    if (char_get_absorbby(vict)) {
-      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
+    if (char_get_absorbby(g, vict)) {
+      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
@@ -1096,10 +1096,10 @@ ACMD(do_absorb)
       act(g, "@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", true, ch, nullptr, vict, TO_VICT);
       act(g, "@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
       improve_skill(g, ch, SKILL_ABSORB, 1);
-      if (!char_get_fighting(ch)) {
+      if (!char_get_fighting(g, ch)) {
         set_fighting(g, ch, vict);
       }
-      if (!char_get_fighting(vict)) {
+      if (!char_get_fighting(g, vict)) {
         set_fighting(g, vict, ch);
       }
       char_set_wait(ch, PULSE_3SEC);
@@ -1132,8 +1132,8 @@ ACMD(do_absorb)
     if (char_get_level(vict) > 99) {
       failthresh += (char_get_level(vict) - 95) * 2;
     }
-    if (char_get_absorbby(vict)) {
-      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
+    if (char_get_absorbby(g, vict)) {
+      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
@@ -1160,10 +1160,10 @@ ACMD(do_absorb)
       act(g, "@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", true, ch, nullptr, vict, TO_VICT);
       act(g, "@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
       improve_skill(g, ch, SKILL_ABSORB, 0);
-      if (!char_get_fighting(ch)) {
+      if (!char_get_fighting(g, ch)) {
         set_fighting(g, ch, vict);
       }
-      if (!char_get_fighting(vict)) {
+      if (!char_get_fighting(g, vict)) {
         set_fighting(g, vict, ch);
       }
       char_set_wait(ch, PULSE_4SEC);
@@ -1492,7 +1492,7 @@ ACMD(do_zanzoken)
     return;
   }
 
-  if (char_get_grappling(ch) || char_get_grappled(ch)) {
+  if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are busy in a grapple!\r\n");
     return;
   }
@@ -1774,7 +1774,7 @@ ACMD(do_heal)
       send_to_char(g, vict, "You feel that your lifeforce has recovered some!\r\n");
     }
     improve_skill(g, ch, SKILL_HEAL, 0);
-    if (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
+    if (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) {
       if (char_is_nail(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && getCurPL(g, vict) <= getEffMaxPL(g, vict) * 0.85 && rand_number(g, 1, 3) == 3) {
         char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.005));
       }
@@ -2006,7 +2006,7 @@ ACMD(do_instant)
     return;
   }
 
-  if (skill < perc || (char_get_fighting(ch) && rand_number(g, 1, 2) <= 1)) {
+  if (skill < perc || (char_get_fighting(g, ch) && rand_number(g, 1, 2) <= 1)) {
     if (tar != nullptr) {
       if (tar != ch) {
         send_to_char(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
@@ -2032,7 +2032,7 @@ ACMD(do_instant)
       send_to_char(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
-    if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
+    if (char_get_grappling(g, ch) && char_get_grappling(g, ch) == tar) {
       send_to_char(g, ch, "You are already in the same room with them and are grappling with them!\r\n");
       return;
     }

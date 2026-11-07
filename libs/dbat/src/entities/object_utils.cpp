@@ -571,14 +571,14 @@ void obj_set_timer(struct obj_data *obj, int v)
   obj->timer = v;
 }
 
-struct char_data *obj_get_sitting(const struct obj_data *obj)
+struct char_data *obj_get_sitting(GameWorld *g, const struct obj_data *obj)
 {
-  return obj->sitting;
+  return obj->sitting_uid ? char_by_id(g, obj->sitting_uid) : nullptr;
 }
 
 void obj_set_sitting(struct obj_data *obj, struct char_data *v)
 {
-  obj->sitting = v;
+  obj->sitting_uid = v ? char_get_id(v) : 0;
 }
 
 int obj_get_posttype(const struct obj_data *obj)
@@ -591,24 +591,24 @@ void obj_set_posttype(struct obj_data *obj, int v)
   obj->posttype = v;
 }
 
-struct obj_data *obj_get_posted_to(const struct obj_data *obj)
+struct obj_data *obj_get_posted_to(GameWorld *g, const struct obj_data *obj)
 {
-  return obj->posted_to;
+  return obj->posted_to_uid ? obj_by_id(g, obj->posted_to_uid) : nullptr;
 }
 
 void obj_set_posted_to(struct obj_data *obj, struct obj_data *v)
 {
-  obj->posted_to = v;
+  obj->posted_to_uid = v ? obj_get_id(v) : 0;
 }
 
-struct obj_data *obj_get_fellow_wall(const struct obj_data *obj)
+struct obj_data *obj_get_fellow_wall(GameWorld *g, const struct obj_data *obj)
 {
-  return obj->fellow_wall;
+  return obj->fellow_wall_uid ? obj_by_id(g, obj->fellow_wall_uid) : nullptr;
 }
 
 void obj_set_fellow_wall(struct obj_data *obj, struct obj_data *v)
 {
-  obj->fellow_wall = v;
+  obj->fellow_wall_uid = v ? obj_get_id(v) : 0;
 }
 
 int32_t obj_get_aucter(const struct obj_data *obj)
@@ -681,14 +681,14 @@ void obj_set_foob(struct obj_data *obj, int v)
   obj->foob = v;
 }
 
-struct char_data *obj_get_target(const struct obj_data *obj)
+struct char_data *obj_get_target(GameWorld *g, const struct obj_data *obj)
 {
-  return obj->target;
+  return obj->target_uid ? char_by_id(g, obj->target_uid) : nullptr;
 }
 
 void obj_set_target(struct obj_data *obj, struct char_data *v)
 {
-  obj->target = v;
+  obj->target_uid = v ? char_get_id(v) : 0;
 }
 
 int64_t obj_get_kicharge(const struct obj_data *obj)
@@ -711,14 +711,14 @@ void obj_set_kitype(struct obj_data *obj, int v)
   obj->kitype = v;
 }
 
-struct char_data *obj_get_user(const struct obj_data *obj)
+struct char_data *obj_get_user(GameWorld *g, const struct obj_data *obj)
 {
-  return obj->user;
+  return obj->user_uid ? char_by_id(g, obj->user_uid) : nullptr;
 }
 
 void obj_set_user(struct obj_data *obj, struct char_data *v)
 {
-  obj->user = v;
+  obj->user_uid = v ? char_get_id(v) : 0;
 }
 
 int obj_get_distance(const struct obj_data *obj)

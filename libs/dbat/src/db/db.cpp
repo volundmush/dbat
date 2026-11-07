@@ -523,7 +523,7 @@ void destroy_db(GameWorld *g)
   /* Active Mobiles & Players */
   /* stop_follower() reads the master, so everyone must stop before anyone is freed */
   for (char_data *tch : each_char(g))
-    if (char_get_master(tch))
+    if (char_get_master(g, tch))
       stop_follower(g, tch);
   while (g->characters) {
     chtmp          = g->characters;

@@ -54,7 +54,7 @@ ACMD(do_uppercut)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -80,7 +80,7 @@ ACMD(do_uppercut)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_UPPERCUT, 1);
@@ -287,7 +287,7 @@ ACMD(do_roundhouse)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -313,7 +313,7 @@ ACMD(do_roundhouse)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_ROUNDHOUSE, 1);
@@ -507,7 +507,7 @@ ACMD(do_elbow)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -526,7 +526,7 @@ ACMD(do_elbow)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_ELBOW, 0);
@@ -726,7 +726,7 @@ ACMD(do_kick)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -745,7 +745,7 @@ ACMD(do_kick)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KICK, 0);
@@ -944,7 +944,7 @@ ACMD(do_knee)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -963,7 +963,7 @@ ACMD(do_knee)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KNEE, 0);
@@ -1151,7 +1151,7 @@ ACMD(do_punch)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1169,7 +1169,7 @@ ACMD(do_punch)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_PUNCH, 0);

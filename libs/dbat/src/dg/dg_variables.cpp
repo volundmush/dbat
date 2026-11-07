@@ -296,7 +296,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         else
           strcpy(str, "1");
       } else if (!strcasecmp(field, "carry")) {
-        if (!char_is_npc(c) && char_get_carrying(c))
+        if (!char_is_npc(c) && char_get_carrying(g, c))
           strcpy(str, "1");
         else
           strcpy(str, "0");
@@ -347,7 +347,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         }
         snprintf(str, slen, "%d", char_get_aff_abils_dex(c));
       } else if (!strcasecmp(field, "drag")) {
-        if (!char_is_npc(c) && char_get_drag(c))
+        if (!char_is_npc(c) && char_get_drag(g, c))
           strcpy(str, "1");
         else
           strcpy(str, "0");
@@ -390,8 +390,8 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       break;
     case 'f':
       if (!strcasecmp(field, "fighting")) {
-        if (char_get_fighting(c))
-          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_fighting(c)));
+        if (char_get_fighting(g, c))
+          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_fighting(g, c)));
         else
           *str = '\0';
       } else if (!strcasecmp(field, "flying")) {
@@ -566,10 +566,10 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       }
 
       else if (!strcasecmp(field, "master")) {
-        if (!char_get_master(c))
+        if (!char_get_master(g, c))
           *str = '\0';
         else
-          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_master(c)));
+          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_master(g, c)));
       }
       break;
     case 'n':

@@ -318,8 +318,8 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
   for (char_data *check : each_char(g))
-    if (!char_get_master(check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
-        char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
+    if (!char_get_master(g, check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
+        char_aff_flagged(check, AFF_CHARM) && !circle_follow(g, check, d->character))
       add_follower(g, check, d->character);
   save_char(g, d->character);
 

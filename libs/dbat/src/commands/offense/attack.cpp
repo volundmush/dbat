@@ -57,7 +57,7 @@ ACMD(do_attack)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -232,7 +232,7 @@ ACMD(do_attack)
 
   if (vict) {
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
 
@@ -486,7 +486,7 @@ ACMD(do_attack)
         }
         break;
       case 1:
-        if (!char_get_fighting(ch) && backstab(g, ch, vict, wlvl, dmg)) {
+        if (!char_get_fighting(g, ch) && backstab(g, ch, vict, wlvl, dmg)) {
           if (vict != nullptr && getCurPL(g, vict) > 1 && axion_dice(g, 0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
             do_attack2(g, ch, nullptr, 0, 0);
           }
@@ -833,7 +833,7 @@ static ACMD(do_attack2)
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "With what arms!?\r\n");
     return;
   }
@@ -853,7 +853,7 @@ static ACMD(do_attack2)
     }
   }
 
-  if (!char_get_fighting(ch)) {
+  if (!char_get_fighting(g, ch)) {
     return;
   }
 
@@ -934,8 +934,8 @@ static ACMD(do_attack2)
   } else if (char_is_npc(ch) && char_get_level(ch) > 100) {
     skill = rand_number(g, 95, 100);
   }
-  if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-    vict = char_get_fighting(ch);
+  if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+    vict = char_get_fighting(g, ch);
   }
 
   if (gun2 == true) {

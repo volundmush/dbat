@@ -81,7 +81,7 @@ void mobile_activity(GameWorld *g)
       continue;
 
     /* Scavenger (picking up objects) */
-    if (char_is_humanoid(ch) && !char_get_fighting(ch) && char_is_awake(ch) && !char_mob_flagged(ch, MOB_NOSCAVENGER) && !char_mob_flagged(ch, MOB_NOKILL) && (!player_present(g, ch) || axion_dice(g, 0) > 118))
+    if (char_is_humanoid(ch) && !char_get_fighting(g, ch) && char_is_awake(ch) && !char_mob_flagged(ch, MOB_NOSCAVENGER) && !char_mob_flagged(ch, MOB_NOKILL) && (!player_present(g, ch) || axion_dice(g, 0) > 118))
       if (rroom_get_contents(g, char_get_in_room(ch)) && rand_number(g, 1, 100) >= 95) {
         max      = 1;
         best_obj = nullptr;
@@ -90,7 +90,7 @@ void mobile_activity(GameWorld *g)
             best_obj = obj;
             max      = obj_get_cost(obj);
           }
-        if (best_obj != nullptr && char_can_get_obj(g, ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(best_obj) && !obj_extra_flagged(best_obj, ITEM_NOPICKUP)) {
+        if (best_obj != nullptr && char_can_get_obj(g, ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(g, best_obj) && !obj_extra_flagged(best_obj, ITEM_NOPICKUP)) {
           switch (rand_number(g, 1, 5)) {
             case 1:
               act(g, "$n@W says, '@CFinders keepers, losers weepers.@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -113,8 +113,8 @@ void mobile_activity(GameWorld *g)
       }
 
     /* Mob Movement */
-    if (!char_mob_flagged(ch, MOB_SENTINEL) && (char_get_position(ch) == POS_STANDING) && !char_get_fighting(ch) &&
-        (!char_aff_flagged(ch, AFF_TAMED)) && !char_get_absorbby(ch) &&
+    if (!char_mob_flagged(ch, MOB_SENTINEL) && (char_get_position(ch) == POS_STANDING) && !char_get_fighting(g, ch) &&
+        (!char_aff_flagged(ch, AFF_TAMED)) && !char_get_absorbby(g, ch) &&
         ((door = rand_number(g, 0, 18)) < NUM_OF_DIRS) && char_can_go(g, ch, door) &&
         !rroom_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_NOMOB) &&
         !rroom_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_DEATH) &&
@@ -127,23 +127,23 @@ void mobile_activity(GameWorld *g)
 
     /* RESPOND TO A HUGE ATTACK */
     for (obj_data *hugeatk : room_contents(g, char_get_in_room(ch))) {
-      if (char_get_fighting(ch)) {
+      if (char_get_fighting(g, ch)) {
         continue;
       }
       if (char_mob_flagged(ch, MOB_NOKILL)) {
         continue;
       }
       if (obj_get_vnum(g, hugeatk) == 82 || obj_get_vnum(g, hugeatk) == 83) {
-        if (obj_get_user(hugeatk) != nullptr) {
-          act(g, "@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, obj_get_user(hugeatk), TO_ROOM);
-          act(g, "@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, obj_get_user(hugeatk), TO_VICT);
+        if (obj_get_user(g, hugeatk) != nullptr) {
+          act(g, "@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_ROOM);
+          act(g, "@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_VICT);
           if (char_is_humanoid(ch)) {
             char tar[MAX_INPUT_LENGTH];
-            sprintf(tar, "%s", char_get_name(obj_get_user(hugeatk)));
+            sprintf(tar, "%s", char_get_name(obj_get_user(g, hugeatk)));
             do_punch(g, ch, tar, 0, 0);
           } else {
             char tar[MAX_INPUT_LENGTH];
-            sprintf(tar, "%s", char_get_name(obj_get_user(hugeatk)));
+            sprintf(tar, "%s", char_get_name(obj_get_user(g, hugeatk)));
             do_bite(g, ch, tar, 0, 0);
           }
         }
@@ -159,7 +159,7 @@ void mobile_activity(GameWorld *g)
           break;
         if (vict == ch)
           continue;
-        else if (char_get_fighting(ch))
+        else if (char_get_fighting(g, ch))
           continue;
         else if (!char_can_see(g, ch, vict))
           continue;
@@ -226,12 +226,12 @@ void mobile_activity(GameWorld *g)
       }
     }
 
-    if (char_get_original(ch) && rand_number(g, 1, 5) >= 4) {
-      struct char_data *original = char_get_original(ch);
+    if (char_get_original(g, ch) && rand_number(g, 1, 5) >= 4) {
+      struct char_data *original = char_get_original(g, ch);
 
-      if (char_get_fighting(original) && !char_get_fighting(ch)) {
+      if (char_get_fighting(g, original) && !char_get_fighting(g, ch)) {
         char target[MAX_INPUT_LENGTH];
-        struct char_data *targ = char_get_fighting(original);
+        struct char_data *targ = char_get_fighting(g, original);
 
         sprintf(target, "%s", char_get_alias(targ));
         if (rand_number(g, 1, 5) >= 4) {
@@ -250,7 +250,7 @@ void mobile_activity(GameWorld *g)
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
-        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(ally) && done == false) {
+        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 90) {
             act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, TO_ROOM);
             char buf[MAX_INPUT_LENGTH];
@@ -261,15 +261,15 @@ void mobile_activity(GameWorld *g)
               do_rescue(g, ch, buf, 0, 0);
               if (rand_number(g, 1, 6) == 2) {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
                 do_kiblast(g, ch, tar, 0, 0);
               } else if (rand_number(g, 1, 6) >= 4) {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
                 do_slam(g, ch, tar, 0, 0);
               } else {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
                 do_punch(g, ch, tar, 0, 0);
               }
             }
@@ -279,12 +279,12 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
-    if (false && !char_get_fighting(ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
+    if (false && !char_get_fighting(g, ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
       int done = false;
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
-        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(ally) && done == false) {
+        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 70) {
             act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, TO_ROOM);
             char buf[MAX_INPUT_LENGTH];
@@ -302,7 +302,7 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Absorb protection */
-    if (char_get_absorbby(ch) && rand_number(g, 1, 3) == 3) {
+    if (char_get_absorbby(g, ch) && rand_number(g, 1, 3) == 3) {
       do_escape(g, ch, nullptr, 0, 0);
     }
     if (char_get_position(ch) == POS_SLEEPING && rand_number(g, 1, 3) == 3) {
@@ -341,7 +341,7 @@ void mobile_activity(GameWorld *g)
           break;
         if (char_is_npc(vict) || !char_can_see(g, ch, vict) || char_prf_flagged(g, vict, PRF_NOHASSLE))
           continue;
-        if (char_get_fighting(ch))
+        if (char_get_fighting(g, ch))
           continue;
         if (getCurPL(g, ch) <= getEffMaxPL(g, ch) / 100)
           continue;
@@ -360,7 +360,7 @@ void mobile_activity(GameWorld *g)
       }
     }
 
-    if (char_get_fighting(ch) && rand_number(g, 1, 30) >= 25) {
+    if (char_get_fighting(g, ch) && rand_number(g, 1, 30) >= 25) {
       mob_taunt(g, ch);
     }
 
@@ -372,16 +372,16 @@ void mobile_activity(GameWorld *g)
       for (char_data *vict : room_people(g, char_get_in_room(ch))) {
         if (found)
           break;
-        if (ch == vict || !char_is_npc(vict) || !char_get_fighting(vict))
+        if (ch == vict || !char_is_npc(vict) || !char_get_fighting(g, vict))
           continue;
-        if (char_is_npc(char_get_fighting(vict)) || ch == char_get_fighting(vict))
+        if (char_is_npc(char_get_fighting(g, vict)) || ch == char_get_fighting(g, vict))
           continue;
 
         if (char_is_humanoid(vict)) {
           act(g, "$n jumps to the aid of $N!", false, ch, nullptr, vict, TO_ROOM);
           char tar[MAX_INPUT_LENGTH];
 
-          sprintf(tar, "%s", char_get_name(char_get_fighting(vict)));
+          sprintf(tar, "%s", char_get_name(char_get_fighting(g, vict)));
           do_punch(g, ch, tar, 0, 0);
           found = true;
         }
@@ -449,11 +449,11 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  if (!char_get_fighting(ch)) { /* The NPC is not fighting. Error. ABORT! */
+  if (!char_get_fighting(g, ch)) { /* The NPC is not fighting. Error. ABORT! */
     return;
   }
 
-  struct char_data *vict = char_get_fighting(ch);
+  struct char_data *vict = char_get_fighting(g, ch);
 
   if (vict == nullptr) { /* OH NO */
     return;

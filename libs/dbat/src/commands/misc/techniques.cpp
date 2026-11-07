@@ -129,7 +129,7 @@ ACMD(do_multiform)
     if (tch == ch || !char_is_npc(tch)) {
       continue;
     }
-    if (char_get_mob_vnum(g, tch) == 25 && char_get_original(tch) == ch) {
+    if (char_get_mob_vnum(g, tch) == 25 && char_get_original(g, tch) == ch) {
       count++;
     }
   }
@@ -146,7 +146,7 @@ ACMD(do_multiform)
       if (tch == ch || !char_is_npc(tch)) {
         continue;
       }
-      if (char_get_mob_vnum(g, tch) == 25 && char_get_original(tch) == ch) {
+      if (char_get_mob_vnum(g, tch) == 25 && char_get_original(g, tch) == ch) {
         extract_char(g, tch);
       }
     }
@@ -157,7 +157,7 @@ ACMD(do_multiform)
     int64_t cost = (getMaxKI(g, ch) * 0.005) + (getMaxST(g, ch) * 0.005) + 2;
     int penalty  = 0;
 
-    if (char_get_fighting(ch)) {
+    if (char_get_fighting(g, ch)) {
       penalty = rand_number(g, 8, 15);
     }
 
@@ -272,7 +272,7 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
 
 void handle_multi_merge(GameWorld *g, struct char_data *form)
 {
-  struct char_data *ch = char_get_original(form);
+  struct char_data *ch = char_get_original(g, form);
 
   if (ch == nullptr)
     return;
@@ -334,7 +334,7 @@ ACMD(do_moondust)
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP)) {
-      if (char_get_master(ch) == char_get_master(vict) || char_get_master(vict) == ch || char_get_master(ch) == vict) {
+      if (char_get_master(g, ch) == char_get_master(g, vict) || char_get_master(g, vict) == ch || char_get_master(g, ch) == vict) {
         incCurHealth(g, vict, heal, true);
         act(g, "@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, nullptr, nullptr, TO_CHAR);
         act(g, "@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, nullptr, nullptr, TO_ROOM);
@@ -415,16 +415,16 @@ ACMD(do_liquefy)
   }
 
   if (!strcasecmp(arg, "hide")) {
-    if (char_get_grappled(ch)) {
-      char_set_grappling(char_get_grappled(ch), nullptr);
+    if (char_get_grappled(g, ch)) {
+      char_set_grappling(char_get_grappled(g, ch), nullptr);
       char_set_grappled(ch, nullptr);
     }
-    if (char_get_grappling(ch)) {
-      char_set_grappled(char_get_grappling(ch), nullptr);
+    if (char_get_grappling(g, ch)) {
+      char_set_grappled(char_get_grappling(g, ch), nullptr);
       char_set_grappling(ch, nullptr);
     }
-    if (char_get_drag(ch)) {
-      char_set_dragged(char_get_drag(ch), nullptr);
+    if (char_get_drag(g, ch)) {
+      char_set_dragged(char_get_drag(g, ch), nullptr);
       char_set_drag(ch, nullptr);
     }
     if (axion_dice(g, 0) > char_get_level(ch)) {
@@ -442,16 +442,16 @@ ACMD(do_liquefy)
   }
   if (!strcasecmp(arg, "explode")) {
     struct char_data *vict;
-    if (char_get_grappled(ch)) {
-      char_set_grappling(char_get_grappled(ch), nullptr);
+    if (char_get_grappled(g, ch)) {
+      char_set_grappling(char_get_grappled(g, ch), nullptr);
       char_set_grappled(ch, nullptr);
     }
-    if (char_get_grappling(ch)) {
-      char_set_grappled(char_get_grappling(ch), nullptr);
+    if (char_get_grappling(g, ch)) {
+      char_set_grappled(char_get_grappling(g, ch), nullptr);
       char_set_grappling(ch, nullptr);
     }
-    if (char_get_drag(ch)) {
-      char_set_dragged(char_get_drag(ch), nullptr);
+    if (char_get_drag(g, ch)) {
+      char_set_dragged(char_get_drag(g, ch), nullptr);
       char_set_drag(ch, nullptr);
     }
     if (!*arg2) {
@@ -482,10 +482,10 @@ ACMD(do_liquefy)
       act(g, "@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you are faster and managed to dodge the attempt.@n", true, ch, nullptr, vict, TO_VICT);
       act(g, "@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n", true, ch, nullptr, vict, TO_NOTVICT);
       decCurKI(g, ch, (getMaxKI(g, ch) * .002) + 150, 0);
-      if (!char_get_fighting(ch)) {
+      if (!char_get_fighting(g, ch)) {
         set_fighting(g, ch, vict);
       }
-      if (!char_get_fighting(vict)) {
+      if (!char_get_fighting(g, vict)) {
         set_fighting(g, vict, ch);
       }
       char_set_wait(ch, PULSE_3SEC);
@@ -559,15 +559,15 @@ ACMD(do_defend)
 
   one_argument(argument, arg);
 
-  if (!*arg && char_get_defending(ch) == nullptr) {
+  if (!*arg && char_get_defending(g, ch) == nullptr) {
     send_to_char(g, ch, "Defend who?\r\n");
     return;
   }
-  if (!*arg && char_get_defending(ch)) {
-    act(g, "@YYou stop defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(ch), TO_CHAR);
-    act(g, "@y$n@Y stops defending you.@n", true, ch, nullptr, char_get_defending(ch), TO_VICT);
-    act(g, "@y$n@Y stops defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(ch), TO_NOTVICT);
-    char_set_defender(char_get_defending(ch), nullptr);
+  if (!*arg && char_get_defending(g, ch)) {
+    act(g, "@YYou stop defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(g, ch), TO_CHAR);
+    act(g, "@y$n@Y stops defending you.@n", true, ch, nullptr, char_get_defending(g, ch), TO_VICT);
+    act(g, "@y$n@Y stops defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(g, ch), TO_NOTVICT);
+    char_set_defender(char_get_defending(g, ch), nullptr);
     char_set_defending(ch, nullptr);
     return;
   }
@@ -584,15 +584,15 @@ ACMD(do_defend)
   act(g, "@y$n@Y starts defending you.@n", true, ch, nullptr, vict, TO_VICT);
   act(g, "@y$n@Y starts defending @y$N@Y.@n", true, ch, nullptr, vict, TO_NOTVICT);
   /* Each has only one, so whoever was paired with these two is let go, and told. */
-  if (char_get_defending(ch)) {
-    if (char_get_defending(ch) != vict)
-      act(g, "@y$n@Y stops defending you.@n", false, ch, nullptr, char_get_defending(ch), TO_VICT);
-    char_set_defender(char_get_defending(ch), nullptr);
+  if (char_get_defending(g, ch)) {
+    if (char_get_defending(g, ch) != vict)
+      act(g, "@y$n@Y stops defending you.@n", false, ch, nullptr, char_get_defending(g, ch), TO_VICT);
+    char_set_defender(char_get_defending(g, ch), nullptr);
   }
-  if (char_get_defender(vict)) {
-    if (char_get_defender(vict) != ch)
-      act(g, "@YYou are no longer defending @y$n@Y. Someone else has taken over.@n", false, vict, nullptr, char_get_defender(vict), TO_VICT);
-    char_set_defending(char_get_defender(vict), nullptr);
+  if (char_get_defender(g, vict)) {
+    if (char_get_defender(g, vict) != ch)
+      act(g, "@YYou are no longer defending @y$n@Y. Someone else has taken over.@n", false, vict, nullptr, char_get_defender(g, vict), TO_VICT);
+    char_set_defending(char_get_defender(g, vict), nullptr);
   }
   char_set_defender(vict, ch);
   char_set_defending(ch, vict);
@@ -850,11 +850,11 @@ ACMD(do_healglow)
     return;
   }
 
-  if (char_get_fighting(vict) && vict == ch) {
+  if (char_get_fighting(g, vict) && vict == ch) {
     send_to_char(g, ch, "You are too busy fighting!@n\r\n");
     return;
   }
-  if (char_get_fighting(vict)) {
+  if (char_get_fighting(g, vict)) {
     send_to_char(g, ch, "They are too busy fighting!@n\r\n");
     return;
   }
@@ -1010,7 +1010,7 @@ ACMD(do_shimmer)
     return;
   }
 
-  if (skill < perc || (char_get_fighting(ch) && rand_number(g, 1, 2) <= 1)) {
+  if (skill < perc || (char_get_fighting(g, ch) && rand_number(g, 1, 2) <= 1)) {
     if (tar != nullptr) {
       if (tar != ch) {
         send_to_char(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
@@ -1034,7 +1034,7 @@ ACMD(do_shimmer)
       send_to_char(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
-    if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
+    if (char_get_grappling(g, ch) && char_get_grappling(g, ch) == tar) {
       send_to_char(g, ch, "You are already in the same room with them and are grappling with them!\r\n");
       return;
     }
@@ -1046,15 +1046,15 @@ ACMD(do_shimmer)
       send_to_char(g, ch, "You can not go there as it is a protected area!\r\n");
       return;
     }
-    if (char_get_grappling(ch) && char_aff_flagged(char_get_grappling(ch), AFF_SPIRIT)) {
+    if (char_get_grappling(g, ch) && char_aff_flagged(char_get_grappling(g, ch), AFF_SPIRIT)) {
       send_to_char(g, ch, "You can not take the dead with you!\r\n");
       return;
     }
-    if (char_get_drag(ch) && char_aff_flagged(char_get_drag(ch), AFF_SPIRIT)) {
+    if (char_get_drag(g, ch) && char_aff_flagged(char_get_drag(g, ch), AFF_SPIRIT)) {
       send_to_char(g, ch, "You can not take the dead with you!\r\n");
       return;
     }
-    if (char_get_grappled(ch) && char_aff_flagged(char_get_grappled(ch), AFF_SPIRIT)) {
+    if (char_get_grappled(g, ch) && char_aff_flagged(char_get_grappled(g, ch), AFF_SPIRIT)) {
       send_to_char(g, ch, "You can not take the dead with you!\r\n");
       return;
     }
@@ -1484,7 +1484,7 @@ ACMD(do_ensnare)
       send_to_char(g, ch, "They are already ensnared!\r\n");
       return;
     }
-    if (!char_has_arms(vict)) {
+    if (!char_has_arms(g, vict)) {
       send_to_char(g, ch, "They don't have arms to ensnare!\r\n");
       return;
     }
@@ -1662,17 +1662,17 @@ ACMD(do_warppool)
     return;
   }
 
-  if (char_get_grappling(ch) || char_get_grappled(ch)) {
+  if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_absorbing(ch) || char_get_absorbby(ch)) {
+  if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You are struggling with someone!\r\n");
     return;
   }
 
-  if (char_get_sits(ch)) {
+  if (char_get_sits(g, ch)) {
     send_to_char(g, ch, "You should get up first.\r\n");
     return;
   }

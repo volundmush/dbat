@@ -398,8 +398,8 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   send_to_char(g, ch, "Object Material: @y%s@n\r\n",
                material_names[obj_get_value(j, 7)]);
 
-  if (obj_get_sitting(j)) {
-    sitter = obj_get_sitting(j);
+  if (obj_get_sitting(g, j)) {
+    sitter = obj_get_sitting(g, j);
     send_to_char(g, ch, "HOLDING: %s\r\n", char_get_name(sitter));
   }
 
@@ -658,7 +658,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   send_to_char(g, ch, "Armor: [%d ]\r\n", char_get_armor(k));
 
   sprinttype(char_get_position(k), position_types, buf, sizeof(buf));
-  send_to_char(g, ch, "Pos: %s, Fighting: %s", buf, char_get_fighting(k) ? char_get_name(char_get_fighting(k)) : "Nobody");
+  send_to_char(g, ch, "Pos: %s, Fighting: %s", buf, char_get_fighting(g, k) ? char_get_name(char_get_fighting(g, k)) : "Nobody");
 
   if (char_get_desc(k)) {
     sprinttype(desc_get_connected(char_get_desc(k)), connected_types, buf, sizeof(buf));
@@ -706,7 +706,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   if (!char_is_npc(k))
     send_to_char(g, ch, "Hunger: %d, Thirst: %d, Drunk: %d\r\n", char_get_conditions(g, k, HUNGER), char_get_conditions(g, k, THIRST), char_get_conditions(g, k, DRUNK));
 
-  column = send_to_char(g, ch, "Master is: %s, Followers are:", char_get_master(k) ? char_get_name(char_get_master(k)) : "<none>");
+  column = send_to_char(g, ch, "Master is: %s, Followers are:", char_get_master(g, k) ? char_get_name(char_get_master(g, k)) : "<none>");
   if (!char_get_followers(k))
     send_to_char(g, ch, " <none>\r\n");
   else {
@@ -725,8 +725,8 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
       send_to_char(g, ch, "\r\n");
   }
 
-  if (char_get_sits(k)) {
-    chair = char_get_sits(k);
+  if (char_get_sits(g, k)) {
+    chair = char_get_sits(g, k);
     send_to_char(g, ch, "Is on: %s@n\r\n", obj_get_short_description(chair));
   }
 

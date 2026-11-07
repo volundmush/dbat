@@ -266,7 +266,7 @@ static void check_extract_mid_fight(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
   extract_char(g, dummy);
   extract_pending_chars(g);
-  CHECK(char_get_fighting(ch) == nullptr);
+  CHECK(char_get_fighting(g, ch) == nullptr);
   CHECK_AUDIT(g);
   th_pulses(g, 20);
   CHECK_AUDIT(g);
@@ -287,8 +287,8 @@ static void check_extract_with_followers(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
   extract_char(g, leader);
   extract_pending_chars(g);
-  CHECK(char_get_master(ch) == nullptr);
-  CHECK(char_get_master(follower) == nullptr);
+  CHECK(char_get_master(g, ch) == nullptr);
+  CHECK(char_get_master(g, follower) == nullptr);
   CHECK_AUDIT(g);
   extract_char(g, follower);
   extract_pending_chars(g);
@@ -892,6 +892,9 @@ int main(void)
   GameWorld *g = th_boot();
   struct char_data *ch;
 
+  /* ids that no entity has: entities refer to each other by id, so these stand for ones that have gone */
+  char_set_id(&stray_char, MOB_ID_MAX - 1);
+  obj_set_id(&stray_obj, OBJ_ID_MAX - 1);
   CHECK_AUDIT(g);
   ch = th_player(g, "Tester", ADMLVL_NONE);
   CHECK_AUDIT(g);

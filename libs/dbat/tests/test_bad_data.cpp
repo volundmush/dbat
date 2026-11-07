@@ -692,13 +692,13 @@ static void check_defending_someone_else_lets_go_of_the_first(void)
   move_next_to(g, second, ch);
   move_next_to(g, rival, ch);
   th_type(g, ch, "defend first");
-  CHECK(char_get_defender(first) == ch);
+  CHECK(char_get_defender(g, first) == ch);
   th_take_output(g, first);
   th_type(g, ch, "defend second");
   CHECK(saw(first, "stops defending you"));
-  CHECK(char_get_defender(first) == nullptr);
-  CHECK(char_get_defender(second) == ch);
-  CHECK(char_get_defending(ch) == second);
+  CHECK(char_get_defender(g, first) == nullptr);
+  CHECK(char_get_defender(g, second) == ch);
+  CHECK(char_get_defending(g, ch) == second);
   CHECK_AUDIT(g);
   /* one defender at a time: a second takes over from the first, who may not be there to see it */
   char_from_room(g, ch);
@@ -706,13 +706,13 @@ static void check_defending_someone_else_lets_go_of_the_first(void)
   th_take_output(g, ch);
   th_type(g, rival, "defend second");
   CHECK(saw(ch, "no longer defending"));
-  CHECK(char_get_defender(second) == rival);
-  CHECK(char_get_defending(ch) == nullptr);
+  CHECK(char_get_defender(g, second) == rival);
+  CHECK(char_get_defending(g, ch) == nullptr);
   CHECK_AUDIT(g);
   th_take_output(g, first);
   th_type(g, rival, "defend second"); /* nothing has changed, so nothing to tell */
   CHECK(!saw(first, "stops defending"));
-  CHECK(char_get_defender(second) == rival);
+  CHECK(char_get_defender(g, second) == rival);
   th_shutdown(g);
 }
 

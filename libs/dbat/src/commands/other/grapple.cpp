@@ -69,32 +69,32 @@ ACMD(do_grapple)
     return;
   }
 
-  if (char_get_absorbing(ch)) {
+  if (char_get_absorbing(g, ch)) {
     send_to_char(g, ch, "You are currently absorbing from someone!\r\n");
     return;
   }
-  if (char_get_absorbby(ch)) {
+  if (char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You are currently being absorbed by someone! Try 'escape'!\r\n");
     return;
   }
 
-  if (char_get_grappling(ch) != nullptr) {
-    act(g, "@RYou stop grappling with @r$N@R!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
-    act(g, "@r$n@R stops grappling with @rYOU!!@n", true, ch, nullptr, char_get_grappling(ch), TO_VICT);
-    act(g, "@r$n@R stops grappling with @r$N@R!@n", true, ch, nullptr, char_get_grappling(ch), TO_NOTVICT);
-    char_set_grap(char_get_grappling(ch), -1);
-    char_set_grappled(char_get_grappling(ch), nullptr);
+  if (char_get_grappling(g, ch) != nullptr) {
+    act(g, "@RYou stop grappling with @r$N@R!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
+    act(g, "@r$n@R stops grappling with @rYOU!!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_VICT);
+    act(g, "@r$n@R stops grappling with @r$N@R!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_NOTVICT);
+    char_set_grap(char_get_grappling(g, ch), -1);
+    char_set_grappled(char_get_grappling(g, ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
     return;
   }
 
-  if (char_get_grappled(ch) != nullptr) {
+  if (char_get_grappled(g, ch) != nullptr) {
     send_to_char(g, ch, "You are currently a victim of grappling! Try 'escape' to break free!\r\n");
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
@@ -110,11 +110,11 @@ ACMD(do_grapple)
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (!char_get_fighting(ch)) {
+    if (!char_get_fighting(g, ch)) {
       send_to_char(g, ch, "That target isn't here.\r\n");
       return;
     }
-    vict = char_get_fighting(ch);
+    vict = char_get_fighting(g, ch);
   }
 
   if (!can_kill(g, ch, vict, nullptr, 0)) {
@@ -126,17 +126,17 @@ ACMD(do_grapple)
     return;
   }
 
-  if (char_get_grappled(vict)) {
+  if (char_get_grappled(g, vict)) {
     send_to_char(g, ch, "They are currently in someone else's grasp!\r\n");
     return;
   }
 
-  if (char_get_absorbby(vict)) {
+  if (char_get_absorbby(g, vict)) {
     send_to_char(g, ch, "They are currently in someone else's grasp!\r\n");
     return;
   }
 
-  if (char_get_absorbing(vict)) {
+  if (char_get_absorbing(g, vict)) {
     send_to_char(g, ch, "They are currently absorbing from someone!\r\n");
     return;
   }
@@ -212,7 +212,7 @@ ACMD(do_grapple)
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    if (!char_has_arms(vict) && !strcasecmp("grab", arg2)) {
+    if (!char_has_arms(g, vict) && !strcasecmp("grab", arg2)) {
       send_to_char(g, ch, "They don't even have an arm to grab onto!\r\n");
       return;
     }
@@ -330,8 +330,8 @@ ACMD(do_trip)
   vict = nullptr;
   vict = nullptr;
   if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      vict = char_get_fighting(g, ch);
     } else {
       send_to_char(g, ch, "That target isn't here.\r\n");
       return;
@@ -397,14 +397,14 @@ ACMD(do_trip)
       improve_skill(g, ch, SKILL_TRIP, 0);
       decCurST(g, ch, cost, 0);
       char_set_wait(ch, PULSE_4SEC);
-      if (char_get_fighting(ch) == nullptr) {
+      if (char_get_fighting(g, ch) == nullptr) {
         set_fighting(g, ch, vict);
-      } else if (char_get_fighting(ch) != vict) {
+      } else if (char_get_fighting(g, ch) != vict) {
         set_fighting(g, ch, vict);
       }
-      if (char_get_fighting(vict) == nullptr) {
+      if (char_get_fighting(g, vict) == nullptr) {
         set_fighting(g, vict, ch);
-      } else if (char_get_fighting(vict) != ch) {
+      } else if (char_get_fighting(g, vict) != ch) {
         set_fighting(g, vict, ch);
       }
       return;
@@ -417,10 +417,10 @@ ACMD(do_trip)
       decCurST(g, ch, cost, 0);
       char_set_position(vict, POS_SITTING);
       char_set_wait(ch, PULSE_4SEC);
-      if (char_get_fighting(ch) == nullptr) {
+      if (char_get_fighting(g, ch) == nullptr) {
         set_fighting(g, ch, vict);
       }
-      if (char_get_fighting(vict) == nullptr) {
+      if (char_get_fighting(g, vict) == nullptr) {
         set_fighting(g, vict, ch);
       }
       return;
@@ -514,8 +514,8 @@ ACMD(do_drag)
   if (char_is_npc(ch))
     return;
 
-  if (char_get_drag(ch)) {
-    vict = char_get_drag(ch);
+  if (char_get_drag(g, ch)) {
+    vict = char_get_drag(g, ch);
     char_set_drag(ch, nullptr);
     char_set_dragged(vict, nullptr);
     act(g, "@wYou stop dragging @C$N@W.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -528,7 +528,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     send_to_char(g, ch, "You are busy carrying someone at the moment.\r\n");
     return;
   }
@@ -538,7 +538,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are a bit busy fighting right now!\r\n");
     return;
   }
@@ -558,7 +558,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (char_get_dragged(vict)) {
+  if (char_get_dragged(g, vict)) {
     send_to_char(g, ch, "They are already being dragged!\r\n");
     return;
   }
@@ -573,7 +573,7 @@ ACMD(do_drag)
     act(g, "@wYou try to grab and pull @C$N@W with you, but $E resists!@n", true, ch, nullptr, vict, TO_CHAR);
     act(g, "@C$n@W tries to grab and pull you! However you resist!@n", true, ch, nullptr, vict, TO_VICT);
     act(g, "@C$n@W tries to grab and pull @c$N@W but $E resists!@n", true, ch, nullptr, vict, TO_NOTVICT);
-    if (char_is_npc(vict) && !char_get_fighting(vict)) {
+    if (char_is_npc(vict) && !char_get_fighting(g, vict)) {
       set_fighting(g, vict, ch);
     }
     return;
@@ -591,7 +591,7 @@ ACMD(do_drag)
   char_set_dragged(vict, ch);
   if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(g, 1, 3)) {
     send_to_char(g, vict, "You feel your sleeping body being moved.\r\n");
-    if (char_is_npc(vict) && !char_get_fighting(vict)) {
+    if (char_is_npc(vict) && !char_get_fighting(g, vict)) {
       set_fighting(g, vict, ch);
     }
   }
@@ -603,7 +603,7 @@ ACMD(do_stop)
   if (char_is_npc(ch))
     return;
 
-  if (!char_get_fighting(ch)) {
+  if (!char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are not even fighting!\r\n");
     return;
   }
@@ -617,16 +617,16 @@ ACMD(do_stop)
 ACMD(do_escape)
 {
 
-  if (!char_get_absorbby(ch) && !char_get_grappled(ch)) {
+  if (!char_get_absorbby(g, ch) && !char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are not in anyone's grasp!\r\n");
     return;
   }
   int num = char_get_aff_abils_str(ch);
 
-  struct char_data *offender = char_get_absorbby(ch) ? char_get_absorbby(ch) : char_get_grappled(ch);
+  struct char_data *offender = char_get_absorbby(g, ch) ? char_get_absorbby(g, ch) : char_get_grappled(g, ch);
   int64_t opl                = getCurPL(g, offender);
   int64_t dpl                = getCurPL(g, ch);
-  int skill                  = char_get_absorbby(ch) ? char_get_skill(char_get_absorbby(ch), SKILL_ABSORB) : char_get_skill(char_get_grappled(ch), SKILL_GRAPPLE);
+  int skill                  = char_get_absorbby(g, ch) ? char_get_skill(char_get_absorbby(g, ch), SKILL_ABSORB) : char_get_skill(char_get_grappled(g, ch), SKILL_GRAPPLE);
 
   if (dpl > opl * 10) {
     num += rand_number(g, 10, 15);
@@ -648,32 +648,32 @@ ACMD(do_escape)
 
   bool escaped = (skill - num) < axion_dice(g, 0);
 
-  if (char_get_absorbby(ch)) {
+  if (char_get_absorbby(g, ch)) {
 
     if (escaped) {
-      act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_NOTVICT);
-      act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_VICT);
-      act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_CHAR);
-      if (char_get_fighting(ch) == nullptr) {
-        set_fighting(g, ch, char_get_absorbby(ch));
+      act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_NOTVICT);
+      act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_VICT);
+      act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_CHAR);
+      if (char_get_fighting(g, ch) == nullptr) {
+        set_fighting(g, ch, char_get_absorbby(g, ch));
       }
-      if (char_get_fighting(char_get_absorbby(ch)) == nullptr) {
-        set_fighting(g, char_get_absorbby(ch), ch);
+      if (char_get_fighting(g, char_get_absorbby(g, ch)) == nullptr) {
+        set_fighting(g, char_get_absorbby(g, ch), ch);
       }
-      char_set_absorbing(char_get_absorbby(ch), nullptr);
+      char_set_absorbing(char_get_absorbby(g, ch), nullptr);
       char_set_absorbby(ch, nullptr);
     } else {
-      act(g, "@c$N@W struggles to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_NOTVICT);
-      act(g, "@WYou struggle to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_VICT);
-      act(g, "@c$N@W struggles to break loose of your hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_CHAR);
+      act(g, "@c$N@W struggles to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_NOTVICT);
+      act(g, "@WYou struggle to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_VICT);
+      act(g, "@c$N@W struggles to break loose of your hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_CHAR);
       if (rand_number(g, 1, 3) == 3) {
         int64_t dmg = getEffMaxPL(g, ch) * 0.025;
-        hurt(g, 0, 0, ch, char_get_absorbby(ch), nullptr, dmg, 0);
-        if (char_get_position(char_get_absorbby(ch)) == POS_SLEEPING) {
-          act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_NOTVICT);
-          act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_VICT);
-          act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(ch), nullptr, ch, TO_CHAR);
-          char_set_absorbing(char_get_absorbby(ch), nullptr);
+        hurt(g, 0, 0, ch, char_get_absorbby(g, ch), nullptr, dmg, 0);
+        if (char_get_position(char_get_absorbby(g, ch)) == POS_SLEEPING) {
+          act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_NOTVICT);
+          act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_VICT);
+          act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_absorbby(g, ch), nullptr, ch, TO_CHAR);
+          char_set_absorbing(char_get_absorbby(g, ch), nullptr);
           char_set_absorbby(ch, nullptr);
         }
       }
@@ -681,44 +681,44 @@ ACMD(do_escape)
     }
   }
 
-  if (char_get_grappled(ch)) {
+  if (char_get_grappled(g, ch)) {
 
     if (escaped) {
-      if (char_get_grap(char_get_grappled(ch)) == 4) {
-        act(g, "@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", true, char_get_grappled(ch), nullptr, ch, TO_CHAR);
-        act(g, "@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", true, char_get_grappled(ch), nullptr, ch, TO_VICT);
-        act(g, "@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", true, char_get_grappled(ch), nullptr, ch, TO_NOTVICT);
+      if (char_get_grap(char_get_grappled(g, ch)) == 4) {
+        act(g, "@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_CHAR);
+        act(g, "@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_VICT);
+        act(g, "@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_NOTVICT);
 
-        act(g, "@MYou reform your body mere moments later.@n", true, char_get_grappled(ch), nullptr, nullptr, TO_CHAR);
-        act(g, "@C$n@M reforms $s body mere moments later.", true, char_get_grappled(ch), nullptr, nullptr, TO_ROOM);
+        act(g, "@MYou reform your body mere moments later.@n", true, char_get_grappled(g, ch), nullptr, nullptr, TO_CHAR);
+        act(g, "@C$n@M reforms $s body mere moments later.", true, char_get_grappled(g, ch), nullptr, nullptr, TO_ROOM);
       } else {
-        act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_NOTVICT);
-        act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_VICT);
-        act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_CHAR);
+        act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_NOTVICT);
+        act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_VICT);
+        act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_CHAR);
       }
-      if (char_get_fighting(ch) == nullptr) {
-        set_fighting(g, ch, char_get_grappled(ch));
+      if (char_get_fighting(g, ch) == nullptr) {
+        set_fighting(g, ch, char_get_grappled(g, ch));
       }
-      if (char_get_fighting(char_get_grappled(ch)) == nullptr) {
-        set_fighting(g, char_get_grappled(ch), ch);
+      if (char_get_fighting(g, char_get_grappled(g, ch)) == nullptr) {
+        set_fighting(g, char_get_grappled(g, ch), ch);
       }
-      char_set_grap(char_get_grappled(ch), -1);
-      char_set_grappling(char_get_grappled(ch), nullptr);
+      char_set_grap(char_get_grappled(g, ch), -1);
+      char_set_grappling(char_get_grappled(g, ch), nullptr);
       char_set_grappled(ch, nullptr);
       char_set_grap(ch, -1);
     } else {
-      act(g, "@c$N@W struggles to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_NOTVICT);
-      act(g, "@WYou struggle to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_VICT);
-      act(g, "@c$N@W struggles to break loose of your hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_CHAR);
+      act(g, "@c$N@W struggles to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_NOTVICT);
+      act(g, "@WYou struggle to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_VICT);
+      act(g, "@c$N@W struggles to break loose of your hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_CHAR);
       if (rand_number(g, 1, 3) == 3) {
         int64_t dmg = getEffMaxPL(g, ch) * 0.025;
-        hurt(g, 0, 0, ch, char_get_grappled(ch), nullptr, dmg, 0);
-        if (char_get_position(char_get_grappled(ch)) == POS_SLEEPING) {
-          act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_NOTVICT);
-          act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_VICT);
-          act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_grappled(ch), nullptr, ch, TO_CHAR);
-          char_set_grap(char_get_grappled(ch), -1);
-          char_set_grappling(char_get_grappled(ch), nullptr);
+        hurt(g, 0, 0, ch, char_get_grappled(g, ch), nullptr, dmg, 0);
+        if (char_get_position(char_get_grappled(g, ch)) == POS_SLEEPING) {
+          act(g, "@c$N@W manages to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_NOTVICT);
+          act(g, "@WYou manage to break loose of @C$n's@W hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_VICT);
+          act(g, "@c$N@W manages to break loose of your hold!@n", true, char_get_grappled(g, ch), nullptr, ch, TO_CHAR);
+          char_set_grap(char_get_grappled(g, ch), -1);
+          char_set_grappling(char_get_grappled(g, ch), nullptr);
           char_set_grappled(ch, nullptr);
           char_set_grap(ch, -1);
         }
@@ -739,15 +739,15 @@ ACMD(do_block)
     return;
 
   if (!*arg) {
-    if (!char_get_blocks(ch)) {
+    if (!char_get_blocks(g, ch)) {
       send_to_char(g, ch, "You want to block who?\r\n");
       return;
     }
-    if (char_get_blocks(ch)) {
-      act(g, "@wYou stop blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(ch), TO_CHAR);
-      act(g, "@C$n@w stops blocking you.@n", true, ch, nullptr, char_get_blocks(ch), TO_VICT);
-      act(g, "@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(ch), TO_NOTVICT);
-      vict = char_get_blocks(ch);
+    if (char_get_blocks(g, ch)) {
+      act(g, "@wYou stop blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_CHAR);
+      act(g, "@C$n@w stops blocking you.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_VICT);
+      act(g, "@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_NOTVICT);
+      vict = char_get_blocks(g, ch);
       char_set_blocked(vict, nullptr);
       char_set_blocks(ch, nullptr);
       return;
@@ -759,7 +759,7 @@ ACMD(do_block)
     return;
   }
 
-  if (char_get_blocks(ch) == vict) {
+  if (char_get_blocks(g, ch) == vict) {
     send_to_char(g, ch, "They are already blocked by you!\r\n");
     return;
   }
@@ -769,31 +769,31 @@ ACMD(do_block)
     return;
   }
 
-  if (char_get_blocked(vict)) {
+  if (char_get_blocked(g, vict)) {
     send_to_char(g, ch, "They are already blocked by someone else!\r\n");
     return;
   }
 
-  if (char_get_blocks(ch)) {
-    act(g, "@wYou stop blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(ch), TO_CHAR);
-    act(g, "@C$n@w stops blocking you.@n", true, ch, nullptr, char_get_blocks(ch), TO_VICT);
-    act(g, "@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(ch), TO_NOTVICT);
-    struct char_data *oldv = char_get_blocks(ch);
+  if (char_get_blocks(g, ch)) {
+    act(g, "@wYou stop blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_CHAR);
+    act(g, "@C$n@w stops blocking you.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_VICT);
+    act(g, "@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_NOTVICT);
+    struct char_data *oldv = char_get_blocks(g, ch);
     char_set_blocked(oldv, nullptr);
     char_set_blocks(ch, vict);
     char_set_blocked(vict, ch);
     reveal_hiding(g, ch, 0);
-    act(g, "@wYou start blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_CHAR);
-    act(g, "@C$n@w starts blocking your escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_VICT);
-    act(g, "@C$n@w starts blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_NOTVICT);
+    act(g, "@wYou start blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_CHAR);
+    act(g, "@C$n@w starts blocking your escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_VICT);
+    act(g, "@C$n@w starts blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_NOTVICT);
     return;
   }
   char_set_blocks(ch, vict);
   char_set_blocked(vict, ch);
   reveal_hiding(g, ch, 0);
-  act(g, "@wYou start blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_CHAR);
-  act(g, "@C$n@w starts blocking your escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_VICT);
-  act(g, "@C$n@w starts blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(ch), TO_NOTVICT);
+  act(g, "@wYou start blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_CHAR);
+  act(g, "@C$n@w starts blocking your escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_VICT);
+  act(g, "@C$n@w starts blocking @c$N's@w escape.@n", true, ch, nullptr, char_get_blocks(g, ch), TO_NOTVICT);
   return;
 }
 

@@ -196,12 +196,12 @@ ACMD(do_table)
 
 ACMD(do_draw)
 {
-  if (!char_get_sits(ch)) {
+  if (!char_get_sits(g, ch)) {
     send_to_char(g, ch, "You are not sitting at a duel table.\r\n");
     return;
   }
 
-  if (obj_get_vnum(g, char_get_sits(ch)) < 604 || obj_get_vnum(g, char_get_sits(ch)) > 607) {
+  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
     send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
     return;
   }
@@ -233,12 +233,12 @@ ACMD(do_draw)
 ACMD(do_shuffle)
 {
 
-  if (!char_get_sits(ch)) {
+  if (!char_get_sits(g, ch)) {
     send_to_char(g, ch, "You are not sitting at a duel table.\r\n");
     return;
   }
 
-  if (obj_get_vnum(g, char_get_sits(ch)) < 604 || obj_get_vnum(g, char_get_sits(ch)) > 607) {
+  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
     send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
     return;
   }
@@ -394,7 +394,7 @@ ACMD(do_post)
     send_to_char(g, ch, "You can't seem to find the thing you want to post it on.\r\n");
     return;
   }
-  if (obj_get_posted_to(obj2)) {
+  if (obj_get_posted_to(g, obj2)) {
     send_to_char(g, ch, "It already has something posted on it. Get that first if you want to post.\r\n");
     return;
   }
@@ -422,12 +422,12 @@ ACMD(do_play)
     return;
   }
 
-  if (!char_get_sits(ch)) {
+  if (!char_get_sits(g, ch)) {
     send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
     return;
   }
 
-  if (obj_get_vnum(g, char_get_sits(ch)) < 604 || obj_get_vnum(g, char_get_sits(ch)) > 607) {
+  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
     send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
     return;
   }
@@ -447,7 +447,7 @@ ACMD(do_play)
   }
 
   for (obj_data *obj3 : room_contents(g, char_get_in_room(ch))) {
-    if (obj_get_vnum(g, obj3) == obj_get_vnum(g, char_get_sits(ch)) - 4) {
+    if (obj_get_vnum(g, obj3) == obj_get_vnum(g, char_get_sits(g, ch)) - 4) {
       obj2 = obj3;
     }
   }

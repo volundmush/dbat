@@ -574,7 +574,7 @@ ACMD(do_warp)
   if (char_is_npc(ch))
     return;
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
@@ -733,7 +733,7 @@ ACMD(do_drive)
 
   one_argument(argument, arg3);
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
@@ -760,11 +760,11 @@ ACMD(do_drive)
       send_to_char(g, ch, "@wYou are already piloting the ship, try [pilot unready].\r\n");
       return;
     }
-    if (char_get_carrying(ch)) {
+    if (char_get_carrying(g, ch)) {
       send_to_char(g, ch, "@wYou are busy carrying someone.\r\n");
       return;
     }
-    if (char_get_drag(ch)) {
+    if (char_get_drag(g, ch)) {
       send_to_char(g, ch, "@wYou are busy dragging someone.\r\n");
       return;
     }

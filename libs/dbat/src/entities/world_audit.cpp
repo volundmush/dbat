@@ -131,47 +131,53 @@ static void audit_rooms(GameWorld *g, struct audit *a)
   }
 }
 
+/* References between entities are ids. One that is set but leads nowhere is the id of something that has gone. */
+
 /* Pairs that always point at each other: if I'm grappling you, you're grappled by me. */
-#define AUDIT_PAIR(mine, theirs)                                                                          \
-  do {                                                                                                    \
-    struct char_data *partner = char_get_##mine(ch);                                                      \
-    if (partner) {                                                                                        \
-      if (!set_has(&a->characters, partner))                                                              \
-        problem(a, "%s: %s someone who isn't in the game", name, #mine);                                  \
-      else if (char_get_##theirs(partner) != ch)                                                          \
-        problem(a, "%s: %s %s, whose %s says otherwise", name, #mine, char_get_name(partner), #theirs);   \
-    }                                                                                                     \
+#define AUDIT_PAIR(uid, mine, theirs)                                                                   \
+  do {                                                                                                  \
+    if (uid) {                                                                                          \
+      struct char_data *partner = char_get_##mine(g, ch);                                               \
+      if (!partner || !set_has(&a->characters, partner))                                                \
+        problem(a, "%s: %s someone who isn't in the game", name, #mine);                                \
+      else if (char_get_##theirs(g, partner) != ch)                                                     \
+        problem(a, "%s: %s %s, whose %s says otherwise", name, #mine, char_get_name(partner), #theirs); \
+    }                                                                                                   \
   } while (0)
 
-static void audit_character_links(struct audit *a, struct char_data *ch)
+static void audit_character_links(GameWorld *g, struct audit *a, struct char_data *ch)
 {
-  const char *name = char_get_name(ch);
-  struct char_data *other;
+  const char *name                     = char_get_name(ch);
+  const struct player_special_data *ps = ch->player_specials;
   struct obj_data *seat;
 
-  AUDIT_PAIR(grappling, grappled);
-  AUDIT_PAIR(grappled, grappling);
-  AUDIT_PAIR(drag, dragged);
-  AUDIT_PAIR(dragged, drag);
-  AUDIT_PAIR(absorbing, absorbby);
-  AUDIT_PAIR(absorbby, absorbing);
-  AUDIT_PAIR(defender, defending);
-  AUDIT_PAIR(defending, defender);
-  AUDIT_PAIR(blocks, blocked);
-  AUDIT_PAIR(blocked, blocks);
-  AUDIT_PAIR(carrying, carried_by);
-  AUDIT_PAIR(carried_by, carrying);
+  AUDIT_PAIR(ch->grappling_uid, grappling, grappled);
+  AUDIT_PAIR(ch->grappled_uid, grappled, grappling);
+  AUDIT_PAIR(ch->drag_uid, drag, dragged);
+  AUDIT_PAIR(ch->dragged_uid, dragged, drag);
+  AUDIT_PAIR(ch->absorbing_uid, absorbing, absorbby);
+  AUDIT_PAIR(ch->absorbby_uid, absorbby, absorbing);
+  AUDIT_PAIR(ch->defender_uid, defender, defending);
+  AUDIT_PAIR(ch->defending_uid, defending, defender);
+  AUDIT_PAIR(ch->blocks_uid, blocks, blocked);
+  AUDIT_PAIR(ch->blocked_uid, blocked, blocks);
+  AUDIT_PAIR(ps ? ps->carrying_uid : 0, carrying, carried_by);
+  AUDIT_PAIR(ps ? ps->carried_by_uid : 0, carried_by, carrying);
 
   /* a mind link can be one-way, and a poisoner can poison many */
-  if ((other = char_get_mindlink(ch)) && !set_has(&a->characters, other))
+  if (ch->mindlink_uid && !set_has(&a->characters, char_get_mindlink(g, ch)))
     problem(a, "%s: mind-linked to someone who isn't in the game", name);
-  if ((other = char_get_poisonby(ch)) && !set_has(&a->characters, other))
+  if (ch->poisonby_uid && !set_has(&a->characters, char_get_poisonby(g, ch)))
     problem(a, "%s: poisoned by someone who isn't in the game", name);
+  if (ch->master_uid && !set_has(&a->characters, char_get_master(g, ch)))
+    problem(a, "%s: follows someone who isn't in the game", name);
+  if (ch->fighting_uid && !set_has(&a->characters, char_get_fighting(g, ch)))
+    problem(a, "%s: fighting someone who isn't in the game", name);
 
-  if ((seat = char_get_sits(ch))) {
-    if (!set_has(&a->objects, seat))
+  if (ch->sits_uid) {
+    if (!(seat = char_get_sits(g, ch)) || !set_has(&a->objects, seat))
       problem(a, "%s: sits on an object that isn't in the game", name);
-    else if (obj_get_sitting(seat) != ch)
+    else if (obj_get_sitting(g, seat) != ch)
       problem(a, "%s: sits on object %d, which says otherwise", name, obj_get_item_number(seat));
   }
 }
@@ -246,11 +252,11 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
       problem(a, "%s: wears object %d in slot %d, which doesn't say so", name, obj_get_vnum(g, obj), slot);
   }
 
-  if ((other = char_get_fighting(ch)) && !set_has(&a->characters, other))
+  if ((other = char_get_fighting(g, ch)) && !set_has(&a->characters, other))
     problem(a, "%s: is fighting someone who isn't in the game", name);
-  if ((other = char_get_master(ch)) && !set_has(&a->characters, other))
+  if ((other = char_get_master(g, ch)) && !set_has(&a->characters, other))
     problem(a, "%s: follows someone who isn't in the game", name);
-  audit_character_links(a, ch);
+  audit_character_links(g, a, ch);
   audit_character_values(g, a, ch);
   limit = a->characters.count + 1;
   for (struct follow_type *f = char_get_followers(ch); f; f = f->next) {
@@ -260,7 +266,7 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
     }
     if (!set_has(&a->characters, f->follower))
       problem(a, "%s: is followed by someone who isn't in the game", name);
-    else if (char_get_master(f->follower) != ch)
+    else if (char_get_master(g, f->follower) != ch)
       problem(a, "%s: lists %s as a follower, who says otherwise", name, char_get_name(f->follower));
   }
 }
@@ -315,19 +321,20 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
 
   audit_object_is_listed(g, a, obj);
 
-  if (obj_get_sitting(obj)) {
-    if (!set_has(&a->characters, obj_get_sitting(obj)))
+  if (obj->sitting_uid) {
+    struct char_data *sitter = obj_get_sitting(g, obj);
+    if (!sitter || !set_has(&a->characters, sitter))
       problem(a, "object %d: sat on by someone who isn't in the game", vnum);
-    else if (char_get_sits(obj_get_sitting(obj)) != obj)
-      problem(a, "object %d: sat on by %s, who says otherwise", vnum, char_get_name(obj_get_sitting(obj)));
+    else if (char_get_sits(g, sitter) != obj)
+      problem(a, "object %d: sat on by %s, who says otherwise", vnum, char_get_name(sitter));
   }
-  if (obj_get_user(obj) && !set_has(&a->characters, obj_get_user(obj)))
+  if (obj->user_uid && !set_has(&a->characters, obj_get_user(g, obj)))
     problem(a, "object %d: used by someone who isn't in the game", vnum);
-  if (obj_get_target(obj) && !set_has(&a->characters, obj_get_target(obj)))
+  if (obj->target_uid && !set_has(&a->characters, obj_get_target(g, obj)))
     problem(a, "object %d: targets someone who isn't in the game", vnum);
-  if (obj_get_posted_to(obj) && !set_has(&a->objects, obj_get_posted_to(obj)))
+  if (obj->posted_to_uid && !set_has(&a->objects, obj_get_posted_to(g, obj)))
     problem(a, "object %d: posted to an object that isn't in the game", vnum);
-  if (obj_get_fellow_wall(obj) && !set_has(&a->objects, obj_get_fellow_wall(obj)))
+  if (obj->fellow_wall_uid && !set_has(&a->objects, obj_get_fellow_wall(g, obj)))
     problem(a, "object %d: joined to a wall that isn't in the game", vnum);
 
   for (struct obj_data *inner = obj_get_contains(obj); inner; inner = obj_get_next_content(inner)) {
@@ -453,7 +460,7 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
       problem(&a, "the combat list holds someone who isn't in the game");
       break;
     }
-    if (!char_get_fighting(ch))
+    if (!char_get_fighting(g, ch))
       problem(&a, "%s: is in the combat list, but isn't fighting", char_get_name(ch));
   }
 

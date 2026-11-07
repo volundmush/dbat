@@ -52,7 +52,7 @@ ACMD(do_tslash)
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
@@ -72,7 +72,7 @@ ACMD(do_tslash)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -132,7 +132,7 @@ ACMD(do_tslash)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_TSLASH, 0);
@@ -428,7 +428,7 @@ ACMD(do_pslash)
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
@@ -448,7 +448,7 @@ ACMD(do_pslash)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -484,7 +484,7 @@ ACMD(do_pslash)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_PSLASH, 0);
@@ -675,7 +675,7 @@ ACMD(do_ddslash)
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
@@ -695,7 +695,7 @@ ACMD(do_ddslash)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -732,7 +732,7 @@ ACMD(do_ddslash)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_DDSLASH, 0);
@@ -914,7 +914,7 @@ ACMD(do_kienzan)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -942,7 +942,7 @@ ACMD(do_kienzan)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KIENZAN, 0);

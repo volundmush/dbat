@@ -581,7 +581,7 @@ ACMD(do_situp)
     send_to_char(g, ch, "The fire makes it too hot!\r\n");
     return;
   }
-  if (char_get_drag(ch)) {
+  if (char_get_drag(g, ch)) {
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
@@ -589,7 +589,7 @@ ACMD(do_situp)
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
@@ -648,7 +648,7 @@ ACMD(do_situp)
     send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
@@ -826,12 +826,12 @@ ACMD(do_meditate)
     return;
   }
 
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
-  if (char_get_drag(ch)) {
+  if (char_get_drag(g, ch)) {
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
@@ -841,7 +841,7 @@ ACMD(do_meditate)
     return;
   }
 
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
@@ -877,7 +877,7 @@ ACMD(do_meditate)
     return;
   }
   if (!strcasecmp(arg, "break")) {
-    if (char_get_mindlink(ch) == nullptr) {
+    if (char_get_mindlink(g, ch) == nullptr) {
       send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
       return;
     }
@@ -885,29 +885,29 @@ ACMD(do_meditate)
       send_to_char(g, ch, "This is not how you break YOUR mind link.\r\n");
       return;
     }
-    if ((getCurKI(g, ch)) < getMaxKI(g, char_get_mindlink(ch)) * 0.05) {
+    if ((getCurKI(g, ch)) < getMaxKI(g, char_get_mindlink(g, ch)) * 0.05) {
       send_to_char(g, ch, "You do not have enough ki to manage a break.\r\n");
       return;
     }
-    if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(char_get_mindlink(ch)) + (char_get_skill(char_get_mindlink(ch), SKILL_TELEPATHY) * 0.1)) {
-      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
-      act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, char_get_mindlink(ch), TO_ROOM);
-      send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target manages to push you out!@n\r\n");
-      if (char_get_aff_abils_intel(char_get_mindlink(ch)) < axion_dice(g, -10) && !char_aff_flagged(char_get_mindlink(ch), AFF_SHOCKED)) {
-        send_to_char(g, char_get_mindlink(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
-        char_aff_set(char_get_mindlink(ch), AFF_SHOCKED, false);
+    if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(char_get_mindlink(g, ch)) + (char_get_skill(char_get_mindlink(g, ch), SKILL_TELEPATHY) * 0.1)) {
+      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
+      act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, char_get_mindlink(g, ch), TO_ROOM);
+      send_to_char(g, char_get_mindlink(g, ch), "@rYour mind linked target manages to push you out!@n\r\n");
+      if (char_get_aff_abils_intel(char_get_mindlink(g, ch)) < axion_dice(g, -10) && !char_aff_flagged(char_get_mindlink(g, ch), AFF_SHOCKED)) {
+        send_to_char(g, char_get_mindlink(g, ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
+        char_aff_set(char_get_mindlink(g, ch), AFF_SHOCKED, false);
       }
 
-      char_set_linker(char_get_mindlink(ch), 0);
-      char_set_mindlink(char_get_mindlink(ch), nullptr);
+      char_set_linker(char_get_mindlink(g, ch), 0);
+      char_set_mindlink(char_get_mindlink(g, ch), nullptr);
       char_set_mindlink(ch, nullptr);
       return;
     }
-    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
-    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, char_get_mindlink(ch), TO_ROOM);
-    send_to_char(g, char_get_mindlink(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
+    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
+    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, char_get_mindlink(g, ch), TO_ROOM);
+    send_to_char(g, char_get_mindlink(g, ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
-    decCurKI(g, ch, getMaxKI(g, char_get_mindlink(ch)) * .05, 0);
+    decCurKI(g, ch, getMaxKI(g, char_get_mindlink(g, ch)) * .05, 0);
     return;
   }
   if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
@@ -922,8 +922,8 @@ ACMD(do_meditate)
 
   weight = obj_get_weight(obj);
 
-  if (obj_get_sitting(obj)) {
-    weight += char_get_weight(obj_get_sitting(obj));
+  if (obj_get_sitting(g, obj)) {
+    weight += char_get_weight(obj_get_sitting(g, obj));
   }
 
   if ((rroom_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
@@ -1114,11 +1114,11 @@ ACMD(do_pushup)
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
-  if (char_get_drag(ch)) {
+  if (char_get_drag(g, ch)) {
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
@@ -1178,7 +1178,7 @@ ACMD(do_pushup)
     send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
@@ -1358,14 +1358,14 @@ void base_update(GameWorld *g)
     if (!desc_is_playing(d))
       continue;
     if (char_is_npc(d->character)) {
-      if (char_get_absorbing(d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(d->character))) {
-        send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
-        char_set_absorbby(char_get_absorbing(d->character), nullptr);
+      if (char_get_absorbing(g, d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(g, d->character))) {
+        send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(g, d->character)));
+        char_set_absorbby(char_get_absorbing(g, d->character), nullptr);
         char_set_absorbing(d->character, nullptr);
       }
-      if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(g, 1, 10) >= 7) {
+      if (char_is_android(d->character) && char_get_absorbing(g, d->character) && rand_number(g, 1, 10) >= 7) {
         int64_t drain1 = getMaxKI(g, d->character) * 0.01, drain2 = getMaxST(g, d->character) * 0.01;
-        struct char_data *drained = char_get_absorbing(d->character);
+        struct char_data *drained = char_get_absorbing(g, d->character);
         if ((getCurST(g, drained)) - drain2 < 0) {
           drain2 = (getCurST(g, drained));
         }
@@ -1486,32 +1486,32 @@ void base_update(GameWorld *g)
         send_to_char(g, d->character, "Your body has recovered from your last selfdestruct.\r\n");
       }
     } /* Andros End */
-    if (char_get_carrying(d->character)) {
-      if (char_get_in_room(char_get_carrying(d->character)) != char_get_in_room(d->character)) {
+    if (char_get_carrying(g, d->character)) {
+      if (char_get_in_room(char_get_carrying(g, d->character)) != char_get_in_room(d->character)) {
         carry_drop(g, d->character, 3);
       }
     }
-    if (char_get_defender(d->character)) {
-      if (char_get_in_room(d->character) != char_get_in_room(char_get_defender(d->character))) {
-        char_set_defending(char_get_defender(d->character), nullptr);
+    if (char_get_defender(g, d->character)) {
+      if (char_get_in_room(d->character) != char_get_in_room(char_get_defender(g, d->character))) {
+        char_set_defending(char_get_defender(g, d->character), nullptr);
         char_set_defender(d->character, nullptr);
       }
     }
-    if (char_get_defending(d->character)) {
-      if (char_get_in_room(d->character) != char_get_in_room(char_get_defending(d->character))) {
-        char_set_defender(char_get_defending(d->character), nullptr);
+    if (char_get_defending(g, d->character)) {
+      if (char_get_in_room(d->character) != char_get_in_room(char_get_defending(g, d->character))) {
+        char_set_defender(char_get_defending(g, d->character), nullptr);
         char_set_defending(d->character, nullptr);
       }
     }
     if (char_plr_flagged(d->character, PLR_TRANSMISSION)) {
       char_plr_set(d->character, PLR_TRANSMISSION, false);
     }
-    if (!char_get_fighting(d->character) && char_aff_flagged(d->character, AFF_POSITION)) {
+    if (!char_get_fighting(g, d->character) && char_aff_flagged(d->character, AFF_POSITION)) {
       char_aff_set(d->character, AFF_POSITION, false);
     }
-    if (char_get_sits(d->character)) {
-      if (char_get_in_room(d->character) != obj_get_in_room(char_get_sits(d->character))) {
-        struct obj_data *chair = char_get_sits(d->character);
+    if (char_get_sits(g, d->character)) {
+      if (char_get_in_room(d->character) != obj_get_in_room(char_get_sits(g, d->character))) {
+        struct obj_data *chair = char_get_sits(g, d->character);
         obj_set_sitting(chair, nullptr);
         char_set_sits(d->character, nullptr);
       }
@@ -1531,7 +1531,7 @@ void base_update(GameWorld *g)
         char_plr_set(d->character, PLR_SELFD2, true);
       }
     }
-    if (!char_get_fighting(d->character) && char_get_combo(d->character) > -1) {
+    if (!char_get_fighting(g, d->character) && char_get_combo(d->character) > -1) {
       char_set_combo(d->character, -1);
       char_set_combhits(d->character, 0);
     }
@@ -1574,41 +1574,41 @@ void base_update(GameWorld *g)
         rroom_set_geffect(g, char_get_in_room(d->character), rroom_get_geffect(g, char_get_in_room(d->character)) + (1));
       }
     }
-    if (char_get_absorbing(d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(d->character))) {
-      send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(d->character)));
-      char_set_absorbby(char_get_absorbing(d->character), nullptr);
+    if (char_get_absorbing(g, d->character) && char_get_in_room(d->character) != char_get_in_room(char_get_absorbing(g, d->character))) {
+      send_to_char(g, d->character, "You stop absorbing %s!\r\n", char_get_name(char_get_absorbing(g, d->character)));
+      char_set_absorbby(char_get_absorbing(g, d->character), nullptr);
       char_set_absorbing(d->character, nullptr);
     }
-    if (char_is_android(d->character) && char_get_absorbing(d->character)) {
-      if (getCurST(g, char_get_absorbing(d->character)) < (getMaxST(g, d->character) / 15) &&
-          getCurKI(g, char_get_absorbing(d->character)) < (getMaxKI(g, d->character) / 15)) {
-        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
-        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
-        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
-        if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
-          set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
+    if (char_is_android(d->character) && char_get_absorbing(g, d->character)) {
+      if (getCurST(g, char_get_absorbing(g, d->character)) < (getMaxST(g, d->character) / 15) &&
+          getCurKI(g, char_get_absorbing(g, d->character)) < (getMaxKI(g, d->character) / 15)) {
+        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
+        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
+        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
+        if (!char_get_fighting(g, d->character) || char_get_fighting(g, d->character) != char_get_absorbing(g, d->character)) {
+          set_fighting(g, d->character, char_get_absorbby(g, char_get_absorbing(g, d->character)));
         }
-        if (!char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) || char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) != d->character) {
-          set_fighting(g, char_get_absorbby(char_get_absorbing(d->character)), d->character);
+        if (!char_get_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character))) || char_get_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character))) != d->character) {
+          set_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character)), d->character);
         }
-        char_set_absorbby(char_get_absorbing(d->character), nullptr);
+        char_set_absorbby(char_get_absorbing(g, d->character), nullptr);
         char_set_absorbing(d->character, nullptr);
       }
     }
-    if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(g, 1, 9) >= 6) {
-      if (getCurST(g, char_get_absorbing(d->character)) > (getMaxST(g, d->character) / 15) ||
-          getCurKI(g, char_get_absorbing(d->character)) > (getMaxKI(g, d->character) / 15)) {
+    if (char_is_android(d->character) && char_get_absorbing(g, d->character) && rand_number(g, 1, 9) >= 6) {
+      if (getCurST(g, char_get_absorbing(g, d->character)) > (getMaxST(g, d->character) / 15) ||
+          getCurKI(g, char_get_absorbing(g, d->character)) > (getMaxKI(g, d->character) / 15)) {
 
         incCurKI(g, d->character, getMaxKI(g, d->character) * .08, true);
         incCurST(g, d->character, getMaxST(g, d->character) * .08, true);
 
-        decCurKI(g, char_get_absorbing(d->character), getMaxKI(g, d->character) / 20, 1);
-        decCurST(g, char_get_absorbing(d->character), getMaxST(g, d->character) / 20, 1);
+        decCurKI(g, char_get_absorbing(g, d->character), getMaxKI(g, d->character) / 20, 1);
+        decCurST(g, char_get_absorbing(g, d->character), getMaxST(g, d->character) / 20, 1);
 
-        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
-        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
-        send_to_char(g, char_get_absorbing(d->character), "@wTry 'escape'!@n\r\n");
-        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
+        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
+        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
+        send_to_char(g, char_get_absorbing(g, d->character), "@wTry 'escape'!@n\r\n");
+        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
         if (getCurPL(g, d->character) < getEffMaxPL(g, d->character)) {
           incCurHealth(g, d->character, getMaxKI(g, d->character) * .04, true);
           send_to_char(g, d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
@@ -1616,22 +1616,22 @@ void base_update(GameWorld *g)
 
         if (isFullST(d->character) && isFullKI(d->character)) {
 
-          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_CHAR);
-          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_VICT);
-          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(d->character), TO_NOTVICT);
-          if (!char_get_fighting(d->character) || char_get_fighting(d->character) != char_get_absorbing(d->character)) {
-            set_fighting(g, d->character, char_get_absorbby(char_get_absorbing(d->character)));
+          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
+          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
+          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
+          if (!char_get_fighting(g, d->character) || char_get_fighting(g, d->character) != char_get_absorbing(g, d->character)) {
+            set_fighting(g, d->character, char_get_absorbby(g, char_get_absorbing(g, d->character)));
           }
-          if (!char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) || char_get_fighting(char_get_absorbby(char_get_absorbing(d->character))) != d->character) {
-            set_fighting(g, char_get_absorbby(char_get_absorbing(d->character)), d->character);
+          if (!char_get_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character))) || char_get_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character))) != d->character) {
+            set_fighting(g, char_get_absorbby(g, char_get_absorbing(g, d->character)), d->character);
           }
-          char_set_absorbby(char_get_absorbing(d->character), nullptr);
+          char_set_absorbby(char_get_absorbing(g, d->character), nullptr);
           char_set_absorbing(d->character, nullptr);
         }
         bool sum                 = !is_soft_cap(d->character, 0, 1.0);
         bool mum                 = !is_soft_cap(d->character, 2, 1.0);
         bool ium                 = !is_soft_cap(d->character, 1, 1.0);
-        struct char_data *leader = char_get_master(d->character) ? char_get_master(d->character) : d->character;
+        struct char_data *leader = char_get_master(g, d->character) ? char_get_master(g, d->character) : d->character;
         if (sum) {
           if (rand_number(g, 1, 8) >= 6) {
             int gain = rand_number(g, char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
@@ -1700,7 +1700,7 @@ void base_update(GameWorld *g)
               gain *= 4;
             }
             send_to_char(g, d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-            if (char_get_master(d->character) && group_bonus(g, d->character, 2) == 7) {
+            if (char_get_master(g, d->character) && group_bonus(g, d->character, 2) == 7) {
               if (char_plr_flagged(leader, PLR_SENSEM)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
@@ -1733,8 +1733,8 @@ void base_update(GameWorld *g)
         }
       }
     }
-    if (char_get_blocks(d->character)) {
-      struct char_data *vict = char_get_blocks(d->character);
+    if (char_get_blocks(g, d->character)) {
+      struct char_data *vict = char_get_blocks(g, d->character);
       if (char_get_in_room(vict) != char_get_in_room(d->character)) {
         char_set_blocked(vict, nullptr);
         char_set_blocks(d->character, nullptr);

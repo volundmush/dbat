@@ -133,7 +133,7 @@ ACMD(do_who)
         continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
-      if (showgroup && (!char_get_master(tch) || !char_aff_flagged(tch, AFF_GROUP)))
+      if (showgroup && (!char_get_master(g, tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
       for (i = 0; i < num_ranks; i++)
         if (char_get_admlevel(tch) >= rank[i].min_level && char_get_admlevel(tch) <= rank[i].max_level)
@@ -179,7 +179,7 @@ ACMD(do_who)
         continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
-      if (showgroup && (!char_get_master(tch) || !char_aff_flagged(tch, AFF_GROUP)))
+      if (showgroup && (!char_get_master(g, tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
       if (showleader && (!char_get_followers(tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;

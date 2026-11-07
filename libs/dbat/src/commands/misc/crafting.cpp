@@ -94,7 +94,7 @@ ACMD(do_restring)
     char_get_desc(ch)->obj_was    = strdup(theshort);
     char_get_desc(ch)->obj_short  = strdup(theshort);
     char_get_desc(ch)->obj_long   = strdup(thelong);
-    char_get_desc(ch)->obj_point  = obj;
+    char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
     char_get_desc(ch)->obj_type   = 1;
     char_get_desc(ch)->obj_weapon = 0;
     disp_restring_menu(g, char_get_desc(ch));
@@ -132,7 +132,7 @@ ACMD(do_fish)
       send_to_char(g, ch, "You can't fish while flying.\r\n");
       return;
     }
-    if (char_get_fighting(ch)) {
+    if (char_get_fighting(g, ch)) {
       send_to_char(g, ch, "You can't fish while fighting!\r\n");
       return;
     }
@@ -632,7 +632,7 @@ ACMD(do_runic)
 
   two_arguments(argument, arg, arg2);
 
-  if (char_get_fighting(ch)) {
+  if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are too busy fighting to write runes!\r\n");
     return;
   }
@@ -1049,17 +1049,17 @@ ACMD(do_resize)
 ACMD(do_bury)
 {
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
 
-  if (char_get_grappling(ch) || char_get_grappled(ch)) {
+  if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are busy grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_absorbing(ch) || char_get_absorbby(ch)) {
+  if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You are busy struggling with someone!\r\n");
     return;
   }
@@ -2268,12 +2268,12 @@ ACMD(do_feed)
     return;
   }
 
-  if (char_get_fighting(vict)) {
+  if (char_get_fighting(g, vict)) {
     send_to_char(g, ch, "They are a bit busy at the moment!\r\n");
     return;
   }
 
-  if (char_get_master(vict) != ch && char_get_master(ch) != vict && char_get_master(ch) != char_get_master(vict)) {
+  if (char_get_master(g, vict) != ch && char_get_master(g, ch) != vict && char_get_master(g, ch) != char_get_master(g, vict)) {
     send_to_char(g, ch, "You need to be grouped with them first.\r\n");
     return;
   }

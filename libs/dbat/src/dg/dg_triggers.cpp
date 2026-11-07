@@ -177,7 +177,7 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
     return;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-    if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
+    if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
     /* find memory line with command only */
@@ -236,7 +236,7 @@ bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) ||
-        !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
+        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
     if (!script_has_type(char_get_script(ch), MTRIG_GREET_ALL) && char_is_npc(actor))
@@ -438,14 +438,14 @@ void fight_mtrigger(GameWorld *g, char_data *ch)
   struct char_data *actor;
   trig_data *t;
 
-  if (!script_has_type(char_get_script(ch), MTRIG_FIGHT) || !char_get_fighting(ch) ||
+  if (!script_has_type(char_get_script(ch), MTRIG_FIGHT) || !char_get_fighting(g, ch) ||
       char_aff_flagged(ch, AFF_CHARM))
     return;
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_FIGHT) &&
         (rand_number(g, 1, 100) <= t->narg)) {
-      actor = char_get_fighting(ch);
+      actor = char_get_fighting(g, ch);
       if (actor)
         add_char_uid_var(t, "actor", actor, 0);
       else
@@ -462,7 +462,7 @@ void hitprcnt_mtrigger(GameWorld *g, char_data *ch)
   struct char_data *actor;
   trig_data *t;
 
-  if (!script_has_type(char_get_script(ch), MTRIG_HITPRCNT) || !char_get_fighting(ch) ||
+  if (!script_has_type(char_get_script(ch), MTRIG_HITPRCNT) || !char_get_fighting(g, ch) ||
       char_aff_flagged(ch, AFF_CHARM))
     return;
 
@@ -470,7 +470,7 @@ void hitprcnt_mtrigger(GameWorld *g, char_data *ch)
     if (trigger_ready(t, MTRIG_HITPRCNT) && getEffMaxPL(g, ch) &&
         (getCurPL(g, ch) <= (getEffMaxPL(g, ch) / 100) * t->narg)) {
 
-      actor = char_get_fighting(ch);
+      actor = char_get_fighting(g, ch);
       add_char_uid_var(t, "actor", actor, 0);
       script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
@@ -582,7 +582,7 @@ int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_LEAVE) ||
-        !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
+        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
 
@@ -607,7 +607,7 @@ int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (!script_has_type(char_get_script(ch), MTRIG_DOOR) ||
-        !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
+        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
 

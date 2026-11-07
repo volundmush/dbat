@@ -77,8 +77,8 @@ ACMD(do_lightgrenade)
 
   targ = nullptr;
   if (!*arg || !(targ = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      targ = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      targ = char_get_fighting(g, ch);
     } else {
       send_to_char(g, ch, "Nobody around here by that name.\r\n");
       return;
@@ -115,7 +115,7 @@ ACMD(do_lightgrenade)
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP)) {
-      if (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
+      if (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) {
         if (vict == targ) {
           send_to_char(g, ch, "Leave the group if you want to murder them.\r\n");
         }
@@ -236,7 +236,7 @@ ACMD(do_breath)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -249,8 +249,8 @@ ACMD(do_breath)
   vict = nullptr;
   obj  = nullptr;
   if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
       return;
     }
@@ -261,7 +261,7 @@ ACMD(do_breath)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     index = check_def(g, vict);
@@ -433,7 +433,7 @@ ACMD(do_ram)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -446,8 +446,8 @@ ACMD(do_ram)
   vict = nullptr;
   obj  = nullptr;
   if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
       return;
     }
@@ -458,7 +458,7 @@ ACMD(do_ram)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     index = check_def(g, vict);
@@ -609,7 +609,7 @@ ACMD(do_strike)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -622,8 +622,8 @@ ACMD(do_strike)
   vict = nullptr;
   obj  = nullptr;
   if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, rroom_get_contents(g, char_get_in_room(ch))))) {
       return;
     }
@@ -634,7 +634,7 @@ ACMD(do_strike)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     index = check_def(g, vict);
@@ -794,26 +794,26 @@ ACMD(do_combine)
     send_to_char(g, ch, "You need to be in a group!\r\n");
     return;
   }
-  if (!*arg || (!char_get_master(ch) && !*arg2)) {
+  if (!*arg || (!char_get_master(g, ch) && !*arg2)) {
     send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
     send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
     send_to_char(g, ch, "Cancel Syntax: combine stop\r\n");
   } else {
-    if (!strcasecmp(arg, "stop") && char_get_master(ch)) {
+    if (!strcasecmp(arg, "stop") && char_get_master(g, ch)) {
       if (char_get_combine(ch) == -1) {
         send_to_char(g, ch, "You are not trying to combine any attacks...\r\n");
         return;
       }
       send_to_char(g, ch, "You stop your preparations to combine your attack with a group attack.\r\n");
-      send_to_char(g, char_get_master(ch), "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(char_get_master(ch), ch));
-      for (char_data *fol : char_followers(g, char_get_master(ch))) {
+      send_to_char(g, char_get_master(g, ch), "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(char_get_master(g, ch), ch));
+      for (char_data *fol : char_followers(g, char_get_master(g, ch))) {
         if (ch != fol)
           send_to_char(g, fol, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(fol, ch));
       }
       char_set_combine(ch, -1);
       return;
     }
-    if (!strcasecmp(arg, "stop") && !char_get_master(ch)) {
+    if (!strcasecmp(arg, "stop") && !char_get_master(g, ch)) {
       send_to_char(g, ch, "You do not need to stop as you haven't prepared anything.\r\n");
       return;
     }
@@ -853,7 +853,7 @@ ACMD(do_combine)
     if (char_get_charge(ch) < getMaxKI(g, ch) * 0.05) {
       send_to_char(g, ch, "You need to have the minimum of 5%s ki charged to combine.\r\n", "%");
     }
-    if (!char_get_master(ch)) {
+    if (!char_get_master(g, ch)) {
       if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
         send_to_char(g, ch, "Who will your combined attack be targeting?\r\n");
         return;
@@ -878,11 +878,11 @@ ACMD(do_combine)
       send_to_char(g, ch, "You do not have any followers who have readied an attack to combine or they do not have enough ki anymore to combine said attack.\r\n");
       return;
     }
-    if (char_get_master(ch)) {
+    if (char_get_master(g, ch)) {
       if (char_get_charge(ch) >= getMaxKI(g, ch) * 0.05) {
         act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
-        send_to_char(g, char_get_master(ch), "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(char_get_master(ch), ch), attack_names[temp]);
-        for (char_data *f_ch : char_followers(g, char_get_master(ch))) {
+        send_to_char(g, char_get_master(g, ch), "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(char_get_master(g, ch), ch), attack_names[temp]);
+        for (char_data *f_ch : char_followers(g, char_get_master(g, ch))) {
           if (ch != f_ch)
             send_to_char(g, f_ch, "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f_ch, ch), attack_names[temp]);
         }
@@ -920,7 +920,7 @@ ACMD(do_sunder)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -949,7 +949,7 @@ ACMD(do_sunder)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_SUNDER, 0);
@@ -1113,7 +1113,7 @@ ACMD(do_zen)
     return;
   }
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
@@ -1133,7 +1133,7 @@ ACMD(do_zen)
     }
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1179,7 +1179,7 @@ ACMD(do_zen)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_ZEN, 0);
@@ -1471,7 +1471,7 @@ ACMD(do_malice)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1499,7 +1499,7 @@ ACMD(do_malice)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_MALICE, 0);
@@ -1722,7 +1722,7 @@ ACMD(do_nova)
     if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
       continue;
     }
-    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
       continue;
     }
     if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1774,7 +1774,7 @@ ACMD(do_nova)
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
         continue;
       }
       if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1846,7 +1846,7 @@ ACMD(do_head)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1869,7 +1869,7 @@ ACMD(do_head)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_HEADBUTT, 0);
@@ -2070,7 +2070,7 @@ ACMD(do_bash)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -2089,7 +2089,7 @@ ACMD(do_bash)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_BASH, 0);
@@ -2280,7 +2280,7 @@ ACMD(do_seishou)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -2309,7 +2309,7 @@ ACMD(do_seishou)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_SEISHOU, 0);
@@ -2476,8 +2476,8 @@ ACMD(do_throw)
   }
 
   if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
+      vict = char_get_fighting(g, ch);
     } else {
       send_to_char(g, ch, "Who do you want to target?\r\n");
       return;
@@ -2493,7 +2493,7 @@ ACMD(do_throw)
   }
 
   if (handle_defender(g, vict, ch)) {
-    struct char_data *def = char_get_defender(vict);
+    struct char_data *def = char_get_defender(g, vict);
     vict                  = def;
   }
 
@@ -2924,15 +2924,15 @@ ACMD(do_selfd)
     char_plr_set(ch, PLR_SELFD, false);
     return;
   }
-  if (char_get_grappling(ch) != nullptr && !can_kill(g, ch, char_get_grappling(ch), nullptr, 3)) {
+  if (char_get_grappling(g, ch) != nullptr && !can_kill(g, ch, char_get_grappling(g, ch), nullptr, 3)) {
     act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(g, ch, "You can't kill them, the immortals won't allow it!\r\n");
     char_plr_set(ch, PLR_SELFD, false);
     return;
   }
-  if (char_get_grappling(ch) != nullptr) {
-    tch = char_get_grappling(ch);
+  if (char_get_grappling(g, ch) != nullptr) {
+    tch = char_get_grappling(g, ch);
     dmg += char_get_charge(ch);
     char_set_charge(ch, 0);
     dmg += (getBasePL(ch)) * 0.6;
@@ -3029,7 +3029,7 @@ ACMD(do_razor)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3061,7 +3061,7 @@ ACMD(do_razor)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_WRAZOR, 0);
@@ -3211,7 +3211,7 @@ ACMD(do_spike)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3248,7 +3248,7 @@ ACMD(do_spike)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_WSPIKE, 0);
@@ -3535,7 +3535,7 @@ ACMD(do_koteiru)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3563,7 +3563,7 @@ ACMD(do_koteiru)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KOTEIRU, 0);
@@ -3730,7 +3730,7 @@ ACMD(do_hspiral)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3758,7 +3758,7 @@ ACMD(do_hspiral)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_HSPIRAL, 0);
@@ -3901,7 +3901,7 @@ ACMD(do_spiral)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3915,8 +3915,8 @@ ACMD(do_spiral)
   skill = init_skill(g, ch, SKILL_SPIRAL); /* Set skill value */
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(ch)) {
-      vict = char_get_fighting(ch);
+    if (char_get_fighting(g, ch)) {
+      vict = char_get_fighting(g, ch);
     } else {
       send_to_char(g, ch, "Nothing around here by that name.");
       return;
@@ -3929,7 +3929,7 @@ ACMD(do_spiral)
   }
 
   if (handle_defender(g, vict, ch)) {
-    struct char_data *def = char_get_defender(vict);
+    struct char_data *def = char_get_defender(g, vict);
     vict                  = def;
   }
 
@@ -3966,7 +3966,7 @@ ACMD(do_breaker)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3994,7 +3994,7 @@ ACMD(do_breaker)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_BREAKER, 0);

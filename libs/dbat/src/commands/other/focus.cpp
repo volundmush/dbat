@@ -476,7 +476,7 @@ ACMD(do_focus)
       act(g, "You focus ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_CHAR);
       act(g, "$n focuses ki into your mind, making it work faster!", true, ch, nullptr, vict, TO_VICT);
       act(g, "$n focuses ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_NOTVICT);
-      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }
@@ -566,7 +566,7 @@ ACMD(do_focus)
       act(g, "You focus ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_CHAR);
       act(g, "$n focuses ki into your limbs, making them more flexible!", true, ch, nullptr, vict, TO_VICT);
       act(g, "$n focuses ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_NOTVICT);
-      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }
@@ -662,7 +662,7 @@ ACMD(do_focus)
       act(g, "You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", true, ch, nullptr, vict, TO_CHAR);
       act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", true, ch, nullptr, vict, TO_VICT);
       act(g, "$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", true, ch, nullptr, vict, TO_NOTVICT);
-      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }

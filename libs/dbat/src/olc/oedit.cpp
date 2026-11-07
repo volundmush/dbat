@@ -42,7 +42,6 @@ static void oedit_disp_val4_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val5_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_disp_val9_menu(GameWorld *g, struct descriptor_data *d);
 static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_rnum real_num);
-static bool object_in_game(GameWorld *g, const struct obj_data *obj);
 static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited);
 static void oedit_setup_new(struct descriptor_data *d);
 
@@ -1071,8 +1070,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             } else
               cleanup_olc(g, d, CLEANUP_ALL);
           } else {
-            obj = OLC_IOBJ(d);
-            if (!object_in_game(g, obj)) { /* it was extracted while being edited */
+            obj = obj_by_id(g, OLC(d)->iobj_uid);
+            if (!obj) { /* it was extracted while being edited */
               send_to_char(g, d->character, "\r\nThat object no longer exists. Changes discarded.\r\n");
               cleanup_olc(g, d, CLEANUP_ALL);
               return;
@@ -1757,12 +1756,6 @@ void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 }
 
 /* this is all iedit stuff */
-static bool object_in_game(GameWorld *g, const struct obj_data *obj)
-{
-  /* obj may already be freed: compare the pointer, never read through it */
-  return find_first(each_obj(g), [&](obj_data *k) { return k == obj; }) != nullptr;
-}
-
 /* Replaces what obj is with what the editor made of it, but not where it is or who is using it. */
 static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited)
 {
@@ -1782,9 +1775,9 @@ static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_da
   obj_set_contains(obj, obj_get_contains(&live));
   obj_set_next_content(obj, obj_get_next_content(&live));
   obj_set_next(obj, obj_get_next(&live));
-  obj_set_sitting(obj, obj_get_sitting(&live));
-  obj_set_user(obj, obj_get_user(&live));
-  obj_set_target(obj, obj_get_target(&live));
+  obj_set_sitting(obj, obj_get_sitting(g, &live));
+  obj_set_user(obj, obj_get_user(g, &live));
+  obj_set_target(obj, obj_get_target(g, &live));
   obj_weight_changed(g, obj, obj_get_weight(obj) - obj_get_weight(&live));
 }
 
@@ -1798,7 +1791,7 @@ static void iedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct
   obj_set_script(obj, nullptr);
 
   OLC_OBJ(d)  = obj;
-  OLC_IOBJ(d) = real_num;
+  OLC(d)->iobj_uid = obj_get_id(real_num);
   OLC_VAL(d)  = 0;
   oedit_disp_menu(g, d);
 }

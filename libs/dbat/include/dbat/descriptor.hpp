@@ -70,7 +70,7 @@ struct descriptor_data {
   char *obj_long{};
   int obj_type{};
   int obj_weapon{};
-  struct obj_data *obj_point{};
+  int32_t obj_point_uid{}; /* the object being restrung, by id */
   /*---------------Ship Construction Editing Variables---------------------*/
   int shipmenu{};
   int shipsize{};

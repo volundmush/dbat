@@ -415,8 +415,8 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     return;
-  if (char_get_master(ch) != nullptr)
-    k = char_get_master(ch);
+  if (char_get_master(g, ch) != nullptr)
+    k = char_get_master(g, ch);
   else
     k = ch;
   for (char_data *fol : char_followers(g, k)) {

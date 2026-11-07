@@ -142,10 +142,10 @@ ACMD(do_telepathy)
     if (char_is_npc(ch)) {
       return;
     }
-    if (char_get_mindlink(ch)) {
-      act(g, "@CYou remove the link your mind had with @w$N.@n", true, ch, nullptr, char_get_mindlink(ch), TO_CHAR);
-      act(g, "@w$n@C removes the link $s mind had with yours.@n", true, ch, nullptr, char_get_mindlink(ch), TO_VICT);
-      char_set_mindlink(char_get_mindlink(ch), nullptr);
+    if (char_get_mindlink(g, ch)) {
+      act(g, "@CYou remove the link your mind had with @w$N.@n", true, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
+      act(g, "@w$n@C removes the link $s mind had with yours.@n", true, ch, nullptr, char_get_mindlink(g, ch), TO_VICT);
+      char_set_mindlink(char_get_mindlink(g, ch), nullptr);
       char_set_mindlink(ch, nullptr);
       char_set_linker(ch, 0);
       return;
@@ -170,7 +170,7 @@ ACMD(do_telepathy)
       send_to_char(g, ch, "Kinda pointless when you are both telepathic huh?\r\n");
       return;
     }
-    if (char_get_mindlink(vict)) {
+    if (char_get_mindlink(g, vict)) {
       send_to_char(g, ch, "Someone else is already telepathically linked with them.\r\n");
       return;
     }
@@ -265,8 +265,8 @@ ACMD(do_telepathy)
   } // End of read argument
 
   else {
-    if (char_get_mindlink(ch)) {
-      vict = char_get_mindlink(ch);
+    if (char_get_mindlink(g, ch)) {
+      vict = char_get_mindlink(g, ch);
     } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
       send_to_char(g, ch, "Send your thoughts to who?\r\n");
       return;
@@ -279,7 +279,7 @@ ACMD(do_telepathy)
       send_to_char(g, ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     } else {
-      if (!char_get_mindlink(ch)) {
+      if (!char_get_mindlink(g, ch)) {
         send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2);
         send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2);
         send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2);
@@ -597,7 +597,7 @@ ACMD(do_scouter)
 
   one_argument(argument, arg);
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }

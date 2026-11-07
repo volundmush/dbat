@@ -144,7 +144,7 @@ struct GameWorld {
   /* Dragon balls and wishes */
   int SHENRON{}, DRAGONC{}, DRAGONR{}, DRAGONZ{}, dballtime{}, WISHTIME{};
   int WISH[2]{};
-  struct char_data *EDRAGON{};
+  int32_t EDRAGON_uid{}; /* the summoned Shenron, by id */
   int SHADOW_DRAGON1{}, SHADOW_DRAGON2{}, SHADOW_DRAGON3{}, SHADOW_DRAGON4{}, SHADOW_DRAGON5{}, SHADOW_DRAGON6{}, SHADOW_DRAGON7{};
 
   /* Other game events and counters */

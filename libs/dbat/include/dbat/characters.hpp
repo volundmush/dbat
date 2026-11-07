@@ -98,8 +98,8 @@ struct player_special_data {
   int trainspd{};
 
   // player characters can carry others.
-  struct char_data *carrying{};
-  struct char_data *carried_by{};
+  int32_t carrying_uid{};
+  int32_t carried_by_uid{};
 
   int racial_pref{};
 
@@ -214,35 +214,35 @@ struct char_data {
   struct char_data *next_affect{}; /* For affect wearoff			*/
 
   struct follow_type *followers{}; /* List of chars followers		*/
-  struct char_data *master{};      /* Who is char following?		*/
+  int32_t master_uid{};            /* Who is char following?		*/
   int32_t master_id{};
 
-  struct char_data *fighting{}; /* Opponent				*/
+  int32_t fighting_uid{}; /* Opponent				*/
 
   int8_t position{}; /* Standing, fighting, sleeping, etc.	*/
 
   int timer{}; /* Timer for update			*/
 
-  struct obj_data *sits{}; /* What am I sitting on? */
+  int32_t sits_uid{}; /* What am I sitting on? */
 
   // combat blocking
-  struct char_data *blocks{};  /* Who am I blocking?    */
-  struct char_data *blocked{}; /* Who is blocking me?    */
+  int32_t blocks_uid{};  /* Who am I blocking?    */
+  int32_t blocked_uid{}; /* Who is blocking me?    */
 
   // android absorb
-  struct char_data *absorbing{}; /* Who am I absorbing */
-  struct char_data *absorbby{};  /* Who is absorbing me */
+  int32_t absorbing_uid{}; /* Who am I absorbing */
+  int32_t absorbby_uid{};  /* Who is absorbing me */
 
   // defend stuff
-  struct char_data *defender{};
-  struct char_data *defending{};
+  int32_t defender_uid{};
+  int32_t defending_uid{};
 
-  struct char_data *poisonby{};
+  int32_t poisonby_uid{};
 
   // grappling stuff
   int grap{};
-  struct char_data *grappling{};
-  struct char_data *grappled{};
+  int32_t grappling_uid{};
+  int32_t grappled_uid{};
 
   // Skill info
   int skill_slots{};
@@ -328,10 +328,10 @@ struct char_data {
   int arenawatch{};
 
   // dragging
-  struct char_data *drag{};
-  struct char_data *dragged{};
+  int32_t drag_uid{};
+  int32_t dragged_uid{};
 
-  struct char_data *mindlink{};
+  int32_t mindlink_uid{};
   int lasthit{};
 
   // limb information... why do we have three of them?
@@ -426,7 +426,7 @@ struct char_data {
   int regen{};
 
   // multiform stuff
-  struct char_data *original{};
+  int32_t original_uid{};
   short clones{};
 
   int relax_count{};

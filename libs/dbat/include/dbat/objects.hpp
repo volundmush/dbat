@@ -56,7 +56,7 @@ struct obj_data {
   struct obj_data *next_content{}; /* For 'contains' lists             */
   struct obj_data *next{};         /* For the object list              */
 
-  struct char_data *sitting{}; /* Who is sitting on me? */
+  int32_t sitting_uid{}; /* Who is sitting on me? */
 
   // scouter frequency
   int scoutfreq{};
@@ -69,8 +69,8 @@ struct obj_data {
   // ki attacks
   int64_t kicharge{};
   int kitype{};
-  struct char_data *user{};
-  struct char_data *target{};
+  int32_t user_uid{};
+  int32_t target_uid{};
   int distance{};
 
   // something about food
@@ -86,10 +86,10 @@ struct obj_data {
 
   // notes and boards
   int posttype{};
-  struct obj_data *posted_to{};
+  int32_t posted_to_uid{};
 
   // icewall stuff
-  struct obj_data *fellow_wall{};
+  int32_t fellow_wall_uid{};
 
   // UNUSED FIELDS below here
   int cost_per_day{};                   /* Cost to keep pr. real day           */

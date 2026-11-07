@@ -271,7 +271,7 @@ ACMD(do_say)
       send_to_char(g, ch, "%s", buf);
       add_history(g, ch, buf, HIST_SAY);
       if (g->SHENRON == true) {
-        if (rroom_get_vnum(g, char_get_in_room(ch)) == g->DRAGONR && rroom_get_vnum(g, char_get_in_room(g->EDRAGON)) == g->DRAGONR) {
+        if (rroom_get_vnum(g, char_get_in_room(ch)) == g->DRAGONR && char_by_id(g, g->EDRAGON_uid) && rroom_get_vnum(g, char_get_in_room(char_by_id(g, g->EDRAGON_uid))) == g->DRAGONR) {
           if (strstr(argument, "wish")) {
 
             for (descriptor_data *d : each_desc(g)) {
@@ -750,8 +750,8 @@ ACMD(do_gsay)
   else {
     char buf[MAX_STRING_LENGTH];
 
-    if (char_get_master(ch))
-      k = char_get_master(ch);
+    if (char_get_master(g, ch))
+      k = char_get_master(g, ch);
     else
       k = ch;
 

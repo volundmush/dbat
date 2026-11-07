@@ -224,12 +224,12 @@ ASPELL(spell_charm)
     send_to_char(g, ch, "You fail - shouldn't be doing it anyway.\r\n");
   else if (char_is_saiyan(victim) && rand_number(g, 1, 100) <= 90)
     send_to_char(g, ch, "Your victim resists!\r\n");
-  else if (circle_follow(victim, ch))
+  else if (circle_follow(g, victim, ch))
     send_to_char(g, ch, "Sorry, following in circles cannot be allowed.\r\n");
   else if (mag_newsaves(ch, victim, SPELL_CHARM, level, char_get_aff_abils_intel(ch)))
     send_to_char(g, ch, "Your victim resists!\r\n");
   else {
-    if (char_get_master(victim))
+    if (char_get_master(g, victim))
       stop_follower(g, victim);
 
     add_follower(g, victim, ch);

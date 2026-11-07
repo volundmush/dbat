@@ -74,17 +74,17 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
   /* On with the character's assets... */
 
-  if (char_get_followers(ch) || char_get_master(ch))
+  if (char_get_followers(ch) || char_get_master(g, ch))
     die_follower(g, ch);
 
-  if (char_get_sits(ch)) {
-    chair = char_get_sits(ch);
+  if (char_get_sits(g, ch)) {
+    chair = char_get_sits(g, ch);
     obj_set_sitting(chair, nullptr);
     char_set_sits(ch, nullptr);
   }
 
   if (char_is_npc(ch) && char_get_mob_vnum(g, ch) == 25) {
-    if (char_get_original(ch)) {
+    if (char_get_original(g, ch)) {
       handle_multi_merge(g, ch);
     }
   }
@@ -93,7 +93,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
     for (char_data *clone : each_char(g)) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(g, clone) == 25) {
-          if (char_get_original(clone) == ch) {
+          if (char_get_original(g, clone) == ch) {
             handle_multi_merge(g, clone);
           }
         }
@@ -103,76 +103,76 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
 
   purge_homing(g, ch);
 
-  if (char_get_mindlink(ch)) {
-    char_set_mindlink(char_get_mindlink(ch), nullptr);
+  if (char_get_mindlink(g, ch)) {
+    char_set_mindlink(char_get_mindlink(g, ch), nullptr);
     char_set_mindlink(ch, nullptr);
   }
 
-  if (char_get_grappling(ch)) {
-    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_CHAR);
-    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, char_get_grappling(ch), TO_ROOM);
-    char_set_grap(char_get_grappling(ch), -1);
-    char_set_grappled(char_get_grappling(ch), nullptr);
+  if (char_get_grappling(g, ch)) {
+    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
+    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_ROOM);
+    char_set_grap(char_get_grappling(g, ch), -1);
+    char_set_grappled(char_get_grappling(g, ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
-  if (char_get_grappled(ch)) {
-    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, char_get_grappled(ch), TO_CHAR);
-    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, char_get_grappled(ch), TO_ROOM);
-    char_set_grap(char_get_grappled(ch), -1);
-    char_set_grappling(char_get_grappled(ch), nullptr);
+  if (char_get_grappled(g, ch)) {
+    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), TO_CHAR);
+    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), TO_ROOM);
+    char_set_grap(char_get_grappled(g, ch), -1);
+    char_set_grappling(char_get_grappled(g, ch), nullptr);
     char_set_grappled(ch, nullptr);
     char_set_grap(ch, -1);
   }
 
-  if (char_get_carrying(ch)) {
+  if (char_get_carrying(g, ch)) {
     carry_drop(g, ch, 3);
   }
-  if (char_get_carried_by(ch)) {
-    carry_drop(g, char_get_carried_by(ch), 3);
+  if (char_get_carried_by(g, ch)) {
+    carry_drop(g, char_get_carried_by(g, ch), 3);
   }
 
-  if (char_get_poisonby(ch)) {
+  if (char_get_poisonby(g, ch)) {
     char_set_poisonby(ch, nullptr);
   }
 
-  if (char_get_drag(ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(ch), TO_ROOM);
-    char_set_dragged(char_get_drag(ch), nullptr);
+  if (char_get_drag(g, ch)) {
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_CHAR);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_ROOM);
+    char_set_dragged(char_get_drag(g, ch), nullptr);
     char_set_drag(ch, nullptr);
   }
 
-  if (char_get_dragged(ch)) {
-    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, char_get_dragged(ch), TO_CHAR);
-    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, char_get_dragged(ch), TO_ROOM);
-    char_set_drag(char_get_dragged(ch), nullptr);
+  if (char_get_dragged(g, ch)) {
+    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), TO_CHAR);
+    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), TO_ROOM);
+    char_set_drag(char_get_dragged(g, ch), nullptr);
     char_set_dragged(ch, nullptr);
   }
 
-  if (char_get_defender(ch)) {
-    char_set_defending(char_get_defender(ch), nullptr);
+  if (char_get_defender(g, ch)) {
+    char_set_defending(char_get_defender(g, ch), nullptr);
     char_set_defender(ch, nullptr);
   }
-  if (char_get_defending(ch)) {
-    char_set_defender(char_get_defending(ch), nullptr);
+  if (char_get_defending(g, ch)) {
+    char_set_defender(char_get_defending(g, ch), nullptr);
     char_set_defending(ch, nullptr);
   }
 
-  if (char_get_blocked(ch)) {
-    char_set_blocks(char_get_blocked(ch), nullptr);
+  if (char_get_blocked(g, ch)) {
+    char_set_blocks(char_get_blocked(g, ch), nullptr);
     char_set_blocked(ch, nullptr);
   }
-  if (char_get_blocks(ch)) {
-    char_set_blocked(char_get_blocks(ch), nullptr);
+  if (char_get_blocks(g, ch)) {
+    char_set_blocked(char_get_blocks(g, ch), nullptr);
     char_set_blocks(ch, nullptr);
   }
-  if (char_get_absorbing(ch)) {
-    char_set_absorbby(char_get_absorbing(ch), nullptr);
+  if (char_get_absorbing(g, ch)) {
+    char_set_absorbby(char_get_absorbing(g, ch), nullptr);
     char_set_absorbing(ch, nullptr);
   }
-  if (char_get_absorbby(ch)) {
-    char_set_absorbing(char_get_absorbby(ch), nullptr);
+  if (char_get_absorbby(g, ch)) {
+    char_set_absorbing(char_get_absorbby(g, ch), nullptr);
     char_set_absorbby(ch, nullptr);
   }
 
@@ -188,12 +188,12 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
     if (char_get_equipment(ch, i))
       obj_to_room(g, unequip_char(g, ch, i), char_get_in_room(ch));
 
-  if (char_get_fighting(ch))
+  if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
 
   for (k = g->combat_list; k; k = temp) {
     temp = char_get_next_fighting(k);
-    if (char_get_fighting(k) == ch)
+    if (char_get_fighting(g, k) == ch)
       stop_fighting(g, k);
   }
 
@@ -289,28 +289,28 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
     obj_from_obj(g, obj);
 
   /* Get rid of the contents of the object, as well. */
-  if (obj_get_fellow_wall(obj) && obj_get_vnum(g, obj) == 79) {
+  if (obj_get_fellow_wall(g, obj) && obj_get_vnum(g, obj) == 79) {
     struct obj_data *trash;
-    trash = obj_get_fellow_wall(obj);
+    trash = obj_get_fellow_wall(g, obj);
     obj_set_fellow_wall(obj, nullptr);
     obj_set_fellow_wall(trash, nullptr);
     extract_obj(g, trash);
   }
-  if (obj_get_sitting(obj)) {
-    ch = obj_get_sitting(obj);
+  if (obj_get_sitting(g, obj)) {
+    ch = obj_get_sitting(g, obj);
     obj_set_sitting(obj, nullptr);
     char_set_sits(ch, nullptr);
   }
-  if (obj_get_posted_to(obj) && obj_get_in_obj(obj) == nullptr) {
-    struct obj_data *obj2 = obj_get_posted_to(obj);
+  if (obj_get_posted_to(g, obj) && obj_get_in_obj(obj) == nullptr) {
+    struct obj_data *obj2 = obj_get_posted_to(g, obj);
     obj_set_posted_to(obj2, nullptr);
     obj_set_posttype(obj2, 0);
     obj_set_posted_to(obj, nullptr);
   }
-  if (obj_get_target(obj)) {
+  if (obj_get_target(g, obj)) {
     obj_set_target(obj, nullptr);
   }
-  if (obj_get_user(obj)) {
+  if (obj_get_user(g, obj)) {
     obj_set_user(obj, nullptr);
   }
 

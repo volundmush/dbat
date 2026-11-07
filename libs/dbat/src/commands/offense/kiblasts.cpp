@@ -52,7 +52,7 @@ ACMD(do_eraser)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -80,7 +80,7 @@ ACMD(do_eraser)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_ERASER, 0);
@@ -304,7 +304,7 @@ ACMD(do_bigbang)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -332,7 +332,7 @@ ACMD(do_bigbang)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_BIGBANG, 0);
@@ -511,7 +511,7 @@ ACMD(do_balefire)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -553,7 +553,7 @@ ACMD(do_balefire)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_BALEFIRE, 0);
@@ -735,7 +735,7 @@ ACMD(do_hellflash)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -772,7 +772,7 @@ ACMD(do_hellflash)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_HELLFLASH, 0);
@@ -1008,7 +1008,7 @@ ACMD(do_baku)
     if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
       continue;
     }
-    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
       continue;
     }
     if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1068,7 +1068,7 @@ ACMD(do_baku)
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(vict) == char_get_master(ch))) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, vict) == char_get_master(g, ch))) {
         continue;
       }
       if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1138,7 +1138,7 @@ ACMD(do_shogekiha)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1173,7 +1173,7 @@ ACMD(do_shogekiha)
     }
 
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_SHOGEKIHA, 0);
@@ -1339,7 +1339,7 @@ ACMD(do_shogekiha)
       obj_set_kicharge(obj, obj_get_kicharge(obj) - (char_get_charge(ch)));
       char_set_charge(ch, 0);
       dmg = obj_get_kicharge(obj);
-      hurt(g, 0, 0, obj_get_user(obj), ch, nullptr, dmg, 0);
+      hurt(g, 0, 0, obj_get_user(g, obj), ch, nullptr, dmg, 0);
       extract_obj(g, obj);
     } else {
       dmg = damtype(g, ch, 10, skill, attperc);
@@ -1384,7 +1384,7 @@ ACMD(do_kiblast)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1411,7 +1411,7 @@ ACMD(do_kiblast)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_KIBLAST, 0);

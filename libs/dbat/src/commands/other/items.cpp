@@ -507,7 +507,7 @@ ACMD(do_form)
       return;
     }
 
-    if (char_get_master(vict) != ch) {
+    if (char_get_master(g, vict) != ch) {
       send_to_char(g, ch, "They must be following you first.\r\n");
       return;
     }
@@ -1159,8 +1159,8 @@ ACMD(do_ingest)
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
-    if (char_get_absorbby(vict)) {
-      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(vict)));
+    if (char_get_absorbby(g, vict)) {
+      send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (char_get_absorbs(ch) > 3) {

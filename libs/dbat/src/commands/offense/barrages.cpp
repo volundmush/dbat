@@ -52,7 +52,7 @@ ACMD(do_pbarrage)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -80,7 +80,7 @@ ACMD(do_pbarrage)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_PBARRAGE, 0);
@@ -269,7 +269,7 @@ ACMD(do_scatter)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -311,7 +311,7 @@ ACMD(do_scatter)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_SCATTER, 0);
@@ -516,13 +516,13 @@ ACMD(do_kakusanha)
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict)) {
-      if (char_get_master(vict) == ch) {
+      if (char_get_master(g, vict) == ch) {
         continue;
       }
-      if (char_get_master(ch) == vict) {
+      if (char_get_master(g, ch) == vict) {
         continue;
       }
-      if (char_get_master(vict) == char_get_master(ch)) {
+      if (char_get_master(g, vict) == char_get_master(g, ch)) {
         continue;
       }
     }
@@ -569,7 +569,7 @@ ACMD(do_kakusanha)
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
         continue;
       }
       if (char_mob_flagged(vict, MOB_NOKILL)) {
@@ -755,7 +755,7 @@ ACMD(do_renzo)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -782,7 +782,7 @@ ACMD(do_renzo)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_RENZO, 0);
@@ -1040,7 +1040,7 @@ ACMD(do_tsuihidan)
     return;
   }
 
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1068,7 +1068,7 @@ ACMD(do_tsuihidan)
       return;
     }
     if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(vict);
+      struct char_data *def = char_get_defender(g, vict);
       vict                  = def;
     }
     improve_skill(g, ch, SKILL_TSUIHIDAN, 0);

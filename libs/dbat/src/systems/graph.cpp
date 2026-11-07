@@ -414,12 +414,12 @@ ACMD(do_track)
   }
 
   one_argument(argument, arg);
-  if (!*arg && !char_get_fighting(ch)) {
+  if (!*arg && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Whom are you trying to sense?\r\n");
     return;
   }
-  if (!*arg && char_get_fighting(ch)) {
-    vict = char_get_fighting(ch);
+  if (!*arg && char_get_fighting(g, ch)) {
+    vict = char_get_fighting(g, ch);
     send_to_char(g, ch, "You focus on the one your are fighting.\r\n");
     if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
       send_to_char(g, ch, "You can't sense them.\r\n");

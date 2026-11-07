@@ -900,8 +900,8 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_drag(d->character) && char_get_drag(d->character) != nullptr && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(char_get_drag(d->character)));
+      if (char_get_drag(g, d->character) && char_get_drag(g, d->character) != nullptr && len < sizeof(prompt)) {
+        count   = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(char_get_drag(g, d->character)));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
@@ -1019,36 +1019,36 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        chair   = char_get_sits(d->character);
+      if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        chair   = char_get_sits(g, d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "@c<@CFloating inside a healing tank@c>@n\r\n");
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        chair   = char_get_sits(d->character);
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        chair   = char_get_sits(g, d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        chair   = char_get_sits(d->character);
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        chair   = char_get_sits(g, d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        chair   = char_get_sits(d->character);
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        chair   = char_get_sits(g, d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_aff_flagged(d->character, AFF_POSITION) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        chair   = char_get_sits(d->character);
+        chair   = char_get_sits(g, d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "(Best Position)\r\n");
         flagged = true;
         if (count >= 0)

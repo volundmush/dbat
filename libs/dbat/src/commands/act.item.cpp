@@ -885,12 +885,12 @@ ACMD(do_deploy)
 ACMD(do_twohand)
 {
 
-  if (char_get_grappling(ch) || char_get_grappled(ch)) {
+  if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are busy grappling with someone!\r\n");
     return;
   }
 
-  if (char_get_absorbing(ch) || char_get_absorbby(ch)) {
+  if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You are busy struggling with someone!\r\n");
     return;
   }
@@ -1786,7 +1786,7 @@ ACMD(do_put)
 
   one_argument(two_arguments(argument, arg1, arg2), arg3); /* three_arguments */
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
@@ -1918,7 +1918,7 @@ static void perform_get_from_container(GameWorld *g, struct char_data *ch, struc
       act(g, "$p: you can't hold any more items.", false, ch, obj, nullptr, TO_CHAR);
       return;
     }
-    if (char_get_sits(ch) && obj_get_vnum(g, char_get_sits(ch)) > 603 && obj_get_vnum(g, char_get_sits(ch)) < 608 && obj_get_vnum(g, char_get_sits(ch)) - 4 != obj_get_vnum(g, cont) && obj_get_vnum(g, cont) > 599 && obj_get_vnum(g, cont) < 604) {
+    if (char_get_sits(g, ch) && obj_get_vnum(g, char_get_sits(g, ch)) > 603 && obj_get_vnum(g, char_get_sits(g, ch)) < 608 && obj_get_vnum(g, char_get_sits(g, ch)) - 4 != obj_get_vnum(g, cont) && obj_get_vnum(g, cont) > 599 && obj_get_vnum(g, cont) < 604) {
       send_to_char(g, ch, "You aren't playing at that table!\r\n");
       return;
     }
@@ -2004,7 +2004,7 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
 bool perform_get_from_room(GameWorld *g, struct char_data *ch, struct obj_data *obj)
 {
 
-  if (obj_get_sitting(obj)) {
+  if (obj_get_sitting(g, obj)) {
     send_to_char(g, ch, "Someone is on that!\r\n");
     return false;
   }
@@ -2116,7 +2116,7 @@ ACMD(do_get)
 
   one_argument(two_arguments(argument, arg1, arg2), arg3); /* three_arguments */
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
@@ -2359,7 +2359,7 @@ ACMD(do_drop)
   int dotmode, multi, num_don_rooms;
   const char *sname;
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
@@ -2628,7 +2628,7 @@ ACMD(do_give)
 
   argument = one_argument(argument, arg);
 
-  if (!char_has_arms(ch)) {
+  if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
