@@ -305,34 +305,28 @@ static void free_type_list(struct shop_buy_data **list)
  */
 void free_shop(struct shop_data *shop)
 {
+  free_shop_contents(shop);
+  delete shop;
+}
+
+/* Frees what a shop holds, but not the shop itself. */
+void free_shop_contents(struct shop_data *shop)
+{
   free_shop_strings(shop);
-  free_type_list(&(shop)->type);
+  if (shop->type)
+    free_type_list(&(shop)->type);
   delete[] shop_get_rooms(shop);
   delete[] shop_get_products(shop);
-  delete shop;
+  shop_set_rooms(shop, nullptr);
+  shop_set_products(shop, nullptr);
 }
 
 /*-------------------------------------------------------------------*/
 
-/* returns the real number of the shop with given virtual number 
- *
- * We take so good care to keep it sorted - let's use it :) - Welcor
- */
-static int shop_order(const void *key, const void *shop)
+/* The shop numbered vnum, or null. */
+struct shop_data *find_shop(GameWorld *g, shop_vnum vnum)
 {
-  shop_vnum k = *(const shop_vnum *)key, v = ((const struct shop_data *)shop)->vnum;
-
-  return (k > v) - (k < v);
-}
-
-shop_rnum real_shop(GameWorld *g, shop_vnum vnum)
-{
-  struct shop_data *found;
-
-  if (g->top_shop < 0)
-    return NOWHERE;
-  found = (struct shop_data *)bsearch(&vnum, g->shops, g->top_shop + 1, sizeof(*g->shops), shop_order);
-  return found ? found - g->shops : NOWHERE;
+  return g->shops.find(vnum);
 }
 
 /*-------------------------------------------------------------------*/
@@ -368,50 +362,16 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
 
 /*-------------------------------------------------------------------*/
 
-shop_rnum add_shop(GameWorld *g, struct shop_data *nshp)
+struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
 {
-  shop_rnum rshop;
-  shop_rnum found = 0;
-  zone_rnum rznum = real_zone_by_thing(g, shop_get_vnum(nshp));
+  zone_rnum rznum        = real_zone_by_thing(g, shop_get_vnum(nshp));
+  struct shop_data *shop = find_shop(g, shop_get_vnum(nshp));
 
-  /*
-   * The shop already exists, just update it.
-   */
-  if ((rshop = real_shop(g, shop_get_vnum(nshp))) != NOWHERE) {
-    /* free old strings. They're not used in any other place -- Welcor */
-    copy_shop(&g->shops[rshop], nshp, true);
-    if (rznum != NOWHERE)
-      add_to_save_list(g, g->zones[rznum].number, SL_SHP);
-    else
-      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
-    return rshop;
-  }
-
-  g->top_shop++;
-  resize_array(g->shops, g->top_shop, g->top_shop + 1);
-
-  for (rshop = g->top_shop; rshop > 0; rshop--) {
-    if (nshp->vnum > rshop_get_vnum(g, rshop - 1)) {
-      found = rshop;
-
-      /* Make a "nofree" variant and remove these later. */
-      g->shops[rshop].in_room   = nullptr;
-      g->shops[rshop].producing = nullptr;
-      g->shops[rshop].type      = nullptr;
-      /* don't free old strings - they're still in use -- Welcor */
-      copy_shop(&g->shops[rshop], nshp, false);
-      break;
-    }
-    g->shops[rshop] = g->shops[rshop - 1];
-  }
-
-  if (!found) {
-    /* Make a "nofree" variant and remove these later. */
-    g->shops[rshop].in_room   = nullptr;
-    g->shops[rshop].producing = nullptr;
-    g->shops[rshop].type      = nullptr;
-    /* don't free old strings - they're still in use -- Welcor */
-    copy_shop(&g->shops[0], nshp, false);
+  if (shop) /* The shop already exists: just update it, freeing its old strings. */
+    copy_shop(shop, nshp, true);
+  else {
+    shop = g->shops.emplace(shop_get_vnum(nshp));
+    copy_shop(shop, nshp, false);
   }
 
   if (rznum != NOWHERE)
@@ -419,7 +379,7 @@ shop_rnum add_shop(GameWorld *g, struct shop_data *nshp)
   else
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
-  return rshop;
+  return shop;
 }
 
 /*-------------------------------------------------------------------*/
@@ -428,7 +388,6 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
 {
   IDXTYPE i;
   int j;
-  shop_rnum rshop;
   struct atomic_file af;
   FILE *shop_file;
   char fname[128], oldname[128];
@@ -453,9 +412,8 @@ bool save_shops(GameWorld *g, zone_rnum zone_num)
    * Search database for shops in this zone.
    */
   for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
-    if ((rshop = real_shop(g, i)) != NOWHERE) {
+    if ((shop = find_shop(g, i)) != nullptr) {
       fprintf(shop_file, "#%d~\n", i);
-      shop = g->shops + rshop;
 
       /*
        * Save the products.

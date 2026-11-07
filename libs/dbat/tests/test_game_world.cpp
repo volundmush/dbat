@@ -66,9 +66,7 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   g->zones[0].top    = first_vnum + 99;
   g->top_zone        = 0;
 
-  g->shops         = new shop_data[1]();
-  g->shops[0].vnum = first_vnum;
-  g->top_shop      = 0;
+  g->shops.emplace(first_vnum)->vnum = first_vnum;
 
   init_lookup_table(g);
   circle_srandom(g, 12345); /* an unseeded generator repeats one value forever */
@@ -77,7 +75,6 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 
 static void free_world(GameWorld *g)
 {
-  delete[] g->shops;
   delete[] g->zones;
   delete[] g->obj_index;
   delete[] g->obj_proto;
@@ -91,8 +88,8 @@ static void check_starting_values(void)
 {
   GameWorld *g = game_world_create();
 
-  CHECK(g->top_shop == -1);
-  CHECK(g->top_guild == -1);
+  CHECK(g->shops.empty());
+  CHECK(g->guilds.empty());
   CHECK(g->top_of_socialt == -1);
   CHECK(g->TOPCOUNTDOWN == 60);
   CHECK(g->exp_multiplier == 1.0f);
@@ -124,8 +121,8 @@ static void check_lookups(GameWorld *a, GameWorld *b)
   CHECK(real_zone(b, 1) == NOWHERE);
   CHECK(real_zone_by_thing(a, 150) == 0);
   CHECK(real_zone_by_thing(b, 150) == NOWHERE);
-  CHECK(real_shop(a, 100) == 0);
-  CHECK(real_shop(b, 100) == NOWHERE);
+  CHECK(find_shop(a, 100) != nullptr);
+  CHECK(find_shop(b, 100) == nullptr);
 }
 
 /* a character and an object placed in A appear only in A */

@@ -118,57 +118,13 @@ void guild_set_feat(struct guild_data *guild, int n, int v)
   guild->feats[n] = v;
 }
 
-room_vnum rguild_get_vnum(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].vnum;
-}
 
-void rguild_set_vnum(GameWorld *g, guild_rnum i, room_vnum v)
-{
-  g->guild_index[i].vnum = v;
-}
 
-mob_rnum rguild_get_gm(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].gm;
-}
 
-void rguild_set_gm(GameWorld *g, guild_rnum i, mob_rnum v)
-{
-  g->guild_index[i].gm = v;
-}
 
-int rguild_get_open(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].open;
-}
 
-int rguild_get_close(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].close;
-}
 
-float rguild_get_charge(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].charge;
-}
 
-int rguild_get_minlvl(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].minlvl;
-}
 
-bitvector_t *rguild_get_with_who(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].with_who;
-}
 
-spec_proc_func rguild_get_func(GameWorld *g, guild_rnum i)
-{
-  return g->guild_index[i].func;
-}
 
-void rguild_set_func(GameWorld *g, guild_rnum i, spec_proc_func v)
-{
-  g->guild_index[i].func = v;
-}

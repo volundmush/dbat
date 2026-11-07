@@ -4,7 +4,7 @@
 struct shop_data;
 struct shop_buy_data;
 
-/* Field accessors for shops: g_* take a pointer, rshop_* a real number (an index into g->shops). */
+/* Field accessors for shops. */
 room_vnum shop_get_vnum(const struct shop_data *shop);
 void shop_set_vnum(struct shop_data *shop, room_vnum v);
 mob_rnum shop_get_keeper(const struct shop_data *shop);
@@ -59,35 +59,9 @@ void shop_set_product(struct shop_data *shop, int n, obj_vnum v);
 int shop_get_buy_type(const struct shop_data *shop, int n);
 void shop_set_buy_type(struct shop_data *shop, int n, int v);
 char *shop_get_buy_word(const struct shop_data *shop, int n);
-room_vnum rshop_get_vnum(GameWorld *g, shop_rnum i);
-void rshop_set_vnum(GameWorld *g, shop_rnum i, room_vnum v);
-mob_rnum rshop_get_keeper(GameWorld *g, shop_rnum i);
-void rshop_set_keeper(GameWorld *g, shop_rnum i, mob_rnum v);
-int rshop_get_open1(GameWorld *g, shop_rnum i);
-int rshop_get_close1(GameWorld *g, shop_rnum i);
-int rshop_get_open2(GameWorld *g, shop_rnum i);
-int rshop_get_close2(GameWorld *g, shop_rnum i);
-int rshop_get_bank(GameWorld *g, shop_rnum i);
-void rshop_set_bank(GameWorld *g, shop_rnum i, int v);
-int rshop_get_temper(GameWorld *g, shop_rnum i);
-bitvector_t rshop_get_bitvector(GameWorld *g, shop_rnum i);
-bitvector_t *rshop_get_with_who(GameWorld *g, shop_rnum i);
-int rshop_get_lastsort(GameWorld *g, shop_rnum i);
-void rshop_set_lastsort(GameWorld *g, shop_rnum i, int v);
-float rshop_get_profit_buy(GameWorld *g, shop_rnum i);
-float rshop_get_profit_sell(GameWorld *g, shop_rnum i);
-spec_proc_func rshop_get_func(GameWorld *g, shop_rnum i);
-void rshop_set_func(GameWorld *g, shop_rnum i, spec_proc_func v);
-room_vnum rshop_get_room(GameWorld *g, shop_rnum i, int n);
-void rshop_set_room(GameWorld *g, shop_rnum i, int n, room_vnum v);
-obj_vnum rshop_get_product(GameWorld *g, shop_rnum i, int n);
-void rshop_set_product(GameWorld *g, shop_rnum i, int n, obj_vnum v);
-int rshop_get_buy_type(GameWorld *g, shop_rnum i, int n);
-void rshop_set_buy_type(GameWorld *g, shop_rnum i, int n, int v);
-char *rshop_get_buy_word(GameWorld *g, shop_rnum i, int n);
-void rshop_set_buy_word(GameWorld *g, shop_rnum i, int n, char *v);
-bool rshop_uses_bank(GameWorld *g, shop_rnum i);
-bool rshop_allows_steal(GameWorld *g, shop_rnum i);
+void shop_set_buy_word(struct shop_data *shop, int n, char *v);
+bool shop_uses_bank(const struct shop_data *shop);
+bool shop_allows_steal(const struct shop_data *shop);
 int shop_buy_get_type(const struct shop_buy_data *buy);
 void shop_buy_set_type(struct shop_buy_data *buy, int v);
 char *shop_buy_get_keywords(const struct shop_buy_data *buy);

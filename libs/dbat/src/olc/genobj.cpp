@@ -119,7 +119,6 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
  */
 static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
 {
-  shop_rnum shop;
   int i, cmd_no;
   zone_rnum zone;
 
@@ -159,9 +158,9 @@ static obj_rnum adjust_objects(GameWorld *g, obj_rnum refpt)
   /*
    * Renumber shop produce.
    */
-  for (shop = 0; shop <= g->top_shop; shop++)
-    for (i = 0; rshop_get_product(g, shop, i) != NOTHING; i++)
-      rshop_set_product(g, shop, i, rshop_get_product(g, shop, i) + (rshop_get_product(g, shop, i) >= refpt));
+  for (struct shop_data *shop : g->shops.all())
+    for (i = 0; shop_get_product(shop, i) != NOTHING; i++)
+      shop_set_product(shop, i, shop_get_product(shop, i) + (shop_get_product(shop, i) >= refpt));
 
   return refpt;
 }
@@ -485,7 +484,6 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   obj_rnum i;
   zone_rnum zrnum;
   struct obj_data *obj, *tmp;
-  shop_rnum shop;
   int j, cmd_no;
   zone_rnum zone;
 
@@ -541,9 +539,9 @@ obj_rnum delete_object(GameWorld *g, obj_rnum rnum)
   resize_array(g->obj_index, g->top_obj + 2, g->top_obj + 1);
   resize_array(g->obj_proto, g->top_obj + 2, g->top_obj + 1);
 
-  for (shop = 0; shop <= g->top_shop; shop++)
-    for (j = 0; rshop_get_product(g, shop, j) != NOTHING; j++)
-      rshop_set_product(g, shop, j, rshop_get_product(g, shop, j) - (rshop_get_product(g, shop, j) > rnum));
+  for (struct shop_data *shop : g->shops.all())
+    for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
+      shop_set_product(shop, j, shop_get_product(shop, j) - (shop_get_product(shop, j) > rnum));
 
   /* Renumber zone table. */
   for (zone = 0; zone <= g->top_zone; zone++) {

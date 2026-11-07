@@ -511,15 +511,14 @@ static void check_new_guilds(GameWorld *g)
     guild_set_not_enough_gold(&guild, message);
     add_guild(g, &guild);
   }
-  CHECK(g->top_guild == 3);
-  for (guild_rnum r = 1; r <= g->top_guild; r++) {
+  CHECK(g->guilds.size() == 4);
+  for (guild_vnum v = 310; v <= 330; v += 10) {
     char message[32];
 
-    snprintf(message, sizeof(message), "guild %d", 300 + r * 10);
-    CHECK(rguild_get_vnum(g, r) == 300 + r * 10);
-    CHECK(!strcmp(guild_get_no_such_skill(&g->guild_index[r]), message));
+    snprintf(message, sizeof(message), "guild %d", v);
+    CHECK(find_guild(g, v) && !strcmp(guild_get_no_such_skill(find_guild(g, v)), message));
   }
-  CHECK(rguild_get_vnum(g, 0) == 300);
+  CHECK(guild_get_vnum(*g->guilds.all().begin()) == 300);
   CHECK(count_guilds(g, 0, 99999) == 4);
 }
 

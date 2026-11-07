@@ -530,8 +530,9 @@ static void compose_builder_command(GameWorld *g, char *text, size_t size)
       snprintf(text, size, "zedit %d", g->zones[bot_dice(g->top_zone + 1)].number);
       break;
     case 4:
-      if (g->top_shop >= 0) {
-        snprintf(text, size, "sedit %d", rshop_get_vnum(g, bot_dice(g->top_shop + 1)));
+      if (!g->shops.empty()) {
+        int n = bot_dice(g->shops.size()); /* the nth shop, in vnum order */
+        snprintf(text, size, "sedit %d", shop_get_vnum(find_first(g->shops.all(), [&](shop_data *) { return n-- == 0; })));
         break;
       }
       [[fallthrough]];

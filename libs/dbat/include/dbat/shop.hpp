@@ -190,10 +190,10 @@ extern const char *const trade_letters[NUM_TRADERS + 1];
 extern const char *const shop_bits[];
 
 // functions
-bool shop_producing(GameWorld *g, struct obj_data *item, shop_rnum shop_nr);
+bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop);
 void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count);
 void assign_the_shopkeepers(GameWorld *g);
-bool ok_shop_room(GameWorld *g, shop_rnum shop_nr, room_vnum room);
+bool ok_shop_room(GameWorld *g, struct shop_data *shop, room_vnum room);
 void destroy_shops(GameWorld *g);
 void show_shops(GameWorld *g, struct char_data *ch, char *arg);
 int count_shops(GameWorld *g, shop_vnum low, shop_vnum high);

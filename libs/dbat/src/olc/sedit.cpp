@@ -25,7 +25,7 @@
 #include "dbat/game_world.hpp"
 
 static void sedit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, shop_rnum rshop_num);
+static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct shop_data *shop);
 static void sedit_setup_new(struct descriptor_data *d);
 
 /*
@@ -50,7 +50,7 @@ ACMD(do_oasis_sedit)
 {
   IDXTYPE number = NOWHERE;
   int save       = 0;
-  shop_rnum real_num;
+  struct shop_data *existing;
   struct descriptor_data *d;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
@@ -171,8 +171,8 @@ ACMD(do_oasis_sedit)
 
   OLC_NUM(d) = number;
 
-  if ((real_num = real_shop(g, number)) != NOTHING)
-    sedit_setup_existing(g, d, real_num);
+  if ((existing = find_shop(g, number)) != nullptr)
+    sedit_setup_existing(g, d, existing);
   else
     sedit_setup_new(d);
 
@@ -239,7 +239,7 @@ static void sedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, shop_rnum rshop_num)
+static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct shop_data *shop)
 {
   /*
    * Create a scratch shop structure.
@@ -247,7 +247,7 @@ static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, shop_r
   OLC_SHOP(d) = new shop_data();
 
   /* don't waste time trying to free NULL strings -- Welcor */
-  copy_shop(OLC_SHOP(d), g->shops + rshop_num, false);
+  copy_shop(OLC_SHOP(d), shop, false);
 }
 
 /**************************************************************************
@@ -822,9 +822,9 @@ void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       break;
     case SEDIT_COPY:
-      if ((i = real_shop(g, atoi(arg))) != NOWHERE) {
+      if (struct shop_data *source = find_shop(g, atoi(arg))) {
         free_shop(OLC_SHOP(d));
-        sedit_setup_existing(g, d, i);
+        sedit_setup_existing(g, d, source);
       } else
         write_to_output(g, d, "That shop does not exist.\r\n");
       break;

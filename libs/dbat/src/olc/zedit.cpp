@@ -841,9 +841,9 @@ static bool zone_range_loses_something(GameWorld *g, struct descriptor_data *d, 
       what = "object";
     else if (real_trigger(g, vnum) != NOTHING)
       what = "trigger";
-    else if (real_shop(g, vnum) != NOTHING)
+    else if (find_shop(g, vnum))
       what = "shop";
-    else if (real_guild(g, vnum) != NOTHING)
+    else if (find_guild(g, vnum))
       what = "guild";
     if (what) {
       write_to_output(g, d, "That would leave %s %d outside the zone, and the next save would destroy it. "

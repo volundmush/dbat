@@ -3,7 +3,8 @@
 # Behavioural regression check of the working tree against <git-ref>:
 #   1. `dbat -c` syntax-check boot: exit status and log must match.
 #   2. Full boot under gdb with the RNG pinned (mob stats are rolled from the seed), then
-#      roundtrip_dump(): every player and every zone's mobs are saved; the data/ trees must match.
+#      roundtrip_dump(): every player is saved, and every zone's mobs, objects, rooms, shops, guilds and zone
+#      file; the data/ trees must match. VERIFY_SHARED_ROUNDTRIP=1 builds the ref with this roundtrip.cpp.
 # Each build runs on its own copy of data/; the real data/ is never written.
 set -euo pipefail
 ref=${1:-HEAD}
@@ -13,6 +14,9 @@ work=$(mktemp -d "${TMPDIR:-/tmp}/dbat-verify.XXXXXX")
 echo "verify: $ref vs working tree in $work"
 mkdir -p "$work/ref-src"
 git -C "$root" archive "$ref" libs apps tools | tar -x -C "$work/ref-src"
+# VERIFY_SHARED_ROUNDTRIP=1: build the ref with this tree's roundtrip.cpp, so that both save the same files. Only
+# while the save functions it calls are the same on both sides.
+[ "${VERIFY_SHARED_ROUNDTRIP:-0}" = 1 ] && cp "$here/roundtrip.cpp" "$work/ref-src/tools/roundtrip.cpp"
 "$here/build-tree.sh" "$work/ref-src" "$work/ref" -O2 & p1=$!
 "$here/build-tree.sh" "$root" "$work/new" -O2 & p2=$!
 wait $p1; wait $p2

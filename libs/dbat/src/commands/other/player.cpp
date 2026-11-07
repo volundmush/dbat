@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -128,7 +129,7 @@ ACMD(do_quit)
     send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
     if (char_get_followers(ch) || char_get_master(g, ch))
       die_follower(g, ch);
-    if (ch == g->ch_selling)
+    if (ch == auction_seller(g))
       stop_auction(g, AUC_QUIT_CANCEL, nullptr);
 
     /*  We used to check here for duping attempts, but we may as well

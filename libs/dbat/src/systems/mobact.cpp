@@ -315,17 +315,16 @@ void mobile_activity(GameWorld *g)
       diff = game_now(g) - char_get_lastpl(ch);
 
       if (diff > 86400) {
-        shop_rnum shop_nr;
-        shop_rnum shopnr = -1;
+        struct shop_data *shopnr = nullptr;
 
         char_set_lastpl(ch, game_now(g));
-        for (shop_nr = 0; shop_nr <= g->top_shop; shop_nr++) {
-          if (rshop_get_keeper(g, shop_nr) == char_get_nr(ch)) {
-            shopnr = shop_nr;
+        for (struct shop_data *shop : g->shops.all()) {
+          if (shop_get_keeper(shop) == char_get_nr(ch)) {
+            shopnr = shop;
           }
         }
         for (obj_data *sobj : char_inventory(g, ch)) {
-          if (shopnr != -1 && !shop_producing(g, sobj, shopnr)) { /* a builder can take a keeper's shop away */
+          if (shopnr && !shop_producing(g, sobj, shopnr)) { /* a builder can take a keeper's shop away */
             char_set_gold(ch, char_get_gold(ch) + (obj_get_cost(sobj)));
             extract_obj(g, sobj);
           }
@@ -391,7 +390,7 @@ void mobile_activity(GameWorld *g)
     /* Add new mobile actions here */
 
     if (char_is_kabito(ch)) {
-      shop_rnum shop_nr;
+      struct shop_data *shop;
       found = false;
       /* Is there a shopkeeper around? */
       for (char_data *vict : room_people(g, char_get_in_room(ch))) {
@@ -399,14 +398,12 @@ void mobile_activity(GameWorld *g)
           break;
         if (char_get_mob_spec(g, vict) == shop_keeper) {
           /* Ok, vict is a shop keeper.  Which shop is his? */
-          for (shop_nr = 0; shop_nr <= g->top_shop; shop_nr++)
-            if (rshop_get_keeper(g, shop_nr) == char_get_nr(vict))
-              break;
-          if (shop_nr <= g->top_shop)
+          shop = find_first(g->shops.all(), [&](shop_data *s) { return shop_get_keeper(s) == char_get_nr(vict); });
+          if (shop)
             /* Is the shopkeeper in his shop? */
-            if (ok_shop_room(g, shop_nr, char_get_in_room(vict)))
+            if (ok_shop_room(g, shop, char_get_in_room(vict)))
               /* Does the shopkeeper prevent stealing? */
-              if (!rshop_allows_steal(g, shop_nr))
+              if (!shop_allows_steal(shop))
                 found = true;
         }
         /* Note: found will be true if there the character is in a shop where

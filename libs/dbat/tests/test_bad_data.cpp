@@ -783,12 +783,13 @@ static void check_shop_with_impossible_item_types(void)
 
   th_before_boot(give_the_shop_impossible_item_types);
   g = th_boot();
-  CHECK(g->top_shop == 0); /* the one shop, still there */
-  CHECK(rshop_get_buy_type(g, 0, 0) == ITEM_ARMOR);
-  CHECK(rshop_get_buy_word(g, 0, 0) && !strcmp(rshop_get_buy_word(g, 0, 0), "potions"));
-  CHECK(rshop_get_buy_type(g, 0, 1) == 19);
-  CHECK(rshop_get_buy_word(g, 0, 1) == nullptr);
-  CHECK(rshop_get_buy_type(g, 0, 2) == NOTHING);
+  CHECK(g->shops.size() == 1); /* the one shop, still there */
+  struct shop_data *shop = *g->shops.all().begin();
+  CHECK(shop_get_buy_type(shop, 0) == ITEM_ARMOR);
+  CHECK(shop_get_buy_word(shop, 0) && !strcmp(shop_get_buy_word(shop, 0), "potions"));
+  CHECK(shop_get_buy_type(shop, 1) == 19);
+  CHECK(shop_get_buy_word(shop, 1) == nullptr);
+  CHECK(shop_get_buy_type(shop, 2) == NOTHING);
   th_shutdown(g);
 }
 

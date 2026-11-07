@@ -280,7 +280,6 @@ static void list_objects(GameWorld *g, struct char_data *ch, zone_rnum rnum, roo
  */
 static void list_shops(GameWorld *g, struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
 {
-  shop_rnum i;
   int j, counter = 0;
   IDXTYPE bottom, top;
 
@@ -299,19 +298,19 @@ static void list_shops(GameWorld *g, struct char_data *ch, zone_rnum rnum, shop_
                "Index VNum    Shop Room(s)\r\n"
                "----- ------- ---------------------------------------------\r\n");
 
-  for (i = 0; i <= g->top_shop; i++) {
-    if (rshop_get_vnum(g, i) >= bottom && rshop_get_vnum(g, i) <= top) {
+  for (struct shop_data *i : g->shops.all()) {
+    if (shop_get_vnum(i) >= bottom && shop_get_vnum(i) <= top) {
       counter++;
 
-      send_to_char(g, ch, "@g%4d@n) [@g%-5d@n]", counter, rshop_get_vnum(g, i));
+      send_to_char(g, ch, "@g%4d@n) [@g%-5d@n]", counter, shop_get_vnum(i));
 
       /************************************************************************/
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
 
-      for (j = 0; rshop_get_room(g, i, j) != NOWHERE; j++)
+      for (j = 0; shop_get_room(i, j) != NOWHERE; j++)
         send_to_char(g, ch, "%s@c[@y%d@c]@n",
-                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", rshop_get_room(g, i, j));
+                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop_get_room(i, j));
 
       if (j == 0)
         send_to_char(g, ch, "@cNone.@n");

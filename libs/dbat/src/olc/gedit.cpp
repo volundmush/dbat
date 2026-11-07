@@ -29,7 +29,7 @@
 #include "dbat/game_world.hpp"
 
 static void gedit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, guild_rnum rgm_num);
+static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct guild_data *guild);
 static void gedit_setup_new(GameWorld *g, struct descriptor_data *d);
 
 /*
@@ -54,7 +54,7 @@ ACMD(do_oasis_gedit)
 {
   IDXTYPE number = NOWHERE;
   int save       = 0;
-  guild_rnum real_num;
+  struct guild_data *existing;
   struct descriptor_data *d;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
@@ -174,8 +174,8 @@ ACMD(do_oasis_gedit)
 
   OLC_NUM(d) = number;
 
-  if ((real_num = real_guild(g, number)) != NOTHING)
-    gedit_setup_existing(g, d, real_num);
+  if ((existing = find_guild(g, number)) != nullptr)
+    gedit_setup_existing(g, d, existing);
   else
     gedit_setup_new(g, d);
 
@@ -231,11 +231,11 @@ static void gedit_setup_new(GameWorld *g, struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, int rgm_num)
+static void gedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct guild_data *guild)
 {
   /*. Alloc some guild shaped space . */
   OLC_GUILD(d) = new guild_data();
-  copy_guild(OLC_GUILD(d), g->guild_index + rgm_num);
+  copy_guild(OLC_GUILD(d), guild);
   gedit_disp_menu(g, d);
 }
 

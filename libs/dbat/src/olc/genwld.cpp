@@ -252,10 +252,10 @@ bool delete_room(GameWorld *g, room_rnum rnum)
    * Remove this room from all shop lists.
    */
   {
-    for (i = 0; i < g->top_shop; i++) {
-      for (j = 0; rshop_get_room(g, i, j) != NOWHERE; j++) {
-        if (rshop_get_room(g, i, j) == rroom_get_vnum(g, rnum))
-          rshop_set_room(g, i, j, 0); /* set to the void */
+    for (struct shop_data *shop : g->shops.all()) {
+      for (j = 0; shop_get_room(shop, j) != NOWHERE; j++) {
+        if (shop_get_room(shop, j) == rroom_get_vnum(g, rnum))
+          shop_set_room(shop, j, 0); /* set to the void */
       }
     }
   }

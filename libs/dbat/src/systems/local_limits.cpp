@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 
+#include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/local_limits.hpp"
@@ -1548,7 +1549,7 @@ static void point_update_objects(GameWorld *g)
   for (obj_data *j : each_obj(g)) {
 
     /* Let's get rid of dropped norent items. */
-    if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && g->obj_selling != j && obj_get_vnum(g, j) != 7200) {
+    if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && auction_obj(g) != j && obj_get_vnum(g, j) != 7200) {
       time_t diff = 0;
 
       diff = game_now(g) - obj_get_lload(j);

@@ -43,8 +43,6 @@ static void extract_mobile_all(GameWorld *g, mob_vnum vnum);
 mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 {
   mob_rnum rnum, i, found = false;
-  shop_rnum shop;
-  guild_rnum guild;
   int cmd_no;
   zone_rnum zone;
 
@@ -113,16 +111,14 @@ mob_rnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
         zone_get_cmd(g, zone, cmd_no)->arg1 += (zone_get_cmd(g, zone, cmd_no)->arg1 >= found);
 
   /* Update shop keepers. */
-  if (g->shops)
-    for (shop = 0; shop <= g->top_shop; shop++)
-      if (rshop_get_keeper(g, shop) != NOTHING && rshop_get_keeper(g, shop) >= found)
-        rshop_set_keeper(g, shop, rshop_get_keeper(g, shop) + 1);
+  for (struct shop_data *shop : g->shops.all())
+    if (shop_get_keeper(shop) != NOTHING && shop_get_keeper(shop) >= found)
+      shop_set_keeper(shop, shop_get_keeper(shop) + 1);
 
   /* Update guild masters */
-  if (g->guild_index)
-    for (guild = 0; guild <= g->top_guild; guild++)
-      if (rguild_get_gm(g, guild) != NOTHING && rguild_get_gm(g, guild) >= found)
-        rguild_set_gm(g, guild, rguild_get_gm(g, guild) + 1);
+  for (struct guild_data *guild : g->guilds.all())
+    if (guild_get_gm(guild) != NOTHING && guild_get_gm(guild) >= found)
+      guild_set_gm(guild, guild_get_gm(guild) + 1);
 
   add_to_save_list(g, g->zones[real_zone_by_thing(g, vnum)].number, SL_MOB);
   return found;
@@ -199,35 +195,33 @@ mob_rnum delete_mobile(GameWorld *g, mob_rnum refpt)
 
   zone_vnum last_saved_zone = NOTHING;
   /* Update shop keepers.  */
-  if (g->shops)
-    for (counter = 0; counter <= g->top_shop; counter++) {
-      zone_vnum zvnum = g->zones[real_zone_by_thing(g, counter)].number;
-      /* Find the shop for this keeper and reset it's keeper to
+  for (struct shop_data *shop : g->shops.all()) {
+    zone_vnum zvnum = g->zones[real_zone_by_thing(g, shop_get_vnum(shop))].number;
+    /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
-      if (rshop_get_keeper(g, counter) == refpt) {
-        rshop_set_keeper(g, counter, NOTHING);
-        if (zvnum != last_saved_zone) {
-          add_to_save_list(g, zvnum, SL_SHP);
-          last_saved_zone = zvnum;
-        }
+    if (shop_get_keeper(shop) == refpt) {
+      shop_set_keeper(shop, NOTHING);
+      if (zvnum != last_saved_zone) {
+        add_to_save_list(g, zvnum, SL_SHP);
+        last_saved_zone = zvnum;
       }
     }
+  }
 
   last_saved_zone = NOTHING;
   /* Update guild masters */
-  if (g->guild_index)
-    for (counter = 0; counter <= g->top_guild; counter++) {
-      /* Find the guild for this trainer and reset it's trainer to
+  for (struct guild_data *guild : g->guilds.all()) {
+    /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
-      if (rguild_get_gm(g, counter) == refpt) {
-        rguild_set_gm(g, counter, NOTHING);
-        zone_vnum zvnum = g->zones[real_zone_by_thing(g, counter)].number;
-        if (zvnum != last_saved_zone) {
-          add_to_save_list(g, zvnum, SL_GLD);
-          last_saved_zone = zvnum;
-        }
+    if (guild_get_gm(guild) == refpt) {
+      guild_set_gm(guild, NOTHING);
+      zone_vnum zvnum = g->zones[real_zone_by_thing(g, guild_get_vnum(guild))].number;
+      if (zvnum != last_saved_zone) {
+        add_to_save_list(g, zvnum, SL_GLD);
+        last_saved_zone = zvnum;
       }
     }
+  }
 
   return refpt;
 }

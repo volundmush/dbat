@@ -2,6 +2,9 @@
 #include <ctime>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/registry.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/shop.hpp"
 #include "dbat/ban.hpp"
 #include "dbat/config.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -42,10 +45,8 @@ struct GameWorld {
   struct reset_q_type reset_q{};
 
   /* Shops and guilds */
-  struct shop_data *shops{};
-  shop_rnum top_shop{};
-  struct guild_data *guild_index{};
-  guild_rnum top_guild{};
+  vnum_table<shop_data, shop_vnum> shops;    /* in vnum order */
+  vnum_table<guild_data, guild_vnum> guilds; /* in vnum order */
   int cmd_say{}, cmd_tell{}, cmd_emote{}, cmd_slap{}, cmd_puke{};
 
   /* Scripts */
@@ -155,8 +156,8 @@ struct GameWorld {
   int64_t toppoint[25]{};
 
   /* Auctions */
-  struct char_data *ch_selling{}, *ch_buying{};
-  struct obj_data *obj_selling{};
+  int32_t ch_selling_uid{}, ch_buying_uid{}; /* by id, as entities refer to each other */
+  int32_t obj_selling_uid{};
   int aucstat{}, curbid{};
 
   /* Pathfinding and map display */

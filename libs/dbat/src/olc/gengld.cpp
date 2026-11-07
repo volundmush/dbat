@@ -13,7 +13,6 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
-static void free_guild_strings(struct guild_data *guild);
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
@@ -39,7 +38,7 @@ void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
   guild_set_func(tgm, guild_get_func(fgm));
 
   /*. Copy the strings over . */
-  free_guild_strings(tgm);
+  free_guild_contents(tgm);
   guild_set_no_such_skill(tgm, str_udup(guild_get_no_such_skill(fgm)));
   guild_set_not_enough_gold(tgm, str_udup(guild_get_not_enough_gold(fgm)));
 
@@ -53,7 +52,8 @@ void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
 /*-------------------------------------------------------------------*/
 /*. Free all the character strings in a guild structure . */
 
-static void free_guild_strings(struct guild_data *guild)
+/* Frees what a guild holds, but not the guild itself. */
+void free_guild_contents(struct guild_data *guild)
 {
   if (guild_get_no_such_skill(guild)) {
     free(guild_get_no_such_skill(guild));
@@ -71,7 +71,7 @@ static void free_guild_strings(struct guild_data *guild)
 
 void free_guild(struct guild_data *guild)
 {
-  free_guild_strings(guild);
+  free_guild_contents(guild);
   delete guild;
 }
 
@@ -81,21 +81,10 @@ void free_guild(struct guild_data *guild)
  *
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
-static int guild_order(const void *key, const void *guild)
+/* The guild numbered vnum, or null. */
+struct guild_data *find_guild(GameWorld *g, guild_vnum vnum)
 {
-  guild_vnum k = *(const guild_vnum *)key, v = ((const struct guild_data *)guild)->vnum;
-
-  return (k > v) - (k < v);
-}
-
-guild_rnum real_guild(GameWorld *g, guild_vnum vnum)
-{
-  struct guild_data *found;
-
-  if (g->top_guild < 0)
-    return NOWHERE;
-  found = (struct guild_data *)bsearch(&vnum, g->guild_index, g->top_guild + 1, sizeof(*g->guild_index), guild_order);
-  return found ? found - g->guild_index : NOWHERE;
+  return g->guilds.find(vnum);
 }
 
 /*-------------------------------------------------------------------*/
@@ -126,52 +115,21 @@ const char *gedit_modify_string(char **str, char *new_g)
 
 /*-------------------------------------------------------------------*/
 
-guild_rnum add_guild(GameWorld *g, struct guild_data *ngld)
+struct guild_data *add_guild(GameWorld *g, struct guild_data *ngld)
 {
-  guild_rnum rguild;
-  guild_rnum found = 0;
-  zone_rnum rznum  = real_zone_by_thing(g, guild_get_vnum(ngld));
+  zone_rnum rznum          = real_zone_by_thing(g, guild_get_vnum(ngld));
+  struct guild_data *guild = find_guild(g, guild_get_vnum(ngld));
 
-  /*
-   * The guild already exists, just update it.
-   */
-  if ((rguild = real_guild(g, guild_get_vnum(ngld))) != NOWHERE) {
-    copy_guild(&g->guild_index[rguild], ngld);
-    if (rznum != NOWHERE) {
-      add_to_save_list(g, g->zones[rznum].number, SL_GLD);
-    } else
-      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
-    return rguild;
-  }
-
-  mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
-
-  g->top_guild++;
-  resize_array(g->guild_index, g->top_guild, g->top_guild + 1);
-
-  for (rguild = g->top_guild; rguild > 0; rguild--) {
-    if (ngld->vnum > rguild_get_vnum(g, rguild - 1)) {
-      found = rguild;
-
-      /* whatever this slot holds is uninitialized, or was just copied to the next one up */
-      g->guild_index[rguild] = {};
-      copy_guild(&g->guild_index[rguild], ngld);
-      break;
-    }
-    g->guild_index[rguild] = g->guild_index[rguild - 1];
-  }
-
-  if (!found) {
-    g->guild_index[0] = {};
-    copy_guild(&g->guild_index[0], ngld);
-  }
+  if (!guild) /* new: copy_guild() frees the old strings of one that exists */
+    guild = g->guilds.emplace(guild_get_vnum(ngld));
+  copy_guild(guild, ngld);
 
   if (rznum != NOWHERE) {
     add_to_save_list(g, g->zones[rznum].number, SL_GLD);
   } else
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
 
-  return rguild;
+  return guild;
 }
 
 /*-------------------------------------------------------------------*/
@@ -181,7 +139,6 @@ bool save_guilds(GameWorld *g, zone_rnum zone_num)
   struct atomic_file af;
   IDXTYPE i;
   int j;
-  guild_rnum rguild;
   FILE *guild_file;
   char fname[64];
   struct guild_data *guild;
@@ -199,9 +156,8 @@ bool save_guilds(GameWorld *g, zone_rnum zone_num)
 
   /*. Search database for guilds in this zone . */
   for (i = genolc_zone_bottom(g, zone_num); i <= g->zones[zone_num].top; i++) {
-    if ((rguild = real_guild(g, i)) != NOWHERE) {
+    if ((guild = find_guild(g, i)) != nullptr) {
       fprintf(guild_file, "#%d~\n", i);
-      guild = g->guild_index + rguild;
 
       for (j = 0; j < SKILL_TABLE_SIZE; j++)
         if (guild_get_skill(guild, j))

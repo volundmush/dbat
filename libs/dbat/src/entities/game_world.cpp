@@ -18,8 +18,6 @@ GameWorld *game_world_create(void)
   GameWorld *g;
 
   g                 = new GameWorld();
-  g->top_shop       = -1;
-  g->top_guild      = -1;
   g->top_of_socialt = -1;
   g->TOPCOUNTDOWN   = 60;
   g->exp_multiplier = 1.0;

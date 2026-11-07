@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.item.hpp"
 #include "dbat/consts/auction.hpp"
@@ -45,6 +46,13 @@
 #include "dbat/boards.hpp"
 #include "dbat/local_limits.hpp"
 #include "dbat/game_world.hpp"
+
+struct char_data *auction_seller(GameWorld *g) { return char_by_id(g, g->ch_selling_uid); }
+struct char_data *auction_buyer(GameWorld *g) { return char_by_id(g, g->ch_buying_uid); }
+struct obj_data *auction_obj(GameWorld *g) { return obj_by_id(g, g->obj_selling_uid); }
+void auction_set_seller(GameWorld *g, struct char_data *ch) { g->ch_selling_uid = ch ? char_get_id(ch) : 0; }
+void auction_set_buyer(GameWorld *g, struct char_data *ch) { g->ch_buying_uid = ch ? char_get_id(ch) : 0; }
+void auction_set_obj(GameWorld *g, struct obj_data *obj) { g->obj_selling_uid = obj ? obj_get_id(obj) : 0; }
 
 static int64_t max_carry_weight(GameWorld *g, struct char_data *ch);
 
@@ -924,15 +932,15 @@ static void start_auction(GameWorld *g, struct char_data *ch, struct obj_data *o
   /* Take object from character and set variables */
 
   obj_from_char(g, obj);
-  g->obj_selling = obj;
-  g->ch_selling  = ch;
-  g->ch_buying   = nullptr;
+  auction_set_obj(g, obj);
+  auction_set_seller(g, ch);
+  auction_set_buyer(g, nullptr);
   g->curbid      = bid;
 
   /* Tell th character where his item went */
-  snprintf(buf, sizeof(buf), "%s magicly flies away from your hands to be auctioned!\r\n", obj_get_short_description(g->obj_selling));
+  snprintf(buf, sizeof(buf), "%s magicly flies away from your hands to be auctioned!\r\n", obj_get_short_description(auction_obj(g)));
   CAP(buf);
-  send_to_char(g, g->ch_selling, "%s", buf);
+  send_to_char(g, auction_seller(g), "%s", buf);
 
   /* Anounce the item is being sold */
   snprintf(buf, sizeof(buf), auctioneer[AUC_NULL_STATE], g->curbid);
@@ -947,11 +955,11 @@ void check_auction(GameWorld *g)
     case AUC_NULL_STATE:
       return;
     case AUC_OFFERING: {
-      if (g->obj_selling == nullptr) {
+      if (auction_obj(g) == nullptr) {
         auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         g->curbid     = 0;
-        g->ch_selling = nullptr;
-        g->ch_buying  = nullptr;
+        auction_set_seller(g, nullptr);
+        auction_set_buyer(g, nullptr);
         g->aucstat    = AUC_NULL_STATE;
         return;
       }
@@ -962,11 +970,11 @@ void check_auction(GameWorld *g)
       return;
     }
     case AUC_GOING_ONCE: {
-      if (g->obj_selling == nullptr) {
+      if (auction_obj(g) == nullptr) {
         auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         g->curbid     = 0;
-        g->ch_selling = nullptr;
-        g->ch_buying  = nullptr;
+        auction_set_seller(g, nullptr);
+        auction_set_buyer(g, nullptr);
         g->aucstat    = AUC_NULL_STATE;
         return;
       }
@@ -978,11 +986,11 @@ void check_auction(GameWorld *g)
       return;
     }
     case AUC_GOING_TWICE: {
-      if (g->obj_selling == nullptr) {
+      if (auction_obj(g) == nullptr) {
         auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         g->curbid     = 0;
-        g->ch_selling = nullptr;
-        g->ch_buying  = nullptr;
+        auction_set_seller(g, nullptr);
+        auction_set_buyer(g, nullptr);
         g->aucstat    = AUC_NULL_STATE;
         return;
       }
@@ -994,30 +1002,30 @@ void check_auction(GameWorld *g)
       return;
     }
     case AUC_LAST_CALL: {
-      if (g->obj_selling == nullptr) {
+      if (auction_obj(g) == nullptr) {
         auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         g->curbid     = 0;
-        g->ch_selling = nullptr;
-        g->ch_buying  = nullptr;
+        auction_set_seller(g, nullptr);
+        auction_set_buyer(g, nullptr);
         g->aucstat    = AUC_NULL_STATE;
         return;
       }
-      if (g->ch_buying == nullptr) {
+      if (auction_buyer(g) == nullptr) {
 
         snprintf(buf, sizeof(buf), auctioneer[AUC_LAST_CALL], g->curbid);
 
         CAP(buf);
         auc_send_to_all(g, buf, false);
 
-        snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(g->obj_selling));
+        snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
         CAP(buf);
-        send_to_char(g, g->ch_selling, "%s", buf);
-        obj_to_char(g, g->obj_selling, g->ch_selling);
+        send_to_char(g, auction_seller(g), "%s", buf);
+        obj_to_char(g, auction_obj(g), auction_seller(g));
 
         /* Reset auctioning values */
-        g->obj_selling = nullptr;
-        g->ch_selling  = nullptr;
-        g->ch_buying   = nullptr;
+        auction_set_obj(g, nullptr);
+        auction_set_seller(g, nullptr);
+        auction_set_buyer(g, nullptr);
         g->curbid      = 0;
         g->aucstat     = AUC_NULL_STATE;
         return;
@@ -1027,28 +1035,28 @@ void check_auction(GameWorld *g)
       auc_send_to_all(g, buf, true);
 
       /* Give the object to the buyer */
-      obj_to_char(g, g->obj_selling, g->ch_buying);
-      snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands, what a steal!\r\n", obj_get_short_description(g->obj_selling));
+      obj_to_char(g, auction_obj(g), auction_buyer(g));
+      snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands, what a steal!\r\n", obj_get_short_description(auction_obj(g)));
       CAP(buf);
-      send_to_char(g, g->ch_buying, "%s", buf);
+      send_to_char(g, auction_buyer(g), "%s", buf);
 
-      snprintf(buf, sizeof(buf), "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_get_short_description(g->obj_selling), g->curbid);
-      send_to_char(g, g->ch_selling, "%s", buf);
+      snprintf(buf, sizeof(buf), "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_get_short_description(auction_obj(g)), g->curbid);
+      send_to_char(g, auction_seller(g), "%s", buf);
 
       /* Give selling char the money for his stuff */
-      if (char_get_gold(g->ch_selling) + g->curbid > char_gold_carry(g->ch_selling)) {
-        send_to_char(g, g->ch_buying, "You couldn't hold all the zenni, so some of it was deposited for you.\r\n");
+      if (char_get_gold(auction_seller(g)) + g->curbid > char_gold_carry(auction_seller(g))) {
+        send_to_char(g, auction_buyer(g), "You couldn't hold all the zenni, so some of it was deposited for you.\r\n");
         int diff = 0;
-        diff     = (char_get_gold(g->ch_selling) + g->curbid) - char_gold_carry(g->ch_selling);
-        char_set_gold(g->ch_selling, char_gold_carry(g->ch_selling));
-        char_set_bank_gold(g->ch_selling, char_get_bank_gold(g->ch_selling) + (diff));
-      } else if (char_get_gold(g->ch_selling) + g->curbid <= char_gold_carry(g->ch_selling)) {
-        char_set_gold(g->ch_selling, char_get_gold(g->ch_selling) + (g->curbid));
+        diff     = (char_get_gold(auction_seller(g)) + g->curbid) - char_gold_carry(auction_seller(g));
+        char_set_gold(auction_seller(g), char_gold_carry(auction_seller(g)));
+        char_set_bank_gold(auction_seller(g), char_get_bank_gold(auction_seller(g)) + (diff));
+      } else if (char_get_gold(auction_seller(g)) + g->curbid <= char_gold_carry(auction_seller(g))) {
+        char_set_gold(auction_seller(g), char_get_gold(auction_seller(g)) + (g->curbid));
       }
       /* Reset auctioning values */
-      g->obj_selling = nullptr;
-      g->ch_selling  = nullptr;
-      g->ch_buying   = nullptr;
+      auction_set_obj(g, nullptr);
+      auction_set_seller(g, nullptr);
+      auction_set_buyer(g, nullptr);
       g->curbid      = 0;
       g->aucstat     = AUC_NULL_STATE;
       return;
@@ -1084,17 +1092,17 @@ ACMD(do_auction)
     return;
   }
   if (is_abbrev(arg1, "cancel") || is_abbrev(arg1, "stop")) {
-    if ((ch != g->ch_selling && char_get_admlevel(ch) <= ADMLVL_GRGOD) || g->aucstat == AUC_NULL_STATE) {
+    if ((ch != auction_seller(g) && char_get_admlevel(ch) <= ADMLVL_GRGOD) || g->aucstat == AUC_NULL_STATE) {
       send_to_char(g, ch, "You're not even selling anything!\r\n");
       return;
     }
-    if (ch == g->ch_selling) {
+    if (ch == auction_seller(g)) {
       stop_auction(g, AUC_NORMAL_CANCEL, nullptr);
       return;
     }
     stop_auction(g, AUC_WIZ_CANCEL, ch);
   } else if (is_abbrev(arg1, "stats") || is_abbrev(arg1, "identify")) {
-    auc_stat(g, ch, g->obj_selling);
+    auc_stat(g, ch, auction_obj(g));
     return;
   } else if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch)))) {
     snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
@@ -1108,8 +1116,8 @@ ACMD(do_auction)
     send_to_char(g, ch, "Come on? One zenni at least?\r\n");
     return;
   } else if (g->aucstat != AUC_NULL_STATE) {
-    snprintf(buf, sizeof(buf), "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", char_get_name(g->ch_selling),
-             obj_get_short_description(g->obj_selling), bid);
+    snprintf(buf, sizeof(buf), "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", char_get_name(auction_seller(g)),
+             obj_get_short_description(auction_obj(g)), bid);
     send_to_char(g, ch, "%s", buf);
     return;
   } else if (obj_extra_flagged(obj, ITEM_NOSELL)) {
@@ -1364,11 +1372,11 @@ ACMD(do_bid)
 
 void stop_auction(GameWorld *g, int type, struct char_data *ch)
 {
-  if (g->obj_selling == nullptr) {
+  if (auction_obj(g) == nullptr) {
     auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
     g->curbid     = 0;
-    g->ch_selling = nullptr;
-    g->ch_buying  = nullptr;
+    auction_set_seller(g, nullptr);
+    auction_set_buyer(g, nullptr);
     g->aucstat    = AUC_NULL_STATE;
     return;
   }
@@ -1399,23 +1407,23 @@ void stop_auction(GameWorld *g, int type, struct char_data *ch)
   }
 
   if (type != AUC_WIZ_CANCEL) {
-    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(g->obj_selling));
+    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
     CAP(buf);
-    send_to_char(g, g->ch_selling, "%s", buf);
-    obj_to_char(g, g->obj_selling, g->ch_selling);
+    send_to_char(g, auction_seller(g), "%s", buf);
+    obj_to_char(g, auction_obj(g), auction_seller(g));
   } else {
-    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(g->obj_selling));
+    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
     CAP(buf);
     send_to_char(g, ch, "%s", buf);
-    obj_to_char(g, g->obj_selling, ch);
+    obj_to_char(g, auction_obj(g), ch);
   }
 
-  if (!(g->ch_buying == nullptr))
-    char_set_gold(g->ch_buying, char_get_gold(g->ch_buying) + (g->curbid));
+  if (!(auction_buyer(g) == nullptr))
+    char_set_gold(auction_buyer(g), char_get_gold(auction_buyer(g)) + (g->curbid));
 
-  g->obj_selling = nullptr;
-  g->ch_selling  = nullptr;
-  g->ch_buying   = nullptr;
+  auction_set_obj(g, nullptr);
+  auction_set_seller(g, nullptr);
+  auction_set_buyer(g, nullptr);
   g->curbid      = 0;
 
   g->aucstat = AUC_NULL_STATE;
@@ -1428,7 +1436,7 @@ static void auc_stat(GameWorld *g, struct char_data *ch, struct obj_data *obj)
     send_to_char(g, ch, "Nothing is being auctioned!\r\n");
     return;
   }
-  if (ch == g->ch_selling) {
+  if (ch == auction_seller(g)) {
     send_to_char(g, ch, "You should have found that out BEFORE auctioning it!\r\n");
     return;
   }
@@ -1438,7 +1446,7 @@ static void auc_stat(GameWorld *g, struct char_data *ch, struct obj_data *obj)
   }
   /* auctioneer tells the character the auction details */
   snprintf(buf, sizeof(buf), auctioneer[AUC_STAT], g->curbid);
-  act(g, buf, true, g->ch_selling, obj, ch, TO_VICT | TO_SLEEP);
+  act(g, buf, true, auction_seller(g), obj, ch, TO_VICT | TO_SLEEP);
   char_set_gold(ch, char_get_gold(ch) - (500));
 
   /*call_magic(ch, NULL, obj_selling, SPELL_IDENTIFY, 30, CAST_SPELL);*/
@@ -1458,9 +1466,9 @@ static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer)
     if (rroom_flagged(g, char_get_in_room(i->character), ROOM_PAST))
       continue;
     if (buyer)
-      act(g, messg, true, g->ch_buying, g->obj_selling, i->character, TO_VICT | TO_SLEEP);
+      act(g, messg, true, auction_buyer(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
     else
-      act(g, messg, true, g->ch_selling, g->obj_selling, i->character, TO_VICT | TO_SLEEP);
+      act(g, messg, true, auction_seller(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
   }
 }
 

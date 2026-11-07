@@ -1,6 +1,7 @@
 /* Verification helper (not part of the server build).
  * Called from gdb after boot by verify.sh: loads every player and saves it back, then saves every
- * zone's mobiles, so the resulting data/ tree can be diffed between two builds. */
+ * zone's mobiles, objects, rooms, shops, guilds and zone file, so the resulting data/ tree can be diffed
+ * between two builds. */
 #include <cstdio>
 
 #include "dbat/utils.hpp"
@@ -9,6 +10,11 @@
 #include "dbat/players.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/genmob.hpp"
+#include "dbat/gengld.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/genshp.hpp"
+#include "dbat/genwld.hpp"
+#include "dbat/genzon.hpp"
 #include "dbat/game_world.hpp"
 
 extern "C" long roundtrip_dump(GameWorld *g)
@@ -27,9 +33,15 @@ extern "C" long roundtrip_dump(GameWorld *g)
     save_char(g, pc);
     players++;
   }
-  for (zone_rnum z = 0; z <= g->top_zone; z++)
-    if (save_mobiles(g, z))
-      zones++;
-  fprintf(stderr, "ROUNDTRIP saved %d players and mobs for %d zones\n", players, zones);
+  for (zone_rnum z = 0; z <= g->top_zone; z++) {
+    bool ok = save_mobiles(g, z);
+    ok      = save_objects(g, z) && ok;
+    ok      = save_rooms(g, z) && ok;
+    ok      = save_shops(g, z) && ok;
+    ok      = save_guilds(g, z) && ok;
+    ok      = save_zone(g, z) && ok;
+    zones += ok;
+  }
+  fprintf(stderr, "ROUNDTRIP saved %d players, and the world files of %d zones\n", players, zones);
   return players;
 }
