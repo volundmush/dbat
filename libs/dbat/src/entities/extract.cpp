@@ -17,6 +17,8 @@
 
 
 /* Extract a ch completely from the world, and leave his stuff behind */
+static void finish_character_extractions(GameWorld *g);
+
 void extract_char_final(GameWorld *g, struct char_data *ch)
 {
   struct char_data *k, *temp;
@@ -333,13 +335,31 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
       free_proto_script(obj, OBJ_TRIGGER);
   }
 
-  free_obj(g, obj);
+  /* Gone from the game now, but freed later, so that whoever still holds a pointer to it this pulse holds memory. */
+  obj_retire(g, obj);
+  g->extracted_objects.push_back(obj);
 }
 
-void extract_pending_chars(GameWorld *g)
+void free_extracted_objects(GameWorld *g, obj_vnum vnum)
+{
+  std::vector<struct obj_data *> now, later;
+
+  for (struct obj_data *obj : g->extracted_objects)
+    (vnum == NOTHING || obj_get_item_number(obj) == vnum ? now : later).push_back(obj);
+  g->extracted_objects.swap(later);
+  for (struct obj_data *obj : now)
+    free_obj(g, obj);
+}
+
+void finish_extractions(GameWorld *g)
 {
   free_extracted_triggers(g);
+  finish_character_extractions(g);
+  free_extracted_objects(g, NOTHING);
+}
 
+static void finish_character_extractions(GameWorld *g)
+{
   if (g->extractions_pending < 0)
     mud_log("SYSERR: Negative (%d) extractions pending.", g->extractions_pending);
 

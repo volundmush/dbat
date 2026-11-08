@@ -26,6 +26,7 @@ struct GameWorld {
   vnum_table<room_data, room_vnum> rooms; /* all rooms, by vnum */
   id_table<char_data> characters;         /* every NPC and PC in the game, by id */
   id_table<obj_data> objects;             /* every object in the game, by id */
+  std::vector<struct obj_data *> extracted_objects; /* out of the game, waiting for finish_extractions() */
   struct char_data *affect_list{};
   struct char_data *combat_list{};
   struct char_data *next_combat_list{};

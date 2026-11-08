@@ -35,6 +35,7 @@ obj_vnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
    */
   obj_set_item_number(newobj, obj_proto_of(g, ovnum) ? ovnum : NOTHING);
   if (obj_get_item_number(newobj) != NOTHING) {
+    free_extracted_objects(g, ovnum); /* they share the strings copy_object() replaces */
     copy_object(g, obj_proto_of(g, obj_get_item_number(newobj)), newobj);
     update_objects(g, obj_proto_of(g, obj_get_item_number(newobj)));
     add_to_save_list(g, rznum->number, SL_OBJ);
@@ -427,7 +428,8 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
     extract_obj(g, tmp);
   }
 
-  /* No copy is left to share these, now that they have all been extracted. */
+  /* No copy is left to share these, now that they have all been extracted and freed. */
+  free_extracted_objects(g, rnum);
   free_object_strings(g, obj);
   free_proto_script(obj, OBJ_TRIGGER);
 

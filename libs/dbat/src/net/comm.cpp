@@ -749,7 +749,7 @@ void game_heartbeat(GameWorld *g, int heart_pulse)
   }
 
   /* Every pulse! Don't want them to stink the place up... */
-  extract_pending_chars(g);
+  finish_extractions(g);
 }
 
 /* ******************************************************************

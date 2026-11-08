@@ -5,6 +5,7 @@
 
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
+#include "dbat/extract.hpp"
 #include "dbat/descriptor.hpp"
 #include "dbat/dg_event.hpp"
 #include "dbat/genshp.hpp"
@@ -69,6 +70,7 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 
 static void free_world(GameWorld *g)
 {
+  free_extracted_objects(g, NOTHING); /* while their prototypes exist */
   for (struct zone_data *zone : g->zones.all())
     delete[] zone->cmd;
   g->zones.clear();

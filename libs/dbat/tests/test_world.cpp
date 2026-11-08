@@ -265,7 +265,7 @@ static void check_extract_mid_fight(GameWorld *g, struct char_data *ch)
   set_fighting(g, dummy, ch);
   CHECK_AUDIT(g);
   extract_char(g, dummy);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK(char_get_fighting(g, ch) == nullptr);
   CHECK_AUDIT(g);
   th_pulses(g, 20);
@@ -286,12 +286,12 @@ static void check_extract_with_followers(GameWorld *g, struct char_data *ch)
   add_follower(g, ch, leader);
   CHECK_AUDIT(g);
   extract_char(g, leader);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK(char_get_master(g, ch) == nullptr);
   CHECK(char_get_master(g, follower) == nullptr);
   CHECK_AUDIT(g);
   extract_char(g, follower);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK_AUDIT(g);
 }
 
@@ -304,7 +304,7 @@ static void check_script_purges_its_owner(GameWorld *g, struct char_data *ch)
   th_type(g, ch, "east");
   CHECK(char_get_in_room(ch) == 305);
   CHECK(saw(ch, "The stranger vanishes."));
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK(mob_in(g, 305, 302) == nullptr);
   CHECK_AUDIT(g);
   th_pulses(g, 20);
@@ -483,7 +483,7 @@ static void check_iedit(GameWorld *g)
 
   extract_obj(g, chest);
   extract_char(g, builder);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK_AUDIT(g);
 }
 
@@ -523,6 +523,35 @@ static void check_new_guilds(GameWorld *g)
 }
 
 /* Deleting a prototype used to read the object it had just freed, and to lose what its copies held. */
+/* An extracted object leaves the game at once but is freed between pulses, so a pointer held across the extraction
+ * still reads memory. Saving its prototype in OLC frees the waiting copies first, as they share the strings it
+ * replaces; ASan catches it if that goes wrong. */
+static void check_deferred_free(GameWorld *g, struct char_data *ch)
+{
+  struct obj_data *sword = read_object(g, 301), *edit;
+  long id                = obj_get_id(sword);
+
+  obj_to_char(g, sword, ch);
+  extract_obj(g, sword);
+  CHECK(obj_by_id(g, id) == nullptr);
+  CHECK(!find_first(char_inventory(g, ch), [&](struct obj_data *o) { return o == sword; }));
+  CHECK(!strcmp(obj_get_short_description(sword), "a plain sword"));
+  CHECK_AUDIT(g);
+
+  edit = new obj_data();
+  copy_object(g, edit, obj_proto_of(g, 301));
+  add_object(g, edit, 301);
+  for (struct obj_data *waiting : g->extracted_objects)
+    CHECK(obj_get_item_number(waiting) != 301);
+  free_object_strings(g, edit);
+  delete edit;
+  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, 301)), "a plain sword"));
+
+  finish_extractions(g);
+  CHECK(g->extracted_objects.empty());
+  CHECK_AUDIT(g);
+}
+
 static void check_delete_object_prototype(GameWorld *g, struct char_data *ch)
 {
   obj_vnum chest_vnum = 300;
@@ -581,7 +610,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
     char_to_room(g, mob, char_get_in_room(ch));
     command_interpreter(g, mob, writable{"snet 5"});
     extract_char(g, mob);
-    extract_pending_chars(g);
+    finish_extractions(g);
   }
 
   th_type(g, leaver, "quit"); /* leaves a nameless character at the menu */
@@ -594,7 +623,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
 
   extract_char(g, admin);
-  extract_pending_chars(g);
+  finish_extractions(g);
 }
 
 /* Experience is 64 bits wide everywhere: level_exp() * 5 used to overflow int. */
@@ -636,7 +665,7 @@ static void check_whois_with_affects(GameWorld *g, struct char_data *ch)
   CHECK_AUDIT(g);
 
   extract_char(g, admin);
-  extract_pending_chars(g);
+  finish_extractions(g);
 }
 
 /* The walk used to stop at whoever's last affect ended, so everyone after them missed the hour. */
@@ -676,7 +705,7 @@ static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
   affect_from_char(g, ch, SPELL_SLEEP);
   extract_char(g, ending);
   extract_char(g, other);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK_AUDIT(g);
 }
 
@@ -788,7 +817,7 @@ static void check_remove_trigger_on_a_dying_mob(GameWorld *g, struct char_data *
   attach_trigger(g, obj_script_slot(obj), 388);
   equip_char(g, mob, obj, WEAR_FINGER_R);
   die(g, mob, nullptr);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK(find_obj(g, id) == nullptr);
   CHECK_AUDIT(g);
 }
@@ -806,7 +835,7 @@ static void check_receive_trigger_purges_the_gift(GameWorld *g, struct char_data
   CHECK(receive_mtrigger(g, mob, ch, obj) == 0);
   CHECK(find_obj(g, id) == nullptr);
   extract_char(g, mob);
-  extract_pending_chars(g);
+  finish_extractions(g);
   CHECK_AUDIT(g);
 }
 
@@ -914,6 +943,7 @@ int main(void)
   check_new_guilds(g);
   check_awkward_commands(g, ch);
   check_experience_width(g, ch);
+  check_deferred_free(g, ch);
   check_delete_object_prototype(g, ch);
   check_whois_with_affects(g, ch);
   check_affects_all_count_down(g, ch);

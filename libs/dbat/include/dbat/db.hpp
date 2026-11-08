@@ -140,6 +140,8 @@ long get_ptable_by_name(GameWorld *g, const char *name);
 struct obj_data *create_obj(GameWorld *g);
 void clear_object(struct obj_data *obj);
 void free_obj(GameWorld *g, struct obj_data *obj);
+/* Takes obj out of the game: no longer found by id or unique id. free_obj() does this too. */
+void obj_retire(GameWorld *g, struct obj_data *obj);
 struct obj_data *read_object(GameWorld *g, obj_vnum nr);
 int vnum_object(GameWorld *g, char *searchname, struct char_data *ch);
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);

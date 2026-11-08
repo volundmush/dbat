@@ -496,6 +496,7 @@ void destroy_db(GameWorld *g)
   ssize_t itr;
 
   free_extracted_triggers(g);
+  free_extracted_objects(g, NOTHING); /* before the prototypes whose strings they share */
 
   /* Active Mobiles & Players */
   /* stop_follower() reads the master, so everyone must stop before anyone is freed */
@@ -3488,6 +3489,12 @@ static void remove_unique_id(GameWorld *g, struct obj_data *obj)
   }
 }
 
+void obj_retire(GameWorld *g, struct obj_data *obj)
+{
+  remove_unique_id(g, obj);
+  obj_unregister(g, obj);
+}
+
 static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_data *obj2)
 {
   mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%lld:%" PRId64 "]",
@@ -3777,7 +3784,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
             if (room_max && (room_max >= ZCMD2.arg4)) {
               extract_char(g, mob);
-              extract_pending_chars(g);
+              finish_extractions(g);
               break;
             }
 
