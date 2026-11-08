@@ -31,7 +31,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
 
   switch (terminator) {
     case STRINGADD_SAVE:
-      if (!*d->str)
+      if (!*d->str.chars())
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else if (!(fl = fopen(storage, "a"))) {
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
@@ -45,10 +45,10 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
         free(d->newsbuf);
         d->newsbuf = nullptr;
-        strip_cr(*d->str);
-        fprintf(fl, "%s\n", *d->str);
-        free(*d->str);
-        *d->str = nullptr;
+        strip_cr(*d->str.chars());
+        fprintf(fl, "%s\n", *d->str.chars());
+        free(*d->str.chars());
+        *d->str.chars() = nullptr;
         fclose(fl);
 
         g->NEWSUPDATE = game_now(g);
@@ -92,17 +92,17 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
       if (!(fl = atomic_open(&af, storage, false)))
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else {
-        if (*d->str && !(strcmp(storage, "text/news"))) {
+        if (*d->str.chars() && !(strcmp(storage, "text/news"))) {
           char *tmstr;
           time_t mytime                = game_now(g);
           tmstr                        = asctime(localtime(&mytime));
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
-          strip_cr(*d->str);
-          fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), *d->str);
-        } else if (*d->str) {
-          strip_cr(*d->str);
-          fputs(*d->str, fl);
+          strip_cr(*d->str.chars());
+          fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), *d->str.chars());
+        } else if (*d->str.chars()) {
+          strip_cr(*d->str.chars());
+          fputs(*d->str.chars(), fl);
         }
         if (!atomic_commit(&af)) {
           write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");

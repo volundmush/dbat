@@ -13,9 +13,9 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/dg_olc.hpp"
 #include "dbat/game_world.hpp"
 
-static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
+static bool format_text(GameWorld *g, std::string *text, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
 static void parse_edit_action(GameWorld *g, int command, char *string, struct descriptor_data *d);
-static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
+static int replace_str(std::string *string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
 
 void send_editor_help(GameWorld *g, struct descriptor_data *d)
 {
@@ -61,12 +61,12 @@ static void tb_printf(struct textbuf *b, const char *fmt, ...)
     tb_add(b, piece, MIN((size_t)n, sizeof(piece) - 1));
 }
 
-/* Replaces the text being edited with the buffer's contents (which it takes over). */
-static void tb_install(struct textbuf *b, char **text)
+/* Replaces the text being edited with the buffer's contents. */
+static void tb_install(struct textbuf *b, std::string *text)
 {
-  free(*text);
-  *text = b->s ? b->s : strdup("");
-  b->s  = nullptr;
+  *text = b->s ? b->s : "";
+  free(b->s);
+  b->s = nullptr;
 }
 
 /* ---- line helpers ---- */
@@ -110,9 +110,8 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
     case 'a':
       return STRINGADD_ABORT;
     case 'c':
-      if (*(d->str)) {
-        free(*d->str);
-        *(d->str) = nullptr;
+      if (!d->edit_text.empty()) {
+        d->edit_text.clear();
         write_to_output(g, d, "Current buffer cleared.\r\n");
       } else
         write_to_output(g, d, "Current buffer empty.\r\n");
@@ -124,13 +123,13 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
       parse_edit_action(g, PARSE_EDIT, actions, d);
       break;
     case 'f':
-      if (*(d->str))
+      if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_FORMAT, actions, d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'i':
-      if (*(d->str))
+      if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_INSERT, actions, d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
@@ -139,13 +138,13 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
       parse_edit_action(g, PARSE_HELP, actions, d);
       break;
     case 'l':
-      if (*d->str)
+      if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_LIST_NORM, actions, d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'n':
-      if (*d->str)
+      if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_LIST_NUM, actions, d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
@@ -242,7 +241,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       /* in case line_low is negative or zero */
       line_low = MAX(1, line_low);
 
-      if (format_text(g, d->str, flags, d, d->max_str, line_low, line_high))
+      if (format_text(g, &d->edit_text, flags, d, d->max_str, line_low, line_high))
         write_to_output(g, d, "Text formatted with%s indent.\r\n", (indent ? "" : "out"));
       break;
 
@@ -268,11 +267,11 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         return;
         /*wb's fix for empty buffer replacement crashing */
       }
-      if ((!*d->str)) {
+      if (d->edit_text.empty()) {
         return;
       }
-      if ((total_len = ((strlen(t) - strlen(s)) + strlen(*d->str))) <= d->max_str) {
-        if ((replaced = replace_str(d->str, s, t, rep_all, d->max_str)) > 0) {
+      if ((total_len = ((strlen(t) - strlen(s)) + d->edit_text.size())) <= d->max_str) {
+        if ((replaced = replace_str(&d->edit_text, s, t, rep_all, d->max_str)) > 0) {
           write_to_output(g, d, "Replaced %d occurance%sof '%s' with '%s'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
         } else if (replaced == 0) {
           write_to_output(g, d, "String '%s' not found.\r\n", s);
@@ -298,7 +297,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           break;
       }
 
-      if (*d->str == nullptr) {
+      if (d->edit_text.empty()) {
         write_to_output(g, d, "Buffer is empty.\r\n");
         return;
       }
@@ -306,7 +305,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         write_to_output(g, d, "Invalid, line numbers to delete must be higher than 0.\r\n");
         return;
       }
-      if (!(s = line_start(*d->str, line_low))) {
+      if (!(s = line_start(d->edit_text.data(), line_low))) {
         write_to_output(g, d, "Line(s) out of range; not deleting.\r\n");
         return;
       }
@@ -326,14 +325,14 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         total_len--; /* the range ran past the last line: delete to the end */
         *t = '\0';
       }
-      *d->str = str_realloc(*d->str, strlen(*d->str) + 3);
+      d->edit_text.resize(strlen(d->edit_text.c_str())); /* to where the text now ends */
       write_to_output(g, d, "%u line%sdeleted.\r\n", total_len, (total_len != 1 ? "s " : " "));
       break;
 
     case PARSE_LIST_NORM:
       if (!list_range(g, d, string, &line_low, &line_high))
         return;
-      if (!(s = line_start(*d->str, line_low))) {
+      if (!(s = line_start(d->edit_text.data(), line_low))) {
         write_to_output(g, d, "Line(s) out of range; no buffer listing.\r\n");
         return;
       }
@@ -359,7 +358,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
     case PARSE_LIST_NUM:
       if (!list_range(g, d, string, &line_low, &line_high))
         return;
-      if (!(s = line_start(*d->str, line_low))) {
+      if (!(s = line_start(d->edit_text.data(), line_low))) {
         write_to_output(g, d, "Line(s) out of range; no buffer listing.\r\n");
         return;
       }
@@ -387,7 +386,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       line_low = atoi(num);
       strcat(text, "\r\n"); /* (room reserved in its size) */
 
-      if (*d->str == nullptr) {
+      if (d->edit_text.empty()) {
         write_to_output(g, d, command == PARSE_INSERT ? "Buffer is empty, nowhere to insert.\r\n"
                                                    : "Buffer is empty, nothing to change.\r\n");
         return;
@@ -396,13 +395,13 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         write_to_output(g, d, "Line number must be higher than 0.\r\n");
         return;
       }
-      if (!(s = line_start(*d->str, line_low))) {
+      if (!(s = line_start(d->edit_text.data(), line_low))) {
         write_to_output(g, d, command == PARSE_INSERT ? "Line number out of range; insert aborted.\r\n"
                                                    : "Line number out of range; change aborted.\r\n");
         return;
       }
 
-      tb_add(&out, *d->str, (size_t)(s - *d->str)); /* the lines before */
+      tb_add(&out, d->edit_text.data(), (size_t)(s - d->edit_text.data())); /* the lines before */
       tb_puts(&out, text);                          /* the new line */
       if (command == PARSE_INSERT) {
         if (out.len + strlen(s) + 2 > d->max_str) {
@@ -420,7 +419,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           return;
         }
       }
-      tb_install(&out, d->str);
+      tb_install(&out, &d->edit_text);
       write_to_output(g, d, command == PARSE_INSERT ? "Line inserted.\r\n" : "Line changed.\r\n");
       return;
 
@@ -434,9 +433,9 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
 
 /*
  * Re-formats message type formatted char *.
- * (for strings edited with d->str) (mostly olc and mail)
+ * (the text being edited, d->edit_text: mostly olc and mail)
  */
-static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
+static bool format_text(GameWorld *g, std::string *text, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
 {
   int line_chars, cap_next = true, cap_next_next = false, color_chars = 0, i, pass_line = 0;
   char *flow, *start = nullptr, *str, temp;
@@ -444,8 +443,9 @@ static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descri
 
   /* XXX: Want to make sure the string doesn't grow either... */
 
-  if ((flow = *ptr_string) == nullptr)
+  if (text->empty())
     return false;
+  flow = text->data(); /* written through, a character at a time, until tb_install() replaces it */
 
   str = strdup(flow);
   for (i = 0; i < low - 1; i++) {
@@ -578,16 +578,16 @@ static bool format_text(GameWorld *g, char **ptr_string, int mode, struct descri
 
   if (formatted.len + 1 > maxlen)
     formatted.s[maxlen - 1] = '\0';
-  tb_install(&formatted, ptr_string);
+  tb_install(&formatted, text);
   return true;
 }
 
 /* Replaces the first (or, with rep_all, every) occurrence of pattern. Returns how many were replaced,
    or -1 (text unchanged) if the result would not fit in max_size. */
-static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
+static int replace_str(std::string *string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
 {
   struct textbuf out = {nullptr};
-  char *flow         = *string, *match;
+  char *flow         = string->data(), *match;
   size_t plen        = strlen(pattern);
   int count          = 0;
 

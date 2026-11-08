@@ -102,7 +102,14 @@ static void smash_numb(char *str)
  * else you may want through it.  The improved editor patch when updated
  * could use it to pass the old text buffer, for instance.
  */
-void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, char *data)
+void string_edit_begin(struct descriptor_data *d, edit_target target, size_t len)
+{
+  d->str       = target;
+  d->edit_text = target.get();
+  d->max_str   = len;
+}
+
+void string_write(struct descriptor_data *d, edit_target writeto, size_t len, long mailto, char *data)
 {
   if (d->character && !char_is_npc(d->character))
     char_plr_set(d->character, PLR_WRITING, true);
@@ -112,8 +119,7 @@ void string_write(struct descriptor_data *d, char **writeto, size_t len, long ma
   else if (data)
     free(data);
 
-  d->str     = writeto;
-  d->max_str = len;
+  string_edit_begin(d, writeto, len);
   d->mail_to = mailto;
 }
 
@@ -137,31 +143,28 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
   else if ((action = improved_editor_execute(g, d, str)) == STRINGADD_ACTION)
     return;
 
+  std::string &text = d->edit_text;
+
   if (action != STRINGADD_OK)
     /* Do nothing. */;
-  else if (!(*d->str)) {
+  else if (text.empty()) {
     if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
       send_to_char(g, d->character, "String too long - Truncated.\r\n");
       strcpy(str + (d->max_str - 3), "\r\n");
-      *d->str = str_alloc(d->max_str);
-      strcpy(*d->str, str); /* strcpy: OK (size checked) */
+      text = str;
       if (!using_improved_editor)
         action = STRINGADD_SAVE;
-    } else {
-      *d->str = str_alloc(strlen(str) + 3);
-      strcpy(*d->str, str); /* strcpy: OK (size checked) */
-    }
+    } else
+      text = str;
   } else {
-    if (strlen(str) + strlen(*d->str) + 3 > d->max_str) { /* \r\n\0 */
+    if (strlen(str) + text.size() + 3 > d->max_str) { /* \r\n\0 */
       send_to_char(g, d->character, "String too long.  Last line skipped.\r\n");
       if (!using_improved_editor)
         action = STRINGADD_SAVE;
       else if (action == STRINGADD_OK)
         action = STRINGADD_ACTION; /* No appending \r\n\0, but still let them save. */
-    } else {
-      *d->str = str_realloc(*d->str, strlen(*d->str) + strlen(str) + 3); /* \r\n\0 */
-      strcat(*d->str, str);                                       /* strcat: OK (size precalculated) */
-    }
+    } else
+      text += str;
   }
 
   /*
@@ -180,10 +183,9 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
         case CON_EXDESC:
         case CON_TRIGEDIT:
         case CON_HEDIT:
-          free(*d->str);
-          *d->str    = d->backstr;
+          d->str.restore(d->backstr); /* what was there before */
           d->backstr = nullptr;
-          d->str     = nullptr;
+          d->str     = {};
           break;
         case CON_PLAYING:
           /* all CON_PLAYING are handled below in playing_string_cleanup */
@@ -195,10 +197,9 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
       }
       break;
     case STRINGADD_SAVE:
-      if (d->str && *d->str && **d->str == '\0') {
-        free(*d->str);
-        *d->str = strdup("Nothing.\r\n");
-      }
+      if (text.empty())
+        text = "Nothing.\r\n";
+      d->str.set(text); /* the cleanup below may read it from there */
       if (d->backstr)
         free(d->backstr);
       d->backstr = nullptr;
@@ -234,30 +235,31 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
         (*cleanup_modes[i].func)(g, d, action);
 
     /* Common post cleanup code. */
-    d->str     = nullptr;
+    d->str = {};
+    d->edit_text.clear();
     d->mail_to = 0;
     d->max_str = 0;
     if (d->character && !char_is_npc(d->character)) {
       char_plr_set(d->character, PLR_MAILING, false);
       char_plr_set(d->character, PLR_WRITING, false);
     }
-  } else if (action != STRINGADD_ACTION && strlen(*d->str) + 3 <= d->max_str) /* 3 = \r\n\0 */
-    strcat(*d->str, "\r\n");
+  } else if (action != STRINGADD_ACTION && text.size() + 3 <= d->max_str) /* 3 = \r\n\0 */
+    text += "\r\n";
 }
 
 static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action)
 {
   if (char_plr_flagged(d->character, PLR_MAILING)) {
-    if (action == STRINGADD_SAVE && *d->str) {
-      store_mail(g, d->mail_to, char_get_idnum(d->character), *d->str);
+    if (action == STRINGADD_SAVE && !d->edit_text.empty()) {
+      store_mail(g, d->mail_to, char_get_idnum(d->character), d->edit_text.data());
       write_to_output(g, d, "Message sent!\r\n");
       notify_if_playing(g, d->character, d->mail_to);
     } else {
       write_to_output(g, d, "Mail aborted.\r\n");
     }
     /* store_mail() keeps its own copy; the text and its holder came from postmaster_send_mail() */
-    free(*d->str);
-    delete d->str;
+    free(*d->str.chars());
+    delete d->str.chars();
   }
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {
@@ -265,7 +267,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
       struct board_info *board = locate_board(g, d->mail_to - BOARD_MAGIC);
 
       if (action == STRINGADD_ABORT) {
-        if (board_discard_message(board, d->str))
+        if (board_discard_message(board, d->str.chars()))
           write_to_output(g, d, "Post aborted.\r\n");
         else
           write_to_output(g, d, "Unable to find your message to delete it!\r\n");

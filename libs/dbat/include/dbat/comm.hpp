@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/descriptor.hpp"
 
 /*
  * Note, most includes for all platforms are in sysdep.h.  The list of
@@ -49,7 +50,9 @@ int write_to_descriptor(int desc, const char *txt);
 size_t write_to_output(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
 size_t vwrite_to_output(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
 void string_add(GameWorld *g, struct descriptor_data *d, char *str);
-void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, char *data);
+void string_write(struct descriptor_data *d, edit_target txt, size_t len, long mailto, char *data);
+/* Starts the editor on target with what is there now, without string_write()'s player flags */
+void string_edit_begin(struct descriptor_data *d, edit_target target, size_t len);
 
 constexpr int PAGE_WIDTH = 79; /* column at which the text editor wraps lines */
 

@@ -2471,10 +2471,9 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
 
     /* Plug memory leak, from Eric Green. */
     if (!char_is_npc(d->character) && char_plr_flagged(d->character, PLR_MAILING) && d->str) {
-      if (*(d->str))
-        free(*(d->str));
-      delete d->str;
-      d->str = nullptr;
+      free(*d->str.chars()); /* the mail being written, and its holder */
+      delete d->str.chars();
+      d->str = {};
     } else if (d->backstr && !char_is_npc(d->character) && !char_plr_flagged(d->character, PLR_WRITING)) {
       free(d->backstr); /* editing description ... not olc */
       d->backstr = nullptr;

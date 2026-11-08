@@ -553,6 +553,28 @@ static void check_new_prototypes_leave_other_editors_alone(void)
   th_shutdown(g);
 }
 
+/* The editor works on a copy of the text, written back when it is saved: an edit that is aborted leaves the text as
+ * it was, and one that is saved replaces it */
+static void check_editor_saves_and_aborts(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Writer", ADMLVL_IMPL);
+
+  th_type(g, ch, "redit 301");
+  th_type(g, ch, "2"); /* the description, in the editor */
+  th_type(g, ch, "/c");
+  th_type(g, ch, "A fresh line.");
+  th_type(g, ch, "/i1 An inserted line.");
+  th_type(g, ch, "/s");
+  th_type(g, ch, "2");
+  th_type(g, ch, "This is thrown away.");
+  th_type(g, ch, "/a");
+  th_type(g, ch, "q");
+  th_type(g, ch, "y");
+  CHECK(room_get_description(g, 301) && !strcmp(room_get_description(g, 301), "An inserted line.\r\nA fresh line.\r\n"));
+  th_shutdown(g);
+}
+
 static void check_zone_range_keeps_what_is_in_it(void)
 {
   GameWorld *g = th_boot();
@@ -922,6 +944,7 @@ static const struct {
     {"android_without_a_model",                     check_android_without_a_model                    },
     {"race_name_forms_stay_apart",                  check_race_name_forms_stay_apart                 },
     {"zone_range_keeps_what_is_in_it",              check_zone_range_keeps_what_is_in_it             },
+    {"editor_saves_and_aborts",                     check_editor_saves_and_aborts                    },
     {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
     {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },

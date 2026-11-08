@@ -20,6 +20,7 @@
 - `player_specials` is owned by its character (`owned<>`, `dbat/registry.hpp`: a `unique_ptr` that copies what it holds when copied), made with `char_make_player_specials()`; NPCs have none. A zone's reset commands are a `std::vector<reset_com>`, still ending with an `'S'`. [Volund]
 - Saving a new mob or object in OLC no longer adds 1 to the mob and object numbers in shops, mobs and zone commands other builders have open: leftover renumbering from before prototypes were kept by vnum, which corrupted those numbers. The same dead code is gone from redit. [Volund]
 - A connection's input queue is a `std::deque` of lines with `std::string` text, a player's communication history a `std::deque<std::string>` per channel (`char_comm_hist()`; freeing a character used to leak all but the first line of each), and the zone reset queue a `std::deque` of zone numbers. [Volund]
+- The text editor works on a `std::string` the connection holds (`edit_text`), written back to where it goes (`d->str`, now an `edit_target`: a `char **` or a `std::string *`) when it is saved, or restored when an OLC edit is aborted. `string_edit_begin()` starts an edit for code that set `d->str` by hand. This lets fields become `std::string` one at a time. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3

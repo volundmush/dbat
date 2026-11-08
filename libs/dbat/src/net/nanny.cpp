@@ -1100,8 +1100,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       }
       write_to_output(g, d, "Enter the new text you'd like others to see when they look at you.\r\n");
       send_editor_help(g, d);
-      d->str     = char_description_slot(d->character);
-      d->max_str = EXDSCR_LENGTH;
+      string_edit_begin(d, char_description_slot(d->character), EXDSCR_LENGTH);
       desc_set_connected(d, CON_EXDESC);
       break;
 

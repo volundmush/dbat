@@ -132,7 +132,7 @@ static int memory_slot(GameWorld *g, const struct board_msg *msg)
 static bool message_being_written(GameWorld *g, const struct board_msg *msg)
 {
   for (descriptor_data *d : each_desc(g))
-    if (!d->connected && d->str == &msg->data)
+    if (!d->connected && d->str.is(&msg->data))
       return true;
   return false;
 }

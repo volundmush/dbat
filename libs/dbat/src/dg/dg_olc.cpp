@@ -323,8 +323,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             write_to_output(g, d, "%s", OLC_STORAGE(d));
             d->backstr = strdup(OLC_STORAGE(d));
           }
-          d->str     = &OLC_STORAGE(d);
-          d->max_str = MAX_CMD_LENGTH;
+          string_edit_begin(d, &OLC_STORAGE(d), MAX_CMD_LENGTH);
           d->mail_to = 0;
           OLC_VAL(d) = 1;
 
@@ -796,10 +795,10 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
   int llen   = 0;
   int indent = 0, indent_next = false, found_case = false, i, line_num = 0;
 
-  if (!d->str || !*d->str)
+  if (d->edit_text.empty())
     return false;
 
-  sc   = strdup(*d->str); /* we work on a copy, because of strtok() */
+  sc   = strdup(d->edit_text.c_str()); /* we work on a copy, because of strtok() */
   t    = strtok(sc, "\n\r");
   *nsc = '\0';
 
@@ -873,8 +872,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
   if (indent)
     write_to_output(g, d, "Unmatched if, while or switch ignored.\r\n");
 
-  free(*d->str);
-  *d->str = strdup(nsc);
+  d->edit_text = nsc;
   free(sc);
 
   return true;
