@@ -607,8 +607,8 @@ void destroy_db(GameWorld *g)
       free(zone->name);
     if (zone->builders)
       free(zone->builders);
-    if (zone->cmd) {
-      /* first see if any vars were defined in this zone */
+    if (!zone->cmd.empty()) {
+      /* the variables defined in this zone own their strings */
       for (itr = 0; THIS_CMD.command != 'S'; itr++)
         if (THIS_CMD.command == 'V') {
           if (THIS_CMD.sarg1)
@@ -616,8 +616,6 @@ void destroy_db(GameWorld *g)
           if (THIS_CMD.sarg2)
             free(THIS_CMD.sarg2);
         }
-      /* then free the command list */
-      delete[] zone->cmd;
     }
   }
   g->zones.clear();
@@ -2004,7 +2002,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
   mob_vnum nr = mob_index_of(g, char_get_nr(ch))->vnum;
 
   /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
-  char_set_player_specials(ch, nullptr);
+  char_drop_player_specials(ch);
   sprintf(buf2, "mob vnum %d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
@@ -2507,7 +2505,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     mud_log("SYSERR: %s is empty!", zname);
     exit(1);
   } else
-    Z.cmd = new reset_com[num_of_cmds]();
+    Z.cmd.assign(num_of_cmds, reset_com{});
 
   line_num += get_line(fl, buf);
 
@@ -4182,8 +4180,7 @@ void free_char(GameWorld *g, struct char_data *ch)
     for (i = 0; i < NUM_HIST; i++)
       if (char_get_comm_hist(g, ch, i))
         delete char_get_comm_hist(g, ch, i);
-    if (char_get_player_specials(ch))
-      delete char_get_player_specials(ch);
+    char_drop_player_specials(ch);
 
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
@@ -4359,7 +4356,7 @@ void init_char(GameWorld *g, struct char_data *ch)
 
   /* create a player_special structure */
   if (char_get_player_specials(ch) == nullptr) {
-    *char_player_specials_slot(ch) = new player_special_data();
+    char_make_player_specials(ch);
   }
 
   char_set_admlevel(ch, ADMLVL_NONE);

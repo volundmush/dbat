@@ -4545,7 +4545,7 @@ bool MOON_TIMECHECK(GameWorld *g)
  * OLC stay compatible, but it is not consulted.) */
 bool char_is_npc(const struct char_data *ch)
 {
-  return ch->player_specials == nullptr;
+  return !ch->player_specials;
 }
 
 bool char_is_mob(GameWorld *g, const struct char_data *ch)
@@ -6639,11 +6639,11 @@ void char_set_lastint(struct char_data *ch, time_t v)
 }
 
 /* Skills live in player_specials, by id from SKILL_FIRST to SKILL_TABLE_SIZE-1, and only those with something set
- * are there: one that isn't reads as 0. NPCs share the dummy player_specials and have no skills: reads give 0 and
- * writes are ignored. */
+ * are there: one that isn't reads as 0. NPCs have no player_specials and so no skills: reads give 0 and writes are
+ * ignored. */
 static bool has_skills(const struct char_data *ch, int i)
 {
-  return !char_is_npc(ch) && i >= SKILL_FIRST && i < SKILL_TABLE_SIZE;
+  return !char_is_npc(ch) && ch->player_specials && i >= SKILL_FIRST && i < SKILL_TABLE_SIZE;
 }
 
 static struct skill_data skill_of(const struct char_data *ch, int i)
@@ -6866,7 +6866,7 @@ bool race_is_people(int r_id)
 static struct player_special_data *ps_of(GameWorld *g, const struct char_data *ch, const char *field)
 {
   if (ch->player_specials)
-    return ch->player_specials;
+    return ch->player_specials.get();
   mud_log("SYSERR: player-only field '%s' used on NPC %s (#%d)", field, char_get_name(ch), char_get_mob_vnum(g, ch));
   log_backtrace();
   return nullptr;
@@ -7546,12 +7546,17 @@ void char_set_mobcharge(struct char_data *ch, int v)
 
 struct player_special_data *char_get_player_specials(const struct char_data *ch)
 {
-  return ch->player_specials;
+  return ch->player_specials.get();
 }
 
-void char_set_player_specials(struct char_data *ch, struct player_special_data *v)
+struct player_special_data *char_make_player_specials(struct char_data *ch)
 {
-  ch->player_specials = v;
+  return ch->player_specials.make();
+}
+
+void char_drop_player_specials(struct char_data *ch)
+{
+  ch->player_specials.reset();
 }
 
 struct char_data *char_get_poisonby(GameWorld *g, const struct char_data *ch)
@@ -7757,11 +7762,6 @@ struct script_data **char_script_slot(struct char_data *ch)
 struct script_memory **char_memory_slot(struct char_data *ch)
 {
   return &ch->memory;
-}
-
-struct player_special_data **char_player_specials_slot(struct char_data *ch)
-{
-  return &ch->player_specials;
 }
 
 id_list *char_inventory_slot(struct char_data *ch)

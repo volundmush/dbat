@@ -501,7 +501,7 @@ static void check_experience_past_32_bits_survives_a_save(void)
   save_char(g, ch);
   copy = new char_data();
   clear_char(copy);
-  *char_player_specials_slot(copy) = new player_special_data();
+  char_make_player_specials(copy);
   CHECK(load_char(g, "Veteran", copy) >= 0);
   CHECK(char_get_exp(copy) == 3000000000LL);
   free_char(g, copy);

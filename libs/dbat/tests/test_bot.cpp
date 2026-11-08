@@ -858,7 +858,7 @@ static GameWorld *restart_and_compare(GameWorld *g)
 
     pc = new char_data();
     clear_char(pc);
-    *char_player_specials_slot(pc) = new player_special_data();
+    char_make_player_specials(pc);
     if ((position = load_char(g, g->player_table[i].name, pc)) >= 0) {
       char_set_pfilepos(pc, position); /* save_char() skips characters without one */
       save_char(g, pc);

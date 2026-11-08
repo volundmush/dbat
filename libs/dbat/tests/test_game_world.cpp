@@ -9,6 +9,7 @@
 #include "dbat/descriptor.hpp"
 #include "dbat/dg_event.hpp"
 #include "dbat/genshp.hpp"
+#include "dbat/genzon.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/local_limits.hpp"
@@ -59,8 +60,7 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   zone->number           = first_vnum / 100;
   zone->bot              = first_vnum;
   zone->top              = first_vnum + 99;
-  zone->cmd              = new reset_com[1]();
-  zone->cmd[0].command   = 'S';
+  zone->cmd              = empty_cmd_list();
 
   g->shops.emplace(first_vnum)->vnum = first_vnum;
 
@@ -71,8 +71,6 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 static void free_world(GameWorld *g)
 {
   free_extracted_objects(g, NOTHING); /* while their prototypes exist */
-  for (struct zone_data *zone : g->zones.all())
-    delete[] zone->cmd;
   g->zones.clear();
   g->obj_index.clear();
   g->obj_proto.clear();

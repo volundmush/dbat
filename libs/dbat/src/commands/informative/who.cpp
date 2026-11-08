@@ -751,7 +751,7 @@ ACMD(do_whois)
   } else {
     victim = new char_data();
     clear_char(victim);
-    *char_player_specials_slot(victim) = new player_special_data();
+    char_make_player_specials(victim);
     if (load_char(g, argument, victim) >= 0) {
       clan = false;
       send_to_char(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");

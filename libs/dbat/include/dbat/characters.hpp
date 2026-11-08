@@ -175,7 +175,7 @@ struct char_data {
 
   struct abil_data real_abils{}; /* Abilities without modifiers   */
   struct abil_data aff_abils{};  /* Abils with spells/stones/etc  */
-  struct player_special_data *player_specials{};
+  owned<player_special_data> player_specials; /* players only: null for NPCs */
   /* PC specials				*/
   struct mob_special_data mob_specials{};
   /* NPC specials				*/

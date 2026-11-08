@@ -25,7 +25,7 @@ extern "C" long roundtrip_dump(GameWorld *g)
     struct char_data *pc;
     pc = new char_data();
     clear_char(pc);
-    pc->player_specials = new player_special_data();
+    pc->player_specials.make();
     int pos = load_char(g, g->player_table[i].name, pc);
     if (pos < 0)
       continue;

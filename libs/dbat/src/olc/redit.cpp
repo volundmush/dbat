@@ -281,12 +281,8 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
 
 void redit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
-  int j, new_room = false;
   room_vnum room_num;
 
-  if (room_get_number(OLC_ROOM(d)) == NOWHERE) {
-    new_room = true;
-  }
   room_set_number(OLC_ROOM(d), OLC_NUM(d));
   /* FIXME: Why is this not set elsewhere? */
   room_set_zone(OLC_ROOM(d), OLC_ZNUM(d));
@@ -306,39 +302,6 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
   room_set_proto_script(g, room_num, OLC_SCRIPT(d));
   assign_triggers(g, room_of(g, room_num), WLD_TRIGGER);
   /* end trigger update */
-
-  /* Don't adjust numbers on a room update. */
-  if (!new_room)
-    return;
-
-  /* Idea contributed by C.Raehl 4/27/99 */
-  for (descriptor_data *dsc : each_desc(g)) {
-    if (dsc == d)
-      continue;
-
-    if (desc_get_connected(dsc) == CON_ZEDIT) {
-      for (j = 0; OLC_ZONE(dsc)->cmd[j].command != 'S'; j++)
-        switch (OLC_ZONE(dsc)->cmd[j].command) {
-          case 'O':
-          case 'M':
-          case 'T':
-          case 'V':
-            OLC_ZONE(dsc)->cmd[j].arg3 += (OLC_ZONE(dsc)->cmd[j].arg3 >= room_num);
-            break;
-          case 'D':
-            OLC_ZONE(dsc)->cmd[j].arg2 += (OLC_ZONE(dsc)->cmd[j].arg2 >= room_num);
-            [[fallthrough]];
-          case 'R':
-            OLC_ZONE(dsc)->cmd[j].arg1 += (OLC_ZONE(dsc)->cmd[j].arg1 >= room_num);
-            break;
-        }
-    } else if (desc_get_connected(dsc) == CON_REDIT) {
-      for (j = 0; j < NUM_OF_DIRS; j++)
-        if (room_get_dir_option(OLC_ROOM(dsc), j))
-          if (room_get_dir_option(OLC_ROOM(dsc), j)->to_room >= room_num)
-            room_get_dir_option(OLC_ROOM(dsc), j)->to_room++;
-    }
-  }
 }
 
 /*------------------------------------------------------------------------*/

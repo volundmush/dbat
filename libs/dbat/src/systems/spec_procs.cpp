@@ -316,7 +316,7 @@ SPECIAL(auction)
 
           vict = new char_data();
           clear_char(vict);
-          *char_player_specials_slot(vict) = new player_special_data();
+          char_make_player_specials(vict);
           char blam[50];
           sprintf(blam, "%s", obj_get_auctname(obj2));
           if ((player_i = load_char(g, blam, vict)) > -1) {
@@ -941,7 +941,7 @@ SPECIAL(bank)
 
       vict = new char_data();
       clear_char(vict);
-      *char_player_specials_slot(vict) = new player_special_data();
+      char_make_player_specials(vict);
 
       sprintf(name, "%s", rIntro(ch, arg2));
 

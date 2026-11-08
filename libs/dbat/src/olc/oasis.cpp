@@ -221,8 +221,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
       free(OLC_ZONE(d)->builders);
     if (OLC_ZONE(d)->name)
       free(OLC_ZONE(d)->name);
-    if (OLC_ZONE(d)->cmd)
-      delete[] OLC_ZONE(d)->cmd;
     delete OLC_ZONE(d);
   }
 

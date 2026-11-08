@@ -240,7 +240,7 @@ struct char_data *th_existing_player(GameWorld *g, const char *name)
 
   ch = new char_data();
   clear_char(ch);
-  *char_player_specials_slot(ch) = new player_special_data();
+  char_make_player_specials(ch);
   char_set_desc(ch, d);
   d->character = ch;
   if (load_char(g, name, ch) < 0) {
@@ -260,7 +260,7 @@ struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int
 
   ch = new char_data();
   clear_char(ch);
-  *char_player_specials_slot(ch) = new player_special_data();
+  char_make_player_specials(ch);
   char_set_desc(ch, d);
   d->character = ch;
   char_set_pc_name(ch, strdup(name));

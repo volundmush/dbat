@@ -16,7 +16,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static void remove_cmd_from_list(struct reset_com **list, int pos);
+static void remove_cmd_from_list(std::vector<reset_com> *list, int pos);
 
 /* The zone whose rooms include vznum, or null. */
 struct zone_data *find_zone_by_thing(GameWorld *g, room_vnum vznum)
@@ -206,8 +206,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * No zone commands, just terminate it with an 'S'
    */
-  zone->cmd            = new reset_com[1]();
-  zone->cmd[0].command = 'S';
+  zone->cmd = empty_cmd_list();
 
   for (room_vnum v = bottom; v <= top; v++) /* rooms already in its range now belong to it */
     if (room_vnum r = v; room_of(g, r))
@@ -513,7 +512,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
 /*
  * Some common code to count the number of comands in the list.
  */
-int count_commands(struct reset_com *list)
+int count_commands(const std::vector<reset_com> &list)
 {
   int count = 0;
 
@@ -523,78 +522,29 @@ int count_commands(struct reset_com *list)
   return count;
 }
 
-/*-------------------------------------------------------------------*/
-
-/*
- * Adds a new reset command into a list.  Takes a pointer to the list
- * so that it may play with the memory locations.
- */
-void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos)
+std::vector<reset_com> empty_cmd_list()
 {
-  int count, i, l;
-  struct reset_com *newlist;
-
-  /*
-   * Count number of commands (not including terminator).
-   */
-  count = count_commands(*list);
-
-  /*
-   * Value is +2 for the terminator and new field to add.
-   */
-  newlist = new reset_com[count + 2]();
-
-  /*
-   * Even tighter loop to copy the old list and insert a new command.
-   */
-  for (i = 0, l = 0; i <= count; i++) {
-    newlist[i] = ((i == pos) ? *newcmd : (*list)[l++]);
-  }
-
-  /*
-   * Add terminator, then insert new list.
-   */
-  newlist[count + 1].command = 'S';
-  delete[] *list;
-  *list = newlist;
+  std::vector<reset_com> list(1);
+  list[0].command = 'S';
+  return list;
 }
 
 /*-------------------------------------------------------------------*/
 
-/*
- * Remove a reset command from a list.	Takes a pointer to the list
- * so that it may play with the memory locations.
- */
-static void remove_cmd_from_list(struct reset_com **list, int pos)
+void add_cmd_to_list(std::vector<reset_com> *list, const struct reset_com *newcmd, int pos)
 {
-  int count, i, l;
-  struct reset_com *newlist;
+  struct reset_com copy = *newcmd; /* newcmd may be in list */
 
-  /*
-   * Count number of commands (not including terminator)  
-   */
-  count = count_commands(*list);
+  if (list->empty())
+    *list = empty_cmd_list();
+  list->insert(list->begin() + pos, copy);
+}
 
-  /*
-   * Value is 'count' because we didn't include the terminator above
-   * but since we're deleting one thing anyway we want one less.
-   */
-  newlist = new reset_com[count]();
+/*-------------------------------------------------------------------*/
 
-  /*
-   * Even tighter loop to copy old list and skip unwanted command.
-   */
-  for (i = 0, l = 0; i < count; i++) {
-    if (i != pos) {
-      newlist[l++] = (*list)[i];
-    }
-  }
-  /*
-   * Add the terminator, then insert the new list.
-   */
-  newlist[count - 1].command = 'S';
-  delete[] *list;
-  *list = newlist;
+static void remove_cmd_from_list(std::vector<reset_com> *list, int pos)
+{
+  list->erase(list->begin() + pos);
 }
 
 /*-------------------------------------------------------------------*/

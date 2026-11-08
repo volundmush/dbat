@@ -490,7 +490,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
   if (!d->character) {
     d->character = new char_data();
     clear_char(d->character);
-    *char_player_specials_slot(d->character) = new player_special_data();
+    char_make_player_specials(d->character);
     char_set_desc(d->character, d);
     char_prf_set(g, d->character, PRF_COLOR, true);
   }
@@ -544,7 +544,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
         }
         d->character = new char_data();
         clear_char(d->character);
-        *char_player_specials_slot(d->character) = new player_special_data();
+        char_make_player_specials(d->character);
         char_set_desc(d->character, d);
         char_set_alias(d->character, strdup(CAP(tmp_name)));
         char_set_pfilepos(d->character, player_i);
@@ -1245,7 +1245,7 @@ void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
   if (d->character == nullptr) {
     d->character = new char_data();
     clear_char(d->character);
-    *char_player_specials_slot(d->character) = new player_special_data();
+    char_make_player_specials(d->character);
     char_set_desc(d->character, d);
   }
 

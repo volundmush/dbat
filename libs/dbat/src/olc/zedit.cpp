@@ -259,8 +259,7 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_vnum room_
   /*
    * Start the reset command list with a terminator.
    */
-  zone->cmd            = new reset_com[1]();
-  zone->cmd[0].command = 'S';
+  zone->cmd = empty_cmd_list();
 
   /*
    * Add all entries in zone_table that relate to this room.

@@ -870,7 +870,7 @@ ACMD(do_stat)
     else {
       victim = new char_data();
       clear_char(victim);
-      *char_player_specials_slot(victim) = new player_special_data();
+      char_make_player_specials(victim);
       if (load_char(g, buf2, victim) >= 0) {
         char_to_room(g, victim, 0);
         if (char_get_admlevel(victim) > char_get_admlevel(ch))
@@ -1000,7 +1000,7 @@ ACMD(do_last)
   }
   vict = new char_data();
   clear_char(vict);
-  *char_player_specials_slot(vict) = new player_special_data();
+  char_make_player_specials(vict);
   if (load_char(g, arg, vict) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
     free_char(g, vict);
@@ -1165,7 +1165,7 @@ ACMD(do_show)
 
       vict = new char_data();
       clear_char(vict);
-      *char_player_specials_slot(vict) = new player_special_data();
+      char_make_player_specials(vict);
       if (load_char(g, value, vict) < 0) {
         send_to_char(g, ch, "There is no such player.\r\n");
         free_char(g, vict);

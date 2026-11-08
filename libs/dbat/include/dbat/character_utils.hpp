@@ -819,7 +819,9 @@ void char_set_mimic(struct char_data *ch, int v);
 int char_get_mobcharge(const struct char_data *ch);
 void char_set_mobcharge(struct char_data *ch, int v);
 struct player_special_data *char_get_player_specials(const struct char_data *ch);
-void char_set_player_specials(struct char_data *ch, struct player_special_data *v);
+/* Gives ch new player data, or takes it away (for an NPC) */
+struct player_special_data *char_make_player_specials(struct char_data *ch);
+void char_drop_player_specials(struct char_data *ch);
 struct char_data *char_get_poisonby(GameWorld *g, const struct char_data *ch);
 void char_set_poisonby(struct char_data *ch, struct char_data *v);
 struct trig_proto_list *char_get_proto_script(const struct char_data *ch);
@@ -863,7 +865,6 @@ void char_set_raw_title(struct char_data *ch, char *v);
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct script_data **char_script_slot(struct char_data *ch);
 struct script_memory **char_memory_slot(struct char_data *ch);
-struct player_special_data **char_player_specials_slot(struct char_data *ch);
 id_list *char_inventory_slot(struct char_data *ch);
 char **char_description_slot(struct char_data *ch);
 char **char_long_descr_slot(struct char_data *ch);

@@ -138,7 +138,7 @@ static void audit_rooms(GameWorld *g, struct audit *a)
 static void audit_character_links(GameWorld *g, struct audit *a, struct char_data *ch)
 {
   const char *name                     = char_get_name(ch);
-  const struct player_special_data *ps = ch->player_specials;
+  const struct player_special_data *ps = ch->player_specials.get();
   struct obj_data *seat;
 
   AUDIT_PAIR(ch->grappling_uid, grappling, grappled);

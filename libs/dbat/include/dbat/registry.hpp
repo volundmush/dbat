@@ -428,3 +428,38 @@ public:
 
   void clear() { ids_.clear(); }
 };
+
+/*
+ * A T owned by whatever holds this, or none: std::unique_ptr, except that copying copies the T, so that a struct
+ * holding one can still be copied as a whole (a mob from its prototype, say).
+ */
+template <typename T>
+class owned {
+  std::unique_ptr<T> p_;
+
+public:
+  owned() = default;
+  owned(const owned &other) : p_(other.p_ ? std::make_unique<T>(*other.p_) : nullptr) {}
+  owned(owned &&) noexcept = default;
+  owned &operator=(const owned &other)
+  {
+    if (this != &other)
+      p_ = other.p_ ? std::make_unique<T>(*other.p_) : nullptr;
+    return *this;
+  }
+  owned &operator=(owned &&) noexcept = default;
+  ~owned()                            = default;
+
+  T *get() const { return p_.get(); }
+  T *operator->() const { return p_.get(); }
+  T &operator*() const { return *p_; }
+  explicit operator bool() const { return p_ != nullptr; }
+
+  /* A new, value-initialized T in place of whatever was held. */
+  T *make()
+  {
+    p_ = std::make_unique<T>();
+    return p_.get();
+  }
+  void reset() { p_.reset(); }
+};

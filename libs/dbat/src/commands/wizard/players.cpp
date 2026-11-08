@@ -1359,7 +1359,7 @@ ACMD(do_set)
     /* try to load the player off disk */
     cbuf = new char_data();
     clear_char(cbuf);
-    *char_player_specials_slot(cbuf) = new player_special_data();
+    char_make_player_specials(cbuf);
     if ((player_i = load_char(g, name, cbuf)) > -1) {
       if (char_get_admlevel(cbuf) >= char_get_admlevel(ch)) {
         free_char(g, cbuf);

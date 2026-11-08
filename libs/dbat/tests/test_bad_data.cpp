@@ -139,7 +139,7 @@ static struct char_data *load_again(GameWorld *g, const char *name)
 
   copy = new char_data();
   clear_char(copy);
-  *char_player_specials_slot(copy) = new player_special_data();
+  char_make_player_specials(copy);
   CHECK(load_char(g, name, copy) >= 0);
   return copy;
 }
@@ -514,6 +514,45 @@ static void check_race_name_forms_stay_apart(void)
   th_shutdown(g);
 }
 
+/* Saving a new mob, object or room used to add 1 to the numbers in the zone commands another builder had open in zedit,
+ * left over from when prototypes were numbered by their place in a table */
+static void check_new_prototypes_leave_other_editors_alone(void)
+{
+  GameWorld *g            = th_boot();
+  struct char_data *zoner = th_player(g, "Zoner", ADMLVL_IMPL), *maker = th_player(g, "Maker", ADMLVL_IMPL);
+  std::vector<int> before, after;
+
+  th_type(g, zoner, "zedit 300");
+  struct descriptor_data *d = char_get_desc(zoner);
+  CHECK(OLC_ZONE(d) != nullptr);
+  for (int i = 0; OLC_ZONE(d) && OLC_ZONE(d)->cmd[i].command != 'S'; i++)
+    before.push_back(OLC_ZONE(d)->cmd[i].arg1 * 7 + OLC_ZONE(d)->cmd[i].arg3);
+
+  th_type(g, maker, "medit 305"); /* below the mobs the zone loads */
+  th_type(g, maker, "2");         /* a change, so that quitting asks to save */
+  th_type(g, maker, "newmob");
+  th_type(g, maker, "q");
+  th_type(g, maker, "y");
+  CHECK(mob_proto_of(g, 305) != nullptr);
+  th_type(g, maker, "oedit 305"); /* below object 3034, which it loads */
+  th_type(g, maker, "1");
+  th_type(g, maker, "newobj");
+  th_type(g, maker, "q");
+  th_type(g, maker, "y");
+  CHECK(obj_proto_of(g, 305) != nullptr);
+  th_type(g, maker, "redit 306"); /* below rooms 310 and 311, which it names */
+  th_type(g, maker, "1");
+  th_type(g, maker, "A new room");
+  th_type(g, maker, "q");
+  th_type(g, maker, "y");
+  CHECK(room_of(g, 306) != nullptr);
+
+  for (int i = 0; OLC_ZONE(d) && OLC_ZONE(d)->cmd[i].command != 'S'; i++)
+    after.push_back(OLC_ZONE(d)->cmd[i].arg1 * 7 + OLC_ZONE(d)->cmd[i].arg3);
+  CHECK(!before.empty() && before == after);
+  th_shutdown(g);
+}
+
 static void check_zone_range_keeps_what_is_in_it(void)
 {
   GameWorld *g = th_boot();
@@ -858,46 +897,47 @@ static const struct {
   const char *name;
   void (*check)(void);
 } checks[] = {
-    {"while_without_done", check_while_without_done},
-    {"break_without_done", check_break_without_done},
-    {"switch_around_an_unfinished_while", check_switch_around_an_unfinished_while},
-    {"a_finished_while_still_runs", check_a_finished_while_still_runs},
-    {"long_chain_of_operators", check_long_chain_of_operators},
-    {"chain_as_long_as_real_scripts_have", check_chain_as_long_as_real_scripts_have},
-    {"expression_values", check_expression_values},
-    {"specific_goes_with_its_location", check_specific_goes_with_its_location},
-    {"affects_on_two_skills_stay_apart", check_affects_on_two_skills_stay_apart},
-    {"saved_affects_are_cleaned_up", check_saved_affects_are_cleaned_up},
-    {"infravision_comes_off_an_android", check_infravision_comes_off_an_android},
-    {"cut_off_skill_list", check_cut_off_skill_list},
-    {"impossible_indexes_in_a_save", check_impossible_indexes_in_a_save},
-    {"birth_at_the_end_of_time", check_birth_at_the_end_of_time},
-    {"remote_display_survives_a_load", check_remote_display_survives_a_load},
-    {"no_object_file_is_no_problem", check_no_object_file_is_no_problem},
-    {"too_many_applies_on_a_saved_object", check_too_many_applies_on_a_saved_object},
-    {"boot_with_no_socials", check_boot_with_no_socials},
-    {"index_without_an_end", check_index_without_an_end},
-    {"guild_with_impossible_numbers", check_guild_with_impossible_numbers},
-    {"carrying_more_than_a_byte_can_count", check_carrying_more_than_a_byte_can_count},
-    {"mob_memory_gets_forgotten", check_mob_memory_gets_forgotten},
-    {"android_without_a_model", check_android_without_a_model},
-    {"race_name_forms_stay_apart", check_race_name_forms_stay_apart},
-    {"zone_range_keeps_what_is_in_it", check_zone_range_keeps_what_is_in_it},
-    {"worn_container_that_cannot_go_back_on", check_worn_container_that_cannot_go_back_on},
-    {"long_words_in_ban_file", check_long_words_in_ban_file},
-    {"long_word_in_socials", check_long_word_in_socials},
-    {"long_word_in_index", check_long_word_in_index},
-    {"more_affects_than_a_save_holds", check_more_affects_than_a_save_holds},
+    {"while_without_done",                          check_while_without_done                         },
+    {"break_without_done",                          check_break_without_done                         },
+    {"switch_around_an_unfinished_while",           check_switch_around_an_unfinished_while          },
+    {"a_finished_while_still_runs",                 check_a_finished_while_still_runs                },
+    {"long_chain_of_operators",                     check_long_chain_of_operators                    },
+    {"chain_as_long_as_real_scripts_have",          check_chain_as_long_as_real_scripts_have         },
+    {"expression_values",                           check_expression_values                          },
+    {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
+    {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
+    {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },
+    {"infravision_comes_off_an_android",            check_infravision_comes_off_an_android           },
+    {"cut_off_skill_list",                          check_cut_off_skill_list                         },
+    {"impossible_indexes_in_a_save",                check_impossible_indexes_in_a_save               },
+    {"birth_at_the_end_of_time",                    check_birth_at_the_end_of_time                   },
+    {"remote_display_survives_a_load",              check_remote_display_survives_a_load             },
+    {"no_object_file_is_no_problem",                check_no_object_file_is_no_problem               },
+    {"too_many_applies_on_a_saved_object",          check_too_many_applies_on_a_saved_object         },
+    {"boot_with_no_socials",                        check_boot_with_no_socials                       },
+    {"index_without_an_end",                        check_index_without_an_end                       },
+    {"guild_with_impossible_numbers",               check_guild_with_impossible_numbers              },
+    {"carrying_more_than_a_byte_can_count",         check_carrying_more_than_a_byte_can_count        },
+    {"mob_memory_gets_forgotten",                   check_mob_memory_gets_forgotten                  },
+    {"android_without_a_model",                     check_android_without_a_model                    },
+    {"race_name_forms_stay_apart",                  check_race_name_forms_stay_apart                 },
+    {"zone_range_keeps_what_is_in_it",              check_zone_range_keeps_what_is_in_it             },
+    {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
+    {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
+    {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },
+    {"long_word_in_socials",                        check_long_word_in_socials                       },
+    {"long_word_in_index",                          check_long_word_in_index                         },
+    {"more_affects_than_a_save_holds",              check_more_affects_than_a_save_holds             },
     {"message_about_an_object_with_no_description", check_message_about_an_object_with_no_description},
-    {"saying_something_to_someone", check_saying_something_to_someone},
+    {"saying_something_to_someone",                 check_saying_something_to_someone                },
     {"defending_someone_else_lets_go_of_the_first", check_defending_someone_else_lets_go_of_the_first},
-    {"mob_given_armor_with_no_wear_slot", check_mob_given_armor_with_no_wear_slot},
-    {"start_room_cannot_be_deleted", check_start_room_cannot_be_deleted},
-    {"start_room_missing_from_the_world", check_start_room_missing_from_the_world},
-    {"shop_with_impossible_item_types", check_shop_with_impossible_item_types},
-    {"shadow_dragon_missing_from_the_world", check_shadow_dragon_missing_from_the_world},
-    {"homing_ball_that_someone_is_carrying", check_homing_ball_that_someone_is_carrying},
-    {"long_name_in_auction_file", check_long_name_in_auction_file},
+    {"mob_given_armor_with_no_wear_slot",           check_mob_given_armor_with_no_wear_slot          },
+    {"start_room_cannot_be_deleted",                check_start_room_cannot_be_deleted               },
+    {"start_room_missing_from_the_world",           check_start_room_missing_from_the_world          },
+    {"shop_with_impossible_item_types",             check_shop_with_impossible_item_types            },
+    {"shadow_dragon_missing_from_the_world",        check_shadow_dragon_missing_from_the_world       },
+    {"homing_ball_that_someone_is_carrying",        check_homing_ball_that_someone_is_carrying       },
+    {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },
 };
 
 int main(int argc, char **argv)

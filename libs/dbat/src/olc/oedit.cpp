@@ -267,10 +267,7 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_vn
 
 static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
-  int i;
   obj_vnum robj_num;
-
-  i = (!obj_proto_of(g, OLC_NUM(d)));
 
   if ((robj_num = add_object(g, OLC_OBJ(d), OLC_NUM(d))) == NOTHING) {
     mud_log("oedit_save_internally: add_object failed.");
@@ -298,38 +295,6 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
     assign_triggers(g, obj, OBJ_TRIGGER);
   }
   /* end trigger update */
-
-  if (!i) /* If it's not a new object, don't renumber. */
-    return;
-
-  /*
-   * Renumber produce in shops being edited.
-   */
-  for (descriptor_data *dsc : each_desc(g))
-    if (desc_get_connected(dsc) == CON_SEDIT)
-      for (i = 0; shop_get_product(OLC_SHOP(dsc), i) != NOTHING; i++)
-        if (shop_get_product(OLC_SHOP(dsc), i) >= robj_num)
-          shop_set_product(OLC_SHOP(dsc), i, shop_get_product(OLC_SHOP(dsc), i) + 1);
-
-  /* Update other people in zedit too. From: C.Raehl 4/27/99 */
-  for (descriptor_data *dsc : each_desc(g))
-    if (desc_get_connected(dsc) == CON_ZEDIT)
-      for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
-        switch (OLC_ZONE(dsc)->cmd[i].command) {
-          case 'P':
-            OLC_ZONE(dsc)->cmd[i].arg3 += (OLC_ZONE(dsc)->cmd[i].arg3 >= robj_num);
-            [[fallthrough]];
-          case 'E':
-          case 'G':
-          case 'O':
-            OLC_ZONE(dsc)->cmd[i].arg1 += (OLC_ZONE(dsc)->cmd[i].arg1 >= robj_num);
-            break;
-          case 'R':
-            OLC_ZONE(dsc)->cmd[i].arg2 += (OLC_ZONE(dsc)->cmd[i].arg2 >= robj_num);
-            break;
-          default:
-            break;
-        }
 }
 
 /*------------------------------------------------------------------------*/

@@ -289,10 +289,7 @@ static void init_mobile(GameWorld *g, struct char_data *mob)
  */
 static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
-  int i;
   mob_vnum new_rnum;
-
-  i = (!mob_proto_of(g, OLC_NUM(d)));
 
   if ((new_rnum = add_mobile(g, OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
     mud_log("medit_save_internally: add_mobile failed.");
@@ -321,30 +318,6 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
     assign_triggers(g, mob, MOB_TRIGGER);
   }
   /* end trigger update */
-
-  if (!i) /* Only renumber on new mobiles. */
-    return;
-
-  /*
-   * Update keepers in shops being edited and other mobs being edited.
-   */
-  for (descriptor_data *dsc : each_desc(g)) {
-    if (desc_get_connected(dsc) == CON_SEDIT) {
-      if (shop_get_keeper(OLC_SHOP(dsc)) != NOTHING && shop_get_keeper(OLC_SHOP(dsc)) >= new_rnum)
-        shop_set_keeper(OLC_SHOP(dsc), shop_get_keeper(OLC_SHOP(dsc)) + 1);
-    } else if (desc_get_connected(dsc) == CON_MEDIT)
-      char_set_nr(OLC_MOB(dsc), char_get_nr(OLC_MOB(dsc)) + ((char_get_nr(OLC_MOB(dsc)) != NOTHING && char_get_nr(OLC_MOB(dsc)) >= new_rnum)));
-  }
-
-  /*
-   * Update other people in zedit too. From: C.Raehl 4/27/99
-   */
-  for (descriptor_data *dsc : each_desc(g))
-    if (desc_get_connected(dsc) == CON_ZEDIT)
-      for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
-        if (OLC_ZONE(dsc)->cmd[i].command == 'M')
-          if (OLC_ZONE(dsc)->cmd[i].arg1 >= new_rnum)
-            OLC_ZONE(dsc)->cmd[i].arg1++;
 }
 
 /**************************************************************************

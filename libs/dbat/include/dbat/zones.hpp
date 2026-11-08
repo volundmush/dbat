@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/zoneflags.hpp"
 
@@ -46,7 +48,7 @@ struct zone_data {
   int min_level{};                        /* Minimum level to enter zone        */
   int max_level{};                        /* Max Mortal level to enter zone     */
   bitvector_t zone_flags[ZF_ARRAY_MAX]{}; /* Flags for the zone.                */
-  struct reset_com *cmd{};                /* command table for reset	          */
+  std::vector<reset_com> cmd;             /* the reset commands, ending with an 'S' */
 
   /*
     * Reset mode:

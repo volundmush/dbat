@@ -177,7 +177,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
 
   d->character = new char_data();
   clear_char(d->character);
-  *char_player_specials_slot(d->character) = new player_special_data();
+  char_make_player_specials(d->character);
   char_set_desc(d->character, d);
 
   if ((player_i = load_char(g, name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
@@ -1899,7 +1899,7 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
   if (d->character == nullptr) {
     d->character = new char_data();
     clear_char(d->character);
-    *char_player_specials_slot(d->character) = new player_special_data();
+    char_make_player_specials(d->character);
     char_set_desc(d->character, d);
   }
   char_prf_set(g, d->character, PRF_COLOR, true);
