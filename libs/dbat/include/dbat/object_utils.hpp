@@ -122,8 +122,6 @@ struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
 
 /* Removes obj from a list linked through next_content: a room's contents, a container or an inventory. */
 void obj_unlink_content(struct obj_data **head, struct obj_data *obj);
-/* Removes obj from g->objects. */
-void obj_unlink_from_list(GameWorld *g, struct obj_data *obj);
 
 /* Field accessors */
 char *obj_get_action_description(const struct obj_data *obj);
@@ -143,8 +141,6 @@ struct obj_data *obj_get_in_obj(const struct obj_data *obj);
 void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
 char *obj_get_name(const struct obj_data *obj);
 void obj_set_name(struct obj_data *obj, char *v);
-struct obj_data *obj_get_next(const struct obj_data *obj);
-void obj_set_next(struct obj_data *obj, struct obj_data *v);
 struct obj_data *obj_get_next_content(const struct obj_data *obj);
 void obj_set_next_content(struct obj_data *obj, struct obj_data *v);
 struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj);

@@ -817,8 +817,6 @@ void char_set_memory(struct char_data *ch, struct script_memory *v);
 void char_set_mimic(struct char_data *ch, int v);
 int char_get_mobcharge(const struct char_data *ch);
 void char_set_mobcharge(struct char_data *ch, int v);
-struct char_data *char_get_next(const struct char_data *ch);
-void char_set_next(struct char_data *ch, struct char_data *v);
 struct char_data *char_get_next_affect(const struct char_data *ch);
 void char_set_next_affect(struct char_data *ch, struct char_data *v);
 struct char_data *char_get_next_fighting(const struct char_data *ch);

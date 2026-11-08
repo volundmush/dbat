@@ -54,7 +54,6 @@ struct obj_data {
   struct script_data *script{};           /* script info for the object       */
 
   struct obj_data *next_content{}; /* For 'contains' lists             */
-  struct obj_data *next{};         /* For the object list              */
 
   int32_t sitting_uid{}; /* Who is sitting on me? */
 

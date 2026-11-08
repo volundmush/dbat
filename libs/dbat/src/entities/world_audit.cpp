@@ -70,23 +70,12 @@ static bool valid_room(const GameWorld *g, room_vnum room)
 
 static void collect(GameWorld *g, struct audit *a)
 {
-  struct char_data *ch;
-  struct obj_data *obj;
-  size_t n = 0;
-
-  for (ch = g->characters; ch; ch = char_get_next(ch))
-    n++;
-  a->characters.items = new const void *[n + 1]();
-  for (ch = g->characters; ch; ch = char_get_next(ch))
-    a->characters.items[a->characters.count++] = ch;
+  a->characters.items = new const void *[g->characters.size() + 1]();
+  g->characters.visit([a](long, const struct char_data *ch) { a->characters.items[a->characters.count++] = ch; });
   set_sort(&a->characters);
 
-  n = 0;
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
-    n++;
-  a->objects.items = new const void *[n + 1]();
-  for (obj = g->objects; obj; obj = obj_get_next(obj))
-    a->objects.items[a->objects.count++] = obj;
+  a->objects.items = new const void *[g->objects.size() + 1]();
+  g->objects.visit([a](long, const struct obj_data *obj) { a->objects.items[a->objects.count++] = obj; });
   set_sort(&a->objects);
 }
 
@@ -381,9 +370,10 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   std::vector<obj_vnum> vnums;
   size_t i = 0;
 
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj))
+  g->objects.visit([&](long, const struct obj_data *obj) {
     if (obj_get_item_number(obj) != NOTHING)
       vnums.push_back(obj_get_item_number(obj));
+  });
   std::sort(vnums.begin(), vnums.end());
   g->obj_index.visit([&](obj_vnum r, const index_data *index) {
     int found = 0;
@@ -399,9 +389,10 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
 
   vnums.clear();
   i = 0;
-  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch))
+  g->characters.visit([&](long, const struct char_data *ch) {
     if (char_is_npc(ch) && char_get_nr(ch) != NOBODY)
       vnums.push_back(char_get_nr(ch));
+  });
   std::sort(vnums.begin(), vnums.end());
   g->mob_index.visit([&](mob_vnum r, const index_data *index) {
     int found = 0;
@@ -414,24 +405,6 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   });
   for (; i < vnums.size(); i++)
     problem(a, "mob: prototype %d doesn't exist", vnums[i]);
-}
-
-/* Scripts find things through this table, by id. */
-static void audit_lookup_table(const GameWorld *g, struct audit *a)
-{
-  for (int bucket = 0; bucket < BUCKET_COUNT; bucket++)
-    for (const struct lookup_table_t *entry = g->lookup_table[bucket].next; entry; entry = entry->next) {
-      if (entry->type == OBJ_TRIGGER) {
-        if (!set_has(&a->objects, entry->c))
-          problem(a, "lookup table: id %ld is an object that isn't in the game", entry->uid);
-        else if (obj_get_id(static_cast<const struct obj_data *>(entry->c)) != entry->uid)
-          problem(a, "lookup table: id %ld is an object that says %d", entry->uid,
-                  obj_get_id(static_cast<const struct obj_data *>(entry->c)));
-      } else if (entry->type == MOB_TRIGGER) {
-        if (!set_has(&a->characters, entry->c) && !held_by_a_connection(g, static_cast<const struct char_data *>(entry->c)))
-          problem(a, "lookup table: id %ld is someone who isn't in the game", entry->uid);
-      }
-    }
 }
 
 static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
@@ -449,17 +422,17 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
 
   collect(g, &a);
   audit_rooms(g, &a);
-  /* Loops over entities (iterate.hpp) find each one again by its id, and pass over any they can't find */
-  for (struct char_data *ch = g->characters; ch; ch = char_get_next(ch)) {
+  /* Loops over entities (iterate.hpp) find each one again by the id it is registered under */
+  g->characters.visit([&](long id, struct char_data *ch) {
     audit_character(g, &a, ch);
-    if (char_by_id(g, char_get_id(ch)) != ch)
-      problem(&a, "%s: id %d doesn't lead back to them", char_get_name(ch), char_get_id(ch));
-  }
-  for (struct obj_data *obj = g->objects; obj; obj = obj_get_next(obj)) {
+    if (char_get_id(ch) != id)
+      problem(&a, "%s: registered as id %ld, but says id %d", char_get_name(ch), id, char_get_id(ch));
+  });
+  g->objects.visit([&](long id, struct obj_data *obj) {
     audit_object(g, &a, obj);
-    if (obj_by_id(g, obj_get_id(obj)) != obj)
-      problem(&a, "%s: id %d doesn't lead back to it", obj_get_short_description(obj), obj_get_id(obj));
-  }
+    if (obj_get_id(obj) != id)
+      problem(&a, "%s: registered as id %ld, but says id %d", obj_get_short_description(obj), id, obj_get_id(obj));
+  });
 
   limit = a.characters.count + 1;
   for (struct char_data *ch = g->combat_list; ch; ch = char_get_next_fighting(ch)) {
@@ -494,7 +467,6 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
 
   audit_connections(g, &a);
   audit_index_counts(g, &a);
-  audit_lookup_table(g, &a);
 
   delete[] a.characters.items;
   delete[] a.objects.items;

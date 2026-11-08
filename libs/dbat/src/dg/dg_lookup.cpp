@@ -507,31 +507,6 @@ obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name)
 /* find_char() helpers */
 
 
-void init_lookup_table(GameWorld *g)
-{
-  int i;
-  for (i = 0; i < BUCKET_COUNT; i++) {
-    g->lookup_table[i].uid  = UID_OUT_OF_RANGE;
-    g->lookup_table[i].type = -1;
-    g->lookup_table[i].c    = nullptr;
-    g->lookup_table[i].next = nullptr;
-  }
-}
-
-static struct lookup_table_t *lookup_table_find(GameWorld *g, long uid)
-{
-  struct lookup_table_t *lt;
-
-  if (uid < 0)
-    return nullptr;
-
-  for (lt = g->lookup_table[uid & (BUCKET_COUNT - 1)].next; lt; lt = lt->next)
-    if (lt->uid == uid)
-      return lt;
-
-  return nullptr;
-}
-
 static const char *uid_range_name(long uid)
 {
   if (uid < 0)
@@ -547,15 +522,17 @@ static const char *uid_range_name(long uid)
   return "mob";
 }
 
-static void log_lookup_miss(GameWorld *g, const char *what, long uid, struct lookup_table_t *lt)
+/* found_other: the uid belongs to an entity of the other kind */
+static void log_lookup_miss(GameWorld *g, const char *what, long uid, bool found_other)
 {
   char ctx[MAX_STRING_LENGTH];
+  bool is_obj = !strcmp(what, "find_obj");
 
   dg_context_str(g, ctx, sizeof(ctx));
-  if (lt)
+  if (found_other)
     mud_log("%s: uid %ld (%s range) belongs to a %s, not a %s%s",
-            what, uid, uid_range_name(uid), lt->type == OBJ_TRIGGER ? "object" : "character",
-            strcmp(what, "find_obj") ? "character" : "object", ctx);
+            what, uid, uid_range_name(uid), is_obj ? "character" : "object",
+            is_obj ? "object" : "character", ctx);
   else
     mud_log("%s: no entity with uid %ld (%s range; next mob uid %ld, next obj uid %ld)%s",
             what, uid, uid_range_name(uid), g->max_mob_id, g->max_obj_id, ctx);
@@ -563,87 +540,65 @@ static void log_lookup_miss(GameWorld *g, const char *what, long uid, struct loo
 
 static struct char_data *find_char_by_uid_in_lookup_table(GameWorld *g, long uid)
 {
-  struct lookup_table_t *lt = lookup_table_find(g, uid);
-
-  if (lt && lt->type == MOB_TRIGGER)
-    return (struct char_data *)(lt->c);
-
-  log_lookup_miss(g, "find_char", uid, lt);
+  if (struct char_data *ch = char_by_id(g, uid))
+    return ch;
+  log_lookup_miss(g, "find_char", uid, obj_by_id(g, uid) != nullptr);
   return nullptr;
 }
 
 static struct obj_data *find_obj_by_uid_in_lookup_table(GameWorld *g, long uid)
 {
-  struct lookup_table_t *lt = lookup_table_find(g, uid);
-
-  if (lt && lt->type == OBJ_TRIGGER)
-    return (struct obj_data *)(lt->c);
-
-  log_lookup_miss(g, "find_obj", uid, lt);
+  if (struct obj_data *obj = obj_by_id(g, uid))
+    return obj;
+  log_lookup_miss(g, "find_obj", uid, char_by_id(g, uid) != nullptr);
   return nullptr;
 }
 
 struct char_data *char_by_id(GameWorld *g, long id)
 {
-  struct lookup_table_t *lt = lookup_table_find(g, id);
-  return lt && lt->type == MOB_TRIGGER ? (struct char_data *)(lt->c) : nullptr;
+  return g->characters.find(id);
 }
 
 struct obj_data *obj_by_id(GameWorld *g, long id)
 {
-  struct lookup_table_t *lt = lookup_table_find(g, id);
-  return lt && lt->type == OBJ_TRIGGER ? (struct obj_data *)(lt->c) : nullptr;
+  return g->objects.find(id);
 }
 
-void add_to_lookup_table(GameWorld *g, long uid, int type, void *c)
+/* Never keep two entities under one id: the newcomer replaces the other, which can no longer be found. */
+void char_register(GameWorld *g, struct char_data *ch)
 {
-  struct lookup_table_t *lt = lookup_table_find(g, uid), *head;
+  long id = char_get_id(ch);
 
-  if (lt) {
-    if (lt->c == c && lt->type == type)
-      return;
-    /* Never keep two entries for one UID: find and remove would disagree. */
-    mud_log("SYSERR: add_to_lookup_table: uid %ld already maps to another %s; replacing it with this %s.",
-            uid, lt->type == OBJ_TRIGGER ? "object" : "character",
-            type == OBJ_TRIGGER ? "object" : "character");
-    lt->type = type;
-    lt->c    = c;
+  if (g->characters.add(id, ch))
     return;
-  }
-
-  head = &g->lookup_table[uid & (BUCKET_COUNT - 1)];
-  lt         = new lookup_table_t();
-  lt->uid    = uid;
-  lt->type   = type;
-  lt->c      = c;
-  lt->next   = head->next;
-  head->next = lt;
-  g->lookup_table_entries++;
+  if (g->characters.find(id) == ch)
+    return;
+  mud_log("SYSERR: char_register: uid %ld already maps to another character; replacing it with this character.", id);
+  g->characters.remove(id, g->characters.find(id));
+  g->characters.add(id, ch);
 }
 
-void remove_from_lookup_table(GameWorld *g, long uid)
+void obj_register(GameWorld *g, struct obj_data *obj)
 {
-  struct lookup_table_t *lt, *prev;
+  long id = obj_get_id(obj);
 
-  /*
-   * This is not supposed to happen. UID 0 is not used.
-   * However, while I'm debugging the issue, let's just return right away.
-   *
-   * Welcor 02/04
-   */
-  if (uid <= 0)
+  if (g->objects.add(id, obj))
     return;
+  if (g->objects.find(id) == obj)
+    return;
+  mud_log("SYSERR: obj_register: uid %ld already maps to another object; replacing it with this object.", id);
+  g->objects.remove(id, g->objects.find(id));
+  g->objects.add(id, obj);
+}
 
-  prev = &g->lookup_table[uid & (BUCKET_COUNT - 1)];
-  for (lt = prev->next; lt; prev = lt, lt = lt->next)
-    if (lt->uid == uid) {
-      prev->next = lt->next;
-      delete lt;
-      g->lookup_table_entries--;
-      return;
-    }
+void char_unregister(GameWorld *g, struct char_data *ch)
+{
+  g->characters.remove(char_get_id(ch), ch);
+}
 
-  mud_log("remove_from_lookup. UID %ld not found.", uid);
+void obj_unregister(GameWorld *g, struct obj_data *obj)
+{
+  g->objects.remove(obj_get_id(obj), obj);
 }
 
 /*
@@ -669,7 +624,7 @@ static long next_uid(GameWorld *g, long *counter, long base, long max, const cha
       *counter = base;
     }
     uid = (*counter)++;
-    if (!lookup_table_find(g, uid))
+    if (!char_by_id(g, uid) && !obj_by_id(g, uid))
       return uid;
   }
 
@@ -692,7 +647,7 @@ void dg_log_uid_stats(GameWorld *g)
   mud_log("DG UIDs: next mob %ld (%.4f%% used), next obj %ld (%.4f%% used), lookup entries %ld",
           g->max_mob_id, 100.0 * (g->max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
           g->max_obj_id, 100.0 * (g->max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
-          g->lookup_table_entries);
+          (long)(g->characters.size() + g->objects.size()));
 }
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[])

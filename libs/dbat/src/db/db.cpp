@@ -494,8 +494,6 @@ static void free_extra_descriptions(struct extra_descr_data *edesc)
 void destroy_db(GameWorld *g)
 {
   ssize_t itr;
-  struct char_data *chtmp;
-  struct obj_data *objtmp;
 
   free_extracted_triggers(g);
 
@@ -504,18 +502,16 @@ void destroy_db(GameWorld *g)
   for (char_data *tch : each_char(g))
     if (char_get_master(g, tch))
       stop_follower(g, tch);
-  while (g->characters) {
-    chtmp          = g->characters;
-    g->characters = char_get_next(g->characters);
-    free_char(g, chtmp);
-  }
+  for (long id : g->characters.ids())
+    if (struct char_data *tch = g->characters.find(id))
+      free_char(g, tch);
+  g->characters.clear();
 
   /* Active Objects */
-  while (g->objects) {
-    objtmp      = g->objects;
-    g->objects = obj_get_next(g->objects);
-    free_obj(g, objtmp);
-  }
+  for (long id : g->objects.ids())
+    if (struct obj_data *obj = g->objects.find(id))
+      free_obj(g, obj);
+  g->objects.clear();
 
   /* Rooms */
   for (room_vnum cnt : g->rooms.vnums()) {
@@ -2842,8 +2838,6 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   mob = new char_data();
   clear_char(mob);
   *mob = (*mob_proto_of(g, i));
-  char_set_next(mob, g->characters);
-  g->characters   = mob;
   char_set_next_affect(mob, nullptr);
 
   if (char_is_hoshijin(mob) && char_get_sex(mob) == SEX_MALE) {
@@ -3404,8 +3398,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   mob_index_of(g, i)->number++;
 
   char_set_id(mob, dg_new_mob_uid(g));
-  /* find_char helper */
-  add_to_lookup_table(g, char_get_id(mob), MOB_TRIGGER, (void *)mob);
+  char_register(g, mob);
 
   copy_proto_script(mob_proto_of(g, i), mob, MOB_TRIGGER);
   assign_triggers(g, mob, MOB_TRIGGER);
@@ -3588,12 +3581,9 @@ struct obj_data *create_obj(GameWorld *g)
 
   obj = new obj_data();
   clear_object(obj);
-  obj_set_next(obj, g->objects);
-  g->objects = obj;
 
   obj_set_id(obj, dg_new_obj_uid(g));
-  /* find_obj helper */
-  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
+  obj_register(g, obj);
 
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
@@ -3618,15 +3608,12 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr)
   obj = new obj_data();
   clear_object(obj);
   *obj = (*obj_proto_of(g, i));
-  obj_set_next(obj, g->objects);
-  g->objects = obj;
   obj_set_room_loaded(obj, NOWHERE);
 
   obj_index_of(g, i)->number++;
 
   obj_set_id(obj, dg_new_obj_uid(g));
-  /* find_obj helper */
-  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
+  obj_register(g, obj);
 
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
@@ -4242,13 +4229,7 @@ void free_char(GameWorld *g, struct char_data *ch)
   if (char_get_desc(ch))
     char_get_desc(ch)->character = nullptr;
 
-  /* find_char helper */
-  /*
-  * when free_char is called with a blank character struct, ID is set
-  * to 0, and has not yet been added to the lookup table.
-  */
-  if (char_get_id(ch) != 0)
-    remove_from_lookup_table(g, char_get_id(ch));
+  char_unregister(g, ch); /* if it is the one registered under its id */
 
   delete ch;
 }
@@ -4276,8 +4257,7 @@ void free_obj(GameWorld *g, struct obj_data *obj)
   if (obj_get_script(obj))
     extract_script(g, obj, OBJ_TRIGGER);
 
-  /* find_obj helper */
-  remove_from_lookup_table(g, obj_get_id(obj));
+  obj_unregister(g, obj);
 
   if (obj_get_sbinfo(obj))
     delete[] obj_get_sbinfo(obj);
@@ -4348,7 +4328,6 @@ void reset_char(GameWorld *g, struct char_data *ch)
   char_set_master(ch, nullptr);
   char_set_in_room(ch, NOWHERE);
   char_set_inventory(ch, nullptr);
-  char_set_next(ch, nullptr);
   char_set_next_fighting(ch, nullptr);
   char_set_next_in_room(ch, nullptr);
   char_set_fighting(ch, nullptr);

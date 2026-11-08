@@ -321,7 +321,6 @@ static OCMD(do_otransform)
     obj_set_proto_script(&tmpobj, obj_get_proto_script(obj));
     obj_set_script(&tmpobj, obj_get_script(obj));
     obj_set_next_content(&tmpobj, obj_get_next_content(obj));
-    obj_set_next(&tmpobj, obj_get_next(obj));
     memcpy(obj, &tmpobj, sizeof(*obj));
 
     if (wearer) {

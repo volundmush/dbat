@@ -890,13 +890,6 @@ struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
   return &obj->sbinfo;
 }
 
-void obj_unlink_from_list(GameWorld *g, struct obj_data *obj)
-{
-  struct obj_data *temp;
-
-  REMOVE_FROM_LIST(obj, g->objects, next, temp);
-}
-
 void obj_unlink_content(struct obj_data **head, struct obj_data *obj)
 {
   struct obj_data *temp;
@@ -987,16 +980,6 @@ char *obj_get_name(const struct obj_data *obj)
 void obj_set_name(struct obj_data *obj, char *v)
 {
   obj->name = v;
-}
-
-struct obj_data *obj_get_next(const struct obj_data *obj)
-{
-  return obj->next;
-}
-
-void obj_set_next(struct obj_data *obj, struct obj_data *v)
-{
-  obj->next = v;
 }
 
 struct obj_data *obj_get_next_content(const struct obj_data *obj)

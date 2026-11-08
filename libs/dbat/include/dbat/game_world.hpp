@@ -24,8 +24,8 @@
 struct GameWorld {
   /* Entities and their prototypes */
   vnum_table<room_data, room_vnum> rooms; /* all rooms, by vnum */
-  struct char_data *characters{}; /* All NPCs and PCs in the game      */
-  struct obj_data *objects{};     /* All objects in the game           */
+  id_table<char_data> characters;         /* every NPC and PC in the game, by id */
+  id_table<obj_data> objects;             /* every object in the game, by id */
   struct char_data *affect_list{};
   struct char_data *combat_list{};
   struct char_data *next_combat_list{};
@@ -54,8 +54,6 @@ struct GameWorld {
   struct trig_data *trigger_list{};
   struct trig_data *extracted_triggers{}; /* waiting for free_extracted_triggers() */
   struct dg_run_ctx dg_ctx{};
-  struct lookup_table_t lookup_table[BUCKET_COUNT]{};
-  long lookup_table_entries{};
   int dg_owner_purged{};
   int dg_eval_depth{}; /* how deeply nested the expression being evaluated is */
   int dg_act_check{};

@@ -302,8 +302,6 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   if (!room_of(g, load_room)) /* a builder deleted the start room */
     load_room = 0;          /* The Void */
 
-  char_set_next(d->character, g->characters);
-  g->characters     = d->character;
   char_to_room(g, d->character, load_room);
   load_result = Crash_load(g, d->character);
   if (char_get_player_specials(d->character)->host) {
@@ -312,8 +310,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   }
   char_get_player_specials(d->character)->host = strdup(d->host);
   char_set_id(d->character, char_get_idnum(d->character));
-  /* find_char helper */
-  add_to_lookup_table(g, char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
+  char_register(g, d->character);
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
   for (char_data *check : each_char(g))

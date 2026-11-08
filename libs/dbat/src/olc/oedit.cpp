@@ -1769,7 +1769,6 @@ static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_da
   obj_set_in_obj(obj, obj_get_in_obj(&live));
   obj_set_contains(obj, obj_get_contains(&live));
   obj_set_next_content(obj, obj_get_next_content(&live));
-  obj_set_next(obj, obj_get_next(&live));
   obj_set_sitting(obj, obj_get_sitting(g, &live));
   obj_set_user(obj, obj_get_user(g, &live));
   obj_set_target(obj, obj_get_target(g, &live));

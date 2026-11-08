@@ -261,9 +261,6 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   event_init(g);
 
-  /* set up hash table for find_char() */
-  init_lookup_table(g);
-
   boot_db(g);
 
   FILE *mapfile;

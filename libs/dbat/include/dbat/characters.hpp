@@ -208,7 +208,6 @@ struct char_data {
 
   struct char_data *next_in_room{};
   /* For room->people - list		*/
-  struct char_data *next{}; /* For either monster or ppl-list	*/
   struct char_data *next_fighting{};
   /* For fighting list			*/
   struct char_data *next_affect{}; /* For affect wearoff			*/

@@ -7581,16 +7581,6 @@ void char_set_mobcharge(struct char_data *ch, int v)
   ch->mobcharge = v;
 }
 
-struct char_data *char_get_next(const struct char_data *ch)
-{
-  return ch->next;
-}
-
-void char_set_next(struct char_data *ch, struct char_data *v)
-{
-  ch->next = v;
-}
-
 struct char_data *char_get_next_affect(const struct char_data *ch)
 {
   return ch->next_affect;

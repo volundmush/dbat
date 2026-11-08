@@ -138,7 +138,6 @@ static GameWorld *boot_here(time_t when, const char *log_mode)
   load_config(g);
   g->no_rent_check = 1;
   event_init(g);
-  init_lookup_table(g);
   boot_db(g);
   topLoad(g);
   read_surface_map(g);

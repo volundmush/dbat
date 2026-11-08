@@ -212,9 +212,12 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
     Crash_delete_crashfile(ch);
   }
 
-  /* If there's a descriptor, they're in the menu now. */
+  /* If there's a descriptor, they're in the menu now: out of the game, and not to be found by id, until they enter
+   * it again. */
   if (char_is_npc(ch) || !char_get_desc(ch))
     free_char(g, ch);
+  else
+    char_unregister(g, ch);
 }
 
 /*
@@ -317,7 +320,7 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
   while (obj_get_contains(obj))
     extract_obj(g, obj_get_contains(obj));
 
-  obj_unlink_from_list(g, obj);
+  obj_unregister(g, obj);
 
   if (obj_get_item_number(obj) != NOTHING)
     (obj_index_of(g, obj_get_item_number(obj))->number)--;
@@ -337,32 +340,22 @@ void extract_pending_chars(GameWorld *g)
 {
   free_extracted_triggers(g);
 
-  struct char_data *vict, *next_vict, *prev_vict;
-
   if (g->extractions_pending < 0)
     mud_log("SYSERR: Negative (%d) extractions pending.", g->extractions_pending);
 
-  for (vict = g->characters, prev_vict = nullptr; vict && g->extractions_pending; vict = next_vict) {
-    next_vict = char_get_next(vict);
-
+  for (char_data *vict : each_char(g)) {
+    if (!g->extractions_pending)
+      break;
     if (char_mob_flagged(vict, MOB_NOTDEADYET))
       char_mob_set(vict, MOB_NOTDEADYET, false);
     else if (char_plr_flagged(vict, PLR_NOTDEADYET))
       char_plr_set(vict, PLR_NOTDEADYET, false);
-    else {
-      /* Last non-free'd character to continue chain from. */
-      prev_vict = vict;
+    else
       continue;
-    }
 
     char_unlink_from_affect_list(g, vict);
-    extract_char_final(g, vict);
+    extract_char_final(g, vict); /* which frees it, unregistering it */
     g->extractions_pending--;
-
-    if (prev_vict)
-      char_set_next(prev_vict, next_vict);
-    else
-      g->characters = next_vict;
   }
 
   if (g->extractions_pending > 0)

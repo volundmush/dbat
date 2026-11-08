@@ -145,8 +145,7 @@ inline auto each_char(GameWorld *g)
 {
   auto s = dbat_iter::make_snapshot<char_data, int>([g](long id) { return char_by_id(g, id); },
                                                    [](const char_data *) { return 0; });
-  for (char_data *ch = g->characters; ch; ch = char_get_next(ch))
-    s.add(char_get_id(ch), 0);
+  g->characters.visit([&s](long id, const auto *) { s.add(id, 0); });
   return s;
 }
 
@@ -155,8 +154,7 @@ inline auto each_obj(GameWorld *g)
 {
   auto s = dbat_iter::make_snapshot<obj_data, int>([g](long id) { return obj_by_id(g, id); },
                                                   [](const obj_data *) { return 0; });
-  for (obj_data *o = g->objects; o; o = obj_get_next(o))
-    s.add(obj_get_id(o), 0);
+  g->objects.visit([&s](long id, const auto *) { s.add(id, 0); });
   return s;
 }
 

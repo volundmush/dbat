@@ -193,6 +193,12 @@ struct char_data *find_char(GameWorld *g, long n);
 /* find_char() and find_obj() without their log line, for code that expects the entity may be gone */
 struct char_data *char_by_id(GameWorld *g, long id);
 struct obj_data *obj_by_id(GameWorld *g, long id);
+/* Make an entity findable by its id, and part of each_char()/each_obj(), as the newest; or stop that. Unregistering
+ * removes the entity only if it is the one registered under its id. */
+void char_register(GameWorld *g, struct char_data *ch);
+void char_unregister(GameWorld *g, struct char_data *ch);
+void obj_register(GameWorld *g, struct obj_data *obj);
+void obj_unregister(GameWorld *g, struct obj_data *obj);
 char_data *get_char(GameWorld *g, char *name);
 char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name);
 char_data *get_char_in_room(GameWorld *g, room_data *room, char *name);
@@ -230,12 +236,9 @@ void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
                   int type, char *cmd);
 void read_saved_vars(struct char_data *ch);
 void save_char_vars(GameWorld *g, struct char_data *ch);
-void init_lookup_table(GameWorld *g);
-void add_to_lookup_table(GameWorld *g, long uid, int type, void *c);
 long dg_new_mob_uid(GameWorld *g);
 long dg_new_obj_uid(GameWorld *g);
 void dg_log_uid_stats(GameWorld *g);
-void remove_from_lookup_table(GameWorld *g, long uid);
 
 /* from dg_db_scripts.c */
 void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
@@ -323,16 +326,4 @@ struct dg_run_ctx {
   char line[256]{};
 };
 
-/* find_char() helpers */
-// Must be power of 2
-constexpr int BUCKET_COUNT = 4096;
-// to recognize an empty bucket head; real UIDs are never negative
-constexpr long UID_OUT_OF_RANGE = -1;
-
-struct lookup_table_t {
-  long uid{};
-  int type{}; /* MOB_TRIGGER for characters, OBJ_TRIGGER for objects */
-  void *c{};
-  struct lookup_table_t *next{};
-};
 

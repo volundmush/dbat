@@ -911,7 +911,6 @@ ACMD(do_mtransform)
     char_set_script(&tmpmob, char_get_script(ch));
     char_set_memory(&tmpmob, char_get_memory(ch));
     char_set_next_in_room(&tmpmob, char_get_next_in_room(ch));
-    char_set_next(&tmpmob, char_get_next(ch));
     char_set_next_fighting(&tmpmob, char_get_next_fighting(ch));
     char_set_followers(&tmpmob, char_get_followers(ch));
     char_set_master(&tmpmob, char_get_master(g, ch));

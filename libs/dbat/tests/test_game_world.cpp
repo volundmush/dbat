@@ -63,7 +63,6 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
 
   g->shops.emplace(first_vnum)->vnum = first_vnum;
 
-  init_lookup_table(g);
   circle_srandom(g, 12345); /* an unseeded generator repeats one value forever */
   return g;
 }
@@ -166,15 +165,15 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
 
   CHECK(mob != nullptr);
   CHECK(obj != nullptr);
-  CHECK(a->characters == mob);
-  CHECK(a->objects == obj);
+  CHECK(a->characters.size() == 1 && a->characters.find(char_get_id(mob)) == mob);
+  CHECK(a->objects.size() == 1 && a->objects.find(obj_get_id(obj)) == obj);
   CHECK(mob_index_of(a, 100)->number == 1);
   CHECK(obj_index_of(a, 100)->number == 1);
   CHECK(char_get_mob_vnum(a, mob) == 100);
   CHECK(obj_get_vnum(a, obj) == 100);
 
-  CHECK(b->characters == nullptr);
-  CHECK(b->objects == nullptr);
+  CHECK(b->characters.empty());
+  CHECK(b->objects.empty());
   CHECK(mob_index_of(b, 200)->number == 0);
   CHECK(obj_index_of(b, 200)->number == 0);
   CHECK(read_mobile(b, 100) == nullptr);
@@ -183,10 +182,10 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
   CHECK(find_char(a, char_get_id(mob)) == mob);
   CHECK(find_char(b, char_get_id(mob)) == nullptr);
 
-  remove_from_lookup_table(a, char_get_id(mob));
-  remove_from_lookup_table(a, obj_get_id(obj));
-  a->characters = nullptr;
-  a->objects    = nullptr;
+  char_unregister(a, mob);
+  obj_unregister(a, obj);
+  a->characters.clear();
+  a->objects.clear();
   delete mob;
   delete obj;
 }
@@ -208,7 +207,7 @@ static void check_iteration(GameWorld *g)
     if (ch == mob[4]) {
       char_from_room(g, mob[2]);
       char_to_room(g, mob[2], 101);                     /* moved away before its turn */
-      remove_from_lookup_table(g, char_get_id(mob[1])); /* destroyed before its turn */
+      char_unregister(g, mob[1]);                       /* destroyed before its turn */
       char_to_room(g, mob[5], 100);                     /* added during the loop */
     }
   }
@@ -255,18 +254,61 @@ static void check_iteration(GameWorld *g)
   obj_from_room(g, obj[3]);
   obj_from_room(g, obj[0]);
   for (auto &o : obj) {
-    remove_from_lookup_table(g, obj_get_id(o));
+    obj_unregister(g, o);
     delete o;
   }
   for (auto &m : mob) {
     if (char_get_in_room(m) != NOWHERE)
       char_from_room(g, m);
     if (char_by_id(g, char_get_id(m)))
-      remove_from_lookup_table(g, char_get_id(m));
+      char_unregister(g, m);
     delete m;
   }
-  g->characters = nullptr;
-  g->objects    = nullptr;
+  g->characters.clear();
+  g->objects.clear();
+}
+
+/* The registry keeps entities newest first, as the old lists did, through growth and removals */
+static void check_id_table(void)
+{
+  id_table<int> t;
+  std::vector<int> items(3000);
+  std::vector<long> expect;
+
+  for (int i = 0; i < 3000; i++)
+    CHECK(t.add(i + 1, &items[i]));
+  CHECK(!t.add(5, &items[0])); /* taken */
+  CHECK(!t.add(0, &items[0])); /* ids are positive */
+  for (int i = 0; i < 3000; i++)
+    if (i % 3)
+      CHECK(t.remove(i + 1, &items[i]));
+  CHECK(!t.remove(1, &items[1])); /* not the one registered under that id */
+  CHECK(t.size() == 1000);
+  for (int i = 2999; i >= 0; i--)
+    if (!(i % 3))
+      expect.push_back(i + 1);
+  CHECK(t.ids() == expect);
+  CHECK(t.find(1) == &items[0]);
+  CHECK(t.find(2) == nullptr);
+  CHECK(t.add(2, &items[1]) && t.ids().front() == 2); /* back, as the newest */
+}
+
+/* Freeing a copy of a character, such as one loaded from its player file, leaves the one in the game registered */
+static void check_registry(GameWorld *g)
+{
+  struct char_data *mob  = read_mobile(g, 100);
+  struct char_data *copy = new char_data();
+
+  clear_char(copy);
+  char_set_id(copy, char_get_id(mob));
+  free_char(g, copy);
+  CHECK(char_by_id(g, char_get_id(mob)) == mob);
+
+  char_unregister(g, mob);
+  CHECK(char_by_id(g, char_get_id(mob)) == nullptr);
+  CHECK(g->characters.empty());
+  mob_index_of(g, 100)->number--;
+  delete mob;
 }
 
 /* References between entities are ids: one to something that has gone reads as nobody, not a dangling pointer */
@@ -282,8 +324,8 @@ static void check_references(GameWorld *g)
   CHECK(char_get_master(g, b) == a);
   CHECK(char_get_sits(g, a) == seat);
 
-  remove_from_lookup_table(g, char_get_id(b)); /* b and the seat go */
-  remove_from_lookup_table(g, obj_get_id(seat));
+  char_unregister(g, b); /* b and the seat go */
+  obj_unregister(g, seat);
   CHECK(char_get_fighting(g, a) == nullptr);
   CHECK(char_get_sits(g, a) == nullptr);
   CHECK(char_get_master(g, b) == a); /* what b pointed at is still there */
@@ -291,9 +333,9 @@ static void check_references(GameWorld *g)
   char_set_fighting(a, nullptr);
   CHECK(a->fighting_uid == 0);
 
-  remove_from_lookup_table(g, char_get_id(a));
-  g->characters = nullptr;
-  g->objects    = nullptr;
+  char_unregister(g, a);
+  g->characters.clear();
+  g->objects.clear();
   delete a;
   delete b;
   delete seat;
@@ -337,9 +379,9 @@ static void check_random_color(GameWorld *a, GameWorld *b)
   second = circle_random(b);
   CHECK(circle_random(a) == second);
 
-  remove_from_lookup_table(a, char_get_id(mob));
+  char_unregister(a, mob);
   mob_index_of(a, 100)->number--;
-  a->characters = nullptr;
+  a->characters.clear();
   delete mob;
 }
 
@@ -425,7 +467,7 @@ static void check_objects_off_the_ground(void)
   obj = carried_object(g, holder);
   obj_set_timer(obj, 1);
   point_update(g);
-  CHECK(g->objects == nullptr);
+  CHECK(g->objects.empty());
   free_world(g);
 
   g   = make_world(500, 1);
@@ -433,7 +475,7 @@ static void check_objects_off_the_ground(void)
   obj_set_type_flag(obj, ITEM_PORTAL);
   obj_set_timer(obj, 1);
   point_update(g);
-  CHECK(g->objects == nullptr);
+  CHECK(g->objects.empty());
   free_world(g);
 
   /* a carried Glacial Wall doesn't melt */
@@ -508,6 +550,8 @@ int main(void)
   check_read_entities(a, b);
   check_iteration(a);
   check_references(a);
+  check_id_table();
+  check_registry(a);
   check_rng(a, b);
   check_random_color(a, b);
   check_other_state(a, b);

@@ -194,9 +194,9 @@ static void check_audit_notices_damage(GameWorld *g, struct char_data *ch)
   obj_to_room(g, chest, room);
   CHECK_AUDIT(g);
 
-  remove_from_lookup_table(g, obj_get_id(obj)); /* loops over entities would pass it over */
+  obj_unregister(g, obj); /* loops over entities would pass it over */
   CHECK_NOTICED(g);
-  add_to_lookup_table(g, obj_get_id(obj), OBJ_TRIGGER, obj);
+  obj_register(g, obj);
   CHECK_AUDIT(g);
 
   char_set_in_room(ch, room + 1);

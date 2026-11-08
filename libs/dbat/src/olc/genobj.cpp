@@ -82,12 +82,11 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     obj_set_in_obj(obj, obj_get_in_obj(&swap));
     obj_set_contains(obj, obj_get_contains(&swap));
     obj_set_next_content(obj, obj_get_next_content(&swap));
-    obj_set_next(obj, obj_get_next(&swap));
     obj_set_sitting(obj, obj_get_sitting(g, &swap));
     obj_set_user(obj, obj_get_user(g, &swap));
     obj_set_target(obj, obj_get_target(g, &swap));
 
-    /* This copy keeps its identity: scripts and the lookup table find it by id. */
+    /* This copy keeps its identity: scripts and the registry find it by id. */
     obj_set_id(obj, obj_get_id(&swap));
     obj_set_script(obj, obj_get_script(&swap));
 
