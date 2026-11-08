@@ -208,8 +208,8 @@ static void gedit_setup_new(GameWorld *g, struct descriptor_data *d)
   guild_set_minlvl(guilddata, 0);
 
   /*. Some default strings . */
-  guild_set_no_such_skill(guilddata, strdup(guild_default_no_skill));
-  guild_set_not_enough_gold(guilddata, strdup(guild_default_no_gold));
+  guild_set_no_such_skill(guilddata, guild_default_no_skill);
+  guild_set_not_enough_gold(guilddata, guild_default_no_gold);
 
   /* init the wasteful skills and spells table */
 
@@ -466,7 +466,7 @@ static void gedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 **************************************************************************/
 
 /* Stores a builder-written guild message, or tells the builder why it can't be used. */
-static void gedit_set_message(GameWorld *g, struct descriptor_data *d, char **msg, char *arg)
+static void gedit_set_message(GameWorld *g, struct descriptor_data *d, std::string *msg, char *arg)
 {
   const char *problem = gedit_modify_string(msg, arg);
 

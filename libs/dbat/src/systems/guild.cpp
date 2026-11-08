@@ -815,7 +815,7 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
   char buf[MAX_STRING_LENGTH];
 
   if (!(does_guild_know(g, guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill, char_get_name(ch));
+    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
@@ -885,7 +885,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
 
   /****  Does the GM know the skill the player wants to learn?  ****/
   if (!(does_guild_know(g, guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill, char_get_name(ch));
+    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
@@ -897,7 +897,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
         learntype = g->spell_info[skill_num].can_learn_skill[i];
     switch (learntype) {
       case SKLEARN_CANT:
-        snprintf(buf, sizeof(buf), guild_nr->no_such_skill, char_get_name(ch));
+        snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
         do_tell(g, keeper, buf, g->cmd_tell, 0);
         return;
       case SKLEARN_CROSSCLASS:
@@ -1018,7 +1018,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
                    pointcost, (pointcost == 1) ? "" : "s");
     }
   } else {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill, char_get_name(ch));
+    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
   }
 }
@@ -1199,18 +1199,18 @@ static void read_guild_line(GameWorld *g, guild_vnum vnum, FILE *gm_f, const cha
 }
 
 /* An empty or malformed message would reach snprintf() as a NULL or unsafe format, so use the default. */
-static char *read_guild_message(GameWorld *g, guild_vnum vnum, FILE *gm_f, const char *why, const char *field, const char *fallback)
+static std::string read_guild_message(GameWorld *g, guild_vnum vnum, FILE *gm_f, const char *why, const char *field,
+                                      const char *fallback)
 {
   const char *problem;
-  char *msg;
+  std::string msg = take_string(fread_string(gm_f, why));
 
-  if (!(msg = fread_string(gm_f, why)))
-    return strdup(fallback);
+  if (msg.empty())
+    return fallback;
 
-  if ((problem = npc_msg_format_problem(msg, false))) {
+  if ((problem = npc_msg_format_problem(msg.c_str(), false))) {
     mud_log("SYSERR: Guild #%d %s: %s; using the default.", vnum, field, problem);
-    free(msg);
-    return strdup(fallback);
+    return fallback;
   }
   return msg;
 }
@@ -1316,10 +1316,9 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
         free(buf);
         buf = fread_string(gm_f, buf2);
       }
-      if (g->guilds.find(vnum)) {
+      if (g->guilds.find(vnum))
         mud_log("SYSERR: Guild #%d is defined twice; ignoring the second one.", vnum);
-        free_guild_contents(guild);
-      } else
+      else
         g->guilds.insert(vnum, std::move(made));
     } else {
       if (*buf == '$') /* EOF */
@@ -1510,8 +1509,6 @@ void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, gui
 
 void destroy_guilds(GameWorld *g)
 {
-  for (struct guild_data *guild : g->guilds.all())
-    free_guild_contents(guild);
   g->guilds.clear();
 }
 

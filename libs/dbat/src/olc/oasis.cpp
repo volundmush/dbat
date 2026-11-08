@@ -221,19 +221,8 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
 
   /* OLC_SHOP(d) is the editor's own copy, owning all it holds. */
   delete OLC_SHOP(d);
-  /*. Check for a guild . */
-  if (OLC_GUILD(d)) {
-    switch (cleanup_type) {
-      case CLEANUP_ALL:
-        free_guild(OLC_GUILD(d));
-        break;
-      case CLEANUP_STRUCTS:
-        delete OLC_GUILD(d);
-        break;
-      default:
-        break;
-    }
-  }
+  /* OLC_GUILD(d) is the editor's own copy too. */
+  delete OLC_GUILD(d);
 
   if (OLC_HOUSE(d)) { /*. free_house performs no sanity checks, must be careful here .*/
     switch (cleanup_type) {

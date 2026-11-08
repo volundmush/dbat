@@ -1,11 +1,11 @@
 #pragma once
+#include <string>
+
 #include "dbat/guild_utils.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/guild.hpp"
 
-void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
-void free_guild(struct guild_data *guild);
-void free_guild_contents(struct guild_data *guild);
+void copy_guild(struct guild_data *tguild, const struct guild_data *fguild);
 struct guild_data *add_guild(GameWorld *g, struct guild_data *guild);
 bool save_guilds(GameWorld *g, struct zone_data *zone_num);
 struct guild_data *find_guild(GameWorld *g, guild_vnum vnum);
@@ -25,5 +25,4 @@ constexpr int LEARNED_LEVEL = 0; /* % known which is considered "learned" */
 constexpr int MAX_PER_PRAC  = 1; /* max percent gain in skill per practice */
 constexpr int MIN_PER_PRAC  = 2; /* min percent gain in skill per practice */
 constexpr int PRAC_TYPE     = 3; /* should it say 'spell' or 'skill'?	 */
-const char *gedit_modify_string(char **str, char *new_g);
-
+const char *gedit_modify_string(std::string *str, const char *new_g);

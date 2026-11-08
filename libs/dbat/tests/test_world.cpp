@@ -503,7 +503,7 @@ static void check_new_guilds(GameWorld *g)
 
   for (size_t i = 0; i < sizeof(vnums) / sizeof(*vnums); i++) {
     char message[32];
-    struct guild_data guild = {0};
+    struct guild_data guild{};
 
     snprintf(message, sizeof(message), "guild %d", vnums[i]);
     guild_set_vnum(&guild, vnums[i]);

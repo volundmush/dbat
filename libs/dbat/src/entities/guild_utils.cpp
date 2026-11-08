@@ -1,4 +1,5 @@
 #include "dbat/guild_utils.hpp"
+#include "dbat/stringutils.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
@@ -78,24 +79,24 @@ bitvector_t *guild_get_with_who(struct guild_data *guild)
   return guild->with_who;
 }
 
-char *guild_get_no_such_skill(const struct guild_data *guild)
+const char *guild_get_no_such_skill(const struct guild_data *guild)
 {
-  return guild->no_such_skill;
+  return c_str_or_null(guild->no_such_skill);
 }
 
-void guild_set_no_such_skill(struct guild_data *guild, char *v)
+void guild_set_no_such_skill(struct guild_data *guild, const char *v)
 {
-  guild->no_such_skill = v;
+  guild->no_such_skill = v ? v : "";
 }
 
-char *guild_get_not_enough_gold(const struct guild_data *guild)
+const char *guild_get_not_enough_gold(const struct guild_data *guild)
 {
-  return guild->not_enough_gold;
+  return c_str_or_null(guild->not_enough_gold);
 }
 
-void guild_set_not_enough_gold(struct guild_data *guild, char *v)
+void guild_set_not_enough_gold(struct guild_data *guild, const char *v)
 {
-  guild->not_enough_gold = v;
+  guild->not_enough_gold = v ? v : "";
 }
 
 int guild_get_skill(const struct guild_data *guild, int n)

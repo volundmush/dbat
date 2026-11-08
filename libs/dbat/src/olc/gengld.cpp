@@ -21,58 +21,9 @@
 
 /*-------------------------------------------------------------------*/
 
-void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
+void copy_guild(struct guild_data *tgm, const struct guild_data *fgm)
 {
-  int i;
-
-  /*. Copy basic info over . */
-  guild_set_vnum(tgm, guild_get_vnum(fgm));
-  guild_set_charge(tgm, guild_get_charge(fgm));
-  guild_set_gm(tgm, guild_get_gm(fgm));
-  for (i = 0; i < SW_ARRAY_MAX; i++)
-    guild_get_with_who(tgm)
-        [i] = guild_get_with_who(fgm)[i];
-  guild_set_open(tgm, guild_get_open(fgm));
-  guild_set_close(tgm, guild_get_close(fgm));
-  guild_set_minlvl(tgm, guild_get_minlvl(fgm));
-  guild_set_func(tgm, guild_get_func(fgm));
-
-  /*. Copy the strings over . */
-  free_guild_contents(tgm);
-  guild_set_no_such_skill(tgm, str_udup(guild_get_no_such_skill(fgm)));
-  guild_set_not_enough_gold(tgm, str_udup(guild_get_not_enough_gold(fgm)));
-
-  for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    guild_set_skill(tgm, i, guild_get_skill(fgm, i));
-
-  for (i = 0; i < NUM_FEATS_DEFINED; i++)
-    guild_set_feat(tgm, i, guild_get_feat(fgm, i));
-}
-
-/*-------------------------------------------------------------------*/
-/*. Free all the character strings in a guild structure . */
-
-/* Frees what a guild holds, but not the guild itself. */
-void free_guild_contents(struct guild_data *guild)
-{
-  if (guild_get_no_such_skill(guild)) {
-    free(guild_get_no_such_skill(guild));
-    guild_set_no_such_skill(guild, nullptr);
-  }
-  if (guild_get_not_enough_gold(guild)) {
-    free(guild_get_not_enough_gold(guild));
-    guild_set_not_enough_gold(guild, nullptr);
-  }
-}
-
-/*-------------------------------------------------------------------*/
-
-/*. Free up the whole guild structure and its contents . */
-
-void free_guild(struct guild_data *guild)
-{
-  free_guild_contents(guild);
-  delete guild;
+  *tgm = *fgm;
 }
 
 /*-------------------------------------------------------------------*/
@@ -87,9 +38,9 @@ struct guild_data *find_guild(GameWorld *g, guild_vnum vnum)
 
 /* Generic string modifier for guild master messages. Returns NULL once stored, or why the message can't be used (the
  * old one is then kept). */
-const char *gedit_modify_string(char **str, char *new_g)
+const char *gedit_modify_string(std::string *str, const char *new_g)
 {
-  char *pointer;
+  const char *pointer;
   char buf[MAX_STRING_LENGTH];
 
   /*. Check the '%s' is present, if not, add it . */
@@ -103,9 +54,7 @@ const char *gedit_modify_string(char **str, char *new_g)
   if (problem)
     return problem;
 
-  if (*str)
-    free(*str);
-  *str = strdup(pointer);
+  *str = pointer;
   return nullptr;
 }
 
@@ -116,7 +65,7 @@ struct guild_data *add_guild(GameWorld *g, struct guild_data *ngld)
   struct zone_data *rznum  = find_zone_by_thing(g, guild_get_vnum(ngld));
   struct guild_data *guild = find_guild(g, guild_get_vnum(ngld));
 
-  if (!guild) /* new: copy_guild() frees the old strings of one that exists */
+  if (!guild) /* otherwise it exists, and is updated */
     guild = g->guilds.emplace(guild_get_vnum(ngld));
   copy_guild(guild, ngld);
 

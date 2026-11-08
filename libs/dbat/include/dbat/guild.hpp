@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <string>
 
 #include "dbat/guild_utils.hpp"
 #include "dbat/consts/types.hpp"
@@ -16,8 +17,8 @@ struct guild_data {
   room_vnum vnum{};                     /* number of the guild */
   int skills[SKILL_TABLE_SIZE]{};       /* array to keep track of which feats things we'll train */
   float charge{};                       /* charge * skill level = how much we'll charge */
-  char *no_such_skill{};                /* message when we don't teach that skill */
-  char *not_enough_gold{};              /* message when the student doesn't have enough gold */
+  std::string no_such_skill{};          /* message when we don't teach that skill */
+  std::string not_enough_gold{};        /* message when the student doesn't have enough gold */
   int minlvl{};                         /* Minumum level guildmaster will train */
   mob_vnum gm{};                        /* GM's vnum */
   bitvector_t with_who[GW_ARRAY_MAX]{}; /* whom we dislike */
