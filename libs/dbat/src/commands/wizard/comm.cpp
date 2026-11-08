@@ -262,7 +262,7 @@ ACMD(do_newsedit)
   send_to_char(g, ch, "@D---------------------------------------------------------@n\n");
   send_editor_help(g, char_get_desc(ch));
   skip_spaces(&argument);
-  char_get_desc(ch)->newsbuf = strdup(argument);
+  char_get_desc(ch)->newsbuf = argument;
   g->TOP_OF_NEWS       = lookup;
   g->LASTNEWS          = lookup;
   string_write(char_get_desc(ch), fields[0].buffer, 2000, 0, backstr);

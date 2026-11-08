@@ -19,7 +19,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   char fname[40], line[READ_SIZE], prev[READ_SIZE] = "";
   FILE *fl, *file;
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user)) {
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user.c_str())) {
     mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
@@ -78,7 +78,7 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, char *name)
     return;
   }
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user)) {
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user.c_str())) {
     mud_log("ERROR: Custom unable to be read from user file!");
     return;
   }
@@ -116,7 +116,7 @@ void customCreate(struct descriptor_data *d)
 
   /* Create Their Custom File */
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user))
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user.c_str()))
     return;
 
   if (!(fl = atomic_open(&af, fname, true))) {

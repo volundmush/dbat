@@ -9,12 +9,12 @@
 extern const char *const list_bonus[];
 extern const struct command_info cmd_info[];
 
-void userLoad(struct descriptor_data *d, char *name);
+void userLoad(struct descriptor_data *d, const char *name);
 bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen);
 const char *rIntro(struct char_data *ch, char *arg);
 bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg);
 void fingerUser(GameWorld *g, struct char_data *ch, char *name);
-bool readUserIndex(char *name);
+bool readUserIndex(const char *name);
 void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name);
 void command_interpreter(GameWorld *g, struct char_data *ch, char *argument);
 void nanny(GameWorld *g, struct descriptor_data *d, char *arg);

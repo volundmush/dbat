@@ -790,7 +790,7 @@ ACMD(do_rptrans)
       continue;
     if (char_is_npc(k->character))
       continue;
-    if (!strcasecmp(k->user, arg))
+    if (!strcasecmp(k->user.c_str(), arg))
       vict = k->character;
   }
   if (vict == nullptr) {

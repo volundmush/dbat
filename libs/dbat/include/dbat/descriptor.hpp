@@ -90,7 +90,7 @@ struct descriptor_data {
   char last_input[MAX_INPUT_LENGTH]{}; /* the last input			*/
   char small_outbuf[SMALL_BUFSIZE]{};  /* standard output buffer		*/
   char *output{};                      /* ptr to the current output buffer	*/
-  char **history{};                    /* History of commands, for ! mostly.	*/
+  std::string history[HISTORY_SIZE];   /* History of commands, for ! mostly.	*/
   int history_pos{};                   /* Circular array position.		*/
   int bufptr{};                        /* ptr to end of current output		*/
   int bufspace{};                      /* space left in the output buffer	*/
@@ -101,34 +101,33 @@ struct descriptor_data {
   struct descriptor_data *snooping{};  /* Who is this char snooping	*/
   struct descriptor_data *snoop_by{};  /* And who is snooping this char	*/
   struct oasis_olc_data *olc{};        /* OLC info                            */
-  char *user{};                        /* What user am I?                     */
-  char *email{};                       /* User Account Email.                 */
-  char *pass{};                        /* User Account Password.              */
-  char *loadplay{};                    /* What character am I loading?        */
+  std::string user;                    /* What user am I?                     */
+  std::string email;                   /* User Account Email.                 */
+  std::string pass;                    /* User Account Password.              */
+  std::string loadplay;                /* What character am I loading?        */
   int writenew{};                      /* What slot am I writing to?          */
   int total{};                         /* What Is My Total Character Limit?   */
   int rpp{};                           /* What is my total RPP?               */
-  char *tmp1{};
-  char *tmp2{};
-  char *tmp3{};
-  char *tmp4{};
-  char *tmp5{};
+  std::string tmp1;
+  std::string tmp2;
+  std::string tmp3;
+  std::string tmp4;
+  std::string tmp5;
   int level{};
-  char *newsbuf{};
+  std::string newsbuf;
   /*---------------Player Level Object Editing Variables-------------------*/
   int obj_editval{};
   int obj_editflag{};
-  char *obj_was{};
-  char *obj_name{};
-  char *obj_short{};
-  char *obj_long{};
+  std::string obj_was;
+  std::string obj_name;
+  std::string obj_short;
+  std::string obj_long;
   int obj_type{};
   int obj_weapon{};
   int32_t obj_point_uid{}; /* the object being restrung, by id */
   /*---------------Ship Construction Editing Variables---------------------*/
   int shipmenu{};
   int shipsize{};
-  char *ship_name{};
   int shipextra[4]{};
   int shields{};
   int armor{};
@@ -137,7 +136,7 @@ struct descriptor_data {
   /*-----------------------------------------------------------------------*/
   int user_freed{};
   int customfile{};
-  char *title{};
+  std::string title;
   int rbank{};
 };
 

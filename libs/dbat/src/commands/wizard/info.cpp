@@ -1031,7 +1031,7 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
 
     tmp = snprintf(bufptr, left,
                    "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
-                   zone->number, zone->name, zone->builders,
+                   zone->number, zone->name.c_str(), zone->builders.c_str(),
                    zone->age, zone->lifespan,
                    zone->reset_mode,
                    zone->bot, zone->top);
@@ -1062,8 +1062,8 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
 
   return snprintf(bufptr, left,
                   "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zone->number,
-                  count_color_chars(zone->name) + 30, zone->name,
-                  zone->builders, zone->bot, zone->top);
+                  count_color_chars(zone->name.c_str()) + 30, zone->name.c_str(),
+                  zone->builders.c_str(), zone->bot, zone->top);
 }
 
 ACMD(do_show)

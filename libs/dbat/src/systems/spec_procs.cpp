@@ -950,11 +950,11 @@ SPECIAL(bank)
         send_to_char(g, ch, "That person doesn't exist.\r\n");
         return (true);
       }
-      if (char_get_desc(ch)->user == nullptr) {
+      if (char_get_desc(ch)->user.empty()) {
         send_to_char(g, ch, "There is an error. Report to Iovan.");
         return (true);
       }
-      if (!strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp1) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp2) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp3) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp4) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp5)) {
+      if (!strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp1.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp2.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp3.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp4.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp5.c_str())) {
         send_to_char(g, ch, "You can not transfer money to your own offline characters...");
         if (is_file == true)
           free_char(g, vict);

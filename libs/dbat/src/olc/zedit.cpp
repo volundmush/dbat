@@ -237,9 +237,8 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_vnum room_
   /*
    * Copy all the zone header information over.
    */
-  zone->name = strdup(OLC_ZNUM(d)->name);
-  if (OLC_ZNUM(d)->builders)
-    zone->builders = strdup(OLC_ZNUM(d)->builders);
+  zone->name          = OLC_ZNUM(d)->name;
+  zone->builders      = OLC_ZNUM(d)->builders;
   zone->lifespan      = OLC_ZNUM(d)->lifespan;
   zone->bot           = OLC_ZNUM(d)->bot;
   zone->top           = OLC_ZNUM(d)->top;
@@ -410,11 +409,8 @@ static void zedit_save_internally(GameWorld *g, struct descriptor_data *d)
    * Finally, if zone headers have been changed, copy over  
    */
   if (OLC_ZONE(d)->number) {
-    free(OLC_ZNUM(d)->name);
-    free(OLC_ZNUM(d)->builders);
-
-    OLC_ZNUM(d)->name          = strdup(OLC_ZONE(d)->name);
-    OLC_ZNUM(d)->builders      = strdup(OLC_ZONE(d)->builders);
+    OLC_ZNUM(d)->name          = OLC_ZONE(d)->name;
+    OLC_ZNUM(d)->builders      = OLC_ZONE(d)->builders;
     OLC_ZNUM(d)->bot           = OLC_ZONE(d)->bot;
     OLC_ZNUM(d)->top           = OLC_ZONE(d)->top;
     OLC_ZNUM(d)->reset_mode    = OLC_ZONE(d)->reset_mode;
@@ -487,8 +483,8 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 
                OLC_NUM(d),
                OLC_ZNUM(d)->number,
-               OLC_ZONE(d)->builders ? OLC_ZONE(d)->builders : "None.",
-               OLC_ZONE(d)->name ? OLC_ZONE(d)->name : "<NONE!>",
+               OLC_ZONE(d)->builders.c_str(),
+               OLC_ZONE(d)->name.c_str(),
                OLC_ZONE(d)->lifespan,
                OLC_ZONE(d)->bot,
                OLC_ZONE(d)->top,
@@ -1401,11 +1397,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * Add new name and return to main menu.
      */
       if (genolc_checkstring(d, arg)) {
-        if (OLC_ZONE(d)->name)
-          free(OLC_ZONE(d)->name);
-        else
-          mud_log("SYSERR: OLC: ZEDIT_ZONE_NAME: no name to free!");
-        OLC_ZONE(d)->name   = strdup(arg);
+        OLC_ZONE(d)->name   = arg;
         OLC_ZONE(d)->number = 1;
       }
       zedit_disp_menu(g, d);
@@ -1417,11 +1409,7 @@ void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * Add new builders list and return to main menu.
      */
       if (genolc_checkstring(d, arg)) {
-        if (OLC_ZONE(d)->builders)
-          free(OLC_ZONE(d)->builders);
-        else
-          mud_log("SYSERR: OLC: ZEDIT_ZONE_BUILDERS: no builders list to free!");
-        OLC_ZONE(d)->builders = strdup(arg);
+        OLC_ZONE(d)->builders = arg;
         OLC_ZONE(d)->number   = 1;
       }
       zedit_disp_menu(g, d);

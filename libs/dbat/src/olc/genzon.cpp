@@ -189,9 +189,9 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
 
   zone = g->zones.emplace(vzone_num);
 
-  zone->name          = strdup("New Zone");
+  zone->name          = "New Zone";
   zone->number        = vzone_num;
-  zone->builders      = strdup("None");
+  zone->builders      = "None";
   zone->bot           = bottom;
   zone->top           = top;
   zone->lifespan      = 30;
@@ -377,11 +377,11 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
                  "%s~\n"
                  "%d %d %d %d %s %s %s %s %d %d\n",
           zone_num->number,
-          (zone_num->builders && *zone_num->builders)
-              ? zone_num->builders
+          !zone_num->builders.empty()
+              ? zone_num->builders.c_str()
               : "None.",
-          (zone_num->name && *zone_num->name)
-              ? zone_num->name
+          !zone_num->name.empty()
+              ? zone_num->name.c_str()
               : "undefined",
           genolc_zone_bottom(g, zone_num),
           zone_num->top,

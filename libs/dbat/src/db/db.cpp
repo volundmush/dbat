@@ -547,10 +547,6 @@ void destroy_db(GameWorld *g)
 #define THIS_CMD zone->cmd[itr]
 
   for (struct zone_data *zone : g->zones.all()) {
-    if (zone->name)
-      free(zone->name);
-    if (zone->builders)
-      free(zone->builders);
     if (!zone->cmd.empty()) {
       /* the variables defined in this zone own their strings */
       for (itr = 0; THIS_CMD.command != 'S'; itr++)
@@ -730,7 +726,7 @@ void boot_db(GameWorld *g)
 
   for (struct zone_data *i : g->zones.all()) {
     mud_log("Resetting #%d: %s (rooms %d-%d).", i->number,
-            i->name, i->bot, i->top);
+            i->name.c_str(), i->bot, i->top);
     reset_zone(g, i);
   }
 
@@ -2463,12 +2459,12 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
   line_num += get_line(fl, buf);
   if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
     *ptr = '\0';
-  Z.builders = strdup(buf);
+  Z.builders = buf;
 
   line_num += get_line(fl, buf);
   if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
     *ptr = '\0';
-  Z.name = strdup(buf);
+  Z.name = buf;
 
   line_num += get_line(fl, buf);
   if (version >= 2) {
@@ -2496,14 +2492,12 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
      * last one.
      */
     mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-    if (sscanf(Z.name, " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    if (sscanf(Z.name.c_str(), " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
       mud_log("SYSERR: Could not fix previous error, aborting game.");
       exit(1);
     } else {
-      free(Z.name);
-      Z.name = strdup(Z.builders);
-      free(Z.builders);
-      Z.builders = strdup("None.");
+      Z.name     = Z.builders;
+      Z.builders = "None.";
       zone_fix   = true;
     }
   }
@@ -3617,7 +3611,7 @@ void zone_update(GameWorld *g)
     if (zone->reset_mode == 2 || is_empty(g, zone)) {
       g->reset_q.erase(it);
       reset_zone(g, zone);
-      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)", zone->name, zone->number);
+      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)", zone->name.c_str(), zone->number);
       break;
     }
   }

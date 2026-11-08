@@ -25,7 +25,7 @@
 #include "nanny_internal.hpp"
 
 /* The account's character slots, numbered from 1. */
-char **account_slot(struct descriptor_data *d, int n)
+std::string *account_slot(struct descriptor_data *d, int n)
 {
   switch (n) {
     case 1:
@@ -43,21 +43,18 @@ char **account_slot(struct descriptor_data *d, int n)
 
 void set_account_slot(struct descriptor_data *d, int n, const char *name)
 {
-  char **slot = account_slot(d, n);
-
-  free(*slot);
-  *slot = strdup(name);
+  *account_slot(d, n) = name;
 }
 
 /* Empties every slot holding name (used when a character is deleted or missing). */
 void empty_account_slots_named(struct descriptor_data *d, const char *name)
 {
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-    if (!strcasecmp(name, *account_slot(d, n)))
+    if (!strcasecmp(name, account_slot(d, n)->c_str()))
       set_account_slot(d, n, "Empty");
 }
 
-bool readUserIndex(char *name)
+bool readUserIndex(const char *name)
 {
   char fname[40];
   FILE *fl;
@@ -96,7 +93,7 @@ bool lockRead(const char *name)
   return known;
 }
 
-void userLoad(struct descriptor_data *d, char *name)
+void userLoad(struct descriptor_data *d, const char *name)
 {
   char fname[40], filler[100] = "", line[256] = "";
   FILE *fl;
@@ -116,27 +113,15 @@ void userLoad(struct descriptor_data *d, char *name)
     switch (count) {
       case 1:
         sscanf(line, "%99s", filler);
-        if (d->user) {
-          free(d->user);
-          d->user = nullptr;
-        }
-        d->user = strdup(filler);
+        d->user = filler;
         break;
       case 2:
         sscanf(line, "%99s", filler);
-        if (d->email) {
-          free(d->email);
-          d->email = nullptr;
-        }
-        d->email = strdup(filler);
+        d->email = filler;
         break;
       case 3:
         sscanf(line, "%99s", filler);
-        if (d->pass) {
-          free(d->pass);
-          d->pass = nullptr;
-        }
-        d->pass = strdup(filler);
+        d->pass = filler;
         break;
       case 4:
         sscanf(line, "%d\n", &d->total);
@@ -176,20 +161,20 @@ void userCreate(struct descriptor_data *d)
 
   /* Write Their User File */
 
-  if (!get_filename(fname, sizeof(fname), USER_FILE, d->user))
+  if (!get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str()))
     return;
 
   if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save user, %s, to filename, %s.", d->user, fname);
+    mud_log("ERROR: could not save user, %s, to filename, %s.", d->user.c_str(), fname);
     return;
   }
 
   /* User's Account Name */
-  fprintf(fl, "%s\n", CAP(d->user));
+  fprintf(fl, "%s\n", CAP(d->user.data()));
   /* User's Email */
-  fprintf(fl, "%s\n", d->email);
+  fprintf(fl, "%s\n", d->email.c_str());
   /* User's Password */
-  fprintf(fl, "%s\n", d->pass);
+  fprintf(fl, "%s\n", d->pass.c_str());
   /* User's Allowed Player Total */
   fprintf(fl, "3\n");
   d->total = 3;
@@ -224,9 +209,9 @@ void userDelete(GameWorld *g, struct descriptor_data *d)
 
   char fname[40];
 
-  if (get_filename(fname, sizeof(fname), USER_FILE, d->user)) {
+  if (get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str())) {
     for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++) {
-      const char *name = *account_slot(d, n);
+      const char *name = account_slot(d, n)->c_str();
       if (strcasecmp(name, "Empty") && (player_i = get_ptable_by_name(g, name)) >= 0)
         remove_player(g, player_i);
     }
@@ -284,25 +269,25 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
     if (!d) {
       return;
     }
-    if (d->user == nullptr) {
+    if (d->user.empty()) {
       return;
     }
-    if (!get_filename(fname, sizeof(fname), USER_FILE, d->user))
+    if (!get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str()))
       return;
 
     if (!(fl = atomic_open(&af, fname, true))) {
-      mud_log("ERROR: could not save user, %s, to filename, %s.", d->user, fname);
+      mud_log("ERROR: could not save user, %s, to filename, %s.", d->user.c_str(), fname);
       return;
     }
 
     /* User's Account Name */
-    fprintf(fl, "%s\n", CAP(d->user));
+    fprintf(fl, "%s\n", CAP(d->user.data()));
 
     /* User's Email */
-    fprintf(fl, "%s\n", d->email);
+    fprintf(fl, "%s\n", d->email.c_str());
 
     /* User's Pass */
-    fprintf(fl, "%s\n", d->pass);
+    fprintf(fl, "%s\n", d->pass.c_str());
 
     /* User's Allowed Player Total */
     if (setTot <= 3 || setTot > 5) {
@@ -321,7 +306,7 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
 
     /* Write Player Slots */
     for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-      fprintf(fl, "%s\n", *account_slot(d, n) ? *account_slot(d, n) : "Empty");
+      fprintf(fl, "%s\n", !account_slot(d, n)->empty() ? account_slot(d, n)->c_str() : "Empty");
 
     fprintf(fl, "%d\n", d->level);
 
@@ -544,15 +529,15 @@ void userRead(GameWorld *g, struct descriptor_data *d)
 {
   write_to_output(g, d, "                 @RUser Menu@n\n");
   write_to_output(g, d, "@D=============================================@n\r\n");
-  write_to_output(g, d, "@D|@gUser Account  @D: @w%-27s@D|@n\n", d->user);
-  write_to_output(g, d, "@D|@gEmail Address @D: @w%-27s@D|@n\n", d->email);
+  write_to_output(g, d, "@D|@gUser Account  @D: @w%-27s@D|@n\n", d->user.c_str());
+  write_to_output(g, d, "@D|@gEmail Address @D: @w%-27s@D|@n\n", d->email.c_str());
   write_to_output(g, d, "@D|@gMax Characters@D: @w%-27d@D|@n\n", d->total);
   write_to_output(g, d, "@D|@gRP Points     @D: @w%-27d@D|@n\n", d->rpp);
   write_to_output(g, d, "@D=============================================@n\r\n\r\n");
   write_to_output(g, d, "      @D[@y----@YSelect A Character Slot@y----@D]@n\n");
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
     if (n <= 3 || d->total >= n)
-      write_to_output(g, d, "                @B(@W%d@B) @C%s@n\n", n, *account_slot(d, n));
+      write_to_output(g, d, "                @B(@W%d@B) @C%s@n\n", n, account_slot(d, n)->c_str());
   write_to_output(g, d, "\n");
   write_to_output(g, d, "      @D[@y---- @YSelect Another Option @y----@D]@n\n");
   write_to_output(g, d, "                @B(@WB@B) @CBuy New C. Slot @D(@R15 RPP@D)@n\n");

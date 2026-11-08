@@ -216,10 +216,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
    * Check for a zone.  cleanup_type is irrelevant here, free() everything.
    */
   if (OLC_ZONE(d)) {
-    if (OLC_ZONE(d)->builders)
-      free(OLC_ZONE(d)->builders);
-    if (OLC_ZONE(d)->name)
-      free(OLC_ZONE(d)->name);
     delete OLC_ZONE(d);
   }
 
@@ -405,7 +401,7 @@ bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum)
     return (true);
 
   /* always access if a player helped build the zone in the first place */
-  if (is_name(char_get_name(ch), rnum->builders))
+  if (is_name(char_get_name(ch), rnum->builders.c_str()))
     return (true);
 
   /* no access if you haven't been assigned a zone */

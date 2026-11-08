@@ -42,9 +42,8 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         tmstr                        = asctime(localtime(&mytime));
         *(tmstr + strlen(tmstr) - 1) = '\0';
 
-        fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
-        free(d->newsbuf);
-        d->newsbuf = nullptr;
+        fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf.c_str(), char_get_name(d->character), tmstr);
+        d->newsbuf.clear();
         strip_cr(*d->str.chars());
         fprintf(fl, "%s\n", *d->str.chars());
         free(*d->str.chars());

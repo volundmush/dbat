@@ -201,9 +201,9 @@ ACMD(do_rpp)
         return;
       }
       desc_set_connected(char_get_desc(ch), CON_POBJ);
-      char_get_desc(ch)->obj_name   = strdup("Generic Armor Vest");
-      char_get_desc(ch)->obj_short  = strdup("@cGeneric @DArmor @WVest@n");
-      char_get_desc(ch)->obj_long   = strdup("@wA @cgeneric @Darmor @Wvest@w is lying here@n");
+      char_get_desc(ch)->obj_name   = "Generic Armor Vest";
+      char_get_desc(ch)->obj_short  = "@cGeneric @DArmor @WVest@n";
+      char_get_desc(ch)->obj_long   = "@wA @cgeneric @Darmor @Wvest@w is lying here@n";
       char_get_desc(ch)->obj_type   = 1;
       char_get_desc(ch)->obj_weapon = 0;
       disp_custom_menu(g, char_get_desc(ch));
@@ -495,10 +495,10 @@ ACMD(do_rpp)
       snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
       snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
 
-      char_get_desc(ch)->obj_name   = strdup(thename);
-      char_get_desc(ch)->obj_was    = strdup(theshort);
-      char_get_desc(ch)->obj_short  = strdup(theshort);
-      char_get_desc(ch)->obj_long   = strdup(thelong);
+      char_get_desc(ch)->obj_name      = thename;
+      char_get_desc(ch)->obj_was       = theshort;
+      char_get_desc(ch)->obj_short     = theshort;
+      char_get_desc(ch)->obj_long      = thelong;
       char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
       char_get_desc(ch)->obj_type   = 1;
       char_get_desc(ch)->obj_weapon = 0;

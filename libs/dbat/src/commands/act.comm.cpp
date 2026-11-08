@@ -879,9 +879,9 @@ ACMD(do_tell)
         continue;
       if (char_is_npc(k->character))
         continue;
-      if (k->user == nullptr)
+      if (k->user.empty())
         continue;
-      if (found == false && !char_is_npc(ch) && (!strcasecmp(k->user, buf) || strstr(k->user, buf))) {
+      if (found == false && !char_is_npc(ch) && (!strcasecmp(k->user.c_str(), buf) || strstr(k->user.c_str(), buf))) {
         vict  = k->character;
         found = true;
       } else if (!char_is_npc(ch) && found == false && (!strcasecmp(char_get_name(k->character), buf) || strstr(char_get_name(k->character), buf)) && char_get_admlevel(k->character) > 0) {

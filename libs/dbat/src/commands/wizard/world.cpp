@@ -706,9 +706,9 @@ ACMD(do_zreset)
   }
   if (i && (can_edit_zone(g, ch, i) || char_get_admlevel(ch) > ADMLVL_IMMORT)) {
     reset_zone(g, i);
-    send_to_char(g, ch, "Reset zone #%d: %s.\r\n", i->number, i->name);
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset zone %d (%s)", char_get_name(ch), i->number, i->name);
-    log_imm_action(g, "RESET: %s has reset zone #%d: %s.", char_get_name(ch), i->number, i->name);
+    send_to_char(g, ch, "Reset zone #%d: %s.\r\n", i->number, i->name.c_str());
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset zone %d (%s)", char_get_name(ch), i->number, i->name.c_str());
+    log_imm_action(g, "RESET: %s has reset zone #%d: %s.", char_get_name(ch), i->number, i->name.c_str());
   } else
     send_to_char(g, ch, "You do not have permission to reset this zone. Try %d.\r\n", char_get_olc_zone(g, ch));
 }

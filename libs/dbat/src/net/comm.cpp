@@ -1847,7 +1847,6 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->login_time = game_now(g);
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
-  newd->history = new char *[HISTORY_SIZE]();
   /* Numbers run from 1 to 999 and wrap, skipping any still in use. */
   do {
     if (++g->last_desc == 1000)
@@ -1859,14 +1858,14 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
 /* What a connection holds before it has logged in to an account. */
 static void set_empty_account(struct descriptor_data *d)
 {
-  d->user  = strdup("Empty");
-  d->pass  = strdup("Empty");
-  d->email = strdup("Empty");
-  d->tmp1  = strdup("Empty");
-  d->tmp2  = strdup("Empty");
-  d->tmp3  = strdup("Empty");
-  d->tmp4  = strdup("Empty");
-  d->tmp5  = strdup("Empty");
+  d->user  = "Empty";
+  d->pass  = "Empty";
+  d->email = "Empty";
+  d->tmp1  = "Empty";
+  d->tmp2  = "Empty";
+  d->tmp3  = "Empty";
+  d->tmp4  = "Empty";
+  d->tmp5  = "Empty";
 }
 
 static void set_color(GameWorld *g, struct descriptor_data *d)
@@ -2313,8 +2312,8 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
 
       skip_spaces(&commandln);
       for (; cnt != starting_pos; cnt--) {
-        if (t->history[cnt] && is_abbrev(commandln, t->history[cnt])) {
-          strcpy(tmp, t->history[cnt]); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
+        if (!t->history[cnt].empty() && is_abbrev(commandln, t->history[cnt].c_str())) {
+          strcpy(tmp, t->history[cnt].c_str()); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
           strcpy(t->last_input, tmp);   /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
           write_to_output(g, t, "%s\r\n", tmp);
           break;
@@ -2327,9 +2326,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
         strcpy(t->last_input, tmp); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
     } else {
       strcpy(t->last_input, tmp); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-      if (t->history[t->history_pos])
-        free(t->history[t->history_pos]);       /* Clear the old line. */
-      t->history[t->history_pos] = strdup(tmp); /* Save the new. */
+      t->history[t->history_pos] = tmp;         /* Replace the old line. */
       if (++t->history_pos >= HISTORY_SIZE)     /* Wrap to top. */
         t->history_pos = 0;
     }
@@ -2428,18 +2425,14 @@ static void free_user(struct descriptor_data *d)
   }
   d->user_freed = 1;
 
-  if (d->user && strcasecmp(d->user, "Empty"))
-    mud_log("Freeing User: %s", d->user);
+  if (!d->user.empty() && strcasecmp(d->user.c_str(), "Empty"))
+    mud_log("Freeing User: %s", d->user.c_str());
 
-  free(d->user);
-  free(d->pass);
-  free(d->email);
-  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++) {
-    char **slot = account_slot(d, n);
-    free(*slot);
-    *slot = nullptr;
-  }
-  d->user = d->pass = d->email = nullptr;
+  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
+    account_slot(d, n)->clear();
+  d->user.clear();
+  d->pass.clear();
+  d->email.clear();
 }
 
 void close_all_sockets(GameWorld *g)
@@ -2494,25 +2487,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
   if (d->original && char_get_desc(d->original))
     char_set_desc(d->original, nullptr);
 
-  /* Clear the command history. */
-  if (d->history) {
-    int cnt;
-    for (cnt = 0; cnt < HISTORY_SIZE; cnt++)
-      if (d->history[cnt])
-        free(d->history[cnt]);
-    delete[] d->history;
-  }
-
-  if (d->obj_name)
-    free(d->obj_name);
-  if (d->obj_short)
-    free(d->obj_short);
-  if (d->obj_long)
-    free(d->obj_long);
-
   free_user(d);
-  free(d->loadplay); /* the account slot being loaded, if any */
-  d->loadplay = nullptr;
 
   /*. Kill any OLC stuff (every editor, and character creation's stat points, keep theirs in d->olc) .*/
   if (d->olc)

@@ -401,13 +401,13 @@ ACMD(do_users)
 
     snprintf(line, sizeof(line), "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
              d->original && char_get_alias(d->original) ? char_get_alias(d->original) : d->character && char_get_alias(d->character) ? char_get_alias(d->character)
-                                                                                                       : "UNDEFINED",
-             d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
+                                                                                                                                     : "UNDEFINED",
+             !d->user.empty() ? d->user.c_str() : "UNKNOWN", state, idletime, timeptr,
              "N");
     if (*d->host)
-      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN", d->host);
+      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN", d->host);
     else
-      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN");
+      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN");
 
     if (desc_get_connected(d) != CON_PLAYING) {
       snprintf(line2, sizeof(line2), "@g%s@n", line);

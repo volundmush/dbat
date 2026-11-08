@@ -4622,12 +4622,12 @@ const char *char_get_name(const struct char_data *ch)
 
 const char *char_get_title(const struct char_data *ch)
 {
-  return ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]");
+  return ((ch)->desc ? (!(ch)->desc->title.empty() ? (ch)->desc->title.c_str() : "[Unset Title]") : "@D[@GNew User@D]");
 }
 
 const char *char_get_user(const struct char_data *ch)
 {
-  return ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER");
+  return ((ch)->desc ? (!(ch)->desc->user.empty() ? (ch)->desc->user.c_str() : "NOUSER") : "NOUSER");
 }
 
 int char_get_level(const struct char_data *ch)

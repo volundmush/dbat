@@ -90,10 +90,10 @@ ACMD(do_restring)
     snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
     snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
 
-    char_get_desc(ch)->obj_name   = strdup(thename);
-    char_get_desc(ch)->obj_was    = strdup(theshort);
-    char_get_desc(ch)->obj_short  = strdup(theshort);
-    char_get_desc(ch)->obj_long   = strdup(thelong);
+    char_get_desc(ch)->obj_name      = thename;
+    char_get_desc(ch)->obj_was       = theshort;
+    char_get_desc(ch)->obj_short     = theshort;
+    char_get_desc(ch)->obj_long      = thelong;
     char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
     char_get_desc(ch)->obj_type   = 1;
     char_get_desc(ch)->obj_weapon = 0;

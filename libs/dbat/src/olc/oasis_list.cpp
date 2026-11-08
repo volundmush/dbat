@@ -128,7 +128,7 @@ ACMD(do_oasis_links)
         if (to_room != NOWHERE && (zrnum != room_get_zone(g, to_room)))
           send_to_char(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
                        room_get_zone(g, to_room)->number,
-                       room_get_zone(g, to_room)->name,
+                       room_get_zone(g, to_room)->name.c_str(),
                        nr, dirs[j], to_room);
       }
     }
@@ -330,8 +330,8 @@ static void list_zones(GameWorld *g, struct char_data *ch)
 
   for (struct zone_data *i : g->zones.all())
     send_to_char(g, ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
-                 i->number, count_color_chars(i->name) + 30, i->name,
-                 i->builders ? i->builders : "None.");
+                 i->number, count_color_chars(i->name.c_str()) + 30, i->name.c_str(),
+                 i->builders.c_str());
 }
 
 /*
@@ -404,8 +404,8 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
                "@g   Shops       = @c%d\r\n"
                "@g   Triggers    = @c%d\r\n"
                "@g   Guilds      = @c%d@n\r\n",
-               rnum->number, rnum->name,
-               rnum->builders, rnum->lifespan,
+               rnum->number, rnum->name.c_str(),
+               rnum->builders.c_str(), rnum->lifespan,
                rnum->age, rnum->bot, rnum->top,
                rnum->reset_mode ? ((rnum->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
                rnum->min_level, rnum->max_level, bits,

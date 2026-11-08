@@ -86,11 +86,12 @@ static void pay_player_count_rewards(GameWorld *g, int oldcount)
 ************************************************************************* */
 
 /* This function needs to die. */
-static bool _parse_name(char *arg, char *name)
+static bool _parse_name(const char *arg, char *name)
 {
   int i;
 
-  skip_spaces(&arg);
+  while (isspace(*arg))
+    arg++;
   for (i = 0; (*name = *arg); arg++, i++, name++)
     if (!isalpha(*arg))
       return true;
@@ -498,10 +499,9 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
       write_to_output(g, d, "Enter name: ");
       return;
     }
-    free(d->loadplay);
-    d->loadplay = strdup(arg);
+    d->loadplay = arg;
   }
-  if ((_parse_name(d->loadplay, tmp_name)) || strlen(tmp_name) < 2 ||
+  if ((_parse_name(d->loadplay.c_str(), tmp_name)) || strlen(tmp_name) < 2 ||
       strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(g, tmp_name) ||
       fill_word(strcpy(buf, tmp_name)) || reserved_word(buf)) { /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
     write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
@@ -580,9 +580,8 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
       }
     } else {
       if (d->writenew <= 0) {
-        empty_account_slots_named(d, d->loadplay);
-        free(d->loadplay);
-        d->loadplay = nullptr;
+        empty_account_slots_named(d, d->loadplay.c_str());
+        d->loadplay.clear();
         userWrite(g, d, 0, 0, 0, "index");
         userRead(g, d);
         write_to_output(g, d, "Character missing. Emptying slot.\r\n");
@@ -675,26 +674,18 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
       send_to_imm(g, "%s rejected by wizlock", CAP(arg));
       desc_set_connected(d, CON_CLOSE);
     } else {
-      if (d->user) {
-        free(d->user);
-        d->user = nullptr;
-      }
-      d->user = strdup(arg);
-      write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user);
+      d->user = arg;
+      write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user.c_str());
       write_to_output(g, d, "Yes or no: \n");
       desc_set_connected(d, CON_USER_CONF);
     }
   } else {
     if (g->circle_restrict == 101) {
-      if (d->user) {
-        free(d->user);
-        d->user = nullptr;
-      }
-      d->user = strdup(arg);
-      userLoad(d, d->user);
+      d->user = arg;
+      userLoad(d, d->user.c_str());
       if (d->level == 0) {
         write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
-        send_to_imm(g, "%s rejected by wizlock", d->user);
+        send_to_imm(g, "%s rejected by wizlock", d->user.c_str());
         desc_set_connected(d, CON_CLOSE);
       } else {
         write_to_output(g, d, "Password: \r\n");
@@ -702,10 +693,6 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
         desc_set_connected(d, CON_PASSWORD);
       }
     } else {
-      if (d->user) {
-        free(d->user);
-        d->user = nullptr;
-      }
       userLoad(d, arg);
       write_to_output(g, d, "Password: \r\n");
       send_to_imm(g, "Username, %s, logging in.", CAP(arg));
@@ -718,26 +705,22 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
 static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (!*arg) {
-    write_to_output(g, d, "You want your user name to be, %s?\r\n", d->user);
+    write_to_output(g, d, "You want your user name to be, %s?\r\n", d->user.c_str());
     write_to_output(g, d, "Yes or no: \n");
     return;
   }
   if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
-    write_to_output(g, d, "User Account, %s, created.\r\nEnter Email:\n", d->user);
+    write_to_output(g, d, "User Account, %s, created.\r\nEnter Email:\n", d->user.c_str());
     write_to_output(g, d, "Remember your email must be valid and matching the example given.\n");
     write_to_output(g, d, "[Example: iovan@@advent-truth.com]\n");
-    send_to_imm(g, "Username, %s, creating.", CAP(d->user));
+    send_to_imm(g, "Username, %s, creating.", CAP(d->user.data()));
     desc_set_connected(d, CON_GET_EMAIL);
   } else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
-    if (d->user) {
-      free(d->user);
-      d->user = nullptr;
-    }
-    d->user = strdup("Empty");
+    d->user = "Empty";
     write_to_output(g, d, "Enter Username: \n");
     desc_set_connected(d, CON_GET_USER);
   } else {
-    write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user);
+    write_to_output(g, d, "You want you user name to be, %s?\r\n", d->user.c_str());
     write_to_output(g, d, "Yes or no: \n");
     return;
   }
@@ -752,7 +735,7 @@ static bool fits_user_file(const char *value, size_t max_length)
 /* CON_GET_EMAIL */
 static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  if (readUserIndex(d->user) && !*arg) {
+  if (readUserIndex(d->user.c_str()) && !*arg) {
     write_to_output(g, d, "Email, or M for menu?\r\n");
     return;
   }
@@ -760,7 +743,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Email?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user.c_str())) {
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
@@ -769,15 +752,11 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
   } else if (!fits_user_file(arg, MAX_EMAIL_LENGTH)) {
     write_to_output(g, d, "Emails can be at most %d characters, with no spaces, and can't start with '*'. Email?\r\n", MAX_EMAIL_LENGTH);
     return;
-  } else if (readUserIndex(d->user)) {
+  } else if (readUserIndex(d->user.c_str())) {
     if (strstr(arg, "@")) {
       search_replace(arg, "@", "<AT>");
     }
-    if (d->email) {
-      free(d->email);
-      d->email = nullptr;
-    }
-    d->email = strdup(arg);
+    d->email = arg;
     userWrite(g, d, 0, 0, 0, "index");
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
@@ -786,11 +765,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
       search_replace(arg, "@", "<AT>");
     }
     write_to_output(g, d, "Your email is: %s\n", arg);
-    if (d->email) {
-      free(d->email);
-      d->email = nullptr;
-    }
-    d->email = strdup(arg);
+    d->email = arg;
     write_to_output(g, d, "Password: \r\n");
     desc_set_connected(d, CON_NEWPASSWD);
   }
@@ -799,7 +774,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_NEWPASSWD */
 static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  if (readUserIndex(d->user) && !*arg) {
+  if (readUserIndex(d->user.c_str()) && !*arg) {
     write_to_output(g, d, "Password, or M for menu?\r\n");
     return;
   }
@@ -807,35 +782,27 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Password?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user.c_str())) {
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
-  } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
+  } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user.c_str())) {
     write_to_output(g, d, "Password is too long. Password, or M for menu?\r\n");
     return;
   } else if (strlen(arg) > MAX_PWD_LENGTH) {
     write_to_output(g, d, "Password is too long. Password?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_PWD_LENGTH)) {
-    write_to_output(g, d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user) ? ", or M for menu" : "");
+    write_to_output(g, d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user.c_str()) ? ", or M for menu" : "");
     return;
-  } else if (readUserIndex(d->user)) {
+  } else if (readUserIndex(d->user.c_str())) {
     write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
-    if (d->pass) {
-      free(d->pass);
-      d->pass = nullptr;
-    }
-    d->pass = strdup(arg);
+    d->pass = arg;
     userWrite(g, d, 0, 0, 0, "index");
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else {
     write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
-    if (d->pass) {
-      free(d->pass);
-      d->pass = nullptr;
-    }
-    d->pass = strdup(arg);
+    d->pass = arg;
     userCreate(d);
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
@@ -852,24 +819,20 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (!strcasecmp("return", arg)) {
-    if (d->user) {
-      free(d->user);
-      d->user = nullptr;
-    }
-    d->user = strdup("Empty");
+    d->user = "Empty";
     write_to_output(g, d, "Username?\r\n");
     desc_set_connected(d, CON_GET_USER);
     return;
   }
-  if (!strcasecmp(d->pass, arg)) {
+  if (!strcasecmp(d->pass.c_str(), arg)) {
     for (descriptor_data *k : each_desc(g)) {
       if (k == d)
         continue;
-      if (!k->user)
+      if (k->user.empty())
         continue;
-      if (!d->user)
+      if (d->user.empty())
         continue;
-      if (!strcasecmp(k->user, d->user)) {
+      if (!strcasecmp(k->user.c_str(), d->user.c_str())) {
         if (desc_get_connected(k) == CON_PLAYING) {
           desc_set_connected(k, CON_DISCONNECT);
           write_to_output(g, k, "Your account has been usurped by someone who knows its password!@n");
@@ -882,12 +845,12 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else {
-    send_to_imm(g, "Username, %s, password failure!", CAP(d->user));
-    mud_log("%s BAD PASSWORD from [%s]", CAP(d->user), d->host);
+    send_to_imm(g, "Username, %s, password failure!", CAP(d->user.data()));
+    mud_log("%s BAD PASSWORD from [%s]", CAP(d->user.data()), d->host);
     /* counted per connection, so switching usernames does not reset it */
     if (++d->bad_pws >= CONFIG_MAX_BAD_PWS) {
       write_to_output(g, d, "Too many wrong passwords. Disconnecting.\r\n");
-      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user.data()));
       desc_set_connected(d, CON_CLOSE);
       return;
     }
@@ -930,7 +893,7 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
     write_to_output(g, d, "You only have %d character slots avaialable!\r\n", d->total);
     return;
   }
-  name = *account_slot(d, n);
+  name = account_slot(d, n)->c_str();
   if (!strcasecmp(name, "Empty")) {
     write_to_output(g, d, "Enter New Character Name: \n");
     d->writenew = n;
@@ -939,8 +902,7 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
     write_to_output(g, d, "That character has been locked out for rule violations. Play another character.\n");
   } else {
     write_to_output(g, d, "Loading character, %s.\r\n***Press Return***\n", name);
-    free(d->loadplay);
-    d->loadplay = strdup(name);
+    d->loadplay = name;
     d->writenew = 0;
     desc_set_connected(d, CON_GET_NAME);
   }
@@ -1182,7 +1144,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
       write_to_output(g, d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
       d->rpp += refund;
     }
-    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user.c_str(), char_get_name(d->character), char_get_level(d->character));
 
     empty_account_slots_named(d, char_get_name(d->character));
     userWrite(g, d, 0, 0, 0, "index");

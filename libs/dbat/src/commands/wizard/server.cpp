@@ -274,7 +274,7 @@ static bool write_copyover_file(GameWorld *g)
     else if (char_get_was_in_room(player) > 1)
       room = char_get_was_in_room(player);
     fprintf(fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
-            d->user && *d->user ? d->user : "Empty");
+            !d->user.empty() ? d->user.c_str() : "Empty");
   }
 
   /* After the end marker, so that an older server ignores it. What else outlives the process goes here. */
