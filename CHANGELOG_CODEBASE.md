@@ -28,6 +28,8 @@
 - A zone's name and builders are `std::string`s, as are a connection's account fields (user, email, password, character slots, the character being loaded), the restring fields, the news being written, its title and its command history (`std::string history[HISTORY_SIZE]`); `account_slot()` gives a `std::string *`. An empty one is what a null was. The unused `ship_name` is gone. [Volund]
 - A shop's messages are `std::string`s, and what it sells, where it is and what it buys (with each type's keywords a `std::string`) are `std::vector`s rather than arrays ended by -1, so copying a shop is a plain copy: `free_shop()`, `free_shop_contents()` and the shop list helpers (`add_to_int_list()` and the rest) are gone. The getters `shop_get_product()`, `shop_get_room()` and `shop_get_buy_type()` give way to `shop_products()`, `shop_rooms()` and `shop_buy_types()`. [Volund]
 - A guild's two messages are `std::string`s, so copying a guild is a plain copy and `free_guild()` and `free_guild_contents()` are gone. A guild being edited is now freed with its messages when the edit is saved. [Volund]
+- A saved object with a negative unique id (other than -1, which means none yet) is given a new one, with a SYSERR, instead of being filed under a negative index in the unique id table. [Volund]
+- A help keyword with an opening quote and no closing one no longer makes `one_word()` read past the end of the line, which could make the help table too small for what was loaded into it. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3

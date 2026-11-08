@@ -3368,7 +3368,7 @@ void add_unique_id(GameWorld *g, struct obj_data *obj)
   int i;
   if (!g->obj_unique_hash_pools)
     init_obj_unique_hash(g);
-  if (obj_get_unique_id(obj) == -1) {
+  if (obj_get_unique_id(obj) < 0) { /* none yet: circle_random() is below 2^31, so a new one is never negative */
     if (sizeof(long long) > sizeof(long))
       obj_set_unique_id(obj, (((long long)circle_random(g)) << (sizeof(long long) * 4)) +
                        circle_random(g));
@@ -3444,7 +3444,7 @@ static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_dat
 void check_unique_id(GameWorld *g, struct obj_data *obj)
 {
   struct obj_unique_hash_elem *elem;
-  if (!obj || obj_get_unique_id(obj) == -1)
+  if (!obj || obj_get_unique_id(obj) < 0) /* -1 for none; no real one is negative */
     return;
   elem = g->obj_unique_hash_pools[obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS];
   while (elem) {

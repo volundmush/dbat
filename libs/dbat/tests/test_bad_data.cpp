@@ -26,6 +26,7 @@
 #include "dbat/game_world.hpp"
 #include "dbat/genwld.hpp"
 #include "dbat/handler.hpp"
+#include "dbat/help.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -402,6 +403,24 @@ static void check_too_many_applies_on_a_saved_object(void)
   th_shutdown(g);
 }
 
+static void check_saved_object_with_a_negative_unique_id(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  char path[256];
+
+  /* -1 means none yet, but no real unique id is negative, and a pool can't be found from one that is */
+  save_path("plrobjs", "new", "tester", path, sizeof(path));
+  write_file(path, "1\n#350\n0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\nU\n-38995189\n$~\n");
+  Crash_load(g, ch);
+  struct obj_data *obj = first_obj(g, char_get_inventory(ch));
+  CHECK(obj && obj_get_unique_id(obj) >= 0);
+  while (char_get_inventory(ch))
+    extract_obj(g, first_obj(g, char_get_inventory(ch)));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 /* ------ world files ------ */
 
 static void empty_socials(void)
@@ -647,6 +666,24 @@ static void check_long_word_in_socials(void)
 static void long_word_in_index(void)
 {
   write_long_word_line("world/shp/index", "", "\n$\n");
+}
+
+/* The first keywords leave words behind in the buffer, for an unfinished quote to run on into. */
+static void help_keyword_with_an_unfinished_quote(void)
+{
+  write_file("text/help/help.hlp", "t aaa bbb ccc ddd\nFirst.\n#0\n\"re.\nSecond.\n#0\n$\n");
+}
+
+static void check_help_keyword_with_an_unfinished_quote(void)
+{
+  th_before_boot(help_keyword_with_an_unfinished_quote);
+  GameWorld *g = th_boot();
+
+  /* t, aaa, bbb, ccc, ddd, and what follows the quote; top_of_helpt is the last one's index */
+  CHECK(g->top_of_helpt == 5);
+  for (int i = 0; i <= g->top_of_helpt; i++)
+    CHECK(strcmp(g->help_table[i].keywords, "bb") && strcmp(g->help_table[i].keywords, "a"));
+  th_shutdown(g);
 }
 
 static void check_long_word_in_index(void)
@@ -937,6 +974,7 @@ static const struct {
     {"remote_display_survives_a_load",              check_remote_display_survives_a_load             },
     {"no_object_file_is_no_problem",                check_no_object_file_is_no_problem               },
     {"too_many_applies_on_a_saved_object",          check_too_many_applies_on_a_saved_object         },
+    {"saved_object_with_a_negative_unique_id",      check_saved_object_with_a_negative_unique_id     },
     {"boot_with_no_socials",                        check_boot_with_no_socials                       },
     {"index_without_an_end",                        check_index_without_an_end                       },
     {"guild_with_impossible_numbers",               check_guild_with_impossible_numbers              },
@@ -951,6 +989,7 @@ static const struct {
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },
     {"long_word_in_socials",                        check_long_word_in_socials                       },
     {"long_word_in_index",                          check_long_word_in_index                         },
+    {"help_keyword_with_an_unfinished_quote",       check_help_keyword_with_an_unfinished_quote      },
     {"more_affects_than_a_save_holds",              check_more_affects_than_a_save_holds             },
     {"message_about_an_object_with_no_description", check_message_about_an_object_with_no_description},
     {"saying_something_to_someone",                 check_saying_something_to_someone                },

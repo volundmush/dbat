@@ -700,6 +700,12 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
               {
                 int64_t uid = obj_get_unique_id(temp);
                 sscanf(line, "%" SCNd64, &uid);
+                /* -1 is an object not yet given one; no real one is negative. */
+                if (uid < -1) {
+                  mud_log("SYSERR: Object #%d has unique id %" PRId64 ", which can't be; giving it a new one.",
+                          obj_get_vnum(g, temp), uid);
+                  uid = -1;
+                }
                 obj_set_unique_id(temp, uid);
               }
               get_line(fl, line);

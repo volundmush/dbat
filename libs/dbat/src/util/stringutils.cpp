@@ -169,7 +169,8 @@ char *one_word(char *argument, char *first_arg)
       *(first_arg++) = tolower(*argument);
       argument++;
     }
-    argument++;
+    if (*argument) /* the closing quote, if the word has one */
+      argument++;
   } else {
     while (*argument && !isspace(*argument)) {
       *(first_arg++) = tolower(*argument);
