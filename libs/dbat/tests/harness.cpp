@@ -121,6 +121,9 @@ GameWorld *th_boot_at(time_t when)
   return boot_here(when, "w");
 }
 
+/* The world booted last and not yet shut down, for th_abandon() */
+static GameWorld *current_world;
+
 /* Boots from the current directory. */
 static GameWorld *boot_here(time_t when, const char *log_mode)
 {
@@ -133,6 +136,7 @@ static GameWorld *boot_here(time_t when, const char *log_mode)
   }
 
   g = game_world_create();
+  current_world  = g;
   g->pinned_time = when;
   CONFIG_CONFFILE = strdup(CONFIG_FILE);
   load_config(g);
@@ -150,6 +154,8 @@ static void free_game(GameWorld *g)
   game_world_free_contents(g);
   free(CONFIG_CONFFILE);
   game_world_destroy(g);
+  if (g == current_world)
+    current_world = nullptr;
   fclose(logfile);
   logfile = nullptr;
 }
@@ -172,6 +178,12 @@ void th_before_boot(void (*hook)(void))
 
 void th_abandon(void)
 {
+  /* Half booted, or stopped mid-pulse, its contents can't be taken apart safely; deleting the world frees its tables
+   * and rooms, which were most of what each refused input used to leak. */
+  if (current_world) {
+    game_world_destroy(current_world);
+    current_world = nullptr;
+  }
   if (logfile) {
     fclose(logfile);
     logfile = nullptr;

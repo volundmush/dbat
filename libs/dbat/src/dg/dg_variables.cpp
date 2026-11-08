@@ -400,10 +400,10 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         else
           strcpy(str, "0");
       } else if (!strcasecmp(field, "follower")) {
-        if (!char_get_followers(c) || !char_get_followers(c)->follower)
+        if (!char_get_followers(c))
           *str = '\0';
         else
-          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_followers(c)->follower));
+          snprintf(str, slen, "%c%ld", UID_CHAR, char_get_followers(c).newest());
       }
       break;
     case 'g':

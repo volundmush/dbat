@@ -132,12 +132,6 @@ struct mob_special_data {
   int8_t damsizedice{}; /* The size of the damage dice's           */
 };
 
-/* Structure used for chars following other chars */
-struct follow_type {
-  struct char_data *follower{};
-  struct follow_type *next{};
-};
-
 struct char_data {
   int32_t id{};    /* used by DG triggers			*/
   int32_t idnum{}; /* player's idnum; -1 for mobiles	*/
@@ -207,11 +201,9 @@ struct char_data {
   struct script_data *script{};   /* script info for the object		*/
   struct script_memory *memory{}; /* for mob memory triggers		*/
 
-  struct char_data *next_fighting{};
   /* For fighting list			*/
-  struct char_data *next_affect{}; /* For affect wearoff			*/
 
-  struct follow_type *followers{}; /* List of chars followers		*/
+  id_list followers;               /* the characters following it, newest first */
   int32_t master_uid{};            /* Who is char following?		*/
   int32_t master_id{};
 

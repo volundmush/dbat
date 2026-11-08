@@ -34,11 +34,7 @@ static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch, st
 void affect_update(GameWorld *g)
 {
   struct affected_type *af, *next;
-  struct char_data *i, *next_char;
-
-  for (i = g->affect_list; i; i = next_char) {
-    /* affect_remove() clears this when someone's last affect ends, so it must be read first */
-    next_char = char_get_next_affect(i);
+  for (char_data *i : each_affected(g)) {
     for (af = char_get_affected(i); af; af = next) {
       next = af->next;
       if (af->duration >= 1)

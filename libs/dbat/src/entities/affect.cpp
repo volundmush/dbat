@@ -301,10 +301,8 @@ void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af
 
   affected_alloc = new affected_type();
 
-  if (!char_get_affected(ch)) {
-    char_set_next_affect(ch, g->affect_list);
-    g->affect_list     = ch;
-  }
+  if (!char_get_affected(ch))
+    g->affect_list.add(char_get_id(ch), ch);
   *affected_alloc      = *af;
   affected_alloc->next = char_get_affected(ch);
   char_set_affected(ch, affected_alloc);
@@ -333,7 +331,6 @@ void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af)
   affect_total(g, ch);
   if (!char_get_affected(ch)) {
     char_unlink_from_affect_list(g, ch);
-    char_set_next_affect(ch, nullptr);
   }
 }
 

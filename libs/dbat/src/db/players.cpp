@@ -379,7 +379,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
     char_set_time_maxage(ch, 0);
     char_set_time_created(ch, 0);
     char_set_time_birth(ch, 0);
-    char_set_followers(ch, nullptr);
+    char_followers_slot(ch)->clear();
     for (i = 0; i < NUM_COLOR; i++)
       char_get_player_specials(ch)->color_choices[i] = nullptr;
 

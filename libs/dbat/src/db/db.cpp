@@ -2837,7 +2837,6 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   mob = new char_data();
   clear_char(mob);
   *mob = (*mob_proto_of(g, i));
-  char_set_next_affect(mob, nullptr);
 
   if (char_is_hoshijin(mob) && char_get_sex(mob) == SEX_MALE) {
     char_set_hairl(mob, 0);
@@ -4141,19 +4140,6 @@ char *fread_string(FILE *fl, const char *error)
   return text;
 }
 
-/* Called to free all allocated follow_type structs - Update by Jamie Nelson */
-static void free_followers(struct follow_type *k)
-{
-  if (!k)
-    return;
-
-  if (k->next)
-    free_followers(k->next);
-
-  k->follower = nullptr;
-  delete k;
-}
-
 /* release memory allocated for a char struct */
 void free_char(GameWorld *g, struct char_data *ch)
 {
@@ -4228,13 +4214,14 @@ void free_char(GameWorld *g, struct char_data *ch)
   if (char_get_script(ch))
     extract_script(g, ch, MOB_TRIGGER);
 
-  /* new version of free_followers take the followers pointer as arg */
-  free_followers(char_get_followers(ch));
+  char_followers_slot(ch)->clear();
 
   if (char_get_desc(ch))
     char_get_desc(ch)->character = nullptr;
 
   char_unregister(g, ch); /* if it is the one registered under its id */
+  char_unlink_from_combat_list(g, ch);
+  char_unlink_from_affect_list(g, ch);
 
   delete ch;
 }
@@ -4329,11 +4316,10 @@ void reset_char(GameWorld *g, struct char_data *ch)
   for (i = 0; i < NUM_WEARS; i++)
     char_set_equipment(ch, i, nullptr);
 
-  char_set_followers(ch, nullptr);
+  char_followers_slot(ch)->clear();
   char_set_master(ch, nullptr);
   char_set_in_room(ch, NOWHERE);
   char_inventory_slot(ch)->clear();
-  char_set_next_fighting(ch, nullptr);
   char_set_fighting(ch, nullptr);
   char_set_position(ch, POS_STANDING);
   char_set_mob_specials_default_pos(ch, POS_STANDING);

@@ -203,7 +203,6 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
 {
   const char *name = char_get_name(ch);
   room_vnum room   = char_get_in_room(ch);
-  size_t limit     = a->objects.count + 1;
   struct char_data *other;
 
   if (room != NOWHERE && !valid_room(g, room))
@@ -244,17 +243,15 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
     problem(a, "%s: follows someone who isn't in the game", name);
   audit_character_links(g, a, ch);
   audit_character_values(g, a, ch);
-  limit = a->characters.count + 1;
-  for (struct follow_type *f = char_get_followers(ch); f; f = f->next) {
-    if (!limit--) {
-      problem(a, "%s: the list of followers loops", name);
-      break;
-    }
-    if (!set_has(&a->characters, f->follower))
+  if (char_get_followers(ch).has_duplicates())
+    problem(a, "%s: lists a follower twice", name);
+  char_get_followers(ch).each([&](long id) {
+    struct char_data *f = char_by_id(g, id);
+    if (!f)
       problem(a, "%s: is followed by someone who isn't in the game", name);
-    else if (char_get_master(g, f->follower) != ch)
-      problem(a, "%s: lists %s as a follower, who says otherwise", name, char_get_name(f->follower));
-  }
+    else if (char_get_master(g, f) != ch)
+      problem(a, "%s: lists %s as a follower, who says otherwise", name, char_get_name(f));
+  });
 }
 
 static bool list_has_object(const id_list &list, const struct obj_data *obj)
@@ -407,7 +404,6 @@ static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
 int world_audit(GameWorld *g, world_audit_report *report, void *context)
 {
   struct audit a = {.report = report, .context = context};
-  size_t limit;
 
   collect(g, &a);
   audit_rooms(g, &a);
@@ -423,32 +419,26 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
       problem(&a, "%s: registered as id %ld, but says id %d", obj_get_short_description(obj), id, obj_get_id(obj));
   });
 
-  limit = a.characters.count + 1;
-  for (struct char_data *ch = g->combat_list; ch; ch = char_get_next_fighting(ch)) {
-    if (!limit--) {
-      problem(&a, "the combat list loops");
-      break;
-    }
-    if (!set_has(&a.characters, ch)) {
-      problem(&a, "the combat list holds someone who isn't in the game");
-      break;
-    }
-    if (!char_get_fighting(g, ch))
+  bool stray = false;
+  g->combat_list.visit([&](long id, struct char_data *ch) {
+    if (!set_has(&a.characters, ch))
+      stray = true;
+    else if (char_get_id(ch) != id)
+      problem(&a, "%s: in the combat list as id %ld, but says id %d", char_get_name(ch), id, char_get_id(ch));
+    else if (!char_get_fighting(g, ch))
       problem(&a, "%s: is in the combat list, but isn't fighting", char_get_name(ch));
-  }
+  });
+  if (stray)
+    problem(&a, "the combat list holds someone who isn't in the game");
 
-  limit = a.characters.count + 1;
-  for (struct char_data *ch = g->affect_list; ch; ch = char_get_next_affect(ch)) {
-    if (!limit--) {
-      problem(&a, "the affect list loops");
-      break;
-    }
+  stray = false;
+  g->affect_list.visit([&](long, struct char_data *ch) {
     /* someone who has just quit stays attached to their connection, affects and all, at the menu */
-    if (!set_has(&a.characters, ch) && !held_by_a_connection(g, ch)) {
-      problem(&a, "the affect list holds someone who isn't in the game");
-      break;
-    }
-  }
+    if (!set_has(&a.characters, ch) && !held_by_a_connection(g, ch))
+      stray = true;
+  });
+  if (stray)
+    problem(&a, "the affect list holds someone who isn't in the game");
 
   g->descriptors.visit([&](long, struct descriptor_data *d) {
     if (d->character && desc_get_connected(d) == CON_PLAYING && !set_has(&a.characters, d->character))

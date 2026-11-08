@@ -910,8 +910,7 @@ ACMD(do_mtransform)
     char_set_proto_script(&tmpmob, char_get_proto_script(ch));
     char_set_script(&tmpmob, char_get_script(ch));
     char_set_memory(&tmpmob, char_get_memory(ch));
-    char_set_next_fighting(&tmpmob, char_get_next_fighting(ch));
-    char_set_followers(&tmpmob, char_get_followers(ch));
+    *char_followers_slot(&tmpmob) = char_get_followers(ch);
     char_set_master(&tmpmob, char_get_master(g, ch));
 
     char_set_was_in_room(&tmpmob, char_get_was_in_room(ch));
@@ -974,7 +973,6 @@ ACMD(do_mfollow)
 {
   char buf[MAX_INPUT_LENGTH];
   struct char_data *leader;
-  struct follow_type *j, *k;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
@@ -1004,17 +1002,7 @@ ACMD(do_mfollow)
 
   /* stop following someone else first */
   if (char_get_master(g, ch)) {
-    if (char_get_followers(char_get_master(g, ch))->follower == ch) { /* Head of follower-list? */
-      k = char_get_followers(char_get_master(g, ch));
-      char_set_followers(char_get_master(g, ch), k->next);
-      delete k;
-    } else { /* locate follower who is not head of list */
-      for (k = char_get_followers(char_get_master(g, ch)); k->next->follower != ch; k = k->next);
-
-      j       = k->next;
-      k->next = j->next;
-      delete j;
-    }
+    char_followers_slot(char_get_master(g, ch))->remove(char_get_id(ch));
     char_set_master(ch, nullptr);
   }
 
@@ -1027,12 +1015,7 @@ ACMD(do_mfollow)
   }
 
   char_set_master(ch, leader);
-
-  k = new follow_type();
-
-  k->follower       = ch;
-  k->next           = char_get_followers(leader);
-  char_set_followers(leader, k);
+  char_followers_slot(leader)->add(char_get_id(ch));
 }
 
 /* prints the message to everyone in the range of numbers */

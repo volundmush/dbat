@@ -21,7 +21,6 @@ static void finish_character_extractions(GameWorld *g);
 
 void extract_char_final(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *k, *temp;
   struct obj_data *chair;
   struct obj_data *obj;
   int i;
@@ -193,11 +192,9 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
 
-  for (k = g->combat_list; k; k = temp) {
-    temp = char_get_next_fighting(k);
+  for (char_data *k : each_fighting(g))
     if (char_get_fighting(g, k) == ch)
       stop_fighting(g, k);
-  }
 
   char_from_room(g, ch);
 

@@ -685,7 +685,7 @@ static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
   affect_to_char(g, ch, &permanent);
   affect_to_char(g, other, &lasting);
   affect_to_char(g, ending, &short_lived);
-  CHECK(g->affect_list == ending);
+  CHECK(g->affect_list.newest() == ending);
   th_take_output(g, ch);
 
   affect_update(g);

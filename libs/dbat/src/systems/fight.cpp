@@ -1459,8 +1459,7 @@ void set_fighting(GameWorld *g, struct char_data *ch, struct char_data *vict)
   if (char_get_fighting(g, ch)) /* they carry on with whoever they were already fighting */
     return;
 
-  char_set_next_fighting(ch, g->combat_list);
-  g->combat_list       = ch;
+  g->combat_list.add(char_get_id(ch), ch);
 
   char_set_fighting(ch, vict);
 
@@ -1478,15 +1477,11 @@ void set_fighting(GameWorld *g, struct char_data *ch, struct char_data *vict)
 void stop_fighting(GameWorld *g, struct char_data *ch)
 {
 
-  if (ch == g->next_combat_list)
-    g->next_combat_list = char_get_next_fighting(ch);
-
   if (char_is_npc(ch)) {
     char_set_combo(ch, -1);
     char_set_combhits(ch, 0);
   }
   char_unlink_from_combat_list(g, ch);
-  char_set_next_fighting(ch, nullptr);
   char_set_fighting(ch, nullptr);
   if (char_aff_flagged(ch, AFF_POSITION)) {
     char_aff_set(ch, AFF_POSITION, false);
@@ -1895,7 +1890,6 @@ typedef enum DeathType : uint8_t {
 
 void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
 {
-  struct char_data *k, *temp;
 
   if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
@@ -2064,11 +2058,9 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     if (char_get_fighting(g, ch))
       stop_fighting(g, ch);
 
-    for (k = g->combat_list; k; k = temp) {
-      temp = char_get_next_fighting(k);
+    for (char_data *k : each_fighting(g))
       if (char_get_fighting(g, k) == ch)
         stop_fighting(g, k);
-    }
 
     bool android_lose    = true;
     DeathType death_type = Afterlife;

@@ -1355,31 +1355,33 @@ ACMD(do_show)
       break;
 
     case 15:
-    case 16:
+    case 16: {
+      std::vector<struct char_data *> victs; /* everyone affected, newest first, or the one asked about */
       if (!*value) {
-        low  = 1;
-        vict = g->affect_list;
+        low = 1;
+        g->affect_list.visit([&](long, struct char_data *affected) { victs.push_back(affected); });
       } else {
         low = 0;
         if (!(vict = get_char_world_vis(g, ch, value, nullptr))) {
           send_to_char(g, ch, "Cannot find that character.\r\n");
           return;
         }
+        victs.push_back(vict);
       }
-      k = MAX_STRING_LENGTH;
-      strp    = str_alloc(k);
-      strp[0] = j = 0;
-      if (!vict) {
+      if (victs.empty()) {
         send_to_char(g, ch, "None.\r\n");
         return;
       }
-      do {
+      k       = MAX_STRING_LENGTH;
+      strp    = str_alloc(k);
+      strp[0] = j = 0;
+      for (struct char_data *who : victs) {
         if ((k - j) < (MAX_INPUT_LENGTH * 8)) {
           k *= 2;
           strp = str_realloc(strp, k);
         }
-        j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(vict));
-        aff = char_get_affected(vict);
+        j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(who));
+        aff = char_get_affected(who);
         for (; aff; aff = aff->next) {
           j += snprintf(strp + j, k - j, "SPL: (%3d%s) @c%-21s@n ", aff->duration + 1,
                         (l == 15) ? "hr" : "rd", skill_name(g, aff->type));
@@ -1397,11 +1399,10 @@ ACMD(do_show)
           }
           j += snprintf(strp + j, k - j, "\r\n");
         }
-        vict = char_get_next_affect(vict);
-      } while (low && vict);
+      }
       send_to_char(g, ch, "%s", strp);
       free(strp);
-      break;
+    } break;
 
     /* show what? */
     default:

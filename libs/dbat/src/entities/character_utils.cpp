@@ -3631,8 +3631,6 @@ bool circle_follow(GameWorld *g, struct char_data *ch, struct char_data *victim)
 /* This will NOT do if a character quits/dies!!          */
 void stop_follower(GameWorld *g, struct char_data *ch)
 {
-  struct follow_type *j, *k;
-
   if (char_get_master(g, ch) == nullptr) {
     core_dump();
     return;
@@ -3646,18 +3644,7 @@ void stop_follower(GameWorld *g, struct char_data *ch)
   if (has_group(g, ch))
     char_set_combatexpertise(ch, 0);
 
-  if (char_get_master(g, ch)->followers->follower == ch) { /* Head of follower-list? */
-    k                                 = char_get_master(g, ch)->followers;
-    char_get_master(g, ch)->followers = k->next;
-    delete k;
-  } else { /* locate follower who is not head of list */
-    for (k = char_get_master(g, ch)->followers; k->next->follower != ch; k = k->next);
-
-    j       = k->next;
-    k->next = j->next;
-    delete j;
-  }
-
+  char_followers_slot(char_get_master(g, ch))->remove(char_get_id(ch));
   char_set_master(ch, nullptr);
 }
 
@@ -3677,20 +3664,13 @@ void die_follower(GameWorld *g, struct char_data *ch)
 /* will arise. CH will follow leader                               */
 void add_follower(GameWorld *g, struct char_data *ch, struct char_data *leader)
 {
-  struct follow_type *k;
-
   if (char_get_master(g, ch)) {
     core_dump();
     return;
   }
 
   char_set_master(ch, leader);
-
-  k = new follow_type();
-
-  k->follower       = ch;
-  k->next           = leader->followers;
-  leader->followers = k;
+  char_followers_slot(leader)->add(char_get_id(ch));
 
   act(g, "You now follow $N.", false, ch, nullptr, leader, TO_CHAR);
   if (char_get_in_room(ch) != NOWHERE && char_get_in_room(leader) != NOWHERE && char_can_see(g, leader, ch)) {
@@ -7454,14 +7434,14 @@ void char_set_energy(struct char_data *ch, double v)
   ch->energy = v;
 }
 
-struct follow_type *char_get_followers(const struct char_data *ch)
+const id_list &char_get_followers(const struct char_data *ch)
 {
   return ch->followers;
 }
 
-void char_set_followers(struct char_data *ch, struct follow_type *v)
+id_list *char_followers_slot(struct char_data *ch)
 {
-  ch->followers = v;
+  return &ch->followers;
 }
 
 int char_get_gooptime(const struct char_data *ch)
@@ -7574,25 +7554,7 @@ void char_set_mobcharge(struct char_data *ch, int v)
   ch->mobcharge = v;
 }
 
-struct char_data *char_get_next_affect(const struct char_data *ch)
-{
-  return ch->next_affect;
-}
 
-void char_set_next_affect(struct char_data *ch, struct char_data *v)
-{
-  ch->next_affect = v;
-}
-
-struct char_data *char_get_next_fighting(const struct char_data *ch)
-{
-  return ch->next_fighting;
-}
-
-void char_set_next_fighting(struct char_data *ch, struct char_data *v)
-{
-  ch->next_fighting = v;
-}
 
 struct player_special_data *char_get_player_specials(const struct char_data *ch)
 {
@@ -7881,16 +7843,12 @@ struct obj_data **char_get_equipment_array(struct char_data *ch)
 
 void char_unlink_from_affect_list(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *temp;
-
-  REMOVE_FROM_LIST(ch, g->affect_list, next_affect, temp);
+  g->affect_list.remove(char_get_id(ch), ch);
 }
 
 void char_unlink_from_combat_list(GameWorld *g, struct char_data *ch)
 {
-  struct char_data *temp;
-
-  REMOVE_FROM_LIST(ch, g->combat_list, next_fighting, temp);
+  g->combat_list.remove(char_get_id(ch), ch);
 }
 
 void char_reset_aff_abils(struct char_data *ch)

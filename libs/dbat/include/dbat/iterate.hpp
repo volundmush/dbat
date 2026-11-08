@@ -162,6 +162,19 @@ inline auto each_obj(GameWorld *g)
   return s;
 }
 
+/* Everyone in g->combat_list or g->affect_list, newest first; one who has left it by their turn is passed over. These
+ * are found through the list itself, not by id: a player at the menu is unregistered, but their affects still wear
+ * off. free_char() takes everyone out of both lists. */
+inline auto each_member_of(const id_table<char_data> *list)
+{
+  auto s = dbat_iter::make_snapshot<char_data, int>([list](long id) { return list->find(id); },
+                                                    [](const char_data *) { return 0; });
+  list->visit([&s](long id, const char_data *) { s.add(id, 0); });
+  return s;
+}
+inline auto each_fighting(GameWorld *g) { return each_member_of(&g->combat_list); }
+inline auto each_affected(GameWorld *g) { return each_member_of(&g->affect_list); }
+
 /* Every connection, playing or not. */
 inline auto each_desc(GameWorld *g)
 {
@@ -290,8 +303,10 @@ inline auto char_followers(GameWorld *g, const char_data *ch)
     return m ? static_cast<long>(char_get_id(m)) : 0L;
   };
   auto s = dbat_iter::make_snapshot<char_data, long>([g](long id) { return char_by_id(g, id); }, master_id);
-  for (follow_type *f = char_get_followers(ch); f; f = f->next)
-    s.add(char_get_id(f->follower), master_id(f->follower));
+  char_get_followers(ch).each([&](long id) {
+    if (const char_data *f = char_by_id(g, id))
+      s.add(id, master_id(f));
+  });
   return s;
 }
 

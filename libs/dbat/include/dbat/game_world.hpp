@@ -27,9 +27,8 @@ struct GameWorld {
   id_table<char_data> characters;         /* every NPC and PC in the game, by id */
   id_table<obj_data> objects;             /* every object in the game, by id */
   std::vector<struct obj_data *> extracted_objects; /* out of the game, waiting for finish_extractions() */
-  struct char_data *affect_list{};
-  struct char_data *combat_list{};
-  struct char_data *next_combat_list{};
+  id_table<char_data> affect_list;                  /* everyone with an affect to wear off, newest first */
+  id_table<char_data> combat_list;                  /* everyone fighting, newest first */
   vnum_table<index_data, mob_vnum> mob_index; /* mob prototypes, by vnum */
   vnum_table<char_data, mob_vnum> mob_proto;
   long max_mob_id{};
