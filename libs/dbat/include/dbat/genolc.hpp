@@ -19,8 +19,6 @@ void strip_cr(char *);
 bool save_all(GameWorld *g);
 char *str_udup(const char *);
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
-void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);
-void free_ex_descriptions(struct extra_descr_data *head);
 int sprintascii(char *out, bitvector_t bits);
 void free_save_list(GameWorld *g);
 

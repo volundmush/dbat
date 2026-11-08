@@ -270,17 +270,13 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
         }
       }
 
-      if (room_get_ex_description(room)) {
-        struct extra_descr_data *xdesc;
-
-        for (xdesc = room_get_ex_description(room); xdesc; xdesc = xdesc->next) {
-          strlcpy(buf, xdesc->description, sizeof(buf));
-          strip_cr(buf);
-          fprintf(sf, "E\n"
-                      "%s~\n"
-                      "%s~\n",
-                  xdesc->keyword, buf);
-        }
+      for (const extra_descr_data &xdesc : room_get_ex_description(room)) {
+        strlcpy(buf, xdesc.description.c_str(), sizeof(buf));
+        strip_cr(buf);
+        fprintf(sf, "E\n"
+                    "%s~\n"
+                    "%s~\n",
+                xdesc.keyword.c_str(), buf);
       }
       fprintf(sf, "S\n");
       script_save_to_disk(sf, room, WLD_TRIGGER);
@@ -353,8 +349,7 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source)
       room_get_dir_option(dest, i)->keyword = strdup(room_get_dir_option(source, i)->keyword);
   }
 
-  if (room_get_ex_description(source))
-    copy_ex_descriptions(room_ex_description_slot(dest), room_get_ex_description(source));
+  /* extra descriptions are copied with the room */
 
   return true;
 }
@@ -368,8 +363,6 @@ bool free_room_strings(struct room_data *room)
     free(room_get_name(room));
   if (room_get_description(room))
     free(room_get_description(room));
-  if (room_get_ex_description(room))
-    free_ex_descriptions(room_get_ex_description(room));
 
   /* Free exits. */
   for (i = 0; i < NUM_OF_DIRS; i++) {

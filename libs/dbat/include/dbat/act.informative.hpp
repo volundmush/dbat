@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/extradesc.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/colors.hpp"
 
@@ -17,7 +18,7 @@ constexpr int HIST_LENGTH = 100;
 int readIntro(struct char_data *ch, struct char_data *vict);
 void introCreate(struct char_data *ch);
 void sort_commands(GameWorld *g);
-char *find_exdesc(char *word, struct extra_descr_data *list);
+const char *find_exdesc(char *word, const ex_desc_list &list);
 void add_history(GameWorld *g, struct char_data *ch, char *str, int type);
 void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int ignore_brief);
 bool perf_skill(int skill);

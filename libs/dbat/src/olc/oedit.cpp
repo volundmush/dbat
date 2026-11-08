@@ -333,6 +333,7 @@ static void oedit_disp_container_flags_menu(GameWorld *g, struct descriptor_data
 static void oedit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct extra_descr_data *extra_desc = OLC_DESC(d);
+  extra_descr_data *next_desc         = ex_desc_next(*obj_ex_description_slot(OLC_OBJ(d)), extra_desc);
 
   clear_screen(g, d);
   write_to_output(g, d,
@@ -343,9 +344,9 @@ static void oedit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
                   "@g0@n) Quit\r\n"
                   "Enter choice : ",
 
-                  (extra_desc->keyword && *extra_desc->keyword) ? extra_desc->keyword : "<NONE>",
-                  (extra_desc->description && *extra_desc->description) ? extra_desc->description : "<NONE>",
-                  !extra_desc->next ? "Not set." : "Set.");
+                  !extra_desc->keyword.empty() ? extra_desc->keyword.c_str() : "<NONE>",
+                  !extra_desc->description.empty() ? extra_desc->description.c_str() : "<NONE>",
+                  !next_desc ? "Not set." : "Set.");
   OLC_MODE(d) = OEDIT_EXTRADESC_MENU;
 }
 
@@ -1144,10 +1145,9 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           /*
        * If extra descriptions don't exist.
        */
-          if (obj_get_ex_description(OLC_OBJ(d)) == nullptr) {
-            *obj_ex_description_slot(OLC_OBJ(d)) = new extra_descr_data();
-          }
-          OLC_DESC(d) = obj_get_ex_description(OLC_OBJ(d));
+          if (obj_get_ex_description(OLC_OBJ(d)).empty())
+            obj_ex_description_slot(OLC_OBJ(d))->emplace_back();
+          OLC_DESC(d) = &obj_ex_description_slot(OLC_OBJ(d))->front();
           oedit_disp_extradesc_menu(g, d);
           break;
         case 'm':
@@ -1572,9 +1572,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case OEDIT_EXTRADESC_KEY:
       if (genolc_checkstring(d, arg)) {
-        if (OLC_DESC(d)->keyword)
-          free(OLC_DESC(d)->keyword);
-        OLC_DESC(d)->keyword = str_udup(arg);
+        OLC_DESC(d)->keyword = take_string(str_udup(arg));
       }
       oedit_disp_extradesc_menu(g, d);
       return;
@@ -1582,19 +1580,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case OEDIT_EXTRADESC_MENU:
       switch ((number = atoi(arg))) {
         case 0:
-          if (!OLC_DESC(d)->keyword || !OLC_DESC(d)->description) {
-            struct extra_descr_data *temp;
-
-            if (OLC_DESC(d)->keyword)
-              free(OLC_DESC(d)->keyword);
-            if (OLC_DESC(d)->description)
-              free(OLC_DESC(d)->description);
-
-            /*
-	 * Clean up pointers  
-	 */
-            REMOVE_FROM_LIST(OLC_DESC(d), *obj_ex_description_slot(OLC_OBJ(d)), next, temp);
-            delete OLC_DESC(d);
+          if (OLC_DESC(d)->keyword.empty() || OLC_DESC(d)->description.empty()) { /* unfinished: drop it */
+            ex_desc_remove(*obj_ex_description_slot(OLC_OBJ(d)), OLC_DESC(d));
             OLC_DESC(d) = nullptr;
           }
           break;
@@ -1608,9 +1595,9 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_MODE(d) = OEDIT_EXTRADESC_DESCRIPTION;
           send_editor_help(g, d);
           write_to_output(g, d, "Enter the extra description:\r\n\r\n");
-          if (OLC_DESC(d)->description) {
-            write_to_output(g, d, "%s", OLC_DESC(d)->description);
-            oldtext = strdup(OLC_DESC(d)->description);
+          if (!OLC_DESC(d)->description.empty()) {
+            write_to_output(g, d, "%s", OLC_DESC(d)->description.c_str());
+            oldtext = strdup(OLC_DESC(d)->description.c_str());
           }
           string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
           OLC_VAL(d) = 1;
@@ -1620,16 +1607,13 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           /*
        * Only go to the next description if this one is finished.
        */
-          if (OLC_DESC(d)->keyword && OLC_DESC(d)->description) {
-            struct extra_descr_data *new_extra;
+          if (!OLC_DESC(d)->keyword.empty() && !OLC_DESC(d)->description.empty()) {
+            ex_desc_list &list = *obj_ex_description_slot(OLC_OBJ(d));
 
-            if (OLC_DESC(d)->next)
-              OLC_DESC(d) = OLC_DESC(d)->next;
-            else { /* Make new extra description and attach at end. */
-              new_extra         = new extra_descr_data();
-              OLC_DESC(d)->next = new_extra;
-              OLC_DESC(d)       = OLC_DESC(d)->next;
-            }
+            if (extra_descr_data *next = ex_desc_next(list, OLC_DESC(d)))
+              OLC_DESC(d) = next;
+            else /* Make new extra description and attach at end. */
+              OLC_DESC(d) = &list.emplace_back();
           }
           /*
        * No break - drop into default case.
@@ -1717,11 +1701,6 @@ void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 static void commit_iedit(GameWorld *g, struct obj_data *obj, const struct obj_data *edited)
 {
   struct obj_data live = *obj;
-
-  if (obj_get_item_number(obj) != NOTHING)
-    free_object_strings_proto(g, obj);
-  else
-    free_object_strings(g, obj);
 
   *obj = *edited;
   obj_set_in_room(obj, obj_get_in_room(&live));

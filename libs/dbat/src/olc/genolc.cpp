@@ -131,40 +131,6 @@ void strip_cr(char *buffer)
   buffer[wpos] = '\0';
 }
 
-void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from)
-{
-  struct extra_descr_data *wpos;
-
-  *to  = new extra_descr_data();
-  wpos = *to;
-
-  for (; from; from = from->next, wpos = wpos->next) {
-    wpos->keyword     = str_udup(from->keyword);
-    wpos->description = str_udup(from->description);
-    if (from->next)
-      wpos->next = new extra_descr_data();
-  }
-}
-
-void free_ex_descriptions(struct extra_descr_data *head)
-{
-  struct extra_descr_data *thised, *next_one;
-
-  if (!head) {
-    mud_log("free_ex_descriptions: NULL pointer or NULL data.");
-    return;
-  }
-
-  for (thised = head; thised; thised = next_one) {
-    next_one = thised->next;
-    if (thised->keyword)
-      free(thised->keyword);
-    if (thised->description)
-      free(thised->description);
-    delete thised;
-  }
-}
-
 bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *ritem, *temp;

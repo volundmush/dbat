@@ -1366,14 +1366,11 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
   }
 }
 
-char *find_exdesc(char *word, struct extra_descr_data *list)
+const char *find_exdesc(char *word, const ex_desc_list &list)
 {
-  struct extra_descr_data *i;
-
-  for (i = list; i; i = i->next)
-    /*if (isname(word, i->keyword))*/
-    if (*i->keyword == '.' ? isname(word, i->keyword + 1) : isname(word, i->keyword))
-      return (i->description);
+  for (const extra_descr_data &i : list)
+    if (i.keyword[0] == '.' ? isname(word, i.keyword.c_str() + 1) : isname(word, i.keyword.c_str()))
+      return i.description.c_str();
 
   return (nullptr);
 }
@@ -1391,7 +1388,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
   int bits, found = false, j, fnum, i = 0, msg = 1;
   struct char_data *found_char = nullptr;
   struct obj_data *obj, *found_obj = nullptr;
-  char *desc;
+  const char *desc;
   char number[MAX_STRING_LENGTH];
 
   if (!char_get_desc(ch))
@@ -1711,13 +1708,12 @@ ACMD(do_look)
       else
         look_at_target(g, ch, arg2, 0);
     } else if (is_abbrev(arg, "around")) {
-      struct extra_descr_data *i;
       int found = 0;
 
-      for (i = room_get_ex_description(g, char_get_in_room(ch)); i; i = i->next) {
-        if (*i->keyword != '.') {
+      for (const extra_descr_data &i : room_get_ex_description(g, char_get_in_room(ch))) {
+        if (i.keyword[0] != '.') {
           send_to_char(g, ch, "%s%s:\r\n%s",
-                       (found ? "\r\n" : ""), i->keyword, i->description);
+                       (found ? "\r\n" : ""), i.keyword.c_str(), i.description.c_str());
           found = 1;
         }
       }

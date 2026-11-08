@@ -35,7 +35,7 @@ obj_vnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
    */
   obj_set_item_number(newobj, obj_proto_of(g, ovnum) ? ovnum : NOTHING);
   if (obj_get_item_number(newobj) != NOTHING) {
-    free_extracted_objects(g, ovnum); /* they share the strings copy_object() replaces */
+    free_extracted_objects(g, ovnum); /* they share the trigger list copy_object() replaces */
     copy_object(g, obj_proto_of(g, obj_get_item_number(newobj)), newobj);
     update_objects(g, obj_proto_of(g, obj_get_item_number(newobj)));
     add_to_save_list(g, rznum->number, SL_OBJ);
@@ -145,7 +145,6 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   struct atomic_file af;
   FILE *fp;
   struct obj_data *obj;
-  struct extra_descr_data *ex_desc;
 
   if (!zone_num) {
     mud_log("SYSERR: no zone given.");
@@ -220,22 +219,20 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
       /*
        * Do we have extra descriptions?
        */
-      if (obj_get_ex_description(obj)) { /* Yes, save them too. */
-        for (ex_desc = obj_get_ex_description(obj); ex_desc; ex_desc = ex_desc->next) {
-          /*
-           * Sanity check to prevent nasty protection faults.
-           */
-          if (!ex_desc->keyword || !ex_desc->description || !*ex_desc->keyword || !*ex_desc->description) {
-            mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
-            continue;
-          }
-          strlcpy(buf, ex_desc->description, sizeof(buf));
-          strip_cr(buf);
-          fprintf(fp, "E\n"
-                      "%s~\n"
-                      "%s~\n",
-                  ex_desc->keyword, buf);
+      for (const extra_descr_data &ex_desc : obj_get_ex_description(obj)) { /* Yes, save them too. */
+        /*
+         * Sanity check to prevent nasty protection faults.
+         */
+        if (ex_desc.keyword.empty() || ex_desc.description.empty()) {
+          mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
+          continue;
         }
+        strlcpy(buf, ex_desc.description.c_str(), sizeof(buf));
+        strip_cr(buf);
+        fprintf(fp, "E\n"
+                    "%s~\n"
+                    "%s~\n",
+                ex_desc.keyword.c_str(), buf);
       }
       /*
        * Do we have affects?
@@ -277,77 +274,8 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   return true;
 }
 
-/*
- * Free all, unconditionally.
- */
-void free_object_strings(GameWorld *g, struct obj_data *obj)
-{
-#if 0 /* Debugging, do not enable. */
-  struct obj_data *t;
-  int i = 0;
-
-  for (t = g->objects; t; t = t->next) {
-    if (t == obj) {
-      i++;
-      continue;
-    }
-    assert(obj->name != t->name);
-    assert(obj->description != t->description);
-    assert(obj->short_description != t->short_description);
-    assert(obj->action_description != t->action_description);
-    assert(obj->ex_description != t->ex_description);
-  }
-  assert(i <= 1);
-#endif
-
-  /* the strings are std::string and go with the object */
-  if (obj_get_ex_description(obj))
-    free_ex_descriptions(obj_get_ex_description(obj));
-}
-
-/*
- * For object instances that are not the prototype.
- */
-void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
-{
-  obj_vnum robj_num = obj_get_item_number(obj);
-
-  /* the strings are std::string, each object's own; only the extra descriptions may be the prototype's */
-  if (obj_get_ex_description(obj)) {
-    struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
-    int ok_key, ok_desc, ok_item;
-    for (thised = obj_get_ex_description(obj); thised; thised = next_one) {
-      next_one = thised->next;
-      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(obj_proto_of(g, robj_num)); plist; plist = plist->next) {
-        if (plist->keyword == thised->keyword)
-          ok_key = 0;
-        if (plist->description == thised->description)
-          ok_desc = 0;
-        if (plist == thised)
-          ok_item = 0;
-      }
-      if (thised->keyword && ok_key)
-        free(thised->keyword);
-      if (thised->description && ok_desc)
-        free(thised->description);
-      if (ok_item)
-        delete thised;
-    }
-  }
-}
-
-static void copy_object_strings(struct obj_data *to, struct obj_data *from)
-{
-  /* the strings are std::string, copied with the rest of the object */
-  if (obj_get_ex_description(from))
-    copy_ex_descriptions(obj_ex_description_slot(to), obj_get_ex_description(from));
-  else
-    obj_set_ex_description(to, nullptr);
-}
-
 bool copy_object(GameWorld *g, struct obj_data *to, struct obj_data *from)
 {
-  free_object_strings(g, to);
   return copy_object_main(to, from, true);
 }
 
@@ -358,8 +286,7 @@ static bool copy_object_preserve(struct obj_data *to, struct obj_data *from)
 
 static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
 {
-  *to = *from;
-  copy_object_strings(to, from);
+  *to = *from; /* strings and extra descriptions included */
   return true;
 }
 
@@ -411,7 +338,6 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 
   /* No copy is left to share these, now that they have all been extracted and freed. */
   free_extracted_objects(g, rnum);
-  free_object_strings(g, obj);
   free_proto_script(obj, OBJ_TRIGGER);
 
   /* Shops stop producing it. */

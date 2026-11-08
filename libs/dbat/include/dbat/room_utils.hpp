@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/extradesc.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/flags.hpp"
@@ -48,10 +49,8 @@ void room_set_description(struct room_data *room, char *v);
 char *room_get_description(GameWorld *g, room_vnum room);
 void room_set_description(GameWorld *g, room_vnum room, char *v);
 int room_get_dmg(const struct room_data *room);
-struct extra_descr_data *room_get_ex_description(const struct room_data *room);
-void room_set_ex_description(struct room_data *room, struct extra_descr_data *v);
-struct extra_descr_data *room_get_ex_description(GameWorld *g, room_vnum room);
-void room_set_ex_description(GameWorld *g, room_vnum room, struct extra_descr_data *v);
+const ex_desc_list &room_get_ex_description(const struct room_data *room);
+const ex_desc_list &room_get_ex_description(GameWorld *g, room_vnum room);
 spec_proc_func room_get_func(const struct room_data *room);
 void room_set_func(GameWorld *g, room_vnum room, spec_proc_func v);
 int room_get_geffect(const struct room_data *room);
@@ -88,7 +87,7 @@ void room_set_zone(GameWorld *g, room_vnum room, struct zone_data *v);
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct script_data **room_script_slot(struct room_data *room);
 struct script_data **room_script_slot(GameWorld *g, room_vnum room);
-struct extra_descr_data **room_ex_description_slot(struct room_data *room);
+ex_desc_list *room_ex_description_slot(struct room_data *room);
 char **room_description_slot(struct room_data *room);
 id_list *room_contents_slot(GameWorld *g, room_vnum room);
 id_list *room_people_slot(GameWorld *g, room_vnum room);

@@ -270,27 +270,17 @@ int room_get_dmg(const struct room_data *room)
   return room->dmg;
 }
 
-struct extra_descr_data *room_get_ex_description(const struct room_data *room)
+const ex_desc_list &room_get_ex_description(const struct room_data *room)
 {
   return room->ex_description;
 }
 
-void room_set_ex_description(struct room_data *room, struct extra_descr_data *v)
+const ex_desc_list &room_get_ex_description(GameWorld *g, room_vnum room)
 {
-  room->ex_description = v;
-}
-
-struct extra_descr_data *room_get_ex_description(GameWorld *g, room_vnum room)
-{
+  static const ex_desc_list none;
   if (struct room_data *r = room_of(g, room))
     return r->ex_description;
-  return {};
-}
-
-void room_set_ex_description(GameWorld *g, room_vnum room, struct extra_descr_data *v)
-{
-  if (struct room_data *r = room_of(g, room))
-    r->ex_description = v;
+  return none;
 }
 
 spec_proc_func room_get_func(const struct room_data *room)
@@ -488,7 +478,7 @@ struct script_data **room_script_slot(GameWorld *g, room_vnum room)
   return r ? &r->script : nullptr;
 }
 
-struct extra_descr_data **room_ex_description_slot(struct room_data *room)
+ex_desc_list *room_ex_description_slot(struct room_data *room)
 {
   return &room->ex_description;
 }

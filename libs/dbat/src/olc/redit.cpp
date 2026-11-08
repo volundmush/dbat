@@ -250,21 +250,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
   /*
    * Extra descriptions, if necessary.
    */
-  if (room_get_ex_description(g, real_num)) {
-    struct extra_descr_data *tdesc, *temp, *temp2;
-    temp = new extra_descr_data();
-
-    room_set_ex_description(room, temp);
-    for (tdesc = room_get_ex_description(g, real_num); tdesc; tdesc = tdesc->next) {
-      temp->keyword     = strdup(tdesc->keyword);
-      temp->description = strdup(tdesc->description);
-      if (tdesc->next) {
-        temp2      = new extra_descr_data();
-        temp->next = temp2;
-        temp       = temp2;
-      }
-    }
-  }
+  *room_ex_description_slot(room) = room_get_ex_description(g, real_num);
   /*
    * Attach copy of room to player's descriptor.
    */
@@ -337,6 +323,7 @@ void free_room(GameWorld *g, struct room_data *room)
 static void redit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct extra_descr_data *extra_desc = OLC_DESC(d);
+  extra_descr_data *next_desc         = ex_desc_next(*room_ex_description_slot(OLC_ROOM(d)), extra_desc);
 
   clear_screen(g, d);
   write_to_output(g, d,
@@ -344,10 +331,10 @@ static void redit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
                   "@g2@n) Description:\r\n@y%s\r\n"
                   "@g3@n) Goto next description: ",
 
-                  extra_desc->keyword ? extra_desc->keyword : "<NONE>",
-                  extra_desc->description ? extra_desc->description : "<NONE>");
+                  !extra_desc->keyword.empty() ? extra_desc->keyword.c_str() : "<NONE>",
+                  !extra_desc->description.empty() ? extra_desc->description.c_str() : "<NONE>");
 
-  write_to_output(g, d, !extra_desc->next ? "Not Set.\r\n" : "Set.\r\n");
+  write_to_output(g, d, !next_desc ? "Not Set.\r\n" : "Set.\r\n");
   write_to_output(g, d, "Enter choice (0 to quit) : ");
   OLC_MODE(d) = REDIT_EXTRADESC_MENU;
 }
@@ -718,9 +705,9 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           /*
        * If the extra description doesn't exist.
        */
-          if (!room_get_ex_description(OLC_ROOM(d)))
-            *room_ex_description_slot(OLC_ROOM(d)) = new extra_descr_data();
-          OLC_DESC(d) = room_get_ex_description(OLC_ROOM(d));
+          if (room_get_ex_description(OLC_ROOM(d)).empty())
+            room_ex_description_slot(OLC_ROOM(d))->emplace_back();
+          OLC_DESC(d) = &room_ex_description_slot(OLC_ROOM(d))->front();
           redit_disp_extradesc_menu(g, d);
           break;
         case 'w':
@@ -950,9 +937,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case REDIT_EXTRADESC_KEY:
       if (genolc_checkstring(d, arg)) {
-        if (OLC_DESC(d)->keyword)
-          free(OLC_DESC(d)->keyword);
-        OLC_DESC(d)->keyword = str_udup(arg);
+        OLC_DESC(d)->keyword = take_string(str_udup(arg));
       }
       redit_disp_extradesc_menu(g, d);
       return;
@@ -964,19 +949,8 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
        * If something got left out, delete the extra description
        * when backing out to the menu.
        */
-          if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
-            struct extra_descr_data *temp;
-            if (OLC_DESC(d)->keyword)
-              free(OLC_DESC(d)->keyword);
-            if (OLC_DESC(d)->description)
-              free(OLC_DESC(d)->description);
-
-            /*
-	 * Clean up pointers.
-	 */
-            REMOVE_FROM_LIST(OLC_DESC(d), *room_ex_description_slot(OLC_ROOM(d)), next, temp);
-            delete OLC_DESC(d);
-          }
+          if (OLC_DESC(d)->keyword.empty() || OLC_DESC(d)->description.empty()) /* unfinished: drop it */
+            ex_desc_remove(*room_ex_description_slot(OLC_ROOM(d)), OLC_DESC(d));
           break;
         case 1:
           OLC_MODE(d) = REDIT_EXTRADESC_KEY;
@@ -986,29 +960,23 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_MODE(d) = REDIT_EXTRADESC_DESCRIPTION;
           send_editor_help(g, d);
           write_to_output(g, d, "Enter extra description:\r\n\r\n");
-          if (OLC_DESC(d)->description) {
-            write_to_output(g, d, "%s", OLC_DESC(d)->description);
-            oldtext = strdup(OLC_DESC(d)->description);
+          if (!OLC_DESC(d)->description.empty()) {
+            write_to_output(g, d, "%s", OLC_DESC(d)->description.c_str());
+            oldtext = strdup(OLC_DESC(d)->description.c_str());
           }
           string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
           return;
         case 3:
-          if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
+          if (OLC_DESC(d)->keyword.empty() || OLC_DESC(d)->description.empty()) {
             write_to_output(g, d, "You can't edit the next extra description without completing this one.\r\n");
             redit_disp_extradesc_menu(g, d);
           } else {
-            struct extra_descr_data *new_extra;
+            ex_desc_list &list = *room_ex_description_slot(OLC_ROOM(d));
 
-            if (OLC_DESC(d)->next)
-              OLC_DESC(d) = OLC_DESC(d)->next;
-            else {
-              /*
-	   * Make new extra description and attach at end.
-	   */
-              new_extra         = new extra_descr_data();
-              OLC_DESC(d)->next = new_extra;
-              OLC_DESC(d)       = new_extra;
-            }
+            if (extra_descr_data *next = ex_desc_next(list, OLC_DESC(d)))
+              OLC_DESC(d) = next;
+            else /* Make new extra description and attach at end. */
+              OLC_DESC(d) = &list.emplace_back();
             redit_disp_extradesc_menu(g, d);
           }
           return;

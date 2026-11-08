@@ -538,7 +538,6 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   int locate = 0, j;
   obj_vnum nr;
   std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
-  struct extra_descr_data *new_descr;
   room_vnum rrnum;
 
   if (!room_of(g, rrnum = rvnum))
@@ -659,19 +658,19 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
           obj_get_affected(temp)[j].specific = 0;
         }
 
-        obj_set_ex_description(temp, nullptr);
+        obj_ex_description_slot(temp)->clear();
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
           switch (*line) {
-            case 'E':
-              new_descr              = new extra_descr_data();
-              new_descr->keyword     = fread_string(fl, buf2);
-              new_descr->description = fread_string(fl, buf2);
-              new_descr->next        = obj_get_ex_description(temp);
-              obj_set_ex_description(temp, new_descr);
+            case 'E': {
+              extra_descr_data descr;
+              descr.keyword     = take_string(fread_string(fl, buf2));
+              descr.description = take_string(fread_string(fl, buf2));
+              obj_ex_description_slot(temp)->push_front(std::move(descr));
               get_line(fl, line);
               break;
+            }
             case 'A':
               if (j >= MAX_OBJ_AFFECT) {
                 mud_log("SYSERR: Too many object affectations in loading house file");

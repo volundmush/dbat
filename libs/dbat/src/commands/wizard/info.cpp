@@ -270,7 +270,6 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
 static void do_stat_room(GameWorld *g, struct char_data *ch)
 {
   char buf2[MAX_STRING_LENGTH];
-  struct extra_descr_data *desc;
   struct room_data *rm = room_of(g, char_get_in_room(ch));
   int i, found, column;
 
@@ -287,10 +286,10 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
 
   send_to_char(g, ch, "Description:\r\n%s", room_get_description(rm) ? room_get_description(rm) : "  None.\r\n");
 
-  if (room_get_ex_description(rm)) {
+  if (!room_get_ex_description(rm).empty()) {
     send_to_char(g, ch, "Extra descs:");
-    for (desc = room_get_ex_description(rm); desc; desc = desc->next)
-      send_to_char(g, ch, " [@c%s@n]", desc->keyword);
+    for (const extra_descr_data &desc : room_get_ex_description(rm))
+      send_to_char(g, ch, " [@c%s@n]", desc.keyword.c_str());
     send_to_char(g, ch, "\r\n");
   }
 
@@ -362,7 +361,6 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   int i, found;
   obj_vnum vnum;
   struct char_data *sitter;
-  struct extra_descr_data *desc;
   char buf[MAX_STRING_LENGTH];
 
   vnum = obj_get_vnum(g, j);
@@ -402,10 +400,10 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     send_to_char(g, ch, "HOLDING: %s\r\n", char_get_name(sitter));
   }
 
-  if (obj_get_ex_description(j)) {
+  if (!obj_get_ex_description(j).empty()) {
     send_to_char(g, ch, "Extra descs:");
-    for (desc = obj_get_ex_description(j); desc; desc = desc->next)
-      send_to_char(g, ch, " [@g%s@n]", desc->keyword);
+    for (const extra_descr_data &desc : obj_get_ex_description(j))
+      send_to_char(g, ch, " [@g%s@n]", desc.keyword.c_str());
     send_to_char(g, ch, "\r\n");
   }
 
@@ -1636,7 +1634,7 @@ ACMD(do_zcheck)
   char buf[MAX_STRING_LENGTH];
   float avg_dam;
   size_t len = 0;
-  struct extra_descr_data *ext, *ext2;
+
   one_argument(argument, buf);
 
   if (!*buf || !strcmp(buf, "."))
@@ -1854,11 +1852,12 @@ ACMD(do_zcheck)
                         "- total accurcy mod %d out of range (limit +/-%d).\r\n",
                         tohit, MAX_APPLY_ACCURCY_MOD_TOTAL);
 
-      for (ext2 = nullptr, ext = obj_get_ex_description(obj); ext; ext = ext->next)
-        if (strncmp(ext->description, "   ", 3))
-          ext2 = ext;
+      bool unformatted = false;
+      for (const extra_descr_data &ext : obj_get_ex_description(obj))
+        if (strncmp(ext.description.c_str(), "   ", 3))
+          unformatted = true;
 
-      if (ext2 && (found = 1))
+      if (unformatted && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- has unformatted extra description\r\n");
       /*****ADDITIONAL OBJ CHECKS HERE*****/
@@ -1919,11 +1918,12 @@ ACMD(do_zcheck)
                         "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                         MAX_COLOUMN_WIDTH);
 
-      for (ext2 = nullptr, ext = room_get_ex_description(g, i); ext; ext = ext->next)
-        if (strncmp(ext->description, "   ", 3))
-          ext2 = ext;
+      bool unformatted = false;
+      for (const extra_descr_data &ext : room_get_ex_description(g, i))
+        if (strncmp(ext.description.c_str(), "   ", 3))
+          unformatted = true;
 
-      if (ext2 && (found = 1))
+      if (unformatted && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
                         "- has unformatted extra description\r\n");
 

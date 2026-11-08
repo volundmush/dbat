@@ -477,18 +477,6 @@ void boot_world(GameWorld *g)
   }
 }
 
-static void free_extra_descriptions(struct extra_descr_data *edesc)
-{
-  struct extra_descr_data *enext;
-
-  for (; edesc; edesc = enext) {
-    enext = edesc->next;
-
-    free(edesc->keyword);
-    free(edesc->description);
-    delete edesc;
-  }
-}
 
 /* Free the world, in a memory allocation sense. */
 void destroy_db(GameWorld *g)
@@ -520,7 +508,6 @@ void destroy_db(GameWorld *g)
       free(room_get_name(g, cnt));
     if (room_get_description(g, cnt))
       free(room_get_description(g, cnt));
-    free_extra_descriptions(room_get_ex_description(g, cnt));
 
     /* free any assigned scripts */
     if (room_get_script(g, cnt))
@@ -543,8 +530,6 @@ void destroy_db(GameWorld *g)
 
   /* Objects */
   for (obj_vnum ovnum : g->obj_proto.vnums()) {
-    if (obj_get_ex_description(obj_proto_of(g, ovnum)))
-      free_extra_descriptions(obj_get_ex_description(obj_proto_of(g, ovnum)));
     delete[] obj_get_sbinfo(obj_proto_of(g, ovnum)); /* spellbook pages */
 
     /* free script proto list */
@@ -1303,7 +1288,6 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
   char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
-  struct extra_descr_data *new_descr;
   char letter;
 
   /* This really had better fit or there are other problems. */
@@ -1407,7 +1391,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   for (i = 0; i < NUM_OF_DIRS; i++)
     room_set_dir_option(g, g->parse_room_index, i, nullptr);
 
-  room_set_ex_description(g, g->parse_room_index, nullptr);
+  room_ex_description_slot(room_of(g, g->parse_room_index))->clear();
 
   snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1420,26 +1404,19 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
       case 'D':
         setup_dir(g, fl, g->parse_room_index, atoi(line + 1));
         break;
-      case 'E':
-        new_descr              = new extra_descr_data();
-        new_descr->keyword     = fread_string(fl, buf2);
-        new_descr->description = fread_string(fl, buf2);
-        /* fix for crashes in the editor when formatting 
-       * - e-descs are assumed to end with a \r\n
-       * -- Welcor 09/03 
-       */
-        {
-          char *tmp = strchr(new_descr->description, '\0');
-          if (tmp > new_descr->description && *(tmp - 1) != '\n') {
-            tmp = str_alloc(strlen(new_descr->description) + 3);
-            sprintf(tmp, "%s\r\n", new_descr->description); /* sprintf ok : size checked above*/
-            free(new_descr->description);
-            new_descr->description = tmp;
-          }
-        }
-        new_descr->next = room_get_ex_description(g, g->parse_room_index);
-        room_set_ex_description(g, g->parse_room_index, new_descr);
+      case 'E': {
+        extra_descr_data descr;
+        descr.keyword     = take_string(fread_string(fl, buf2));
+        descr.description = take_string(fread_string(fl, buf2));
+        /* fix for crashes in the editor when formatting
+         * - e-descs are assumed to end with a \r\n
+         * -- Welcor 09/03
+         */
+        if (!descr.description.empty() && descr.description.back() != '\n')
+          descr.description += "\r\n";
+        room_ex_description_slot(room_of(g, g->parse_room_index))->push_front(std::move(descr));
         break;
+      }
       case 'S': /* end of room */
         /* DG triggers -- script is defined after the end of the room */
         letter = fread_letter(fl);
@@ -2163,7 +2140,6 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
   char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
-  struct extra_descr_data *new_descr;
 
   if (g->obj_index.find(nr)) {
     mud_log("SYSERR: object #%d is defined twice.", nr);
@@ -2357,13 +2333,13 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       exit(1);
     }
     switch (*line) {
-      case 'E':
-        new_descr                   = new extra_descr_data();
-        new_descr->keyword          = fread_string(obj_f, buf2);
-        new_descr->description      = fread_string(obj_f, buf2);
-        new_descr->next             = obj_get_ex_description(obj_proto_of(g, g->parse_obj_index));
-        obj_set_ex_description(obj_proto_of(g, g->parse_obj_index), new_descr);
+      case 'E': {
+        extra_descr_data descr;
+        descr.keyword     = take_string(fread_string(obj_f, buf2));
+        descr.description = take_string(fread_string(obj_f, buf2));
+        obj_ex_description_slot(obj_proto_of(g, g->parse_obj_index))->push_front(std::move(descr));
         break;
+      }
       case 'A':
         if (j >= MAX_OBJ_AFFECT) {
           mud_log("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
@@ -4180,12 +4156,10 @@ void free_char(GameWorld *g, struct char_data *ch)
 void free_obj(GameWorld *g, struct obj_data *obj)
 {
   remove_unique_id(g, obj);
+  /* its strings and extra descriptions go with it; the trigger list may be the prototype's */
   if (obj_get_item_number(obj) == NOWHERE) {
-    free_object_strings(g, obj);
-    /* free script proto list */
     free_proto_script(obj, OBJ_TRIGGER);
   } else {
-    free_object_strings_proto(g, obj);
     if (obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
       free_proto_script(obj, OBJ_TRIGGER);
   }
@@ -4533,7 +4507,6 @@ static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate)
 {
   int counter2, i;
-  struct extra_descr_data *ex_desc;
   char buf1[MAX_STRING_LENGTH + 1];
   char ebuf0[MAX_STRING_LENGTH], ebuf1[MAX_STRING_LENGTH];
   char ebuf2[MAX_STRING_LENGTH], ebuf3[MAX_STRING_LENGTH];
@@ -4599,18 +4572,19 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
         return false;
 
   /* Do we have extra descriptions? */
-  if (obj_get_ex_description(obj)) { /*. Yep, save them too . */
-    for (ex_desc = obj_get_ex_description(obj); ex_desc; ex_desc = ex_desc->next) {
+  for (const extra_descr_data &ex : obj_get_ex_description(obj)) { /*. Yep, save them too . */
+    {
+      const extra_descr_data *ex_desc = &ex;
       /*. Sanity check to prevent nasty protection faults . */
-      if (!*ex_desc->keyword || !*ex_desc->description) {
+      if (ex_desc->keyword.empty() || ex_desc->description.empty()) {
         continue;
       }
-      strcpy(buf1, ex_desc->description);
+      strcpy(buf1, ex_desc->description.c_str());
       strip_cr(buf1);
       if (!OBJ_SAVE_FPRINTF(g, fp, obj, "extra description", "E\n"
-                                                          "%s~\n"
-                                                          "%s~\n",
-                            ex_desc->keyword,
+                                                             "%s~\n"
+                                                             "%s~\n",
+                            ex_desc->keyword.c_str(),
                             buf1))
         return false;
     }

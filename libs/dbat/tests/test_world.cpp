@@ -543,7 +543,6 @@ static void check_deferred_free(GameWorld *g, struct char_data *ch)
   add_object(g, edit, 301);
   for (struct obj_data *waiting : g->extracted_objects)
     CHECK(obj_get_item_number(waiting) != 301);
-  free_object_strings(g, edit);
   delete edit;
   CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, 301)), "a plain sword"));
 

@@ -698,7 +698,6 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   int locate = 0, j, num_objs = 0;
   obj_vnum nr;
   std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
-  struct extra_descr_data *new_descr;
   int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
   long long timed = 0;
   char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
@@ -838,21 +837,21 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
 
         /* maybe clear spellbook for good luck too? */
 
-        obj_set_ex_description(temp, nullptr);
+        obj_ex_description_slot(temp)->clear();
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
           switch (*line) {
-            case 'E':
-              new_descr = new extra_descr_data();
+            case 'E': {
+              extra_descr_data descr;
               sprintf(buf2, "rented object edesc keyword for object #%d", nr);
-              new_descr->keyword = fread_string(fl, buf2);
-              sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, new_descr->keyword);
-              new_descr->description = fread_string(fl, buf2);
-              new_descr->next        = obj_get_ex_description(temp);
-              obj_set_ex_description(temp, new_descr);
+              descr.keyword = take_string(fread_string(fl, buf2));
+              sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, descr.keyword.c_str());
+              descr.description = take_string(fread_string(fl, buf2));
+              obj_ex_description_slot(temp)->push_front(std::move(descr));
               get_line(fl, line);
               break;
+            }
             case 'A':
               if (j >= MAX_OBJ_AFFECT) {
                 mud_log("SYSERR: Too many object affectations in loading rent file");

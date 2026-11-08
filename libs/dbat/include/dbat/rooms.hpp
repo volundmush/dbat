@@ -32,7 +32,7 @@ struct room_data {
   int sector_type{};                                     /* sector type (move/hide)            */
   char *name{};                                          /* Rooms name 'You are ...'           */
   char *description{};                                   /* Shown when entered                 */
-  struct extra_descr_data *ex_description{};             /* for examine/look       */
+  ex_desc_list ex_description;                           /* for examine/look */
   struct room_direction_data *dir_option[NUM_OF_DIRS]{}; /* Directions */
   bitvector_t room_flags[RF_ARRAY_MAX]{};                /* DEATH,DARK ... etc */
 

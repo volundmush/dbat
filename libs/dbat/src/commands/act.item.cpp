@@ -96,7 +96,7 @@ static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer);
 static bool has_housekey(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *plant);
 static bool can_harvest(GameWorld *g, struct obj_data *plant);
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
+static const char *find_exdesc_keywords(char *word, const ex_desc_list &list);
 
 /* local variables */
 static char buf[MAX_STRING_LENGTH];
@@ -2052,13 +2052,11 @@ bool perform_get_from_room(GameWorld *g, struct char_data *ch, struct obj_data *
   return false;
 }
 
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
+static const char *find_exdesc_keywords(char *word, const ex_desc_list &list)
 {
-  struct extra_descr_data *i;
-
-  for (i = list; i; i = i->next)
-    if (isname(word, i->keyword))
-      return (i->keyword);
+  for (const extra_descr_data &i : list)
+    if (isname(word, i.keyword.c_str()))
+      return i.keyword.c_str();
 
   return (nullptr);
 }
@@ -2067,7 +2065,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
 {
   struct obj_data *obj;
   int dotmode, found = 0;
-  char *descword;
+  const char *descword;
 
   /* Are they trying to take something in a room extra description? */
   if (find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch))) != nullptr) {

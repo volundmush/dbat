@@ -352,7 +352,7 @@ const char *money_desc(int amount)
 struct obj_data *create_money(GameWorld *g, int amount)
 {
   struct obj_data *obj;
-  struct extra_descr_data *new_descr;
+  extra_descr_data descr;
   char buf[200];
   int y;
 
@@ -361,21 +361,20 @@ struct obj_data *create_money(GameWorld *g, int amount)
     return (nullptr);
   }
   obj = create_obj(g);
-  new_descr = new extra_descr_data();
 
   if (amount == 1) {
     obj->name              = "zenni money";
     obj->short_description = "a single zenni";
     obj->description       = "One miserable zenni is lying here";
-    new_descr->keyword     = strdup("zenni money");
-    new_descr->description = strdup("It's just one miserable little zenni.");
+    descr.keyword          = "zenni money";
+    descr.description      = "It's just one miserable little zenni.";
   } else {
     obj->name              = "zenni money";
     obj->short_description = money_desc(amount);
     snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
     obj->description = CAP(buf);
 
-    new_descr->keyword = strdup("zenni money");
+    descr.keyword = "zenni money";
     if (amount < 10)
       snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
     else if (amount < 100)
@@ -387,11 +386,10 @@ struct obj_data *create_money(GameWorld *g, int amount)
                1000 * ((amount / 1000) + rand_number(g, 0, (amount / 1000))));
     else
       strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
-    new_descr->description = strdup(buf);
+    descr.description = buf;
   }
 
-  new_descr->next     = nullptr;
-  obj->ex_description = new_descr;
+  obj->ex_description = {descr};
 
   obj_set_type_flag(obj, ITEM_MONEY);
   obj_set_value(obj, 7, MATERIAL_GOLD);
@@ -870,7 +868,7 @@ id_list *obj_contains_slot(struct obj_data *obj)
   return &obj->contains;
 }
 
-struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj)
+ex_desc_list *obj_ex_description_slot(struct obj_data *obj)
 {
   return &obj->ex_description;
 }
@@ -940,14 +938,9 @@ void obj_set_description(struct obj_data *obj, const std::string &v)
   obj->description = v;
 }
 
-struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj)
+const ex_desc_list &obj_get_ex_description(const struct obj_data *obj)
 {
   return obj->ex_description;
-}
-
-void obj_set_ex_description(struct obj_data *obj, struct extra_descr_data *v)
-{
-  obj->ex_description = v;
 }
 
 time_t obj_get_generation(const struct obj_data *obj)

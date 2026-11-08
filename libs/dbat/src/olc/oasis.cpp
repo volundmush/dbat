@@ -202,7 +202,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
    * with strdup().
    */
   if (OLC_OBJ(d)) {
-    free_object_strings(g, OLC_OBJ(d));
     delete OLC_OBJ(d);
   }
 

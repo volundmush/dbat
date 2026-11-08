@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <ctime>
 
+#include "dbat/extradesc.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/flags.hpp"
@@ -117,7 +118,7 @@ struct obj_data *create_money(GameWorld *g, int amount);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
 id_list *obj_contains_slot(struct obj_data *obj);
-struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj);
+ex_desc_list *obj_ex_description_slot(struct obj_data *obj);
 struct script_data **obj_script_slot(struct obj_data *obj);
 std::string *obj_action_description_slot(struct obj_data *obj);
 struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
@@ -134,8 +135,7 @@ const id_list &obj_get_contains(const struct obj_data *obj);
 const char *obj_get_description(const struct obj_data *obj);
 void obj_set_description(struct obj_data *obj, const char *v);
 void obj_set_description(struct obj_data *obj, const std::string &v);
-struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj);
-void obj_set_ex_description(struct obj_data *obj, struct extra_descr_data *v);
+const ex_desc_list &obj_get_ex_description(const struct obj_data *obj);
 time_t obj_get_generation(const struct obj_data *obj);
 void obj_set_generation(struct obj_data *obj, time_t v);
 struct obj_data *obj_get_in_obj(const struct obj_data *obj);

@@ -271,8 +271,6 @@ ACMD(do_rcopy)
     free(room_get_name(g, rrnum));
   if (room_get_description(g, rrnum))
     free(room_get_description(g, rrnum));
-  if (room_get_ex_description(g, rrnum))
-    free_ex_descriptions(room_get_ex_description(g, rrnum));
   room_set_sector_type(g, rrnum, room_sect(g, trnum));
 
   /* Copy over description name and extra descriptions */
@@ -280,10 +278,7 @@ ACMD(do_rcopy)
   room_set_name(g, rrnum, str_udup(room_get_name(g, trnum)));
 
   /* Copy over any existings extra descriptions */
-  if (room_get_ex_description(g, trnum))
-    copy_ex_descriptions(room_ex_description_slot(room_of(g, rrnum)), room_get_ex_description(g, trnum));
-  else
-    room_set_ex_description(g, rrnum, nullptr);
+  *room_ex_description_slot(room_of(g, rrnum)) = room_get_ex_description(g, trnum);
 
   /* Finally copy over room flags */
   for (i = 0; i < AF_ARRAY_MAX; i++) {
