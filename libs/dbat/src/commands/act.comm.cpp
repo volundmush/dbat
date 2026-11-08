@@ -253,7 +253,7 @@ ACMD(do_say)
       act(g, buf, true, ch, nullptr, sch, TO_NOTVICT);
     }
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     } else {
       if (strstr(verb, "says to")) {
         char saytoo[200];
@@ -775,7 +775,7 @@ ACMD(do_gsay)
       }
 
     if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
       send_to_char(g, ch, "@WYou tell the group, '@G%s@W'@n\r\n", argument);
   }
@@ -805,7 +805,7 @@ static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *v
   }
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   } else {
     if (!char_is_npc(ch)) {
       snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n", char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
@@ -815,7 +815,7 @@ static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *v
       send_to_char(g, ch, "%s", buf2);
       add_history(g, ch, buf2, HIST_TELL);
     } else {
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     }
   }
 
@@ -893,7 +893,7 @@ ACMD(do_tell)
   if (found == false && !char_is_npc(ch))
     send_to_char(g, ch, "No user around with that name.");
   else if (char_is_npc(ch) && !(vict = get_player_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (is_tell_ok(g, ch, vict))
     perform_tell(g, ch, vict, buf2);
 }
@@ -978,7 +978,7 @@ ACMD(do_spec_comm)
   if (!*buf || !*buf2)
     send_to_char(g, ch, "Whom do you want to %s.. and what??\r\n", action_sing);
   else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (vict == ch)
     send_to_char(g, ch, "You can't get your mouth close enough to your ear...\r\n");
   else {
@@ -996,7 +996,7 @@ ACMD(do_spec_comm)
     act(g, buf1, false, ch, nullptr, vict, TO_VICT);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     } else {
       char blum[MAX_INPUT_LENGTH];
       snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
@@ -1316,7 +1316,7 @@ ACMD(do_page)
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) != nullptr) {
       act(g, buf, false, ch, nullptr, vict, TO_VICT);
       if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-        send_to_char(g, ch, "%s", CONFIG_OK);
+        send_to_char(g, ch, "%s", CONFIG_OK.c_str());
       else
         act(g, buf, false, ch, nullptr, vict, TO_CHAR);
     } else
@@ -1446,7 +1446,7 @@ ACMD(do_gen_comm)
 
   /* first, set up strings to be given to the communicator */
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   } else {
     snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on, com_msgs[subcmd][1], argument, color_on);
     send_to_char(g, ch, "%s", buf2);

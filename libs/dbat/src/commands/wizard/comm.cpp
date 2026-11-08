@@ -318,7 +318,7 @@ ACMD(do_echo)
     snprintf(buf, sizeof(buf), "%s", argument);
   }
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   }
   if (NoName == true) {
     char blom[MAX_INPUT_LENGTH];
@@ -348,7 +348,7 @@ ACMD(do_send)
     return;
   }
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     return;
   }
   send_to_char(g, vict, "%s\r\n", buf);
@@ -398,7 +398,7 @@ ACMD(do_gecho)
         send_to_char(g, pt->character, "%s\r\n", argument);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
       send_to_char(g, ch, "%s\r\n", argument);
   }
@@ -418,7 +418,7 @@ ACMD(do_ginfo)
         send_to_char(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", argument);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
       send_to_char(g, ch, "@D[@GINFO@D] @g%s@n\r\n", argument);
   }
@@ -440,7 +440,7 @@ ACMD(do_poofset)
 
   *msg = argument;
 
-  send_to_char(g, ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }
 
 ACMD(do_wiznet)
@@ -529,5 +529,5 @@ ACMD(do_wiznet)
   }
 
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }

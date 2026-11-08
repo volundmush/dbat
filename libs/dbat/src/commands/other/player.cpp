@@ -425,7 +425,7 @@ ACMD(do_group)
   }
 
   if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if ((char_get_master(g, vict) != ch) && (vict != ch))
     act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
   else {
@@ -666,7 +666,7 @@ ACMD(do_display)
     }
   }
 
-  send_to_char(g, ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }
 
 ACMD(do_gen_write)

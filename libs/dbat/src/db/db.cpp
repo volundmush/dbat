@@ -409,7 +409,7 @@ ACMD(do_reboot)
     return;
   }
 
-  send_to_char(g, ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }
 
 void boot_world(GameWorld *g)
@@ -4542,9 +4542,9 @@ static void load_default_config(GameWorld *g)
   CONFIG_IDLE_MAX_LEVEL         = idle_max_level;
   CONFIG_DTS_ARE_DUMPS          = dts_are_dumps;
   CONFIG_LOAD_INVENTORY         = load_into_inventory;
-  CONFIG_OK                     = strdup(OK);
-  CONFIG_NOPERSON               = strdup(NOPERSON);
-  CONFIG_NOEFFECT               = strdup(NOEFFECT);
+  CONFIG_OK                     = OK;
+  CONFIG_NOPERSON               = NOPERSON;
+  CONFIG_NOEFFECT               = NOEFFECT;
   CONFIG_TRACK_T_DOORS          = track_through_doors;
   CONFIG_LEVEL_CAP              = level_cap;
   CONFIG_STACK_MOBS             = show_mob_stacking;
@@ -4583,17 +4583,9 @@ static void load_default_config(GameWorld *g)
   /****************************************************************************/
   CONFIG_DFLT_PORT = DFLT_PORT;
 
-  if (DFLT_IP)
-    CONFIG_DFLT_IP = strdup(DFLT_IP);
-  else
-    CONFIG_DFLT_IP = nullptr;
-
-  CONFIG_DFLT_DIR = strdup(DFLT_DIR);
-
-  if (LOGNAME)
-    CONFIG_LOGNAME = strdup(LOGNAME);
-  else
-    CONFIG_LOGNAME = nullptr;
+  CONFIG_DFLT_IP  = DFLT_IP ? DFLT_IP : "";
+  CONFIG_DFLT_DIR = DFLT_DIR;
+  CONFIG_LOGNAME  = LOGNAME ? LOGNAME : "";
 
   CONFIG_MAX_PLAYING    = max_playing;
   CONFIG_MAX_FILESIZE   = max_filesize;
@@ -4602,9 +4594,9 @@ static void load_default_config(GameWorld *g)
   CONFIG_NS_IS_SLOW     = nameserver_is_slow;
   CONFIG_NEW_SOCIALS    = use_new_socials;
   CONFIG_OLC_SAVE       = auto_save_olc;
-  CONFIG_MENU           = strdup(MENU);
-  CONFIG_WELC_MESSG     = strdup(WELC_MESSG);
-  CONFIG_START_MESSG    = strdup(START_MESSG);
+  CONFIG_MENU           = MENU;
+  CONFIG_WELC_MESSG     = WELC_MESSG;
+  CONFIG_START_MESSG    = START_MESSG;
   CONFIG_EXP_MULTIPLIER = 1.0;
 
   /****************************************************************************/
@@ -4647,9 +4639,9 @@ void load_config(GameWorld *g)
 
   load_default_config(g);
 
-  snprintf(buf, sizeof(buf), "%s/%s", DFLT_DIR, CONFIG_CONFFILE);
-  if (!(fl = fopen(CONFIG_CONFFILE, "r")) && !(fl = fopen(buf, "r"))) {
-    snprintf(buf, sizeof(buf), "Game Config File: %s", CONFIG_CONFFILE);
+  snprintf(buf, sizeof(buf), "%s/%s", DFLT_DIR, CONFIG_CONFFILE.c_str());
+  if (!(fl = fopen(CONFIG_CONFFILE.c_str(), "r")) && !(fl = fopen(buf, "r"))) {
+    snprintf(buf, sizeof(buf), "Game Config File: %s", CONFIG_CONFFILE.c_str());
     perror(buf);
     return;
   }
@@ -4661,8 +4653,8 @@ void load_config(GameWorld *g)
     split_argument(line, tag);
     config_load_option(g, tag, line, fl);
   }
-  if (!CONFIG_DFLT_DIR) /* an empty DFLT_DIR line */
-    CONFIG_DFLT_DIR = strdup(DFLT_DIR);
+  if (CONFIG_DFLT_DIR.empty()) /* an empty DFLT_DIR line */
+    CONFIG_DFLT_DIR = DFLT_DIR;
 
   fclose(fl);
 }

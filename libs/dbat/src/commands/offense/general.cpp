@@ -277,7 +277,7 @@ ACMD(do_rescue)
   if (!*arg)
     send_to_char(g, ch, "Whom do you wish to rescue?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (helpee == ch)
     send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else if (!char_get_fighting(g, helpee))
@@ -321,7 +321,7 @@ ACMD(do_assist)
   if (!*arg)
     send_to_char(g, ch, "Whom do you wish to assist?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (helpee == ch)
     send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else {

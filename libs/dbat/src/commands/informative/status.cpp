@@ -1422,7 +1422,7 @@ ACMD(do_diagnose)
 
   if (*buf) {
     if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+      send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else {
       send_to_char(g, ch, "%s", char_get_sex(vict) == SEX_MALE ? "He " : (char_get_sex(vict) == SEX_FEMALE ? "She " : "It "));
       diag_char_to_char(g, vict, ch);

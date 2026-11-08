@@ -39,9 +39,9 @@ enum cedit_type {
   CT_METHOD, /* int, an index into creation_methods[] */
   CT_PORT,   /* uint16_t */
   CT_FLOAT,  /* float */
-  CT_MSG,    /* char *, one line stored with a trailing "\r\n" */
-  CT_STR,    /* char *, one line, may be NULL */
-  CT_TEXT,   /* char *, several lines ending in '~' in the file, may be NULL */
+  CT_MSG,    /* std::string, one line stored with a trailing "\r\n" */
+  CT_STR,    /* std::string, one line, may be empty */
+  CT_TEXT,   /* std::string, several lines ending in '~' in the file, may be empty */
 };
 
 constexpr int CO_NOBLANK      = (1 << 0); /* no blank line after it in the file */
@@ -52,7 +52,7 @@ struct cedit_option {
   const char *key{};     /* config file key */
   const char *comment{}; /* comment lines written before it in the file, or NULL */
   enum cedit_type type{};
-  size_t offset{};       /* in struct config_data */
+  void *(*field)(struct config_data *){}; /* where it is in a config_data */
   const char *section{}; /* starts this section of the file */
   unsigned flags{};
   int min{}, max{};       /* with CO_RANGE */
@@ -63,23 +63,22 @@ struct cedit_option {
   const char *note{}; /* sent after it is toggled */
 };
 
-/* The field's offset, refusing to compile unless the field has type T. */
-template <typename Field, typename T> consteval size_t checked_offset(size_t offset)
-{
-  static_assert(std::is_same_v<Field, T>, "cedit option has the wrong type for its field");
-  return offset;
-}
-#define FIELD(f, T) checked_offset<decltype(((struct config_data *)nullptr)->f), T>(offsetof(struct config_data, f))
+/* Finds the field in a config_data, refusing to compile unless the field has type T. */
+#define FIELD(f, T)                                                                                    \
+  [](struct config_data *c) -> void * {                                                                \
+    static_assert(std::is_same_v<decltype(c->f), T>, "cedit option has the wrong type for its field"); \
+    return &c->f;                                                                                      \
+  }
 
-#define BOOL(f)       .type = CT_BOOL, .offset = FIELD(f, int)
-#define INT(f)        .type = CT_INT, .offset = FIELD(f, int)
-#define ROOM(f)       .type = CT_ROOM, .offset = FIELD(f, room_vnum)
-#define METHOD(f)     .type = CT_METHOD, .offset = FIELD(f, int)
-#define PORT(f)       .type = CT_PORT, .offset = FIELD(f, uint16_t)
-#define FLOAT(f)      .type = CT_FLOAT, .offset = FIELD(f, float)
-#define MSG(f)        .type = CT_MSG, .offset = FIELD(f, char *)
-#define STR(f)        .type = CT_STR, .offset = FIELD(f, char *)
-#define TEXT(f)       .type = CT_TEXT, .offset = FIELD(f, char *)
+#define BOOL(f)       .type = CT_BOOL, .field = FIELD(f, int)
+#define INT(f)        .type = CT_INT, .field = FIELD(f, int)
+#define ROOM(f)       .type = CT_ROOM, .field = FIELD(f, room_vnum)
+#define METHOD(f)     .type = CT_METHOD, .field = FIELD(f, int)
+#define PORT(f)       .type = CT_PORT, .field = FIELD(f, uint16_t)
+#define FLOAT(f)      .type = CT_FLOAT, .field = FIELD(f, float)
+#define MSG(f)        .type = CT_MSG, .field = FIELD(f, std::string)
+#define STR(f)        .type = CT_STR, .field = FIELD(f, std::string)
+#define TEXT(f)       .type = CT_TEXT, .field = FIELD(f, std::string)
 #define RANGE(lo, hi) .flags = CO_RANGE, .min = (lo), .max = (hi)
 #define MENU(m, c, l) .menu = (m), .choice = (c), .label = (l)
 
@@ -285,7 +284,12 @@ static bool is_string_option(const struct cedit_option *o)
 
 static void *option_field(struct config_data *c, const struct cedit_option *o)
 {
-  return (char *)c + o->offset;
+  return o->field(c);
+}
+
+static std::string *string_field(struct config_data *c, const struct cedit_option *o)
+{
+  return static_cast<std::string *>(option_field(c, o));
 }
 
 static void cedit_disp_menu(GameWorld *g, struct descriptor_data *d);
@@ -336,45 +340,26 @@ ACMD(do_oasis_cedit)
 
 /*-------------------------------------------------------------------*/
 
-/* The editor works on a copy of config_info, with its own copies of the strings. */
+/* The editor works on a copy of config_info. */
 static void cedit_setup(GameWorld *g, struct descriptor_data *d)
 {
-  OLC_CONFIG(d)           = new config_data();
-  *OLC_CONFIG(d)          = g->config_info;
-  OLC_CONFIG(d)->CONFFILE = nullptr;
-
-  for (int i = 0; i < NUM_CEDIT_OPTIONS; i++) {
-    const struct cedit_option *o = &cedit_options[i];
-    char **s;
-
-    if (!is_string_option(o))
-      continue;
-    s  = (char **)option_field(OLC_CONFIG(d), o);
-    *s = o->type == CT_MSG ? str_udup(*s) : (*s ? strdup(*s) : nullptr);
-  }
+  OLC_CONFIG(d) = new config_data(g->config_info);
+  OLC_CONFIG(d)->CONFFILE.clear();
 
   cedit_disp_menu(g, d);
 }
 
 /******************************************************************************/
 
-/* Installs the edited copy as config_info. The copy's strings move over with it. */
+/* Installs the edited copy as config_info. */
 static void cedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
   struct config_data *c = OLC_CONFIG(d);
   /* see if we need to reassign spec procs on rooms */
   int reassign = (CONFIG_DTS_ARE_DUMPS != c->play.dts_are_dumps);
 
-  for (int i = 0; i < NUM_CEDIT_OPTIONS; i++)
-    if (is_string_option(&cedit_options[i]))
-      free(*(char **)option_field(&g->config_info, &cedit_options[i]));
-
-  c->CONFFILE = g->config_info.CONFFILE;
+  c->CONFFILE    = g->config_info.CONFFILE;
   g->config_info = *c;
-
-  for (int i = 0; i < NUM_CEDIT_OPTIONS; i++)
-    if (is_string_option(&cedit_options[i]))
-      *(char **)option_field(c, &cedit_options[i]) = nullptr;
 
   /* if we changed the dts to/from dumps, reassign - Welcor */
   if (reassign)
@@ -390,7 +375,7 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
 {
   static const char *const obsolete[] = {"auto_level", "immort_level_ok"};
   const struct cedit_option *o        = nullptr;
-  char **s;
+  std::string *s;
   int num;
 
   for (int i = 0; i < NUM_CEDIT_OPTIONS && !o; i++)
@@ -404,7 +389,7 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
     return;
   }
 
-  s = (char **)option_field(&g->config_info, o);
+  s = is_string_option(o) ? string_field(&g->config_info, o) : nullptr;
   switch (o->type) {
     case CT_BOOL:
     case CT_INT:
@@ -422,20 +407,16 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
       *(float *)option_field(&g->config_info, o) = atof(line);
       break;
     case CT_MSG:
-      free(*s);
-      *s = str_alloc(strlen(line) + 3);
-      sprintf(*s, "%s\r\n", line);
+      *s = std::string(line) + "\r\n";
       break;
     case CT_STR:
-      free(*s);
-      *s = *line ? strdup(line) : nullptr;
+      *s = line;
       break;
     case CT_TEXT: {
       char error[MAX_INPUT_LENGTH];
 
-      free(*s);
       snprintf(error, sizeof(error), "Reading %s in load_config()", o->key);
-      *s = fread_string(fl, error);
+      *s = take_string(fread_string(fl, error));
       break;
     }
   }
@@ -454,7 +435,7 @@ bool save_config(GameWorld *g, struct zone_data *unused)
   struct atomic_file af;
   FILE *fl;
 
-  if (!(fl = atomic_open(&af, CONFIG_CONFFILE, false))) {
+  if (!(fl = atomic_open(&af, CONFIG_CONFFILE.c_str(), false))) {
     perror("SYSERR: save_config");
     return (false);
   }
@@ -477,7 +458,7 @@ bool save_config(GameWorld *g, struct zone_data *unused)
 
     if (o->section)
       fprintf(fl, "%s* [ %s ]\n", i ? "\n\n\n" : "", o->section);
-    if (is_string_option(o) && !*(char **)f)
+    if (is_string_option(o) && string_field(&g->config_info, o)->empty())
       continue;
     if (o->comment)
       fputs(o->comment, fl);
@@ -498,12 +479,12 @@ bool save_config(GameWorld *g, struct zone_data *unused)
       case CT_MSG:
       case CT_STR:
         fprintf(fl, "%s = ", o->key);
-        put_no_cr(*(char **)f, fl);
+        put_no_cr(string_field(&g->config_info, o)->c_str(), fl);
         fputc('\n', fl);
         break;
       case CT_TEXT:
         fprintf(fl, "%s = \n", o->key);
-        put_no_cr(*(char **)f, fl);
+        put_no_cr(string_field(&g->config_info, o)->c_str(), fl);
         fputs("~\n", fl);
         break;
     }
@@ -584,7 +565,7 @@ static void cedit_disp_option(GameWorld *g, struct descriptor_data *d, const str
     case CT_MSG:
     case CT_STR:
     case CT_TEXT:
-      value = *(char **)f ? *(char **)f : "<None>";
+      value = string_field(OLC_CONFIG(d), o)->empty() ? "<None>" : string_field(OLC_CONFIG(d), o)->c_str();
       break;
   }
 
@@ -617,7 +598,7 @@ static void cedit_disp_submenu(GameWorld *g, struct descriptor_data *d, char men
 static void cedit_prompt(GameWorld *g, struct descriptor_data *d, int i)
 {
   const struct cedit_option *o = &cedit_options[i];
-  char **text;
+  std::string *text;
 
   OLC_MODE(d) = CEDIT_OPTION;
   OLC_VAL(d)  = i;
@@ -628,13 +609,13 @@ static void cedit_prompt(GameWorld *g, struct descriptor_data *d, int i)
       write_to_output(g, d, "@W%d@B) @C%s@n\r\n", m, creation_methods[m]);
     write_to_output(g, d, "Choose character creation type: ");
   } else if (o->type == CT_TEXT) {
-    text = (char **)option_field(OLC_CONFIG(d), o);
+    text = string_field(OLC_CONFIG(d), o);
     clear_screen(g, d);
     send_editor_help(g, d);
     write_to_output(g, d, "%s", o->prompt);
-    if (*text)
-      write_to_output(g, d, "%s", *text);
-    string_write(d, text, MAX_INPUT_LENGTH, 0, *text ? strdup(*text) : nullptr);
+    if (!text->empty())
+      write_to_output(g, d, "%s", text->c_str());
+    string_write(d, text, MAX_INPUT_LENGTH, 0, !text->empty() ? strdup(text->c_str()) : nullptr);
   } else
     write_to_output(g, d, "%s", o->prompt);
 }
@@ -652,15 +633,11 @@ static bool parse_int(const char *arg, long *value)
 }
 
 /* A message option (OK, NOPERSON, NOEFFECT): the text as typed, then a newline. */
-static char *message_option(const char *text)
+static std::string message_option(const char *text)
 {
-  char *msg;
-
   if (!*text)
     text = "undefined"; /* as str_udup() */
-  msg = str_alloc(strlen(text) + 3);
-  sprintf(msg, "%s\r\n", text);
-  return msg;
+  return std::string(text) + "\r\n";
 }
 
 /*
@@ -671,7 +648,7 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
 {
   const struct cedit_option *o = &cedit_options[i];
   void *f                      = option_field(OLC_CONFIG(d), o);
-  char **s                     = (char **)f;
+  std::string *s               = is_string_option(o) ? string_field(OLC_CONFIG(d), o) : nullptr;
   long num;
   char *end;
   float fnum;
@@ -679,15 +656,13 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
   switch (o->type) {
     case CT_MSG:
       genolc_checkstring(d, arg);
-      free(*s);
       *s = message_option(arg);
       return true;
 
     case CT_STR:
       if (!*arg)
         break;
-      free(*s);
-      *s = strdup(arg);
+      *s = arg;
       return true;
 
     case CT_FLOAT:

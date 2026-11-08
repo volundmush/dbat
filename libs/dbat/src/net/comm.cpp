@@ -1804,13 +1804,13 @@ static struct in_addr *get_bind_addr(GameWorld *g)
   memset((char *)&bind_addr, 0, sizeof(bind_addr));
 
   /* If DLFT_IP is unspecified, use INADDR_ANY */
-  if (CONFIG_DFLT_IP == nullptr) {
+  if (CONFIG_DFLT_IP.empty()) {
     bind_addr.s_addr = htonl(INADDR_ANY);
   } else {
     /* If the parsing fails, use INADDR_ANY */
-    if (!inet_aton(CONFIG_DFLT_IP, &bind_addr)) {
+    if (!inet_aton(CONFIG_DFLT_IP.c_str(), &bind_addr)) {
       mud_log("SYSERR: DFLT_IP of %s appears to be an invalid IP address",
-              CONFIG_DFLT_IP);
+              CONFIG_DFLT_IP.c_str());
       bind_addr.s_addr = htonl(INADDR_ANY);
     }
   }

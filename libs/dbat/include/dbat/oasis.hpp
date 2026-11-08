@@ -462,7 +462,6 @@ ACMD(do_oasis_hsedit);
 
 bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg);
 
-bool free_strings(GameWorld *g, void *data, int type);
 void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum);
 bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum);
 

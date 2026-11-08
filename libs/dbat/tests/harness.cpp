@@ -138,7 +138,7 @@ static GameWorld *boot_here(time_t when, const char *log_mode)
   g = game_world_create();
   current_world  = g;
   g->pinned_time = when;
-  CONFIG_CONFFILE = strdup(CONFIG_FILE);
+  CONFIG_CONFFILE = CONFIG_FILE;
   load_config(g);
   g->no_rent_check = 1;
   event_init(g);
@@ -152,7 +152,6 @@ static void free_game(GameWorld *g)
 {
   close_all_sockets(g);
   game_world_free_contents(g);
-  free(CONFIG_CONFFILE);
   game_world_destroy(g);
   if (g == current_world)
     current_world = nullptr;

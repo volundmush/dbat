@@ -2582,7 +2582,7 @@ static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, char
   if (!*arg)
     send_to_char(g, ch, "To who?\r\n");
   else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     if (char_is_npc(ch))
       send_to_imm(g, "Mob Give: Victim, %s, doesn't exist.", arg);
   } else if (vict == ch)
@@ -2610,7 +2610,7 @@ static void perform_give_gold(GameWorld *g, struct char_data *ch, struct char_da
     send_to_char(g, ch, "They can't carry that much zenni.\r\n");
     return;
   }
-  send_to_char(g, ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 
   snprintf(out, sizeof(out), "$n gives you %d zenni.", amount);
   act(g, out, false, ch, nullptr, vict, TO_VICT);

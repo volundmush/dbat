@@ -48,13 +48,12 @@ int main(int argc, char **argv)
   /** Otherwise, there will be no variables set to set the rest of the vars  **/
   /** to, which will mean trouble --> Mythran                                **/
   /****************************************************************************/
-  CONFIG_CONFFILE = nullptr;
   while ((pos < argc) && (*(argv[pos]) == '-')) {
     if (*(argv[pos] + 1) == 'f') {
       if (*(argv[pos] + 2))
-        CONFIG_CONFFILE = strdup(argv[pos] + 2);
+        CONFIG_CONFFILE = argv[pos] + 2;
       else if (++pos < argc)
-        CONFIG_CONFFILE = strdup(argv[pos]);
+        CONFIG_CONFFILE = argv[pos];
       else {
         puts("SYSERR: File name to read from expected after option -f.");
         exit(1);
@@ -64,13 +63,13 @@ int main(int argc, char **argv)
   }
   pos = 1;
 
-  if (!CONFIG_CONFFILE)
-    CONFIG_CONFFILE = strdup(CONFIG_FILE);
+  if (CONFIG_CONFFILE.empty())
+    CONFIG_CONFFILE = CONFIG_FILE;
 
   load_config(g);
 
   g->port = CONFIG_DFLT_PORT;
-  dir  = CONFIG_DFLT_DIR;
+  dir     = CONFIG_DFLT_DIR.c_str();
 
   while ((pos < argc) && (*(argv[pos]) == '-')) {
     switch (*(argv[pos] + 1)) {
@@ -79,11 +78,10 @@ int main(int argc, char **argv)
           ++pos;
         break;
       case 'o':
-        /* copies, because the configuration's strings get freed at shutdown */
         if (*(argv[pos] + 2))
-          CONFIG_LOGNAME = strdup(argv[pos] + 2);
+          CONFIG_LOGNAME = argv[pos] + 2;
         else if (++pos < argc)
-          CONFIG_LOGNAME = strdup(argv[pos]);
+          CONFIG_LOGNAME = argv[pos];
         else {
           puts("SYSERR: File name to log to expected after option -o.");
           exit(1);
@@ -162,13 +160,13 @@ int main(int argc, char **argv)
   }
 
   /* All arguments have been parsed, try to open log file. */
-  setup_log(CONFIG_LOGNAME, STDERR_FILENO, g->fCopyOver);
+  setup_log(CONFIG_LOGNAME.c_str(), STDERR_FILENO, g->fCopyOver);
 
   /*
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-  mud_log("Using %s for configuration.", CONFIG_CONFFILE);
+  mud_log("Using %s for configuration.", CONFIG_CONFFILE.c_str());
   g->xap_objs = 1;
   if (chdir(dir) < 0) {
     perror("SYSERR: Fatal error changing to data directory");
@@ -187,9 +185,6 @@ int main(int argc, char **argv)
   game_world_free_contents(g);
 
   free(g->launch_dir);
-
-  /* probably should free the entire config here.. */
-  free(CONFIG_CONFFILE);
 
   game_world_destroy(g);
 

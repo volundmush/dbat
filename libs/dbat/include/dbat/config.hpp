@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/characters.hpp"
@@ -27,9 +28,9 @@ struct game_data {
   int stack_mobs{};          /* Turn mob stacking on                 */
   int stack_objs{};          /* Turn obj stacking on                 */
   int mob_fighting{};        /* Allow mobs to attack other mobs.     */
-  char *OK{};                /* When player receives 'Okay.' text.	  */
-  char *NOPERSON{};          /* 'No-one by that name here.'	  */
-  char *NOEFFECT{};          /* 'Nothing seems to happen.'	          */
+  std::string OK{};          /* When player receives 'Okay.' text.	  */
+  std::string NOPERSON{};    /* 'No-one by that name here.'	  */
+  std::string NOEFFECT{};    /* 'Nothing seems to happen.'	          */
   int disp_closed_doors{};   /* Display closed doors in autoexit?	  */
   int reroll_player{};       /* Players can reroll stats on creation */
   int initial_points{};      /* Initial points pool size		  */
@@ -69,9 +70,9 @@ struct room_numbers {
  */
 struct game_operation {
   uint16_t DFLT_PORT{};     /* The default port to run the game.  */
-  char *DFLT_IP{};          /* Bind to all interfaces.		  */
-  char *DFLT_DIR{};         /* The default directory (lib).	  */
-  char *LOGNAME{};          /* The file to log messages to.	  */
+  std::string DFLT_IP{};    /* Bind to all interfaces.		  */
+  std::string DFLT_DIR{};   /* The default directory (lib).	  */
+  std::string LOGNAME{};    /* The file to log messages to.	  */
   int max_playing{};        /* Maximum number of players allowed. */
   int max_filesize{};       /* Maximum size of misc files.	  */
   int max_bad_pws{};        /* Maximum number of pword attempts.  */
@@ -79,9 +80,9 @@ struct game_operation {
   int nameserver_is_slow{}; /* Is the nameserver slow or fast?	  */
   int use_new_socials{};    /* Use new or old socials file ?      */
   int auto_save_olc{};      /* Does OLC save to disk right away ? */
-  char *MENU{};             /* The MAIN MENU.			  */
-  char *WELC_MESSG{};       /* The welcome message.		  */
-  char *START_MESSG{};      /* The start msg for new characters.  */
+  std::string MENU{};       /* The MAIN MENU.			  */
+  std::string WELC_MESSG{}; /* The welcome message.		  */
+  std::string START_MESSG{}; /* The start msg for new characters.  */
   int imc_enabled{};        /**< Is connection to IMC allowed ? */
 };
 
@@ -128,7 +129,7 @@ struct creation_data {
  * The main configuration structure;
  */
 struct config_data {
-  char *CONFFILE{};                  /* config file path	 */
+  std::string CONFFILE{};            /* config file path	 */
   struct game_data play{};           /* play related config   */
   struct crash_save_data csd{};      /* rent and save related */
   struct room_numbers room_nums{};   /* room numbers          */

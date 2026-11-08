@@ -57,7 +57,6 @@ void game_world_free_contents(GameWorld *g)
     free_help_table(g);                     /* db.c */
     Free_Invalid_List(g);                   /* ban.c */
     free_ban_list(g);                       /* ban.c */
-    free_strings(g, &g->config_info, OASIS_CFG); /* oasis_delete.c */
     free_disabled(g);                       /* interpreter.c */
     free_save_list(g);                      /* genolc.c */
   }

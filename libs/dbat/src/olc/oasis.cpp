@@ -35,7 +35,6 @@
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-static void free_config(GameWorld *g, struct config_data *data);
 
 /* -------------------------------------------------------------------------- */
 
@@ -192,7 +191,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
 
   /* cedit's copy of the configuration (it has no room, so this can't go above) */
   if (OLC_CONFIG(d)) {
-    free_config(g, OLC_CONFIG(d));
+    delete OLC_CONFIG(d);
     OLC_CONFIG(d) = nullptr;
   }
 
@@ -330,19 +329,6 @@ void split_argument(char *argument, char *tag)
     *(wrt++) = *(tmp++);
 
   *wrt = '\0';
-}
-
-static void free_config(GameWorld *g, struct config_data *data)
-{
-  /****************************************************************************/
-  /** Free strings.                                                          **/
-  /****************************************************************************/
-  free_strings(g, data, OASIS_CFG);
-
-  /****************************************************************************/
-  /** Free the data structure.                                               **/
-  /****************************************************************************/
-  delete data;
 }
 
 /******************************************************************************/

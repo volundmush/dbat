@@ -348,7 +348,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+        send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
         return;
       }
 
@@ -357,7 +357,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 
@@ -594,7 +594,7 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
 
   if (!affected_by_spell(victim, spell)) {
     if (msg_not_affected)
-      send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+      send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 
@@ -656,7 +656,7 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
   }
 
   if (to_char == nullptr)
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
   else
     act(g, to_char, true, ch, obj, nullptr, TO_CHAR);
 
@@ -815,7 +815,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+        send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
         return;
       }
   /*
@@ -823,7 +823,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT);
+    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 

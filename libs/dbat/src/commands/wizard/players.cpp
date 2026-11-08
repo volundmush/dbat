@@ -436,7 +436,7 @@ ACMD(do_advance)
         false, ch, nullptr, victim, TO_VICT);
   }
 
-  send_to_char(g, ch, "%s", CONFIG_OK);
+  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 
   if (newlevel < oldlevel)
     mud_log("(GC) %s demoted %s from level %d to %d.",
@@ -491,12 +491,12 @@ ACMD(do_restore)
     }
     send_to_char(g, ch, "Okay.\r\n");
   } else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (!char_is_npc(vict) && ch != vict && char_get_admlevel(vict) >= char_get_admlevel(ch))
     send_to_char(g, ch, "They don't need your help.\r\n");
   else {
     restore_by(g, vict, ch);
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     send_to_imm(g, "[Log: %s restored %s.]", char_get_name(ch), char_get_name(vict));
     log_imm_action(g, "RESTORE: %s has restored %s.", char_get_name(ch), char_get_name(vict));
   }
@@ -827,7 +827,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
     /*    value = atoi(val_arg); */
     send_to_char(g, ch, "%s's %s set to %" PRId64 ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
   } else
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 
   switch (mode) {
     case 0:

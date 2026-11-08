@@ -573,7 +573,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         } else {
           d->idle_tics = 0;
-          write_to_output(g, d, "\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
+          write_to_output(g, d, "\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU.c_str());
           char_set_rp(d->character, d->rpp);
           desc_set_connected(d, CON_MENU);
         }
@@ -942,7 +942,7 @@ static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_RMOTD: read CR after printing motd */
 static void state_rmotd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  write_to_output(g, d, "%s", CONFIG_MENU);
+  write_to_output(g, d, "%s", CONFIG_MENU.c_str());
   desc_set_connected(d, CON_MENU);
 }
 
@@ -964,7 +964,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
         return;
       }
       load_result = enter_player_game(g, d);
-      send_to_char(g, d->character, "%s", CONFIG_WELC_MESSG);
+      send_to_char(g, d->character, "%s", CONFIG_WELC_MESSG.c_str());
       act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
 
       oldcount = update_player_count(g);
@@ -978,7 +978,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 
       if (char_get_level(d->character) == 0) {
         do_start(g, d->character);
-        send_to_char(g, d->character, "%s", CONFIG_START_MESSG);
+        send_to_char(g, d->character, "%s", CONFIG_START_MESSG.c_str());
       }
       if (char_get_in_room(d->character) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
         char_from_room(g, d->character);
@@ -1074,7 +1074,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     default:
-      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
+      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU.c_str());
       break;
   }
 }
@@ -1152,7 +1152,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_UMENU);
     return;
   }
-  write_to_output(g, d, "\r\nCharacter not deleted.\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
+  write_to_output(g, d, "\r\nCharacter not deleted.\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU.c_str());
   desc_set_connected(d, CON_MENU);
 }
 

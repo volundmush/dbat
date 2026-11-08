@@ -274,7 +274,7 @@ ACMD(do_trans)
     send_to_char(g, ch, "Whom do you wish to transfer?\r\n");
   else if (strcasecmp("all", buf)) {
     if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-      send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+      send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else if (victim == ch)
       send_to_char(g, ch, "That doesn't make much sense, does it?\r\n");
     else {
@@ -313,7 +313,7 @@ ACMD(do_trans)
         look_at_room(g, char_get_in_room(victim), victim, 0);
         enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
       }
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   }
 }
 
@@ -328,7 +328,7 @@ ACMD(do_teleport)
   if (!*buf)
     send_to_char(g, ch, "Whom do you wish to teleport?\r\n");
   else if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (victim == ch)
     send_to_char(g, ch, "Use 'goto' to teleport yourself.\r\n");
   else if (char_get_admlevel(victim) >= char_get_admlevel(ch))
@@ -340,7 +340,7 @@ ACMD(do_teleport)
       send_to_char(g, ch, "They are inside a healing tank!\r\n");
       return;
     }
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     act(g, "$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
     char_from_room(g, victim);
     char_to_room(g, victim, target);
@@ -416,7 +416,7 @@ ACMD(do_snoop)
       send_to_char(g, ch, "You can't.\r\n");
       return;
     }
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 
     if (char_get_desc(ch)->snooping)
       char_get_desc(ch)->snooping->snoop_by = nullptr;
@@ -448,7 +448,7 @@ ACMD(do_switch)
   else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
     send_to_char(g, ch, "You are not godly enough to use that room!\r\n");
   else {
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 
     char_get_desc(ch)->character = victim;
     char_get_desc(ch)->original  = ch;
@@ -597,7 +597,7 @@ ACMD(do_purge)
       return;
     }
 
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   } else { /* no argument. clean out the room */
     int i;
 
@@ -643,17 +643,17 @@ ACMD(do_force)
     send_to_char(g, ch, "Whom do you wish to force do what?\r\n");
   else if (!char_adm_flagged(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
-      send_to_char(g, ch, "%s", CONFIG_NOPERSON);
+      send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict))
       send_to_char(g, ch, "No, no, no!\r\n");
     else {
-      send_to_char(g, ch, "%s", CONFIG_OK);
+      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
       act(g, buf1, true, ch, nullptr, vict, TO_VICT);
       mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced %s to %s", char_get_name(ch), char_get_name(vict), to_force);
       command_interpreter(g, vict, to_force);
     }
   } else if (!strcasecmp("room", arg)) {
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced room %d to %s",
            char_get_name(ch), char_get_in_room(ch), to_force);
 
@@ -664,7 +664,7 @@ ACMD(do_force)
       command_interpreter(g, tch, to_force);
     }
   } else { /* force all */
-    send_to_char(g, ch, "%s", CONFIG_OK);
+    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced all to %s", char_get_name(ch), to_force);
 
     for (descriptor_data *i : each_desc(g)) {
