@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/roomflags.hpp"
@@ -8,9 +9,8 @@
 #include "dbat/extradesc.hpp"
 
 struct room_direction_data {
-  char *general_description{}; /* When look DIR.			*/
-
-  char *keyword{}; /* for open/close			*/
+  std::string general_description; /* When look DIR; empty for none */
+  std::string keyword;             /* for open/close; empty for none */
 
   int16_t exit_info{};       /* Exit info			*/
   obj_vnum key{};            /* Key's number (-1 for no key)		*/
@@ -30,10 +30,10 @@ struct room_data {
   room_vnum number{};                                    /* Rooms number	(vnum)		      */
   struct zone_data *zone{};                              /* Room zone (for resetting)          */
   int sector_type{};                                     /* sector type (move/hide)            */
-  char *name{};                                          /* Rooms name 'You are ...'           */
-  char *description{};                                   /* Shown when entered                 */
+  std::string name;                                      /* Rooms name 'You are ...'; empty for none */
+  std::string description;                               /* Shown when entered; empty for none */
   ex_desc_list ex_description;                           /* for examine/look */
-  struct room_direction_data *dir_option[NUM_OF_DIRS]{}; /* Directions */
+  owned<room_direction_data> dir_option[NUM_OF_DIRS];    /* Directions: the room owns its exits */
   bitvector_t room_flags[RF_ARRAY_MAX]{};                /* DEATH,DARK ... etc */
 
   struct trig_proto_list *proto_script{}; /* list of default triggers  */

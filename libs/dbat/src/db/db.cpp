@@ -504,27 +504,13 @@ void destroy_db(GameWorld *g)
 
   /* Rooms */
   for (room_vnum cnt : g->rooms.vnums()) {
-    if (room_get_name(g, cnt))
-      free(room_get_name(g, cnt));
-    if (room_get_description(g, cnt))
-      free(room_get_description(g, cnt));
 
     /* free any assigned scripts */
     if (room_get_script(g, cnt))
       extract_script(g, room_of(g, cnt), WLD_TRIGGER);
     /* free script proto list */
     free_proto_script(room_of(g, cnt), WLD_TRIGGER);
-
-    for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-      if (!room_get_dir_option(g, cnt, itr))
-        continue;
-
-      if (room_get_dir_option(g, cnt, itr)->general_description)
-        free(room_get_dir_option(g, cnt, itr)->general_description);
-      if (room_get_dir_option(g, cnt, itr)->keyword)
-        free(room_get_dir_option(g, cnt, itr)->keyword);
-      delete room_get_dir_option(g, cnt, itr);
-    }
+    /* its strings, exits and extra descriptions go with it */
   }
   g->rooms.clear();
 
@@ -1307,8 +1293,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   g->rooms.emplace(virtual_nr);
   room_set_zone(g, g->parse_room_index, g->parse_room_zone);
   room_set_number(g, g->parse_room_index, virtual_nr);
-  room_set_name(g, g->parse_room_index, fread_string(fl, buf2));
-  room_set_description(g, g->parse_room_index, fread_string(fl, buf2));
+  room_set_name(g, g->parse_room_index, take_string(fread_string(fl, buf2)));
+  room_set_description(g, g->parse_room_index, take_string(fread_string(fl, buf2)));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1445,8 +1431,8 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
   struct room_direction_data *new_exit;
   new_exit = new room_direction_data();
   room_set_dir_option(g, room, dir, new_exit);
-  room_get_dir_option(g, room, dir)->general_description = fread_string(fl, buf2);
-  room_get_dir_option(g, room, dir)->keyword             = fread_string(fl, buf2);
+  room_get_dir_option(g, room, dir)->general_description = take_string(fread_string(fl, buf2));
+  room_get_dir_option(g, room, dir)->keyword             = take_string(fread_string(fl, buf2));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Format error, %s", buf2);

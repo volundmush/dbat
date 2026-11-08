@@ -196,8 +196,8 @@ static void redit_setup_new(struct descriptor_data *d)
 {
   OLC_ROOM(d) = new room_data();
 
-  room_set_name(OLC_ROOM(d), strdup("An unfinished room"));
-  room_set_description(OLC_ROOM(d), strdup("You are in an unfinished room.\r\n"));
+  room_set_name(OLC_ROOM(d), "An unfinished room");
+  room_set_description(OLC_ROOM(d), "You are in an unfinished room.\r\n");
   room_set_number(OLC_ROOM(d), NOWHERE);
   OLC_ITEM_TYPE(d)         = WLD_TRIGGER;
   OLC_SCRIPT(d)            = nullptr;
@@ -221,8 +221,8 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
   /*
    * Allocate space for all strings.
    */
-  room_set_name(room, str_udup(room_get_name(g, real_num)));
-  room_set_description(room, str_udup(room_get_description(g, real_num)));
+  room_set_name(room, take_string(str_udup(room_get_name(g, real_num))));
+  room_set_description(room, take_string(str_udup(room_get_description(g, real_num))));
 
   /*
    * Exits - We allocate only if necessary.
@@ -233,17 +233,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
       new_exit = new room_direction_data();
       room_set_dir_option(room, counter, new_exit);
 
-      /*
-       * Copy the numbers over.
-       */
-      *room_get_dir_option(room, counter) = *room_get_dir_option(g, real_num, counter);
-      /*
-       * Allocate the strings.
-       */
-      if (room_get_dir_option(g, real_num, counter)->general_description)
-        room_get_dir_option(room, counter)->general_description = strdup(room_get_dir_option(g, real_num, counter)->general_description);
-      if (room_get_dir_option(g, real_num, counter)->keyword)
-        room_get_dir_option(room, counter)->keyword = strdup(room_get_dir_option(g, real_num, counter)->keyword);
+      *room_get_dir_option(room, counter) = *room_get_dir_option(g, real_num, counter); /* strings and all */
     }
   }
 
@@ -375,8 +365,8 @@ static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
                   "Enter choice, 0 to quit : ",
 
                   OLC_EXIT(d)->to_room != NOWHERE ? OLC_EXIT(d)->to_room : -1,
-                  OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
-                  OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
+                  exit_description(OLC_EXIT(d)) ? exit_description(OLC_EXIT(d)) : "<NONE>",
+                  exit_keyword(OLC_EXIT(d)) ? exit_keyword(OLC_EXIT(d)) : "<NONE>",
                   OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
                   door_buf, OLC_EXIT(d)->dclock, OLC_EXIT(d)->dchide,
                   OLC_EXIT(d)->dcskill != 0 ? g->spell_info[OLC_EXIT(d)->dcskill].name : "<NONE>",
@@ -761,10 +751,8 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case REDIT_NAME:
       if (!genolc_checkstring(d, arg))
         break;
-      if (room_get_name(OLC_ROOM(d)))
-        free(room_get_name(OLC_ROOM(d)));
       arg[MAX_ROOM_NAME] = '\0';
-      room_set_name(OLC_ROOM(d), str_udup(arg));
+      room_set_name(OLC_ROOM(d), take_string(str_udup(arg)));
       break;
 
     case REDIT_DESC:
@@ -813,9 +801,9 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
           send_editor_help(g, d);
           write_to_output(g, d, "Enter exit description:\r\n\r\n");
-          if (OLC_EXIT(d)->general_description) {
-            write_to_output(g, d, "%s", OLC_EXIT(d)->general_description);
-            oldtext = strdup(OLC_EXIT(d)->general_description);
+          if (exit_description(OLC_EXIT(d))) {
+            write_to_output(g, d, "%s", exit_description(OLC_EXIT(d)));
+            oldtext = strdup(exit_description(OLC_EXIT(d)));
           }
           string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, oldtext);
           return;
@@ -835,12 +823,6 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           /*
        * Delete an exit.
        */
-          if (OLC_EXIT(d)->keyword)
-            free(OLC_EXIT(d)->keyword);
-          if (OLC_EXIT(d)->general_description)
-            free(OLC_EXIT(d)->general_description);
-          if (OLC_EXIT(d))
-            delete OLC_EXIT(d);
           room_set_dir_option(OLC_ROOM(d), OLC_VAL(d), nullptr);
           break;
         case '7':
@@ -906,9 +888,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case REDIT_EXIT_KEYWORD:
-      if (OLC_EXIT(d)->keyword)
-        free(OLC_EXIT(d)->keyword);
-      OLC_EXIT(d)->keyword = str_udup(arg);
+      OLC_EXIT(d)->keyword = take_string(str_udup(arg));
       redit_disp_exit_menu(g, d);
       return;
 

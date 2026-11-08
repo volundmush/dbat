@@ -503,8 +503,8 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
     send_to_char(g, ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
   } else if (IS_SET(obj_get_exit(g, vehicle, dir)->exit_info, EX_CLOSED)) {
     /* But the door is closed */
-    if (obj_get_exit(g, vehicle, dir)->keyword)
-      send_to_char(g, ch, "@wThe %s seems to be closed.\r\n", fname(obj_get_exit(g, vehicle, dir)->keyword));
+    if (exit_keyword(obj_get_exit(g, vehicle, dir)))
+      send_to_char(g, ch, "@wThe %s seems to be closed.\r\n", fname(exit_keyword(obj_get_exit(g, vehicle, dir))));
     else
       send_to_char(g, ch, "@wIt seems to be closed.\r\n");
 

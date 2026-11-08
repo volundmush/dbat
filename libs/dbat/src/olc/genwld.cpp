@@ -114,13 +114,8 @@ bool delete_room(GameWorld *g, room_vnum vnum)
 
       if (!exit || exit->to_room != vnum)
         continue;
-      if ((!exit->keyword || !*exit->keyword) && (!exit->general_description || !*exit->general_description)) {
+      if (exit->keyword.empty() && exit->general_description.empty()) {
         /* no description, remove exit completely */
-        if (exit->keyword)
-          free(exit->keyword);
-        if (exit->general_description)
-          free(exit->general_description);
-        delete exit;
         room_set_dir_option(other, j, nullptr);
       } else {
         /* description is set, just point to nowhere */
@@ -226,8 +221,8 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
       for (j = 0; j < NUM_OF_DIRS; j++) {
         if (room_get_dir_option(room, j)) {
           int dflag;
-          if (room_get_dir_option(room, j)->general_description) {
-            strlcpy(buf, room_get_dir_option(room, j)->general_description, sizeof(buf));
+          if (exit_description(room_get_dir_option(room, j))) {
+            strlcpy(buf, exit_description(room_get_dir_option(room, j)), sizeof(buf));
             strip_cr(buf);
           } else
             *buf = '\0';
@@ -248,8 +243,8 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
           } else
             dflag = 0;
 
-          if (room_get_dir_option(room, j)->keyword)
-            strlcpy(buf1, room_get_dir_option(room, j)->keyword, sizeof(buf1));
+          if (exit_keyword(room_get_dir_option(room, j)))
+            strlcpy(buf1, exit_keyword(room_get_dir_option(room, j)), sizeof(buf1));
           else
             *buf1 = '\0';
 
@@ -323,33 +318,15 @@ static bool copy_room(struct room_data *to, struct room_data *from)
  */
 static bool copy_room_strings(struct room_data *dest, struct room_data *source)
 {
-  int i;
-
   if (dest == nullptr || source == nullptr) {
     mud_log("SYSERR: GenOLC: copy_room_strings: NULL values passed.");
     return false;
   }
 
-  room_set_description(dest, str_udup(room_get_description(source)));
-  room_set_name(dest, str_udup(room_get_name(source)));
+  room_set_description(dest, take_string(str_udup(room_get_description(source))));
+  room_set_name(dest, take_string(str_udup(room_get_name(source))));
 
-  for (i = 0; i < NUM_OF_DIRS; i++) {
-    if (!room_get_dir_option(source, i))
-      continue;
-
-    {
-      struct room_direction_data *new_exit;
-      new_exit = new room_direction_data();
-      room_set_dir_option(dest, i, new_exit);
-    }
-    *room_get_dir_option(dest, i) = *room_get_dir_option(source, i);
-    if (room_get_dir_option(source, i)->general_description)
-      room_get_dir_option(dest, i)->general_description = strdup(room_get_dir_option(source, i)->general_description);
-    if (room_get_dir_option(source, i)->keyword)
-      room_get_dir_option(dest, i)->keyword = strdup(room_get_dir_option(source, i)->keyword);
-  }
-
-  /* extra descriptions are copied with the room */
+  /* exits and extra descriptions are copied with the room */
 
   return true;
 }
@@ -359,22 +336,10 @@ bool free_room_strings(struct room_data *room)
   int i;
 
   /* Free descriptions. */
-  if (room_get_name(room))
-    free(room_get_name(room));
-  if (room_get_description(room))
-    free(room_get_description(room));
 
   /* Free exits. */
-  for (i = 0; i < NUM_OF_DIRS; i++) {
-    if (room_get_dir_option(room, i)) {
-      if (room_get_dir_option(room, i)->general_description)
-        free(room_get_dir_option(room, i)->general_description);
-      if (room_get_dir_option(room, i)->keyword)
-        free(room_get_dir_option(room, i)->keyword);
-      delete room_get_dir_option(room, i);
-      room_set_dir_option(room, i, nullptr);
-    }
-  }
+  for (i = 0; i < NUM_OF_DIRS; i++)
+    room_set_dir_option(room, i, nullptr);
 
   return true;
 }

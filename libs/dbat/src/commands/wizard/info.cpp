@@ -111,7 +111,7 @@ ACMD(do_finddoor)
           nlen = snprintf(buf + len, sizeof(buf) - len,
                           "[%3d] Room %d, %s (%s)\r\n",
                           ++num, i,
-                          dirs[d], room_get_dir_option(g, i, d)->keyword);
+                          dirs[d], exit_keyword(room_get_dir_option(g, i, d)));
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -344,10 +344,10 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n  DC Lock: [%2d], DC Hide: [%2d], DC Skill: [%4s], DC Move: [%2d]\r\n%s",
                  dirs[i], buf1,
                  room_get_dir_option(rm, i)->key == NOTHING ? -1 : room_get_dir_option(rm, i)->key,
-                 room_get_dir_option(rm, i)->keyword ? room_get_dir_option(rm, i)->keyword : "None", buf2,
+                 exit_keyword(room_get_dir_option(rm, i)) ? exit_keyword(room_get_dir_option(rm, i)) : "None", buf2,
                  room_get_dir_option(rm, i)->dclock, room_get_dir_option(rm, i)->dchide,
                  room_get_dir_option(rm, i)->dcskill == 0 ? "None" : g->spell_info[room_get_dir_option(rm, i)->dcskill].name, room_get_dir_option(rm, i)->dcmove,
-                 room_get_dir_option(rm, i)->general_description ? room_get_dir_option(rm, i)->general_description : "  No exit description.\r\n");
+                 exit_description(room_get_dir_option(rm, i)) ? exit_description(room_get_dir_option(rm, i)) : "  No exit description.\r\n");
   }
 
   /* check the room for a script */
@@ -1255,7 +1255,7 @@ ACMD(do_show)
               break;
             len += nlen;
           }
-          if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !room_get_dir_option(g, r, j)->general_description) {
+          if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !exit_description(room_get_dir_option(g, r, j))) {
             nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
             if (len + nlen >= sizeof(buf) || nlen < 0)
               break;

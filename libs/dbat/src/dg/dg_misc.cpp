@@ -335,14 +335,8 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
 
   /* purge exit */
   if (field == 0) {
-    if (newexit) {
-      if (newexit->general_description)
-        free(newexit->general_description);
-      if (newexit->keyword)
-        free(newexit->keyword);
-      delete newexit;
+    if (newexit)
       room_set_dir_option(rm, dir, nullptr);
-    }
     return true;
   }
 
@@ -353,11 +347,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
 
   switch (field) {
     case 1: /* description */
-      if (newexit->general_description)
-        free(newexit->general_description);
-      newexit->general_description = str_alloc(strlen(value) + 3);
-      strcpy(newexit->general_description, value);
-      strcat(newexit->general_description, "\r\n");
+      newexit->general_description = std::string(value) + "\r\n";
       break;
     case 2: /* flags       */
       newexit->exit_info = (int16_t)asciiflag_conv(value);
@@ -366,9 +356,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
       newexit->key = atoi(value);
       break;
     case 4: /* name        */
-      if (newexit->keyword)
-        free(newexit->keyword);
-      newexit->keyword = strdup(value);
+      newexit->keyword = value;
       break;
     case 5: /* room        */
       if (room_of(g, to_room = atoi(value)))

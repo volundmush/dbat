@@ -444,17 +444,17 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
               char argh[100];
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
                 mud_log("ERROR: %s found error direction NORTHWEST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist1 + strlen(dlist1), sizeof(dlist1) - strlen(dlist1), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -467,18 +467,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTH@n\r\n");
                 mud_log("ERROR: %s found error direction NORTH at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[200];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist2 + strlen(dlist2), sizeof(dlist2) - strlen(dlist2), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -491,18 +491,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHEAST@n\r\n");
                 mud_log("ERROR: %s found error direction NORTHEAST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist3 + strlen(dlist3), sizeof(dlist3) - strlen(dlist3), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -515,18 +515,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION EAST@n\r\n");
                 mud_log("ERROR: %s found error direction EAST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist4 + strlen(dlist4), sizeof(dlist4) - strlen(dlist4), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -539,18 +539,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHEAST@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTHEAST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist5 + strlen(dlist5), sizeof(dlist5) - strlen(dlist5), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -563,18 +563,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTH@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTH at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist6 + strlen(dlist6), sizeof(dlist6) - strlen(dlist6), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -587,18 +587,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHWEST@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTHWEST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist7 + strlen(dlist7), sizeof(dlist7) - strlen(dlist7), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -611,18 +611,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION WEST@n\r\n");
                 mud_log("ERROR: %s found error direction WEST at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist8 + strlen(dlist8), sizeof(dlist8) - strlen(dlist8), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -635,18 +635,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION UP@n\r\n");
                 mud_log("ERROR: %s found error direction UP at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist9 + strlen(dlist9), sizeof(dlist9) - strlen(dlist9), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -659,18 +659,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION DOWN@n\r\n");
                 mud_log("ERROR: %s found error direction DOWN at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist10 + strlen(dlist10), sizeof(dlist10) - strlen(dlist10), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -683,18 +683,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION INSIDE@n\r\n");
                 mud_log("ERROR: %s found error direction INSIDE at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist11 + strlen(dlist11), sizeof(dlist11) - strlen(dlist11), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -707,18 +707,18 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(room_get_dir_option(g, target_room, door)->keyword) == nullptr) {
+              if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION OUTSIDE@n\r\n");
                 mud_log("ERROR: %s found error direction OUTSIDE at room %d", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
               char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined") ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               snprintf(dlist12 + strlen(dlist12), sizeof(dlist12) - strlen(dlist12), "                    The %s%s %s %s %s%s.\r\n",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (room_get_dir_option(g, target_room, door)->keyword &&
-                        strcasecmp(fname(room_get_dir_option(g, target_room, door)->keyword), "undefined"))
-                           ? fname(room_get_dir_option(g, target_room, door)->keyword)
+                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                            : "opening",
                        strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
@@ -778,40 +778,40 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             snprintf(blam, sizeof(blam), "%s", dirs[door]);
             *blam = toupper(*blam);
             if (door == 6) {
-              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 0) {
-              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 7) {
-              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 1) {
-              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 8) {
-              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 2) {
-              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 9) {
-              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 3) {
-              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 4) {
-              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 5) {
-              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 10) {
-              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 11) {
-              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (room_get_dir_option(g, target_room, door)->keyword) ? fname(room_get_dir_option(g, target_room, door)->keyword) : "opening");
+              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
           }
         }
@@ -1225,8 +1225,8 @@ void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int
 static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
 {
   if (char_get_exit(g, ch, dir)) {
-    if (char_get_exit(g, ch, dir)->general_description)
-      send_to_char(g, ch, "%s", char_get_exit(g, ch, dir)->general_description);
+    if (exit_description(char_get_exit(g, ch, dir)))
+      send_to_char(g, ch, "%s", exit_description(char_get_exit(g, ch, dir)));
     else {
       struct obj_data *obj;
       int founded = false;
@@ -1242,12 +1242,12 @@ static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
       }
     }
 
-    if (room_exit_flagged(char_get_exit(g, ch, dir), EX_ISDOOR) && char_get_exit(g, ch, dir)->keyword) {
+    if (room_exit_flagged(char_get_exit(g, ch, dir), EX_ISDOOR) && exit_keyword(char_get_exit(g, ch, dir))) {
       if (!room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) &&
           room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED))
-        send_to_char(g, ch, "The %s is closed.\r\n", fname(char_get_exit(g, ch, dir)->keyword));
+        send_to_char(g, ch, "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
       else if (!room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED))
-        send_to_char(g, ch, "The %s is open.\r\n", fname(char_get_exit(g, ch, dir)->keyword));
+        send_to_char(g, ch, "The %s is open.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
     }
   } else
     send_to_char(g, ch, "Nothing special there...\r\n");

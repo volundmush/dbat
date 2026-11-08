@@ -896,16 +896,16 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
     check = true;
 
   if (char_get_exit(g, ch, dir)) {
-    if (char_get_exit(g, ch, dir)->general_description &&
+    if (exit_description(char_get_exit(g, ch, dir)) &&
         !room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
-      send_to_char(g, ch, "%s", char_get_exit(g, ch, dir)->general_description);
+      send_to_char(g, ch, "%s", exit_description(char_get_exit(g, ch, dir)));
     else if (!room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
       send_to_char(g, ch, "There is a normal exit there.\r\n");
     else if (room_exit_flagged(char_get_exit(g, ch, dir), EX_ISDOOR) &&
              room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) &&
-             char_get_exit(g, ch, dir)->keyword && (check == true))
+             exit_keyword(char_get_exit(g, ch, dir)) && (check == true))
       send_to_char(g, ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                   fname(char_get_exit(g, ch, dir)->keyword),
+                   fname(exit_keyword(char_get_exit(g, ch, dir))),
                    (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) ? "" : "open ");
     else
       send_to_char(g, ch, "There is no exit there.\r\n");

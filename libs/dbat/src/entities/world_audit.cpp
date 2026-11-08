@@ -86,7 +86,7 @@ static void audit_rooms(GameWorld *g, struct audit *a)
   g->rooms.visit([&](room_vnum vnum, const struct room_data *room) {
 
     for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
-      const struct room_direction_data *exit = room->dir_option[dir];
+      const struct room_direction_data *exit = room->dir_option[dir].get();
 
       if (exit && exit->to_room != NOWHERE && !valid_room(g, exit->to_room))
         problem(a, "room %d: exit %d leads to room %d, which doesn't exist", vnum, dir, exit->to_room);

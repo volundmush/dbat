@@ -96,12 +96,6 @@ ACMD(do_dig)
    */
   if (rvnum == NOTHING) {
     if (room_get_dir_option(g, char_get_in_room(ch), dir)) {
-      /* free the old pointers, if any */
-      if (room_get_dir_option(g, char_get_in_room(ch), dir)->general_description)
-        free(room_get_dir_option(g, char_get_in_room(ch), dir)->general_description);
-      if (room_get_dir_option(g, char_get_in_room(ch), dir)->keyword)
-        free(room_get_dir_option(g, char_get_in_room(ch), dir)->keyword);
-      delete room_get_dir_option(g, char_get_in_room(ch), dir);
       room_set_dir_option(g, char_get_in_room(ch), dir, nullptr);
       add_to_save_list(g, room_get_zone(g, char_get_in_room(ch))->number, SL_WLD);
       send_to_char(g, ch, "You remove the exit to the %s.\r\n", dirs[dir]);
@@ -150,12 +144,12 @@ ACMD(do_dig)
 
     /* Copy the room's name. */
     if (*new_room_name)
-      room_set_name(OLC_ROOM(d), strdup(new_room_name));
+      room_set_name(OLC_ROOM(d), new_room_name);
     else
-      room_set_name(OLC_ROOM(d), strdup("An unfinished room"));
+      room_set_name(OLC_ROOM(d), "An unfinished room");
 
     /* Copy the room's description.*/
-    room_set_description(OLC_ROOM(d), strdup("You are in an unfinished room.\r\n"));
+    room_set_description(OLC_ROOM(d), "You are in an unfinished room.\r\n");
     room_set_zone(OLC_ROOM(d), OLC_ZNUM(d));
     room_set_number(OLC_ROOM(d), NOWHERE);
 
@@ -183,8 +177,8 @@ ACMD(do_dig)
     new_exit = new room_direction_data();
     room_set_dir_option(g, char_get_in_room(ch), dir, new_exit);
   }
-  room_get_dir_option(g, char_get_in_room(ch), dir)->general_description = nullptr;
-  room_get_dir_option(g, char_get_in_room(ch), dir)->keyword             = nullptr;
+  room_get_dir_option(g, char_get_in_room(ch), dir)->general_description.clear();
+  room_get_dir_option(g, char_get_in_room(ch), dir)->keyword.clear();
   room_get_dir_option(g, char_get_in_room(ch), dir)->to_room             = rrnum;
   add_to_save_list(g, room_get_zone(g, char_get_in_room(ch))->number, SL_WLD);
   save_rooms(g, room_get_zone(g, rrnum));
@@ -203,8 +197,8 @@ ACMD(do_dig)
       new_exit = new room_direction_data();
       room_set_dir_option(g, rrnum, rev_dir[dir], new_exit);
     }
-    room_get_dir_option(g, rrnum, rev_dir[dir])->general_description = nullptr;
-    room_get_dir_option(g, rrnum, rev_dir[dir])->keyword             = nullptr;
+    room_get_dir_option(g, rrnum, rev_dir[dir])->general_description.clear();
+    room_get_dir_option(g, rrnum, rev_dir[dir])->keyword.clear();
     room_get_dir_option(g, rrnum, rev_dir[dir])->to_room             = char_get_in_room(ch);
     add_to_save_list(g, room_get_zone(g, rrnum)->number, SL_WLD);
     save_rooms(g, room_get_zone(g, rrnum));
@@ -267,15 +261,11 @@ ACMD(do_rcopy)
   }
 
   /* Free descriptions. */
-  if (room_get_name(g, rrnum))
-    free(room_get_name(g, rrnum));
-  if (room_get_description(g, rrnum))
-    free(room_get_description(g, rrnum));
   room_set_sector_type(g, rrnum, room_sect(g, trnum));
 
   /* Copy over description name and extra descriptions */
-  room_set_description(g, rrnum, str_udup(room_get_description(g, trnum)));
-  room_set_name(g, rrnum, str_udup(room_get_name(g, trnum)));
+  room_set_description(g, rrnum, take_string(str_udup(room_get_description(g, trnum))));
+  room_set_name(g, rrnum, take_string(str_udup(room_get_name(g, trnum))));
 
   /* Copy over any existings extra descriptions */
   *room_ex_description_slot(room_of(g, rrnum)) = room_get_ex_description(g, trnum);
@@ -334,9 +324,9 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
       OLC_NUM(d)  = vnum;
       OLC_ROOM(d) = new room_data();
 
-      room_set_name(OLC_ROOM(d), strdup("New BuildWalk Room"));
+      room_set_name(OLC_ROOM(d), "New BuildWalk Room");
 
-      room_set_description(OLC_ROOM(d), str_printf("This unfinished room was created by %s.\r\n", char_get_name(ch)));
+      room_set_description(OLC_ROOM(d), str_format("This unfinished room was created by %s.\r\n", char_get_name(ch)));
       room_set_zone(OLC_ROOM(d), OLC_ZNUM(d));
       room_set_number(OLC_ROOM(d), NOWHERE);
 

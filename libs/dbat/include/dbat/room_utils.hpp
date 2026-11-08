@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "dbat/extradesc.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
@@ -30,9 +31,13 @@ bool room_toggle_flag(struct room_data *room, int flag);
 bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag);
 
 struct room_direction_data *room_get_dir_option(GameWorld *g, room_vnum room, int i);
-void room_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v);
+void room_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v); /* as below */
 struct room_direction_data *room_get_dir_option(const struct room_data *room, int i);
+/* Gives the room the exit v, a new'd one it now owns, or none (null), freeing the old one */
 void room_set_dir_option(struct room_data *room, int i, struct room_direction_data *v);
+/* An exit's keyword and description, or null for none */
+const char *exit_keyword(const struct room_direction_data *exit);
+const char *exit_description(const struct room_direction_data *exit);
 
 int num_pc_in_room(GameWorld *g, struct room_data *room);
 int cook_element(GameWorld *g, room_vnum room);
@@ -44,10 +49,12 @@ room_vnum room_get_exit_to_room(GameWorld *g, room_vnum room, int dir);
 /* Field accessors */
 const id_list &room_get_contents(const struct room_data *room);
 const id_list &room_get_contents(GameWorld *g, room_vnum room);
-char *room_get_description(const struct room_data *room);
-void room_set_description(struct room_data *room, char *v);
-char *room_get_description(GameWorld *g, room_vnum room);
-void room_set_description(GameWorld *g, room_vnum room, char *v);
+const char *room_get_description(const struct room_data *room);
+void room_set_description(struct room_data *room, const char *v);
+void room_set_description(struct room_data *room, const std::string &v);
+const char *room_get_description(GameWorld *g, room_vnum room);
+void room_set_description(GameWorld *g, room_vnum room, const char *v);
+void room_set_description(GameWorld *g, room_vnum room, const std::string &v);
 int room_get_dmg(const struct room_data *room);
 const ex_desc_list &room_get_ex_description(const struct room_data *room);
 const ex_desc_list &room_get_ex_description(GameWorld *g, room_vnum room);
@@ -57,10 +64,12 @@ int room_get_geffect(const struct room_data *room);
 int room_get_gravity(const struct room_data *room);
 int8_t room_get_light(GameWorld *g, room_vnum room);
 void room_set_light(GameWorld *g, room_vnum room, int8_t v);
-char *room_get_name(const struct room_data *room);
-void room_set_name(struct room_data *room, char *v);
-char *room_get_name(GameWorld *g, room_vnum room);
-void room_set_name(GameWorld *g, room_vnum room, char *v);
+const char *room_get_name(const struct room_data *room);
+void room_set_name(struct room_data *room, const char *v);
+void room_set_name(struct room_data *room, const std::string &v);
+const char *room_get_name(GameWorld *g, room_vnum room);
+void room_set_name(GameWorld *g, room_vnum room, const char *v);
+void room_set_name(GameWorld *g, room_vnum room, const std::string &v);
 room_vnum room_get_number(const struct room_data *room);
 void room_set_number(struct room_data *room, room_vnum v);
 void room_set_number(GameWorld *g, room_vnum room, room_vnum v);
@@ -88,7 +97,7 @@ void room_set_zone(GameWorld *g, room_vnum room, struct zone_data *v);
 struct script_data **room_script_slot(struct room_data *room);
 struct script_data **room_script_slot(GameWorld *g, room_vnum room);
 ex_desc_list *room_ex_description_slot(struct room_data *room);
-char **room_description_slot(struct room_data *room);
+std::string *room_description_slot(struct room_data *room);
 id_list *room_contents_slot(GameWorld *g, room_vnum room);
 id_list *room_people_slot(GameWorld *g, room_vnum room);
 

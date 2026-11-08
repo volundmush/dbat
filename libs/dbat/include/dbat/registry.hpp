@@ -462,4 +462,6 @@ public:
     return p_.get();
   }
   void reset() { p_.reset(); }
+  /* Takes over p, a new'd T (or null), freeing what was held */
+  void adopt(T *p) { p_.reset(p); }
 };

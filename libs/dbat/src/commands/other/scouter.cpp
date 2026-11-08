@@ -319,8 +319,8 @@ ACMD(do_eavesdrop)
     return;
   }
   if (char_get_exit(g, ch, dir)) {
-    if (IS_SET(char_get_exit(g, ch, dir)->exit_info, EX_CLOSED) && char_get_exit(g, ch, dir)->keyword) {
-      snprintf(buf, sizeof(buf), "The %s is closed.\r\n", fname(char_get_exit(g, ch, dir)->keyword));
+    if (IS_SET(char_get_exit(g, ch, dir)->exit_info, EX_CLOSED) && exit_keyword(char_get_exit(g, ch, dir))) {
+      snprintf(buf, sizeof(buf), "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
       send_to_char(g, ch, "%s", buf);
     } else {
       char_set_listenroom(ch, char_get_exit(g, ch, dir)->to_room);

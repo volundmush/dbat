@@ -176,24 +176,34 @@ bitvector_t *room_get_room_flags(GameWorld *g, room_vnum room)
 struct room_direction_data *room_get_dir_option(GameWorld *g, room_vnum room, int i)
 {
   if (struct room_data *r = room_of(g, room))
-    return r->dir_option[i];
+    return r->dir_option[i].get();
   return {};
 }
 
 void room_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v)
 {
   if (struct room_data *r = room_of(g, room))
-    r->dir_option[i] = v;
+    r->dir_option[i].adopt(v);
 }
 
 struct room_direction_data *room_get_dir_option(const struct room_data *room, int i)
 {
-  return room->dir_option[i];
+  return room->dir_option[i].get();
 }
 
 void room_set_dir_option(struct room_data *room, int i, struct room_direction_data *v)
 {
-  room->dir_option[i] = v;
+  room->dir_option[i].adopt(v);
+}
+
+const char *exit_keyword(const struct room_direction_data *exit)
+{
+  return exit->keyword.empty() ? nullptr : exit->keyword.c_str();
+}
+
+const char *exit_description(const struct room_direction_data *exit)
+{
+  return exit->general_description.empty() ? nullptr : exit->general_description.c_str();
 }
 
 /* Room flag setters and toggles, on the room or on its vnum. */
@@ -242,24 +252,35 @@ const id_list &room_get_contents(GameWorld *g, room_vnum room)
   return none;
 }
 
-char *room_get_description(const struct room_data *room)
+const char *room_get_description(const struct room_data *room)
 {
-  return room->description;
+  return room->description.empty() ? nullptr : room->description.c_str(); /* null for none, as the files have it */
 }
 
-void room_set_description(struct room_data *room, char *v)
+void room_set_description(struct room_data *room, const char *v)
+{
+  room->description = v ? v : "";
+}
+
+void room_set_description(struct room_data *room, const std::string &v)
 {
   room->description = v;
 }
 
-char *room_get_description(GameWorld *g, room_vnum room)
+const char *room_get_description(GameWorld *g, room_vnum room)
 {
   if (struct room_data *r = room_of(g, room))
-    return r->description;
-  return {};
+    return room_get_description(r);
+  return nullptr;
 }
 
-void room_set_description(GameWorld *g, room_vnum room, char *v)
+void room_set_description(GameWorld *g, room_vnum room, const char *v)
+{
+  if (struct room_data *r = room_of(g, room))
+    room_set_description(r, v);
+}
+
+void room_set_description(GameWorld *g, room_vnum room, const std::string &v)
 {
   if (struct room_data *r = room_of(g, room))
     r->description = v;
@@ -317,24 +338,35 @@ void room_set_light(GameWorld *g, room_vnum room, int8_t v)
     r->light = v;
 }
 
-char *room_get_name(const struct room_data *room)
+const char *room_get_name(const struct room_data *room)
 {
-  return room->name;
+  return room->name.empty() ? nullptr : room->name.c_str(); /* null for none, as the files have it */
 }
 
-void room_set_name(struct room_data *room, char *v)
+void room_set_name(struct room_data *room, const char *v)
+{
+  room->name = v ? v : "";
+}
+
+void room_set_name(struct room_data *room, const std::string &v)
 {
   room->name = v;
 }
 
-char *room_get_name(GameWorld *g, room_vnum room)
+const char *room_get_name(GameWorld *g, room_vnum room)
 {
   if (struct room_data *r = room_of(g, room))
-    return r->name;
-  return {};
+    return room_get_name(r);
+  return nullptr;
 }
 
-void room_set_name(GameWorld *g, room_vnum room, char *v)
+void room_set_name(GameWorld *g, room_vnum room, const char *v)
+{
+  if (struct room_data *r = room_of(g, room))
+    room_set_name(r, v);
+}
+
+void room_set_name(GameWorld *g, room_vnum room, const std::string &v)
 {
   if (struct room_data *r = room_of(g, room))
     r->name = v;
@@ -483,7 +515,7 @@ ex_desc_list *room_ex_description_slot(struct room_data *room)
   return &room->ex_description;
 }
 
-char **room_description_slot(struct room_data *room)
+std::string *room_description_slot(struct room_data *room)
 {
   return &room->description;
 }
