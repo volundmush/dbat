@@ -56,7 +56,6 @@ void mobile_activity(GameWorld *g)
 {
   struct obj_data *best_obj;
   int door, found, max;
-  memory_rec *names;
 
   for (char_data *ch : each_char(g)) {
 
@@ -345,10 +344,7 @@ void mobile_activity(GameWorld *g)
         if (getCurPL(g, ch) <= getEffMaxPL(g, ch) / 100)
           continue;
 
-        for (names = char_get_mob_specials_memory(ch); names && !found; names = names->next) {
-          if (names->id != char_get_idnum(vict))
-            continue;
-
+        if (char_get_mob_specials_memory(ch).contains(char_get_idnum(vict))) {
           found = true;
           act(g, "'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr, TO_ROOM);
           char tar[MAX_INPUT_LENGTH];
@@ -658,22 +654,12 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
 /* make ch remember victim */
 void remember(GameWorld *g, struct char_data *ch, struct char_data *victim)
 {
-  memory_rec *tmp;
-  bool present = false;
-
   if (!char_is_npc(ch) || char_is_npc(victim) || char_prf_flagged(g, victim, PRF_NOHASSLE))
     return;
 
-  for (tmp = char_get_mob_specials_memory(ch); tmp && !present; tmp = tmp->next)
-    if (tmp->id == char_get_idnum(victim))
-      present = true;
-
-  if (!present && !char_mob_flagged(ch, MOB_SPAR) && !char_plr_flagged(victim, PLR_SPAR)) {
-    tmp       = new memory_rec();
-    tmp->next = char_get_mob_specials_memory(ch);
-    tmp->id   = char_get_idnum(victim);
-    char_set_mob_specials_memory(ch, tmp);
-  }
+  bool present = char_get_mob_specials_memory(ch).contains(char_get_idnum(victim));
+  if (!present && !char_mob_flagged(ch, MOB_SPAR) && !char_plr_flagged(victim, PLR_SPAR))
+    char_mob_memory_slot(ch)->add(char_get_idnum(victim));
 }
 
 /* make ch forget victim */
@@ -681,17 +667,7 @@ void remember(GameWorld *g, struct char_data *ch, struct char_data *victim)
 /* erase ch's memory */
 void clearMemory(struct char_data *ch)
 {
-  memory_rec *curr, *next;
-
-  curr = char_get_mob_specials_memory(ch);
-
-  while (curr) {
-    next = curr->next;
-    delete curr;
-    curr = next;
-  }
-
-  char_set_mob_specials_memory(ch, nullptr);
+  char_mob_memory_slot(ch)->clear();
 }
 
 /*

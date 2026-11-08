@@ -640,9 +640,9 @@ ACMD(do_wizutil)
         act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
         break;
       case SCMD_UNAFFECT:
-        if (char_get_affected(vict) || char_get_affected_by(vict)) {
-          while (char_get_affected(vict))
-            affect_remove(g, vict, char_get_affected(vict));
+        if (!char_affects(vict).empty() || char_get_affected_by(vict)) {
+          while (!char_affects(vict).empty())
+            affect_remove(g, vict, &char_affects(vict).front());
           for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
             char_get_affected_by(vict)[taeller] = 0;
           send_to_char(g, vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");

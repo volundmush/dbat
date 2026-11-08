@@ -235,7 +235,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
 
     /* character initializations */
     /* initializations necessary to keep some things straight */
-    char_set_affected(ch, nullptr);
+    char_affects(ch).clear();
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
       char_set_skills_base(ch, i, 0);
@@ -742,7 +742,7 @@ void save_char(GameWorld *g, struct char_data *ch)
   FILE *fl;
   char fname[40], buf[MAX_STRING_LENGTH];
   int i, id, save_index = false;
-  struct affected_type *aff, tmp_aff[MAX_AFFECT];
+  struct affected_type tmp_aff[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
@@ -798,11 +798,11 @@ void save_char(GameWorld *g, struct char_data *ch)
       char_eq[i] = nullptr;
   }
 
-  for (aff = char_get_affected(ch), i = 0; i < MAX_AFFECT; i++) {
-    if (aff) {
-      tmp_aff[i]      = *aff;
-      tmp_aff[i].next = nullptr;
-      aff             = aff->next;
+  auto aff = char_affects(ch).begin();
+  for (i = 0; i < MAX_AFFECT; i++) {
+    if (aff != char_affects(ch).end()) {
+      tmp_aff[i] = *aff;
+      ++aff;
     } else {
       tmp_aff[i].type      = 0; /* Zero signifies not used */
       tmp_aff[i].duration  = 0;
@@ -810,7 +810,6 @@ void save_char(GameWorld *g, struct char_data *ch)
       tmp_aff[i].specific  = 0;
       tmp_aff[i].location  = 0;
       tmp_aff[i].bitvector = 0;
-      tmp_aff[i].next      = nullptr;
     }
   }
 
@@ -821,11 +820,11 @@ void save_char(GameWorld *g, struct char_data *ch)
    * effects are doubled when the char logs back in.
    */
 
-  if ((i >= MAX_AFFECT) && aff && aff->next)
+  if ((i >= MAX_AFFECT) && aff != char_affects(ch).end() && std::next(aff) != char_affects(ch).end())
     mud_log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
 
-  while (char_get_affected(ch))
-    affect_remove(g, ch, char_get_affected(ch));
+  while (!char_affects(ch).empty())
+    affect_remove(g, ch, &char_affects(ch).front());
 
   char_reset_aff_abils(ch);
 
@@ -1052,10 +1051,10 @@ void save_char(GameWorld *g, struct char_data *ch)
   /* Save affects */
   fprintf(fl, "Affs:\n");
   for (i = 0; i < MAX_AFFECT; i++) {
-    aff = &tmp_aff[i];
-    if (aff->type)
-      fprintf(fl, "%d %d %d %d %d %d\n", aff->type, aff->duration,
-              aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
+    const struct affected_type *saved = &tmp_aff[i];
+    if (saved->type)
+      fprintf(fl, "%d %d %d %d %d %d\n", saved->type, saved->duration,
+              saved->modifier, saved->location, (int)saved->bitvector, saved->specific);
   }
   fprintf(fl, "0 0 0 0 0 0\n");
 

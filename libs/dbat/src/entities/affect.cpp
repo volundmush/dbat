@@ -229,7 +229,6 @@ void affect_modify_ar(GameWorld *g, struct char_data *ch, int loc, int mod, int 
 /* restoring original abilities, and then affecting all again           */
 void affect_total(GameWorld *g, struct char_data *ch)
 {
-  struct affected_type *af;
   int i, j;
 
   for (i = 0; i < NUM_WEARS; i++) {
@@ -241,8 +240,8 @@ void affect_total(GameWorld *g, struct char_data *ch)
                          obj_get_bitvector(char_get_equipment(ch, i)), false);
   }
 
-  for (af = char_get_affected(ch); af; af = af->next)
-    affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, false);
+  for (struct affected_type &a : char_affects(ch))
+    affect_modify(g, ch, a.location, a.modifier, a.specific, a.bitvector, false);
 
   char_reset_aff_abils(ch);
 
@@ -256,8 +255,8 @@ void affect_total(GameWorld *g, struct char_data *ch)
     }
   }
 
-  for (af = char_get_affected(ch); af; af = af->next)
-    affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, true);
+  for (struct affected_type &a : char_affects(ch))
+    affect_modify(g, ch, a.location, a.modifier, a.specific, a.bitvector, true);
 
   /* Make certain values are between 0..100, not < 0 and not > 100! */
 
@@ -297,15 +296,9 @@ void affect_total(GameWorld *g, struct char_data *ch)
    Automatically sets apropriate bits and apply's */
 void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af)
 {
-  struct affected_type *affected_alloc;
-
-  affected_alloc = new affected_type();
-
-  if (!char_get_affected(ch))
+  if (char_affects(ch).empty())
     g->affect_list.add(char_get_id(ch), ch);
-  *affected_alloc      = *af;
-  affected_alloc->next = char_get_affected(ch);
-  char_set_affected(ch, affected_alloc);
+  char_affects(ch).push_front(*af);
 
   affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, true);
   affect_total(g, ch);
@@ -318,18 +311,18 @@ void affect_to_char(GameWorld *g, struct char_data *ch, struct affected_type *af
  */
 void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af)
 {
-  struct affected_type *cmtemp;
+  std::list<affected_type> &affects = char_affects(ch);
+  auto it                           = std::find_if(affects.begin(), affects.end(), [af](const affected_type &a) { return &a == af; });
 
-  if (char_get_affected(ch) == nullptr) {
+  if (it == affects.end()) {
     core_dump();
     return;
   }
 
   affect_modify(g, ch, af->location, af->modifier, af->specific, af->bitvector, false);
-  REMOVE_FROM_LIST(af, *char_affected_slot(ch), next, cmtemp);
-  delete af;
+  affects.erase(it);
   affect_total(g, ch);
-  if (!char_get_affected(ch)) {
+  if (affects.empty()) {
     char_unlink_from_affect_list(g, ch);
   }
 }
@@ -337,10 +330,8 @@ void affect_remove(GameWorld *g, struct char_data *ch, struct affected_type *af)
 /* Call affect_remove with every spell of spelltype "skill" */
 void affect_from_char(GameWorld *g, struct char_data *ch, int type)
 {
-  struct affected_type *hjp, *next;
-
-  for (hjp = char_get_affected(ch); hjp; hjp = next) {
-    next = hjp->next;
+  for (auto it = char_affects(ch).begin(); it != char_affects(ch).end();) {
+    struct affected_type *hjp = &*it++;
     if (hjp->type == type)
       affect_remove(g, ch, hjp);
   }
@@ -352,10 +343,8 @@ void affect_from_char(GameWorld *g, struct char_data *ch, int type)
  */
 bool affected_by_spell(struct char_data *ch, int type)
 {
-  struct affected_type *hjp;
-
-  for (hjp = char_get_affected(ch); hjp; hjp = hjp->next)
-    if (hjp->type == type)
+  for (const struct affected_type &hjp : char_affects(ch))
+    if (hjp.type == type)
       return (true);
 
   return (false);
@@ -364,11 +353,10 @@ bool affected_by_spell(struct char_data *ch, int type)
 void affect_join(GameWorld *g, struct char_data *ch, struct affected_type *af,
                  bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
 {
-  struct affected_type *hjp, *next;
   bool found = false;
 
-  for (hjp = char_get_affected(ch); !found && hjp; hjp = next) {
-    next = hjp->next;
+  for (auto it = char_affects(ch).begin(); !found && it != char_affects(ch).end();) {
+    struct affected_type *hjp = &*it++;
 
     if ((hjp->type == af->type) && (hjp->location == af->location) && (hjp->specific == af->specific)) {
       if (add_dur)

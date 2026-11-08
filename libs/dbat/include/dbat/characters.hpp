@@ -1,4 +1,8 @@
 #pragma once
+#include <list>
+#include <map>
+#include "dbat/command.hpp"
+#include "dbat/affected.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/prefflags.hpp"
@@ -67,7 +71,7 @@ struct skill_data {
 struct player_special_data {
   char *poofin{};                          /* Description on arrival of a god.     */
   char *poofout{};                         /* Description upon a god's exit.       */
-  struct alias_data *aliases{};            /* Character's aliases                  */
+  std::list<alias_data> aliases;           /* Character's aliases, newest first   */
   int32_t last_tell{};                     /* idnum of last tell from              */
   void *last_olc_targ{};                   /* olc control                          */
   int last_olc_mode{};                     /* olc control                          */
@@ -76,7 +80,7 @@ struct player_special_data {
   int8_t freeze_level{};                   /* Level of god who froze char, if any	*/
   int16_t invis_level{};                   /* level of invisibility		*/
   room_vnum load_room{};                   /* Which room to place char in		*/
-  struct skill_data skills[SKILL_SLOTS]{}; /* slot k holds skill id SKILL_FIRST + k; NPCs have none */
+  std::map<uint16_t, skill_data> skills;   /* by skill id, only those with something set; NPCs have none */
   bitvector_t pref[PR_ARRAY_MAX]{};        /* preference flags for PC's.		*/
   uint8_t bad_pws{};                       /* number of bad password attemps	*/
   int8_t conditions[NUM_CONDITIONS]{};     /* Drunk, full, thirsty			*/
@@ -112,17 +116,9 @@ struct player_special_data {
   // END UNUSED
 };
 
-/* memory structure for characters */
-struct memory_rec_struct {
-  int32_t id{};
-  struct memory_rec_struct *next{};
-};
-
-typedef struct memory_rec_struct memory_rec;
-
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
-  memory_rec *memory{}; /* List of attackers to remember	       */
+  id_list memory;       /* the ids of attackers to remember, newest first */
   int newitem{};        /* Check if mob has new inv item       */
 
   // BELOW FIELDS ARE UNUSED
@@ -184,8 +180,7 @@ struct char_data {
   struct mob_special_data mob_specials{};
   /* NPC specials				*/
 
-  struct affected_type *affected{};
-  /* affected by what spells		*/
+  std::list<affected_type> affected; /* affected by what spells, newest first */
 
   // inventory and equipment
   struct obj_data *equipment[NUM_WEARS]{};

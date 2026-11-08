@@ -243,8 +243,8 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
     if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(mob_proto_of(g, i)))
       free_proto_script(mob, MOB_TRIGGER);
   }
-  while (char_get_affected(mob))
-    affect_remove(g, mob, char_get_affected(mob));
+  while (!char_affects(mob).empty())
+    affect_remove(g, mob, &char_affects(mob).front());
 
   /* free any assigned scripts */
   if (char_get_script(mob))
@@ -338,7 +338,7 @@ static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *m
     fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
             getCurPL(g, mob), getEffMaxPL(g, mob), (getCurKI(g, mob)), getMaxKI(g, mob),
             (getCurST(g, mob)), getMaxST(g, mob));
-    for (aff = char_get_affected(mob); aff; aff = aff->next)
+    for (auto aff_it = char_affects(mob).begin(); aff_it != char_affects(mob).end() && (aff = &*aff_it); ++aff_it)
       if (aff->type)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);

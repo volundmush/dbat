@@ -32,11 +32,11 @@ void write_aliases(GameWorld *g, struct char_data *ch)
   struct atomic_file af;
   FILE *file;
   char fn[MAX_STRING_LENGTH];
-  struct alias_data *temp;
+  std::list<alias_data> *aliases = char_aliases(g, ch);
 
   get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
 
-  if (char_get_aliases(g, ch) == nullptr) {
+  if (!aliases || aliases->empty()) {
     remove(fn);
     return;
   }
@@ -51,16 +51,16 @@ void write_aliases(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  for (temp = char_get_aliases(g, ch); temp; temp = temp->next) {
-    int aliaslen = strlen(temp->alias);
-    int repllen  = strlen(temp->replacement) - 1;
+  for (const struct alias_data &a : *aliases) {
+    int aliaslen = (int)a.alias.size();
+    int repllen  = (int)a.replacement.size() - 1;
 
     fprintf(file, "%d\n%s\n" /* Alias */
                   "%d\n%s\n" /* Replacement */
                   "%d\n",    /* Type */
-            aliaslen, temp->alias,
-            repllen, temp->replacement + 1,
-            temp->type);
+            aliaslen, a.alias.c_str(),
+            repllen, a.replacement.c_str() + 1,
+            a.type);
   }
 
   atomic_commit(&af);
@@ -77,7 +77,7 @@ static bool read_alias_record(FILE *file, struct alias_data *a)
     return false;
 
   fgets(xbuf, length + 1, file);
-  a->alias = strdup(xbuf);
+  a->alias = xbuf;
 
   /* Build the replacement. */
   if (fscanf(file, "%d\n", &length) != 1 || length < 0 || length >= (int)sizeof(xbuf) - 1)
@@ -85,7 +85,7 @@ static bool read_alias_record(FILE *file, struct alias_data *a)
 
   *xbuf = ' '; /* Doesn't need terminated, fgets() will. */
   fgets(xbuf + 1, length + 1, file);
-  a->replacement = strdup(xbuf);
+  a->replacement = xbuf;
 
   /* Figure out the alias type. */
   if (fscanf(file, "%d\n", &length) != 1)
@@ -99,7 +99,7 @@ void read_aliases(GameWorld *g, struct char_data *ch)
 {
   FILE *file;
   char xbuf[MAX_STRING_LENGTH];
-  struct alias_data *head = nullptr, **tail = &head;
+  std::list<alias_data> loaded;
 
   get_filename(xbuf, sizeof(xbuf), ALIAS_FILE, char_get_name(ch));
 
@@ -117,23 +117,18 @@ void read_aliases(GameWorld *g, struct char_data *ch)
 
   /* A malformed record is dropped along with everything after it; the records before it are kept. */
   for (;;) {
-    struct alias_data *a;
+    struct alias_data a;
 
-    a = new alias_data();
-    if (!read_alias_record(file, a)) {
-      free(a->alias);
-      free(a->replacement);
-      delete a;
+    if (!read_alias_record(file, &a))
       break;
-    }
-    *tail = a;
-    tail  = &a->next;
+    loaded.push_back(std::move(a));
 
     if (feof(file))
       break;
   }
 
-  char_set_aliases(g, ch, head);
+  if (std::list<alias_data> *aliases = char_aliases(g, ch))
+    *aliases = std::move(loaded);
   fclose(file);
 }
 
@@ -157,34 +152,29 @@ ACMD(do_alias)
 {
   char arg[MAX_INPUT_LENGTH];
   char *repl;
-  struct alias_data *a, *temp;
+  struct alias_data *a;
+  std::list<alias_data> *aliases;
 
-  if (char_is_npc(ch))
+  if (char_is_npc(ch) || !(aliases = char_aliases(g, ch)))
     return;
 
   repl = any_one_arg(argument, arg);
 
   if (!*arg) { /* no argument specified -- list currently defined aliases */
     send_to_char(g, ch, "Currently defined aliases:\r\n");
-    if ((a = char_get_aliases(g, ch)) == nullptr)
+    if (aliases->empty())
       send_to_char(g, ch, " None.\r\n");
-    else {
-      while (a != nullptr) {
-        send_to_char(g, ch, "%-15s %s\r\n", a->alias, a->replacement);
-        a = a->next;
-      }
-    }
+    else
+      for (const struct alias_data &each : *aliases)
+        send_to_char(g, ch, "%-15s %s\r\n", each.alias.c_str(), each.replacement.c_str());
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    if ((a = find_alias(char_get_aliases(g, ch), arg)) != nullptr) {
-      struct alias_data *head = char_get_aliases(g, ch);
-      REMOVE_FROM_LIST(a, head, next, temp);
-      char_set_aliases(g, ch, head);
-      free_alias(a);
-    }
+    bool had = (a = find_alias(*aliases, arg)) != nullptr;
+    if (had)
+      aliases->remove_if([a](const alias_data &each) { return &each == a; });
     /* if no replacement string is specified, assume we want to delete */
     if (!*repl) {
-      if (a == nullptr)
+      if (!had)
         send_to_char(g, ch, "No such alias.\r\n");
       else
         send_to_char(g, ch, "Alias deleted.\r\n");
@@ -193,16 +183,15 @@ ACMD(do_alias)
         send_to_char(g, ch, "You can't alias 'alias'.\r\n");
         return;
       }
-      a        = new alias_data();
-      a->alias = strdup(arg);
+      struct alias_data added;
+      added.alias = arg;
       delete_doubledollar(repl);
-      a->replacement = strdup(repl);
+      added.replacement = repl;
       if (strchr(repl, ALIAS_SEP_CHAR) || strchr(repl, ALIAS_VAR_CHAR))
-        a->type = ALIAS_COMPLEX;
+        added.type = ALIAS_COMPLEX;
       else
-        a->type = ALIAS_SIMPLE;
-      a->next = char_get_aliases(g, ch);
-      char_set_aliases(g, ch, a);
+        added.type = ALIAS_SIMPLE;
+      aliases->push_front(std::move(added));
       send_to_char(g, ch, "Alias added.\r\n");
     }
   }
@@ -227,6 +216,7 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
 {
   struct txt_q temp_queue;
   char *tokens[NUM_TOKENS], *temp, *write_point;
+  const char *rep;
   char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH]; /* raw? */
   char *end         = buf + sizeof(buf) - 1;                  /* $* and $1..$9 can expand past any buffer */
   int num_of_tokens = 0, num;
@@ -244,30 +234,30 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   temp_queue  = txt_q{};
 
   /* now parse the alias */
-  for (temp = a->replacement; *temp; temp++) {
-    if (*temp == ALIAS_SEP_CHAR) {
+  for (rep = a->replacement.c_str(); *rep; rep++) {
+    if (*rep == ALIAS_SEP_CHAR) {
       *write_point              = '\0';
       buf[MAX_INPUT_LENGTH - 1] = '\0';
       write_to_q(buf, &temp_queue, 1);
       write_point = buf;
-    } else if (*temp == ALIAS_VAR_CHAR) {
-      temp++;
-      if (!*temp) { /* a '$' at the very end: keep it, and don't step past the string */
+    } else if (*rep == ALIAS_VAR_CHAR) {
+      rep++;
+      if (!*rep) { /* a '$' at the very end: keep it, and don't step past the string */
         alias_append(&write_point, end, "$");
         break;
       }
-      if ((num = *temp - '1') < num_of_tokens && num >= 0)
+      if ((num = *rep - '1') < num_of_tokens && num >= 0)
         alias_append(&write_point, end, tokens[num]);
-      else if (*temp == ALIAS_GLOB_CHAR)
+      else if (*rep == ALIAS_GLOB_CHAR)
         alias_append(&write_point, end, orig);
       else {
-        char literal[2] = {*temp, '\0'};
+        char literal[2] = {*rep, '\0'};
         alias_append(&write_point, end, literal);
-        if (*temp == '$') /* redouble $ for act safety */
+        if (*rep == '$') /* redouble $ for act safety */
           alias_append(&write_point, end, "$");
       }
     } else if (write_point < end)
-      *(write_point++) = *temp;
+      *(write_point++) = *rep;
   }
 
   *write_point              = '\0';
@@ -294,14 +284,15 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
 bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen)
 {
   char first_arg[MAX_INPUT_LENGTH], *ptr;
-  struct alias_data *a, *tmp;
+  struct alias_data *a;
+  std::list<alias_data> *aliases;
 
   /* Mobs don't have alaises. */
   if (char_is_npc(d->character))
     return false;
 
   /* bail out immediately if the guy doesn't have any aliases */
-  if ((tmp = char_get_aliases(g, d->character)) == nullptr)
+  if (!(aliases = char_aliases(g, d->character)) || aliases->empty())
     return false;
 
   /* find the alias we're supposed to match */
@@ -312,11 +303,11 @@ bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t m
     return false;
 
   /* if the first arg is not an alias, return without doing anything */
-  if ((a = find_alias(tmp, first_arg)) == nullptr)
+  if ((a = find_alias(*aliases, first_arg)) == nullptr)
     return false;
 
   if (a->type == ALIAS_SIMPLE) {
-    strlcpy(orig, a->replacement, maxlen);
+    strlcpy(orig, a->replacement.c_str(), maxlen);
     return false;
   }
   perform_complex_alias(&d->input, ptr, a);

@@ -17,7 +17,5 @@ struct affected_type {
   int location{};          /* Tells which ability to change(APPLY_XXX)*/
   int specific{};          /* Some locations have parameters          */
   bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
-
-  struct affected_type *next{};
 };
 

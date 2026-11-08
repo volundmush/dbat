@@ -689,17 +689,17 @@ static void check_affects_all_count_down(GameWorld *g, struct char_data *ch)
   th_take_output(g, ch);
 
   affect_update(g);
-  CHECK(char_get_affected(ending) == nullptr);
-  CHECK(char_get_affected(other) && char_get_affected(other)->duration == 2);
-  CHECK(char_get_affected(ch) && char_get_affected(ch)->duration == -1);
+  CHECK(char_affects(ending).empty());
+  CHECK(!char_affects(other).empty() && char_affects(other).front().duration == 2);
+  CHECK(!char_affects(ch).empty() && char_affects(ch).front().duration == -1);
 
   /* and it counts down to the end, without touching anyone else */
   affect_update(g);
   affect_update(g);
-  CHECK(char_get_affected(other) && char_get_affected(other)->duration == 0);
+  CHECK(!char_affects(other).empty() && char_affects(other).front().duration == 0);
   affect_update(g);
-  CHECK(char_get_affected(other) == nullptr);
-  CHECK(char_get_affected(ch) && char_get_affected(ch)->duration == -1);
+  CHECK(char_affects(other).empty());
+  CHECK(!char_affects(ch).empty() && char_affects(ch).front().duration == -1);
   CHECK_AUDIT(g);
 
   affect_from_char(g, ch, SPELL_SLEEP);

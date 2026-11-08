@@ -372,7 +372,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   char_set_overf(d->character, false);
   char_set_spam(d->character, 0);
   char_set_rage_meter(d->character, 0);
-  if (!char_get_affected(d->character)) {
+  if (char_affects(d->character).empty()) {
     if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
       char_aff_set(d->character, AFF_HEALGLOW, false);
     }

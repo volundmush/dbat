@@ -577,8 +577,8 @@ void destroy_db(GameWorld *g)
     /* free script proto list */
     free_proto_script(mob_proto_of(g, mvnum), MOB_TRIGGER);
 
-    while (char_get_affected(mob_proto_of(g, mvnum)))
-      affect_remove(g, mob_proto_of(g, mvnum), char_get_affected(mob_proto_of(g, mvnum)));
+    while (!char_affects(mob_proto_of(g, mvnum)).empty())
+      affect_remove(g, mob_proto_of(g, mvnum), &char_affects(mob_proto_of(g, mvnum)).front());
   }
   g->mob_proto.clear();
   g->mob_index.clear();
@@ -4145,18 +4145,13 @@ void free_char(GameWorld *g, struct char_data *ch)
 {
   int i;
   mob_vnum nr;
-  struct alias_data *a;
-
   /* first: removing an affect can change skills, which live in the player data freed below */
-  while (char_get_affected(ch))
-    affect_remove(g, ch, char_get_affected(ch));
+  while (!char_affects(ch).empty())
+    affect_remove(g, ch, &char_affects(ch).front());
 
   if (char_get_player_specials(ch)) {
 
-    while ((a = char_get_aliases(g, ch)) != nullptr) {
-      char_set_aliases(g, ch, char_get_aliases(g, ch)->next);
-      free_alias(a);
-    }
+    char_get_player_specials(ch)->aliases.clear();
     if (char_get_player_specials(ch)->poofin)
       free(char_get_player_specials(ch)->poofin);
     if (char_get_player_specials(ch)->poofout)
@@ -4333,7 +4328,7 @@ void reset_char(GameWorld *g, struct char_data *ch)
 /* clear ALL the working variables of a char; do NOT free any space alloc'ed */
 void clear_char(struct char_data *ch)
 {
-  memset((char *)ch, 0, sizeof(struct char_data));
+  *ch = char_data{}; /* each field's initial value: it holds containers, so it must never be memset */
 
   char_set_in_room(ch, NOWHERE);
   char_set_pfilepos(ch, -1);
@@ -4347,7 +4342,7 @@ void clear_char(struct char_data *ch)
 
 void clear_object(struct obj_data *obj)
 {
-  memset((char *)obj, 0, sizeof(struct obj_data));
+  *obj = obj_data{}; /* each field's initial value: it holds containers, so it must never be memset */
 
   obj_set_item_number(obj, NOTHING);
   obj_set_in_room(obj, NOWHERE);

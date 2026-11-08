@@ -905,7 +905,7 @@ ACMD(do_mtransform)
       char_set_ddesc(&tmpmob, strdup(char_get_ddesc(m)));
 
     char_set_id(&tmpmob, char_get_id(ch));
-    char_set_affected(&tmpmob, char_get_affected(ch));
+    char_affects(&tmpmob)         = char_affects(ch);
     *char_inventory_slot(&tmpmob) = char_get_inventory(ch);
     char_set_proto_script(&tmpmob, char_get_proto_script(ch));
     char_set_script(&tmpmob, char_get_script(ch));

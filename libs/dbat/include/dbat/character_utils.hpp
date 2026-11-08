@@ -66,8 +66,8 @@ char *char_get_poofout(GameWorld *g, const struct char_data *ch);
 void char_set_poofout(GameWorld *g, struct char_data *ch, char *v);
 int char_get_olc_zone(GameWorld *g, const struct char_data *ch);
 void char_set_olc_zone(GameWorld *g, struct char_data *ch, zone_vnum v);
-struct alias_data *char_get_aliases(GameWorld *g, const struct char_data *ch);
-void char_set_aliases(GameWorld *g, struct char_data *ch, struct alias_data *v);
+/* The character's aliases, newest first; null for one without player data */
+std::list<alias_data> *char_aliases(GameWorld *g, struct char_data *ch);
 int32_t char_get_last_tell(GameWorld *g, const struct char_data *ch);
 void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v);
 char *char_get_host(GameWorld *g, const struct char_data *ch);
@@ -450,8 +450,8 @@ struct index_data *mob_index_of(GameWorld *g, mob_vnum vnum);
 
 int8_t char_get_mob_specials_default_pos(const struct char_data *ch);
 void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v);
-memory_rec *char_get_mob_specials_memory(const struct char_data *ch);
-void char_set_mob_specials_memory(struct char_data *ch, memory_rec *v);
+const id_list &char_get_mob_specials_memory(const struct char_data *ch);
+id_list *char_mob_memory_slot(struct char_data *ch);
 int char_get_cooldown(const struct char_data *ch);
 void char_set_cooldown(struct char_data *ch, int v);
 
@@ -779,8 +779,9 @@ int8_t char_get_mob_specials_attack_type(const struct char_data *ch);
 void char_set_mob_specials_attack_type(struct char_data *ch, int8_t v);
 
 /* Field accessors */
-struct affected_type *char_get_affected(const struct char_data *ch);
-void char_set_affected(struct char_data *ch, struct affected_type *v);
+/* The character's affects, newest first. Add and remove them with affect_to_char() and affect_remove(). */
+std::list<affected_type> &char_affects(struct char_data *ch);
+const std::list<affected_type> &char_affects(const struct char_data *ch);
 int char_get_aggtimer(const struct char_data *ch);
 void char_set_aggtimer(struct char_data *ch, int v);
 void char_set_baseki(struct char_data *ch, int64_t v);
@@ -862,7 +863,6 @@ void char_set_raw_title(struct char_data *ch, char *v);
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct script_data **char_script_slot(struct char_data *ch);
 struct script_memory **char_memory_slot(struct char_data *ch);
-struct affected_type **char_affected_slot(struct char_data *ch);
 struct player_special_data **char_player_specials_slot(struct char_data *ch);
 id_list *char_inventory_slot(struct char_data *ch);
 char **char_description_slot(struct char_data *ch);

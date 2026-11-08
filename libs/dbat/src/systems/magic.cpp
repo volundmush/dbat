@@ -33,15 +33,15 @@ static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch, st
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(GameWorld *g)
 {
-  struct affected_type *af, *next;
   for (char_data *i : each_affected(g)) {
-    for (af = char_get_affected(i); af; af = next) {
-      next = af->next;
+    for (auto it = char_affects(i).begin(); it != char_affects(i).end();) {
+      struct affected_type *af         = &*it++;
+      const struct affected_type *next = it == char_affects(i).end() ? nullptr : &*it;
       if (af->duration >= 1)
         af->duration--;
       else if (af->duration == 0) {
         if (af->type > 0)
-          if (!af->next || (af->next->type != af->type) || (af->next->duration > 0)) {
+          if (!next || (next->type != af->type) || (next->duration > 0)) {
             if (g->spell_info[af->type].wear_off_msg)
               send_to_char(g, i, "%s\r\n", g->spell_info[af->type].wear_off_msg);
             if (char_get_speedboost(i) > 0 && af->type == SPELL_HAYASA) {

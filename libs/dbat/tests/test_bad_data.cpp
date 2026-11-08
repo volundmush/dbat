@@ -290,8 +290,8 @@ static void check_saved_affects_are_cleaned_up(void)
 
   int count = 0;
 
-  for (struct affected_type *af = char_get_affected(copy); af; af = af->next) {
-    CHECK(af->specific == 0);
+  for (const struct affected_type &af : char_affects(copy)) {
+    CHECK(af.specific == 0);
     count++;
   }
   CHECK(count == 2);

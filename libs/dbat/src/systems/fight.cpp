@@ -1894,8 +1894,8 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
   if (char_get_fighting(g, ch))
     stop_fighting(g, ch);
 
-  while (char_get_affected(ch))
-    affect_remove(g, ch, char_get_affected(ch));
+  while (!char_affects(ch).empty())
+    affect_remove(g, ch, &char_affects(ch).front());
 
   /* To make ordinary commands work in scripts.  welcor*/
   if (char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_SLEEPING && char_get_position(ch) != POS_RESTING)

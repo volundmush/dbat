@@ -1373,10 +1373,8 @@ bool know_skill(GameWorld *g, struct char_data *ch, int skill)
 bool is_affected(struct char_data *ch, int aff_flag)
 {
 
-  struct affected_type *af;
-
-  for (af = ch->affected; af; af = af->next) {
-    if (af->location == APPLY_NONE && af->bitvector == (bitvector_t)aff_flag)
+  for (const struct affected_type &af : ch->affected) {
+    if (af.location == APPLY_NONE && af.bitvector == (bitvector_t)aff_flag)
       return (true);
   }
 
@@ -1386,10 +1384,8 @@ bool is_affected(struct char_data *ch, int aff_flag)
 void null_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 {
 
-  struct affected_type *af, *next_af;
-
-  for (af = ch->affected; af; af = next_af) {
-    next_af = af->next;
+  for (auto it = ch->affected.begin(); it != ch->affected.end();) {
+    struct affected_type *af = &*it++;
     if (af->location == APPLY_NONE && af->bitvector == (bitvector_t)aff_flag)
       affect_remove(g, ch, af);
   }
@@ -1398,10 +1394,8 @@ void null_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag)
 {
 
-  struct affected_type *af, *next_af;
-
-  for (af = ch->affected; af; af = next_af) {
-    next_af = af->next;
+  for (auto it = ch->affected.begin(); it != ch->affected.end();) {
+    struct affected_type *af = &*it++;
     if (af->bitvector == (bitvector_t)aff_flag)
       affect_remove(g, ch, af);
   }
@@ -3138,15 +3132,7 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
         }
 
         if (char_get_level(vict) > 4 && char_get_alignment(vict) >= 0) {
-          memory_rec *names;
-          int remember = false;
-
-          for (names = char_get_mob_specials_memory(vict); names && !remember; names = names->next) {
-            if (names->id != char_get_idnum(ch))
-              continue;
-
-            remember = true;
-          }
+          int remember = char_get_mob_specials_memory(vict).contains(char_get_idnum(ch));
 
           if (remember == true) {
             act(g, "@w$n@W says, '@C$N you will die by my hand!@W'@n", true, vict, nullptr, ch, TO_ROOM);
@@ -6652,54 +6638,63 @@ void char_set_lastint(struct char_data *ch, time_t v)
   ch->lastint = v;
 }
 
-/* The skills table lives in player_specials and covers ids SKILL_FIRST..SKILL_TABLE_SIZE-1. NPCs share the
- * dummy player_specials and have no skills: reads give 0 and writes are ignored. */
-static struct skill_data *skill_slot(const struct char_data *ch, int i)
+/* Skills live in player_specials, by id from SKILL_FIRST to SKILL_TABLE_SIZE-1, and only those with something set
+ * are there: one that isn't reads as 0. NPCs share the dummy player_specials and have no skills: reads give 0 and
+ * writes are ignored. */
+static bool has_skills(const struct char_data *ch, int i)
 {
-  if (char_is_npc(ch))
-    return nullptr;
-  if (i < SKILL_FIRST || i >= SKILL_TABLE_SIZE)
-    return nullptr;
-  return &ch->player_specials->skills[i - SKILL_FIRST];
+  return !char_is_npc(ch) && i >= SKILL_FIRST && i < SKILL_TABLE_SIZE;
+}
+
+static struct skill_data skill_of(const struct char_data *ch, int i)
+{
+  if (!has_skills(ch, i))
+    return {};
+  auto it = ch->player_specials->skills.find(static_cast<uint16_t>(i));
+  return it == ch->player_specials->skills.end() ? skill_data{} : it->second;
+}
+
+/* Changes skill i with change(skill), dropping it once nothing is set. */
+template <typename F>
+static void change_skill(struct char_data *ch, int i, F &&change)
+{
+  if (!has_skills(ch, i))
+    return;
+  auto &skills         = ch->player_specials->skills;
+  struct skill_data &s = skills[static_cast<uint16_t>(i)];
+  change(s);
+  if (!s.base && !s.mod && !s.perf)
+    skills.erase(static_cast<uint16_t>(i));
 }
 
 int8_t char_get_skills_mod(const struct char_data *ch, int i)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  return s ? s->mod : 0;
+  return skill_of(ch, i).mod;
 }
 
 void char_set_skills_mod(struct char_data *ch, int i, int8_t v)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  if (s)
-    s->mod = v;
+  change_skill(ch, i, [v](struct skill_data &s) { s.mod = v; });
 }
 
 int8_t char_get_skills_perf(const struct char_data *ch, int i)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  return s ? s->perf : 0;
+  return skill_of(ch, i).perf;
 }
 
 void char_set_skills_perf(struct char_data *ch, int i, int8_t v)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  if (s)
-    s->perf = v;
+  change_skill(ch, i, [v](struct skill_data &s) { s.perf = v; });
 }
 
 int8_t char_get_skills_base(const struct char_data *ch, int i)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  return s ? s->base : 0;
+  return skill_of(ch, i).base;
 }
 
 void char_set_skills_base(struct char_data *ch, int i, int8_t v)
 {
-  struct skill_data *s = skill_slot(ch, i);
-  if (s)
-    s->base = v;
+  change_skill(ch, i, [v](struct skill_data &s) { s.base = v; });
 }
 
 bitvector_t *char_get_bodyparts(const struct char_data *ch)
@@ -6737,14 +6732,14 @@ void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v)
   ch->mob_specials.default_pos = v;
 }
 
-memory_rec *char_get_mob_specials_memory(const struct char_data *ch)
+const id_list &char_get_mob_specials_memory(const struct char_data *ch)
 {
   return ch->mob_specials.memory;
 }
 
-void char_set_mob_specials_memory(struct char_data *ch, memory_rec *v)
+id_list *char_mob_memory_slot(struct char_data *ch)
 {
-  ch->mob_specials.memory = v;
+  return &ch->mob_specials.memory;
 }
 
 int char_get_cooldown(const struct char_data *ch)
@@ -7176,17 +7171,10 @@ void char_set_olc_zone(GameWorld *g, struct char_data *ch, zone_vnum v)
     ps->olc_zone = v;
 }
 
-struct alias_data *char_get_aliases(GameWorld *g, const struct char_data *ch)
+std::list<alias_data> *char_aliases(GameWorld *g, struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "aliases");
-  return ps ? ps->aliases : nullptr;
-}
-
-void char_set_aliases(GameWorld *g, struct char_data *ch, struct alias_data *v)
-{
-  struct player_special_data *ps = ps_of(g, ch, "aliases");
-  if (ps)
-    ps->aliases = v;
+  return ps ? &ps->aliases : nullptr;
 }
 
 int32_t char_get_last_tell(GameWorld *g, const struct char_data *ch)
@@ -7364,14 +7352,14 @@ void char_set_mob_specials_attack_type(struct char_data *ch, int8_t v)
   ch->mob_specials.attack_type = v;
 }
 
-struct affected_type *char_get_affected(const struct char_data *ch)
+std::list<affected_type> &char_affects(struct char_data *ch)
 {
   return ch->affected;
 }
 
-void char_set_affected(struct char_data *ch, struct affected_type *v)
+const std::list<affected_type> &char_affects(const struct char_data *ch)
 {
-  ch->affected = v;
+  return ch->affected;
 }
 
 int char_get_aggtimer(const struct char_data *ch)
@@ -7769,11 +7757,6 @@ struct script_data **char_script_slot(struct char_data *ch)
 struct script_memory **char_memory_slot(struct char_data *ch)
 {
   return &ch->memory;
-}
-
-struct affected_type **char_affected_slot(struct char_data *ch)
-{
-  return &ch->affected;
 }
 
 struct player_special_data **char_player_specials_slot(struct char_data *ch)

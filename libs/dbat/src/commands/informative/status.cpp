@@ -1028,9 +1028,9 @@ ACMD(do_status)
     else if (char_get_conditions(g, ch, DRUNK) > 0)
       send_to_char(g, ch, "You have an alcoholic buzz.\r\n");
 
-    if (char_get_affected(ch)) {
+    if (!char_affects(ch).empty()) {
       int lasttype = 0;
-      for (aff = char_get_affected(ch); aff; aff = aff->next) {
+      for (auto aff_it = char_affects(ch).begin(); aff_it != char_affects(ch).end() && (aff = &*aff_it); ++aff_it) {
         if (!strcasecmp(skill_name(g, aff->type), "runic") && aff->type != lasttype) {
           lasttype = aff->type;
           send_to_char(g, ch, "Your Kenaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);

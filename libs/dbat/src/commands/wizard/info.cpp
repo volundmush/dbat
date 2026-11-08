@@ -734,8 +734,8 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   send_to_char(g, ch, "AFF: @y%s@n\r\n", buf);
 
   /* Routine to show what spells a char is affected by */
-  if (char_get_affected(k)) {
-    for (aff = char_get_affected(k); aff; aff = aff->next) {
+  if (!char_affects(k).empty()) {
+    for (auto aff_it = char_affects(k).begin(); aff_it != char_affects(k).end() && (aff = &*aff_it); ++aff_it) {
       send_to_char(g, ch, "SPL: (%3dhr) @c%-21s@n ", aff->duration + 1, skill_name(g, aff->type));
 
       if (aff->modifier)
@@ -1381,8 +1381,7 @@ ACMD(do_show)
           strp = str_realloc(strp, k);
         }
         j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(who));
-        aff = char_get_affected(who);
-        for (; aff; aff = aff->next) {
+        for (auto aff_it = char_affects(who).begin(); aff_it != char_affects(who).end() && (aff = &*aff_it); ++aff_it) {
           j += snprintf(strp + j, k - j, "SPL: (%3d%s) @c%-21s@n ", aff->duration + 1,
                         (l == 15) ? "hr" : "rd", skill_name(g, aff->type));
 

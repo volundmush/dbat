@@ -818,26 +818,12 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
   }
 }
 
-struct alias_data *find_alias(struct alias_data *alias_list, char *str)
+struct alias_data *find_alias(std::list<alias_data> &aliases, const char *str)
 {
-  while (alias_list != nullptr) {
-    if (*str == *alias_list->alias) /* hey, every little bit counts :-) */
-      if (!strcmp(str, alias_list->alias))
-        return (alias_list);
-
-    alias_list = alias_list->next;
-  }
-
-  return (nullptr);
-}
-
-void free_alias(struct alias_data *a)
-{
-  if (a->alias)
-    free(a->alias);
-  if (a->replacement)
-    free(a->replacement);
-  delete a;
+  for (struct alias_data &a : aliases)
+    if (a.alias == str)
+      return &a;
+  return nullptr;
 }
 
 /* Used in specprocs, mostly.  (Exactly) matches "command" to cmd number */

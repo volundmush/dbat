@@ -1,4 +1,6 @@
 #pragma once
+#include <list>
+#include <string>
 #include "dbat/consts/types.hpp"
 
 struct command_info {
@@ -12,10 +14,9 @@ struct command_info {
 };
 
 struct alias_data {
-  char *alias{};
-  char *replacement{};
+  std::string alias;
+  std::string replacement; /* starts with a space */
   int type{};
-  struct alias_data *next{};
 };
 
 constexpr int ALIAS_SIMPLE  = 0;
@@ -25,8 +26,7 @@ constexpr int ALIAS_SEP_CHAR  = ';';
 constexpr int ALIAS_VAR_CHAR  = '$';
 constexpr int ALIAS_GLOB_CHAR = '*';
 
-void free_alias(struct alias_data *a);
-struct alias_data *find_alias(struct alias_data *alias_list, char *str);
+struct alias_data *find_alias(std::list<alias_data> &aliases, const char *str);
 
 int find_command(GameWorld *g, const char *command);
 
