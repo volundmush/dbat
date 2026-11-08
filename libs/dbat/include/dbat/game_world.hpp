@@ -1,5 +1,6 @@
 #pragma once
 #include <deque>
+#include <string>
 #include <ctime>
 
 #include "dbat/consts/types.hpp"
@@ -119,8 +120,9 @@ struct GameWorld {
   int top_of_socialt{};
 
   /* Text loaded at boot */
-  char *background{}, *credits{}, *handbook{}, *help{}, *ihelp{}, *immlist{}, *imotd{}, *info{};
-  char *motd{}, *news{}, *policies{}, *wizlist{}, *GREETANSI{}, *GREETINGS{};
+  /* The text files shown as they are: empty if one couldn't be read */
+  std::string background, credits, handbook, help, ihelp, immlist, imotd, info;
+  std::string motd, news, policies, wizlist, GREETANSI, GREETINGS;
   struct help_index_element *help_table{};
   int top_of_helpt{};
   char *context_help_list[NUM_CONTEXTS]{};

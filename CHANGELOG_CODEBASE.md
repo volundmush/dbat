@@ -30,6 +30,7 @@
 - A guild's two messages are `std::string`s, so copying a guild is a plain copy and `free_guild()` and `free_guild_contents()` are gone. A guild being edited is now freed with its messages when the edit is saved. [Volund]
 - A saved object with a negative unique id (other than -1, which means none yet) is given a new one, with a SYSERR, instead of being filed under a negative index in the unique id table. [Volund]
 - A help keyword with an opening quote and no closing one no longer makes `one_word()` read past the end of the line, which could make the help table too small for what was loaded into it. [Volund]
+- The text files the game shows (`motd`, `news`, `credits`, the greetings and the rest) are `std::string`s on `GameWorld`, empty for one that couldn't be read, and `free_text_files()` is gone. `newsedit` writes into the connection's own `draft` instead of borrowing `immlist` (the text of the immlist file, which no command shows), so an entry no longer starts out holding that file. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3

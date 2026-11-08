@@ -594,6 +594,26 @@ static void check_editor_saves_and_aborts(void)
   th_shutdown(g);
 }
 
+static void check_news_entry_leaves_the_immortal_list_alone(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Writer", ADMLVL_IMPL);
+  char news[4096]      = "";
+
+  th_type(g, ch, "newsedit A title");
+  th_type(g, ch, "The entry itself.");
+  th_type(g, ch, "/s");
+  FILE *fl = fopen(NEWS_FILE, "r");
+  CHECK(fl);
+  if (fl) {
+    news[fread(news, 1, sizeof(news) - 1, fl)] = '\0';
+    fclose(fl);
+  }
+  /* the editor used to start out holding the immlist file, which it borrowed to write in */
+  CHECK(strstr(news, "The entry itself.") && !strstr(news, "Fixture immlist"));
+  th_shutdown(g);
+}
+
 static void check_zone_range_keeps_what_is_in_it(void)
 {
   GameWorld *g = th_boot();
@@ -984,6 +1004,7 @@ static const struct {
     {"race_name_forms_stay_apart",                  check_race_name_forms_stay_apart                 },
     {"zone_range_keeps_what_is_in_it",              check_zone_range_keeps_what_is_in_it             },
     {"editor_saves_and_aborts",                     check_editor_saves_and_aborts                    },
+    {"news_entry_leaves_the_immortal_list_alone",   check_news_entry_leaves_the_immortal_list_alone  },
     {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
     {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },

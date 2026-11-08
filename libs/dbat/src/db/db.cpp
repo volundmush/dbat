@@ -91,8 +91,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr);
 static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr);
 static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr);
 static void load_zones(GameWorld *g, FILE *fl, char *zonename);
-static int file_to_string(const char *name, char *buf);
-static int file_to_string_alloc(const char *name, char **buf);
+static int file_to_string(const char *name, std::string &text);
+static int file_to_string_alloc(const char *name, std::string *text);
 static int count_alias_records(FILE *fl);
 static int count_hash_records(FILE *fl);
 static bitvector_t asciiflag_conv_aff(char *flag);
@@ -305,21 +305,6 @@ void reboot_wizlists(GameWorld *g)
 {
   file_to_string_alloc(WIZLIST_FILE, &g->wizlist);
   file_to_string_alloc(IMMLIST_FILE, &g->immlist);
-}
-
-/* Wipe out all the loaded text files, for shutting down. */
-void free_text_files(GameWorld *g)
-{
-  char **textfiles[] = {
-      &g->wizlist, &g->immlist, &g->news, &g->credits, &g->motd, &g->imotd, &g->help, &g->info,
-      &g->policies, &g->handbook, &g->background, &g->GREETINGS, &g->GREETANSI, &g->ihelp, nullptr};
-  int rf;
-
-  for (rf = 0; textfiles[rf]; rf++)
-    if (*textfiles[rf]) {
-      free(*textfiles[rf]);
-      *textfiles[rf] = nullptr;
-    }
 }
 
 /*
@@ -4109,28 +4094,26 @@ void free_obj(GameWorld *g, struct obj_data *obj)
 
 /* Read a text file into a freshly allocated string at *buf, replacing (and freeing) what was there. On failure
  * *buf is left untouched. */
-static int file_to_string_alloc(const char *name, char **buf)
+/* Reads a text file into text, leaving it as it was if the file can't be read. */
+static int file_to_string_alloc(const char *name, std::string *text)
 {
-  char temp[MAX_STRING_LENGTH];
+  std::string temp;
 
   if (file_to_string(name, temp) < 0)
     return (-1);
 
-  if (*buf)
-    free(*buf);
-
-  *buf = strdup(temp);
+  *text = std::move(temp);
   return (0);
 }
 
 /* read contents of a text file, and place in buf */
-static int file_to_string(const char *name, char *buf)
+static int file_to_string(const char *name, std::string &text)
 {
   FILE *fl;
   char tmp[READ_SIZE + 3];
   int len;
 
-  *buf = '\0';
+  text.clear();
 
   if (!(fl = fopen(name, "r"))) {
     mud_log("SYSERR: reading %s: %s", name, strerror(errno));
@@ -4144,13 +4127,13 @@ static int file_to_string(const char *name, char *buf)
       tmp[len - 1] = '\0'; /* take off the trailing \n */
     strcat(tmp, "\r\n");   /* strcat: OK (tmp:READ_SIZE+3) */
 
-    if (strlen(buf) + strlen(tmp) + 1 > MAX_STRING_LENGTH) {
+    if (text.size() + strlen(tmp) + 1 > MAX_STRING_LENGTH) {
       mud_log("SYSERR: %s: string too big (%d max)", name, MAX_STRING_LENGTH);
-      *buf = '\0';
+      text.clear();
       fclose(fl);
       return (-1);
     }
-    strcat(buf, tmp); /* strcat: OK (size checked above) */
+    text += tmp;
   }
 
   fclose(fl);

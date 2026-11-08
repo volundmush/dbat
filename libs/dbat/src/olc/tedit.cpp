@@ -31,7 +31,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
 
   switch (terminator) {
     case STRINGADD_SAVE:
-      if (!*d->str.chars())
+      if (d->draft.empty())
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else if (!(fl = fopen(storage, "a"))) {
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
@@ -44,10 +44,8 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
 
         fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf.c_str(), char_get_name(d->character), tmstr);
         d->newsbuf.clear();
-        strip_cr(*d->str.chars());
-        fprintf(fl, "%s\n", *d->str.chars());
-        free(*d->str.chars());
-        *d->str.chars() = nullptr;
+        strip_cr(d->draft);
+        fprintf(fl, "%s\n", d->draft.c_str());
         fclose(fl);
 
         g->NEWSUPDATE = game_now(g);
@@ -74,6 +72,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
   }
 
   /* Common cleanup code. */
+  d->draft.clear();
   desc_set_connected(d, CON_PLAYING);
 }
 
@@ -81,9 +80,10 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 {
   struct atomic_file af;
   FILE *fl;
-  char *storage = OLC_STORAGE(d);
+  char *storage     = OLC_STORAGE(d);
+  std::string *text = d->str.text(); /* the file's text, as now edited */
 
-  if (!storage)
+  if (!storage || !text)
     terminator = STRINGADD_ABORT;
 
   switch (terminator) {
@@ -91,17 +91,17 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
       if (!(fl = atomic_open(&af, storage, false)))
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else {
-        if (*d->str.chars() && !(strcmp(storage, "text/news"))) {
+        if (!text->empty() && !(strcmp(storage, "text/news"))) {
           char *tmstr;
           time_t mytime                = game_now(g);
           tmstr                        = asctime(localtime(&mytime));
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
-          strip_cr(*d->str.chars());
-          fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), *d->str.chars());
-        } else if (*d->str.chars()) {
-          strip_cr(*d->str.chars());
-          fputs(*d->str.chars(), fl);
+          strip_cr(*text);
+          fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), text->c_str());
+        } else if (!text->empty()) {
+          strip_cr(*text);
+          fputs(text->c_str(), fl);
         }
         if (!atomic_commit(&af)) {
           write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");
@@ -149,7 +149,7 @@ ACMD(do_tedit)
   struct {
     const char *cmd{};
     char level{};
-    char **buffer{};
+    std::string *buffer{};
     int size{};
     const char *filename{};
   } fields[] = {
@@ -212,9 +212,9 @@ ACMD(do_tedit)
   }
   char_get_desc(ch)->olc = new oasis_olc_data();
 
-  if (*fields[l].buffer) {
-    send_to_char(g, ch, "%s", *fields[l].buffer);
-    backstr = strdup(*fields[l].buffer);
+  if (!fields[l].buffer->empty()) {
+    send_to_char(g, ch, "%s", fields[l].buffer->c_str());
+    backstr = strdup(fields[l].buffer->c_str());
   }
 
   OLC_STORAGE(char_get_desc(ch)) = strdup(fields[l].filename);

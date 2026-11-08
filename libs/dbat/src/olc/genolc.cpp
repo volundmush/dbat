@@ -131,6 +131,12 @@ void strip_cr(char *buffer)
   buffer[wpos] = '\0';
 }
 
+/* Takes out every carriage return. */
+void strip_cr(std::string &text)
+{
+  std::erase(text, '\r');
+}
+
 bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
 {
   struct save_list_data *ritem, *temp;

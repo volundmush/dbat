@@ -166,9 +166,9 @@ ACMD(do_help)
 
   if (!*argument) {
     if (char_get_admlevel(ch) < ADMLVL_IMMORT)
-      send_to_char(g, ch, "%s", g->help);
+      send_to_char(g, ch, "%s", g->help.c_str());
     else
-      send_to_char(g, ch, "%s", g->ihelp);
+      send_to_char(g, ch, "%s", g->ihelp.c_str());
     return;
   }
 
@@ -218,33 +218,33 @@ ACMD(do_gen_ps)
 
   switch (subcmd) {
     case SCMD_CREDITS:
-      send_to_char(g, ch, "%s", g->credits);
+      send_to_char(g, ch, "%s", g->credits.c_str());
       break;
     case SCMD_NEWS:
-      send_to_char(g, ch, "%s", g->news);
+      send_to_char(g, ch, "%s", g->news.c_str());
       char_set_lastpl(ch, game_now(g));
       break;
     case SCMD_INFO:
-      send_to_char(g, ch, "%s", g->info);
+      send_to_char(g, ch, "%s", g->info.c_str());
       break;
     case SCMD_WIZLIST:
-      send_to_char(g, ch, "%s", g->wizlist);
+      send_to_char(g, ch, "%s", g->wizlist.c_str());
       break;
     case SCMD_IMMLIST:
-      send_to_char(g, ch, "%s", g->immlist);
+      send_to_char(g, ch, "%s", g->immlist.c_str());
       break;
     case SCMD_HANDBOOK:
-      send_to_char(g, ch, "%s", g->handbook);
+      send_to_char(g, ch, "%s", g->handbook.c_str());
       break;
     case SCMD_POLICIES:
-      snprintf(bum, sizeof(bum), "--------------------\r\n%s\r\n--------------------\r\n", g->policies);
+      snprintf(bum, sizeof(bum), "--------------------\r\n%s\r\n--------------------\r\n", g->policies.c_str());
       send_to_char(g, ch, "%s", bum);
       break;
     case SCMD_MOTD:
-      send_to_char(g, ch, "%s", g->motd);
+      send_to_char(g, ch, "%s", g->motd.c_str());
       break;
     case SCMD_IMOTD:
-      send_to_char(g, ch, "%s", g->imotd);
+      send_to_char(g, ch, "%s", g->imotd.c_str());
       break;
     case SCMD_CLEAR:
       send_to_char(g, ch, "\033[H\033[J");

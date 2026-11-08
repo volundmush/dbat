@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/db.hpp"
 
@@ -16,6 +18,7 @@ bool remove_from_save_list(GameWorld *g, zone_vnum, int type);
 bool add_to_save_list(GameWorld *g, zone_vnum, int type);
 bool in_save_list(GameWorld *g, zone_vnum, int type);
 void strip_cr(char *);
+void strip_cr(std::string &text);
 bool save_all(GameWorld *g);
 char *str_udup(const char *);
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);

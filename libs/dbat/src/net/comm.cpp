@@ -1877,7 +1877,7 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
     char_set_desc(d->character, d);
   }
   char_prf_set(g, d->character, PRF_COLOR, true);
-  write_to_output(g, d, "%s", g->GREETANSI);
+  write_to_output(g, d, "%s", g->GREETANSI.c_str());
   write_to_output(g, d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
   write_to_output(g, d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", g->PCOUNT);
   write_to_output(g, d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", g->HIGHPCOUNT);

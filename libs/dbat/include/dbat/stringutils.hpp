@@ -12,6 +12,7 @@ void trim(char *s);
 char *add_commas(int64_t num);
 char *CAP(char *txt);
 void prune_crlf(char *txt);
+void prune_crlf(std::string &txt);
 
 int count_color_chars(const char *string);
 char *one_word(char *argument, char *first_arg);

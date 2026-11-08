@@ -573,7 +573,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         } else {
           d->idle_tics = 0;
-          write_to_output(g, d, "\r\n%s\r\n%s", g->motd, CONFIG_MENU);
+          write_to_output(g, d, "\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
           char_set_rp(d->character, d->rpp);
           desc_set_connected(d, CON_MENU);
         }
@@ -1074,7 +1074,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     default:
-      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", g->motd, CONFIG_MENU);
+      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
       break;
   }
 }
@@ -1152,7 +1152,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_UMENU);
     return;
   }
-  write_to_output(g, d, "\r\nCharacter not deleted.\r\n%s\r\n%s", g->motd, CONFIG_MENU);
+  write_to_output(g, d, "\r\nCharacter not deleted.\r\n%s\r\n%s", g->motd.c_str(), CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 

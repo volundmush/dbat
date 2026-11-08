@@ -50,7 +50,6 @@ void game_world_free_contents(GameWorld *g)
     free_player_index(g);                   /* players.c */
     clear_free_list(g);                     /* mail.c */
     free_mail_index(g);                     /* mail.c */
-    free_text_files(g);                     /* db.c */
     clear_boards(g);                        /* boards.c */
     delete[] g->cmd_sort_info;              /* act.informative.c */
     free_command_list(g);                   /* act.informative.c */

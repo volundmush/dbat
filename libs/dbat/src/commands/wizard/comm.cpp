@@ -224,18 +224,6 @@ ACMD(do_newsedit)
   fclose(fl);
 
   /* Time to write the entry */
-  struct {
-    const char *cmd{};
-    char level{};
-    char **buffer{};
-    int size{};
-    const char *filename{};
-  } fields[] = {
-      /* edit the lvls to your own needs */
-      {"news", ADMLVL_IMMORT, &g->immlist, 2000, IMMLIST_FILE},
-      {"\n",   0,             nullptr,  0,    nullptr     }
-  };
-
   char *tmstr;
   time_t mytime                = game_now(g);
   tmstr                        = asctime(localtime(&mytime));
@@ -251,7 +239,6 @@ ACMD(do_newsedit)
   } else {
     lookup = lastentry + 1;
   }
-  char *backstr = nullptr;
   act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
@@ -265,7 +252,8 @@ ACMD(do_newsedit)
   char_get_desc(ch)->newsbuf = argument;
   g->TOP_OF_NEWS       = lookup;
   g->LASTNEWS          = lookup;
-  string_write(char_get_desc(ch), fields[0].buffer, 2000, 0, backstr);
+  char_get_desc(ch)->draft.clear();
+  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, 2000, 0, nullptr);
   desc_set_connected(char_get_desc(ch), CON_NEWSEDIT);
 }
 

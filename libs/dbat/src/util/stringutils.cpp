@@ -129,6 +129,12 @@ void prune_crlf(char *txt)
     txt[--n] = '\0';
 }
 
+void prune_crlf(std::string &txt)
+{
+  while (!txt.empty() && (txt.back() == '\n' || txt.back() == '\r'))
+    txt.pop_back();
+}
+
 char *one_argument(char *argument, char *first_arg)
 {
   char *begin = first_arg;
