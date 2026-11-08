@@ -103,7 +103,7 @@ static const char *skill_percent(GameWorld *g, struct char_data *ch, char *skill
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-static int item_in_list(GameWorld *g, char *item, obj_data *list)
+static int item_in_list(GameWorld *g, char *item, const id_list &list)
 {
   int count = 0;
 
@@ -473,7 +473,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           *str = '\0';   /* arg given, not found */
         } else {         /* no arg given */
           if (char_get_inventory(c)) {
-            snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(char_get_inventory(c)));
+            snprintf(str, slen, "%c%ld", UID_CHAR, char_get_inventory(c).newest());
           } else {
             *str = '\0';
           }
@@ -576,8 +576,8 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       if (!strcasecmp(field, "name")) {
         snprintf(str, slen, "%s", char_get_name(c));
       } else if (!strcasecmp(field, "next_in_room")) {
-        if (char_get_next_in_room(c))
-          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(char_get_next_in_room(c)));
+        if (char_data *next = char_next_in_room(g, c))
+          snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(next));
         else
           *str = '\0';
       }
@@ -828,7 +828,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
 
       else if (!strcasecmp(field, "contents")) {
         if (obj_get_contains(o))
-          snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj_get_contains(o)));
+          snprintf(str, slen, "%c%ld", UID_CHAR, obj_get_contains(o).newest());
         else
           *str = '\0';
       }
@@ -910,8 +910,8 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           obj_set_name(o, strdup(blah));
         }
       } else if (!strcasecmp(field, "next_in_list")) {
-        if (obj_get_next_content(o))
-          snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(obj_get_next_content(o)));
+        if (obj_data *next = obj_next_in_list(g, o))
+          snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(next));
         else
           *str = '\0';
       }
@@ -1151,7 +1151,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
       *str = '\0';   /* arg given, not found */
     } else {         /* no arg given */
       if (room_get_contents(r)) {
-        snprintf(str, slen, "%c%d", UID_CHAR, obj_get_id(room_get_contents(r)));
+        snprintf(str, slen, "%c%ld", UID_CHAR, room_get_contents(r).newest());
       } else {
         *str = '\0';
       }
@@ -1160,7 +1160,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
 
   else if (!strcasecmp(field, "people")) {
     if (room_get_people(r))
-      snprintf(str, slen, "%c%d", UID_CHAR, char_get_id(room_get_people(r)));
+      snprintf(str, slen, "%c%ld", UID_CHAR, room_get_people(r).newest());
     else
       *str = '\0';
   } else if (!strcasecmp(field, "id")) {

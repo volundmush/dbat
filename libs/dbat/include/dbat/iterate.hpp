@@ -103,21 +103,25 @@ inline auto obj_snapshot(GameWorld *g)
   return make_snapshot<obj_data, obj_place>([g](long id) { return obj_by_id(g, id); }, place_of);
 }
 
-/* Characters in the list starting at head, which must be one room's people. */
-inline auto chars_in_room_list(GameWorld *g, char_data *head)
+/* The characters in list, which must be one room's people. */
+inline auto chars_in_room_list(GameWorld *g, const id_list &list)
 {
   auto s = char_snapshot(g);
-  for (char_data *ch = head; ch; ch = char_get_next_in_room(ch))
-    s.add(char_get_id(ch), char_get_in_room(ch));
+  list.each([&](long id) {
+    if (const char_data *ch = char_by_id(g, id))
+      s.add(id, char_get_in_room(ch));
+  });
   return s;
 }
 
-/* Objects in the list starting at head, linked by next_content: a room's contents, an inventory or a container's. */
-inline auto objs_in_content_list(GameWorld *g, obj_data *head)
+/* The objects in list: a room's contents, an inventory or a container's. */
+inline auto objs_in_content_list(GameWorld *g, const id_list &list)
 {
   auto s = obj_snapshot(g);
-  for (obj_data *o = head; o; o = obj_get_next_content(o))
-    s.add(obj_get_id(o), place_of(o));
+  list.each([&](long id) {
+    if (const obj_data *o = obj_by_id(g, id))
+      s.add(id, place_of(o));
+  });
   return s;
 }
 
@@ -170,23 +174,25 @@ inline auto each_desc(GameWorld *g)
 /* The characters in a room. */
 inline auto room_people(GameWorld *g, room_vnum room)
 {
-  return dbat_iter::chars_in_room_list(g, room == NOWHERE ? nullptr : room_get_people(g, room));
+  return dbat_iter::chars_in_room_list(g, room_get_people(g, room));
 }
 
 /* The objects lying in a room. */
 inline auto room_contents(GameWorld *g, room_vnum room)
 {
-  return dbat_iter::objs_in_content_list(g, room == NOWHERE ? nullptr : room_get_contents(g, room));
+  return dbat_iter::objs_in_content_list(g, room_get_contents(g, room));
 }
 
 /* The same, for code holding the room itself */
 inline auto room_people(GameWorld *g, const room_data *room)
 {
-  return dbat_iter::chars_in_room_list(g, room ? room_get_people(room) : nullptr);
+  static const id_list none;
+  return dbat_iter::chars_in_room_list(g, room ? room_get_people(room) : none);
 }
 inline auto room_contents(GameWorld *g, const room_data *room)
 {
-  return dbat_iter::objs_in_content_list(g, room ? room_get_contents(room) : nullptr);
+  static const id_list none;
+  return dbat_iter::objs_in_content_list(g, room ? room_get_contents(room) : none);
 }
 
 /* What a character carries, not what it wears. */
@@ -201,17 +207,80 @@ inline auto obj_contents(GameWorld *g, const obj_data *obj)
   return dbat_iter::objs_in_content_list(g, obj_get_contains(obj));
 }
 
-/* The objects in the list starting at head: any of the three lists above, for code that is handed one. */
-inline auto obj_list(GameWorld *g, obj_data *head)
+/* The objects in list: any of the three lists above, for code that is handed one. */
+inline auto obj_list(GameWorld *g, const id_list &list)
 {
-  return dbat_iter::objs_in_content_list(g, head);
+  return dbat_iter::objs_in_content_list(g, list);
 }
 
-/* The characters in the list starting at head, which must be a room's people, for code that is handed one. */
-inline auto char_list(GameWorld *g, char_data *head)
+/* The characters in list, which must be a room's people, for code that is handed one. */
+inline auto char_list(GameWorld *g, const id_list &list)
 {
-  return dbat_iter::chars_in_room_list(g, head);
+  return dbat_iter::chars_in_room_list(g, list);
 }
+
+/* The list obj is in: a room's contents, an inventory or a container's; null if it is in none (worn, or nowhere). */
+inline const id_list *list_of(GameWorld *g, const obj_data *obj)
+{
+  if (obj_get_in_room(obj) != NOWHERE)
+    return &room_get_contents(g, obj_get_in_room(obj));
+  if (const char_data *carrier = obj_get_carried_by(obj))
+    return &char_get_inventory(carrier);
+  if (const obj_data *container = obj_get_in_obj(obj))
+    return &obj_get_contains(container);
+  return nullptr;
+}
+
+/* What follows obj in the list it is in, newest first, or ch among the people in its room, as the old next_content
+ * and next_in_room did; null at the end. */
+inline obj_data *obj_next_in_list(GameWorld *g, const obj_data *obj)
+{
+  const id_list *list = list_of(g, obj);
+  long next           = list ? list->after(obj_get_id(obj)) : 0;
+  return next ? obj_by_id(g, next) : nullptr;
+}
+inline char_data *char_next_in_room(GameWorld *g, const char_data *ch)
+{
+  long next = room_get_people(g, char_get_in_room(ch)).after(char_get_id(ch));
+  return next ? char_by_id(g, next) : nullptr;
+}
+
+/* The members of list from start on, newest first: what the old linked lists gave by following start. If start isn't
+ * a member, just start. */
+inline auto obj_list_from(GameWorld *g, const id_list &list, obj_data *start)
+{
+  auto s = dbat_iter::obj_snapshot(g);
+  if (!start)
+    return s;
+  if (!list.contains(obj_get_id(start))) {
+    s.add(obj_get_id(start), dbat_iter::place_of(start));
+    return s;
+  }
+  bool on = false;
+  list.each([&](long id) {
+    on = on || id == obj_get_id(start);
+    if (const obj_data *o = on ? obj_by_id(g, id) : nullptr)
+      s.add(id, dbat_iter::place_of(o));
+  });
+  return s;
+}
+inline auto char_list_from(GameWorld *g, const id_list &list, char_data *start)
+{
+  auto s = dbat_iter::char_snapshot(g);
+  if (!start)
+    return s;
+  bool on = false;
+  list.each([&](long id) {
+    on = on || id == char_get_id(start);
+    if (const char_data *ch = on ? char_by_id(g, id) : nullptr)
+      s.add(id, char_get_in_room(ch));
+  });
+  return s;
+}
+
+/* The newest member of a list, as the head of the old linked lists was, or null if it is empty. */
+inline obj_data *first_obj(GameWorld *g, const id_list &list) { return list ? obj_by_id(g, list.newest()) : nullptr; }
+inline char_data *first_char(GameWorld *g, const id_list &list) { return list ? char_by_id(g, list.newest()) : nullptr; }
 
 /* The characters following ch. */
 inline auto char_followers(GameWorld *g, const char_data *ch)

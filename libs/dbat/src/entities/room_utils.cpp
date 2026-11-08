@@ -228,27 +228,18 @@ room_vnum room_get_exit_to_room(GameWorld *g, room_vnum room, int dir)
   return r && r->dir_option[dir] ? r->dir_option[dir]->to_room : NOWHERE;
 }
 
-struct obj_data *room_get_contents(const struct room_data *room)
+const id_list &room_get_contents(const struct room_data *room)
 {
   return room->contents;
 }
 
-void room_set_contents(struct room_data *room, struct obj_data *v)
+/* A room that doesn't exist has nothing in it. */
+const id_list &room_get_contents(GameWorld *g, room_vnum room)
 {
-  room->contents = v;
-}
-
-struct obj_data *room_get_contents(GameWorld *g, room_vnum room)
-{
+  static const id_list none;
   if (struct room_data *r = room_of(g, room))
     return r->contents;
-  return {};
-}
-
-void room_set_contents(GameWorld *g, room_vnum room, struct obj_data *v)
-{
-  if (struct room_data *r = room_of(g, room))
-    r->contents = v;
+  return none;
 }
 
 char *room_get_description(const struct room_data *room)
@@ -375,27 +366,18 @@ void room_set_number(GameWorld *g, room_vnum room, room_vnum v)
     r->number = v;
 }
 
-struct char_data *room_get_people(const struct room_data *room)
+const id_list &room_get_people(const struct room_data *room)
 {
   return room->people;
 }
 
-void room_set_people(struct room_data *room, struct char_data *v)
+/* A room that doesn't exist has nothing in it. */
+const id_list &room_get_people(GameWorld *g, room_vnum room)
 {
-  room->people = v;
-}
-
-struct char_data *room_get_people(GameWorld *g, room_vnum room)
-{
+  static const id_list none;
   if (struct room_data *r = room_of(g, room))
     return r->people;
-  return {};
-}
-
-void room_set_people(GameWorld *g, room_vnum room, struct char_data *v)
-{
-  if (struct room_data *r = room_of(g, room))
-    r->people = v;
+  return none;
 }
 
 struct trig_proto_list *room_get_proto_script(const struct room_data *room)
@@ -516,13 +498,13 @@ char **room_description_slot(struct room_data *room)
   return &room->description;
 }
 
-struct obj_data **room_contents_slot(GameWorld *g, room_vnum room)
+id_list *room_contents_slot(GameWorld *g, room_vnum room)
 {
   struct room_data *r = room_of(g, room);
   return r ? &r->contents : nullptr;
 }
 
-struct char_data **room_people_slot(GameWorld *g, room_vnum room)
+id_list *room_people_slot(GameWorld *g, room_vnum room)
 {
   struct room_data *r = room_of(g, room);
   return r ? &r->people : nullptr;

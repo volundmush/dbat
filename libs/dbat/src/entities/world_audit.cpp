@@ -84,7 +84,6 @@ static void collect(GameWorld *g, struct audit *a)
 static void audit_rooms(GameWorld *g, struct audit *a)
 {
   g->rooms.visit([&](room_vnum vnum, const struct room_data *room) {
-    size_t limit;
 
     for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
       const struct room_direction_data *exit = room->dir_option[dir];
@@ -93,33 +92,32 @@ static void audit_rooms(GameWorld *g, struct audit *a)
         problem(a, "room %d: exit %d leads to room %d, which doesn't exist", vnum, dir, exit->to_room);
     }
 
-    limit = a->characters.count + 1;
-    for (struct char_data *ch = room->people; ch; ch = char_get_next_in_room(ch)) {
-      if (!limit--) {
-        problem(a, "room %d: the list of people loops", vnum);
-        break;
-      }
-      if (!set_has(&a->characters, ch)) {
-        problem(a, "room %d: a person here isn't in the game", vnum);
-        break;
-      }
-      if (char_get_in_room(ch) != vnum)
-        problem(a, "room %d: %s is listed here, but says room %d", vnum, char_get_name(ch), char_get_in_room(ch));
-    }
+    bool missing = false;
 
-    limit = a->objects.count + 1;
-    for (struct obj_data *obj = room->contents; obj; obj = obj_get_next_content(obj)) {
-      if (!limit--) {
-        problem(a, "room %d: the list of contents loops", vnum);
-        break;
-      }
-      if (!set_has(&a->objects, obj)) {
-        problem(a, "room %d: an object here isn't in the game", vnum);
-        break;
-      }
-      if (obj_get_in_room(obj) != vnum)
+    if (room->people.has_duplicates())
+      problem(a, "room %d: someone is listed here twice", vnum);
+    room->people.each([&](long id) {
+      struct char_data *ch = char_by_id(g, id);
+      if (!ch)
+        missing = true;
+      else if (char_get_in_room(ch) != vnum)
+        problem(a, "room %d: %s is listed here, but says room %d", vnum, char_get_name(ch), char_get_in_room(ch));
+    });
+    if (missing)
+      problem(a, "room %d: a person here isn't in the game", vnum);
+
+    missing = false;
+    if (room->contents.has_duplicates())
+      problem(a, "room %d: an object is listed here twice", vnum);
+    room->contents.each([&](long id) {
+      struct obj_data *obj = obj_by_id(g, id);
+      if (!obj)
+        missing = true;
+      else if (obj_get_in_room(obj) != vnum)
         problem(a, "room %d: object %d is listed here, but says room %d", vnum, obj_get_vnum(g, obj), obj_get_in_room(obj));
-    }
+    });
+    if (missing)
+      problem(a, "room %d: an object here isn't in the game", vnum);
   });
 }
 
@@ -179,7 +177,6 @@ static void audit_character_values(GameWorld *g, struct audit *a, struct char_da
   const char *name = char_get_name(ch);
   int64_t weight   = 0;
   int items        = 0;
-  size_t limit     = a->objects.count + 1;
 
   if (char_get_position(ch) < 0 || char_get_position(ch) > POS_STANDING)
     problem(a, "%s: position %d doesn't exist", name, char_get_position(ch));
@@ -190,16 +187,16 @@ static void audit_character_values(GameWorld *g, struct audit *a, struct char_da
   if (char_get_exp(ch) < 0)
     problem(a, "%s: has negative experience", name);
 
-  for (struct obj_data *obj = char_get_inventory(ch); obj && limit; obj = obj_get_next_content(obj), limit--) {
-    weight += obj_get_weight(obj);
-    items++;
-  }
-  if (limit) {
-    if (items != char_get_carry_items(ch))
-      problem(a, "%s: carries %d items, but counts %d", name, items, char_get_carry_items(ch));
-    if (weight != char_get_carry_weight(ch))
-      problem(a, "%s: carries a weight of %lld, but counts %d", name, (long long)weight, char_get_carry_weight(ch));
-  }
+  char_get_inventory(ch).each([&](long id) {
+    if (const struct obj_data *obj = obj_by_id(g, id)) {
+      weight += obj_get_weight(obj);
+      items++;
+    }
+  });
+  if (items != char_get_carry_items(ch))
+    problem(a, "%s: carries %d items, but counts %d", name, items, char_get_carry_items(ch));
+  if (weight != char_get_carry_weight(ch))
+    problem(a, "%s: carries a weight of %lld, but counts %d", name, (long long)weight, char_get_carry_weight(ch));
 }
 
 static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
@@ -212,26 +209,23 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
   if (room != NOWHERE && !valid_room(g, room))
     problem(a, "%s: in room index %d, which doesn't exist", name, room);
   else if (room != NOWHERE) {
-    size_t people = a->characters.count + 1;
-
-    for (other = room_get_people(g, room); other && other != ch && people; other = char_get_next_in_room(other))
-      people--;
-    if (other != ch)
+    if (!room_get_people(g, room).contains(char_get_id(ch)))
       problem(a, "%s: says room %d, but isn't listed there", name, room);
   }
 
-  for (struct obj_data *obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
-    if (!limit--) {
-      problem(a, "%s: the inventory loops", name);
-      break;
-    }
-    if (!set_has(&a->objects, obj)) {
-      problem(a, "%s: carries an object that isn't in the game", name);
-      break;
-    }
-    if (obj_get_carried_by(obj) != ch)
+  bool missing = false;
+
+  if (char_get_inventory(ch).has_duplicates())
+    problem(a, "%s: carries an object twice", name);
+  char_get_inventory(ch).each([&](long id) {
+    struct obj_data *obj = obj_by_id(g, id);
+    if (!obj)
+      missing = true;
+    else if (obj_get_carried_by(obj) != ch)
       problem(a, "%s: carries object %d, which doesn't say so", name, obj_get_vnum(g, obj));
-  }
+  });
+  if (missing)
+    problem(a, "%s: carries an object that isn't in the game", name);
 
   for (int slot = 0; slot < NUM_WEARS; slot++) {
     struct obj_data *obj = char_get_equipment(ch, slot);
@@ -263,14 +257,9 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
   }
 }
 
-static bool list_has_object(const struct audit *a, struct obj_data *list, const struct obj_data *obj)
+static bool list_has_object(const id_list &list, const struct obj_data *obj)
 {
-  size_t limit = a->objects.count + 1;
-
-  for (; list && limit; list = obj_get_next_content(list), limit--)
-    if (list == obj)
-      return true;
-  return false;
+  return list.contains(obj_get_id(obj));
 }
 
 /* The other direction from the room and character checks: an object must be listed where it says it is. */
@@ -282,14 +271,14 @@ static void audit_object_is_listed(GameWorld *g, struct audit *a, struct obj_dat
   struct char_data *wearer = obj_get_worn_by(obj);
   struct obj_data *outer   = obj_get_in_obj(obj);
 
-  if (room != NOWHERE && valid_room(g, room) && !list_has_object(a, room_get_contents(g, room), obj))
+  if (room != NOWHERE && valid_room(g, room) && !list_has_object(room_get_contents(g, room), obj))
     problem(a, "object %d: says room %d, but isn't listed there", vnum, room);
-  if (owner && set_has(&a->characters, owner) && !list_has_object(a, char_get_inventory(owner), obj))
+  if (owner && set_has(&a->characters, owner) && !list_has_object(char_get_inventory(owner), obj))
     problem(a, "object %d: says %s carries it, but isn't in the inventory", vnum, char_get_name(owner));
   if (wearer && set_has(&a->characters, wearer) &&
       (obj_get_worn_on(obj) < 0 || obj_get_worn_on(obj) >= NUM_WEARS || char_get_equipment(wearer, obj_get_worn_on(obj)) != obj))
     problem(a, "object %d: says %s wears it, but isn't in that slot", vnum, char_get_name(wearer));
-  if (outer && set_has(&a->objects, outer) && !list_has_object(a, obj_get_contains(outer), obj))
+  if (outer && set_has(&a->objects, outer) && !list_has_object(obj_get_contains(outer), obj))
     problem(a, "object %d: says it's inside object %d, but isn't listed there", vnum, obj_get_vnum(g, outer));
 }
 
@@ -298,7 +287,6 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
   obj_vnum vnum = obj_get_vnum(g, obj);
   int places    = (obj_get_in_room(obj) != NOWHERE) + (obj_get_carried_by(obj) != nullptr) +
                (obj_get_worn_by(obj) != nullptr) + (obj_get_in_obj(obj) != nullptr);
-  size_t limit  = a->objects.count + 1;
 
   if (places > 1)
     problem(a, "object %d: is in %d places at once", vnum, places);
@@ -329,18 +317,19 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
   if (obj->fellow_wall_uid && !set_has(&a->objects, obj_get_fellow_wall(g, obj)))
     problem(a, "object %d: joined to a wall that isn't in the game", vnum);
 
-  for (struct obj_data *inner = obj_get_contains(obj); inner; inner = obj_get_next_content(inner)) {
-    if (!limit--) {
-      problem(a, "object %d: the list of contents loops", vnum);
-      break;
-    }
-    if (!set_has(&a->objects, inner)) {
-      problem(a, "object %d: contains an object that isn't in the game", vnum);
-      break;
-    }
-    if (obj_get_in_obj(inner) != obj)
+  bool missing = false;
+
+  if (obj_get_contains(obj).has_duplicates())
+    problem(a, "object %d: contains an object twice", vnum);
+  obj_get_contains(obj).each([&](long id) {
+    struct obj_data *inner = obj_by_id(g, id);
+    if (!inner)
+      missing = true;
+    else if (obj_get_in_obj(inner) != obj)
       problem(a, "object %d: contains object %d, which doesn't say so", vnum, obj_get_vnum(g, inner));
-  }
+  });
+  if (missing)
+    problem(a, "object %d: contains an object that isn't in the game", vnum);
 }
 
 /* Is d an open connection? Compares pointers only, as d may have been freed. */

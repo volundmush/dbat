@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/prefflags.hpp"
 #include "dbat/consts/magic.hpp"
@@ -194,7 +195,7 @@ struct char_data {
 
   // inventory and equipment
   struct obj_data *equipment[NUM_WEARS]{};
-  struct obj_data *carrying{};
+  id_list carrying;     /* the objects it carries, newest first */
   int carry_weight{};   // carried weight
   int carry_items{}; // number of carried items
 
@@ -206,8 +207,6 @@ struct char_data {
   struct script_data *script{};   /* script info for the object		*/
   struct script_memory *memory{}; /* for mob memory triggers		*/
 
-  struct char_data *next_in_room{};
-  /* For room->people - list		*/
   struct char_data *next_fighting{};
   /* For fighting list			*/
   struct char_data *next_affect{}; /* For affect wearoff			*/

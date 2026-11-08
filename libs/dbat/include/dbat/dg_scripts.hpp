@@ -211,7 +211,7 @@ obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name);
 obj_data *get_obj_in_room(GameWorld *g, room_data *room, char *name);
 obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name);
 int trgvar_in_room(GameWorld *g, room_vnum vnum);
-obj_data *get_obj_in_list(GameWorld *g, char *name, obj_data *list);
+obj_data *get_obj_in_list(GameWorld *g, char *name, const id_list &list);
 obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name);
 void script_trigger_check(GameWorld *g);
 void check_time_triggers(GameWorld *g);

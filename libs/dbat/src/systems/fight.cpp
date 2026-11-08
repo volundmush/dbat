@@ -1057,7 +1057,7 @@ void fight_stack(GameWorld *g)
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
           act(g, "$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
-            extract_obj(g, char_get_inventory(ch));
+            extract_obj(g, first_obj(g, char_get_inventory(ch)));
 
           extract_char(g, ch);
           continue;
@@ -1067,7 +1067,7 @@ void fight_stack(GameWorld *g)
         if (rand_number(g, 1, 30) >= 22 && !block_calc(g, ch)) {
           act(g, "$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
           while (char_get_inventory(ch))
-            extract_obj(g, char_get_inventory(ch));
+            extract_obj(g, first_obj(g, char_get_inventory(ch)));
           extract_char(g, ch);
           continue;
         }
@@ -1761,11 +1761,12 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
 
   if (!char_mob_flagged(ch, MOB_HUSK)) {
     /* transfer character's inventory to the corpse */
-    obj_set_contains(corpse, char_get_inventory(ch));
+    *obj_contains_slot(corpse) = char_get_inventory(ch);
     for (obj_data *o : obj_contents(g, corpse)) {
       obj_set_in_obj(o, corpse);
     }
-    object_list_new_owner(corpse, nullptr);
+    object_list_new_owner(g, obj_get_contains(corpse), nullptr);
+    obj_set_carried_by(corpse, nullptr);
 
     /* transfer character's equipment to the corpse */
     for (i = 0; i < NUM_WEARS; i++)
@@ -1791,7 +1792,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
     char_set_gold(ch, 0);
   }
   if (!char_mob_flagged(ch, MOB_HUSK)) {
-    char_set_inventory(ch, nullptr);
+    char_inventory_slot(ch)->clear();
     char_set_carry_items(ch, 0);
     char_set_carry_weight(ch, 0);
   }

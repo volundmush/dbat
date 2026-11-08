@@ -81,8 +81,7 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     obj_set_worn_by(obj, obj_get_worn_by(&swap));
     obj_set_worn_on(obj, obj_get_worn_on(&swap));
     obj_set_in_obj(obj, obj_get_in_obj(&swap));
-    obj_set_contains(obj, obj_get_contains(&swap));
-    obj_set_next_content(obj, obj_get_next_content(&swap));
+    *obj_contains_slot(obj) = obj_get_contains(&swap);
     obj_set_sitting(obj, obj_get_sitting(g, &swap));
     obj_set_user(obj, obj_get_user(g, &swap));
     obj_set_target(obj, obj_get_target(g, &swap));
@@ -410,7 +409,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
   while ((tmp = first_object_of_proto(g, obj))) {
     /* extract_obj() will just axe contents. */
     while (obj_get_contains(tmp)) {
-      struct obj_data *content = obj_get_contains(tmp);
+      struct obj_data *content = first_obj(g, obj_get_contains(tmp));
 
       obj_from_obj(g, content);
       if (obj_get_in_room(tmp) != NOWHERE)

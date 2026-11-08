@@ -37,7 +37,11 @@
 
 static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj, int location);
 static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location);
-static void Crash_restore_weight(struct obj_data *obj);
+static void Crash_restore_weight(GameWorld *g, struct obj_data *obj);
+static void Crash_restore_weight_list(GameWorld *g, const id_list &list);
+static bool Crash_save_list(GameWorld *g, const id_list &list, FILE *fp, int location);
+static void Crash_extract_objs_from(GameWorld *g, const std::vector<long> &ids, std::size_t i);
+static void Crash_extract_norents_from(GameWorld *g, const std::vector<long> &ids, std::size_t i);
 static void Crash_extract_objs(GameWorld *g, struct obj_data *obj);
 static bool Crash_is_unrentable(struct obj_data *obj);
 static void Crash_extract_norents(GameWorld *g, struct obj_data *obj);
@@ -87,27 +91,27 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
   for (j = 0; j < NUM_WEARS; j++)
     if (char_get_equipment(ch, j)) {
       if (!Crash_save(g, char_get_equipment(ch, j), fp, j + 1)) {
-        Crash_restore_weight(char_get_equipment(ch, j));
+        Crash_restore_weight(g, char_get_equipment(ch, j));
         mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
         atomic_abort(&af);
         return false;
       }
       if (ferror(fp)) {
-        Crash_restore_weight(char_get_equipment(ch, j));
+        Crash_restore_weight(g, char_get_equipment(ch, j));
         Crash_log_file_error("write", af.tmp, __FILE__, __LINE__);
         atomic_abort(&af);
         return false;
       }
-      Crash_restore_weight(char_get_equipment(ch, j));
+      Crash_restore_weight(g, char_get_equipment(ch, j));
     }
 
-  if (!Crash_save(g, char_get_inventory(ch), fp, 0)) {
-    Crash_restore_weight(char_get_inventory(ch));
+  if (!Crash_save_list(g, char_get_inventory(ch), fp, 0)) {
+    Crash_restore_weight_list(g, char_get_inventory(ch));
     mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     atomic_abort(&af);
     return false;
   }
-  Crash_restore_weight(char_get_inventory(ch));
+  Crash_restore_weight_list(g, char_get_inventory(ch));
 
   return atomic_commit(&af);
 }
@@ -481,14 +485,14 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
   fclose(fl);
 }
 
+/* Saves obj after what it contains, taking their weight off the containers until Crash_restore_weight() */
 static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
 
   if (obj) {
-    Crash_save(g, obj_get_next_content(obj), fp, location);
-    Crash_save(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
+    Crash_save_list(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
     result = Obj_to_store(g, obj, fp, location);
 
     for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
@@ -500,14 +504,27 @@ static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int locatio
   return (true);
 }
 
-static void Crash_restore_weight(struct obj_data *obj)
+/* The objects of list, oldest first, as the files have always had them. The result is the newest one's. */
+static bool Crash_save_list(GameWorld *g, const id_list &list, FILE *fp, int location)
+{
+  bool result = true;
+
+  list.each_oldest_first([&](long id) { result = Crash_save(g, obj_by_id(g, id), fp, location); });
+  return result;
+}
+
+static void Crash_restore_weight(GameWorld *g, struct obj_data *obj)
 {
   if (obj) {
-    Crash_restore_weight(obj_get_contains(obj));
-    Crash_restore_weight(obj_get_next_content(obj));
+    Crash_restore_weight_list(g, obj_get_contains(obj));
     if (obj_get_in_obj(obj))
       obj_set_weight(obj_get_in_obj(obj), obj_get_weight(obj_get_in_obj(obj)) + (obj_get_weight(obj)));
   }
+}
+
+static void Crash_restore_weight_list(GameWorld *g, const id_list &list)
+{
+  list.each([&](long id) { Crash_restore_weight(g, obj_by_id(g, id)); });
 }
 
 /*
@@ -529,13 +546,27 @@ static void Crash_extract_norent_eq(GameWorld *g, struct char_data *ch)
   }
 }
 
+/* Extracts obj after what it contains */
 static void Crash_extract_objs(GameWorld *g, struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_objs(g, obj_get_contains(obj));
-    Crash_extract_objs(g, obj_get_next_content(obj));
+    Crash_extract_objs_from(g, obj_get_contains(obj).ids(), 0);
     extract_obj(g, obj);
   }
+}
+
+/* The objects of ids from i on, each after what it contains and after the older ones, as the old recursion along the
+ * list did. */
+static void Crash_extract_objs_from(GameWorld *g, const std::vector<long> &ids, std::size_t i)
+{
+  if (i >= ids.size())
+    return;
+  struct obj_data *obj = obj_by_id(g, ids[i]);
+  if (obj)
+    Crash_extract_objs_from(g, obj_get_contains(obj).ids(), 0);
+  Crash_extract_objs_from(g, ids, i + 1);
+  if (obj)
+    extract_obj(g, obj);
 }
 
 static bool Crash_is_unrentable(struct obj_data *obj)
@@ -553,11 +584,23 @@ static bool Crash_is_unrentable(struct obj_data *obj)
 static void Crash_extract_norents(GameWorld *g, struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_norents(g, obj_get_contains(obj));
-    Crash_extract_norents(g, obj_get_next_content(obj));
+    Crash_extract_norents_from(g, obj_get_contains(obj).ids(), 0);
     if (Crash_is_unrentable(obj))
       extract_obj(g, obj);
   }
+}
+
+/* As Crash_extract_objs_from(), for the unrentable ones */
+static void Crash_extract_norents_from(GameWorld *g, const std::vector<long> &ids, std::size_t i)
+{
+  if (i >= ids.size())
+    return;
+  struct obj_data *obj = obj_by_id(g, ids[i]);
+  if (obj)
+    Crash_extract_norents_from(g, obj_get_contains(obj).ids(), 0);
+  Crash_extract_norents_from(g, ids, i + 1);
+  if (obj && Crash_is_unrentable(obj))
+    extract_obj(g, obj);
 }
 
 void Crash_crashsave(GameWorld *g, struct char_data *ch)
@@ -577,7 +620,7 @@ void Crash_rentsave(GameWorld *g, struct char_data *ch, int cost)
     return;
 
   Crash_extract_norent_eq(g, ch);
-  Crash_extract_norents(g, char_get_inventory(ch));
+  Crash_extract_norents_from(g, char_get_inventory(ch).ids(), 0);
 
   if (!Crash_write_safe_file(g, ch, RENT_RENTED, cost, "rentsave"))
     return;
@@ -586,7 +629,7 @@ void Crash_rentsave(GameWorld *g, struct char_data *ch, int cost)
     if (char_get_equipment(ch, j))
       Crash_extract_objs(g, char_get_equipment(ch, j));
 
-  Crash_extract_objs(g, char_get_inventory(ch));
+  Crash_extract_objs_from(g, char_get_inventory(ch).ids(), 0);
 }
 
 /* ************************************************************************
@@ -654,8 +697,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   struct obj_data *temp;
   int locate = 0, j, num_objs = 0;
   obj_vnum nr;
-  struct obj_data *obj1;
-  struct obj_data *cont_row[MAX_BAG_ROWS];
+  std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
   struct extra_descr_data *new_descr;
   int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
   long long timed = 0;
@@ -690,7 +732,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   }
 
   for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j] = nullptr; /* empty all cont lists (you never know ...) */
+    cont_row[j].clear(); /* empty all cont lists (you never know ...) */
 
   if (!feof(fl))
     get_line(fl, line);
@@ -913,14 +955,13 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
 
       if (locate > 0) { /* item equipped */
         for (j = MAX_BAG_ROWS - 1; j > 0; j--)
-          if (cont_row[j]) { /* no container -> back to ch's inventory */
-            for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(g, cont_row[j], ch);
-            }
-            cont_row[j] = nullptr;
+          if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
+            for (struct obj_data *row_obj : cont_row[j])
+              obj_to_char(g, row_obj, ch);
+            cont_row[j].clear();
+            cont_row[j].clear();
           }
-        if (cont_row[0]) { /* content list existing */
+        if (!cont_row[0].empty()) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* auto_equip puts it in the inventory if it can't be worn after all */
             bool worn = locate <= NUM_WEARS && char_get_equipment(ch, locate - 1) == temp;
@@ -928,47 +969,42 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
             /* rem item ; fill ; equip again */
             if (worn)
               temp = unequip_char(g, ch, locate - 1);
-            obj_set_contains(temp, nullptr); /* should be empty - but who knows */
-            for (; cont_row[0]; cont_row[0] = obj1) {
-              obj1 = obj_get_next_content(cont_row[0]);
-              obj_to_obj(g, cont_row[0], temp);
-            }
+            obj_contains_slot(temp)->clear(); /* should be empty - but who knows */
+            for (struct obj_data *row_obj : cont_row[0])
+              obj_to_obj(g, row_obj, temp);
+            cont_row[0].clear();
             if (worn)
               equip_char(g, ch, temp, locate - 1);
           } else { /* object isn't container -> empty content list */
-            for (; cont_row[0]; cont_row[0] = obj1) {
-              obj1 = obj_get_next_content(cont_row[0]);
-              obj_to_char(g, cont_row[0], ch);
-            }
-            cont_row[0] = nullptr;
+            for (struct obj_data *row_obj : cont_row[0])
+              obj_to_char(g, row_obj, ch);
+            cont_row[0].clear();
+            cont_row[0].clear();
           }
         }
       } else { /* locate <= 0 */
         for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
-          if (cont_row[j]) { /* no container -> back to ch's inventory */
-            for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(g, cont_row[j], ch);
-            }
-            cont_row[j] = nullptr;
+          if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
+            for (struct obj_data *row_obj : cont_row[j])
+              obj_to_char(g, row_obj, ch);
+            cont_row[j].clear();
+            cont_row[j].clear();
           }
 
-        if (j == -locate && cont_row[j]) { /* content list existing */
+        if (j == -locate && !cont_row[j].empty()) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* take item ; fill ; give to char again */
             obj_from_char(g, temp);
-            obj_set_contains(temp, nullptr);
-            for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_obj(g, cont_row[j], temp);
-            }
+            obj_contains_slot(temp)->clear();
+            for (struct obj_data *row_obj : cont_row[j])
+              obj_to_obj(g, row_obj, temp);
+            cont_row[j].clear();
             obj_to_char(g, temp, ch); /* add to inv first ... */
           } else {                 /* object isn't container -> empty content list */
-            for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = obj_get_next_content(cont_row[j]);
-              obj_to_char(g, cont_row[j], ch);
-            }
-            cont_row[j] = nullptr;
+            for (struct obj_data *row_obj : cont_row[j])
+              obj_to_char(g, row_obj, ch);
+            cont_row[j].clear();
+            cont_row[j].clear();
           }
         }
 
@@ -977,12 +1013,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
              but put it at the list's end thus having the items
              in the same order as before renting */
           obj_from_char(g, temp);
-          if ((obj1 = cont_row[-locate - 1])) {
-            while (obj_get_next_content(obj1))
-              obj1 = obj_get_next_content(obj1);
-            obj_set_next_content(obj1, temp);
-          } else
-            cont_row[-locate - 1] = temp;
+          cont_row[-locate - 1].push_back(temp);
         }
       } /* locate less than zero */
     } else {

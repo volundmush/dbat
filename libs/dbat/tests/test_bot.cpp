@@ -459,7 +459,7 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
     }
     case 1: {
       int count, chosen;
-      struct obj_data *list = char_get_in_room(ch) != NOWHERE && bot_dice(2) ? room_get_contents(g, char_get_in_room(ch)) : char_get_inventory(ch);
+      const id_list &list = char_get_in_room(ch) != NOWHERE && bot_dice(2) ? room_get_contents(g, char_get_in_room(ch)) : char_get_inventory(ch);
 
       count  = count_members(obj_list(g, list));
       chosen = bot_dice(count ? count : 1);

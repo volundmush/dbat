@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <ctime>
 
+#include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/flags.hpp"
 #include "dbat/objects.hpp"
@@ -114,14 +115,12 @@ const char *money_desc(int amount);
 struct obj_data *create_money(GameWorld *g, int amount);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
-struct obj_data **obj_contains_slot(struct obj_data *obj);
+id_list *obj_contains_slot(struct obj_data *obj);
 struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj);
 struct script_data **obj_script_slot(struct obj_data *obj);
 char **obj_action_description_slot(struct obj_data *obj);
 struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
 
-/* Removes obj from a list linked through next_content: a room's contents, a container or an inventory. */
-void obj_unlink_content(struct obj_data **head, struct obj_data *obj);
 
 /* Field accessors */
 char *obj_get_action_description(const struct obj_data *obj);
@@ -129,8 +128,7 @@ void obj_set_action_description(struct obj_data *obj, char *v);
 struct obj_affected_type *obj_get_affected(struct obj_data *obj);
 struct char_data *obj_get_carried_by(const struct obj_data *obj);
 void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
-struct obj_data *obj_get_contains(const struct obj_data *obj);
-void obj_set_contains(struct obj_data *obj, struct obj_data *v);
+const id_list &obj_get_contains(const struct obj_data *obj);
 char *obj_get_description(const struct obj_data *obj);
 void obj_set_description(struct obj_data *obj, char *v);
 struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj);
@@ -141,8 +139,6 @@ struct obj_data *obj_get_in_obj(const struct obj_data *obj);
 void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
 char *obj_get_name(const struct obj_data *obj);
 void obj_set_name(struct obj_data *obj, char *v);
-struct obj_data *obj_get_next_content(const struct obj_data *obj);
-void obj_set_next_content(struct obj_data *obj, struct obj_data *v);
 struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj);
 void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v);
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj);

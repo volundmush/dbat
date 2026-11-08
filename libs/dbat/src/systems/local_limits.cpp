@@ -1574,26 +1574,26 @@ static void point_update_objects(GameWorld *g)
       if (!strstr(obj_get_name(j), "android") && !strstr(obj_get_name(j), "Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
         if (obj_get_timer(j) == 5) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DFlies start to gather around $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DFlies start to gather around $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 3) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 2) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 1) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           }
         }
       }
@@ -1604,17 +1604,17 @@ static void point_update_objects(GameWorld *g)
             act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
             if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
             }
           } else {
             act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
             if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
             }
           }
         }
@@ -1647,9 +1647,9 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "A glowing portal fades from existence.",
-              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           act(g, "A glowing portal fades from existence.",
-              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
         }
         extract_obj(g, j);
         continue;
@@ -1661,9 +1661,9 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "The $p@n settles to the ground and goes out.",
-              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_ROOM);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
           act(g, "A $p@n settles to the ground and goes out.",
-              true, room_get_people(g, obj_get_in_room(j)), j, nullptr, TO_CHAR);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
         }
         extract_obj(g, j);
         continue;

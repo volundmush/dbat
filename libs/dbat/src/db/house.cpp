@@ -32,8 +32,8 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
 /* local functions */
 static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
 static bool House_load(GameWorld *g, room_vnum vnum);
-static bool House_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location);
-static void House_restore_weight(struct obj_data *obj);
+static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location);
+static void House_restore_weight(GameWorld *g, const id_list &list);
 
 static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg);
 static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg);
@@ -53,37 +53,48 @@ static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
 
 /* Save all objects for a house (recursive; initial call must be followed
    by a call to House_restore_weight)  Assumes file is open already. */
-static bool House_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location)
+static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location)
 {
-  struct obj_data *tmp;
-  int result;
-  if (obj) {
-    if (obj_extra_flagged(obj, ITEM_NORENT)) {
-      obj = obj_get_next_content(obj);
-    }
+  std::vector<struct obj_data *> saved;
+  std::vector<long> ids = list.ids();
+  bool result           = true;
+
+  /* Newest first, an object that isn't to be rented is passed over, but only one at a time: the one after it is
+   * saved whatever it is. That is how the old recursion along the list behaved, and what the house files hold. */
+  for (std::size_t i = 0; i < ids.size(); i++) {
+    struct obj_data *obj = obj_by_id(g, ids[i]);
+    if (obj && obj_extra_flagged(obj, ITEM_NORENT) && i + 1 < ids.size())
+      obj = obj_by_id(g, ids[++i]);
+    else if (obj && obj_extra_flagged(obj, ITEM_NORENT))
+      obj = nullptr;
+    if (obj)
+      saved.push_back(obj);
   }
-  if (obj) {
-    House_save(g, obj_get_next_content(obj), fp, location);
+
+  /* Oldest first, each after what it contains. The result is the newest one's. */
+  for (std::size_t i = saved.size(); i-- > 0;) {
+    struct obj_data *obj = saved[i], *tmp;
+
     House_save(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
     result = Obj_to_store(g, obj, fp, location);
     if (!result)
-      return false;
-
+      continue;
     for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
   }
-  return true;
+  return result;
 }
 
 /* restore weight of containers after House_save has changed them for saving */
-static void House_restore_weight(struct obj_data *obj)
+static void House_restore_weight(GameWorld *g, const id_list &list)
 {
-  if (obj) {
-    House_restore_weight(obj_get_contains(obj));
-    House_restore_weight(obj_get_next_content(obj));
-    if (obj_get_in_obj(obj))
-      obj_set_weight(obj_get_in_obj(obj), obj_get_weight(obj_get_in_obj(obj)) + (obj_get_weight(obj)));
-  }
+  list.each([&](long id) {
+    if (struct obj_data *obj = obj_by_id(g, id)) {
+      House_restore_weight(g, obj_get_contains(obj));
+      if (obj_get_in_obj(obj))
+        obj_set_weight(obj_get_in_obj(obj), obj_get_weight(obj_get_in_obj(obj)) + (obj_get_weight(obj)));
+    }
+  });
 }
 
 /* Save all objects in a house */
@@ -107,7 +118,7 @@ static void House_crashsave(GameWorld *g, room_vnum vnum)
     return;
   }
   bool saved = atomic_commit(&af);
-  House_restore_weight(room_get_contents(g, rnum));
+  House_restore_weight(g, room_get_contents(g, rnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
     room_set_flag(g, rnum, ROOM_HOUSE_CRASH, false);
 }
@@ -526,8 +537,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   struct obj_data *temp;
   int locate = 0, j;
   obj_vnum nr;
-  struct obj_data *obj1;
-  struct obj_data *cont_row[MAX_BAG_ROWS];
+  std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
   struct extra_descr_data *new_descr;
   room_vnum rrnum;
 
@@ -546,7 +556,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   }
 
   for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j] = nullptr; /* empty all cont lists (you never know ...) */
+    cont_row[j].clear(); /* empty all cont lists (you never know ...) */
 
   if (!feof(fl))
     get_line(fl, line);
@@ -737,30 +747,27 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
 
       /*No need to check if its equipped since rooms can't equip things --firebird_223*/
       for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
-        if (cont_row[j]) { /* no container -> back to ch's inventory */
-          for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_room(g, cont_row[j], rrnum);
-          }
-          cont_row[j] = nullptr;
+        if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
+          for (struct obj_data *row_obj : cont_row[j])
+            obj_to_room(g, row_obj, rrnum);
+          cont_row[j].clear();
+          cont_row[j].clear();
         }
 
-      if (j == -locate && cont_row[j]) { /* content list existing */
+      if (j == -locate && !cont_row[j].empty()) { /* content list existing */
         if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
           /* take item ; fill ; give to char again */
           obj_from_room(g, temp);
-          obj_set_contains(temp, nullptr);
-          for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_obj(g, cont_row[j], temp);
-          }
+          obj_contains_slot(temp)->clear();
+          for (struct obj_data *row_obj : cont_row[j])
+            obj_to_obj(g, row_obj, temp);
+          cont_row[j].clear();
           obj_to_room(g, temp, rrnum); /* add to inv first ... */
         } else {                    /* object isn't container -> empty content list */
-          for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = obj_get_next_content(cont_row[j]);
-            obj_to_room(g, cont_row[j], rrnum);
-          }
-          cont_row[j] = nullptr;
+          for (struct obj_data *row_obj : cont_row[j])
+            obj_to_room(g, row_obj, rrnum);
+          cont_row[j].clear();
+          cont_row[j].clear();
         }
       }
 
@@ -769,12 +776,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
                   but put it at the list's end thus having the items
                   in the same order as before renting */
         obj_from_room(g, temp);
-        if ((obj1 = cont_row[-locate - 1])) {
-          while (obj_get_next_content(obj1))
-            obj1 = obj_get_next_content(obj1);
-          obj_set_next_content(obj1, temp);
-        } else
-          cont_row[-locate - 1] = temp;
+        cont_row[-locate - 1].push_back(temp);
       }
     } else {
       get_line(fl, line);

@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/flags.hpp"
 #include "dbat/rooms.hpp"
@@ -40,10 +41,8 @@ bool room_is_dark(GameWorld *g, room_vnum room);
 room_vnum room_get_exit_to_room(GameWorld *g, room_vnum room, int dir);
 
 /* Field accessors */
-struct obj_data *room_get_contents(const struct room_data *room);
-void room_set_contents(struct room_data *room, struct obj_data *v);
-struct obj_data *room_get_contents(GameWorld *g, room_vnum room);
-void room_set_contents(GameWorld *g, room_vnum room, struct obj_data *v);
+const id_list &room_get_contents(const struct room_data *room);
+const id_list &room_get_contents(GameWorld *g, room_vnum room);
 char *room_get_description(const struct room_data *room);
 void room_set_description(struct room_data *room, char *v);
 char *room_get_description(GameWorld *g, room_vnum room);
@@ -66,10 +65,8 @@ void room_set_name(GameWorld *g, room_vnum room, char *v);
 room_vnum room_get_number(const struct room_data *room);
 void room_set_number(struct room_data *room, room_vnum v);
 void room_set_number(GameWorld *g, room_vnum room, room_vnum v);
-struct char_data *room_get_people(const struct room_data *room);
-void room_set_people(struct room_data *room, struct char_data *v);
-struct char_data *room_get_people(GameWorld *g, room_vnum room);
-void room_set_people(GameWorld *g, room_vnum room, struct char_data *v);
+const id_list &room_get_people(const struct room_data *room);
+const id_list &room_get_people(GameWorld *g, room_vnum room);
 struct trig_proto_list *room_get_proto_script(const struct room_data *room);
 void room_set_proto_script(struct room_data *room, struct trig_proto_list *v);
 struct trig_proto_list *room_get_proto_script(GameWorld *g, room_vnum room);
@@ -93,8 +90,8 @@ struct script_data **room_script_slot(struct room_data *room);
 struct script_data **room_script_slot(GameWorld *g, room_vnum room);
 struct extra_descr_data **room_ex_description_slot(struct room_data *room);
 char **room_description_slot(struct room_data *room);
-struct obj_data **room_contents_slot(GameWorld *g, room_vnum room);
-struct char_data **room_people_slot(GameWorld *g, room_vnum room);
+id_list *room_contents_slot(GameWorld *g, room_vnum room);
+id_list *room_people_slot(GameWorld *g, room_vnum room);
 
 /* The room numbered vnum, or null. */
 struct room_data *room_of(GameWorld *g, room_vnum vnum);

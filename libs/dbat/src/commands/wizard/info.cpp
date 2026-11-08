@@ -304,7 +304,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     column += send_to_char(g, ch, "%s @y%s@n(%s)", found++ ? "," : "", char_get_name(k),
                            !char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB"));
     if (column >= 62) {
-      send_to_char(g, ch, "%s\r\n", char_get_next_in_room(k) ? "," : "");
+      send_to_char(g, ch, "%s\r\n", char_next_in_room(g, k) ? "," : "");
       found  = false;
       column = 0;
     }
@@ -321,7 +321,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
 
       column += send_to_char(g, ch, "%s %s", found++ ? "," : "", obj_get_short_description(j));
       if (column >= 62) {
-        send_to_char(g, ch, "%s\r\n", obj_get_next_content(j) ? "," : "");
+        send_to_char(g, ch, "%s\r\n", obj_next_in_list(g, j) ? "," : "");
         found  = false;
         column = 0;
       }
@@ -523,7 +523,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     for (obj_data *j2 : obj_contents(g, j)) {
       column += send_to_char(g, ch, "%s %s", found++ ? "," : "", obj_get_short_description(j2));
       if (column >= 62) {
-        send_to_char(g, ch, "%s\r\n", obj_get_next_content(j2) ? "," : "");
+        send_to_char(g, ch, "%s\r\n", obj_next_in_list(g, j2) ? "," : "");
         found  = false;
         column = 0;
       }

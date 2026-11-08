@@ -133,28 +133,35 @@ static void check_rooms(GameWorld *a, GameWorld *b)
   clear_char(ch);
   obj = new obj_data();
   clear_object(obj);
+  /* rooms list their people and objects by id, so they must be registered */
+  char_set_id(ch, 1);
+  char_register(a, ch);
+  obj_set_id(obj, OBJ_ID_BASE);
+  obj_register(a, obj);
 
   char_to_room(a, ch, 101);
   obj_to_room(a, obj, 102);
   CHECK(char_get_in_room(ch) == 101);
   CHECK(obj_get_in_room(obj) == 102);
-  CHECK(room_get_people(a, 101) == ch);
-  CHECK(room_get_contents(a, 102) == obj);
-  CHECK(room_get_people(b, 201) == nullptr);
-  CHECK(room_get_contents(a, 101) == nullptr);
+  CHECK(first_char(a, room_get_people(a, 101)) == ch);
+  CHECK(first_obj(a, room_get_contents(a, 102)) == obj);
+  CHECK(room_get_people(b, 201).empty());
+  CHECK(room_get_contents(a, 101).empty());
 
   /* the room count is per world too: room 102 exists in A, but B has no room 202 */
   char_from_room(a, ch);
-  CHECK(room_get_people(a, 101) == nullptr);
+  CHECK(room_get_people(a, 101).empty());
   CHECK(char_get_in_room(ch) == NOWHERE);
   char_to_room(b, ch, 202);
   CHECK(char_get_in_room(ch) == NOWHERE);
   char_to_room(a, ch, 102);
-  CHECK(room_get_people(a, 102) == ch);
-  CHECK(room_get_people(b, 201) == nullptr);
+  CHECK(first_char(a, room_get_people(a, 102)) == ch);
+  CHECK(room_get_people(b, 201).empty());
 
   char_from_room(a, ch);
   obj_from_room(a, obj);
+  char_unregister(a, ch);
+  obj_unregister(a, obj);
   delete obj;
   delete ch;
 }

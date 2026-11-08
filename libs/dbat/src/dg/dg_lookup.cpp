@@ -61,7 +61,7 @@ int trgvar_in_room(GameWorld *g, room_vnum vnum)
   return i;
 }
 
-obj_data *get_obj_in_list(GameWorld *g, char *name, obj_data *list)
+obj_data *get_obj_in_list(GameWorld *g, char *name, const id_list &list)
 {
   long id;
 

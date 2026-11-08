@@ -66,8 +66,8 @@ static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct cha
 static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, char *arg, struct char_data *keeper, struct shop_data *shop, int msg);
-static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name, struct obj_data *list);
-static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name, struct obj_data *list);
+static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name, const id_list &list);
+static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name, const id_list &list);
 static char *customer_string(GameWorld *g, struct shop_data *shop, int detailed);
 static void list_all_shops(GameWorld *g, struct char_data *ch);
 static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_data *shop);
@@ -516,7 +516,7 @@ static char *times_message(struct obj_data *obj, char *name, int num)
 }
 
 static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name,
-                                          struct obj_data *list)
+                                          const id_list &list)
 {
   struct obj_data *last_match = nullptr;
   int j, number;
@@ -544,7 +544,7 @@ static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, ch
 }
 
 static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name,
-                                         struct obj_data *list)
+                                         const id_list &list)
 {
   struct obj_data *last_obj = nullptr;
   int qindex;
@@ -907,7 +907,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (!char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(keeper, char_get_gold(keeper) + (goldamt));
 
-  strlcpy(tempstr, times_message(char_get_inventory(ch), nullptr, bought), sizeof(tempstr));
+  strlcpy(tempstr, times_message(first_obj(g, char_get_inventory(ch)), nullptr, bought), sizeof(tempstr));
 
   snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
   act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
@@ -975,7 +975,6 @@ static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct cha
    and information hiding is almost never used, it isn't that big a deal) -JF
 */
 {
-  struct obj_data *loop;
   IDXTYPE temp;
 
   if (shop_get_lastsort(shop) < char_get_carry_items(keeper))
@@ -988,35 +987,29 @@ static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct cha
     return (obj_proto_of(g, temp));
   }
   shop_set_lastsort(shop, shop_get_lastsort(shop) + 1);
-  loop = char_get_inventory(keeper);
+  /* it goes just after the first copy of it, to keep them together, or first if there is none */
+  struct obj_data *copy = find_first(char_inventory(g, keeper), [&](struct obj_data *o) { return same_obj(obj, o); });
   obj_to_char(g, obj, keeper);
-  char_set_inventory(keeper, loop);
-  while (loop) {
-    if (same_obj(obj, loop)) {
-      obj_set_next_content(obj, obj_get_next_content(loop));
-      obj_set_next_content(loop, obj);
-      return (obj);
-    }
-    loop = obj_get_next_content(loop);
-  }
-  char_set_inventory(keeper, obj);
+  if (copy)
+    char_inventory_slot(keeper)->place_after(obj_get_id(obj), obj_get_id(copy));
   return (obj);
 }
 
 static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop_data *shop)
 {
-  struct obj_data *list = nullptr, *temp;
+  std::vector<struct obj_data *> taken;
+  struct obj_data *temp;
 
   while (shop_get_lastsort(shop) < char_get_carry_items(keeper)) {
-    temp = char_get_inventory(keeper);
+    temp = first_obj(g, char_get_inventory(keeper));
     obj_from_char(g, temp);
-    obj_set_next_content(temp, list);
-    list               = temp;
+    taken.push_back(temp);
   }
 
-  while (list) {
-    temp = list;
-    list = obj_get_next_content(list);
+  /* the last one taken first */
+  while (!taken.empty()) {
+    temp = taken.back();
+    taken.pop_back();
     if (shop_producing(g, temp, shop) &&
         !get_obj_in_list_num(g, obj_get_item_number(temp), char_get_inventory(keeper))) {
       obj_to_char(g, temp, keeper);

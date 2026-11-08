@@ -395,9 +395,9 @@ static void check_too_many_applies_on_a_saved_object(void)
   save_path("plrobjs", "new", "tester", path, sizeof(path));
   write_file(path, text);
   Crash_load(g, ch);
-  CHECK(char_get_inventory(ch) != nullptr);
+  CHECK(!char_get_inventory(ch).empty());
   while (char_get_inventory(ch))
-    extract_obj(g, char_get_inventory(ch));
+    extract_obj(g, first_obj(g, char_get_inventory(ch)));
   CHECK_AUDIT(g);
   th_shutdown(g);
 }
@@ -619,7 +619,7 @@ static void check_worn_container_that_cannot_go_back_on(void)
   struct obj_data *inside = read_object(g, 350);
 
   while (char_get_inventory(ch))
-    extract_obj(g, char_get_inventory(ch));
+    extract_obj(g, first_obj(g, char_get_inventory(ch)));
   for (int i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i))
       extract_obj(g, char_get_equipment(ch, i));
@@ -639,7 +639,7 @@ static void check_worn_container_that_cannot_go_back_on(void)
     if (obj_get_vnum(g, obj) == CONTAINER_VNUM)
       back = obj;
   CHECK(back != nullptr);
-  CHECK(back && obj_get_contains(back) != nullptr);
+  CHECK(back && !obj_get_contains(back).empty());
   CHECK_AUDIT(g);
   th_shutdown(g);
 }

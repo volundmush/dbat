@@ -889,7 +889,7 @@ ACMD(do_mtransform)
     /* put the mob in the same room as ch so extract will work */
     char_to_room(g, m, char_get_in_room(ch));
 
-    memcpy(&tmpmob, m, sizeof(*m));
+    tmpmob = *m;
 
     /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
        the strings so we don't end up free'ing the prototypes later */
@@ -906,11 +906,10 @@ ACMD(do_mtransform)
 
     char_set_id(&tmpmob, char_get_id(ch));
     char_set_affected(&tmpmob, char_get_affected(ch));
-    char_set_inventory(&tmpmob, char_get_inventory(ch));
+    *char_inventory_slot(&tmpmob) = char_get_inventory(ch);
     char_set_proto_script(&tmpmob, char_get_proto_script(ch));
     char_set_script(&tmpmob, char_get_script(ch));
     char_set_memory(&tmpmob, char_get_memory(ch));
-    char_set_next_in_room(&tmpmob, char_get_next_in_room(ch));
     char_set_next_fighting(&tmpmob, char_get_next_fighting(ch));
     char_set_followers(&tmpmob, char_get_followers(ch));
     char_set_master(&tmpmob, char_get_master(g, ch));
@@ -921,7 +920,7 @@ ACMD(do_mtransform)
     char_set_carry_weight(&tmpmob, char_get_carry_weight(ch));
     char_set_carry_items(&tmpmob, char_get_carry_items(ch));
     char_set_fighting(&tmpmob, char_get_fighting(g, ch));
-    memcpy(ch, &tmpmob, sizeof(*ch));
+    *ch = tmpmob;
 
     for (pos = 0; pos < NUM_WEARS; pos++) {
       if (obj[pos])

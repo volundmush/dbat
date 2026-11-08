@@ -1390,8 +1390,6 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   }
 
   room_set_func(g, g->parse_room_index, nullptr);
-  room_set_contents(g, g->parse_room_index, nullptr);
-  room_set_people(g, g->parse_room_index, nullptr);
   room_set_light(g, g->parse_room_index, 0); /* Zero light sources */
   room_set_timed(g, g->parse_room_index, -1);
   room_set_dmg(g, g->parse_room_index, 0);
@@ -4334,9 +4332,8 @@ void reset_char(GameWorld *g, struct char_data *ch)
   char_set_followers(ch, nullptr);
   char_set_master(ch, nullptr);
   char_set_in_room(ch, NOWHERE);
-  char_set_inventory(ch, nullptr);
+  char_inventory_slot(ch)->clear();
   char_set_next_fighting(ch, nullptr);
-  char_set_next_in_room(ch, nullptr);
   char_set_fighting(ch, nullptr);
   char_set_position(ch, POS_STANDING);
   char_set_mob_specials_default_pos(ch, POS_STANDING);

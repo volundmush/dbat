@@ -391,7 +391,7 @@ struct obj_data *find_vehicle_by_vnum(GameWorld *g, obj_vnum vnum)
 }
 
 /* Search the given list for an object type, and return a ptr to that obj*/
-static struct obj_data *get_obj_in_list_type(GameWorld *g, int type, struct obj_data *list)
+static struct obj_data *get_obj_in_list_type(GameWorld *g, int type, const id_list &list)
 {
 
   for (obj_data *i : obj_list(g, list))

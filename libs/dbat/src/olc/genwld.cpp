@@ -31,8 +31,6 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source);
  */
 room_vnum add_room(GameWorld *g, struct room_data *room)
 {
-  struct char_data *tch;
-  struct obj_data *tobj;
   struct room_data *slot;
   room_vnum vnum;
 
@@ -43,11 +41,10 @@ room_vnum add_room(GameWorld *g, struct room_data *room)
   if ((slot = room_of(g, vnum))) {
     if (room_get_script(slot))
       extract_script(g, slot, WLD_TRIGGER);
-    tch  = room_get_people(slot);
-    tobj = room_get_contents(slot);
+    id_list people = room_get_people(slot), contents = room_get_contents(slot);
     copy_room(slot, room);
-    room_set_people(slot, tch);
-    room_set_contents(slot, tobj);
+    slot->people   = people;
+    slot->contents = contents;
     add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
     mud_log("GenOLC: add_room: Updated existing room #%d.", vnum);
     return vnum;
@@ -314,8 +311,8 @@ static bool copy_room(struct room_data *to, struct room_data *from)
 
   /* Don't put people and objects in two locations.
      Am thinking this shouldn't be done here... */
-  room_set_people(from, nullptr);
-  room_set_contents(from, nullptr);
+  from->people.clear();
+  from->contents.clear();
 
   return true;
 }

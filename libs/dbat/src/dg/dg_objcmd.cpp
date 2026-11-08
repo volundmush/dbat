@@ -147,8 +147,8 @@ static OCMD(do_oecho)
 
   else if ((room = obj_room(obj)) != NOWHERE) {
     if (room_get_people(g, room)) {
-      sub_write(g, argument, room_get_people(g, room), true, TO_ROOM);
-      sub_write(g, argument, room_get_people(g, room), true, TO_CHAR);
+      sub_write(g, argument, first_char(g, room_get_people(g, room)), true, TO_ROOM);
+      sub_write(g, argument, first_char(g, room_get_people(g, room)), true, TO_CHAR);
     }
   }
 
@@ -310,18 +310,17 @@ static OCMD(do_otransform)
     }
 
     /* move new obj info over to old object and delete new obj */
-    memcpy(&tmpobj, o, sizeof(*o));
+    tmpobj = *o;
     obj_set_in_room(&tmpobj, obj_get_in_room(obj));
     obj_set_carried_by(&tmpobj, obj_get_carried_by(obj));
     obj_set_worn_by(&tmpobj, obj_get_worn_by(obj));
     obj_set_worn_on(&tmpobj, obj_get_worn_on(obj));
     obj_set_in_obj(&tmpobj, obj_get_in_obj(obj));
-    obj_set_contains(&tmpobj, obj_get_contains(obj));
+    *obj_contains_slot(&tmpobj) = obj_get_contains(obj);
     obj_set_id(&tmpobj, obj_get_id(obj));
     obj_set_proto_script(&tmpobj, obj_get_proto_script(obj));
     obj_set_script(&tmpobj, obj_get_script(obj));
-    obj_set_next_content(&tmpobj, obj_get_next_content(obj));
-    memcpy(obj, &tmpobj, sizeof(*obj));
+    *obj = tmpobj;
 
     if (wearer) {
       equip_char(g, wearer, obj, pos);
@@ -607,8 +606,8 @@ static OCMD(do_oasound)
         (room_get_dir_option(g, room, door))->to_room != NOWHERE &&
         (room_get_dir_option(g, room, door))->to_room != room &&
         room_get_people(g, (room_get_dir_option(g, room, door))->to_room)) {
-      sub_write(g, argument, room_get_people(g, (room_get_dir_option(g, room, door))->to_room), true, TO_ROOM);
-      sub_write(g, argument, room_get_people(g, (room_get_dir_option(g, room, door))->to_room), true, TO_CHAR);
+      sub_write(g, argument, first_char(g, room_get_people(g, (room_get_dir_option(g, room, door))->to_room)), true, TO_ROOM);
+      sub_write(g, argument, first_char(g, room_get_people(g, (room_get_dir_option(g, room, door))->to_room)), true, TO_CHAR);
     }
   }
 }

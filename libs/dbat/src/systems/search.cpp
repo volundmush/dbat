@@ -94,7 +94,7 @@ int get_number(char **name)
 }
 
 /* Search a given list for an object number, and return a ptr to that obj */
-struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, struct obj_data *list)
+struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, const id_list &list)
 {
 
   for (obj_data *i : obj_list(g, list))
@@ -328,7 +328,7 @@ bool obj_named_and_visible(GameWorld *g, struct char_data *ch, const char *name,
   return isname(name, obj_get_name(obj)) && (char_can_see_obj(g, ch, obj) || obj_get_type_flag(obj) == ITEM_LIGHT);
 }
 
-struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, struct obj_data *list)
+struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, const id_list &list)
 {
   int num;
 

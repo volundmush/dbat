@@ -139,8 +139,7 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
       char_set_sdesc(caster, strdup(obj_get_short_description((struct obj_data *)go)));
     else if (type == WLD_TRIGGER)
       char_set_sdesc(caster, strdup("The gods"));
-    char_set_next_in_room(caster, room_get_people(caster_room));
-    room_set_people(caster_room, caster);
+    caster_room->people.add(char_get_id(caster)); /* there, without char_to_room()'s side effects */
     char_set_in_room(caster, room_get_number(caster_room));
     call_magic(g, caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
     extract_char(g, caster);

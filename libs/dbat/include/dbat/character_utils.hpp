@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <ctime>
 
+#include "dbat/registry.hpp"
 #include "dbat/consts/autoexit.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/pulse.hpp"
@@ -785,8 +786,7 @@ void char_set_aggtimer(struct char_data *ch, int v);
 void char_set_baseki(struct char_data *ch, int64_t v);
 void char_set_basepl(struct char_data *ch, int64_t v);
 void char_set_basest(struct char_data *ch, int64_t v);
-struct obj_data *char_get_inventory(const struct char_data *ch);
-void char_set_inventory(struct char_data *ch, struct obj_data *v);
+const id_list &char_get_inventory(const struct char_data *ch);
 void char_set_class(struct char_data *ch, int v);
 int char_get_choice(const struct char_data *ch);
 void char_set_choice(struct char_data *ch, int v);
@@ -821,8 +821,6 @@ struct char_data *char_get_next_affect(const struct char_data *ch);
 void char_set_next_affect(struct char_data *ch, struct char_data *v);
 struct char_data *char_get_next_fighting(const struct char_data *ch);
 void char_set_next_fighting(struct char_data *ch, struct char_data *v);
-struct char_data *char_get_next_in_room(const struct char_data *ch);
-void char_set_next_in_room(struct char_data *ch, struct char_data *v);
 struct player_special_data *char_get_player_specials(const struct char_data *ch);
 void char_set_player_specials(struct char_data *ch, struct player_special_data *v);
 struct char_data *char_get_poisonby(GameWorld *g, const struct char_data *ch);
@@ -870,7 +868,7 @@ struct script_data **char_script_slot(struct char_data *ch);
 struct script_memory **char_memory_slot(struct char_data *ch);
 struct affected_type **char_affected_slot(struct char_data *ch);
 struct player_special_data **char_player_specials_slot(struct char_data *ch);
-struct obj_data **char_inventory_slot(struct char_data *ch);
+id_list *char_inventory_slot(struct char_data *ch);
 char **char_description_slot(struct char_data *ch);
 char **char_long_descr_slot(struct char_data *ch);
 char **char_short_descr_slot(struct char_data *ch);
@@ -886,7 +884,6 @@ int8_t *char_real_abils_cha_slot(struct char_data *ch);
 struct obj_data **char_get_equipment_array(struct char_data *ch);
 
 /* Unlinking a character from the lists that run through it */
-void char_unlink_person(struct char_data **head, struct char_data *ch);
 void char_unlink_from_affect_list(GameWorld *g, struct char_data *ch);
 void char_unlink_from_combat_list(GameWorld *g, struct char_data *ch);
 

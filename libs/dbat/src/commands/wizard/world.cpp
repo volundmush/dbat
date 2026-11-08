@@ -613,7 +613,7 @@ ACMD(do_purge)
 
       /* Dump inventory. */
       while (char_get_inventory(tch))
-        extract_obj(g, char_get_inventory(tch));
+        extract_obj(g, first_obj(g, char_get_inventory(tch)));
 
       /* Dump equipment. */
       for (i = 0; i < NUM_WEARS; i++)
@@ -626,7 +626,7 @@ ACMD(do_purge)
 
     /* Clear the ground. */
     while (room_get_contents(g, char_get_in_room(ch)))
-      extract_obj(g, room_get_contents(g, char_get_in_room(ch)));
+      extract_obj(g, first_obj(g, room_get_contents(g, char_get_in_room(ch))));
   }
 }
 

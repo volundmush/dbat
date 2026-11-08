@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/itemdata.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -44,7 +45,7 @@ struct obj_data {
   int16_t worn_on{};                         /* Worn where?		      */
 
   struct obj_data *in_obj{};   /* In what object NULL when none    */
-  struct obj_data *contains{}; /* Contains objects                 */
+  id_list contains;            /* the objects inside it, newest first */
 
   int32_t id{};        /* used by DG triggers              */
   time_t generation{}; /* creation time for dupe check     */
@@ -53,7 +54,6 @@ struct obj_data {
   struct trig_proto_list *proto_script{}; /* list of default triggers  */
   struct script_data *script{};           /* script info for the object       */
 
-  struct obj_data *next_content{}; /* For 'contains' lists             */
 
   int32_t sitting_uid{}; /* Who is sitting on me? */
 

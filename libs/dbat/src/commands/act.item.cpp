@@ -664,7 +664,7 @@ ACMD(do_pack)
       money = 65000;
       while (count < 4) {
         while (room_get_contents(g, rnum))
-          extract_obj(g, room_get_contents(g, rnum));
+          extract_obj(g, first_obj(g, room_get_contents(g, rnum)));
         count++;
         rnum++;
       }
@@ -673,7 +673,7 @@ ACMD(do_pack)
       money = 150000;
       while (count < 4) {
         while (room_get_contents(g, rnum))
-          extract_obj(g, room_get_contents(g, rnum));
+          extract_obj(g, first_obj(g, room_get_contents(g, rnum)));
         count++;
         rnum++;
       }
@@ -682,7 +682,7 @@ ACMD(do_pack)
       money = 1000000;
       while (count < 4) {
         while (room_get_contents(g, rnum))
-          extract_obj(g, room_get_contents(g, rnum));
+          extract_obj(g, first_obj(g, room_get_contents(g, rnum)));
         count++;
         rnum++;
       }
@@ -1833,7 +1833,7 @@ ACMD(do_put)
         else if (obj == cont && howmany == 1)
           send_to_char(g, ch, "You attempt to fold it into itself, but fail.\r\n");
         else {
-          for (obj_data *match : obj_list(g, obj)) {
+          for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
             if (!howmany)
               break;
             if (!obj_named_and_visible(g, ch, theobj, match))
@@ -1976,7 +1976,7 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
       snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
       act(g, out, false, ch, cont, nullptr, TO_CHAR);
     } else {
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, obj_get_contains(cont), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
           continue;
         if (!howmany--)
@@ -2083,7 +2083,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
       send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(arg), arg);
     else {
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, room_get_contents(g, char_get_in_room(ch)), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
           continue;
         if (!howmany--)
@@ -2430,7 +2430,7 @@ ACMD(do_drop)
     else if (check_saveroom_count(g, ch, obj) > 150)
       send_to_char(g, ch, "The save room you are in can not hold anymore items! (150 max, count of items in containers is halved)\r\n");
     else {
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
           continue;
         perform_drop(g, ch, match, mode, sname, RDR);
@@ -2476,7 +2476,7 @@ ACMD(do_drop)
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
         send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg);
 
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
           continue;
         obj = match;
@@ -2664,7 +2664,7 @@ ACMD(do_give)
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
       send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg);
     else {
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
           continue;
         if (!amount--)
@@ -3686,7 +3686,7 @@ ACMD(do_wear)
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(g, ch, "You are not experienced enough to use that.\r\n");
     else
-      for (obj_data *match : obj_list(g, obj)) {
+      for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg1, match))
           continue;
         obj = match;

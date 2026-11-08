@@ -865,7 +865,7 @@ bool obj_wear_toggle(struct obj_data *obj, int flag)
   return flag_array_toggle(obj_get_wear_flags(obj), flag);
 }
 
-struct obj_data **obj_contains_slot(struct obj_data *obj)
+id_list *obj_contains_slot(struct obj_data *obj)
 {
   return &obj->contains;
 }
@@ -888,13 +888,6 @@ char **obj_action_description_slot(struct obj_data *obj)
 struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
 {
   return &obj->sbinfo;
-}
-
-void obj_unlink_content(struct obj_data **head, struct obj_data *obj)
-{
-  struct obj_data *temp;
-
-  REMOVE_FROM_LIST(obj, *head, next_content, temp);
 }
 
 char *obj_get_action_description(const struct obj_data *obj)
@@ -922,14 +915,9 @@ void obj_set_carried_by(struct obj_data *obj, struct char_data *v)
   obj->carried_by = v;
 }
 
-struct obj_data *obj_get_contains(const struct obj_data *obj)
+const id_list &obj_get_contains(const struct obj_data *obj)
 {
   return obj->contains;
-}
-
-void obj_set_contains(struct obj_data *obj, struct obj_data *v)
-{
-  obj->contains = v;
 }
 
 char *obj_get_description(const struct obj_data *obj)
@@ -980,16 +968,6 @@ char *obj_get_name(const struct obj_data *obj)
 void obj_set_name(struct obj_data *obj, char *v)
 {
   obj->name = v;
-}
-
-struct obj_data *obj_get_next_content(const struct obj_data *obj)
-{
-  return obj->next_content;
-}
-
-void obj_set_next_content(struct obj_data *obj, struct obj_data *v)
-{
-  obj->next_content = v;
 }
 
 struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj)

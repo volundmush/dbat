@@ -20,24 +20,29 @@
 /* external vars */
 
 /* local functions */
-static void update_object(struct obj_data *obj, int use);
 
 /* external functions */
 
 /* Stock isname().  Leave this here even if you put in a newer  *
  * isname().  Used for OasisOLC.                                */
 
-static void update_object(struct obj_data *obj, int use)
+static void update_objects(GameWorld *g, const id_list &list, int use);
+
+/* Runs down the timers of obj and what it contains */
+static void update_object(GameWorld *g, struct obj_data *obj, int use)
 {
-  if (!obj)
-    return;
   /* dont update objects with a timer trigger */
   if (!script_has_type(obj_get_script(obj), OTRIG_TIMER) && (obj_get_timer(obj) > 0))
     obj_set_timer(obj, obj_get_timer(obj) - (use));
-  if (obj_get_contains(obj))
-    update_object(obj_get_contains(obj), use);
-  if (obj_get_next_content(obj))
-    update_object(obj_get_next_content(obj), use);
+  update_objects(g, obj_get_contains(obj), use);
+}
+
+static void update_objects(GameWorld *g, const id_list &list, int use)
+{
+  list.each([&](long id) {
+    if (struct obj_data *obj = obj_by_id(g, id))
+      update_object(g, obj, use);
+  });
 }
 
 void update_char_objects(GameWorld *g, struct char_data *ch)
@@ -61,11 +66,11 @@ void update_char_objects(GameWorld *g, struct char_data *ch)
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_TIME) - (1));
       }
-      update_object(char_get_equipment(ch, i), 2);
+      update_object(g, char_get_equipment(ch, i), 2);
     }
 
   if (char_get_inventory(ch))
-    update_object(char_get_inventory(ch), 1);
+    update_objects(g, char_get_inventory(ch), 1);
 }
 
 /* check and see if this item is better */

@@ -748,10 +748,10 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
 }
 
 /* Runs the command triggers on a list of objects, returning true if one of them took the command. */
-static bool cmd_otrig_list(GameWorld *g, obj_data *obj, char_data *actor, char *cmd, char *argument, int type)
+static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, char *cmd, char *argument, int type)
 {
   /* a script can purge any object at all: the loop passes over whatever goes */
-  for (obj_data *o : obj_list(g, obj)) {
+  for (obj_data *o : obj_list(g, list)) {
     bool forged = obj_extra_flagged(o, ITEM_FORGED);
 
     if (cmd_otrig(g, o, actor, cmd, argument, type) && !forged)

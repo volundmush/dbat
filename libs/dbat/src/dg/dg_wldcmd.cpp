@@ -80,8 +80,8 @@ static void act_to_room(GameWorld *g, char *str, room_data *room)
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-  act(g, str, false, room_get_people(room), nullptr, nullptr, TO_ROOM);
-  act(g, str, false, room_get_people(room), nullptr, nullptr, TO_CHAR);
+  act(g, str, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
+  act(g, str, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
 }
 
 /* World commands */

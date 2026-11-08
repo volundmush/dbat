@@ -180,7 +180,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
 
   /* transfer objects to room, if any */
   while (char_get_inventory(ch)) {
-    obj = char_get_inventory(ch);
+    obj = first_obj(g, char_get_inventory(ch));
     obj_from_char(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
   }
@@ -259,7 +259,7 @@ void extract_char(GameWorld *g, struct char_data *ch)
         (char_get_in_room(fol) == char_get_in_room(ch) || char_get_in_room(ch) == 1)) {
       /* transfer objects to char, if any */
       while (char_get_inventory(fol)) {
-        obj = char_get_inventory(fol);
+        obj = first_obj(g, char_get_inventory(fol));
         obj_from_char(g, obj);
         obj_to_char(g, obj, ch);
       }
@@ -320,7 +320,7 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
   }
 
   while (obj_get_contains(obj))
-    extract_obj(g, obj_get_contains(obj));
+    extract_obj(g, first_obj(g, obj_get_contains(obj)));
 
   obj_unregister(g, obj);
 

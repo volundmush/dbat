@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <map>
@@ -325,4 +326,105 @@ public:
     capacity_ = occupied_ = live_ = removed_ = 0;
     order_.clear();
   }
+};
+
+/*
+ * The members of one container: a room's people or contents, an inventory, what a container holds. Kept by id, newest
+ * first, as the old linked lists were, because that order reaches the save files and what players see. A member that
+ * isn't registered (see id_table) can't be found from its id, so whatever goes into a container must be.
+ */
+class id_list {
+  std::vector<long> ids_; /* oldest first */
+
+public:
+  /* Adds id as the newest member. */
+  void add(long id) { ids_.push_back(id); }
+
+  /* Removes id, keeping the others in order. False if it wasn't a member. */
+  bool remove(long id)
+  {
+    for (std::size_t i = ids_.size(); i-- > 0;)
+      if (ids_[i] == id) {
+        ids_.erase(ids_.begin() + static_cast<std::ptrdiff_t>(i));
+        return true;
+      }
+    return false;
+  }
+
+  /* Moves member id to just after anchor, newest first, where the old lists spliced it in. */
+  void place_after(long id, long anchor)
+  {
+    remove(id);
+    for (std::size_t i = ids_.size(); i-- > 0;)
+      if (ids_[i] == anchor) {
+        ids_.insert(ids_.begin() + static_cast<std::ptrdiff_t>(i), id);
+        return;
+      }
+    ids_.push_back(id);
+  }
+
+  /* Does any id appear twice? A container holds each member once: this is what a loop in the old linked lists was. */
+  bool has_duplicates() const
+  {
+    std::size_t n = ids_.size();
+    if (n < 2)
+      return false;
+    const long *e = ids_.data();
+    if (n <= 32) { /* the usual case, without copying */
+      for (std::size_t i = 0; i < n; i++)
+        for (std::size_t j = i + 1; j < n; j++)
+          if (e[i] == e[j])
+            return true;
+      return false;
+    }
+    std::vector<long> sorted(ids_);
+    std::sort(sorted.begin(), sorted.end());
+    return std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end();
+  }
+
+  bool contains(long id) const
+  {
+    for (long member : ids_)
+      if (member == id)
+        return true;
+    return false;
+  }
+
+  bool empty() const { return ids_.empty(); }
+  explicit operator bool() const { return !ids_.empty(); }
+  std::size_t size() const { return ids_.size(); }
+
+  /* The newest member, or 0 if there are none. */
+  long newest() const { return ids_.empty() ? 0 : ids_.back(); }
+
+  /* The member after id, newest first, or 0 if id is the oldest or not a member. */
+  long after(long id) const
+  {
+    for (std::size_t i = ids_.size(); i-- > 0;)
+      if (ids_[i] == id)
+        return i > 0 ? ids_[i - 1] : 0;
+    return 0;
+  }
+
+  /* Calls f(id) for each member, newest first. f must not change the list. */
+  template <typename F>
+  void each(F &&f) const
+  {
+    const long *e = ids_.data();
+    for (std::size_t i = ids_.size(); i-- > 0;)
+      f(e[i]);
+  }
+
+  /* The same, oldest first. */
+  template <typename F>
+  void each_oldest_first(F &&f) const
+  {
+    for (long id : ids_)
+      f(id);
+  }
+
+  /* The members, newest first, as they are now. */
+  std::vector<long> ids() const { return {ids_.rbegin(), ids_.rend()}; }
+
+  void clear() { ids_.clear(); }
 };

@@ -8,7 +8,16 @@
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
+#include "dbat/dg_scripts.hpp"
 #include "dbat/game_world.hpp"
+
+/* Containers list their members by id, so only a registered entity can be found in one. */
+static void check_registered(GameWorld *g, const struct obj_data *obj, const char *where)
+{
+  if (obj_by_id(g, obj_get_id(obj)) != obj)
+    mud_log("SYSERR: %s: object %d (id %d) isn't registered, so it can't be listed there.", where,
+            obj_get_vnum(g, obj), obj_get_id(obj));
+}
 
 /* put an object in a room */
 void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
@@ -28,8 +37,8 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
     if (room == 80) {
       auc_load(object);
     }
-    obj_set_next_content(object, room_get_contents(g, room));
-    room_set_contents(g, room, object);
+    check_registered(g, object, "obj_to_room");
+    room_contents_slot(g, room)->add(obj_get_id(object));
     obj_set_in_room(object, room);
     obj_set_carried_by(object, nullptr);
     obj_set_lload(object, game_now(g));
@@ -120,12 +129,11 @@ void obj_from_room(GameWorld *g, struct obj_data *object)
     obj_set_posttype(object, 0);
   }
 
-  obj_unlink_content(room_contents_slot(g, obj_get_in_room(object)), object);
+  room_contents_slot(g, obj_get_in_room(object))->remove(obj_get_id(object));
 
   if (room_flagged(g, obj_get_in_room(object), ROOM_HOUSE))
     room_set_flag(g, obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
   obj_set_in_room(object, NOWHERE);
-  obj_set_next_content(object, nullptr);
 }
 
 /* put an object in an object (quaint)  */
@@ -139,8 +147,8 @@ void obj_to_obj(GameWorld *g, struct obj_data *obj, struct obj_data *obj_to)
     return;
   }
 
-  obj_set_next_content(obj, obj_get_contains(obj_to));
-  obj_set_contains(obj_to, obj);
+  check_registered(g, obj, "obj_to_obj");
+  obj_contains_slot(obj_to)->add(obj_get_id(obj));
   obj_set_in_obj(obj, obj_to);
   tmp_obj           = obj_get_in_obj(obj);
 
@@ -171,7 +179,7 @@ void obj_from_obj(GameWorld *g, struct obj_data *obj)
   }
   obj_from = obj_get_in_obj(obj);
   temp     = obj_get_in_obj(obj);
-  obj_unlink_content(obj_contains_slot(obj_from), obj);
+  obj_contains_slot(obj_from)->remove(obj_get_id(obj));
 
   /* Subtract weight from containers container */
   /* Only worry about weight for non-eternal containers
@@ -191,7 +199,6 @@ void obj_from_obj(GameWorld *g, struct obj_data *obj)
   }
 
   obj_set_in_obj(obj, nullptr);
-  obj_set_next_content(obj, nullptr);
 }
 
 /* move a player out of a room */
@@ -218,9 +225,8 @@ void char_from_room(GameWorld *g, struct char_data *ch)
   if (char_plr_flagged(ch, PLR_AURALIGHT))
     room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
-  char_unlink_person(room_people_slot(g, char_get_in_room(ch)), ch);
+  room_people_slot(g, char_get_in_room(ch))->remove(char_get_id(ch));
   char_set_in_room(ch, NOWHERE);
-  char_set_next_in_room(ch, nullptr);
 }
 
 /* place a character in a room */
@@ -231,8 +237,10 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
   if (ch == nullptr || !room_of(g, room))
     mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d Ch: %p", room, (void *)ch);
   else {
-    char_set_next_in_room(ch, room_get_people(g, room));
-    room_set_people(g, room, ch);
+    if (char_by_id(g, char_get_id(ch)) != ch)
+      mud_log("SYSERR: char_to_room: %s (id %d) isn't registered, so the room can't list them.", char_get_name(ch),
+              char_get_id(ch));
+    room_people_slot(g, room)->add(char_get_id(ch));
     char_set_in_room(ch, room);
 
     for (i = 0; i < NUM_WEARS; i++)
@@ -262,8 +270,8 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
 void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
 {
   if (object && ch) {
-    obj_set_next_content(object, char_get_inventory(ch));
-    char_set_inventory(ch, object);
+    check_registered(g, object, "obj_to_char");
+    char_inventory_slot(ch)->add(obj_get_id(object));
     obj_set_carried_by(object, ch);
     obj_set_in_room(object, NOWHERE);
     char_set_carry_weight(ch, char_get_carry_weight(ch) + (obj_get_weight(object)));
@@ -309,7 +317,7 @@ void obj_from_char(GameWorld *g, struct obj_data *object)
     mud_log("SYSERR: NULL object passed to obj_from_char.");
     return;
   }
-  obj_unlink_content(char_inventory_slot(obj_get_carried_by(object)), object);
+  char_inventory_slot(obj_get_carried_by(object))->remove(obj_get_id(object));
 
   /* set flag for crash-save system, but not on mobs! */
   if (!char_is_npc(obj_get_carried_by(object)))
@@ -325,7 +333,6 @@ void obj_from_char(GameWorld *g, struct obj_data *object)
   }
 
   obj_set_carried_by(object, nullptr);
-  obj_set_next_content(object, nullptr);
 }
 
 /* Return the effect of a piece of armor in position eq_pos */
@@ -465,11 +472,12 @@ struct obj_data *unequip_char(GameWorld *g, struct char_data *ch, int pos)
 }
 
 /* Set all carried_by to point to new owner */
-void object_list_new_owner(struct obj_data *list, struct char_data *ch)
+void object_list_new_owner(GameWorld *g, const id_list &list, struct char_data *ch)
 {
-  if (list) {
-    object_list_new_owner(obj_get_contains(list), ch);
-    object_list_new_owner(obj_get_next_content(list), ch);
-    obj_set_carried_by(list, ch);
-  }
+  list.each([&](long id) {
+    if (struct obj_data *obj = obj_by_id(g, id)) {
+      object_list_new_owner(g, obj_get_contains(obj), ch);
+      obj_set_carried_by(obj, ch);
+    }
+  });
 }

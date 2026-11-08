@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/roomflags.hpp"
 #include "dbat/consts/directions.hpp"
@@ -41,8 +42,8 @@ struct room_data {
   int8_t light{}; /* Number of lightsources in room     */
   SPECIAL(*func){};
 
-  struct obj_data *contents{}; /* List of items in room              */
-  struct char_data *people{};  /* List of NPC / PC in room           */
+  id_list contents; /* the objects lying here, newest first */
+  id_list people;   /* the characters here, newest first */
 
   int timed{};   /* For timed Dt's                     */
   int dmg{};     /* How damaged the room is            */

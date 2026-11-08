@@ -627,7 +627,7 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
   return (found);
 }
 
-void list_obj_to_char(GameWorld *g, struct obj_data *list, struct char_data *ch, int mode, int show)
+void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, int show)
 {
   struct obj_data *d;
   bool found = false;
@@ -655,7 +655,7 @@ void list_obj_to_char(GameWorld *g, struct obj_data *list, struct char_data *ch,
       /* an earlier copy has already been shown, with the count */
       if (find_first(obj_list(g, list), [&](obj_data *j) { return j == i || stacks(j); }) != i)
         continue;
-      for (obj_data *j : obj_list(g, i))
+      for (obj_data *j : obj_list_from(g, list, i))
         if (stacks(j) && char_can_see_obj(g, ch, j)) {
           num++;
           if (d == i && !char_can_see_obj(g, ch, d))
@@ -1396,7 +1396,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   }
 }
 
-void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *ch)
+void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
 {
   std::vector<struct char_data *> hidden;
   int num;
@@ -1438,7 +1438,7 @@ void list_char_to_char(GameWorld *g, struct char_data *list, struct char_data *c
         /* an earlier occurrence has already been shown, with the count */
         if (find_first(char_list(g, list), [&](char_data *j) { return j == i || stacks(j); }) != i)
           continue;
-        for (char_data *j : char_list(g, i))
+        for (char_data *j : char_list_from(g, list, i))
           if (stacks(j))
             num++;
       }

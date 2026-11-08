@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "dbat/iterate.hpp"
 #include "dbat/alias.hpp"
 #include "dbat/db.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -74,7 +75,7 @@ static void read_file_in_game(int kind, const uint8_t *data, size_t size)
       break;
   }
   while (char_get_inventory(ch))
-    extract_obj(g, char_get_inventory(ch));
+    extract_obj(g, first_obj(g, char_get_inventory(ch)));
   for (int i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i))
       extract_obj(g, char_get_equipment(ch, i));

@@ -44,7 +44,7 @@ SPECIAL(dump)
   struct obj_data *k;
   int value = 0;
 
-  for (k = room_get_contents(g, char_get_in_room(ch)); k; k = room_get_contents(g, char_get_in_room(ch))) {
+  for (k = first_obj(g, room_get_contents(g, char_get_in_room(ch))); k; k = first_obj(g, room_get_contents(g, char_get_in_room(ch)))) {
     act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     extract_obj(g, k);
   }
@@ -54,7 +54,7 @@ SPECIAL(dump)
 
   do_drop(g, ch, argument, cmd, SCMD_DROP);
 
-  for (k = room_get_contents(g, char_get_in_room(ch)); k; k = room_get_contents(g, char_get_in_room(ch))) {
+  for (k = first_obj(g, room_get_contents(g, char_get_in_room(ch))); k; k = first_obj(g, room_get_contents(g, char_get_in_room(ch)))) {
     act(g, "$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
     value += MAX(1, MIN(50, obj_get_cost(k) / 10));
     extract_obj(g, k);

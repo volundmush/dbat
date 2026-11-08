@@ -2944,9 +2944,7 @@ void handle_evolution(GameWorld *g, struct char_data *ch, int64_t dmg)
 
 void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num)
 {
-  struct char_data *tch = nullptr;
-
-  for (tch = room_get_people(g, char_get_in_room(ch)); tch; tch = tch->next_in_room) {
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (!char_is_demon(tch))
       continue;
     if ((getCurLF(g, tch)) >= (getMaxLF(g, tch)))
@@ -2961,14 +2959,14 @@ void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num)
 void mob_talk(GameWorld *g, struct char_data *ch, const char *speech)
 {
 
-  struct char_data *tch = nullptr, *vict = nullptr;
+  struct char_data *vict = nullptr;
   int stop = 1;
 
   if (char_is_npc(ch)) {
     return;
   }
 
-  for (tch = room_get_people(g, char_get_in_room(ch)); tch; tch = tch->next_in_room) {
+  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
     if (!char_is_npc(tch))
       continue;
     if (!char_is_humanoid(tch))
@@ -7421,14 +7419,9 @@ void char_set_basest(struct char_data *ch, int64_t v)
   ch->basest = v;
 }
 
-struct obj_data *char_get_inventory(const struct char_data *ch)
+const id_list &char_get_inventory(const struct char_data *ch)
 {
   return ch->carrying;
-}
-
-void char_set_inventory(struct char_data *ch, struct obj_data *v)
-{
-  ch->carrying = v;
 }
 
 void char_set_class(struct char_data *ch, int v)
@@ -7599,16 +7592,6 @@ struct char_data *char_get_next_fighting(const struct char_data *ch)
 void char_set_next_fighting(struct char_data *ch, struct char_data *v)
 {
   ch->next_fighting = v;
-}
-
-struct char_data *char_get_next_in_room(const struct char_data *ch)
-{
-  return ch->next_in_room;
-}
-
-void char_set_next_in_room(struct char_data *ch, struct char_data *v)
-{
-  ch->next_in_room = v;
 }
 
 struct player_special_data *char_get_player_specials(const struct char_data *ch)
@@ -7836,7 +7819,7 @@ struct player_special_data **char_player_specials_slot(struct char_data *ch)
   return &ch->player_specials;
 }
 
-struct obj_data **char_inventory_slot(struct char_data *ch)
+id_list *char_inventory_slot(struct char_data *ch)
 {
   return &ch->carrying;
 }
@@ -7894,13 +7877,6 @@ int8_t *char_real_abils_cha_slot(struct char_data *ch)
 struct obj_data **char_get_equipment_array(struct char_data *ch)
 {
   return ch->equipment;
-}
-
-void char_unlink_person(struct char_data **head, struct char_data *ch)
-{
-  struct char_data *temp;
-
-  REMOVE_FROM_LIST(ch, *head, next_in_room, temp);
 }
 
 void char_unlink_from_affect_list(GameWorld *g, struct char_data *ch)
