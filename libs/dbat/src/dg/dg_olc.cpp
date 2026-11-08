@@ -445,7 +445,6 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
 {
   trig_data *trig  = OLC_TRIG(d);
   trig_data *proto = rnum->proto;
-  trig_data *live_trig;
   struct cmdlist_element *cmd, *next_cmd;
 
   for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
@@ -465,8 +464,7 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
   trig_data_copy(proto, trig);
 
   /* go through the mud and replace existing triggers         */
-  live_trig = g->trigger_list;
-  while (live_trig) {
+  g->triggers.visit([&](long, struct trig_data *live_trig) {
     if (live_trig->index == rnum) {
       if (live_trig->arglist) {
         free(live_trig->arglist);
@@ -500,9 +498,7 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
       live_trig->data_type    = proto->data_type;
       live_trig->depth        = 0;
     }
-
-    live_trig = live_trig->next_in_world;
-  }
+  });
 }
 
 /* Adds the edited trigger to the trigger index. */

@@ -194,8 +194,9 @@ void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc)
 
   sc->types |= t->trigger_type;
 
-  t->next_in_world = g->trigger_list;
-  g->trigger_list     = t;
+  if (!t->id)
+    t->id = ++g->max_trig_id;
+  g->triggers.add(t->id, t);
 }
 
 ACMD(do_attach)

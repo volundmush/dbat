@@ -51,8 +51,9 @@ struct GameWorld {
 
   /* Scripts */
   vnum_table<index_data, trig_vnum> trig_index; /* each entry holds its trigger as proto */
-  struct trig_data *trigger_list{};
-  struct trig_data *extracted_triggers{}; /* waiting for free_extracted_triggers() */
+  id_table<trig_data> triggers;                 /* every trigger attached to something */
+  long max_trig_id{};                           /* the last id given to a trigger */
+  std::vector<struct trig_data *> extracted_triggers; /* waiting for free_extracted_triggers() */
   struct dg_run_ctx dg_ctx{};
   int dg_owner_purged{};
   int dg_eval_depth{}; /* how deeply nested the expression being evaluated is */
@@ -69,7 +70,7 @@ struct GameWorld {
   long top_idnum{};
 
   /* Connections and the server */
-  struct descriptor_data *descriptors{};
+  id_table<descriptor_data> descriptors; /* every connection, by desc_num */
   struct txt_block *bufpool{};
   int buf_largecount{}, buf_overflows{}, buf_switches{};
   int max_players{};

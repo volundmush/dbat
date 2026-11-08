@@ -65,7 +65,7 @@ struct trig_data {
   struct trig_var_data *var_list{};     /* list of local vars for trigger  */
 
   struct trig_data *next{};
-  struct trig_data *next_in_world{}; /* next in the global trigger list */
+  long id{};                         /* in g->triggers, while attached to something; 0 if not */
   bool extracted{};                  /* removed while a script was running: see free_extracted_triggers() */
   bool owner_gone{};                 /* and what it belonged to went too */
 };

@@ -184,14 +184,13 @@ static void forget_closed_connections(const GameWorld *g)
   int kept = 0;
 
   for (int i = 0; i < num_connections; i++) {
-    for (const struct descriptor_data *d = g->descriptors; d; d = d->next)
-      if (d == connections[i].d) {
-        connections[kept++] = connections[i];
-        goto next;
-      }
-    if (connections[i].peer >= 0)
+    bool open = false;
+
+    g->descriptors.visit([&](long, const struct descriptor_data *d) { open = open || d == connections[i].d; });
+    if (open)
+      connections[kept++] = connections[i];
+    else if (connections[i].peer >= 0)
       close(connections[i].peer);
-  next:;
   }
   num_connections = kept;
 }

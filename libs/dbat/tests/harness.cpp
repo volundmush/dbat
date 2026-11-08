@@ -146,8 +146,7 @@ static GameWorld *boot_here(time_t when, const char *log_mode)
 
 static void free_game(GameWorld *g)
 {
-  while (g->descriptors)
-    close_socket(g, g->descriptors);
+  close_all_sockets(g);
   game_world_free_contents(g);
   free(CONFIG_CONFFILE);
   game_world_destroy(g);
@@ -218,8 +217,7 @@ static struct descriptor_data *new_test_descriptor(GameWorld *g)
   d->tmp4  = strdup("Empty");
   d->tmp5  = strdup("Empty");
   d->customfile = 1;
-  d->next  = g->descriptors;
-  g->descriptors = d;
+  g->descriptors.add(d->desc_num, d);
   return d;
 }
 
@@ -284,8 +282,8 @@ struct descriptor_data *th_connect(GameWorld *g, int *peer)
   game_add_connection(g, ends[0], "127.0.0.1");
   *peer = ends[1];
   /* a new connection goes on the front, and a refused one is closed */
-  if (g->descriptors && g->descriptors->descriptor == ends[0])
-    return g->descriptors;
+  if (g->descriptors.newest() && g->descriptors.newest()->descriptor == ends[0])
+    return g->descriptors.newest();
   close(ends[1]);
   return nullptr;
 }

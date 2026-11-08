@@ -692,7 +692,7 @@ static void check_script_loses_its_owner(GameWorld *g)
   CHECK(count_objects_of(g, 351) == 0);
   CHECK_AUDIT(g);
   th_pulses(g, 3);
-  CHECK(g->extracted_triggers == nullptr);
+  CHECK(g->extracted_triggers.empty());
   CHECK_AUDIT(g);
 }
 

@@ -343,24 +343,25 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
   }
 }
 
+/* Is d an open connection? Compares pointers only, as d may have been freed. */
+static bool is_open(const GameWorld *g, const struct descriptor_data *d)
+{
+  bool found = false;
+  g->descriptors.visit([&](long, const struct descriptor_data *other) { found = found || other == d; });
+  return found;
+}
+
 static void audit_connections(const GameWorld *g, struct audit *a)
 {
-  for (const struct descriptor_data *d = g->descriptors; d; d = d->next) {
-    bool found = !d->snooping;
-
-    for (const struct descriptor_data *other = g->descriptors; other && !found; other = other->next)
-      found = other == d->snooping;
-    if (!found)
+  g->descriptors.visit([&](long, const struct descriptor_data *d) {
+    if (d->snooping && !is_open(g, d->snooping))
       problem(a, "a connection is snooping one that has closed");
     else if (d->snooping && d->snooping->snoop_by != d)
       problem(a, "a connection is snooping one that says otherwise");
 
-    found = !d->snoop_by;
-    for (const struct descriptor_data *other = g->descriptors; other && !found; other = other->next)
-      found = other == d->snoop_by;
-    if (!found)
+    if (d->snoop_by && !is_open(g, d->snoop_by))
       problem(a, "a connection is snooped on by one that has closed");
-  }
+  });
 }
 
 /* The index counts how many of each thing exist, and zone resets and limits go by it. */
@@ -409,10 +410,9 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
 
 static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
 {
-  for (const struct descriptor_data *d = g->descriptors; d; d = d->next)
-    if (d->character == ch || d->original == ch)
-      return true;
-  return false;
+  bool held = false;
+  g->descriptors.visit([&](long, const struct descriptor_data *d) { held = held || d->character == ch || d->original == ch; });
+  return held;
 }
 
 int world_audit(GameWorld *g, world_audit_report *report, void *context)
@@ -461,9 +461,10 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
     }
   }
 
-  for (struct descriptor_data *d = g->descriptors; d; d = d->next)
+  g->descriptors.visit([&](long, struct descriptor_data *d) {
     if (d->character && desc_get_connected(d) == CON_PLAYING && !set_has(&a.characters, d->character))
       problem(&a, "a connection is playing a character who isn't in the game");
+  });
 
   audit_connections(g, &a);
   audit_index_counts(g, &a);

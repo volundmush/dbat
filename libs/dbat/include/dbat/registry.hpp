@@ -179,7 +179,7 @@ public:
 };
 
 /*
- * Entities that come and go while the game runs, numbered by id: characters and objects. The table doesn't own
+ * Entities that come and go while the game runs, numbered by id: characters, objects, connections and triggers. The table doesn't own
  * them. They are kept in the order they were added and visited newest first, as the old lists were, because that
  * order reaches the save files and what players see.
  */
@@ -196,7 +196,8 @@ class id_table {
     long id{};
     std::size_t place{};
   };
-  std::unique_ptr<slot[]> slots_;
+  std::unique_ptr<slot[]> storage_;
+  slot *slots_{};          /* storage_.get(), apart because unique_ptr's operator[] is a deep call chain at -O0 */
   std::size_t capacity_{}; /* a power of two, or 0 */
   std::size_t occupied_{}; /* slots in use or removed */
   std::size_t live_{};
@@ -240,7 +241,8 @@ class id_table {
         order_[out++] = e;
     order_.resize(out);
     removed_  = 0;
-    slots_    = std::make_unique<slot[]>(capacity);
+    storage_  = std::make_unique<slot[]>(capacity);
+    slots_    = storage_.get();
     capacity_ = capacity;
     occupied_ = 0;
     for (std::size_t i = 0; i < order_.size(); i++)
@@ -285,6 +287,15 @@ public:
   std::size_t size() const { return live_; }
   bool empty() const { return live_ == 0; }
 
+  /* The entity added most recently that is still here, or null. */
+  T *newest() const
+  {
+    for (std::size_t i = order_.size(); i-- > 0;)
+      if (order_[i].item)
+        return order_[i].item;
+    return nullptr;
+  }
+
   /* Every id, newest first, as they are now. */
   std::vector<long> ids() const
   {
@@ -309,7 +320,8 @@ public:
 
   void clear()
   {
-    slots_.reset();
+    storage_.reset();
+    slots_    = nullptr;
     capacity_ = occupied_ = live_ = removed_ = 0;
     order_.clear();
   }

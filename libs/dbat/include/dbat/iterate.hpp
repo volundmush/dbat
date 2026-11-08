@@ -161,16 +161,9 @@ inline auto each_obj(GameWorld *g)
 /* Every connection, playing or not. */
 inline auto each_desc(GameWorld *g)
 {
-  auto s = dbat_iter::make_snapshot<descriptor_data, int>(
-      [g](long num) {
-        for (descriptor_data *d = g->descriptors; d; d = d->next)
-          if (d->desc_num == num)
-            return d;
-        return static_cast<descriptor_data *>(nullptr);
-      },
-      [](const descriptor_data *) { return 0; });
-  for (descriptor_data *d = g->descriptors; d; d = d->next)
-    s.add(d->desc_num, 0);
+  auto s = dbat_iter::make_snapshot<descriptor_data, int>([g](long num) { return g->descriptors.find(num); },
+                                                          [](const descriptor_data *) { return 0; });
+  g->descriptors.visit([&s](long num, const descriptor_data *) { s.add(num, 0); });
   return s;
 }
 

@@ -125,8 +125,6 @@ void free_trigger(GameWorld *g, struct trig_data *trig)
 /* remove a single trigger from a mob/obj/room */
 void extract_trigger(GameWorld *g, struct trig_data *trig)
 {
-  struct trig_data *temp;
-
   if (trig->wait_event) {
     event_cancel(g, trig->wait_event);
     trig->wait_event = nullptr;
@@ -134,14 +132,12 @@ void extract_trigger(GameWorld *g, struct trig_data *trig)
 
   trig->index->number--;
 
-  /* walk the trigger list and remove this one */
-  REMOVE_FROM_LIST(trig, g->trigger_list, next_in_world, temp);
+  g->triggers.remove(trig->id, trig);
 
   /* A running script may be this trigger, or be about to read it, so it can't go yet. */
   if (g->script_depth > 0) {
-    trig->extracted     = true;
-    trig->next_in_world = g->extracted_triggers;
-    g->extracted_triggers = trig;
+    trig->extracted = true;
+    g->extracted_triggers.push_back(trig);
     return;
   }
   free_trigger(g, trig);
@@ -150,15 +146,12 @@ void extract_trigger(GameWorld *g, struct trig_data *trig)
 /* Frees the triggers extract_trigger() left, once no script can be using them. */
 void free_extracted_triggers(GameWorld *g)
 {
-  struct trig_data *next;
-
   if (g->script_depth > 0)
     return;
-  for (struct trig_data *trig = g->extracted_triggers; trig; trig = next) {
-    next = trig->next_in_world;
+  std::vector<struct trig_data *> extracted;
+  extracted.swap(g->extracted_triggers);
+  for (struct trig_data *trig : extracted)
     free_trigger(g, trig);
-  }
-  g->extracted_triggers = nullptr;
 }
 
 /* remove all triggers from a mob/obj/room */

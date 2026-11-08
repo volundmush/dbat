@@ -421,13 +421,14 @@ static void check_other_state(GameWorld *a, GameWorld *b)
 
   a->time_info.hours            = 7;
   a->weather_info.pressure      = 1000;
-  a->descriptors                = &d;
+  d.desc_num                    = 1;
+  a->descriptors.add(d.desc_num, &d);
   a->config_info.play.level_cap = 50;
   CHECK(b->time_info.hours == 0);
   CHECK(b->weather_info.pressure == 0);
-  CHECK(b->descriptors == nullptr);
+  CHECK(b->descriptors.empty());
   CHECK(b->config_info.play.level_cap == 0);
-  a->descriptors = nullptr;
+  a->descriptors.remove(d.desc_num, &d);
 
   event_init(a);
   event_init(b);

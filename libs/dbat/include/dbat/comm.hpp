@@ -31,6 +31,7 @@ void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...) 
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 void close_socket(GameWorld *g, struct descriptor_data *d);
+void close_all_sockets(GameWorld *g);
 
 constexpr int TO_ROOM        = 1;
 constexpr int TO_VICT        = 2;

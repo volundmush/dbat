@@ -169,8 +169,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
 
   snprintf(d->host, sizeof(d->host), "%s", host);
-  d->next         = g->descriptors;
-  g->descriptors = d;
+  g->descriptors.add(d->desc_num, d);
 
   d->connected = CON_CLOSE;
 
@@ -302,8 +301,7 @@ void init_game(GameWorld *g, uint16_t cmport)
   Crash_save_all(g);
 
   mud_log("Closing all sockets.");
-  while (g->descriptors)
-    close_socket(g, g->descriptors);
+  close_all_sockets(g);
 
   close(g->mother_desc);
 
@@ -528,7 +526,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     }
 
     /* Sleep if we don't have any connections */
-    if (g->descriptors == nullptr) {
+    if (g->descriptors.empty()) {
       struct pollfd mother = {.fd = cmmother_desc, .events = POLLIN};
 
       mud_log("No connections.  Going to sleep.");
@@ -1875,8 +1873,11 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
   newd->history = new char *[HISTORY_SIZE]();
-  if (++g->last_desc == 1000)
-    g->last_desc = 1;
+  /* Numbers run from 1 to 999 and wrap, skipping any still in use. */
+  do {
+    if (++g->last_desc == 1000)
+      g->last_desc = 1;
+  } while (g->descriptors.find(g->last_desc) && g->descriptors.size() < 999);
   newd->desc_num = g->last_desc;
 }
 
@@ -1989,8 +1990,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   init_descriptor(g, newd, desc);
 
   /* prepend to list */
-  newd->next      = g->descriptors;
-  g->descriptors = newd;
+  g->descriptors.add(newd->desc_num, newd);
 
   set_color(g, newd);
 
@@ -2467,11 +2467,15 @@ static void free_user(struct descriptor_data *d)
   d->user = d->pass = d->email = nullptr;
 }
 
+void close_all_sockets(GameWorld *g)
+{
+  for (descriptor_data *d : each_desc(g))
+    close_socket(g, d);
+}
+
 void close_socket(GameWorld *g, struct descriptor_data *d)
 {
-  struct descriptor_data *temp;
-
-  REMOVE_FROM_LIST(d, g->descriptors, next, temp);
+  g->descriptors.remove(d->desc_num, d);
   close(d->descriptor);
   flush_queues(g, d);
 
