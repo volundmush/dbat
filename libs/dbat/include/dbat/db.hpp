@@ -110,7 +110,7 @@ bool is_empty(GameWorld *g, struct zone_data *zone_nr);
 void index_boot(GameWorld *g, int mode);
 void boot_db(GameWorld *g);
 void destroy_db(GameWorld *g);
-int create_entry(GameWorld *g, char *name);
+int create_entry(GameWorld *g, const char *name);
 void zone_update(GameWorld *g);
 char *fread_string(FILE *fl, const char *error);
 long get_id_by_name(GameWorld *g, const char *name);

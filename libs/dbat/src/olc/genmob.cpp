@@ -21,7 +21,6 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static bool free_mobile_strings(struct char_data *mob);
 static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *mob, FILE *fd);
 
 /* From db.c */
@@ -29,9 +28,8 @@ void init_mobile_skills(void);
 
 static bool update_mobile_strings(struct char_data *t, struct char_data *f);
 static void check_mobile_strings(GameWorld *g, struct char_data *mob);
-static void check_mobile_string(GameWorld *g, mob_vnum i, char **string, const char *dscr);
+static void check_mobile_string(GameWorld *g, mob_vnum i, std::string *string, const char *dscr);
 static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *mob, FILE *fd);
-static bool copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 #if CONFIG_GENOLC_MOBPROG
 bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
@@ -45,11 +43,11 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
   mob_vnum rnum, found = false;
 
   if (mob_proto_of(g, rnum = vnum)) {
-    /* Copy over the mobile and free() the old strings. */
+    /* Copy over the mobile. */
     copy_mobile(g, mob_proto_of(g, rnum), mob);
     char_set_nr(mob_proto_of(g, rnum), rnum); /* medit's copy option can bring another mob's number */
 
-    /* Now re-point all existing mobile strings to here. */
+    /* Now give all existing mobiles its strings. */
     for (char_data *live_mob : each_char(g))
       if (rnum == char_get_nr(live_mob))
         update_mobile_strings(live_mob, mob_proto_of(g, rnum));
@@ -63,7 +61,6 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
   struct index_data *index = g->mob_index.emplace(vnum);
   *proto                   = *mob;
   char_set_nr(proto, vnum);
-  copy_mobile_strings(proto, mob);
   index->vnum   = vnum;
   index->number = 0;
   index->func   = nullptr;
@@ -86,10 +83,8 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
 
 bool copy_mobile(GameWorld *g, struct char_data *to, struct char_data *from)
 {
-  free_mobile_strings(to);
-  *to = *from;
   check_mobile_strings(g, from);
-  copy_mobile_strings(to, from);
+  *to = *from;
   return true;
 }
 
@@ -163,25 +158,10 @@ mob_vnum delete_mobile(GameWorld *g, mob_vnum refpt)
     }
   }
 
-  /* Copies being extracted keep its strings, and free them themselves now that it has gone. */
+  /* Copies still being extracted own everything they hold, so the prototype can go now. */
   g->mob_proto.take(refpt);
   g->mob_index.take(refpt);
   return refpt;
-}
-
-static bool copy_mobile_strings(struct char_data *t, struct char_data *f)
-{
-  if (char_get_alias(f))
-    char_set_alias(t, strdup(char_get_alias(f)));
-  if (char_get_raw_title(f))
-    char_set_raw_title(t, strdup(char_get_raw_title(f)));
-  if (char_get_sdesc(f))
-    char_set_sdesc(t, strdup(char_get_sdesc(f)));
-  if (char_get_ldesc(f))
-    char_set_ldesc(t, strdup(char_get_ldesc(f)));
-  if (char_get_ddesc(f))
-    char_set_ddesc(t, strdup(char_get_ddesc(f)));
-  return true;
 }
 
 static bool update_mobile_strings(struct char_data *t, struct char_data *f)
@@ -199,21 +179,6 @@ static bool update_mobile_strings(struct char_data *t, struct char_data *f)
   return true;
 }
 
-static bool free_mobile_strings(struct char_data *mob)
-{
-  if (char_get_alias(mob))
-    free(char_get_alias(mob));
-  if (char_get_raw_title(mob))
-    free(char_get_raw_title(mob));
-  if (char_get_sdesc(mob))
-    free(char_get_sdesc(mob));
-  if (char_get_ldesc(mob))
-    free(char_get_ldesc(mob));
-  if (char_get_ddesc(mob))
-    free(char_get_ddesc(mob));
-  return true;
-}
-
 /* Free a mobile structure that has been edited. Take care of existing mobiles 
  * and their mob_proto!  */
 bool free_mobile(GameWorld *g, struct char_data *mob)
@@ -225,20 +190,9 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
 
   /* Non-prototyped mobile.  Also known as new mobiles.  */
   if ((i = char_get_nr(mob)) == NOBODY) {
-    free_mobile_strings(mob);
     /* free script proto list */
     free_proto_script(mob, MOB_TRIGGER);
   } else { /* Prototyped mobile. */
-    if (char_get_alias(mob) && char_get_alias(mob) != char_get_alias(mob_proto_of(g, i)))
-      free(char_get_alias(mob));
-    if (char_get_raw_title(mob) && char_get_raw_title(mob) != char_get_raw_title(mob_proto_of(g, i)))
-      free(char_get_raw_title(mob));
-    if (char_get_sdesc(mob) && char_get_sdesc(mob) != char_get_sdesc(mob_proto_of(g, i)))
-      free(char_get_sdesc(mob));
-    if (char_get_ldesc(mob) && char_get_ldesc(mob) != char_get_ldesc(mob_proto_of(g, i)))
-      free(char_get_ldesc(mob));
-    if (char_get_ddesc(mob) && char_get_ddesc(mob) != char_get_ddesc(mob_proto_of(g, i)))
-      free(char_get_ddesc(mob));
     /* free script proto list if it's not the prototype */
     if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(mob_proto_of(g, i)))
       free_proto_script(mob, MOB_TRIGGER);
@@ -417,14 +371,12 @@ static void check_mobile_strings(GameWorld *g, struct char_data *mob)
   check_mobile_string(g, mvnum, char_short_descr_slot(mob), "short description");
 }
 
-static void check_mobile_string(GameWorld *g, mob_vnum i, char **string, const char *dscr)
+static void check_mobile_string(GameWorld *g, mob_vnum i, std::string *string, const char *dscr)
 {
-  if (*string == nullptr || **string == '\0') {
+  if (string->empty()) {
     char smbuf[128];
     sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "%s", smbuf);
-    if (*string)
-      free(*string);
-    *string = strdup("An undefined string.");
+    *string = "An undefined string.";
   }
 }

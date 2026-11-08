@@ -263,7 +263,7 @@ struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int
   char_make_player_specials(ch);
   char_set_desc(ch, d);
   d->character = ch;
-  char_set_pc_name(ch, strdup(name));
+  char_set_pc_name(ch, name);
   char_set_race(ch, race);
   char_set_class(ch, sensei);
   char_set_pfilepos(ch, create_entry(g, char_get_pc_name(ch)));

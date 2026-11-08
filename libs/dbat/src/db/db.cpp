@@ -526,17 +526,6 @@ void destroy_db(GameWorld *g)
 
   /* Mobiles */
   for (mob_vnum mvnum : g->mob_proto.vnums()) {
-    if (char_get_alias(mob_proto_of(g, mvnum)))
-      free(char_get_alias(mob_proto_of(g, mvnum)));
-    if (char_get_raw_title(mob_proto_of(g, mvnum)))
-      free(char_get_raw_title(mob_proto_of(g, mvnum)));
-    if (char_get_sdesc(mob_proto_of(g, mvnum)))
-      free(char_get_sdesc(mob_proto_of(g, mvnum)));
-    if (char_get_ldesc(mob_proto_of(g, mvnum)))
-      free(char_get_ldesc(mob_proto_of(g, mvnum)));
-    if (char_get_ddesc(mob_proto_of(g, mvnum)))
-      free(char_get_ddesc(mob_proto_of(g, mvnum)));
-
     /* free script proto list */
     free_proto_script(mob_proto_of(g, mvnum), MOB_TRIGGER);
 
@@ -1953,15 +1942,15 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
   sprintf(buf2, "mob vnum %d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
-  char_set_alias(ch, fread_string(mob_f, buf2));
+  char_set_alias(ch, take_string(fread_string(mob_f, buf2)));
   tmpptr = fread_string(mob_f, buf2);
-  char_set_sdesc(ch, tmpptr);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
-  char_set_ldesc(ch, fread_string(mob_f, buf2));
-  char_set_ddesc(ch, fread_string(mob_f, buf2));
+  char_set_sdesc(ch, take_string(tmpptr));
+  char_set_ldesc(ch, take_string(fread_string(mob_f, buf2)));
+  char_set_ddesc(ch, take_string(fread_string(mob_f, buf2)));
 
   /* *** Numeric data *** */
   if (!get_line(mob_f, line)) {
@@ -4067,60 +4056,17 @@ char *fread_string(FILE *fl, const char *error)
 /* release memory allocated for a char struct */
 void free_char(GameWorld *g, struct char_data *ch)
 {
-  int i;
-  mob_vnum nr;
   /* first: removing an affect can change skills, which live in the player data freed below */
   while (!char_affects(ch).empty())
     affect_remove(g, ch, &char_affects(ch).front());
 
-  /* Containers (affects aside, which change what they affect), player_specials and the lists it holds go with ch;
-   * its strings don't, until they are std::string. */
-  if (char_get_player_specials(ch)) {
-    if (char_get_player_specials(ch)->poofin)
-      free(char_get_player_specials(ch)->poofin);
-    if (char_get_player_specials(ch)->poofout)
-      free(char_get_player_specials(ch)->poofout);
-    if (char_get_player_specials(ch)->host)
-      free(char_get_player_specials(ch)->host);
-    for (i = 0; i < NUM_COLOR; i++)
-      if (char_get_player_specials(ch)->color_choices[i])
-        free(char_get_player_specials(ch)->color_choices[i]);
-  }
-  if (!char_is_npc(ch) || (char_is_npc(ch) && char_get_nr(ch) == NOBODY)) {
-    /* if this is a player, or a non-prototyped non-player, free all */
-    if (char_get_name(ch))
-      free(char_get_name(ch));
-    if (char_get_voice(ch))
-      free(char_get_voice(ch));
-    if (char_get_raw_title(ch))
-      free(char_get_raw_title(ch));
-    free(char_get_loguser(ch));
-    if (char_get_sdesc(ch))
-      free(char_get_sdesc(ch));
-    if (char_get_ldesc(ch))
-      free(char_get_ldesc(ch));
-    if (char_get_ddesc(ch))
-      free(char_get_ddesc(ch));
-    free(const_cast<char *>(char_get_feature(ch)));
-    free(const_cast<char *>(char_get_rdisplay(ch)));
-
-    /* free script proto list */
+  /* Containers (affects aside, which change what they affect), strings and player_specials go with ch. */
+  if (!char_is_npc(ch) || char_get_nr(ch) == NOBODY) {
+    /* a player, or a mob with no prototype: its trigger list is its own */
     free_proto_script(ch, MOB_TRIGGER);
-
-  } else if ((nr = char_get_nr(ch)) != NOBODY) {
-    /* otherwise, free strings only if the string is not pointing at proto (none, once OLC has deleted it) */
-    struct char_data *proto = mob_proto_of(g, nr);
-    if (char_get_alias(ch) && char_get_alias(ch) != (proto ? char_get_alias(proto) : nullptr))
-      free(char_get_alias(ch));
-    if (char_get_raw_title(ch) && char_get_raw_title(ch) != (proto ? char_get_raw_title(proto) : nullptr))
-      free(char_get_raw_title(ch));
-    if (char_get_sdesc(ch) && char_get_sdesc(ch) != (proto ? char_get_sdesc(proto) : nullptr))
-      free(char_get_sdesc(ch));
-    if (char_get_ldesc(ch) && char_get_ldesc(ch) != (proto ? char_get_ldesc(proto) : nullptr))
-      free(char_get_ldesc(ch));
-    if (char_get_ddesc(ch) && char_get_ddesc(ch) != (proto ? char_get_ddesc(proto) : nullptr))
-      free(char_get_ddesc(ch));
-    /* free script proto list if it's not the prototype */
+  } else {
+    /* free script proto list if it's not the prototype's (none, once OLC has deleted it) */
+    struct char_data *proto = mob_proto_of(g, char_get_nr(ch));
     if (char_get_proto_script(ch) && char_get_proto_script(ch) != (proto ? char_get_proto_script(proto) : nullptr))
       free_proto_script(ch, MOB_TRIGGER);
   }

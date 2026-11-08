@@ -52,3 +52,7 @@ template <size_t N> writable(const char (&)[N]) -> writable<N>;
 /* A writable copy of s (null reads as ""), for a function that may change its argument: f(writable_copy(s).data()).
  * The copy lasts until the end of the statement. */
 inline std::string writable_copy(const char *s) { return s ? s : ""; }
+
+/* s as a C string, null when empty: how the getters of std::string fields read, since the files store an
+ * empty string as none. The pointer lasts until s changes. */
+inline const char *c_str_or_null(const std::string &s) { return s.empty() ? nullptr : s.c_str(); }

@@ -307,11 +307,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   char_register(g, d->character);
   char_to_room(g, d->character, load_room);
   load_result = Crash_load(g, d->character);
-  if (char_get_player_specials(d->character)->host) {
-    free(char_get_player_specials(d->character)->host);
-    char_get_player_specials(d->character)->host = nullptr;
-  }
-  char_get_player_specials(d->character)->host = strdup(d->host);
+  char_get_player_specials(d->character)->host = d->host;
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
   for (char_data *check : each_char(g))
@@ -546,7 +542,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
         clear_char(d->character);
         char_make_player_specials(d->character);
         char_set_desc(d->character, d);
-        char_set_alias(d->character, strdup(CAP(tmp_name)));
+        char_set_alias(d->character, CAP(tmp_name));
         char_set_pfilepos(d->character, player_i);
         char_prf_set(g, d->character, PRF_COLOR, true);
         display_races(g, d);
@@ -599,7 +595,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
           return;
         }
-        char_set_alias(d->character, strdup(CAP(tmp_name)));
+        char_set_alias(d->character, CAP(tmp_name));
 
         display_races(g, d);
         char_set_rp(d->character, d->rpp);
@@ -632,7 +628,6 @@ static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (*arg == 'n' || *arg == 'N') {
     write_to_output(g, d, "Okay, what IS it, then? ");
-    free(char_get_alias(d->character));
     char_set_alias(d->character, nullptr);
     desc_set_connected(d, CON_GET_NAME);
   } else

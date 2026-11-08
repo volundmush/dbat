@@ -580,7 +580,7 @@ int64_t incCurKIPercent(GameWorld *g, char_data *ch, double amt, bool limit_max)
 
 int64_t decCurKIPercent(GameWorld *g, char_data *ch, double amt, int64_t floor)
 {
-  if (!strcasecmp(ch->name, "Wayland")) {
+  if (!strcasecmp(ch->name.c_str(), "Wayland")) {
     send_to_char(g, ch, "decCurKIPercent called with: %f\r\n", amt);
   }
   double fl = 0.0;
@@ -1204,8 +1204,8 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
     sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
     sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
-    ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
-    return (ch->temp_prompt);
+    ch->temp_prompt = str_format("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
+    return ch->temp_prompt.c_str();
   }
   if (char_get_master(g, ch) && char_aff_flagged(char_get_master(g, ch), AFF_GROUP)) {
     party1  = char_get_master(g, ch);
@@ -1347,8 +1347,8 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
     sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
     sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
-    ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
-    return (ch->temp_prompt);
+    ch->temp_prompt = str_format("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
+    return ch->temp_prompt.c_str();
   }
   return ("");
 }
@@ -4615,9 +4615,9 @@ zone_vnum char_in_zone(GameWorld *g, const struct char_data *ch)
   return (((room_get_zone(g, (char_get_in_room(ch)))))->number);
 }
 
-char *char_get_name(const struct char_data *ch)
+const char *char_get_name(const struct char_data *ch)
 {
-  return (char_is_npc(ch) ? (ch)->short_descr : char_get_pc_name(ch));
+  return char_is_npc(ch) ? c_str_or_null(ch->short_descr) : char_get_pc_name(ch);
 }
 
 const char *char_get_title(const struct char_data *ch)
@@ -5356,12 +5356,17 @@ void char_set_was_in_room(struct char_data *ch, room_vnum v)
   ch->was_in_room = v;
 }
 
-char *char_get_pc_name(const struct char_data *ch)
+const char *char_get_pc_name(const struct char_data *ch)
 {
-  return ch->name;
+  return c_str_or_null(ch->name); /* null for none, as the files have it */
 }
 
-void char_set_pc_name(struct char_data *ch, char *v)
+void char_set_pc_name(struct char_data *ch, const char *v)
+{
+  ch->name = v ? v : "";
+}
+
+void char_set_pc_name(struct char_data *ch, const std::string &v)
 {
   ch->name = v;
 }
@@ -5381,12 +5386,17 @@ int char_get_mimic(const struct char_data *ch)
   return ch->mimic;
 }
 
-char *char_get_voice(const struct char_data *ch)
+const char *char_get_voice(const struct char_data *ch)
 {
-  return ch->voice;
+  return c_str_or_null(ch->voice); /* null for none, as the files have it */
 }
 
-void char_set_voice(struct char_data *ch, char *v)
+void char_set_voice(struct char_data *ch, const char *v)
+{
+  ch->voice = v ? v : "";
+}
+
+void char_set_voice(struct char_data *ch, const std::string &v)
 {
   ch->voice = v;
 }
@@ -5403,22 +5413,30 @@ void char_set_transclass(struct char_data *ch, int v)
 
 const char *char_get_feature(const struct char_data *ch)
 {
-  return ch->feature;
+  return c_str_or_null(ch->feature); /* null for none, as the files have it */
 }
 
-/* Keeps its own copy of v. */
 void char_set_feature(struct char_data *ch, const char *v)
 {
-  free(const_cast<char *>(ch->feature));
-  ch->feature = v ? strdup(v) : nullptr;
+  ch->feature = v ? v : "";
 }
 
-char *char_get_loguser(const struct char_data *ch)
+void char_set_feature(struct char_data *ch, const std::string &v)
 {
-  return ch->loguser;
+  ch->feature = v;
 }
 
-void char_set_loguser(struct char_data *ch, char *v)
+const char *char_get_loguser(const struct char_data *ch)
+{
+  return c_str_or_null(ch->loguser); /* null for none, as the files have it */
+}
+
+void char_set_loguser(struct char_data *ch, const char *v)
+{
+  ch->loguser = v ? v : "";
+}
+
+void char_set_loguser(struct char_data *ch, const std::string &v)
 {
   ch->loguser = v;
 }
@@ -5629,14 +5647,17 @@ void char_set_suppressed(struct char_data *ch, int64_t v)
 
 const char *char_get_rdisplay(const struct char_data *ch)
 {
-  return ch->rdisplay;
+  return c_str_or_null(ch->rdisplay); /* null for none, as the files have it */
 }
 
-/* Keeps its own copy of v. */
 void char_set_rdisplay(struct char_data *ch, const char *v)
 {
-  free(const_cast<char *>(ch->rdisplay));
-  ch->rdisplay = v ? strdup(v) : nullptr;
+  ch->rdisplay = v ? v : "";
+}
+
+void char_set_rdisplay(struct char_data *ch, const std::string &v)
+{
+  ch->rdisplay = v;
 }
 
 int8_t char_get_aff_abils_str(const struct char_data *ch)
@@ -7132,26 +7153,36 @@ void char_set_bad_pws(GameWorld *g, struct char_data *ch, uint8_t v)
     ps->bad_pws = v;
 }
 
-char *char_get_poofin(GameWorld *g, const struct char_data *ch)
+const char *char_get_poofin(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofin");
-  return ps ? ps->poofin : nullptr;
+  return ps ? c_str_or_null(ps->poofin) : nullptr;
 }
 
-void char_set_poofin(GameWorld *g, struct char_data *ch, char *v)
+void char_set_poofin(GameWorld *g, struct char_data *ch, const char *v)
+{
+  char_set_poofin(g, ch, std::string(v ? v : ""));
+}
+
+void char_set_poofin(GameWorld *g, struct char_data *ch, const std::string &v)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofin");
   if (ps)
     ps->poofin = v;
 }
 
-char *char_get_poofout(GameWorld *g, const struct char_data *ch)
+const char *char_get_poofout(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofout");
-  return ps ? ps->poofout : nullptr;
+  return ps ? c_str_or_null(ps->poofout) : nullptr;
 }
 
-void char_set_poofout(GameWorld *g, struct char_data *ch, char *v)
+void char_set_poofout(GameWorld *g, struct char_data *ch, const char *v)
+{
+  char_set_poofout(g, ch, std::string(v ? v : ""));
+}
+
+void char_set_poofout(GameWorld *g, struct char_data *ch, const std::string &v)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofout");
   if (ps)
@@ -7190,13 +7221,18 @@ void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v)
     ps->last_tell = v;
 }
 
-char *char_get_host(GameWorld *g, const struct char_data *ch)
+const char *char_get_host(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "host");
-  return ps ? ps->host : nullptr;
+  return ps ? c_str_or_null(ps->host) : nullptr;
 }
 
-void char_set_host(GameWorld *g, struct char_data *ch, char *v)
+void char_set_host(GameWorld *g, struct char_data *ch, const char *v)
+{
+  char_set_host(g, ch, std::string(v ? v : ""));
+}
+
+void char_set_host(GameWorld *g, struct char_data *ch, const std::string &v)
 {
   struct player_special_data *ps = ps_of(g, ch, "host");
   if (ps)
@@ -7275,42 +7311,62 @@ const char *char_race_abbr(const struct char_data *ch)
   return race_abbrevs[ch->race];
 }
 
-char *char_get_alias(const struct char_data *ch)
+const char *char_get_alias(const struct char_data *ch)
 {
-  return ch->name;
+  return c_str_or_null(ch->name); /* null for none, as the files have it */
 }
 
-void char_set_alias(struct char_data *ch, char *v)
+void char_set_alias(struct char_data *ch, const char *v)
+{
+  ch->name = v ? v : "";
+}
+
+void char_set_alias(struct char_data *ch, const std::string &v)
 {
   ch->name = v;
 }
 
-char *char_get_sdesc(const struct char_data *ch)
+const char *char_get_sdesc(const struct char_data *ch)
 {
-  return ch->short_descr;
+  return c_str_or_null(ch->short_descr); /* null for none, as the files have it */
 }
 
-void char_set_sdesc(struct char_data *ch, char *v)
+void char_set_sdesc(struct char_data *ch, const char *v)
+{
+  ch->short_descr = v ? v : "";
+}
+
+void char_set_sdesc(struct char_data *ch, const std::string &v)
 {
   ch->short_descr = v;
 }
 
-char *char_get_ldesc(const struct char_data *ch)
+const char *char_get_ldesc(const struct char_data *ch)
 {
-  return ch->long_descr;
+  return c_str_or_null(ch->long_descr); /* null for none, as the files have it */
 }
 
-void char_set_ldesc(struct char_data *ch, char *v)
+void char_set_ldesc(struct char_data *ch, const char *v)
+{
+  ch->long_descr = v ? v : "";
+}
+
+void char_set_ldesc(struct char_data *ch, const std::string &v)
 {
   ch->long_descr = v;
 }
 
-char *char_get_ddesc(const struct char_data *ch)
+const char *char_get_ddesc(const struct char_data *ch)
 {
-  return ch->description;
+  return c_str_or_null(ch->description); /* null for none, as the files have it */
 }
 
-void char_set_ddesc(struct char_data *ch, char *v)
+void char_set_ddesc(struct char_data *ch, const char *v)
+{
+  ch->description = v ? v : "";
+}
+
+void char_set_ddesc(struct char_data *ch, const std::string &v)
 {
   ch->description = v;
 }
@@ -7662,9 +7718,9 @@ void char_set_stamina(struct char_data *ch, double v)
   ch->stamina = v;
 }
 
-char *char_get_temp_prompt(const struct char_data *ch)
+const char *char_get_temp_prompt(const struct char_data *ch)
 {
-  return ch->temp_prompt;
+  return c_str_or_null(ch->temp_prompt);
 }
 
 int char_get_throws(const struct char_data *ch)
@@ -7737,12 +7793,17 @@ void char_set_timer(struct char_data *ch, int v)
   ch->timer = v;
 }
 
-char *char_get_raw_title(const struct char_data *ch)
+const char *char_get_raw_title(const struct char_data *ch)
 {
-  return ch->title;
+  return c_str_or_null(ch->title); /* null for none, as the files have it */
 }
 
-void char_set_raw_title(struct char_data *ch, char *v)
+void char_set_raw_title(struct char_data *ch, const char *v)
+{
+  ch->title = v ? v : "";
+}
+
+void char_set_raw_title(struct char_data *ch, const std::string &v)
 {
   ch->title = v;
 }
@@ -7762,22 +7823,22 @@ id_list *char_inventory_slot(struct char_data *ch)
   return &ch->carrying;
 }
 
-char **char_description_slot(struct char_data *ch)
+std::string *char_description_slot(struct char_data *ch)
 {
   return &ch->description;
 }
 
-char **char_long_descr_slot(struct char_data *ch)
+std::string *char_long_descr_slot(struct char_data *ch)
 {
   return &ch->long_descr;
 }
 
-char **char_short_descr_slot(struct char_data *ch)
+std::string *char_short_descr_slot(struct char_data *ch)
 {
   return &ch->short_descr;
 }
 
-char **char_name_slot(struct char_data *ch)
+std::string *char_name_slot(struct char_data *ch)
 {
   return &ch->name;
 }

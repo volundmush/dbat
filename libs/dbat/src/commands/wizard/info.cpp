@@ -1013,7 +1013,7 @@ ACMD(do_last)
   send_to_char(g, ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
                char_get_idnum(vict), char_get_level(vict),
                char_race_abbr(vict), char_class_abbr(vict),
-               char_get_name(vict), char_get_player_specials(vict)->host && *char_get_player_specials(vict)->host ? char_get_player_specials(vict)->host : "(NOHOST)",
+               char_get_name(vict), !char_get_player_specials(vict)->host.empty() ? char_get_player_specials(vict)->host.c_str() : "(NOHOST)",
                ctime(&logon));
   free_char(g, vict);
 }

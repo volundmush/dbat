@@ -1282,7 +1282,7 @@ SPECIAL(shop_keeper)
       snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
       act(g, argm, false, ch, nullptr, keeper, TO_CHAR);
       act(g, argm, false, ch, nullptr, keeper, TO_ROOM);
-      do_action(g, keeper, char_get_name(ch), g->cmd_slap, 0);
+      do_action(g, keeper, writable_copy(char_get_name(ch)).data(), g->cmd_slap, 0);
 
       return (true);
     }

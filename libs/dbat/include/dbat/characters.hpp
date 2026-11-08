@@ -71,13 +71,13 @@ struct skill_data {
 };
 
 struct player_special_data {
-  char *poofin{};                          /* Description on arrival of a god.     */
-  char *poofout{};                         /* Description upon a god's exit.       */
+  std::string poofin;                      /* Description on arrival of a god.     */
+  std::string poofout;                     /* Description upon a god's exit.       */
   std::list<alias_data> aliases;           /* Character's aliases, newest first   */
   int32_t last_tell{};                     /* idnum of last tell from              */
   void *last_olc_targ{};                   /* olc control                          */
   int last_olc_mode{};                     /* olc control                          */
-  char *host{};                            /* host of last logon                   */
+  std::string host;                        /* host of last logon                   */
   int wimp_level{};                        /* Below this # of hit points, flee!	*/
   int8_t freeze_level{};                   /* Level of god who froze char, if any	*/
   int16_t invis_level{};                   /* level of invisibility		*/
@@ -93,7 +93,7 @@ struct player_special_data {
   zone_vnum olc_zone{};                    /* Zone where OLC is permitted		*/
   int speaking{};                          /* Language currently speaking		*/
 
-  char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
+  std::string color_choices[NUM_COLOR]; /* Choices for custom colors		*/
   int murder{};                     /* Murder of PC's count                 */
 
   // Attribute training
@@ -140,11 +140,11 @@ struct char_data {
   room_vnum was_in_room{}; /* location for linkdead people		*/
   int wait{};              /* wait for how many loops		*/
 
-  char *name{};        /* PC / NPC s name (kill ...  )		*/
-  char *short_descr{}; /* for NPC 'actions'			*/
-  char *long_descr{};  /* for 'look'				*/
-  char *description{}; /* Extra descriptions                   */
-  char *title{};       /* PC / NPC's title                     */
+  std::string name;        /* PC / NPC s name (kill ...  )		*/
+  std::string short_descr; /* for NPC 'actions'			*/
+  std::string long_descr;  /* for 'look'				*/
+  std::string description; /* Extra descriptions                   */
+  std::string title;       /* PC / NPC's title                     */
 
   int size{};   /* Size class of char                   */
   int8_t sex{}; /* PC / NPC's sex                       */
@@ -171,9 +171,9 @@ struct char_data {
   int8_t eye{};     /* PC eye color                         */
   int8_t distfea{}; /* PC's Distinguishing Feature          */
   int aura{};
-  const char *feature{};
-  const char *rdisplay{};
-  char *voice{}; /* PC's snet voice */
+  std::string feature;
+  std::string rdisplay;
+  std::string voice; /* PC's snet voice */
 
   struct abil_data real_abils{}; /* Abilities without modifiers   */
   struct abil_data aff_abils{};  /* Abils with spells/stones/etc  */
@@ -191,7 +191,7 @@ struct char_data {
   int carry_items{}; // number of carried items
 
   struct descriptor_data *desc{}; /* NULL for mobiles			*/
-  char *loguser{};                /* What user was I last saved as?      */
+  std::string loguser;            /* What user was I last saved as?      */
 
   // dgscripts data
   struct trig_proto_list *proto_script{};
@@ -392,7 +392,7 @@ struct char_data {
   int accuracy_mod{}; /* Any bonus or penalty to the accuracy	*/
   int fishstate{};
 
-  char *temp_prompt{};
+  std::string temp_prompt;
 
   int personality{};
   int combine{};

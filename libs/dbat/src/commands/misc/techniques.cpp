@@ -216,11 +216,11 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
     char_data *clone = nullptr;
     clone            = read_mobile(g, r_num);
 
-    char_set_alias(clone, strdup(clone_name));
-    char_set_sdesc(clone, strdup(clone_sdesc));
-    char_set_ldesc(clone, strdup(clone_ldesc));
+    char_set_alias(clone, clone_name);
+    char_set_sdesc(clone, clone_sdesc);
+    char_set_ldesc(clone, clone_ldesc);
     if (char_get_ddesc(ch))
-      char_set_ddesc(clone, strdup(char_get_ddesc(ch)));
+      char_set_ddesc(clone, char_get_ddesc(ch));
     char_set_race(clone, char_get_race(ch));
     char_set_class(clone, char_get_class(ch));
 
@@ -602,7 +602,7 @@ ACMD(do_defend)
 ACMD(do_scry)
 {
 
-  if (strcasecmp(CAP(char_get_name(ch)), "Galeos")) {
+  if (strcasecmp(char_get_name(ch), "Galeos")) {
     send_to_char(g, ch, "You do not know how to perform that technique.\r\n");
     return;
   }

@@ -187,13 +187,11 @@ SPECIAL(pet_shops)
 
     if (*pet_name) {
       snprintf(buf, sizeof(buf), "%s %s", char_get_alias(pet), pet_name);
-      /* free(pet->name); don't free the prototype! */
-      char_set_alias(pet, strdup(buf));
+      char_set_alias(pet, buf);
 
       snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
                char_get_ddesc(pet), pet_name);
-      /* free(pet->description); don't free the prototype! */
-      char_set_ddesc(pet, strdup(buf));
+      char_set_ddesc(pet, buf);
     }
     char_to_room(g, pet, char_get_in_room(ch));
     add_follower(g, pet, ch);

@@ -107,7 +107,7 @@ void build_player_index(GameWorld *g)
  * If the name already exists, by overwriting a deleted character, then
  * we re-use the old position.
  */
-int create_entry(GameWorld *g, char *name)
+int create_entry(GameWorld *g, const char *name)
 {
   int i, pos;
 
@@ -245,7 +245,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
     char_set_sex(ch, PFDEF_SEX);
     char_set_size(ch, PFDEF_SIZE);
     char_set_class(ch, CLASS_ROSHI);
-    char_set_loguser(ch, strdup("NOUSER"));
+    char_set_loguser(ch, "NOUSER");
     char_set_race(ch, PFDEF_RACE);
     char_set_admlevel(ch, PFDEF_LEVEL);
     char_set_class_level(ch, PFDEF_LEVEL);
@@ -381,7 +381,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
     char_set_time_birth(ch, 0);
     char_followers_slot(ch)->clear();
     for (i = 0; i < NUM_COLOR; i++)
-      char_get_player_specials(ch)->color_choices[i] = nullptr;
+      char_get_player_specials(ch)->color_choices[i].clear();
 
     while (get_line(fl, line)) {
       tag_argument(line, tag);
@@ -441,8 +441,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Clas")) char_set_class(ch, atoi(line));
           else if (!strcmp(tag, "Colr")) {
             if (sscanf(line, "%d %127s", &num, buf2) == 2 && num >= 0 && num < NUM_COLOR) {
-              free(char_get_player_specials(ch)->color_choices[num]);
-              char_get_player_specials(ch)->color_choices[num] = strdup(buf2);
+              char_get_player_specials(ch)->color_choices[num] = buf2;
             }
           } else if (!strcmp(tag, "Con ")) char_set_real_abils_con(ch, atoi(line));
           else if (!strcmp(tag, "Cool")) char_set_con_cooldown(ch, atoi(line));
@@ -452,7 +451,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
         case 'D':
           if (!strcmp(tag, "Deat")) char_set_deathtime(ch, atoll(line));
           else if (!strcmp(tag, "Deac")) char_set_dcount(ch, atoi(line));
-          else if (!strcmp(tag, "Desc")) char_set_ddesc(ch, fread_string(fl, buf2));
+          else if (!strcmp(tag, "Desc")) char_set_ddesc(ch, take_string(fread_string(fl, buf2)));
           else if (!strcmp(tag, "Dex ")) char_set_real_abils_dex(ch, atoi(line));
           else if (!strcmp(tag, "Drnk")) char_set_conditions(g, ch, DRUNK, atoi(line));
           else if (!strcmp(tag, "Damg"))
@@ -489,11 +488,8 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           else if (!strcmp(tag, "HitD")) char_set_race_level(ch, atoi(line));
           else if (!strcmp(tag, "Hite")) char_set_height(ch, atoi(line));
           else if (!strcmp(tag, "Home")) char_set_hometown(ch, atoi(line));
-          else if (!strcmp(tag, "Host")) {
-            if (char_get_host(g, ch))
-              free(char_get_host(g, ch));
-            char_set_host(g, ch, strdup(line));
-          } else if (!strcmp(tag, "Hrc ")) char_set_hairc(ch, atoi(line));
+          else if (!strcmp(tag, "Host")) char_set_host(g, ch, line);
+          else if (!strcmp(tag, "Hrc ")) char_set_hairc(ch, atoi(line));
           else if (!strcmp(tag, "Hrl ")) char_set_hairl(ch, atoi(line));
           else if (!strcmp(tag, "Hrs ")) char_set_hairs(ch, atoi(line));
           else if (!strcmp(tag, "Hung")) char_set_conditions(g, ch, HUNGER, atoi(line));
@@ -541,7 +537,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           break;
 
         case 'N':
-          if (!strcmp(tag, "Name")) char_set_pc_name(ch, strdup(line));
+          if (!strcmp(tag, "Name")) char_set_pc_name(ch, line);
           break;
 
         case 'O':
@@ -554,8 +550,8 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Phse")) char_set_starphase(ch, atoi(line));
           else if (!strcmp(tag, "Plyd")) char_set_time_played(ch, atoll(line));
 #ifdef ASCII_SAVE_POOFS
-          else if (!strcmp(tag, "PfIn")) char_set_poofin(g, ch, strdup(line));
-          else if (!strcmp(tag, "PfOt")) char_set_poofout(g, ch, strdup(line));
+          else if (!strcmp(tag, "PfIn")) char_set_poofin(g, ch, line);
+          else if (!strcmp(tag, "PfOt")) char_set_poofout(g, ch, line);
 #endif
           else if (!strcmp(tag, "Pole")) char_set_accuracy(ch, atoi(line));
           else if (!strcmp(tag, "Posi")) char_set_position(ch, atoi(line));
@@ -648,15 +644,10 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           break;
         case 'U':
           if (!strcmp(tag, "Upgr")) char_set_upgrade(ch, atoi(line));
-          else if (!strcmp(tag, "User")) {
-            if (char_get_loguser(ch)) {
-              free(char_get_loguser(ch));
-            }
-            char_set_loguser(ch, strdup(line));
-          }
+          else if (!strcmp(tag, "User")) char_set_loguser(ch, line);
           break;
         case 'V':
-          if (!strcmp(tag, "Voic")) char_set_voice(ch, strdup(line));
+          if (!strcmp(tag, "Voic")) char_set_voice(ch, line);
           break;
 
         case 'W':
@@ -757,11 +748,9 @@ void save_char(GameWorld *g, struct char_data *ch)
   if (char_get_desc(ch)) {
     if (*char_get_desc(ch)->host) {
       if (!char_get_host(g, ch))
-        char_set_host(g, ch, strdup(char_get_desc(ch)->host));
-      else if (char_get_host(g, ch) && !strcmp(char_get_host(g, ch), char_get_desc(ch)->host)) {
-        free(char_get_host(g, ch));
-        char_set_host(g, ch, strdup(char_get_desc(ch)->host));
-      }
+        char_set_host(g, ch, char_get_desc(ch)->host);
+      else if (char_get_host(g, ch) && !strcmp(char_get_host(g, ch), char_get_desc(ch)->host))
+        char_set_host(g, ch, char_get_desc(ch)->host);
     }
 
     /*
@@ -1062,8 +1051,8 @@ void save_char(GameWorld *g, struct char_data *ch)
   write_level_data(ch, fl);*/
 
   for (i = 0; i < NUM_COLOR; i++)
-    if (char_get_player_specials(ch)->color_choices[i]) {
-      fprintf(fl, "Colr: %d %s\r\n", i, char_get_player_specials(ch)->color_choices[i]);
+    if (!char_get_player_specials(ch)->color_choices[i].empty()) {
+      fprintf(fl, "Colr: %d %s\r\n", i, char_get_player_specials(ch)->color_choices[i].c_str());
     }
 
   atomic_commit(&af);

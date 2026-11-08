@@ -438,7 +438,7 @@ ACMD(do_ginfo)
 
 ACMD(do_poofset)
 {
-  char **msg;
+  std::string *msg;
 
   if (char_is_npc(ch))
     return;
@@ -450,13 +450,7 @@ ACMD(do_poofset)
 
   skip_spaces(&argument);
 
-  if (*msg)
-    free(*msg);
-
-  if (!*argument)
-    *msg = nullptr;
-  else
-    *msg = strdup(argument);
+  *msg = argument;
 
   send_to_char(g, ch, "%s", CONFIG_OK);
 }

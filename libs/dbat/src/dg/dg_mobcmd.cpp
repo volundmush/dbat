@@ -891,19 +891,7 @@ ACMD(do_mtransform)
 
     tmpmob = *m;
 
-    /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
-       the strings so we don't end up free'ing the prototypes later */
-    if (char_get_alias(m))
-      char_set_alias(&tmpmob, strdup(char_get_alias(m)));
-    if (char_get_raw_title(m))
-      char_set_raw_title(&tmpmob, strdup(char_get_raw_title(m)));
-    if (char_get_sdesc(m))
-      char_set_sdesc(&tmpmob, strdup(char_get_sdesc(m)));
-    if (char_get_ldesc(m))
-      char_set_ldesc(&tmpmob, strdup(char_get_ldesc(m)));
-    if (char_get_ddesc(m))
-      char_set_ddesc(&tmpmob, strdup(char_get_ddesc(m)));
-
+    /* tmpmob has copies of m's strings, so extracting m leaves them be */
     char_set_id(&tmpmob, char_get_id(ch));
     char_affects(&tmpmob)         = char_affects(ch);
     *char_inventory_slot(&tmpmob) = char_get_inventory(ch);

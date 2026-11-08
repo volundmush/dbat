@@ -1454,8 +1454,6 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
       }
       if (len < sizeof(prompt) && has_group(g, d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n%s", report_party_health(g, d->character));
-        if (char_get_temp_prompt(d->character))
-          free(char_get_temp_prompt(d->character));
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
@@ -1466,7 +1464,7 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
       strncat(prompt, ">\n", sizeof(prompt) - len - 1); /* strncat: OK */
 
   } else if (desc_get_connected(d) == CON_PLAYING && char_is_npc(d->character))
-    snprintf(prompt, sizeof(prompt), "%s>\n", CAP(char_get_name(d->character)));
+    snprintf(prompt, sizeof(prompt), "%s>\n", CAP(writable_copy(char_get_name(d->character)).data()));
   else
     *prompt = '\0';
 
@@ -1589,7 +1587,7 @@ Extra codes:      @l - blink          @o - bold
 static const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 
 #define NEW_STRING_LENGTH (size_t)(dest_char - save_pos)
-static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, char **choices)
+static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, const std::string *choices)
 {
   char *dest_char, *source_char, *save_pos;
   const char *color_char, *replacement = nullptr;
@@ -1650,8 +1648,8 @@ static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, cha
         if (i < 0 || i >= NUM_COLOR)
           i = COLOR_NORMAL;
         replacement = default_color_choices[i];
-        if (choices && choices[i])
-          replacement = choices[i];
+        if (choices && !choices[i].empty())
+          replacement = choices[i].c_str();
         while (*source_char && isdigit(*source_char))
           source_char++;
         if (!*source_char)
@@ -1659,8 +1657,8 @@ static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, cha
       }
     } else if (*source_char == 'n') {
       replacement = default_color_choices[COLOR_NORMAL];
-      if (choices && choices[COLOR_NORMAL])
-        replacement = choices[COLOR_NORMAL];
+      if (choices && !choices[COLOR_NORMAL].empty())
+        replacement = choices[COLOR_NORMAL].c_str();
     } else {
       for (i = 0; CCODE[i] != '!'; i++) { /* do we find it ? */
         if ((*source_char) == CCODE[i]) { /* if so :*/

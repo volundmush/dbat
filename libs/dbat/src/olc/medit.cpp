@@ -212,10 +212,10 @@ static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
   /*
    * Set up some default strings.
    */
-  char_set_alias(mob, strdup("mob unfinished"));
-  char_set_sdesc(mob, strdup("the unfinished mob"));
-  char_set_ldesc(mob, strdup("An unfinished mob stands here.\r\n"));
-  char_set_ddesc(mob, strdup("It looks unfinished.\r\n"));
+  char_set_alias(mob, "mob unfinished");
+  char_set_sdesc(mob, "the unfinished mob");
+  char_set_ldesc(mob, "An unfinished mob stands here.\r\n");
+  char_set_ddesc(mob, "It looks unfinished.\r\n");
   char_set_race(mob, RACE_HUMAN);
   OLC_SCRIPT(d) = nullptr;
 
@@ -742,26 +742,20 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       /*-------------------------------------------------------------------*/
     case MEDIT_ALIAS:
       smash_tilde(arg);
-      if (char_get_alias(OLC_MOB(d)))
-        free(char_get_alias(OLC_MOB(d)));
-      char_set_alias(OLC_MOB(d), str_udup(arg));
+      char_set_alias(OLC_MOB(d), take_string(str_udup(arg)));
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_S_DESC:
       smash_tilde(arg);
-      if (char_get_sdesc(OLC_MOB(d)))
-        free(char_get_sdesc(OLC_MOB(d)));
-      char_set_sdesc(OLC_MOB(d), str_udup(arg));
+      char_set_sdesc(OLC_MOB(d), take_string(str_udup(arg)));
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_L_DESC:
       smash_tilde(arg);
-      if (char_get_ldesc(OLC_MOB(d)))
-        free(char_get_ldesc(OLC_MOB(d)));
       if (arg && *arg) {
-        char_set_ldesc(OLC_MOB(d), str_printf("%s\r\n", arg));
+        char_set_ldesc(OLC_MOB(d), str_format("%s\r\n", arg));
       } else
-        char_set_ldesc(OLC_MOB(d), strdup("undefined"));
+        char_set_ldesc(OLC_MOB(d), "undefined");
 
       break;
       /*-------------------------------------------------------------------*/

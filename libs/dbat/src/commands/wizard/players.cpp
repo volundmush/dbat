@@ -62,7 +62,7 @@
 static void print_lockout(GameWorld *g, struct char_data *ch);
 static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
 static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level);
-static void lockWrite(GameWorld *g, struct char_data *ch, char *name);
+static void lockWrite(GameWorld *g, struct char_data *ch, const char *name);
 
 static void print_lockout(GameWorld *g, struct char_data *ch)
 {
@@ -138,7 +138,7 @@ ACMD(do_approve)
   return;
 }
 
-static void lockWrite(GameWorld *g, struct char_data *ch, char *name)
+static void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
 {
   struct atomic_file af;
   FILE *file;
@@ -146,6 +146,8 @@ static void lockWrite(GameWorld *g, struct char_data *ch, char *name)
   char *names[500] = {nullptr};
   FILE *fl;
   int count = 0, x = 0, found = false;
+  std::string capped = writable_copy(name);
+  CAP(capped.data());
 
   /* Read Introduction File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
@@ -177,7 +179,7 @@ static void lockWrite(GameWorld *g, struct char_data *ch, char *name)
 
   while (x < count) {
     if (x == 0 || strcasecmp(names[x - 1], names[x])) {
-      if (strcasecmp(names[x], CAP(name))) {
+      if (strcasecmp(names[x], capped.c_str())) {
         fprintf(fl, "%s\n", CAP(names[x]));
       } else {
         found = true;
@@ -186,14 +188,14 @@ static void lockWrite(GameWorld *g, struct char_data *ch, char *name)
     x++;
   }
   if (found == false) {
-    fprintf(fl, "%s\n", CAP(name));
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name), char_get_name(ch));
-    mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
+    fprintf(fl, "%s\n", capped.c_str());
+    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", capped.c_str(), char_get_name(ch));
+    mud_log("LOCKOUT: %s sentenced by %s.", capped.c_str(), char_get_name(ch));
+    log_imm_action(g, "LOCKOUT: %s sentenced by %s.", capped.c_str(), char_get_name(ch));
   } else {
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", CAP(name), char_get_name(ch));
-    mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
+    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", capped.c_str(), char_get_name(ch));
+    mud_log("LOCKOUT: %s sentenced by %s.", capped.c_str(), char_get_name(ch));
+    log_imm_action(g, "LOCKOUT: %s sentenced by %s.", capped.c_str(), char_get_name(ch));
   }
 
   atomic_commit(&af);

@@ -101,10 +101,7 @@ ACMD(do_voice)
   }
   if (char_get_voice(ch) != nullptr) {
     send_to_char(g, ch, "Your voice has now been set to: %s\r\n", argument);
-    if (char_get_voice(ch)) {
-      free(char_get_voice(ch));
-    }
-    char_set_voice(ch, strdup(argument));
+    char_set_voice(ch, argument);
     char_set_rp(ch, char_get_rp(ch) - (1));
     char_get_desc(ch)->rpp = char_get_rp(ch);
     userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
@@ -112,10 +109,7 @@ ACMD(do_voice)
     return;
   }
   send_to_char(g, ch, "Your voice has now been set to: %s\r\n", argument);
-  if (char_get_voice(ch)) {
-    free(char_get_voice(ch));
-  }
-  char_set_voice(ch, strdup(argument));
+  char_set_voice(ch, argument);
   return;
 }
 
