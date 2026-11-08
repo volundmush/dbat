@@ -1478,21 +1478,9 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
  */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased)
 {
-  struct txt_block *newt;
-
-  newt          = new txt_block();
-  newt->text    = strdup(txt);
-  newt->aliased = aliased;
+  queue->lines.push_back({txt, aliased});
   if (!aliased)
     queue->typed++;
-
-  /* queue empty? */
-  if (!queue->head)
-    queue->head = queue->tail = newt;
-  else {
-    queue->tail->next = newt;
-    queue->tail       = newt;
-  }
 }
 
 /*
@@ -1500,21 +1488,15 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
  */
 static bool get_from_q(struct txt_q *queue, char *dest, int *aliased)
 {
-  struct txt_block *tmp;
-
-  /* queue empty? */
-  if (!queue->head)
+  if (queue->lines.empty())
     return false;
 
-  strcpy(dest, queue->head->text); /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
-  *aliased = queue->head->aliased;
+  const txt_line &line = queue->lines.front();
+  snprintf(dest, MAX_INPUT_LENGTH, "%s", line.text.c_str()); /* lines are queued at most this long */
+  *aliased = line.aliased;
   if (!*aliased)
     queue->typed--;
-
-  tmp         = queue->head;
-  queue->head = queue->head->next;
-  free(tmp->text);
-  delete tmp;
+  queue->lines.pop_front();
 
   return true;
 }
@@ -1522,12 +1504,7 @@ static bool get_from_q(struct txt_q *queue, char *dest, int *aliased)
 /* Throw away the commands a descriptor has typed but not yet run. */
 static void flush_input_queue(struct descriptor_data *d)
 {
-  while (d->input.head) {
-    struct txt_block *tmp = d->input.head;
-    d->input.head         = d->input.head->next;
-    free(tmp->text);
-    delete tmp;
-  }
+  d->input.lines.clear();
   d->input.typed = 0;
 }
 

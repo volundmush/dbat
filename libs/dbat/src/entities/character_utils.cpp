@@ -7203,17 +7203,10 @@ void char_set_host(GameWorld *g, struct char_data *ch, char *v)
     ps->host = v;
 }
 
-struct txt_block *char_get_comm_hist(GameWorld *g, const struct char_data *ch, int i)
+std::deque<std::string> *char_comm_hist(GameWorld *g, const struct char_data *ch, int i)
 {
   struct player_special_data *ps = ps_of(g, ch, "comm_hist");
-  return ps ? ps->comm_hist[i] : nullptr;
-}
-
-void char_set_comm_hist(GameWorld *g, struct char_data *ch, int i, struct txt_block *v)
-{
-  struct player_special_data *ps = ps_of(g, ch, "comm_hist");
-  if (ps)
-    ps->comm_hist[i] = v;
+  return ps ? &ps->comm_hist[i] : nullptr;
 }
 
 /* NPCs always speak the common tongue (mob loading sets it, and mob speech reads it), so this is not a

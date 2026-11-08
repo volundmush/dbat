@@ -1,4 +1,7 @@
 #pragma once
+#include <deque>
+#include <string>
+
 #include <sys/socket.h>
 
 #include "dbat/consts/types.hpp"
@@ -11,10 +14,15 @@ struct txt_block {
   struct txt_block *next{};
 };
 
+/* A line of input waiting to be run */
+struct txt_line {
+  std::string text;
+  int aliased{}; /* it came from an alias, not from the player */
+};
+
 struct txt_q {
-  struct txt_block *head{};
-  struct txt_block *tail{};
-  int typed{}; /* queued lines the player typed (alias expansions are not counted) */
+  std::deque<txt_line> lines; /* first in, first out */
+  int typed{};                /* queued lines the player typed (alias expansions are not counted) */
 };
 
 struct descriptor_data {

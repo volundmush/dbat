@@ -19,6 +19,7 @@
 - A character's own lists are C++ containers: skills are a `std::map` holding only those with something set (read through the same accessors, so an unset one is still 0); affects are a `std::list<affected_type>` (`char_affects()`), newest first; a mob's remembered attackers are an `id_list`; aliases are a `std::list<alias_data>` with `std::string`s (`char_aliases()`). `clear_char()` and `clear_object()` assign a fresh value instead of `memset`ting, which would corrupt the containers. [Volund]
 - `player_specials` is owned by its character (`owned<>`, `dbat/registry.hpp`: a `unique_ptr` that copies what it holds when copied), made with `char_make_player_specials()`; NPCs have none. A zone's reset commands are a `std::vector<reset_com>`, still ending with an `'S'`. [Volund]
 - Saving a new mob or object in OLC no longer adds 1 to the mob and object numbers in shops, mobs and zone commands other builders have open: leftover renumbering from before prototypes were kept by vnum, which corrupted those numbers. The same dead code is gone from redit. [Volund]
+- A connection's input queue is a `std::deque` of lines with `std::string` text, a player's communication history a `std::deque<std::string>` per channel (`char_comm_hist()`; freeing a character used to leak all but the first line of each), and the zone reset queue a `std::deque` of zone numbers. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3

@@ -315,10 +315,10 @@ static void check_staff_log_all_of_snet(void)
   for (struct char_data *staff = nearby; staff; staff = staff == nearby ? far : nullptr) {
     bool logged[3] = {};
 
-    for (struct txt_block *line = char_get_comm_hist(g, staff, HIST_SNET); line; line = line->next) {
-      logged[0] |= strstr(line->text, "ello everyone") != nullptr;
-      logged[1] |= strstr(line->text, "Broadcast") != nullptr;
-      logged[2] |= strstr(line->text, "Call to") != nullptr;
+    for (const std::string &line : *char_comm_hist(g, staff, HIST_SNET)) {
+      logged[0] |= line.find("ello everyone") != std::string::npos;
+      logged[1] |= line.find("Broadcast") != std::string::npos;
+      logged[2] |= line.find("Call to") != std::string::npos;
     }
     CHECK(logged[0]);
     CHECK(logged[1]);

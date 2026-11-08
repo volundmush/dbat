@@ -516,10 +516,10 @@ ACMD(do_history)
     return;
   }
 
-  if (char_get_comm_hist(g, ch, type) && char_get_comm_hist(g, ch, type)->text && *char_get_comm_hist(g, ch, type)->text) {
-    struct txt_block *tmp;
-    for (tmp = char_get_comm_hist(g, ch, type); tmp; tmp = tmp->next)
-      send_to_char(g, ch, "%s", tmp->text);
+  std::deque<std::string> *history = char_comm_hist(g, ch, type);
+  if (history && !history->empty() && !history->front().empty()) {
+    for (const std::string &line : *history)
+      send_to_char(g, ch, "%s", line.c_str());
 /* Make this a 1 if you want history to cear after viewing */
 #if 0 
       free_history(ch, type);
@@ -530,41 +530,21 @@ ACMD(do_history)
 
 void add_history(GameWorld *g, struct char_data *ch, char *str, int type)
 {
-  int i = 0;
   char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
-  struct txt_block *tmp;
+  std::deque<std::string> *history;
   time_t ct;
 
-  if (char_is_npc(ch))
+  if (char_is_npc(ch) || !(history = char_comm_hist(g, ch, type)))
     return;
 
-  tmp = char_get_comm_hist(g, ch, type);
-  ct  = game_now(g);
+  ct = game_now(g);
   strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
   snprintf(buf, sizeof(buf), "%s%s", time_str, str);
 
-  if (!tmp) {
-    struct txt_block *first;
-    first       = new txt_block();
-    first->text = strdup(buf);
-    char_set_comm_hist(g, ch, type, first);
-  } else {
-    while (tmp->next)
-      tmp = tmp->next;
-    tmp->next       = new txt_block();
-    tmp->next->text = strdup(buf);
-
-    for (tmp = char_get_comm_hist(g, ch, type); tmp; tmp = tmp->next, i++);
-
-    for (; i > HIST_LENGTH && char_get_comm_hist(g, ch, type); i--) {
-      tmp = char_get_comm_hist(g, ch, type);
-      char_set_comm_hist(g, ch, type, tmp->next);
-      if (tmp->text)
-        free(tmp->text);
-      delete tmp;
-    }
-  }
+  history->push_back(buf);
+  while (history->size() > HIST_LENGTH)
+    history->pop_front();
   /* add this history message to ALL */
   if (type != HIST_ALL)
     add_history(g, ch, str, HIST_ALL);

@@ -1,6 +1,8 @@
 #pragma once
+#include <deque>
 #include <list>
 #include <map>
+#include <string>
 #include "dbat/command.hpp"
 #include "dbat/affected.hpp"
 #include "dbat/registry.hpp"
@@ -87,7 +89,7 @@ struct player_special_data {
 
   // Only the character's own class in this array is used, to store PS/Practices.
   int practice_points{};                   /* Practice points available to the character */
-  struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communcations history     */
+  std::deque<std::string> comm_hist[NUM_HIST]; /* each channel's history, oldest first */
   zone_vnum olc_zone{};                    /* Zone where OLC is permitted		*/
   int speaking{};                          /* Language currently speaking		*/
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <deque>
+#include <string>
 #include <cstdint>
 #include <ctime>
 
@@ -72,8 +74,8 @@ int32_t char_get_last_tell(GameWorld *g, const struct char_data *ch);
 void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v);
 char *char_get_host(GameWorld *g, const struct char_data *ch);
 void char_set_host(GameWorld *g, struct char_data *ch, char *v);
-struct txt_block *char_get_comm_hist(GameWorld *g, const struct char_data *ch, int i);
-void char_set_comm_hist(GameWorld *g, struct char_data *ch, int i, struct txt_block *v);
+/* Channel i of ch's communication history, oldest first; null for one without player data */
+std::deque<std::string> *char_comm_hist(GameWorld *g, const struct char_data *ch, int i);
 int char_get_speaking(const struct char_data *ch);
 void char_set_speaking(struct char_data *ch, int v);
 int char_get_feat_points(GameWorld *g, const struct char_data *ch);

@@ -590,15 +590,7 @@ void destroy_db(GameWorld *g)
   destroy_guilds(g);
 
   /* Zones */
-  /* zone table reset queue */
-  if (g->reset_q.head) {
-    struct reset_q_element *ftemp = g->reset_q.head, *temp;
-    while (ftemp) {
-      temp = ftemp->next;
-      delete ftemp;
-      ftemp = temp;
-    }
-  }
+  g->reset_q.clear();
 
 #define THIS_CMD zone->cmd[itr]
 
@@ -790,7 +782,7 @@ void boot_db(GameWorld *g)
     reset_zone(g, i);
   }
 
-  g->reset_q.head = g->reset_q.tail = nullptr;
+  g->reset_q.clear();
 
   g->boot_time = game_now(g);
 
@@ -3646,7 +3638,6 @@ constexpr int ZO_DEAD = 999;
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(GameWorld *g)
 {
-  struct reset_q_element *update_u, *temp;
 
   /* jelson 10/22/92 */
   if (((++g->zone_update_timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60) {
@@ -3664,18 +3655,7 @@ void zone_update(GameWorld *g)
         (i->age)++;
 
       if (i->age >= i->lifespan && i->age < ZO_DEAD && i->reset_mode) {
-        /* enqueue zone */
-
-        update_u = new reset_q_element();
-
-        update_u->zone_to_reset = i;
-
-        if (!g->reset_q.head)
-          g->reset_q.head = g->reset_q.tail = update_u;
-        else {
-          g->reset_q.tail->next = update_u;
-          g->reset_q.tail       = update_u;
-        }
+        g->reset_q.push_back(i->number);
 
         i->age = ZO_DEAD;
       }
@@ -3684,28 +3664,19 @@ void zone_update(GameWorld *g)
 
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
-  for (update_u = g->reset_q.head; update_u; update_u = update_u->next)
-    if (update_u->zone_to_reset->reset_mode == 2 ||
-        is_empty(g, update_u->zone_to_reset)) {
-      reset_zone(g, update_u->zone_to_reset);
-      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-             update_u->zone_to_reset->name, update_u->zone_to_reset->number);
-      /* dequeue */
-      if (update_u == g->reset_q.head)
-        g->reset_q.head = g->reset_q.head->next;
-      else {
-        for (temp = g->reset_q.head; temp->next != update_u;
-             temp = temp->next);
-
-        if (!update_u->next)
-          g->reset_q.tail = temp;
-
-        temp->next = update_u->next;
-      }
-
-      delete update_u;
+  for (auto it = g->reset_q.begin(); it != g->reset_q.end(); ++it) {
+    struct zone_data *zone = find_zone(g, *it);
+    if (!zone) { /* gone since it was queued */
+      g->reset_q.erase(it);
       break;
     }
+    if (zone->reset_mode == 2 || is_empty(g, zone)) {
+      g->reset_q.erase(it);
+      reset_zone(g, zone);
+      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)", zone->name, zone->number);
+      break;
+    }
+  }
 }
 
 static void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message)
@@ -4147,9 +4118,9 @@ void free_char(GameWorld *g, struct char_data *ch)
   while (!char_affects(ch).empty())
     affect_remove(g, ch, &char_affects(ch).front());
 
+  /* Containers (affects aside, which change what they affect), player_specials and the lists it holds go with ch;
+   * its strings don't, until they are std::string. */
   if (char_get_player_specials(ch)) {
-
-    char_get_player_specials(ch)->aliases.clear();
     if (char_get_player_specials(ch)->poofin)
       free(char_get_player_specials(ch)->poofin);
     if (char_get_player_specials(ch)->poofout)
@@ -4177,10 +4148,6 @@ void free_char(GameWorld *g, struct char_data *ch)
       free(char_get_ddesc(ch));
     free(const_cast<char *>(char_get_feature(ch)));
     free(const_cast<char *>(char_get_rdisplay(ch)));
-    for (i = 0; i < NUM_HIST; i++)
-      if (char_get_comm_hist(g, ch, i))
-        delete char_get_comm_hist(g, ch, i);
-    char_drop_player_specials(ch);
 
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
@@ -4205,8 +4172,6 @@ void free_char(GameWorld *g, struct char_data *ch)
   /* free any assigned scripts */
   if (char_get_script(ch))
     extract_script(g, ch, MOB_TRIGGER);
-
-  char_followers_slot(ch)->clear();
 
   if (char_get_desc(ch))
     char_get_desc(ch)->character = nullptr;

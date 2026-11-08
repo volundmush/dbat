@@ -265,12 +265,7 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   write_to_q(buf, &temp_queue, 1);
 
   /* push our temp_queue on to the _front_ of the input queue */
-  if (input_q->head == nullptr)
-    *input_q = temp_queue;
-  else {
-    temp_queue.tail->next = input_q->head;
-    input_q->head         = temp_queue.head;
-  }
+  input_q->lines.insert(input_q->lines.begin(), temp_queue.lines.begin(), temp_queue.lines.end());
 }
 
 /*

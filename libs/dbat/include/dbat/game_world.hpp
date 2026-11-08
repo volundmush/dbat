@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <ctime>
 
 #include "dbat/consts/types.hpp"
@@ -42,7 +43,7 @@ struct GameWorld {
 
   /* Zones */
   vnum_table<zone_data, zone_vnum> zones; /* in vnum order */
-  struct reset_q_type reset_q{};
+  std::deque<zone_vnum> reset_q;          /* zones waiting to reset, first come first served */
 
   /* Shops and guilds */
   vnum_table<shop_data, shop_vnum> shops;    /* in vnum order */
