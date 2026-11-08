@@ -3,14 +3,8 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/shop.hpp"
 
-void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
-void remove_from_type_list(struct shop_buy_data **list, int num);
-void remove_from_int_list(IDXTYPE **list, IDXTYPE num);
-void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl);
-void add_to_int_list(IDXTYPE **tlist, IDXTYPE newi);
-void free_shop(struct shop_data *shop);
-void free_shop_contents(struct shop_data *shop);
-const char *modify_string(char **str, char *newstr, bool allow_int);
+void copy_shop(struct shop_data *tshop, const struct shop_data *fshop);
+const char *modify_string(std::string *str, const char *newstr, bool allow_int);
 struct shop_data *add_shop(GameWorld *g, struct shop_data *shop);
 bool save_shops(GameWorld *g, struct zone_data *zone_num);
 struct shop_data *find_shop(GameWorld *g, shop_vnum vnum);

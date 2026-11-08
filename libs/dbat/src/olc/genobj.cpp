@@ -303,7 +303,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 {
   struct zone_data *zrnum;
   struct obj_data *obj, *tmp;
-  int j, cmd_no;
+  int cmd_no;
 
   if (rnum == NOTHING || !(obj = obj_proto_of(g, rnum)))
     return NOTHING;
@@ -342,12 +342,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 
   /* Shops stop producing it. */
   for (struct shop_data *shop : g->shops.all()) {
-    int kept = 0;
-    for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
-      if (shop_get_product(shop, j) != rnum)
-        shop_set_product(shop, kept++, shop_get_product(shop, j));
-    if (kept != j) {
-      shop_set_product(shop, kept, NOTHING);
+    if (std::erase(shop_products(shop), rnum)) {
       if (struct zone_data *zone = find_zone_by_thing(g, shop_get_vnum(shop)))
         add_to_save_list(g, zone->number, SL_SHP);
     }

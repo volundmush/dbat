@@ -219,25 +219,8 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     delete OLC_ZONE(d);
   }
 
-  /*
-   * Check for a shop.  free_shop doesn't perform sanity checks, we must
-   * be careful here.
-   * OLC_SHOP(d) is a _copy_ - no pointers to the original. Just go ahead
-   * and free it all.
-   */
-  if (OLC_SHOP(d)) {
-    //    switch (cleanup_type) {
-    //    case CLEANUP_ALL:
-    free_shop(OLC_SHOP(d));
-    //      break;
-    //    case CLEANUP_STRUCTS:
-    //      free(OLC_SHOP(d));
-    //      break;
-    //    default:
-    /* The caller has screwed up but we already griped above. */
-    //      break;
-    //    }
-  }
+  /* OLC_SHOP(d) is the editor's own copy, owning all it holds. */
+  delete OLC_SHOP(d);
   /*. Check for a guild . */
   if (OLC_GUILD(d)) {
     switch (cleanup_type) {

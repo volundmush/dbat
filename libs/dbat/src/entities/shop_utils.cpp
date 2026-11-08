@@ -2,6 +2,7 @@
 #include "dbat/shop.hpp"
 #include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/stringutils.hpp"
 
 room_vnum shop_get_vnum(const struct shop_data *shop)
 {
@@ -133,159 +134,110 @@ void shop_set_func(struct shop_data *shop, spec_proc_func v)
   shop->func = v;
 }
 
-room_vnum *shop_get_rooms(struct shop_data *shop)
-{
-  return shop->in_room;
-}
-
-obj_vnum *shop_get_products(struct shop_data *shop)
-{
-  return shop->producing;
-}
-
-struct shop_buy_data *shop_get_buy_types(struct shop_data *shop)
-{
-  return shop->type;
-}
-
 bitvector_t *shop_get_with_who(struct shop_data *shop)
 {
   return shop->with_who;
 }
 
-char *shop_get_no_such_item1(const struct shop_data *shop)
+std::vector<obj_vnum> &shop_products(struct shop_data *shop)
 {
-  return shop->no_such_item1;
+  return shop->producing;
 }
 
-void shop_set_no_such_item1(struct shop_data *shop, char *v)
+const std::vector<obj_vnum> &shop_products(const struct shop_data *shop)
 {
-  shop->no_such_item1 = v;
+  return shop->producing;
 }
 
-char *shop_get_no_such_item2(const struct shop_data *shop)
+std::vector<room_vnum> &shop_rooms(struct shop_data *shop)
 {
-  return shop->no_such_item2;
+  return shop->in_room;
 }
 
-void shop_set_no_such_item2(struct shop_data *shop, char *v)
+const std::vector<room_vnum> &shop_rooms(const struct shop_data *shop)
 {
-  shop->no_such_item2 = v;
+  return shop->in_room;
 }
 
-char *shop_get_missing_cash1(const struct shop_data *shop)
+std::vector<shop_buy_data> &shop_buy_types(struct shop_data *shop)
 {
-  return shop->missing_cash1;
+  return shop->type;
 }
 
-void shop_set_missing_cash1(struct shop_data *shop, char *v)
+const std::vector<shop_buy_data> &shop_buy_types(const struct shop_data *shop)
 {
-  shop->missing_cash1 = v;
+  return shop->type;
 }
 
-char *shop_get_missing_cash2(const struct shop_data *shop)
+const char *shop_get_no_such_item1(const struct shop_data *shop)
 {
-  return shop->missing_cash2;
+  return c_str_or_null(shop->no_such_item1);
 }
 
-void shop_set_missing_cash2(struct shop_data *shop, char *v)
+void shop_set_no_such_item1(struct shop_data *shop, const char *v)
 {
-  shop->missing_cash2 = v;
+  shop->no_such_item1 = v ? v : "";
 }
 
-char *shop_get_do_not_buy(const struct shop_data *shop)
+const char *shop_get_no_such_item2(const struct shop_data *shop)
 {
-  return shop->do_not_buy;
+  return c_str_or_null(shop->no_such_item2);
 }
 
-void shop_set_do_not_buy(struct shop_data *shop, char *v)
+void shop_set_no_such_item2(struct shop_data *shop, const char *v)
 {
-  shop->do_not_buy = v;
+  shop->no_such_item2 = v ? v : "";
 }
 
-char *shop_get_message_buy(const struct shop_data *shop)
+const char *shop_get_missing_cash1(const struct shop_data *shop)
 {
-  return shop->message_buy;
+  return c_str_or_null(shop->missing_cash1);
 }
 
-void shop_set_message_buy(struct shop_data *shop, char *v)
+void shop_set_missing_cash1(struct shop_data *shop, const char *v)
 {
-  shop->message_buy = v;
+  shop->missing_cash1 = v ? v : "";
 }
 
-char *shop_get_message_sell(const struct shop_data *shop)
+const char *shop_get_missing_cash2(const struct shop_data *shop)
 {
-  return shop->message_sell;
+  return c_str_or_null(shop->missing_cash2);
 }
 
-void shop_set_message_sell(struct shop_data *shop, char *v)
+void shop_set_missing_cash2(struct shop_data *shop, const char *v)
 {
-  shop->message_sell = v;
+  shop->missing_cash2 = v ? v : "";
 }
 
-room_vnum shop_get_room(const struct shop_data *shop, int n)
+const char *shop_get_do_not_buy(const struct shop_data *shop)
 {
-  return shop->in_room[n];
+  return c_str_or_null(shop->do_not_buy);
 }
 
-void shop_set_room(struct shop_data *shop, int n, room_vnum v)
+void shop_set_do_not_buy(struct shop_data *shop, const char *v)
 {
-  shop->in_room[n] = v;
+  shop->do_not_buy = v ? v : "";
 }
 
-obj_vnum shop_get_product(const struct shop_data *shop, int n)
+const char *shop_get_message_buy(const struct shop_data *shop)
 {
-  return shop->producing[n];
+  return c_str_or_null(shop->message_buy);
 }
 
-void shop_set_product(struct shop_data *shop, int n, obj_vnum v)
+void shop_set_message_buy(struct shop_data *shop, const char *v)
 {
-  shop->producing[n] = v;
+  shop->message_buy = v ? v : "";
 }
 
-int shop_get_buy_type(const struct shop_data *shop, int n)
+const char *shop_get_message_sell(const struct shop_data *shop)
 {
-  return shop->type[n].type;
+  return c_str_or_null(shop->message_sell);
 }
 
-void shop_set_buy_type(struct shop_data *shop, int n, int v)
+void shop_set_message_sell(struct shop_data *shop, const char *v)
 {
-  shop->type[n].type = v;
+  shop->message_sell = v ? v : "";
 }
-
-char *shop_get_buy_word(const struct shop_data *shop, int n)
-{
-  return shop->type[n].keywords;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int shop_buy_get_type(const struct shop_buy_data *buy)
 {
@@ -297,34 +249,14 @@ void shop_buy_set_type(struct shop_buy_data *buy, int v)
   buy->type = v;
 }
 
-char *shop_buy_get_keywords(const struct shop_buy_data *buy)
+const char *shop_buy_get_keywords(const struct shop_buy_data *buy)
 {
-  return buy->keywords;
+  return c_str_or_null(buy->keywords);
 }
 
-void shop_buy_set_keywords(struct shop_buy_data *buy, char *v)
+void shop_buy_set_keywords(struct shop_buy_data *buy, const char *v)
 {
-  buy->keywords = v;
-}
-
-void shop_set_products(struct shop_data *shop, obj_vnum *v)
-{
-  shop->producing = v;
-}
-
-void shop_set_rooms(struct shop_data *shop, room_vnum *v)
-{
-  shop->in_room = v;
-}
-
-void shop_set_buy_types(struct shop_data *shop, struct shop_buy_data *v)
-{
-  shop->type = v;
-}
-
-void shop_set_buy_word(struct shop_data *shop, int n, char *v)
-{
-  shop->type[n].keywords = v;
+  buy->keywords = v ? v : "";
 }
 
 bool shop_uses_bank(const struct shop_data *shop)

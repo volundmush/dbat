@@ -11,6 +11,7 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
 
@@ -55,9 +56,9 @@ static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop
 /* Local variables */
 
 /* local functions */
-static char *read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why);
-static int read_type_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, struct shop_buy_data *list, int new_format, int max);
-static int read_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, struct shop_buy_data *list, int new_format, int max, int type);
+static std::string read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why);
+static std::vector<shop_buy_data> read_type_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, int new_format, int max);
+static std::vector<shop_buy_data> read_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, int new_format, int max, int type);
 static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
@@ -80,7 +81,7 @@ static int top(struct stack_data *stack);
 static int pop(struct stack_data *stack);
 static void evaluate_operation(struct stack_data *ops, struct stack_data *vals);
 static int find_oper_num(char token);
-static int evaluate_expression(struct obj_data *obj, char *expr);
+static int evaluate_expression(struct obj_data *obj, const char *expr);
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop);
 static bool same_obj(struct obj_data *obj1, struct obj_data *obj2);
 
@@ -90,8 +91,8 @@ static int buy_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop,
 static int sell_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
 static char *list_object(GameWorld *g, struct obj_data *obj, int cnt, int oindex, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
 
-static bool add_to_list(GameWorld *g, shop_vnum vnum, struct shop_buy_data *list, int type, int *len, int *val);
-static int end_read_list(struct shop_buy_data *list, int len, int error);
+static bool add_to_list(GameWorld *g, shop_vnum vnum, std::vector<shop_buy_data> &list, int type, int *val);
+static void end_read_list(const std::vector<shop_buy_data> &list, int error);
 static void read_line(GameWorld *g, shop_vnum vnum, FILE *shop_f, const char *string, void *data);
 
 /* config arrays */
@@ -352,10 +353,11 @@ static int find_oper_num(char token)
   return (NOTHING);
 }
 
-static int evaluate_expression(struct obj_data *obj, char *expr)
+static int evaluate_expression(struct obj_data *obj, const char *expr)
 {
   struct stack_data ops, vals;
-  char *ptr, *end, name[MAX_STRING_LENGTH];
+  const char *ptr, *end;
+  char name[MAX_STRING_LENGTH];
   int temp, eindex;
 
   if (!expr || !*expr) /* Allows opening ( first. */
@@ -408,21 +410,19 @@ static int evaluate_expression(struct obj_data *obj, char *expr)
 
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop)
 {
-  int counter;
-
   if (obj_get_cost(item) < 1)
     return (OBJECT_NOVAL);
 
   if (obj_extra_flagged(item, ITEM_NOSELL))
     return (OBJECT_NOTOK);
 
-  for (counter = 0; shop_get_buy_type(shop, counter) != NOTHING; counter++)
-    if (shop_get_buy_type(shop, counter) == obj_get_type_flag(item)) {
+  for (const shop_buy_data &buy : shop_buy_types(shop))
+    if (buy.type == obj_get_type_flag(item)) {
       if (obj_get_value(item, VAL_WAND_CHARGES) == 0 &&
           (obj_get_type_flag(item) == ITEM_WAND ||
            obj_get_type_flag(item) == ITEM_STAFF))
         return (OBJECT_DEAD);
-      else if (evaluate_expression(item, shop_get_buy_word(shop, counter)))
+      else if (evaluate_expression(item, buy.keywords.c_str()))
         return (OBJECT_OK);
     }
   return (OBJECT_NOTOK);
@@ -463,13 +463,11 @@ static bool same_obj(struct obj_data *obj1, struct obj_data *obj2)
 
 bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop)
 {
-  int counter;
-
   if (obj_get_item_number(item) == NOTHING)
     return (false);
 
-  for (counter = 0; shop_get_product(shop, counter) != NOTHING; counter++)
-    if (same_obj(item, obj_proto_of(g, shop_get_product(shop, counter))))
+  for (obj_vnum product : shop_products(shop))
+    if (same_obj(item, obj_proto_of(g, product)))
       return (true);
   return (false);
 }
@@ -582,7 +580,7 @@ static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, cha
       if (msg) {
         char buf[MAX_INPUT_LENGTH];
 
-        snprintf(buf, sizeof(buf), shop->no_such_item1, char_get_name(ch));
+        snprintf(buf, sizeof(buf), shop->no_such_item1.c_str(), char_get_name(ch));
         do_tell(g, keeper, buf, g->cmd_tell, 0);
       }
       return (nullptr);
@@ -835,7 +833,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (buy_price(g, obj, shop, keeper, ch) > char_get_gold(ch) && !char_adm_flagged(ch, ADM_MONEY)) {
     char actbuf[MAX_INPUT_LENGTH];
 
-    snprintf(actbuf, sizeof(actbuf), shop->missing_cash2, char_get_name(ch));
+    snprintf(actbuf, sizeof(actbuf), shop->missing_cash2.c_str(), char_get_name(ch));
     do_tell(g, keeper, actbuf, g->cmd_tell, 0);
 
     switch (shop_get_temper(shop)) {
@@ -912,7 +910,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
   act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
-  snprintf(tempbuf, sizeof(tempbuf), shop->message_buy, char_get_name(ch), goldamt);
+  snprintf(tempbuf, sizeof(tempbuf), shop->message_buy.c_str(), char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
 
   send_to_char(g, ch, "You now have %s.\r\n", tempstr);
@@ -934,7 +932,7 @@ static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char
     if (msg) {
       char tbuf[MAX_INPUT_LENGTH];
 
-      snprintf(tbuf, sizeof(tbuf), shop->no_such_item2, char_get_name(ch));
+      snprintf(tbuf, sizeof(tbuf), shop->no_such_item2.c_str(), char_get_name(ch));
       do_tell(g, keeper, tbuf, g->cmd_tell, 0);
     }
     return (nullptr);
@@ -950,7 +948,7 @@ static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char
       snprintf(buf, sizeof(buf), "%s You've got to be kidding, that thing is worthless!", char_get_name(ch));
       break;
     case OBJECT_NOTOK:
-      snprintf(buf, sizeof(buf), shop->do_not_buy, char_get_name(ch));
+      snprintf(buf, sizeof(buf), shop->do_not_buy.c_str(), char_get_name(ch));
       break;
     case OBJECT_DEAD:
       snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_USED_WANDSTAFF);
@@ -1059,7 +1057,7 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
   if (char_get_gold(keeper) + shop_get_bank(shop) < sell_price(g, obj, shop, keeper, ch)) {
     char buf[MAX_INPUT_LENGTH];
 
-    snprintf(buf, sizeof(buf), shop->missing_cash1, char_get_name(ch));
+    snprintf(buf, sizeof(buf), shop->missing_cash1.c_str(), char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
@@ -1091,7 +1089,7 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
   snprintf(tempbuf, sizeof(tempbuf), "$n sells something to %s.\r\n", char_get_name(keeper));
   act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
-  snprintf(tempbuf, sizeof(tempbuf), shop->message_sell, char_get_name(ch), goldamt);
+  snprintf(tempbuf, sizeof(tempbuf), shop->message_sell.c_str(), char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
 
   send_to_char(g, ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt));
@@ -1243,12 +1241,7 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
 
 bool ok_shop_room(GameWorld *g, struct shop_data *shop, room_vnum room)
 {
-  int mindex;
-
-  for (mindex = 0; shop_get_room(shop, mindex) != NOWHERE; mindex++)
-    if (shop_get_room(shop, mindex) == room)
-      return (true);
-  return (false);
+  return std::ranges::contains(shop_rooms(shop), room);
 }
 
 SPECIAL(shop_keeper)
@@ -1313,20 +1306,19 @@ SPECIAL(shop_keeper)
 }
 
 /* val == obj_vnum and obj_vnum (?) */
-static bool add_to_list(GameWorld *g, shop_vnum vnum, struct shop_buy_data *list, int type, int *len, int *val)
+static bool add_to_list(GameWorld *g, shop_vnum vnum, std::vector<shop_buy_data> &list, int type, int *val)
 {
   if (*val != NOTHING && *val >= 0) { /* necessary after changing to unsigned v/rnums -- Welcor */
     if (type == LIST_TRADE && *val >= NUM_ITEM_TYPES) {
       mud_log("SYSERR: Shop #%d buys item type %d, which doesn't exist; ignoring it.", vnum, *val);
       return (false);
     }
-    if (*len < MAX_SHOP_OBJ) {
+    if (list.size() < MAX_SHOP_OBJ) {
       if (type == LIST_PRODUCE && !obj_proto_of(g, *val))
         *val = NOTHING;
-      if (*val != NOTHING) {
-        shop_buy_set_type(&(list[*len]), *val);
-        shop_buy_set_keywords(&(list[(*len)++]), nullptr);
-      } else
+      if (*val != NOTHING)
+        list.push_back({.type = *val});
+      else
         *val = NOTHING;
       return (false);
     } else
@@ -1335,13 +1327,11 @@ static bool add_to_list(GameWorld *g, shop_vnum vnum, struct shop_buy_data *list
   return (false);
 }
 
-static int end_read_list(struct shop_buy_data *list, int len, int error)
+static void end_read_list(const std::vector<shop_buy_data> &list, int error)
 {
+  /* The count includes the -1 that ended the old lists. */
   if (error)
-    mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.hpp to %d", len + error);
-  shop_buy_set_keywords(&(list[len]), nullptr);
-  shop_buy_set_type(&(list[len++]), NOTHING);
-  return (len);
+    mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.hpp to %d", (int)list.size() + 1 + error);
 }
 
 static void read_line(GameWorld *g, shop_vnum vnum, FILE *shop_f, const char *string, void *data)
@@ -1354,36 +1344,39 @@ static void read_line(GameWorld *g, shop_vnum vnum, FILE *shop_f, const char *st
   }
 }
 
-static int read_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, struct shop_buy_data *list, int new_format,
-                     int max, int type)
+static std::vector<shop_buy_data> read_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, int new_format, int max,
+                                            int type)
 {
-  int count, temp, len = 0, error = 0;
+  int count, temp, error = 0;
+  std::vector<shop_buy_data> list;
 
   if (new_format) {
     for (;;) {
       read_line(g, vnum, shop_f, "%d", &temp);
       if (temp < 0) /* Always "-1" the string. */
         break;
-      error += add_to_list(g, vnum, list, type, &len, &temp);
+      error += add_to_list(g, vnum, list, type, &temp);
     }
   } else
     for (count = 0; count < max; count++) {
       read_line(g, vnum, shop_f, "%d", &temp);
-      error += add_to_list(g, vnum, list, type, &len, &temp);
+      error += add_to_list(g, vnum, list, type, &temp);
     }
-  return (end_read_list(list, len, error));
+  end_read_list(list, error);
+  return list;
 }
 
 /* END_OF inefficient. */
-static int read_type_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, struct shop_buy_data *list,
-                          int new_format, int max)
+static std::vector<shop_buy_data> read_type_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, int new_format, int max)
 {
-  int tindex, num, len = 0, error = 0, before;
+  int tindex, num, error = 0;
+  size_t before;
+  std::vector<shop_buy_data> list;
   char *ptr;
   char buf[MAX_STRING_LENGTH];
 
   if (!new_format)
-    return (read_list(g, vnum, shop_f, list, 0, max, LIST_TRADE));
+    return read_list(g, vnum, shop_f, 0, max, LIST_TRADE);
 
   do {
     if (!fgets(buf, sizeof(buf), shop_f))
@@ -1415,29 +1408,29 @@ static int read_type_list(GameWorld *g, shop_vnum vnum, FILE *shop_f, struct sho
       ptr++;
     while (*ptr && isspace(*(END_OF(ptr) - 1)))
       *(END_OF(ptr) - 1) = '\0';
-    before = len;
-    error += add_to_list(g, vnum, list, LIST_TRADE, &len, &num);
-    if (*ptr && len > before)
-      shop_buy_set_keywords(&(list[len - 1]), strdup(ptr));
+    before = list.size();
+    error += add_to_list(g, vnum, list, LIST_TRADE, &num);
+    if (*ptr && list.size() > before)
+      list.back().keywords = ptr;
   } while (num >= 0);
-  return (end_read_list(list, len, error));
+  end_read_list(list, error);
+  return list;
 }
 
-static char *read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why)
+static std::string read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why)
 {
   const char *problem;
-  char *tbuf;
+  std::string text = take_string(fread_string(shop_f, why));
 
-  /* An empty or malformed message would reach snprintf() as a NULL or unsafe format, so use the default. */
-  if (!(tbuf = fread_string(shop_f, why)))
-    return strdup(shop_default_msgs[mnum]);
+  /* An empty or malformed message would reach snprintf() as an unsafe format, so use the default. */
+  if (text.empty())
+    return shop_default_msgs[mnum];
 
-  if ((problem = npc_msg_format_problem(tbuf, mnum == SHOP_MSG_BUY || mnum == SHOP_MSG_SELL))) {
+  if ((problem = npc_msg_format_problem(text.c_str(), mnum == SHOP_MSG_BUY || mnum == SHOP_MSG_SELL))) {
     mud_log("SYSERR: Shop #%d message #%d: %s; using the default.", shr, mnum, problem);
-    free(tbuf);
-    return strdup(shop_default_msgs[mnum]);
+    return shop_default_msgs[mnum];
   }
-  return (tbuf);
+  return text;
 }
 
 void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
@@ -1445,7 +1438,6 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
   char *buf, buf2[256], *p;
   room_vnum temp;
   int count, new_format = false;
-  struct shop_buy_data list[MAX_SHOP_OBJ + 1];
   int done = false;
 
   snprintf(buf2, sizeof(buf2), "beginning of shop file %s", filename);
@@ -1460,20 +1452,13 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       std::unique_ptr<shop_data> made = std::make_unique<shop_data>();
       struct shop_data *shop          = made.get();
       shop_set_vnum(shop, temp);
-      temp            = read_list(g, vnum, shop_f, list, new_format, MAX_PROD, LIST_PRODUCE);
-      shop->producing = new obj_vnum[temp]();
-      for (count = 0; count < temp; count++)
-        shop_set_product(shop, count, shop_buy_get_type(&(list[count])));
+      for (const shop_buy_data &product : read_list(g, vnum, shop_f, new_format, MAX_PROD, LIST_PRODUCE))
+        shop->producing.push_back(product.type);
 
       read_line(g, vnum, shop_f, "%f", &shop->profit_buy);
       read_line(g, vnum, shop_f, "%f", &shop->profit_sell);
 
-      temp       = read_type_list(g, vnum, shop_f, list, new_format, MAX_TRADE);
-      shop->type = new shop_buy_data[temp]();
-      for (count = 0; count < temp; count++) {
-        shop_set_buy_type(shop, count, shop_buy_get_type(&(list[count])));
-        shop_set_buy_word(shop, count, shop_buy_get_keywords(&(list[count])));
-      }
+      shop->type = read_type_list(g, vnum, shop_f, new_format, MAX_TRADE);
 
       shop->no_such_item1 = read_shop_message(SHOP_MSG_NOITEM1, shop_get_vnum(shop), shop_f, buf2);
       shop->no_such_item2 = read_shop_message(SHOP_MSG_NOITEM2, shop_get_vnum(shop), shop_f, buf2);
@@ -1512,10 +1497,8 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
         shop_get_with_who(shop)
             [temp++] = 0;
 
-      temp          = read_list(g, vnum, shop_f, list, new_format, 1, LIST_ROOM);
-      shop->in_room = new room_vnum[temp]();
-      for (count = 0; count < temp; count++)
-        shop_set_room(shop, count, shop_buy_get_type(&(list[count])));
+      for (const shop_buy_data &room : read_list(g, vnum, shop_f, new_format, 1, LIST_ROOM))
+        shop->in_room.push_back(room.type);
 
       read_line(g, vnum, shop_f, "%d", &shop->open1);
       read_line(g, vnum, shop_f, "%d", &shop->close1);
@@ -1525,10 +1508,9 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       shop_set_bank(shop, 0);
       shop_set_lastsort(shop, 0);
       shop_set_func(shop, nullptr);
-      if (g->shops.find(vnum)) {
+      if (g->shops.find(vnum))
         mud_log("SYSERR: Shop #%d is defined twice; ignoring the second one.", vnum);
-        free_shop_contents(shop);
-      } else
+      else
         g->shops.insert(vnum, std::move(made));
     } else {
       if (*buf == '$') /* EOF */
@@ -1616,7 +1598,7 @@ static void list_all_shops(GameWorld *g, struct char_data *ch)
 
     len += snprintf(buf + len, sizeof(buf) - len,
                     "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
-                    number, shop_get_vnum(shop), shop_get_room(shop, 0), buf1,
+                    number, shop_get_vnum(shop), shop_rooms(shop).empty() ? NOWHERE : shop_rooms(shop)[0], buf1,
                     shop_get_profit_sell(shop), shop_get_profit_buy(shop),
                     customer_string(g, shop, false));
   }
@@ -1640,7 +1622,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
   send_to_char(g, ch, "Rooms:      ");
   column = 12; /* ^^^ strlen ^^^ */
-  for (sindex = 0; shop_get_room(shop, sindex) != NOWHERE; sindex++) {
+  for (sindex = 0; sindex < (int)shop_rooms(shop).size(); sindex++) {
     char buf1[128];
     int linelen;
     room_vnum temp;
@@ -1650,10 +1632,10 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
       column += 2;
     }
 
-    if (room_of(g, temp = shop_get_room(shop, sindex)))
+    if (room_of(g, temp = shop_rooms(shop)[sindex]))
       linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room_get_name(g, temp), temp);
     else
-      linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", shop_get_room(shop, sindex));
+      linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", shop_rooms(shop)[sindex]);
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
@@ -1686,7 +1668,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
   send_to_char(g, ch, "Produces:   ");
   column = 12; /* ^^^ strlen ^^^ */
-  for (sindex = 0; shop_get_product(shop, sindex) != NOTHING; sindex++) {
+  for (sindex = 0; sindex < (int)shop_products(shop).size(); sindex++) {
     char buf1[128];
     int linelen;
 
@@ -1695,8 +1677,8 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
       column += 2;
     }
     linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                       obj_get_short_description(obj_proto_of(g, shop_get_product(shop, sindex))),
-                       obj_index_of(g, shop_get_product(shop, sindex))->vnum);
+                       obj_get_short_description(obj_proto_of(g, shop_products(shop)[sindex])),
+                       obj_index_of(g, shop_products(shop)[sindex])->vnum);
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
@@ -1714,7 +1696,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
   send_to_char(g, ch, "\r\nBuys:       ");
   column = 12; /* ^^^ strlen ^^^ */
-  for (sindex = 0; shop_get_buy_type(shop, sindex) != NOTHING; sindex++) {
+  for (sindex = 0; sindex < (int)shop_buy_types(shop).size(); sindex++) {
     char buf1[128];
     size_t linelen;
 
@@ -1724,9 +1706,9 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
     }
 
     linelen = snprintf(buf1, sizeof(buf1), "%s (#%d) [%s]",
-                       item_types[shop_get_buy_type(shop, sindex)],
-                       shop_get_buy_type(shop, sindex),
-                       shop_get_buy_word(shop, sindex) ? shop_get_buy_word(shop, sindex) : "all");
+                       item_types[shop_buy_types(shop)[sindex].type],
+                       shop_buy_types(shop)[sindex].type,
+                       shop_buy_get_keywords(&shop_buy_types(shop)[sindex]) ? shop_buy_get_keywords(&shop_buy_types(shop)[sindex]) : "all");
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
@@ -1783,8 +1765,6 @@ void show_shops(GameWorld *g, struct char_data *ch, char *arg)
 
 void destroy_shops(GameWorld *g)
 {
-  for (struct shop_data *shop : g->shops.all())
-    free_shop_contents(shop);
   g->shops.clear();
 }
 

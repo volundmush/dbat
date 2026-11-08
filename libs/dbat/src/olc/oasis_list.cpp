@@ -300,9 +300,9 @@ static void list_shops(GameWorld *g, struct char_data *ch, struct zone_data *rnu
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
 
-      for (j = 0; shop_get_room(i, j) != NOWHERE; j++)
+      for (j = 0; j < (int)shop_rooms(i).size(); j++)
         send_to_char(g, ch, "%s@c[@y%d@c]@n",
-                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop_get_room(i, j));
+                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop_rooms(i)[j]);
 
       if (j == 0)
         send_to_char(g, ch, "@cNone.@n");

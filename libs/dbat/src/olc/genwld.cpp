@@ -151,9 +151,9 @@ bool delete_room(GameWorld *g, room_vnum vnum)
 
   /* Remove this room from all shop lists. */
   for (struct shop_data *shop : g->shops.all())
-    for (j = 0; shop_get_room(shop, j) != NOWHERE; j++)
-      if (shop_get_room(shop, j) == vnum)
-        shop_set_room(shop, j, 0); /* set to the void */
+    for (j = 0; j < (int)shop_rooms(shop).size(); j++)
+      if (shop_rooms(shop)[j] == vnum)
+        shop_rooms(shop)[j] = 0; /* set to the void */
 
   g->rooms.take(vnum);
   return true;

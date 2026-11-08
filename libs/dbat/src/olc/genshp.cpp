@@ -3,7 +3,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/arrays.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/genshp.hpp"
@@ -14,11 +13,6 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
-static void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
-static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
-static void free_shop_strings(struct shop_data *shop);
-static void free_type_list(struct shop_buy_data **list);
-
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
  * 	as the other editors with regard to updates or style.
@@ -26,299 +20,9 @@ static void free_type_list(struct shop_buy_data **list);
 
 /*-------------------------------------------------------------------*/
 
-void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings)
+void copy_shop(struct shop_data *tshop, const struct shop_data *fshop)
 {
-  int i;
-
-  /*
-   * Copy basic information over.
-   */
-  shop_set_vnum(tshop, shop_get_vnum(fshop));
-  shop_set_keeper(tshop, shop_get_keeper(fshop));
-  shop_set_open1(tshop, shop_get_open1(fshop));
-  shop_set_close1(tshop, shop_get_close1(fshop));
-  shop_set_open2(tshop, shop_get_open2(fshop));
-  shop_set_close2(tshop, shop_get_close2(fshop));
-  shop_set_bank(tshop, shop_get_bank(fshop));
-  shop_set_temper(tshop, shop_get_temper(fshop));
-  shop_set_bitvector(tshop, shop_get_bitvector(fshop));
-  for (i = 0; i < SW_ARRAY_MAX; i++)
-    shop_get_with_who(tshop)
-        [i] = shop_get_with_who(fshop)[i];
-  shop_set_lastsort(tshop, shop_get_lastsort(fshop));
-  shop_set_profit_buy(tshop, shop_get_profit_buy(fshop));
-  shop_set_profit_sell(tshop, shop_get_profit_sell(fshop));
-  shop_set_func(tshop, shop_get_func(fshop));
-
-  /*
-   * Copy lists over.
-   */
-  copy_list(&(tshop)->in_room, shop_get_rooms(fshop));
-  copy_list(&(tshop)->producing, shop_get_products(fshop));
-  copy_type_list(&(tshop->type), fshop->type);
-
-  /*
-   * Copy notification strings over.
-   */
-  if (free_old_strings)
-    free_shop_strings(tshop);
-  shop_set_no_such_item1(tshop, str_udup(shop_get_no_such_item1(fshop)));
-  shop_set_no_such_item2(tshop, str_udup(shop_get_no_such_item2(fshop)));
-  shop_set_missing_cash1(tshop, str_udup(shop_get_missing_cash1(fshop)));
-  shop_set_missing_cash2(tshop, str_udup(shop_get_missing_cash2(fshop)));
-  shop_set_do_not_buy(tshop, str_udup(shop_get_do_not_buy(fshop)));
-  shop_set_message_buy(tshop, str_udup(shop_get_message_buy(fshop)));
-  shop_set_message_sell(tshop, str_udup(shop_get_message_sell(fshop)));
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Copy a 'NOTHING' terminated integer array list.
- */
-static void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
-{
-  int num_items, i;
-
-  if (*tlist)
-    delete[] *tlist;
-
-  /*
-   * Count number of entries. A shop still being built might have no list at all.
-   */
-  for (i = 0; flist && flist[i] != NOTHING; i++);
-  num_items = i + 1;
-
-  /*
-   * Make space for entries.
-   */
-  *tlist = new IDXTYPE[num_items]();
-
-  /*
-   * Copy entries over.
-   */
-  for (i = 0; i < num_items; i++)
-    (*tlist)[i] = flist[i];
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Copy a -1 terminated (in the type field) shop_buy_data 
- * array list.
- */
-static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist)
-{
-  int num_items, i;
-
-  if (*tlist)
-    free_type_list(tlist);
-
-  /*
-   * Count number of entries.
-   */
-  for (i = 0; shop_buy_get_type(&(flist[i])) != NOTHING; i++);
-  num_items = i + 1;
-
-  /*
-   * Make space for entries.
-   */
-  *tlist = new shop_buy_data[num_items]();
-
-  /*
-   * Copy entries over.
-   */
-  for (i = 0; i < num_items; i++) {
-    (*tlist)[i].type = flist[i].type;
-    if (shop_buy_get_keywords(&(flist[i])))
-      shop_buy_set_keywords(&((*tlist)[i]), strdup(shop_buy_get_keywords(&(flist[i]))));
-  }
-}
-
-/*-------------------------------------------------------------------*/
-
-void remove_from_type_list(struct shop_buy_data **list, int num)
-{
-  int i, num_items;
-  struct shop_buy_data *nlist;
-
-  /*
-   * Count number of entries.
-   */
-  for (i = 0; (*list)[i].type != NOTHING; i++);
-
-  if (num < 0 || num >= i)
-    return;
-  num_items = i;
-
-  nlist = new shop_buy_data[num_items]();
-
-  for (i = 0; i < num_items; i++)
-    nlist[i] = (i < num) ? (*list)[i] : (*list)[i + 1];
-
-  free(shop_buy_get_keywords(&((*list)[num])));
-  delete[] *list;
-  *list = nlist;
-}
-
-/*-------------------------------------------------------------------*/
-
-void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl)
-{
-  int i, num_items;
-  struct shop_buy_data *nlist;
-
-  /*
-   * Count number of entries.
-   */
-  for (i = 0; (*list)[i].type != NOTHING; i++);
-  num_items = i;
-
-  /*
-   * Make a new list and slot in the new entry.
-   */
-  nlist = new shop_buy_data[num_items + 2]();
-
-  for (i = 0; i < num_items; i++)
-    nlist[i] = (*list)[i];
-  nlist[num_items]          = *newl;
-  nlist[num_items + 1].type = NOTHING;
-
-  /*
-   * Out with the old, in with the new.
-   */
-  delete[] *list;
-  *list = nlist;
-}
-
-/*-------------------------------------------------------------------*/
-
-void add_to_int_list(IDXTYPE **list, IDXTYPE newi)
-{
-  IDXTYPE i, num_items, *nlist;
-
-  /*
-   * Count number of entries.
-   */
-  for (i = 0; (*list)[i] != NOTHING; i++);
-  num_items = i;
-
-  /*
-   * Make a new list and slot in the new entry.
-   */
-  nlist = new IDXTYPE[num_items + 2]();
-
-  for (i = 0; i < num_items; i++)
-    nlist[i] = (*list)[i];
-  nlist[num_items]     = newi;
-  nlist[num_items + 1] = NOTHING;
-
-  /*
-   * Out with the old, in with the new.
-   */
-  delete[] *list;
-  *list = nlist;
-}
-
-/*-------------------------------------------------------------------*/
-
-void remove_from_int_list(IDXTYPE **list, IDXTYPE num)
-{
-  IDXTYPE i, num_items, *nlist;
-
-  /*
-   * Count number of entries.
-   */
-  for (i = 0; (*list)[i] != NOTHING; i++);
-
-  if (num < 0 || num >= i)
-    return;
-  num_items = i;
-
-  nlist = new IDXTYPE[num_items]();
-
-  for (i = 0; i < num_items; i++)
-    nlist[i] = (i < num) ? (*list)[i] : (*list)[i + 1];
-
-  delete[] *list;
-  *list = nlist;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Free all the notice character strings in a shop structure.
- */
-static void free_shop_strings(struct shop_data *shop)
-{
-  if (shop_get_no_such_item1(shop)) {
-    free(shop_get_no_such_item1(shop));
-    shop_set_no_such_item1(shop, nullptr);
-  }
-  if (shop_get_no_such_item2(shop)) {
-    free(shop_get_no_such_item2(shop));
-    shop_set_no_such_item2(shop, nullptr);
-  }
-  if (shop_get_missing_cash1(shop)) {
-    free(shop_get_missing_cash1(shop));
-    shop_set_missing_cash1(shop, nullptr);
-  }
-  if (shop_get_missing_cash2(shop)) {
-    free(shop_get_missing_cash2(shop));
-    shop_set_missing_cash2(shop, nullptr);
-  }
-  if (shop_get_do_not_buy(shop)) {
-    free(shop_get_do_not_buy(shop));
-    shop_set_do_not_buy(shop, nullptr);
-  }
-  if (shop_get_message_buy(shop)) {
-    free(shop_get_message_buy(shop));
-    shop_set_message_buy(shop, nullptr);
-  }
-  if (shop_get_message_sell(shop)) {
-    free(shop_get_message_sell(shop));
-    shop_set_message_sell(shop, nullptr);
-  }
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Free a type list and all the strings it contains.
- */
-static void free_type_list(struct shop_buy_data **list)
-{
-  int i;
-
-  for (i = 0; (*list)[i].type != NOTHING; i++)
-    if (shop_buy_get_keywords(&((*list)[i])))
-      free(shop_buy_get_keywords(&((*list)[i])));
-
-  delete[] *list;
-  *list = nullptr;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Free up the whole shop structure and it's content.
- */
-void free_shop(struct shop_data *shop)
-{
-  free_shop_contents(shop);
-  delete shop;
-}
-
-/* Frees what a shop holds, but not the shop itself. */
-void free_shop_contents(struct shop_data *shop)
-{
-  free_shop_strings(shop);
-  if (shop->type)
-    free_type_list(&(shop)->type);
-  delete[] shop_get_rooms(shop);
-  delete[] shop_get_products(shop);
-  shop_set_rooms(shop, nullptr);
-  shop_set_products(shop, nullptr);
+  *tshop = *fshop;
 }
 
 /*-------------------------------------------------------------------*/
@@ -335,11 +39,11 @@ struct shop_data *find_shop(GameWorld *g, shop_vnum vnum)
  * Generic string modifier for shop keeper messages. Returns NULL once stored, or why the message can't be used (the
  * old one is then kept).
  */
-const char *modify_string(char **str, char *new_s, bool allow_int)
+const char *modify_string(std::string *str, const char *new_s, bool allow_int)
 {
 
   char buf[MAX_STRING_LENGTH];
-  char *pointer;
+  const char *pointer;
 
   /*
    * Check the '%s' is present, if not, add it.
@@ -354,9 +58,7 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
   if (problem)
     return problem;
 
-  if (*str)
-    free(*str);
-  *str = strdup(pointer);
+  *str = pointer;
   return nullptr;
 }
 
@@ -367,12 +69,9 @@ struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
   struct zone_data *rznum = find_zone_by_thing(g, shop_get_vnum(nshp));
   struct shop_data *shop = find_shop(g, shop_get_vnum(nshp));
 
-  if (shop) /* The shop already exists: just update it, freeing its old strings. */
-    copy_shop(shop, nshp, true);
-  else {
+  if (!shop) /* Otherwise the shop already exists: just update it. */
     shop = g->shops.emplace(shop_get_vnum(nshp));
-    copy_shop(shop, nshp, false);
-  }
+  copy_shop(shop, nshp);
 
   if (rznum != nullptr)
     add_to_save_list(g, rznum->number, SL_SHP);
@@ -417,8 +116,8 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
       /*
        * Save the products.
        */
-      for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
-        fprintf(shop_file, "%d\n", obj_index_of(g, shop_get_product(shop, j))->vnum);
+      for (obj_vnum product : shop_products(shop))
+        fprintf(shop_file, "%d\n", product);
       fprintf(shop_file, "-1\n");
 
       /*
@@ -432,10 +131,8 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
       /*
        * Save the buy types and namelists.
        */
-      for (j = 0; shop_get_buy_type(shop, j) != NOTHING; j++)
-        fprintf(shop_file, "%d%s\n",
-                shop_get_buy_type(shop, j),
-                shop_get_buy_word(shop, j) ? shop_get_buy_word(shop, j) : "");
+      for (const shop_buy_data &buy : shop_buy_types(shop))
+        fprintf(shop_file, "%d%s\n", buy.type, buy.keywords.c_str());
       fprintf(shop_file, "-1\n");
 
       /* Not allowed to use Ascii in shopfile anymore (bpl21)
@@ -475,8 +172,8 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
       /*
        * Save the rooms.
        */
-      for (j = 0; shop_get_room(shop, j) != NOWHERE; j++)
-        fprintf(shop_file, "%d\n", shop_get_room(shop, j));
+      for (room_vnum room : shop_rooms(shop))
+        fprintf(shop_file, "%d\n", room);
       fprintf(shop_file, "-1\n");
 
       /*

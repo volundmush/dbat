@@ -846,11 +846,12 @@ static void check_shop_with_impossible_item_types(void)
   g = th_boot();
   CHECK(g->shops.size() == 1); /* the one shop, still there */
   struct shop_data *shop = *g->shops.all().begin();
-  CHECK(shop_get_buy_type(shop, 0) == ITEM_ARMOR);
-  CHECK(shop_get_buy_word(shop, 0) && !strcmp(shop_get_buy_word(shop, 0), "potions"));
-  CHECK(shop_get_buy_type(shop, 1) == 19);
-  CHECK(shop_get_buy_word(shop, 1) == nullptr);
-  CHECK(shop_get_buy_type(shop, 2) == NOTHING);
+  const std::vector<shop_buy_data> &buys = shop_buy_types(shop);
+  CHECK(buys.size() == 2);
+  CHECK(buys[0].type == ITEM_ARMOR);
+  CHECK(buys[0].keywords == "potions");
+  CHECK(buys[1].type == 19);
+  CHECK(buys[1].keywords.empty());
   th_shutdown(g);
 }
 

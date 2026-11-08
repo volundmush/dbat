@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdio>
+#include <string>
+#include <vector>
 
 #include "dbat/shop_utils.hpp"
 #include "dbat/consts/types.hpp"
@@ -7,7 +9,7 @@
 
 struct shop_buy_data {
   int type{};
-  char *keywords{};
+  std::string keywords{}; /* Which of that type it buys: empty for all */
 };
 
 constexpr int SW_ARRAY_MAX = 4;
@@ -29,22 +31,22 @@ extern const char *const shop_default_msgs[NUM_SHOP_MSGS];
 
 struct shop_data {
   room_vnum vnum{};                     /* Virtual number of this shop		*/
-  obj_vnum *producing{};                /* Which item to produce (virtual)	*/
+  std::vector<obj_vnum> producing{};    /* Which item to produce (virtual)	*/
   float profit_buy{};                   /* Factor to multiply cost with		*/
   float profit_sell{};                  /* Factor to multiply cost with		*/
-  struct shop_buy_data *type{};         /* Which items to trade			*/
-  char *no_such_item1{};                /* Message if keeper hasn't got an item	*/
-  char *no_such_item2{};                /* Message if player hasn't got an item	*/
-  char *missing_cash1{};                /* Message if keeper hasn't got cash	*/
-  char *missing_cash2{};                /* Message if player hasn't got cash	*/
-  char *do_not_buy{};                   /* If keeper dosn't buy such things	*/
-  char *message_buy{};                  /* Message when player buys item	*/
-  char *message_sell{};                 /* Message when player sells item	*/
+  std::vector<shop_buy_data> type{};    /* Which items to trade			*/
+  std::string no_such_item1{};          /* Message if keeper hasn't got an item	*/
+  std::string no_such_item2{};          /* Message if player hasn't got an item	*/
+  std::string missing_cash1{};          /* Message if keeper hasn't got cash	*/
+  std::string missing_cash2{};          /* Message if player hasn't got cash	*/
+  std::string do_not_buy{};             /* If keeper dosn't buy such things	*/
+  std::string message_buy{};            /* Message when player buys item	*/
+  std::string message_sell{};           /* Message when player sells item	*/
   int temper1{};                        /* How does keeper react if no money	*/
   bitvector_t bitvector{};              /* Can attack? Use bank? Cast here?	*/
   mob_vnum keeper{};                    /* The mobile who owns the shop (vnum)	*/
   bitvector_t with_who[SW_ARRAY_MAX]{}; /* Who does the shop trade with?	*/
-  room_vnum *in_room{};                 /* Where is the shop?			*/
+  std::vector<room_vnum> in_room{};     /* Where is the shop?			*/
   int open1{}, open2{};                   /* When does the shop open?		*/
   int close1{}, close2{};                 /* When does the shop close?		*/
   int bankAccount{};                    /* Store all gold over 15000 (disabled)	*/
