@@ -756,14 +756,14 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
       break;
   }
 
-  obj_set_name(body_part, strdup(buf));
+  obj_set_name(body_part, buf);
   if (num > 0) {
     snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
   } else {
     snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
   }
-  obj_set_description(body_part, strdup(buf2));
-  obj_set_short_description(body_part, strdup(part));
+  obj_set_description(body_part, buf2);
+  obj_set_short_description(body_part, part);
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);
@@ -1593,53 +1593,53 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
   switch (char_get_death_type(ch)) {
     case DTYPE_HEAD:
       *buf2        = '\0';
-      obj_set_name(corpse, str_printf("headless corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("headless corpse %s", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_printf("The headless corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The headless corpse of %s is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_printf("The headless remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The headless remains of %s's corpse", char_get_name(ch)));
       obj_set_value(corpse, VAL_CORPSE_HEAD, 0);
       break;
     case DTYPE_HALF:
       *buf2        = '\0';
-      obj_set_name(corpse, str_printf("half corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("half corpse %s", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_printf("Half of %s's corpse is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("Half of %s's corpse is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_printf("Half of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("Half of %s's corpse", char_get_name(ch)));
       break;
     case DTYPE_VAPOR:
       *buf2        = '\0';
-      obj_set_name(corpse, str_printf("burnt chunks corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("burnt chunks corpse %s", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_printf("The burnt chunks of %s's corpse are scattered here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The burnt chunks of %s's corpse are scattered here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_printf("The burnt chunks of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The burnt chunks of %s's corpse", char_get_name(ch)));
       break;
     case DTYPE_PULP:
       *buf2        = '\0';
-      obj_set_name(corpse, str_printf("beaten bloody corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("beaten bloody corpse %s", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_printf("The bloody and beaten corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The bloody and beaten corpse of %s is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_printf("The bloody and beaten remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The bloody and beaten remains of %s's corpse", char_get_name(ch)));
       break;
     default:
-      obj_set_name(corpse, str_printf("corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("corpse %s", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_printf("The corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The corpse of %s is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_printf("the remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("the remains of %s's corpse", char_get_name(ch)));
       break;
   }
 
@@ -1718,9 +1718,9 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
         sprintf(nick, "@RRaw %s@R Steak@n", char_get_name(ch));
         sprintf(nick2, "Raw %s Steak", char_get_alias(ch));
         sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", char_get_name(ch));
-        obj_set_short_description(meat, strdup(nick));
-        obj_set_name(meat, strdup(nick2));
-        obj_set_description(meat, strdup(nick3));
+        obj_set_short_description(meat, nick);
+        obj_set_name(meat, nick2);
+        obj_set_description(meat, nick3);
         obj_set_value(meat, 7, 14);
       }
     }

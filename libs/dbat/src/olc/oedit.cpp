@@ -221,9 +221,9 @@ static void oedit_setup_new(struct descriptor_data *d)
   OLC_OBJ(d) = new obj_data();
 
   clear_object(OLC_OBJ(d));
-  obj_set_name(OLC_OBJ(d), strdup("unfinished object"));
-  obj_set_description(OLC_OBJ(d), strdup("An unfinished object is lying here."));
-  obj_set_short_description(OLC_OBJ(d), strdup("an unfinished object"));
+  obj_set_name(OLC_OBJ(d), "unfinished object");
+  obj_set_description(OLC_OBJ(d), "An unfinished object is lying here.");
+  obj_set_short_description(OLC_OBJ(d), "an unfinished object");
   obj_wear_set(OLC_OBJ(d), ITEM_WEAR_TAKE, true);
   OLC_VAL(d)       = 0;
   OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
@@ -1218,24 +1218,21 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if (!genolc_checkstring(d, arg))
         break;
       if (obj_get_name(OLC_OBJ(d)))
-        free(obj_get_name(OLC_OBJ(d)));
-      obj_set_name(OLC_OBJ(d), str_udup(arg));
+        obj_set_name(OLC_OBJ(d), take_string(str_udup(arg)));
       break;
 
     case OEDIT_SHORTDESC:
       if (!genolc_checkstring(d, arg))
         break;
       if (obj_get_short_description(OLC_OBJ(d)))
-        free(obj_get_short_description(OLC_OBJ(d)));
-      obj_set_short_description(OLC_OBJ(d), str_udup(arg));
+        obj_set_short_description(OLC_OBJ(d), take_string(str_udup(arg)));
       break;
 
     case OEDIT_LONGDESC:
       if (!genolc_checkstring(d, arg))
         break;
       if (obj_get_description(OLC_OBJ(d)))
-        free(obj_get_description(OLC_OBJ(d)));
-      obj_set_description(OLC_OBJ(d), str_udup(arg));
+        obj_set_description(OLC_OBJ(d), take_string(str_udup(arg)));
       break;
 
     case OEDIT_TYPE:

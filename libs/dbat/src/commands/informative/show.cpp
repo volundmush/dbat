@@ -444,7 +444,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
           break;
 
         case ITEM_WINDOW:
-          look_out_window(g, ch, obj_get_name(obj));
+          look_out_window(g, ch, writable_copy(obj_get_name(obj)).data());
           return;
           break;
 

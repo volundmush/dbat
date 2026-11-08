@@ -543,14 +543,6 @@ void destroy_db(GameWorld *g)
 
   /* Objects */
   for (obj_vnum ovnum : g->obj_proto.vnums()) {
-    if (obj_get_name(obj_proto_of(g, ovnum)))
-      free(obj_get_name(obj_proto_of(g, ovnum)));
-    if (obj_get_description(obj_proto_of(g, ovnum)))
-      free(obj_get_description(obj_proto_of(g, ovnum)));
-    if (obj_get_short_description(obj_proto_of(g, ovnum)))
-      free(obj_get_short_description(obj_proto_of(g, ovnum)));
-    if (obj_get_action_description(obj_proto_of(g, ovnum)))
-      free(obj_get_action_description(obj_proto_of(g, ovnum)));
     if (obj_get_ex_description(obj_proto_of(g, ovnum)))
       free_extra_descriptions(obj_get_ex_description(obj_proto_of(g, ovnum)));
     delete[] obj_get_sbinfo(obj_proto_of(g, ovnum)); /* spellbook pages */
@@ -2190,23 +2182,24 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   sprintf(buf2, "object #%d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  obj_set_name(obj_proto_of(g, g->parse_obj_index), fread_string(obj_f, buf2));
+  obj_set_name(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2)));
   if (obj_get_name(obj_proto_of(g, g->parse_obj_index)) == nullptr) {
     mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
+  /* each is adjusted before it is stored: the setters copy */
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_short_description(obj_proto_of(g, g->parse_obj_index), tmpptr);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
+  obj_set_short_description(obj_proto_of(g, g->parse_obj_index), take_string(tmpptr));
 
   tmpptr = fread_string(obj_f, buf2);
-  obj_set_description(obj_proto_of(g, g->parse_obj_index), tmpptr);
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
-  obj_set_action_description(obj_proto_of(g, g->parse_obj_index), fread_string(obj_f, buf2));
+  obj_set_description(obj_proto_of(g, g->parse_obj_index), take_string(tmpptr));
+  obj_set_action_description(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2)));
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -4413,7 +4406,8 @@ static int check_object(GameWorld *g, struct obj_data *obj)
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_DRINKCON: {
-      char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj_get_name(obj), ' ');
+      char onealias[MAX_INPUT_LENGTH];
+      const char *space = strrchr(obj_get_name(obj), ' ');
 
       strlcpy(onealias, space ? space + 1 : obj_get_name(obj), sizeof(onealias));
       if (search_block(onealias, drinknames, true) < 0 && (error = true)) {

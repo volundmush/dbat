@@ -1,5 +1,6 @@
 #pragma once
 #include <cstring>
+#include <string>
 #include <cctype>
 
 #include <strings.h>
@@ -12,7 +13,7 @@ char *add_commas(int64_t num);
 char *CAP(char *txt);
 void prune_crlf(char *txt);
 
-int count_color_chars(char *string);
+int count_color_chars(const char *string);
 char *one_word(char *argument, char *first_arg);
 char *any_one_arg(char *argument, char *first_arg);
 char *one_argument(char *argument, char *first_arg);
@@ -29,6 +30,10 @@ bool reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
 /* A new string formatted as by printf(); aborts if out of memory. */
 char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
+/* The same, as a std::string */
+std::string str_format(const char *format, ...) __attribute__((format(printf, 1, 2)));
+/* s, a malloc'd string (null for none), as a std::string; s is freed */
+std::string take_string(char *s);
 /* A zero-filled buffer of n chars. Like strdup()'s strings, it is released with free(), so that a field can hold
  * either; both go when strings become std::string. */
 char *str_alloc(size_t n);
@@ -43,3 +48,7 @@ template <size_t N> struct writable {
   operator char *() { return text; }
 };
 template <size_t N> writable(const char (&)[N]) -> writable<N>;
+
+/* A writable copy of s (null reads as ""), for a function that may change its argument: f(writable_copy(s).data()).
+ * The copy lasts until the end of the statement. */
+inline std::string writable_copy(const char *s) { return s ? s : ""; }

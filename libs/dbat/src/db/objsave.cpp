@@ -795,22 +795,22 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
               special care */
-        obj_set_name(temp, fread_string(fl, "rented object name"));
+        obj_set_name(temp, take_string(fread_string(fl, "rented object name")));
         if (obj_get_name(temp) == nullptr) {
-          obj_set_name(temp, strdup("undefined"));
+          obj_set_name(temp, "undefined");
         }
 
-        obj_set_short_description(temp, fread_string(fl, "rented object short desc"));
+        obj_set_short_description(temp, take_string(fread_string(fl, "rented object short desc")));
         if (obj_get_short_description(temp) == nullptr) {
-          obj_set_short_description(temp, strdup("undefined"));
+          obj_set_short_description(temp, "undefined");
         }
 
-        obj_set_description(temp, fread_string(fl, "rented object desc"));
+        obj_set_description(temp, take_string(fread_string(fl, "rented object desc")));
         if (obj_get_description(temp) == nullptr) {
-          obj_set_description(temp, strdup("undefined"));
+          obj_set_description(temp, "undefined");
         }
 
-        obj_set_action_description(temp, fread_string(fl, "rented object adesc"));
+        obj_set_action_description(temp, take_string(fread_string(fl, "rented object adesc")));
         if (obj_get_action_description(temp) == nullptr) {
           obj_set_action_description(temp, nullptr);
         }

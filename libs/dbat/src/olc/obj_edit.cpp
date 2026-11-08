@@ -206,13 +206,13 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           }
 
           *buf      = '\0';
-          obj_set_name(obj, strdup(d->obj_name));
+          obj_set_name(obj, d->obj_name);
 
           *buf2                  = '\0';
-          obj_set_short_description(obj, strdup(d->obj_short));
+          obj_set_short_description(obj, d->obj_short);
 
           *buf3            = '\0';
-          obj_set_description(obj, strdup(d->obj_long));
+          obj_set_description(obj, d->obj_long);
 
           d->obj_editflag = EDIT_NONE;
           d->obj_editval  = EDIT_NONE;
@@ -458,20 +458,20 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
                 break;
             }
             *buf                   = '\0';
-            obj_set_name(obj, strdup(d->obj_name));
+            obj_set_name(obj, d->obj_name);
             *buf2                  = '\0';
-            obj_set_short_description(obj, strdup(d->obj_short));
+            obj_set_short_description(obj, d->obj_short);
             *buf3                  = '\0';
-            obj_set_description(obj, strdup(d->obj_long));
+            obj_set_description(obj, d->obj_long);
           } else {
             obj = read_object(g, 20098);
             obj_to_char(g, obj, d->character);
             *buf                   = '\0';
-            obj_set_name(obj, strdup(d->obj_name));
+            obj_set_name(obj, d->obj_name);
             *buf2                  = '\0';
-            obj_set_short_description(obj, strdup(d->obj_short));
+            obj_set_short_description(obj, d->obj_short);
             *buf3                  = '\0';
-            obj_set_description(obj, strdup(d->obj_long));
+            obj_set_description(obj, d->obj_long);
             switch (d->obj_weapon) {
               case 1:
                 obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);

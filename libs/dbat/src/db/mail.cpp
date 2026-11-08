@@ -678,13 +678,13 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
-    obj_set_action_description(obj, read_delete(g, char_get_idnum(ch), &from));
+    obj_set_action_description(obj, take_string(read_delete(g, char_get_idnum(ch), &from)));
     char bla[256], blm[256];
     sprintf(bla, "@WA piece of mail@n");
     sprintf(blm, "@WSomeone has left a piece of mail here@n");
-    obj_set_short_description(obj, strdup(bla));
-    obj_set_description(obj, strdup(blm));
-    obj_set_name(obj, strdup("mail paper letter"));
+    obj_set_short_description(obj, bla);
+    obj_set_description(obj, blm);
+    obj_set_name(obj, "mail paper letter");
     *bla                   = '\0';
     *blm                   = '\0';
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
@@ -694,7 +694,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
 
     if (obj_get_action_description(obj) == nullptr)
-      obj_set_action_description(obj, strdup("Mail system error - please report.  Error #11.\r\n"));
+      obj_set_action_description(obj, "Mail system error - please report.  Error #11.\r\n");
 
     /* so it saves */
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);

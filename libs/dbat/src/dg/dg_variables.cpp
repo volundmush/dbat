@@ -774,16 +774,6 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
   }
 }
 
-/*
- * true if s is one of the strings o shares with its prototype, which must not be freed
- * (the rule free_object_strings_proto() and name_to_drinkcon() follow)
- */
-static bool obj_string_is_proto(GameWorld *g, const obj_data *o, const char *s)
-{
-  obj_vnum rnum = obj_get_item_number(o);
-  return rnum != NOTHING && (s == obj_get_name(obj_proto_of(g, rnum)) || s == obj_get_short_description(obj_proto_of(g, rnum)));
-}
-
 /* sets str to the value of field on object o */
 static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, char *str, size_t slen)
 {
@@ -905,9 +895,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s %s", obj_get_name(o), subfield);
-          if (!obj_string_is_proto(g, o, obj_get_name(o)))
-            free(obj_get_name(o));
-          obj_set_name(o, strdup(blah));
+          obj_set_name(o, blah);
         }
       } else if (!strcasecmp(field, "next_in_list")) {
         if (obj_data *next = obj_next_in_list(g, o))
@@ -931,9 +919,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(o), subfield);
-          if (!obj_string_is_proto(g, o, obj_get_short_description(o)))
-            free(obj_get_short_description(o));
-          obj_set_short_description(o, strdup(blah));
+          obj_set_short_description(o, blah);
         }
       } else if (!strcasecmp(field, "setaffects")) {
         if (subfield && *subfield) {

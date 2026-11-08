@@ -21,6 +21,7 @@
 - Saving a new mob or object in OLC no longer adds 1 to the mob and object numbers in shops, mobs and zone commands other builders have open: leftover renumbering from before prototypes were kept by vnum, which corrupted those numbers. The same dead code is gone from redit. [Volund]
 - A connection's input queue is a `std::deque` of lines with `std::string` text, a player's communication history a `std::deque<std::string>` per channel (`char_comm_hist()`; freeing a character used to leak all but the first line of each), and the zone reset queue a `std::deque` of zone numbers. [Volund]
 - The text editor works on a `std::string` the connection holds (`edit_text`), written back to where it goes (`d->str`, now an `edit_target`: a `char **` or a `std::string *`) when it is saved, or restored when an OLC edit is aborted. `string_edit_begin()` starts an edit for code that set `d->str` by hand. This lets fields become `std::string` one at a time. [Volund]
+- An object's name, descriptions and action description are `std::string`s, each object's own: the setters copy (`str_format()` and `take_string()` help callers that built a malloc'd string), the getters read null for an empty one as the files have it, and the pointer sharing with prototypes is gone for them (`obj_string_is_proto()` with it). Restringing no longer leaves an object sharing, and later reading after free, the strings its connection frees. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild and zone files as well as players. [Volund]
 
 # 2.9.3

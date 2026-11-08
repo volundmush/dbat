@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/itemdata.hpp"
@@ -35,10 +36,10 @@ struct obj_data {
 
   struct obj_affected_type affected[MAX_OBJ_AFFECT]{}; /* affects */
 
-  char *name{};                              /* Title of object :get etc.        */
-  char *description{};                       /* When in room                     */
-  char *short_description{};                 /* when worn/carry/in cont.         */
-  char *action_description{};                /* What to write when used          */
+  std::string name;                          /* Title of object :get etc.; empty for none */
+  std::string description;                   /* When in room; empty for none */
+  std::string short_description;             /* when worn/carry/in cont.; empty for none */
+  std::string action_description;            /* What to write when used; empty for none */
   struct extra_descr_data *ex_description{}; /* extra descriptions     */
   struct char_data *carried_by{};            /* Carried by :NULL in room/conta   */
   struct char_data *worn_by{};               /* Worn by?			      */

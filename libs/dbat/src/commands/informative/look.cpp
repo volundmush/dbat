@@ -1534,7 +1534,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CLeave@n\r\n");
             } else if (obj_get_type_flag(thing) == ITEM_WINDOW) {
-              look_out_window(g, ch, obj_get_name(thing));
+              look_out_window(g, ch, writable_copy(obj_get_name(thing)).data());
             }
 
             if (obj_get_type_flag(thing) == ITEM_CONTROL) {

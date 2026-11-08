@@ -2742,7 +2742,8 @@ void weight_change_object(GameWorld *g, struct obj_data *obj, int weight)
 
 void name_from_drinkcon(GameWorld *g, struct obj_data *obj)
 {
-  char *new_name, *cur_name, *next;
+  char *new_name;
+  const char *cur_name, *next;
   const char *liqname;
   int liqlen, cpylen;
 
@@ -2784,9 +2785,7 @@ void name_from_drinkcon(GameWorld *g, struct obj_data *obj)
     new_name[used + cpylen] = '\0';
   }
 
-  if (obj_get_item_number(obj) == NOTHING || obj_get_name(obj) != obj_get_name(obj_proto_of(g, obj_get_item_number(obj))))
-    free(obj_get_name(obj));
-  obj_set_name(obj, new_name);
+  obj_set_name(obj, take_string(new_name));
 }
 
 void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)
@@ -2803,10 +2802,7 @@ void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)
   new_name = str_alloc(len);
   snprintf(new_name, len, "%s %s", obj_get_name(obj), drinknames[type]);
 
-  if (obj_get_item_number(obj) == NOTHING || obj_get_name(obj) != obj_get_name(obj_proto_of(g, obj_get_item_number(obj))))
-    free(obj_get_name(obj));
-
-  obj_set_name(obj, new_name);
+  obj_set_name(obj, take_string(new_name));
 }
 
 ACMD(do_drink)

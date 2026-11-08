@@ -34,7 +34,7 @@ int levenshtein_distance(char *s1, char *s2)
   return i;
 }
 
-int count_color_chars(char *string)
+int count_color_chars(const char *string)
 {
   int i, len;
   int num = 0;
@@ -410,6 +410,27 @@ char *str_printf(const char *format, ...)
   }
   va_end(args);
   return s;
+}
+
+std::string str_format(const char *format, ...)
+{
+  va_list args;
+  char *s;
+
+  va_start(args, format);
+  if (vasprintf(&s, format, args) < 0) {
+    perror("SYSERR: str_format");
+    abort();
+  }
+  va_end(args);
+  return take_string(s);
+}
+
+std::string take_string(char *s)
+{
+  std::string out = s ? s : "";
+  free(s);
+  return out;
 }
 
 char *str_alloc(size_t n)

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <cstdint>
 #include <ctime>
 
@@ -96,7 +97,7 @@ spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj);
 bool obj_is_corpse(const struct obj_data *obj);
 
 bool obj_wear_flagged(const struct obj_data *obj, int part);
-char *obj_get_short_description(const struct obj_data *obj);
+const char *obj_get_short_description(const struct obj_data *obj);
 
 const char *obj_sana(const struct obj_data *obj);
 room_vnum obj_get_room_loaded(const struct obj_data *obj);
@@ -118,33 +119,37 @@ struct obj_data *create_money(GameWorld *g, int amount);
 id_list *obj_contains_slot(struct obj_data *obj);
 struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj);
 struct script_data **obj_script_slot(struct obj_data *obj);
-char **obj_action_description_slot(struct obj_data *obj);
+std::string *obj_action_description_slot(struct obj_data *obj);
 struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
 
 
 /* Field accessors */
-char *obj_get_action_description(const struct obj_data *obj);
-void obj_set_action_description(struct obj_data *obj, char *v);
+const char *obj_get_action_description(const struct obj_data *obj);
+void obj_set_action_description(struct obj_data *obj, const char *v);
+void obj_set_action_description(struct obj_data *obj, const std::string &v);
 struct obj_affected_type *obj_get_affected(struct obj_data *obj);
 struct char_data *obj_get_carried_by(const struct obj_data *obj);
 void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
 const id_list &obj_get_contains(const struct obj_data *obj);
-char *obj_get_description(const struct obj_data *obj);
-void obj_set_description(struct obj_data *obj, char *v);
+const char *obj_get_description(const struct obj_data *obj);
+void obj_set_description(struct obj_data *obj, const char *v);
+void obj_set_description(struct obj_data *obj, const std::string &v);
 struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj);
 void obj_set_ex_description(struct obj_data *obj, struct extra_descr_data *v);
 time_t obj_get_generation(const struct obj_data *obj);
 void obj_set_generation(struct obj_data *obj, time_t v);
 struct obj_data *obj_get_in_obj(const struct obj_data *obj);
 void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
-char *obj_get_name(const struct obj_data *obj);
-void obj_set_name(struct obj_data *obj, char *v);
+const char *obj_get_name(const struct obj_data *obj);
+void obj_set_name(struct obj_data *obj, const char *v);
+void obj_set_name(struct obj_data *obj, const std::string &v);
 struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj);
 void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v);
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj);
 struct script_data *obj_get_script(const struct obj_data *obj);
 void obj_set_script(struct obj_data *obj, struct script_data *v);
-void obj_set_short_description(struct obj_data *obj, char *v);
+void obj_set_short_description(struct obj_data *obj, const char *v);
+void obj_set_short_description(struct obj_data *obj, const std::string &v);
 int64_t obj_get_unique_id(const struct obj_data *obj);
 void obj_set_unique_id(struct obj_data *obj, int64_t v);
 struct char_data *obj_get_worn_by(const struct obj_data *obj);

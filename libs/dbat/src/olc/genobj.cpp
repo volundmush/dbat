@@ -300,14 +300,7 @@ void free_object_strings(GameWorld *g, struct obj_data *obj)
   assert(i <= 1);
 #endif
 
-  if (obj_get_name(obj))
-    free(obj_get_name(obj));
-  if (obj_get_description(obj))
-    free(obj_get_description(obj));
-  if (obj_get_short_description(obj))
-    free(obj_get_short_description(obj));
-  if (obj_get_action_description(obj))
-    free(obj_get_action_description(obj));
+  /* the strings are std::string and go with the object */
   if (obj_get_ex_description(obj))
     free_ex_descriptions(obj_get_ex_description(obj));
 }
@@ -319,14 +312,7 @@ void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
 {
   obj_vnum robj_num = obj_get_item_number(obj);
 
-  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(obj_proto_of(g, robj_num)))
-    free(obj_get_name(obj));
-  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(obj_proto_of(g, robj_num)))
-    free(obj_get_description(obj));
-  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(obj_proto_of(g, robj_num)))
-    free(obj_get_short_description(obj));
-  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(obj_proto_of(g, robj_num)))
-    free(obj_get_action_description(obj));
+  /* the strings are std::string, each object's own; only the extra descriptions may be the prototype's */
   if (obj_get_ex_description(obj)) {
     struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
     int ok_key, ok_desc, ok_item;
@@ -352,11 +338,7 @@ void free_object_strings_proto(GameWorld *g, struct obj_data *obj)
 
 static void copy_object_strings(struct obj_data *to, struct obj_data *from)
 {
-  obj_set_name(to, obj_get_name(from) ? strdup(obj_get_name(from)) : nullptr);
-  obj_set_description(to, obj_get_description(from) ? strdup(obj_get_description(from)) : nullptr);
-  obj_set_short_description(to, obj_get_short_description(from) ? strdup(obj_get_short_description(from)) : nullptr);
-  obj_set_action_description(to, obj_get_action_description(from) ? strdup(obj_get_action_description(from)) : nullptr);
-
+  /* the strings are std::string, copied with the rest of the object */
   if (obj_get_ex_description(from))
     copy_ex_descriptions(obj_ex_description_slot(to), obj_get_ex_description(from));
   else

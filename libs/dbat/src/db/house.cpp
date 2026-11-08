@@ -613,22 +613,22 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
                                        special care */
-        obj_set_name(temp, fread_string(fl, buf2));
+        obj_set_name(temp, take_string(fread_string(fl, buf2)));
         if (obj_get_name(temp) == nullptr) {
-          obj_set_name(temp, strdup("undefined"));
+          obj_set_name(temp, "undefined");
         }
 
-        obj_set_short_description(temp, fread_string(fl, buf2));
+        obj_set_short_description(temp, take_string(fread_string(fl, buf2)));
         if (obj_get_short_description(temp) == nullptr) {
-          obj_set_short_description(temp, strdup("undefined"));
+          obj_set_short_description(temp, "undefined");
         }
 
-        obj_set_description(temp, fread_string(fl, buf2));
+        obj_set_description(temp, take_string(fread_string(fl, buf2)));
         if (obj_get_description(temp) == nullptr) {
-          obj_set_description(temp, strdup("undefined"));
+          obj_set_description(temp, "undefined");
         }
 
-        obj_set_action_description(temp, fread_string(fl, buf2));
+        obj_set_action_description(temp, take_string(fread_string(fl, buf2)));
         if (obj_get_action_description(temp) == nullptr) {
           obj_set_action_description(temp, nullptr);
         }

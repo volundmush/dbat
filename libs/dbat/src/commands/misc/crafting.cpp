@@ -2375,9 +2375,9 @@ ACMD(do_spoil)
   snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part);
   snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part);
 
-  obj_set_name(body_part, strdup(buf));
-  obj_set_description(body_part, strdup(buf2));
-  obj_set_short_description(body_part, strdup(buf3));
+  obj_set_name(body_part, buf);
+  obj_set_description(body_part, buf2);
+  obj_set_short_description(body_part, buf3);
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);

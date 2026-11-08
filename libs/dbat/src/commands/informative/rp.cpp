@@ -504,7 +504,7 @@ ACMD(do_nickname)
       }
       char nick[MAX_INPUT_LENGTH];
       snprintf(nick, sizeof(nick), "%s", CAP(arg2));
-      obj_set_action_description(ship2, strdup(nick));
+      obj_set_action_description(ship2, nick);
       for (obj_data *k : each_obj(g)) {
         if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
           extract_obj(g, k);
@@ -530,8 +530,8 @@ ACMD(do_nickname)
   char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
   snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(obj), CAP(arg2));
   snprintf(nick2, sizeof(nick2), "%s %s", obj_get_name(obj), arg2);
-  obj_set_short_description(obj, strdup(nick));
-  obj_set_name(obj, strdup(nick2));
+  obj_set_short_description(obj, nick);
+  obj_set_name(obj, nick2);
   return;
 }
 

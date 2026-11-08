@@ -710,7 +710,7 @@ static void check_message_about_an_object_with_no_description(void)
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
   struct obj_data *obj = read_object(g, 350);
-  char *description = obj_get_short_description(obj);
+  std::string description = obj_get_short_description(obj); /* a copy: clearing the field invalidates the pointer */
 
   obj_set_short_description(obj, nullptr);
   act(g, "You look at $p.", false, ch, obj, nullptr, TO_CHAR);

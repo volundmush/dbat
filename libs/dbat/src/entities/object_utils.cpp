@@ -364,16 +364,16 @@ struct obj_data *create_money(GameWorld *g, int amount)
   new_descr = new extra_descr_data();
 
   if (amount == 1) {
-    obj->name              = strdup("zenni money");
-    obj->short_description = strdup("a single zenni");
-    obj->description       = strdup("One miserable zenni is lying here");
+    obj->name              = "zenni money";
+    obj->short_description = "a single zenni";
+    obj->description       = "One miserable zenni is lying here";
     new_descr->keyword     = strdup("zenni money");
     new_descr->description = strdup("It's just one miserable little zenni.");
   } else {
-    obj->name              = strdup("zenni money");
-    obj->short_description = strdup(money_desc(amount));
+    obj->name              = "zenni money";
+    obj->short_description = money_desc(amount);
     snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
-    obj->description = strdup(CAP(buf));
+    obj->description = CAP(buf);
 
     new_descr->keyword = strdup("zenni money");
     if (amount < 10)
@@ -480,7 +480,7 @@ bool obj_wear_flagged(const struct obj_data *obj, int part)
 
 const char *obj_sana(const struct obj_data *obj)
 {
-  return (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a");
+  return (strchr("aeiouAEIOU", *(obj)->name.c_str()) ? "an" : "a");
 }
 
 /* Field accessors (formerly accessor macros). */
@@ -780,9 +780,9 @@ void obj_set_item_number(struct obj_data *obj, obj_vnum v)
   obj->item_number = v;
 }
 
-char *obj_get_short_description(const struct obj_data *obj)
+const char *obj_get_short_description(const struct obj_data *obj)
 {
-  return obj->short_description;
+  return obj->short_description.empty() ? nullptr : obj->short_description.c_str(); /* null for none, as the files have it */
 }
 
 room_vnum obj_get_room_loaded(const struct obj_data *obj)
@@ -880,7 +880,7 @@ struct script_data **obj_script_slot(struct obj_data *obj)
   return &obj->script;
 }
 
-char **obj_action_description_slot(struct obj_data *obj)
+std::string *obj_action_description_slot(struct obj_data *obj)
 {
   return &obj->action_description;
 }
@@ -890,12 +890,17 @@ struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
   return &obj->sbinfo;
 }
 
-char *obj_get_action_description(const struct obj_data *obj)
+const char *obj_get_action_description(const struct obj_data *obj)
 {
-  return obj->action_description;
+  return obj->action_description.empty() ? nullptr : obj->action_description.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_action_description(struct obj_data *obj, char *v)
+void obj_set_action_description(struct obj_data *obj, const char *v)
+{
+  obj->action_description = v ? v : "";
+}
+
+void obj_set_action_description(struct obj_data *obj, const std::string &v)
 {
   obj->action_description = v;
 }
@@ -920,12 +925,17 @@ const id_list &obj_get_contains(const struct obj_data *obj)
   return obj->contains;
 }
 
-char *obj_get_description(const struct obj_data *obj)
+const char *obj_get_description(const struct obj_data *obj)
 {
-  return obj->description;
+  return obj->description.empty() ? nullptr : obj->description.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_description(struct obj_data *obj, char *v)
+void obj_set_description(struct obj_data *obj, const char *v)
+{
+  obj->description = v ? v : "";
+}
+
+void obj_set_description(struct obj_data *obj, const std::string &v)
 {
   obj->description = v;
 }
@@ -960,12 +970,17 @@ void obj_set_in_obj(struct obj_data *obj, struct obj_data *v)
   obj->in_obj = v;
 }
 
-char *obj_get_name(const struct obj_data *obj)
+const char *obj_get_name(const struct obj_data *obj)
 {
-  return obj->name;
+  return obj->name.empty() ? nullptr : obj->name.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_name(struct obj_data *obj, char *v)
+void obj_set_name(struct obj_data *obj, const char *v)
+{
+  obj->name = v ? v : "";
+}
+
+void obj_set_name(struct obj_data *obj, const std::string &v)
 {
   obj->name = v;
 }
@@ -995,7 +1010,12 @@ void obj_set_script(struct obj_data *obj, struct script_data *v)
   obj->script = v;
 }
 
-void obj_set_short_description(struct obj_data *obj, char *v)
+void obj_set_short_description(struct obj_data *obj, const char *v)
+{
+  obj->short_description = v ? v : "";
+}
+
+void obj_set_short_description(struct obj_data *obj, const std::string &v)
 {
   obj->short_description = v;
 }

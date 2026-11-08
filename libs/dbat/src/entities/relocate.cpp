@@ -70,9 +70,9 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
                 sprintf(nick2, "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w", obj_get_action_description(object));
               }
               snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-              obj_set_name(vehicle, strdup(nick));
-              obj_set_short_description(vehicle, strdup(nick2));
-              obj_set_description(vehicle, strdup(nick3));
+              obj_set_name(vehicle, nick);
+              obj_set_short_description(vehicle, nick2);
+              obj_set_description(vehicle, nick3);
             }
           }
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
