@@ -1,9 +1,11 @@
 #pragma once
 #include <deque>
 #include <string>
+#include <vector>
 #include <ctime>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/help.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/rooms.hpp"
 #include "dbat/guild.hpp"
@@ -123,8 +125,7 @@ struct GameWorld {
   /* The text files shown as they are: empty if one couldn't be read */
   std::string background, credits, handbook, help, ihelp, immlist, imotd, info;
   std::string motd, news, policies, wizlist, GREETANSI, GREETINGS;
-  struct help_index_element *help_table{};
-  int top_of_helpt{};
+  std::vector<help_index_element> help_table; /* in keyword order */
   char *context_help_list[NUM_CONTEXTS]{};
 
   /* Boards, mail, houses and bans */

@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <cerrno>
 #include <csignal>
 
@@ -3163,25 +3164,18 @@ static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode
   return (false);
 }
 
-/* Orders a typed help topic against an entry's keywords: a prefix of them matches. */
-static int help_prefix_order(const void *key, const void *elem)
-{
-  const char *entry = static_cast<const char *>(key);
-
-  return strncasecmp(entry, ((const struct help_index_element *)elem)->keywords, strlen(entry));
-}
-
+/* Shows the first help entry with a keyword that starts with entry. */
 void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 {
-  struct help_index_element *found;
+  size_t len = strlen(entry);
+  auto found = std::lower_bound(g->help_table.begin(), g->help_table.end(), entry,
+                                [len](const help_index_element &el, const char *key) {
+                                  return strncasecmp(el.keywords.c_str(), key, len) < 0;
+                                });
 
-  if (!g->help_table)
+  if (found == g->help_table.end() || strncasecmp(found->keywords.c_str(), entry, len))
     return;
-  if (!(found = (struct help_index_element *)bsearch(entry, g->help_table, g->top_of_helpt + 1, sizeof(*g->help_table), help_prefix_order)))
-    return;
-  while (found > g->help_table && !help_prefix_order(entry, found - 1)) /* the first of the matches */
-    found--;
-  write_to_output(g, t, "\r\n%s\r\n", found->entry);
+  write_to_output(g, t, "\r\n%s\r\n", found->entry.c_str());
 }
 
 /* Thx to Jamie Nelson of 4D for this contribution */

@@ -124,20 +124,20 @@ int search_help(GameWorld *g, const char *argument, int level)
   int chk, bot, top, mid, minlen;
 
   bot    = 0;
-  top    = g->top_of_helpt;
+  top    = (int)g->help_table.size() - 1;
   minlen = strlen(argument);
 
   while (bot <= top) {
     mid = (bot + top) / 2;
 
-    if (!(chk = strncasecmp(argument, g->help_table[mid].keywords, minlen))) {
-      while ((mid > 0) && !strncasecmp(argument, g->help_table[mid - 1].keywords, minlen))
+    if (!(chk = strncasecmp(argument, g->help_table[mid].keywords.c_str(), minlen))) {
+      while ((mid > 0) && !strncasecmp(argument, g->help_table[mid - 1].keywords.c_str(), minlen))
         mid--;
 
       while (level < g->help_table[mid].min_level && mid < (bot + top) / 2)
         mid++;
 
-      if (strncasecmp(argument, g->help_table[mid].keywords, minlen))
+      if (strncasecmp(argument, g->help_table[mid].keywords.c_str(), minlen))
         break;
 
       return mid;
@@ -159,7 +159,7 @@ ACMD(do_help)
 
   skip_spaces(&argument);
 
-  if (!g->help_table) {
+  if (g->help_table.empty()) {
     send_to_char(g, ch, "No help available.\r\n");
     return;
   }
@@ -180,18 +180,18 @@ ACMD(do_help)
     if (char_get_admlevel(ch) < 3) {
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), argument);
     }
-    for (i = 0; i <= g->top_of_helpt; i++) {
+    for (i = 0; i < (int)g->help_table.size(); i++) {
       if (g->help_table[i].min_level > char_get_admlevel(ch))
         continue;
       /* To help narrow down results, if they don't start with the same letters, move on */
-      if (*argument != *g->help_table[i].keywords)
+      if (*argument != *g->help_table[i].keywords.c_str())
         continue;
-      if (levenshtein_distance(argument, g->help_table[i].keywords) <= 2) {
+      if (levenshtein_distance(argument, g->help_table[i].keywords.c_str()) <= 2) {
         if (!found) {
           send_to_char(g, ch, "\r\nDid you mean:\r\n");
           found = 1;
         }
-        send_to_char(g, ch, "  %s\r\n", g->help_table[i].keywords);
+        send_to_char(g, ch, "  %s\r\n", g->help_table[i].keywords.c_str());
       }
     }
     return;
@@ -201,7 +201,7 @@ ACMD(do_help)
     return;
   }
   snprintf(buf, sizeof(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", g->help_table[mid].entry);
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", g->help_table[mid].entry.c_str());
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
   if (char_get_admlevel(ch) > 0) {
     snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", g->help_table[mid].min_level);

@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstddef>
 #include <cerrno>
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
 
@@ -112,7 +113,7 @@ static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-static int hsort(const void *a, const void *b);
+static bool help_keyword_order(const help_index_element &a, const help_index_element &b);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 /* external vars */
@@ -348,8 +349,7 @@ ACMD(do_reboot)
       send_to_char(g, ch, "Cannot read handbook\r\n");
     if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
       send_to_char(g, ch, "Cannot read background\r\n");
-    if (g->help_table)
-      free_help_table(g);
+    free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
   } else if (!strcasecmp(arg, "levels")) {
     if (load_levels(g) < 0)
@@ -398,8 +398,7 @@ ACMD(do_reboot)
     else
       send_to_char(g, ch, "Cannot read greetings.\r\n");
   } else if (!strcasecmp(arg, "xhelp")) {
-    if (g->help_table)
-      free_help_table(g);
+    free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
   } else if (!strcasecmp(arg, "ihelp")) {
     if (file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp) < 0)
@@ -1064,7 +1063,7 @@ void index_boot(GameWorld *g, int mode)
       mud_log("   %d zones, %d bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_HLP:
-      g->help_table = new help_index_element[rec_count]();
+      g->help_table.reserve(rec_count);
       size[0] = sizeof(struct help_index_element) * rec_count;
       mud_log("   %d entries, %d bytes.", rec_count, size[0]);
       break;
@@ -1106,8 +1105,8 @@ void index_boot(GameWorld *g, int mode)
 
   /* Sort the help index. */
   if (mode == DB_BOOT_HLP) {
-    qsort(g->help_table, g->top_of_helpt, sizeof(struct help_index_element), hsort);
-    g->top_of_helpt--;
+    /* stable, as glibc's qsort() was: an entry's keywords stay in the order the file gave them */
+    std::stable_sort(g->help_table.begin(), g->help_table.end(), help_keyword_order);
   }
 }
 
@@ -2573,18 +2572,7 @@ static void get_one_line(FILE *fl, char *buf)
 
 void free_help_table(GameWorld *g)
 {
-  if (g->help_table) {
-    int hp;
-    for (hp = 0; hp <= g->top_of_helpt; hp++) { /* top_of_helpt is the last index */
-      if (g->help_table[hp].keywords)
-        free(g->help_table[hp].keywords);
-      if (g->help_table[hp].entry && !g->help_table[hp].duplicate)
-        free(g->help_table[hp].entry);
-    }
-    delete[] g->help_table;
-    g->help_table = nullptr;
-  }
-  g->top_of_helpt = 0;
+  g->help_table.clear();
 }
 
 static void load_help(GameWorld *g, FILE *fl, char *name)
@@ -2635,12 +2623,12 @@ static void load_help(GameWorld *g, FILE *fl, char *name)
     }
 
     el.duplicate = 0;
-    el.entry     = strdup(entry);
+    el.entry     = entry;
     scan         = one_word(key, next_key);
 
     while (*next_key) {
-      el.keywords                = strdup(next_key);
-      g->help_table[g->top_of_helpt++] = el;
+      el.keywords = next_key;
+      g->help_table.push_back(el);
       el.duplicate++;
       scan = one_word(scan, next_key);
     }
@@ -2648,14 +2636,9 @@ static void load_help(GameWorld *g, FILE *fl, char *name)
   }
 }
 
-static int hsort(const void *a, const void *b)
+static bool help_keyword_order(const help_index_element &a, const help_index_element &b)
 {
-  const struct help_index_element *a1, *b1;
-
-  a1 = (const struct help_index_element *)a;
-  b1 = (const struct help_index_element *)b;
-
-  return (strcasecmp(a1->keywords, b1->keywords));
+  return strcasecmp(a.keywords.c_str(), b.keywords.c_str()) < 0;
 }
 
 /*************************************************************************

@@ -92,7 +92,7 @@ ACMD(do_oasis_hedit)
     send_to_char(g, ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d).c_str());
     OLC_MODE(d) = HEDIT_CONFIRM_ADD;
   } else {
-    send_to_char(g, ch, "Do you wish to edit the '%s' help file? ", g->help_table[OLC_INDEX(d)].keywords);
+    send_to_char(g, ch, "Do you wish to edit the '%s' help file? ", g->help_table[OLC_INDEX(d)].keywords.c_str());
     OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
   }
 
@@ -111,9 +111,8 @@ static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
   char buf3[MAX_INPUT_LENGTH];
   sprintf(buf3, "<<X<< Put helpfile keywords here in caps");
 
-  OLC_HELP(d)->keywords = strdup(buf3);
-  /*strdup(OLC_STORAGE(d).c_str());*/
-  OLC_HELP(d)->entry = strdup("\r\nThis help file is unfinished.\r\n");
+  OLC_HELP(d)->keywords = buf3;
+  OLC_HELP(d)->entry    = "\r\nThis help file is unfinished.\r\n";
   OLC_VAL(d)         = 0;
 
   hedit_disp_menu(g, d);
@@ -123,10 +122,11 @@ static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, int rn
 {
   OLC_HELP(d) = new help_index_element();
 
-  OLC_HELP(d)->keywords  = str_udup(g->help_table[rnum].keywords);
-  OLC_HELP(d)->entry     = str_udup(g->help_table[rnum].entry);
-  OLC_HELP(d)->duplicate = g->help_table[rnum].duplicate;
-  OLC_HELP(d)->min_level = g->help_table[rnum].min_level;
+  *OLC_HELP(d) = g->help_table[rnum];
+  if (OLC_HELP(d)->keywords.empty())
+    OLC_HELP(d)->keywords = "undefined"; /* as str_udup() */
+  if (OLC_HELP(d)->entry.empty())
+    OLC_HELP(d)->entry = "undefined";
   OLC_VAL(d)             = 0;
 
   hedit_disp_menu(g, d);
@@ -134,19 +134,9 @@ static void hedit_setup_existing(GameWorld *g, struct descriptor_data *d, int rn
 
 static void hedit_save_internally(GameWorld *g, struct descriptor_data *d)
 {
-  struct help_index_element *new_help_table = nullptr;
-  if (OLC_INDEX(d) == NOWHERE) {
-    /*if (OLC_INDEX(d) > top_of_helpt) {*/
-    int i;
-    new_help_table = new help_index_element[g->top_of_helpt + 2]();
-
-    /* top_of_helpt is the index of the last entry */
-    for (i = 0; i <= g->top_of_helpt; i++)
-      new_help_table[i] = g->help_table[i];
-    new_help_table[++g->top_of_helpt] = *OLC_HELP(d);
-    delete[] g->help_table;
-    g->help_table = new_help_table;
-  } else
+  if (OLC_INDEX(d) == NOWHERE)
+    g->help_table.push_back(*OLC_HELP(d));
+  else
     g->help_table[OLC_INDEX(d)] = *OLC_HELP(d);
 
   add_to_save_list(g, HEDIT_PERMISSION, SL_HLP);
@@ -166,10 +156,10 @@ static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
     return;
   }
 
-  for (i = 0; i <= g->top_of_helpt; i++) {
+  for (i = 0; i < (int)g->help_table.size(); i++) {
     if (g->help_table[i].duplicate)
       continue;
-    strlcpy(buf1, g->help_table[i].entry ? g->help_table[i].entry : "Empty\r\n", sizeof(buf1));
+    strlcpy(buf1, !g->help_table[i].entry.empty() ? g->help_table[i].entry.c_str() : "Empty\r\n", sizeof(buf1));
     strip_cr(buf1);
 
     /* Forget making a buffer, lets just write the thing now. */
@@ -197,8 +187,8 @@ static void hedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   "@g3@n) Min Level   : @y%d\r\n"
                   "@gQ@n) Quit\r\n"
                   "Enter choice : ",
-                  OLC_HELP(d)->keywords ? OLC_HELP(d)->keywords : "<None>",
-                  OLC_HELP(d)->entry ? OLC_HELP(d)->entry : "<None>\r\n",
+                  !OLC_HELP(d)->keywords.empty() ? OLC_HELP(d)->keywords.c_str() : "<None>",
+                  !OLC_HELP(d)->entry.empty() ? OLC_HELP(d)->entry.c_str() : "<None>\r\n",
                   OLC_HELP(d)->min_level);
   OLC_MODE(d) = HEDIT_MAIN_MENU;
 }
@@ -213,23 +203,22 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          if (OLC_HELP(d)->keywords == nullptr) {
+          if (OLC_HELP(d)->keywords.empty()) {
             hedit_disp_menu(g, d);
             write_to_output(g, d, "\n@RYou must fill in the keywords before you save.@n\r\n");
-          } else if (strstr(OLC_HELP(d)->keywords, "undefined")) {
+          } else if (OLC_HELP(d)->keywords.find("undefined") != std::string::npos) {
             hedit_disp_menu(g, d);
             write_to_output(g, d, "\n@RYou must fill in the keywords before you save.@n\r\n");
-          } else if (strstr(OLC_HELP(d)->keywords, "<<X<<")) {
+          } else if (OLC_HELP(d)->keywords.find("<<X<<") != std::string::npos) {
             hedit_disp_menu(g, d);
             write_to_output(g, d, "\n@RYou must fill in the keywords before you save.@n\r\n");
           } else {
             write_to_output(g, d, "Help saved to disk.\r\n");
             char buf[MAX_INPUT_LENGTH];
             *buf = '\0';
-            sprintf(buf, "%s", OLC_HELP(d)->keywords);
+            snprintf(buf, sizeof(buf), "%s", OLC_HELP(d)->keywords.c_str());
             send_to_imm(g, "@gHedit@D: @w%s@G has just edited and saved, @Y%s@G.@n", char_get_alias(d->character), buf);
             hedit_save_internally(g, d);
-            /* Do not free strings, just the help structure. */
             cleanup_olc(g, d, CLEANUP_STRUCTS);
             g->HEDITS = false;
           }
@@ -260,27 +249,27 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'N':
           OLC_INDEX(d)
           ++;
-          for (; OLC_INDEX(d) <= g->top_of_helpt; OLC_INDEX(d)++)
-            if (is_abbrev(OLC_STORAGE(d).c_str(), g->help_table[OLC_INDEX(d)].keywords))
+          for (; OLC_INDEX(d) < (int)g->help_table.size(); OLC_INDEX(d)++)
+            if (is_abbrev(OLC_STORAGE(d).c_str(), g->help_table[OLC_INDEX(d)].keywords.c_str()))
               break;
             else
-              OLC_INDEX(d) = g->top_of_helpt + 1;
+              OLC_INDEX(d) = g->help_table.size();
 
-          if (OLC_INDEX(d) > g->top_of_helpt) {
+          if (OLC_INDEX(d) >= (int)g->help_table.size()) {
             OLC_INDEX(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
             write_to_output(g, d, "Do you wish to add the '%s' help file? ",
                             OLC_STORAGE(d).c_str());
             OLC_MODE(d) = HEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '%s' help file? ",
-                            g->help_table[OLC_INDEX(d)].keywords);
+                            g->help_table[OLC_INDEX(d)].keywords.c_str());
             OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
           }
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\n"
                                 "Do you wish to edit the '%s' help file? ",
-                          g->help_table[OLC_INDEX(d)].keywords);
+                          g->help_table[OLC_INDEX(d)].keywords.c_str());
           break;
       }
       return;
@@ -330,9 +319,9 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           clear_screen(g, d);
           send_editor_help(g, d);
           write_to_output(g, d, "Enter help entry: (/s saves /h for help)\r\n");
-          if (OLC_HELP(d)->entry) {
-            write_to_output(g, d, "%s", OLC_HELP(d)->entry);
-            oldtext = strdup(OLC_HELP(d)->entry);
+          if (!OLC_HELP(d)->entry.empty()) {
+            write_to_output(g, d, "%s", OLC_HELP(d)->entry.c_str());
+            oldtext = strdup(OLC_HELP(d)->entry.c_str());
           }
           string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0, oldtext);
           OLC_VAL(d) = 1;
@@ -349,32 +338,30 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       return;
 
     case HEDIT_KEYWORDS:
-      if (OLC_HELP(d)->keywords)
-        free(OLC_HELP(d)->keywords);
       if (strlen(arg) > MAX_HELP_KEYWORDS)
         arg[MAX_HELP_KEYWORDS - 1] = '\0';
       strip_cr(arg);
-      OLC_HELP(d)->keywords = str_udup(arg);
-      if (strstr(OLC_HELP(d)->keywords, "undefined")) {
+      OLC_HELP(d)->keywords = *arg ? arg : "undefined"; /* as str_udup() */
+      if (OLC_HELP(d)->keywords.find("undefined") != std::string::npos) {
         OLC_MODE(d) = HEDIT_KEYWORDS;
         clear_screen(g, d);
         write_to_output(g, d, "@RYou must at least enter SOME keywords.@n\n");
         write_to_output(g, d, "Keywords: ");
         change = false;
-      } else if (strstr(OLC_HELP(d)->keywords, "<<X<<")) {
+      } else if (OLC_HELP(d)->keywords.find("<<X<<") != std::string::npos) {
         OLC_MODE(d) = HEDIT_KEYWORDS;
         clear_screen(g, d);
         write_to_output(g, d, "@RLet's not joke around with help files now.@n\n");
         write_to_output(g, d, "Keywords: ");
         change = false;
-      } else if (strstr(OLC_HELP(d)->keywords, "<<x<<")) {
+      } else if (OLC_HELP(d)->keywords.find("<<x<<") != std::string::npos) {
         OLC_MODE(d) = HEDIT_KEYWORDS;
         clear_screen(g, d);
         write_to_output(g, d, "@RLet's not joke around with help files now.@n\n");
         write_to_output(g, d, "Keywords: ");
         change = false;
       } else {
-        OLC_HELP(d)->entry = str_printf("%s\r\n----------\r\n\r\n%s", OLC_HELP(d)->keywords, OLC_HELP(d)->entry);
+        OLC_HELP(d)->entry = OLC_HELP(d)->keywords + "\r\n----------\r\n\r\n" + OLC_HELP(d)->entry;
       }
       break;
 
@@ -454,7 +441,7 @@ ACMD(do_hindex)
 
   if (!*argument) {
     send_to_char(g, ch, "Usage: hindex <string>\r\n");
-    for (i = 0; i <= g->top_of_helpt; i++) {
+    for (i = 0; i < (int)g->help_table.size(); i++) {
       num++;
     }
     if (num > 0 && char_get_admlevel(ch) > 0) {
@@ -464,11 +451,11 @@ ACMD(do_hindex)
   }
 
   len = sprintf(buf, "Help index entries based on '%s':\r\n", argument);
-  for (i = 0; i <= g->top_of_helpt; i++) {
+  for (i = 0; i < (int)g->help_table.size(); i++) {
     num++;
-    if (is_abbrev(argument, g->help_table[i].keywords) && (char_get_admlevel(ch) >= g->help_table[i].min_level))
+    if (is_abbrev(argument, g->help_table[i].keywords.c_str()) && (char_get_admlevel(ch) >= g->help_table[i].min_level))
       len +=
-          snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", g->help_table[i].keywords,
+          snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", g->help_table[i].keywords.c_str(),
                    (++count % 3 ? "" : "\r\n"));
   }
   if (count % 3)

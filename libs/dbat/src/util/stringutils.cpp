@@ -7,7 +7,7 @@
 #include "dbat/log.hpp"
 #include "dbat/consts/maximums.hpp"
 
-int levenshtein_distance(char *s1, char *s2)
+int levenshtein_distance(const char *s1, const char *s2)
 {
   int s1_len = strlen(s1), s2_len = strlen(s2);
   int **d, i, j;

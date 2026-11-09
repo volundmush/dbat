@@ -7,7 +7,7 @@
 
 #include "dbat/consts/types.hpp"
 
-int levenshtein_distance(char *s1, char *s2);
+int levenshtein_distance(const char *s1, const char *s2);
 void trim(char *s);
 char *add_commas(int64_t num);
 char *CAP(char *txt);

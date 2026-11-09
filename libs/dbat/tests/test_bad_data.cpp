@@ -701,10 +701,10 @@ static void check_help_keyword_with_an_unfinished_quote(void)
   th_before_boot(help_keyword_with_an_unfinished_quote);
   GameWorld *g = th_boot();
 
-  /* t, aaa, bbb, ccc, ddd, and what follows the quote; top_of_helpt is the last one's index */
-  CHECK(g->top_of_helpt == 5);
-  for (int i = 0; i <= g->top_of_helpt; i++)
-    CHECK(strcmp(g->help_table[i].keywords, "bb") && strcmp(g->help_table[i].keywords, "a"));
+  /* t, aaa, bbb, ccc, ddd, and what follows the quote */
+  CHECK(g->help_table.size() == 6);
+  for (const help_index_element &el : g->help_table)
+    CHECK(el.keywords != "bb" && el.keywords != "a");
   th_shutdown(g);
 }
 
