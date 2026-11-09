@@ -49,6 +49,7 @@
 - The attack commands (`commands/offense/` and `act.attack.cpp`) take their arguments apart with `dbat/args.hpp` into `std::string`s instead of fixed buffers, and `tech_handle_targeting()` and `tech_handle_charge()` take a `std::string &` and a `std::string_view`. [Volund]
 - An object's spellbook pages are its own (`owned<>`), copied with it and freed with it: oedit's copy of a spellbook no longer shares the prototype's pages, which an edit changed at once even if it was then abandoned, and an editor closed on a spellbook no longer leaks them. `obj_make_sbinfo()` replaces `obj_sbinfo_slot()`. [Volund]
 - The information commands (`commands/informative/`) take their arguments apart with `dbat/args.hpp`. `look_at_target()` takes a `std::string &`, `look_out_window()` and `find_exdesc()` a `std::string_view`, and `readUserIndex()` and `fingerUser()` a `const std::string &`; `users` parses its options from a view instead of copying the line into buffers. [Volund]
+- The miscellaneous commands (`commands/misc/`) take their arguments apart with `dbat/args.hpp`. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

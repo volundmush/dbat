@@ -11,6 +11,7 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -430,11 +431,13 @@ ACMD(do_song)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int skill = char_get_skill(ch, SKILL_MYSTICMUSIC);
 
-  two_arguments(argument, arg, arg2);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
+  if (arg.empty()) {
     send_to_char(g, ch, "@YSongs Known\n@c-------------------@n\r\n");
     send_to_char(g, ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
     send_to_char(g, ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
@@ -442,16 +445,16 @@ ACMD(do_song)
   }
   int64_t cost = getMaxKI(g, ch) * 0.01;
   int modifier = 1;
-  if (!strcasecmp(arg, "shielding")) {
+  if (str_eq_nocase(arg, "shielding")) {
     modifier = 20;
     cost *= modifier;
-  } else if (!strcasecmp(arg, "teleport")) {
+  } else if (str_eq_nocase(arg, "teleport")) {
     modifier = 50;
     cost *= modifier;
-  } else if (!strcasecmp(arg, "shadow")) {
+  } else if (str_eq_nocase(arg, "shadow")) {
     modifier = 8;
     cost *= modifier;
-  } else if (!strcasecmp(arg, "safety")) {
+  } else if (str_eq_nocase(arg, "safety")) {
     modifier = 3;
     cost *= modifier;
   }
@@ -499,7 +502,7 @@ ACMD(do_song)
     return;
   }
   if (modifier == 50) {
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
       return;
     }
@@ -507,21 +510,21 @@ ACMD(do_song)
       send_to_char(g, ch, "Not while you're dead!\r\n");
       return;
     }
-    if (!strcasecmp(arg2, "earth")) {
+    if (str_eq_nocase(arg2, "earth")) {
       char_set_powerattack(ch, SONG_TELEPORT_EARTH);
-    } else if (!strcasecmp(arg2, "frigid")) {
+    } else if (str_eq_nocase(arg2, "frigid")) {
       char_set_powerattack(ch, SONG_TELEPORT_FRIGID);
-    } else if (!strcasecmp(arg2, "vegeta")) {
+    } else if (str_eq_nocase(arg2, "vegeta")) {
       char_set_powerattack(ch, SONG_TELEPORT_VEGETA);
-    } else if (!strcasecmp(arg2, "namek")) {
+    } else if (str_eq_nocase(arg2, "namek")) {
       char_set_powerattack(ch, SONG_TELEPORT_NAMEK);
-    } else if (!strcasecmp(arg2, "arlia")) {
+    } else if (str_eq_nocase(arg2, "arlia")) {
       char_set_powerattack(ch, SONG_TELEPORT_ARLIA);
-    } else if (!strcasecmp(arg2, "kanassa")) {
+    } else if (str_eq_nocase(arg2, "kanassa")) {
       char_set_powerattack(ch, SONG_TELEPORT_KANASSA);
-    } else if (!strcasecmp(arg2, "konack")) {
+    } else if (str_eq_nocase(arg2, "konack")) {
       char_set_powerattack(ch, SONG_TELEPORT_KONACK);
-    } else if (!strcasecmp(arg2, "aether")) {
+    } else if (str_eq_nocase(arg2, "aether")) {
       char_set_powerattack(ch, SONG_TELEPORT_AETHER);
     } else {
       send_to_char(g, ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");

@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -58,11 +59,12 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality);
 ACMD(do_restring)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
   int pay = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_get_in_room(ch) >= 178 && char_get_in_room(ch) <= 184) {
     pay = 5000;
@@ -110,16 +112,18 @@ ACMD(do_fish)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: fish ( cast | hook | reel | apply | stop)\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "cast")) {
+  if (str_eq_nocase(arg, "cast")) {
     if (char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(g, ch, "You are already fishing! Syntax: fish stop\r\n");
       return;
@@ -157,7 +161,7 @@ ACMD(do_fish)
     send_to_char(g, ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", char_get_accuracy_mod(ch));
     return;
   }
-  if (!strcasecmp(arg, "hook")) {
+  if (str_eq_nocase(arg, "hook")) {
     if (!char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(g, ch, "You are not even fishing!\r\n");
       return;
@@ -187,7 +191,7 @@ ACMD(do_fish)
     char_set_fishstate(ch, FISH_REELING);
     return;
   }
-  if (!strcasecmp(arg, "apply")) {
+  if (str_eq_nocase(arg, "apply")) {
     if (!char_get_equipment(ch, WEAR_WIELD2)) {
       send_to_char(g, ch, "You are not holding a fishing pole.\r\n");
       return;
@@ -203,7 +207,7 @@ ACMD(do_fish)
       } else {
         struct obj_data *bait;
 
-        if (!*arg2) {
+        if (arg2.empty()) {
           send_to_char(g, ch, "Syntax: fish apply (bait)\r\n");
           return;
         }
@@ -224,7 +228,7 @@ ACMD(do_fish)
         } /* End we applied bait */
       } /* End Applying bait */
     } /* end has pole */
-  } else if (!strcasecmp(arg, "stop")) {
+  } else if (str_eq_nocase(arg, "stop")) {
     if (!char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(g, ch, "You are not even fishing!\r\n");
       return;
@@ -491,20 +495,22 @@ ACMD(do_extract)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], argu[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
+  std::string arg, arg2, arg3;
   struct obj_data *obj = nullptr, *obj2 = nullptr;
   int skill = char_get_skill(ch, SKILL_EXTRACT), chance = axion_dice(g, 0);
 
-  half_chop(argument, arg, argu);
-  two_arguments(argu, arg2, arg3);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  arg2                  = take_arg(rest);
+  arg3                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: extract (object)\r\n");
     send_to_char(g, ch, "Syntax: extract combine (bottle1) (bottle2)\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "combine")) {
+  if (str_eq_nocase(arg, "combine")) {
     if (!(obj = get_obj_in_list_vis(g, ch, arg2, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You do not have the first bottle that you were wanting to combine.\r\n");
       return;
@@ -627,17 +633,19 @@ ACMD(do_runic)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int skill = char_get_skill(ch, SKILL_RUNIC), bonus = 0;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are too busy fighting to write runes!\r\n");
     return;
   }
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: runic (target) (skill)\r\n");
     send_to_char(g, ch, "@D----@GRunic Skills@D----@n\r\n");
     send_to_char(g, ch, "@Rkenaz\n%s\n%s\n%s\n%s\n%s\n%s@n\n", skill >= 40 ? "@Galgiz" : "", skill >= 40 ? "@moagaz" : "", skill >= 50 ? "@CLaguz" : "", skill >= 60 ? "@Ywunjo" : "", skill >= 80 ? "@rpurisaz" : "", skill >= 100 ? "@mgebo" : "");
@@ -710,7 +718,7 @@ ACMD(do_runic)
     char_set_wait(ch, PULSE_3SEC);
     return;
   }
-  if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
+  if (str_eq_nocase(arg2, "kenaz") || str_eq_nocase(arg2, "Kenaz")) {
     inkcost += 1;
     if (vict == ch) {
       decCurKI(g, ch, cost, 0);
@@ -750,7 +758,7 @@ ACMD(do_runic)
     char_set_wait(ch, PULSE_3SEC);
     return;
   }
-  if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
+  if (str_eq_nocase(arg2, "algiz") || str_eq_nocase(arg2, "Algiz")) {
     inkcost += 2;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -794,7 +802,7 @@ ACMD(do_runic)
     char_set_wait(ch, PULSE_3SEC);
     return;
   }
-  if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
+  if (str_eq_nocase(arg2, "oagaz") || str_eq_nocase(arg2, "Oagaz")) {
     inkcost += 3;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -817,7 +825,7 @@ ACMD(do_runic)
         obj_to_char(g, empty, ch);
       }
     }
-  } else if (!strcasecmp(arg2, "laguz") || !strcasecmp(arg2, "Laguz")) {
+  } else if (str_eq_nocase(arg2, "laguz") || str_eq_nocase(arg2, "Laguz")) {
     inkcost += 4;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -860,7 +868,7 @@ ACMD(do_runic)
     improve_skill(g, ch, SKILL_RUNIC, 1);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "wunjo") || !strcasecmp(arg2, "Wunjo")) {
+  } else if (str_eq_nocase(arg2, "wunjo") || str_eq_nocase(arg2, "Wunjo")) {
     inkcost += 4;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -903,7 +911,7 @@ ACMD(do_runic)
     improve_skill(g, ch, SKILL_RUNIC, 1);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "purisaz") || !strcasecmp(arg2, "Purisaz")) {
+  } else if (str_eq_nocase(arg2, "purisaz") || str_eq_nocase(arg2, "Purisaz")) {
     inkcost += 4;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -946,7 +954,7 @@ ACMD(do_runic)
     improve_skill(g, ch, SKILL_RUNIC, 1);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "gebo") || !strcasecmp(arg2, "Gebo")) {
+  } else if (str_eq_nocase(arg2, "gebo") || str_eq_nocase(arg2, "Gebo")) {
     inkcost += 10;
     if (amount < inkcost) {
       send_to_char(g, ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -993,10 +1001,12 @@ ACMD(do_runic)
 
 ACMD(do_resize)
 {
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct obj_data *obj;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_BUILD)) {
     send_to_char(g, ch, "You do not have the skill to resize equipment!\r\n");
@@ -1006,7 +1016,7 @@ ACMD(do_resize)
     send_to_char(g, ch, "Your build skill must be at least level 80 before you can resize equipment.\r\n");
     return;
   }
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: resize (obj) (small | medium)\r\n");
     return;
   }
@@ -1022,7 +1032,7 @@ ACMD(do_resize)
     send_to_char(g, ch, "You do not have enough stamina to resize this object at this time.\r\n");
     return;
   }
-  if (!strcasecmp(arg2, "small")) {
+  if (str_eq_nocase(arg2, "small")) {
     if (obj_get_size(obj) == SIZE_SMALL) {
       send_to_char(g, ch, "The equipment is already small sized.\r\n");
       return;
@@ -1031,7 +1041,7 @@ ACMD(do_resize)
     act(g, "@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
     obj_set_size(obj, SIZE_SMALL);
     decCurST(g, ch, obj_get_weight(obj) + (getMaxST(g, ch) / 40), 0);
-  } else if (!strcasecmp(arg2, "medium")) {
+  } else if (str_eq_nocase(arg2, "medium")) {
     if (obj_get_size(obj) == SIZE_MEDIUM) {
       send_to_char(g, ch, "The equipment is already medium sized.\r\n");
       return;
@@ -1064,11 +1074,13 @@ ACMD(do_bury)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: dig [bury (item) | uncover]\r\n");
     return;
   }
@@ -1086,8 +1098,8 @@ ACMD(do_bury)
     }
   }
 
-  if (!strcasecmp(arg, "bury")) {
-    if (!*arg2) {
+  if (str_eq_nocase(arg, "bury")) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Bury what?\r\n");
       return;
     }
@@ -1109,7 +1121,7 @@ ACMD(do_bury)
     obj_from_char(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
     obj_extra_set(obj, ITEM_BURIED, true);
-  } else if (!strcasecmp(arg, "uncover")) {
+  } else if (str_eq_nocase(arg, "uncover")) {
     if (fobj == nullptr) {
       send_to_char(g, ch, "There is nothing buried here.\r\n");
       return;
@@ -1155,19 +1167,21 @@ ACMD(do_silk)
   }
 
   struct obj_data *obj = nullptr, *weaved = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
   int prob = char_get_skill(ch, SKILL_SILK), perc = rand_number(g, 1, 120);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: silk (weave | bundle)\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "weave")) {
+  if (str_eq_nocase(arg, "weave")) {
 
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Syntax: silk weave (head | wrist | belt)\r\n");
       return;
     }
@@ -1186,7 +1200,7 @@ ACMD(do_silk)
       send_to_char(g, ch, "You do not have an acceptable bundle of silk in your inventory!\r\n");
       return;
     } else {
-      if (!strcasecmp(arg2, "head")) {
+      if (str_eq_nocase(arg2, "head")) {
         if (prob <= perc) {
           act(g, "@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_CHAR);
           act(g, "@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -1245,7 +1259,7 @@ ACMD(do_silk)
         do_get(g, ch, writable{"headsash"}, 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
-      } else if (!strcasecmp(arg2, "wrist")) {
+      } else if (str_eq_nocase(arg2, "wrist")) {
         if (prob <= perc) {
           act(g, "@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_CHAR);
           act(g, "@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -1304,7 +1318,7 @@ ACMD(do_silk)
         do_get(g, ch, writable{"wristband"}, 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
-      } else if (!strcasecmp(arg2, "belt")) {
+      } else if (str_eq_nocase(arg2, "belt")) {
         if (prob <= perc) {
           act(g, "@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_CHAR);
           act(g, "@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -1370,7 +1384,7 @@ ACMD(do_silk)
       return;
     } ////
 
-  } else if (!strcasecmp(arg, "bundle")) {
+  } else if (str_eq_nocase(arg, "bundle")) {
     int64_t cost = ((getMaxKI(g, ch) * 0.01) * (prob * 0.20)) + (char_get_aff_abils_intel(ch) * char_get_level(ch));
 
     if ((getCurKI(g, ch)) < cost) {
@@ -1960,9 +1974,10 @@ static bool campfire_cook(int recipe)
 
 ACMD(do_cook)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
     return;
@@ -1981,7 +1996,7 @@ ACMD(do_cook)
 
   int skill = char_get_skill(ch, SKILL_COOKING), prob = axion_dice(g, 0);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "@D---------------------@RCooking@D---------------------@n\r\n");
     send_to_char(g, ch, "@Y 1@B) @CCooked Steak		@Y17@B) @CCarambola Bread@n\r\n");
     send_to_char(g, ch, "@Y 2@B) @CTomato Soup		@n\r\n");
@@ -2002,7 +2017,7 @@ ACMD(do_cook)
     send_to_char(g, ch, "@wSyntax: cook (recipe number)@n\r\n");
     return;
   }
-  int num = atoi(arg), pass = false;
+  int num = parse_int(arg), pass = false;
   struct obj_data *meal = nullptr;
 
   int recipe = -1;
@@ -2227,13 +2242,15 @@ ACMD(do_feed)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct char_data *vict;
   struct obj_data *obj;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Feed a senzu to whom?\r\n");
     return;
   }
@@ -2296,13 +2313,14 @@ ACMD(do_spoil)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
   int type = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What corpse do you want to decapitate?\r\n");
     return;
   }

@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -134,10 +135,11 @@ ACMD(do_multiform)
     }
   }
 
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!strcasecmp(arg, "merge")) {
+  if (str_eq_nocase(arg, "merge")) {
     if (count == 0) {
       send_to_char(g, ch, "You have no multiforms present to merge with!\r\n");
       return;
@@ -153,7 +155,7 @@ ACMD(do_multiform)
     return;
   }
 
-  if (!strcasecmp(arg, "split")) {
+  if (str_eq_nocase(arg, "split")) {
     int64_t cost = (getMaxKI(g, ch) * 0.005) + (getMaxST(g, ch) * 0.005) + 2;
     int penalty  = 0;
 
@@ -400,11 +402,13 @@ ACMD(do_liquefy)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
     return;
   }
@@ -414,7 +418,7 @@ ACMD(do_liquefy)
     return;
   }
 
-  if (!strcasecmp(arg, "hide")) {
+  if (str_eq_nocase(arg, "hide")) {
     if (char_get_grappled(g, ch)) {
       char_set_grappling(char_get_grappled(g, ch), nullptr);
       char_set_grappled(ch, nullptr);
@@ -440,7 +444,7 @@ ACMD(do_liquefy)
     char_aff_set(ch, AFF_LIQUEFIED, true);
     return;
   }
-  if (!strcasecmp(arg, "explode")) {
+  if (str_eq_nocase(arg, "explode")) {
     struct char_data *vict;
     if (char_get_grappled(g, ch)) {
       char_set_grappling(char_get_grappled(g, ch), nullptr);
@@ -454,7 +458,7 @@ ACMD(do_liquefy)
       char_set_dragged(char_get_drag(g, ch), nullptr);
       char_set_drag(ch, nullptr);
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
       return;
     }
@@ -526,17 +530,18 @@ ACMD(do_liquefy)
 ACMD(do_lifeforce)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int setting = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: life (0 - 99)\n0 is off.\r\n");
     return;
   }
 
-  setting = atoi(arg);
+  setting = parse_int(arg);
 
   if (setting > 99) {
     send_to_char(g, ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting));
@@ -555,15 +560,16 @@ ACMD(do_lifeforce)
 ACMD(do_defend)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg && char_get_defending(g, ch) == nullptr) {
+  if (arg.empty() && char_get_defending(g, ch) == nullptr) {
     send_to_char(g, ch, "Defend who?\r\n");
     return;
   }
-  if (!*arg && char_get_defending(g, ch)) {
+  if (arg.empty() && char_get_defending(g, ch)) {
     act(g, "@YYou stop defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(g, ch), TO_CHAR);
     act(g, "@y$n@Y stops defending you.@n", true, ch, nullptr, char_get_defending(g, ch), TO_VICT);
     act(g, "@y$n@Y stops defending @y$N@Y.@n", true, ch, nullptr, char_get_defending(g, ch), TO_NOTVICT);
@@ -607,11 +613,12 @@ ACMD(do_scry)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: scry (target)\r\n");
     return;
   }
@@ -704,11 +711,12 @@ ACMD(do_ashcloud)
   }
   int level = 1;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: ashcloud (1 | 2 | 3)\r\n");
     return;
   }
@@ -738,7 +746,7 @@ ACMD(do_ashcloud)
     return;
   }
 
-  level = atoi(arg);
+  level = parse_int(arg);
 
   int64_t mult   = 5;
   double initial = 0.0;
@@ -823,15 +831,16 @@ ACMD(do_ashcloud)
 ACMD(do_healglow)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_HEALGLOW)) {
     send_to_char(g, ch, "You do not know how to perform that technique.\r\n");
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     vict = ch;
   } else if (char_get_skill(ch, SKILL_HEALGLOW) < 100) {
     send_to_char(g, ch, "You can not target anyone except yourself unless you are a master of this technique.\nSyntax: healingglow\r\n");
@@ -946,9 +955,10 @@ ACMD(do_shimmer)
   int64_t cost          = 0;
   struct char_data *tar = nullptr;
 
-  char arg[MAX_INPUT_LENGTH] = "";
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
@@ -973,7 +983,7 @@ ACMD(do_shimmer)
     send_to_char(g, ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
     send_to_char(g, ch, "Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
     return;
@@ -989,19 +999,19 @@ ACMD(do_shimmer)
   perc  = axion_dice(g, 0);
   skill = 100;
 
-  if (!strcasecmp(arg, "planet-earth")) {
+  if (str_eq_nocase(arg, "planet-earth")) {
     location = 300;
-  } else if (!strcasecmp(arg, "planet-namek")) {
+  } else if (str_eq_nocase(arg, "planet-namek")) {
     location = 10222;
-  } else if (!strcasecmp(arg, "planet-frigid")) {
+  } else if (str_eq_nocase(arg, "planet-frigid")) {
     location = 4017;
-  } else if (!strcasecmp(arg, "planet-vegeta")) {
+  } else if (str_eq_nocase(arg, "planet-vegeta")) {
     location = 2200;
-  } else if (!strcasecmp(arg, "planet-konack")) {
+  } else if (str_eq_nocase(arg, "planet-konack")) {
     location = 8006;
-  } else if (!strcasecmp(arg, "planet-aether")) {
+  } else if (str_eq_nocase(arg, "planet-aether")) {
     location = 12024;
-  } else if (!strcasecmp(arg, "afterlife")) {
+  } else if (str_eq_nocase(arg, "afterlife")) {
     location = 6000;
   } else if (!(tar = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "@RThat target doesn't exist.@n\r\n");
@@ -1168,11 +1178,13 @@ ACMD(do_hydromancy)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax 1: hydromancy flood (direction)\r\n");
     send_to_char(g, ch, "Example: hydromancy flood nw\r\n");
     send_to_char(g, ch, "\nSyntax 2: hydromancy spike\r\n");
@@ -1181,7 +1193,7 @@ ACMD(do_hydromancy)
 
   int attempt = 0;
 
-  if (!strcasecmp(arg, "spike")) {
+  if (str_eq_nocase(arg, "spike")) {
     struct obj_data *obj = nullptr;
 
     cost = 100 + (char_get_skill(ch, SKILL_STYLE) / (1 + (getMaxKI(g, ch) * 0.5)));
@@ -1224,8 +1236,8 @@ ACMD(do_hydromancy)
     }
     improve_skill(g, ch, SKILL_STYLE, 1);
     char_set_con_cooldown(ch, 10);
-  } else if (!strcasecmp(arg, "flood")) {
-    if (!*arg2) {
+  } else if (str_eq_nocase(arg, "flood")) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Syntax 1: hydromancy flood (direction)\r\n");
       send_to_char(g, ch, "Example: hydromancy flood nw\r\n");
       send_to_char(g, ch, "\nSyntax 2: hydromancy spike\r\n");
@@ -1303,9 +1315,10 @@ ACMD(do_kanso)
   }
 
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(g, ch, "Perform Kanso Suru on who?\r\n");
@@ -1466,12 +1479,13 @@ ACMD(do_ensnare)
     return;
   } else {
     int prob = char_get_skill(ch, SKILL_ENSNARE), perc = axion_dice(g, 0);
-    char arg[MAX_INPUT_LENGTH];
+    std::string arg;
     struct char_data *vict;
 
-    one_argument(argument, arg);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
 
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "Syntax: ensnare (target)\r\n");
       return;
     }
@@ -1560,19 +1574,21 @@ ACMD(do_adrenaline)
     send_to_char(g, ch, "You are not an arlian and do not possess this ability\r\n");
     return;
   } else {
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    two_arguments(argument, arg, arg2);
+    std::string arg, arg2;
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
+    arg2                  = take_arg(rest);
 
-    if (!*arg || !*arg2) {
+    if (arg.empty() || arg2.empty()) {
       send_to_char(g, ch, "Syntax: adrenaline (pl or ki) (percent)\r\nExample: adrenaline pl 10\r\n");
       return;
     } else {
-      if (atoi(arg2) < 0 || atoi(arg2) > 100) {
+      if (parse_int(arg2) < 0 || parse_int(arg2) > 100) {
         send_to_char(g, ch, "The percent must be between 1 and 100%s.\r\n", "%");
         return;
       }
 
-      double percent = atoi(arg2) * 0.01;
+      double percent = parse_int(arg2) * 0.01;
 
       if ((getCurST(g, ch) - (getBasePL(ch) * percent)) < 0) {
         send_to_char(g, ch, "You do not have enough stamina to trade for adrenaline!\r\n");
@@ -1581,7 +1597,7 @@ ACMD(do_adrenaline)
 
       int64_t trade = getBaseST(ch) * percent;
 
-      if (!strcasecmp(arg, "pl")) {
+      if (str_eq_nocase(arg, "pl")) {
         act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
@@ -1590,7 +1606,7 @@ ACMD(do_adrenaline)
         incCurHealth(g, ch, trade, true);
         decCurST(g, ch, trade, 0);
 
-      } else if (!strcasecmp(arg, "ki")) {
+      } else if (str_eq_nocase(arg, "ki")) {
         act(g, "@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@g$n@G seems to concentrate and $e appears energized!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
@@ -1680,11 +1696,12 @@ ACMD(do_warppool)
   int perc = char_get_skill(ch, SKILL_WARP);
   int64_t cost = getMaxKI(g, ch) / 20;
   int prob = axion_dice(g, 0), pass = false;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What planet are you wanting to warp to?\n[ earth | frigid | kanassa | namek | aether ]\r\n");
     return;
   }
@@ -1713,27 +1730,27 @@ ACMD(do_warppool)
     return;
   }
 
-  if (!strcasecmp("earth", arg) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+  if (str_eq_nocase("earth", arg) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
     send_to_char(g, ch, "You are already on Earth!\r\n");
     return;
   }
-  if (!strcasecmp("frigid", arg) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
+  if (str_eq_nocase("frigid", arg) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
     send_to_char(g, ch, "You are already on Frigid!\r\n");
     return;
   }
-  if (!strcasecmp("kanassa", arg) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
+  if (str_eq_nocase("kanassa", arg) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
     send_to_char(g, ch, "You are already on Kanasssa!\r\n");
     return;
   }
-  if (!strcasecmp("namek", arg) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
+  if (str_eq_nocase("namek", arg) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
     send_to_char(g, ch, "You are already on Namek!\r\n");
     return;
   }
-  if (!strcasecmp("aether", arg) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
+  if (str_eq_nocase("aether", arg) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
     send_to_char(g, ch, "You are already on Aether!\r\n");
     return;
   }
-  if (!strcasecmp("earth", arg)) {
+  if (str_eq_nocase("earth", arg)) {
     if (prob > perc) {
       act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1748,7 +1765,7 @@ ACMD(do_warppool)
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
-  } else if (!strcasecmp("frigid", arg)) {
+  } else if (str_eq_nocase("frigid", arg)) {
     if (prob > perc) {
       act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1763,7 +1780,7 @@ ACMD(do_warppool)
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
-  } else if (!strcasecmp("namek", arg)) {
+  } else if (str_eq_nocase("namek", arg)) {
     if (prob > perc) {
       act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1778,7 +1795,7 @@ ACMD(do_warppool)
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
-  } else if (!strcasecmp("kanassa", arg)) {
+  } else if (str_eq_nocase("kanassa", arg)) {
     if (prob > perc) {
       act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1793,7 +1810,7 @@ ACMD(do_warppool)
       act(g, "@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", true, ch, nullptr, nullptr, TO_ROOM);
       decCurKI(g, ch, cost, 0);
     }
-  } else if (!strcasecmp("aether", arg)) {
+  } else if (str_eq_nocase("aether", arg)) {
     if (prob > perc) {
       act(g, "@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1840,14 +1857,15 @@ ACMD(do_obstruct)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int skill = char_get_skill(ch, SKILL_HYOGA_KABE);
   int prob = axion_dice(g, 0);
   int64_t cost = (getMaxKI(g, ch) / MAX(skill, 1)) * 2.5;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What direction are you wanting to block off?\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
     return;
   }
@@ -1859,40 +1877,40 @@ ACMD(do_obstruct)
 
   int dir = -1, dir2 = -1;
 
-  if (!strcasecmp("n", arg) || !strcasecmp("N", arg)) {
+  if (str_eq_nocase("n", arg) || str_eq_nocase("N", arg)) {
     dir  = 0;
     dir2 = 2;
-  } else if (!strcasecmp("e", arg) || !strcasecmp("E", arg)) {
+  } else if (str_eq_nocase("e", arg) || str_eq_nocase("E", arg)) {
     dir  = 1;
     dir2 = 3;
-  } else if (!strcasecmp("s", arg) || !strcasecmp("S", arg)) {
+  } else if (str_eq_nocase("s", arg) || str_eq_nocase("S", arg)) {
     dir  = 2;
     dir2 = 0;
-  } else if (!strcasecmp("w", arg) || !strcasecmp("W", arg)) {
+  } else if (str_eq_nocase("w", arg) || str_eq_nocase("W", arg)) {
     dir  = 3;
     dir2 = 1;
-  } else if (!strcasecmp("u", arg) || !strcasecmp("U", arg)) {
+  } else if (str_eq_nocase("u", arg) || str_eq_nocase("U", arg)) {
     dir  = 4;
     dir2 = 5;
-  } else if (!strcasecmp("d", arg) || !strcasecmp("D", arg)) {
+  } else if (str_eq_nocase("d", arg) || str_eq_nocase("D", arg)) {
     dir  = 5;
     dir2 = 4;
-  } else if (!strcasecmp("i", arg) || !strcasecmp("I", arg)) {
+  } else if (str_eq_nocase("i", arg) || str_eq_nocase("I", arg)) {
     dir  = 10;
     dir2 = 11;
-  } else if (!strcasecmp("o", arg) || !strcasecmp("O", arg)) {
+  } else if (str_eq_nocase("o", arg) || str_eq_nocase("O", arg)) {
     dir  = 11;
     dir2 = 10;
-  } else if (!strcasecmp("nw", arg) || !strcasecmp("NW", arg)) {
+  } else if (str_eq_nocase("nw", arg) || str_eq_nocase("NW", arg)) {
     dir  = 6;
     dir2 = 8;
-  } else if (!strcasecmp("ne", arg) || !strcasecmp("NE", arg)) {
+  } else if (str_eq_nocase("ne", arg) || str_eq_nocase("NE", arg)) {
     dir  = 7;
     dir2 = 9;
-  } else if (!strcasecmp("se", arg) || !strcasecmp("SE", arg)) {
+  } else if (str_eq_nocase("se", arg) || str_eq_nocase("SE", arg)) {
     dir  = 8;
     dir2 = 6;
-  } else if (!strcasecmp("sw", arg) || !strcasecmp("SW", arg)) {
+  } else if (str_eq_nocase("sw", arg) || str_eq_nocase("SW", arg)) {
     dir  = 9;
     dir2 = 7;
   } else {

@@ -13,6 +13,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -55,11 +56,12 @@ ACMD(do_preference)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
     return;
   }
@@ -69,7 +71,7 @@ ACMD(do_preference)
     return;
   }
 
-  if (!strcasecmp(arg, "throw")) {
+  if (str_eq_nocase(arg, "throw")) {
     send_to_char(g, ch, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
     char_set_preference(ch, PREFERENCE_THROWING);
     if (char_get_skills_base(ch, SKILL_THROW) <= 90) {
@@ -79,17 +81,17 @@ ACMD(do_preference)
     }
     return;
   }
-  if (!strcasecmp(arg, "hand")) {
+  if (str_eq_nocase(arg, "hand")) {
     send_to_char(g, ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");
     char_set_preference(ch, PREFERENCE_H2H);
     return;
   }
-  if (!strcasecmp(arg, "ki")) {
+  if (str_eq_nocase(arg, "ki")) {
     send_to_char(g, ch, "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
     char_set_preference(ch, PREFERENCE_KI);
     return;
   }
-  if (!strcasecmp(arg, "weapon")) {
+  if (str_eq_nocase(arg, "weapon")) {
     send_to_char(g, ch, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
     char_set_preference(ch, PREFERENCE_WEAPON);
     return;
@@ -147,11 +149,13 @@ ACMD(do_instill)
     return;
 
   struct obj_data *obj, *token;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: instill (token) (target)\r\n");
     return;
   }
@@ -250,20 +254,21 @@ ACMD(do_instill)
 ACMD(do_arena)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_in_arena(g, ch)) {
     send_to_char(g, ch, "You are too busy competing to be a spectator.\r\n");
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
     return;
   }
-  if (!strcasecmp(arg, "stop")) {
+  if (str_eq_nocase(arg, "stop")) {
     send_to_char(g, ch, "You stop viewing what's going on in the arena.\r\n");
     char_prf_set(g, ch, PRF_ARENAWATCH, false);
     char_set_arenawatch(ch, -1);
@@ -273,7 +278,7 @@ ACMD(do_arena)
     send_to_char(g, ch, "You are not close enough to the arena floor to see it.\r\n");
     return;
   }
-  if (!strcasecmp(arg, "look")) {
+  if (str_eq_nocase(arg, "look")) {
     if (!char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
       send_to_char(g, ch, "You are not even watching anyone in the arena.\r\n");
       return;
@@ -281,7 +286,7 @@ ACMD(do_arena)
     if (arena_watch(g, ch) != NOWHERE) {
       look_at_room(g, arena_watch(g, ch), ch, 0);
     }
-  } else if (!strcasecmp(arg, "scan")) {
+  } else if (str_eq_nocase(arg, "scan")) {
     if (char_get_in_room(ch) == 17875) {
       int found = false;
 
@@ -306,7 +311,7 @@ ACMD(do_arena)
       return;
     }
   } else {
-    int num = atoi(arg);
+    int num = parse_int(arg);
 
     if (num < 0) {
       send_to_char(g, ch, "That is not a valid fighter number\r\n");
