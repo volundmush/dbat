@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -54,8 +55,9 @@ ACMD(do_evolve)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   int64_t plcost = char_get_level(ch), stcost = char_get_level(ch), kicost = char_get_level(ch);
 
@@ -63,7 +65,7 @@ ACMD(do_evolve)
   kicost += (molt_threshold(ch) * 0.50) + (getBaseKI(ch) * 0.22);
   stcost += (molt_threshold(ch) * 0.50) + (getBaseST(ch) * 0.15);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "@D-=@YConvert Evolution Points To What?@D=-@n\r\n");
     send_to_char(g, ch, "@D-------------------------------------@n\r\n");
     send_to_char(g, ch, "@CPowerlevel  @D: @Y%s @Wpts\r\n", add_commas(plcost));
@@ -72,7 +74,7 @@ ACMD(do_evolve)
     send_to_char(g, ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(char_get_moltexp(ch)));
     return;
   }
-  if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
+  if (str_eq_nocase(arg, "powerlevel") || str_eq_nocase(arg, "pl")) {
     if (plcost > molt_threshold(ch)) {
       send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
       return;
@@ -91,7 +93,7 @@ ACMD(do_evolve)
     gainBasePL(ch, plgain, false);
     char_set_moltexp(ch, char_get_moltexp(ch) - (plcost));
     send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
-  } else if (!strcasecmp(arg, "ki")) {
+  } else if (str_eq_nocase(arg, "ki")) {
     if (kicost > molt_threshold(ch)) {
       send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
       return;
@@ -110,7 +112,7 @@ ACMD(do_evolve)
     gainBaseKI(ch, kigain, false);
     char_set_moltexp(ch, char_get_moltexp(ch) - (kicost));
     send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
-  } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
+  } else if (str_eq_nocase(arg, "stamina") || str_eq_nocase(arg, "st")) {
     if (stcost > molt_threshold(ch)) {
       send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
       return;
@@ -184,24 +186,26 @@ bool perf_skill(int skill)
 
 ACMD(do_perf)
 {
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int i, skill = 1, found = false, type = 0;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (char_is_npc(ch) || char_get_admlevel(ch) > 0) {
     send_to_char(g, ch, "I don't think so.\r\n");
     return;
   }
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "@WType @G1@D: @wOver Charged@n\r\n");
     send_to_char(g, ch, "@WType @G2@D: @wAccurate@n\r\n");
     send_to_char(g, ch, "@WType @G3@D: @wEfficient@n\r\n");
     send_to_char(g, ch, "Syntax: perfect (skillname) (type 1/2/or 3)\r\n");
     return;
   }
-  if (strlen(arg) < 4) {
+  if (arg.size() < 4) {
     send_to_char(g, ch, "The skill name should be longer than 3 characters...\r\n");
     return;
   }
@@ -212,39 +216,39 @@ ACMD(do_perf)
     if (found == true)
       continue;
 
-    if (strstr(g->spell_info[i].name, arg)) {
+    if (strstr(g->spell_info[i].name, arg.c_str())) {
       skill = i;
       found = true;
     }
   }
   if (found == false) {
-    send_to_char(g, ch, "The skill %s doesn't exist.\r\n", arg);
+    send_to_char(g, ch, "The skill %s doesn't exist.\r\n", arg.c_str());
     return;
   }
   if (!char_get_skill(ch, skill)) {
-    send_to_char(g, ch, "You don't know %s.\r\n", arg);
+    send_to_char(g, ch, "You don't know %s.\r\n", arg.c_str());
     return;
   }
   if (char_get_skill(ch, skill) < 100) {
-    send_to_char(g, ch, "You have not mastered the skill %s and thus can't perfect it.\r\n", arg);
+    send_to_char(g, ch, "You have not mastered the skill %s and thus can't perfect it.\r\n", arg.c_str());
     return;
   }
   if (char_get_skills_perf(ch, skill) > 0) {
-    send_to_char(g, ch, "You have already mastered the skill %s and chosen how to perfect it.\r\n", arg);
+    send_to_char(g, ch, "You have already mastered the skill %s and chosen how to perfect it.\r\n", arg.c_str());
     return;
   }
   if (!perf_skill(skill)) {
     send_to_char(g, ch, "You can't perfect that type of skill.\r\n");
     return;
   }
-  if (atoi(arg2) < 1 || atoi(arg2) > 3) {
+  if (parse_int(arg2) < 1 || parse_int(arg2) > 3) {
     send_to_char(g, ch, "@WType @G1@D: @wOver Charged@n\r\n");
     send_to_char(g, ch, "@WType @G2@D: @wAccurate@n\r\n");
     send_to_char(g, ch, "@WType @G3@D: @wEfficient@n\r\n");
     send_to_char(g, ch, "@RType must be a number between 1 and 3.@n\r\n");
     return;
   }
-  type = atoi(arg2);
+  type = parse_int(arg2);
   switch (type) {
     case 1:
       send_to_char(g, ch, "You perfect the skill %s so that you can over charge it!\r\n", g->spell_info[skill].name);
@@ -279,19 +283,20 @@ ACMD(do_score)
 
   int view = 0, full = 5, personal = 1, health = 2, stats = 3, other = 4;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     view = full;
-  } else if (strstr("personal", arg) || strstr("Personal", arg)) {
+  } else if (std::string_view("personal").contains(arg) || std::string_view("Personal").contains(arg)) {
     view = personal;
-  } else if (strstr("health", arg) || strstr("Health", arg)) {
+  } else if (std::string_view("health").contains(arg) || std::string_view("Health").contains(arg)) {
     view = health;
-  } else if (strstr("statistics", arg) || strstr("Statistics", arg)) {
+  } else if (std::string_view("statistics").contains(arg) || std::string_view("Statistics").contains(arg)) {
     view = stats;
-  } else if (strstr("other", arg) || strstr("Other", arg)) {
+  } else if (std::string_view("other").contains(arg) || std::string_view("Other").contains(arg)) {
     view = other;
   } else {
     send_to_char(g, ch, "Syntax: score, or... score (personal, health, statistics, other)\r\n");
@@ -547,7 +552,7 @@ void trans_check(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
 ACMD(do_status)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct affected_type *aff;
 
   const char *forget_level[7] = {
@@ -559,9 +564,10 @@ ACMD(do_status)
       "@rForgotten@n",
       "\n"};
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
     send_to_char(g, ch, "            @D---------------@CAppearance@D---------------\n");
     bringdesc(g, ch, ch);
@@ -1186,7 +1192,7 @@ ACMD(do_status)
       send_to_char(g, ch, "Aura Light is active.\r\n");
     send_to_char(g, ch, "@D<@b--------------------------------------------------------------@D>@n\r\n");
     send_to_char(g, ch, "To view your bonus/negative traits enter: status traits\r\n");
-  } else if (!strcasecmp(arg, "traits")) {
+  } else if (str_eq_nocase(arg, "traits")) {
     bonus_status(g, ch);
   } else {
     send_to_char(g, ch, "The only argument status takes is 'traits'. If you just want your status do not use an argument.\r\n");
@@ -1371,11 +1377,12 @@ ACMD(do_levels)
 
 ACMD(do_consider)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *victim;
   int diff;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
   if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(g, ch, "Consider killing who?\r\n");
@@ -1415,12 +1422,13 @@ ACMD(do_consider)
 
 ACMD(do_diagnose)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *vict;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
-  if (*buf) {
+  if (!buf.empty()) {
     if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
       send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else {

@@ -735,7 +735,7 @@ static bool fits_user_file(const char *value, size_t max_length)
 /* CON_GET_EMAIL */
 static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  if (readUserIndex(d->user.c_str()) && !*arg) {
+  if (readUserIndex(d->user) && !*arg) {
     write_to_output(g, d, "Email, or M for menu?\r\n");
     return;
   }
@@ -743,7 +743,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Email?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->user.c_str())) {
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
   } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
@@ -752,7 +752,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
   } else if (!fits_user_file(arg, MAX_EMAIL_LENGTH)) {
     write_to_output(g, d, "Emails can be at most %d characters, with no spaces, and can't start with '*'. Email?\r\n", MAX_EMAIL_LENGTH);
     return;
-  } else if (readUserIndex(d->user.c_str())) {
+  } else if (readUserIndex(d->user)) {
     if (strstr(arg, "@")) {
       search_replace(arg, "@", "<AT>");
     }
@@ -774,7 +774,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_NEWPASSWD */
 static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  if (readUserIndex(d->user.c_str()) && !*arg) {
+  if (readUserIndex(d->user) && !*arg) {
     write_to_output(g, d, "Password, or M for menu?\r\n");
     return;
   }
@@ -782,19 +782,19 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Password?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->user.c_str())) {
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
     userRead(g, d);
     desc_set_connected(d, CON_UMENU);
-  } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user.c_str())) {
+  } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
     write_to_output(g, d, "Password is too long. Password, or M for menu?\r\n");
     return;
   } else if (strlen(arg) > MAX_PWD_LENGTH) {
     write_to_output(g, d, "Password is too long. Password?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_PWD_LENGTH)) {
-    write_to_output(g, d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user.c_str()) ? ", or M for menu" : "");
+    write_to_output(g, d, "Passwords can't contain spaces or start with '*'. Password%s?\r\n", readUserIndex(d->user) ? ", or M for menu" : "");
     return;
-  } else if (readUserIndex(d->user.c_str())) {
+  } else if (readUserIndex(d->user)) {
     write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
     d->pass = arg;
     userWrite(g, d, 0, 0, 0, "index");

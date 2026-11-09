@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -212,9 +213,10 @@ ACMD(do_help)
 /* Shows one of the fixed text files (credits, news, motd, ...) */
 ACMD(do_gen_ps)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char bum[10000];
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   switch (subcmd) {
     case SCMD_CREDITS:
@@ -273,15 +275,16 @@ static const char *const ctypes[] = {
 
 ACMD(do_color)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int tp;
 
   /*if (IS_NPC(ch))
     return;*/
 
-  any_one_arg(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
@@ -432,11 +435,13 @@ ACMD(do_commands)
   int no, i, cmd_num;
   int wizhelp = 0, socials = 0;
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
+  char label[MAX_INPUT_LENGTH];
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (*arg) {
+  if (!arg.empty()) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
       send_to_char(g, ch, "Who is that?\r\n");
       return;
@@ -478,11 +483,11 @@ ACMD(do_commands)
       continue;
 
     if (check_disabled(g, &g->complete_cmd_info[i]))
-      snprintf(arg, sizeof(arg), "(%s)", g->complete_cmd_info[i].command);
+      snprintf(label, sizeof(label), "(%s)", g->complete_cmd_info[i].command);
     else
-      snprintf(arg, sizeof(arg), "%s", g->complete_cmd_info[i].command);
+      snprintf(label, sizeof(label), "%s", g->complete_cmd_info[i].command);
 
-    send_to_char(g, ch, "%-11s%s", arg, no++ % 7 == 0 ? "\r\n" : "");
+    send_to_char(g, ch, "%-11s%s", label, no++ % 7 == 0 ? "\r\n" : "");
   }
 
   if (no % 7 != 1)
@@ -491,13 +496,14 @@ ACMD(do_commands)
 
 ACMD(do_history)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int type;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   type = search_block(arg, history_types, false);
-  if (!*arg || type < 0) {
+  if (arg.empty() || type < 0) {
     int i;
 
     send_to_char(g, ch, "Usage: history <");

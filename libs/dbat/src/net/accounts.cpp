@@ -54,13 +54,13 @@ void empty_account_slots_named(struct descriptor_data *d, const char *name)
       set_account_slot(d, n, "Empty");
 }
 
-bool readUserIndex(const char *name)
+bool readUserIndex(const std::string &name)
 {
   char fname[40];
   FILE *fl;
 
   /* Read User Index */
-  if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
+  if (!get_filename(fname, sizeof(fname), USER_FILE, name.c_str())) {
     return false;
   }
   if (!(fl = fopen(fname, "r"))) {
@@ -445,14 +445,14 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
   return;
 }
 
-void fingerUser(GameWorld *g, struct char_data *ch, char *name)
+void fingerUser(GameWorld *g, struct char_data *ch, const std::string &name)
 {
   char filename[40], uname[100] = "", email[100] = "", pass[100] = "", tmp1[100] = "", tmp2[100] = "", tmp3[100] = "", tmp4[100] = "", tmp5[100] = "", line[256] = "";
   int total = 0, rpp = 0, rbank = 0;
   FILE *file;
 
   /* Read and Write User Index */
-  if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
+  if (!get_filename(filename, sizeof(filename), USER_FILE, name.c_str())) {
     send_to_char(g, ch, "That user doesn't exist.\r\n");
     return;
   }
@@ -520,7 +520,7 @@ void fingerUser(GameWorld *g, struct char_data *ch, char *name)
     send_to_char(g, ch, "@D[@gCh. Slot 4 @D: @w%-30s@D]@n\r\n", tmp4);
     send_to_char(g, ch, "@D[@gCh. Slot 5 @D: @w%-30s@D]@n\r\n", tmp5);
     send_to_char(g, ch, "\n");
-    customRead(g, char_get_desc(ch), 1, name);
+    customRead(g, char_get_desc(ch), 1, name.c_str());
   }
   return;
 }

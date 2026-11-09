@@ -44,7 +44,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   atomic_commit(&af);
 }
 
-void customRead(GameWorld *g, struct descriptor_data *d, int type, char *name)
+void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *name)
 {
 
   char fname[40], line[256], filler[256] = "";

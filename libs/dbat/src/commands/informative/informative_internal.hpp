@@ -1,6 +1,8 @@
 #pragma once
 
 /* Declarations shared by the files split out of act.informative.c. */
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 
 void search_room(GameWorld *g, struct char_data *ch);
@@ -15,7 +17,7 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch);
 void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch);
 void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch);
 void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch);
-void look_out_window(GameWorld *g, struct char_data *ch, char *arg);
+void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg);
 void trans_check(GameWorld *g, struct char_data *ch, struct char_data *vict);
 void search_in_direction(GameWorld *g, struct char_data *ch, int dir);
 

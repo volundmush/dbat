@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -51,9 +52,10 @@ ACMD(do_mimic)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_MIMIC)) {
     send_to_char(g, ch, "You do not know how to mimic the appearance of other races.\r\n");
@@ -68,7 +70,7 @@ ACMD(do_mimic)
     can_mimic[r] = race_can_be_mimiced(r) && race_valid_sex(r, char_get_sex(ch));
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "@CMimic Menu\n@c--------------------@W\r\n");
     for (int r = 0; r < NUM_RACES; r++) {
       if (!can_mimic[r])
@@ -89,7 +91,7 @@ ACMD(do_mimic)
     return;
   }
 
-  if (!strcasecmp(arg, "stop")) {
+  if (str_eq_nocase(arg, "stop")) {
     if (!char_get_mimic(ch)) {
       send_to_char(g, ch, "You are not imitating another race.\r\n");
       return;
@@ -101,7 +103,7 @@ ACMD(do_mimic)
 
   int race = RACE_UNDEFINED;
   for (int r = 0; r < NUM_RACES; r++) {
-    if (can_mimic[r] && !strcasecmp(arg, race_name(r))) {
+    if (can_mimic[r] && str_eq_nocase(arg, race_name(r))) {
       race = r;
       break;
     }
@@ -169,11 +171,13 @@ ACMD(do_kyodaika)
 ACMD(do_table)
 {
   struct obj_data *obj = nullptr, *obj2 = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: table (red | blue | green | yellow) (card name)");
     return;
   }
@@ -290,17 +294,18 @@ ACMD(do_shuffle)
 ACMD(do_hand)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int count = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: hand (look | show)\r\n");
     return;
   }
 
-  if (!strcasecmp("look", arg)) {
+  if (str_eq_nocase("look", arg)) {
     send_to_char(g, ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
     for (obj_data *obj : char_inventory(g, ch)) {
       if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
@@ -323,7 +328,7 @@ ACMD(do_hand)
       snprintf(buf, sizeof(buf), "There are %d cards in the hand.", count);
       act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
     }
-  } else if (!strcasecmp("show", arg)) {
+  } else if (str_eq_nocase("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
     act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
     for (obj_data *obj : char_inventory(g, ch)) {
@@ -351,13 +356,15 @@ ACMD(do_hand)
 ACMD(do_post)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct obj_data *obj;
   struct obj_data *obj2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: post (obj name)\n"
                      "        post (obj name) (target obj name)\r\n");
     return;
@@ -378,7 +385,7 @@ ACMD(do_post)
     return;
   }
 
-  if (!*arg2) {
+  if (arg2.empty()) {
     if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE && room_sect(g, char_get_in_room(ch)) != SECT_CITY) {
       send_to_char(g, ch, "You are not near any general structure you can post it on.\r\n");
       return;
@@ -433,10 +440,11 @@ ACMD(do_play)
   }
 
   struct obj_data *obj = nullptr, *obj2 = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: play (card name)");
     return;
   }
@@ -467,28 +475,30 @@ ACMD(do_play)
 ACMD(do_nickname)
 {
   struct obj_data *obj = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: nickname (object) (nickname)\n");
     send_to_char(g, ch, "Syntax: nickname ship (nickname)\n");
     return;
   }
 
-  if (strcasecmp(arg, "ship")) {
+  if (!str_eq_nocase(arg, "ship")) {
     if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You don't have that item to nickname.\r\n");
       return;
     }
   }
-  if (strlen(arg2) > 20) {
+  if (arg2.size() > 20) {
     send_to_char(g, ch, "You can't nickname items with any name longer than 20 characters.\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "ship")) {
+  if (str_eq_nocase(arg, "ship")) {
     struct obj_data *ship2 = nullptr;
     int found = false;
     for (obj_data *ship : room_contents(g, char_get_in_room(ch))) {
@@ -498,12 +508,12 @@ ACMD(do_nickname)
       }
     }
     if (found == true) {
-      if (strstr(arg2, "@")) {
+      if (arg2.find('@') != std::string::npos) {
         send_to_char(g, ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
         return;
       }
       char nick[MAX_INPUT_LENGTH];
-      snprintf(nick, sizeof(nick), "%s", CAP(arg2));
+      snprintf(nick, sizeof(nick), "%s", CAP(arg2).c_str());
       obj_set_action_description(ship2, nick);
       for (obj_data *k : each_obj(g)) {
         if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
@@ -526,10 +536,10 @@ ACMD(do_nickname)
     send_to_char(g, ch, "%s@w is a corpse!@n\r\n", obj_get_short_description(obj));
     return;
   }
-  send_to_char(g, ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj_get_short_description(obj), arg2);
+  send_to_char(g, ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj_get_short_description(obj), arg2.c_str());
   char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-  snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(obj), CAP(arg2));
-  snprintf(nick2, sizeof(nick2), "%s %s", obj_get_name(obj), arg2);
+  snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(obj), CAP(arg2).c_str());
+  snprintf(nick2, sizeof(nick2), "%s %s", obj_get_name(obj), arg2.c_str());
   obj_set_short_description(obj, nick);
   obj_set_name(obj, nick2);
   return;
@@ -539,14 +549,13 @@ ACMD(do_showoff)
 {
   struct obj_data *obj   = nullptr;
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  *arg  = '\0';
-  *arg2 = '\0';
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  two_arguments(argument, arg, arg2);
-
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "You want to show what item to what character?\r\n");
     return;
   }
@@ -627,7 +636,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 0;
 }
 
-static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
+static void introWrite(struct char_data *ch, struct char_data *vict, std::string name)
 {
   struct atomic_file af;
   FILE *file;
@@ -684,7 +693,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
     x++;
   }
 
-  fprintf(fl, "%s %s\n", char_get_name(vict), CAP(name));
+  fprintf(fl, "%s %s\n", char_get_name(vict), CAP(name).c_str());
 
   atomic_commit(&af);
   return;
@@ -696,31 +705,33 @@ ACMD(do_intro)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct char_data *vict;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: dub (target) (name)\r\nWho do you want to dub and what do you want to name them?\r\n");
     return;
   }
 
-  if (!*arg2) {
+  if (arg2.empty()) {
     send_to_char(g, ch, "Syntax: dub (target) (name)\r\nWhat name do you wish to know them by?\r\n");
     return;
   }
 
-  if (strlen(arg2) > 20) {
+  if (arg2.size() > 20) {
     send_to_char(g, ch, "Limit the name to 20 characters.\r\n");
     return;
   }
-  if (strlen(arg2) < 3) {
+  if (arg2.size() < 3) {
     send_to_char(g, ch, "Limit the name to at least 3 characters.\r\n");
     return;
   }
 
-  if (strstr(arg2, "$") || strstr(arg2, "@") || strstr(arg2, "%")) {
+  if (arg2.find_first_of("$@%") != std::string::npos) {
     send_to_char(g, ch, "Illegal character. No symbols.\r\n");
     return;
   }
@@ -744,7 +755,7 @@ ACMD(do_intro)
     send_to_char(g, ch, "There seems to have been an error, report this to Iovan.\r\n");
     return;
   }
-  if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg)) {
+  if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg.c_str())) {
     send_to_char(g, ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
     return;
   }
@@ -759,16 +770,18 @@ ACMD(do_rptrans)
 {
   struct char_data *vict = nullptr;
   int amt = 0;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: exchange (target) (amount)\r\n");
     return;
   }
 
-  amt = atoi(arg2);
+  amt = parse_int(arg2);
 
   if (amt <= 0) {
     send_to_char(g, ch, "Are you being funny?\r\n");
@@ -790,11 +803,11 @@ ACMD(do_rptrans)
       continue;
     if (char_is_npc(k->character))
       continue;
-    if (!strcasecmp(k->user.c_str(), arg))
+    if (str_eq_nocase(k->user, arg))
       vict = k->character;
   }
   if (vict == nullptr) {
-    userWrite(g, nullptr, 0, amt, 0, arg);
+    userWrite(g, nullptr, 0, amt, 0, arg.c_str());
   } else {
     char_set_rp(vict, char_get_rp(vict) + (amt));
     char_get_desc(vict)->rpp += amt;
@@ -806,8 +819,8 @@ ACMD(do_rptrans)
   char_set_rp(ch, char_get_rp(ch) - (amt));
   char_get_desc(ch)->rpp -= amt;
   userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-  send_to_char(g, ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-  mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
+  send_to_char(g, ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg).c_str());
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg.c_str());
   save_char(g, ch);
 }
 

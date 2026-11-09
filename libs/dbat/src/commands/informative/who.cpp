@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -45,17 +46,18 @@
 #include "informative_internal.hpp"
 
 static void print_object_location(GameWorld *g, int num, struct obj_data *obj, struct char_data *ch, int recur);
-static void perform_mortal_where(GameWorld *g, struct char_data *ch, char *arg);
-static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg);
+static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::string &arg);
+static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::string &arg);
 
 ACMD(do_finger)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What user are you wanting to look at?\r\n");
     return;
   }
@@ -295,48 +297,45 @@ ACMD(do_users)
 {
   char line[200], line2[220], idletime[10];
   char state[30], *timeptr, mode;
-  char name_search[MAX_INPUT_LENGTH], host_search[MAX_INPUT_LENGTH];
+  std::string name_search, host_search;
   struct char_data *tch;
   int low = 0, high = CONFIG_LEVEL_CAP, num_can_see = 0;
   int showclass = 0, outlaws = 0, playing = 0, deadweight = 0, showrace = 0;
-  char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  host_search[0] = name_search[0] = '\0';
-
-  strcpy(buf, argument); /* strcpy: OK (sizeof: argument == buf) */
-  while (*buf) {
-    char buf1[MAX_INPUT_LENGTH];
-
-    half_chop(buf, arg, buf1);
-    if (*arg == '-') {
-      mode = *(arg + 1); /* just in case; we destroy arg in the switch */
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  while (!rest.empty()) {
+    arg  = take_word(rest);
+    rest = skip_spaces(rest);
+    if (arg[0] == '-') {
+      mode = arg[1]; /* '\0' for a bare "-" */
       switch (mode) {
         case 'o':
         case 'k':
           outlaws = 1;
           playing = 1;
-          strcpy(buf, buf1); /* strcpy: OK (sizeof: buf1 == buf) */
           break;
         case 'p':
           playing = 1;
-          strcpy(buf, buf1); /* strcpy: OK (sizeof: buf1 == buf) */
           break;
         case 'd':
           deadweight = 1;
-          strcpy(buf, buf1); /* strcpy: OK (sizeof: buf1 == buf) */
           break;
         case 'l':
           playing = 1;
-          half_chop(buf1, arg, buf);
-          sscanf(arg, "%d-%d", &low, &high);
+          arg     = take_word(rest);
+          rest    = skip_spaces(rest);
+          sscanf(arg.c_str(), "%d-%d", &low, &high);
           break;
         case 'n':
           playing = 1;
-          half_chop(buf1, name_search, buf);
+          name_search = take_word(rest);
+          rest        = skip_spaces(rest);
           break;
         case 'h':
           playing = 1;
-          half_chop(buf1, host_search, buf);
+          host_search = take_word(rest);
+          rest        = skip_spaces(rest);
           break;
         default:
           send_to_char(g, ch, "%s", USERS_FORMAT);
@@ -352,8 +351,6 @@ ACMD(do_users)
                "Num Name                 User-name            State          Idl Login    C\r\n"
                "--- -------------------- -------------------- -------------- --- -------- -\r\n");
 
-  one_argument(argument, arg);
-
   for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PLAYING && playing)
       continue;
@@ -365,9 +362,9 @@ ACMD(do_users)
       else if (!(tch = d->character))
         continue;
 
-      if (*host_search && !strstr(d->host, host_search))
+      if (!host_search.empty() && !strstr(d->host, host_search.c_str()))
         continue;
-      if (*name_search && strcasecmp(char_get_name(tch), name_search))
+      if (!name_search.empty() && !str_eq_nocase(char_get_name(tch), name_search))
         continue;
       if (!char_can_see(g, ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
         continue;
@@ -423,11 +420,11 @@ ACMD(do_users)
   send_to_char(g, ch, "\r\n%d visible sockets connected.\r\n", num_can_see);
 }
 
-static void perform_mortal_where(GameWorld *g, struct char_data *ch, char *arg)
+static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::string &arg)
 {
   struct char_data *i;
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Players in your Zone\r\n--------------------\r\n");
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || d->character == ch)
@@ -480,7 +477,7 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
     send_to_char(g, ch, "in an unknown location\r\n");
 }
 
-static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
+static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::string &arg)
 {
   struct char_data *i;
   int num = 0, num2 = 0, found = 0;
@@ -497,7 +494,7 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
                             "@cKanassa@n",
                             "@RUNKOWN@n"};
 
-  if (!*arg) {
+  if (arg.empty()) {
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
     send_to_char(g, ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (descriptor_data *d : each_desc(g))
@@ -539,7 +536,7 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
         }
       }
   } else {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg.c_str());
     for (char_data *tch : each_char(g)) {
       if (char_can_see(g, ch, tch) && char_get_in_room(tch) != NOWHERE && isname(arg, char_get_alias(tch))) {
         found = 1;
@@ -569,9 +566,10 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, char *arg)
 
 ACMD(do_where)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_adm_flagged(ch, ADM_FULLWHERE) || char_get_admlevel(ch) > 4)
     perform_immort_where(g, ch, arg);

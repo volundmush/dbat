@@ -2,6 +2,7 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -45,8 +46,8 @@
 #include "informative_internal.hpp"
 
 static void look_in_direction(GameWorld *g, struct char_data *ch, int dir);
-static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg);
-static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int read);
+static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &arg);
+static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, int read);
 static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data *ch, int exit_mode);
 static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch);
 
@@ -929,15 +930,16 @@ static const char *const exitlevels[] = {
 
 ACMD(do_autoexit)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int tp;
 
   if (char_is_npc(ch))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Your current autoexit level is %s.\r\n", exitlevels[char_exit_level(g, ch)]);
     return;
   }
@@ -1253,16 +1255,16 @@ static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
     send_to_char(g, ch, "Nothing special there...\r\n");
 }
 
-static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
+static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &arg)
 {
   struct obj_data *obj    = nullptr;
   struct char_data *dummy = nullptr;
   int amt, bits;
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Look in what?\r\n");
   else if (!(bits = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
-    send_to_char(g, ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
+    send_to_char(g, ch, "There doesn't seem to be %s %s here.\r\n", AN(arg.c_str()), arg.c_str());
   } else if (find_exdesc(arg, obj_get_ex_description(obj)) != nullptr && !bits)
     send_to_char(g, ch, "There's nothing inside that!\r\n");
   else if ((obj_get_type_flag(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) {
@@ -1366,7 +1368,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, char *arg)
   }
 }
 
-const char *find_exdesc(char *word, const ex_desc_list &list)
+const char *find_exdesc(std::string_view word, const ex_desc_list &list)
 {
   for (const extra_descr_data &i : list)
     if (i.keyword[0] == '.' ? isname(word, i.keyword.c_str() + 1) : isname(word, i.keyword.c_str()))
@@ -1383,18 +1385,17 @@ const char *find_exdesc(char *word, const ex_desc_list &list)
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cmread)
+static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, int cmread)
 {
   int bits, found = false, j, fnum, i = 0, msg = 1;
   struct char_data *found_char = nullptr;
   struct obj_data *obj, *found_obj = nullptr;
   const char *desc;
-  char number[MAX_STRING_LENGTH];
 
   if (!char_get_desc(ch))
     return;
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Look at what?\r\n");
     return;
   }
@@ -1407,8 +1408,9 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
     if (obj)
       found = true;
     if (obj) {
-      arg = one_argument(arg, number);
-      if (!*number) {
+      std::string_view rest = arg;
+      std::string number    = take_arg(rest);
+      if (number.empty()) {
         send_to_char(g, ch, "Read what?\r\n");
         return;
       }
@@ -1420,10 +1422,9 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
 
       if (isname(number, obj_get_name(obj))) {
         show_board(g, obj_get_vnum(g, obj), ch);
-      } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
-                 (strchr(number, '.'))) {
-        char target[MAX_INPUT_LENGTH]; /* "<number> <arg>", built aside: arg may not overlap */
-        snprintf(target, sizeof(target), "%s %s", number, arg);
+      } else if ((!isdigit(number[0]) || (!(msg = parse_int(number)))) ||
+                 number.find('.') != std::string::npos) {
+        std::string target = number + " " + std::string(rest);
         look_at_target(g, ch, target, 0);
       } else {
         board_display_msg(g, obj_get_vnum(g, obj), ch, msg);
@@ -1445,7 +1446,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
     }
 
     /* Strip off "number." from 2.foo and friends. */
-    if (!(fnum = get_number(&arg))) {
+    if (!(fnum = get_number(arg))) {
       send_to_char(g, ch, "Look at what?\r\n");
       return;
     }
@@ -1531,7 +1532,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
               send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(g, ch, "@YSyntax@D: @CLeave@n\r\n");
             } else if (obj_get_type_flag(thing) == ITEM_WINDOW) {
-              look_out_window(g, ch, writable_copy(obj_get_name(thing)).data());
+              look_out_window(g, ch, writable_copy(obj_get_name(thing)));
             }
 
             if (obj_get_type_flag(thing) == ITEM_CONTROL) {
@@ -1561,7 +1562,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, char *arg, int cm
   }
 }
 
-void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
+void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   struct obj_data *viewport = nullptr, *vehicle = nullptr;
   struct char_data *dummy = nullptr;
@@ -1569,7 +1570,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, char *arg)
   int bits, door;
 
   /* First, lets find something to look out of or through. */
-  if (*arg) {
+  if (!arg.empty()) {
     /* Find this object and see if it is a window */
     if (!(bits = generic_find(g, arg,
                               FIND_OBJ_ROOM | FIND_OBJ_INV | FIND_OBJ_EQUIP,
@@ -1650,19 +1651,20 @@ ACMD(do_look)
     send_to_char(g, ch, "It is pitch black...\r\n");
     list_char_to_char(g, room_get_people(g, char_get_in_room(ch)), ch); /* glowing red eyes */
   } else {
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    std::string arg, arg2;
 
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
     if (subcmd == SCMD_READ) {
-      one_argument(argument, arg);
-      if (!*arg)
+      arg = take_arg(rest);
+      if (arg.empty())
         send_to_char(g, ch, "Read what?\r\n");
       else
         look_at_target(g, ch, arg, 1);
       return;
     }
-    argument = any_one_arg(argument, arg);
-    one_argument(argument, arg2);
-    if (!*arg) {
+    arg  = take_word(rest);
+    arg2 = take_arg(rest);
+    if (arg.empty()) {
       if (subcmd == SCMD_SEARCH) {
         search_room(g, ch);
       } else {
@@ -1671,12 +1673,12 @@ ACMD(do_look)
           //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-    } else if (is_abbrev(arg, "inside") && char_get_exit(g, ch, INDIR) && !*arg2) {
+    } else if (is_abbrev(arg, "inside") && char_get_exit(g, ch, INDIR) && arg2.empty()) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(g, ch, INDIR);
       else
         look_in_direction(g, ch, INDIR);
-    } else if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && !*arg2) {
+    } else if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && arg2.empty()) {
       search_in_direction(g, ch, INDIR);
     } else if (is_abbrev(arg, "inside") ||
                is_abbrev(arg, "into") || is_abbrev(arg, "onto")) {
@@ -1684,7 +1686,7 @@ ACMD(do_look)
     } else if ((is_abbrev(arg, "outside") ||
                 is_abbrev(arg, "through") ||
                 is_abbrev(arg, "thru")) &&
-               (subcmd == SCMD_LOOK) && *arg2) {
+               (subcmd == SCMD_LOOK) && !arg2.empty()) {
       look_out_window(g, ch, arg2);
     } else if (is_abbrev(arg, "outside") &&
                (subcmd == SCMD_LOOK) && !char_get_exit(g, ch, OUTDIR)) {
@@ -1734,17 +1736,19 @@ ACMD(do_examine)
 {
   struct char_data *tmp_char;
   struct obj_data *tmp_object;
-  char tempsave[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Examine what?\r\n");
     return;
   }
 
   /* look_at_target() eats the number. */
-  look_at_target(g, ch, strcpy(tempsave, arg), 0); /* strcpy: OK */
+  std::string tempsave = arg;
+  look_at_target(g, ch, tempsave, 0);
 
   generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_CHAR_ROOM | FIND_OBJ_EQUIP, ch, &tmp_char, &tmp_object);
 
