@@ -2,6 +2,7 @@
 #include <cstring>
 
 #include "dbat/flags.hpp"
+#include "dbat/consts/maximums.hpp"
 
 static bool flag_test(const bitvector_t bitvector[], int flag)
 {
@@ -103,6 +104,30 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int ma
   }
 
   return len;
+}
+
+std::string sprintbit(bitvector_t vector, const char *const names[])
+{
+  char buf[MAX_STRING_LENGTH];
+
+  sprintbit(vector, names, buf, sizeof(buf));
+  return buf;
+}
+
+std::string sprinttype(int type, const char *const names[])
+{
+  char buf[MAX_STRING_LENGTH];
+
+  sprinttype(type, names, buf, sizeof(buf));
+  return buf;
+}
+
+std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar)
+{
+  char buf[MAX_STRING_LENGTH];
+
+  sprintbitarray(bitvector, names, maxar, buf, sizeof(buf));
+  return buf;
 }
 
 int get_flag_by_name(const char *const flag_list[], char *flag_name)

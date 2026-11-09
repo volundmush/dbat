@@ -1,9 +1,15 @@
 #pragma once
+#include <string>
+
 #include "dbat/consts/types.hpp"
 
 size_t sprintbit(bitvector_t vector, const char *const names[], char *result, size_t reslen);
 size_t sprinttype(int type, const char *const names[], char *result, size_t reslen);
 size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar, char *result, size_t reslen);
+/* The same, as std::strings */
+std::string sprintbit(bitvector_t vector, const char *const names[]);
+std::string sprinttype(int type, const char *const names[]);
+std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar);
 
 int get_flag_by_name(const char *const flag_list[], char *flag_name);
 

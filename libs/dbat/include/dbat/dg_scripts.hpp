@@ -11,6 +11,7 @@
 
 #pragma once
 #include <string>
+#include "dbat/consts/maximums.hpp"
 #include "dbat/consts/pulse.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/triggers.hpp"
@@ -32,6 +33,9 @@ struct trig_proto_list {
  * everything isnt happening at the same time
  */
 constexpr int PULSE_DG_SCRIPT = 13 * PASSES_PER_SEC;
+
+/* The longest a script variable's value can be: what a substituted script line can hold. */
+constexpr size_t MAX_DG_VAR_LENGTH = MAX_INPUT_LENGTH - 1;
 
 /* one line of the trigger */
 struct cmdlist_element {
@@ -254,6 +258,7 @@ void assign_triggers(GameWorld *g, void *i, int type);
 void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id);
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
+std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, const char *line);
 void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf);
 

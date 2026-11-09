@@ -273,6 +273,21 @@ static void check_arithmetic_at_the_limits(void)
   th_shutdown(g);
 }
 
+/* A script variable can't grow past what a script line holds. */
+static void check_script_variable_has_a_limit(void)
+{
+  GameWorld *g               = th_boot(); /* for the log */
+  struct trig_var_data *vars = nullptr;
+  std::string long_value(MAX_INPUT_LENGTH + 4000, 'x');
+
+  add_var(&vars, "big", long_value.c_str(), 0);
+  CHECK(vars && vars->value.size() == (size_t)MAX_INPUT_LENGTH - 1);
+  add_var(&vars, "big", "small", 0); /* and setting it again replaces it */
+  CHECK(vars && vars->value == "small" && !vars->next);
+  delete vars;
+  th_shutdown(g);
+}
+
 static void check_specific_goes_with_its_location(void)
 {
   CHECK(affect_checked_specific(APPLY_SKILL, SKILL_HAYASA) == SKILL_HAYASA);
@@ -1107,6 +1122,7 @@ static const struct {
     {"chain_as_long_as_real_scripts_have",          check_chain_as_long_as_real_scripts_have         },
     {"expression_values",                           check_expression_values                          },
     {"arithmetic_at_the_limits",                    check_arithmetic_at_the_limits                   },
+    {"script_variable_has_a_limit",                 check_script_variable_has_a_limit                },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },
