@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/act.social.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/social.hpp"
@@ -34,7 +35,7 @@ static int social_sort_order(const void *a, const void *b);
 
 ACMD(do_action)
 {
-  char arg[MAX_INPUT_LENGTH], part[MAX_INPUT_LENGTH];
+  std::string arg, part;
   int act_nr;
   struct social_messg *action;
   struct char_data *vict;
@@ -53,20 +54,17 @@ ACMD(do_action)
     return;
   }
 
-  two_arguments(argument, arg, part);
+  std::string_view rest = argument;
+  arg                   = take_arg(rest);
+  part                  = take_arg(rest);
 
-  if ((!action->char_body_found) && (*part)) {
+  if ((!action->char_body_found) && !part.empty()) {
     send_to_char(g, ch, "Sorry, this social does not support body parts.\r\n");
     return;
   }
 
-  if (!action->char_found)
-    *arg = '\0';
-
-  if (action->char_found && argument)
-    one_argument(argument, arg);
-  else
-    *arg = '\0';
+  if (!action->char_found) /* the target word only counts for socials that take one */
+    arg.clear();
 
   vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
   if (!vict) {
@@ -98,10 +96,10 @@ ACMD(do_action)
   if (char_get_position(vict) < action->min_victim_position)
     act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else {
-    if (*part) {
-      act(g, action->char_body_found, 0, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_CHAR | TO_SLEEP);
-      act(g, action->others_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_NOTVICT);
-      act(g, action->vict_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part)) /* act() reads it as $t text */, vict, TO_VICT);
+    if (!part.empty()) {
+      act(g, action->char_body_found, 0, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_CHAR | TO_SLEEP);
+      act(g, action->others_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_NOTVICT);
+      act(g, action->vict_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_VICT);
     } else {
       act(g, action->char_found, 0, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       act(g, action->others_found, action->hide, ch, nullptr, vict, TO_NOTVICT);
@@ -112,12 +110,13 @@ ACMD(do_action)
 
 ACMD(do_insult)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *victim;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (*arg) {
+  if (!arg.empty()) {
     if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
       send_to_char(g, ch, "Can't hear you!\r\n");
     else {
@@ -419,20 +418,23 @@ static int find_action(GameWorld *g, int cmd)
 ACMD(do_gmote)
 {
   int act_nr, length;
-  char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
+  std::string arg, buf;
+  char out[MAX_INPUT_LENGTH];
   struct social_messg *action;
   struct char_data *vict = nullptr;
 
-  half_chop(argument, buf, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_word(rest);
+  arg                   = skip_spaces(rest);
 
   if (subcmd)
-    for (length = strlen(buf), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
-      if (!strncmp(g->complete_cmd_info[cmd].command, buf, length))
+    for (length = buf.size(), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
+      if (!strncmp(g->complete_cmd_info[cmd].command, buf.c_str(), length))
         break;
 
   if ((act_nr = find_action(g, cmd)) < 0) {
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(g, buf, false, ch, nullptr, vict, TO_GMOTE);
+    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
+    act(g, out, false, ch, nullptr, vict, TO_GMOTE);
     return;
   }
 
@@ -444,14 +446,14 @@ ACMD(do_gmote)
   action = &g->soc_mess_list[act_nr];
 
   if (!action->char_found)
-    *arg = '\0';
+    arg.clear();
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (!action->others_no_arg || !*action->others_no_arg) {
       send_to_char(g, ch, "Who are you going to do that to?\r\n");
       return;
     }
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
+    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
   } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "%s\r\n", action->not_found);
     return;
@@ -460,14 +462,14 @@ ACMD(do_gmote)
       send_to_char(g, ch, "%s\r\n", action->char_auto);
       return;
     }
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);
+    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);
   } else {
     if (char_get_position(vict) < action->min_victim_position) {
       act(g, "$N is not in a proper position for that.",
           false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       return;
     }
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
+    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
   }
-  act(g, buf, false, ch, nullptr, vict, TO_GMOTE);
+  act(g, out, false, ch, nullptr, vict, TO_GMOTE);
 }

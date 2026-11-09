@@ -407,6 +407,14 @@ void search_replace(char *string, const char *find, const char *replace)
   return;
 }
 
+void search_replace(std::string &s, std::string_view find, std::string_view replace)
+{
+  size_t pos;
+
+  while ((pos = s.find(find)) != std::string::npos)
+    s.replace(pos, find.size(), replace);
+}
+
 char *str_printf(const char *format, ...)
 {
   va_list args;

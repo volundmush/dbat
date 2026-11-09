@@ -52,6 +52,8 @@
 - The miscellaneous commands (`commands/misc/`) take their arguments apart with `dbat/args.hpp`. [Volund]
 - The other commands (`commands/other/`) take their arguments apart with `dbat/args.hpp`. `mag_objectmagic()`, `list_skills()`, `print_skills_by_type()` and `race_find_form()` take a `std::string_view`, and `rpp_feature()` a `const std::string &`. [Volund]
 - The wizard commands (`commands/wizard/`) take their arguments apart with `dbat/args.hpp`; `set` reads its target, field and value from one view instead of chopping a buffer four times. `find_target_room()` and the `vnum_*()` searches take a `std::string_view`. [Volund]
+- The communication, social, item and movement commands (`act.comm.cpp`, `act.social.cpp`, `act.item.cpp`, `act.movement.cpp`) take their arguments apart with `dbat/args.hpp`. `AN()` is a function of a `std::string_view` rather than a macro, and `search_replace()` has a `std::string` version, which whispers that are overheard now use: the char * one built its result in a fixed buffer. [Volund]
+- "get all.<thing> all.<container>" takes every <thing> from every container. Taking them from the first container stripped the "all." from the name, so from each of the others it took only one. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

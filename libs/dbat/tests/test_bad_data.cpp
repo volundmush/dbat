@@ -1132,6 +1132,41 @@ static void check_worn_container_that_cannot_go_back_on(void)
   th_shutdown(g);
 }
 
+/* "get all.<thing> all.<container>" takes every <thing> from every container (taking them from the first stripped
+ * "all." off the name, so from the others it took only one each) */
+static void check_get_all_from_all_containers(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Gatherer", ADMLVL_IMPL);
+
+  while (char_get_inventory(ch))
+    extract_obj(g, first_obj(g, char_get_inventory(ch)));
+  for (int b = 0; b < 2; b++) {
+    struct obj_data *bag = read_object(g, CONTAINER_VNUM);
+    obj_set_name(bag, "satchel");
+    obj_set_value(bag, VAL_CONTAINER_FLAGS, 0); /* open */
+    for (int i = 0; i < 2; i++) {
+      struct obj_data *pebble = read_object(g, 350);
+      obj_set_name(pebble, "pebble");
+      obj_to_obj(g, pebble, bag);
+    }
+    obj_to_char(g, bag, ch);
+  }
+  th_type(g, ch, "get all.pebble all.satchel");
+
+  int loose = 0, left = 0;
+  for (obj_data *obj : char_inventory(g, ch)) {
+    if (obj_get_vnum(g, obj) == 350)
+      loose++;
+    else
+      left += (int)obj_get_contains(obj).size();
+  }
+  CHECK(loose == 4);
+  CHECK(left == 0);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static void check_message_about_an_object_with_no_description(void)
 {
   GameWorld *g = th_boot();
@@ -1488,6 +1523,7 @@ static const struct {
     {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
     {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },
     {"spellbook_edit_can_be_abandoned",             check_spellbook_edit_can_be_abandoned            },
+    {"get_all_from_all_containers",                 check_get_all_from_all_containers                },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

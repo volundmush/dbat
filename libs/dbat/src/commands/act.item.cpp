@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.item.hpp"
@@ -79,14 +80,14 @@ static void majin_gain(GameWorld *g, struct char_data *ch, int type);
 
 static bool can_take_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 static void get_check_money(GameWorld *g, struct char_data *ch, struct obj_data *obj);
-static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int howmany);
+static void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, int howmany);
 static void perform_give_gold(GameWorld *g, struct char_data *ch, struct char_data *vict, int amount);
 static void perform_give(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj);
 static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, room_vnum RDR);
 static void perform_drop_gold(GameWorld *g, struct char_data *ch, int amount, int8_t mode, room_vnum RDR);
-static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, char *arg);
+static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, std::string_view arg);
 static void perform_put(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
-static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *cont, char *arg, int mode, int howmany);
+static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *cont, std::string arg, int mode, int howmany);
 static void wear_message(GameWorld *g, struct char_data *ch, struct obj_data *obj, int where);
 static void perform_get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct obj_data *cont, int mode);
 static int hands(struct char_data *ch);
@@ -96,7 +97,7 @@ static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer);
 static bool has_housekey(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *plant);
 static bool can_harvest(GameWorld *g, struct obj_data *plant);
-static const char *find_exdesc_keywords(char *word, const ex_desc_list &list);
+static const char *find_exdesc_keywords(std::string_view word, const ex_desc_list &list);
 
 /* local variables */
 static char buf[MAX_STRING_LENGTH];
@@ -266,10 +267,12 @@ static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *p
 ACMD(do_garden)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct obj_data *obj;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_GARDENING) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
     int numb = rand_number(g, 8, 16);
@@ -280,8 +283,8 @@ ACMD(do_garden)
     return;
   }
 
-  if (*arg) {
-    if (!strcasecmp(arg, "collect")) {
+  if (!arg.empty()) {
+    if (str_eq_nocase(arg, "collect")) {
       int found = false;
 
       for (obj_data *obj2 : char_inventory(g, ch)) {
@@ -325,7 +328,7 @@ ACMD(do_garden)
     }
   }
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: garden (plant) ( water | harvest | dig | plant | pick )\r\n");
     send_to_char(g, ch, "Syntax: garden collect [Will collect soil from a room with soil.\r\n");
     return;
@@ -336,7 +339,7 @@ ACMD(do_garden)
     return;
   }
 
-  if (!strcasecmp(arg2, "plant")) {
+  if (str_eq_nocase(arg2, "plant")) {
     if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "What are you trying to plant?\r\n");
       send_to_char(g, ch, "Syntax: garden (plant in inventory) plant\r\n");
@@ -361,7 +364,7 @@ ACMD(do_garden)
     send_to_char(g, ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost));
     return;
   }
-  if (!strcasecmp(arg2, "water")) {
+  if (str_eq_nocase(arg2, "water")) {
     struct obj_data *water = nullptr;
     int found = false;
 
@@ -411,7 +414,7 @@ ACMD(do_garden)
     improve_skill(g, ch, SKILL_GARDENING, 0);
     return;
   }
-  if (!strcasecmp(arg2, "harvest")) {
+  if (str_eq_nocase(arg2, "harvest")) {
     struct obj_data *clippers = nullptr;
     int found = false;
 
@@ -459,7 +462,7 @@ ACMD(do_garden)
     improve_skill(g, ch, SKILL_GARDENING, 0);
     return;
   }
-  if (!strcasecmp(arg2, "dig")) {
+  if (str_eq_nocase(arg2, "dig")) {
     int found = false;
 
     for (obj_data *obj2 : char_inventory(g, ch)) {
@@ -481,7 +484,7 @@ ACMD(do_garden)
     improve_skill(g, ch, SKILL_GARDENING, 0);
     return;
   }
-  if (!strcasecmp(arg2, "plant")) {
+  if (str_eq_nocase(arg2, "plant")) {
     int found = false;
 
     for (obj_data *obj2 : char_inventory(g, ch)) {
@@ -556,7 +559,7 @@ ACMD(do_garden)
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(g, ch, SKILL_GARDENING, 0);
     }
-  } else if (!strcasecmp(arg2, "pick")) {
+  } else if (str_eq_nocase(arg2, "pick")) {
     if (!obj_extra_flagged(obj, ITEM_MATURE)) {
       send_to_char(g, ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
       return;
@@ -609,11 +612,13 @@ ACMD(do_pack)
 {
 
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Pack up which type of house capsule?\nSyntax: pack (target)\r\n");
     return;
   }
@@ -639,11 +644,11 @@ ACMD(do_pack)
     return;
   }
   if (obj_get_vnum(g, obj) >= 18800 && obj_get_vnum(g, obj) <= 19199 && obj_get_type_flag(obj) == ITEM_VEHICLE) {
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
       return;
     }
-    if (strcasecmp(arg2, "yes")) {
+    if (!str_eq_nocase(arg2, "yes")) {
       send_to_char(g, ch, "This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
       return;
     }
@@ -760,11 +765,12 @@ ACMD(do_deploy)
   struct obj_data *obj = nullptr;
   int capsule = false, furniture = false;
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     for (obj_data *obj4 : char_inventory(g, ch)) {
       if (obj_get_vnum(g, obj4) == 4 || obj_get_vnum(g, obj4) == 5 || obj_get_vnum(g, obj4) == 6) {
         obj     = obj4;
@@ -1066,12 +1072,14 @@ void check_auction(GameWorld *g)
 
 ACMD(do_auction)
 {
-  char arg1[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg1;
+  std::string arg2;
   struct obj_data *obj;
   int bid = 0;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
     send_to_char(g, ch, "This is a different dimension!\r\n");
@@ -1086,7 +1094,7 @@ ACMD(do_auction)
     return;
   }
 
-  if (!*arg1) {
+  if (arg1.empty()) {
     send_to_char(g, ch, "Auction what?\r\n");
     send_to_char(g, ch, "[ Auction: <item> | <cancel> ]\r\n");
     return;
@@ -1105,14 +1113,14 @@ ACMD(do_auction)
     auc_stat(g, ch, auction_obj(g));
     return;
   } else if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch)))) {
-    snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
+    snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1.c_str());
     send_to_char(g, ch, "%s", buf);
     return;
-  } else if (!*arg2) {
+  } else if (arg2.empty()) {
     snprintf(buf, sizeof(buf), "What should be the minimum bid?\r\n");
     send_to_char(g, ch, "%s", buf);
     return;
-  } else if (*arg2 && (bid = atoi(arg2)) <= 0) {
+  } else if (!arg2.empty() && (bid = parse_int(arg2)) <= 0) {
     send_to_char(g, ch, "Come on? One zenni at least?\r\n");
     return;
   } else if (g->aucstat != AUC_NULL_STATE) {
@@ -1136,7 +1144,7 @@ ACMD(do_auction)
 ACMD(do_bid)
 {
   struct obj_data *obj2 = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int found = false, list = 0, masterList = 0;
   room_vnum auct_room;
 
@@ -1159,9 +1167,11 @@ ACMD(do_bid)
     return;
   }
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
     return;
   }
@@ -1173,7 +1183,7 @@ ACMD(do_bid)
   masterList = list;
   list       = 0;
 
-  if (!strcasecmp(arg, "list")) {
+  if (str_eq_nocase(arg, "list")) {
     send_to_char(g, ch, "@Y                                   Auction@n\r\n");
     send_to_char(g, ch, "@c------------------------------------------------------------------------------@n\r\n");
     for (obj_data *obj : room_contents(g, auct_room)) {
@@ -1198,13 +1208,13 @@ ACMD(do_bid)
       send_to_char(g, ch, "No items are currently being auctioned.\r\n");
     }
     send_to_char(g, ch, "@c------------------------------------------------------------------------------@n\r\n");
-  } else if (!strcasecmp(arg, "appraise")) {
-    if (!*arg2) {
+  } else if (str_eq_nocase(arg, "appraise")) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
       send_to_char(g, ch, "What item number did you want to appraise?\r\n");
       return;
     }
-    if (atoi(arg2) < 0 || atoi(arg2) > masterList) {
+    if (parse_int(arg2) < 0 || parse_int(arg2) > masterList) {
       send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
       send_to_char(g, ch, "That item number doesn't exist.\r\n");
       return;
@@ -1216,7 +1226,7 @@ ACMD(do_bid)
           continue;
         }
         list++;
-        if (atoi(arg2) == list) {
+        if (parse_int(arg2) == list) {
           obj2 = obj;
         }
       }
@@ -1298,12 +1308,12 @@ ACMD(do_bid)
     send_to_char(g, ch, "@c------------------------------------------------------------------------\n");
     return;
   } else {
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
       send_to_char(g, ch, "What amount did you want to bid?\r\n");
       return;
     }
-    if (atoi(arg) < 0 || atoi(arg) > masterList) {
+    if (parse_int(arg) < 0 || parse_int(arg) > masterList) {
       send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
       send_to_char(g, ch, "That item number is not found.\r\n");
       return;
@@ -1315,7 +1325,7 @@ ACMD(do_bid)
           continue;
         }
         list++;
-        if (atoi(arg) == list) {
+        if (parse_int(arg) == list) {
           obj2 = obj;
         }
       }
@@ -1333,15 +1343,15 @@ ACMD(do_bid)
       send_to_char(g, ch, "You auctioned the item, go to the auction house and cancel if you can.\r\n");
       return;
     }
-    if (obj_get_curBidder(obj2) > 0 && atoi(arg2) <= (obj_get_bid(obj2) + (obj_get_bid(obj2) * .1)) && obj_get_curBidder(obj2) > -1) {
+    if (obj_get_curBidder(obj2) > 0 && parse_int(arg2) <= (obj_get_bid(obj2) + (obj_get_bid(obj2) * .1)) && obj_get_curBidder(obj2) > -1) {
       send_to_char(g, ch, "You have to bid at least 10 percent over the current bid.\r\n");
       return;
     }
-    if (atoi(arg2) < obj_get_bid(obj2) && obj_get_curBidder(obj2) <= -1) {
+    if (parse_int(arg2) < obj_get_bid(obj2) && obj_get_curBidder(obj2) <= -1) {
       send_to_char(g, ch, "You have to bid at least the starting bid.\r\n");
       return;
     }
-    if (atoi(arg2) > (((char_get_gold(ch) + char_get_bank_gold(ch)) / 100) * 50) + (char_get_gold(ch) + char_get_bank_gold(ch))) {
+    if (parse_int(arg2) > (((char_get_gold(ch) + char_get_bank_gold(ch)) / 100) * 50) + (char_get_gold(ch) + char_get_bank_gold(ch))) {
       send_to_char(g, ch, "You can not bid more than 150%s of your total money (on hand and in the bank).\r\n", "%");
       return;
     }
@@ -1349,10 +1359,10 @@ ACMD(do_bid)
       send_to_char(g, ch, "Bidding on that object has been closed.\r\n");
       return;
     }
-    obj_set_bid(obj2, atoi(arg2));
+    obj_set_bid(obj2, parse_int(arg2));
     obj_set_curBidder(obj2, char_get_id(ch));
     auc_save(g);
-    int bid = atoi(arg2);
+    int bid = parse_int(arg2);
     mud_log("AUCTION: %s has bid %s on %s", char_get_name(ch), obj_get_short_description(obj2), add_commas(bid));
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || char_is_npc(d->character))
@@ -1784,42 +1794,39 @@ static void perform_put(GameWorld *g, struct char_data *ch, struct obj_data *obj
 
 ACMD(do_put)
 {
-  char arg1[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
-  char arg3[MAX_INPUT_LENGTH];
+  std::string arg1, arg2, arg3;
   struct obj_data *obj, *cont;
   struct char_data *tmp_char;
   int obj_dotmode, cont_dotmode, found = 0, howmany = 1;
-  char *theobj, *thecont;
 
-  one_argument(two_arguments(argument, arg1, arg2), arg3); /* three_arguments */
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
+  arg3                  = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
 
-  if (*arg3 && is_number(arg1)) {
-    howmany = atoi(arg1);
-    theobj  = arg2;
-    thecont = arg3;
-  } else {
-    theobj  = arg1;
-    thecont = arg2;
-  }
+  bool counted = !arg3.empty() && is_number(arg1); /* put <count> <thing> <container> */
+  if (counted)
+    howmany = parse_int(arg1);
+  std::string &theobj  = counted ? arg2 : arg1;
+  std::string &thecont = counted ? arg3 : arg2;
   obj_dotmode  = find_all_dots(theobj);
   cont_dotmode = find_all_dots(thecont);
 
-  if (!*theobj)
+  if (theobj.empty())
     send_to_char(g, ch, "Put what in what?\r\n");
   else if (cont_dotmode != FIND_INDIV)
     send_to_char(g, ch, "You can only put things into one container at a time.\r\n");
-  else if (!*thecont) {
+  else if (thecont.empty()) {
     send_to_char(g, ch, "What do you want to put %s in?\r\n", obj_dotmode == FIND_INDIV ? "it" : "them");
   } else {
     generic_find(g, thecont, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
     if (!cont)
-      send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(thecont), thecont);
+      send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(thecont), thecont.c_str());
     else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
              (obj_get_type_flag(cont) != ITEM_PORTAL) &&
              (obj_get_type_flag(cont) != ITEM_VEHICLE))
@@ -1829,7 +1836,7 @@ ACMD(do_put)
     else {
       if (obj_dotmode == FIND_INDIV) { /* put <obj> <container> */
         if (!(obj = get_obj_in_list_vis(g, ch, theobj, nullptr, char_get_inventory(ch))))
-          send_to_char(g, ch, "You aren't carrying %s %s.\r\n", AN(theobj), theobj);
+          send_to_char(g, ch, "You aren't carrying %s %s.\r\n", AN(theobj), theobj.c_str());
         else if (obj == cont && howmany == 1)
           send_to_char(g, ch, "You attempt to fold it into itself, but fail.\r\n");
         else {
@@ -1856,7 +1863,7 @@ ACMD(do_put)
           if (obj_dotmode == FIND_ALL)
             send_to_char(g, ch, "You don't seem to have anything to put in it.\r\n");
           else
-            send_to_char(g, ch, "You don't seem to have any %ss.\r\n", theobj);
+            send_to_char(g, ch, "You don't seem to have any %ss.\r\n", theobj.c_str());
         }
       }
     }
@@ -1960,7 +1967,7 @@ static void perform_get_from_container(GameWorld *g, struct char_data *ch, struc
 }
 
 static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *cont,
-                               char *arg, int mode, int howmany)
+                               std::string arg, int mode, int howmany)
 {
   struct obj_data *obj;
   int obj_dotmode, found = 0;
@@ -1973,7 +1980,7 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
     if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, obj_get_contains(cont)))) {
       char out[MAX_STRING_LENGTH];
 
-      snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
+      snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg.c_str());
       act(g, out, false, ch, cont, nullptr, TO_CHAR);
     } else {
       for (obj_data *match : obj_list_from(g, obj_get_contains(cont), obj)) {
@@ -1985,7 +1992,7 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
       }
     }
   } else {
-    if (obj_dotmode == FIND_ALLDOT && !*arg) {
+    if (obj_dotmode == FIND_ALLDOT && arg.empty()) {
       send_to_char(g, ch, "Get all of what?\r\n");
       return;
     }
@@ -2002,7 +2009,7 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
       else {
         char out[MAX_STRING_LENGTH];
 
-        snprintf(out, sizeof(out), "You can't seem to find any %ss in $p.", arg);
+        snprintf(out, sizeof(out), "You can't seem to find any %ss in $p.", arg.c_str());
         act(g, out, false, ch, cont, nullptr, TO_CHAR);
       }
     }
@@ -2052,7 +2059,7 @@ bool perform_get_from_room(GameWorld *g, struct char_data *ch, struct obj_data *
   return false;
 }
 
-static const char *find_exdesc_keywords(char *word, const ex_desc_list &list)
+static const char *find_exdesc_keywords(std::string_view word, const ex_desc_list &list)
 {
   for (const extra_descr_data &i : list)
     if (isname(word, i.keyword.c_str()))
@@ -2061,7 +2068,7 @@ static const char *find_exdesc_keywords(char *word, const ex_desc_list &list)
   return (nullptr);
 }
 
-static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int howmany)
+static void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, int howmany)
 {
   struct obj_data *obj;
   int dotmode, found = 0;
@@ -2069,7 +2076,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
 
   /* Are they trying to take something in a room extra description? */
   if (find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch))) != nullptr) {
-    send_to_char(g, ch, "You can't take %s %s.\r\n", AN(arg), arg);
+    send_to_char(g, ch, "You can't take %s %s.\r\n", AN(arg), arg.c_str());
     return;
   }
 
@@ -2079,7 +2086,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
     if ((descword = find_exdesc_keywords(arg, room_get_ex_description(g, char_get_in_room(ch)))) != nullptr)
       send_to_char(g, ch, "%s: you can't take that!\r\n", fname(descword));
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
-      send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(arg), arg);
+      send_to_char(g, ch, "You don't see %s %s here.\r\n", AN(arg), arg.c_str());
     else {
       for (obj_data *match : obj_list_from(g, room_get_contents(g, char_get_in_room(ch)), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2090,7 +2097,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
       }
     }
   } else {
-    if (dotmode == FIND_ALLDOT && !*arg) {
+    if (dotmode == FIND_ALLDOT && arg.empty()) {
       send_to_char(g, ch, "Get all of what?\r\n");
       return;
     }
@@ -2105,46 +2112,47 @@ static void get_from_room(GameWorld *g, struct char_data *ch, char *arg, int how
       if (dotmode == FIND_ALL)
         send_to_char(g, ch, "There doesn't seem to be anything here.\r\n");
       else
-        send_to_char(g, ch, "You don't see any %ss here.\r\n", arg);
+        send_to_char(g, ch, "You don't see any %ss here.\r\n", arg.c_str());
     }
   }
 }
 
 ACMD(do_get)
 {
-  char arg1[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
-  char arg3[MAX_INPUT_LENGTH];
+  std::string arg1, arg2, arg3;
 
   int cont_dotmode, found = 0, mode;
   struct obj_data *cont;
   struct char_data *tmp_char;
 
-  one_argument(two_arguments(argument, arg1, arg2), arg3); /* three_arguments */
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
+  arg3                  = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
 
-  if (!*arg1)
+  if (arg1.empty())
     send_to_char(g, ch, "Get what?\r\n");
-  else if (!*arg2)
+  else if (arg2.empty())
     get_from_room(g, ch, arg1, 1);
-  else if (is_number(arg1) && !*arg3)
-    get_from_room(g, ch, arg2, atoi(arg1));
+  else if (is_number(arg1) && arg3.empty())
+    get_from_room(g, ch, arg2, parse_int(arg1));
   else {
     int amount = 1;
     if (is_number(arg1)) {
-      amount = atoi(arg1);
-      strcpy(arg1, arg2); /* strcpy: OK (sizeof: arg1 == arg2) */
-      strcpy(arg2, arg3); /* strcpy: OK (sizeof: arg2 == arg3) */
+      amount = parse_int(arg1);
+      arg1   = arg2;
+      arg2   = arg3;
     }
     cont_dotmode = find_all_dots(arg2);
     if (cont_dotmode == FIND_INDIV) {
       mode = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
       if (!cont)
-        send_to_char(g, ch, "You don't have %s %s.\r\n", AN(arg2), arg2);
+        send_to_char(g, ch, "You don't have %s %s.\r\n", AN(arg2), arg2.c_str());
       else if (obj_get_type_flag(cont) == ITEM_VEHICLE)
         send_to_char(g, ch, "You will need to enter it first.\r\n");
       else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
@@ -2153,7 +2161,7 @@ ACMD(do_get)
       else
         get_from_container(g, ch, cont, arg1, mode, amount);
     } else {
-      if (cont_dotmode == FIND_ALLDOT && !*arg2) {
+      if (cont_dotmode == FIND_ALLDOT && arg2.empty()) {
         send_to_char(g, ch, "Get from all of what?\r\n");
         return;
       }
@@ -2183,7 +2191,7 @@ ACMD(do_get)
         if (cont_dotmode == FIND_ALL)
           send_to_char(g, ch, "You can't seem to find any containers.\r\n");
         else
-          send_to_char(g, ch, "You can't seem to find any %ss here.\r\n", arg2);
+          send_to_char(g, ch, "You can't seem to find any %ss here.\r\n", arg2.c_str());
       }
     }
   }
@@ -2358,7 +2366,7 @@ static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj
 
 ACMD(do_drop)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
   room_vnum RDR = 0;
   int8_t mode   = SCMD_DROP;
@@ -2408,23 +2416,24 @@ ACMD(do_drop)
       break;
   }
 
-  argument = one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What do you want to %s?\r\n", sname);
     return;
   }
   if (is_number(arg)) {
-    multi = atoi(arg);
-    one_argument(argument, arg);
-    if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg))
+    multi = parse_int(arg);
+    arg   = take_arg(rest);
+    if (str_eq_nocase("zenni", arg) || str_eq_nocase("gold", arg))
       perform_drop_gold(g, ch, multi, mode, RDR);
     else if (multi <= 0)
       send_to_char(g, ch, "Yeah, that makes sense.\r\n");
-    else if (!*arg)
+    else if (arg.empty())
       send_to_char(g, ch, "What do you want to %s %d of?\r\n", sname, multi);
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg);
+      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg.c_str());
     else if (check_saveroom_count(g, ch, obj) > 150)
       send_to_char(g, ch, "The save room you are in can not hold anymore items! (150 max, count of items in containers is halved)\r\n");
     else {
@@ -2467,12 +2476,12 @@ ACMD(do_drop)
     } else if (dotmode == FIND_ALLDOT) {
       int fail = false;
 
-      if (!*arg) {
+      if (arg.empty()) {
         send_to_char(g, ch, "What do you want to %s all of?\r\n", sname);
         return;
       }
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-        send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg);
+        send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg.c_str());
 
       for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2489,7 +2498,7 @@ ACMD(do_drop)
       }
     } else {
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-        send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+        send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg.c_str());
       } else if (check_saveroom_count(g, ch, obj) > 150) {
         send_to_char(g, ch, "The item couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
       } else {
@@ -2574,17 +2583,17 @@ static void perform_give(GameWorld *g, struct char_data *ch, struct char_data *v
 }
 
 /* utility function for give */
-static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, char *arg)
+static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   struct char_data *vict;
+  std::string name(skip_spaces(arg));
 
-  skip_spaces(&arg);
-  if (!*arg)
+  if (name.empty())
     send_to_char(g, ch, "To who?\r\n");
-  else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  else if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     if (char_is_npc(ch))
-      send_to_imm(g, "Mob Give: Victim, %s, doesn't exist.", arg);
+      send_to_imm(g, "Mob Give: Victim, %s, doesn't exist.", name.c_str());
   } else if (vict == ch)
     send_to_char(g, ch, "What's the point of that?\r\n");
   else
@@ -2627,12 +2636,13 @@ static void perform_give_gold(GameWorld *g, struct char_data *ch, struct char_da
 
 ACMD(do_give)
 {
-  char arg[MAX_STRING_LENGTH];
+  std::string arg;
   int amount, dotmode;
   struct char_data *vict;
   struct obj_data *obj;
 
-  argument = one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no arms!\r\n");
@@ -2640,13 +2650,13 @@ ACMD(do_give)
   }
 
   reveal_hiding(g, ch, 0);
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Give what to who?\r\n");
   else if (is_number(arg)) {
-    amount   = atoi(arg);
-    argument = one_argument(argument, arg);
-    if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg)) {
-      one_argument(argument, arg);
+    amount = parse_int(arg);
+    arg    = take_arg(rest);
+    if (str_eq_nocase("zenni", arg) || str_eq_nocase("gold", arg)) {
+      arg = take_arg(rest);
       if ((vict = give_find_vict(g, ch, arg)) != nullptr) {
         perform_give_gold(g, ch, vict, amount);
         if (char_get_admlevel(ch) > 0 && !char_is_npc(vict)) {
@@ -2655,12 +2665,12 @@ ACMD(do_give)
         }
       }
       return;
-    } else if (!*arg) /* Give multiple code. */
+    } else if (arg.empty()) /* Give multiple code. */
       send_to_char(g, ch, "What do you want to give %d of?\r\n", amount);
-    else if (!(vict = give_find_vict(g, ch, argument)))
+    else if (!(vict = give_find_vict(g, ch, rest)))
       return;
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg);
+      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg.c_str());
     else {
       for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2676,15 +2686,15 @@ ACMD(do_give)
       }
     }
   } else {
-    char buf1[MAX_INPUT_LENGTH];
+    std::string buf1;
 
-    one_argument(argument, buf1);
+    buf1 = take_arg(rest);
     if (!(vict = give_find_vict(g, ch, buf1)))
       return;
     dotmode = find_all_dots(arg);
     if (dotmode == FIND_INDIV) {
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-        send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+        send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg.c_str());
       else {
         perform_give(g, ch, vict, obj);
         if (char_get_admlevel(ch) > 0 && !char_is_npc(vict)) {
@@ -2693,7 +2703,7 @@ ACMD(do_give)
         }
       }
     } else {
-      if (dotmode == FIND_ALLDOT && !*arg) {
+      if (dotmode == FIND_ALLDOT && arg.empty()) {
         send_to_char(g, ch, "All of what?\r\n");
         return;
       }
@@ -2805,13 +2815,14 @@ void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)
 
 ACMD(do_drink)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *temp;
   struct affected_type af = {};
   int amount, weight, wasthirsty = 0;
   int on_ground = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
   if (char_is_npc(ch)) {
     return;
   }
@@ -2828,7 +2839,7 @@ ACMD(do_drink)
     return;
   }
   wasthirsty = char_get_conditions(g, ch, THIRST);
-  if (!*arg && !char_is_npc(ch)) {
+  if (arg.empty() && !char_is_npc(ch)) {
     char out[MAX_STRING_LENGTH];
     switch (room_sect(g, char_get_in_room(ch))) {
       case SECT_WATER_SWIM:
@@ -3014,12 +3025,13 @@ ACMD(do_drink)
 
 ACMD(do_eat)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *food;
   struct affected_type af = {};
   int amount;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) /* Cannot use GET_COND() on mobs. */
     return;
@@ -3036,12 +3048,12 @@ ACMD(do_eat)
     send_to_char(g, ch, "You feel too sick from the poison to eat!\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Eat what?\r\n");
     return;
   }
   if (!(food = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg.c_str());
     return;
   }
   if (char_get_conditions(g, ch, THIRST) <= 1 && char_get_conditions(g, ch, HUNGER) >= 2) {
@@ -3229,14 +3241,16 @@ static void majin_gain(GameWorld *g, struct char_data *ch, int type)
 
 ACMD(do_pour)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
   struct obj_data *from_obj = nullptr, *to_obj = nullptr;
   int amount = 0;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (subcmd == SCMD_POUR) {
-    if (!*arg1) { /* No arguments */
+    if (arg1.empty()) { /* No arguments */
       send_to_char(g, ch, "From what do you want to pour?\r\n");
       return;
     }
@@ -3250,7 +3264,7 @@ ACMD(do_pour)
     }
   }
   if (subcmd == SCMD_FILL) {
-    if (!*arg1) { /* no arguments */
+    if (arg1.empty()) { /* no arguments */
       send_to_char(g, ch, "What do you want to fill?  And what are you filling it from?\r\n");
       return;
     }
@@ -3262,12 +3276,12 @@ ACMD(do_pour)
       act(g, "You can't fill $p!", false, ch, to_obj, nullptr, TO_CHAR);
       return;
     }
-    if (!*arg2) { /* no 2nd argument */
+    if (arg2.empty()) { /* no 2nd argument */
       act(g, "What do you want to fill $p from?", false, ch, to_obj, nullptr, TO_CHAR);
       return;
     }
     if (!(from_obj = get_obj_in_list_vis(g, ch, arg2, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char(g, ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
+      send_to_char(g, ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2.c_str());
       return;
     }
     if (obj_get_type_flag(from_obj) != ITEM_FOUNTAIN && !obj_extra_flagged(from_obj, ITEM_BROKEN)) {
@@ -3284,11 +3298,11 @@ ACMD(do_pour)
     return;
   }
   if (subcmd == SCMD_POUR) { /* pour */
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Where do you want it?  Out or in what?\r\n");
       return;
     }
-    if (!strcasecmp(arg2, "out")) {
+    if (str_eq_nocase(arg2, "out")) {
       if (obj_get_value(from_obj, VAL_DRINKCON_CAPACITY) > 0) {
         act(g, "$n empties $p.", true, ch, from_obj, nullptr, TO_ROOM);
         act(g, "You empty $p.", false, ch, from_obj, nullptr, TO_CHAR);
@@ -3330,7 +3344,7 @@ ACMD(do_pour)
     return;
   }
   if (subcmd == SCMD_POUR)
-    send_to_char(g, ch, "You pour the %s into the %s.", drinks[obj_get_value(from_obj, VAL_DRINKCON_LIQUID)], arg2);
+    send_to_char(g, ch, "You pour the %s into the %s.", drinks[obj_get_value(from_obj, VAL_DRINKCON_LIQUID)], arg2.c_str());
 
   if (subcmd == SCMD_FILL) {
     act(g, "You gently fill $p from $P.", false, ch, to_obj, from_obj, TO_CHAR);
@@ -3637,20 +3651,22 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
 
 ACMD(do_wear)
 {
-  char arg1[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg1;
+  std::string arg2;
   struct obj_data *obj;
   int where, dotmode, items_worn = 0;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg1) {
+  if (arg1.empty()) {
     send_to_char(g, ch, "Wear what?\r\n");
     return;
   }
   dotmode = find_all_dots(arg1);
 
-  if (*arg2 && (dotmode != FIND_INDIV)) {
+  if (!arg2.empty() && (dotmode != FIND_INDIV)) {
     send_to_char(g, ch, "You can't specify the same body location for more than one item!\r\n");
     return;
   }
@@ -3676,12 +3692,12 @@ ACMD(do_wear)
     if (!items_worn)
       send_to_char(g, ch, "You don't seem to have anything wearable.\r\n");
   } else if (dotmode == FIND_ALLDOT) {
-    if (!*arg1) {
+    if (arg1.empty()) {
       send_to_char(g, ch, "Wear all of what?\r\n");
       return;
     }
     if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg1);
+      send_to_char(g, ch, "You don't seem to have any %ss.\r\n", arg1.c_str());
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(g, ch, "You are not experienced enough to use that.\r\n");
     else
@@ -3698,7 +3714,7 @@ ACMD(do_wear)
       }
   } else {
     if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
+      send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg1), arg1.c_str());
     else if (obj_extra_flagged(obj, ITEM_BROKEN))
       send_to_char(g, ch, "But it seems to be broken!\r\n");
     else if (obj_extra_flagged(obj, ITEM_FORGED))
@@ -3710,7 +3726,7 @@ ACMD(do_wear)
         if (!is_proficient_with_armor(ch, obj_get_value(obj, VAL_ARMOR_SKILL)) && obj_get_type_flag(obj) == ITEM_ARMOR)
           send_to_char(g, ch, "You have no proficiency with this type of armor.\r\nYour fighting and physical skills will be greatly impeded.\r\n");
         perform_wear(g, ch, obj, where);
-      } else if (!*arg2)
+      } else if (arg2.empty())
         act(g, "You can't wear $p.", false, ch, obj, nullptr, TO_CHAR);
     }
   }
@@ -3718,15 +3734,16 @@ ACMD(do_wear)
 
 ACMD(do_wield)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Wield what?\r\n");
   else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg.c_str());
   else {
     if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
       send_to_char(g, ch, "You can't wield that.\r\n");
@@ -3750,15 +3767,16 @@ ACMD(do_wield)
 
 ACMD(do_grab)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Hold what?\r\n");
   else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+    send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg.c_str());
   else if (char_get_level(ch) < obj_get_level(obj))
     send_to_char(g, ch, "You are not experienced enough to use that.\r\n");
   else if (char_plr_flagged(ch, PLR_THANDW))
@@ -3822,12 +3840,13 @@ void perform_remove(GameWorld *g, struct char_data *ch, int pos)
 ACMD(do_remove)
 {
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int i, dotmode, found = 0, msg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Remove what?\r\n");
     return;
   }
@@ -3840,7 +3859,7 @@ ACMD(do_remove)
     found = 1;
 
   if (found) {
-    if (!isdigit(*arg) || (!(msg = atoi(arg)))) {
+    if (!isdigit(arg[0]) || (!(msg = parse_int(arg)))) {
       found = 0;
     } else {
       remove_board_msg(g, obj_get_vnum(g, obj), ch, msg);
@@ -3861,7 +3880,7 @@ ACMD(do_remove)
         send_to_char(g, ch, "You're not using anything.\r\n");
       }
     } else if (dotmode == FIND_ALLDOT) {
-      if (!*arg) {
+      if (arg.empty()) {
         send_to_char(g, ch, "Remove all of what?\r\n");
       } else {
         found = 0;
@@ -3873,12 +3892,12 @@ ACMD(do_remove)
           }
         }
         if (!found) {
-          send_to_char(g, ch, "You don't seem to be using any %ss.\r\n", arg);
+          send_to_char(g, ch, "You don't seem to be using any %ss.\r\n", arg.c_str());
         }
       }
     } else {
       if ((i = get_obj_pos_in_equip_vis(g, ch, arg, nullptr, char_get_equipment_array(ch))) < 0) {
-        send_to_char(g, ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg);
+        send_to_char(g, ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg.c_str());
       } else {
         perform_remove(g, ch, i);
       }

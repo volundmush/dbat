@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.movement.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -43,7 +44,7 @@
 static void handle_fall(GameWorld *g, struct char_data *ch);
 static int check_swim(GameWorld *g, struct char_data *ch);
 static void disp_locations(GameWorld *g, struct char_data *ch);
-static int find_door(GameWorld *g, struct char_data *ch, const char *type, char *dir, const char *cmdname);
+static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::string_view dir, const char *cmdname);
 static bool has_key(GameWorld *g, struct char_data *ch, obj_vnum key);
 static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj, int door, int scmd);
 static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
@@ -122,7 +123,7 @@ ACMD(do_carry)
     return;
 
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
   if (char_get_drag(g, ch)) {
     send_to_char(g, ch, "You are busy dragging someone at the moment.\r\n");
@@ -142,9 +143,10 @@ ACMD(do_carry)
     }
     return;
   } else { /* So not carrying already. */
-    one_argument(argument, arg);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
 
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "You want to carry who?\r\n");
       return;
     }
@@ -1396,11 +1398,11 @@ ACMD(do_move)
   }
 }
 
-static int find_door(GameWorld *g, struct char_data *ch, const char *type, char *dir, const char *cmdname)
+static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::string_view dir, const char *cmdname)
 {
   int door;
 
-  if (*dir) { /* a direction was specified */
+  if (!dir.empty()) { /* a direction was specified */
     if ((door = search_block(dir, dirs, false)) < 0 &&
         (door = search_block(dir, abbr_dirs, false)) < 0) { /* Partial Match */
       send_to_char(g, ch, "That's not a direction.\r\n");
@@ -1775,7 +1777,7 @@ ACMD(do_gen_door)
 {
   int door = -1;
   obj_vnum keynum;
-  char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
+  std::string type, dir;
   struct obj_data *obj     = nullptr;
   struct char_data *victim = nullptr;
 
@@ -1784,13 +1786,15 @@ ACMD(do_gen_door)
     send_to_char(g, ch, "%c%s what?\r\n", toupper(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
     return;
   }
-  two_arguments(argument, type, dir);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  type                  = take_arg(rest);
+  dir                   = take_arg(rest);
   if (!generic_find(g, type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
-    door = find_door(g, ch, type, dir, cmd_door[subcmd]);
+    door = find_door(g, ch, type.c_str(), dir, cmd_door[subcmd]);
 
   if ((obj) && (obj_get_type_flag(obj) != ITEM_CONTAINER && obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH)) {
     obj  = nullptr;
-    door = find_door(g, ch, type, dir, cmd_door[subcmd]);
+    door = find_door(g, ch, type.c_str(), dir, cmd_door[subcmd]);
   }
 
   if ((obj) || (door >= 0)) {
@@ -2013,12 +2017,13 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
 ACMD(do_enter)
 {
   struct obj_data *obj = nullptr;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   int door, move_dir = -1;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
-  if (*buf) { /* an argument was supplied, search for door keyword */
+  if (!buf.empty()) { /* an argument was supplied, search for door keyword */
     /* Is the object in the room? */
     obj = get_obj_in_list_vis(g, ch, buf, nullptr, room_get_contents(g, char_get_in_room(ch)));
     /* Is the object in the character's inventory? */
@@ -2041,7 +2046,7 @@ ACMD(do_enter)
       if (move_dir > -1)
         perform_move(g, ch, move_dir, 1);
       else
-        send_to_char(g, ch, "There is no %s here.\r\n", buf);
+        send_to_char(g, ch, "There is no %s here.\r\n", buf.c_str());
     }
   } else if (room_flagged(g, char_get_in_room(ch), ROOM_INDOORS)) {
     send_to_char(g, ch, "You are already indoors.\r\n");
@@ -2324,9 +2329,10 @@ static void fly_to_space(GameWorld *g, struct char_data *ch, room_vnum space)
 
 ACMD(do_fly)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
     send_to_char(g, ch, "You can't fly, you are struggling with someone right now!");
@@ -2353,7 +2359,7 @@ ACMD(do_fly)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (char_aff_flagged(ch, AFF_FLYING) && room_sect(g, char_get_in_room(ch)) != SECT_FLYING && room_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
       act(g, "@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -2395,7 +2401,7 @@ ACMD(do_fly)
     char_set_altitude(ch, 1);
     decCurKI(g, ch, getMaxKI(g, ch) / 100, 0);
   }
-  if (!strcasecmp("high", arg)) {
+  if (str_eq_nocase("high", arg)) {
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 100 && !char_is_android(ch)) {
       send_to_char(g, ch, "You do not have the ki to fly.");
       return;
@@ -2414,7 +2420,7 @@ ACMD(do_fly)
     char_set_altitude(ch, 2);
     decCurKI(g, ch, getMaxKI(g, ch) / 100, 0);
   }
-  if (!strcasecmp("space", arg)) {
+  if (str_eq_nocase("space", arg)) {
     if (!char_is_outside(g, ch)) {
       send_to_char(g, ch, "You are not outside!");
       return;
@@ -2548,8 +2554,9 @@ ACMD(do_stand)
 ACMD(do_sit)
 {
   struct obj_data *chair = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(g, ch, "You are busy piloting a ship!\r\n");
@@ -2575,7 +2582,7 @@ ACMD(do_sit)
     do_fly(g, ch, nullptr, 0, 0);
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     switch (char_get_position(ch)) {
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
@@ -2661,8 +2668,9 @@ ACMD(do_sit)
 ACMD(do_rest)
 {
   struct obj_data *chair = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(g, ch, "You are busy piloting a ship!\r\n");
@@ -2710,7 +2718,7 @@ ACMD(do_rest)
     do_fly(g, ch, nullptr, 0, 0);
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (char_get_sits(g, ch)) {
       chair = char_get_sits(g, ch);
       if (obj_get_type_flag(chair) != ITEM_BED) {
@@ -2803,8 +2811,9 @@ ACMD(do_rest)
 ACMD(do_sleep)
 {
   struct obj_data *chair = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
@@ -2871,7 +2880,7 @@ ACMD(do_sleep)
     do_fly(g, ch, nullptr, 0, 0);
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (char_get_sits(g, ch)) {
       chair = char_get_sits(g, ch);
       if (obj_get_type_flag(chair) != ITEM_BED) {
@@ -2973,11 +2982,12 @@ ACMD(do_sleep)
 
 ACMD(do_wake)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict;
   int self = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_aff_flagged(ch, AFF_KNOCKED)) {
     send_to_char(g, ch, "You are knocked out cold for right now!\r\n");
@@ -2989,7 +2999,7 @@ ACMD(do_wake)
     return;
   }
 
-  if (*arg) {
+  if (!arg.empty()) {
     if (char_get_position(ch) == POS_SLEEPING)
       send_to_char(g, ch, "Maybe you should wake yourself up first.\r\n");
     else if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)) == nullptr)
@@ -3054,17 +3064,18 @@ ACMD(do_wake)
 
 ACMD(do_follow)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *leader;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
-  if (*buf) {
+  if (!buf.empty()) {
     if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
       return;

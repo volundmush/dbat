@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
+#include <string_view>
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/character_utils.hpp"
@@ -21,7 +23,8 @@
 #define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r')
 
 /* See also: ANA, SANA */
-#define AN(string) (strchr("aeiouAEIOU", *string) ? "an" : "a")
+/* "an" or "a" for s; an empty s gives "an", as the old macro's strchr() found the terminator. */
+inline const char *AN(std::string_view s) { return strchr("aeiouAEIOU", s.empty() ? '\0' : s[0]) ? "an" : "a"; }
 
 #define MIN(a, b)  ((a) < (b) ? (a) : (b))
 #define countof(a) (sizeof(a) / sizeof((a)[0])) /* elements in an array (C2y has it as countof) */

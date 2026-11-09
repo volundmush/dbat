@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -38,10 +39,10 @@
 #include "dbat/game_world.hpp"
 
 /* local functions */
-static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, char *arg);
+static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *arg);
 static bool is_tell_ok(GameWorld *g, struct char_data *ch, struct char_data *vict);
-static void handle_whisper(GameWorld *g, char *buf, struct char_data *ch, struct char_data *vict);
-static const char *overhear(GameWorld *g, char *buf, int type);
+static void handle_whisper(GameWorld *g, std::string &buf, struct char_data *ch, struct char_data *vict);
+static const char *overhear(GameWorld *g, std::string &buf, int type);
 static void list_languages(GameWorld *g, struct char_data *ch);
 static void garble_text(GameWorld *g, char *string, int known, int lang);
 
@@ -116,11 +117,12 @@ ACMD(do_voice)
 ACMD(do_languages)
 {
   int i, found = false;
-  char arg[MAX_STRING_LENGTH];
+  std::string arg;
 
   if (CONFIG_ENABLE_LANGUAGES) {
-    one_argument(argument, arg);
-    if (!*arg)
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
+    if (arg.empty())
       list_languages(g, ch);
     else {
       for (i = MIN_LANGUAGES; i <= MAX_LANGUAGES; i++) {
@@ -781,7 +783,7 @@ ACMD(do_gsay)
   }
 }
 
-static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, char *arg)
+static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *arg)
 {
   char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
@@ -863,17 +865,19 @@ static bool is_tell_ok(GameWorld *g, struct char_data *ch, struct char_data *vic
 ACMD(do_tell)
 {
   struct char_data *vict = nullptr;
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf, buf2;
 
-  half_chop(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_word(rest);
+  buf2                  = skip_spaces(rest);
 
-  if (!*buf || !*buf2) {
+  if (buf.empty() || buf2.empty()) {
     send_to_char(g, ch, "Who do you wish to tell what??\r\n");
     return;
   }
   int found = false;
   if (!char_is_npc(ch)) {
-    snprintf(buf, sizeof(buf), "%s", CAP(buf));
+    CAP(buf);
     for (descriptor_data *k : each_desc(g)) {
       if (desc_get_connected(k) != CON_PLAYING)
         continue;
@@ -881,10 +885,10 @@ ACMD(do_tell)
         continue;
       if (k->user.empty())
         continue;
-      if (found == false && !char_is_npc(ch) && (!strcasecmp(k->user.c_str(), buf) || strstr(k->user.c_str(), buf))) {
+      if (found == false && !char_is_npc(ch) && (str_eq_nocase(k->user, buf) || strstr(k->user.c_str(), buf.c_str()))) {
         vict  = k->character;
         found = true;
-      } else if (!char_is_npc(ch) && found == false && (!strcasecmp(char_get_name(k->character), buf) || strstr(char_get_name(k->character), buf)) && char_get_admlevel(k->character) > 0) {
+      } else if (!char_is_npc(ch) && found == false && (str_eq_nocase(char_get_name(k->character), buf) || strstr(char_get_name(k->character), buf.c_str())) && char_get_admlevel(k->character) > 0) {
         vict  = k->character;
         found = true;
       }
@@ -895,7 +899,7 @@ ACMD(do_tell)
   else if (char_is_npc(ch) && !(vict = get_player_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
   else if (is_tell_ok(g, ch, vict))
-    perform_tell(g, ch, vict, buf2);
+    perform_tell(g, ch, vict, buf2.c_str());
 }
 
 ACMD(do_reply)
@@ -944,7 +948,7 @@ ACMD(do_reply)
 
 ACMD(do_spec_comm)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf, buf2;
   struct char_data *vict;
   const char *action_sing, *action_plur, *action_others;
 
@@ -973,9 +977,11 @@ ACMD(do_spec_comm)
       break;
   }
 
-  half_chop(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_word(rest);
+  buf2                  = skip_spaces(rest);
 
-  if (!*buf || !*buf2)
+  if (buf.empty() || buf2.empty())
     send_to_char(g, ch, "Whom do you want to %s.. and what??\r\n", action_sing);
   else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
@@ -986,11 +992,11 @@ ACMD(do_spec_comm)
     char obuf[MAX_STRING_LENGTH];
 
     if (CONFIG_ENABLE_LANGUAGES) {
-      strcpy(obuf, buf2);
+      strcpy(obuf, buf2.c_str());
       garble_text(g, obuf, char_get_skill(vict, char_get_speaking(ch)), char_get_speaking(ch));
       snprintf(buf1, sizeof(buf1), "$n %s you%s '%s'", action_plur, char_get_skill(vict, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", obuf);
     } else {
-      snprintf(buf1, sizeof(buf1), "@c$n @W%s you '@m%s@W'@n", action_plur, buf2);
+      snprintf(buf1, sizeof(buf1), "@c$n @W%s you '@m%s@W'@n", action_plur, buf2.c_str());
     }
 
     act(g, buf1, false, ch, nullptr, vict, TO_VICT);
@@ -999,7 +1005,7 @@ ACMD(do_spec_comm)
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     } else {
       char blum[MAX_INPUT_LENGTH];
-      snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
+      snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2.c_str());
       act(g, blum, true, ch, nullptr, vict, TO_CHAR);
     }
 
@@ -1012,7 +1018,7 @@ ACMD(do_spec_comm)
   }
 }
 
-static void handle_whisper(GameWorld *g, char *buf, struct char_data *ch, struct char_data *vict)
+static void handle_whisper(GameWorld *g, std::string &buf, struct char_data *ch, struct char_data *vict)
 {
 
   for (char_data *tch : room_people(g, char_get_in_room(ch))) {
@@ -1048,7 +1054,7 @@ static void handle_whisper(GameWorld *g, char *buf, struct char_data *ch, struct
   }
 }
 
-static const char *overhear(GameWorld *g, char *buf, int type)
+static const char *overhear(GameWorld *g, std::string &buf, int type)
 {
 
   switch (type) {
@@ -1119,7 +1125,7 @@ static const char *overhear(GameWorld *g, char *buf, int type)
         search_replace(buf, "t", "..");
         search_replace(buf, "T", "..");
       }
-      return buf;
+      return buf.c_str();
       break;
     case 1:
       if (rand_number(g, 1, 10) >= 5) {
@@ -1158,7 +1164,7 @@ static const char *overhear(GameWorld *g, char *buf, int type)
         search_replace(buf, "o", "..");
         search_replace(buf, "O", "..");
       }
-      return buf;
+      return buf.c_str();
       break;
     case 2:
       if (rand_number(g, 1, 10) >= 5) {
@@ -1187,10 +1193,10 @@ static const char *overhear(GameWorld *g, char *buf, int type)
         search_replace(buf, "b", "..");
         search_replace(buf, "B", "..");
       }
-      return buf;
+      return buf.c_str();
       break;
     case 3:
-      return buf;
+      return buf.c_str();
       break;
   }
 
@@ -1204,8 +1210,7 @@ static const char *overhear(GameWorld *g, char *buf, int type)
 ACMD(do_write)
 {
   struct obj_data *paper, *pen = nullptr, *obj;
-  char *papername, *penname;
-  char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
+  std::string papername, penname;
 
   /* before we do anything, lets see if there's a board involved. */
   auto is_board = [&](obj_data *o) { return obj_get_type_flag(o) == ITEM_BOARD; };
@@ -1218,30 +1223,29 @@ ACMD(do_write)
     return;
   }
 
-  papername = buf1;
-  penname   = buf2;
-
-  two_arguments(argument, papername, penname);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  papername             = take_arg(rest);
+  penname               = take_arg(rest);
 
   if (!char_get_desc(ch))
     return;
 
-  if (!*papername) { /* nothing was delivered */
+  if (papername.empty()) { /* nothing was delivered */
     send_to_char(g, ch, "write on [what] with [what pen?]\r\n");
     return;
   }
-  if (*penname) { /* there were two arguments */
+  if (!penname.empty()) { /* there were two arguments */
     if (!(paper = get_obj_in_list_vis(g, ch, papername, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "You have no %s.\r\n", papername);
+      send_to_char(g, ch, "You have no %s.\r\n", papername.c_str());
       return;
     }
     if (!(pen = get_obj_in_list_vis(g, ch, penname, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "You have no %s.\r\n", penname);
+      send_to_char(g, ch, "You have no %s.\r\n", penname.c_str());
       return;
     }
   } else { /* there was one arg.. let's see what we can find */
     if (!(paper = get_obj_in_list_vis(g, ch, papername, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "There is no %s in your inventory.\r\n", papername);
+      send_to_char(g, ch, "There is no %s in your inventory.\r\n", papername.c_str());
       return;
     }
     if (obj_get_type_flag(paper) == ITEM_PEN) { /* oops, a pen.. */
@@ -1253,7 +1257,7 @@ ACMD(do_write)
     }
     /* One object was found.. now for the other one. */
     if (!char_get_equipment(ch, WEAR_WIELD2)) {
-      send_to_char(g, ch, "You can't write with %s %s alone.\r\n", AN(papername), papername);
+      send_to_char(g, ch, "You can't write with %s %s alone.\r\n", AN(papername), papername.c_str());
       return;
     }
     if (!char_can_see_obj(g, ch, char_get_equipment(ch, WEAR_WIELD2))) {
@@ -1289,19 +1293,21 @@ ACMD(do_write)
 ACMD(do_page)
 {
   struct char_data *vict;
-  char buf2[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
+  std::string buf2, arg;
 
-  half_chop(argument, arg, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  buf2                  = skip_spaces(rest);
 
   if (char_is_npc(ch))
     send_to_char(g, ch, "Monsters can't page.. go away.\r\n");
-  else if (!*arg)
+  else if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to page?\r\n");
   else {
     char buf[MAX_STRING_LENGTH];
 
-    snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2);
-    if (!strcasecmp(arg, "all")) {
+    snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2.c_str());
+    if (str_eq_nocase(arg, "all")) {
       if (char_adm_flagged(ch, ADM_TELLALL)) {
         for (descriptor_data *d : each_desc(g))
           if (desc_get_connected(d) == CON_PLAYING && d->character)
@@ -1501,7 +1507,6 @@ ACMD(do_respond)
 {
   int found = 0, mnum = 0;
   struct obj_data *obj;
-  char number[MAX_STRING_LENGTH];
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "As a mob, you never bothered to learn to read or write.\r\n");
@@ -1515,12 +1520,13 @@ ACMD(do_respond)
   if (obj)
     found = 1;
   if (obj) {
-    argument = one_argument(argument, number);
-    if (!*number) {
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string number    = take_arg(rest);
+    if (number.empty()) {
       send_to_char(g, ch, "Respond to what?\r\n");
       return;
     }
-    if (!isdigit(*number) || (!(mnum = atoi(number)))) {
+    if (!isdigit(number[0]) || (!(mnum = parse_int(number)))) {
       send_to_char(g, ch, "You must type the number of the message you wish to reply to.\r\n");
       return;
     }
