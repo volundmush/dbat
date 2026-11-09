@@ -1572,16 +1572,13 @@ in the vault (vnum: 453) now and then. you can just use
  * - Jamie Nelson 31st Oct 2003 01:24
  */
 
-/*
- * Substitutes the variables into line, up to the length of a command line. The scan works on a copy of the line,
- * which it cuts up in place, so the copy has room to spare: a chained field (%x.y.z%) writes "tmpvr" over the
- * variable's name, which can be shorter.
- */
+/* Substitutes the variables into line, up to the length of a command line. The scan cuts up a copy of the line. */
 std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, const char *line)
 {
   constexpr size_t max_len = MAX_INPUT_LENGTH - 1; /* what fits a command line */
   std::string out, repl_str, subfield;
   char *var = nullptr, *field = nullptr, *p = nullptr;
+  char tmpvr[]    = "tmpvr"; /* what a chained field (%x.y.z%) goes on looking at */
   int paren_count = 0;
   int dots        = 0;
 
@@ -1594,7 +1591,6 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
   }
 
   std::string tmp = line;
-  tmp.append(8, '\0'); /* the room "tmpvr" may need */
   p = tmp.data();
 
   while (*p && out.size() < max_len) {
@@ -1628,7 +1624,7 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
             if (!repl_str.empty()) {
               std::string tmp2 = "eval tmpvr " + repl_str; /* temp var */
               process_eval(g, go, sc, trig, type, tmp2.data());
-              strcpy(var, "tmpvr"); /* strcpy: OK (tmp has room after the line) */
+              var   = tmpvr; /* not written over the name, which may be shorter and run into the next field */
               field = p;
               dots  = 0;
               continue;

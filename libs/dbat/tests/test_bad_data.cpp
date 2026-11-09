@@ -288,6 +288,25 @@ static void check_script_variable_has_a_limit(void)
   th_shutdown(g);
 }
 
+/*
+ * A chained field gives the same on a one-letter variable as on a long one. ("id" is a number, which a further
+ * field gets nothing from; a short name used to be written over, leaving no field, and so gave the whole number.)
+ */
+static void check_chained_field_on_a_short_variable(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *mob = read_mobile(g, 300);
+  trig_data trig{};
+
+  char_to_room(g, mob, 300);
+  add_char_uid_var(&trig, "x", mob, 0);
+  add_char_uid_var(&trig, "actor", mob, 0);
+  std::string want = var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%actor.id.strlen%");
+  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%x.id.strlen%") == want);
+  free_varlist(trig.var_list);
+  th_shutdown(g);
+}
+
 static void check_specific_goes_with_its_location(void)
 {
   CHECK(affect_checked_specific(APPLY_SKILL, SKILL_HAYASA) == SKILL_HAYASA);
@@ -1123,6 +1142,7 @@ static const struct {
     {"expression_values",                           check_expression_values                          },
     {"arithmetic_at_the_limits",                    check_arithmetic_at_the_limits                   },
     {"script_variable_has_a_limit",                 check_script_variable_has_a_limit                },
+    {"chained_field_on_a_short_variable",           check_chained_field_on_a_short_variable          },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

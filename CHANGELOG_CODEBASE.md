@@ -38,6 +38,7 @@
 - A script variable's name and value are `std::string`s, so setting, removing and freeing variables no longer copies or frees them by hand. `remove_var()` takes a `const char *`. [Volund]
 - DG script arithmetic (`eval` and `if`) wraps around when it overflows, as the game's builds did in practice, but now as defined behaviour, and dividing the smallest number by -1 wraps the same way where it used to make the processor trap and take the game down. [Volund]
 - Script variable substitution (`var_subst()`) and the character, object and room fields it looks up build `std::string`s rather than writing into fixed buffers; a substituted line is still cut at `MAX_INPUT_LENGTH`, as the commands it goes to need. A script variable's value is capped at `MAX_DG_VAR_LENGTH`, the same length, with a SYSERR when something tries to set a longer one. `sprintbit()`, `sprinttype()` and `sprintbitarray()` have `std::string` versions. [Volund]
+- A chained script field (`%x.y.z%`) no longer writes "tmpvr" over the variable's name in the line being substituted, which on a variable of one or two letters ran into the next field and looked up the wrong one. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3
