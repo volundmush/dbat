@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/zoneflags.hpp"
 #include "dbat/consts/types.hpp"
@@ -88,7 +90,7 @@ struct oasis_olc_data {
   struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
-  char *storage{};                   /* used for 'tedit'         */
+  std::string storage{};             /* tedit's file, trigedit's script, the new keyword for hedit and aedit */
   struct char_data *mob{};           /* used for 'medit'         */
   struct room_data *room{};          /* used for 'redit'         */
   struct obj_data *obj{};            /* used for 'oedit'         */
@@ -119,7 +121,7 @@ struct oasis_olc_data {
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 #define OLC_INDEX(d) (OLC(d)->index)    /* aedit's and hedit's entry. */
 
-#define OLC_STORAGE(d) (OLC(d)->storage)     /* char pointer.	*/
+#define OLC_STORAGE(d) (OLC(d)->storage)     /* std::string.	*/
 #define OLC_ROOM(d)    (OLC(d)->room)        /* Room structure.	*/
 #define OLC_OBJ(d)     (OLC(d)->obj)         /* Object structure.	*/
 #define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/

@@ -254,16 +254,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     }
   }
 
-  /* free storage if allocated (for tedit and aedit) */
-  /* and Triggers */
-  /* 
-    * this is the command list - it's been copied to disk already,
-    * so just free it -- Welcor
-    */
-  if (OLC_STORAGE(d)) {
-    free(OLC_STORAGE(d));
-    OLC_STORAGE(d) = nullptr;
-  }
   /*
     * Free this one regardless. If we've left olc, we've either made
     * a fresh copy of it in the trig index, or we lost connection.

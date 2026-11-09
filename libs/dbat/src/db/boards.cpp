@@ -123,7 +123,7 @@ static void board_path(char *buf, size_t size, obj_vnum vnum)
 /* The memory[] bucket for a message. A deleted poster has id -1, which can make the sum negative. */
 static int memory_slot(GameWorld *g, const struct board_msg *msg)
 {
-  int slot = (msg->timestamp % BOARD_MEMORY_SLOTS + get_id_by_name(g, msg->name) % BOARD_MEMORY_SLOTS) % BOARD_MEMORY_SLOTS;
+  int slot = (msg->timestamp % BOARD_MEMORY_SLOTS + get_id_by_name(g, msg->name.c_str()) % BOARD_MEMORY_SLOTS) % BOARD_MEMORY_SLOTS;
 
   return slot < 0 ? slot + BOARD_MEMORY_SLOTS : slot;
 }
@@ -140,20 +140,16 @@ static bool message_being_written(GameWorld *g, const struct board_msg *msg)
 /* Saved messages: finished ones. Unfinished ones are written when their author saves them. */
 static bool message_saveable(GameWorld *g, const struct board_msg *msg)
 {
-  return msg->data && !message_being_written(g, msg);
+  return !msg->data.empty() && !message_being_written(g, msg);
 }
 
 static void free_message(struct board_msg *msg)
 {
-  free(msg->name);
-  free(msg->subject);
-  free(msg->data);
   delete msg;
 }
 
 static void free_memory(struct board_memory *mem)
 {
-  free(mem->name);
   delete mem;
 }
 
@@ -209,9 +205,9 @@ static struct board_msg *new_message(GameWorld *g, struct char_data *ch, const c
   struct board_msg *msg;
 
   msg            = new board_msg();
-  msg->name      = strdup(char_get_name(ch));
+  msg->name      = char_get_name(ch);
   msg->timestamp = game_now(g);
-  msg->subject   = strdup(subject);
+  msg->subject   = subject;
   return msg;
 }
 
@@ -227,7 +223,7 @@ static char *board_time_str(const time_t *when)
 static bool has_read(GameWorld *g, struct board_info *board, const struct board_msg *msg, struct char_data *ch)
 {
   for (struct board_memory *mem = board->memory[memory_slot(g, msg)]; mem; mem = mem->next)
-    if (!strcmp(mem->name, char_get_name(ch)) && mem->timestamp == msg->timestamp)
+    if (mem->name == char_get_name(ch) && mem->timestamp == msg->timestamp)
       return true;
   return false;
 }
@@ -243,7 +239,7 @@ static bool mark_read(GameWorld *g, struct board_info *board, const struct board
 
   slot = memory_slot(g, msg);
   mem                 = new board_memory();
-  mem->name           = strdup(char_get_name(ch));
+  mem->name           = char_get_name(ch);
   mem->timestamp      = msg->timestamp;
   mem->next           = board->memory[slot];
   board->memory[slot] = mem;
@@ -289,7 +285,7 @@ static void parse_memory_line(GameWorld *g, struct board_info *board, const char
     return;
 
   mem                 = new board_memory();
-  mem->name           = strdup(reader);
+  mem->name           = reader;
   mem->timestamp      = timestamp;
   mem->next           = board->memory[slot];
   board->memory[slot] = mem;
@@ -309,10 +305,10 @@ static bool parse_message(FILE *fl, struct board_info *board, const char *path)
   get_line(fl, subject);
 
   msg            = new board_msg();
-  msg->name      = strdup(poster);
+  msg->name      = poster;
   msg->timestamp = timestamp;
-  msg->subject   = strdup(subject);
-  msg->data      = fread_string(fl, path);
+  msg->subject   = subject;
+  msg->data      = take_string(fread_string(fl, path));
   add_message_tail(board, msg);
   return true;
 }
@@ -551,11 +547,11 @@ bool save_board(GameWorld *g, struct board_info *board)
 
   for (msg = board->messages; msg; msg = msg->next)
     if (message_saveable(g, msg))
-      fprintf(fl, "#%d\n%s\n%ld\n%s\n%s~\n", i++, msg->name, (long)msg->timestamp, msg->subject, msg->data);
+      fprintf(fl, "#%d\n%s\n%ld\n%s\n%s~\n", i++, msg->name.c_str(), (long)msg->timestamp, msg->subject.c_str(), msg->data.c_str());
 
   for (int slot = 0; slot < BOARD_MEMORY_SLOTS; slot++)
     for (struct board_memory *mem = board->memory[slot]; mem; mem = mem->next)
-      fprintf(fl, "S%d %s %d\n", slot, mem->name, mem->timestamp);
+      fprintf(fl, "S%d %s %d\n", slot, mem->name.c_str(), mem->timestamp);
 
   return atomic_commit(&af);
 }
@@ -610,8 +606,8 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
   send_to_char(g, ch, "                  @WThere %s %d %s on the board.@n\r\n", (board->num_messages == 1) ? "is" : "are", board->num_messages, (board->num_messages == 1) ? "message" : "messages");
 
   for (struct board_msg *msg = nth_message(board, 1, oldest_first); msg; msg = oldest_first ? msg->prev : msg->next) {
-    snprintf(name, sizeof(name), "%s", msg->name);
-    send_to_char(g, ch, "@D[%s] (@C%2d@D) : @W%6.10s @D(@G%-10s@D) ::@w %-45s\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject ? msg->subject : "No Subject");
+    snprintf(name, sizeof(name), "%s", msg->name.c_str());
+    send_to_char(g, ch, "@D[%s] (@C%2d@D) : @W%6.10s @D(@G%-10s@D) ::@w %-45s\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject.c_str());
   }
   send_to_char(g, ch, "@rO@b============================================================================@rO@n\n");
 
@@ -657,13 +653,13 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
 
   added = mark_read(g, board, msg, ch);
 
-  snprintf(name, sizeof(name), "%s", msg->name);
+  snprintf(name, sizeof(name), "%s", msg->name.c_str());
   send_to_char(g, ch, "@r_____________________________________________________________________________@n\r\n\r\n@gMessage @W[@Y%2d@W] @D: @c%6.10s @D(@C%s@D)\r\n@GTopic        @D: @w%s\r\n@r-------------------------------------------------------------------------@n\r\n\r\n%s\n@r_____________________________________________________________________________@n\r\n",
                arg,
                board_time_str(&msg->timestamp),
                CAP(name),
-               msg->subject ? msg->subject : "No Subject",
-               msg->data ? msg->data : "Looks like this message is empty.");
+               msg->subject.c_str(),
+               !msg->data.empty() ? msg->data.c_str() : "Looks like this message is empty.");
 
   if (board_proto(g, board_vnum))
     mark_board_visited(g, ch, board_vnum);
@@ -743,20 +739,20 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   }
 
   /* a subject longer than a board file line can hold would not load back */
-  snprintf(subject, sizeof(subject), "Re: %s", other->subject);
+  snprintf(subject, sizeof(subject), "Re: %s", other->subject.c_str());
   msg = new_message(g, ch, subject);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
   act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-  snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data ? other->data : "");
-  msg->data = strdup(quote);
+  snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data.c_str());
+  msg->data = quote;
   write_to_output(g, char_get_desc(ch), "%s", quote);
   start_post(g, board, msg, ch);
 }
 
 /* Called when the author aborts: removes the message whose text is being edited at data. */
-bool board_discard_message(struct board_info *board, char **data)
+bool board_discard_message(struct board_info *board, const std::string *data)
 {
   if (!board)
     return false;
@@ -801,7 +797,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
     mud_log("Board doesn't exists! Weird.");
     return;
   }
-  if (!obj_extra_flagged(obj, ITEM_CBOARD) && char_get_admlevel(ch) < board->remove_lvl && strcmp(char_get_name(ch), msg->name)) {
+  if (!obj_extra_flagged(obj, ITEM_CBOARD) && char_get_admlevel(ch) < board->remove_lvl && msg->name != char_get_name(ch)) {
     send_to_char(g, ch, "You can't remove other people's messages.\r\n");
     return;
   }

@@ -603,7 +603,7 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
                                  int cmd, char *arg)
 {
   long recipient;
-  char buf[MAX_INPUT_LENGTH], **mailwrite;
+  char buf[MAX_INPUT_LENGTH];
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
@@ -640,8 +640,8 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
 
   /* Start writing! */
-  mailwrite = new char *();
-  string_write(char_get_desc(ch), mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
+  char_get_desc(ch)->draft.clear();
+  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, MAX_MAIL_SIZE, recipient, nullptr);
 }
 
 static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,

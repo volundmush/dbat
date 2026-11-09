@@ -27,6 +27,8 @@
 #include "dbat/genwld.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/help.hpp"
+#include "dbat/boards.hpp"
+#include "dbat/mail.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -834,6 +836,82 @@ static void check_defending_someone_else_lets_go_of_the_first(void)
   th_shutdown(g);
 }
 
+static void make_the_mail_file(void)
+{
+  write_file(MAIL_FILE, "");
+}
+
+static void check_letter_reaches_its_reader(void)
+{
+  th_before_boot(make_the_mail_file);
+  GameWorld *g           = th_boot();
+  struct char_data *ch   = th_player(g, "Writer", ADMLVL_NONE);
+  struct char_data *rd   = th_player(g, "Reader", ADMLVL_NONE);
+  struct char_data *post = read_mobile(g, 300);
+
+  mob_index_of(g, 300)->func = postmaster;
+  char_to_room(g, post, char_get_in_room(ch));
+  move_next_to(g, rd, ch);
+  char_set_gold(ch, 1000);
+  char_set_class_level(ch, MIN_MAIL_LEVEL); /* "mail" needs a level of 2, and sending one 3 */
+  th_type(g, ch, "mail Reader");
+  th_type(g, ch, "Dear Reader.");
+  th_type(g, ch, "/s");
+  CHECK(saw(ch, "Message sent!"));
+  th_take_output(g, ch);
+
+  th_type(g, ch, "mail Reader"); /* and one thrown away */
+  th_type(g, ch, "Never mind.");
+  th_type(g, ch, "/a");
+  CHECK(saw(ch, "Mail aborted."));
+
+  th_type(g, rd, "receive");
+  int sent = 0, aborted = 0;
+  for (struct obj_data *obj : char_inventory(g, rd)) {
+    const char *text = obj_get_action_description(obj);
+    sent += text && strstr(text, "Dear Reader.");
+    aborted += text && strstr(text, "Never mind.");
+  }
+  CHECK(sent == 1 && aborted == 0);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+static void check_board_post_saves_and_aborts(void)
+{
+  GameWorld *g             = th_boot();
+  struct char_data *ch     = th_player(g, "Writer", ADMLVL_IMPL);
+  struct board_info *board = create_new_board(g, 350);
+
+  CHECK(board);
+  if (!board) {
+    th_shutdown(g);
+    return;
+  }
+  write_board_message(g, 350, ch, writable{"A subject"});
+  th_type(g, ch, "First post.");
+  th_type(g, ch, "/s");
+  CHECK(board->num_messages == 1);
+
+  write_board_message(g, 350, ch, writable{"Thrown away"});
+  th_type(g, ch, "Never mind.");
+  th_type(g, ch, "/a");
+  CHECK(saw(ch, "Post aborted."));
+  CHECK(board->num_messages == 1);
+
+  board_respond(g, 350, ch, 1);
+  th_type(g, ch, "A reply.");
+  th_type(g, ch, "/s");
+  CHECK(board->num_messages == 2);
+
+  th_take_output(g, ch);
+  board_display_msg(g, 350, ch, 1);
+  board_display_msg(g, 350, ch, 2);
+  CHECK(saw(ch, "First post.") && saw(ch, "A subject") && saw(ch, "Re: A subject") && saw(ch, "A reply."));
+  CHECK(!saw(ch, "Never mind."));
+  th_shutdown(g);
+}
+
 static void check_mob_given_armor_with_no_wear_slot(void)
 {
   GameWorld *g = th_boot();
@@ -1005,6 +1083,8 @@ static const struct {
     {"zone_range_keeps_what_is_in_it",              check_zone_range_keeps_what_is_in_it             },
     {"editor_saves_and_aborts",                     check_editor_saves_and_aborts                    },
     {"news_entry_leaves_the_immortal_list_alone",   check_news_entry_leaves_the_immortal_list_alone  },
+    {"letter_reaches_its_reader",                   check_letter_reaches_its_reader                  },
+    {"board_post_saves_and_aborts",                 check_board_post_saves_and_aborts                },
     {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
     {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },

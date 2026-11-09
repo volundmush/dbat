@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "dbat/consts/types.hpp"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
@@ -11,18 +12,18 @@ constexpr int BOARD_MEMORY_SLOTS = 301;     /* buckets of "who has read what" re
 /* One message. Doubly linked, newest first, so forward or back is simple. */
 struct board_msg {
   time_t timestamp{};
-  char *subject{};
-  char *data{};
+  std::string subject{};
+  std::string data{}; /* empty until its author first saves it */
   struct board_msg *next{};
   struct board_msg *prev{};
-  char *name{}; /* poster */
+  std::string name{}; /* poster */
 };
 
 /* One "reader has read the message with this timestamp" record, hashed by message. */
 struct board_memory {
   int timestamp{};
   struct board_memory *next{};
-  char *name{}; /* reader */
+  std::string name{}; /* reader */
 };
 
 struct board_info {
@@ -50,6 +51,6 @@ void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch
 void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int mnum);
 void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int arg);
 
-bool board_discard_message(struct board_info *board, char **data);
+bool board_discard_message(struct board_info *board, const std::string *data);
 void board_login_notices(GameWorld *g, struct char_data *ch);
 

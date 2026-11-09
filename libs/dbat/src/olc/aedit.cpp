@@ -82,19 +82,19 @@ ACMD(do_oasis_aedit)
   d->olc = new oasis_olc_data();
 
   OLC_NUM(d)     = 0;
-  OLC_STORAGE(d) = strdup(arg);
+  OLC_STORAGE(d) = arg;
 
   for (OLC_INDEX(d) = 0; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
-    if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_INDEX(d)].command))
+    if (is_abbrev(OLC_STORAGE(d).c_str(), g->soc_mess_list[OLC_INDEX(d)].command))
       break;
 
   if (OLC_INDEX(d) > g->top_of_socialt) {
-    if ((i = aedit_find_command(g, OLC_STORAGE(d))) != -1) {
-      send_to_char(g, ch, "The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), g->complete_cmd_info[i].command);
+    if ((i = aedit_find_command(g, OLC_STORAGE(d).c_str())) != -1) {
+      send_to_char(g, ch, "The '%s' command already exists (%s).\r\n", OLC_STORAGE(d).c_str(), g->complete_cmd_info[i].command);
       cleanup_olc(g, d, CLEANUP_ALL);
       return;
     }
-    send_to_char(g, ch, "Do you wish to add the '%s' action? ", OLC_STORAGE(d));
+    send_to_char(g, ch, "Do you wish to add the '%s' action? ", OLC_STORAGE(d).c_str());
     OLC_MODE(d) = AEDIT_CONFIRM_ADD;
   } else {
     send_to_char(g, ch, "Do you wish to edit the '%s' action? ", g->soc_mess_list[OLC_INDEX(d)].command);
@@ -109,8 +109,8 @@ ACMD(do_oasis_aedit)
 static void aedit_setup_new(GameWorld *g, struct descriptor_data *d)
 {
   OLC_ACTION(d)                      = new social_messg();
-  OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d));
-  OLC_ACTION(d)->sort_as             = strdup(OLC_STORAGE(d));
+  OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d).c_str());
+  OLC_ACTION(d)->sort_as             = strdup(OLC_STORAGE(d).c_str());
   OLC_ACTION(d)->min_victim_position = POS_STANDING;
   OLC_ACTION(d)->min_char_position   = POS_STANDING;
   OLC_ACTION(d)->char_no_arg         = strdup("This action is unfinished.");
@@ -336,16 +336,16 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_INDEX(d)
           ++;
           for (; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
-            if (is_abbrev(OLC_STORAGE(d), g->soc_mess_list[OLC_INDEX(d)].command))
+            if (is_abbrev(OLC_STORAGE(d).c_str(), g->soc_mess_list[OLC_INDEX(d)].command))
               break;
 
           if (OLC_INDEX(d) > g->top_of_socialt) {
-            if (aedit_find_command(g, OLC_STORAGE(d)) != -1) {
+            if (aedit_find_command(g, OLC_STORAGE(d).c_str()) != -1) {
               cleanup_olc(g, d, CLEANUP_ALL);
               break;
             }
             write_to_output(g, d, "Do you wish to add the '%s' action? ",
-                            OLC_STORAGE(d));
+                            OLC_STORAGE(d).c_str());
             OLC_MODE(d) = AEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '%s' action? ",
@@ -375,8 +375,8 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\n"
-                             "Do you wish to add the '%s' action? ",
-                          OLC_STORAGE(d));
+                                "Do you wish to add the '%s' action? ",
+                          OLC_STORAGE(d).c_str());
           break;
       }
       return;

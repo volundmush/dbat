@@ -68,6 +68,7 @@ public:
     }
   }
   bool is(char *const *chars) const { return chars_ && chars_ == chars; }
+  bool is(const std::string *text) const { return text_ && text_ == text; }
   char **chars() const { return chars_; }
   std::string *text() const { return text_; }
 };
@@ -82,7 +83,7 @@ struct descriptor_data {
   time_t login_time{};                 /* when the person connected		*/
   edit_target str;                     /* where the text being written goes, or none */
   std::string edit_text;               /* the text being written, saved to str at the end */
-  std::string draft;                   /* where a news entry is saved, until it is filed */
+  std::string draft;                   /* where a news entry or letter is saved, until it is filed or sent */
   char *backstr{};                     /* backup string for modify-str system	*/
   size_t max_str{};                    /* maximum size of string in modify-str	*/
   int32_t mail_to{};                   /* name for mail system			*/

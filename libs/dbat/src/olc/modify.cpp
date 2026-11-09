@@ -257,9 +257,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
     } else {
       write_to_output(g, d, "Mail aborted.\r\n");
     }
-    /* store_mail() keeps its own copy; the text and its holder came from postmaster_send_mail() */
-    free(*d->str.chars());
-    delete d->str.chars();
+    d->draft.clear(); /* store_mail() keeps its own copy */
   }
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {
@@ -267,7 +265,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
       struct board_info *board = locate_board(g, d->mail_to - BOARD_MAGIC);
 
       if (action == STRINGADD_ABORT) {
-        if (board_discard_message(board, d->str.chars()))
+        if (board_discard_message(board, d->str.text()))
           write_to_output(g, d, "Post aborted.\r\n");
         else
           write_to_output(g, d, "Unable to find your message to delete it!\r\n");

@@ -168,8 +168,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   trig->trigger_type = MTRIG_GREET;
 
   /* cmdlist will be a large char string until the trigger is saved */
-  OLC_STORAGE(d) = str_alloc(MAX_CMD_LENGTH);
-  strlcpy(OLC_STORAGE(d), "%echo% This trigger commandlist is not complete!\r\n", MAX_CMD_LENGTH);
+  OLC_STORAGE(d) = "%echo% This trigger commandlist is not complete!\r\n";
   trig->narg = 100;
 
   OLC_TRIG(d) = trig;
@@ -187,15 +186,12 @@ static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, str
 
   trig_data_copy(trig, rtrg_num->proto);
 
-  /* convert cmdlist to a char string, sized to fit: some loaded scripts exceed MAX_CMD_LENGTH */
-  size_t len = 1;
-  for (c = trig->cmdlist; c; c = c->next)
-    len += strlen(c->cmd) + 2;
-  OLC_STORAGE(d) = str_alloc(MAX(len, (size_t)MAX_CMD_LENGTH));
-
-  char *end = OLC_STORAGE(d);
-  for (c = trig->cmdlist; c; c = c->next)
-    end += sprintf(end, "%s\r\n", c->cmd);
+  /* convert cmdlist to a string */
+  OLC_STORAGE(d).clear();
+  for (c = trig->cmdlist; c; c = c->next) {
+    OLC_STORAGE(d) += c->cmd;
+    OLC_STORAGE(d) += "\r\n";
+  }
   /* now trig->cmdlist is something to pass to the text editor */
   /* it will be converted back to a real cmdlist_element list later */
 
@@ -243,7 +239,7 @@ static void trigedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   trgtypes,                           /* greet/drop/etc         */
                   trig->narg,                         /* numeric arg            */
                   trig->arglist ? trig->arglist : "", /* strict arg             */
-                  OLC_STORAGE(d));                    /* the command list       */
+                  OLC_STORAGE(d).c_str());            /* the command list       */
 
   OLC_MODE(d) = TRIGEDIT_MAIN_MENU;
 }
@@ -318,11 +314,8 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case '6':
           OLC_MODE(d) = TRIGEDIT_COMMANDS;
           write_to_output(g, d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
-          d->backstr = nullptr;
-          if (OLC_STORAGE(d)) {
-            write_to_output(g, d, "%s", OLC_STORAGE(d));
-            d->backstr = strdup(OLC_STORAGE(d));
-          }
+          write_to_output(g, d, "%s", OLC_STORAGE(d).c_str());
+          d->backstr = strdup(OLC_STORAGE(d).c_str());
           string_edit_begin(d, &OLC_STORAGE(d), MAX_CMD_LENGTH);
           d->mail_to = 0;
           OLC_VAL(d) = 1;
@@ -419,24 +412,23 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* Builds trig->cmdlist from the editor text s, one element per line. */
-static void trigedit_compile_script(trig_data *trig, char *s)
+/* Makes the trigger's command list from the script, a line to a command. */
+static void trigedit_compile_script(trig_data *trig, std::string script)
 {
   struct cmdlist_element *cmd;
+  char *s;
 
   trig->cmdlist = new cmdlist_element();
-  if (s) {
-    /* strtok returns NULL if s is "\r\n" */
-    char *t            = strtok(s, "\n\r");
-    trig->cmdlist->cmd = strdup(t ? t : "* No script");
-    cmd                = trig->cmdlist;
+  /* strtok returns NULL if the script is "\r\n" */
+  char *t            = strtok(script.data(), "\n\r");
+  trig->cmdlist->cmd = strdup(t ? t : "* No script");
+  cmd                = trig->cmdlist;
 
-    while ((s = strtok(nullptr, "\n\r"))) {
-      cmd->next = new cmdlist_element();
-      cmd      = cmd->next;
-      cmd->cmd = strdup(s);
-    }
-  } else
-    trig->cmdlist->cmd = strdup("* No Script");
+  while ((s = strtok(nullptr, "\n\r"))) {
+    cmd->next = new cmdlist_element();
+    cmd       = cmd->next;
+    cmd->cmd  = strdup(s);
+  }
 }
 
 /* Replaces the trigger prototype with the edited trigger, and updates every live copy of it. */

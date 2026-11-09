@@ -80,7 +80,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 {
   struct atomic_file af;
   FILE *fl;
-  char *storage     = OLC_STORAGE(d);
+  const char *storage = !OLC_STORAGE(d).empty() ? OLC_STORAGE(d).c_str() : nullptr;
   std::string *text = d->str.text(); /* the file's text, as now edited */
 
   if (!storage || !text)
@@ -217,7 +217,7 @@ ACMD(do_tedit)
     backstr = strdup(fields[l].buffer->c_str());
   }
 
-  OLC_STORAGE(char_get_desc(ch)) = strdup(fields[l].filename);
+  OLC_STORAGE(char_get_desc(ch)) = fields[l].filename;
   string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0, backstr);
 
   act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);

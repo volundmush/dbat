@@ -85,11 +85,11 @@ ACMD(do_oasis_hedit)
 
   d->olc         = new oasis_olc_data();
   OLC_NUM(d)     = 0;
-  OLC_STORAGE(d) = strdup(arg);
-  OLC_INDEX(d)   = search_help(g, (const char *)OLC_STORAGE(d), ADMLVL_IMPL);
+  OLC_STORAGE(d) = arg;
+  OLC_INDEX(d)   = search_help(g, OLC_STORAGE(d).c_str(), ADMLVL_IMPL);
 
   if (OLC_INDEX(d) == NOWHERE) {
-    send_to_char(g, ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
+    send_to_char(g, ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d).c_str());
     OLC_MODE(d) = HEDIT_CONFIRM_ADD;
   } else {
     send_to_char(g, ch, "Do you wish to edit the '%s' help file? ", g->help_table[OLC_INDEX(d)].keywords);
@@ -112,7 +112,7 @@ static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
   sprintf(buf3, "<<X<< Put helpfile keywords here in caps");
 
   OLC_HELP(d)->keywords = strdup(buf3);
-  /*strdup(OLC_STORAGE(d));*/
+  /*strdup(OLC_STORAGE(d).c_str());*/
   OLC_HELP(d)->entry = strdup("\r\nThis help file is unfinished.\r\n");
   OLC_VAL(d)         = 0;
 
@@ -261,7 +261,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_INDEX(d)
           ++;
           for (; OLC_INDEX(d) <= g->top_of_helpt; OLC_INDEX(d)++)
-            if (is_abbrev(OLC_STORAGE(d), g->help_table[OLC_INDEX(d)].keywords))
+            if (is_abbrev(OLC_STORAGE(d).c_str(), g->help_table[OLC_INDEX(d)].keywords))
               break;
             else
               OLC_INDEX(d) = g->top_of_helpt + 1;
@@ -269,7 +269,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           if (OLC_INDEX(d) > g->top_of_helpt) {
             OLC_INDEX(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
             write_to_output(g, d, "Do you wish to add the '%s' help file? ",
-                            OLC_STORAGE(d));
+                            OLC_STORAGE(d).c_str());
             OLC_MODE(d) = HEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '%s' help file? ",
@@ -300,8 +300,8 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\n"
-                             "Do you wish to add the '%s' help file? ",
-                          OLC_STORAGE(d));
+                                "Do you wish to add the '%s' help file? ",
+                          OLC_STORAGE(d).c_str());
           break;
       }
       return;
