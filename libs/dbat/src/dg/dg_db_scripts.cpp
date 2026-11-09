@@ -42,7 +42,7 @@ struct dg_lint_block {
 static void dg_lint_warn(GameWorld *g, const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
 {
   mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", trig_get_vnum(g, trig),
-          trig->name ? trig->name : "", line, msg);
+          trig->name.c_str(), line, msg);
   if (d)
     write_to_output(g, d, "Warning: line %d: %s\r\n", line, msg);
 }
@@ -61,7 +61,7 @@ int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data 
   char msg[MAX_INPUT_LENGTH];
 
   for (const struct cmdlist_element *cl = trig->cmdlist; cl; cl = cl->next) {
-    const char *p = cl->cmd;
+    const char *p = cl->cmd.c_str();
     line++;
     while (*p && isspace(*p))
       p++;
@@ -142,7 +142,7 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
   trig->index = t_index;
-  trig->name = fread_string(trig_f, errors);
+  trig->name  = take_string(fread_string(trig_f, errors));
 
   get_line(trig_f, line);
   k                  = sscanf(line, "%d %255s %d", &attach_type, flags, t);
@@ -150,20 +150,20 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   trig->trigger_type = (long)asciiflag_conv(flags);
   trig->narg         = (k == 3) ? t[0] : 0;
 
-  trig->arglist = fread_string(trig_f, errors);
+  trig->arglist = take_string(fread_string(trig_f, errors));
 
   /* an empty or blank script becomes the same placeholder trigedit saves */
   cmds = fread_string(trig_f, errors);
   s    = cmds ? strtok(cmds, "\n\r") : nullptr;
 
   trig->cmdlist      = new cmdlist_element();
-  trig->cmdlist->cmd = strdup(s ? s : "* Empty script");
+  trig->cmdlist->cmd = s ? s : "* Empty script";
   cle                = trig->cmdlist;
 
   while (s && (s = strtok(nullptr, "\n\r"))) {
     cle->next = new cmdlist_element();
     cle      = cle->next;
-    cle->cmd = strdup(s);
+    cle->cmd  = s;
   }
 
   free(cmds);
@@ -201,12 +201,12 @@ static void trig_data_init(trig_data *this_data)
 {
   this_data->index        = nullptr;
   this_data->data_type    = 0;
-  this_data->name         = nullptr;
+  this_data->name.clear();
   this_data->trigger_type = 0;
   this_data->cmdlist      = nullptr;
   this_data->curr_state   = nullptr;
   this_data->narg         = 0;
-  this_data->arglist      = nullptr;
+  this_data->arglist.clear();
   this_data->depth        = 0;
   this_data->wait_event   = nullptr;
   this_data->purged       = false;
@@ -222,16 +222,16 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
   this_data->index       = trg->index;
   this_data->attach_type = trg->attach_type;
   this_data->data_type   = trg->data_type;
-  if (trg->name)
-    this_data->name = strdup(trg->name);
+  if (!trg->name.empty())
+    this_data->name = trg->name;
   else {
-    this_data->name = strdup("unnamed trigger");
+    this_data->name = "unnamed trigger";
     mud_log("Trigger with no name! (%d)", trg->index ? trg->index->vnum : NOTHING);
   }
   this_data->trigger_type = trg->trigger_type;
   this_data->cmdlist      = trg->cmdlist;
   this_data->narg         = trg->narg;
-  if (trg->arglist) this_data->arglist = strdup(trg->arglist);
+  this_data->arglist      = trg->arglist;
 }
 
 /* for mobs and rooms: */

@@ -41,6 +41,7 @@ constexpr int SCRIPT_DEL_TRIGGER = 2;
 
 /* prototype exported functions from dg_olc.c */
 void script_save_to_disk(FILE *fp, void *item, int type);
+bool save_triggers(GameWorld *g, struct zone_data *zone);
 void dg_olc_script_copy(struct descriptor_data *d);
 void dg_script_menu(GameWorld *g, struct descriptor_data *d);
 bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg);

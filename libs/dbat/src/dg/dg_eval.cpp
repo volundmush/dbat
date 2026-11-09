@@ -307,7 +307,7 @@ struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_e
   }
 
   for (c = cl->next; c; c = c->next) {
-    for (p = c->cmd; *p && isspace(*p); p++);
+    for (p = c->cmd.data(); *p && isspace(*p); p++);
 
     if (!strncasecmp("if ", p, 3))
       c = find_end(g, trig, c);
@@ -341,7 +341,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
     return cl;
 
   for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
+    for (p = c->cmd.data(); *p && isspace(*p); p++); /* skip spaces */
 
     if (!strncasecmp("if ", p, 3))
       c = find_end(g, trig, c);
@@ -369,7 +369,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
   }
 
   /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
-  for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
+  for (p = c->cmd.data(); *p && isspace(*p); p++); /* skip spaces */
   if (strncasecmp("end", p, 3))
     script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 5)", trig_get_vnum(g, trig));
   return c;
@@ -393,7 +393,7 @@ find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
     return cl;
 
   for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd; *p && isspace(*p); p++);
+    for (p = c->cmd.data(); *p && isspace(*p); p++);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6)) {
       c = find_done(c);
@@ -426,7 +426,7 @@ struct cmdlist_element *find_done(struct cmdlist_element *cl)
     return cl;
 
   for (c = cl->next; c && c->next; c = c->next) {
-    for (p = c->cmd; *p && isspace(*p); p++);
+    for (p = c->cmd.data(); *p && isspace(*p); p++);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
       c = find_done(c);

@@ -3,8 +3,8 @@
 # Behavioural regression check of the working tree against <git-ref>:
 #   1. `dbat -c` syntax-check boot: exit status and log must match.
 #   2. Full boot under gdb with the RNG pinned (mob stats are rolled from the seed), then
-#      roundtrip_dump(): every player is saved, and every zone's mobs, objects, rooms, shops, guilds and zone
-#      file; the data/ trees must match. VERIFY_SHARED_ROUNDTRIP=1 builds the ref with this roundtrip.cpp.
+#      roundtrip_dump(): every player is saved, and every zone's mobs, objects, rooms, shops, guilds, triggers
+#      and zone file; the data/ trees must match. VERIFY_SHARED_ROUNDTRIP=1 builds the ref with this roundtrip.cpp.
 # Each build runs on its own copy of data/; the real data/ is never written.
 set -euo pipefail
 ref=${1:-HEAD}

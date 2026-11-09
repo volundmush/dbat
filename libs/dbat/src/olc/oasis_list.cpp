@@ -440,7 +440,7 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
       counter++;
 
       send_to_char(g, ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-                   counter, i->vnum, i->proto->name);
+                   counter, i->vnum, i->proto->name.c_str());
 
       if (i->proto->attach_type == OBJ_TRIGGER) {
         sprintbit(i->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));

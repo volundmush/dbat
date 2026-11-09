@@ -72,13 +72,13 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   s = strtok(cmd, "'");
   if (s == nullptr) {
     script_log(g, "Trigger: %s, VNum %d. dg_cast needs spell name.",
-               trig->name, trig_get_vnum(g, trig));
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
   s = strtok(nullptr, "'");
   if (s == nullptr) {
     script_log(g, "Trigger: %s, VNum %d. dg_cast needs spell name in `'s.",
-               trig->name, trig_get_vnum(g, trig));
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
   t = strtok(nullptr, "\0");
@@ -87,7 +87,7 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   spellnum = find_skill_num(g, s, SKTYPE_SPELL);
   if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!IS_SET(skill_type(g, spellnum), SKTYPE_SPELL)))) {
     script_log(g, "Trigger: %s, VNum %d. dg_cast: invalid spell name (%s)",
-               trig->name, trig_get_vnum(g, trig), orig_cmd);
+               trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
     return;
   }
 
@@ -117,14 +117,14 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
 
     if (!target) {
       script_log(g, "Trigger: %s, VNum %d. dg_cast: target not found (%s)",
-                 trig->name, trig_get_vnum(g, trig), orig_cmd);
+                 trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
       return;
     }
   }
 
   if (IS_SET(SINFO.routines, MAG_GROUPS)) {
     script_log(g, "Trigger: %s, VNum %d. dg_cast: group spells not permitted (%s)",
-               trig->name, trig_get_vnum(g, trig), orig_cmd);
+               trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
     return;
   }
 
@@ -173,7 +173,7 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   if (!*charname || !*property ||
       !*value_p || !*duration_p) {
     script_log(g, "Trigger: %s, VNum %d. dg_affect usage: <target> <property> <value> <duration>",
-               trig->name, trig_get_vnum(g, trig));
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
 
@@ -181,7 +181,7 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   duration = atoi(duration_p);
   if (duration <= 0) {
     script_log(g, "Trigger: %s, VNum %d. dg_affect: need positive duration!",
-               trig->name, trig_get_vnum(g, trig));
+               trig->name.c_str(), trig_get_vnum(g, trig));
     script_log(g, "Line was: dg_affect %s %s %s %s (%d)",
                charname, property, value_p, duration_p, duration);
     return;
@@ -210,7 +210,7 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
 
   if (!type) { /* property not found */
     script_log(g, "Trigger: %s, VNum %d. dg_affect: unknown property '%s'!",
-               trig->name, trig_get_vnum(g, trig), property);
+               trig->name.c_str(), trig_get_vnum(g, trig), property);
     return;
   }
 
@@ -218,7 +218,7 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   ch = get_char(g, charname);
   if (!ch) {
     script_log(g, "Trigger: %s, VNum %d. dg_affect: cannot locate target!",
-               trig->name, trig_get_vnum(g, trig));
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
 

@@ -791,7 +791,7 @@ ACMD(do_mremember)
   /* fill in the structure */
   mem->id = char_get_id(victim);
   if (argument && *argument) {
-    mem->cmd = strdup(argument);
+    mem->cmd = argument;
   }
 }
 
@@ -826,7 +826,6 @@ ACMD(do_mforget)
   prev = nullptr;
   while (mem) {
     if (mem->id == char_get_id(victim)) {
-      if (mem->cmd) free(mem->cmd);
       if (prev == nullptr) {
         char_set_memory(ch, mem->next);
         delete mem;

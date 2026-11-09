@@ -19,9 +19,9 @@ static struct obj_data *find_obj_by_uid_in_lookup_table(GameWorld *g, long uid);
 
 /* Return pointer to first occurrence of string ct in */
 /* cs, or NULL if not present.  Case insensitive */
-char *str_str(char *cs, char *ct)
+const char *str_str(const char *cs, const char *ct)
 {
-  char *s, *t;
+  const char *s, *t;
 
   if (!cs || !ct || !*ct)
     return nullptr;

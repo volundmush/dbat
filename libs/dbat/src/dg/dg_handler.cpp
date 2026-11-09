@@ -105,13 +105,8 @@ bool remove_var(struct trig_var_data **var_list, char *name)
  */
 void free_trigger(GameWorld *g, struct trig_data *trig)
 {
-  free(trig->name);
-  trig->name = nullptr;
-
-  if (trig->arglist) {
-    free(trig->arglist);
-    trig->arglist = nullptr;
-  }
+  trig->name.clear();
+  trig->arglist.clear();
   if (trig->var_list) {
     free_varlist(trig->var_list);
     trig->var_list = nullptr;
@@ -184,7 +179,6 @@ void extract_script_mem(struct script_memory *sc)
   struct script_memory *next;
   while (sc) {
     next = sc->next;
-    if (sc->cmd) free(sc->cmd);
     delete sc;
     sc = next;
   }

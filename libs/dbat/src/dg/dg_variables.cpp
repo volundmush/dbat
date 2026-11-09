@@ -764,12 +764,12 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       else {
         *str = '\0';
         script_log(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
-                   trig->name, trig_get_vnum(g, trig), field);
+                   trig->name.c_str(), trig_get_vnum(g, trig), field);
       }
     } else {
       *str = '\0';
       script_log(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
-                 trig->name, trig_get_vnum(g, trig), field);
+                 trig->name.c_str(), trig_get_vnum(g, trig), field);
     }
   }
 }
@@ -1020,16 +1020,16 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         snprintf(str, slen, "%s", vd->value);
       else {
         *str = '\0';
-        if (strcasecmp(trig->name, "Rename Object")) {
+        if (strcasecmp(trig->name.c_str(), "Rename Object")) {
           script_log(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                     trig->name, trig_get_vnum(g, trig), type, field);
+                     trig->name.c_str(), trig_get_vnum(g, trig), type, field);
         }
       }
     } else {
       *str = '\0';
-      if (strcasecmp(trig->name, "Rename Object")) {
+      if (strcasecmp(trig->name.c_str(), "Rename Object")) {
         script_log(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                   trig->name, trig_get_vnum(g, trig), type, field);
+                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
       }
     }
   }
@@ -1098,7 +1098,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     if (!room_get_script(r)) {
       *str = '\0';
       script_log(g, "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                 trig ? trig->name : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
+                 trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
     } else {
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
@@ -1197,12 +1197,12 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
       else {
         *str = '\0';
         script_log(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                   trig->name, trig_get_vnum(g, trig), type, field);
+                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
       }
     } else {
       *str = '\0';
       script_log(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                 trig->name, trig_get_vnum(g, trig), type, field);
+                 trig->name.c_str(), trig_get_vnum(g, trig), type, field);
     }
   }
 }

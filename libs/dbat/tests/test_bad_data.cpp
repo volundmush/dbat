@@ -506,7 +506,7 @@ static void check_mob_memory_gets_forgotten(void)
   char_to_room(g, mob, char_get_in_room(ch));
   mem      = new script_memory();
   mem->id  = char_get_id(ch);
-  mem->cmd = strdup("say I remember you");
+  mem->cmd = "say I remember you";
   char_set_memory(mob, mem);
   greet_memory_mtrigger(g, ch);
   CHECK(saw(ch, "I remember you"));
@@ -912,6 +912,22 @@ static void check_board_post_saves_and_aborts(void)
   th_shutdown(g);
 }
 
+static void check_trigger_argument_can_be_cleared(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Writer", ADMLVL_IMPL);
+
+  CHECK(find_trigger(g, 312)->proto->arglist == "dance");
+  th_type(g, ch, "trigedit 312");
+  th_type(g, ch, "5");
+  th_type(g, ch, ""); /* no argument at all */
+  th_type(g, ch, "q");
+  th_type(g, ch, "y");
+  CHECK(find_trigger(g, 312)->proto->arglist.empty());
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static void check_mob_given_armor_with_no_wear_slot(void)
 {
   GameWorld *g = th_boot();
@@ -1085,6 +1101,7 @@ static const struct {
     {"news_entry_leaves_the_immortal_list_alone",   check_news_entry_leaves_the_immortal_list_alone  },
     {"letter_reaches_its_reader",                   check_letter_reaches_its_reader                  },
     {"board_post_saves_and_aborts",                 check_board_post_saves_and_aborts                },
+    {"trigger_argument_can_be_cleared",             check_trigger_argument_can_be_cleared            },
     {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
     {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },

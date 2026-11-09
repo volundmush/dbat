@@ -164,7 +164,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   /*
    * Set up some defaults
    */
-  trig->name         = strdup("new trigger");
+  trig->name         = "new trigger";
   trig->trigger_type = MTRIG_GREET;
 
   /* cmdlist will be a large char string until the trigger is saved */
@@ -233,13 +233,13 @@ static void trigedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   "@gQ@n) Quit\r\n"
                   "Enter Choice :",
 
-                  OLC_NUM(d),                         /* vnum on the title line */
-                  trig->name,                         /* name                   */
-                  attach_type,                        /* attach type            */
-                  trgtypes,                           /* greet/drop/etc         */
-                  trig->narg,                         /* numeric arg            */
-                  trig->arglist ? trig->arglist : "", /* strict arg             */
-                  OLC_STORAGE(d).c_str());            /* the command list       */
+                  OLC_NUM(d),              /* vnum on the title line */
+                  trig->name.c_str(),      /* name                   */
+                  attach_type,             /* attach type            */
+                  trgtypes,                /* greet/drop/etc         */
+                  trig->narg,              /* numeric arg            */
+                  trig->arglist.c_str(),   /* strict arg             */
+                  OLC_STORAGE(d).c_str()); /* the command list       */
 
   OLC_MODE(d) = TRIGEDIT_MAIN_MENU;
 }
@@ -358,9 +358,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case TRIGEDIT_NAME:
       smash_tilde(arg);
-      if (OLC_TRIG(d)->name)
-        free(OLC_TRIG(d)->name);
-      OLC_TRIG(d)->name = strdup((arg && *arg) ? arg : "undefined");
+      OLC_TRIG(d)->name = (arg && *arg) ? arg : "undefined";
       OLC_VAL(d)
       ++;
       break;
@@ -380,7 +378,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
     case TRIGEDIT_ARGUMENT:
       smash_tilde(arg);
-      OLC_TRIG(d)->arglist = (*arg ? strdup(arg) : nullptr);
+      OLC_TRIG(d)->arglist = arg;
       OLC_VAL(d)
       ++;
       break;
@@ -420,13 +418,13 @@ static void trigedit_compile_script(trig_data *trig, std::string script)
   trig->cmdlist = new cmdlist_element();
   /* strtok returns NULL if the script is "\r\n" */
   char *t            = strtok(script.data(), "\n\r");
-  trig->cmdlist->cmd = strdup(t ? t : "* No script");
+  trig->cmdlist->cmd = t ? t : "* No script";
   cmd                = trig->cmdlist;
 
   while ((s = strtok(nullptr, "\n\r"))) {
     cmd->next = new cmdlist_element();
     cmd       = cmd->next;
-    cmd->cmd  = strdup(s);
+    cmd->cmd  = s;
   }
 }
 
@@ -439,13 +437,8 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
 
   for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
     next_cmd = cmd->next;
-    if (cmd->cmd)
-      free(cmd->cmd);
     delete cmd;
   }
-
-  free(proto->arglist);
-  free(proto->name);
 
   /* Recompile the command list from the new script */
   trigedit_compile_script(trig, OLC_STORAGE(d));
@@ -456,19 +449,8 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
   /* go through the mud and replace existing triggers         */
   g->triggers.visit([&](long, struct trig_data *live_trig) {
     if (live_trig->index == rnum) {
-      if (live_trig->arglist) {
-        free(live_trig->arglist);
-        live_trig->arglist = nullptr;
-      }
-      if (live_trig->name) {
-        free(live_trig->name);
-        live_trig->name = nullptr;
-      }
-
-      if (proto->arglist)
-        live_trig->arglist = strdup(proto->arglist);
-      if (proto->name)
-        live_trig->name = strdup(proto->name);
+      live_trig->arglist = proto->arglist;
+      live_trig->name    = proto->name;
 
       /* anything could have happened so we don't want to keep these */
       if (live_trig->wait_event) {
@@ -506,14 +488,8 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
   trig_data_copy(index->proto, trig);
 }
 
-/*
- * Writes every trigger of the editor's zone to <zone>.trg.
- * note: we write this to disk NOW instead of letting the builder
- * have control because if we lose this after having assigned a
- * new trigger to an item, we will get SYSERR's upton reboot that
- * could make things hard to debug.
- */
-static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
+/* Writes every trigger of the zone to <zone>.trg. Returns false, having logged why, if it couldn't. */
+bool save_triggers(GameWorld *g, struct zone_data *in_zone)
 {
   IDXTYPE i;
   struct index_data *rnum;
@@ -526,53 +502,63 @@ static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
   struct atomic_file af;
   char fname[MAX_INPUT_LENGTH];
 
-  zone = OLC_ZNUM(d)->number;
-  top  = OLC_ZNUM(d)->top;
+  zone = in_zone->number;
+  top  = in_zone->top;
 
   snprintf(fname, sizeof(fname), "%s%d.trg", TRG_PREFIX, zone);
   if (!(trig_file = atomic_open(&af, fname, false))) {
-    mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, d->character)), true,
-           "SYSERR: OLC: Can't open trig file \"%s\"", fname);
-    return;
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't open trig file \"%s\"", fname);
+    return false;
   }
 
-  for (i = OLC_ZNUM(d)->bot; i <= top; i++) {
+  for (i = in_zone->bot; i <= top; i++) {
     if ((rnum = find_trigger(g, i)) != nullptr) {
       trig = rnum->proto;
 
       if (fprintf(trig_file, "#%d\n", i) < 0) {
-        mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, d->character)), true,
-               "SYSERR: OLC: Can't write trig file!");
+        mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't write trig file!");
         atomic_abort(&af);
-        return;
+        return false;
       }
       sprintascii(bitBuf, trig->trigger_type);
       fprintf(trig_file, "%s%c\n"
                          "%d %s %d\n"
                          "%s%c\n",
-              (trig->name) ? (trig->name) : "unknown trigger", STRING_TERMINATOR,
+              !trig->name.empty() ? trig->name.c_str() : "unknown trigger", STRING_TERMINATOR,
               trig->attach_type,
               *bitBuf ? bitBuf : "0", trig->narg,
-              trig->arglist ? trig->arglist : "", STRING_TERMINATOR);
+              trig->arglist.c_str(), STRING_TERMINATOR);
 
       /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
       if (!trig->cmdlist)
         fputs("* Empty script", trig_file);
       for (cmd = trig->cmdlist; cmd; cmd = cmd->next)
-        fprintf(trig_file, "%s\n", cmd->cmd);
+        fprintf(trig_file, "%s\n", cmd->cmd.c_str());
 
       fprintf(trig_file, "%c\n", STRING_TERMINATOR);
     }
   }
 
   fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
-  if (!atomic_commit(&af)) {
-    write_to_output(g, d, "Could not write the trigger file; nothing was changed.\r\n");
-    return;
-  }
-
-  write_to_output(g, d, "Trigger saved to disk.\r\n");
+  if (!atomic_commit(&af))
+    return false;
   create_world_index(g, zone, "trg");
+  return true;
+}
+
+/*
+ * Writes the editor's zone's triggers to disk.
+ * note: we write this to disk NOW instead of letting the builder
+ * have control because if we lose this after having assigned a
+ * new trigger to an item, we will get SYSERR's upton reboot that
+ * could make things hard to debug.
+ */
+static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
+{
+  if (save_triggers(g, OLC_ZNUM(d)))
+    write_to_output(g, d, "Trigger saved to disk.\r\n");
+  else
+    write_to_output(g, d, "Could not write the trigger file; nothing was changed.\r\n");
 }
 
 /* save the zone's triggers to internal memory and to disk */
@@ -630,7 +616,7 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
 
   while (editscript) {
     write_to_output(g, d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
-                    find_trigger(g, editscript->vnum)->proto->name);
+                    find_trigger(g, editscript->vnum)->proto->name.c_str());
     if (find_trigger(g, editscript->vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
       write_to_output(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
     else

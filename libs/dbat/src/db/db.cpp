@@ -556,8 +556,6 @@ void destroy_db(GameWorld *g)
         i = entry->proto->cmdlist;
         while (i) {
           j = i->next;
-          if (i->cmd)
-            free(i->cmd);
           delete i;
           i = j;
         }

@@ -1,6 +1,6 @@
 /* Verification helper (not part of the server build).
  * Called from gdb after boot by verify.sh: loads every player and saves it back, then saves every
- * zone's mobiles, objects, rooms, shops, guilds and zone file, so the resulting data/ tree can be diffed
+ * zone's mobiles, objects, rooms, shops, guilds, triggers and zone file, so the resulting data/ tree can be diffed
  * between two builds. */
 #include <cstdio>
 
@@ -15,6 +15,8 @@
 #include "dbat/genshp.hpp"
 #include "dbat/genwld.hpp"
 #include "dbat/genzon.hpp"
+#include "dbat/dg_olc.hpp"
+#include "dbat/genolc.hpp"
 #include "dbat/game_world.hpp"
 
 extern "C" long roundtrip_dump(GameWorld *g)
@@ -39,6 +41,8 @@ extern "C" long roundtrip_dump(GameWorld *g)
     ok      = save_rooms(g, z) && ok;
     ok      = save_shops(g, z) && ok;
     ok      = save_guilds(g, z) && ok;
+    if (!g->trig_index.vnums_in(genolc_zone_bottom(g, z), z->top).empty()) /* as on disk: no file for a zone without */
+      ok = save_triggers(g, z) && ok;
     ok      = save_zone(g, z) && ok;
     zones += ok;
   }

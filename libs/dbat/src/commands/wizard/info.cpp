@@ -243,7 +243,7 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
         case 'T':
           send_to_char(g, ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       find_trigger(g, ZOCMD.arg2)->proto->name,
+                       find_trigger(g, ZOCMD.arg2)->proto->name.c_str(),
                        ZOCMD.arg2,
                        ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" : ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
           break;
@@ -761,8 +761,8 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
         if (!mc)
           send_to_char(g, ch, "  ** Corrupted!\r\n");
         else {
-          if (mem->cmd)
-            send_to_char(g, ch, "  %-20.20s%s\r\n", char_get_name(mc), mem->cmd);
+          if (!mem->cmd.empty())
+            send_to_char(g, ch, "  %-20.20s%s\r\n", char_get_name(mc), mem->cmd.c_str());
           else
             send_to_char(g, ch, "  %-20.20s <default>\r\n", char_get_name(mc));
         }
@@ -2086,7 +2086,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 
   send_to_char(g, ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
                trnum->proto->attach_type == MOB_TRIGGER ? "mobile" : (trnum->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-               tvnum, trnum->proto->name);
+               tvnum, trnum->proto->name.c_str());
 
   for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {

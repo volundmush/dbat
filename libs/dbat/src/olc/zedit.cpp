@@ -552,7 +552,7 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
       case 'T':
         write_to_output(g, d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        find_trigger(g, MYCMD.arg2)->proto->name,
+                        find_trigger(g, MYCMD.arg2)->proto->name.c_str(),
                         MYCMD.arg2,
                         ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" : ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);
         break;

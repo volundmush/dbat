@@ -31,7 +31,7 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
   }
 
   len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-                  trig->name, trig_get_vnum(g, trig), g->trig_index.place(trig_get_vnum(g, trig)));
+                  trig->name.c_str(), trig_get_vnum(g, trig), g->trig_index.place(trig_get_vnum(g, trig)));
 
   if (trig->attach_type == OBJ_TRIGGER) {
     len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Objects\r\n");
@@ -46,16 +46,14 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 
   len += snprintf(sb + len, sizeof(sb) - len, "Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
                   buf, trig->narg,
-                  ((trig->arglist && *trig->arglist)
-                       ? trig->arglist
-                       : "None"));
+                  !trig->arglist.empty() ? trig->arglist.c_str() : "None");
 
   len += snprintf(sb + len, sizeof(sb) - len, "Commands:\r\n");
 
   cmd_list = trig->cmdlist;
   while (cmd_list) {
-    if (cmd_list->cmd)
-      len += snprintf(sb + len, sizeof(sb) - len, "%s\r\n", cmd_list->cmd);
+    if (!cmd_list->cmd.empty())
+      len += snprintf(sb + len, sizeof(sb) - len, "%s\r\n", cmd_list->cmd.c_str());
 
     if (len > MAX_STRING_LENGTH - 80) {
       len += snprintf(sb + len, sizeof(sb) - len, "*** Overflow - script too long! ***\r\n");
@@ -104,7 +102,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
   for (t = sc->trig_list; t; t = t->next) {
     send_to_char(g, ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-                 t->name, trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
+                 t->name.c_str(), trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
 
     if (t->attach_type == OBJ_TRIGGER) {
       send_to_char(g, ch, "  Trigger Intended Assignment: Objects\r\n");
@@ -119,12 +117,12 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
     send_to_char(g, ch, "  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
                  buf1, t->narg,
-                 ((t->arglist && *t->arglist) ? t->arglist : "None"));
+                 !t->arglist.empty() ? t->arglist.c_str() : "None");
 
     if (t->wait_event) {
       send_to_char(g, ch, "    Wait: %ld, Current line: %s\r\n",
                    event_time(g, t->wait_event),
-                   t->curr_state ? t->curr_state->cmd : "End of Script");
+                   t->curr_state ? t->curr_state->cmd.c_str() : "End of Script");
       send_to_char(g, ch, "  Variables: %s\r\n", t->var_list ? "" : "None");
 
       for (tv = t->var_list; tv; tv = tv->next) {
@@ -254,7 +252,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(char_script_slot(victim)), trig, loc);
 
     send_to_char(g, ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                 tn, trig->name, char_get_sdesc(victim), char_get_mob_vnum(g, victim));
+                 tn, trig->name.c_str(), char_get_sdesc(victim), char_get_mob_vnum(g, victim));
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
@@ -287,7 +285,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(obj_script_slot(object)), trig, loc);
 
     send_to_char(g, ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                 tn, trig->name,
+                 tn, trig->name.c_str(),
                  (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
                  obj_get_vnum(g, object));
   }
@@ -321,7 +319,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
     send_to_char(g, ch, "Trigger %d (%s) attached to room %d.\r\n",
-                 tn, trig->name, rnum);
+                 tn, trig->name.c_str(), rnum);
   }
 
   else
@@ -358,7 +356,7 @@ bool remove_trigger(GameWorld *g, struct script_data *sc, char *name)
 
   for (n = 0, j = nullptr, i = sc->trig_list; i; j = i, i = i->next) {
     if (string) {
-      if (isname(name, i->name))
+      if (isname(name, i->name.c_str()))
         if (++n >= num)
           break;
     }

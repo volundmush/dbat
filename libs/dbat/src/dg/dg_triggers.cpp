@@ -73,9 +73,9 @@ static char *one_phrase(char *arg, char *first_arg)
   return arg;
 }
 
-static bool is_substring(char *sub, char *string)
+static bool is_substring(const char *sub, const char *string)
 {
-  char *s;
+  const char *s;
 
   if ((s = str_str(string, sub))) {
     int len    = strlen(string);
@@ -98,7 +98,7 @@ static bool is_substring(char *sub, char *string)
  * phrases are in double quotes (").
  * if wrdlist is NULL, then return 1, if str is NULL, return 0.
  */
-static bool word_check(char *str, char *wordlist)
+static bool word_check(const char *str, const char *wordlist)
 {
   char *words, *phrase, *s;
   size_t len;
@@ -188,7 +188,7 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
       continue;
 
     long id = mem->id;
-    char *cmd = mem->cmd ? strdup(mem->cmd) : nullptr;
+    char *cmd       = !mem->cmd.empty() ? strdup(mem->cmd.c_str()) : nullptr;
     char_data *self = ch;
 
     if (cmd) {
@@ -220,7 +220,6 @@ void greet_memory_mtrigger(GameWorld *g, char_data *actor)
         prev->next = mem->next;
       else
         char_set_memory(ch, mem->next);
-      if (mem->cmd) free(mem->cmd);
       delete mem;
     }
   }
@@ -282,7 +281,7 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
         while (*link != mem) link = &(*link)->next;
         *link = mem->next;
 
-        if (mem->cmd) command_interpreter(g, ch, mem->cmd);
+        if (!mem->cmd.empty()) command_interpreter(g, ch, mem->cmd.data());
         else {
           for (t = char_get_script(ch)->trig_list; t; t = t->next) {
             if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(g, 1, 100) <=
@@ -293,7 +292,6 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
             }
           }
         }
-        free(mem->cmd);
         delete mem;
         if (!ch || !char_get_memory(ch))
           return;
@@ -340,14 +338,14 @@ bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
         if (!trigger_ready(t, MTRIG_COMMAND))
           continue;
 
-        if (!t->arglist || !*t->arglist) {
+        if (t->arglist.empty()) {
           mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
                  trig_get_vnum(g, t));
           continue;
         }
 
-        if (*t->arglist == '*' ||
-            !strncasecmp(t->arglist, cmd, strlen(t->arglist))) {
+        if (t->arglist[0] == '*' ||
+            !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size())) {
           add_char_uid_var(t, "actor", actor, 0);
           skip_spaces(&argument);
           add_var(&t->var_list, "arg", argument, 0);
@@ -376,14 +374,14 @@ void speech_mtrigger(GameWorld *g, char_data *actor, char *str)
         if (!trigger_ready(t, MTRIG_SPEECH))
           continue;
 
-        if (!t->arglist || !*t->arglist) {
+        if (t->arglist.empty()) {
           mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
                  trig_get_vnum(g, t));
           continue;
         }
 
-        if (((t->narg && word_check(str, t->arglist)) ||
-             (!t->narg && is_substring(t->arglist, str)))) {
+        if (((t->narg && word_check(str, t->arglist.c_str())) ||
+             (!t->narg && is_substring(t->arglist.c_str(), str)))) {
           add_char_uid_var(t, "actor", actor, 0);
           add_var(&t->var_list, "speech", str, 0);
           script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
@@ -403,14 +401,14 @@ void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor
       if (!trigger_ready(t, MTRIG_ACT))
         continue;
 
-      if (!t->arglist || !*t->arglist) {
+      if (t->arglist.empty()) {
         mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
                trig_get_vnum(g, t));
         continue;
       }
 
-      if (((t->narg && word_check(str, t->arglist)) ||
-           (!t->narg && is_substring(t->arglist, str)))) {
+      if (((t->narg && word_check(str, t->arglist.c_str())) ||
+           (!t->narg && is_substring(t->arglist.c_str(), str)))) {
         if (actor)
           add_char_uid_var(t, "actor", actor, 0);
         if (victim)
@@ -723,15 +721,15 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
         continue;
 
       if (IS_SET(t->narg, type) &&
-          (!t->arglist || !*t->arglist)) {
+          t->arglist.empty()) {
         mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
                trig_get_vnum(g, t));
         continue;
       }
 
       if (IS_SET(t->narg, type) &&
-          (*t->arglist == '*' ||
-           !strncasecmp(t->arglist, cmd, strlen(t->arglist)))) {
+          (t->arglist[0] == '*' ||
+           !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size()))) {
 
         add_char_uid_var(t, "actor", actor, 0);
         skip_spaces(&argument);
@@ -1105,14 +1103,14 @@ int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
     if (!trigger_ready(t, WTRIG_COMMAND))
       continue;
 
-    if (!t->arglist || !*t->arglist) {
+    if (t->arglist.empty()) {
       mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
              trig_get_vnum(g, t));
       continue;
     }
 
-    if (*t->arglist == '*' ||
-        !strncasecmp(t->arglist, cmd, strlen(t->arglist))) {
+    if (t->arglist[0] == '*' ||
+        !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size())) {
       add_char_uid_var(t, "actor", actor, 0);
       skip_spaces(&argument);
       add_var(&t->var_list, "arg", argument, 0);
@@ -1139,15 +1137,15 @@ void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
     if (!trigger_ready(t, WTRIG_SPEECH))
       continue;
 
-    if (!t->arglist || !*t->arglist) {
+    if (t->arglist.empty()) {
       mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
              trig_get_vnum(g, t));
       continue;
     }
 
-    if (*t->arglist == '*' ||
-        (t->narg && word_check(str, t->arglist)) ||
-        (!t->narg && is_substring(t->arglist, str))) {
+    if (t->arglist[0] == '*' ||
+        (t->narg && word_check(str, t->arglist.c_str())) ||
+        (!t->narg && is_substring(t->arglist.c_str(), str))) {
       add_char_uid_var(t, "actor", actor, 0);
       add_var(&t->var_list, "speech", str, 0);
       script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);

@@ -10,6 +10,7 @@
 **************************************************************************/
 
 #pragma once
+#include <string>
 #include "dbat/consts/pulse.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/triggers.hpp"
@@ -34,7 +35,7 @@ constexpr int PULSE_DG_SCRIPT = 13 * PASSES_PER_SEC;
 
 /* one line of the trigger */
 struct cmdlist_element {
-  char *cmd{}; /* one line of a trigger */
+  std::string cmd{}; /* one line of a trigger */
   struct cmdlist_element *original{};
   struct cmdlist_element *next{};
 };
@@ -52,12 +53,12 @@ struct trig_data {
   struct index_data *index{};           /* its prototype's entry */
   uint8_t attach_type{};                /* mob/obj/wld intentions          */
   uint8_t data_type{};                  /* type of game_data for trig      */
-  char *name{};                         /* name of trigger                 */
+  std::string name{};                   /* name of trigger                 */
   bitvector_t trigger_type{};           /* type of trigger (for bitvector) */
   struct cmdlist_element *cmdlist{};    /* top of command list             */
   struct cmdlist_element *curr_state{}; /* ptr to current line of trigger  */
   int narg{};                           /* numerical argument              */
-  char *arglist{};                      /* argument list                   */
+  std::string arglist{};                /* argument list                   */
   int depth{};                          /* depth into nest ifs/whiles/etc  */
   int loops{};                          /* loop iteration counter          */
   struct event *wait_event{};           /* event to pause the trigger      */
@@ -98,7 +99,7 @@ typedef struct char_data char_data;
 /* used for actor memory triggers */
 struct script_memory {
   long id{};   /* id of who to remember */
-  char *cmd{}; /* command, or NULL for generic */
+  std::string cmd{}; /* command, or empty for generic */
   struct script_memory *next{};
 };
 
@@ -186,7 +187,7 @@ void time_otrigger(GameWorld *g, obj_data *obj);
 void time_wtrigger(GameWorld *g, room_data *room);
 
 /* function prototypes from dg_scripts.c */
-char *str_str(char *cs, char *ct);
+const char *str_str(const char *cs, const char *ct);
 int find_eq_pos_script(char *arg);
 bool can_wear_on_pos(struct obj_data *obj, int pos);
 struct char_data *find_char(GameWorld *g, long n);
