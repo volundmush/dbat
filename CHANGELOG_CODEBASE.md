@@ -36,6 +36,7 @@
 - The help table is a `std::vector` of entries with `std::string` keywords and text, sorted with `std::stable_sort` (glibc's `qsort()` kept equal keywords in file order too), and `top_of_helpt` is gone. hedit's copy of the entry it edits is freed when the editor closes; it never was. [Volund]
 - A trigger's name and argument list, each line of its script, and a mob's remembered command (`mremember`) are `std::string`s, so loading, copying, editing and freeing a trigger no longer duplicates or frees them by hand, and trigedit no longer leaks the old name or argument when one is changed. `str_str()`, `word_check()` and `is_substring()` take `const char *`. [Volund]
 - A script variable's name and value are `std::string`s, so setting, removing and freeing variables no longer copies or frees them by hand. `remove_var()` takes a `const char *`. [Volund]
+- DG script arithmetic (`eval` and `if`) wraps around when it overflows, as the game's builds did in practice, but now as defined behaviour, and dividing the smallest number by -1 wraps the same way where it used to make the processor trap and take the game down. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

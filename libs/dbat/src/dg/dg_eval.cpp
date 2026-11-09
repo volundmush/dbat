@@ -35,11 +35,39 @@ static bool is_num(char *arg)
   return true;
 }
 
+/*
+ * Script arithmetic wraps around when it overflows, which is what the game's builds always did in practice, but
+ * done in unsigned arithmetic it is defined behaviour. Dividing the smallest number by -1 wraps the same way,
+ * where the processor would trap and take the game down.
+ */
+static long long wrap_add(long long a, long long b)
+{
+  return (long long)((unsigned long long)a + (unsigned long long)b);
+}
+
+static long long wrap_sub(long long a, long long b)
+{
+  return (long long)((unsigned long long)a - (unsigned long long)b);
+}
+
+static long long wrap_mul(long long a, long long b)
+{
+  return (long long)((unsigned long long)a * (unsigned long long)b);
+}
+
+static long long wrap_div(long long a, long long b)
+{
+  if (!b)
+    return 0;
+  if (b == -1)
+    return wrap_sub(0, a);
+  return a / b;
+}
+
 /* evaluates 'lhs op rhs', and copies to result */
 static void eval_op(const char *op, char *lhs, char *rhs, char *result)
 {
   unsigned char *p;
-  long long n;
 
   /* strip off extra spaces at begin and end */
   while (*lhs && isspace(*lhs))
@@ -114,16 +142,16 @@ static void eval_op(const char *op, char *lhs, char *rhs, char *result)
     sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
 
   else if (!strcmp("*", op))
-    sprintf(result, "%lld", atoll(lhs) * atoll(rhs));
+    sprintf(result, "%lld", wrap_mul(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("/", op))
-    sprintf(result, "%lld", (n = atoll(rhs)) ? (atoll(lhs) / n) : 0);
+    sprintf(result, "%lld", wrap_div(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("+", op))
-    sprintf(result, "%lld", atoll(lhs) + atoll(rhs));
+    sprintf(result, "%lld", wrap_add(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("-", op))
-    sprintf(result, "%lld", atoll(lhs) - atoll(rhs));
+    sprintf(result, "%lld", wrap_sub(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("!", op)) {
     if (is_num(rhs))

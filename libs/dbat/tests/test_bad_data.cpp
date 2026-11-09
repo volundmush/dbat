@@ -245,6 +245,34 @@ static void check_expression_values(void)
 
 /* ------ affects ------ */
 
+/* Arithmetic at the ends of the range wraps around, and never takes the game down. */
+static void check_arithmetic_at_the_limits(void)
+{
+  static const struct {
+    const char *expression, *value;
+  } cases[] = {
+      {"9223372036854775807 + 1",                   "-9223372036854775808"},
+      {"9223372036854775807 * 2",                   "-2"                  },
+      {"99999999999999999999 + 6",                  "-9223372036854775803"}, /* atoll() makes a number too large the largest one */
+      {"(0 - 9223372036854775807) - 2",             "9223372036854775807" }, /* subtraction groups from the right */
+      {"7 / 0",                                     "0"                   },
+      {"((0 - 9223372036854775807) - 1) / (0 - 1)", "-9223372036854775808"}, /* the processor traps on this */
+  };
+  GameWorld *g = th_boot();
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
+    char line[256], result[MAX_INPUT_LENGTH] = "";
+
+    snprintf(line, sizeof(line), "%s", cases[i].expression);
+    eval_expr(g, line, result, nullptr, nullptr, nullptr, WLD_TRIGGER);
+    if (strcmp(result, cases[i].value)) {
+      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result, cases[i].value);
+      failures++;
+    }
+  }
+  th_shutdown(g);
+}
+
 static void check_specific_goes_with_its_location(void)
 {
   CHECK(affect_checked_specific(APPLY_SKILL, SKILL_HAYASA) == SKILL_HAYASA);
@@ -1078,6 +1106,7 @@ static const struct {
     {"long_chain_of_operators",                     check_long_chain_of_operators                    },
     {"chain_as_long_as_real_scripts_have",          check_chain_as_long_as_real_scripts_have         },
     {"expression_values",                           check_expression_values                          },
+    {"arithmetic_at_the_limits",                    check_arithmetic_at_the_limits                   },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },
