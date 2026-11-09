@@ -95,7 +95,7 @@ void item_check(GameWorld *g, struct obj_data *object, struct char_data *ch)
         break;
       case ITEM_ARMOR:
       case ITEM_WORN:
-        where = find_eq_pos(g, ch, object, nullptr);
+        where = find_eq_pos(g, ch, object);
         if (where < 0) /* armor with nowhere to wear it */
           break;
         if (!char_get_equipment(ch, where)) {

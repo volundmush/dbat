@@ -3575,7 +3575,7 @@ void perform_wear(GameWorld *g, struct char_data *ch, struct obj_data *obj, int 
   equip_char(g, ch, obj, where);
 }
 
-int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, char *arg)
+int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view arg)
 {
   int where = -1;
 
@@ -3605,7 +3605,7 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, char *
       "scouter",
       "\n"};
 
-  if (!arg || !*arg) {
+  if (arg.empty()) {
     if (obj_wear_flagged(obj, ITEM_WEAR_FINGER) && char_body_flagged(ch, WEAR_FINGER_R)) return WEAR_FINGER_R;
     if (obj_wear_flagged(obj, ITEM_WEAR_NECK) && char_body_flagged(ch, WEAR_NECK_1)) return WEAR_NECK_1;
     if (obj_wear_flagged(obj, ITEM_WEAR_BODY) && char_body_flagged(ch, WEAR_BODY)) return WEAR_BODY;
@@ -3623,8 +3623,13 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, char *
     if (obj_wear_flagged(obj, ITEM_WEAR_EAR) && char_body_flagged(ch, WEAR_EAR_R)) return WEAR_EAR_R;
     if (obj_wear_flagged(obj, ITEM_WEAR_SH) && char_body_flagged(ch, WEAR_SH)) return WEAR_SH;
     if (obj_wear_flagged(obj, ITEM_WEAR_EYE) && char_body_flagged(ch, WEAR_EYE)) return WEAR_EYE;
-  } else if (((where = search_block(arg, keywords, false)) < 0) || (*arg == '!')) {
-    send_to_char(g, ch, "'%s'?  What part of your body is THAT?\r\n", arg);
+  } else if ((where = search_block(arg, keywords, false)) < 0) {
+    /* lowercased, unless it starts with '!' (which search_block() refuses before lowercasing) */
+    std::string said(arg);
+    if (said[0] != '!')
+      for (char &c : said)
+        c = tolower((unsigned char)c);
+    send_to_char(g, ch, "'%s'?  What part of your body is THAT?\r\n", said.c_str());
     return -1;
   }
   return (where);
@@ -3651,7 +3656,7 @@ ACMD(do_wear)
   }
   if (dotmode == FIND_ALL) {
     for (obj_data *thing : char_inventory(g, ch)) {
-      if (char_can_see_obj(g, ch, thing) && (where = find_eq_pos(g, ch, thing, nullptr)) >= 0) {
+      if (char_can_see_obj(g, ch, thing) && (where = find_eq_pos(g, ch, thing)) >= 0) {
         if (char_get_level(ch) < obj_get_level(thing)) {
           act(g, "$p: you are not experienced enough to use that.",
               false, ch, thing, nullptr, TO_CHAR);
@@ -3684,7 +3689,7 @@ ACMD(do_wear)
         if (!obj_named_and_visible(g, ch, arg1, match))
           continue;
         obj = match;
-        if ((where = find_eq_pos(g, ch, obj, nullptr)) >= 0) {
+        if ((where = find_eq_pos(g, ch, obj)) >= 0) {
           if (!is_proficient_with_armor(ch, obj_get_value(obj, VAL_ARMOR_SKILL)) && obj_get_type_flag(obj) == ITEM_ARMOR)
             send_to_char(g, ch, "You have no proficiency with this type of armor.\r\nYour fighting and physical skills will be greatly impeded.\r\n");
           perform_wear(g, ch, obj, where);

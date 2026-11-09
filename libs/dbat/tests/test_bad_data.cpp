@@ -616,6 +616,144 @@ static void check_args_match_the_old_parsers(void)
   CHECK(mismatches == 0);
 }
 
+/* The name matching the lookups do, as it was before it took std::string_views: copied here to compare with. */
+static bool old_is_name(const char *str, const char *namelist)
+{
+  const char *curname, *curstr;
+
+  if (!*str || !*namelist || !str || !namelist)
+    return false;
+
+  curname = namelist;
+  for (;;) {
+    for (curstr = str;; curstr++, curname++) {
+      if (!*curstr && !isalpha(*curname))
+        return true;
+      if (!*curname)
+        return false;
+      if (!*curstr || *curname == ' ')
+        break;
+      if (tolower(*curstr) != tolower(*curname))
+        break;
+    }
+    for (; isalpha(*curname); curname++);
+    if (!*curname)
+      return false;
+    curname++;
+  }
+}
+
+static bool old_isname(const char *str, const char *namelist)
+{
+  char *newlist, *curtok;
+  static char newlistbuf[MAX_STRING_LENGTH];
+
+  if (!str || !*str || !namelist || !*namelist)
+    return false;
+  if (!strcasecmp(str, namelist))
+    return true;
+
+  strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
+  newlist = newlistbuf;
+  for (curtok = strsep(&newlist, " \t"); curtok; curtok = strsep(&newlist, " \t")) {
+    if (curtok && is_abbrev(str, curtok)) {
+      if (isdigit(*str) && (atoi(str) != atoi(curtok)))
+        return false;
+      return true;
+    }
+  }
+  return false;
+}
+
+static int old_get_number(char **name)
+{
+  int i;
+  char *ppos;
+  char number[MAX_INPUT_LENGTH];
+
+  *number = '\0';
+  if ((ppos = strchr(*name, '.')) != nullptr) {
+    *ppos++ = '\0';
+    strlcpy(number, *name, sizeof(number));
+    memmove(*name, ppos, strlen(ppos) + 1);
+    for (i = 0; *(number + i); i++)
+      if (!isdigit(*(number + i)))
+        return (0);
+    return (atoi(number));
+  }
+  return (1);
+}
+
+static int old_find_all_dots(char *arg)
+{
+  if (!strcmp(arg, "all"))
+    return (FIND_ALL);
+  else if (!strncmp(arg, "all.", 4)) {
+    memmove(arg, arg + 4, strlen(arg + 4) + 1);
+    return (FIND_ALLDOT);
+  } else
+    return (FIND_INDIV);
+}
+
+/* isname(), is_name(), get_number() and the rest find what they did as char * functions, and leave the
+ * caller's name as they did. */
+static void check_name_matching_matches_the_old_code(void)
+{
+  static const char *const tokens[] = {"sword", "Sword", "sw", "2.", "0.", "10", "100", "1000", " ", "\t", "@r",
+                                       "@", "\xc8", "a", "-", "+", "0", "99999999999999999999", ".", "all", "all.",
+                                       "!", "\n", "x.y", "ME", "-12"};
+  static const char *const words[]  = {"finger", "neck", "body", "head", "\n"};
+  unsigned seed                     = 4242;
+  int mismatches                    = 0;
+  auto next                         = [&] { return (seed = seed * 1103515245 + 12345) / 65536; };
+  auto text                         = [&] {
+    std::string t;
+    for (int n = next() % 5; n > 0; n--)
+      t += tokens[next() % (sizeof(tokens) / sizeof(*tokens))];
+    return t;
+  };
+
+  for (int i = 0; i < 20000; i++) {
+    std::string a = text(), b = text();
+    char buf[MAX_INPUT_LENGTH], old_buf[MAX_INPUT_LENGTH];
+
+    mismatches += isname(a, b) != old_isname(a.c_str(), b.c_str());
+    mismatches += is_name(a, b) != old_is_name(a.c_str(), b.c_str());
+    mismatches += isname(a.c_str(), nullptr) || isname(nullptr, b.c_str()) || is_name(a.c_str(), nullptr);
+    mismatches += is_abbrev(std::string_view(a), b) != is_abbrev(a.c_str(), b.c_str());
+    mismatches += str_eq_nocase(a, b) != !strcasecmp(a.c_str(), b.c_str());
+    mismatches += parse_int(a) != atoi(a.c_str());
+    mismatches += is_number(std::string_view(a)) != is_number(a.c_str());
+
+    std::string name = a;
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    char *old_p = old_buf;
+    mismatches += get_number(name) != old_get_number(&old_p) || name != old_buf;
+    snprintf(buf, sizeof(buf), "%s", a.c_str());
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    char *p = buf;
+    old_p   = old_buf;
+    mismatches += get_number(&p) != old_get_number(&old_p) || strcmp(buf, old_buf);
+
+    name = a;
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    mismatches += find_all_dots(name) != old_find_all_dots(old_buf) || name != old_buf;
+    snprintf(buf, sizeof(buf), "%s", a.c_str());
+    name = a;
+    mismatches += find_all_dots(buf) != find_all_dots(name) || buf != name;
+
+    name = a;
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    mismatches += CAP(name) != CAP(old_buf);
+
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    mismatches += search_block(std::string_view(a), words, false) != search_block(old_buf, words, false);
+    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
+    mismatches += search_block(std::string_view(a), words, true) != search_block(old_buf, words, true);
+  }
+  CHECK(mismatches == 0);
+}
+
 /* ------ world files ------ */
 
 static void empty_socials(void)
@@ -1311,6 +1449,7 @@ static const struct {
     {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
     {"text_field_of_self",                          check_text_field_of_self                         },
     {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
+    {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

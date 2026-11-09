@@ -6,6 +6,7 @@
 **                                                                    **
 ***********************************************************************/
 #pragma once
+#include <string_view>
 #include "dbat/consts/weapons.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/feats.hpp"
@@ -13,7 +14,7 @@
 /* Functions defined in feats.c */
 bool is_proficient_with_armor(const struct char_data *ch, int armor_type);
 bool is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
-int find_feat_num(GameWorld *g, char *name);
+int find_feat_num(GameWorld *g, std::string_view name);
 void assign_feats(GameWorld *g);
 void sort_feats(GameWorld *g);
 bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);

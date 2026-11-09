@@ -61,12 +61,12 @@ int trgvar_in_room(GameWorld *g, room_vnum vnum)
   return i;
 }
 
-obj_data *get_obj_in_list(GameWorld *g, char *name, const id_list &list)
+obj_data *get_obj_in_list(GameWorld *g, std::string_view name, const id_list &list)
 {
   long id;
 
-  if (*name == UID_CHAR) {
-    id = atoi(name + 1);
+  if (name.starts_with(UID_CHAR)) {
+    id = parse_int(name.substr(1));
     for (obj_data *i : obj_list(g, list))
       if (id == obj_get_id(i))
         return i;
@@ -79,30 +79,28 @@ obj_data *get_obj_in_list(GameWorld *g, char *name, const id_list &list)
   return nullptr;
 }
 
-obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name)
+obj_data *get_object_in_equip(GameWorld *g, char_data *ch, std::string_view name)
 {
   int j, n = 0, number;
   obj_data *obj;
-  char tmpname[MAX_INPUT_LENGTH];
-  char *tmp = tmpname;
   long id;
 
-  if (*name == UID_CHAR) {
-    id = atoi(name + 1);
+  if (name.starts_with(UID_CHAR)) {
+    id = parse_int(name.substr(1));
 
     for (j = 0; j < NUM_WEARS; j++)
       if ((obj = char_get_equipment(ch, j)))
         if (id == obj_get_id(obj))
           return (obj);
   } else if (is_number(name)) {
-    obj_vnum ovnum = atoi(name);
+    obj_vnum ovnum = parse_int(name);
     for (j = 0; j < NUM_WEARS; j++)
       if ((obj = char_get_equipment(ch, j)))
         if (obj_get_vnum(g, obj) == ovnum)
           return (obj);
   } else {
-    snprintf(tmpname, sizeof(tmpname), "%s", name);
-    if (!(number = get_number(&tmp)))
+    std::string tmp(name);
+    if (!(number = get_number(tmp)))
       return nullptr;
 
     for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
@@ -117,7 +115,7 @@ obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name)
 
 /* Handles 'held', 'light' and 'wield' positions - Welcor
    After idea from Byron Ellacott - bje@apnic.net */
-int find_eq_pos_script(char *arg)
+int find_eq_pos_script(std::string_view arg)
 {
   int i;
   struct eq_pos_list {
@@ -151,11 +149,11 @@ int find_eq_pos_script(char *arg)
       {"none",      -1           }
   };
 
-  if (is_number(arg) && (i = atoi(arg)) >= 0 && i < NUM_WEARS)
+  if (is_number(arg) && (i = parse_int(arg)) >= 0 && i < NUM_WEARS)
     return i;
 
   for (i = 0; eq_pos[i].where != -1; i++) {
-    if (!strcasecmp(eq_pos[i].pos, arg))
+    if (str_eq_nocase(eq_pos[i].pos, arg))
       return eq_pos[i].where;
   }
   return (-1);
@@ -233,12 +231,12 @@ room_data *find_room(GameWorld *g, long n)
  ************************************************************/
 
 /* search the entire world for a char, and return a pointer */
-char_data *get_char(GameWorld *g, char *name)
+char_data *get_char(GameWorld *g, std::string_view name)
 {
   char_data *i;
 
-  if (*name == UID_CHAR) {
-    i = find_char(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR)) {
+    i = find_char(g, parse_int(name.substr(1)));
 
     if (i && valid_dg_target(g, i, DG_ALLOW_GODS))
       return i;
@@ -255,12 +253,12 @@ char_data *get_char(GameWorld *g, char *name)
 /*
  * Finds a char in the same room as the object with the name 'name'
  */
-char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name)
+char_data *get_char_near_obj(GameWorld *g, obj_data *obj, std::string_view name)
 {
   char_data *ch;
 
-  if (*name == UID_CHAR) {
-    ch = find_char(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR)) {
+    ch = find_char(g, parse_int(name.substr(1)));
 
     if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
@@ -280,12 +278,12 @@ char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name)
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching in room room first
  */
-char_data *get_char_in_room(GameWorld *g, room_data *room, char *name)
+char_data *get_char_in_room(GameWorld *g, room_data *room, std::string_view name)
 {
   char_data *ch;
 
-  if (*name == UID_CHAR) {
-    ch = find_char(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR)) {
+    ch = find_char(g, parse_int(name.substr(1)));
 
     if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
@@ -301,13 +299,13 @@ char_data *get_char_in_room(GameWorld *g, room_data *room, char *name)
 
 /* searches the room with the object for an object with name 'name'*/
 
-obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
+obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, std::string_view name)
 {
   obj_data *i = nullptr;
   room_vnum rm;
   long id;
 
-  if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
+  if (str_eq_nocase(name, "self") || str_eq_nocase(name, "me"))
     return obj;
 
   /* is it inside ? */
@@ -316,8 +314,8 @@ obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
 
   /* or outside ? */
   if (obj_get_in_obj(obj)) {
-    if (*name == UID_CHAR) {
-      id = atoi(name + 1);
+    if (name.starts_with(UID_CHAR)) {
+      id = parse_int(name.substr(1));
 
       if (id == obj_get_id(obj_get_in_obj(obj)))
         return obj_get_in_obj(obj);
@@ -345,11 +343,11 @@ obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name)
 }
 
 /* returns the object in the world with name name, or NULL if not found */
-obj_data *get_obj(GameWorld *g, char *name)
+obj_data *get_obj(GameWorld *g, std::string_view name)
 {
 
-  if (*name == UID_CHAR)
-    return find_obj(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR))
+    return find_obj(g, parse_int(name.substr(1)));
   else {
     for (obj_data *obj : each_obj(g))
       if (isname(name, obj_get_name(obj)))
@@ -360,13 +358,13 @@ obj_data *get_obj(GameWorld *g, char *name)
 }
 
 /* finds room by id or vnum.  returns NULL if not found */
-room_data *get_room(GameWorld *g, char *name)
+room_data *get_room(GameWorld *g, std::string_view name)
 {
   room_vnum nr;
 
-  if (*name == UID_CHAR)
-    return find_room(g, atoi(name + 1));
-  else if (!room_of(g, nr = atoi(name)))
+  if (name.starts_with(UID_CHAR))
+    return find_room(g, parse_int(name.substr(1)));
+  else if (!room_of(g, nr = parse_int(name)))
     return nullptr;
   else
     return room_of(g, nr);
@@ -376,12 +374,12 @@ room_data *get_room(GameWorld *g, char *name)
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching with the person owing the object
  */
-char_data *get_char_by_obj(GameWorld *g, obj_data *obj, char *name)
+char_data *get_char_by_obj(GameWorld *g, obj_data *obj, std::string_view name)
 {
   char_data *ch;
 
-  if (*name == UID_CHAR) {
-    ch = find_char(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR)) {
+    ch = find_char(g, parse_int(name.substr(1)));
 
     if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
@@ -409,12 +407,12 @@ char_data *get_char_by_obj(GameWorld *g, obj_data *obj, char *name)
  * returns a pointer to the first character in world by name name,
  * or NULL if none found.  Starts searching in room room first
  */
-char_data *get_char_by_room(GameWorld *g, room_data *room, char *name)
+char_data *get_char_by_room(GameWorld *g, room_data *room, std::string_view name)
 {
   char_data *ch;
 
-  if (*name == UID_CHAR) {
-    ch = find_char(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR)) {
+    ch = find_char(g, parse_int(name.substr(1)));
 
     if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
       return ch;
@@ -437,15 +435,15 @@ char_data *get_char_by_room(GameWorld *g, room_data *room, char *name)
  * returns the object in the world with name name, or NULL if not found
  * search based on obj
  */
-obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name)
+obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, std::string_view name)
 {
   obj_data *i = nullptr;
   room_vnum rm;
 
-  if (*name == UID_CHAR)
-    return find_obj(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR))
+    return find_obj(g, parse_int(name.substr(1)));
 
-  if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
+  if (str_eq_nocase(name, "self") || str_eq_nocase(name, "me"))
     return obj;
 
   if (obj_get_contains(obj) && (i = get_obj_in_list(g, name, obj_get_contains(obj))))
@@ -469,12 +467,12 @@ obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name)
 }
 
 /* only searches the room */
-obj_data *get_obj_in_room(GameWorld *g, room_data *room, char *name)
+obj_data *get_obj_in_room(GameWorld *g, room_data *room, std::string_view name)
 {
   long id;
 
-  if (*name == UID_CHAR) {
-    id = atoi(name + 1);
+  if (name.starts_with(UID_CHAR)) {
+    id = parse_int(name.substr(1));
     for (obj_data *obj : obj_list(g, room_get_contents(room)))
       if (id == obj_get_id(obj))
         return obj;
@@ -488,11 +486,11 @@ obj_data *get_obj_in_room(GameWorld *g, room_data *room, char *name)
 }
 
 /* returns obj with name - searches room, then world */
-obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name)
+obj_data *get_obj_by_room(GameWorld *g, room_data *room, std::string_view name)
 {
 
-  if (*name == UID_CHAR)
-    return find_obj(g, atoi(name + 1));
+  if (name.starts_with(UID_CHAR))
+    return find_obj(g, parse_int(name.substr(1)));
 
   for (obj_data *obj : obj_list(g, room_get_contents(room)))
     if (isname(name, obj_get_name(obj)))

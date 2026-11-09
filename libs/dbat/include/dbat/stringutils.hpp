@@ -1,6 +1,7 @@
 #pragma once
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <cctype>
 
 #include <strings.h>
@@ -11,6 +12,8 @@ int levenshtein_distance(const char *s1, const char *s2);
 void trim(char *s);
 char *add_commas(int64_t num);
 char *CAP(char *txt);
+/* txt with its first letter capitalised, passing over leading colour codes, as CAP(char *) does */
+std::string &CAP(std::string &txt);
 void prune_crlf(char *txt);
 void prune_crlf(std::string &txt);
 
@@ -20,11 +23,20 @@ char *any_one_arg(char *argument, char *first_arg);
 char *one_argument(char *argument, char *first_arg);
 char *two_arguments(char *argument, char *first_arg, char *second_arg);
 bool is_abbrev(const char *arg1, const char *arg2);
+/* Whether arg1 is a non-empty start of arg2, ignoring case */
+bool is_abbrev(std::string_view arg1, std::string_view arg2);
+/* Whether a and b are the same ignoring case, as strcasecmp() finds them */
+bool str_eq_nocase(std::string_view a, std::string_view b);
+/* The number s starts with, read as atoi() reads it: leading whitespace and a sign allowed, the rest ignored */
+int parse_int(std::string_view s);
 void half_chop(char *string, char *arg1, char *arg2);
 void skip_spaces(char **string);
 char *delete_doubledollar(char *string);
 int search_block(char *arg, const char *const *list, int exact);
+/* search_block() without lowercasing arg in place */
+int search_block(std::string_view arg, const char *const *list, int exact);
 bool is_number(const char *str);
+bool is_number(std::string_view str);
 bool fill_word(char *argument);
 char *fname(const char *namelist);
 bool reserved_word(char *argument);

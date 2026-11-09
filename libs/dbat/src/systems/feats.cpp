@@ -7,6 +7,7 @@
 *****************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/feats.hpp"
 #include "dbat/comm.hpp"
@@ -220,28 +221,24 @@ void sort_feats(GameWorld *g)
   qsort_r(&g->feat_sort_info[0], NUM_FEATS_DEFINED, sizeof(int), compare_feats, g);
 }
 
-int find_feat_num(GameWorld *g, char *name)
+int find_feat_num(GameWorld *g, std::string_view name)
 {
-  int ftindex, ok;
-  char *temp, *temp2;
-  char first[MAX_INPUT_LENGTH], first2[MAX_INPUT_LENGTH];
-
-  for (ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++) {
+  for (int ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++) {
     if (is_abbrev(name, g->feat_list[ftindex].name))
       return (ftindex);
 
-    ok = true;
-    /* It won't be changed, but other uses of this function elsewhere may. */
-    temp  = any_one_arg(const_cast<char *>(g->feat_list[ftindex].name), first); /* only reads it */
-    temp2 = any_one_arg(name, first2);
-    while (*first && *first2 && ok) {
+    /* each word of name abbreviating the matching word of the feat's */
+    bool ok                    = true;
+    std::string_view feat_rest = g->feat_list[ftindex].name, name_rest = name;
+    std::string first = take_word(feat_rest), first2 = take_word(name_rest);
+    while (!first.empty() && !first2.empty() && ok) {
       if (!is_abbrev(first2, first))
         ok = false;
-      temp  = any_one_arg(temp, first);
-      temp2 = any_one_arg(temp2, first2);
+      first  = take_word(feat_rest);
+      first2 = take_word(name_rest);
     }
 
-    if (ok && !*first2)
+    if (ok && first2.empty())
       return (ftindex);
   }
 

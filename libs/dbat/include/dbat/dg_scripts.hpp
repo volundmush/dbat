@@ -11,6 +11,7 @@
 
 #pragma once
 #include <string>
+#include <string_view>
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/pulse.hpp"
 #include "dbat/consts/types.hpp"
@@ -192,7 +193,7 @@ void time_wtrigger(GameWorld *g, room_data *room);
 
 /* function prototypes from dg_scripts.c */
 const char *str_str(const char *cs, const char *ct);
-int find_eq_pos_script(char *arg);
+int find_eq_pos_script(std::string_view arg);
 bool can_wear_on_pos(struct obj_data *obj, int pos);
 struct char_data *find_char(GameWorld *g, long n);
 /* find_char() and find_obj() without their log line, for code that expects the entity may be gone */
@@ -204,20 +205,20 @@ void char_register(GameWorld *g, struct char_data *ch);
 void char_unregister(GameWorld *g, struct char_data *ch);
 void obj_register(GameWorld *g, struct obj_data *obj);
 void obj_unregister(GameWorld *g, struct obj_data *obj);
-char_data *get_char(GameWorld *g, char *name);
-char_data *get_char_near_obj(GameWorld *g, obj_data *obj, char *name);
-char_data *get_char_in_room(GameWorld *g, room_data *room, char *name);
-obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, char *name);
-obj_data *get_obj(GameWorld *g, char *name);
-room_data *get_room(GameWorld *g, char *name);
-char_data *get_char_by_obj(GameWorld *g, obj_data *obj, char *name);
-char_data *get_char_by_room(GameWorld *g, room_data *room, char *name);
-obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, char *name);
-obj_data *get_obj_in_room(GameWorld *g, room_data *room, char *name);
-obj_data *get_obj_by_room(GameWorld *g, room_data *room, char *name);
+char_data *get_char(GameWorld *g, std::string_view name);
+char_data *get_char_near_obj(GameWorld *g, obj_data *obj, std::string_view name);
+char_data *get_char_in_room(GameWorld *g, room_data *room, std::string_view name);
+obj_data *get_obj_near_obj(GameWorld *g, obj_data *obj, std::string_view name);
+obj_data *get_obj(GameWorld *g, std::string_view name);
+room_data *get_room(GameWorld *g, std::string_view name);
+char_data *get_char_by_obj(GameWorld *g, obj_data *obj, std::string_view name);
+char_data *get_char_by_room(GameWorld *g, room_data *room, std::string_view name);
+obj_data *get_obj_by_obj(GameWorld *g, obj_data *obj, std::string_view name);
+obj_data *get_obj_in_room(GameWorld *g, room_data *room, std::string_view name);
+obj_data *get_obj_by_room(GameWorld *g, room_data *room, std::string_view name);
 int trgvar_in_room(GameWorld *g, room_vnum vnum);
-obj_data *get_obj_in_list(GameWorld *g, char *name, const id_list &list);
-obj_data *get_object_in_equip(GameWorld *g, char_data *ch, char *name);
+obj_data *get_obj_in_list(GameWorld *g, std::string_view name, const id_list &list);
+obj_data *get_object_in_equip(GameWorld *g, char_data *ch, std::string_view name);
 void script_trigger_check(GameWorld *g);
 void check_time_triggers(GameWorld *g);
 void find_uid_name(GameWorld *g, char *uid, char *name, size_t nlen);

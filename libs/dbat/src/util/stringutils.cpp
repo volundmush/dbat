@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <climits>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -458,4 +460,73 @@ char *str_realloc(char *s, size_t n)
     abort();
   }
   return grown;
+}
+
+std::string &CAP(std::string &txt)
+{
+  size_t i = 0;
+  while (i + 1 < txt.size() && txt[i] == '@' && IS_COLOR_CHAR(txt[i + 1]))
+    i += 2;
+  if (i < txt.size())
+    txt[i] = toupper((unsigned char)txt[i]);
+  return txt;
+}
+
+bool str_eq_nocase(std::string_view a, std::string_view b)
+{
+  if (a.size() != b.size())
+    return false;
+  for (size_t i = 0; i < a.size(); i++)
+    if (tolower((unsigned char)a[i]) != tolower((unsigned char)b[i]))
+      return false;
+  return true;
+}
+
+bool is_abbrev(std::string_view arg1, std::string_view arg2)
+{
+  return !arg1.empty() && arg1.size() <= arg2.size() && str_eq_nocase(arg1, arg2.substr(0, arg1.size()));
+}
+
+int parse_int(std::string_view s)
+{
+  size_t i = 0;
+  while (i < s.size() && isspace((unsigned char)s[i]))
+    i++;
+  bool neg = false;
+  if (i < s.size() && (s[i] == '+' || s[i] == '-'))
+    neg = s[i++] == '-';
+
+  /* strtol()'s reading: past the range it stops at LONG_MAX or LONG_MIN; atoi() then keeps the low bits */
+  const unsigned long limit = neg ? (unsigned long)LONG_MAX + 1 : (unsigned long)LONG_MAX;
+  unsigned long v           = 0;
+  for (; i < s.size() && isdigit((unsigned char)s[i]); i++) {
+    unsigned long d = s[i] - '0';
+    v               = v > (limit - d) / 10 ? limit : v * 10 + d;
+  }
+  long r = neg ? (v == limit ? LONG_MIN : -(long)v) : (long)v;
+  return (int)r;
+}
+
+int search_block(std::string_view arg, const char *const *list, int exact)
+{
+  if (!arg.empty() && arg[0] == '!')
+    return -1;
+
+  std::string low(arg);
+  for (char &c : low)
+    c = tolower((unsigned char)c);
+
+  size_t l = std::max<size_t>(low.size(), 1); /* so "" doesn't match the first string */
+  for (int i = 0; *list[i] != '\n'; i++)
+    if (exact ? low == list[i] : !strncmp(low.c_str(), list[i], l))
+      return i;
+  return -1;
+}
+
+bool is_number(std::string_view str)
+{
+  for (char c : str)
+    if (!isdigit((unsigned char)c))
+      return false;
+  return true;
 }

@@ -624,7 +624,7 @@ static bool has_flight(GameWorld *g, struct char_data *ch)
 
   /* non-wearable flying items in inventory will do it */
   for (obj_data *obj : char_inventory(g, ch))
-    if (obj_aff_flagged(obj, AFF_FLYING) && (find_eq_pos(g, ch, obj, nullptr) < 0))
+    if (obj_aff_flagged(obj, AFF_FLYING) && (find_eq_pos(g, ch, obj) < 0))
       return true;
 
   /* anything worn as wings will do */
