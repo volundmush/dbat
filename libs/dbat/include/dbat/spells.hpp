@@ -1,4 +1,6 @@
 #pragma once
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/races.hpp"
 #include "dbat/consts/senseis.hpp"
@@ -337,8 +339,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
                struct obj_data *ovict, int spellnum, int level, int casttype, char *arg);
 
-void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
-                     char *argument);
+void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view argument);
 
 bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
                   int level, int cast_stat);

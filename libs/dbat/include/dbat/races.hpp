@@ -1,4 +1,6 @@
 #pragma once
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/races.hpp"
 #include "dbat/transformations.hpp"
@@ -33,7 +35,7 @@ bool race_check_can_transform(GameWorld *g, char_data *ch);
 int race_flag_to_tier(int flag);
 int race_current_trans_tier(const char_data *ch);
 transform_bonus race_current_form(GameWorld *g, char_data *ch);
-bool race_find_form(char_data *ch, const char *arg, transform_bonus *out);
+bool race_find_form(char_data *ch, std::string_view arg, transform_bonus *out);
 bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier);
 void race_display_forms(GameWorld *g, char_data *ch);
 void race_display_trans_req(GameWorld *g, char_data *ch);

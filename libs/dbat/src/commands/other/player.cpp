@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
@@ -210,14 +211,15 @@ ACMD(do_not_here)
 
 ACMD(do_practice)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
   /* if (IS_NPC(ch))
     return; */
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (*arg)
+  if (!arg.empty())
     send_to_char(g, ch, "You can only practice skills with your trainer.\r\n");
   else
     send_to_char(g, ch, "Use the skills command unless you are at your trainer.\r\n");
@@ -226,8 +228,9 @@ ACMD(do_practice)
 
 ACMD(do_skills)
 {
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
   if (char_is_npc(ch)) {
     return;
   }
@@ -364,19 +367,20 @@ static void print_group(GameWorld *g, struct char_data *ch)
 
 ACMD(do_group)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   struct char_data *vict;
   int found, highlvl = 0, lowlvl = 0;
   int64_t highpl = 0, lowpl = 0;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
   if (char_get_bonuses(ch, BONUS_LONER) > 0) {
     send_to_char(g, ch, "You can not group as you prefer to be alone.\r\n");
     return;
   }
 
-  if (!*buf) {
+  if (buf.empty()) {
     print_group(g, ch);
     return;
   }
@@ -406,7 +410,7 @@ ACMD(do_group)
 
   int foundwas = 0;
 
-  if (!strcasecmp(buf, "all")) {
+  if (str_eq_nocase(buf, "all")) {
     perform_group(g, ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
     found = 0;
     for (char_data *foll : char_followers(g, ch)) {
@@ -447,12 +451,13 @@ ACMD(do_group)
 
 ACMD(do_ungroup)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *tch;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
-  if (!*buf) {
+  if (buf.empty()) {
     if (char_get_master(g, ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
       send_to_char(g, ch, "But you lead no group!\r\n");
       return;
@@ -500,7 +505,8 @@ ACMD(do_ungroup)
 
 ACMD(do_split)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
+  char msg[MAX_INPUT_LENGTH];
   int amount, num, share, rest;
   size_t len;
   struct char_data *k;
@@ -508,10 +514,11 @@ ACMD(do_split)
   if (char_is_npc(ch))
     return;
 
-  one_argument(argument, buf);
+  std::string_view args = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(args);
 
   if (is_number(buf)) {
-    amount = atoi(buf);
+    amount = parse_int(buf);
     if (amount <= 0) {
       send_to_char(g, ch, "Sorry, you can't do that.\r\n");
       return;
@@ -545,16 +552,16 @@ ACMD(do_split)
     char_set_gold(ch, char_get_gold(ch) + (share));
 
     /* Abusing signed/unsigned to make sizeof work. */
-    len = snprintf(buf, sizeof(buf), "%s splits %d zenni; you receive %d.\r\n",
+    len = snprintf(msg, sizeof(msg), "%s splits %d zenni; you receive %d.\r\n",
                    char_get_name(ch), amount, share);
-    if (rest && len < sizeof(buf)) {
-      snprintf(buf + len, sizeof(buf) - len,
+    if (rest && len < sizeof(msg)) {
+      snprintf(msg + len, sizeof(msg) - len,
                "%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", char_get_name(ch));
     }
     if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) &&
         !char_is_npc(k) && k != ch) {
       char_set_gold(k, char_get_gold(k) + (share));
-      send_to_char(g, k, "%s", buf);
+      send_to_char(g, k, "%s", msg);
     }
 
     for (char_data *foll : char_followers(g, k)) {
@@ -564,7 +571,7 @@ ACMD(do_split)
           foll != ch) {
 
         char_set_gold(foll, char_get_gold(foll) + (share));
-        send_to_char(g, foll, "%s", buf);
+        send_to_char(g, foll, "%s", msg);
       }
     }
     send_to_char(g, ch, "You split %d zenni among %d members -- %d zenni each.\r\n",
@@ -1042,7 +1049,8 @@ ACMD(do_file)
       req_lines = 0,
       i;
   int l;
-  char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], line[READ_SIZE];
+  char line[READ_SIZE];
+  std::string field, value;
   char buf[MAX_STRING_LENGTH];
 
   struct file_struct {
@@ -1080,10 +1088,12 @@ ACMD(do_file)
     return;
   }
 
-  two_arguments(argument, field, value);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  field                 = take_arg(rest);
+  value                 = take_arg(rest);
 
   for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (!strncmp(field, fields[l].cmd, strlen(field)))
+    if (std::string_view(fields[l].cmd).starts_with(field))
       break;
 
   if (*(fields[l].cmd) == '\n') {
@@ -1096,14 +1106,14 @@ ACMD(do_file)
     return;
   }
 
-  if (!strcasecmp(field, "request")) {
+  if (str_eq_nocase(field, "request")) {
     char_set_lboard(ch, 2, game_now(g));
   }
 
-  if (!*value)
+  if (value.empty())
     req_lines = 15; /* default is the last 15 lines */
   else
-    req_lines = atoi(value);
+    req_lines = parse_int(value);
 
   if (!(req_file = fopen(fields[l].file, "r"))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true,

@@ -100,16 +100,16 @@ ACMD(do_preference)
   return;
 }
 
-void rpp_feature(GameWorld *g, struct char_data *ch, const char *arg)
+void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg)
 {
   int cost = 0, change = false;
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: rpp 13 (description)\nExample: rpp 13 a large red scar on his face\nDisplayed to others: He has a large red scar on his face.\r\n");
     return;
   }
 
-  if (strlen(arg) > 60) {
+  if (arg.size() > 60) {
     send_to_char(g, ch, "Please limit it to 60 characters.\r\n");
     return;
   }
@@ -130,7 +130,7 @@ void rpp_feature(GameWorld *g, struct char_data *ch, const char *arg)
                                                                                                          : "It");
 
   char_set_rbank(ch, char_get_rbank(ch) - (cost));
-  snprintf(buf8, sizeof(buf8), "...%s has %s.", sex, arg);
+  snprintf(buf8, sizeof(buf8), "...%s has %s.", sex, arg.c_str());
   send_to_char(g, ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
   send_to_char(g, ch, "You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n", buf8);
   char_set_feature(ch, buf8);

@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/spell_parser.hpp"
@@ -199,15 +200,13 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
  * the DikuMUD format did not specify staff and wand levels in the world
  * files (this is a CircleMUD enhancement).
  */
-void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
-                     char *argument)
+void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view argument)
 {
-  char arg[MAX_INPUT_LENGTH];
   int i, k;
   struct char_data *tch = nullptr;
   struct obj_data *tobj = nullptr;
 
-  one_argument(argument, arg);
+  std::string arg = take_arg(argument);
 
   k = generic_find(g, arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tch, &tobj);
 
@@ -288,7 +287,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj,
                    DEFAULT_WAND_LVL, CAST_WAND, nullptr);
       break;
     case ITEM_SCROLL:
-      if (*arg) {
+      if (!arg.empty()) {
         if (!k) {
           act(g, "There is nothing to here to affect with $p.", false,
               ch, obj, nullptr, TO_CHAR);

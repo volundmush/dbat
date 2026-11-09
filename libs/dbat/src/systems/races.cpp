@@ -694,14 +694,14 @@ transform_bonus race_current_form(GameWorld *g, char_data *ch)
   return table[tier];
 }
 
-bool race_find_form(char_data *ch, const char *arg, transform_bonus *out)
+bool race_find_form(char_data *ch, std::string_view arg, transform_bonus *out)
 {
   const struct form_name *names = race_form_names(ch);
   if (!names)
     return false;
   const transform_bonus *table = race_trans_table(ch);
   for (; names->name; names++) {
-    if (!strcasecmp(names->name, arg)) {
+    if (str_eq_nocase(names->name, arg)) {
       if (table)
         *out = table[names->tier];
       else

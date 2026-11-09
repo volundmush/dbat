@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -54,15 +55,14 @@
 ACMD(do_focus)
 {
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  char name[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string name;
 
-  *name = '\0';
-  *arg  = '\0';
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  name                  = take_arg(rest);
 
-  two_arguments(argument, arg, name);
-
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Yes but what do you want to focus?\r\n");
     return;
   }
@@ -74,11 +74,11 @@ ACMD(do_focus)
     send_to_char(g, ch, "You are cursed and can't focus!\r\n");
     return;
   }
-  if (!(strcmp(arg, "tough"))) {
+  if (!(arg != "tough")) {
     if (!know_skill(g, ch, SKILL_TSKIN)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_STONESKIN)) {
         send_to_char(g, ch, "You already have tough skin!\r\n");
         return;
@@ -112,7 +112,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_STONESKIN)) {
@@ -147,11 +147,11 @@ ACMD(do_focus)
     } // End of victim of tough skin
   } // End of tough skin
 
-  else if (!(strcmp(arg, "might"))) {
+  else if (!(arg != "might")) {
     if (!know_skill(g, ch, SKILL_MIGHT)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_MIGHT)) {
         send_to_char(g, ch, "You already have mighty muscles!\r\n");
         return;
@@ -195,7 +195,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_MIGHT)) {
@@ -239,7 +239,7 @@ ACMD(do_focus)
     } // End of victim of might
   } // End of might
 
-  else if (!(strcmp(arg, "wither"))) {
+  else if (!(arg != "wither")) {
     if (!know_skill(g, ch, SKILL_WITHER)) {
       return;
     }
@@ -280,11 +280,11 @@ ACMD(do_focus)
     return;
   } // End of wither
 
-  else if (!(strcmp(arg, "enlighten"))) {
+  else if (!(arg != "enlighten")) {
     if (!know_skill(g, ch, SKILL_ENLIGHTEN)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_ENLIGHTEN)) {
         send_to_char(g, ch, "You already have superior wisdom!\r\n");
         return;
@@ -340,7 +340,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_ENLIGHTEN)) {
@@ -397,11 +397,11 @@ ACMD(do_focus)
     } // End of victim of enlighten
   } // End of enlighten
 
-  else if (!(strcmp(arg, "genius"))) {
+  else if (!(arg != "genius")) {
     if (!know_skill(g, ch, SKILL_GENIUS)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_GENIUS)) {
         send_to_char(g, ch, "You already have superior intelligence!\r\n");
         return;
@@ -440,7 +440,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_GENIUS)) {
@@ -486,11 +486,11 @@ ACMD(do_focus)
     } // End of victim of genius
   } // End of genius
 
-  else if (!(strcmp(arg, "flex"))) {
+  else if (!(arg != "flex")) {
     if (!know_skill(g, ch, SKILL_FLEX)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_FLEX)) {
         send_to_char(g, ch, "You already have superior agility!\r\n");
         return;
@@ -530,7 +530,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_FLEX)) {
@@ -576,11 +576,11 @@ ACMD(do_focus)
     } // End of victim of FLEX
   } // End of FLEX
 
-  else if (!(strcmp(arg, "bless"))) {
+  else if (!(arg != "bless")) {
     if (!know_skill(g, ch, SKILL_BLESS)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_BLESS)) {
         send_to_char(g, ch, "You already are blessed!\r\n");
         return;
@@ -625,7 +625,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_BLESS)) {
@@ -676,11 +676,11 @@ ACMD(do_focus)
     } // End of victim of BLESS
   } // End of BLESS
 
-  else if (!(strcmp(arg, "curse"))) {
+  else if (!(arg != "curse")) {
     if (!know_skill(g, ch, SKILL_CURSE)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (char_aff_flagged(ch, AFF_CURSE)) {
         send_to_char(g, ch, "You already are cursed!\r\n");
         return;
@@ -724,7 +724,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_CURSE)) {
@@ -769,7 +769,7 @@ ACMD(do_focus)
     } // End of victim of CURSE
   } // End of CURSE
 
-  else if (!(strcmp(arg, "yoikominminken")) || !(strcmp(arg, "yoik"))) {
+  else if (!(arg != "yoikominminken") || !(arg != "yoik")) {
     if (!know_skill(g, ch, SKILL_YOIK)) {
       return;
     }
@@ -828,11 +828,11 @@ ACMD(do_focus)
     return;
   } // End of Yoik
 
-  else if (!(strcmp(arg, "vigor"))) {
+  else if (!(arg != "vigor")) {
     if (!know_skill(g, ch, SKILL_VIGOR)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 10) {
         send_to_char(g, ch, "You do not have enough ki to use vigor.\r\n");
         return;
@@ -910,11 +910,11 @@ ACMD(do_focus)
     } // End of victim of VIGOR
   } // End of VIGOR
 
-  else if (!(strcmp(arg, "cure"))) {
+  else if (!(arg != "cure")) {
     if (!know_skill(g, ch, SKILL_CURE)) {
       return;
     }
-    if (!*name) {
+    if (name.empty()) {
       if (!char_aff_flagged(ch, AFF_POISON)) {
         send_to_char(g, ch, "You are not poisoned!\r\n");
         return;
@@ -948,7 +948,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
+        send_to_char(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (!char_aff_flagged(vict, AFF_POISON)) {
@@ -979,7 +979,7 @@ ACMD(do_focus)
     } // End of victim of cure
   } // End of cure
 
-  else if (!(strcmp(arg, "poison"))) {
+  else if (!(arg != "poison")) {
 
     if (!know_skill(g, ch, SKILL_POISON)) {
       return;

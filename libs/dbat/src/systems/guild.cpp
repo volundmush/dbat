@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/config.hpp"
@@ -239,14 +240,13 @@ static int compare_spells(const void *x, const void *y, void *world)
   return strcmp(g->spell_info[a].name, g->spell_info[b].name);
 }
 
-int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, char *argument)
+int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, std::string_view argument)
 {
-  char arg[MAX_INPUT_LENGTH];
   size_t len = 0;
   int i, t, known, nlen = 0, count = 0, canknow = 0;
   char buf2[READ_SIZE];
 
-  one_argument(argument, arg);
+  std::string arg = take_arg(argument);
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     t = g->spell_info[i].skilltype;
@@ -255,10 +255,10 @@ int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxs
       continue;
 
     known = char_get_skill(ch, i);
-    if (*arg) {
-      if (atoi(arg) <= 0 && !strstr(g->spell_info[i].name, arg)) {
+    if (!arg.empty()) {
+      if (parse_int(arg) <= 0 && !strstr(g->spell_info[i].name, arg.c_str())) {
         known = 0;
-      } else if (atoi(arg) > char_get_skill(ch, i)) {
+      } else if (parse_int(arg) > char_get_skill(ch, i)) {
         known = 0;
       }
     }
@@ -373,7 +373,7 @@ int slot_count(struct char_data *ch)
   return (skills);
 }
 
-void list_skills(GameWorld *g, struct char_data *ch, char *arg)
+void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   const char *overflow = "\r\n**OVERFLOW**\r\n";
   size_t len           = 0;

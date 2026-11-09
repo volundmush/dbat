@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -140,12 +141,14 @@ void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj)
 ACMD(do_rpp)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int tnlcost = 1, revcost = 1, selection = 0, pay = 0;
   int max_choice = 15; /* Controls the maximum number of menu choices */
   struct obj_data *obj;
 
-  half_chop(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  arg2                  = skip_spaces(rest);
 
   if (char_is_npc(ch)) {
     return;
@@ -165,7 +168,7 @@ ACMD(do_rpp)
     revcost *= 6;
   }
 
-  if (!*arg) { /* Display menu */
+  if (arg.empty()) { /* Display menu */
     send_to_char(g, ch, "@C                             Rewards Menu\n");
     send_to_char(g, ch, "@b  ------------------------------------------------------------------\n");
     send_to_char(g, ch, "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
@@ -185,7 +188,7 @@ ACMD(do_rpp)
 
   /* What choice did they make? */
 
-  selection = atoi(arg);
+  selection = parse_int(arg);
 
   if (selection <= 0 || selection > max_choice) {
     send_to_char(g, ch, "You must choose a number from the menu. Enter the command again with no arguments for the menu.\r\n");
@@ -217,23 +220,23 @@ ACMD(do_rpp)
         send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
         return;
       } else {
-        if (!*arg2) {
+        if (arg2.empty()) {
           send_to_char(g, ch, "What do you want to change your alignment to? (evil, sorta-evil, neutral, sorta-good, good)");
           return;
         }
-        if (!strcasecmp(arg2, "evil")) {
+        if (str_eq_nocase(arg2, "evil")) {
           send_to_char(g, ch, "You change your alignment to Evil.\r\n");
           char_set_alignment(ch, -750);
-        } else if (!strcasecmp(arg2, "sorta-evil")) {
+        } else if (str_eq_nocase(arg2, "sorta-evil")) {
           send_to_char(g, ch, "You change your alignment to Sorta Evil.\r\n");
           char_set_alignment(ch, -50);
-        } else if (!strcasecmp(arg2, "neutral")) {
+        } else if (str_eq_nocase(arg2, "neutral")) {
           send_to_char(g, ch, "You change your alignment to Neutral.\r\n");
           char_set_alignment(ch, 0);
-        } else if (!strcasecmp(arg2, "sorta-good")) {
+        } else if (str_eq_nocase(arg2, "sorta-good")) {
           send_to_char(g, ch, "You change your alignment to Sorta Good.\r\n");
           char_set_alignment(ch, 51);
-        } else if (!strcasecmp(arg2, "good")) {
+        } else if (str_eq_nocase(arg2, "good")) {
           send_to_char(g, ch, "You change your alignment to Good.\r\n");
           char_set_alignment(ch, 300);
         } else {
@@ -261,11 +264,11 @@ ACMD(do_rpp)
         send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
         return;
       } else {
-        if (!*arg2) {
+        if (arg2.empty()) {
           send_to_char(g, ch, "What stat? (str, con, int, wis, spd, agl)");
           return;
         }
-        if (!strcasecmp(arg2, "str")) {
+        if (str_eq_nocase(arg2, "str")) {
           if (char_get_bonuses(ch, BONUS_WIMP) > 0 && char_get_real_abils_str(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -276,7 +279,7 @@ ACMD(do_rpp)
           }
           send_to_char(g, ch, "You increase your strength by 2.\r\n");
           char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
-        } else if (!strcasecmp(arg2, "con")) {
+        } else if (str_eq_nocase(arg2, "con")) {
           if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && char_get_real_abils_con(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -287,7 +290,7 @@ ACMD(do_rpp)
           }
           send_to_char(g, ch, "You increase your constitution by 2.\r\n");
           char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
-        } else if (!strcasecmp(arg2, "int")) {
+        } else if (str_eq_nocase(arg2, "int")) {
           if (char_get_bonuses(ch, BONUS_DULL) > 0 && char_get_real_abils_intel(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -298,7 +301,7 @@ ACMD(do_rpp)
           }
           send_to_char(g, ch, "You increase your intelligence by 2.\r\n");
           char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
-        } else if (!strcasecmp(arg2, "wis")) {
+        } else if (str_eq_nocase(arg2, "wis")) {
           if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && char_get_real_abils_wis(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -309,7 +312,7 @@ ACMD(do_rpp)
           }
           send_to_char(g, ch, "You increase your wisdom by 2.\r\n");
           char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
-        } else if (!strcasecmp(arg2, "spd")) {
+        } else if (str_eq_nocase(arg2, "spd")) {
           if (char_get_bonuses(ch, BONUS_SLOW) > 0 && char_get_real_abils_cha(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -320,7 +323,7 @@ ACMD(do_rpp)
           }
           send_to_char(g, ch, "You increase your speed by 2.\r\n");
           char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
-        } else if (!strcasecmp(arg2, "agl")) {
+        } else if (str_eq_nocase(arg2, "agl")) {
           if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && char_get_real_abils_dex(ch) >= 70) {
             send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
@@ -389,35 +392,35 @@ ACMD(do_rpp)
         send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
         return;
       } else {
-        if (!*arg2) {
+        if (arg2.empty()) {
           send_to_char(g, ch, "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
           return;
         }
-        if (!strcasecmp(arg2, "white")) {
+        if (str_eq_nocase(arg2, "white")) {
           char_set_aura(ch, 0);
           send_to_char(g, ch, "You change your aura to white.\r\n");
-        } else if (!strcasecmp(arg2, "blue")) {
+        } else if (str_eq_nocase(arg2, "blue")) {
           char_set_aura(ch, 1);
           send_to_char(g, ch, "You change your aura to blue.\r\n");
-        } else if (!strcasecmp(arg2, "red")) {
+        } else if (str_eq_nocase(arg2, "red")) {
           char_set_aura(ch, 2);
           send_to_char(g, ch, "You change your aura to red.\r\n");
-        } else if (!strcasecmp(arg2, "green")) {
+        } else if (str_eq_nocase(arg2, "green")) {
           char_set_aura(ch, 3);
           send_to_char(g, ch, "You change your aura to green.\r\n");
-        } else if (!strcasecmp(arg2, "pink")) {
+        } else if (str_eq_nocase(arg2, "pink")) {
           char_set_aura(ch, 4);
           send_to_char(g, ch, "You change your aura to pink.\r\n");
-        } else if (!strcasecmp(arg2, "purple")) {
+        } else if (str_eq_nocase(arg2, "purple")) {
           char_set_aura(ch, 5);
           send_to_char(g, ch, "You change your aura to purple.\r\n");
-        } else if (!strcasecmp(arg2, "yellow")) {
+        } else if (str_eq_nocase(arg2, "yellow")) {
           char_set_aura(ch, 6);
           send_to_char(g, ch, "You change your aura to yellow.\r\n");
-        } else if (!strcasecmp(arg2, "black")) {
+        } else if (str_eq_nocase(arg2, "black")) {
           char_set_aura(ch, 7);
           send_to_char(g, ch, "You change your aura to black.\r\n");
-        } else if (!strcasecmp(arg2, "orange")) {
+        } else if (str_eq_nocase(arg2, "orange")) {
           char_set_aura(ch, 8);
           send_to_char(g, ch, "You change your aura to orange.\r\n");
         } else {
@@ -451,15 +454,15 @@ ACMD(do_rpp)
     } /* End Simple Soft-cap Reward */
 
     if (selection == 12) {
-      if (!*arg2) {
+      if (arg2.empty()) {
         disp_rpp_store(g, ch);
         return;
       }
-      if (atoi(arg2) <= 0) {
+      if (parse_int(arg2) <= 0) {
         send_to_char(g, ch, "That is not a choice in the RPP store!\r\n");
         return;
       }
-      int choice = atoi(arg2);
+      int choice = parse_int(arg2);
       handle_rpp_store(g, ch, choice);
       return;
     }

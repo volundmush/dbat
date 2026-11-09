@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdio>
 #include <string>
+#include <string_view>
 
 #include "dbat/guild_utils.hpp"
 #include "dbat/consts/types.hpp"
@@ -31,13 +32,13 @@ struct guild_data {
 ACMD(do_teach);
 
 /* Functions defined in guild.c */
-int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);
+int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, std::string_view argument);
 void levelup_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);
 void show_guild(GameWorld *g, struct char_data *ch, char *arg);
 void handle_ingest_learn(GameWorld *g, struct char_data *ch, struct char_data *vict);
-void list_skills(GameWorld *g, struct char_data *ch, char *arg);
+void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg);
 int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high);
 
 /*. External . */

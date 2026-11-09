@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -86,9 +87,10 @@ ACMD(do_train)
 
   int plus      = 0;
   int64_t total = 0, weight = 0, bonus = 0, cost = 0;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   weight = getCurCarriedWeight(ch);
 
@@ -116,7 +118,7 @@ ACMD(do_train)
     concap = concap * 1.5;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
     send_to_char(g, ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(g, ch)), char_get_real_abils_str(ch) >= 80 ? "@rCAPPED" : add_commas(strcap));
     send_to_char(g, ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(g, ch)), char_get_real_abils_cha(ch) >= 80 ? "@rCAPPED" : add_commas(spdcap));
@@ -210,7 +212,7 @@ ACMD(do_train)
   int *stat_train       = nullptr;
   int needed            = 0;
 
-  if (!strcasecmp("str", arg)) {
+  if (str_eq_nocase("str", arg)) {
     stat_id     = 1;
     stat_val    = char_real_abils_str_slot(ch);
     stat_name   = "strength";
@@ -218,7 +220,7 @@ ACMD(do_train)
     nega_trait  = BONUS_WIMP;
     stat_train  = &(char_get_player_specials(ch)->trainstr);
     needed      = strcap;
-  } else if (!strcasecmp("spd", arg)) {
+  } else if (str_eq_nocase("spd", arg)) {
     stat_id     = 2;
     stat_val    = char_real_abils_cha_slot(ch);
     stat_name   = "speed";
@@ -226,7 +228,7 @@ ACMD(do_train)
     nega_trait  = BONUS_SLOW;
     stat_train  = &(char_get_player_specials(ch)->trainspd);
     needed      = spdcap;
-  } else if (!strcasecmp("con", arg)) {
+  } else if (str_eq_nocase("con", arg)) {
     stat_id     = 3;
     stat_val    = char_real_abils_con_slot(ch);
     stat_name   = "constitution";
@@ -234,7 +236,7 @@ ACMD(do_train)
     nega_trait  = BONUS_FRAIL;
     stat_train  = &(char_get_player_specials(ch)->traincon);
     needed      = concap;
-  } else if (!strcasecmp("agl", arg)) {
+  } else if (str_eq_nocase("agl", arg)) {
     stat_id     = 4;
     stat_val    = char_real_abils_dex_slot(ch);
     stat_name   = "agility";
@@ -242,7 +244,7 @@ ACMD(do_train)
     nega_trait  = BONUS_CLUMSY;
     stat_train  = &(char_get_player_specials(ch)->trainagl);
     needed      = aglcap;
-  } else if (!strcasecmp("int", arg)) {
+  } else if (str_eq_nocase("int", arg)) {
     stat_id     = 5;
     stat_val    = char_real_abils_intel_slot(ch);
     stat_name   = "intelligence";
@@ -250,7 +252,7 @@ ACMD(do_train)
     nega_trait  = BONUS_DULL;
     stat_train  = &(char_get_player_specials(ch)->trainint);
     needed      = intcap;
-  } else if (!strcasecmp("wis", arg)) {
+  } else if (str_eq_nocase("wis", arg)) {
     stat_id     = 6;
     stat_val    = char_real_abils_wis_slot(ch);
     stat_name   = "wisdom";
@@ -498,15 +500,16 @@ ACMD(do_potential)
   int boost = 0;
 
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_POTENTIAL)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who's potential do you want to release?\r\n");
     send_to_char(g, ch, "Potential Releases: %d\r\n", char_get_boosts(ch));
     return;
@@ -804,9 +807,11 @@ ACMD(do_meditate)
 
   int64_t bonus = 0, cost = 1, weight = 0;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You are a mob fool!\r\n");
@@ -851,12 +856,12 @@ ACMD(do_meditate)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "expand")) {
+  if (str_eq_nocase(arg, "expand")) {
     int slot_cost = 3500;
     if (char_is_saiyan(ch)) {
       slot_cost = 7000;
@@ -876,7 +881,7 @@ ACMD(do_meditate)
     }
     return;
   }
-  if (!strcasecmp(arg, "break")) {
+  if (str_eq_nocase(arg, "break")) {
     if (char_get_mindlink(g, ch) == nullptr) {
       send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
       return;

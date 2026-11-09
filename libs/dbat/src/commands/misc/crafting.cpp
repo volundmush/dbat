@@ -2303,7 +2303,7 @@ ACMD(do_feed)
   act(g, "@WYou take $p@W and pop it into @C$N@W's mouth!@n", true, ch, obj, vict, TO_CHAR);
   act(g, "@C$n@W takes $p@W and pops it into YOUR mouth!@n", true, ch, obj, vict, TO_VICT);
   act(g, "@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", true, ch, obj, vict, TO_NOTVICT);
-  mag_objectmagic(g, vict, obj, writable{""});
+  mag_objectmagic(g, vict, obj, "");
 }
 
 /* This allows players to decapitate a corpse for a sick trophy. */

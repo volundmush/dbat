@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -137,11 +138,12 @@ ACMD(do_form)
   double discount = 1.0;
   int64_t cost    = 0;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], clam[MAX_INPUT_LENGTH];
+  std::string arg, arg2, arg3;
 
-  half_chop(argument, arg, clam);
-
-  half_chop(clam, arg2, arg3);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  arg2                  = take_word(rest);
+  arg3                  = skip_spaces(rest); /* the rest of the line, as half_chop left it */
 
   if (!know_skill(g, ch, SKILL_CREATE)) {
     return;
@@ -210,7 +212,7 @@ ACMD(do_form)
     }
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What do you want to create?\r\n"
                      "@GCreation @WMenu@n\r\n"
                      "@D---------------@n\r\n"
@@ -224,23 +226,23 @@ ACMD(do_form)
     return;
   }
   reveal_hiding(g, ch, 0);
-  if (!(strcmp(arg, "food"))) {
+  if (!(arg != "food")) {
     cost = getMaxKI(g, ch) / MAX(skill / 2, 1);
     cost *= discount;
 
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
       send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (*arg2) {
-      if (!strcasecmp(arg2, "highest") && skill >= 100) {
+    } else if (!arg2.empty()) {
+      if (str_eq_nocase(arg2, "highest") && skill >= 100) {
         level = 4;
-      } else if (!strcasecmp(arg2, "high") && skill >= 75) {
+      } else if (str_eq_nocase(arg2, "high") && skill >= 75) {
         level = 3;
-      } else if (!strcasecmp(arg2, "mid") && skill >= 50) {
+      } else if (str_eq_nocase(arg2, "mid") && skill >= 50) {
         level = 2;
       } else {
         level = 1;
@@ -267,23 +269,23 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "water"))) {
+  if (!(arg != "water")) {
     cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
       send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (*arg2) {
-      if (!strcasecmp(arg2, "highest") && skill >= 100) {
+    } else if (!arg2.empty()) {
+      if (str_eq_nocase(arg2, "highest") && skill >= 100) {
         level = 4;
-      } else if (!strcasecmp(arg2, "high") && skill >= 75) {
+      } else if (str_eq_nocase(arg2, "high") && skill >= 75) {
         level = 3;
-      } else if (!strcasecmp(arg2, "mid") && skill >= 50) {
+      } else if (str_eq_nocase(arg2, "mid") && skill >= 50) {
         level = 2;
       } else {
         level = 1;
@@ -310,7 +312,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "bag"))) {
+  if (!(arg != "bag")) {
     cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
@@ -319,7 +321,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 319);
@@ -332,7 +334,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "mattress"))) {
+  if (!(arg != "mattress")) {
     cost = getMaxKI(g, ch) / skill;
     cost *= discount;
 
@@ -341,7 +343,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 16);
@@ -353,7 +355,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "weapon"))) {
+  if (!(arg != "weapon")) {
     cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
@@ -362,30 +364,30 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
       return;
     }
-    if (!*arg3) {
+    if (arg3.empty()) {
       send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | higher | highest)\r\n");
       send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (*arg3) {
-      if (!strcasecmp(arg3, "highest") && skill >= 100) {
+    } else if (!arg3.empty()) {
+      if (str_eq_nocase(arg3, "highest") && skill >= 100) {
         level = 5;
-      } else if (!strcasecmp(arg3, "higher") && skill >= 75) {
+      } else if (str_eq_nocase(arg3, "higher") && skill >= 75) {
         level = 4;
-      } else if (!strcasecmp(arg3, "high") && skill >= 50) {
+      } else if (str_eq_nocase(arg3, "high") && skill >= 50) {
         level = 3;
-      } else if (!strcasecmp(arg3, "mid") && skill >= 30) {
+      } else if (str_eq_nocase(arg3, "mid") && skill >= 30) {
         level = 2;
       } else {
         level = 1;
       }
     }
-    if (!strcasecmp(arg2, "sword")) {
+    if (str_eq_nocase(arg2, "sword")) {
       if (level == 5) {
         obj = read_object(g, 1519);
         add_unique_id(g, obj);
@@ -402,7 +404,7 @@ ACMD(do_form)
         obj = read_object(g, 90);
         add_unique_id(g, obj);
       }
-    } else if (!strcasecmp(arg2, "dagger")) {
+    } else if (str_eq_nocase(arg2, "dagger")) {
       if (level == 5) {
         obj = read_object(g, 1540);
         add_unique_id(g, obj);
@@ -419,7 +421,7 @@ ACMD(do_form)
         obj = read_object(g, 1536);
         add_unique_id(g, obj);
       }
-    } else if (!strcasecmp(arg2, "club")) {
+    } else if (str_eq_nocase(arg2, "club")) {
       if (level == 5) {
         obj = read_object(g, 1545);
         add_unique_id(g, obj);
@@ -436,7 +438,7 @@ ACMD(do_form)
         obj = read_object(g, 1541);
         add_unique_id(g, obj);
       }
-    } else if (!strcasecmp(arg2, "spear")) {
+    } else if (str_eq_nocase(arg2, "spear")) {
       if (level == 5) {
         obj = read_object(g, 1550);
         add_unique_id(g, obj);
@@ -453,7 +455,7 @@ ACMD(do_form)
         obj = read_object(g, 1546);
         add_unique_id(g, obj);
       }
-    } else if (!strcasecmp(arg2, "gun")) {
+    } else if (str_eq_nocase(arg2, "gun")) {
       if (level == 5) {
         obj = read_object(g, 1555);
         add_unique_id(g, obj);
@@ -483,7 +485,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "clothesbeam"))) {
+  if (!(arg != "clothesbeam")) {
     cost = getMaxKI(g, ch) / 2;
     cost *= discount;
 
@@ -492,10 +494,10 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "Who do you want to hit with clothesbeam?\r\nSyntax: create clothesbeam (target)\r\n");
       return;
     }
@@ -544,7 +546,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "gi"))) {
+  if (!(arg != "gi")) {
     cost = getMaxKI(g, ch) / 5;
     cost *= discount;
     if (gi == false) {
@@ -552,7 +554,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 92);
@@ -567,7 +569,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "shuriken"))) {
+  if (!(arg != "shuriken")) {
     cost = getMaxKI(g, ch) / 4;
     cost *= discount;
 
@@ -576,7 +578,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 19053);
@@ -592,7 +594,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "pants"))) {
+  if (!(arg != "pants")) {
     cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
@@ -601,7 +603,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 91);
@@ -616,7 +618,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "wristband"))) {
+  if (!(arg != "wristband")) {
     cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
@@ -625,7 +627,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 1528);
@@ -640,7 +642,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "boots"))) {
+  if (!(arg != "boots")) {
     cost = getMaxKI(g, ch) / 5;
     cost *= discount;
 
@@ -649,7 +651,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 1532);
@@ -664,7 +666,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "light"))) {
+  if (!(arg != "light")) {
     cost = getMaxKI(g, ch) / (skill * 2);
     cost *= discount;
 
@@ -673,7 +675,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 72);
@@ -687,7 +689,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "kachin"))) {
+  if (!(arg != "kachin")) {
     cost = getMaxKI(g, ch) - 1;
     cost *= discount;
 
@@ -696,7 +698,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 87);
@@ -710,7 +712,7 @@ ACMD(do_form)
     decCurKI(g, ch, cost, 0);
     return;
   }
-  if (!(strcmp(arg, "elixir"))) {
+  if (!(arg != "elixir")) {
     cost = getMaxKI(g, ch) - 1;
     cost *= discount;
 
@@ -719,15 +721,15 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s\r\n", arg.c_str());
       return;
     }
     if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
-      send_to_char(g, ch, "You need to be at full powerlevel to create %s\r\n", arg);
+      send_to_char(g, ch, "You need to be at full powerlevel to create %s\r\n", arg.c_str());
       return;
     }
     if (char_get_practice_points(g, ch) < 10) {
-      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
+      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 86);
@@ -743,7 +745,7 @@ ACMD(do_form)
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (10));
     return;
   }
-  if (!(strcmp(arg, "senzu"))) {
+  if (!(arg != "senzu")) {
     cost          = getMaxKI(g, ch);
     int64_t cost2 = getEffMaxPL(g, ch) - 1;
 
@@ -752,19 +754,19 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create %s, you need full ki.\r\n", arg);
+      send_to_char(g, ch, "You do not have enough ki to create %s, you need full ki.\r\n", arg.c_str());
       return;
     }
     if (getCurPL(g, ch) <= cost2) {
-      send_to_char(g, ch, "You do not have enough powerlevel to create %s, you need to be at full.\r\n", arg);
+      send_to_char(g, ch, "You do not have enough powerlevel to create %s, you need to be at full.\r\n", arg.c_str());
       return;
     }
     if ((getCurST(g, ch)) < getMaxST(g, ch)) {
-      send_to_char(g, ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
+      send_to_char(g, ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg.c_str());
       return;
     }
     if (char_get_practice_points(g, ch) < 50) {
-      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
+      send_to_char(g, ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg.c_str());
       return;
     }
     obj = read_object(g, 1);
@@ -903,17 +905,19 @@ ACMD(do_srepair)
 ACMD(do_upgrade)
 {
   int count = 0, bonus = 0, cost = 0;
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (char_is_npc(ch) || !char_is_android(ch)) {
     send_to_char(g, ch, "You are not an android!\r\n");
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (!char_plr_flagged(ch, PLR_ABSORB)) {
       send_to_char(g, ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
                        "@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n"
@@ -929,7 +933,7 @@ ACMD(do_upgrade)
     return;
   }
 
-  if (!strcasecmp("augment", arg)) {
+  if (str_eq_nocase("augment", arg)) {
     struct obj_data *obj = nullptr;
     int64_t gain         = 0;
     if (char_get_level(ch) < 80) {
@@ -974,7 +978,7 @@ ACMD(do_upgrade)
         }
         break;
     }
-    if (!strcasecmp("powerlevel", arg2)) {
+    if (str_eq_nocase("powerlevel", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
       act(g, "@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -983,7 +987,7 @@ ACMD(do_upgrade)
       send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
     }
-    if (!strcasecmp("ki", arg2)) {
+    if (str_eq_nocase("ki", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
       act(g, "@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -992,7 +996,7 @@ ACMD(do_upgrade)
       send_to_char(g, ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
     }
-    if (!strcasecmp("stamina", arg2)) {
+    if (str_eq_nocase("stamina", arg2)) {
       obj_from_char(g, obj);
       extract_obj(g, obj);
       act(g, "@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1015,23 +1019,23 @@ ACMD(do_upgrade)
     return;
   }
 
-  if (!*arg2 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
-    send_to_char(g, ch, "How many times do you want to increase %s?", arg);
+  if (arg2.empty() && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
+    send_to_char(g, ch, "How many times do you want to increase %s?", arg.c_str());
     return;
   }
 
-  if (atoi(arg2) <= 0 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
+  if (parse_int(arg2) <= 0 && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
     send_to_char(g, ch, "It needs to be between 1-1000\r\n");
     return;
   }
 
-  if (atoi(arg2) > 1000 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
+  if (parse_int(arg2) > 1000 && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
     send_to_char(g, ch, "It needs to be between 1-1000\r\n");
     return;
   }
 
-  if (!strcasecmp("powerlevel", arg)) {
-    count = atoi(arg2);
+  if (str_eq_nocase("powerlevel", arg)) {
+    count = parse_int(arg2);
     while (count > 0) {
       if (char_get_level(ch) >= 90) {
         bonus += char_get_level(ch) * 5000;
@@ -1062,10 +1066,10 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg.c_str());
     gainBasePL(ch, bonus, true);
-  } else if (!strcasecmp("ki", arg)) {
-    count = atoi(arg2);
+  } else if (str_eq_nocase("ki", arg)) {
+    count = parse_int(arg2);
     while (count > 0) {
       if (char_get_level(ch) >= 90) {
         bonus += char_get_level(ch) * 3650;
@@ -1096,10 +1100,10 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg.c_str());
     gainBaseKI(ch, bonus, true);
-  } else if (!strcasecmp("stamina", arg)) {
-    count = atoi(arg2);
+  } else if (str_eq_nocase("stamina", arg)) {
+    count = parse_int(arg2);
     while (count > 0) {
       if (char_get_level(ch) >= 90) {
         bonus += char_get_level(ch) * 3650;
@@ -1130,7 +1134,7 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+    send_to_char(g, ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg.c_str());
     gainBaseST(ch, bonus, true);
   } else {
     send_to_char(g, ch, "That is not a valid upgrade option.\r\n");
@@ -1143,11 +1147,12 @@ ACMD(do_ingest)
 
   if (char_is_majin(ch)) {
     struct char_data *vict;
-    char arg[MAX_INPUT_LENGTH];
+    std::string arg;
 
-    one_argument(argument, arg);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
 
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "Who do you want to ingest?\r\n");
       return;
     }
@@ -1263,7 +1268,7 @@ ACMD(do_plant)
 {
   struct char_data *vict;
   struct obj_data *obj;
-  char vict_name[MAX_INPUT_LENGTH], obj_name[MAX_INPUT_LENGTH];
+  std::string vict_name, obj_name;
   int roll = 0, detect = 0, fail = 0;
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
@@ -1271,7 +1276,9 @@ ACMD(do_plant)
     return;
   }
 
-  two_arguments(argument, obj_name, vict_name);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  obj_name              = take_arg(rest);
+  vict_name             = take_arg(rest);
 
   if (!(vict = get_char_vis(g, ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(g, ch, "Plant what on who?\r\n");
@@ -1344,9 +1351,10 @@ ACMD(do_forgery)
   struct obj_data *obj2, *obj3 = nullptr;
   struct obj_data *obj4 = nullptr;
   int found = false;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) {
     return;
@@ -1356,7 +1364,7 @@ ACMD(do_forgery)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Okay, make a forgery of what?\r\n");
     return;
   }
@@ -1456,10 +1464,11 @@ ACMD(do_appraise)
 {
   int i, found;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char buf[MAX_STRING_LENGTH];
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) {
     return;
@@ -1469,7 +1478,7 @@ ACMD(do_appraise)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Okay, appraise what?\r\n");
     return;
   }
@@ -1611,11 +1620,13 @@ ACMD(do_disguise)
 
 ACMD(do_use)
 {
-  char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
+  std::string buf, arg;
   struct obj_data *mag_item = nullptr;
 
-  half_chop(argument, arg, buf);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  buf                   = skip_spaces(rest);
+  if (arg.empty()) {
     send_to_char(g, ch, "What do you want to %s?\r\n", CMD_NAME);
     return;
   }
@@ -1625,13 +1636,13 @@ ACMD(do_use)
       case SCMD_RECITE:
       case SCMD_QUAFF:
         if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg.c_str()), arg.c_str());
           return;
         }
         break;
       case SCMD_USE:
         if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+          send_to_char(g, ch, "You don't seem to have %s %s.\r\n", AN(arg.c_str()), arg.c_str());
           return;
         }
         break;
@@ -1748,12 +1759,13 @@ ACMD(do_use)
 
 ACMD(do_value)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int value_lev;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     switch (subcmd) {
       case SCMD_WIMPY:
         if (char_get_wimp_level(g, ch)) {
@@ -1766,13 +1778,13 @@ ACMD(do_value)
     }
   }
 
-  if (isdigit(*arg)) {
+  if (isdigit(arg[0])) {
     switch (subcmd) {
       case SCMD_WIMPY:
         /* 'wimp_level' is a player_special. -gg 2/25/98 */
         if (char_is_npc(ch))
           return;
-        if ((value_lev = atoi(arg)) != 0) {
+        if ((value_lev = parse_int(arg)) != 0) {
           if (value_lev < 0)
             send_to_char(g, ch, "Heh, heh, heh.. we are jolly funny today, eh?\r\n");
           else if (value_lev > getEffMaxPL(g, ch))
@@ -1798,16 +1810,18 @@ ACMD(do_value)
 
 ACMD(do_compare)
 {
-  char arg1[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg1;
+  std::string arg2;
   struct obj_data *obj1, *obj2;
   struct char_data *tchar;
   int value1 = 0, value2 = 0, o1, o2;
   const char *msg = nullptr;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg1 || !*arg2) {
+  if (arg1.empty() || arg2.empty()) {
     send_to_char(g, ch, "Compare what to what?\n\r");
     return;
   }
@@ -1854,14 +1868,15 @@ ACMD(do_compare)
 
 ACMD(do_break)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj;
   struct char_data *dummy = nullptr;
   int cmbrk;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Usually you break SOMETHING.\r\n");
     return;
   }
@@ -1887,23 +1902,24 @@ ACMD(do_break)
 
 ACMD(do_fix)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct obj_data *obj, *obj4 = nullptr;
   struct char_data *dummy = nullptr;
   int cmbrk, found = false, self = false, custom = false;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_REPAIR)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Usually you fix SOMETHING.\r\n");
     return;
   }
 
-  if (!strcasecmp("self", arg)) {
+  if (str_eq_nocase("self", arg)) {
     if (!char_is_android(ch)) {
       send_to_char(g, ch, "Only androids can fix their bodies with repair kits.\r\n");
       return;

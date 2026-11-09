@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "dbat/consts/types.hpp"
 
 void handle_multi_merge(GameWorld *g, struct char_data *form);
@@ -6,7 +8,7 @@ void handle_songs(GameWorld *g);
 void fish_update(GameWorld *g);
 void disp_rpp_store(GameWorld *g, struct char_data *ch);
 void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice);
-void rpp_feature(GameWorld *g, struct char_data *ch, const char *arg);
+void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg);
 void ash_burn(GameWorld *g, struct char_data *ch);
 
 // commands

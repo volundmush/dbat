@@ -330,12 +330,12 @@ ACMD(do_skillset)
     size_t len = 0;
 
     len = text_used(len, snprintf(help_text, sizeof(help_text), "\r\nSkills:\r\n"), sizeof(help_text));
-    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL, nullptr), sizeof(help_text));
+    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL, ""), sizeof(help_text));
     len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nSpells:\r\n"), sizeof(help_text));
-    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SPELL, nullptr), sizeof(help_text));
+    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SPELL, ""), sizeof(help_text));
     if (CONFIG_ENABLE_LANGUAGES) {
       len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nLanguages:\r\n"), sizeof(help_text));
-      len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL | SKTYPE_LANG, nullptr), sizeof(help_text));
+      len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL | SKTYPE_LANG, ""), sizeof(help_text));
     }
     if (len == sizeof(help_text) - 1)
       strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */

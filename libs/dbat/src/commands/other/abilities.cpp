@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -132,15 +133,16 @@ ACMD(do_infuse)
 ACMD(do_paralyze)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_PARALYZE)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who are you wanting to paralyze?\r\n");
     return;
   }
@@ -255,15 +257,16 @@ ACMD(do_kura)
     return;
   }
 
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: kuraiiro (1-100).\r\n");
     return;
   }
 
-  int num      = atoi(arg);
+  int num      = parse_int(arg);
   int skill    = char_get_skill(ch, SKILL_KURA);
   int64_t cost = 0, bonus = 0;
 
@@ -308,9 +311,10 @@ ACMD(do_candy)
 
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
     send_to_char(g, ch, "You are not a majin, how can you do that?\r\n");
@@ -393,16 +397,17 @@ ACMD(do_candy)
 
 ACMD(do_future)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict = nullptr;
-  one_argument(argument, arg);
+  std::string_view rest  = argument ? argument : ""; /* (some callers pass null) */
+  arg                    = take_arg(rest);
 
   if (char_is_npc(ch) || !char_is_kanassan(ch)) {
     send_to_char(g, ch, "You are incapable of this ability.\r\n");
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Bestow advance future sight on who?\r\n");
     return;
   }
@@ -477,8 +482,9 @@ ACMD(do_future)
 
 ACMD(do_suppress)
 {
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
     return;
@@ -500,12 +506,12 @@ ACMD(do_suppress)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "release")) {
+  if (str_eq_nocase(arg, "release")) {
     if (char_get_suppression(ch)) {
       reveal_hiding(g, ch, 0);
       act(g, "@GYou stop suppressing your current powerlevel!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -517,7 +523,7 @@ ACMD(do_suppress)
     return;
   }
 
-  int num = atoi(arg);
+  int num = parse_int(arg);
 
   if (num > 99 || num <= 0) {
     send_to_char(g, ch, "Out of suppression range.\r\nSyntax: suppress (1 - 99 | release)\r\n");
@@ -577,22 +583,24 @@ ACMD(do_implant)
 
   struct obj_data *limb  = nullptr;
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
   int found = false;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!limb_ok(g, ch, 0)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: implant (rarm | larm | rleg | lleg) (target)\r\n");
     return;
   }
 
-  if (!*arg2) {
+  if (arg2.empty()) {
     vict = ch;
   } else if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(g, ch, "That person isn't here.\r\n");
@@ -610,7 +618,7 @@ ACMD(do_implant)
     return;
   }
 
-  if (!(strcmp(arg, "rarm"))) {
+  if (!(arg != "rarm")) {
     if (char_get_limb_condition(vict, (1) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(g, ch, "They already have a right arm!\r\n");
@@ -636,7 +644,7 @@ ACMD(do_implant)
     extract_obj(g, limb);
     return;
   }
-  if (!(strcmp(arg, "larm"))) {
+  if (!(arg != "larm")) {
     if (char_get_limb_condition(vict, (2) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(g, ch, "They already have a left arm!\r\n");
@@ -662,7 +670,7 @@ ACMD(do_implant)
     extract_obj(g, limb);
     return;
   }
-  if (!(strcmp(arg, "rleg"))) {
+  if (!(arg != "rleg")) {
     if (char_get_limb_condition(vict, (3) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(g, ch, "They already have a right leg!\r\n");
@@ -688,7 +696,7 @@ ACMD(do_implant)
     extract_obj(g, limb);
     return;
   }
-  if (!(strcmp(arg, "lleg"))) {
+  if (!(arg != "lleg")) {
     if (char_get_limb_condition(vict, (4) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(g, ch, "They already have a left leg!\r\n");
@@ -723,9 +731,10 @@ ACMD(do_implant)
 ACMD(do_fury)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_halfbreed(ch) || char_is_npc(ch)) {
     send_to_char(g, ch, "You are furious, but you'll get over it.\r\n");
@@ -742,7 +751,7 @@ ACMD(do_fury)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
       if ((getCurLF(g, ch)) >= (getMaxLF(g, ch)) * 0.2) {
         restoreHealth(ch, false);
@@ -753,7 +762,7 @@ ACMD(do_fury)
       }
     }
     char_set_fury(ch, 0);
-  } else if (!strcasecmp(arg, "attack")) {
+  } else if (str_eq_nocase(arg, "attack")) {
     char_set_fury(ch, 50);
   } else {
     send_to_char(g, ch, "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n");
@@ -770,16 +779,17 @@ ACMD(do_majinize)
 {
 
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
     send_to_char(g, ch, "You are not a majin and can not majinize anyone.\r\n");
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who do you want to majinize?\r\n");
     return;
   }
@@ -863,9 +873,10 @@ ACMD(do_spit)
   int cost = 0;
   struct char_data *vict;
   struct affected_type af = {};
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_SPIT)) {
     return;
@@ -875,7 +886,7 @@ ACMD(do_spit)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Yes but who do you want to petrify?\r\n");
     return;
   }
@@ -944,9 +955,11 @@ ACMD(do_spit)
 ACMD(do_absorb)
 {
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_ABSORB)) {
     return;
@@ -995,7 +1008,7 @@ ACMD(do_absorb)
     char_set_absorbing(ch, nullptr);
   }
 
-  if (!*arg && char_is_android(ch)) {
+  if (arg.empty() && char_is_android(ch)) {
     send_to_char(g, ch, "Who do you want to absorb?\r\n");
     return;
   }
@@ -1007,7 +1020,7 @@ ACMD(do_absorb)
     }
   }
   if (char_is_bio(ch)) {
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "Syntax: absorb (swallow | extract) (target)\r\n");
       return;
     }
@@ -1074,7 +1087,7 @@ ACMD(do_absorb)
     return;
   } // End of android absorb
 
-  else if (char_is_bio(ch) && !(strcmp(arg, "swallow"))) {
+  else if (char_is_bio(ch) && !(arg != "swallow")) {
     if (char_get_absorbby(g, vict)) {
       send_to_char(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
@@ -1127,7 +1140,7 @@ ACMD(do_absorb)
       die(g, vict, nullptr);
     }
   } // End of bio absorb
-  else if (char_is_bio(ch) && !(strcmp(arg, "extract"))) {
+  else if (char_is_bio(ch) && !(arg != "extract")) {
     int failthresh = rand_number(g, 1, 125);
     if (char_get_level(vict) > 99) {
       failthresh += (char_get_level(vict) - 95) * 2;
@@ -1210,9 +1223,10 @@ ACMD(do_regenerate)
 
   int64_t amt = 0;
   int skill   = 0;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   skill = init_skill(g, ch, SKILL_REGENERATE);
 
@@ -1224,7 +1238,7 @@ ACMD(do_regenerate)
     skill = char_get_suppression(ch);
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Regenerate how much PL?\r\nMax percent you can regen: %d\r\nSyntax: regenerate (1 - 100)\r\n", skill);
     return;
   }
@@ -1239,7 +1253,7 @@ ACMD(do_regenerate)
     return;
   }
 
-  int num = atoi(arg);
+  int num = parse_int(arg);
 
   if (num <= 0) {
     send_to_char(g, ch, "What is the point of that?\r\nSyntax: regenerate (1 - 100)\r\n");
@@ -1384,9 +1398,10 @@ static const int64_t kaioken_levels[21] = {
 
 ACMD(do_kaioken)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int roll = axion_dice(g, 0), x = 0;
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_KAIOKEN)) {
     return;
@@ -1402,13 +1417,13 @@ ACMD(do_kaioken)
     }
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What level of kaioken do you want to try and achieve?\r\n"
                      "Syntax: kaioken 1-20\r\n");
     return;
   }
 
-  x = atoi(arg);
+  x = parse_int(arg);
 
   if (x < 0 || x > 20) {
     send_to_char(g, ch, "That level of kaioken dosn't exist...\r\n"
@@ -1629,9 +1644,10 @@ ACMD(do_heal)
 {
   int64_t cost = 0, prob = 0, perc = 0, heal = 0, bonus = 0;
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_HEAL)) {
     return;
@@ -1641,7 +1657,7 @@ ACMD(do_heal)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "You want to heal WHO?\r\n");
     return;
   }
@@ -1826,27 +1842,28 @@ ACMD(do_heal)
 ACMD(do_barrier)
 {
   int prob = 0, perc = 0, size = 0;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_BARRIER) && !char_get_skill(ch, SKILL_AQUA_BARRIER)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "[Syntax] barrier < 1-75 | release >\r\n");
     return;
   }
 
-  if (char_aff_flagged(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
+  if (char_aff_flagged(ch, AFF_SANCTUARY) && str_eq_nocase("release", arg)) {
     act(g, "@BYou dispel your barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@B$n@B dispels $s barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_barrier(ch, 0);
     char_aff_set(ch, AFF_SANCTUARY, false);
     return;
   }
-  if (!strcasecmp("release", arg)) {
+  if (str_eq_nocase("release", arg)) {
     send_to_char(g, ch, "You don't have a barrier.\r\n");
     return;
   }
@@ -1861,7 +1878,7 @@ ACMD(do_barrier)
     return;
   }
 
-  size         = atoi(arg);
+  size         = parse_int(arg);
   int64_t cost = 0;
   prob         = 0;
   if (char_get_skill(ch, SKILL_BARRIER)) {
@@ -1928,9 +1945,10 @@ ACMD(do_instant)
   int64_t cost          = 0;
   struct char_data *tar = nullptr;
 
-  char arg[MAX_INPUT_LENGTH] = "";
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
@@ -1962,7 +1980,7 @@ ACMD(do_instant)
     send_to_char(g, ch, "You can not leave where you are at!\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
     send_to_char(g, ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
     return;
@@ -1987,17 +2005,17 @@ ACMD(do_instant)
   skill     = char_get_skill(ch, SKILL_INSTANTT);
   skill_num = SKILL_INSTANTT;
 
-  if (!strcasecmp(arg, "planet-earth")) {
+  if (str_eq_nocase(arg, "planet-earth")) {
     location = 300;
-  } else if (!strcasecmp(arg, "planet-namek")) {
+  } else if (str_eq_nocase(arg, "planet-namek")) {
     location = 10222;
-  } else if (!strcasecmp(arg, "planet-frigid")) {
+  } else if (str_eq_nocase(arg, "planet-frigid")) {
     location = 4017;
-  } else if (!strcasecmp(arg, "planet-vegeta")) {
+  } else if (str_eq_nocase(arg, "planet-vegeta")) {
     location = 2200;
-  } else if (!strcasecmp(arg, "planet-konack")) {
+  } else if (str_eq_nocase(arg, "planet-konack")) {
     location = 8006;
-  } else if (!strcasecmp(arg, "planet-aether")) {
+  } else if (str_eq_nocase(arg, "planet-aether")) {
     location = 12024;
   } else if (!(tar = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "@RThat target was not found.@n\r\n");
@@ -2080,7 +2098,7 @@ ACMD(do_instant)
 ACMD(do_transform)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   char buf3[MAX_INPUT_LENGTH];
 
   if (!race_can_transform(char_get_race(ch))) {
@@ -2097,10 +2115,12 @@ ACMD(do_transform)
   }
 
   // Moved this further down. No need to parse the entry if we quit early. -Volund
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Called with no argument - display transformation information */
-  if (!*arg) {
+  if (arg.empty()) {
     race_display_forms(g, ch);
     if (trans_req(ch, 1) > 0) {
       race_display_trans_req(g, ch);
@@ -2117,7 +2137,7 @@ ACMD(do_transform)
   }
 
   // check for revert.
-  if (!strcasecmp("revert", arg)) {
+  if (str_eq_nocase("revert", arg)) {
     if (!can_revert) {
       send_to_char(g, ch, "That would be unthinkable.\r\n");
       return;
@@ -2133,8 +2153,8 @@ ACMD(do_transform)
     race_echo_revert(g, ch, race_flag_to_tier(cur_form.flag));
     char_plr_set(ch, cur_form.flag, false);
 
-    if (*arg2) {
-      do_transform(g, ch, arg2, 0, 0);
+    if (!arg2.empty()) {
+      do_transform(g, ch, arg2.data(), 0, 0);
     }
     return;
   }
@@ -2201,7 +2221,7 @@ ACMD(do_aid)
 {
   struct char_data *vict;
   struct obj_data *aid_obj = nullptr, *aid_prod = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int dc = 0, found = false;
   obj_vnum num = 47, num2 = 0;
 
@@ -2211,9 +2231,11 @@ ACMD(do_aid)
   if (char_get_skill(ch, SKILL_SURVIVAL)) {
   }
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: aid heal (target)\r\n");
     send_to_char(g, ch, "        aid adrenex\r\n");
     send_to_char(g, ch, "        aid antitoxin\r\n");
@@ -2222,16 +2244,16 @@ ACMD(do_aid)
     return;
   }
 
-  if (!strcasecmp(arg, "adrenex")) {
+  if (str_eq_nocase(arg, "adrenex")) {
     num  = 380;
     num2 = 381;
-  } else if (!strcasecmp(arg, "antitoxin")) {
+  } else if (str_eq_nocase(arg, "antitoxin")) {
     num  = 380;
     num2 = 383;
-  } else if (!strcasecmp(arg, "salve")) {
+  } else if (str_eq_nocase(arg, "salve")) {
     num  = 380;
     num2 = 382;
-  } else if (!strcasecmp(arg, "formula-82")) {
+  } else if (str_eq_nocase(arg, "formula-82")) {
     num  = 380;
     num2 = 385;
   }
@@ -2381,11 +2403,12 @@ ACMD(do_aid)
 
 ACMD(do_aura)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: aura light\r\n");
     return;
   }
@@ -2400,7 +2423,7 @@ ACMD(do_aura)
     return;
   }
 
-  if (!strcasecmp(arg, "light")) {
+  if (str_eq_nocase(arg, "light")) {
     if (char_get_skill(ch, SKILL_FOCUS) < 75 || char_get_skill(ch, SKILL_CONCENTRATION) < 75) {
       send_to_char(g, ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
       return;

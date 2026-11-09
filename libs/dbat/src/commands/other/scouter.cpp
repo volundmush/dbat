@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -60,10 +61,12 @@ static bool has_scanner(GameWorld *g, struct char_data *ch);
 ACMD(do_telepathy)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
 
-  half_chop(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  arg2                  = skip_spaces(rest);
 
   if (!know_skill(g, ch, SKILL_TELEPATHY)) {
     return;
@@ -74,7 +77,7 @@ ACMD(do_telepathy)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: telepathy [ read ] (target)\r\n"
                      "        telepathy [ link ] (target)\r\n"
                      "        telepathy [  far ] (target)\r\n"
@@ -86,7 +89,7 @@ ACMD(do_telepathy)
     send_to_char(g, ch, "You do not have enough ki to focus your mental abilities.\r\n");
     return;
   }
-  if (!(strcmp(arg, "far"))) {
+  if (!(arg != "far")) {
     if (char_is_npc(ch)) {
       return;
     }
@@ -138,7 +141,7 @@ ACMD(do_telepathy)
     decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
     return;
   }
-  if (!(strcmp(arg, "link"))) {
+  if (!(arg != "link")) {
     if (char_is_npc(ch)) {
       return;
     }
@@ -187,7 +190,7 @@ ACMD(do_telepathy)
     char_set_linker(ch, 1);
     return;
   }
-  if (!(strcmp(arg, "read"))) {
+  if (!(arg != "read")) {
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(g, ch, "Read the mind of who?\r\n");
       return;
@@ -280,9 +283,9 @@ ACMD(do_telepathy)
       return;
     } else {
       if (!char_get_mindlink(g, ch)) {
-        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2);
-        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2);
-        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2);
+        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2.c_str());
+        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2.c_str());
+        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2.c_str());
       } else {
         send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), argument);
         send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), argument);
@@ -297,8 +300,9 @@ ACMD(do_telepathy)
 ACMD(do_eavesdrop)
 {
   int dir;
-  char buf[MAX_INPUT_LENGTH];
-  one_argument(argument, buf);
+  std::string buf;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
   if (char_get_listenroom(ch) > 0) {
     send_to_char(g, ch, "You stop eavesdropping.\r\n");
@@ -307,7 +311,7 @@ ACMD(do_eavesdrop)
     return;
   }
 
-  if (!*buf) {
+  if (buf.empty()) {
     send_to_char(g, ch, "In which direction would you like to eavesdrop?\r\n");
     return;
   }
@@ -320,8 +324,7 @@ ACMD(do_eavesdrop)
   }
   if (char_get_exit(g, ch, dir)) {
     if (IS_SET(char_get_exit(g, ch, dir)->exit_info, EX_CLOSED) && exit_keyword(char_get_exit(g, ch, dir))) {
-      snprintf(buf, sizeof(buf), "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
-      send_to_char(g, ch, "%s", buf);
+      send_to_char(g, ch, "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
     } else {
       char_set_listenroom(ch, char_get_exit(g, ch, dir)->to_room);
       char_set_eavesdir(ch, dir);
@@ -376,10 +379,13 @@ static bool has_scanner(GameWorld *g, struct char_data *ch)
 ACMD(do_snet)
 {
   int channel = 0, global = false, call = -1, reached = false;
-  char voice[150], arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  char voice[150];
+  std::string arg, arg2;
   char hist[MAX_INPUT_LENGTH];
 
-  half_chop(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  arg2                  = skip_spaces(rest);
 
   struct obj_data *obj  = nullptr;
   struct obj_data *obj2 = nullptr;
@@ -412,27 +418,27 @@ ACMD(do_snet)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "[Syntax] snet < [1-999] | check | #(scouter number) | * message | message>\r\n");
     return;
   }
 
-  if (strstr(arg, "#")) {
-    search_replace(arg, "#", "");
-    call = atoi(arg);
+  if (arg.find('#') != std::string::npos) {
+    std::erase(arg, '#');
+    call = parse_int(arg);
     if (call <= -1) {
       send_to_char(g, ch, "Call what personal scouter number?\r\n");
       return;
     }
   }
 
-  if (!strcasecmp(arg, "check")) {
+  if (str_eq_nocase(arg, "check")) {
     send_to_char(g, ch, "Your personal scouter number is: %d\r\n", char_get_id(ch));
     return;
   }
 
   if (call <= -1) {
-    channel = atoi(arg);
+    channel = parse_int(arg);
   }
 
   if (channel > 0) {
@@ -451,7 +457,7 @@ ACMD(do_snet)
     if (obj_get_scoutfreq(obj) == 0) {
       obj_set_scoutfreq(obj, 1);
     }
-    if (!strcasecmp(arg, "*") && call <= -1) {
+    if (str_eq_nocase(arg, "*") && call <= -1) {
       global = true;
     }
     if (char_get_voice(ch) != nullptr) {
@@ -470,11 +476,11 @@ ACMD(do_snet)
       /* It will always be heard and logged for admin. */
       if (char_get_admlevel(i->character) > 0) {
         if (call <= -1 && global == false) {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
         } else if (call <= -1) {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         } else {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, !*arg2 ? "" : CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, arg2.empty() ? "" : CAP(arg2).c_str());
         }
         send_to_char(g, i->character, "%s", hist);
         add_history(g, i->character, hist, HIST_SNET);
@@ -510,9 +516,9 @@ ACMD(do_snet)
           obj_set_scoutfreq(obj2, 1);
         }
         if (global == false && call <= -1 && obj_get_scoutfreq(obj2) == obj_get_scoutfreq(obj) && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
+          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
           *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
+          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
@@ -522,9 +528,9 @@ ACMD(do_snet)
           continue;
         } /* It is the right freq */
         else if (global == true && call <= -1 && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
+          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
           *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
@@ -533,9 +539,9 @@ ACMD(do_snet)
           }
           continue;
         } else if (call > -1 && char_get_id(i->character) == call) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), !*arg2 ? "" : CAP(arg2));
+          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
           *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), !*arg2 ? "" : CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
@@ -549,12 +555,12 @@ ACMD(do_snet)
     if (call <= -1) {
       if (global == false) {
         reveal_hiding(g, ch, 3);
-        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg, !*arg2 ? "" : arg2);
+        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
         *hist = '\0';
-        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg, !*arg2 ? "" : arg2);
+        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
         add_history(g, ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
-        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
+        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -562,12 +568,12 @@ ACMD(do_snet)
       }
       if (global == true) {
         reveal_hiding(g, ch, 3);
-        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
+        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         *hist = '\0';
-        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
+        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         add_history(g, ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
-        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -575,12 +581,12 @@ ACMD(do_snet)
       }
     } else {
       reveal_hiding(g, ch, 3);
-      send_to_char(g, ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
+      send_to_char(g, ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
       *hist = '\0';
-      snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
+      snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
       add_history(g, ch, hist, HIST_SNET);
       char over[MAX_STRING_LENGTH];
-      snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+      snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
       act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
       if (reached == false) {
         send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
@@ -593,9 +599,10 @@ ACMD(do_scouter)
 {
   struct char_data *vict = nullptr;
   int count = 0;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
     send_to_char(g, ch, "You have no available arms!\r\n");
@@ -608,12 +615,12 @@ ACMD(do_scouter)
     obj = nullptr;
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "[Syntax] scouter < target | scan>\r\n");
     return;
   }
   reveal_hiding(g, ch, 3);
-  if (!strcasecmp("scan", arg)) {
+  if (str_eq_nocase("scan", arg)) {
     for (descriptor_data *i : each_desc(g)) {
       if (desc_get_connected(i) != CON_PLAYING) {
         continue;

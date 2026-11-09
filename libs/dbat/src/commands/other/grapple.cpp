@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <sys/stat.h>
 
+#include "dbat/args.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/shadowdragons.hpp"
@@ -100,11 +101,13 @@ ACMD(do_grapple)
   }
 
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: grapple (target) (hold | choke | grab)\r\n");
     return;
   }
@@ -141,7 +144,7 @@ ACMD(do_grapple)
     return;
   }
 
-  if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) || !strcasecmp("wrap", arg2)) {
+  if (str_eq_nocase("hold", arg2) || str_eq_nocase("choke", arg2) || str_eq_nocase("grab", arg2) || str_eq_nocase("wrap", arg2)) {
     int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(g, 0), cost = getMaxST(g, ch) / 100;
 
     if ((getCurST(g, ch)) < cost) {
@@ -212,11 +215,11 @@ ACMD(do_grapple)
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    if (!char_has_arms(g, vict) && !strcasecmp("grab", arg2)) {
+    if (!char_has_arms(g, vict) && str_eq_nocase("grab", arg2)) {
       send_to_char(g, ch, "They don't even have an arm to grab onto!\r\n");
       return;
     }
-    if (!strcasecmp("hold", arg2)) {
+    if (str_eq_nocase("hold", arg2)) {
       reveal_hiding(g, ch, 0);
       act(g, "@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", true, ch, nullptr, vict, TO_CHAR);
       act(g, "@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", true, ch, nullptr, vict, TO_VICT);
@@ -234,7 +237,7 @@ ACMD(do_grapple)
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    if (!strcasecmp("choke", arg2)) {
+    if (str_eq_nocase("choke", arg2)) {
       reveal_hiding(g, ch, 0);
       act(g, "@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", true, ch, nullptr, vict, TO_CHAR);
       act(g, "@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", true, ch, nullptr, vict, TO_VICT);
@@ -252,7 +255,7 @@ ACMD(do_grapple)
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    if (!strcasecmp("wrap", arg2)) {
+    if (str_eq_nocase("wrap", arg2)) {
       if (!char_is_majin(ch)) {
         send_to_char(g, ch, "Your body is not flexible enough to wrap around a target!\r\n");
         return;
@@ -274,7 +277,7 @@ ACMD(do_grapple)
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    if (!strcasecmp("grab", arg2)) {
+    if (str_eq_nocase("grab", arg2)) {
       reveal_hiding(g, ch, 0);
       act(g, "@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", true, ch, nullptr, vict, TO_CHAR);
       act(g, "@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", true, ch, nullptr, vict, TO_VICT);
@@ -305,10 +308,11 @@ ACMD(do_grapple)
 ACMD(do_trip)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict = nullptr;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_TRIP) && !char_is_npc(ch)) {
     return;
@@ -329,7 +333,7 @@ ACMD(do_trip)
 
   vict = nullptr;
   vict = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else {
@@ -434,14 +438,15 @@ ACMD(do_trip)
 ACMD(do_rip)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
     return;
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Rip the tail off who?\r\n");
     return;
   }
@@ -507,9 +512,10 @@ ACMD(do_rip)
 ACMD(do_drag)
 {
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
     return;
@@ -533,7 +539,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Who do you want to drag?\r\n");
     return;
   }
@@ -731,14 +737,15 @@ ACMD(do_escape)
 ACMD(do_block)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
     return;
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (!char_get_blocks(g, ch)) {
       send_to_char(g, ch, "You want to block who?\r\n");
       return;
@@ -810,16 +817,18 @@ ACMD(do_steal)
 
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int gold = 0, prob = char_get_skill(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "An important basic of theft is actually having a victim!\r\n");
     return;
   }
@@ -889,7 +898,7 @@ ACMD(do_steal)
     }
     improve_skill(g, vict, SKILL_SPOT, 1);
   } else {                           /* Ok it wasn't a critical failure... */
-    if (!strcasecmp(arg, "zenni")) { /* MOOLA! */
+    if (str_eq_nocase(arg, "zenni")) { /* MOOLA! */
       if (prob > perc) {
         if (char_get_gold(vict) > 0) {
           if (char_get_gold(vict) > 100) {
