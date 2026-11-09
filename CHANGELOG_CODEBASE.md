@@ -51,6 +51,7 @@
 - The information commands (`commands/informative/`) take their arguments apart with `dbat/args.hpp`. `look_at_target()` takes a `std::string &`, `look_out_window()` and `find_exdesc()` a `std::string_view`, and `readUserIndex()` and `fingerUser()` a `const std::string &`; `users` parses its options from a view instead of copying the line into buffers. [Volund]
 - The miscellaneous commands (`commands/misc/`) take their arguments apart with `dbat/args.hpp`. [Volund]
 - The other commands (`commands/other/`) take their arguments apart with `dbat/args.hpp`. `mag_objectmagic()`, `list_skills()`, `print_skills_by_type()` and `race_find_form()` take a `std::string_view`, and `rpp_feature()` a `const std::string &`. [Volund]
+- The wizard commands (`commands/wizard/`) take their arguments apart with `dbat/args.hpp`; `set` reads its target, field and value from one view instead of chopping a buffer four times. `find_target_room()` and the `vnum_*()` searches take a `std::string_view`. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

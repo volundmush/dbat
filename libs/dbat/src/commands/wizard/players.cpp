@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -60,7 +61,7 @@
 
 /* local functions */
 static void print_lockout(GameWorld *g, struct char_data *ch);
-static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
+static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode, const std::string &val_arg);
 static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level);
 static void lockWrite(GameWorld *g, struct char_data *ch, const char *name);
 
@@ -114,12 +115,13 @@ static void print_lockout(GameWorld *g, struct char_data *ch)
 ACMD(do_approve)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict = nullptr;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What player do you want to approve as having an acceptable bio?\r\n");
     return;
   }
@@ -207,12 +209,14 @@ ACMD(do_reward)
   struct char_data *vict = nullptr;
   int amt = 0;
 
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: reward (target) (amount)\r\nThis is either a positive number or a negative.\r\n");
     return;
   }
@@ -222,7 +226,7 @@ ACMD(do_reward)
     return;
   }
 
-  amt = atoi(arg2);
+  amt = parse_int(arg2);
 
   if (amt == 0) {
     send_to_char(g, ch, "That is pointless don't you think? Try an amount higher than 0.\r\n");
@@ -234,7 +238,7 @@ ACMD(do_reward)
       continue;
     if (char_is_npc(k->character))
       continue;
-    if (!strcasecmp(k->user.c_str(), arg))
+    if (str_eq_nocase(k->user, arg))
       vict = k->character;
   }
 
@@ -242,8 +246,8 @@ ACMD(do_reward)
     if (vict != nullptr) {
       send_to_char(g, ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", char_get_name(vict), amt);
       send_to_char(g, vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt, char_get_name(ch));
-      send_to_imm(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
+      send_to_imm(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg.c_str(), amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg.c_str(), amt, char_get_name(ch));
       char_set_rp(vict, char_get_rp(vict) + amt);
       char_set_rp(vict, char_get_rp(vict));
       if (amt <= 29) {
@@ -252,10 +256,10 @@ ACMD(do_reward)
       char_get_desc(vict)->rpp += amt;
       userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
     } else {
-      send_to_char(g, ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
-      send_to_imm(g, "ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
-      userWrite(g, nullptr, 0, amt, 0, arg);
+      send_to_char(g, ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg.c_str(), amt);
+      send_to_imm(g, "ROLEPLAY: User %s has been awarded %d RP points by %s.", arg.c_str(), amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg.c_str(), amt, char_get_name(ch));
+      userWrite(g, nullptr, 0, amt, 0, arg.c_str());
     }
   } else {
     if (vict != nullptr) {
@@ -268,36 +272,38 @@ ACMD(do_reward)
       char_get_desc(vict)->rpp += amt;
       userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
     } else {
-      send_to_char(g, ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
-      send_to_imm(g, "ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
-      userWrite(g, nullptr, 0, amt, 0, arg);
+      send_to_char(g, ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg.c_str());
+      send_to_imm(g, "ROLEPLAY: User %s has had %d RP points deducted by %s.", arg.c_str(), amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: %s has been awarded %d RP points by %s.", arg.c_str(), amt, char_get_name(ch));
+      userWrite(g, nullptr, 0, amt, 0, arg.c_str());
     }
   }
 }
 
 ACMD(do_permission)
 {
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "You want to @Grestrict@n or @Gunrestrict@n?\r\n");
     return;
   }
 
-  if (!*arg2 && !strcasecmp("unrestrict", arg)) {
+  if (arg2.empty() && str_eq_nocase("unrestrict", arg)) {
     send_to_char(g, ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
     return;
   }
-  if (!strcasecmp("unrestrict", arg)) {
-    if (!strcasecmp("saiyan", arg2)) {
+  if (str_eq_nocase("unrestrict", arg)) {
+    if (str_eq_nocase("saiyan", arg2)) {
       send_to_char(g, ch, "You have unrestricted saiyans for the very next character creation.\r\n");
       send_to_imm(g, "PERMISSION: %s unrestricted saiyans.", char_get_name(ch));
       g->SAIYAN_ALLOWED = true;
-    } else if (!strcasecmp("majin", arg2)) {
+    } else if (str_eq_nocase("majin", arg2)) {
       send_to_char(g, ch, "You have unrestricted majins for the very next character creation.\r\n");
       send_to_imm(g, "PERMISSION: %s unrestricted majins.", char_get_name(ch));
       g->MAJIN_ALLOWED = true;
@@ -305,7 +311,7 @@ ACMD(do_permission)
       send_to_char(g, ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
       return;
     }
-  } else if (!strcasecmp("restrict", arg)) {
+  } else if (str_eq_nocase("restrict", arg)) {
     send_to_char(g, ch, "You have restricted character creation to standard race slection.\r\n");
     send_to_imm(g, "PERMISSION: %s restricted races again.", char_get_name(ch));
     g->MAJIN_ALLOWED = false;
@@ -337,28 +343,29 @@ ACMD(do_interest)
 ACMD(do_hell)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: lockout (character)\n"
                      "        lockout list\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "Iovan") || !strcasecmp(arg, "iovan") || !strcasecmp(arg, "Fahl") || !strcasecmp(arg, "fahl") || !strcasecmp(arg, "Xyron") || !strcasecmp(arg, "xyron") || !strcasecmp(arg, "Samael") || !strcasecmp(arg, "samael")) {
+  if (str_eq_nocase(arg, "Iovan") || str_eq_nocase(arg, "iovan") || str_eq_nocase(arg, "Fahl") || str_eq_nocase(arg, "fahl") || str_eq_nocase(arg, "Xyron") || str_eq_nocase(arg, "xyron") || str_eq_nocase(arg, "Samael") || str_eq_nocase(arg, "samael")) {
     send_to_char(g, ch, "What are you smoking? You can't lockout senior imms.\r\n");
     return;
   }
 
-  if (!strcasecmp(arg, "list")) {
+  if (str_eq_nocase(arg, "list")) {
     print_lockout(g, ch);
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    lockWrite(g, ch, arg);
+    lockWrite(g, ch, arg.c_str());
     return;
   }
   struct descriptor_data *d = char_get_desc(vict);
@@ -377,12 +384,14 @@ ACMD(do_hell)
 ACMD(do_advance)
 {
   struct char_data *victim;
-  char name[MAX_INPUT_LENGTH], level[MAX_INPUT_LENGTH];
+  std::string name, level;
   int newlevel, oldlevel;
 
-  two_arguments(argument, name, level);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_arg(rest);
+  level                 = take_arg(rest);
 
-  if (*name) {
+  if (!name.empty()) {
     if (!(victim = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
       send_to_char(g, ch, "That player is not here.\r\n");
       return;
@@ -396,12 +405,12 @@ ACMD(do_advance)
     send_to_char(g, ch, "NO!  Not on NPC's.\r\n");
     return;
   }
-  if (!*level) {
+  if (level.empty()) {
     send_to_char(g, ch, "[ 1 - 100 | demote ]\r\n");
     return;
   }
-  if ((newlevel = atoi(level)) <= 0) {
-    if (!strcasecmp("demote", level)) {
+  if ((newlevel = parse_int(level)) <= 0) {
+    if (str_eq_nocase("demote", level)) {
       char_set_class_level(victim, 1);
       char_set_basepl(victim, 150);
       char_set_baseki(victim, 150);
@@ -475,11 +484,12 @@ ACMD(do_handout)
 
 ACMD(do_restore)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *vict;
 
-  one_argument(argument, buf);
-  if (!*buf)
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to restore?\r\n");
   else if (is_abbrev(buf, "all")) {
     send_to_imm(g, "[Log: %s restored all.]", char_get_name(ch));
@@ -527,7 +537,7 @@ static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)
 
 ACMD(do_invis)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int level;
 
   if (char_is_npc(ch)) {
@@ -535,14 +545,15 @@ ACMD(do_invis)
     return;
   }
 
-  one_argument(argument, arg);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (arg.empty()) {
     if (char_get_invis_level(g, ch) > 0)
       perform_immort_vis(g, ch);
     else
       perform_immort_invis(g, ch, char_get_admlevel(ch));
   } else {
-    level = atoi(arg);
+    level = parse_int(arg);
     if (level > char_get_admlevel(ch))
       send_to_char(g, ch, "You can't go invisible above your own level.\r\n");
     else if (level < 1)
@@ -557,14 +568,15 @@ ACMD(do_invis)
  */
 ACMD(do_wizutil)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict;
   int taeller;
   long result;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Yes, but for whom?!?\r\n");
   else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "There is no such player.\r\n");
@@ -778,7 +790,7 @@ static const struct set_struct {
 };
 
 static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode,
-                        char *val_arg)
+                        const std::string &val_arg)
 {
   int i, on = 0, off = 0;
   int64_t value = 0;
@@ -811,9 +823,9 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
 
   /* Find the value of the argument */
   if (set_fields[mode].type == BINARY) {
-    if (!strcmp(val_arg, "on") || !strcmp(val_arg, "yes"))
+    if (val_arg == "on" || val_arg == "yes")
       on = 1;
-    else if (!strcmp(val_arg, "off") || !strcmp(val_arg, "no"))
+    else if (val_arg == "off" || val_arg == "no")
       off = 1;
     if (!(on || off)) {
       send_to_char(g, ch, "Value must be 'on' or 'off'.\r\n");
@@ -823,8 +835,8 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
   } else if (set_fields[mode].type == NUMBER) {
     char *ptr;
 
-    value = strtoll(val_arg, &ptr, 10);
-    /*    value = atoi(val_arg); */
+    value = strtoll(val_arg.c_str(), &ptr, 10);
+    /*    value = parse_int(val_arg); */
     send_to_char(g, ch, "%s's %s set to %" PRId64 ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
   } else
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
@@ -837,7 +849,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
       SET_OR_REMOVE(char_get_act(vict), PLR_INVSTART);
       break;
     case 2:
-      set_title(g, vict, val_arg);
+      set_title(g, vict, val_arg.c_str());
       send_to_char(g, ch, "%s's title is now: %s\r\n", char_get_name(vict), char_get_title(vict));
       break;
     case 3:
@@ -982,11 +994,11 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
     case 29:
     case 30:
     case 31:
-      if (!strcasecmp(val_arg, "off")) {
+      if (str_eq_nocase(val_arg, "off")) {
         char_set_conditions(g, vict, (mode - 29), -1); /* warning: magic number here */
         send_to_char(g, ch, "%s's %s now off.\r\n", char_get_name(vict), set_fields[mode].cmd);
       } else if (is_number(val_arg)) {
-        value = atoi(val_arg);
+        value = parse_int(val_arg);
         RANGE(0, 48);
         char_set_conditions(g, vict, (mode - 29), value); /* and here too */
         send_to_char(g, ch, "%s's %s set to %" PRId64 ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
@@ -1028,7 +1040,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
       SET_OR_REMOVE(char_get_act(vict), PLR_DELETED);
       break;
     case 39:
-      if ((chosen_sensei = sensei_find(val_arg)) == CLASS_UNDEFINED) {
+      if ((chosen_sensei = sensei_find(val_arg.c_str())) == CLASS_UNDEFINED) {
         send_to_char(g, ch, "That is not a class.\r\n");
         return false;
       }
@@ -1042,11 +1054,11 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
       SET_OR_REMOVE(char_get_pref(g, vict), PRF_QUEST);
       break;
     case 42:
-      if (!strcasecmp(val_arg, "off")) {
+      if (str_eq_nocase(val_arg, "off")) {
         char_plr_set(vict, PLR_LOADROOM, false);
         char_set_load_room(g, vict, NOWHERE);
       } else if (is_number(val_arg)) {
-        rvnum = atoi(val_arg);
+        rvnum = parse_int(val_arg);
         if (room_of(g, rvnum)) {
           char_plr_set(vict, PLR_LOADROOM, true);
           char_set_load_room(g, vict, rvnum);
@@ -1122,14 +1134,14 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
         send_to_char(g, ch, "Value must be either 'socials', 'actions', 'hedit', 'off' or a zone number.\r\n");
         return false;
       } else
-        char_set_olc_zone(g, vict, atoi(val_arg));
+        char_set_olc_zone(g, vict, parse_int(val_arg));
       break;
 
     case 52:
       if (char_is_npc(vict)) {
-        chosen_race = race_find(val_arg, char_get_sex(ch), false);
+        chosen_race = race_find(val_arg.c_str(), char_get_sex(ch), false);
       } else {
-        chosen_race = race_find(val_arg, char_get_sex(ch), true);
+        chosen_race = race_find(val_arg.c_str(), char_get_sex(ch), true);
       }
       if (chosen_race == RACE_UNDEFINED) {
         send_to_char(g, ch, "That is not a valid race for them.\r\n");
@@ -1322,24 +1334,31 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
 ACMD(do_set)
 {
   struct char_data *vict = nullptr, *cbuf = nullptr;
-  char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-  int mode, len, player_i = 0, retval;
+  std::string name, field, buf;
+  int mode, player_i = 0, retval;
   char is_file = 0, is_player = 0;
 
-  half_chop(argument, name, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_word(rest);
+  rest                  = skip_spaces(rest);
 
-  if (!strcmp(name, "file")) {
+  if (name == "file") {
     is_file = 1;
-    half_chop(buf, name, buf);
-  } else if (!strcasecmp(name, "player")) {
+    name    = take_word(rest);
+    rest    = skip_spaces(rest);
+  } else if (str_eq_nocase(name, "player")) {
     is_player = 1;
-    half_chop(buf, name, buf);
-  } else if (!strcasecmp(name, "mob"))
-    half_chop(buf, name, buf);
+    name      = take_word(rest);
+    rest      = skip_spaces(rest);
+  } else if (str_eq_nocase(name, "mob")) {
+    name = take_word(rest);
+    rest = skip_spaces(rest);
+  }
 
-  half_chop(buf, field, buf);
+  field = take_word(rest);
+  buf   = skip_spaces(rest); /* the value: the rest of the line */
 
-  if (!*name || !*field) {
+  if (name.empty() || field.empty()) {
     send_to_char(g, ch, "Usage: set <victim> <field> <value>\r\n");
     return;
   }
@@ -1362,7 +1381,7 @@ ACMD(do_set)
     cbuf = new char_data();
     clear_char(cbuf);
     char_make_player_specials(cbuf);
-    if ((player_i = load_char(g, name, cbuf)) > -1) {
+    if ((player_i = load_char(g, name.c_str(), cbuf)) > -1) {
       if (char_get_admlevel(cbuf) >= char_get_admlevel(ch)) {
         free_char(g, cbuf);
         send_to_char(g, ch, "Sorry, you can't do that.\r\n");
@@ -1377,13 +1396,12 @@ ACMD(do_set)
   }
 
   /* find the command in the list */
-  len = strlen(field);
   for (mode = 0; *(set_fields[mode].cmd) != '\n'; mode++)
-    if (!strcmp(field, set_fields[mode].cmd))
+    if (field == set_fields[mode].cmd)
       break;
   if (*(set_fields[mode].cmd) == '\n')
     for (mode = 0; *(set_fields[mode].cmd) != '\n'; mode++)
-      if (!strncmp(field, set_fields[mode].cmd, len))
+      if (std::string_view(set_fields[mode].cmd).starts_with(field))
         break;
 
   /* perform the set */
@@ -1409,13 +1427,15 @@ ACMD(do_chown)
 {
   struct char_data *victim;
   struct obj_data *obj;
-  char buf2[MAX_INPUT_LENGTH];
-  char buf3[MAX_INPUT_LENGTH];
+  std::string buf2;
+  std::string buf3;
   int i, k = 0;
 
-  two_arguments(argument, buf2, buf3);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf2                  = take_arg(rest);
+  buf3                  = take_arg(rest);
 
-  if (!*buf2)
+  if (buf2.empty())
     send_to_char(g, ch, "Syntax: chown <object> <character>.\r\n");
   else if (!(victim = get_char_vis(g, ch, buf3, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "No one by that name here.\r\n");
@@ -1423,7 +1443,7 @@ ACMD(do_chown)
     send_to_char(g, ch, "Are you sure you're feeling ok?\r\n");
   else if (char_get_level(victim) >= char_get_level(ch))
     send_to_char(g, ch, "That's really not such a good idea.\r\n");
-  else if (!*buf3)
+  else if (buf3.empty())
     send_to_char(g, ch, "Syntax: chown <object> <character>.\r\n");
   else {
     for (i = 0; i < NUM_WEARS; i++) {
@@ -1436,7 +1456,7 @@ ACMD(do_chown)
 
     if (!(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
       if (!k && !(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
-        send_to_char(g, ch, "%s does not appear to have the %s.\r\n", char_get_name(victim), buf2);
+        send_to_char(g, ch, "%s does not appear to have the %s.\r\n", char_get_name(victim), buf2.c_str());
         return;
       }
     }

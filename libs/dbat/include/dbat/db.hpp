@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 
@@ -129,7 +130,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch);
 void save_char(GameWorld *g, struct char_data *ch);
 void init_char(GameWorld *g, struct char_data *ch);
 struct char_data *read_mobile(GameWorld *g, mob_vnum nr);
-int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch);
+int vnum_mobile(GameWorld *g, std::string_view searchname, struct char_data *ch);
 void clear_char(struct char_data *ch);
 void reset_char(GameWorld *g, struct char_data *ch);
 void free_char(GameWorld *g, struct char_data *ch);
@@ -142,14 +143,14 @@ void free_obj(GameWorld *g, struct obj_data *obj);
 /* Takes obj out of the game: no longer found by id or unique id. free_obj() does this too. */
 void obj_retire(GameWorld *g, struct obj_data *obj);
 struct obj_data *read_object(GameWorld *g, obj_vnum nr);
-int vnum_object(GameWorld *g, char *searchname, struct char_data *ch);
+int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch);
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(GameWorld *g, struct obj_data *obj);
 void check_unique_id(GameWorld *g, struct obj_data *obj);
 char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high);
-int vnum_material(GameWorld *g, char *searchname, struct char_data *ch);
-int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch);
-int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch);
+int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *ch);
+int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data *ch);
+int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *ch);
 
 /* global buffering system */
 

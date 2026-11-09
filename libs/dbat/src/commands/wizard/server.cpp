@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -72,16 +73,18 @@ static void game_info(GameWorld *g, const char *format, ...) __attribute__((form
 ACMD(do_lag)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: lag (target) (number of seconds)\r\n");
     return;
   }
 
-  int found = false, num = atoi(arg2);
+  int found = false, num = parse_int(arg2);
 
   if (num <= 0 || num > 5) {
     send_to_char(g, ch, "Keep it between 1 to 5 seconds please.\r\n");
@@ -92,7 +95,7 @@ ACMD(do_lag)
     if (!d->character || !char_get_name(d->character)) { /* still at the login menus */
       continue;
     }
-    if (!strcasecmp(char_get_name(d->character), arg)) {
+    if (str_eq_nocase(char_get_name(d->character), arg)) {
       if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
         send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
         continue;
@@ -126,34 +129,35 @@ ACMD(do_lag)
 
 ACMD(do_shutdown)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
   if (subcmd != SCMD_SHUTDOWN) {
     send_to_char(g, ch, "If you want to shut something down, say so!\r\n");
     return;
   }
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all(g, "Shutting down.\r\n");
     g->circle_shutdown = 1;
-  } else if (!strcasecmp(arg, "reboot")) {
+  } else if (str_eq_nocase(arg, "reboot")) {
     mud_log("(GC) Reboot by %s.", char_get_name(ch));
     send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
     touch(FASTBOOT_FILE);
     g->circle_shutdown = g->circle_reboot = 1;
-  } else if (!strcasecmp(arg, "die")) {
+  } else if (str_eq_nocase(arg, "die")) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all(g, "Shutting down for maintenance.\r\n");
     touch(KILLSCRIPT_FILE);
     g->circle_shutdown = 1;
-  } else if (!strcasecmp(arg, "now")) {
+  } else if (str_eq_nocase(arg, "now")) {
     mud_log("(GC) Shutdown NOW by %s.", char_get_name(ch));
     send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
     g->circle_shutdown = 1;
     g->circle_reboot   = 2; /* do not autosave olc */
-  } else if (!strcasecmp(arg, "pause")) {
+  } else if (str_eq_nocase(arg, "pause")) {
     mud_log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all(g, "Shutting down for maintenance.\r\n");
     touch(PAUSE_FILE);
@@ -206,11 +210,12 @@ static void game_info(GameWorld *g, const char *format, ...)
 /* (c) 1996-97 Erwin S. Andreasen <erwin@pip.dknet.dk> */
 ACMD(do_copyover)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int secs;
 
-  one_argument(argument, arg);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (arg.empty()) {
     execute_copyover(g);
   } else if (is_abbrev(arg, "cancel") || is_abbrev(arg, "stop")) {
     if (!g->copyover_timer) {
@@ -227,7 +232,7 @@ ACMD(do_copyover)
     send_to_char(g, ch, "A timed copyover will produce an automatic warning when it starts, and then\r\n");
     send_to_char(g, ch, "every minute.  During the last minute, there will be more frequent warnings.\r\n");
   } else {
-    secs = atoi(arg);
+    secs = parse_int(arg);
     if (!secs || secs < 0) {
       send_to_char(g, ch, "Type @ycopyover help@n for usage info.");
     } else {
@@ -393,12 +398,13 @@ void copyover_check(GameWorld *g)
 
 ACMD(do_dc)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct descriptor_data *d;
   int num_to_dc;
 
-  one_argument(argument, arg);
-  if (!(num_to_dc = atoi(arg))) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (!(num_to_dc = parse_int(arg))) {
     send_to_char(g, ch, "Usage: DC <user number> (type USERS for a list)\r\n");
     return;
   }
@@ -450,13 +456,14 @@ ACMD(do_dc)
 
 ACMD(do_wizlock)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int value;
   const char *when;
 
-  one_argument(argument, arg);
-  if (*arg) {
-    value = atoi(arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (!arg.empty()) {
+    value = parse_int(arg);
     if (value < 0 || value > 101) {
       send_to_char(g, ch, "Invalid wizlock value.\r\n");
       return;
@@ -466,7 +473,7 @@ ACMD(do_wizlock)
   } else
     when = "currently";
 
-  if (*arg) {
+  if (!arg.empty()) {
     switch (g->circle_restrict) {
       case 0:
         send_to_char(g, ch, "The game is %s completely open.\r\n", when);
@@ -490,7 +497,7 @@ ACMD(do_wizlock)
         break;
     }
   }
-  if (!*arg) {
+  if (arg.empty()) {
     switch (g->circle_restrict) {
       case 0:
         send_to_char(g, ch, "The game is %s completely open.\r\n", when);

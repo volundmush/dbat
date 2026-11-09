@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -66,17 +67,19 @@ ACMD(do_transobj)
 
   struct obj_data *obj;
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!char_is_npc(ch) && char_get_admlevel(ch) < 1) {
     send_to_char(g, ch, "Huh!?");
     return;
   }
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: transo (object) (target)\r\n");
     return;
   }
@@ -85,7 +88,7 @@ ACMD(do_transobj)
     send_to_char(g, ch, "You want to send what?\r\n");
     return;
   }
-  if (!strcasecmp("all", arg2)) {
+  if (str_eq_nocase("all", arg2)) {
     obj_vnum num          = obj_get_vnum(g, obj);
     struct obj_data *obj2 = nullptr;
 
@@ -133,31 +136,30 @@ ACMD(do_recall)
 }
 
 /* take a string, and return a room vnum, or NOWHERE.. used for goto, at, etc.  -je 4/6/93 */
-room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
+room_vnum find_target_room(GameWorld *g, struct char_data *ch, std::string_view rawroomstr)
 {
   room_vnum location = NOWHERE;
-  char roomstr[MAX_INPUT_LENGTH];
   struct room_data *rm;
 
-  one_argument(rawroomstr, roomstr);
+  std::string roomstr = take_arg(rawroomstr);
 
-  if (!*roomstr) {
+  if (roomstr.empty()) {
     send_to_char(g, ch, "You must supply a room number or name.\r\n");
     return (NOWHERE);
   }
 
-  if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
-    if (!room_of(g, location = atoi(roomstr))) {
+  if (isdigit(roomstr[0]) && roomstr.find('.') == std::string::npos) {
+    if (!room_of(g, location = parse_int(roomstr))) {
       send_to_char(g, ch, "No room exists with that number.\r\n");
       return (NOWHERE);
     }
   } else {
     struct char_data *target_mob;
     struct obj_data *target_obj;
-    char *mobobjstr = roomstr;
+    std::string mobobjstr = roomstr;
     int num;
 
-    num = get_number(&mobobjstr);
+    num = get_number(mobobjstr);
     if ((target_mob = get_char_vis(g, ch, mobobjstr, &num, FIND_CHAR_WORLD)) != nullptr) {
       if ((location = char_get_in_room(target_mob)) == NOWHERE) {
         send_to_char(g, ch, "That character is currently lost.\r\n");
@@ -209,16 +211,18 @@ room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr)
 
 ACMD(do_at)
 {
-  char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
+  std::string command, buf;
   room_vnum location, original_loc;
 
-  half_chop(argument, buf, command);
-  if (!*buf) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_word(rest);
+  command               = skip_spaces(rest);
+  if (buf.empty()) {
     send_to_char(g, ch, "You must supply a room number or a name.\r\n");
     return;
   }
 
-  if (!*command) {
+  if (command.empty()) {
     send_to_char(g, ch, "What do you want to do there?\r\n");
     return;
   }
@@ -230,7 +234,7 @@ ACMD(do_at)
   original_loc = char_get_in_room(ch);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  command_interpreter(g, ch, command);
+  command_interpreter(g, ch, command.data());
 
   /* check if the char is still there */
   if (char_get_in_room(ch) == location) {
@@ -266,13 +270,14 @@ ACMD(do_goto)
 
 ACMD(do_trans)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *victim;
 
-  one_argument(argument, buf);
-  if (!*buf)
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to transfer?\r\n");
-  else if (strcasecmp("all", buf)) {
+  else if (!str_eq_nocase("all", buf)) {
     if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
       send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else if (victim == ch)
@@ -319,13 +324,15 @@ ACMD(do_trans)
 
 ACMD(do_teleport)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf, buf2;
   struct char_data *victim;
   room_vnum target;
 
-  two_arguments(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  buf2                  = take_arg(rest);
 
-  if (!*buf)
+  if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to teleport?\r\n");
   else if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
@@ -333,7 +340,7 @@ ACMD(do_teleport)
     send_to_char(g, ch, "Use 'goto' to teleport yourself.\r\n");
   else if (char_get_admlevel(victim) >= char_get_admlevel(ch))
     send_to_char(g, ch, "Maybe you shouldn't do that.\r\n");
-  else if (!*buf2)
+  else if (buf2.empty())
     send_to_char(g, ch, "Where do you wish to send this person?\r\n");
   else if ((target = find_target_room(g, ch, buf2)) != NOWHERE) {
     if (char_plr_flagged(victim, PLR_HEALT)) {
@@ -386,15 +393,16 @@ static void stop_snooping(GameWorld *g, struct char_data *ch)
 
 ACMD(do_snoop)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *victim, *tch;
 
   if (!char_get_desc(ch))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     stop_snooping(g, ch);
   else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "No such person around.\r\n");
@@ -428,14 +436,15 @@ ACMD(do_snoop)
 
 ACMD(do_switch)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *victim;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_get_desc(ch)->original)
     send_to_char(g, ch, "You're already switched.\r\n");
-  else if (!*arg)
+  else if (arg.empty())
     send_to_char(g, ch, "Switch with who?\r\n");
   else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(g, ch, "No such character.\r\n");
@@ -561,14 +570,15 @@ ACMD(do_load)
 /* clean a room of all mobiles and objects */
 ACMD(do_purge)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *vict;
   struct obj_data *obj;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
   /* argument supplied. destroy single object or char */
-  if (*buf) {
+  if (!buf.empty()) {
     if ((vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)) != nullptr) {
       if (!char_is_npc(vict) && (char_get_admlevel(ch) <= char_get_admlevel(vict))) {
         send_to_char(g, ch, "Fuuuuuuuuu!\r\n");
@@ -633,15 +643,18 @@ ACMD(do_purge)
 ACMD(do_force)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH], to_force[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH + 32];
+  char buf1[MAX_INPUT_LENGTH + 32];
+  std::string arg, to_force;
 
-  half_chop(argument, arg, to_force);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  to_force              = skip_spaces(rest);
 
-  snprintf(buf1, sizeof(buf1), "$n has forced you to '%s'.", to_force);
+  snprintf(buf1, sizeof(buf1), "$n has forced you to '%s'.", to_force.c_str());
 
-  if (!*arg || !*to_force)
+  if (arg.empty() || to_force.empty())
     send_to_char(g, ch, "Whom do you wish to force do what?\r\n");
-  else if (!char_adm_flagged(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
+  else if (!char_adm_flagged(ch, ADM_FORCEMASS) || (!str_eq_nocase("all", arg) && !str_eq_nocase("room", arg))) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
       send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     else if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict))
@@ -649,43 +662,44 @@ ACMD(do_force)
     else {
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
       act(g, buf1, true, ch, nullptr, vict, TO_VICT);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced %s to %s", char_get_name(ch), char_get_name(vict), to_force);
-      command_interpreter(g, vict, to_force);
+      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced %s to %s", char_get_name(ch), char_get_name(vict), to_force.c_str());
+      command_interpreter(g, vict, to_force.data());
     }
-  } else if (!strcasecmp("room", arg)) {
+  } else if (str_eq_nocase("room", arg)) {
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced room %d to %s",
-           char_get_name(ch), char_get_in_room(ch), to_force);
+           char_get_name(ch), char_get_in_room(ch), to_force.c_str());
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
       act(g, buf1, true, ch, nullptr, tch, TO_VICT);
-      command_interpreter(g, tch, to_force);
+      command_interpreter(g, tch, to_force.data());
     }
   } else { /* force all */
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced all to %s", char_get_name(ch), to_force);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced all to %s", char_get_name(ch), to_force.c_str());
 
     for (descriptor_data *i : each_desc(g)) {
 
       if (desc_get_connected(i) != CON_PLAYING || !(vict = i->character) || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
         continue;
       act(g, buf1, true, ch, nullptr, vict, TO_VICT);
-      command_interpreter(g, vict, to_force);
+      command_interpreter(g, vict, to_force.data());
     }
   }
 }
 
 ACMD(do_zreset)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct zone_data *i;
   zone_vnum j;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (*arg == '*') {
+  if (arg[0] == '*') {
     if (char_get_admlevel(ch) < ADMLVL_VICE) {
       send_to_char(g, ch, "You do not have permission to reset the entire world.\r\n");
       return;
@@ -698,10 +712,10 @@ ACMD(do_zreset)
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) %s reset all MUD zones.", char_get_name(ch));
     log_imm_action(g, "RESET: %s has reset all MUD zones.", char_get_name(ch));
     return;
-  } else if (*arg == '.' || !*arg)
+  } else if (arg[0] == '.' || arg.empty())
     i = room_get_zone(g, char_get_in_room(ch));
   else {
-    j = atoi(arg);
+    j = parse_int(arg);
     i = find_zone(g, j);
   }
   if (i && (can_edit_zone(g, ch, i) || char_get_admlevel(ch) > ADMLVL_IMMORT)) {
@@ -730,9 +744,10 @@ ACMD(do_peace)
 ACMD(do_raise)
 {
   struct char_data *vict = nullptr;
-  char name[MAX_INPUT_LENGTH];
+  std::string name;
 
-  one_argument(argument, name);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_arg(rest);
 
   if (char_get_admlevel(ch) < ADMLVL_BUILDER && !char_is_npc(ch)) {
     return;
@@ -772,14 +787,15 @@ ACMD(do_zpurge)
   struct zone_data *stored = nullptr;
   int found        = false;
   room_vnum room;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     zone = room_get_zone(g, char_get_in_room(ch))->number;
   } else {
-    zone = atoi(arg);
+    zone = parse_int(arg);
   }
 
   stored = find_zone(g, zone);

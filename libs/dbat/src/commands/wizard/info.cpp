@@ -13,6 +13,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -76,17 +77,18 @@ ACMD(do_finddoor)
   obj_vnum vnum = NOTHING;
   size_t len;
   int nlen;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char buf[MAX_STRING_LENGTH] = {0};
   struct char_data *tmp_char;
   struct obj_data *obj;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Format: finddoor <obj/vnum>\r\n");
   } else if (is_number(arg)) {
-    vnum = atoi(arg);
+    vnum = parse_int(arg);
     if (!obj_proto_of(g, vnum)) {
       send_to_char(g, ch, "There is no object with that vnum.\r\n");
       return;
@@ -128,11 +130,13 @@ ACMD(do_finddoor)
 
 ACMD(do_vnum)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf, buf2;
 
-  half_chop(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_word(rest);
+  buf2                  = skip_spaces(rest);
 
-  if (!*buf || !*buf2 || (!is_abbrev(buf, "mob") && !is_abbrev(buf, "obj") && !is_abbrev(buf, "mat") && !is_abbrev(buf, "wtype") && !is_abbrev(buf, "atype"))) {
+  if (buf.empty() || buf2.empty() || (!is_abbrev(buf, "mob") && !is_abbrev(buf, "obj") && !is_abbrev(buf, "mat") && !is_abbrev(buf, "wtype") && !is_abbrev(buf, "atype"))) {
     send_to_char(g, ch, "Usage: vnum { atype | material | mob | obj | wtype } <name>\r\n");
     return;
   }
@@ -797,9 +801,10 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 ACMD(do_varstat)
 {
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "That player is not in the game.\r\n");
@@ -830,20 +835,22 @@ ACMD(do_varstat)
 
 ACMD(do_stat)
 {
-  char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf1, buf2;
   struct char_data *victim;
   struct obj_data *object;
 
-  half_chop(argument, buf1, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_word(rest);
+  buf2                  = skip_spaces(rest);
 
-  if (!*buf1) {
+  if (buf1.empty()) {
     send_to_char(g, ch, "Stats on who or what or where?\r\n");
     return;
   }
   if (is_abbrev(buf1, "room")) {
     do_stat_room(g, ch);
   } else if (is_abbrev(buf1, "mob")) {
-    if (!*buf2)
+    if (buf2.empty())
       send_to_char(g, ch, "Stats on which mobile?\r\n");
     else {
       if ((victim = get_char_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
@@ -852,7 +859,7 @@ ACMD(do_stat)
         send_to_char(g, ch, "No such mobile around.\r\n");
     }
   } else if (is_abbrev(buf1, "player")) {
-    if (!*buf2) {
+    if (buf2.empty()) {
       send_to_char(g, ch, "Stats on which player?\r\n");
     } else {
       if ((victim = get_player_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
@@ -861,7 +868,7 @@ ACMD(do_stat)
         send_to_char(g, ch, "No such player around.\r\n");
     }
   } else if (is_abbrev(buf1, "file")) {
-    if (!*buf2)
+    if (buf2.empty())
       send_to_char(g, ch, "Stats on which player?\r\n");
     else if ((victim = get_player_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(g, ch, victim);
@@ -869,7 +876,7 @@ ACMD(do_stat)
       victim = new char_data();
       clear_char(victim);
       char_make_player_specials(victim);
-      if (load_char(g, buf2, victim) >= 0) {
+      if (load_char(g, buf2.c_str(), victim) >= 0) {
         char_to_room(g, victim, 0);
         if (char_get_admlevel(victim) > char_get_admlevel(ch))
           send_to_char(g, ch, "Sorry, you can't do that.\r\n");
@@ -882,7 +889,7 @@ ACMD(do_stat)
       }
     }
   } else if (is_abbrev(buf1, "object")) {
-    if (!*buf2)
+    if (buf2.empty())
       send_to_char(g, ch, "Stats on which object?\r\n");
     else {
       if ((object = get_obj_vis(g, ch, buf2, nullptr)) != nullptr)
@@ -891,15 +898,15 @@ ACMD(do_stat)
         send_to_char(g, ch, "No such object around.\r\n");
     }
   } else if (is_abbrev(buf1, "zone")) {
-    if (!*buf2) {
+    if (buf2.empty()) {
       send_to_char(g, ch, "Stats on which zone?\r\n");
       return;
     }
-    print_zone(g, ch, atoi(buf2));
+    print_zone(g, ch, parse_int(buf2));
     return;
   } else {
-    char *name = buf1;
-    int number = get_number(&name);
+    std::string name = buf1;
+    int number       = get_number(name);
 
     if ((object = get_obj_in_equip_vis(g, ch, name, &number, char_get_equipment_array(ch))) != nullptr)
       do_stat_object(g, ch, object);
@@ -920,11 +927,13 @@ ACMD(do_stat)
 
 ACMD(do_vstat)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf, buf2;
 
-  two_arguments(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  buf2                  = take_arg(rest);
 
-  if (!*buf || !*buf2 || !isdigit(*buf2)) {
+  if (buf.empty() || buf2.empty() || !isdigit(buf2[0])) {
     send_to_char(g, ch, "Usage: vstat { obj | mob } <number>\r\n");
     return;
   }
@@ -937,7 +946,7 @@ ACMD(do_vstat)
     struct char_data *mob;
     mob_vnum r_num;
 
-    if (!mob_proto_of(g, r_num = atoi(buf2))) {
+    if (!mob_proto_of(g, r_num = parse_int(buf2))) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");
       return;
     }
@@ -949,7 +958,7 @@ ACMD(do_vstat)
     struct obj_data *obj;
     obj_vnum r_num;
 
-    if (!obj_proto_of(g, r_num = atoi(buf2))) {
+    if (!obj_proto_of(g, r_num = parse_int(buf2))) {
       send_to_char(g, ch, "There is no object with that number.\r\n");
       return;
     }
@@ -988,18 +997,19 @@ ACMD(do_date)
 
 ACMD(do_last)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict = nullptr;
 
-  one_argument(argument, arg);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (arg.empty()) {
     send_to_char(g, ch, "For whom do you wish to search?\r\n");
     return;
   }
   vict = new char_data();
   clear_char(vict);
   char_make_player_specials(vict);
-  if (load_char(g, arg, vict) < 0) {
+  if (load_char(g, arg.c_str(), vict) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
     free_char(g, vict);
     return;
@@ -1635,12 +1645,13 @@ ACMD(do_zcheck)
   float avg_dam;
   size_t len = 0;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string zarg      = take_arg(rest);
 
-  if (!*buf || !strcmp(buf, "."))
+  if (zarg.empty() || zarg == ".")
     zrnum = room_get_zone(g, char_get_in_room(ch));
   else
-    zrnum = find_zone(g, atoi(buf));
+    zrnum = find_zone(g, parse_int(zarg));
 
   if (zrnum == nullptr) {
     send_to_char(g, ch, "Check what zone ?\r\n");
@@ -2187,27 +2198,29 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 
 ACMD(do_checkloadstatus)
 {
-  char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string buf1, buf2;
 
-  two_arguments(argument, buf1, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_arg(rest);
+  buf2                  = take_arg(rest);
 
-  if ((!*buf1) || (!*buf2) || (!isdigit(*buf2))) {
+  if (buf1.empty() || buf2.empty() || !isdigit(buf2[0])) {
     send_to_char(g, ch, "Checkload <M | O | T> <vnum>\r\n");
     return;
   }
 
-  if (tolower(*buf1) == 'm') {
-    mob_checkload(g, ch, atoi(buf2));
+  if (tolower(buf1[0]) == 'm') {
+    mob_checkload(g, ch, parse_int(buf2));
     return;
   }
 
-  if (tolower(*buf1) == 'o') {
-    obj_checkload(g, ch, atoi(buf2));
+  if (tolower(buf1[0]) == 'o') {
+    obj_checkload(g, ch, parse_int(buf2));
     return;
   }
 
-  if (tolower(*buf1) == 't') {
-    trg_checkload(g, ch, atoi(buf2));
+  if (tolower(buf1[0]) == 't') {
+    trg_checkload(g, ch, parse_int(buf2));
     return;
   }
 }

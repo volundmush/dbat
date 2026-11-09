@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -69,20 +70,22 @@ ACMD(do_news)
   FILE *fl;
   const char *filename;
   char line[256];
-  char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], title[256], lastline[256];
+  char buf[MAX_STRING_LENGTH], title[256], lastline[256];
+  std::string arg;
   int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
   filename = NEWS_FILE;
 
   /* Check the file for the entry so we may edit it if need be*/
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: news (number | list)\r\n");
     return;
   }
 
-  lookup = atoi(arg);
+  lookup = parse_int(arg);
 
   if (!(fl = fopen(filename, "r"))) {
     mud_log("SYSERR: opening news file for reading");
@@ -124,7 +127,7 @@ ACMD(do_news)
       } /* End Check the entry */
     } /* End of main read while */
     fclose(fl);
-  } else if (!strcasecmp(arg, "list")) {
+  } else if (str_eq_nocase(arg, "list")) {
     while (!feof(fl)) {
       get_line(fl, line);
       if (*line == '#') { /* Count the entries */
@@ -338,12 +341,14 @@ ACMD(do_echo)
 
 ACMD(do_send)
 {
-  char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
+  std::string arg, buf;
   struct char_data *vict;
 
-  half_chop(argument, arg, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  buf                   = skip_spaces(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Send what to who?\r\n");
     return;
   }
@@ -351,11 +356,11 @@ ACMD(do_send)
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
     return;
   }
-  send_to_char(g, vict, "%s\r\n", buf);
+  send_to_char(g, vict, "%s\r\n", buf.c_str());
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, "Sent.\r\n");
   else
-    send_to_char(g, ch, "You send '%s' to %s.\r\n", buf, char_get_name(vict));
+    send_to_char(g, ch, "You send '%s' to %s.\r\n", buf.c_str(), char_get_name(vict));
 }
 
 static const char *const logtypes[] = {
@@ -363,11 +368,12 @@ static const char *const logtypes[] = {
 
 ACMD(do_syslog)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int tp;
 
-  one_argument(argument, arg);
-  if (!*arg) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (arg.empty()) {
     send_to_char(g, ch, "Your syslog is currently %s.\r\n",
                  logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
     return;

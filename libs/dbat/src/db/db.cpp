@@ -2641,7 +2641,7 @@ static bool help_keyword_order(const help_index_element &a, const help_index_ele
 *  procedures for resetting, both play-time and boot-time	 	 *
 *************************************************************************/
 
-int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch)
+int vnum_mobile(GameWorld *g, std::string_view searchname, struct char_data *ch)
 {
   int found = 0;
 
@@ -2654,7 +2654,7 @@ int vnum_mobile(GameWorld *g, char *searchname, struct char_data *ch)
   return (found);
 }
 
-int vnum_object(GameWorld *g, char *searchname, struct char_data *ch)
+int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch)
 {
   int found = 0;
 
@@ -2667,7 +2667,7 @@ int vnum_object(GameWorld *g, char *searchname, struct char_data *ch)
   return (found);
 }
 
-int vnum_material(GameWorld *g, char *searchname, struct char_data *ch)
+int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *ch)
 {
   int found = 0;
 
@@ -2681,7 +2681,7 @@ int vnum_material(GameWorld *g, char *searchname, struct char_data *ch)
   return (found);
 }
 
-int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch)
+int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data *ch)
 {
   int found = 0;
 
@@ -2697,7 +2697,7 @@ int vnum_weapontype(GameWorld *g, char *searchname, struct char_data *ch)
   return (found);
 }
 
-int vnum_armortype(GameWorld *g, char *searchname, struct char_data *ch)
+int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *ch)
 {
   int found = 0;
 

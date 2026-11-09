@@ -1,10 +1,12 @@
 #pragma once
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 
 /* global variables */
 
 // functions
-room_vnum find_target_room(GameWorld *g, struct char_data *ch, char *rawroomstr);
+room_vnum find_target_room(GameWorld *g, struct char_data *ch, std::string_view rawroomstr);
 void perform_immort_vis(GameWorld *g, struct char_data *ch);
 void snoop_check(struct char_data *ch);
 void copyover_check(GameWorld *g);
