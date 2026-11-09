@@ -1,5 +1,6 @@
 /* kiballs.c: ki ball and sphere attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -33,9 +34,11 @@ ACMD(do_geno)
   int perc, prob;
   double attperc = 0.5, minimum = .4;
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
   /* Can they do the technique? */
 
   if (!can_grav(g, ch)) {
@@ -50,7 +53,7 @@ ACMD(do_geno)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -66,7 +69,7 @@ ACMD(do_geno)
   }
 
   vict = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else {
@@ -131,9 +134,11 @@ ACMD(do_genki)
   int perc, prob;
   double attperc = .5, minimum = .4;
   struct char_data *vict = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
   /* Can they do the technique? */
 
   if (!can_grav(g, ch)) {
@@ -148,7 +153,7 @@ ACMD(do_genki)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -164,7 +169,7 @@ ACMD(do_genki)
   }
 
   vict = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else {
@@ -240,9 +245,11 @@ ACMD(do_spiritball)
   double attperc = .25, minimum = .20;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -258,7 +265,7 @@ ACMD(do_spiritball)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -464,9 +471,11 @@ ACMD(do_deathball)
   double attperc = .3, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -482,7 +491,7 @@ ACMD(do_deathball)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -658,9 +667,10 @@ ACMD(do_hellspear)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .3, minimum = .1;
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg2;
 
-  one_argument(argument, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -788,9 +798,11 @@ ACMD(do_crusher)
   double attperc = .2, minimum = .10;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -806,7 +818,7 @@ ACMD(do_crusher)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1034,9 +1046,11 @@ ACMD(do_blessedhammer)
   double attperc = .05, minimum = .01;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1048,7 +1062,7 @@ ACMD(do_blessedhammer)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1251,9 +1265,11 @@ ACMD(do_kiball)
   double attperc = .05, minimum = .01;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -1272,7 +1288,7 @@ ACMD(do_kiball)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

@@ -121,8 +121,8 @@ id_list *obj_contains_slot(struct obj_data *obj);
 ex_desc_list *obj_ex_description_slot(struct obj_data *obj);
 struct script_data **obj_script_slot(struct obj_data *obj);
 std::string *obj_action_description_slot(struct obj_data *obj);
-struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
-
+/* The object's spellbook pages (SPELLBOOK_SIZE of them), made blank if it has none */
+struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj);
 
 /* Field accessors */
 const char *obj_get_action_description(const struct obj_data *obj);

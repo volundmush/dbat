@@ -1,5 +1,6 @@
 /* melee.c: basic melee attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -32,10 +33,11 @@ ACMD(do_uppercut)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_UPPERCUT);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -54,7 +56,7 @@ ACMD(do_uppercut)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -255,10 +257,11 @@ ACMD(do_roundhouse)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_ROUNDHOUSE);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -287,7 +290,7 @@ ACMD(do_roundhouse)
     }
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -485,10 +488,11 @@ ACMD(do_elbow)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_ELBOW);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -507,7 +511,7 @@ ACMD(do_elbow)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -694,10 +698,11 @@ ACMD(do_kick)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_KICK);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -726,7 +731,7 @@ ACMD(do_kick)
     }
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -912,10 +917,11 @@ ACMD(do_knee)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_KNEE);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -944,7 +950,7 @@ ACMD(do_knee)
     }
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1129,10 +1135,11 @@ ACMD(do_punch)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_PUNCH);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -1151,7 +1158,7 @@ ACMD(do_punch)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

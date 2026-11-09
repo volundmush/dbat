@@ -905,6 +905,43 @@ static void check_new_prototypes_leave_other_editors_alone(void)
   th_shutdown(g);
 }
 
+/* oedit works on a copy of an object's spellbook pages: quitting without saving leaves the prototype's as they were
+ * (the copy shared them, so changing a page changed the prototype's at once) */
+static void check_spellbook_edit_can_be_abandoned(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Bookish", ADMLVL_IMPL);
+  int spell            = 0;
+  for (int i = 1; i < SKILL_TABLE_SIZE && !spell; i++)
+    if (g->spell_info[i].skilltype == SKTYPE_SPELL)
+      spell = i;
+  CHECK(spell > 0);
+  std::string number = std::to_string(spell);
+
+  th_type(g, ch, "oedit 305");
+  th_type(g, ch, "1");
+  th_type(g, ch, "spellbook");
+  th_type(g, ch, "t");
+  th_type(g, ch, "1");
+  th_type(g, ch, number.c_str());
+  th_type(g, ch, "0");
+  th_type(g, ch, "q");
+  th_type(g, ch, "y");
+  CHECK(obj_proto_of(g, 305) && obj_get_sbinfo(obj_proto_of(g, 305)));
+  CHECK(obj_proto_of(g, 305) && obj_get_sbinfo(obj_proto_of(g, 305)) && obj_get_sbinfo(obj_proto_of(g, 305))[0].spellname == spell);
+
+  th_type(g, ch, "oedit 305");
+  th_type(g, ch, "t");
+  th_type(g, ch, "1");
+  th_type(g, ch, "0"); /* clears the page */
+  th_type(g, ch, "0");
+  th_type(g, ch, "q");
+  th_type(g, ch, "n");
+  CHECK(desc_get_connected(char_get_desc(ch)) == CON_PLAYING);
+  CHECK(obj_get_sbinfo(obj_proto_of(g, 305)) && obj_get_sbinfo(obj_proto_of(g, 305))[0].spellname == spell);
+  th_shutdown(g);
+}
+
 /* The editor works on a copy of the text, written back when it is saved: an edit that is aborted leaves the text as
  * it was, and one that is saved replaces it */
 static void check_editor_saves_and_aborts(void)
@@ -1450,6 +1487,7 @@ static const struct {
     {"text_field_of_self",                          check_text_field_of_self                         },
     {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
     {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },
+    {"spellbook_edit_can_be_abandoned",             check_spellbook_edit_can_be_abandoned            },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

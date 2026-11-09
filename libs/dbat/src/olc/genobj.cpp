@@ -90,13 +90,6 @@ static int update_objects(GameWorld *g, struct obj_data *refobj)
     obj_set_id(obj, obj_get_id(&swap));
     obj_set_script(obj, obj_get_script(&swap));
 
-    /* Each copy owns its own spellbook pages, as in read_object(), and frees them when it goes. */
-    delete[] obj_get_sbinfo(&swap);
-    *obj_sbinfo_slot(obj) = nullptr;
-    if (obj_get_sbinfo(refobj)) {
-      *obj_sbinfo_slot(obj) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
-      memcpy(obj_get_sbinfo(obj), obj_get_sbinfo(refobj), SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
-    }
 
     /* What it holds still counts towards its weight, and whoever carries it needs to know the change. */
     for (obj_data *inner : obj_contents(g, obj))

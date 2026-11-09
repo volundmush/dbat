@@ -63,10 +63,10 @@ void tech_handle_posmodifier(char_data *vict, int *pry, int *blk, int *dge, int 
   }
 }
 
-bool tech_handle_charge(GameWorld *g, char_data *ch, char *arg, double minimum, double *attperc)
+bool tech_handle_charge(GameWorld *g, char_data *ch, std::string_view arg, double minimum, double *attperc)
 {
-  if (*arg) {
-    double adjust = (double)(atoi(arg)) * 0.01;
+  if (!arg.empty()) {
+    double adjust = (double)(parse_int(arg)) * 0.01;
     if (adjust < 0.01 || adjust > 1.00) {
       send_to_char(g, ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
       return false;
@@ -80,11 +80,11 @@ bool tech_handle_charge(GameWorld *g, char_data *ch, char *arg, double minimum, 
   return true;
 }
 
-bool tech_handle_targeting(GameWorld *g, char_data *ch, char *arg, char_data **vict, obj_data **obj)
+bool tech_handle_targeting(GameWorld *g, char_data *ch, std::string &arg, char_data **vict, obj_data **obj)
 {
   *vict = nullptr;
   *obj  = nullptr;
-  if (!*arg || !(*vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(*vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       *vict = char_get_fighting(g, ch);
       return true;

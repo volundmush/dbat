@@ -1640,7 +1640,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].spellname = 0;
           obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].pages     = 0;
         } else {
-          *obj_sbinfo_slot(OLC_OBJ(d)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
+          obj_make_sbinfo(OLC_OBJ(d));
         }
         oedit_disp_prompt_spellbook_menu(g, d);
       } else if (number < 0 || number >= SKILL_TABLE_SIZE) {
@@ -1659,7 +1659,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         }
 
         if (!obj_get_sbinfo(OLC_OBJ(d))) {
-          *obj_sbinfo_slot(OLC_OBJ(d)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
+          obj_make_sbinfo(OLC_OBJ(d));
         }
 
         obj_get_sbinfo(OLC_OBJ(d))[OLC_VAL(d)].spellname = number;

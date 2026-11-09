@@ -1,5 +1,6 @@
 /* melee_special.c: special melee attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -33,9 +34,11 @@ ACMD(do_rogafufuken)
   double attperc = .05, minimum = .01;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -51,7 +54,7 @@ ACMD(do_rogafufuken)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -243,10 +246,11 @@ ACMD(do_heeldrop)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_HEELDROP);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
@@ -259,7 +263,7 @@ ACMD(do_heeldrop)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -520,10 +524,11 @@ ACMD(do_bite)
   int64_t dmg, stcost = 20 + (getEffMaxPL(g, ch) / 500);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) {
     send_to_char(g, ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
@@ -533,7 +538,7 @@ ACMD(do_bite)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -549,7 +554,7 @@ ACMD(do_bite)
 
   vict = nullptr;
   obj  = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
@@ -733,10 +738,11 @@ ACMD(do_slam)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_SLAM);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -755,7 +761,7 @@ ACMD(do_slam)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1061,10 +1067,11 @@ ACMD(do_tailwhip)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_TAILWHIP);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
@@ -1082,7 +1089,7 @@ ACMD(do_tailwhip)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

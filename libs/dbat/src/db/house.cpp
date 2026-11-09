@@ -718,7 +718,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
               sscanf(line, "%d %d", t, t + 1);
 
               if (!obj_get_sbinfo(temp)) {
-                *obj_sbinfo_slot(temp) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
+                obj_make_sbinfo(temp);
               }
               obj_get_sbinfo(temp)[j].spellname = t[0];
               obj_get_sbinfo(temp)[j].pages     = t[1];

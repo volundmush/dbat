@@ -1,5 +1,6 @@
 /* special_beams.c: special beam attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -33,9 +34,11 @@ ACMD(do_honoo)
   double attperc = .125, minimum = .1;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -47,7 +50,7 @@ ACMD(do_honoo)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -340,9 +343,11 @@ ACMD(do_psyblast)
   double attperc = .125, minimum = .1;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -358,7 +363,7 @@ ACMD(do_psyblast)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -600,9 +605,11 @@ ACMD(do_sbc)
   double attperc = .15, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -618,7 +625,7 @@ ACMD(do_sbc)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -795,9 +802,11 @@ ACMD(do_kousengan)
   double attperc = .05, minimum = .01;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -813,7 +822,7 @@ ACMD(do_kousengan)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1016,9 +1025,11 @@ ACMD(do_deathbeam)
   double attperc = .1, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1034,7 +1045,7 @@ ACMD(do_deathbeam)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

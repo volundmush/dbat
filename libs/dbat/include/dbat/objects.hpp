@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string>
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
@@ -93,6 +94,6 @@ struct obj_data {
 
   // UNUSED FIELDS below here
   int cost_per_day{};                   /* Cost to keep pr. real day           */
-  struct obj_spellbook_spell *sbinfo{}; /* For spellbook info */
+  owned<std::array<obj_spellbook_spell, SPELLBOOK_SIZE>> sbinfo{}; /* For spellbook info: its own, or none */
 };
 

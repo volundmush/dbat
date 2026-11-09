@@ -2,6 +2,7 @@
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -33,10 +34,11 @@
 ACMD(do_charge)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int amt;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(g, ch, "@WYou are concentrating too much on your aura to be able to charge.");
@@ -54,16 +56,16 @@ ACMD(do_charge)
     send_to_char(g, ch, "You feel too sick from the poison to concentrate.\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Charge, yes. How much percent though?\r\n");
     send_to_char(g, ch, "[ 1 - 100 | cancel | release]\r\n");
     return;
   }
-  if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) <= 0)) {
+  if (str_eq_nocase("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) <= 0)) {
     send_to_char(g, ch, "Try cancel instead, you have nothing charged up yet!\r\n");
     return;
   }
-  if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) > 0)) {
+  if (str_eq_nocase("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) > 0)) {
     send_to_char(g, ch, "You stop charging and release your pent up energy.\r\n");
     switch (rand_number(g, 1, 3)) {
       case 1:
@@ -85,7 +87,7 @@ ACMD(do_charge)
     char_plr_set(ch, PLR_CHARGE, false);
     return;
   }
-  if (!strcasecmp("release", arg) && char_get_charge(ch) > 0) {
+  if (str_eq_nocase("release", arg) && char_get_charge(ch) > 0) {
     send_to_char(g, ch, "You release your pent up energy.\r\n");
     switch (rand_number(g, 1, 3)) {
       case 1:
@@ -106,7 +108,7 @@ ACMD(do_charge)
     char_set_chargeto(ch, 0);
     return;
   }
-  if (!strcasecmp("cancel", arg) && char_plr_flagged(ch, PLR_CHARGE)) {
+  if (str_eq_nocase("cancel", arg) && char_plr_flagged(ch, PLR_CHARGE)) {
     send_to_char(g, ch, "You stop charging.\r\n");
     switch (rand_number(g, 1, 3)) {
       case 1:
@@ -126,7 +128,7 @@ ACMD(do_charge)
     char_set_chargeto(ch, 0);
     return;
   }
-  if (!strcasecmp("cancel", arg) && !char_plr_flagged(ch, PLR_CHARGE)) {
+  if (str_eq_nocase("cancel", arg) && !char_plr_flagged(ch, PLR_CHARGE)) {
     send_to_char(g, ch, "You are not even charging!\r\n");
     return;
   }
@@ -134,7 +136,7 @@ ACMD(do_charge)
     send_to_char(g, ch, "You don't even have enough ki!\r\n");
     return;
   }
-  if ((amt = atoi(arg)) > 0) {
+  if ((amt = parse_int(arg)) > 0) {
     if (amt >= 101) {
       send_to_char(g, ch, "You have set it too high!\r\n");
       return;
@@ -269,12 +271,13 @@ ACMD(do_powerup)
 ACMD(do_rescue)
 {
 
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *helpee, *opponent;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to rescue?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
@@ -309,16 +312,17 @@ ACMD(do_rescue)
 
 ACMD(do_assist)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *helpee, *opponent;
 
   if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You're already fighting!  How can you assist someone else?\r\n");
     return;
   }
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to assist?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
     send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
@@ -355,15 +359,16 @@ ACMD(do_assist)
 
 ACMD(do_kill)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict;
 
   if (char_is_npc(ch) || !char_adm_flagged(ch, ADM_INSTANTKILL)) {
     return;
   }
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Kill who?\r\n");
   } else {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
@@ -382,9 +387,10 @@ ACMD(do_kill)
 ACMD(do_flee)
 {
   int i, attempt;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (char_get_position(ch) < POS_RESTING) {
     send_to_char(g, ch, "You are in pretty bad shape, unable to flee!\r\n");
@@ -425,7 +431,7 @@ ACMD(do_flee)
   }
 
   for (i = 0; i < 12; i++) {
-    if (*arg) {
+    if (!arg.empty()) {
       if ((attempt = search_block(arg, dirs, false) > -1)) {
         attempt = search_block(arg, dirs, false);
       } else if ((attempt = search_block(arg, abbr_dirs, false) > -1)) {
@@ -433,8 +439,7 @@ ACMD(do_flee)
       } else {
         attempt = rand_number(g, 0, NUM_OF_DIRS - 1); /* Select a random direction */
       }
-    }
-    if (!*arg) {
+    } else {
       attempt = rand_number(g, 0, NUM_OF_DIRS - 1); /* Select a random direction */
     }
     if (char_can_go(g, ch, attempt) &&

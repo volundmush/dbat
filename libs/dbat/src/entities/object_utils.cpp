@@ -883,9 +883,11 @@ std::string *obj_action_description_slot(struct obj_data *obj)
   return &obj->action_description;
 }
 
-struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
+struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj)
 {
-  return &obj->sbinfo;
+  if (!obj->sbinfo)
+    obj->sbinfo.make();
+  return obj->sbinfo->data();
 }
 
 const char *obj_get_action_description(const struct obj_data *obj)
@@ -990,7 +992,7 @@ void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v)
 
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj)
 {
-  return obj->sbinfo;
+  return obj->sbinfo ? obj->sbinfo->data() : nullptr;
 }
 
 struct script_data *obj_get_script(const struct obj_data *obj)

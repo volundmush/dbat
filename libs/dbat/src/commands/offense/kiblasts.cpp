@@ -1,5 +1,6 @@
 /* kiblasts.c: ki blast attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -34,9 +35,11 @@ ACMD(do_eraser)
   double attperc = .125, minimum = .1;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -52,7 +55,7 @@ ACMD(do_eraser)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -286,9 +289,11 @@ ACMD(do_bigbang)
   double attperc = .3, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -304,7 +309,7 @@ ACMD(do_bigbang)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -493,9 +498,11 @@ ACMD(do_balefire)
   double attperc = .3, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -511,7 +518,7 @@ ACMD(do_balefire)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -717,9 +724,11 @@ ACMD(do_hellflash)
   double attperc = .2, minimum = .10;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -735,7 +744,7 @@ ACMD(do_hellflash)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -964,9 +973,10 @@ ACMD(do_baku)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .15, minimum = .05;
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg2;
 
-  one_argument(argument, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1120,9 +1130,11 @@ ACMD(do_shogekiha)
   double attperc = .125, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1138,7 +1150,7 @@ ACMD(do_shogekiha)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1363,9 +1375,11 @@ ACMD(do_kiblast)
   double attperc = .075, minimum = .01;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!can_grav(g, ch)) {
     return;
@@ -1384,7 +1398,7 @@ ACMD(do_kiblast)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

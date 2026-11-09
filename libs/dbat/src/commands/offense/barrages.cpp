@@ -1,5 +1,6 @@
 /* barrages.c: multi-hit ki barrages
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -34,9 +35,11 @@ ACMD(do_pbarrage)
   double attperc = .2, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -52,7 +55,7 @@ ACMD(do_pbarrage)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -251,9 +254,11 @@ ACMD(do_scatter)
   double attperc = .3, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -269,7 +274,7 @@ ACMD(do_scatter)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -473,9 +478,10 @@ ACMD(do_kakusanha)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .3, minimum = .10;
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg2;
 
-  one_argument(argument, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -737,9 +743,11 @@ ACMD(do_renzo)
   double attperc = .125, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -755,7 +763,7 @@ ACMD(do_renzo)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1022,9 +1030,11 @@ ACMD(do_tsuihidan)
   double attperc = .1, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1040,7 +1050,7 @@ ACMD(do_tsuihidan)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }

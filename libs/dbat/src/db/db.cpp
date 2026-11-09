@@ -500,8 +500,6 @@ void destroy_db(GameWorld *g)
 
   /* Objects */
   for (obj_vnum ovnum : g->obj_proto.vnums()) {
-    delete[] obj_get_sbinfo(obj_proto_of(g, ovnum)); /* spellbook pages */
-
     /* free script proto list */
     free_proto_script(obj_proto_of(g, ovnum), OBJ_TRIGGER);
   }
@@ -2345,7 +2343,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
           exit(1);
         }
         if (!obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))) {
-          *obj_sbinfo_slot(obj_proto_of(g, g->parse_obj_index)) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
+          obj_make_sbinfo(obj_proto_of(g, g->parse_obj_index));
         }
         obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))[j].spellname = t[0];
         obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))[j].pages     = t[1];
@@ -3496,7 +3494,6 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr)
 {
   struct obj_data *obj;
   obj_vnum i = nr;
-  int j;
 
   if (!obj_proto_of(g, i)) {
     mud_log("Object (V) %d does not exist in database.", nr);
@@ -3516,13 +3513,6 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr)
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
-  if (obj_get_sbinfo(obj_proto_of(g, i))) {
-    *obj_sbinfo_slot(obj) = new obj_spellbook_spell[SPELLBOOK_SIZE]();
-    for (j = 0; j < SPELLBOOK_SIZE; j++) {
-      obj_get_sbinfo(obj)[j].spellname = obj_get_sbinfo(obj_proto_of(g, i))[j].spellname;
-      obj_get_sbinfo(obj)[j].pages     = obj_get_sbinfo(obj_proto_of(g, i))[j].pages;
-    }
-  }
   copy_proto_script(obj_proto_of(g, i), obj, OBJ_TRIGGER);
   assign_triggers(g, obj, OBJ_TRIGGER);
   if (obj_get_vnum(g, obj) == 65) {
@@ -4066,9 +4056,6 @@ void free_obj(GameWorld *g, struct obj_data *obj)
     extract_script(g, obj, OBJ_TRIGGER);
 
   obj_unregister(g, obj);
-
-  if (obj_get_sbinfo(obj))
-    delete[] obj_get_sbinfo(obj);
 
   delete obj;
 }

@@ -1,5 +1,6 @@
 /* attack.c: weapon attacks (attack, attack2)
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -36,13 +37,14 @@ ACMD(do_attack)
   int64_t dmg;
   struct char_data *vict;
   struct obj_data *obj = nullptr;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
   if (char_is_android(ch)) {
     stcost *= 0.25;
   }
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
@@ -57,7 +59,7 @@ ACMD(do_attack)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -814,10 +816,11 @@ static ACMD(do_attack2)
   int64_t dmg;
   struct char_data *vict = nullptr;
   struct obj_data *obj   = nullptr;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_get_equipment(ch, WEAR_WIELD2)) {
     return;

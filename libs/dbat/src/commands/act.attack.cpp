@@ -13,6 +13,7 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.attack.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -42,9 +43,11 @@ ACMD(do_lightgrenade)
   int64_t dmg;
   double attperc = .35, minimum = .15;
   struct char_data *targ = nullptr;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -76,7 +79,7 @@ ACMD(do_lightgrenade)
   }
 
   targ = nullptr;
-  if (!*arg || !(targ = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(targ = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       targ = char_get_fighting(g, ch);
     } else {
@@ -224,10 +227,11 @@ ACMD(do_breath)
   int64_t dmg, stcost = getEffMaxPL(g, ch) / 5000;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     return;
@@ -236,7 +240,7 @@ ACMD(do_breath)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -248,7 +252,7 @@ ACMD(do_breath)
 
   vict = nullptr;
   obj  = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
@@ -421,10 +425,11 @@ ACMD(do_ram)
   int64_t dmg, stcost = getEffMaxPL(g, ch) / 200;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     return;
@@ -433,7 +438,7 @@ ACMD(do_ram)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -445,7 +450,7 @@ ACMD(do_ram)
 
   vict = nullptr;
   obj  = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
@@ -597,10 +602,11 @@ ACMD(do_strike)
   int64_t dmg, stcost = getEffMaxPL(g, ch) / 400;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
     return;
@@ -609,7 +615,7 @@ ACMD(do_strike)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     return;
   }
 
@@ -621,7 +627,7 @@ ACMD(do_strike)
 
   vict = nullptr;
   obj  = nullptr;
-  if (!*arg || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
@@ -784,22 +790,24 @@ ACMD(do_strike)
 ACMD(do_combine)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   struct char_data *vict;
   int fire = false, temp = -1;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   if (!has_group(g, ch)) {
     send_to_char(g, ch, "You need to be in a group!\r\n");
     return;
   }
-  if (!*arg || (!char_get_master(g, ch) && !*arg2)) {
+  if (arg.empty() || (!char_get_master(g, ch) && arg2.empty())) {
     send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
     send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
     send_to_char(g, ch, "Cancel Syntax: combine stop\r\n");
   } else {
-    if (!strcasecmp(arg, "stop") && char_get_master(g, ch)) {
+    if (str_eq_nocase(arg, "stop") && char_get_master(g, ch)) {
       if (char_get_combine(ch) == -1) {
         send_to_char(g, ch, "You are not trying to combine any attacks...\r\n");
         return;
@@ -813,13 +821,13 @@ ACMD(do_combine)
       char_set_combine(ch, -1);
       return;
     }
-    if (!strcasecmp(arg, "stop") && !char_get_master(g, ch)) {
+    if (str_eq_nocase(arg, "stop") && !char_get_master(g, ch)) {
       send_to_char(g, ch, "You do not need to stop as you haven't prepared anything.\r\n");
       return;
     }
     int i = 0;
     for (i = 0; i < 14; i++) {
-      if (strstr(arg, attack_names[i])) {
+      if (arg.find(attack_names[i]) != std::string::npos) {
         if (i == 5) {
           if (!char_get_equipment(ch, WEAR_WIELD1)) {
             send_to_char(g, ch, "You need to wield a sword to use this technique.\r\n");
@@ -902,9 +910,11 @@ ACMD(do_sunder)
   double attperc = .25, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -920,7 +930,7 @@ ACMD(do_sunder)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1095,9 +1105,11 @@ ACMD(do_zen)
   double attperc = .2, minimum = .1;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1133,7 +1145,7 @@ ACMD(do_zen)
     }
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1449,9 +1461,11 @@ ACMD(do_malice)
   double attperc = .3, minimum = .15;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1471,7 +1485,7 @@ ACMD(do_malice)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -1666,9 +1680,10 @@ ACMD(do_nova)
   int perc, dge = 2, count = 0, skill;
   int64_t dmg;
   double attperc = .20, minimum = .1;
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg2;
 
-  one_argument(argument, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -1829,10 +1844,11 @@ ACMD(do_head)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_HEADBUTT);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
   int mult;
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
@@ -1846,7 +1862,7 @@ ACMD(do_head)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -2053,10 +2069,11 @@ ACMD(do_bash)
   int64_t dmg, stcost = physical_cost(g, ch, SKILL_BASH);
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   double attperc = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
     return;
@@ -2070,7 +2087,7 @@ ACMD(do_bash)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -2262,9 +2279,11 @@ ACMD(do_seishou)
   double attperc = .15, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -2280,7 +2299,7 @@ ACMD(do_seishou)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -2442,19 +2461,21 @@ ACMD(do_throw)
 {
   struct char_data *vict = nullptr, *tch = nullptr;
   struct obj_data *obj = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH] = "", chunk[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH] = "";
+  std::string arg, arg2, arg3;
+  std::string chunk;
   int odam = 0, miss = true, perc = 0, prob = 0, perc2 = 0, grab = false;
   int64_t damage;
 
   char_set_throws(ch, rand_number(g, 1, 3)); /* (set by the interpreter before, for any "throw") */
-  half_chop(argument, arg, chunk);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_word(rest);
+  chunk                 = skip_spaces(rest);
 
   if (playing_song(g, ch)) {
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Throw what?\r\n");
     return;
   }
@@ -2464,8 +2485,10 @@ ACMD(do_throw)
     return;
   }
 
-  if (*chunk) {
-    two_arguments(chunk, arg2, arg3);
+  if (!chunk.empty()) {
+    std::string_view chunk_rest = chunk;
+    arg2                        = take_arg(chunk_rest);
+    arg3                        = take_arg(chunk_rest);
   }
 
   if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
@@ -2613,8 +2636,8 @@ ACMD(do_throw)
     perc  = init_skill(g, ch, SKILL_THROW);
     perc2 = init_skill(g, vict, SKILL_DODGE);
     prob  = axion_dice(g, penalty);
-    if (*arg3) {
-      if (!strcasecmp(arg3, "1") || !strcasecmp(arg3, "single")) {
+    if (!arg3.empty()) {
+      if (str_eq_nocase(arg3, "1") || str_eq_nocase(arg3, "single")) {
         multithrow = false;
       } else {
         send_to_char(g, ch, "Syntax: throw (obj | character) (target) <-- This will multithrow if able\nSyntax: throw (obj) (target) (1 | single) <-- This will not multi throw)\r\n");
@@ -3011,9 +3034,11 @@ ACMD(do_razor)
   double attperc = .14, minimum = .05;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3029,7 +3054,7 @@ ACMD(do_razor)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3191,11 +3216,13 @@ ACMD(do_spike)
   int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int64_t dmg;
   double attperc = .14, minimum = .05;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3211,7 +3238,7 @@ ACMD(do_spike)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3516,10 +3543,12 @@ ACMD(do_koteiru)
   int64_t dmg;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   double attperc = .3, minimum = .1;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3535,7 +3564,7 @@ ACMD(do_koteiru)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3711,10 +3740,12 @@ ACMD(do_hspiral)
   int64_t dmg;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   double attperc = .3, minimum = .15;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3730,7 +3761,7 @@ ACMD(do_hspiral)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3883,9 +3914,10 @@ ACMD(do_spiral)
 {
   int skill;
   struct char_data *vict;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3901,7 +3933,7 @@ ACMD(do_spiral)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
@@ -3947,10 +3979,12 @@ ACMD(do_breaker)
   int64_t dmg;
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   double attperc = .14, minimum = .05;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
 
@@ -3966,7 +4000,7 @@ ACMD(do_breaker)
     return;
   }
 
-  if (!*arg && !char_get_fighting(g, ch)) {
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
