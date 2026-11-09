@@ -44,6 +44,7 @@
 - A script message (`%send%`, `%echoaround%` and the like) ending in the escape character `\` ends there, where it used to read on past the end of the line. [Volund]
 - A text field (`strlen`, `trim` and the rest) asked of something that isn't a variable, such as `%self.strlen%`, is looked for among that thing's own fields, where it used to crash the game. [Volund]
 - An empty record in a shop file (a line with only `~`) is skipped with a SYSERR, where it used to crash the boot. [Volund]
+- `dbat/args.hpp` takes a command's argument apart a word at a time from a `std::string_view`: `take_arg()`, `take_word()` and `take_quoted()` give what `one_argument()`, `any_one_arg()` and `one_word()` did, and `skip_spaces()` has a `string_view` form. `bad_data` checks them against the old functions on three thousand lines. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

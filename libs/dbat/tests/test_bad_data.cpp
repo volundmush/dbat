@@ -14,6 +14,7 @@
 
 #include "dbat/iterate.hpp"
 #include "dbat/affect.hpp"
+#include "dbat/args.hpp"
 #include "dbat/combat.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/consts/applies.hpp"
@@ -539,6 +540,80 @@ static void check_saved_object_with_a_negative_unique_id(void)
     extract_obj(g, first_obj(g, char_get_inventory(ch)));
   CHECK_AUDIT(g);
   th_shutdown(g);
+}
+
+/* ------ parsing ------ */
+
+/* The words args.hpp takes off a line are the ones the old char * functions did, and so is what is left. */
+static void check_args_match_the_old_parsers(void)
+{
+  static const char *const edges[] = {
+      "",
+      " ",
+      "\t",
+      "sword",
+      "  Sword  shield ",
+      "the sword",
+      "the in at sword",
+      "the",
+      "the ",
+      "into the bag",
+      "\"two words\" more",
+      "\"unclosed words",
+      "\"\"",
+      "\" \"",
+      "\t\tTAB\tthen",
+      "\xc8\xe9 accents",
+      "a\nb",
+      "on",
+      "To The At",
+      "2.sword",
+      "all.coin from bag",
+      "x \"y z\" w",
+  };
+  static const char *const tokens[] = {" ", "  ", "\t", "\"", "the", "In", "at", "x", "Sword", "\xc8", "\n", "2.", "on", "a"};
+  std::vector<std::string> inputs(edges, edges + sizeof(edges) / sizeof(*edges));
+  unsigned seed  = 12345;
+  int mismatches = 0;
+
+  for (int i = 0; i < 3000; i++) {
+    std::string text;
+    for (int n = (seed = seed * 1103515245 + 12345) % 9; n > 0; n--)
+      text += tokens[(seed = seed * 1103515245 + 12345) / 65536 % (sizeof(tokens) / sizeof(*tokens))];
+    inputs.push_back(text);
+  }
+
+  for (const std::string &input : inputs) {
+    char buf[MAX_INPUT_LENGTH], w1[MAX_INPUT_LENGTH], w2[MAX_INPUT_LENGTH];
+    std::string_view args;
+    const char *rest;
+
+    snprintf(buf, sizeof(buf), "%s", input.c_str());
+    rest = one_argument(buf, w1);
+    args = input;
+    mismatches += take_arg(args) != w1 || args != rest;
+
+    snprintf(buf, sizeof(buf), "%s", input.c_str());
+    rest = any_one_arg(buf, w1);
+    args = input;
+    mismatches += take_word(args) != w1 || args != rest;
+
+    snprintf(buf, sizeof(buf), "%s", input.c_str());
+    rest = one_word(buf, w1);
+    args = input;
+    mismatches += take_quoted(args) != w1 || args != rest;
+
+    snprintf(buf, sizeof(buf), "%s", input.c_str());
+    rest = two_arguments(buf, w1, w2);
+    args = input;
+    mismatches += take_arg(args) != w1 || take_arg(args) != w2 || args != rest;
+
+    snprintf(buf, sizeof(buf), "%s", input.c_str());
+    half_chop(buf, w1, w2);
+    args = input;
+    mismatches += take_word(args) != w1 || skip_spaces(args) != w2;
+  }
+  CHECK(mismatches == 0);
 }
 
 /* ------ world files ------ */
@@ -1235,6 +1310,7 @@ static const struct {
     {"wait_until_no_time",                          check_wait_until_no_time                         },
     {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
     {"text_field_of_self",                          check_text_field_of_self                         },
+    {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },
