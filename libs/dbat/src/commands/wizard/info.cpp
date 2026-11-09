@@ -819,11 +819,11 @@ ACMD(do_varstat)
     /* currently, variable context for players is always 0, so it is */
     /* not displayed here. in the future, this might change */
     for (tv = char_get_script(vict)->global_vars; tv; tv = tv->next) {
-      if (*(tv->value) == UID_CHAR) {
-        find_uid_name(g, tv->value, uname, sizeof(uname));
-        send_to_char(g, ch, "    %10s:  [UID]: %s\r\n", tv->name, uname);
+      if (tv->value[0] == UID_CHAR) {
+        find_uid_name(g, tv->value.data(), uname, sizeof(uname));
+        send_to_char(g, ch, "    %10s:  [UID]: %s\r\n", tv->name.c_str(), uname);
       } else
-        send_to_char(g, ch, "    %10s:  %s\r\n", tv->name, tv->value);
+        send_to_char(g, ch, "    %10s:  %s\r\n", tv->name.c_str(), tv->value.c_str());
     }
   }
 }

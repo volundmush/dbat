@@ -41,8 +41,8 @@ struct cmdlist_element {
 };
 
 struct trig_var_data {
-  char *name{};   /* name of variable  */
-  char *value{};  /* value of variable */
+  std::string name{};  /* name of variable  */
+  std::string value{}; /* value of variable */
   long context{}; /* 0: global context */
 
   struct trig_var_data *next{};
@@ -260,7 +260,7 @@ void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
 /* From dg_handler.c */
 void free_varlist(struct trig_var_data *vd);
 struct script_data *dg_ensure_script(struct script_data **slot);
-bool remove_var(struct trig_var_data **var_list, char *name);
+bool remove_var(struct trig_var_data **var_list, const char *name);
 void free_trigger(GameWorld *g, trig_data *trig);
 void extract_trigger(GameWorld *g, struct trig_data *trig);
 void extract_script(GameWorld *g, void *thing, int type);

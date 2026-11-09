@@ -1,5 +1,5 @@
 /* Verification helper (not part of the server build).
- * Called from gdb after boot by verify.sh: loads every player and saves it back, then saves every
+ * Called from gdb after boot by verify.sh: loads every player and saves it back (and its script variables), then saves every
  * zone's mobiles, objects, rooms, shops, guilds, triggers and zone file, so the resulting data/ tree can be diffed
  * between two builds. */
 #include <cstdio>
@@ -16,6 +16,7 @@
 #include "dbat/genwld.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/dg_olc.hpp"
+#include "dbat/dg_scripts.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/game_world.hpp"
 
@@ -33,6 +34,8 @@ extern "C" long roundtrip_dump(GameWorld *g)
       continue;
     char_set_pfilepos(pc, pos); /* save_char() silently skips characters without a player-file position */
     save_char(g, pc);
+    read_saved_vars(pc); /* and their script variables, which are kept in a file of their own */
+    save_char_vars(g, pc);
     players++;
   }
   for (struct zone_data *z : g->zones.all()) {

@@ -34,10 +34,6 @@
 /* frees memory associated with var */
 static void free_var_el(struct trig_var_data *var)
 {
-  if (var->name)
-    free(var->name);
-  if (var->value)
-    free(var->value);
   delete var;
 }
 
@@ -76,11 +72,11 @@ void free_varlist(struct trig_var_data *vd)
  * remove var name from var_list
  * returns 1 if found, else 0
  */
-bool remove_var(struct trig_var_data **var_list, char *name)
+bool remove_var(struct trig_var_data **var_list, const char *name)
 {
   struct trig_var_data *i, *j;
 
-  for (j = nullptr, i = *var_list; i && strcasecmp(name, i->name);
+  for (j = nullptr, i = *var_list; i && strcasecmp(name, i->name.c_str());
        j = i, i = i->next);
 
   if (i) {

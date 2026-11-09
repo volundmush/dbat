@@ -46,20 +46,18 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
     return;
   }
 
-  for (vd = *var_list; vd && strcasecmp(vd->name, name); vd = vd->next);
+  for (vd = *var_list; vd && strcasecmp(vd->name.c_str(), name); vd = vd->next);
 
-  char *copy = strdup(value); /* before freeing the old value, which value may be */
+  std::string copy = value; /* before replacing the old value, which value may be */
 
-  if (vd && (!vd->context || vd->context == id)) {
-    free(vd->value);
-  } else {
+  if (!vd || (vd->context && vd->context != id)) {
     vd          = new trig_var_data();
-    vd->name    = strdup(name);
+    vd->name    = name;
     vd->next    = *var_list;
     vd->context = id;
     *var_list   = vd;
   }
-  vd->value = copy;
+  vd->value = std::move(copy);
 }
 
 /* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
@@ -170,12 +168,12 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
 
   if (!strcasecmp(field, "strlen")) { /* strlen    */
     char limit[200];
-    sprintf(limit, "%zu", strlen(vd->value));
+    sprintf(limit, "%zu", strlen(vd->value.c_str()));
     snprintf(str, slen, "%d", atoi(limit));
     return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
     /* trim whitespace from ends */
-    snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value); /* -1 to use later*/
+    snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value.c_str()); /* -1 to use later*/
     p  = tmpvar;
     p2 = tmpvar + strlen(tmpvar) - 1;
     while (*p && isspace(*p)) p++;
@@ -188,27 +186,27 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     snprintf(str, slen, "%s", p);
     return true;
   } else if (!strcasecmp(field, "contains")) { /* contains  */
-    if (str_str(vd->value, subfield))
+    if (str_str(vd->value.c_str(), subfield))
       strcpy(str, "1");
     else
       strcpy(str, "0");
     return true;
   } else if (!strcasecmp(field, "car")) { /* car       */
-    char *car = vd->value;
+    const char *car = vd->value.c_str();
     while (*car && !isspace(*car))
       *str++ = *car++;
     *str = '\0';
     return true;
 
   } else if (!strcasecmp(field, "cdr")) { /* cdr       */
-    char *cdr = vd->value;
+    const char *cdr = vd->value.c_str();
     while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
     while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
     snprintf(str, slen, "%s", cdr);
     return true;
   } else if (!strcasecmp(field, "charat")) { /* CharAt    */
-    size_t len = strlen(vd->value), dgindex = atoi(subfield);
+    size_t len = strlen(vd->value.c_str()), dgindex = atoi(subfield);
     if (dgindex > len || dgindex < 1)
       strcpy(str, "");
     else
@@ -221,9 +219,9 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     /* depending on what patches you've got applied.                      */
     /* on older source bases:    extern struct command_info *cmd_info; */
     int length, cmd;
-    for (length = strlen(vd->value), cmd = 0;
+    for (length = strlen(vd->value.c_str()), cmd = 0;
          *cmd_info[cmd].command != '\n'; cmd++)
-      if (!strncmp(cmd_info[cmd].command, vd->value, length))
+      if (!strncmp(cmd_info[cmd].command, vd->value.c_str(), length))
         break;
 
     if (*cmd_info[cmd].command == '\n')
@@ -722,7 +720,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         strcpy(str, "0");
         if (char_get_script(c) && char_get_script(c)->global_vars) {
           for (remote_vd = char_get_script(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-            if (!strcasecmp(remote_vd->name, subfield)) break;
+            if (!strcasecmp(remote_vd->name.c_str(), subfield)) break;
           }
           if (remote_vd) strcpy(str, "1");
         }
@@ -757,10 +755,10 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
   if (*str == '\x1') { /* no match found in switch */
     if (char_get_script(c)) {
       for (vd = (char_get_script(c))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name, field))
+        if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        snprintf(str, slen, "%s", vd->value);
+        snprintf(str, slen, "%s", vd->value.c_str());
       else {
         *str = '\0';
         script_log(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
@@ -1014,10 +1012,10 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
   if (*str == '\x1') { /* no match in switch */
     if (obj_get_script(o)) {   /* check for global var */
       for (vd = (obj_get_script(o))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name, field))
+        if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        snprintf(str, slen, "%s", vd->value);
+        snprintf(str, slen, "%s", vd->value.c_str());
       else {
         *str = '\0';
         if (strcasecmp(trig->name.c_str(), "Rename Object")) {
@@ -1101,10 +1099,10 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
                  trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
     } else {
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name, field))
+        if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        snprintf(str, slen, "%s", vd->value);
+        snprintf(str, slen, "%s", vd->value.c_str());
       else
         *str = '\0';
     }
@@ -1190,10 +1188,10 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
   } else {
     if (room_get_script(r)) { /* check for global var */
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name, field))
+        if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        snprintf(str, slen, "%s", vd->value);
+        snprintf(str, slen, "%s", vd->value.c_str());
       else {
         *str = '\0';
         script_log(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
@@ -1240,19 +1238,19 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
   /* X.global() will have a NULL trig */
   if (trig)
     for (vd = trig->var_list; vd; vd = vd->next)
-      if (!strcasecmp(vd->name, var))
+      if (!strcasecmp(vd->name.c_str(), var))
         break;
 
   /* some evil waitstates could crash the mud if sent here with sc==NULL*/
   if (!vd && sc)
     for (vd = sc->global_vars; vd; vd = vd->next)
-      if (!strcasecmp(vd->name, var) &&
+      if (!strcasecmp(vd->name.c_str(), var) &&
           (vd->context == 0 || vd->context == sc->context))
         break;
 
   if (!*field) {
     if (vd)
-      snprintf(str, slen, "%s", vd->value);
+      snprintf(str, slen, "%s", vd->value.c_str());
     else {
       if (!strcasecmp(var, "self")) {
         switch (type) {
@@ -1309,7 +1307,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
   else {
     if (vd) {
-      name = vd->value;
+      name = vd->value.data();
 
       switch (type) {
         case MOB_TRIGGER:
@@ -1382,11 +1380,11 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
           return;
         }
         for (vd = thescript->global_vars; vd; vd = vd->next)
-          if (!strcasecmp(vd->name, field))
+          if (!strcasecmp(vd->name.c_str(), field))
             break;
 
         if (vd)
-          snprintf(str, slen, "%s", vd->value);
+          snprintf(str, slen, "%s", vd->value.c_str());
 
         return;
       } else if (!strcasecmp(var, "people")) {

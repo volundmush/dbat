@@ -741,12 +741,12 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
 
   /* find the locally owned variable */
   for (vd = trig->var_list; vd; vd = vd->next)
-    if (!strcasecmp(vd->name, buf))
+    if (!strcasecmp(vd->name.c_str(), buf))
       break;
 
   if (!vd)
     for (vd = sc->global_vars; vd; vd = vd->next)
-      if (!strcasecmp(vd->name, var) &&
+      if (!strcasecmp(vd->name.c_str(), var) &&
           (vd->context == 0 || vd->context == sc->context))
         break;
 
@@ -782,7 +782,7 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
 
   if (sc_remote == nullptr) return; /* no script to assign */
 
-  add_var(&(sc_remote->global_vars), vd->name, vd->value, context);
+  add_var(&(sc_remote->global_vars), vd->name.c_str(), vd->value.c_str(), context);
 }
 
 /*
@@ -838,7 +838,7 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
 
   /* find the global */
   for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
-    if (!strcasecmp(vd->name, var) &&
+    if (!strcasecmp(vd->name.c_str(), var) &&
         (vd->context == 0 || vd->context == sc->context))
       break;
 
@@ -848,9 +848,6 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
   if (vd_prev) vd_prev->next = vd->next;
   else sc_remote->global_vars = vd->next;
 
-  /* and free up the space */
-  free(vd->value);
-  free(vd->name);
   delete vd;
 }
 
@@ -873,7 +870,7 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
   }
 
   for (vd = trig->var_list; vd; vd = vd->next)
-    if (!strcasecmp(vd->name, var))
+    if (!strcasecmp(vd->name.c_str(), var))
       break;
 
   if (!vd) {
@@ -882,8 +879,8 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
     return;
   }
 
-  add_var(&(sc->global_vars), vd->name, vd->value, id);
-  remove_var(&trig->var_list, vd->name);
+  add_var(&(sc->global_vars), vd->name.c_str(), vd->value.c_str(), id);
+  remove_var(&trig->var_list, vd->name.c_str());
 }
 
 /* set the current context for a script */
@@ -1379,8 +1376,8 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   /* note that currently, context will always be zero. this may change */
   /* in the future */
   while (vars) {
-    if (*vars->name != '-') /* don't save if it begins with - */
-      fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
+    if (vars->name[0] != '-') /* don't save if it begins with - */
+      fprintf(file, "%s %ld %s\n", vars->name.c_str(), vars->context, vars->value.c_str());
     vars = vars->next;
   }
 

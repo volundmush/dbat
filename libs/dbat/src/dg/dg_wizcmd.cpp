@@ -92,12 +92,12 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
   send_to_char(g, ch, "Global context: %ld\r\n", sc->context);
 
   for (tv = sc->global_vars; tv; tv = tv->next) {
-    snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name, tv->context);
-    if (*(tv->value) == UID_CHAR) {
-      find_uid_name(g, tv->value, name, sizeof(name));
-      send_to_char(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, name);
+    snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name.c_str(), tv->context);
+    if (tv->value[0] == UID_CHAR) {
+      find_uid_name(g, tv->value.data(), name, sizeof(name));
+      send_to_char(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name.c_str(), name);
     } else
-      send_to_char(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, tv->value);
+      send_to_char(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name.c_str(), tv->value.c_str());
   }
 
   for (t = sc->trig_list; t; t = t->next) {
@@ -126,11 +126,11 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
       send_to_char(g, ch, "  Variables: %s\r\n", t->var_list ? "" : "None");
 
       for (tv = t->var_list; tv; tv = tv->next) {
-        if (*(tv->value) == UID_CHAR) {
-          find_uid_name(g, tv->value, name, sizeof(name));
-          send_to_char(g, ch, "    %15s:  %s\r\n", tv->name, name);
+        if (tv->value[0] == UID_CHAR) {
+          find_uid_name(g, tv->value.data(), name, sizeof(name));
+          send_to_char(g, ch, "    %15s:  %s\r\n", tv->name.c_str(), name);
         } else
-          send_to_char(g, ch, "    %15s:  %s\r\n", tv->name, tv->value);
+          send_to_char(g, ch, "    %15s:  %s\r\n", tv->name.c_str(), tv->value.c_str());
       }
     }
   }
