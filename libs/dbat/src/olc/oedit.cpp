@@ -956,7 +956,6 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
   int number;
   obj_vnum rnum;
   int max_val, min_val;
-  char *oldtext = nullptr;
   struct board_info *tmp;
   struct obj_data *obj;
   obj_vnum robj;
@@ -1086,9 +1085,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter action description:\r\n\r\n");
           if (obj_get_action_description(OLC_OBJ(d))) {
             write_to_output(g, d, "%s", obj_get_action_description(OLC_OBJ(d)));
-            oldtext = strdup(obj_get_action_description(OLC_OBJ(d)));
           }
-          string_write(d, obj_action_description_slot(OLC_OBJ(d)), MAX_MESSAGE_LENGTH, 0, oldtext);
+          string_write(d, obj_action_description_slot(OLC_OBJ(d)), MAX_MESSAGE_LENGTH, 0);
           OLC_VAL(d) = 1;
           break;
         case '5':
@@ -1597,9 +1595,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter the extra description:\r\n\r\n");
           if (!OLC_DESC(d)->description.empty()) {
             write_to_output(g, d, "%s", OLC_DESC(d)->description.c_str());
-            oldtext = strdup(OLC_DESC(d)->description.c_str());
           }
-          string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
+          string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0);
           OLC_VAL(d) = 1;
           return;
 

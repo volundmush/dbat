@@ -315,7 +315,6 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           OLC_MODE(d) = TRIGEDIT_COMMANDS;
           write_to_output(g, d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
           write_to_output(g, d, "%s", OLC_STORAGE(d).c_str());
-          d->backstr = strdup(OLC_STORAGE(d).c_str());
           string_edit_begin(d, &OLC_STORAGE(d), MAX_CMD_LENGTH);
           d->mail_to = 0;
           OLC_VAL(d) = 1;

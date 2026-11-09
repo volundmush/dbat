@@ -615,7 +615,7 @@ static void cedit_prompt(GameWorld *g, struct descriptor_data *d, int i)
     write_to_output(g, d, "%s", o->prompt);
     if (!text->empty())
       write_to_output(g, d, "%s", text->c_str());
-    string_write(d, text, MAX_INPUT_LENGTH, 0, !text->empty() ? strdup(text->c_str()) : nullptr);
+    string_write(d, text, MAX_INPUT_LENGTH, 0);
   } else
     write_to_output(g, d, "%s", o->prompt);
 }

@@ -1045,15 +1045,6 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
     case '2':
       if (char_get_ddesc(d->character)) {
         write_to_output(g, d, "Current description:\r\n%s", char_get_ddesc(d->character));
-        /*
-	 * Don't free this now... so that the old description gets loaded
-	 * as the current buffer in the editor.  Do setup the ABORT buffer
-	 * here, however.
-	 *
-	 * free(d->character->description);
-	 * d->character->description = NULL;
-	 */
-        d->backstr = strdup(char_get_ddesc(d->character));
       }
       write_to_output(g, d, "Enter the new text you'd like others to see when they look at you.\r\n");
       send_editor_help(g, d);

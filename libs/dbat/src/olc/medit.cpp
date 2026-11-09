@@ -516,7 +516,6 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int i         = -1;
   mob_vnum rnum;
-  char *oldtext = nullptr;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
     i = atoi(arg);
@@ -601,9 +600,8 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter mob description:\r\n\r\n");
           if (char_get_ddesc(OLC_MOB(d))) {
             write_to_output(g, d, "%s", char_get_ddesc(OLC_MOB(d)));
-            oldtext = strdup(char_get_ddesc(OLC_MOB(d)));
           }
-          string_write(d, char_description_slot(OLC_MOB(d)), MAX_MOB_DESC, 0, oldtext);
+          string_write(d, char_description_slot(OLC_MOB(d)), MAX_MOB_DESC, 0);
           OLC_VAL(d) = 1;
           return;
         case '6':

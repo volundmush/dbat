@@ -27,52 +27,6 @@ struct txt_q {
   int typed{};                /* queued lines the player typed (alias expansions are not counted) */
 };
 
-/*
- * Where text written in the editor goes once it is saved: a malloc'd char * string, which is freed and replaced, or a
- * std::string. Fields move from the first to the second as they become std::string.
- */
-class edit_target {
-  char **chars_{};
-  std::string *text_{};
-
-public:
-  edit_target() = default;
-  edit_target(char **chars) : chars_(chars) {}
-  edit_target(std::string *text) : text_(text) {}
-
-  explicit operator bool() const { return chars_ || text_; }
-  /* the text there now, "" if none */
-  std::string get() const
-  {
-    if (chars_)
-      return *chars_ ? *chars_ : "";
-    return text_ ? *text_ : std::string();
-  }
-  void set(const std::string &text) const
-  {
-    if (chars_) {
-      free(*chars_);
-      *chars_ = strdup(text.c_str());
-    } else if (text_)
-      *text_ = text;
-  }
-  /* the text there before editing began, kept as a char * (null for none) */
-  void restore(char *old) const
-  {
-    if (chars_) {
-      free(*chars_);
-      *chars_ = old;
-    } else if (text_) {
-      *text_ = old ? old : "";
-      free(old);
-    }
-  }
-  bool is(char *const *chars) const { return chars_ && chars_ == chars; }
-  bool is(const std::string *text) const { return text_ && text_ == text; }
-  char **chars() const { return chars_; }
-  std::string *text() const { return text_; }
-};
-
 struct descriptor_data {
   int descriptor{};                    /* file descriptor for socket		*/
   char host[HOST_LENGTH + 1]{};        /* hostname				*/
@@ -81,10 +35,10 @@ struct descriptor_data {
   int connected{};                     /* mode of 'connectedness'		*/
   int desc_num{};                      /* unique num assigned to desc		*/
   time_t login_time{};                 /* when the person connected		*/
-  edit_target str;                     /* where the text being written goes, or none */
+  std::string *str{};                  /* where the text being written goes once saved, or null */
   std::string edit_text;               /* the text being written, saved to str at the end */
   std::string draft;                   /* where a news entry or letter is saved, until it is filed or sent */
-  char *backstr{};                     /* backup string for modify-str system	*/
+  std::string backstr;                 /* what was there when writing began, put back if an OLC edit is aborted */
   size_t max_str{};                    /* maximum size of string in modify-str	*/
   int32_t mail_to{};                   /* name for mail system			*/
   int has_prompt{};                    /* is the user at a prompt?             */

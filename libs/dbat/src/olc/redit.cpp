@@ -494,7 +494,6 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   int number;
   room_vnum rnum;
-  char *oldtext = nullptr;
 
   switch (OLC_MODE(d)) {
     case REDIT_CONFIRM_SAVESTRING:
@@ -568,9 +567,8 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
           if (room_get_description(OLC_ROOM(d))) {
             write_to_output(g, d, "%s", room_get_description(OLC_ROOM(d)));
-            oldtext = strdup(room_get_description(OLC_ROOM(d)));
           }
-          string_write(d, room_description_slot(OLC_ROOM(d)), MAX_ROOM_DESC, 0, oldtext);
+          string_write(d, room_description_slot(OLC_ROOM(d)), MAX_ROOM_DESC, 0);
           OLC_VAL(d) = 1;
           break;
         case '3':
@@ -803,9 +801,8 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter exit description:\r\n\r\n");
           if (exit_description(OLC_EXIT(d))) {
             write_to_output(g, d, "%s", exit_description(OLC_EXIT(d)));
-            oldtext = strdup(exit_description(OLC_EXIT(d)));
           }
-          string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0, oldtext);
+          string_write(d, &OLC_EXIT(d)->general_description, MAX_EXIT_DESC, 0);
           return;
         case '3':
           OLC_MODE(d) = REDIT_EXIT_KEYWORD;
@@ -942,9 +939,8 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter extra description:\r\n\r\n");
           if (!OLC_DESC(d)->description.empty()) {
             write_to_output(g, d, "%s", OLC_DESC(d)->description.c_str());
-            oldtext = strdup(OLC_DESC(d)->description.c_str());
           }
-          string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
+          string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0);
           return;
         case 3:
           if (OLC_DESC(d)->keyword.empty() || OLC_DESC(d)->description.empty()) {

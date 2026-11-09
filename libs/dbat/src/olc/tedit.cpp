@@ -81,7 +81,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
   struct atomic_file af;
   FILE *fl;
   const char *storage = !OLC_STORAGE(d).empty() ? OLC_STORAGE(d).c_str() : nullptr;
-  std::string *text = d->str.text(); /* the file's text, as now edited */
+  std::string *text   = d->str; /* the file's text, as now edited */
 
   if (!storage || !text)
     terminator = STRINGADD_ABORT;
@@ -144,7 +144,6 @@ ACMD(do_tedit)
 {
   int l, i = 0;
   char field[MAX_INPUT_LENGTH];
-  char *backstr = nullptr;
 
   struct {
     const char *cmd{};
@@ -214,11 +213,10 @@ ACMD(do_tedit)
 
   if (!fields[l].buffer->empty()) {
     send_to_char(g, ch, "%s", fields[l].buffer->c_str());
-    backstr = strdup(fields[l].buffer->c_str());
   }
 
   OLC_STORAGE(char_get_desc(ch)) = fields[l].filename;
-  string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0, backstr);
+  string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0);
 
   act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);

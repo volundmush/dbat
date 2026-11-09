@@ -195,7 +195,6 @@ static void hedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 
 void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  char *oldtext = nullptr;
   int number, change = true;
 
   switch (OLC_MODE(d)) {
@@ -321,9 +320,8 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           write_to_output(g, d, "Enter help entry: (/s saves /h for help)\r\n");
           if (!OLC_HELP(d)->entry.empty()) {
             write_to_output(g, d, "%s", OLC_HELP(d)->entry.c_str());
-            oldtext = strdup(OLC_HELP(d)->entry.c_str());
           }
-          string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0, oldtext);
+          string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0);
           OLC_VAL(d) = 1;
           break;
         case '3':

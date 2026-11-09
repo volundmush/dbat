@@ -1272,11 +1272,8 @@ ACMD(do_write)
   else if (obj_get_type_flag(paper) != ITEM_NOTE)
     act(g, "You can't write on $p.", false, ch, paper, nullptr, TO_CHAR);
   else {
-    char *backstr = nullptr;
-
     /* Something on it, display it as that's in input buffer. */
     if (obj_get_action_description(paper)) {
-      backstr = strdup(obj_get_action_description(paper));
       send_to_char(g, ch, "There's something written on it already:\r\n");
       send_to_char(g, ch, "%s", obj_get_action_description(paper));
     }
@@ -1285,7 +1282,7 @@ ACMD(do_write)
     act(g, "$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
     obj_extra_set(paper, ITEM_UNIQUE_SAVE, true);
     send_editor_help(g, char_get_desc(ch));
-    string_write(char_get_desc(ch), obj_action_description_slot(paper), MAX_NOTE_LENGTH, 0, backstr);
+    string_write(char_get_desc(ch), obj_action_description_slot(paper), MAX_NOTE_LENGTH, 0);
   }
 }
 

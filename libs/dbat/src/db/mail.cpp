@@ -641,7 +641,7 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
 
   /* Start writing! */
   char_get_desc(ch)->draft.clear();
-  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, MAX_MAIL_SIZE, recipient, nullptr);
+  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, MAX_MAIL_SIZE, recipient);
 }
 
 static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,

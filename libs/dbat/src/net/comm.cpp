@@ -2463,10 +2463,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
 
     /* Plug memory leak, from Eric Green. */
     if (!char_is_npc(d->character) && char_plr_flagged(d->character, PLR_MAILING) && d->str) {
-      d->str = {}; /* the letter being written, in d->draft */
-    } else if (d->backstr && !char_is_npc(d->character) && !char_plr_flagged(d->character, PLR_WRITING)) {
-      free(d->backstr); /* editing description ... not olc */
-      d->backstr = nullptr;
+      d->str = nullptr; /* the letter being written, in d->draft */
     }
     if (desc_is_playing(d) || desc_get_connected(d) == CON_DISCONNECT) {
       struct char_data *link_challenged = d->original ? d->original : d->character;

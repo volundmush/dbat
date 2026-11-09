@@ -253,7 +253,7 @@ ACMD(do_newsedit)
   g->TOP_OF_NEWS       = lookup;
   g->LASTNEWS          = lookup;
   char_get_desc(ch)->draft.clear();
-  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, 2000, 0, nullptr);
+  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, 2000, 0);
   desc_set_connected(char_get_desc(ch), CON_NEWSEDIT);
 }
 

@@ -95,31 +95,24 @@ static void smash_numb(char *str)
 #endif
 }
 
-/*
- * Basic API function to start writing somewhere.
- *
- * 'data' isn't used in stock CircleMUD but you can use it to pass whatever
- * else you may want through it.  The improved editor patch when updated
- * could use it to pass the old text buffer, for instance.
- */
-void string_edit_begin(struct descriptor_data *d, edit_target target, size_t len)
+/* Starts the editor on target, with the text there now, which is also kept to put back if the edit is aborted. */
+void string_edit_begin(struct descriptor_data *d, std::string *target, size_t len)
 {
   d->str       = target;
-  d->edit_text = target.get();
+  d->edit_text = *target;
+  d->backstr   = *target;
   d->max_str   = len;
 }
 
-void string_write(struct descriptor_data *d, edit_target writeto, size_t len, long mailto, char *data)
+/* Starts writing to writeto: string_edit_begin(), as a player who is writing (mailto is the letter's recipient). */
+void string_write(struct descriptor_data *d, std::string *writeto, size_t len, long mailto)
 {
   if (d->character && !char_is_npc(d->character))
     char_plr_set(d->character, PLR_WRITING, true);
 
-  if (using_improved_editor)
-    d->backstr = data;
-  else if (data)
-    free(data);
-
   string_edit_begin(d, writeto, len);
+  if (!using_improved_editor) /* which can't abort */
+    d->backstr.clear();
   d->mail_to = mailto;
 }
 
@@ -183,9 +176,9 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
         case CON_EXDESC:
         case CON_TRIGEDIT:
         case CON_HEDIT:
-          d->str.restore(d->backstr); /* what was there before */
-          d->backstr = nullptr;
-          d->str     = {};
+          *d->str = d->backstr; /* what was there before */
+          d->backstr.clear();
+          d->str = nullptr;
           break;
         case CON_PLAYING:
           /* all CON_PLAYING are handled below in playing_string_cleanup */
@@ -199,10 +192,8 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
     case STRINGADD_SAVE:
       if (text.empty())
         text = "Nothing.\r\n";
-      d->str.set(text); /* the cleanup below may read it from there */
-      if (d->backstr)
-        free(d->backstr);
-      d->backstr = nullptr;
+      *d->str = text; /* the cleanup below may read it from there */
+      d->backstr.clear();
       break;
     case STRINGADD_ACTION:
       break;
@@ -235,7 +226,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
         (*cleanup_modes[i].func)(g, d, action);
 
     /* Common post cleanup code. */
-    d->str = {};
+    d->str = nullptr;
     d->edit_text.clear();
     d->mail_to = 0;
     d->max_str = 0;
@@ -265,7 +256,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
       struct board_info *board = locate_board(g, d->mail_to - BOARD_MAGIC);
 
       if (action == STRINGADD_ABORT) {
-        if (board_discard_message(board, d->str.text()))
+        if (board_discard_message(board, d->str))
           write_to_output(g, d, "Post aborted.\r\n");
         else
           write_to_output(g, d, "Unable to find your message to delete it!\r\n");

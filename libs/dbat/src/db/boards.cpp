@@ -132,7 +132,7 @@ static int memory_slot(GameWorld *g, const struct board_msg *msg)
 static bool message_being_written(GameWorld *g, const struct board_msg *msg)
 {
   for (descriptor_data *d : each_desc(g))
-    if (!d->connected && d->str.is(&msg->data))
+    if (!d->connected && d->str == &msg->data)
       return true;
   return false;
 }
@@ -674,7 +674,7 @@ static void start_post(GameWorld *g, struct board_info *board, struct board_msg 
   board->num_messages = MAX(board->num_messages + 1, 1);
   add_message_head(board, msg);
   char_plr_set(ch, PLR_WRITING, true);
-  string_write(char_get_desc(ch), &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC, nullptr);
+  string_write(char_get_desc(ch), &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC);
   announce_new_post(g, board->vnum);
 }
 
