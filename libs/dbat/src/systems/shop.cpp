@@ -1444,6 +1444,10 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
 
   while (!done) {
     buf = fread_string(shop_f, buf2);
+    if (!buf) { /* an empty record: nothing to read, and no end of file either */
+      mud_log("SYSERR: Empty record in %s; skipping it.", buf2);
+      continue;
+    }
     if (*buf == '#') { /* New shop */
       sscanf(buf, "#%d\n", &temp);
       snprintf(buf2, sizeof(buf2), "shop #%d in shop file %s", temp, filename);

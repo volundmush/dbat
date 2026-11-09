@@ -1124,6 +1124,37 @@ static void check_shop_with_impossible_item_types(void)
   th_shutdown(g);
 }
 
+static void empty_record_before_the_shops(void)
+{
+  FILE *fl = fopen("world/shp/3.shp", "r");
+  char text[65536];
+  size_t len;
+
+  if (!fl)
+    abort();
+  len       = fread(text, 1, sizeof(text) - 1, fl);
+  text[len] = '\0';
+  fclose(fl);
+  /* the version line, then an empty record, then the shops as they were */
+  char *rest = strchr(text, '\n');
+  if (!rest)
+    abort();
+  fl = fopen("world/shp/3.shp", "w");
+  fwrite(text, 1, rest + 1 - text, fl);
+  fputs("~\n", fl);
+  fputs(rest + 1, fl);
+  fclose(fl);
+}
+
+static void check_empty_record_in_a_shop_file(void)
+{
+  th_before_boot(empty_record_before_the_shops);
+  GameWorld *g = th_boot();
+
+  CHECK(g->shops.size() == 1); /* the fixture's shop, still read after it */
+  th_shutdown(g);
+}
+
 static void save_a_shadow_dragon_that_does_not_exist(void)
 {
   FILE *fl = fopen(TIME_FILE, "w");
@@ -1242,6 +1273,7 @@ static const struct {
     {"start_room_cannot_be_deleted",                check_start_room_cannot_be_deleted               },
     {"start_room_missing_from_the_world",           check_start_room_missing_from_the_world          },
     {"shop_with_impossible_item_types",             check_shop_with_impossible_item_types            },
+    {"empty_record_in_a_shop_file",                 check_empty_record_in_a_shop_file                },
     {"shadow_dragon_missing_from_the_world",        check_shadow_dragon_missing_from_the_world       },
     {"homing_ball_that_someone_is_carrying",        check_homing_ball_that_someone_is_carrying       },
     {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },

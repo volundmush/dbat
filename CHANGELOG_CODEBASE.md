@@ -43,6 +43,7 @@
 - A script `wait` too long to count is held to `MAX_WAIT_PULSES`, as good as forever, where it used to overflow (in practice into no wait at all), and `wait until` with no time it can read is a script error rather than a wait until a time made of whatever was in memory. [Volund]
 - A script message (`%send%`, `%echoaround%` and the like) ending in the escape character `\` ends there, where it used to read on past the end of the line. [Volund]
 - A text field (`strlen`, `trim` and the rest) asked of something that isn't a variable, such as `%self.strlen%`, is looked for among that thing's own fields, where it used to crash the game. [Volund]
+- An empty record in a shop file (a line with only `~`) is skipped with a SYSERR, where it used to crash the boot. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3
