@@ -175,9 +175,10 @@ void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis,
         tokens[++i] = ++s;
         break;
 
-      case '\\':
+      case '\\': /* the next character as it is, if there is one */
         p++;
-        *s++ = *p++;
+        if (*p)
+          *s++ = *p++;
         break;
 
       default:

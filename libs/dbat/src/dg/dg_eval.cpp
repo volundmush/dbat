@@ -11,10 +11,10 @@
 
 /* Local functions not used elsewhere */
 static bool is_num(char *arg);
-static void eval_op(const char *op, char *lhs, char *rhs, char *result);
+static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text);
 static char *matching_paren(char *p);
 constexpr int MAX_EVAL_DEPTH = 200;
-static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, struct script_data *sc,
+static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, void *go, struct script_data *sc,
                             trig_data *trig, int type);
 
 /* returns 1 if string is all digits, else 0 */
@@ -64,9 +64,11 @@ static long long wrap_div(long long a, long long b)
   return a / b;
 }
 
-/* evaluates 'lhs op rhs', and copies to result */
-static void eval_op(const char *op, char *lhs, char *rhs, char *result)
+/* evaluates 'lhs op rhs' */
+static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text)
 {
+  char *lhs = lhs_text.data(), *rhs = rhs_text.data();
+  char result[32]; /* a number, or 0 or 1 */
   unsigned char *p;
 
   /* strip off extra spaces at begin and end */
@@ -159,6 +161,10 @@ static void eval_op(const char *op, char *lhs, char *rhs, char *result)
     else
       sprintf(result, "%d", !*rhs);
   }
+
+  else
+    *result = '\0';
+  return result;
 }
 
 /*
@@ -212,11 +218,10 @@ static char *next_token(char *p)
   return p + 1;
 }
 
-/* evaluates line, and returns answer in result */
-void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_data *sc,
-               trig_data *trig, int type)
+/* evaluates line */
+std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_data *sc, trig_data *trig, int type)
 {
-  char *expr, *p;
+  std::string result;
 
   while (*line && isspace(*line))
     line++;
@@ -224,8 +229,7 @@ void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_d
   /* each operator or bracket goes one deeper; real scripts reach about 40, and the stack is finite */
   if (g->dg_eval_depth >= MAX_EVAL_DEPTH) {
     script_log(g, "Trigger VNum %d has an expression nested too deeply.", trig ? trig_get_vnum(g, trig) : NOTHING);
-    *result = '\0';
-    return;
+    return result;
   }
   g->dg_eval_depth++;
 
@@ -233,27 +237,27 @@ void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_d
     ;
 
   else if (*line == '(') {
-    expr = strdup(line);
-    p    = matching_paren(expr);
-    *p   = '\0';
-    eval_expr(g, expr + 1, result, go, sc, trig, type);
-    free(expr);
+    std::string expr = line;
+    char *p          = matching_paren(expr.data());
+    *p               = '\0';
+    result           = eval_expr(g, expr.c_str() + 1, go, sc, trig, type);
   }
 
   else
-    var_subst(g, go, sc, trig, type, line, result);
+    result = var_subst(g, go, sc, trig, type, line);
 
   g->dg_eval_depth--;
+  return result;
 }
 
 /*
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, struct script_data *sc,
+static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, void *go, struct script_data *sc,
                             trig_data *trig, int type)
 {
-  char *p, *line, *lhr, *rhr;
+  char *p;
   int i;
 
   /*
@@ -277,41 +281,33 @@ static bool eval_lhs_op_rhs(GameWorld *g, char *expr, char *result, void *go, st
       "!",
       "\n"};
 
-  line = strdup(expr);
+  std::string line = expr; /* cut in two at the operator */
 
   /* the places in line where an op could possibly occur */
   for (i = 0; *ops[i] != '\n'; i++)
-    for (p = line; *p; p = next_token(p))
+    for (p = line.data(); *p; p = next_token(p))
       if (!strncasecmp(ops[i], p, strlen(ops[i]))) {
         *p = '\0';
         p += strlen(ops[i]);
 
-        lhr = str_alloc(MAX_INPUT_LENGTH);
-        rhr = str_alloc(MAX_INPUT_LENGTH);
-        eval_expr(g, line, lhr, go, sc, trig, type);
-        eval_expr(g, p, rhr, go, sc, trig, type);
-        eval_op(ops[i], lhr, rhr, result);
-        free(lhr);
-        free(rhr);
-        free(line);
-
+        std::string lhr = eval_expr(g, line.c_str(), go, sc, trig, type);
+        std::string rhr = eval_expr(g, p, go, sc, trig, type);
+        result          = eval_op(ops[i], lhr, rhr);
         return true;
       }
 
-  free(line);
   return false;
 }
 
 /* returns 1 if cond is true, else 0 */
-bool process_if(GameWorld *g, char *cond, void *go, struct script_data *sc,
+bool process_if(GameWorld *g, const char *cond, void *go, struct script_data *sc,
                 trig_data *trig, int type)
 {
-  char result[MAX_INPUT_LENGTH], *p;
+  std::string result = eval_expr(g, cond, go, sc, trig, type);
+  const char *p      = result.c_str();
 
-  eval_expr(g, cond, result, go, sc, trig, type);
-
-  p = result;
-  skip_spaces(&p);
+  while (isspace(*p))
+    p++;
 
   if (!*p || *p == '0')
     return false;
@@ -327,7 +323,7 @@ bool process_if(GameWorld *g, char *cond, void *go, struct script_data *sc,
 struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_element *cl)
 {
   struct cmdlist_element *c;
-  char *p;
+  const char *p;
 
   if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
     script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 1)", trig_get_vnum(g, trig));
@@ -335,7 +331,7 @@ struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_e
   }
 
   for (c = cl->next; c; c = c->next) {
-    for (p = c->cmd.data(); *p && isspace(*p); p++);
+    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
 
     if (!strncasecmp("if ", p, 3))
       c = find_end(g, trig, c);
@@ -363,13 +359,13 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
                                       struct script_data *sc, int type)
 {
   struct cmdlist_element *c;
-  char *p;
+  const char *p;
 
   if (!(cl->next))
     return cl;
 
   for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd.data(); *p && isspace(*p); p++); /* skip spaces */
+    for (p = c->cmd.c_str(); *p && isspace(*p); p++); /* skip spaces */
 
     if (!strncasecmp("if ", p, 3))
       c = find_end(g, trig, c);
@@ -397,7 +393,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
   }
 
   /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
-  for (p = c->cmd.data(); *p && isspace(*p); p++); /* skip spaces */
+  for (p = c->cmd.c_str(); *p && isspace(*p); p++); /* skip spaces */
   if (strncasecmp("end", p, 3))
     script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 5)", trig_get_vnum(g, trig));
   return c;
@@ -409,27 +405,25 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
 */
 struct cmdlist_element *
 find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, struct script_data *sc, int type, char *cond)
+          void *go, struct script_data *sc, int type, const char *cond)
 {
-  char result[MAX_INPUT_LENGTH], match[MAX_INPUT_LENGTH];
+  std::string result = eval_expr(g, cond, go, sc, trig, type);
   struct cmdlist_element *c;
-  char *p;
-
-  eval_expr(g, cond, result, go, sc, trig, type);
+  const char *p;
 
   if (!(cl->next))
     return cl;
 
   for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd.data(); *p && isspace(*p); p++);
+    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6)) {
       c = find_done(c);
       if (!c->next) /* it never ended, and neither does this */
         return c;
     } else if (!strncasecmp("case ", p, 5)) {
-      eval_op("==", result, p + 5, match);
-      if (*match && *match != '0')
+      std::string match = eval_op("==", result, p + 5);
+      if (!match.empty() && match[0] != '0')
         return c;
     } else if (!strncasecmp("default", p, 7))
       return c;
@@ -448,13 +442,13 @@ find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
 struct cmdlist_element *find_done(struct cmdlist_element *cl)
 {
   struct cmdlist_element *c;
-  char *p;
+  const char *p;
 
   if (!cl || !(cl->next))
     return cl;
 
   for (c = cl->next; c && c->next; c = c->next) {
-    for (p = c->cmd.data(); *p && isspace(*p); p++);
+    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
       c = find_done(c);

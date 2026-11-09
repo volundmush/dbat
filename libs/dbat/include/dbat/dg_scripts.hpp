@@ -259,8 +259,6 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
 std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, const char *line);
-void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-               int type, char *line, char *buf);
 
 /* From dg_handler.c */
 void free_varlist(struct trig_var_data *vd);

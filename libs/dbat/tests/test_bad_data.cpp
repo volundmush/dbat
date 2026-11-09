@@ -230,12 +230,10 @@ static void check_expression_values(void)
   GameWorld *g = th_boot();
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
-    char line[256], result[MAX_INPUT_LENGTH] = "";
+    std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
 
-    snprintf(line, sizeof(line), "%s", cases[i].expression);
-    eval_expr(g, line, result, nullptr, nullptr, nullptr, WLD_TRIGGER);
-    if (strcmp(result, cases[i].value)) {
-      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result, cases[i].value);
+    if (result != cases[i].value) {
+      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result.c_str(), cases[i].value);
       failures++;
     }
   }
@@ -261,12 +259,10 @@ static void check_arithmetic_at_the_limits(void)
   GameWorld *g = th_boot();
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
-    char line[256], result[MAX_INPUT_LENGTH] = "";
+    std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
 
-    snprintf(line, sizeof(line), "%s", cases[i].expression);
-    eval_expr(g, line, result, nullptr, nullptr, nullptr, WLD_TRIGGER);
-    if (strcmp(result, cases[i].value)) {
-      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result, cases[i].value);
+    if (result != cases[i].value) {
+      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result.c_str(), cases[i].value);
       failures++;
     }
   }
@@ -304,6 +300,66 @@ static void check_chained_field_on_a_short_variable(void)
   std::string want = var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%actor.id.strlen%");
   CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%x.id.strlen%") == want);
   free_varlist(trig.var_list);
+  th_shutdown(g);
+}
+
+/* A variable left open at the end of a line runs to the end, and no further. */
+static void check_variable_left_open_at_the_end(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *mob = read_mobile(g, 300);
+  trig_data trig{};
+
+  char_to_room(g, mob, 300);
+  add_char_uid_var(&trig, "actor", mob, 0);
+  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "hello %actor.name") ==
+        std::string("hello ") + char_get_name(mob));
+  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%") == "");
+  free_varlist(trig.var_list);
+  th_shutdown(g);
+}
+
+/* A wait too long to count is as good as forever, rather than overflowing into no wait at all. */
+static void check_wait_too_long_to_count(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("wait 9223372036854775807 s\n%echo% The wait is over.", &ch);
+
+  CHECK(!saw(ch, "The wait is over."));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A wait until no time at all is an error in the script, not a time made up. */
+static void check_wait_until_no_time(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("wait until noon\n%echo% The wait is over.", &ch);
+
+  CHECK(!saw(ch, "The wait is over."));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A message ending in the escape character ends there. */
+static void check_message_ending_in_a_backslash(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("%send% %actor% Hello there\\", &ch);
+
+  CHECK(saw(ch, "Hello there\r\n") || saw(ch, "Hello there\n"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* The text fields (strlen and the rest) are a variable's: self has none of its own. */
+static void check_text_field_of_self(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("%echo% [%self.strlen%] [%self.vnum%]", &ch);
+
+  CHECK(saw(ch, "[] ["));
+  CHECK_AUDIT(g);
   th_shutdown(g);
 }
 
@@ -1143,6 +1199,11 @@ static const struct {
     {"arithmetic_at_the_limits",                    check_arithmetic_at_the_limits                   },
     {"script_variable_has_a_limit",                 check_script_variable_has_a_limit                },
     {"chained_field_on_a_short_variable",           check_chained_field_on_a_short_variable          },
+    {"variable_left_open_at_the_end",               check_variable_left_open_at_the_end              },
+    {"wait_too_long_to_count",                      check_wait_too_long_to_count                     },
+    {"wait_until_no_time",                          check_wait_until_no_time                         },
+    {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
+    {"text_field_of_self",                          check_text_field_of_self                         },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

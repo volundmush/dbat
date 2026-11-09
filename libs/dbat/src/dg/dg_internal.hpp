@@ -16,9 +16,8 @@ void dg_context_str(GameWorld *g, char *buf, size_t len);
 room_data *find_room(GameWorld *g, long n);
 
 /* dg_eval.c */
-void eval_expr(GameWorld *g, char *line, char *result, void *go, struct script_data *sc,
-               trig_data *trig, int type);
-bool process_if(GameWorld *g, char *cond, void *go, struct script_data *sc,
+std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_data *sc, trig_data *trig, int type);
+bool process_if(GameWorld *g, const char *cond, void *go, struct script_data *sc,
                 trig_data *trig, int type);
 struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_element *cl);
 struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
@@ -26,7 +25,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
                                       struct script_data *sc, int type);
 struct cmdlist_element *
 find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, struct script_data *sc, int type, char *cond);
+          void *go, struct script_data *sc, int type, const char *cond);
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
 /* dg_wizcmd.c */

@@ -171,6 +171,9 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
   char *p, *p2;
   char tmpvar[MAX_STRING_LENGTH];
 
+  if (!vd) /* a field of self, which is no variable: its own fields, not these */
+    return false;
+
   if (!strcasecmp(field, "strlen")) { /* strlen    */
     char limit[200];
     sprintf(limit, "%zu", strlen(vd->value.c_str()));
@@ -1591,6 +1594,7 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
   }
 
   std::string tmp = line;
+  tmp.push_back('\0'); /* an unclosed %variable leaves the scan one past the end of the line */
   p = tmp.data();
 
   while (*p && out.size() < max_len) {
@@ -1658,12 +1662,4 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
   if (out.size() > max_len)
     out.resize(max_len);
   return out;
-}
-
-/* substitutes any variables into line and returns it as buf, which holds MAX_INPUT_LENGTH */
-void var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, char *line, char *buf)
-{
-  std::string out = var_subst(g, go, sc, trig, type, line);
-
-  memcpy(buf, out.c_str(), out.size() + 1);
 }

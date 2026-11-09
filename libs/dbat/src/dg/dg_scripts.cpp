@@ -7,7 +7,9 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <algorithm>
 #include <cerrno>
+#include <climits>
 #include <cstdlib>
 
 #include <unistd.h>
@@ -303,6 +305,19 @@ void script_log(GameWorld *g, const char *format, ...)
 }
 
 /* processes any 'wait' commands in a trigger */
+/* The longest a script can wait, in pulses: as good as forever, and far enough from overflowing once the pulse is added. */
+constexpr long MAX_WAIT_PULSES = LONG_MAX / 4;
+
+/* a * b, held to MAX_WAIT_PULSES (and as far the other way) instead of overflowing */
+static long wait_mul(long a, long b)
+{
+  long product;
+
+  if (__builtin_mul_overflow(a, b, &product) || product > MAX_WAIT_PULSES || product < -MAX_WAIT_PULSES)
+    return (a < 0) != (b < 0) ? -MAX_WAIT_PULSES : MAX_WAIT_PULSES;
+  return product;
+}
+
 static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char *cmd,
                          struct cmdlist_element *cl)
 {
@@ -323,13 +338,19 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
   if (!strncasecmp(arg, "until ", 6)) {
 
     /* valid forms of time are 14:30 and 1430 */
-    if (sscanf(arg, "until %ld:%ld", &hr, &min) == 2)
-      min += (hr * 60);
+    int fields = sscanf(arg, "until %ld:%ld", &hr, &min);
+    if (fields < 1) {
+      script_log(g, "Trigger: %s, VNum %d. wait until w/o a time: '%s'",
+                 trig->name.c_str(), trig_get_vnum(g, trig), cl->cmd.c_str());
+      return;
+    }
+    if (fields == 2)
+      min = wait_mul(hr, 60) + min;
     else
-      min = (hr % 100) + ((hr / 100) * 60);
+      min = (hr % 100) + wait_mul(hr / 100, 60);
 
     /* calculate the pulse of the day of "until" time */
-    ntime = (min * SECS_PER_MUD_HOUR * PASSES_PER_SEC) / 60;
+    ntime = wait_mul(min, SECS_PER_MUD_HOUR * PASSES_PER_SEC) / 60;
 
     /* calculate pulse of day of current time */
     when = (g->pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC)) +
@@ -344,11 +365,12 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
   else {
     if (sscanf(arg, "%ld %c", &when, &c) == 2) {
       if (c == 't')
-        when *= PULSES_PER_MUD_HOUR;
+        when = wait_mul(when, PULSES_PER_MUD_HOUR);
       else if (c == 's')
-        when *= PASSES_PER_SEC;
+        when = wait_mul(when, PASSES_PER_SEC);
     }
   }
+  when = std::clamp(when, -MAX_WAIT_PULSES, MAX_WAIT_PULSES);
 
   wait_event_obj          = new wait_event_data();
   wait_event_obj->trigger = trig;
@@ -381,8 +403,7 @@ static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, c
 void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd)
 {
-  char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-  char result[MAX_INPUT_LENGTH], *expr;
+  char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *expr;
 
   expr = one_argument(cmd, arg);   /* cut off 'eval' */
   expr = one_argument(expr, name); /* cut off name */
@@ -395,8 +416,8 @@ void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
     return;
   }
 
-  eval_expr(g, expr, result, go, sc, trig, type);
-  add_var(&trig->var_list, name, result, sc ? sc->context : 0);
+  std::string result = eval_expr(g, expr, go, sc, trig, type);
+  add_var(&trig->var_list, name, result.c_str(), sc ? sc->context : 0);
 }
 
 /* script attaching a trigger to something */
@@ -404,7 +425,7 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
                            int type, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
-  char result[MAX_INPUT_LENGTH], *id_p;
+  char *id_p;
   trig_data *newtrig;
   char_data *c = nullptr;
   obj_data *o  = nullptr;
@@ -428,8 +449,8 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   }
 
   /* parse and locate the id specified */
-  eval_expr(g, id_p, result, go, sc, trig, type);
-  if (!(id = atoi(result))) {
+  std::string result = eval_expr(g, id_p, go, sc, trig, type);
+  if (!(id = atoi(result.c_str()))) {
     script_log(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
                trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
@@ -481,7 +502,7 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
                            int type, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
-  char result[MAX_INPUT_LENGTH], *id_p;
+  char *id_p;
   char_data *c = nullptr;
   obj_data *o  = nullptr;
   room_data *r = nullptr;
@@ -503,8 +524,8 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
   }
 
   /* parse and locate the id specified */
-  eval_expr(g, id_p, result, go, sc, trig, type);
-  if (!(id = atoi(result))) {
+  std::string result = eval_expr(g, id_p, go, sc, trig, type);
+  if (!(id = atoi(result.c_str()))) {
     script_log(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
                trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
@@ -599,10 +620,9 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
   }
 
   if (atoi(arg) != 0) { /* easy, if you pass an id number */
-    char result[MAX_INPUT_LENGTH];
 
-    eval_expr(g, arg, result, go, sc, trig, type);
-    snprintf(uid, sizeof(uid), "%c%s", UID_CHAR, result);
+    std::string result = eval_expr(g, arg, go, sc, trig, type);
+    snprintf(uid, sizeof(uid), "%c%s", UID_CHAR, result.c_str());
   } else { /* a lot more work without it */
     if (!*name) {
       script_log(g, "Trigger: %s, VNum %d. makeuid needs name: '%s'",
@@ -1125,7 +1145,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
 {
   int ret_val      = 1;
   struct cmdlist_element *cl;
-  char cmd[MAX_INPUT_LENGTH], *p;
+  const char *p;
   struct script_data *sc = nullptr;
   struct cmdlist_element *temp;
   unsigned long loops = 0;
@@ -1178,7 +1198,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
 
   for (cl                    = (mode == TRIG_NEW) ? trig->cmdlist : trig->curr_state;
        cl && trig->depth && !trig->extracted; cl = cl->next) {
-    for (p = cl->cmd.data(); *p && isspace(*p); p++);
+    for (p = cl->cmd.c_str(); *p && isspace(*p); p++);
     dg_ctx_set_line(g, p);
 
     if (*p == '*') /* comment */
@@ -1233,7 +1253,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
     } else if (!strncasecmp("done", p, 4)) {
       /* if in a while loop, cl->original is non-NULL */
       if (cl->original) {
-        char *orig_cmd = cl->original->cmd.data();
+        const char *orig_cmd = cl->original->cmd.c_str();
         while (*orig_cmd && isspace(*orig_cmd)) orig_cmd++;
         if (cl->original && process_if(g, orig_cmd + 6, go, sc, trig,
                                        type)) {
@@ -1262,9 +1282,9 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
 
     else {
 
-      var_subst(g, go, sc, trig, type, p, cmd);
+      std::string cmd = var_subst(g, go, sc, trig, type, p);
 
-      enum dg_line_result res = dg_run_command(g, go_adress, go, sc, trig, type, cmd, cl, &ret_val);
+      enum dg_line_result res = dg_run_command(g, go_adress, go, sc, trig, type, cmd.data(), cl, &ret_val);
       if (res == DG_LINE_HALT)
         break;
       if (res == DG_LINE_STOP) {
