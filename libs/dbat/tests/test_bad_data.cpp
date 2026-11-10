@@ -1167,6 +1167,83 @@ static void check_get_all_from_all_containers(void)
   th_shutdown(g);
 }
 
+/* mjunk <name> junks the item by that name and mjunk all.<name> every one (the first read a name after "all." from
+ * any name, so "mjunk sword" junked what matched "d", and the second junked only one) */
+static void check_mjunk_by_name(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *mob = read_mobile(g, 300);
+  const char *names[]   = {"sword", "dagger", "pebble", "pebble"};
+
+  CHECK(mob != nullptr);
+  char_to_room(g, mob, char_get_in_room(ch));
+  for (const char *name : names) {
+    struct obj_data *obj = read_object(g, 350);
+    obj_set_name(obj, name);
+    obj_to_char(g, obj, mob);
+  }
+  auto count = [&](const char *name) {
+    int n = 0;
+    for (obj_data *obj : char_inventory(g, mob))
+      if (!strcmp(obj_get_name(obj), name))
+        n++;
+    return n;
+  };
+
+  do_mjunk(g, mob, writable{"sword"}, 0, 0);
+  CHECK(count("sword") == 0);
+  CHECK(count("dagger") == 1);
+  do_mjunk(g, mob, writable{"all.pebble"}, 0, 0);
+  CHECK(count("pebble") == 0);
+  CHECK(count("dagger") == 1);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A zone echo longer than a typed line (a script line can be, once its variables are filled in) reaches the zone
+ * whole (it was formatted into a buffer of MAX_INPUT_LENGTH) */
+static void check_long_zone_echo(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Listener", ADMLVL_NONE);
+  struct char_data *mob = read_mobile(g, 300);
+
+  CHECK(mob != nullptr);
+  char_to_room(g, mob, char_get_in_room(ch));
+  std::string text(MAX_INPUT_LENGTH + 100, 'x');
+  std::string line = std::to_string(char_get_in_room(ch)) + " " + text + "END";
+  do_mzoneecho(g, mob, line.data(), 0, 0);
+  CHECK(saw(ch, "xxxEND"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* mload mob <vnum> <room> loads the mob into that room (the room came with the space before it, so it was never
+ * a number) */
+static void check_mload_mob_into_a_room(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *mob = read_mobile(g, 300);
+
+  CHECK(mob != nullptr && room_of(g, 301) != nullptr);
+  char_to_room(g, mob, char_get_in_room(ch));
+  CHECK(char_get_in_room(ch) != 301);
+  auto in_301 = [&]() {
+    int n = 0;
+    for (char_data *tch : room_people(g, 301))
+      if (char_get_mob_vnum(g, tch) == 300)
+        n++;
+    return n;
+  };
+  int before = in_301();
+  do_mload(g, mob, writable{"mob 300 301"}, 0, 0);
+  CHECK(in_301() == before + 1);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static void check_message_about_an_object_with_no_description(void)
 {
   GameWorld *g = th_boot();
@@ -1524,6 +1601,9 @@ static const struct {
     {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },
     {"spellbook_edit_can_be_abandoned",             check_spellbook_edit_can_be_abandoned            },
     {"get_all_from_all_containers",                 check_get_all_from_all_containers                },
+    {"mjunk_by_name",                               check_mjunk_by_name                              },
+    {"long_zone_echo",                              check_long_zone_echo                             },
+    {"mload_mob_into_a_room",                       check_mload_mob_into_a_room                      },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

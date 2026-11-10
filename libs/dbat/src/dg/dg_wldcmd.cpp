@@ -10,6 +10,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -89,35 +90,37 @@ static void act_to_room(GameWorld *g, char *str, room_data *room)
 /* changes gravity, light, or lava levels of a room. */
 static WCMD(do_weffect)
 {
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int num = 0;
   room_vnum nr;
   room_vnum target;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     wld_log(g, room, "weffect called without type argument");
     return;
   }
 
-  if (!*arg2) {
+  if (arg2.empty()) {
     wld_log(g, room, "weffect called without setting argument");
     return;
   }
 
-  num = atoi(arg2);
+  num = parse_int(arg2);
 
   nr     = num;
   target = nr;
 
-  if (!strcasecmp(arg, "gravity")) { /* Set gravity */
+  if (str_eq_nocase(arg, "gravity")) { /* Set gravity */
     if (num < 0 || num > 10000) {
       wld_log(g, room, "weffect setting out of bounds, 0 - 10000 only.");
       return;
     }
     room_set_gravity(g, room_get_number(room), num);
-  } else if (!strcasecmp(arg, "light")) {
+  } else if (str_eq_nocase(arg, "light")) {
     if (!room_of(g, target)) {
       wld_log(g, room, "weffect target is NOWHERE.");
       return;
@@ -127,7 +130,7 @@ static WCMD(do_weffect)
     } else {
       room_set_flag(g, target, ROOM_INDOORS, false);
     }
-  } else if (!strcasecmp(arg, "lava")) {
+  } else if (str_eq_nocase(arg, "lava")) {
     if (!room_of(g, target)) {
       wld_log(g, room, "weffect target is NOWHERE.");
       return;
@@ -206,7 +209,7 @@ static WCMD(do_wsend)
 static WCMD(do_wzoneecho)
 {
   struct zone_data *zone;
-  char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+  char room_num[MAX_INPUT_LENGTH], *msg;
 
   msg = any_one_arg(argument, room_num);
   skip_spaces(&msg);
@@ -218,8 +221,7 @@ static WCMD(do_wzoneecho)
     wld_log(g, room, "wzoneecho called for nonexistant zone");
 
   else {
-    sprintf(buf, "%s\r\n", msg);
-    send_to_zone(g, buf, zone);
+    send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
   }
 }
 
@@ -278,22 +280,24 @@ static WCMD(do_wteleport)
 {
   char_data *ch;
   room_vnum target, nr;
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg1 || !*arg2) {
+  if (arg1.empty() || arg2.empty()) {
     wld_log(g, room, "wteleport called with too few args");
     return;
   }
 
-  nr     = atoi(arg2);
+  nr     = parse_int(arg2);
   target = nr;
 
   if (!room_of(g, target))
     wld_log(g, room, "wteleport target is an invalid room");
 
-  else if (!strcasecmp(arg1, "all")) {
+  else if (str_eq_nocase(arg1, "all")) {
     if (nr == room_get_number(room)) {
       wld_log(g, room, "wteleport all target is itself");
       return;
@@ -358,13 +362,14 @@ static WCMD(do_wforce)
 /* purge all objects an npcs in room, or specified object or mob */
 static WCMD(do_wpurge)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char_data *ch;
   obj_data *obj;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     /* purge all */
     for (char_data *tch : room_people(g, room)) {
       if (char_is_npc(tch))
@@ -378,13 +383,13 @@ static WCMD(do_wpurge)
     return;
   }
 
-  if (*arg == UID_CHAR)
+  if (arg[0] == UID_CHAR)
     ch = get_char(g, arg);
   else
     ch = get_char_in_room(g, room, arg);
 
   if (!ch) {
-    if (*arg == UID_CHAR)
+    if (arg[0] == UID_CHAR)
       obj = get_obj(g, arg);
     else
       obj = get_obj_in_room(g, room, arg);
@@ -500,19 +505,21 @@ static WCMD(do_wload)
 
 static WCMD(do_wdamage)
 {
-  char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
+  std::string name, amount;
   int dam = 0;
   char_data *ch;
 
-  two_arguments(argument, name, amount);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_arg(rest);
+  amount                = take_arg(rest);
 
   /* who cares if it's a number ? if not it'll just be 0 */
-  if (!*name || !*amount) {
+  if (name.empty() || amount.empty()) {
     wld_log(g, room, "wdamage: bad syntax");
     return;
   }
 
-  dam = atoi(amount);
+  dam = parse_int(amount);
   ch  = get_char_by_room(g, room, name);
 
   if (!ch) {

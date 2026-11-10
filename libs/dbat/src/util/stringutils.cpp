@@ -411,6 +411,8 @@ void search_replace(std::string &s, std::string_view find, std::string_view repl
 {
   size_t pos;
 
+  if (find.empty()) /* would match forever */
+    return;
   while ((pos = s.find(find)) != std::string::npos)
     s.replace(pos, find.size(), replace);
 }

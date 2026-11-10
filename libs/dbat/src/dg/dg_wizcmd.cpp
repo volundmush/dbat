@@ -4,6 +4,7 @@
  */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/act.wizard.hpp"
@@ -203,25 +204,27 @@ ACMD(do_attach)
   obj_data *object;
   room_data *room;
   trig_data *trig;
-  char targ_name[MAX_INPUT_LENGTH], trig_name[MAX_INPUT_LENGTH];
-  char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
+  std::string arg, trig_name, targ_name, loc_name;
   int loc;
   trig_vnum tn;
   struct index_data *rn;
   IDXTYPE num_arg;
   room_vnum rnum;
 
-  argument = two_arguments(argument, arg, trig_name);
-  two_arguments(argument, targ_name, loc_name);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  trig_name             = take_arg(rest);
+  targ_name             = take_arg(rest);
+  loc_name              = take_arg(rest);
 
-  if (!*arg || !*targ_name || !*trig_name) {
+  if (arg.empty() || targ_name.empty() || trig_name.empty()) {
     send_to_char(g, ch, "Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
     return;
   }
 
-  num_arg = atoi(targ_name);
-  tn      = atoi(trig_name);
-  loc     = (*loc_name) ? atoi(loc_name) : -1;
+  num_arg = parse_int(targ_name);
+  tn      = parse_int(trig_name);
+  loc     = !loc_name.empty() ? parse_int(loc_name) : -1;
 
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
     victim = get_char_vis(g, ch, targ_name, nullptr, FIND_CHAR_WORLD);
@@ -291,9 +294,9 @@ ACMD(do_attach)
   }
 
   else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
-    if (strchr(targ_name, '.'))
+    if (targ_name.find('.') != std::string::npos)
       rnum = char_get_in_room(ch);
-    else if (isdigit(*targ_name))
+    else if (isdigit(targ_name[0]))
       rnum = find_target_room(g, ch, targ_name);
     else
       rnum = NOWHERE;
@@ -397,23 +400,25 @@ ACMD(do_detach)
   char_data *victim = nullptr;
   obj_data *object  = nullptr;
   struct room_data *room;
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-  char *trigger = nullptr;
+  std::string arg1, arg2, arg3;
+  std::string *trigger = nullptr; /* arg2 or arg3 */
   IDXTYPE num_arg;
 
-  argument = two_arguments(argument, arg1, arg2);
-  one_argument(argument, arg3);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
+  arg3                  = take_arg(rest);
 
-  if (!*arg1 || !*arg2) {
+  if (arg1.empty() || arg2.empty()) {
     send_to_char(g, ch, "Usage: detach [ mob | object | room ] { target } { trigger |"
                      " 'all' }\r\n");
     return;
   }
 
   /* vnum of mob/obj, if given */
-  num_arg = atoi(arg2);
+  num_arg = parse_int(arg2);
 
-  if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
+  if (str_eq_nocase(arg1, "room") || str_eq_nocase(arg1, "wtr")) {
     room = room_of(g, char_get_in_room(ch));
     if (!can_edit_zone(g, ch, room_get_zone(room))) {
       send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
@@ -421,10 +426,10 @@ ACMD(do_detach)
     }
     if (!room_get_script(room))
       send_to_char(g, ch, "This room does not have any triggers.\r\n");
-    else if (!strcasecmp(arg2, "all")) {
+    else if (str_eq_nocase(arg2, "all")) {
       extract_script(g, room, WLD_TRIGGER);
       send_to_char(g, ch, "All triggers removed from room.\r\n");
-    } else if (remove_trigger(g, room_get_script(room), arg2)) {
+    } else if (remove_trigger(g, room_get_script(room), arg2.data())) {
       send_to_char(g, ch, "Trigger removed.\r\n");
       if (!room_get_script(room)->trig_list) {
         extract_script(g, room, WLD_TRIGGER);
@@ -434,7 +439,7 @@ ACMD(do_detach)
   }
 
   else {
-    if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
+    if (is_abbrev(arg1, "mobile") || str_eq_nocase(arg1, "mtr")) {
       victim = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
         victim = find_first(room_people(g, char_get_in_room(ch)),
@@ -446,13 +451,13 @@ ACMD(do_detach)
         }
       }
 
-      if (!*arg3)
+      if (arg3.empty())
         send_to_char(g, ch, "You must specify a trigger to remove.\r\n");
       else
-        trigger = arg3;
+        trigger = &arg3;
     }
 
-    else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
+    else if (is_abbrev(arg1, "object") || str_eq_nocase(arg1, "otr")) {
       object = get_obj_vis(g, ch, arg2, nullptr);
       if (!object) { /* search room for one with this vnum */
         object = find_first(room_contents(g, char_get_in_room(ch)),
@@ -468,10 +473,10 @@ ACMD(do_detach)
         }
       }
 
-      if (!*arg3)
+      if (arg3.empty())
         send_to_char(g, ch, "You must specify a trigger to remove.\r\n");
       else
-        trigger = arg3;
+        trigger = &arg3;
     } else {
       /* Thanks to Carlos Myers for fixing the line below */
       if ((object = get_obj_in_equip_vis(g, ch, arg1, nullptr, char_get_equipment_array(ch))))
@@ -489,7 +494,7 @@ ACMD(do_detach)
       else
         send_to_char(g, ch, "Nothing around by that name.\r\n");
 
-      trigger = arg2;
+      trigger = &arg2;
     }
 
     if (victim) {
@@ -501,12 +506,12 @@ ACMD(do_detach)
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, char_get_mob_vnum(g, victim)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
-      } else if (trigger && !strcasecmp(trigger, "all")) {
+      } else if (trigger && str_eq_nocase(*trigger, "all")) {
         extract_script(g, victim, MOB_TRIGGER);
         send_to_char(g, ch, "All triggers removed from %s.\r\n", char_get_sdesc(victim));
       }
 
-      else if (trigger && remove_trigger(g, char_get_script(victim), trigger)) {
+      else if (trigger && remove_trigger(g, char_get_script(victim), trigger->data())) {
         send_to_char(g, ch, "Trigger removed.\r\n");
         if (!char_get_script(victim)->trig_list) {
           extract_script(g, victim, MOB_TRIGGER);
@@ -522,13 +527,13 @@ ACMD(do_detach)
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, obj_get_vnum(g, object)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
-      } else if (trigger && !strcasecmp(trigger, "all")) {
+      } else if (trigger && str_eq_nocase(*trigger, "all")) {
         extract_script(g, object, OBJ_TRIGGER);
         send_to_char(g, ch, "All triggers removed from %s.\r\n",
                      obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
       }
 
-      else if (trigger && remove_trigger(g, obj_get_script(object), trigger)) {
+      else if (trigger && remove_trigger(g, obj_get_script(object), trigger->data())) {
         send_to_char(g, ch, "Trigger removed.\r\n");
         if (!obj_get_script(object)->trig_list) {
           extract_script(g, object, OBJ_TRIGGER);
@@ -545,26 +550,23 @@ ACMD(do_detach)
 ACMD(do_vdelete)
 {
   struct script_data *sc_remote = nullptr;
-  char *var, *uid_p;
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
+  std::string var, uid_s;
   long uid;
   room_data *room;
   char_data *mob;
   obj_data *obj;
 
-  argument = two_arguments(argument, buf, buf2);
-  var      = buf;
-  uid_p    = buf2;
-  skip_spaces(&var);
-  skip_spaces(&uid_p);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  var                   = take_arg(rest);
+  uid_s                 = take_arg(rest);
 
-  if (!*buf || !*buf2) {
+  if (var.empty() || uid_s.empty()) {
     send_to_char(g, ch, "Usage: vdelete { <variablename> | * | all } <id>\r\n");
     return;
   }
 
   /* find the target script from the uid number */
-  uid = atoi(buf2);
+  uid = parse_int(uid_s);
   if (uid <= 0) {
     send_to_char(g, ch, "vdelete: illegal id specified.\r\n");
     return;
@@ -591,14 +593,14 @@ ACMD(do_vdelete)
     return;
   }
 
-  if (*var == '*' || is_abbrev(var, "all")) {
+  if (var[0] == '*' || is_abbrev(var, "all")) {
     free_varlist(sc_remote->global_vars);
     sc_remote->global_vars = nullptr;
     send_to_char(g, ch, "All variables deleted from that id.\r\n");
     return;
   }
 
-  if (!remove_var(&sc_remote->global_vars, var)) {
+  if (!remove_var(&sc_remote->global_vars, var.c_str())) {
     send_to_char(g, ch, "That variable cannot be located.\r\n");
     return;
   }
@@ -608,11 +610,12 @@ ACMD(do_vdelete)
 ACMD(do_tstat)
 {
   struct index_data *rnum;
-  char str[MAX_INPUT_LENGTH];
+  std::string str;
 
-  half_chop(argument, str, argument);
-  if (*str) {
-    rnum = find_trigger(g, atoi(str));
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  str                   = take_word(rest);
+  if (!str.empty()) {
+    rnum = find_trigger(g, parse_int(str));
     if (rnum == nullptr) {
       send_to_char(g, ch, "That vnum does not exist.\r\n");
       return;

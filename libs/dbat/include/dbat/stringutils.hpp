@@ -42,7 +42,7 @@ char *fname(const char *namelist);
 bool reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
 /* Replaces the first find in s, then searches again from the start, until none is left, as the char * version does
- * (so replace must not contain find). */
+ * (so replace must not contain find; an empty find changes nothing). */
 void search_replace(std::string &s, std::string_view find, std::string_view replace);
 /* A new string formatted as by printf(); aborts if out of memory. */
 char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));

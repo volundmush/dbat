@@ -55,6 +55,11 @@
 - The communication, social, item and movement commands (`act.comm.cpp`, `act.social.cpp`, `act.item.cpp`, `act.movement.cpp`) take their arguments apart with `dbat/args.hpp`. `AN()` is a function of a `std::string_view` rather than a macro, and `search_replace()` has a `std::string` version, which whispers that are overheard now use: the char * one built its result in a fixed buffer. [Volund]
 - "get all.<thing> all.<container>" takes every <thing> from every container. Taking them from the first container stripped the "all." from the name, so from each of the others it took only one. [Volund]
 - The OLC commands (`olc/`) take their arguments apart with `dbat/args.hpp`; `skillset` finds the quoted skill name in a view instead of lowercasing the line in place, and `dig` and `zedit new` read the rest of the line from the same view. [Volund]
+- The mob and wizard script commands (`dg_mobcmd.cpp`, `dg_wizcmd.cpp`, and the object and room commands the converter could take) take their arguments apart with `dbat/args.hpp`. `find_obj_target_room()` takes a `std::string_view`. The object and room commands keep their `char *` lines for now. [Volund]
+- `mjunk <name>` junks the item by that name and `mjunk all.<name>` every one by it. The first read a name after "all." from whatever it was given, so `mjunk sword` junked whatever matched "d" (and read past a name shorter than four letters); the second junked only one. `mjunk all` is as it was. [Volund]
+- `mload mob <vnum> <room>` loads the mob into that room. The room came with the space before it, so it was never taken for a number and the mob was not loaded. [Volund]
+- `mzoneecho`, `ozoneecho` and `wzoneecho` no longer overflow a buffer of `MAX_INPUT_LENGTH` with a message longer than that, which a script line can be once its variables are filled in. [Volund]
+- `search_replace()` on a `std::string` with nothing to find changes nothing; `mechoaround` and `oechoaround` use it instead of copying the message into a buffer. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

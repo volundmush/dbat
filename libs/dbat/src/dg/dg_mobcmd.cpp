@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -109,12 +110,12 @@ ACMD(do_masound)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  if (!*argument) {
+  if (!argument || !*argument) {
     mob_log(g, ch, "masound called with no argument");
     return;
   }
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   was_in_room = char_get_in_room(ch);
   for (door = 0; door < NUM_OF_DIRS; door++) {
@@ -123,7 +124,7 @@ ACMD(do_masound)
     if (((newexit = room_get_dir_option(g, was_in_room, door)) != nullptr) &&
         newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
       char_set_in_room(ch, newexit->to_room);
-      sub_write(g, argument, ch, true, TO_ROOM);
+      sub_write(g, text.data(), ch, true, TO_ROOM);
     }
   }
 
@@ -133,25 +134,27 @@ ACMD(do_masound)
 /* Heals a stat of the mob */
 ACMD(do_mheal)
 {
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
 
   if (!mob_cmd_allowed(g, ch, false))
     return;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg || !*arg2) {
+  if (arg.empty() || arg2.empty()) {
     mob_log(g, ch, "mheal called without an argument");
     return;
   }
 
-  double num = atoi(arg2);
+  double num = parse_int(arg2);
 
-  if (!strcasecmp(arg, "pl")) {
+  if (str_eq_nocase(arg, "pl")) {
     incCurHealthPercent(g, ch, num, true);
-  } else if (!strcasecmp(arg, "ki")) {
+  } else if (str_eq_nocase(arg, "ki")) {
     incCurKIPercent(g, ch, num, true);
-  } else if (!strcasecmp(arg, "st")) {
+  } else if (str_eq_nocase(arg, "st")) {
     incCurSTPercent(g, ch, num, true);
   } else {
     mob_log(g, ch, "mheal called with wrong argument [pl | ki | st]");
@@ -162,27 +165,28 @@ ACMD(do_mheal)
 /* lets the mobile kill any player or mobile without murder*/
 ACMD(do_mkill)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char_data *victim;
   char buf[MAX_INPUT_LENGTH];
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mkill called with no argument");
     return;
   }
 
-  if (*arg == UID_CHAR) {
+  if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log(g, ch, "mkill: victim (%s) not found", arg);
+      mob_log(g, ch, "mkill: victim (%s) not found", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log(g, ch, "mkill: victim (%s) not found", arg);
+    mob_log(g, ch, "mkill: victim (%s) not found", arg.c_str());
     return;
   }
 
@@ -231,23 +235,24 @@ ACMD(do_mkill)
  */
 ACMD(do_mjunk)
 {
-  char arg[MAX_INPUT_LENGTH];
-  int pos, junk_all = 0;
+  std::string arg;
+  int pos;
   obj_data *obj;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mjunk called with no argument");
     return;
   }
 
-  if (!strcasecmp(arg, "all")) junk_all = 1;
+  int dotmode = find_all_dots(arg); /* takes "all." off arg */
 
-  if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
+  if (dotmode == FIND_INDIV) {
     /* Thanks to Carlos Myers for fixing the line below */
     if ((pos = get_obj_pos_in_equip_vis(g, ch, arg, nullptr, char_get_equipment_array(ch))) >= 0) {
       extract_obj(g, unequip_char(g, ch, pos));
@@ -258,7 +263,7 @@ ACMD(do_mjunk)
     return;
   }
   for (obj_data *item : char_inventory(g, ch)) {
-    if (arg[3] == '\0' || isname(arg + 4, obj_get_name(item))) {
+    if (dotmode == FIND_ALL || isname(arg, obj_get_name(item))) {
       extract_obj(g, item);
     }
   }
@@ -271,68 +276,64 @@ ACMD(do_mjunk)
 /* prints the message to everyone in the room other than the mob and victim */
 ACMD(do_mechoaround)
 {
-  char arg[MAX_INPUT_LENGTH];
   char_data *victim;
-  char *p;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  p = one_argument(argument, arg);
-  skip_spaces(&p);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_arg(rest);
+  std::string p(skip_spaces(rest));
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mechoaround called with no argument");
     return;
   }
 
-  if (*arg == UID_CHAR) {
+  if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log(g, ch, "mechoaround: victim (%s) does not exist", arg);
+      mob_log(g, ch, "mechoaround: victim (%s) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log(g, ch, "mechoaround: victim (%s) does not exist", arg);
+    mob_log(g, ch, "mechoaround: victim (%s) does not exist", arg.c_str());
     return;
   }
 
-  char buf[MAX_STRING_LENGTH];
-
-  sprintf(buf, "%s", p);
-  search_replace(buf, char_get_name(victim), "$n");
-  act(g, buf, true, victim, nullptr, nullptr, TO_ROOM);
+  if (const char *name = char_get_name(victim)) /* null for a mob with no short description */
+    search_replace(p, name, "$n");
+  act(g, p.c_str(), true, victim, nullptr, nullptr, TO_ROOM);
   /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
 
 /* sends the message to only the victim */
 ACMD(do_msend)
 {
-  char arg[MAX_INPUT_LENGTH];
   char_data *victim;
-  char *p;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  p = one_argument(argument, arg);
-  skip_spaces(&p);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_arg(rest);
+  std::string p(skip_spaces(rest));
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "msend called with no argument");
     return;
   }
 
-  if (*arg == UID_CHAR) {
+  if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log(g, ch, "msend: victim (%s) does not exist", arg);
+      mob_log(g, ch, "msend: victim (%s) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log(g, ch, "msend: victim (%s) does not exist", arg);
+    mob_log(g, ch, "msend: victim (%s) does not exist", arg.c_str());
     return;
   }
 
-  sub_write(g, p, victim, true, TO_CHAR);
+  sub_write(g, p.data(), victim, true, TO_CHAR);
 }
 
 /* prints the message to the room at large */
@@ -356,23 +357,22 @@ ACMD(do_mecho)
 ACMD(do_mzoneecho)
 {
   struct zone_data *zone;
-  char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  msg = any_one_arg(argument, room_number);
-  skip_spaces(&msg);
+  std::string_view rest   = argument ? argument : ""; /* (some callers pass null) */
+  std::string room_number = take_word(rest);
+  std::string msg(skip_spaces(rest));
 
-  if (!*room_number || !*msg)
+  if (room_number.empty() || msg.empty())
     mob_log(g, ch, "mzoneecho called with too few args");
 
-  else if ((zone = find_zone_by_thing(g, atoi(room_number))) == nullptr)
+  else if ((zone = find_zone_by_thing(g, parse_int(room_number))) == nullptr)
     mob_log(g, ch, "mzoneecho called for nonexistant zone");
 
   else {
-    sprintf(buf, "%s\r\n", msg);
-    send_to_zone(g, buf, zone);
+    send_to_zone(g, (msg + "\r\n").c_str(), zone);
   }
 }
 
@@ -382,11 +382,10 @@ ACMD(do_mzoneecho)
  */
 ACMD(do_mload)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
   IDXTYPE number = 0;
   char_data *mob;
   obj_data *object;
-  char *target;
   char_data *tch;
   obj_data *cnt;
   int pos;
@@ -394,9 +393,12 @@ ACMD(do_mload)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  target = two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
+  std::string target(skip_spaces(rest)); /* where to load it */
 
-  if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+  if (arg1.empty() || arg2.empty() || !is_number(arg2) || ((number = parse_int(arg2)) < 0)) {
     mob_log(g, ch, "mload: bad syntax");
     return;
   }
@@ -404,13 +406,13 @@ ACMD(do_mload)
   /* load mob to target room - Jamie Nelson, April 13 2004 */
   if (is_abbrev(arg1, "mob")) {
     room_vnum rnum;
-    if (!target || !*target) {
+    if (target.empty()) {
       rnum = char_get_in_room(ch);
     } else {
-      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
+      if (!isdigit(target[0]) || !room_of(g, rnum = parse_int(target))) {
         mob_log(g, ch, "mload: room target vnum doesn't exist "
-                    "(loading mob vnum %d to room %s)",
-                number, target);
+                       "(loading mob vnum %d to room %s)",
+                number, target.c_str());
         return;
       }
     }
@@ -439,7 +441,7 @@ ACMD(do_mload)
     }
     randomize_eq(g, object);
     /* special handling to make objects able to load on a person/in a container/worn etc. */
-    if (!target || !*target) {
+    if (target.empty()) {
       add_unique_id(g, object);
       if (obj_wear_flagged(object, ITEM_WEAR_TAKE)) {
         obj_to_char(g, object, ch);
@@ -449,10 +451,12 @@ ACMD(do_mload)
       load_otrigger(g, object);
       return;
     }
-    two_arguments(target, arg1, arg2); /* recycling ... */
-    tch = (*arg1 == UID_CHAR) ? get_char(g, arg1) : get_char_room_vis(g, ch, arg1, nullptr);
+    std::string_view trest = target; /* recycling ... */
+    arg1                   = take_arg(trest);
+    arg2                   = take_arg(trest);
+    tch                    = (arg1[0] == UID_CHAR) ? get_char(g, arg1) : get_char_room_vis(g, ch, arg1, nullptr);
     if (tch) {
-      if (*arg2 &&
+      if (!arg2.empty() &&
           (pos = find_eq_pos_script(arg2)) >= 0 &&
           !char_get_equipment(tch, pos) &&
           can_wear_on_pos(object, pos)) {
@@ -464,7 +468,7 @@ ACMD(do_mload)
       load_otrigger(g, object);
       return;
     }
-    cnt = (*arg1 == UID_CHAR) ? get_obj(g, arg1) : get_obj_vis(g, ch, arg1, nullptr);
+    cnt = (arg1[0] == UID_CHAR) ? get_obj(g, arg1) : get_obj_vis(g, ch, arg1, nullptr);
     if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       obj_to_obj(g, object, cnt);
       load_otrigger(g, object);
@@ -488,16 +492,17 @@ ACMD(do_mload)
  */
 ACMD(do_mpurge)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char_data *victim;
   obj_data *obj;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     /* 'purge' */
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
@@ -512,12 +517,12 @@ ACMD(do_mpurge)
     return;
   }
 
-  if (*arg == UID_CHAR)
+  if (arg[0] == UID_CHAR)
     victim = get_char(g, arg);
   else victim = get_char_room_vis(g, ch, arg, nullptr);
 
   if (victim == nullptr) {
-    if (*arg == UID_CHAR)
+    if (arg[0] == UID_CHAR)
       obj = get_obj(g, arg);
     else
       obj = get_obj_vis(g, ch, arg, nullptr);
@@ -544,15 +549,16 @@ ACMD(do_mpurge)
 /* lets the mobile goto any location it wishes that is not private */
 ACMD(do_mgoto)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   room_vnum location;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mgoto called with no argument");
     return;
   }
@@ -576,15 +582,15 @@ ACMD(do_mgoto)
 /* lets the mobile do a command at another location. Very useful */
 ACMD(do_mat)
 {
-  char arg[MAX_INPUT_LENGTH];
   room_vnum location, original;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  argument = one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_arg(rest);
 
-  if (!*arg || !*argument) {
+  if (arg.empty() || rest.empty()) {
     mob_log(g, ch, "mat: bad argument");
     return;
   }
@@ -597,7 +603,8 @@ ACMD(do_mat)
   original = char_get_in_room(ch);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  command_interpreter(g, ch, argument);
+  std::string line(rest);
+  command_interpreter(g, ch, line.data());
 
   /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
   if (char_get_in_room(ch) == location) {
@@ -612,16 +619,18 @@ ACMD(do_mat)
  */
 ACMD(do_mteleport)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
   room_vnum target;
   char_data *vict;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  argument = two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg1 || !*arg2) {
+  if (arg1.empty() || arg2.empty()) {
     mob_log(g, ch, "mteleport: bad syntax");
     return;
   }
@@ -633,7 +642,7 @@ ACMD(do_mteleport)
     return;
   }
 
-  if (!strcasecmp(arg1, "all")) {
+  if (str_eq_nocase(arg1, "all")) {
     if (target == char_get_in_room(ch)) {
       mob_log(g, ch, "mteleport all target is itself");
       return;
@@ -648,13 +657,13 @@ ACMD(do_mteleport)
       }
     }
   } else {
-    if (*arg1 == UID_CHAR) {
+    if (arg1[0] == UID_CHAR) {
       if (!(vict = get_char(g, arg1))) {
-        mob_log(g, ch, "mteleport: victim (%s) does not exist", arg1);
+        mob_log(g, ch, "mteleport: victim (%s) does not exist", arg1.c_str());
         return;
       }
     } else if (!(vict = get_char_vis(g, ch, arg1, nullptr, FIND_CHAR_WORLD))) {
-      mob_log(g, ch, "mteleport: victim (%s) does not exist", arg1);
+      mob_log(g, ch, "mteleport: victim (%s) does not exist", arg1.c_str());
       return;
     }
 
@@ -668,29 +677,31 @@ ACMD(do_mteleport)
 
 ACMD(do_mdamage)
 {
-  char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
+  std::string name, amount;
   int dam = 0;
   char_data *vict;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  two_arguments(argument, name, amount);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_arg(rest);
+  amount                = take_arg(rest);
 
   /* who cares if it's a number ? if not it'll just be 0 */
-  if (!*name || !*amount) {
+  if (name.empty() || amount.empty()) {
     mob_log(g, ch, "mdamage: bad syntax");
     return;
   }
 
-  dam = atoi(amount);
-  if (*name == UID_CHAR) {
+  dam = parse_int(amount);
+  if (name[0] == UID_CHAR) {
     if (!(vict = get_char(g, name))) {
-      mob_log(g, ch, "mdamage: victim (%s) does not exist", name);
+      mob_log(g, ch, "mdamage: victim (%s) does not exist", name.c_str());
       return;
     }
   } else if (!(vict = get_char_room_vis(g, ch, name, nullptr))) {
-    mob_log(g, ch, "mdamage: victim (%s) does not exist", name);
+    mob_log(g, ch, "mdamage: victim (%s) does not exist", name.c_str());
     return;
   }
   script_damage(g, vict, dam);
@@ -702,19 +713,20 @@ ACMD(do_mdamage)
  */
 ACMD(do_mforce)
 {
-  char arg[MAX_INPUT_LENGTH];
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  argument = one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_arg(rest);
+  std::string line(rest); /* the command; every target is given this same line */
 
-  if (!*arg || !*argument) {
+  if (arg.empty() || rest.empty()) {
     mob_log(g, ch, "mforce: bad syntax");
     return;
   }
 
-  if (!strcasecmp(arg, "all")) {
+  if (str_eq_nocase(arg, "all")) {
     char_data *vch;
 
     for (descriptor_data *i : each_desc(g)) {
@@ -725,16 +737,16 @@ ACMD(do_mforce)
         vch = i->character;
         if (char_get_level(vch) < char_get_level(ch) && char_can_see(g, ch, vch) &&
             valid_dg_target(g, vch, 0)) {
-          command_interpreter(g, vch, argument);
+          command_interpreter(g, vch, line.data());
         }
       }
     }
   } else {
     char_data *victim;
 
-    if (*arg == UID_CHAR) {
+    if (arg[0] == UID_CHAR) {
       if (!(victim = get_char(g, arg))) {
-        mob_log(g, ch, "mforce: victim (%s) does not exist", arg);
+        mob_log(g, ch, "mforce: victim (%s) does not exist", arg.c_str());
         return;
       }
     } else if ((victim = get_char_room_vis(g, ch, arg, nullptr)) == nullptr) {
@@ -748,7 +760,7 @@ ACMD(do_mforce)
     }
 
     if (valid_dg_target(g, victim, 0))
-      command_interpreter(g, victim, argument);
+      command_interpreter(g, victim, line.data());
   }
 }
 
@@ -757,25 +769,25 @@ ACMD(do_mremember)
 {
   char_data *victim;
   struct script_memory *mem;
-  char arg[MAX_INPUT_LENGTH];
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  argument = one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mremember: bad syntax");
     return;
   }
 
-  if (*arg == UID_CHAR) {
+  if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log(g, ch, "mremember: victim (%s) does not exist", arg);
+      mob_log(g, ch, "mremember: victim (%s) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    mob_log(g, ch, "mremember: victim (%s) does not exist", arg);
+    mob_log(g, ch, "mremember: victim (%s) does not exist", arg.c_str());
     return;
   }
 
@@ -790,8 +802,8 @@ ACMD(do_mremember)
 
   /* fill in the structure */
   mem->id = char_get_id(victim);
-  if (argument && *argument) {
-    mem->cmd = argument;
+  if (!rest.empty()) {
+    mem->cmd = rest;
   }
 }
 
@@ -800,25 +812,26 @@ ACMD(do_mforget)
 {
   char_data *victim;
   struct script_memory *mem, *prev;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     mob_log(g, ch, "mforget: bad syntax");
     return;
   }
 
-  if (*arg == UID_CHAR) {
+  if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log(g, ch, "mforget: victim (%s) does not exist", arg);
+      mob_log(g, ch, "mforget: victim (%s) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    mob_log(g, ch, "mforget: victim (%s) does not exist", arg);
+    mob_log(g, ch, "mforget: victim (%s) does not exist", arg.c_str());
     return;
   }
 
@@ -845,7 +858,7 @@ ACMD(do_mforget)
 /* transform into a different mobile */
 ACMD(do_mtransform)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char_data *m, tmpmob;
   obj_data *obj[NUM_WEARS];
   mob_vnum this_rnum = char_get_nr(ch);
@@ -859,17 +872,18 @@ ACMD(do_mtransform)
     return;
   }
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     mob_log(g, ch, "mtransform: missing argument");
-  else if (!isdigit(*arg) && *arg != '-')
+  else if (!isdigit(arg[0]) && arg[0] != '-')
     mob_log(g, ch, "mtransform: bad argument");
   else {
-    if (isdigit(*arg))
-      m = read_mobile(g, atoi(arg));
+    if (isdigit(arg[0]))
+      m = read_mobile(g, parse_int(arg));
     else {
-      m = read_mobile(g, atoi(arg + 1));
+      m = read_mobile(g, parse_int(std::string_view(arg).substr(1)));
     }
     if (m == nullptr) {
       mob_log(g, ch, "mtransform: bad mobile vnum");
@@ -920,19 +934,20 @@ ACMD(do_mtransform)
 
 ACMD(do_mdoor)
 {
-  char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
-  char field[MAX_INPUT_LENGTH], *value;
+  std::string target, direction, field;
   room_data *rm;
   int dir, fd;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  argument = two_arguments(argument, target, direction);
-  value    = one_argument(argument, field);
-  skip_spaces(&value);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  target                = take_arg(rest);
+  direction             = take_arg(rest);
+  field                 = take_arg(rest);
+  std::string value(skip_spaces(rest));
 
-  if (!*target || !*direction || !*field) {
+  if (target.empty() || direction.empty() || field.empty()) {
     mob_log(g, ch, "mdoor called with too few args");
     return;
   }
@@ -952,32 +967,33 @@ ACMD(do_mdoor)
     return;
   }
 
-  if (!dg_door_apply(g, rm, dir, fd, value))
+  if (!dg_door_apply(g, rm, dir, fd, value.data()))
     mob_log(g, ch, "mdoor: invalid door target");
 }
 
 ACMD(do_mfollow)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   struct char_data *leader;
 
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  one_argument(argument, buf);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
 
-  if (!*buf) {
+  if (buf.empty()) {
     mob_log(g, ch, "mfollow: bad syntax");
     return;
   }
 
-  if (*buf == UID_CHAR) {
+  if (buf[0] == UID_CHAR) {
     if (!(leader = get_char(g, buf))) {
-      mob_log(g, ch, "mfollow: victim (%s) does not exist", buf);
+      mob_log(g, ch, "mfollow: victim (%s) does not exist", buf.c_str());
       return;
     }
   } else if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    mob_log(g, ch, "mfollow: victim (%s) not found", buf);
+    mob_log(g, ch, "mfollow: victim (%s) not found", buf.c_str());
     return;
   }
 
@@ -1009,16 +1025,18 @@ ACMD(do_mfollow)
 /* Thx to Jamie Nelson of 4D for this contribution */
 ACMD(do_mrecho)
 {
-  char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
+  std::string start, finish;
 
   if (!mob_cmd_allowed(g, ch, false))
     return;
-  msg = two_arguments(argument, start, finish);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  start                 = take_arg(rest);
+  finish                = take_arg(rest);
 
-  skip_spaces(&msg);
+  std::string msg(skip_spaces(rest));
 
-  if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
+  if (msg.empty() || start.empty() || finish.empty() || !is_number(start) || !is_number(finish))
     mob_log(g, ch, "mrecho called with too few args");
   else
-    send_to_range(g, atoi(start), atoi(finish), "%s\r\n", msg);
+    send_to_range(g, parse_int(start), parse_int(finish), "%s\r\n", msg.c_str());
 }

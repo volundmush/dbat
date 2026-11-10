@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/screen.hpp"
@@ -36,7 +37,7 @@
   void(name)(GameWorld * g, obj_data * obj, char *argument, int cmd, int subcmd)
 
 static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...) __attribute__((format(printf, 3, 4)));
-static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr);
+static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, std::string_view rawroomstr);
 static OCMD(do_oecho);
 static OCMD(do_oforce);
 static OCMD(do_ozoneecho);
@@ -94,21 +95,19 @@ room_vnum obj_room(obj_data *obj)
 }
 
 /* returns the real room number, or NOWHERE if not found or invalid */
-static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, char *rawroomstr)
+static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, std::string_view rawroomstr)
 {
   room_vnum tmp;
   room_vnum location;
   char_data *target_mob;
   obj_data *target_obj;
-  char roomstr[MAX_INPUT_LENGTH];
+  std::string roomstr = take_arg(rawroomstr);
 
-  one_argument(rawroomstr, roomstr);
-
-  if (!*roomstr)
+  if (roomstr.empty())
     return NOWHERE;
 
-  if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
-    tmp = atoi(roomstr);
+  if (isdigit(roomstr[0]) && roomstr.find('.') == std::string::npos) {
+    tmp = parse_int(roomstr);
     if (!room_of(g, location = tmp))
       return NOWHERE;
   }
@@ -196,7 +195,7 @@ static OCMD(do_oforce)
 static OCMD(do_ozoneecho)
 {
   struct zone_data *zone;
-  char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+  char room_number[MAX_INPUT_LENGTH], *msg;
 
   msg = any_one_arg(argument, room_number);
   skip_spaces(&msg);
@@ -208,8 +207,7 @@ static OCMD(do_ozoneecho)
     obj_log(g, obj, "ozoneecho called for nonexistant zone");
 
   else {
-    sprintf(buf, "%s\r\n", msg);
-    send_to_zone(g, buf, zone);
+    send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
   }
 }
 
@@ -236,11 +234,11 @@ static OCMD(do_osend)
     if (subcmd == SCMD_OSEND)
       sub_write(g, msg, ch, true, TO_CHAR);
     else if (subcmd == SCMD_OECHOAROUND) {
-      char msgbuf[MAX_STRING_LENGTH];
+      std::string text = msg;
 
-      sprintf(msgbuf, "%s", msg);
-      search_replace(msgbuf, char_get_name(ch), "$n");
-      act(g, msgbuf, true, ch, nullptr, nullptr, TO_ROOM);
+      if (const char *name = char_get_name(ch)) /* null for a mob with no short description */
+        search_replace(text, name, "$n");
+      act(g, text.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
       /*sub_write(msg, ch, TRUE, TO_ROOM);*/
     }
   }
@@ -268,16 +266,17 @@ static OCMD(do_orecho)
 /* set the object's timer value */
 static OCMD(do_otimer)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     obj_log(g, obj, "otimer: missing argument");
-  else if (!isdigit(*arg))
+  else if (!isdigit(arg[0]))
     obj_log(g, obj, "otimer: bad argument");
   else
-    obj_set_timer(obj, atoi(arg));
+    obj_set_timer(obj, parse_int(arg));
 }
 
 /* transform into a different object */
@@ -285,19 +284,20 @@ static OCMD(do_otimer)
 /* are containers! */
 static OCMD(do_otransform)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   obj_data *o, tmpobj;
   struct char_data *wearer = nullptr;
   int pos                  = 0;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg)
+  if (arg.empty())
     obj_log(g, obj, "otransform: missing argument");
-  else if (!isdigit(*arg))
+  else if (!isdigit(arg[0]))
     obj_log(g, obj, "otransform: bad argument");
   else {
-    o = read_object(g, atoi(arg));
+    o = read_object(g, parse_int(arg));
     if (o == nullptr) {
       obj_log(g, obj, "otransform: bad object vnum");
       return;
@@ -339,14 +339,15 @@ static OCMD(do_dupe)
 /* purge all objects an npcs in room, or specified object or mob */
 static OCMD(do_opurge)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char_data *ch;
   obj_data *o;
   room_vnum rm;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     /* purge all */
     if ((rm = obj_room(obj)) != NOWHERE) {
       for (char_data *tch : room_people(g, rm)) {
@@ -390,11 +391,12 @@ static OCMD(do_opurge)
 static OCMD(do_ogoto)
 {
   room_vnum target;
-  char arg1[MAX_INPUT_LENGTH];
+  std::string arg1;
 
-  one_argument(argument, arg1);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
 
-  if (!*arg1) {
+  if (arg1.empty()) {
     obj_log(g, obj, "ogoto called with too few args");
     return;
   }
@@ -415,11 +417,13 @@ static OCMD(do_oteleport)
 {
   char_data *ch;
   room_vnum target, rm;
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
 
-  two_arguments(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg1 || !*arg2) {
+  if (arg1.empty() || arg2.empty()) {
     obj_log(g, obj, "oteleport called with too few args");
     return;
   }
@@ -429,7 +433,7 @@ static OCMD(do_oteleport)
   if (target == NOWHERE)
     obj_log(g, obj, "oteleport target is an invalid room");
 
-  else if (!strcasecmp(arg1, "all")) {
+  else if (str_eq_nocase(arg1, "all")) {
     rm = obj_room(obj);
     if (target == rm)
       obj_log(g, obj, "oteleport target is itself");
@@ -562,19 +566,21 @@ static OCMD(do_dgoload)
 
 static OCMD(do_odamage)
 {
-  char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
+  std::string name, amount;
   int dam = 0;
   char_data *ch;
 
-  two_arguments(argument, name, amount);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  name                  = take_arg(rest);
+  amount                = take_arg(rest);
 
   /* who cares if it's a number ? if not it'll just be 0 */
-  if (!*name || !*amount) {
+  if (name.empty() || amount.empty()) {
     obj_log(g, obj, "odamage: bad syntax");
     return;
   }
 
-  dam = atoi(amount);
+  dam = parse_int(amount);
   ch  = get_char_by_obj(g, obj, name);
 
   if (!ch) {
@@ -649,18 +655,20 @@ static OCMD(do_odoor)
 
 static OCMD(do_osetval)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
   int position, new_value;
 
-  two_arguments(argument, arg1, arg2);
-  if (!*arg1 || !*arg2 ||
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_arg(rest);
+  arg2                  = take_arg(rest);
+  if (arg1.empty() || arg2.empty() ||
       !is_number(arg1) || !is_number(arg2)) {
     obj_log(g, obj, "osetval: bad syntax");
     return;
   }
 
-  position  = atoi(arg1);
-  new_value = atoi(arg2);
+  position  = parse_int(arg1);
+  new_value = parse_int(arg2);
   if (position >= 0 && position < NUM_OBJ_VAL_POSITIONS)
     obj_set_value(obj, position, new_value);
   else
