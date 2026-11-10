@@ -40,6 +40,8 @@
 #include "dbat/shop_utils.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/guild_utils.hpp"
+#include "dbat/rooms.hpp"
+#include "dbat/room_utils.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
@@ -1410,6 +1412,38 @@ static void check_rent_listing_keeps_no_copies(void)
 #endif
 }
 
+/* The exit list names a northwest exit in full (the direction went through an eight-letter buffer) */
+static void check_exit_list_names_northwest(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
+
+  auto *exit    = new room_direction_data();
+  exit->to_room = 301;
+  room_set_dir_option(g, 300, 6, exit);
+  char_from_room(g, ch);
+  char_to_room(g, ch, 300);
+  th_type(g, ch, "exits");
+  CHECK(saw(ch, "Northwest"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* The player list capitalises each name without keeping a copy of it */
+static void check_player_list_keeps_no_copies(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
+
+  th_type(g, ch, "players");
+  CHECK(saw(ch, "players listed."));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+#ifdef __SANITIZE_ADDRESS__
+  CHECK(__lsan_do_recoverable_leak_check() == 0); /* the run ends in _exit(), which LeakSanitizer doesn't see */
+#endif
+}
+
 /* log_imm_action() appends its line, plain or formatted, to the request file */
 static void check_imm_action_reaches_the_log(void)
 {
@@ -1799,6 +1833,8 @@ static const struct {
     {"guild_with_no_customers",                     check_guild_with_no_customers                    },
     {"long_help_index",                             check_long_help_index                            },
     {"rent_listing_keeps_no_copies",                check_rent_listing_keeps_no_copies               },
+    {"exit_list_names_northwest",                   check_exit_list_names_northwest                  },
+    {"player_list_keeps_no_copies",                 check_player_list_keeps_no_copies                },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

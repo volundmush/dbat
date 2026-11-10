@@ -1485,8 +1485,7 @@ static const int flags_door[] =
 
 static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj, int door, int scmd)
 {
-  char buf[MAX_STRING_LENGTH];
-  size_t len;
+  std::string buf;
   room_vnum num                    = 0;
   room_vnum other_room             = NOWHERE;
   struct room_direction_data *back = nullptr;
@@ -1513,7 +1512,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   if (!door_wtrigger(g, ch, scmd, door))
     return;
 
-  len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
+  buf = str_format("$n {}s ", cmd_door[scmd]);
   if (!obj && ((other_room = char_get_exit(g, ch, door)->to_room) != NOWHERE)) {
     if ((back = room_get_dir_option(g, other_room, rev_dir[door])) != nullptr)
       if (back->to_room != char_get_in_room(ch))
@@ -1665,7 +1664,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
       if (back)
         TOGGLE_LOCK(g, other_room, obj, rev_dir[door]);
       send_to_char(g, ch, "The lock quickly yields to your skills.\r\n");
-      len = strlcpy(buf, "$n skillfully picks the lock on ", sizeof(buf));
+      buf = "$n skillfully picks the lock on ";
       break;
   }
 
@@ -1674,13 +1673,12 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   if (!obj) {
     dbuf = str_format("{}", dirs[door]);
   }
-  if (len < sizeof(buf))
-    snprintf(buf + len, sizeof(buf) - len, "%s%s%s%s.",
-             obj ? "" : "the ", obj ? "$p" : exit_keyword(char_get_exit(g, ch, door)) ? "$F"
-                                                                                      : "door",
-             obj ? "" : " that leads ", obj ? "" : dbuf.c_str());
+  buf += str_format("{}{}{}{}.",
+                    obj ? "" : "the ", obj ? "$p" : exit_keyword(char_get_exit(g, ch, door)) ? "$F"
+                                                                                             : "door",
+                    obj ? "" : " that leads ", obj ? "" : dbuf.c_str());
   if (!obj || obj_get_in_room(obj) != NOWHERE)
-    act(g, buf, false, ch, obj, obj ? nullptr : exit_keyword(char_get_exit(g, ch, door)), TO_ROOM);
+    act(g, buf.c_str(), false, ch, obj, obj ? nullptr : exit_keyword(char_get_exit(g, ch, door)), TO_ROOM);
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {

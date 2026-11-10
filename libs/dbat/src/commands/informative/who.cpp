@@ -296,7 +296,6 @@ ACMD(do_who)
 ACMD(do_users)
 {
   std::string line;
-  char line2[220];
   std::string idletime;
   std::string state;
   char *timeptr, mode;
@@ -409,8 +408,7 @@ ACMD(do_users)
       line += str_format("\n{:>3d} [{} Site: Hostname unknown]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN");
 
     if (desc_get_connected(d) != CON_PLAYING) {
-      snprintf(line2, sizeof(line2), "@g%s@n", line.c_str());
-      line = line2;
+      line = str_format("@g{}@n", line);
     }
     if (desc_get_connected(d) != CON_PLAYING ||
         (desc_get_connected(d) == CON_PLAYING && char_can_see(g, ch, d->character))) {

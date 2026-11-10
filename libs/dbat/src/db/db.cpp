@@ -3413,49 +3413,30 @@ void check_unique_id(GameWorld *g, struct obj_data *obj)
   }
 }
 
-char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high)
+std::string sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high)
 {
-  int i, count = 0, remain, header;
-  struct obj_unique_hash_elem *q;
-  char *str, *ptr;
-  remain = 40;
-  for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-    q = g->obj_unique_hash_pools[i];
-    remain += 40;
-    while (q) {
-      count++;
-      remain += 80 + (obj_get_short_description(q->obj) ? strlen(obj_get_short_description(q->obj)) : 20);
-      q = q->next_e;
-    }
-  }
-  if (count < 1) {
-    return strdup("No objects in unique hash.\r\n");
-  }
-  str   = str_alloc(remain + 1);
-  ptr   = str;
-  count = snprintf(ptr, remain, "Unique object hashes (vnums %d - %d)\r\n",
-                   low, high);
-  ptr += count;
-  remain -= count;
-  for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-    header = 0;
-    q      = g->obj_unique_hash_pools[i];
-    while (q) {
+  std::string str;
+  bool any = false;
+
+  for (int i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++)
+    if (g->obj_unique_hash_pools[i])
+      any = true;
+  if (!any)
+    return "No objects in unique hash.\r\n";
+
+  str = str_format("Unique object hashes (vnums {:d} - {:d})\r\n", low, high);
+  for (int i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
+    bool header = false;
+    for (struct obj_unique_hash_elem *q = g->obj_unique_hash_pools[i]; q; q = q->next_e)
       if (obj_get_vnum(g, q->obj) >= low && obj_get_vnum(g, q->obj) <= high) {
         if (!header) {
-          header = 1;
-          count  = snprintf(ptr, remain, "|-Hash %d\r\n", i);
-          ptr += count;
-          remain -= count;
+          header = true;
+          str += str_format("|-Hash {:d}\r\n", i);
         }
-        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10lld:%-19" PRId64 "@n] - %s\r\n",
-                         obj_get_vnum(g, q->obj), (long long)q->generation, q->unique_id,
-                         obj_get_short_description(q->obj) ? obj_get_short_description(q->obj) : "<Unknown>");
-        ptr += count;
-        remain -= count;
+        str += str_format("| |- [@g{:>6d}@n] - [@y{:>10d}:{:<19d}@n] - {}\r\n",
+                          obj_get_vnum(g, q->obj), (long long)q->generation, q->unique_id,
+                          obj_get_short_description(q->obj) ? obj_get_short_description(q->obj) : "<Unknown>");
       }
-      q = q->next_e;
-    }
   }
   return str;
 }

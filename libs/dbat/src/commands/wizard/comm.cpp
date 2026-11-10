@@ -449,8 +449,7 @@ ACMD(do_poofset)
 
 ACMD(do_wiznet)
 {
-  char buf1[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32],
-      buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32];
+  std::string buf1, buf2;
   char emote = false;
   int level  = ADMLVL_IMMORT;
 
@@ -513,11 +512,11 @@ ACMD(do_wiznet)
     return;
   }
   if (level > ADMLVL_IMMORT) {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: <@C%d@D> @G%s%s@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", said.c_str());
-    snprintf(buf2, sizeof(buf1), "@cSomeone@D: <@C%d@D> @G%s%s@n\r\n", level, emote ? "<--- " : "", said.c_str());
+    buf1 = str_format("@c{}@D: <@C{:d}@D> @G{}{}@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", said);
+    buf2 = str_format("@cSomeone@D: <@C{:d}@D> @G{}{}@n\r\n", level, emote ? "<--- " : "", said);
   } else {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: @G%s%s@n\r\n", char_get_name(ch), emote ? "<--- " : "", said.c_str());
-    snprintf(buf2, sizeof(buf1), "@cSomeone@D: @G%s%s@n\r\n", emote ? "<--- " : "", said.c_str());
+    buf1 = str_format("@c{}@D: @G{}{}@n\r\n", char_get_name(ch), emote ? "<--- " : "", said);
+    buf2 = str_format("@cSomeone@D: @G{}{}@n\r\n", emote ? "<--- " : "", said);
   }
 
   for (descriptor_data *d : each_desc(g)) {
@@ -525,11 +524,11 @@ ACMD(do_wiznet)
         (!char_prf_flagged(g, d->character, PRF_NOWIZ)) &&
         (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(g, d->character, PRF_NOREPEAT)))) {
       if (char_can_see(g, d->character, ch)) {
-        send_to_char(g, d->character, "{}", buf1);
-        add_history(g, d->character, buf1, HIST_WIZNET);
+        send_to_char(g, d->character, buf1);
+        add_history(g, d->character, buf1.c_str(), HIST_WIZNET);
       } else {
-        send_to_char(g, d->character, "{}", buf2);
-        add_history(g, d->character, buf2, HIST_WIZNET);
+        send_to_char(g, d->character, buf2);
+        add_history(g, d->character, buf2.c_str(), HIST_WIZNET);
       }
     }
   }

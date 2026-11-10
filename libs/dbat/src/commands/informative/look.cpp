@@ -436,9 +436,8 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
         if (char_adm_flagged(ch, ADM_SEESECRET) || char_get_admlevel(ch) > 4) {
           /* Immortals see everything */
           door_found++;
-          char blam[9];
-          snprintf(blam, sizeof(blam), "%s", dirs[door]);
-          *blam = toupper(*blam);
+          std::string blam = dirs[door];
+          CAP(blam);
           if (door == 6) {
             dlist1 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
@@ -720,9 +719,8 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
           if (!IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED)) {
             /* And the door is open */
             door_found++;
-            char blam[9];
-            snprintf(blam, sizeof(blam), "%s", dirs[door]);
-            *blam = toupper(*blam);
+            std::string blam = dirs[door];
+            CAP(blam);
             if (door == 6) {
               dlist1 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
@@ -764,9 +762,8 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                      !IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
             /* But we tell them the door is closed */
             door_found++;
-            char blam[9];
-            snprintf(blam, sizeof(blam), "%s", dirs[door]);
-            *blam = toupper(*blam);
+            std::string blam = dirs[door];
+            CAP(blam);
             if (door == 6) {
               dlist1 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }

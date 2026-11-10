@@ -810,19 +810,12 @@ void gain_level(GameWorld *g, struct char_data *ch, int whichclass)
 void run_autowiz(GameWorld *g)
 {
   if (CONFIG_USE_AUTOWIZ) {
-    size_t res;
-    char buf[256];
+    std::string cmd = str_format("nice ../bin/autowiz {:d} {} {:d} {} {:d} &",
+                                 CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE, (long)getpid());
 
-    res = snprintf(buf, sizeof(buf), "nice ../bin/autowiz %d %s %d %s %ld &",
-                   CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE, (long)getpid());
-
-    /* Abusing signed -> unsigned conversion to avoid '-1' check. */
-    if (res < sizeof(buf)) {
-      mudlog(g, LOG_CMP, ADMLVL_IMMORT, false, "Initiating autowiz.");
-      system(buf);
-      reboot_wizlists(g);
-    } else
-      mud_log("Cannot run autowiz: command-line doesn't fit in buffer.");
+    mudlog(g, LOG_CMP, ADMLVL_IMMORT, false, "Initiating autowiz.");
+    system(cmd.c_str());
+    reboot_wizlists(g);
   }
 }
 

@@ -2791,19 +2791,12 @@ void name_from_drinkcon(GameWorld *g, struct obj_data *obj)
 
 void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)
 {
-  char *new_name;
-  size_t len;
-
   if (!obj || (obj_get_type_flag(obj) != ITEM_DRINKCON && obj_get_type_flag(obj) != ITEM_FOUNTAIN))
     return;
   if (type < 0 || type >= NUM_LIQ_TYPES)
     return;
 
-  len = strlen(obj_get_name(obj)) + strlen(drinknames[type]) + 2;
-  new_name = str_alloc(len);
-  snprintf(new_name, len, "%s %s", obj_get_name(obj), drinknames[type]);
-
-  obj_set_name(obj, take_string(new_name));
+  obj_set_name(obj, str_format("{} {}", obj_get_name(obj), drinknames[type]));
 }
 
 ACMD(do_drink)

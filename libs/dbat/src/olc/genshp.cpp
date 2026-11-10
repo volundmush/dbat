@@ -42,15 +42,15 @@ struct shop_data *find_shop(GameWorld *g, shop_vnum vnum)
 const char *modify_string(std::string *str, const char *new_s, bool allow_int)
 {
 
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   const char *pointer;
 
   /*
    * Check the '%s' is present, if not, add it.
    */
   if (*new_s != '%') {
-    snprintf(buf, sizeof(buf), "%%s %s", new_s);
-    pointer = buf;
+    buf     = str_format("%s {}", new_s);
+    pointer = buf.c_str();
   } else
     pointer = new_s;
 

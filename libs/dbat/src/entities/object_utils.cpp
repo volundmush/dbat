@@ -353,7 +353,7 @@ struct obj_data *create_money(GameWorld *g, int amount)
 {
   struct obj_data *obj;
   extra_descr_data descr;
-  char buf[200];
+  std::string buf;
   int y;
 
   if (amount <= 0) {
@@ -371,21 +371,21 @@ struct obj_data *create_money(GameWorld *g, int amount)
   } else {
     obj->name              = "zenni money";
     obj->short_description = money_desc(amount);
-    snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
+    buf                    = str_format("{} is lying here", money_desc(amount));
     obj->description = CAP(buf);
 
     descr.keyword = "zenni money";
     if (amount < 10)
-      snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
+      buf = str_format("There is {:d} zenni.", amount);
     else if (amount < 100)
-      snprintf(buf, sizeof(buf), "There is about %d zenni.", 10 * (amount / 10));
+      buf = str_format("There is about {:d} zenni.", 10 * (amount / 10));
     else if (amount < 1000)
-      snprintf(buf, sizeof(buf), "It looks to be about %d zenni.", 100 * (amount / 100));
+      buf = str_format("It looks to be about {:d} zenni.", 100 * (amount / 100));
     else if (amount < 100000)
-      snprintf(buf, sizeof(buf), "You guess there is, maybe, %d zenni.",
-               1000 * ((amount / 1000) + rand_number(g, 0, (amount / 1000))));
+      buf = str_format("You guess there is, maybe, {:d} zenni.",
+                       1000 * ((amount / 1000) + rand_number(g, 0, (amount / 1000))));
     else
-      strcpy(buf, "There are is LOT of zenni."); /* strcpy: OK (is < 200) */
+      buf = "There are is LOT of zenni.";
     descr.description = buf;
   }
 

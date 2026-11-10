@@ -15,7 +15,7 @@ void cedit_creation(GameWorld *g, struct char_data *ch);
 void advance_level(GameWorld *g, struct char_data *ch, int whichclass);
 int8_t ability_mod_value(int abil);
 int8_t dex_mod_capped(const struct char_data *ch);
-char *class_desc_str(struct char_data *ch, int howlong, int wantthe);
+std::string class_desc_str(struct char_data *ch, int howlong, int wantthe);
 int highest_skill_value(int level, int type);
 time_t birth_age(GameWorld *g, struct char_data *ch);
 time_t max_age(struct char_data *ch);

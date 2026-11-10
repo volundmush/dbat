@@ -309,7 +309,7 @@ static void execute_copyover(GameWorld *g)
   struct itimerval no_timer = {{0, 0}, {0, 0}};
   char exe[PATH_MAX];
   std::string fold;
-  char mother[32];
+  std::string mother; /* lasts until the exec */
   char **args;
   int num_args = 0;
 
@@ -348,9 +348,9 @@ static void execute_copyover(GameWorld *g)
 
   /* Everything the game was started with, so that it comes back the same, and in the same place. */
   args = new char *[g->launch_argc + 2]();
-  snprintf(mother, sizeof(mother), "-C%d", g->mother_desc);
+  mother           = str_format("-C{:d}", g->mother_desc);
   args[num_args++] = g->launch_argv[0];
-  args[num_args++] = mother;
+  args[num_args++] = mother.data();
   for (int i = 1; i < g->launch_argc; i++)
     if (strncmp(g->launch_argv[i], "-C", 2))
       args[num_args++] = g->launch_argv[i];

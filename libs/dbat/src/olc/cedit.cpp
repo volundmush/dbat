@@ -525,8 +525,8 @@ static void cedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 static void cedit_disp_option(GameWorld *g, struct descriptor_data *d, const struct cedit_option *o)
 {
   void *f = option_field(OLC_CONFIG(d), o);
-  char buf[MAX_INPUT_LENGTH];
-  const char *value = buf;
+  std::string buf;
+  std::string_view value;
   int v;
 
   switch (o->type) {
@@ -539,18 +539,18 @@ static void cedit_disp_option(GameWorld *g, struct descriptor_data *d, const str
       break;
     case CT_INT:
     case CT_ROOM:
-      snprintf(buf, sizeof(buf), "%d", *(int *)f);
+      value = buf = str_format("{:d}", *(int *)f);
       break;
     case CT_METHOD:
       v = *(int *)f;
-      snprintf(buf, sizeof(buf), "%d \r\n   %s", v,
-               v >= 0 && v < NUM_CREATION_METHODS ? creation_methods[v] : "<invalid>");
+      value = buf = str_format("{:d} \r\n   {}", v,
+                               v >= 0 && v < NUM_CREATION_METHODS ? creation_methods[v] : "<invalid>");
       break;
     case CT_PORT:
-      snprintf(buf, sizeof(buf), "%d", *(uint16_t *)f);
+      value = buf = str_format("{:d}", *(uint16_t *)f);
       break;
     case CT_FLOAT:
-      snprintf(buf, sizeof(buf), "%.2f", *(float *)f);
+      value = buf = str_format("{:.2f}", *(float *)f);
       break;
     case CT_MSG:
     case CT_STR:

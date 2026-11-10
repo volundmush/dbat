@@ -1091,8 +1091,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
         } else if (char_is_icer(i) || char_is_demon(i)) {
           send_to_char(g, ch, "@wA {} {}, with {} horns", char_mafe(i), juggleRaceName(i, false), FHA_types[(int)char_get_hairl(i)]);
         } else {
-          char blarg[MAX_INPUT_LENGTH];
-          snprintf(blarg, sizeof(blarg), "%s %s hair %s", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
+          std::string blarg = str_format("{} {} hair {}", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
           send_to_char(g, ch, "@wA {} {}, with {}", char_mafe(i), juggleRaceName(i, false), char_get_hairl(i) == 0 ? "a bald head" : (blarg));
         }
       } else if (char_get_distfea(i) == DISTFEA_SKIN) {

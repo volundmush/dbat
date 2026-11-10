@@ -710,7 +710,6 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   struct board_info *board;
   struct board_msg *msg, *other;
   std::string subject;
-  char quote[MAX_MESSAGE_LENGTH + 128];
 
   if (!char_get_desc(ch))
     return;
@@ -741,9 +740,8 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
   act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-  snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data.c_str());
-  msg->data = quote;
-  write_to_output(g, char_get_desc(ch), "{}", quote);
+  msg->data = str_format("\t@D------- @cQuoted message @D-------@w\r\n{}\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data);
+  write_to_output(g, char_get_desc(ch), msg->data);
   start_post(g, board, msg, ch);
 }
 

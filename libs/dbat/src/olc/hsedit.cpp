@@ -306,39 +306,36 @@ static void hsedit_disp_guest_menu(GameWorld *g, struct descriptor_data *d)
   OLC_MODE(d) = HSEDIT_GUEST_MENU;
 }
 
-static char *hsedit_list_guests(GameWorld *g, struct house_control_rec *thishouse, char *guestlist)
+static std::string hsedit_list_guests(GameWorld *g, struct house_control_rec *thishouse)
 {
-  int j, num_printed;
+  std::string guestlist;
+  int num_printed = 0;
   char *temp;
 
-  if (thishouse->num_of_guests == 0) {
-    sprintf(guestlist, "NONE");
-    return (guestlist);
-  }
+  if (thishouse->num_of_guests == 0)
+    return "NONE";
 
-  for (num_printed = j = 0; j < thishouse->num_of_guests; j++) {
+  for (int j = 0; j < thishouse->num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
     if ((temp = get_name_by_id(g, thishouse->guests[j])) == nullptr)
       continue;
 
     num_printed++;
-    sprintf(guestlist + strlen(guestlist), "%c%s ", toupper(*temp), temp + 1);
+    guestlist += str_format("{:c}{} ", as_char(toupper(*temp)), temp + 1);
   }
 
   if (num_printed == 0)
-    sprintf(guestlist, "all dead");
-
-  return (guestlist);
+    return "all dead";
+  return guestlist;
 }
 
 /* the main menu */
 static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   std::string buf1;
   std::string built_on;
   std::string last_pay;
-  char buf2[MAX_STRING_LENGTH];
   char *timestr;
   std::string no_name;
   struct house_control_rec *house;
@@ -360,30 +357,16 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   } else
     last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
-  *buf2 = '\0';
   buf1  = sprintbit(house->bitvector, house_flags);
   //  sprintf(buf2, "%d %d %d %d", house->value[0], house->value[1], house->value[2], house->value[3]);
   no_name = "(NOBODY)";
-  snprintf(buf, sizeof(buf),
-           "@D-- @RJamdog's House OLC Editor @D--\r\n"
-           "@D--@g House number : @D[@c%d@D]     @gHouse zone: @D[@c%d@D]\r\n"
-           "@g1@D)@g Owner       : @c%ld -- %s\r\n"
-           "@g2@D)@g Atrium      : @c%d\r\n"
-           "@g3@D)@g Direction   : @c%s\r\n"
-           "@g4@D)@g House Type  : @c%s\r\n"
-           "@g5@D)@g Built on    : @c%s\r\n"
-           "@g6@D)@g Payment     : @c%s\r\n"
-           "@g7@D)@g Guests      : @c%s\r\n"
-           "@g8@D)@g Flags       : @c%s\r\n"
-           // "9) Values      : %s\r\n"
-           "@gX@D)@g Delete this house\r\n"
-           "@gQ@D)@g Quit\r\n"
-           "@gEnter choice : @n",
+  /* there is no "9) Values" line */
+  buf = str_format("@D-- @RJamdog's House OLC Editor @D--\r\n@D--@g House number : @D[@c{:d}@D]     @gHouse zone: @D[@c{:d}@D]\r\n@g1@D)@g Owner       : @c{:d} -- {}\r\n@g2@D)@g Atrium      : @c{:d}\r\n@g3@D)@g Direction   : @c{}\r\n@g4@D)@g House Type  : @c{}\r\n@g5@D)@g Built on    : @c{}\r\n@g6@D)@g Payment     : @c{}\r\n@g7@D)@g Guests      : @c{}\r\n@g8@D)@g Flags       : @c{}\r\n@gX@D)@g Delete this house\r\n@gQ@D)@g Quit\r\n@gEnter choice : @n",
 
-           OLC_NUM(d), OLC_ZNUM(d)->number,
-           house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name.c_str() : get_name_by_id(g, house->owner),
-           house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
-           house_types[(house->mode)], built_on.c_str(), last_pay.c_str(), hsedit_list_guests(g, house, buf2), buf1.c_str());
+                   OLC_NUM(d), OLC_ZNUM(d)->number,
+                   house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name.c_str() : get_name_by_id(g, house->owner),
+                   house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
+                   house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(g, house), buf1);
   send_to_char(g, d->character, "{}", buf);
 
   OLC_MODE(d) = HSEDIT_MAIN_MENU;

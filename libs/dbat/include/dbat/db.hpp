@@ -147,7 +147,8 @@ int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch)
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(GameWorld *g, struct obj_data *obj);
 void check_unique_id(GameWorld *g, struct obj_data *obj);
-char *sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high);
+/* the unique objects with vnums low to high, as "show uniques" lists them */
+std::string sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high);
 int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *ch);
 int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data *ch);
 int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *ch);

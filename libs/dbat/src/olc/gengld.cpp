@@ -41,12 +41,12 @@ struct guild_data *find_guild(GameWorld *g, guild_vnum vnum)
 const char *gedit_modify_string(std::string *str, const char *new_g)
 {
   const char *pointer;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   /*. Check the '%s' is present, if not, add it . */
   if (*new_g != '%') {
-    snprintf(buf, sizeof(buf), "%%s %s", new_g);
-    pointer = buf;
+    buf     = str_format("%s {}", new_g);
+    pointer = buf.c_str();
   } else
     pointer = new_g;
 

@@ -65,7 +65,7 @@
 static void do_stat_room(GameWorld *g, struct char_data *ch);
 static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *j);
 static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_data *k);
-static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct zone_data *zone, int listall);
+static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listall);
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum);
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum);
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum);
@@ -1023,19 +1023,15 @@ ACMD(do_last)
    code 3 times ... -je, 4/6/93 */
 
 /* FIXME: overflow possible */
-static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct zone_data *zone, int listall)
+static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listall)
 {
-  size_t tmp;
-
   if (listall) {
     int j, k, l, m, n, o;
-
-    tmp = snprintf(bufptr, left,
-                   "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
-                   zone->number, zone->name.c_str(), zone->builders.c_str(),
-                   zone->age, zone->lifespan,
-                   zone->reset_mode,
-                   zone->bot, zone->top);
+    std::string text = str_format("{:>3d} {:<30.30} By: {:<10.10} Age: {:>3d}; Reset: {:>3d} ({:>1d}); Range: {:>5d}-{:>5d}\r\n",
+                                  zone->number, zone->name, zone->builders,
+                                  zone->age, zone->lifespan,
+                                  zone->reset_mode,
+                                  zone->bot, zone->top);
 
     j = (int)g->rooms.vnums_in(zone->bot, zone->top).size();
     k = (int)g->obj_proto.vnums_in(zone->bot, zone->top).size();
@@ -1047,38 +1043,25 @@ static size_t print_zone_to_buf(GameWorld *g, char *bufptr, size_t left, struct 
 
     o = count_guilds(g, zone->bot, zone->top);
 
-    tmp += snprintf(bufptr + tmp, left - tmp,
-                    "       Zone stats:\r\n"
-                    "       ---------------\r\n"
-                    "         Rooms:    %2d\r\n"
-                    "         Objects:  %2d\r\n"
-                    "         Mobiles:  %2d\r\n"
-                    "         Shops:    %2d\r\n"
-                    "         Triggers: %2d\r\n"
-                    "         Guilds:   %2d\r\n",
-                    j, k, l, m, n, o);
-
-    return tmp;
+    text += str_format("       Zone stats:\r\n       ---------------\r\n         Rooms:    {:>2d}\r\n         Objects:  {:>2d}\r\n         Mobiles:  {:>2d}\r\n         Shops:    {:>2d}\r\n         Triggers: {:>2d}\r\n         Guilds:   {:>2d}\r\n",
+                       j, k, l, m, n, o);
+    return text;
   }
 
-  return snprintf(bufptr, left,
-                  "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zone->number,
-                  count_color_chars(zone->name.c_str()) + 30, zone->name.c_str(),
-                  zone->builders.c_str(), zone->bot, zone->top);
+  return str_format("{:>3d} {} By: {:<10.10} Range: {:>5d}-{:>5d}\r\n", zone->number, printf_width(zone->name.c_str(), count_color_chars(zone->name.c_str()) + 30, true),
+                    zone->builders, zone->bot, zone->top);
 }
 
 ACMD(do_show)
 {
   room_vnum i;
   int j, k, l, con; /* i, j, k to specifics? */
-  size_t len;
-  int nlen;
   struct zone_data *zrn;
   obj_vnum low, high;
   int8_t self            = false;
   struct char_data *vict = nullptr;
   struct affected_type *aff;
-  char *strp, buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   struct show_struct {
     const char *cmd{};
@@ -1128,31 +1111,27 @@ ACMD(do_show)
   }
   if (value == ".")
     self = true;
-  buf[0] = '\0';
+  buf.clear();
 
   switch (l) {
     /* show zone */
     case 1:
       /* tightened up by JE 4/6/93 */
       if (self)
-        print_zone_to_buf(g, buf, sizeof(buf), room_get_zone(g, char_get_in_room(ch)), 1);
+        buf = zone_summary(g, room_get_zone(g, char_get_in_room(ch)), 1);
       else if (!value.empty() && is_number(value)) {
         if ((zrn = find_zone(g, parse_int(value))))
-          print_zone_to_buf(g, buf, sizeof(buf), zrn, 1);
+          buf = zone_summary(g, zrn, 1);
         else {
           send_to_char(g, ch, "That is not a valid zone.\r\n");
           return;
         }
       } else {
-        len = 0;
-        for (struct zone_data *zone : g->zones.all()) {
-          nlen = print_zone_to_buf(g, buf + len, sizeof(buf) - len, zone, 0);
-          if (len + nlen >= sizeof(buf) || nlen < 0)
-            break;
-          len += nlen;
-        }
+        buf.clear();
+        for (struct zone_data *zone : g->zones.all())
+          buf += str_format("{}", zone_summary(g, zone, 0));
       }
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
       break;
 
     /* show player */
@@ -1232,42 +1211,42 @@ ACMD(do_show)
 
     /* show errors */
     case 5:
-      len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
+      buf = "Errant Rooms\r\n------------\r\n";
       k   = 0;
       for (room_vnum r : g->rooms.vnums())
         for (j = 0; j < NUM_OF_DIRS; j++) {
           if (!room_get_dir_option(g, r, j))
             continue;
           if (room_get_dir_option(g, r, j)->to_room == 0) {
-            len += snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
+            buf += str_format("{:>2d}: (void   ) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[j]);
           }
           if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !exit_description(room_get_dir_option(g, r, j))) {
-            len += snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
+            buf += str_format("{:>2d}: (Nowhere) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[j]);
           }
         }
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
       break;
 
     /* show death */
     case 6:
-      len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
+      buf = "Death Traps\r\n-----------\r\n";
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
         if (room_flagged(g, r, ROOM_DEATH)) {
-          len += snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
+          buf += str_format("{:>2d}: [{:>5d}] {}\r\n", ++j, r, room_get_name(g, r));
         }
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
       break;
 
     /* show godrooms */
     case 7:
-      len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
+      buf = "Godrooms\r\n--------------------------\r\n";
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
         if (room_flagged(g, r, ROOM_GODROOM)) {
-          len += snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
+          buf += str_format("{:>2d}: [{:>5d}] {}\r\n", ++j, r, room_get_name(g, r));
         }
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
       break;
 
     /* show shops */
@@ -1324,9 +1303,7 @@ ACMD(do_show)
         low  = -1;
         high = 9999999;
       }
-      strp = sprintuniques(g, low, high);
-      send_to_char(g, ch, "{}", strp);
-      free(strp);
+      send_to_char(g, ch, sprintuniques(g, low, high));
       break;
 
     case 15:
@@ -1347,34 +1324,25 @@ ACMD(do_show)
         send_to_char(g, ch, "None.\r\n");
         return;
       }
-      k       = MAX_STRING_LENGTH;
-      strp    = str_alloc(k);
-      strp[0] = j = 0;
+      std::string text;
       for (struct char_data *who : victs) {
-        if ((k - j) < (MAX_INPUT_LENGTH * 8)) {
-          k *= 2;
-          strp = str_realloc(strp, k);
-        }
-        j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(who));
+        text += str_format("Name: {}\r\n", char_get_name(who));
         for (auto aff_it = char_affects(who).begin(); aff_it != char_affects(who).end() && (aff = &*aff_it); ++aff_it) {
-          j += snprintf(strp + j, k - j, "SPL: (%3d%s) @c%-21s@n ", aff->duration + 1,
-                        (l == 15) ? "hr" : "rd", skill_name(g, aff->type));
+          text += str_format("SPL: ({:>3d}{}) @c{:<21}@n ", aff->duration + 1, (l == 15) ? "hr" : "rd", skill_name(g, aff->type));
 
           if (aff->modifier)
-            j += snprintf(strp + j, k - j, "%+d to %s", aff->modifier,
-                          apply_types[(int)aff->location]);
+            text += str_format("{:+d} to {}", aff->modifier, apply_types[(int)aff->location]);
 
           if (aff->bitvector) {
             if (aff->modifier)
-              j += snprintf(strp + j, k - j, ", ");
+              text += ", ";
 
-            j += snprintf(strp + j, k - j, "sets %s", affected_bits[aff->bitvector]);
+            text += str_format("sets {}", affected_bits[aff->bitvector]);
           }
-          j += snprintf(strp + j, k - j, "\r\n");
+          text += "\r\n";
         }
       }
-      send_to_char(g, ch, "{}", strp);
-      free(strp);
+      send_to_char(g, ch, text);
     } break;
 
     /* show what? */
@@ -1389,8 +1357,9 @@ ACMD(do_show)
 
 ACMD(do_plist)
 {
-  int i, len = 0, count = 0;
-  char mode, buf[MAX_STRING_LENGTH], time_str[MAX_STRING_LENGTH];
+  int i, count = 0;
+  char mode;
+  std::string buf;
   struct time_info_data time_away;
   int low = 0, high = 100, low_day = 0, high_day = 10000, low_hr = 0, high_hr = 24;
 
@@ -1443,15 +1412,13 @@ ACMD(do_plist)
     }
   }
 
-  len = 0;
-  len += snprintf(buf + len, sizeof(buf) - len, "@W[ Id] (Lv) Name         Last@n\r\n"
-                                                "%s-----------------------------------------------%s\r\n",
-                  CCCYN(g, ch, C_NRM),
-                  CCNRM(g, ch, C_NRM));
+  buf = str_format("@W[ Id] (Lv) Name         Last@n\r\n"
+                   "{}-----------------------------------------------{}\r\n",
+                   CCCYN(g, ch, C_NRM), CCNRM(g, ch, C_NRM));
 
   for (i = 0; i <= g->top_of_p_table; i++) {
     if (IS_SET(g->player_table[i].flags, PINDEX_DELETED)) {
-      len += snprintf(buf + len, sizeof(buf) - len, "[%3ld] <DELETED> --Will be removed next boot.\r\n", g->player_table[i].id);
+      buf += str_format("[{:>3d}] <DELETED> --Will be removed next boot.\r\n", g->player_table[i].id);
       continue;
     }
 
@@ -1468,18 +1435,17 @@ ACMD(do_plist)
     if (time_away.hours > high_hr || time_away.hours < low_hr)
       continue;
 
-    strcpy(time_str, asctime(localtime(&g->player_table[i].last)));
-    time_str[strlen(time_str) - 1] = '\0';
+    std::string time_str = asctime(localtime(&g->player_table[i].last));
+    time_str.pop_back(); /* its newline */
+    std::string name = writable_copy(g->player_table[i].name);
 
-    len += snprintf(buf + len, sizeof(buf) - len, "[%3ld] (%2d) %-12s %s\r\n",
-                    g->player_table[i].id, g->player_table[i].level,
-                    CAP(strdup(g->player_table[i].name)), time_str);
+    buf += str_format("[{:>3d}] ({:>2d}) {:<12} {}\r\n", g->player_table[i].id, g->player_table[i].level, CAP(name), time_str);
     count++;
   }
-  snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n"
-                                         "%d players listed.\r\n",
-           CCCYN(g, ch, C_NRM), CCNRM(g, ch, C_NRM), count);
-  send_to_char(g, ch, "{}", buf);
+  buf += str_format("{}-----------------------------------------------{}\r\n"
+                    "{:d} players listed.\r\n",
+                    CCCYN(g, ch, C_NRM), CCNRM(g, ch, C_NRM), count);
+  send_to_char(g, ch, buf);
 }
 
 /******************************************************************************/

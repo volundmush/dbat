@@ -9,7 +9,8 @@
 #include "dbat/consts/types.hpp"
 
 int levenshtein_distance(const char *s1, const char *s2);
-void trim(char *s);
+/* s without the spaces and tabs at either end */
+void trim(std::string &s);
 char *add_commas(int64_t num);
 char *CAP(char *txt);
 /* txt with its first letter capitalised, passing over leading colour codes, as CAP(char *) does */

@@ -80,16 +80,13 @@ void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
-static const char *skill_percent(GameWorld *g, struct char_data *ch, char *skill)
+static std::string skill_percent(GameWorld *g, struct char_data *ch, char *skill)
 {
-  static char retval[16];
-  int skillnum;
+  int skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
 
-  skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
-  if (skillnum <= 0) return ("unknown skill");
-
-  snprintf(retval, sizeof(retval), "%d", char_get_skill(ch, skillnum));
-  return retval;
+  if (skillnum <= 0)
+    return "unknown skill";
+  return str_format("{:d}", char_get_skill(ch, skillnum));
 }
 
 /*
@@ -164,8 +161,6 @@ static bool char_has_item(GameWorld *g, char *item, struct char_data *ch)
 static bool text_processed(char *field, char *subfield, struct trig_var_data *vd,
                            std::string &str)
 {
-  char *p, *p2;
-  char tmpvar[MAX_STRING_LENGTH];
 
   if (!vd) /* a field of self, which is no variable: its own fields, not these */
     return false;
@@ -176,17 +171,9 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
     /* trim whitespace from ends */
-    snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value.c_str()); /* -1 to use later*/
-    p  = tmpvar;
-    p2 = tmpvar + strlen(tmpvar) - 1;
-    while (*p && isspace(*p)) p++;
-    while ((p <= p2) && isspace(*p2)) p2--;
-    if (p > p2) { /* nothing left */
-      str = "";
-      return true;
-    }
-    *(++p2) = '\0'; /* +1 ok (see above) */
-    str     = str_format("{}", p);
+    const char *space = " \t\n\v\f\r"; /* what isspace() finds */
+    size_t start      = vd->value.find_first_not_of(space);
+    str               = start == std::string::npos ? "" : vd->value.substr(start, vd->value.find_last_not_of(space) + 1 - start);
     return true;
   } else if (!strcasecmp(field, "contains")) { /* contains  */
     if (str_str(vd->value.c_str(), subfield))
@@ -672,7 +659,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       }
 
       else if (!strcasecmp(field, "skill"))
-        str = str_format("{}", skill_percent(g, c, subfield));
+        str = skill_percent(g, c, subfield);
 
       else if (!strcasecmp(field, "skillset")) {
         if (!char_is_npc(c) && subfield && *subfield) {

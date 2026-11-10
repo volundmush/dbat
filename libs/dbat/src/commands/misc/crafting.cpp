@@ -82,20 +82,10 @@ ACMD(do_restring)
       return;
     }
     desc_set_connected(char_get_desc(ch), CON_POBJ);
-    char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
-
-    *thename  = '\0';
-    *theshort = '\0';
-    *thelong  = '\0';
-
-    snprintf(thename, sizeof(thename), "%s", obj_get_name(obj));
-    snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
-    snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
-
-    char_get_desc(ch)->obj_name      = thename;
-    char_get_desc(ch)->obj_was       = theshort;
-    char_get_desc(ch)->obj_short     = theshort;
-    char_get_desc(ch)->obj_long      = thelong;
+    char_get_desc(ch)->obj_name      = str_format("{}", obj_get_name(obj));
+    char_get_desc(ch)->obj_was       = str_format("{}", obj_get_short_description(obj));
+    char_get_desc(ch)->obj_short     = char_get_desc(ch)->obj_was;
+    char_get_desc(ch)->obj_long      = str_format("{}", obj_get_description(obj));
     char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
     char_get_desc(ch)->obj_type   = 1;
     char_get_desc(ch)->obj_weapon = 0;
@@ -2367,12 +2357,10 @@ ACMD(do_spoil)
   obj_set_value(obj, VAL_CORPSE_HEAD, 0);
 
   struct obj_data *body_part;
-  char part[1000];
   std::string buf;
   std::string buf2;
   std::string buf3;
 
-  *part = '\0';
   buf.clear();
   buf2.clear();
   buf3.clear();
@@ -2380,7 +2368,7 @@ ACMD(do_spoil)
   body_part              = create_obj(g);
   obj_set_item_number(body_part, NOTHING);
   obj_set_in_room(body_part, NOWHERE);
-  snprintf(part, sizeof(part), "%s", obj_get_name(obj));
+  std::string part = str_format("{}", obj_get_name(obj));
   search_replace(part, "headless", "");
   search_replace(part, "corpse", "");
   search_replace(part, "half", "");

@@ -484,20 +484,10 @@ ACMD(do_rpp)
         return;
       }
       desc_set_connected(char_get_desc(ch), CON_POBJ);
-      char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
-
-      *thename  = '\0';
-      *theshort = '\0';
-      *thelong  = '\0';
-
-      snprintf(thename, sizeof(thename), "%s", obj_get_name(obj));
-      snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
-      snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
-
-      char_get_desc(ch)->obj_name      = thename;
-      char_get_desc(ch)->obj_was       = theshort;
-      char_get_desc(ch)->obj_short     = theshort;
-      char_get_desc(ch)->obj_long      = thelong;
+      char_get_desc(ch)->obj_name      = str_format("{}", obj_get_name(obj));
+      char_get_desc(ch)->obj_was       = str_format("{}", obj_get_short_description(obj));
+      char_get_desc(ch)->obj_short     = char_get_desc(ch)->obj_was;
+      char_get_desc(ch)->obj_long      = str_format("{}", obj_get_description(obj));
       char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
       char_get_desc(ch)->obj_type   = 1;
       char_get_desc(ch)->obj_weapon = 0;

@@ -1468,28 +1468,26 @@ static int comp_rank(const void *a, const void *b)
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
+std::string class_desc_str(struct char_data *ch, int howlong, int wantthe)
 {
-  static char str[MAX_STRING_LENGTH];
-  char *ptr = str;
+  std::string str;
   int i, rank, j;
   int rankorder[NUM_CLASSES];
   const char *buf, *buf2, *buf3;
 
   if (char_is_npc(ch)) {
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", char_class_abbr(ch), char_get_level(ch));
-    return str;
+    return str_format("{}{:d}", char_class_abbr(ch), char_get_level(ch));
   }
 
   if (wantthe)
-    ptr += sprintf(str, "the ");
+    str = "the ";
 
   if (howlong) {
     buf2 = buf = buf3 = "";
     if (howlong == 2) {
       buf3 = " ";
       if (char_get_class_level(ch) >= LVL_EPICSTART)
-        ptr += sprintf(ptr, "Epic ");
+        str += "Epic ";
     }
     for (i = 0; i < NUM_CLASSES; i++) {
       cabbr_ranktable[i] = char_get_class_ranks(ch, i);
@@ -1501,9 +1499,9 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
     for (int sen = 0; sen < NUM_CLASSES; sen++) {
       if (!sensei_exists(sen))
         continue;
-      ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
-                      (howlong == 2 ? sensei_name(sen) : sensei_abbr(sen)), buf3,
-                      cabbr_ranktable[sen]);
+      str += str_format("{}{}{}{}{}{:d}", buf, buf2, buf,
+                        (howlong == 2 ? sensei_name(sen) : sensei_abbr(sen)), buf3,
+                        cabbr_ranktable[sen]);
       buf2 = "/";
       if (howlong == 2)
         buf = " ";
@@ -1518,8 +1516,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
       rank = char_get_class_ranks(ch, j);
     }
   rank = char_get_class_ranks(ch, char_get_class(ch));
-  snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", char_sensei_name_lower(ch),
-           rank, char_get_level(ch) == rank ? "" : "+");
+  str += str_format("{}{:d}{}", char_sensei_name_lower(ch), rank, char_get_level(ch) == rank ? "" : "+");
   return str;
 }
 

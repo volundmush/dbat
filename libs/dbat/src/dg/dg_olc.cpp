@@ -752,18 +752,15 @@ void trigedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int termin
 
 bool format_script(GameWorld *g, struct descriptor_data *d)
 {
-  char nsc[MAX_CMD_LENGTH], *t, line[READ_SIZE];
-  char *sc;
-  size_t len = 0, nlen = 0;
-  int llen   = 0;
-  int indent = 0, indent_next = false, found_case = false, i, line_num = 0;
+  std::string nsc;
+  char *t, *sc;
+  int indent = 0, indent_next = false, found_case = false, line_num = 0;
 
   if (d->edit_text.empty())
     return false;
 
   sc   = strdup(d->edit_text.c_str()); /* we work on a copy, because of strtok() */
   t    = strtok(sc, "\n\r");
-  *nsc = '\0';
 
   while (t) {
     line_num++;
@@ -811,19 +808,13 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
       indent--;
     }
 
-    *line = '\0';
-    for (nlen = 0, i = 0; i < indent && nlen + 2 < (int)sizeof(line); i++) {
-      strcat(line, "  ");
-      nlen += 2;
-    }
-    llen = snprintf(line + nlen, sizeof(line) - nlen, "%s\r\n", t);
-    if (llen < 0 || llen + nlen + len > d->max_str - 1) {
+    std::string line = std::string(2 * indent, ' ') + t + "\r\n";
+    if (nsc.size() + line.size() > d->max_str - 1) {
       write_to_output(g, d, "String too long, formatting aborted\r\n");
       free(sc);
       return false;
     }
-    len = len + nlen + llen;
-    strcat(nsc, line); /* strcat OK, size checked above */
+    nsc += line;
 
     if (indent_next) {
       indent++;

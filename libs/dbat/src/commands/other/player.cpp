@@ -506,9 +506,8 @@ ACMD(do_ungroup)
 ACMD(do_split)
 {
   std::string buf;
-  char msg[MAX_INPUT_LENGTH];
+  std::string msg;
   int amount, num, share, rest;
-  size_t len;
   struct char_data *k;
 
   if (char_is_npc(ch))
@@ -552,12 +551,9 @@ ACMD(do_split)
     char_set_gold(ch, char_get_gold(ch) + (share));
 
     /* Abusing signed/unsigned to make sizeof work. */
-    len = snprintf(msg, sizeof(msg), "%s splits %d zenni; you receive %d.\r\n",
-                   char_get_name(ch), amount, share);
-    if (rest && len < sizeof(msg)) {
-      snprintf(msg + len, sizeof(msg) - len,
-               "%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", char_get_name(ch));
-    }
+    msg = str_format("{} splits {:d} zenni; you receive {:d}.\r\n", char_get_name(ch), amount, share);
+    if (rest)
+      msg += str_format("{:d} zenni {} not splitable, so {} keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", char_get_name(ch));
     if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) &&
         !char_is_npc(k) && k != ch) {
       char_set_gold(k, char_get_gold(k) + (share));

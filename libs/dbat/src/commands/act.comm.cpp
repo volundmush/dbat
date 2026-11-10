@@ -256,10 +256,7 @@ ACMD(do_say)
       send_to_char(g, ch, CONFIG_OK);
     } else {
       if (strstr(verb.c_str(), "says to")) {
-        char saytoo[200];
-        verb.clear();
-        snprintf(saytoo, sizeof(saytoo), "say to @g%s@W", char_get_name(sch));
-        verb = saytoo;
+        verb = str_format("say to @g{}@W", char_get_name(sch));
       }
       buf = str_format("@WYou {}, '@C{}@W'@n\r\n", verb, text);
       send_to_char(g, ch, buf);

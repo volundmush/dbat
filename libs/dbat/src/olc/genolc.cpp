@@ -49,7 +49,7 @@ bool genolc_checkstring(struct descriptor_data *d, char *arg)
 
 const char *npc_msg_format_problem(const char *msg, bool allow_int)
 {
-  static char why[64];
+  static std::string why; /* what is returned, until the next call */
   int ss = 0, ds = 0;
 
   for (const char *p = msg; *p; p++) {
@@ -66,8 +66,8 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
     } else if (*p == '\0')
       return "a '%' at the very end";
     else if (*p != '%') {
-      snprintf(why, sizeof(why), "invalid format '%%%c'", *p);
-      return why;
+      why = str_format("invalid format '%{:c}'", *p);
+      return why.c_str();
     }
   }
 

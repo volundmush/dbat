@@ -66,8 +66,6 @@ static double speednar(GameWorld *g, struct char_data *ch);
 
 const char *juggleRaceName(char_data *ch, bool capitalized)
 {
-  static char buf[2][256];
-
   int apparent = ch->race;
 
   switch (apparent) {
@@ -106,13 +104,7 @@ const char *juggleRaceName(char_data *ch, bool capitalized)
       break;
   }
 
-  /* one each, as callers ask for both forms in one argument list */
-  if (capitalized) {
-    snprintf(buf[1], sizeof(buf[1]), "%s", pc_race_types[apparent]);
-    return buf[1];
-  }
-  snprintf(buf[0], sizeof(buf[0]), "%s", race_names[apparent]);
-  return buf[0];
+  return capitalized ? pc_race_types[apparent] : race_names[apparent];
 }
 
 void restore_by(GameWorld *g, char_data *ch, char_data *healer)
@@ -3278,48 +3270,30 @@ bool is_sparring(struct char_data *ch)
 
 const char *introd_calc(struct char_data *ch)
 {
-  char *sex, *race;
-  static char intro[100];
-
-  *intro = '\0';
+  static std::string intro; /* what is returned, until the next call */
+  const char *sex, *race;
 
   if (char_is_npc(ch)) { /* How the hell... */
     return ("IAMERROR");
   }
 
+  sex  = char_mafe(ch);
+  race = juggleRaceName(ch, true);
   if (char_is_halfbreed(ch)) {
-    if (char_get_racial_pref(ch) == 1) {
-      race = strdup("human");
-    } else if (char_get_racial_pref(ch) == 2) {
-      race = strdup("saiyan");
-    } else {
-      race = strdup(juggleRaceName(ch, true));
-    }
-    sex = strdup(char_mafe(ch));
+    if (char_get_racial_pref(ch) == 1)
+      race = "human";
+    else if (char_get_racial_pref(ch) == 2)
+      race = "saiyan";
   } else if (char_is_android(ch)) {
-    if (char_get_racial_pref(ch) == 1) {
-      race = strdup("android");
-    } else if (char_get_racial_pref(ch) == 2) {
-      race = strdup("human");
-    } else if (char_get_racial_pref(ch) == 3) {
-      race = strdup("robotic-humanoid");
-    } else {
-      race = strdup(juggleRaceName(ch, true));
-    }
-    sex = strdup(char_mafe(ch));
-  } else {
-    sex  = strdup(char_mafe(ch));
-    race = strdup(juggleRaceName(ch, true));
+    if (char_get_racial_pref(ch) == 1)
+      race = "android";
+    else if (char_get_racial_pref(ch) == 2)
+      race = "human";
+    else if (char_get_racial_pref(ch) == 3)
+      race = "robotic-humanoid";
   }
-  sprintf(intro, "%s %s %s", AN(sex), sex, race);
-  if (sex) {
-    free(sex);
-  }
-  if (race) {
-    free(race);
-  }
-
-  return (intro);
+  intro = str_format("{} {} {}", AN(sex), sex, race);
+  return intro.c_str();
 }
 
 static double speednar(GameWorld *g, struct char_data *ch)

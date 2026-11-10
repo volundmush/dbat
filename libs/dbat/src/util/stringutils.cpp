@@ -61,21 +61,16 @@ int count_color_chars(const char *string)
 }
 
 /* Trims leading and trailing spaces from string */
-void trim(char *s)
+void trim(std::string &s)
 {
-  size_t i = 0, len;
+  size_t start = s.find_first_not_of(" \t");
 
-  // Trim spaces and tabs from beginning:
-  while (s[i] == ' ' || s[i] == '\t')
-    i++;
-  if (i > 0)
-    memmove(s, s + i, strlen(s + i) + 1);
-
-  // Trim spaces and tabs from end (an empty or all-blank string ends up empty):
-  len = strlen(s);
-  while (len > 0 && (s[len - 1] == ' ' || s[len - 1] == '\t'))
-    len--;
-  s[len] = '\0';
+  if (start == std::string::npos) { /* empty or all blank */
+    s.clear();
+    return;
+  }
+  s.erase(s.find_last_not_of(" \t") + 1);
+  s.erase(0, start);
 }
 
 /* Turns number into string and adds commas to it. */
@@ -86,12 +81,11 @@ char *add_commas(int64_t num)
   constexpr int DIGITS_PER_BUFFER = 25;
 
   int64_t i, j, len, negative = (num < 0);
-  char num_string[DIGITS_PER_BUFFER];
   static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER];
   static int64_t which = 0;
 
-  sprintf(num_string, "%" PRId64 "", num);
-  len = strlen(num_string);
+  std::string num_string = str_format("{:d}", num);
+  len                    = static_cast<int64_t>(num_string.size());
 
   for (i = j = 0; num_string[i]; ++i) {
     if ((len - i) % DIGITS_PER_GROUP == 0 && i && i - negative)
@@ -395,29 +389,10 @@ char *fname(const char *namelist)
 
 void search_replace(char *string, const char *find, const char *replace)
 {
-  char final[MAX_STRING_LENGTH], temp[2];
-  size_t start, end, i;
+  std::string text = string;
 
-  while (strstr(string, find) != nullptr) {
-
-    final[0] = '\0';
-    start    = strstr(string, find) - string;
-    end      = start + strlen(find);
-
-    temp[1] = '\0';
-
-    strncat(final, string, start);
-
-    strcat(final, replace);
-
-    for (i = end; string[i] != '\0'; i++) {
-      temp[0] = string[i];
-      strcat(final, temp);
-    }
-
-    sprintf(string, "%s", final);
-  }
-  return;
+  search_replace(text, find, replace);
+  strcpy(string, text.c_str()); /* the caller's buffer holds the result, as it always had to */
 }
 
 void search_replace(std::string &s, std::string_view find, std::string_view replace)

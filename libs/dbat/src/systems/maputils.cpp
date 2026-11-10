@@ -286,7 +286,7 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
   int sightradius;
   int count = 0, initline = 0;
   std::string buf;
-  char buf2[512];
+  std::string buf2;
   MapStruct coord;
 
   room_vnum start = rnum;
@@ -353,19 +353,19 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
       if (count == 0) {
         buf += "      @RCompass@n           ";
       } else if (count == 2) {
-        sprintf(buf2, "@w       @w|%s@w|            ", (room_get_dir_option(g, rnum, 0) ? " @CN " : "   "));
+        buf2 = str_format("@w       @w|{}@w|            ", (room_get_dir_option(g, rnum, 0) ? " @CN " : "   "));
         buf += buf2;
       } else if (count == 3) {
-        sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 6) ? " @CNW" : "   "), (room_get_dir_option(g, rnum, 4) ? " @YU " : "   "), (room_get_dir_option(g, rnum, 7) ? "@CNE " : "   "));
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|      ", (room_get_dir_option(g, rnum, 6) ? " @CNW" : "   "), (room_get_dir_option(g, rnum, 4) ? " @YU " : "   "), (room_get_dir_option(g, rnum, 7) ? "@CNE " : "   "));
         buf += buf2;
       } else if (count == 4) {
-        sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 3) ? "  @CW" : "   "), (room_get_dir_option(g, rnum, 10) ? "@m I " : (room_get_dir_option(g, rnum, 11) ? "@mOUT" : "   ")), (room_get_dir_option(g, rnum, 1) ? "@CE  " : "   "));
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|      ", (room_get_dir_option(g, rnum, 3) ? "  @CW" : "   "), (room_get_dir_option(g, rnum, 10) ? "@m I " : (room_get_dir_option(g, rnum, 11) ? "@mOUT" : "   ")), (room_get_dir_option(g, rnum, 1) ? "@CE  " : "   "));
         buf += buf2;
       } else if (count == 5) {
-        sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 9) ? " @CSW" : "   "), (room_get_dir_option(g, rnum, 5) ? " @YD " : "   "), (room_get_dir_option(g, rnum, 8) ? "@CSE " : "   "));
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|      ", (room_get_dir_option(g, rnum, 9) ? " @CSW" : "   "), (room_get_dir_option(g, rnum, 5) ? " @YD " : "   "), (room_get_dir_option(g, rnum, 8) ? "@CSE " : "   "));
         buf += buf2;
       } else if (count == 6) {
-        sprintf(buf2, "@w       @w|%s@w|            ", (room_get_dir_option(g, rnum, 2) ? " @CS " : "   "));
+        buf2 = str_format("@w       @w|{}@w|            ", (room_get_dir_option(g, rnum, 2) ? " @CS " : "   "));
         buf += buf2;
       } else {
         buf += "                        ";
@@ -392,7 +392,7 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
   }
 
   send_to_char(g, ch, buf);
-  *buf2 = '\0';
+  buf2.clear();
   buf.clear();
   if (type == 0) {
     send_to_char(g, ch, "\n@b______________________________________________________________________@n");
