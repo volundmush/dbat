@@ -2083,7 +2083,8 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 {
   static char line[READ_SIZE];
   int t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
-  char *tmpptr, buf2[128];
+  char *tmpptr;
+  std::string buf2;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
   char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
@@ -2102,27 +2103,27 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   clear_object(obj_proto_of(g, g->parse_obj_index));
   obj_set_item_number(obj_proto_of(g, g->parse_obj_index), g->parse_obj_index);
 
-  sprintf(buf2, "object #%d", nr); /* sprintf: OK (for 'buf2 >= 19') */
+  buf2 = str_format("object #{:d}", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  obj_set_name(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2)));
+  obj_set_name(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2.c_str())));
   if (obj_get_name(obj_proto_of(g, g->parse_obj_index)) == nullptr) {
     mud_log("SYSERR: Null obj name or format error at or near {}", buf2);
     exit(1);
   }
   /* each is adjusted before it is stored: the setters copy */
-  tmpptr = fread_string(obj_f, buf2);
+  tmpptr = fread_string(obj_f, buf2.c_str());
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
   obj_set_short_description(obj_proto_of(g, g->parse_obj_index), take_string(tmpptr));
 
-  tmpptr = fread_string(obj_f, buf2);
+  tmpptr = fread_string(obj_f, buf2.c_str());
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
   obj_set_description(obj_proto_of(g, g->parse_obj_index), take_string(tmpptr));
-  obj_set_action_description(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2)));
+  obj_set_action_description(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2.c_str())));
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -2270,8 +2271,8 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].specific = 0;
   }
 
-  strcat(buf2, ", after numeric constants\n" /* strcat: OK (for 'buf2 >= 87') */
-               "...expecting 'E', 'A', '$', or next object number");
+  buf2 += ", after numeric constants\n" /* strcat: OK (for 'buf2 >= 87') */
+          "...expecting 'E', 'A', '$', or next object number";
   j = 0;
 
   for (;;) {
@@ -2282,8 +2283,8 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     switch (*line) {
       case 'E': {
         extra_descr_data descr;
-        descr.keyword     = take_string(fread_string(obj_f, buf2));
-        descr.description = take_string(fread_string(obj_f, buf2));
+        descr.keyword     = take_string(fread_string(obj_f, buf2.c_str()));
+        descr.description = take_string(fread_string(obj_f, buf2.c_str()));
         obj_ex_description_slot(obj_proto_of(g, g->parse_obj_index))->push_front(std::move(descr));
         break;
       }
@@ -2380,11 +2381,13 @@ static void load_zones(GameWorld *g, FILE *fl, const char *zonename)
   std::unique_ptr<zone_data> made = std::make_unique<zone_data>();
   struct zone_data *zone          = made.get(); /* Z and ZCMD2 refer to it */
   int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
-  char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
+  char *ptr, buf[READ_SIZE];
+  std::string zname;
+  std::string buf2;
   int zone_fix = false;
   char t1[80], t2[80], line[MAX_STRING_LENGTH];
 
-  strlcpy(zname, zonename, sizeof(zname));
+  zname = zonename;
 
   /* Skip first 3 lines lest we mistake the zone name for a command. */
   for (tmp = 0; tmp < 3; tmp++)
@@ -2421,7 +2424,7 @@ static void load_zones(GameWorld *g, FILE *fl, const char *zonename)
     mud_log("SYSERR: Format error in {}, line {:d}", zname, line_num);
     exit(1);
   }
-  snprintf(buf2, sizeof(buf2), "beginning of zone #%d", Z.number);
+  buf2 = str_format("beginning of zone #{:d}", Z.number);
 
   line_num += get_line(fl, buf);
   if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
@@ -2562,10 +2565,12 @@ static void load_help(GameWorld *g, FILE *fl, const char *name)
 {
   char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
   size_t entrylen;
-  char line[READ_SIZE + 1], hname[READ_SIZE + 1], *scan;
+  char line[READ_SIZE + 1];
+  std::string hname;
+  char *scan;
   struct help_index_element el;
 
-  strlcpy(hname, name, sizeof(hname));
+  hname = name;
 
   get_one_line(fl, key);
   while (*key != '$') {

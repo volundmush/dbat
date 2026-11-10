@@ -467,7 +467,8 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   mail_index_type *mail_pointer, *prev_mail;
   position_list_type *position_pointer;
   long mail_address, following_block;
-  char *tmstr, buf[MAX_MAIL_SIZE + 256]; /* + header */
+  char *tmstr;
+  std::string buf; /* + header */
   char *to;
 
   if (recipient < 0) {
@@ -533,18 +534,12 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
     *from = strdup("Unknown");
   }
 
-  snprintf(buf, sizeof(buf),
-           " @D* * * * @CGalactic Mail System @D* * * *\r\n"
-           "@cDate@D:@w %s\r\n"
-           "  @cTo@D:@G %s\r\n"
-           "@cFrom@D:@R %s\r\n"
-           "\r\n"
-           "@w%s@n",
+  buf             = str_format(" @D* * * * @CGalactic Mail System @D* * * *\r\n@cDate@D:@w {}\r\n  @cTo@D:@G {}\r\n@cFrom@D:@R {}\r\n\r\n@w{}@n",
 
-           tmstr,
-           to ? CAP(to) : "Unknown",
-           *from ? CAP(*from) : "Unknown",
-           header.txt);
+                               tmstr,
+                   to ? CAP(to) : "Unknown",
+                   *from ? CAP(*from) : "Unknown",
+                               header.txt);
   following_block = header.header_data.next_block;
 
   /* mark the block as deleted */
@@ -555,7 +550,7 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   while (following_block != LAST_BLOCK) {
     read_from_file(g, &data, BLOCK_SIZE, following_block);
 
-    strcat(buf, data.txt); /* strcat: OK (data.txt:DATA_BLOCK_DATASIZE < buf:MAX_MAIL_SIZE) */
+    buf += data.txt; /* strcat: OK (data.txt:DATA_BLOCK_DATASIZE < buf:MAX_MAIL_SIZE) */
     mail_address    = following_block;
     following_block = data.block_type;
     data.block_type = DELETED_BLOCK;
@@ -564,7 +559,7 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   }
   mail_commit(g);
 
-  return strdup(buf);
+  return strdup(buf.c_str());
 }
 
 /****************************************************************

@@ -127,7 +127,8 @@ int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data 
 void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
 {
   int t[2], k, attach_type;
-  char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
+  char line[256], *cmds, *s, flags[256];
+  std::string errors;
   struct cmdlist_element *cle;
   struct index_data *t_index;
   struct trig_data *trig;
@@ -139,10 +140,10 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   t_index->vnum  = nr;
   t_index->proto = trig;
 
-  snprintf(errors, sizeof(errors), "trig vnum %d", nr);
+  errors = str_format("trig vnum {:d}", nr);
 
   trig->index = t_index;
-  trig->name  = take_string(fread_string(trig_f, errors));
+  trig->name  = take_string(fread_string(trig_f, errors.c_str()));
 
   get_line(trig_f, line);
   k                  = sscanf(line, "%d %255s %d", &attach_type, flags, t);
@@ -150,10 +151,10 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   trig->trigger_type = (long)asciiflag_conv(flags);
   trig->narg         = (k == 3) ? t[0] : 0;
 
-  trig->arglist = take_string(fread_string(trig_f, errors));
+  trig->arglist = take_string(fread_string(trig_f, errors.c_str()));
 
   /* an empty or blank script becomes the same placeholder trigedit saves */
-  cmds = fread_string(trig_f, errors);
+  cmds = fread_string(trig_f, errors.c_str());
   s    = cmds ? strtok(cmds, "\n\r") : nullptr;
 
   trig->cmdlist      = new cmdlist_element();

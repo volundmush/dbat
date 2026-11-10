@@ -29,8 +29,10 @@ Conversion (printf -> std::format):
   With no arguments a call is plain text: the replacements' std::string_view overload prints it as it is, so
   only %% is undone and braces are left alone.
   %p wraps its argument in as_pointer(), which prints a null pointer as "(nil)" as glibc's printf does.
-Calls it leaves alone (and prints): a format that isn't a string literal, %n, an integer precision
-(%.3d), a * width whose arguments it can't find.
+  An integer precision (%.3d, %-3.3d) wraps its argument in printf_digits(), which gives at least that many
+  digits after the sign as printf does.
+Calls it leaves alone (and prints): a format that isn't a string literal, %n, an integer precision with flags
+other than - and 0, a * width whose arguments it can't find.
 """
 import os, re, subprocess, sys, tempfile
 
@@ -76,6 +78,12 @@ def convert_spec(flags, width, prec, conv):
         return '{}', notes
     elif width is not None:
         spec += width
+    if prec is not None and conv in 'diu' and prec not in ('*', '') and width != '*' and not set(flags) - set('-0'):
+        # %.3d: at least that many digits (printf_digits()), padded to the width as text; 0 is ignored with it
+        notes.append(f'digits:{prec}')
+        if conv == 'u':
+            notes.append('unsigned')
+        return '{' + ((':' + ('<' if left else '>') + width) if width else '') + '}', notes
     if prec is not None:
         if conv in 'diouxXc':
             raise Unsupported('integer precision')
@@ -244,7 +252,11 @@ def convert_call(src, spans, fi):
         value = arg_texts[k]
         k += 1
         lead = value[:len(value) - len(value.lstrip())]
-        if 'pointer' in n:
+        digits = next((x[7:] for x in n if x.startswith('digits:')), None)
+        if digits is not None:
+            inner = f'as_unsigned({value.strip()})' if 'unsigned' in n else value.strip()
+            value = f'{lead}printf_digits({inner}, {digits})'
+        elif 'pointer' in n:
             value = f'{lead}as_pointer({value.strip()})'
         elif 'unsigned' in n or 'char' in n:
             value = f'{lead}{"as_unsigned" if "unsigned" in n else "as_char"}({value.strip()})'
@@ -327,6 +339,7 @@ def noncode(src):
 
 DECL_LINE = re.compile(r'^([ \t]+)char[ \t]+([^;()]*);([ \t]*(?:/\*.*\*/|//.*))?[ \t]*$', re.M)
 DECLARATOR = re.compile(r'\s*([A-Za-z_]\w*)\s*\[([^\]]+)\]\s*(?:=\s*(?:""|\{\s*(?:0|\'\\0\'|"")?\s*\}))?\s*')
+OTHER_DECLARATOR = re.compile(r'\s*\**\s*[A-Za-z_]\w*\s*(?:=\s*[^,{}"]+)?\s*')
 WRITERS = {'snprintf': 2, 'sprintf': 1, 'strcpy': None, 'strlcpy': None, 'strcat': None, 'strlcat': None}
 # functions that take a std::string_view, to which a std::string is passed as it is
 SV_SINKS = {'send_to_char', 'write_to_output', 'send_to_room', 'send_to_all', 'send_to_outdoor', 'send_to_moon',
@@ -418,7 +431,7 @@ def strip_c_str(v):
 
 def buffer_edits(src, mask, name, size, scope_a, scope_b):
     """The edits [(start, end, text)] that make the char buffer name a std::string, or raises Unsupported."""
-    edits, writes = [], 0
+    edits, writes, counters = [], 0, set()
     for m in re.finditer(r'\b' + re.escape(name) + r'\b', src[scope_a:scope_b]):
         p = scope_a + m.start()
         e = p + len(name)
@@ -437,6 +450,30 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
             spans, close = split_args(src, paren)
             first = re.sub(r'\s+', '', src[spans[0][0]:spans[0][1]])
             call_start = paren - len(re.search(r'([A-Za-z_]\w*)\s*$', src[:paren]).group(0))
+            # a length kept beside it: len = snprintf(name, ...); len += snprintf(name + len, sizeof(name) - len, ...)
+            counted = re.search(r'\b([A-Za-z_]\w*)\s*(\+?=)\s*$', src[max(0, call_start - 60):call_start])
+            mlen = re.fullmatch(re.escape(name) + r'\+([A-Za-z_]\w*)', first)
+            if func == 'snprintf' and (mlen or (counted and first == name)):
+                counter = mlen.group(1) if mlen else counted.group(1)
+                if counted and counted.group(1) != counter:
+                    raise Unsupported(f'line {line}: the result of {func} is used')
+                if mlen and counted and counted.group(2) != '+=':
+                    raise Unsupported(f'line {line}: the result of {func} is used')
+                size_src = re.sub(r'\s+', '', src[spans[1][0]:spans[1][1]])
+                if mlen and size_src not in (f'sizeof({name})-{counter}', f'{re.sub(r"[ ]", "", size)}-{counter}'):
+                    raise Unsupported(f'line {line}: {func} with size {size_src}')
+                if not mlen and not size_ok(size_src, name, size):
+                    raise Unsupported(f'line {line}: {func} with size {size_src}')
+                stmt = call_start - len(counted.group(0)) if counted else call_start
+                if not statement_start(src, mask, stmt) or not re.match(r'\s*;', src[close + 1:]):
+                    raise Unsupported(f'line {line}: the result of {func} is used')
+                counters.add(counter)
+                new_fmt_src, new_args = convert_call(src, spans, 2)
+                expr = new_fmt_src.strip() if not new_args else \
+                    'str_format(' + new_fmt_src.strip() + ',' + ','.join(new_args) + ')'
+                edits.append((stmt, close + 1, f'{name} {"+=" if mlen else "="} {expr}'))
+                writes += 1
+                continue
             if first == name:
                 op = '='
             elif first == f'{name}+strlen({name})':
@@ -546,6 +583,30 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
         raise Unsupported(f'line {line}: {name} used as {src[p - 20:e + 20].strip()!r}')
     if not writes:
         raise Unsupported('never written with snprintf, sprintf, strcpy, strcat or sprintbit')
+    for counter in counters:  # the length kept beside it goes, if nothing else reads it
+        decl = re.compile(r'\n[ \t]*(?:size_t|int|unsigned|long|unsigned int)\s+' + re.escape(counter) +
+                          r'(?:\s*=\s*0)?\s*;[ \t]*(?=\n)')
+        first_use = min(a for a, b, t in edits if t.startswith(name))
+        dm = None
+        for d in decl.finditer(src, 0, first_use):
+            dm = d  # the last declaration before it is used
+        if not dm or mask[dm.start() + 1]:
+            raise Unsupported(f'its length {counter} is not declared on a line of its own')
+        _, counter_end = block_bounds(src, mask, dm.start() + 1, dm.end())
+        if counter_end < first_use:
+            raise Unsupported(f'its length {counter} is declared in a block of its own')
+        for m in re.finditer(r'\b' + re.escape(counter) + r'\b', src[dm.end():counter_end]):
+            p = dm.end() + m.start()
+            if mask[p] or any(a <= p < b for a, b, _ in edits) or re.search(r'(\.|->)\s*$', src[p - 3:p]):
+                continue
+            line_start = src.rfind('\n', 0, p) + 1
+            reset = re.compile(r'[ \t]*' + re.escape(counter) + r'\s*=\s*0\s*;[ \t]*\n').match(src, line_start)
+            if reset:  # the next write starts from the beginning again
+                indent = reset.group(0)[:len(reset.group(0)) - len(reset.group(0).lstrip())]
+                edits.append((reset.start(), reset.end(), f'{indent}{name}.clear();\n'))
+                continue
+            raise Unsupported(f'line {src.count(chr(10), 0, p) + 1}: its length {counter} is read')
+        edits.append((dm.start(), dm.end(), ''))
     return edits
 
 
@@ -586,7 +647,8 @@ def tidy_format_values(src):
                 lead = lead[:len(lead) - len(lead.lstrip())]
                 edits = [x for x in edits if x[0] != values[0][0]]
                 edits.append((spans[fi][0], values[0][1], lead + (w.group(1) or w.group(2))))
-    return apply_edits(src, edits)
+    src = apply_edits(src, edits)
+    return re.sub(r'(\n[ \t]*(\w+)\.clear\(\);)(\n[ \t]*\2\.clear\(\);)+', r'\1', src)  # cleared twice
 
 
 def merge_first_value(src, decl_end, name):
@@ -620,9 +682,12 @@ def convert_buffers(path):
                 continue
             parts = [x for x in re.split(r',', dm.group(2))]
             decls = [DECLARATOR.fullmatch(x) for x in parts]
-            if not all(decls):
+            # the others on the line (char *p, char c = 'x') stay as they are
+            if not all(d or OTHER_DECLARATOR.fullmatch(x) for d, x in zip(decls, parts)) or not any(decls):
                 continue
             for k, d in enumerate(decls):
+                if not d:
+                    continue
                 key = (d.group(1), dm.group(0), src.count(dm.group(0), dm.end()))  # identical ones after it stay put
                 if key not in tried:
                     found = (dm, decls, k, key)
@@ -632,6 +697,7 @@ def convert_buffers(path):
         if not found:
             break
         dm, decls, k, key = found
+        parts = [x.strip() for x in re.split(r',', dm.group(2))]
         tried.add(key)
         name, size = decls[k].group(1), decls[k].group(2).strip()
         line = src.count('\n', 0, dm.start()) + 1
@@ -649,10 +715,10 @@ def convert_buffers(path):
         indent = dm.group(1)
         lines = []
         if k:
-            lines.append(indent + 'char ' + ', '.join(x.group(0).strip() for x in decls[:k]) + ';')
+            lines.append(indent + 'char ' + ', '.join(parts[:k]) + ';')
         lines.append(indent + f'std::string {name};' + (dm.group(3) or ''))
         if k + 1 < len(decls):
-            lines.append(indent + 'char ' + ', '.join(x.group(0).strip() for x in decls[k + 1:]) + ';')
+            lines.append(indent + 'char ' + ', '.join(parts[k + 1:]) + ';')
         edits.append((dm.start(), dm.end(), '\n'.join(lines)))
         src = apply_edits(src, edits)
         src = merge_first_value(src, dm.start() + len('\n'.join(lines[:-1 if k + 1 < len(decls) else None])), name)
@@ -735,7 +801,10 @@ def selftest(root):
             if prec == '*':
                 pf_args.append('3')
             pf_args.append(v)
-            if 'pointer' in notes:
+            digits = next((x[7:] for x in notes if x.startswith('digits:')), None)
+            if digits is not None:
+                val = f'printf_digits({"as_unsigned(" + v + ")" if "unsigned" in notes else v}, {digits})'
+            elif 'pointer' in notes:
                 val = f'as_pointer({v})'
             elif 'unsigned' in notes:
                 val = f'as_unsigned({v})'

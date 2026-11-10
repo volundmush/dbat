@@ -815,11 +815,11 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   if (!(does_guild_know(g, guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = npc_message(guild_nr->no_such_skill, char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
 
@@ -852,7 +852,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
 {
   //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   std::string text(skip_spaces(argument));
 
@@ -888,8 +888,8 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
 
   /****  Does the GM know the skill the player wants to learn?  ****/
   if (!(does_guild_know(g, guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = npc_message(guild_nr->no_such_skill, char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
 
@@ -900,8 +900,8 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
         learntype = g->spell_info[skill_num].can_learn_skill[i];
     switch (learntype) {
       case SKLEARN_CANT:
-        snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
-        do_tell(g, keeper, buf, g->cmd_tell, 0);
+        buf = npc_message(guild_nr->no_such_skill, char_get_name(ch));
+        do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
         return;
       case SKLEARN_CROSSCLASS:
       case SKLEARN_CLASS:
@@ -1021,8 +1021,8 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
                    pointcost, (pointcost == 1) ? "" : "s");
     }
   } else {
-    snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = npc_message(guild_nr->no_such_skill, char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
   }
 }
 
@@ -1230,18 +1230,20 @@ static void read_guild_skill_line(FILE *gm_f, char *buf, int *t1, int *t2, int *
 
 void boot_the_guilds(GameWorld *g, FILE *gm_f, const char *filename, int rec_count)
 {
-  char *buf, buf2[256], *p, buf3[READ_SIZE];
+  char *buf;
+  std::string buf2;
+  char *p, buf3[READ_SIZE];
   room_vnum temp;
   int val, t1, t2, rv;
   int done = false;
 
-  snprintf(buf2, sizeof(buf2), "beginning of GM file %s", filename);
+  buf2 = str_format("beginning of GM file {}", filename);
 
-  buf = fread_string(gm_f, buf2);
+  buf = fread_string(gm_f, buf2.c_str());
   while (!done && buf) {
     if (*buf == '#') { /* New Trainer */
       sscanf(buf, "#%d\n", &temp);
-      snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
+      buf2 = str_format("GM #{:d} in GM file {}", temp, filename);
       free(buf); /* Plug memory leak! */
       guild_vnum vnum                  = temp;
       std::unique_ptr<guild_data> made = std::make_unique<guild_data>();
@@ -1278,8 +1280,8 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, const char *filename, int rec_cou
         read_guild_skill_line(gm_f, buf3, &t1, &t2, &rv, temp);
       }
       read_guild_line(g, vnum, gm_f, "%f", &guild->charge, "GM_CHARGE");
-      guild->no_such_skill   = read_guild_message(g, vnum, gm_f, buf2, "no_such_skill", guild_default_no_skill);
-      guild->not_enough_gold = read_guild_message(g, vnum, gm_f, buf2, "not_enough_gold", guild_default_no_gold);
+      guild->no_such_skill   = read_guild_message(g, vnum, gm_f, buf2.c_str(), "no_such_skill", guild_default_no_skill);
+      guild->not_enough_gold = read_guild_message(g, vnum, gm_f, buf2.c_str(), "not_enough_gold", guild_default_no_gold);
 
       read_guild_line(g, vnum, gm_f, "%d", &guild->minlvl, "GM_MINLVL");
       read_guild_line(g, vnum, gm_f, "%d", &guild->gm, "GM_TRAINER");
@@ -1316,7 +1318,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, const char *filename, int rec_cou
           guild_get_with_who(guild)
               [temp++] = 0;
         free(buf);
-        buf = fread_string(gm_f, buf2);
+        buf = fread_string(gm_f, buf2.c_str());
       }
       if (g->guilds.find(vnum))
         mud_log("SYSERR: Guild #{:d} is defined twice; ignoring the second one.", vnum);
@@ -1326,7 +1328,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, const char *filename, int rec_cou
       if (*buf == '$') /* EOF */
         done = true;
       free(buf); /* Plug memory leak! */
-      buf = done ? nullptr : fread_string(gm_f, buf2);
+      buf = done ? nullptr : fread_string(gm_f, buf2.c_str());
     }
   }
 }

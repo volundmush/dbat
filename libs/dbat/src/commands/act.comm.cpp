@@ -1330,10 +1330,12 @@ ACMD(do_page)
 ACMD(do_gen_comm)
 {
   std::string color_on;
-  char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], *msg;
+  std::string buf1;
+  std::string buf2;
+  char *msg;
 
-  *buf1 = '\0';
-  *buf2 = '\0';
+  buf1.clear();
+  buf2.clear();
 
   /* Array of flags which must _not_ be set in order for comm to be heard */
   int channels[] = {
@@ -1447,9 +1449,9 @@ ACMD(do_gen_comm)
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
     send_to_char(g, ch, CONFIG_OK);
   } else {
-    snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
-    send_to_char(g, ch, "{}", buf2);
-    add_history(g, ch, buf2, hist_type[subcmd]);
+    buf2 = str_format("{}@WYou {}@W, '@w{}@W'{}@n\r\n", color_on, com_msgs[subcmd][1], text, color_on);
+    send_to_char(g, ch, buf2);
+    add_history(g, ch, buf2.c_str(), hist_type[subcmd]);
   }
 
   /* now send all the strings out */
@@ -1466,26 +1468,26 @@ ACMD(do_gen_comm)
 
       if (CONFIG_ENABLE_LANGUAGES) {
         garble_text(g, text, char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
-        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on.c_str(), char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", text.c_str(), color_on.c_str());
+        buf1 = str_format("{}{} {}s{} '{}@n'{}", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", text, color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) != char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+        buf1 = str_format("{}@WSomeone nearby {}s@W, '@w{}@W'@n{}", color_on, com_msgs[subcmd][1], text, color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) == char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+        buf1 = str_format("{}@W$n@W {}s@W, '@w{}@W'@n{}", color_on, com_msgs[subcmd][1], text, color_on);
       } else {
         if (char_get_admlevel(ch) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W$n %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+          buf1 = str_format("{}@W$n {}s@W, '@w{}@W'@n{}", color_on, com_msgs[subcmd][1], text, color_on);
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) < ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+          buf1 = str_format("{}@WAnonymous Player {}s@W, '@w{}@W'@n{}", color_on, com_msgs[subcmd][1], text, color_on);
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) >= ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+          buf1 = str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text, color_on);
         } else if (char_get_admlevel(i->character) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+          buf1 = str_format("{}@W{} ($n) {}s@W, '@w{}@W'@n{}", color_on, char_get_user(ch), com_msgs[subcmd][1], text, color_on);
         } else {
-          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
+          buf1 = str_format("{}@W{} {}s@W, '@w{}@W'@n{}", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text, color_on);
         }
       }
 
-      msg = act(g, buf1, false, ch, nullptr, i->character, TO_VICT | TO_SLEEP);
+      msg = act(g, buf1.c_str(), false, ch, nullptr, i->character, TO_VICT | TO_SLEEP);
       add_history(g, i->character, msg, hist_type[subcmd]);
     }
   }

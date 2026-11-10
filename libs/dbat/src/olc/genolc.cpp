@@ -78,6 +78,30 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
   return nullptr;
 }
 
+std::string npc_message(std::string_view msg, const char *name, int amount)
+{
+  std::string out;
+
+  for (size_t i = 0; i < msg.size(); i++) {
+    if (msg[i] != '%' || i + 1 == msg.size()) {
+      out += msg[i];
+      continue;
+    }
+    switch (msg[++i]) {
+      case 's':
+        out += name ? name : "(null)";
+        break;
+      case 'd':
+        out += std::to_string(amount);
+        break;
+      default: /* %%, and anything else the check let by, as itself */
+        out += msg[i];
+        break;
+    }
+  }
+  return out;
+}
+
 /* A numbered menu of names, `columns` to a line: "@g%2d@n) %-20.20s" then gap after each name.
    Numbering starts at first_number. */
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)

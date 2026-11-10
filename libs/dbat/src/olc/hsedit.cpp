@@ -339,7 +339,8 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   std::string built_on;
   std::string last_pay;
   char buf2[MAX_STRING_LENGTH];
-  char *timestr, no_name[128];
+  char *timestr;
+  std::string no_name;
   struct house_control_rec *house;
 
   clear_screen(g, d);
@@ -362,7 +363,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   *buf2 = '\0';
   buf1  = sprintbit(house->bitvector, house_flags);
   //  sprintf(buf2, "%d %d %d %d", house->value[0], house->value[1], house->value[2], house->value[3]);
-  sprintf(no_name, "(NOBODY)");
+  no_name = "(NOBODY)";
   snprintf(buf, sizeof(buf),
            "@D-- @RJamdog's House OLC Editor @D--\r\n"
            "@D--@g House number : @D[@c%d@D]     @gHouse zone: @D[@c%d@D]\r\n"
@@ -380,7 +381,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
            "@gEnter choice : @n",
 
            OLC_NUM(d), OLC_ZNUM(d)->number,
-           house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name : get_name_by_id(g, house->owner),
+           house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name.c_str() : get_name_by_id(g, house->owner),
            house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
            house_types[(house->mode)], built_on.c_str(), last_pay.c_str(), hsedit_list_guests(g, house, buf2), buf1.c_str());
   send_to_char(g, d->character, "{}", buf);

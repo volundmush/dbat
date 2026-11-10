@@ -305,15 +305,15 @@ ACMD(do_color)
 
 ACMD(do_toggle)
 {
-  char buf2[4];
+  std::string buf2;
 
   if (char_is_npc(ch))
     return;
 
   if (char_get_wimp_level(g, ch) == 0)
-    strcpy(buf2, "OFF"); /* strcpy: OK */
+    buf2 = "OFF"; /* strcpy: OK */
   else
-    snprintf(buf2, sizeof(buf2), "%-3.3d", char_get_wimp_level(g, ch)); /* sprintf: OK */
+    buf2 = str_format("{:<3}", printf_digits(char_get_wimp_level(g, ch), 3)); /* sprintf: OK */
 
   if (char_get_admlevel(ch)) {
     send_to_char(g, ch,

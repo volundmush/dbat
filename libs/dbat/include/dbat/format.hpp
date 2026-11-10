@@ -56,6 +56,20 @@ std::string_view printf_precision(T &&v, int precision)
   return precision < 0 ? text : text.substr(0, precision);
 }
 
+/* v as printf's %.Nd prints it: at least digits digits after the sign (none at all for 0 with no digits) */
+template <class T>
+std::string printf_digits(T v, int digits)
+  requires std::is_integral_v<T>
+{
+  if (digits == 0 && v == 0)
+    return {};
+  std::string text = std::format("{}", v);
+  size_t sign      = text[0] == '-' ? 1 : 0;
+  if (text.size() - sign < static_cast<size_t>(digits))
+    text.insert(sign, static_cast<size_t>(digits) - (text.size() - sign), '0');
+  return text;
+}
+
 /* v as the char printf's %c prints, the byte it ends in; std::format's {:c} throws on an int out of char's range */
 template <class T> constexpr char as_char(T v)
   requires std::is_integral_v<T>

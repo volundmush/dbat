@@ -36,6 +36,8 @@
 #include "dbat/help.hpp"
 #include "dbat/boards.hpp"
 #include "dbat/broadcast.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/shop_utils.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
@@ -1326,6 +1328,27 @@ static void check_sensing_keeps_no_copies(void)
 #endif
 }
 
+/* A shop that trades with no one lists its customers as "None", not as the last shop listed did (the list was
+ * kept in a static buffer that an empty one never wrote to) */
+static void check_shop_with_no_customers(void)
+{
+  GameWorld *g           = th_boot();
+  struct char_data *ch   = th_player(g, "Wizard", ADMLVL_IMPL);
+  struct shop_data *shop = find_first(g->shops.all(), [](shop_data *) { return true; });
+
+  CHECK(shop != nullptr);
+  th_type(g, ch, "game shops 1");
+  CHECK(saw(ch, "Customers:  , "));
+  th_take_output(g, ch);
+
+  for (int i = 0; i < NUM_TRADERS; i++)
+    SET_BIT_AR(shop_get_with_who(shop), i);
+  th_type(g, ch, "game shops 1");
+  CHECK(saw(ch, "Customers:  None"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 /* log_imm_action() appends its line, plain or formatted, to the request file */
 static void check_imm_action_reaches_the_log(void)
 {
@@ -1711,6 +1734,7 @@ static const struct {
     {"deleted_object_leaves_no_put_command",        check_deleted_object_leaves_no_put_command       },
     {"imm_action_reaches_the_log",                  check_imm_action_reaches_the_log                 },
     {"sensing_keeps_no_copies",                     check_sensing_keeps_no_copies                    },
+    {"shop_with_no_customers",                      check_shop_with_no_customers                     },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

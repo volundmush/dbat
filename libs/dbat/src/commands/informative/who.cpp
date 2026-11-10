@@ -298,7 +298,8 @@ ACMD(do_users)
   std::string line;
   char line2[220];
   std::string idletime;
-  char state[30], *timeptr, mode;
+  std::string state;
+  char *timeptr, mode;
   std::string name_search, host_search;
   struct char_data *tch;
   int low = 0, high = CONFIG_LEVEL_CAP, num_can_see = 0;
@@ -388,9 +389,9 @@ ACMD(do_users)
     *(timeptr + 8) = '\0';
 
     if (desc_get_connected(d) == CON_PLAYING && d->original)
-      strcpy(state, "Switched");
+      state = "Switched";
     else
-      strcpy(state, connected_types[desc_get_connected(d)]);
+      state = connected_types[desc_get_connected(d)];
 
     if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
       idletime = str_format("{:>3d}", char_get_timer(d->character) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
