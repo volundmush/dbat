@@ -32,7 +32,8 @@ struct guild_data {
 ACMD(do_teach);
 
 /* Functions defined in guild.c */
-int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxsz, int sktype, std::string_view argument);
+/* ch's skills of type sktype as the skill list shows them, those matching argument (a name part or least level) */
+std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype, std::string_view argument);
 void levelup_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);

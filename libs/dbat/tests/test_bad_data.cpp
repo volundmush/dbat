@@ -38,6 +38,8 @@
 #include "dbat/broadcast.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/shop_utils.hpp"
+#include "dbat/guild.hpp"
+#include "dbat/guild_utils.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
@@ -1349,6 +1351,27 @@ static void check_shop_with_no_customers(void)
   th_shutdown(g);
 }
 
+/* The same for a guild that trains no one: its list is empty, not the last guild's */
+static void check_guild_with_no_customers(void)
+{
+  GameWorld *g            = th_boot();
+  struct char_data *ch    = th_player(g, "Wizard", ADMLVL_IMPL);
+  struct guild_data *gild = find_first(g->guilds.all(), [](guild_data *) { return true; });
+
+  CHECK(gild != nullptr);
+  std::string show = str_format("game guilds {:d}", guild_get_vnum(gild));
+  th_type(g, ch, show.c_str());
+  CHECK(saw(ch, "Whom will train: , "));
+  th_take_output(g, ch);
+
+  for (int i = 0; i < NUM_TRADERS; i++)
+    SET_BIT_AR(guild_get_with_who(gild), i);
+  th_type(g, ch, show.c_str());
+  CHECK(saw(ch, "Whom will train: \r\n"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 /* log_imm_action() appends its line, plain or formatted, to the request file */
 static void check_imm_action_reaches_the_log(void)
 {
@@ -1735,6 +1758,7 @@ static const struct {
     {"imm_action_reaches_the_log",                  check_imm_action_reaches_the_log                 },
     {"sensing_keeps_no_copies",                     check_sensing_keeps_no_copies                    },
     {"shop_with_no_customers",                      check_shop_with_no_customers                     },
+    {"guild_with_no_customers",                     check_guild_with_no_customers                    },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

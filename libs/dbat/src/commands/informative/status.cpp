@@ -1355,7 +1355,6 @@ ACMD(do_levels)
 {
   char buf[MAX_STRING_LENGTH];
   size_t i, len = 0;
-  int nlen;
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You ain't nothin' but a hound-dog.\r\n");
@@ -1364,13 +1363,10 @@ ACMD(do_levels)
 
   for (i = 1; i < 101; i++) {
     if (i == 100)
-      nlen = snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
+      len += snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
     else
-      nlen = snprintf(buf + len, sizeof(buf) - len, "[%2zu] %8s-%-8s : \r\n", i,
+      len += snprintf(buf + len, sizeof(buf) - len, "[%2zu] %8s-%-8s : \r\n", i,
                       add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
-    if (len + nlen >= sizeof(buf) || nlen < 0)
-      break;
-    len += nlen;
   }
 
   send_to_char(g, ch, "{}", buf);

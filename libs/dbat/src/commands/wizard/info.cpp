@@ -75,10 +75,8 @@ ACMD(do_finddoor)
 {
   int d, num = 0;
   obj_vnum vnum = NOTHING;
-  size_t len;
-  int nlen;
   std::string arg;
-  char buf[MAX_STRING_LENGTH] = {0};
+  std::string buf;
   struct char_data *tmp_char;
   struct obj_data *obj;
 
@@ -104,24 +102,20 @@ ACMD(do_finddoor)
       vnum = obj_get_vnum(g, obj);
   }
   if (vnum != NOTHING) {
-    len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
-                   vnum, obj_get_short_description(obj));
+    buf = str_format("Doors unlocked by key [{:d}] {} are:\r\n",
+                     vnum, obj_get_short_description(obj));
     for (room_vnum i : g->rooms.vnums()) {
       for (d = 0; d < NUM_OF_DIRS; d++) {
         if (room_get_dir_option(g, i, d) && room_get_dir_option(g, i, d)->key &&
             room_get_dir_option(g, i, d)->key == vnum) {
-          nlen = snprintf(buf + len, sizeof(buf) - len,
-                          "[%3d] Room %d, %s (%s)\r\n",
-                          ++num, i,
-                          dirs[d], exit_keyword(room_get_dir_option(g, i, d)));
-          if (len + nlen >= sizeof(buf) || nlen < 0)
-            break;
-          len += nlen;
+          buf += str_format("[{:>3d}] Room {:d}, {} ({})\r\n",
+                            ++num, i,
+                            dirs[d], exit_keyword(room_get_dir_option(g, i, d)));
         }
       } /* for all directions */
     } /* for all rooms */
     if (num > 0)
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
     else
       send_to_char(g, ch, "No doors were found for key [{:d}] {}.\r\n",
                    vnum, obj_get_short_description(obj));
@@ -1247,16 +1241,10 @@ ACMD(do_show)
           if (!room_get_dir_option(g, r, j))
             continue;
           if (room_get_dir_option(g, r, j)->to_room == 0) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
-            if (len + nlen >= sizeof(buf) || nlen < 0)
-              break;
-            len += nlen;
+            len += snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
           }
           if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !exit_description(room_get_dir_option(g, r, j))) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
-            if (len + nlen >= sizeof(buf) || nlen < 0)
-              break;
-            len += nlen;
+            len += snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, r, count_color_chars(room_get_name(g, r)) + 40, room_get_name(g, r), QNRM, dirs[j]);
           }
         }
       send_to_char(g, ch, "{}", buf);
@@ -1268,10 +1256,7 @@ ACMD(do_show)
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
         if (room_flagged(g, r, ROOM_DEATH)) {
-          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
-          if (len + nlen >= sizeof(buf) || nlen < 0)
-            break;
-          len += nlen;
+          len += snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
         }
       send_to_char(g, ch, "{}", buf);
       break;
@@ -1282,10 +1267,7 @@ ACMD(do_show)
       j   = 0;
       for (room_vnum r : g->rooms.vnums())
         if (room_flagged(g, r, ROOM_GODROOM)) {
-          nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
-          if (len + nlen >= sizeof(buf) || nlen < 0)
-            break;
-          len += nlen;
+          len += snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r, room_get_name(g, r));
         }
       send_to_char(g, ch, "{}", buf);
       break;

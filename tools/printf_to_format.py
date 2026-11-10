@@ -453,6 +453,16 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
             # a length kept beside it: len = snprintf(name, ...); len += snprintf(name + len, sizeof(name) - len, ...)
             counted = re.search(r'\b([A-Za-z_]\w*)\s*(\+?=)\s*$', src[max(0, call_start - 60):call_start])
             mlen = re.fullmatch(re.escape(name) + r'\+([A-Za-z_]\w*)', first)
+            if func == 'strlcpy' and counted and counted.group(2) == '=' and first == name:
+                # len = strlcpy(name, x, sizeof(name)): the length beside it starts there
+                stmt = call_start - len(counted.group(0))
+                if not size_ok(src[spans[2][0]:spans[2][1]], name, size) or not statement_start(src, mask, stmt) \
+                        or not re.match(r'\s*;', src[close + 1:]):
+                    raise Unsupported(f'line {line}: the result of {func} is used')
+                counters.add(counted.group(1))
+                edits.append((stmt, close + 1, f'{name} = {strip_c_str(src[spans[1][0]:spans[1][1]])}'))
+                writes += 1
+                continue
             if func == 'snprintf' and (mlen or (counted and first == name)):
                 counter = mlen.group(1) if mlen else counted.group(1)
                 if counted and counted.group(1) != counter:
@@ -669,10 +679,37 @@ def merge_first_value(src, decl_end, name):
     return src[:decl_end - 1] + ' = ' + value + ';' + src[j + 1:]
 
 
+def normalize_counted(src):
+    """Rewrites the ways a length beside a buffer is kept into the one buffer_edits() knows,
+    len += snprintf(buf + len, sizeof(buf) - len, ...):
+      nlen = snprintf(buf + len, sizeof(buf) - len, ...); if (len + nlen >= sizeof(buf) || nlen < 0) break; len += nlen;
+      nlen = snprintf(buf + len, sizeof(buf) - len, ...); len += nlen;
+    (a string has no end to stop at), and drops the **OVERFLOW** marker written over a full buffer's end."""
+    mask = noncode(src)
+    call = re.compile(r'\b(\w+) = snprintf\s*\(\s*(\w+) \+ (\w+), sizeof\(\2\) - \3,')
+    edits = []
+    for m in call.finditer(src):
+        if mask[m.start()]:
+            continue
+        nlen, buf, ln = m.groups()
+        _, close = split_args(src, src.index('(', m.start() + len(nlen) + 3))
+        guard = re.compile(r';\s*(?:if \(' + ln + r' \+ ' + nlen + r' >= sizeof\(' + buf + r'\) \|\| ' + nlen +
+                           r' < 0\)\s*break;\s*)?' + ln + r' \+= ' + nlen + r';').match(src, close + 1)
+        if guard:
+            edits.append((m.start(), m.start() + len(nlen), ln))
+            edits.append((m.start() + len(nlen), m.start() + len(nlen) + 3, ' += '))
+            edits.append((close + 1, guard.end(), ';'))
+    src = apply_edits(src, edits)
+    src = re.sub(r'\n[ \t]*if \((\w+) >= sizeof\((\w+)\)\)\s*strcpy\(\2 \+ sizeof\(\2\) - strlen\(overflow\) - 1, overflow\);[^\n]*', '', src)
+    if 'overflow' not in re.sub(r'\n[ \t]*const char \*overflow\s*=\s*"[^"]*";', '', src).replace('**OVERFLOW**', ''):
+        src = re.sub(r'\n[ \t]*const char \*overflow\s*=\s*"[^"]*";', '', src)
+    return src
+
+
 def convert_buffers(path):
     """Makes each local char buffer in path that is written only by snprintf/sprintf/strcpy/strcat and read in ways
     a std::string can be a std::string. Returns [(line, name, reason)] for those left alone."""
-    src = open(path).read()
+    src = normalize_counted(open(path).read())
     tried, left = set(), []
     while True:
         mask = noncode(src)

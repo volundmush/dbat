@@ -284,18 +284,9 @@ static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int a
    *  Modification of character skills                                 *
    ********************************************************************* */
 
-/* The length of a buffer of size bytes after a write that wanted to add wrote bytes, as snprintf() reports it.
- * snprintf() returns what it would have written, so adding that up can pass the end of the buffer. */
-static size_t text_used(size_t len, int wrote, size_t size)
-{
-  len += wrote > 0 ? (size_t)wrote : 0;
-  return len < size ? len : size - 1;
-}
-
 ACMD(do_skillset)
 {
   struct char_data *vict;
-  char help_text[MAX_STRING_LENGTH];
   int skill, value, i = 0, qend;
 
   std::string_view rest = argument;
@@ -327,19 +318,16 @@ ACMD(do_skillset)
 
   /* If there is no chars in argument */
   if (rest.empty()) {
-    size_t len = 0;
+    std::string text = "\r\nSkills:\r\n";
 
-    len = text_used(len, snprintf(help_text, sizeof(help_text), "\r\nSkills:\r\n"), sizeof(help_text));
-    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL, ""), sizeof(help_text));
-    len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nSpells:\r\n"), sizeof(help_text));
-    len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SPELL, ""), sizeof(help_text));
+    text += print_skills_by_type(g, vict, SKTYPE_SKILL, "");
+    text += "\r\nSpells:\r\n";
+    text += print_skills_by_type(g, vict, SKTYPE_SPELL, "");
     if (CONFIG_ENABLE_LANGUAGES) {
-      len = text_used(len, snprintf(help_text + len, sizeof(help_text) - len, "\r\nLanguages:\r\n"), sizeof(help_text));
-      len = text_used(len, print_skills_by_type(g, vict, help_text + len, sizeof(help_text) - len, SKTYPE_SKILL | SKTYPE_LANG, ""), sizeof(help_text));
+      text += "\r\nLanguages:\r\n";
+      text += print_skills_by_type(g, vict, SKTYPE_SKILL | SKTYPE_LANG, "");
     }
-    if (len == sizeof(help_text) - 1)
-      strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    send_to_char(g, ch, "{}", help_text);
+    send_to_char(g, ch, text);
     return;
   }
 
