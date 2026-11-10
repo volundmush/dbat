@@ -31,17 +31,24 @@ struct audit {
   struct pointer_set objects{};
 };
 
-__attribute__((format(printf, 2, 3))) static void problem_printf(struct audit *a, const char *format, ...)
+/* Reports one problem, up to MAX_REPORTED of them */
+static void problem(struct audit *a, std::string_view text)
 {
-  char text[MAX_STRING_LENGTH];
-  va_list args;
-
   if (a->problems++ >= MAX_REPORTED)
     return;
-  va_start(args, format);
-  vsnprintf(text, sizeof(text), format, args);
-  va_end(args);
-  a->report(a->context, text);
+  std::string line(text);
+  a->report(a->context, line.c_str());
+}
+
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+static void problem(struct audit *a, std::format_string<Args...> fmt, Args &&...args)
+{
+  if (a->problems >= MAX_REPORTED) { /* counted, but not worth formatting */
+    a->problems++;
+    return;
+  }
+  problem(a, str_format(fmt, std::forward<Args>(args)...));
 }
 
 static int compare_pointers(const void *x, const void *y)
@@ -88,50 +95,50 @@ static void audit_rooms(GameWorld *g, struct audit *a)
       const struct room_direction_data *exit = room->dir_option[dir].get();
 
       if (exit && exit->to_room != NOWHERE && !valid_room(g, exit->to_room))
-        problem_printf(a, "room %d: exit %d leads to room %d, which doesn't exist", vnum, dir, exit->to_room);
+        problem(a, "room {:d}: exit {:d} leads to room {:d}, which doesn't exist", vnum, dir, exit->to_room);
     }
 
     bool missing = false;
 
     if (room->people.has_duplicates())
-      problem_printf(a, "room %d: someone is listed here twice", vnum);
+      problem(a, "room {:d}: someone is listed here twice", vnum);
     room->people.each([&](long id) {
       struct char_data *ch = char_by_id(g, id);
       if (!ch)
         missing = true;
       else if (char_get_in_room(ch) != vnum)
-        problem_printf(a, "room %d: %s is listed here, but says room %d", vnum, char_get_name(ch), char_get_in_room(ch));
+        problem(a, "room {:d}: {} is listed here, but says room {:d}", vnum, char_get_name(ch), char_get_in_room(ch));
     });
     if (missing)
-      problem_printf(a, "room %d: a person here isn't in the game", vnum);
+      problem(a, "room {:d}: a person here isn't in the game", vnum);
 
     missing = false;
     if (room->contents.has_duplicates())
-      problem_printf(a, "room %d: an object is listed here twice", vnum);
+      problem(a, "room {:d}: an object is listed here twice", vnum);
     room->contents.each([&](long id) {
       struct obj_data *obj = obj_by_id(g, id);
       if (!obj)
         missing = true;
       else if (obj_get_in_room(obj) != vnum)
-        problem_printf(a, "room %d: object %d is listed here, but says room %d", vnum, obj_get_vnum(g, obj), obj_get_in_room(obj));
+        problem(a, "room {:d}: object {:d} is listed here, but says room {:d}", vnum, obj_get_vnum(g, obj), obj_get_in_room(obj));
     });
     if (missing)
-      problem_printf(a, "room %d: an object here isn't in the game", vnum);
+      problem(a, "room {:d}: an object here isn't in the game", vnum);
   });
 }
 
 /* References between entities are ids. One that is set but leads nowhere is the id of something that has gone. */
 
 /* Pairs that always point at each other: if I'm grappling you, you're grappled by me. */
-#define AUDIT_PAIR(uid, mine, theirs)                                                                          \
-  do {                                                                                                         \
-    if (uid) {                                                                                                 \
-      struct char_data *partner = char_get_##mine(g, ch);                                                      \
-      if (!partner || !set_has(&a->characters, partner))                                                       \
-        problem_printf(a, "%s: %s someone who isn't in the game", name, #mine);                                \
-      else if (char_get_##theirs(g, partner) != ch)                                                            \
-        problem_printf(a, "%s: %s %s, whose %s says otherwise", name, #mine, char_get_name(partner), #theirs); \
-    }                                                                                                          \
+#define AUDIT_PAIR(uid, mine, theirs)                                                                   \
+  do {                                                                                                  \
+    if (uid) {                                                                                          \
+      struct char_data *partner = char_get_##mine(g, ch);                                               \
+      if (!partner || !set_has(&a->characters, partner))                                                \
+        problem(a, "{}: {} someone who isn't in the game", name, #mine);                                \
+      else if (char_get_##theirs(g, partner) != ch)                                                     \
+        problem(a, "{}: {} {}, whose {} says otherwise", name, #mine, char_get_name(partner), #theirs); \
+    }                                                                                                   \
   } while (0)
 
 static void audit_character_links(GameWorld *g, struct audit *a, struct char_data *ch)
@@ -155,19 +162,19 @@ static void audit_character_links(GameWorld *g, struct audit *a, struct char_dat
 
   /* a mind link can be one-way, and a poisoner can poison many */
   if (ch->mindlink_uid && !set_has(&a->characters, char_get_mindlink(g, ch)))
-    problem_printf(a, "%s: mind-linked to someone who isn't in the game", name);
+    problem(a, "{}: mind-linked to someone who isn't in the game", name);
   if (ch->poisonby_uid && !set_has(&a->characters, char_get_poisonby(g, ch)))
-    problem_printf(a, "%s: poisoned by someone who isn't in the game", name);
+    problem(a, "{}: poisoned by someone who isn't in the game", name);
   if (ch->master_uid && !set_has(&a->characters, char_get_master(g, ch)))
-    problem_printf(a, "%s: follows someone who isn't in the game", name);
+    problem(a, "{}: follows someone who isn't in the game", name);
   if (ch->fighting_uid && !set_has(&a->characters, char_get_fighting(g, ch)))
-    problem_printf(a, "%s: fighting someone who isn't in the game", name);
+    problem(a, "{}: fighting someone who isn't in the game", name);
 
   if (ch->sits_uid) {
     if (!(seat = char_get_sits(g, ch)) || !set_has(&a->objects, seat))
-      problem_printf(a, "%s: sits on an object that isn't in the game", name);
+      problem(a, "{}: sits on an object that isn't in the game", name);
     else if (obj_get_sitting(g, seat) != ch)
-      problem_printf(a, "%s: sits on object %d, which says otherwise", name, obj_get_item_number(seat));
+      problem(a, "{}: sits on object {:d}, which says otherwise", name, obj_get_item_number(seat));
   }
 }
 
@@ -178,13 +185,13 @@ static void audit_character_values(GameWorld *g, struct audit *a, struct char_da
   int items        = 0;
 
   if (char_get_position(ch) < 0 || char_get_position(ch) > POS_STANDING)
-    problem_printf(a, "%s: position %d doesn't exist", name, char_get_position(ch));
+    problem(a, "{}: position {:d} doesn't exist", name, char_get_position(ch));
   if (char_get_gold(ch) < 0)
-    problem_printf(a, "%s: has negative gold", name);
+    problem(a, "{}: has negative gold", name);
   if (char_get_bank_gold(ch) < 0)
-    problem_printf(a, "%s: has negative gold in the bank", name);
+    problem(a, "{}: has negative gold in the bank", name);
   if (char_get_exp(ch) < 0)
-    problem_printf(a, "%s: has negative experience", name);
+    problem(a, "{}: has negative experience", name);
 
   char_get_inventory(ch).each([&](long id) {
     if (const struct obj_data *obj = obj_by_id(g, id)) {
@@ -193,9 +200,9 @@ static void audit_character_values(GameWorld *g, struct audit *a, struct char_da
     }
   });
   if (items != char_get_carry_items(ch))
-    problem_printf(a, "%s: carries %d items, but counts %d", name, items, char_get_carry_items(ch));
+    problem(a, "{}: carries {:d} items, but counts {:d}", name, items, char_get_carry_items(ch));
   if (weight != char_get_carry_weight(ch))
-    problem_printf(a, "%s: carries a weight of %lld, but counts %d", name, (long long)weight, char_get_carry_weight(ch));
+    problem(a, "{}: carries a weight of {:d}, but counts {:d}", name, (long long)weight, char_get_carry_weight(ch));
 }
 
 static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
@@ -205,25 +212,25 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
   struct char_data *other;
 
   if (room != NOWHERE && !valid_room(g, room))
-    problem_printf(a, "%s: in room index %d, which doesn't exist", name, room);
+    problem(a, "{}: in room index {:d}, which doesn't exist", name, room);
   else if (room != NOWHERE) {
     if (!room_get_people(g, room).contains(char_get_id(ch)))
-      problem_printf(a, "%s: says room %d, but isn't listed there", name, room);
+      problem(a, "{}: says room {:d}, but isn't listed there", name, room);
   }
 
   bool missing = false;
 
   if (char_get_inventory(ch).has_duplicates())
-    problem_printf(a, "%s: carries an object twice", name);
+    problem(a, "{}: carries an object twice", name);
   char_get_inventory(ch).each([&](long id) {
     struct obj_data *obj = obj_by_id(g, id);
     if (!obj)
       missing = true;
     else if (obj_get_carried_by(obj) != ch)
-      problem_printf(a, "%s: carries object %d, which doesn't say so", name, obj_get_vnum(g, obj));
+      problem(a, "{}: carries object {:d}, which doesn't say so", name, obj_get_vnum(g, obj));
   });
   if (missing)
-    problem_printf(a, "%s: carries an object that isn't in the game", name);
+    problem(a, "{}: carries an object that isn't in the game", name);
 
   for (int slot = 0; slot < NUM_WEARS; slot++) {
     struct obj_data *obj = char_get_equipment(ch, slot);
@@ -231,25 +238,25 @@ static void audit_character(GameWorld *g, struct audit *a, struct char_data *ch)
     if (!obj)
       continue;
     if (!set_has(&a->objects, obj))
-      problem_printf(a, "%s: wears an object that isn't in the game", name);
+      problem(a, "{}: wears an object that isn't in the game", name);
     else if (obj_get_worn_by(obj) != ch || obj_get_worn_on(obj) != slot)
-      problem_printf(a, "%s: wears object %d in slot %d, which doesn't say so", name, obj_get_vnum(g, obj), slot);
+      problem(a, "{}: wears object {:d} in slot {:d}, which doesn't say so", name, obj_get_vnum(g, obj), slot);
   }
 
   if ((other = char_get_fighting(g, ch)) && !set_has(&a->characters, other))
-    problem_printf(a, "%s: is fighting someone who isn't in the game", name);
+    problem(a, "{}: is fighting someone who isn't in the game", name);
   if ((other = char_get_master(g, ch)) && !set_has(&a->characters, other))
-    problem_printf(a, "%s: follows someone who isn't in the game", name);
+    problem(a, "{}: follows someone who isn't in the game", name);
   audit_character_links(g, a, ch);
   audit_character_values(g, a, ch);
   if (char_get_followers(ch).has_duplicates())
-    problem_printf(a, "%s: lists a follower twice", name);
+    problem(a, "{}: lists a follower twice", name);
   char_get_followers(ch).each([&](long id) {
     struct char_data *f = char_by_id(g, id);
     if (!f)
-      problem_printf(a, "%s: is followed by someone who isn't in the game", name);
+      problem(a, "{}: is followed by someone who isn't in the game", name);
     else if (char_get_master(g, f) != ch)
-      problem_printf(a, "%s: lists %s as a follower, who says otherwise", name, char_get_name(f));
+      problem(a, "{}: lists {} as a follower, who says otherwise", name, char_get_name(f));
   });
 }
 
@@ -268,14 +275,14 @@ static void audit_object_is_listed(GameWorld *g, struct audit *a, struct obj_dat
   struct obj_data *outer   = obj_get_in_obj(obj);
 
   if (room != NOWHERE && valid_room(g, room) && !list_has_object(room_get_contents(g, room), obj))
-    problem_printf(a, "object %d: says room %d, but isn't listed there", vnum, room);
+    problem(a, "object {:d}: says room {:d}, but isn't listed there", vnum, room);
   if (owner && set_has(&a->characters, owner) && !list_has_object(char_get_inventory(owner), obj))
-    problem_printf(a, "object %d: says %s carries it, but isn't in the inventory", vnum, char_get_name(owner));
+    problem(a, "object {:d}: says {} carries it, but isn't in the inventory", vnum, char_get_name(owner));
   if (wearer && set_has(&a->characters, wearer) &&
       (obj_get_worn_on(obj) < 0 || obj_get_worn_on(obj) >= NUM_WEARS || char_get_equipment(wearer, obj_get_worn_on(obj)) != obj))
-    problem_printf(a, "object %d: says %s wears it, but isn't in that slot", vnum, char_get_name(wearer));
+    problem(a, "object {:d}: says {} wears it, but isn't in that slot", vnum, char_get_name(wearer));
   if (outer && set_has(&a->objects, outer) && !list_has_object(obj_get_contains(outer), obj))
-    problem_printf(a, "object %d: says it's inside object %d, but isn't listed there", vnum, obj_get_vnum(g, outer));
+    problem(a, "object {:d}: says it's inside object {:d}, but isn't listed there", vnum, obj_get_vnum(g, outer));
 }
 
 static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
@@ -285,47 +292,47 @@ static void audit_object(GameWorld *g, struct audit *a, struct obj_data *obj)
                (obj_get_worn_by(obj) != nullptr) + (obj_get_in_obj(obj) != nullptr);
 
   if (places > 1)
-    problem_printf(a, "object %d: is in %d places at once", vnum, places);
+    problem(a, "object {:d}: is in {:d} places at once", vnum, places);
   if (obj_get_in_room(obj) != NOWHERE && !valid_room(g, obj_get_in_room(obj)))
-    problem_printf(a, "object %d: in room index %d, which doesn't exist", vnum, obj_get_in_room(obj));
+    problem(a, "object {:d}: in room index {:d}, which doesn't exist", vnum, obj_get_in_room(obj));
   if (obj_get_carried_by(obj) && !set_has(&a->characters, obj_get_carried_by(obj)))
-    problem_printf(a, "object %d: carried by someone who isn't in the game", vnum);
+    problem(a, "object {:d}: carried by someone who isn't in the game", vnum);
   if (obj_get_worn_by(obj) && !set_has(&a->characters, obj_get_worn_by(obj)))
-    problem_printf(a, "object %d: worn by someone who isn't in the game", vnum);
+    problem(a, "object {:d}: worn by someone who isn't in the game", vnum);
   if (obj_get_in_obj(obj) && !set_has(&a->objects, obj_get_in_obj(obj)))
-    problem_printf(a, "object %d: inside an object that isn't in the game", vnum);
+    problem(a, "object {:d}: inside an object that isn't in the game", vnum);
 
   audit_object_is_listed(g, a, obj);
 
   if (obj->sitting_uid) {
     struct char_data *sitter = obj_get_sitting(g, obj);
     if (!sitter || !set_has(&a->characters, sitter))
-      problem_printf(a, "object %d: sat on by someone who isn't in the game", vnum);
+      problem(a, "object {:d}: sat on by someone who isn't in the game", vnum);
     else if (char_get_sits(g, sitter) != obj)
-      problem_printf(a, "object %d: sat on by %s, who says otherwise", vnum, char_get_name(sitter));
+      problem(a, "object {:d}: sat on by {}, who says otherwise", vnum, char_get_name(sitter));
   }
   if (obj->user_uid && !set_has(&a->characters, obj_get_user(g, obj)))
-    problem_printf(a, "object %d: used by someone who isn't in the game", vnum);
+    problem(a, "object {:d}: used by someone who isn't in the game", vnum);
   if (obj->target_uid && !set_has(&a->characters, obj_get_target(g, obj)))
-    problem_printf(a, "object %d: targets someone who isn't in the game", vnum);
+    problem(a, "object {:d}: targets someone who isn't in the game", vnum);
   if (obj->posted_to_uid && !set_has(&a->objects, obj_get_posted_to(g, obj)))
-    problem_printf(a, "object %d: posted to an object that isn't in the game", vnum);
+    problem(a, "object {:d}: posted to an object that isn't in the game", vnum);
   if (obj->fellow_wall_uid && !set_has(&a->objects, obj_get_fellow_wall(g, obj)))
-    problem_printf(a, "object %d: joined to a wall that isn't in the game", vnum);
+    problem(a, "object {:d}: joined to a wall that isn't in the game", vnum);
 
   bool missing = false;
 
   if (obj_get_contains(obj).has_duplicates())
-    problem_printf(a, "object %d: contains an object twice", vnum);
+    problem(a, "object {:d}: contains an object twice", vnum);
   obj_get_contains(obj).each([&](long id) {
     struct obj_data *inner = obj_by_id(g, id);
     if (!inner)
       missing = true;
     else if (obj_get_in_obj(inner) != obj)
-      problem_printf(a, "object %d: contains object %d, which doesn't say so", vnum, obj_get_vnum(g, inner));
+      problem(a, "object {:d}: contains object {:d}, which doesn't say so", vnum, obj_get_vnum(g, inner));
   });
   if (missing)
-    problem_printf(a, "object %d: contains an object that isn't in the game", vnum);
+    problem(a, "object {:d}: contains an object that isn't in the game", vnum);
 }
 
 /* Is d an open connection? Compares pointers only, as d may have been freed. */
@@ -340,12 +347,12 @@ static void audit_connections(const GameWorld *g, struct audit *a)
 {
   g->descriptors.visit([&](long, const struct descriptor_data *d) {
     if (d->snooping && !is_open(g, d->snooping))
-      problem_printf(a, "a connection is snooping one that has closed");
+      problem(a, "a connection is snooping one that has closed");
     else if (d->snooping && d->snooping->snoop_by != d)
-      problem_printf(a, "a connection is snooping one that says otherwise");
+      problem(a, "a connection is snooping one that says otherwise");
 
     if (d->snoop_by && !is_open(g, d->snoop_by))
-      problem_printf(a, "a connection is snooped on by one that has closed");
+      problem(a, "a connection is snooped on by one that has closed");
   });
 }
 
@@ -364,14 +371,14 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   g->obj_index.visit([&](obj_vnum r, const index_data *index) {
     int found = 0;
     for (; i < vnums.size() && vnums[i] < r; i++)
-      problem_printf(a, "object: prototype %d doesn't exist", vnums[i]);
+      problem(a, "object: prototype {:d} doesn't exist", vnums[i]);
     for (; i < vnums.size() && vnums[i] == r; i++)
       found++;
     if (found != index->number)
-      problem_printf(a, "object %d: %d exist, but the index counts %d", r, found, index->number);
+      problem(a, "object {:d}: {:d} exist, but the index counts {:d}", r, found, index->number);
   });
   for (; i < vnums.size(); i++)
-    problem_printf(a, "object: prototype %d doesn't exist", vnums[i]);
+    problem(a, "object: prototype {:d} doesn't exist", vnums[i]);
 
   vnums.clear();
   i = 0;
@@ -383,14 +390,14 @@ static void audit_index_counts(GameWorld *g, struct audit *a)
   g->mob_index.visit([&](mob_vnum r, const index_data *index) {
     int found = 0;
     for (; i < vnums.size() && vnums[i] < r; i++)
-      problem_printf(a, "mob: prototype %d doesn't exist", vnums[i]);
+      problem(a, "mob: prototype {:d} doesn't exist", vnums[i]);
     for (; i < vnums.size() && vnums[i] == r; i++)
       found++;
     if (found != index->number)
-      problem_printf(a, "mob %d: %d exist, but the index counts %d", r, found, index->number);
+      problem(a, "mob {:d}: {:d} exist, but the index counts {:d}", r, found, index->number);
   });
   for (; i < vnums.size(); i++)
-    problem_printf(a, "mob: prototype %d doesn't exist", vnums[i]);
+    problem(a, "mob: prototype {:d} doesn't exist", vnums[i]);
 }
 
 static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
@@ -410,12 +417,12 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
   g->characters.visit([&](long id, struct char_data *ch) {
     audit_character(g, &a, ch);
     if (char_get_id(ch) != id)
-      problem_printf(&a, "%s: registered as id %ld, but says id %d", char_get_name(ch), id, char_get_id(ch));
+      problem(&a, "{}: registered as id {:d}, but says id {:d}", char_get_name(ch), id, char_get_id(ch));
   });
   g->objects.visit([&](long id, struct obj_data *obj) {
     audit_object(g, &a, obj);
     if (obj_get_id(obj) != id)
-      problem_printf(&a, "%s: registered as id %ld, but says id %d", obj_get_short_description(obj), id, obj_get_id(obj));
+      problem(&a, "{}: registered as id {:d}, but says id {:d}", obj_get_short_description(obj), id, obj_get_id(obj));
   });
 
   bool stray = false;
@@ -423,12 +430,12 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
     if (!set_has(&a.characters, ch))
       stray = true;
     else if (char_get_id(ch) != id)
-      problem_printf(&a, "%s: in the combat list as id %ld, but says id %d", char_get_name(ch), id, char_get_id(ch));
+      problem(&a, "{}: in the combat list as id {:d}, but says id {:d}", char_get_name(ch), id, char_get_id(ch));
     else if (!char_get_fighting(g, ch))
-      problem_printf(&a, "%s: is in the combat list, but isn't fighting", char_get_name(ch));
+      problem(&a, "{}: is in the combat list, but isn't fighting", char_get_name(ch));
   });
   if (stray)
-    problem_printf(&a, "the combat list holds someone who isn't in the game");
+    problem(&a, "the combat list holds someone who isn't in the game");
 
   stray = false;
   g->affect_list.visit([&](long, struct char_data *ch) {
@@ -437,11 +444,11 @@ int world_audit(GameWorld *g, world_audit_report *report, void *context)
       stray = true;
   });
   if (stray)
-    problem_printf(&a, "the affect list holds someone who isn't in the game");
+    problem(&a, "the affect list holds someone who isn't in the game");
 
   g->descriptors.visit([&](long, struct descriptor_data *d) {
     if (d->character && desc_get_connected(d) == CON_PLAYING && !set_has(&a.characters, d->character))
-      problem_printf(&a, "a connection is playing a character who isn't in the game");
+      problem(&a, "a connection is playing a character who isn't in the game");
   });
 
   audit_connections(g, &a);

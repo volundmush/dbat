@@ -80,11 +80,11 @@ void set_height_and_weight_by_race(GameWorld *g, struct char_data *ch)
   race = char_get_race(ch);
   sex  = char_get_sex(ch);
   if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {
-    mud_log_printf("Invalid gender in set_height_and_weight_by_race: %d", sex);
+    mud_log("Invalid gender in set_height_and_weight_by_race: {:d}", sex);
     sex = SEX_NEUTRAL;
   }
   if (race <= RACE_UNDEFINED || race >= NUM_RACES) {
-    mud_log_printf("Invalid gender in set_height_and_weight_by_race: %d", char_get_sex(ch));
+    mud_log("Invalid gender in set_height_and_weight_by_race: {:d}", char_get_sex(ch));
     race = RACE_UNDEFINED + 1; /* first defined race */
   }
 
@@ -149,7 +149,7 @@ int wield_type(int chsize, const struct obj_data *weap)
   if (chsize < obj_get_size(weap) - 1) {
     return WIELD_TWOHAND;
   }
-  mud_log_printf("unknown size vector in wield_type: chsize=%d, weapsize=%d", chsize, obj_get_size(weap));
+  mud_log("unknown size vector in wield_type: chsize={:d}, weapsize={:d}", chsize, obj_get_size(weap));
   return WIELD_NONE;
 }
 
@@ -366,12 +366,12 @@ bool race_check_can_transform(GameWorld *g, char_data *ch)
   // No point checking for Saiyan/Halfbreed because it's just as expensive to check for
   // the Oozaru flag.
   if (char_plr_flagged(ch, PLR_OOZARU)) {
-    send_to_char_printf(g, ch, "You are the great Oozaru right now and can't transform!\r\n");
+    send_to_char(g, ch, "You are the great Oozaru right now and can't transform!\r\n");
     return false;
   }
 
   if (char_get_kaioken(ch) > 0) {
-    send_to_char_printf(g, ch, "You are in kaioken right now and can't transform!\r\n");
+    send_to_char(g, ch, "You are in kaioken right now and can't transform!\r\n");
     return false;
   }
 
@@ -718,7 +718,7 @@ bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier)
   switch (char_get_race(ch)) {
     case RACE_BIO:
       if (tier > 3 - char_get_absorbs(ch)) {
-        send_to_char_printf(g, ch, "You need to absorb something to transform!\r\n");
+        send_to_char(g, ch, "You need to absorb something to transform!\r\n");
         return false;
       }
       break;
@@ -726,11 +726,11 @@ bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier)
       switch (tier) {
         case 2:
           if (char_get_absorbs(ch) > 0) {
-            send_to_char_printf(g, ch, "You need to ingest someone before you can use that form.\r\n");
+            send_to_char(g, ch, "You need to ingest someone before you can use that form.\r\n");
             return false;
           }
           if (char_get_level(ch) < 50) {
-            send_to_char_printf(g, ch, "You must be at least level 50 to reach that form.\r\n");
+            send_to_char(g, ch, "You must be at least level 50 to reach that form.\r\n");
             return false;
           }
       }
@@ -775,12 +775,12 @@ bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier)
   if (rpp_cost) {
     if (char_get_transcost(ch, (tier)-1) == false) {
       if (char_get_rp(ch) < rpp_cost) {
-        send_to_char_printf(g, ch, "You need %i RPP in order to unlock this transformation.\r\n", rpp_cost);
+        send_to_char(g, ch, "You need {:d} RPP in order to unlock this transformation.\r\n", rpp_cost);
         return false;
       }
       char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
       char_set_transcost(ch, (tier)-1, true);
-      send_to_char_printf(g, ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
+      send_to_char(g, ch, "You pay {:d} RPP to permanently unlock this transformation!\r\n", rpp_cost);
     }
   }
 
@@ -798,14 +798,14 @@ bool race_check_trans_unlock(GameWorld *g, char_data *ch, int tier)
   if (ps_cost) {
     if (char_get_transcost(ch, (tier)-1) == false) {
       if (char_get_practice_points(g, ch) < 50) {
-        send_to_char_printf(g, ch,
-                            "You need %i practice points in order to obtain a transformation for the first time.\r\n",
-                            ps_cost);
+        send_to_char(g, ch,
+                     "You need {:d} practice points in order to obtain a transformation for the first time.\r\n",
+                     ps_cost);
         return false;
       }
       char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (50));
       char_set_transcost(ch, (tier)-1, true);
-      send_to_char_printf(g, ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
+      send_to_char(g, ch, "You pay {:d} PS to permanently unlock this transformation!\r\n", ps_cost);
     }
   }
 
@@ -818,211 +818,211 @@ void race_display_forms(GameWorld *g, char_data *ch)
 
   switch (char_get_race(ch)) {
     case RACE_HUMAN:
-      send_to_char_printf(g, ch, "              @YSuper @CHuman@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YSuper @CHuman@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YSuper @CHuman @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CHuman @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CHuman @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CHuman @WFourth @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_SAIYAN:
       if (char_plr_flagged(ch, PLR_LSSJ)) {
-        send_to_char_printf(g, ch, "                @YSuper @CSaiyan@n\r\n");
-        send_to_char_printf(g, ch, "@b-------------------------------------------------@n\r\n");
-        send_to_char_printf(g, ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@b-------------------------------------------------@n\r\n");
+        send_to_char(g, ch, "                @YSuper @CSaiyan@n\r\n");
+        send_to_char(g, ch, "@b-------------------------------------------------@n\r\n");
+        send_to_char(g, ch, "@YSuper @CSaiyan @WFirst   @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@YLegendary @CSuper Saiyan @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@b-------------------------------------------------@n\r\n");
       } else {
-        send_to_char_printf(g, ch, "              @YSuper @CSaiyan@n\r\n");
-        send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-        send_to_char_printf(g, ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n",
-                            (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                         : "??????????");
-        send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+        send_to_char(g, ch, "              @YSuper @CSaiyan@n\r\n");
+        send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+        send_to_char(g, ch, "@YSuper @CSaiyan @WFirst  @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@YSuper @CSaiyan @WSecond @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@YSuper @CSaiyan @WThird  @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@YSuper @CSaiyan @WFourth @R-@G {} BPL Req\r\n",
+                     (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                  : "??????????");
+        send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       }
       break;
     case RACE_ICER:
-      send_to_char_printf(g, ch, "              @YTransform@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YTransform@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YTransform @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YTransform @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YTransform @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YTransform @WFourth @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_KONATSU:
-      send_to_char_printf(g, ch, "              @YShadow@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YShadow@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YShadow @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YShadow @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YShadow @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_NAMEK:
-      send_to_char_printf(g, ch, "              @YSuper @CNamek@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YSuper @CNamek@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YSuper @CNamek @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CNamek @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CNamek @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CNamek @WFourth @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_MUTANT:
-      send_to_char_printf(g, ch, "              @YMutate@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YMutate@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YMutate @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMutate @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMutate @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_HALFBREED:
-      send_to_char_printf(g, ch, "              @YSuper @CSaiyan@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YSuper @CSaiyan@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YSuper @CSaiyan @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CSaiyan @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper @CSaiyan @WThird  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_BIO:
-      send_to_char_printf(g, ch, "              @YPerfection@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YMature        @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YPerfect       @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YSuper Perfect @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YPerfection@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YMature        @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSemi-Perfect  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YPerfect       @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YSuper Perfect @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_ANDROID:
-      send_to_char_printf(g, ch, "              @YUpgrade@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@Y1.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@Y2.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@Y3.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@Y4.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@Y5.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@Y6.0 @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YUpgrade@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@Y1.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@Y2.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@Y3.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@Y4.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                                                : "??????????");
+      send_to_char(g, ch, "@Y5.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5))
+                                                                : "??????????");
+      send_to_char(g, ch, "@Y6.0 @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_MAJIN:
-      send_to_char_printf(g, ch, "              @YMorph@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YMorph@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YMorph @WAffinity @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMorph @WSuper    @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMorph @WTrue     @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_KAI:
-      send_to_char_printf(g, ch, "              @YMystic@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YMystic@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YMystic @WFirst     @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMystic @WSecond    @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YMystic @WThird     @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     case RACE_TRUFFLE:
-      send_to_char_printf(g, ch, "              @YAscend@n\r\n");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
-      send_to_char_printf(g, ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@YAscend @WThird @R-@G %s BPL Req\r\n",
-                          (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                       : "??????????");
-      send_to_char_printf(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "              @YAscend@n\r\n");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
+      send_to_char(g, ch, "@YAscend @WFirst  @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YAscend @WSecond @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                                                : "??????????");
+      send_to_char(g, ch, "@YAscend @WThird @R-@G {} BPL Req\r\n",
+                   (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                                                : "??????????");
+      send_to_char(g, ch, "@b------------------------------------------------@n\r\n");
       break;
     default:
-      send_to_char_printf(g, ch, "You do not have a transformation.\r\n");
+      send_to_char(g, ch, "You do not have a transformation.\r\n");
       break;
   }
 }
@@ -1032,13 +1032,13 @@ void race_display_trans_req(GameWorld *g, char_data *ch)
 
   switch (char_get_transclass(ch)) {
     case 1:
-      send_to_char_printf(g, ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
+      send_to_char(g, ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
       break;
     case 2:
-      send_to_char_printf(g, ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
+      send_to_char(g, ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
       break;
     case 3:
-      send_to_char_printf(g, ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
+      send_to_char(g, ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
       break;
   }
 }
@@ -1345,8 +1345,8 @@ void race_echo_transform(GameWorld *g, char_data *ch, int tier)
           return;
       }
   }
-  send_to_char_printf(g, ch,
-                      "You strain and scream and... hold on, you don't have a transformation. How did this happen? Go tell an admin!\r\n");
+  send_to_char(g, ch,
+               "You strain and scream and... hold on, you don't have a transformation. How did this happen? Go tell an admin!\r\n");
   return;
 }
 

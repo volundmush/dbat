@@ -294,7 +294,7 @@ static int suntzu_weapon_convert(int wp_type)
       new_type = WEAPON_TYPE_UNDEFINED;
       break;
   }
-  mud_log_printf("Converted weapon from [%d] to [%d].", wp_type, new_type);
+  mud_log("Converted weapon from [{:d}] to [{:d}].", wp_type, new_type);
   return new_type;
 }
 
@@ -324,141 +324,141 @@ ACMD(do_reboot)
 
   if (str_eq_nocase(arg, "all") || arg[0] == '*') {
     if (load_levels(g) < 0)
-      send_to_char_printf(g, ch, "Cannot read level configurations\r\n");
+      send_to_char(g, ch, "Cannot read level configurations\r\n");
     if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
       prune_crlf(g->GREETINGS);
     if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
       prune_crlf(g->GREETANSI);
     if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
-      send_to_char_printf(g, ch, "Cannot read wizlist\r\n");
+      send_to_char(g, ch, "Cannot read wizlist\r\n");
     if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
-      send_to_char_printf(g, ch, "Cannot read immlist\r\n");
+      send_to_char(g, ch, "Cannot read immlist\r\n");
     if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
-      send_to_char_printf(g, ch, "Cannot read news\r\n");
+      send_to_char(g, ch, "Cannot read news\r\n");
     if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
-      send_to_char_printf(g, ch, "Cannot read credits\r\n");
+      send_to_char(g, ch, "Cannot read credits\r\n");
     if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
-      send_to_char_printf(g, ch, "Cannot read motd\r\n");
+      send_to_char(g, ch, "Cannot read motd\r\n");
     if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
-      send_to_char_printf(g, ch, "Cannot read imotd\r\n");
+      send_to_char(g, ch, "Cannot read imotd\r\n");
     if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
-      send_to_char_printf(g, ch, "Cannot read help front page\r\n");
+      send_to_char(g, ch, "Cannot read help front page\r\n");
     if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
-      send_to_char_printf(g, ch, "Cannot read info file\r\n");
+      send_to_char(g, ch, "Cannot read info file\r\n");
     if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
-      send_to_char_printf(g, ch, "Cannot read policies\r\n");
+      send_to_char(g, ch, "Cannot read policies\r\n");
     if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
-      send_to_char_printf(g, ch, "Cannot read handbook\r\n");
+      send_to_char(g, ch, "Cannot read handbook\r\n");
     if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
-      send_to_char_printf(g, ch, "Cannot read background\r\n");
+      send_to_char(g, ch, "Cannot read background\r\n");
     free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
   } else if (str_eq_nocase(arg, "levels")) {
     if (load_levels(g) < 0)
-      send_to_char_printf(g, ch, "Cannot read level configurations\r\n");
+      send_to_char(g, ch, "Cannot read level configurations\r\n");
   } else if (str_eq_nocase(arg, "wizlist")) {
     if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
-      send_to_char_printf(g, ch, "Cannot read wizlist\r\n");
+      send_to_char(g, ch, "Cannot read wizlist\r\n");
   } else if (str_eq_nocase(arg, "immlist")) {
     if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
-      send_to_char_printf(g, ch, "Cannot read immlist\r\n");
+      send_to_char(g, ch, "Cannot read immlist\r\n");
   } else if (str_eq_nocase(arg, "news")) {
     if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
-      send_to_char_printf(g, ch, "Cannot read news\r\n");
+      send_to_char(g, ch, "Cannot read news\r\n");
   } else if (str_eq_nocase(arg, "credits")) {
     if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
-      send_to_char_printf(g, ch, "Cannot read credits\r\n");
+      send_to_char(g, ch, "Cannot read credits\r\n");
   } else if (str_eq_nocase(arg, "motd")) {
     if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
-      send_to_char_printf(g, ch, "Cannot read motd\r\n");
+      send_to_char(g, ch, "Cannot read motd\r\n");
   } else if (str_eq_nocase(arg, "imotd")) {
     if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
-      send_to_char_printf(g, ch, "Cannot read imotd\r\n");
+      send_to_char(g, ch, "Cannot read imotd\r\n");
   } else if (str_eq_nocase(arg, "help")) {
     if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
-      send_to_char_printf(g, ch, "Cannot read help front page\r\n");
+      send_to_char(g, ch, "Cannot read help front page\r\n");
   } else if (str_eq_nocase(arg, "info")) {
     if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
-      send_to_char_printf(g, ch, "Cannot read info\r\n");
+      send_to_char(g, ch, "Cannot read info\r\n");
   } else if (str_eq_nocase(arg, "policy")) {
     if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
-      send_to_char_printf(g, ch, "Cannot read policy\r\n");
+      send_to_char(g, ch, "Cannot read policy\r\n");
   } else if (str_eq_nocase(arg, "handbook")) {
     if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
-      send_to_char_printf(g, ch, "Cannot read handbook\r\n");
+      send_to_char(g, ch, "Cannot read handbook\r\n");
   } else if (str_eq_nocase(arg, "background")) {
     if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
-      send_to_char_printf(g, ch, "Cannot read background\r\n");
+      send_to_char(g, ch, "Cannot read background\r\n");
   } else if (str_eq_nocase(arg, "greetings")) {
     if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
       prune_crlf(g->GREETINGS);
     else
-      send_to_char_printf(g, ch, "Cannot read greetings.\r\n");
+      send_to_char(g, ch, "Cannot read greetings.\r\n");
   } else if (str_eq_nocase(arg, "greetansi")) {
     if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
       prune_crlf(g->GREETANSI);
     else
-      send_to_char_printf(g, ch, "Cannot read greetings.\r\n");
+      send_to_char(g, ch, "Cannot read greetings.\r\n");
   } else if (str_eq_nocase(arg, "xhelp")) {
     free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
   } else if (str_eq_nocase(arg, "ihelp")) {
     if (file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp) < 0)
-      send_to_char_printf(g, ch, "Cannot read help front page\r\n");
+      send_to_char(g, ch, "Cannot read help front page\r\n");
   } else {
-    send_to_char_printf(g, ch, "Unknown reload option.\r\n");
+    send_to_char(g, ch, "Unknown reload option.\r\n");
     return;
   }
 
-  send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
+  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
 }
 
 void boot_world(GameWorld *g)
 {
-  mud_log_printf("Loading level tables.");
+  mud_log("Loading level tables.");
   load_levels(g);
 
-  mud_log_printf("Loading zone table.");
+  mud_log("Loading zone table.");
   index_boot(g, DB_BOOT_ZON);
 
-  mud_log_printf("Loading triggers and generating index.");
+  mud_log("Loading triggers and generating index.");
   index_boot(g, DB_BOOT_TRG);
 
-  mud_log_printf("Loading rooms.");
+  mud_log("Loading rooms.");
   index_boot(g, DB_BOOT_WLD);
 
-  mud_log_printf("Renumbering rooms.");
+  mud_log("Renumbering rooms.");
   renum_world(g);
 
-  mud_log_printf("Checking start rooms.");
+  mud_log("Checking start rooms.");
   check_start_rooms(g);
 
-  mud_log_printf("Loading mobs and generating index.");
+  mud_log("Loading mobs and generating index.");
   index_boot(g, DB_BOOT_MOB);
 
-  mud_log_printf("Loading objs and generating index.");
+  mud_log("Loading objs and generating index.");
   index_boot(g, DB_BOOT_OBJ);
 
-  mud_log_printf("Renumbering zone table.");
+  mud_log("Renumbering zone table.");
   renum_zone_table(g);
 
-  mud_log_printf("Loading disabled commands list...");
+  mud_log("Loading disabled commands list...");
   load_disabled(g);
 
   if (g->converting) {
-    mud_log_printf("Saving converted worldfiles to disk.");
+    mud_log("Saving converted worldfiles to disk.");
     save_all(g);
   }
 
   if (!g->no_specials) {
-    mud_log_printf("Loading shops.");
+    mud_log("Loading shops.");
     index_boot(g, DB_BOOT_SHP);
 
-    mud_log_printf("Loading guild masters.");
+    mud_log("Loading guild masters.");
     index_boot(g, DB_BOOT_GLD);
   }
   if (g->SELFISHMETER >= 10) {
-    mud_log_printf("Loading Shadow Dragons.");
+    mud_log("Loading Shadow Dragons.");
     load_shadow_dragons(g);
   }
 }
@@ -575,7 +575,7 @@ void destroy_db(GameWorld *g)
 
   free_obj_unique_hash(g);
 
-  mud_log_printf("Freeing Assemblies.");
+  mud_log("Freeing Assemblies.");
   free_assemblies(g);
 }
 
@@ -599,12 +599,12 @@ static void init_obj_unique_hash(GameWorld *g)
 void boot_db(GameWorld *g)
 {
 
-  mud_log_printf("Boot db -- BEGIN.");
+  mud_log("Boot db -- BEGIN.");
 
-  mud_log_printf("Resetting the game time:");
+  mud_log("Resetting the game time:");
   reset_time(g);
 
-  mud_log_printf("Reading news, credits, help, ihelp, bground, info & motds.");
+  mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
   file_to_string_alloc(NEWS_FILE, &g->news);
   file_to_string_alloc(CREDITS_FILE, &g->credits);
   file_to_string_alloc(MOTD_FILE, &g->motd);
@@ -622,21 +622,21 @@ void boot_db(GameWorld *g)
   if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
     prune_crlf(g->GREETANSI);
 
-  mud_log_printf("Loading spell definitions.");
+  mud_log("Loading spell definitions.");
   mag_assign_spells(g);
 
-  mud_log_printf("Loading feats.");
+  mud_log("Loading feats.");
   assign_feats(g);
 
   boot_world(g);
 
-  mud_log_printf("Loading help entries.");
+  mud_log("Loading help entries.");
   index_boot(g, DB_BOOT_HLP);
 
-  mud_log_printf("Setting up context sensitive help system for OLC");
+  mud_log("Setting up context sensitive help system for OLC");
   boot_context_help(g);
 
-  mud_log_printf("Generating player index.");
+  mud_log("Generating player index.");
   build_player_index(g);
 
   if (g->ERAPLAYERS <= 0)
@@ -644,71 +644,71 @@ void boot_db(GameWorld *g)
 
   insure_directory(LIB_PLROBJS "CRASH");
 
-  mud_log_printf("Booting mail system.");
+  mud_log("Booting mail system.");
   if (!scan_file(g)) {
-    mud_log_printf("    Mail boot failed -- Mail system disabled");
+    mud_log("    Mail boot failed -- Mail system disabled");
     g->no_mail = 1;
   }
 
   if (auto_pwipe) {
-    mud_log_printf("Cleaning out inactive players.");
+    mud_log("Cleaning out inactive players.");
     clean_pfiles(g);
   }
 
-  mud_log_printf("Loading social messages.");
+  mud_log("Loading social messages.");
   boot_social_messages(g);
 
-  mud_log_printf("Building command list.");
+  mud_log("Building command list.");
   create_command_list(g); /* aedit patch -- M. Scott */
 
-  mud_log_printf("Assigning function pointers:");
+  mud_log("Assigning function pointers:");
 
   if (!g->no_specials) {
-    mud_log_printf("   Mobiles.");
+    mud_log("   Mobiles.");
     assign_mobiles(g);
-    mud_log_printf("   Shopkeepers.");
+    mud_log("   Shopkeepers.");
     assign_the_shopkeepers(g);
-    mud_log_printf("   Objects.");
+    mud_log("   Objects.");
     assign_objects(g);
-    mud_log_printf("   Rooms.");
+    mud_log("   Rooms.");
     assign_rooms(g);
-    mud_log_printf("   Guildmasters.");
+    mud_log("   Guildmasters.");
     assign_the_guilds(g);
   }
 
-  mud_log_printf("Init Object Unique Hash");
+  mud_log("Init Object Unique Hash");
   init_obj_unique_hash(g);
 
-  mud_log_printf("Booting assembled objects.");
+  mud_log("Booting assembled objects.");
   assemblyBootAssemblies(g);
 
-  mud_log_printf("Sorting command list and spells.");
+  mud_log("Sorting command list and spells.");
   sort_commands(g);
   sort_spells(g);
   sort_feats(g);
 
-  mud_log_printf("Booting boards system.");
+  mud_log("Booting boards system.");
   init_boards(g);
 
-  mud_log_printf("Reading banned site and invalid-name list.");
+  mud_log("Reading banned site and invalid-name list.");
   load_banned(g);
   Read_Invalid_List(g);
 
   if (!g->no_rent_check) {
-    mud_log_printf("Deleting timed-out crash and rent files:");
+    mud_log("Deleting timed-out crash and rent files:");
     update_obj_file(g);
-    mud_log_printf("   Done.");
+    mud_log("   Done.");
   }
 
   /* Moved here so the object limit code works. -gg 6/24/98 */
   if (!g->mini_mud) {
-    mud_log_printf("Booting houses.");
+    mud_log("Booting houses.");
     House_boot(g);
   }
 
   for (struct zone_data *i : g->zones.all()) {
-    mud_log_printf("Resetting #%d: %s (rooms %d-%d).", i->number,
-                   i->name.c_str(), i->bot, i->top);
+    mud_log("Resetting #{:d}: {} (rooms {:d}-{:d}).", i->number,
+            i->name.c_str(), i->bot, i->top);
     reset_zone(g, i);
   }
 
@@ -716,7 +716,7 @@ void boot_db(GameWorld *g)
 
   g->boot_time = game_now(g);
 
-  mud_log_printf("Boot db -- DONE.");
+  mud_log("Boot db -- DONE.");
 }
 
 /* save the auction file */
@@ -725,7 +725,7 @@ void auc_save(GameWorld *g)
   FILE *fl;
 
   if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
-    mud_log_printf("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
+    mud_log("SYSERR: Can't write to '{}' auction file.", AUCTION_FILE);
   else {
 
     for (obj_data *obj : room_contents(g, 80)) {
@@ -748,7 +748,7 @@ void auc_load(struct obj_data *obj)
   FILE *fl;
 
   if ((fl = fopen(AUCTION_FILE, "r")) == nullptr)
-    mud_log_printf("SYSERR: Can't read from '%s' auction file.", AUCTION_FILE);
+    mud_log("SYSERR: Can't read from '{}' auction file.", AUCTION_FILE);
   else {
     while (!feof(fl)) {
       get_line(fl, line);
@@ -782,7 +782,7 @@ static void reset_time(GameWorld *g)
   FILE *bgtime;
 
   if ((bgtime = fopen(TIME_FILE, "r")) == nullptr)
-    mud_log_printf("SYSERR: Can't read from '%s' time file.", TIME_FILE);
+    mud_log("SYSERR: Can't read from '{}' time file.", TIME_FILE);
   else {
     fscanf_time(bgtime, &beginning_of_time);
     fscanf_time(bgtime, &g->NEWSUPDATE);
@@ -832,8 +832,8 @@ static void reset_time(GameWorld *g)
   else
     g->weather_info.sunlight = SUN_DARK;
 
-  mud_log_printf("   Current Gametime: %dH %dD %dM %dY.", g->time_info.hours,
-                 g->time_info.day, g->time_info.month, g->time_info.year);
+  mud_log("   Current Gametime: {:d}H {:d}D {:d}M {:d}Y.", g->time_info.hours,
+          g->time_info.day, g->time_info.month, g->time_info.year);
 
   g->weather_info.pressure = 960;
   if ((g->time_info.month >= 7) && (g->time_info.month <= 12))
@@ -860,7 +860,7 @@ void save_mud_time(GameWorld *g, struct time_info_data *when)
   FILE *bgtime;
 
   if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
-    mud_log_printf("SYSERR: Can't write to '%s' time file.", TIME_FILE);
+    mud_log("SYSERR: Can't write to '{}' time file.", TIME_FILE);
   else {
     fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(g, when));
     fprintf(bgtime, "%lld\n", (long long)g->NEWSUPDATE);
@@ -897,7 +897,7 @@ void save_mud_time(GameWorld *g, struct time_info_data *when)
  */
 [[noreturn]] static void help_file_eof(void)
 {
-  mud_log_printf("SYSERR: Unexpected end of help file.");
+  mud_log("SYSERR: Unexpected end of help file.");
   exit(1); /* Some day we hope to handle these things better... */
 }
 
@@ -953,7 +953,7 @@ static int count_hash_records(FILE *fl)
 static void read_index_entry(FILE *index, char *entry)
 {
   if (fscanf(index, "%64935s\n", entry) != 1) { /* MAX_STRING_LENGTH */
-    mud_log_printf("SYSERR: index file ends without a '$'");
+    mud_log("SYSERR: index file ends without a '$'");
     strcpy(entry, "$");
   }
 }
@@ -991,7 +991,7 @@ void index_boot(GameWorld *g, int mode)
       prefix = GLD_PREFIX;
       break;
     default:
-      mud_log_printf("SYSERR: Unknown subcommand %d to index_boot!", mode);
+      mud_log("SYSERR: Unknown subcommand {:d} to index_boot!", mode);
       exit(1);
   }
 
@@ -1002,7 +1002,7 @@ void index_boot(GameWorld *g, int mode)
 
   snprintf(buf2, sizeof(buf2), "%s%s", prefix, index_filename);
   if (!(db_index = fopen(buf2, "r"))) {
-    mud_log_printf("SYSERR: opening index file '%s': %s", buf2, strerror(errno));
+    mud_log("SYSERR: opening index file '{}': {}", buf2, strerror(errno));
     exit(1);
   }
 
@@ -1011,8 +1011,8 @@ void index_boot(GameWorld *g, int mode)
   while (*buf1 != '$') {
     snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
     if (!(db_file = fopen(buf2, "r"))) {
-      mud_log_printf("SYSERR: File '%s' listed in '%s%s': %s", buf2, prefix,
-                     index_filename, strerror(errno));
+      mud_log("SYSERR: File '{}' listed in '{}{}': {}", buf2, prefix,
+              index_filename, strerror(errno));
       read_index_entry(db_index, buf1);
       continue;
     }
@@ -1031,8 +1031,8 @@ void index_boot(GameWorld *g, int mode)
   if (!rec_count) {
     if (mode == DB_BOOT_SHP || mode == DB_BOOT_GLD)
       return;
-    mud_log_printf("SYSERR: boot error - 0 records counted in %s/%s.", prefix,
-                   index_filename);
+    mud_log("SYSERR: boot error - 0 records counted in {}/{}.", prefix,
+            index_filename);
     exit(1);
   }
 
@@ -1044,26 +1044,26 @@ void index_boot(GameWorld *g, int mode)
       break;
     case DB_BOOT_WLD:
       size[0] = sizeof(struct room_data) * rec_count;
-      mud_log_printf("   %d rooms, %d bytes.", rec_count, size[0]);
+      mud_log("   {:d} rooms, {:d} bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_MOB:
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct char_data) * rec_count;
-      mud_log_printf("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+      mud_log("   {:d} mobs, {:d} bytes in index, {:d} bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_OBJ:
       size[0] = sizeof(struct index_data) * rec_count;
       size[1] = sizeof(struct obj_data) * rec_count;
-      mud_log_printf("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+      mud_log("   {:d} objs, {:d} bytes in index, {:d} bytes in prototypes.", rec_count, size[0], size[1]);
       break;
     case DB_BOOT_ZON:
       size[0] = sizeof(struct zone_data) * rec_count;
-      mud_log_printf("   %d zones, %d bytes.", rec_count, size[0]);
+      mud_log("   {:d} zones, {:d} bytes.", rec_count, size[0]);
       break;
     case DB_BOOT_HLP:
       g->help_table.reserve(rec_count);
       size[0] = sizeof(struct help_index_element) * rec_count;
-      mud_log_printf("   %d entries, %d bytes.", rec_count, size[0]);
+      mud_log("   {:d} entries, {:d} bytes.", rec_count, size[0]);
       break;
   }
 
@@ -1072,7 +1072,7 @@ void index_boot(GameWorld *g, int mode)
   while (*buf1 != '$') {
     snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
     if (!(db_file = fopen(buf2, "r"))) {
-      mud_log_printf("SYSERR: %s: %s", buf2, strerror(errno));
+      mud_log("SYSERR: {}: {}", buf2, strerror(errno));
       exit(1);
     }
     switch (mode) {
@@ -1124,13 +1124,11 @@ static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
     if (mode != DB_BOOT_OBJ || nr < 0)
       if (!get_line(fl, line)) {
         if (nr == -1) {
-          mud_log_printf("SYSERR: %s file %s is empty!", modes[mode], filename);
+          mud_log("SYSERR: {} file {} is empty!", modes[mode], filename);
         } else {
-          mud_log_printf("SYSERR: Format error in %s after %s #%d\n"
-                         "...expecting a new %s, but file ended!\n"
-                         "(maybe the file is not terminated with '$'?)",
-                         filename,
-                         modes[mode], nr, modes[mode]);
+          mud_log("SYSERR: Format error in {} after {} #{:d}\n...expecting a new {}, but file ended!\n(maybe the file is not terminated with '$'?)",
+                  filename,
+                  modes[mode], nr, modes[mode]);
         }
         exit(1);
       }
@@ -1140,7 +1138,7 @@ static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
     if (*line == '#') {
       last = nr;
       if (sscanf(line, "#%d", &nr) != 1) {
-        mud_log_printf("SYSERR: Format error after %s #%d", modes[mode], last);
+        mud_log("SYSERR: Format error after {} #{:d}", modes[mode], last);
         exit(1);
       }
       if (nr >= 99999)
@@ -1161,9 +1159,9 @@ static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
             break;
         }
     } else {
-      mud_log_printf("SYSERR: Format error in %s file %s near %s #%d", modes[mode],
-                     filename, modes[mode], nr);
-      mud_log_printf("SYSERR: ... offending line: '%s'", line);
+      mud_log("SYSERR: Format error in {} file {} near {} #{:d}", modes[mode],
+              filename, modes[mode], nr);
+      mud_log("SYSERR: ... offending line: '{}'", line);
       exit(1);
     }
   }
@@ -1193,7 +1191,7 @@ bitvector_t asciiflag_conv(char *flag)
       flags |= 1U << (26 + (c - 'A'));
     else if (isupper(c) && !warned) {
       /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
-      mud_log_printf("SYSERR: asciiflag_conv: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
+      mud_log("SYSERR: asciiflag_conv: ignoring out-of-range flag letter '{:c}' in \"{}\".", as_char(c), flag);
       warned = true;
     }
 
@@ -1222,7 +1220,7 @@ static bitvector_t asciiflag_conv_aff(char *flag)
       flags |= 1U << (26 + (c - 'A'));
     else if (isupper(c) && !warned) {
       /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
-      mud_log_printf("SYSERR: asciiflag_conv_aff: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
+      mud_log("SYSERR: asciiflag_conv_aff: ignoring out-of-range flag letter '{:c}' in \"{}\".", as_char(c), flag);
       warned = true;
     }
 
@@ -1248,12 +1246,12 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 
   g->parse_room_zone = find_zone_by_thing(g, virtual_nr);
   if (g->parse_room_zone == nullptr) {
-    mud_log_printf("SYSERR: Room #%d is outside of any zone.", virtual_nr);
+    mud_log("SYSERR: Room #{:d} is outside of any zone.", virtual_nr);
     exit(1);
   }
 
   if (g->rooms.find(virtual_nr)) {
-    mud_log_printf("SYSERR: room #%d is defined twice.", virtual_nr);
+    mud_log("SYSERR: room #{:d} is defined twice.", virtual_nr);
     exit(1);
   }
   g->parse_room_index = virtual_nr;
@@ -1264,13 +1262,13 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   room_set_description(g, g->parse_room_index, take_string(fread_string(fl, buf2)));
 
   if (!get_line(fl, line)) {
-    mud_log_printf("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
-                   virtual_nr);
+    mud_log("SYSERR: Expecting roomflags/sector type of room #{:d} but file ended!",
+            virtual_nr);
     exit(1);
   }
 
   if (((retval = sscanf(line, " %d %127s %127s %127s %127s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) && (bitwarning == true)) {
-    mud_log_printf("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
+    mud_log("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
     exit(1);
   } else if ((retval == 3) && (bitwarning == false)) {
     /* 
@@ -1280,7 +1278,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
    * is converted.
    */
 
-    mud_log_printf("Converting room #%d to 128bits..", virtual_nr);
+    mud_log("Converting room #{:d} to 128bits..", virtual_nr);
     room_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
     room_get_room_flags(g, g->parse_room_index)[1] = 0;
     room_get_room_flags(g, g->parse_room_index)[2] = 0;
@@ -1293,7 +1291,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
       g->converting = true;
     }
 
-    mud_log_printf("   done.");
+    mud_log("   done.");
   } else if (retval == 6) {
     room_get_room_flags(g, g->parse_room_index)[0] = asciiflag_conv(flags);
     room_get_room_flags(g, g->parse_room_index)[1] = asciiflag_conv(flags2);
@@ -1304,7 +1302,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
     sprintf(flags, "object #%d", virtual_nr); /* sprintf: OK (until 399-bit integers) */
 
   } else {
-    mud_log_printf("SYSERR: Format error in roomflags/sector type of room #%d", virtual_nr);
+    mud_log("SYSERR: Format error in roomflags/sector type of room #{:d}", virtual_nr);
     exit(1);
   }
 
@@ -1350,7 +1348,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 
   for (;;) {
     if (!get_line(fl, line)) {
-      mud_log_printf("%s", buf);
+      mud_log("{}", buf);
       exit(1);
     }
     switch (*line) {
@@ -1381,7 +1379,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         }
         return;
       default:
-        mud_log_printf("%s", buf);
+        mud_log("{}", buf);
         exit(1);
     }
   }
@@ -1402,11 +1400,11 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
   room_get_dir_option(g, room, dir)->keyword             = take_string(fread_string(fl, buf2));
 
   if (!get_line(fl, line)) {
-    mud_log_printf("SYSERR: Format error, %s", buf2);
+    mud_log("SYSERR: Format error, {}", buf2);
     exit(1);
   }
   if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
-    mud_log_printf("SYSERR: Format error, %s", buf2);
+    mud_log("SYSERR: Format error, {}", buf2);
     exit(1);
   } else if (bitwarning == false) {
 
@@ -1425,7 +1423,7 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
     room_get_dir_option(g, room, dir)->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
 
     if (retval == 3) {
-      mud_log_printf("Converting world files to include DC add ons.");
+      mud_log("Converting world files to include DC add ons.");
       room_get_dir_option(g, room, dir)->dclock        = 20;
       room_get_dir_option(g, room, dir)->dchide        = 20;
       room_get_dir_option(g, room, dir)->dcskill       = 0;
@@ -1481,17 +1479,17 @@ static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
 static void check_start_rooms(GameWorld *g)
 {
   if (!room_of(g, g->r_mortal_start_room = CONFIG_MORTAL_START)) {
-    mud_log_printf("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
+    mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
     g->r_mortal_start_room = 0; /* The Void */
   }
   if (!room_of(g, g->r_immort_start_room = CONFIG_IMMORTAL_START)) {
     if (!g->mini_mud)
-      mud_log_printf("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
+      mud_log("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
     g->r_immort_start_room = g->r_mortal_start_room;
   }
   if (!room_of(g, g->r_frozen_start_room = CONFIG_FROZEN_START)) {
     if (!g->mini_mud)
-      mud_log_printf("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
+      mud_log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
     g->r_frozen_start_room = g->r_mortal_start_room;
   }
 }
@@ -1602,15 +1600,14 @@ static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mo
   char_set_real_abils_cha(ch, 0);
 
   if (!get_line(mob_f, line)) {
-    mud_log_printf("SYSERR: Format error in mob #%d, file ended after S flag!", nr);
+    mud_log("SYSERR: Format error in mob #{:d}, file ended after S flag!", nr);
     return false;
   }
 
   if (sscanf(line, " %d %d %d %dd%d+%d %dd%d+%d ",
              t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8) != 9) {
-    mud_log_printf("SYSERR: Format error in mob #%d, first line after S flag\n"
-                   "...expecting line of form '# # # #d#+# #d#+#'",
-                   nr);
+    mud_log("SYSERR: Format error in mob #{:d}, first line after S flag\n...expecting line of form '# # # #d#+# #d#+#'",
+            nr);
     return false;
   }
 
@@ -1632,16 +1629,14 @@ static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mo
   /* t[8] (damage mod) is still parsed to keep the mob file format, but unused */
 
   if (!get_line(mob_f, line)) {
-    mud_log_printf("SYSERR: Format error in mob #%d, second line after S flag\n"
-                   "...expecting line of form '# #', but file ended!",
-                   nr);
+    mud_log("SYSERR: Format error in mob #{:d}, second line after S flag\n...expecting line of form '# #', but file ended!",
+            nr);
     return false;
   }
 
   if (sscanf(line, " %d %d %d %d", t, t + 1, t + 2, t + 3) != 4) {
-    mud_log_printf("SYSERR: Format error in mob #%d, second line after S flag\n"
-                   "...expecting line of form '# # # #'",
-                   nr);
+    mud_log("SYSERR: Format error in mob #{:d}, second line after S flag\n...expecting line of form '# # # #'",
+            nr);
     return false;
   }
 
@@ -1651,7 +1646,7 @@ static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mo
 
   char_set_class(ch, t[3]);
   if (char_get_class(ch) < 0 || char_get_class(ch) >= NUM_CLASSES) {
-    mud_log_printf("SYSERR: Invalid class %d for mob #%d", char_get_class(ch), nr);
+    mud_log("SYSERR: Invalid class {:d} for mob #{:d}", char_get_class(ch), nr);
     char_set_class(ch, 28); /* set to commoner */
   }
 
@@ -1664,16 +1659,14 @@ static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mo
   char_set_speaking(ch, SKILL_LANG_COMMON);
 
   if (!get_line(mob_f, line)) {
-    mud_log_printf("SYSERR: Format error in last line of mob #%d\n"
-                   "...expecting line of form '# # #', but file ended!",
-                   nr);
+    mud_log("SYSERR: Format error in last line of mob #{:d}\n...expecting line of form '# # #', but file ended!",
+            nr);
     return false;
   }
 
   if (sscanf(line, " %d %d %d ", t, t + 1, t + 2) != 3) {
-    mud_log_printf("SYSERR: Format error in last line of mob #%d\n"
-                   "...expecting line of form '# # #'",
-                   nr);
+    mud_log("SYSERR: Format error in last line of mob #{:d}\n...expecting line of form '# # #'",
+            nr);
     return false;
   }
 
@@ -1743,8 +1736,8 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
 
   CASE("StrAdd")
   {
-    mud_log_printf("mob #%d trying to set StrAdd, rebalance its strength.",
-                   char_get_mob_vnum(g, ch));
+    mud_log("mob #{:d} trying to set StrAdd, rebalance its strength.",
+            char_get_mob_vnum(g, ch));
   }
 
   CASE("Int")
@@ -1827,7 +1820,7 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
       if (affect_is_loadable(&af))
         affect_to_char(g, ch, &af);
       else
-        mud_log_printf("SYSERR: mob %s has an impossible affect: %s", char_get_name(ch), value);
+        mud_log("SYSERR: mob {} has an impossible affect: {}", char_get_name(ch), value);
     }
   }
 
@@ -1866,8 +1859,8 @@ static void interpret_espec(GameWorld *g, const char *keyword, const char *value
   }
 
   if (!matched) {
-    mud_log_printf("SYSERR: Warning: unrecognized espec keyword %s in mob #%d",
-                   keyword, nr);
+    mud_log("SYSERR: Warning: unrecognized espec keyword {} in mob #{:d}",
+            keyword, nr);
   }
 }
 
@@ -1897,13 +1890,13 @@ static bool parse_enhanced_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, 
     if (!strcmp(line, "E")) /* end of the enhanced section */
       return true;
     else if (*line == '#') { /* we've hit the next mob, maybe? */
-      mud_log_printf("SYSERR: Unterminated E section in mob #%d", nr);
+      mud_log("SYSERR: Unterminated E section in mob #{:d}", nr);
       return false;
     } else
       parse_espec(g, line, ch, nr);
   }
 
-  mud_log_printf("SYSERR: Unexpected end of file reached after mob #%d", nr);
+  mud_log("SYSERR: Unexpected end of file reached after mob #{:d}", nr);
   return false;
 }
 
@@ -1932,20 +1925,19 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
 
   /* *** Numeric data *** */
   if (!get_line(mob_f, line)) {
-    mud_log_printf("SYSERR: Format error after string section of mob #%d\n"
-                   "...expecting line of form '# # # {S | E}', but file ended!",
-                   nr);
+    mud_log("SYSERR: Format error after string section of mob #{:d}\n...expecting line of form '# # # {{S | E}}', but file ended!",
+            nr);
     return false;
   }
 
   if (((retval = sscanf(line, "%127s %127s %127s %127s %127s %127s %127s %127s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
-    mud_log_printf("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
+    mud_log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
     return false;
   }
   if ((retval == 4) && (bitwarning == false)) {
 
-    mud_log_printf("Converting mobile #%d to 128bits..", nr);
+    mud_log("Converting mobile #{:d} to 128bits..", nr);
     char_get_act(ch)[0] = asciiflag_conv(f1);
     char_get_act(ch)[1] = 0;
     char_get_act(ch)[2] = 0;
@@ -1983,7 +1975,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
       g->converting = true;
     }
 
-    mud_log_printf("   done.");
+    mud_log("   done.");
   } else if (retval == 10) {
 
     char_get_act(ch)[0] = asciiflag_conv(f1);
@@ -1999,16 +1991,15 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
     char_set_alignment(ch, t[2]);
 
   } else {
-    mud_log_printf("SYSERR: Format error after string section of mob #%d\n"
-                   "...expecting line of form '# # # {S | E}'",
-                   nr);
+    mud_log("SYSERR: Format error after string section of mob #{:d}\n...expecting line of form '# # # {{S | E}}'",
+            nr);
     exit(1);
   }
 
   char_mob_set(ch, MOB_ISNPC, true);
   if (char_mob_flagged(ch, MOB_NOTDEADYET)) {
     /* Rather bad to load mobiles with this bit already set. */
-    mud_log_printf("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
+    mud_log("SYSERR: Mob #{:d} has reserved bit MOB_NOTDEADYET set.", nr);
     char_mob_set(ch, MOB_NOTDEADYET, false);
   }
 
@@ -2031,7 +2022,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
       break;
     /* add new mob types here.. */
     default:
-      mud_log_printf("SYSERR: Unsupported mob type '%c' in mob #%d", letter, nr);
+      mud_log("SYSERR: Unsupported mob type '{:c}' in mob #{:d}", as_char(letter), nr);
       exit(1);
   }
 
@@ -2062,7 +2053,7 @@ static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr)
 {
 
   if (g->mob_index.find(nr)) {
-    mud_log_printf("SYSERR: mobile #%d is defined twice.", nr);
+    mud_log("SYSERR: mobile #{:d} is defined twice.", nr);
     exit(1);
   }
   g->parse_mob_index = nr;
@@ -2095,7 +2086,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
 
   if (g->obj_index.find(nr)) {
-    mud_log_printf("SYSERR: object #%d is defined twice.", nr);
+    mud_log("SYSERR: object #{:d} is defined twice.", nr);
     exit(1);
   }
   g->parse_obj_index = nr;
@@ -2113,7 +2104,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   /* *** string data *** */
   obj_set_name(obj_proto_of(g, g->parse_obj_index), take_string(fread_string(obj_f, buf2)));
   if (obj_get_name(obj_proto_of(g, g->parse_obj_index)) == nullptr) {
-    mud_log_printf("SYSERR: Null obj name or format error at or near %s", buf2);
+    mud_log("SYSERR: Null obj name or format error at or near {}", buf2);
     exit(1);
   }
   /* each is adjusted before it is stored: the setters copy */
@@ -2132,13 +2123,13 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
-    mud_log_printf("SYSERR: Expecting first numeric line of %s, but file ended!", buf2);
+    mud_log("SYSERR: Expecting first numeric line of {}, but file ended!", buf2);
     exit(1);
   }
 
   if (((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)) == 4) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
-    mud_log_printf("WARNING: Conventional objectfiles detected. Please read 128bit.readme.");
+    mud_log("WARNING: Conventional objectfiles detected. Please read 128bit.readme.");
     exit(1);
   } else if (((retval == 4) || (retval == 3)) && (bitwarning == false)) {
 
@@ -2147,7 +2138,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     else if (retval == 4)
       t[3] = asciiflag_conv_aff(f3);
 
-    mud_log_printf("Converting object #%d to 128bits..", nr);
+    mud_log("Converting object #{:d} to 128bits..", nr);
     obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f1);
     obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[1] = 0;
     obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[2] = 0;
@@ -2166,7 +2157,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       g->converting = true;
     }
 
-    mud_log_printf("   done.");
+    mud_log("   done.");
   } else if (retval == 13) {
 
     obj_get_extra_flags(obj_proto_of(g, g->parse_obj_index))[0] = asciiflag_conv(f1);
@@ -2185,7 +2176,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     obj_get_bitvector(obj_proto_of(g, g->parse_obj_index))[3] = asciiflag_conv(f12);
 
   } else {
-    mud_log_printf("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
+    mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got {:d}), {}", retval, buf2);
     exit(1);
   }
 
@@ -2193,7 +2184,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   obj_set_type_flag(obj_proto_of(g, g->parse_obj_index), t[0]);
 
   if (!get_line(obj_f, line)) {
-    mud_log_printf("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
+    mud_log("SYSERR: Expecting second numeric line of {}, but file ended!", buf2);
     exit(1);
   }
 
@@ -2201,7 +2192,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
     t[j] = 0;
 
   if ((retval = sscanf(line, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, t + 9, t + 10, t + 11, t + 12, t + 13, t + 14, t + 15)) > NUM_OBJ_VAL_POSITIONS) {
-    mud_log_printf("SYSERR: Format error in second numeric line (expecting <=%d args, got %d), %s", NUM_OBJ_VAL_POSITIONS, retval, buf2);
+    mud_log("SYSERR: Format error in second numeric line (expecting <={:d} args, got {:d}), {}", NUM_OBJ_VAL_POSITIONS, retval, buf2);
     exit(1);
   }
 
@@ -2240,14 +2231,14 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
    * }*/
 
   if (!get_line(obj_f, line)) {
-    mud_log_printf("SYSERR: Expecting third numeric line of %s, but file ended!", buf2);
+    mud_log("SYSERR: Expecting third numeric line of {}, but file ended!", buf2);
     exit(1);
   }
   if ((retval = sscanf(line, "%d %d %d %d", t, t + 1, t + 2, t + 3)) != 4) {
     if (retval == 3)
       t[3] = 0;
     else {
-      mud_log_printf("SYSERR: Format error in third numeric line (expecting 4 args, got %d), %s", retval, buf2);
+      mud_log("SYSERR: Format error in third numeric line (expecting 4 args, got {:d}), {}", retval, buf2);
       exit(1);
     }
   }
@@ -2282,7 +2273,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 
   for (;;) {
     if (!get_line(obj_f, line)) {
-      mud_log_printf("SYSERR: Format error in %s", buf2);
+      mud_log("SYSERR: Format error in {}", buf2);
       exit(1);
     }
     switch (*line) {
@@ -2295,30 +2286,27 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       }
       case 'A':
         if (j >= MAX_OBJ_AFFECT) {
-          mud_log_printf("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
+          mud_log("SYSERR: Too many A fields ({:d} max), {}", MAX_OBJ_AFFECT, buf2);
           exit(1);
         }
         if (!get_line(obj_f, line)) {
-          mud_log_printf("SYSERR: Format error in 'A' field, %s\n"
-                         "...expecting 2 numeric constants but file ended!",
-                         buf2);
+          mud_log("SYSERR: Format error in 'A' field, {}\n...expecting 2 numeric constants but file ended!",
+                  buf2);
           exit(1);
         }
 
         t[1] = 0;
         if ((retval = sscanf(line, " %d %d %d ", t, t + 1, t + 2)) != 3) {
           if (retval != 2) {
-            mud_log_printf("SYSERR: Format error in 'A' field, %s\n"
-                           "...expecting 2 numeric arguments, got %d\n"
-                           "...offending line: '%s'",
-                           buf2, retval, line);
+            mud_log("SYSERR: Format error in 'A' field, {}\n...expecting 2 numeric arguments, got {:d}\n...offending line: '{}'",
+                    buf2, retval, line);
             exit(1);
           }
         }
 
         if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
-          mud_log_printf("Warning: object #%d (%s) uses deprecated saving throw applies",
-                         nr, obj_get_short_description(obj_proto_of(g, g->parse_obj_index)));
+          mud_log("Warning: object #{:d} ({}) uses deprecated saving throw applies",
+                  nr, obj_get_short_description(obj_proto_of(g, g->parse_obj_index)));
         }
         obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].location = t[0];
         obj_get_affected(obj_proto_of(g, g->parse_obj_index))[j].modifier = t[1];
@@ -2327,21 +2315,18 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
         break;
       case 'S': /* Spells for Spellbooks*/
         if (j >= SPELLBOOK_SIZE) {
-          mud_log_printf("SYSERR: Unknown spellbook slot in S field, %s", buf2);
+          mud_log("SYSERR: Unknown spellbook slot in S field, {}", buf2);
           exit(1);
         }
         if (!get_line(obj_f, line)) {
-          mud_log_printf("SYSERR: Format error in 'S' field, %s\n"
-                         "...expecting 2 numeric constants but file ended!",
-                         buf2);
+          mud_log("SYSERR: Format error in 'S' field, {}\n...expecting 2 numeric constants but file ended!",
+                  buf2);
           exit(1);
         }
 
         if ((retval = sscanf(line, " %d %d ", t, t + 1)) != 2) {
-          mud_log_printf("SYSERR: Format error in 'S' field, %s\n"
-                         "...expecting 2 numeric arguments, got %d\n"
-                         "...offending line: '%s'",
-                         buf2, retval, line);
+          mud_log("SYSERR: Format error in 'S' field, {}\n...expecting 2 numeric arguments, got {:d}\n...offending line: '{}'",
+                  buf2, retval, line);
           exit(1);
         }
         if (!obj_get_sbinfo(obj_proto_of(g, g->parse_obj_index))) {
@@ -2356,16 +2341,13 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
         break;
       case 'Z':
         if (!get_line(obj_f, line)) {
-          mud_log_printf("SYSERR: Format error in 'Z' field, %s\n"
-                         "...expecting numeric constant but file ended!",
-                         buf2);
+          mud_log("SYSERR: Format error in 'Z' field, {}\n...expecting numeric constant but file ended!",
+                  buf2);
           exit(1);
         }
         if (sscanf(line, "%d", t) != 1) {
-          mud_log_printf("SYSERR: Format error in 'Z' field, %s\n"
-                         "...expecting numeric argument\n"
-                         "...offending line: '%s'",
-                         buf2, line);
+          mud_log("SYSERR: Format error in 'Z' field, {}\n...expecting numeric argument\n...offending line: '{}'",
+                  buf2, line);
           exit(1);
         }
         obj_set_size(obj_proto_of(g, g->parse_obj_index), t[0]);
@@ -2374,13 +2356,13 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
       case '#':
         /* Objects that set CHARM on players are bad. */
         if (obj_aff_flagged(obj_proto_of(g, g->parse_obj_index), AFF_CHARM)) {
-          mud_log_printf("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
+          mud_log("SYSERR: Object #{:d} has reserved bit AFF_CHARM set.", nr);
           obj_aff_set(obj_proto_of(g, g->parse_obj_index), AFF_CHARM, false);
         }
         check_object(g, obj_proto_of(g, g->parse_obj_index));
         return (line);
       default:
-        mud_log_printf("SYSERR: Format error in (%c): %s", *line, buf2);
+        mud_log("SYSERR: Format error in ({:c}): {}", as_char(*line), buf2);
         exit(1);
     }
   }
@@ -2416,7 +2398,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
   rewind(fl);
 
   if (num_of_cmds == 0) {
-    mud_log_printf("SYSERR: %s is empty!", zname);
+    mud_log("SYSERR: {} is empty!", zname);
     exit(1);
   } else
     Z.cmd.assign(num_of_cmds, reset_com{});
@@ -2425,15 +2407,15 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
 
   if (*buf == '@') {
     if (sscanf(buf, "@Version: %d", &version) != 1) {
-      mud_log_printf("SYSERR: Format error in %s (version)", zname);
-      mud_log_printf("SYSERR: ...Line: %s", line);
+      mud_log("SYSERR: Format error in {} (version)", zname);
+      mud_log("SYSERR: ...Line: {}", line);
       exit(1);
     }
     line_num += get_line(fl, buf);
   }
 
   if (sscanf(buf, "#%d", &Z.number) != 1) {
-    mud_log_printf("SYSERR: Format error in %s, line %d", zname, line_num);
+    mud_log("SYSERR: Format error in {}, line {:d}", zname, line_num);
     exit(1);
   }
   snprintf(buf2, sizeof(buf2), "beginning of zone #%d", Z.number);
@@ -2458,7 +2440,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
 
     if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
                &Z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &Z.min_level, &Z.max_level) != 10) {
-      mud_log_printf("SYSERR: Format error in 10-constant line of %s", zname);
+      mud_log("SYSERR: Format error in 10-constant line of {}", zname);
       exit(1);
     }
 
@@ -2473,9 +2455,9 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
      * to fix this by copying the previous 2 last reads into this variable and the
      * last one.
      */
-    mud_log_printf("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
+    mud_log("SYSERR: Format error in numeric constant line of {}, attempting to fix.", zname);
     if (sscanf(Z.name.c_str(), " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
-      mud_log_printf("SYSERR: Could not fix previous error, aborting game.");
+      mud_log("SYSERR: Could not fix previous error, aborting game.");
       exit(1);
     } else {
       Z.name     = Z.builders;
@@ -2484,7 +2466,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     }
   }
   if (Z.bot > Z.top) {
-    mud_log_printf("SYSERR: Zone %d bottom (%d) > top (%d).", Z.number, Z.bot, Z.top);
+    mud_log("SYSERR: Zone {:d} bottom ({:d}) > top ({:d}).", Z.number, Z.bot, Z.top);
     exit(1);
   }
 
@@ -2494,7 +2476,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     /* skip reading one line if we fixed above (line is correct already) */
     if (zone_fix != true) {
       if ((tmp = get_line(fl, buf)) == 0) {
-        mud_log_printf("SYSERR: Format error in %s - premature end of file", zname);
+        mud_log("SYSERR: Format error in {} - premature end of file", zname);
         exit(1);
       }
     } else
@@ -2537,7 +2519,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
     ZCMD2.if_flag = tmp;
 
     if (error) {
-      mud_log_printf("SYSERR: Format error in %s, line %d: '%s'", zname, line_num, buf);
+      mud_log("SYSERR: Format error in {}, line {:d}: '{}'", zname, line_num, buf);
       exit(1);
     }
     ZCMD2.line = line_num;
@@ -2545,12 +2527,12 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
   }
 
   if (num_of_cmds != cmd_no + 1) {
-    mud_log_printf("SYSERR: Zone command count mismatch for %s. Estimated: %d, Actual: %d", zname, num_of_cmds, cmd_no + 1);
+    mud_log("SYSERR: Zone command count mismatch for {}. Estimated: {:d}, Actual: {:d}", zname, num_of_cmds, cmd_no + 1);
     exit(1);
   }
 
   if (g->zones.find(Z.number)) {
-    mud_log_printf("SYSERR: zone #%d is defined twice.", Z.number);
+    mud_log("SYSERR: zone #{:d} is defined twice.", Z.number);
     exit(1);
   }
   g->zones.insert(Z.number, std::move(made));
@@ -2561,7 +2543,7 @@ static void load_zones(GameWorld *g, FILE *fl, char *zonename)
 static void get_one_line(FILE *fl, char *buf)
 {
   if (fgets(buf, READ_SIZE, fl) == nullptr) {
-    mud_log_printf("SYSERR: error reading help file: not terminated with $?");
+    mud_log("SYSERR: error reading help file: not terminated with $?");
     exit(1);
   }
 
@@ -2606,7 +2588,7 @@ static void load_help(GameWorld *g, FILE *fl, char *name)
       strcpy(entry + sizeof(entry) - strlen(truncmsg) - 1, truncmsg); /* strcpy: OK (assuming sane 'entry' size) */
 
       keysize = strlen(key) - 2;
-      mud_log_printf("SYSERR: Help entry exceeded buffer space: %.*s", keysize, key);
+      mud_log("SYSERR: Help entry exceeded buffer space: {}", printf_precision(key, keysize));
 
       /* If we ran out of buffer space, eat the rest of the entry. */
       while (*line != '#')
@@ -2615,7 +2597,7 @@ static void load_help(GameWorld *g, FILE *fl, char *name)
 
     if (*line == '#') {
       if (sscanf(line, "#%d", &el.min_level) != 1) {
-        mud_log_printf("SYSERR: Help entry does not have a min level. %s", key);
+        mud_log("SYSERR: Help entry does not have a min level. {}", key);
         el.min_level = 0;
       }
     }
@@ -2649,9 +2631,9 @@ int vnum_mobile(GameWorld *g, std::string_view searchname, struct char_data *ch)
 
   for (mob_vnum nr : g->mob_proto.vnums())
     if (isname(searchname, char_get_alias(mob_proto_of(g, nr))))
-      send_to_char_printf(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                          ++found, mob_index_of(g, nr)->vnum, char_get_sdesc(mob_proto_of(g, nr)),
-                          char_get_proto_script(mob_proto_of(g, nr)) ? "[TRIG]" : "");
+      send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
+                   ++found, mob_index_of(g, nr)->vnum, char_get_sdesc(mob_proto_of(g, nr)),
+                   char_get_proto_script(mob_proto_of(g, nr)) ? "[TRIG]" : "");
 
   return (found);
 }
@@ -2662,9 +2644,9 @@ int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch)
 
   for (obj_vnum nr : g->obj_proto.vnums())
     if (isname(searchname, obj_get_name(obj_proto_of(g, nr))))
-      send_to_char_printf(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                          ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                          obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+      send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
+                   ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
 
   return (found);
 }
@@ -2675,9 +2657,9 @@ int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *c
 
   for (obj_vnum nr : g->obj_proto.vnums())
     if (isname(searchname, material_names[obj_get_value(obj_proto_of(g, nr), VAL_ALL_MATERIAL)])) {
-      send_to_char_printf(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                          ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                          obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+      send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
+                   ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
     }
 
   return (found);
@@ -2690,9 +2672,9 @@ int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data 
   for (obj_vnum nr : g->obj_proto.vnums())
     if (obj_get_type_flag(obj_proto_of(g, nr)) == ITEM_WEAPON) {
       if (isname(searchname, weapon_type[obj_get_value(obj_proto_of(g, nr), VAL_WEAPON_SKILL)])) {
-        send_to_char_printf(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                            ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                            obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+        send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
+                     ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
       }
     }
 
@@ -2706,9 +2688,9 @@ int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *
   for (obj_vnum nr : g->obj_proto.vnums())
     if (obj_get_type_flag(obj_proto_of(g, nr)) == ITEM_ARMOR) {
       if (isname(searchname, armor_type[obj_get_value(obj_proto_of(g, nr), VAL_ARMOR_SKILL)])) {
-        send_to_char_printf(g, ch, "%3d. [%5d] %-40s %s\r\n",
-                            ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                            obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+        send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
+                     ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
+                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
       }
     }
 
@@ -2724,7 +2706,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   struct char_data *mob;
 
   if (!mob_proto_of(g, i)) {
-    mud_log_printf("WARNING: Mobile vnum %d does not exist in database.", nr);
+    mud_log("WARNING: Mobile vnum {:d} does not exist in database.", nr);
     return (nullptr);
   }
 
@@ -3388,23 +3370,21 @@ void obj_retire(GameWorld *g, struct obj_data *obj)
 
 static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_data *obj2)
 {
-  mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%lld:%" PRId64 "]",
-                obj_get_short_description(obj1) ? obj_get_short_description(obj1) : "<No name>",
-                obj_get_vnum(g, obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
-  mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
-                                              "In object: %s, Carried by: %s, Worn by: %s",
-                obj_get_in_room(obj1),
-                obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj1)),
-                obj_get_in_obj(obj1) ? obj_get_short_description(obj_get_in_obj(obj1)) : "None",
-                obj_get_carried_by(obj1) ? char_get_name(obj_get_carried_by(obj1)) : "Nobody",
-                obj_get_worn_by(obj1) ? char_get_name(obj_get_worn_by(obj1)) : "Nobody");
-  mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
-                                              "In object: %s, Carried by: %s, Worn by: %s",
-                obj_get_in_room(obj2),
-                obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj2)),
-                obj_get_in_obj(obj2) ? obj_get_short_description(obj_get_in_obj(obj2)) : "None",
-                obj_get_carried_by(obj2) ? char_get_name(obj_get_carried_by(obj2)) : "Nobody",
-                obj_get_worn_by(obj2) ? char_get_name(obj_get_worn_by(obj2)) : "Nobody");
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: {} [{:d}] [{:d}:{:d}]",
+         obj_get_short_description(obj1) ? obj_get_short_description(obj1) : "<No name>",
+         obj_get_vnum(g, obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: {:d} ({}), In object: {}, Carried by: {}, Worn by: {}",
+         obj_get_in_room(obj1),
+         obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj1)),
+         obj_get_in_obj(obj1) ? obj_get_short_description(obj_get_in_obj(obj1)) : "None",
+         obj_get_carried_by(obj1) ? char_get_name(obj_get_carried_by(obj1)) : "Nobody",
+         obj_get_worn_by(obj1) ? char_get_name(obj_get_worn_by(obj1)) : "Nobody");
+  mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: {:d} ({}), In object: {}, Carried by: {}, Worn by: {}",
+         obj_get_in_room(obj2),
+         obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : room_get_name(g, obj_get_in_room(obj2)),
+         obj_get_in_obj(obj2) ? obj_get_short_description(obj_get_in_obj(obj2)) : "None",
+         obj_get_carried_by(obj2) ? char_get_name(obj_get_carried_by(obj2)) : "Nobody",
+         obj_get_worn_by(obj2) ? char_get_name(obj_get_worn_by(obj2)) : "Nobody");
 }
 
 void check_unique_id(GameWorld *g, struct obj_data *obj)
@@ -3415,7 +3395,7 @@ void check_unique_id(GameWorld *g, struct obj_data *obj)
   elem = g->obj_unique_hash_pools[obj_get_unique_id(obj) % NUM_OBJ_UNIQUE_POOLS];
   while (elem) {
     if (elem->obj == obj) {
-      mud_log_printf("SYSERR: check_unique_id checking for existing object?!");
+      mud_log("SYSERR: check_unique_id checking for existing object?!");
     }
     if (elem->generation == obj_get_generation(obj) && elem->unique_id == obj_get_unique_id(obj)) {
       log_dupe_objects(g, elem->obj, obj);
@@ -3498,7 +3478,7 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr)
   obj_vnum i = nr;
 
   if (!obj_proto_of(g, i)) {
-    mud_log_printf("Object (V) %d does not exist in database.", nr);
+    mud_log("Object (V) {:d} does not exist in database.", nr);
     return (nullptr);
   }
 
@@ -3569,7 +3549,7 @@ void zone_update(GameWorld *g)
     if (zone->reset_mode == 2 || is_empty(g, zone)) {
       g->reset_q.erase(it);
       reset_zone(g, zone);
-      mudlog_printf(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)", zone->name.c_str(), zone->number);
+      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: {} (Zone {:d})", zone->name.c_str(), zone->number);
       break;
     }
   }
@@ -3577,9 +3557,9 @@ void zone_update(GameWorld *g)
 
 static void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message)
 {
-  mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
-  mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-                ZCMD2.command, zone->number, ZCMD2.line);
+  mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: {}", message);
+  mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '{:c}' cmd in zone #{:d}, line {:d}",
+         as_char(ZCMD2.command), zone->number, ZCMD2.line);
 }
 
 #define ZONE_ERROR(g, message)                \
@@ -3892,40 +3872,40 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
       if (room_of(g, rrnum)) {
         reset_wtrigger(g, room_of(g, rrnum));
         if (room_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
-          send_to_room_printf(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
+          send_to_room(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
           room_set_flag(g, rrnum, ROOM_AURA, false);
         }
         if (room_sect(g, rrnum) == SECT_LAVA) {
           room_set_geffect(g, rrnum, 5);
         }
         if (room_get_geffect(g, rrnum) < -1) {
-          send_to_room_printf(g, rrnum, "The area loses some of the water flooding it.\r\n");
+          send_to_room(g, rrnum, "The area loses some of the water flooding it.\r\n");
           room_set_geffect(g, rrnum, room_get_geffect(g, rrnum) + (1));
         } else if (room_get_geffect(g, rrnum) == -1) {
-          send_to_room_printf(g, rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
+          send_to_room(g, rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
           room_set_geffect(g, rrnum, 0);
         }
         if (room_get_dmg(g, rrnum) >= 100) {
-          send_to_room_printf(g, rrnum, "The area gets rebuilt a little.\r\n");
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
           room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 5, 10)));
         } else if (room_get_dmg(g, rrnum) >= 50) {
-          send_to_room_printf(g, rrnum, "The area gets rebuilt a little.\r\n");
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
           room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
         } else if (room_get_dmg(g, rrnum) >= 10) {
-          send_to_room_printf(g, rrnum, "The area gets rebuilt a little.\r\n");
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
           room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, 10)));
         } else if (room_get_dmg(g, rrnum) > 1) {
-          send_to_room_printf(g, rrnum, "The area gets rebuilt a little.\r\n");
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
           room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - (rand_number(g, 1, room_get_dmg(g, rrnum))));
         } else if (room_get_dmg(g, rrnum) > 0) {
-          send_to_room_printf(g, rrnum, "The area gets rebuilt a little.\r\n");
+          send_to_room(g, rrnum, "The area gets rebuilt a little.\r\n");
           room_set_dmg(g, rrnum, room_get_dmg(g, rrnum) - 1);
         }
         if (room_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 4) == 4 && !room_sunken(g, rrnum) && room_sect(g, rrnum) != SECT_LAVA) {
-          send_to_room_printf(g, rrnum, "The lava has cooled and become solid rock.\r\n");
+          send_to_room(g, rrnum, "The lava has cooled and become solid rock.\r\n");
           room_set_geffect(g, rrnum, 0);
         } else if (room_get_geffect(g, rrnum) >= 1 && rand_number(g, 1, 2) == 2 && room_sunken(g, rrnum) && room_sect(g, rrnum) != SECT_LAVA) {
-          send_to_room_printf(g, rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
+          send_to_room(g, rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
           room_set_geffect(g, rrnum, 0);
         }
       }
@@ -3979,10 +3959,10 @@ char *fread_string(FILE *fl, const char *error)
 
   while (!done) {
     if (getline(&line, &cap, fl) < 0) {
-      mud_log_printf("SYSERR: fread_string: format error at string (pos %ld): %s at or near %s",
-                     ftell(fl), feof(fl) ? "EOF" : ferror(fl) ? "read error"
-                                                              : "unknown error",
-                     error);
+      mud_log("SYSERR: fread_string: format error at string (pos {:d}): {} at or near {}",
+              ftell(fl), feof(fl) ? "EOF" : ferror(fl) ? "read error"
+                                                       : "unknown error",
+              error);
       exit(1);
     }
     /* A line ending in '~' ends the string; any other line gets an "\r\n". Only trailing ~'s count -- Welcor */
@@ -4086,7 +4066,7 @@ static int file_to_string(const char *name, std::string &text)
   text.clear();
 
   if (!(fl = fopen(name, "r"))) {
-    mud_log_printf("SYSERR: reading %s: %s", name, strerror(errno));
+    mud_log("SYSERR: reading {}: {}", name, strerror(errno));
     return (-1);
   }
 
@@ -4098,7 +4078,7 @@ static int file_to_string(const char *name, std::string &text)
     strcat(tmp, "\r\n");   /* strcat: OK (tmp:READ_SIZE+3) */
 
     if (text.size() + strlen(tmp) + 1 > MAX_STRING_LENGTH) {
-      mud_log_printf("SYSERR: %s: string too big (%d max)", name, MAX_STRING_LENGTH);
+      mud_log("SYSERR: {}: string too big ({:d} max)", name, MAX_STRING_LENGTH);
       text.clear();
       fclose(fl);
       return (-1);
@@ -4208,7 +4188,7 @@ void init_char(GameWorld *g, struct char_data *ch)
     char_set_idnum(ch, ++g->top_idnum);
     g->player_table[i].id = char_get_idnum(ch);
   } else
-    mud_log_printf("SYSERR: init_char: Character '%s' not found in player table.", char_get_name(ch));
+    mud_log("SYSERR: init_char: Character '{}' not found in player table.", char_get_name(ch));
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (char_get_admlevel(ch) < ADMLVL_IMPL)
@@ -4248,12 +4228,12 @@ static int check_object(GameWorld *g, struct obj_data *obj)
   int error = false;
 
   if (obj_get_weight(obj) < 0 && (error = true))
-    mud_log_printf("SYSERR: Object #%d (%s) has negative weight (%" PRId64 ").",
-                   obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_weight(obj));
+    mud_log("SYSERR: Object #{:d} ({}) has negative weight ({:d}).",
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_weight(obj));
 
   if (obj_get_cost_per_day(obj) < 0 && (error = true))
-    mud_log_printf("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-                   obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_cost_per_day(obj));
+    mud_log("SYSERR: Object #{:d} ({}) has negative cost/day ({:d}).",
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_cost_per_day(obj));
 
   snprintf(objname, sizeof(objname), "Object #%d (%s)", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
@@ -4270,9 +4250,9 @@ static int check_object(GameWorld *g, struct obj_data *obj)
     [[fallthrough]];
     case ITEM_FOUNTAIN:
       if ((obj_get_value(obj, 0) > 0) && (obj_get_value(obj, 1) > obj_get_value(obj, 0) && (error = true)))
-        mud_log_printf("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                       obj_get_vnum(g, obj), obj_get_short_description(obj),
-                       obj_get_value(obj, 1), obj_get_value(obj, 0));
+        mud_log("SYSERR: Object #{:d} ({}) contains ({:d}) more than maximum ({:d}).",
+                obj_get_vnum(g, obj), obj_get_short_description(obj),
+                obj_get_value(obj, 1), obj_get_value(obj, 0));
       break;
     case ITEM_SCROLL:
     case ITEM_POTION:
@@ -4286,9 +4266,9 @@ static int check_object(GameWorld *g, struct obj_data *obj)
       error |= check_object_level(g, obj, 0);
       error |= check_object_spell_number(g, obj, 3);
       if (obj_get_value(obj, 2) > obj_get_value(obj, 1) && (error = true))
-        mud_log_printf("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                       obj_get_vnum(g, obj), obj_get_short_description(obj),
-                       obj_get_value(obj, 2), obj_get_value(obj, 1));
+        mud_log("SYSERR: Object #{:d} ({}) has more charges ({:d}) than maximum ({:d}).",
+                obj_get_vnum(g, obj), obj_get_short_description(obj),
+                obj_get_value(obj, 2), obj_get_value(obj, 1));
       break;
   }
 
@@ -4315,8 +4295,8 @@ static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val
   if (skill_type(g, obj_get_value(obj, val)) != SKTYPE_SPELL)
     error = true;
   if (error)
-    mud_log_printf("SYSERR: Object #%d (%s) has out of range spell #%d.",
-                   obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
+    mud_log("SYSERR: Object #{:d} ({}) has out of range spell #{:d}.",
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
 
   /*
    * This bug has been fixed, but if you don't like the special behavior...
@@ -4324,7 +4304,7 @@ static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val
 #if 0
   if (obj_get_type_flag(obj) == ITEM_STAFF &&
 	spell_has_routine(g, obj_get_value(obj, val), MAG_AREAS | MAG_MASSES))
-    mud_log_printf("... '%s' (#%d) uses %s spell '%s'.",
+    mud_log("... '{}' (#{:d}) uses {} spell '{}'.",
 	obj->short_description,	obj_get_vnum(g, obj),
 	spell_has_routine(g, obj_get_value(obj, val), MAG_AREAS) ? "area" : "mass",
 	skill_name(g, obj_get_value(obj, val)));
@@ -4337,9 +4317,9 @@ static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val
   spellname = skill_name(g, obj_get_value(obj, val));
 
   if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
-    mud_log_printf("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-                   obj_get_vnum(g, obj), obj_get_short_description(obj), spellname,
-                   obj_get_value(obj, val));
+    mud_log("SYSERR: Object #{:d} ({}) uses '{}' spell #{:d}.",
+            obj_get_vnum(g, obj), obj_get_short_description(obj), spellname,
+            obj_get_value(obj, val));
 
   return (error);
 }
@@ -4349,8 +4329,8 @@ static int check_object_level(GameWorld *g, struct obj_data *obj, int val)
   int error = false;
 
   if ((obj_get_value(obj, val) < 0) && (error = true))
-    mud_log_printf("SYSERR: Object #%d (%s) has out of range level #%d.",
-                   obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
+    mud_log("SYSERR: Object #{:d} ({}) has out of range level #{:d}.",
+            obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_value(obj, val));
 
   return (error);
 }
@@ -4371,9 +4351,9 @@ static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const
 
   if (result < 0 || ferror(fp)) {
     int saved_errno = errno;
-    mud_log_printf("SYSERR: %s:%d: fprintf failed saving object #%d (%s): %s",
-                   file, line, obj_get_vnum(g, obj), context,
-                   saved_errno ? strerror(saved_errno) : "stream error");
+    mud_log("SYSERR: {}:{:d}: fprintf failed saving object #{:d} ({}): {}",
+            file, line, obj_get_vnum(g, obj), context,
+            saved_errno ? strerror(saved_errno) : "stream error");
     return false;
   }
 

@@ -20,12 +20,12 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   FILE *fl, *file;
 
   if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user.c_str())) {
-    mud_log_printf("ERROR: Custom unable to be saved to user file!");
+    mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
 
   if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log_printf("ERROR: Custom unable to be saved to user file!");
+    mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
 
@@ -54,12 +54,12 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
   if (type == 1) {
 
     if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, name)) {
-      mud_log_printf("ERROR: Custom unable to be read from user file!");
+      mud_log("ERROR: Custom unable to be read from user file!");
       return;
     }
 
     if (!(fl = fopen(fname, "r"))) {
-      mud_log_printf("ERROR: Custom file unable to be read!");
+      mud_log("ERROR: Custom file unable to be read!");
       return;
     }
 
@@ -72,19 +72,19 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
       sprintf(filler, "%s", line);
     }
 
-    send_to_char_printf(g, d->character, "%s", buf);
+    send_to_char(g, d->character, "{}", buf);
 
     fclose(fl);
     return;
   }
 
   if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user.c_str())) {
-    mud_log_printf("ERROR: Custom unable to be read from user file!");
+    mud_log("ERROR: Custom unable to be read from user file!");
     return;
   }
 
   if (!(fl = fopen(fname, "r"))) {
-    mud_log_printf("ERROR: Custom file unable to be read!");
+    mud_log("ERROR: Custom file unable to be read!");
     return;
   }
 
@@ -96,7 +96,7 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
     sprintf(filler, "%s", line);
   }
 
-  write_to_output_printf(g, d, "%s", buf);
+  write_to_output(g, d, "{}", buf);
 
   fclose(fl);
 }
@@ -120,7 +120,7 @@ void customCreate(struct descriptor_data *d)
     return;
 
   if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log_printf("ERROR: could not create custom file.");
+    mud_log("ERROR: could not create custom file.");
     return;
   }
 

@@ -15,8 +15,8 @@
 static void check_registered(GameWorld *g, const struct obj_data *obj, const char *where)
 {
   if (obj_by_id(g, obj_get_id(obj)) != obj)
-    mud_log_printf("SYSERR: %s: object %d (id %d) isn't registered, so it can't be listed there.", where,
-                   obj_get_vnum(g, obj), obj_get_id(obj));
+    mud_log("SYSERR: {}: object {:d} (id {:d}) isn't registered, so it can't be listed there.", where,
+            obj_get_vnum(g, obj), obj_get_id(obj));
 }
 
 /* put an object in a room */
@@ -25,11 +25,11 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
   struct obj_data *vehicle = nullptr;
 
   if (!object || !room_of(g, room))
-    mud_log_printf("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)", room, (void *)object);
+    mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #{:d}, obj {})", room, as_pointer((void *)object));
   else {
     if (room_flagged(g, room, ROOM_GARDEN1) || room_flagged(g, room, ROOM_GARDEN2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
-        send_to_room_printf(g, room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", obj_get_short_description(object));
+        send_to_room(g, room, "{} @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", obj_get_short_description(object));
         extract_obj(g, object);
         return;
       }
@@ -78,7 +78,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_LOCKED));
         } else {
-          mud_log_printf("Hatch load: Hatch with no vehicle load room: #%d!", obj_get_vnum(g, object));
+          mud_log("Hatch load: Hatch with no vehicle load room: #{:d}!", obj_get_vnum(g, object));
         }
       }
     }
@@ -111,17 +111,17 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
 void obj_from_room(GameWorld *g, struct obj_data *object)
 {
   if (!object || obj_get_in_room(object) == NOWHERE) {
-    mud_log_printf("SYSERR: NULL object (%p) or obj not in a room (%d) passed to obj_from_room",
-                   (void *)object, obj_get_in_room(object));
+    mud_log("SYSERR: NULL object ({}) or obj not in a room ({:d}) passed to obj_from_room",
+            as_pointer((void *)object), obj_get_in_room(object));
     return;
   }
 
   if (obj_get_posted_to(g, object) && obj_get_in_obj(object) == nullptr) {
     struct obj_data *obj = obj_get_posted_to(g, object);
     if (obj_get_posttype(object) <= 0) {
-      send_to_room_printf(g, obj_get_in_room(obj), "%s@W shakes loose from %s@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(object));
+      send_to_room(g, obj_get_in_room(obj), "{}@W shakes loose from {}@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(object));
     } else {
-      send_to_room_printf(g, obj_get_in_room(obj), "%s@W comes loose from %s@W.@n\r\n", obj_get_short_description(object), obj_get_short_description(obj));
+      send_to_room(g, obj_get_in_room(obj), "{}@W comes loose from {}@W.@n\r\n", obj_get_short_description(object), obj_get_short_description(obj));
     }
     obj_set_posted_to(obj, nullptr);
     obj_set_posttype(obj, 0);
@@ -142,8 +142,8 @@ void obj_to_obj(GameWorld *g, struct obj_data *obj, struct obj_data *obj_to)
   struct obj_data *tmp_obj;
 
   if (!obj || !obj_to || obj == obj_to) {
-    mud_log_printf("SYSERR: NULL object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
-                   (void *)obj, (void *)obj, (void *)obj_to, obj_to ? obj_get_vnum(g, obj_to) : -1);
+    mud_log("SYSERR: NULL object ({}) or same source ({}) and target ({} VNUM: {:d}) obj passed to obj_to_obj.",
+            as_pointer((void *)obj), as_pointer((void *)obj), as_pointer((void *)obj_to), obj_to ? obj_get_vnum(g, obj_to) : -1);
     return;
   }
 
@@ -174,7 +174,7 @@ void obj_from_obj(GameWorld *g, struct obj_data *obj)
   struct obj_data *temp, *obj_from;
 
   if (obj_get_in_obj(obj) == nullptr) {
-    mud_log_printf("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
+    mud_log("SYSERR: ({}): trying to illegally extract obj from obj.", __FILE__);
     return;
   }
   obj_from = obj_get_in_obj(obj);
@@ -207,7 +207,7 @@ void char_from_room(GameWorld *g, struct char_data *ch)
   int i;
 
   if (ch == nullptr || char_get_in_room(ch) == NOWHERE) {
-    mud_log_printf("SYSERR: NULL character or NOWHERE in %s, char_from_room", __FILE__);
+    mud_log("SYSERR: NULL character or NOWHERE in {}, char_from_room", __FILE__);
     return;
   }
 
@@ -235,11 +235,11 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
   int i;
 
   if (ch == nullptr || !room_of(g, room))
-    mud_log_printf("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d Ch: %p", room, (void *)ch);
+    mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: {:d} Ch: {}", room, as_pointer((void *)ch));
   else {
     if (char_by_id(g, char_get_id(ch)) != ch)
-      mud_log_printf("SYSERR: char_to_room: %s (id %d) isn't registered, so the room can't list them.", char_get_name(ch),
-                     char_get_id(ch));
+      mud_log("SYSERR: char_to_room: {} (id {:d}) isn't registered, so the room can't list them.", char_get_name(ch),
+              char_get_id(ch));
     room_people_slot(g, room)->add(char_get_id(ch));
     char_set_in_room(ch, room);
 
@@ -280,9 +280,9 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
 
     } else if (getCurPL(g, ch) > getEffMaxPL(g, ch)) {
       if (char_get_kaioken(ch) > 0) {
-        send_to_char_printf(g, ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
+        send_to_char(g, ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
       } else if (char_aff_flagged(ch, AFF_METAMORPH)) {
-        send_to_char_printf(g, ch, "@RYour metamorphosis strains under the additional weight!@n\n");
+        send_to_char(g, ch, "@RYour metamorphosis strains under the additional weight!@n\n");
       }
     }
 
@@ -295,7 +295,7 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
     if (!char_is_npc(ch))
       char_plr_set(ch, PLR_CRASH, true);
   } else
-    mud_log_printf("SYSERR: NULL obj (%p) or char (%p) passed to obj_to_char.", (void *)object, (void *)ch);
+    mud_log("SYSERR: NULL obj ({}) or char ({}) passed to obj_to_char.", as_pointer((void *)object), as_pointer((void *)ch));
 }
 
 /* take an object from a char */
@@ -314,7 +314,7 @@ void obj_weight_changed(GameWorld *g, struct obj_data *obj, int64_t change)
 void obj_from_char(GameWorld *g, struct obj_data *object)
 {
   if (object == nullptr) {
-    mud_log_printf("SYSERR: NULL object passed to obj_from_char.");
+    mud_log("SYSERR: NULL object passed to obj_from_char.");
     return;
   }
   char_inventory_slot(obj_get_carried_by(object))->remove(obj_get_id(object));
@@ -391,16 +391,16 @@ void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int po
   }
 
   if (char_get_equipment(ch, pos)) {
-    mud_log_printf("SYSERR: Char is already equipped: %s, %s", char_get_name(ch),
-                   obj_get_short_description(obj));
+    mud_log("SYSERR: Char is already equipped: {}, {}", char_get_name(ch),
+            obj_get_short_description(obj));
     return;
   }
   if (obj_get_carried_by(obj)) {
-    mud_log_printf("SYSERR: EQUIP: Obj is carried_by when equip.");
+    mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
     return;
   }
   if (obj_get_in_room(obj) != NOWHERE) {
-    mud_log_printf("SYSERR: EQUIP: Obj is in_room when equip.");
+    mud_log("SYSERR: EQUIP: Obj is in_room when equip.");
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
@@ -423,7 +423,7 @@ void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int po
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
         room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) + 1);
   } else
-    mud_log_printf("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char %s.", char_get_name(ch));
+    mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char {}.", char_get_name(ch));
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++)
     affect_modify_ar(g, ch, obj_get_affected(obj)[j].location,
@@ -456,7 +456,7 @@ struct obj_data *unequip_char(GameWorld *g, struct char_data *ch, int pos)
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
         room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
   } else
-    mud_log_printf("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", char_get_name(ch));
+    mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char {}.", char_get_name(ch));
 
   char_set_equipment(ch, pos, nullptr);
 

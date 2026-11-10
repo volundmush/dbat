@@ -528,8 +528,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
       attspd += 6;
       break;
     default:
-      send_to_imm_printf(g, "ERROR: Combine attacks failure for: %s", char_get_name(ch));
-      send_to_char_printf(g, ch, "An error has been logged. Be patient while waiting for Iovan's response.\r\n");
+      send_to_imm(g, "ERROR: Combine attacks failure for: {}", char_get_name(ch));
+      send_to_char(g, ch, "An error has been logged. Be patient while waiting for Iovan's response.\r\n");
       return;
   }
 
@@ -590,14 +590,14 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
   }
   if (burn == true) {
     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-      send_to_char_printf(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char_printf(g, ch, "@RThey are burned by the attack!@n\r\n");
+      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
+      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-      send_to_char_printf(g, ch, "@RThey appear to be fireproof!@n\r\n");
+      send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
     } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-      send_to_char_printf(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char_printf(g, ch, "@RThey are easily burned!@n\r\n");
+      send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+      send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     }
   }
@@ -611,9 +611,9 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
   hurt(g, 0, 0, ch, vict, nullptr, totki, 1);
   if (same == true) {
     for (char_data *foll : char_followers(g, ch)) {
-      send_to_char_printf(g, foll, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+      send_to_char(g, foll, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
-    send_to_char_printf(g, ch, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+    send_to_char(g, ch, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
   }
 }
 
@@ -814,8 +814,8 @@ void club_stamina(GameWorld *g, struct char_data *ch, struct char_data *vict, in
   drained = dmg * drain;
   decCurST(g, vict, drained, 0);
 
-  send_to_char_printf(g, ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
-  send_to_char_printf(g, vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
+  send_to_char(g, ch, "@D[@YVictim's @GStamina @cLoss@W: @g{}@D]@n\r\n", add_commas(drained));
+  send_to_char(g, vict, "@D[@rYour @GStamina @cLoss@W: @g{}@D]@n\r\n", add_commas(drained));
 }
 
 bool backstab(GameWorld *g, struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg)
@@ -1124,7 +1124,7 @@ static int64_t advanced_energy(GameWorld *g, struct char_data *ch, int64_t dmg)
           act(g, "@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
           act(g, "@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else {
-          send_to_char_printf(g, ch, "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
+          send_to_char(g, ch, "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
         }
       } else {
         char_set_charge(ch, char_get_charge(ch) + (add));
@@ -1635,20 +1635,20 @@ static void damage_eq(GameWorld *g, struct char_data *vict, int location)
       act(g, "@WYour $p@W rips a little!@n", false, nullptr, eq, vict, TO_VICT);
       act(g, "@C$N's@W $p@W rips a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
-        send_to_char_printf(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
+        send_to_char(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
         act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
-        send_to_char_printf(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
+        send_to_char(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
         act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       }
     } else {
       act(g, "@WYour $p@W cracks a little!@n", false, nullptr, eq, vict, TO_VICT);
       act(g, "@C$N's@W $p@W cracks a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
-        send_to_char_printf(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
+        send_to_char(g, vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
         act(g, "@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
-        send_to_char_printf(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
+        send_to_char(g, vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
         act(g, "@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, nullptr, nullptr, vict, TO_NOTVICT);
       }
     }
@@ -1690,7 +1690,7 @@ void huge_update(GameWorld *g)
 
           act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
           act(g, "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
-          send_to_room_printf(g, obj_get_in_room(k), "\r\n");
+          send_to_room(g, obj_get_in_room(k), "\r\n");
           if (getCurPL(g, obj_get_target(g, k)) * bonus < obj_get_kicharge(k) * 5) {
 
             act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
@@ -1791,7 +1791,7 @@ void huge_update(GameWorld *g)
         } else if (char_get_in_room(obj_get_target(g, k)) != obj_get_in_room(k)) {
           ch = obj_get_user(g, k);
 
-          send_to_room_printf(g, obj_get_in_room(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
+          send_to_room(g, obj_get_in_room(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
 
           skill = init_skill(g, ch, SKILL_GENKIDAMA); /* Set skill value */
           dmg   = obj_get_kicharge(k);
@@ -1860,7 +1860,7 @@ void huge_update(GameWorld *g)
 
           act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
           act(g, "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_ROOM);
-          send_to_room_printf(g, obj_get_in_room(k), "\r\n");
+          send_to_room(g, obj_get_in_room(k), "\r\n");
           if (getCurPL(g, obj_get_target(g, k)) * bonus < obj_get_kicharge(k) * 10) {
 
             act(g, "@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(g, k), nullptr, nullptr, TO_CHAR);
@@ -1959,7 +1959,7 @@ void huge_update(GameWorld *g)
         } else if (char_get_in_room(obj_get_target(g, k)) != obj_get_in_room(k)) {
           ch = obj_get_user(g, k);
 
-          send_to_room_printf(g, obj_get_in_room(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
+          send_to_room(g, obj_get_in_room(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
 
           skill = init_skill(g, ch, SKILL_GENOCIDE); /* Set skill value */
           dmg   = obj_get_kicharge(k);
@@ -2068,7 +2068,7 @@ void homing_update(GameWorld *g)
           act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
-            send_to_room_printf(g, obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
+            send_to_room(g, obj_get_in_room(k), "{} has lost all its energy and disappears.\r\n", obj_get_short_description(k));
             extract_obj(g, k);
           }
           continue;
@@ -2163,7 +2163,7 @@ void homing_update(GameWorld *g)
           act(g, "@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, nullptr, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
-            send_to_room_printf(g, obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
+            send_to_room(g, obj_get_in_room(k), "{} has lost all its energy and disappears.\r\n", obj_get_short_description(k));
             extract_obj(g, k);
           }
           continue;
@@ -3377,7 +3377,7 @@ int64_t damtype(GameWorld *g, struct char_data *ch, int type, int skill, double 
     act(g, "Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr, TO_ROOM);
     if (rand_number(g, 1, 10) >= 7) {
-      send_to_char_printf(g, ch, "You feel less angry.\r\n");
+      send_to_char(g, ch, "You feel less angry.\r\n");
       char_plr_set(ch, PLR_FURY, false);
     }
   } else if (char_plr_flagged(ch, PLR_FURY)) {
@@ -3440,7 +3440,7 @@ static void saiyan_gain(GameWorld *g, struct char_data *ch, struct char_data *vi
   }
   if (rand_number(g, 1, 22) >= 18 && (char_get_level(ch) == 100 || level_exp(ch, char_get_level(ch) + 1) - (char_get_exp(ch)) > 0)) {
     if (weak) {
-      send_to_char_printf(g, ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
+      send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
     } else {
       int stats[3] = {0, 1, 2};
       int available[3];
@@ -3453,7 +3453,7 @@ static void saiyan_gain(GameWorld *g, struct char_data *ch, struct char_data *vi
       }
 
       if (avail_count == 0) {
-        send_to_char_printf(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
+        send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
         return;
       }
 
@@ -3462,15 +3462,15 @@ static void saiyan_gain(GameWorld *g, struct char_data *ch, struct char_data *vi
       switch (choice) {
         case 0:
           gainBasePL(ch, gain, false);
-          send_to_char_printf(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+{}@D]@n\r\n", add_commas(gain));
           break;
         case 1:
           gainBaseKI(ch, gain, false);
-          send_to_char_printf(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+{}@D]@n\r\n", add_commas(gain));
           break;
         case 2:
           gainBaseST(ch, gain, false);
-          send_to_char_printf(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+{}@D]@n\r\n", add_commas(gain));
           break;
       }
     }
@@ -3575,7 +3575,7 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       }
       if (vict != nullptr) {
         if (difference >= 51) {
-          send_to_char_printf(g, ch, "The difference in your levels is too great for you to gain anything.\r\n");
+          send_to_char(g, ch, "The difference in your levels is too great for you to gain anything.\r\n");
           return;
         }
         if (difference >= 40) {
@@ -3590,7 +3590,7 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
         if (!char_is_npc(vict)) {
           if (char_prf_flagged(g, vict, PRF_INSTRUCT)) {
             if (char_get_practice_points(g, vict) > 10) {
-              send_to_char_printf(g, vict, "You instruct them in proper fighting techniques and strategies.\r\n");
+              send_to_char(g, vict, "You instruct them in proper fighting techniques and strategies.\r\n");
               act(g, "You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr, vict, TO_CHAR);
               char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (10));
               bonus = 2;
@@ -3620,18 +3620,18 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
         char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (pscost));
         gain = gain * bonus;
         gain_exp(g, ch, gain);
-        send_to_char_printf(g, ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
+        send_to_char(g, ch, "@D[@Y+ @G{} @mExp@D]@n ", add_commas(gain));
         if (type == 0 && rand_number(g, 1, 5) >= 4) {
-          send_to_char_printf(g, ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
+          send_to_char(g, ch, "@D[@Y+ @R{} @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
           gainBasePL(ch, pl, false);
         } else if (type == 1 && rand_number(g, 1, 5) >= 4) {
-          send_to_char_printf(g, ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
+          send_to_char(g, ch, "@D[@Y+ @C{} @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
           gainBaseKI(ch, ki, false);
         }
-        send_to_char_printf(g, ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
-        send_to_char_printf(g, ch, "\r\n");
+        send_to_char(g, ch, "@D[@R- @M{:d} @mPS@D]@n ", pscost);
+        send_to_char(g, ch, "\r\n");
       } else {
-        send_to_char_printf(g, ch, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n", pscost);
+        send_to_char(g, ch, "@RYou need at least {:d} Practice Sessions in order to gain while sparring here.@n\r\n", pscost);
       }
     }
   }
@@ -3704,7 +3704,7 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       gain = large_rand(g, num * .7, num);
 
       if (difference > 50) {
-        send_to_char_printf(g, ch, "The difference in your levels is too great for you to gain anything.\r\n");
+        send_to_char(g, ch, "The difference in your levels is too great for you to gain anything.\r\n");
         return;
       }
       if (difference >= 40) {
@@ -3732,17 +3732,17 @@ static void spar_gain(GameWorld *g, struct char_data *ch, struct char_data *vict
       }
       if (char_get_practice_points(g, vict) >= pscost) {
         char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (pscost));
-        send_to_char_printf(g, vict, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
+        send_to_char(g, vict, "@D[@Y+ @G{} @mExp@D]@n ", add_commas(gain));
         gain = gear_exp(g, vict, gain);
         gain_exp(g, vict, gain);
         if (rand_number(g, 1, 5) >= 4) {
-          send_to_char_printf(g, vict, "@D[@Y+ @G%s @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
+          send_to_char(g, vict, "@D[@Y+ @G{} @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
           gainBaseST(vict, st, false);
         }
-        send_to_char_printf(g, vict, "@D[@R- @M%d @mPS@D]@n ", pscost);
-        send_to_char_printf(g, vict, "\r\n");
+        send_to_char(g, vict, "@D[@R- @M{:d} @mPS@D]@n ", pscost);
+        send_to_char(g, vict, "\r\n");
       } else {
-        send_to_char_printf(g, vict, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n", pscost);
+        send_to_char(g, vict, "@RYou need at least {:d} Practice Sessions in order to gain while sparring here.@n\r\n", pscost);
       }
     }
   }
@@ -3782,7 +3782,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
     if (char_aff_flagged(ch, AFF_POTENT)) {
       dmg += dmg * 0.3;
-      send_to_room_printf(g, char_get_in_room(ch), "@wThere is a bright flash of @Yyellow@w light in the wake of the attack!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@wThere is a bright flash of @Yyellow@w light in the wake of the attack!@n\r\n");
     }
   }
 
@@ -3791,7 +3791,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     if (dmg > 0) {
       if (getCurKI(g, ch) - infuse_cost) {
         decCurKI(g, ch, infuse_cost, 0);
-        send_to_room_printf(g, char_get_in_room(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
+        send_to_room(g, char_get_in_room(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
       } else {
         act(g, "@wYou can no longer infuse ki into your attacks!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3808,7 +3808,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 
     reveal_hiding(g, vict, 0);
     if (char_aff_flagged(vict, AFF_PARALYZE)) {
-      send_to_char_printf(g, ch, "They are a statue and can't be harmed\r\n");
+      send_to_char(g, ch, "They are a statue and can't be harmed\r\n");
       return;
     }
 
@@ -3841,7 +3841,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           if (beforered <= 1) {
             char_set_combo(ch, -1);
             char_set_combhits(ch, 0);
-            send_to_char_printf(g, ch, "@RYou have cut your combo short because you missed your last hit!@n\r\n");
+            send_to_char(g, ch, "@RYou have cut your combo short because you missed your last hit!@n\r\n");
           } else if (char_get_combhits(ch) < physical_mastery(ch)) {
             dmg += combo_damage(ch, dmg, 0);
             if ((char_get_combhits(ch) == 10 || char_get_combhits(ch) == 20 || char_get_combhits(ch) == 30) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) == 100)) {
@@ -3858,7 +3858,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
                 gain += gain * 0.1;
               }
               gain_exp(g, ch, gain);
-              send_to_char_printf(g, ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain));
+              send_to_char(g, ch, "@D[@mExp@W: @G{}@D]@n\r\n", add_commas(gain));
             }
           } else {
             dmg += combo_damage(ch, dmg, 1);
@@ -3876,14 +3876,14 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
                 gain += gain * 0.1;
               }
               gain_exp(g, ch, gain);
-              send_to_char_printf(g, ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain));
+              send_to_char(g, ch, "@D[@mExp@W: @G{}@D]@n\r\n", add_commas(gain));
             }
             char_set_combo(ch, -1);
             char_set_combhits(ch, 0);
           }
         }
       } else if (char_get_combhits(ch) > 0 && char_get_lastattack(ch) < 1000) {
-        send_to_char_printf(g, ch, "@RYou have cut your combo short because you used the wrong attack!@n\r\n");
+        send_to_char(g, ch, "@RYou have cut your combo short because you used the wrong attack!@n\r\n");
         char_set_combo(ch, -1);
         char_set_combhits(ch, 0);
       }
@@ -4253,7 +4253,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         char_set_suppressed(vict, char_get_suppressed(vict) - (dmg));
         suppresso = true;
       } else if (char_get_suppressed(vict) <= dmg) {
-        send_to_char_printf(g, vict, "@GYou no longer have any reserve powerlevel suppressed.@n\r\n");
+        send_to_char(g, vict, "@GYou no longer have any reserve powerlevel suppressed.@n\r\n");
         dmg -= char_get_suppressed(vict);
         char_set_suppressed(vict, 0);
         char_set_suppression(vict, 0);
@@ -4262,7 +4262,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 
     if (char_plr_flagged(vict, PLR_IMMORTAL) && !is_sparring(ch) && getCurHealth(g, vict) - dmg <= 0) {
       if (char_in_arena(g, vict)) {
-        send_to_all_printf(g, "@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", char_get_name(ch), char_get_name(vict));
+        send_to_all(g, "@R{}@r manages to defeat @R{}@r in the Arena!@n\r\n", char_get_name(ch), char_get_name(vict));
         char_from_room(g, ch);
         char_to_room(g, ch, 17875);
         look_at_room(g, char_get_in_room(ch), ch, 0);
@@ -4319,9 +4319,9 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           act(g, "@c$N@w barely clings to life!@n.", true, ch, nullptr, vict, TO_NOTVICT);
           int64_t lifeloss = dmg - getCurPL(g, vict);
           decCurLF(g, vict, lifeloss, 0);
-          send_to_char_printf(g, vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
+          send_to_char(g, vict, "@D[@CLifeforce@D: @R-{}@D]\n", add_commas(lifeloss));
           if ((getCurLF(g, vict)) >= (getMaxLF(g, vict)) * 0.05) {
-            send_to_char_printf(g, vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
+            send_to_char(g, vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
             incCurHealth(g, vict, (getMaxLF(g, vict)) * .05, true);
             decCurLFPercent(g, vict, .05, 0);
           } else {
@@ -4345,8 +4345,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
             int64_t raise = (getMaxKI(g, ch) * 0.005) + 1;
             incCurKI(g, ch, raise, true);
           }
-          send_to_char_printf(g, ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
-          send_to_char_printf(g, vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
+          send_to_char(g, ch, "@D[@GDamage@W: @R{}@D]@n\r\n", add_commas(dmg));
+          send_to_char(g, vict, "@D[@rDamage@W: @R{}@D]@n\r\n", add_commas(dmg));
           int64_t healhp = (long double)(getEffMaxPL(g, vict)) * 0.12;
           if (char_aff_flagged(ch, AFF_METAMORPH) && getCurPL(g, ch) <= getEffMaxPL(g, ch)) {
             act(g, "@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -4358,7 +4358,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           }
           if (!is_sparring(ch) && char_is_npc(vict)) {
             if (type == 0 && rand_number(g, 1, 100) >= 97) {
-              send_to_char_printf(g, ch, "@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
+              send_to_char(g, ch, "@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
               int64_t gain = char_get_exp(vict) * 0.05;
               gain += 1;
               gain_exp(g, ch, gain);
@@ -4377,8 +4377,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
               char_set_wait(ch, PULSE_3SEC);
           }
         } else if (dmg <= 1) {
-          send_to_char_printf(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n\r\n");
-          send_to_char_printf(g, vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
+          send_to_char(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n\r\n");
+          send_to_char(g, vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
         }
 
         decCurHealthPercent(g, vict, 1, 0);
@@ -4410,81 +4410,81 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 10 || char_get_genome(ch, 1) == 10)) {
           incCurKI(g, ch, dmg * .05, true);
         }
-        send_to_char_printf(g, ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
-        send_to_char_printf(g, vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
+        send_to_char(g, ch, "@D[@GDamage@W: @R{}@D]@n", add_commas(dmg));
+        send_to_char(g, vict, "@D[@rDamage@W: @R{}@D]@n\r\n", add_commas(dmg));
         //int64_t healhp = GET_HIT(vict) * 0.12;
         if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(g, ch, PRF_NODEC)) {
           if (char_is_android(vict)) {
-            send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+            send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
           } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
-            send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+            send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
           } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(g, vict) >= 5000000) {
-            send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+            send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
           } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(g, vict) >= 15000000) {
-            send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+            send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
           } else {
-            send_to_char_printf(g, ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(g, vict)));
+            send_to_char(g, ch, " @D<@YProcessing@D: @c{}@D>@n\r\n", add_commas(getCurPL(g, vict)));
           }
         } else {
-          send_to_char_printf(g, ch, "\r\n");
+          send_to_char(g, ch, "\r\n");
         }
       } else if (!char_is_npc(ch)) {
         if (dmg <= 1 && suppresso == false && !char_prf_flagged(g, ch, PRF_NODEC)) {
-          send_to_char_printf(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-          send_to_char_printf(g, vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
+          send_to_char(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
+          send_to_char(g, vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(g, ch, PRF_NODEC)) {
             if (char_is_android(vict)) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(g, vict) >= 5000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(g, vict) >= 15000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(g, vict)));
+              send_to_char(g, ch, " @D<@YProcessing@D: @c{}@D>@n\r\n", add_commas(getCurPL(g, vict)));
             }
           } else {
-            send_to_char_printf(g, ch, "\r\n");
+            send_to_char(g, ch, "\r\n");
           }
         } else if (dmg > 1 && suppresso == true && !char_prf_flagged(g, ch, PRF_NODEC)) {
-          send_to_char_printf(g, ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
-          send_to_char_printf(g, vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
-          send_to_char_printf(g, vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(char_get_suppressed(vict)));
+          send_to_char(g, ch, "@D[@GDamage@W: @R{}@D]@n", add_commas(dmg));
+          send_to_char(g, vict, "@D[@rDamage@W: @R{} @c-Suppression-@D]@n\r\n", add_commas(dmg));
+          send_to_char(g, vict, "@D[Suppression@W: @G{}@D]@n\r\n", add_commas(char_get_suppressed(vict)));
           //int64_t healhp = GET_HIT(vict) * 0.12;
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(g, ch, PRF_NODEC)) {
             if (char_is_android(vict)) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(g, vict) >= 5000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(g, vict) >= 15000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(g, vict)));
+              send_to_char(g, ch, " @D<@YProcessing@D: @c{}@D>@n\r\n", add_commas(getCurPL(g, vict)));
             }
           } else {
-            send_to_char_printf(g, ch, "\r\n");
+            send_to_char(g, ch, "\r\n");
           }
         } else if (dmg <= 1 && suppresso == true && !char_prf_flagged(g, ch, PRF_NODEC)) {
-          send_to_char_printf(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-          send_to_char_printf(g, vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
-          send_to_char_printf(g, vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(char_get_suppressed(vict)));
+          send_to_char(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
+          send_to_char(g, vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
+          send_to_char(g, vict, "@D[Suppression@W: @G{}@D]@n\r\n", add_commas(char_get_suppressed(vict)));
           if (char_get_equipment(ch, WEAR_EYE) && vict) {
             if (char_is_android(vict) && !char_prf_flagged(g, ch, PRF_NODEC)) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(g, vict) >= 5000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(g, vict) >= 15000000) {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+              send_to_char(g, ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char_printf(g, ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(g, vict)));
+              send_to_char(g, ch, " @D<@YProcessing@D: @c{}@D>@n\r\n", add_commas(getCurPL(g, vict)));
             }
           } else {
-            send_to_char_printf(g, ch, "\r\n");
+            send_to_char(g, ch, "\r\n");
           }
         }
       }
@@ -4496,7 +4496,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     /* Increases GET_FURY for halfbreeds who get damaged. */
 
     if (!is_sparring(ch) && char_is_halfbreed(vict) && char_get_fury(vict) < 100 && !char_plr_flagged(vict, PLR_FURY)) {
-      send_to_char_printf(g, vict, "@RYour fury increases a little bit!@n\r\n");
+      send_to_char(g, vict, "@RYour fury increases a little bit!@n\r\n");
       char_set_fury(vict, char_get_fury(vict) + (1));
     }
 
@@ -4609,7 +4609,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       }
     }
   } else {
-    mud_log_printf("Log: Error with hurt.\n");
+    mud_log("Log: Error with hurt.\n");
   }
 }
 
@@ -4817,7 +4817,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
       break;
     default:
       if (char_get_combo(ch) != -1) {
-        send_to_char_printf(g, ch, "@RYou have cut your combo short with the wrong attack!@n\r\n");
+        send_to_char(g, ch, "@RYou have cut your combo short with the wrong attack!@n\r\n");
       }
       char_set_combo(ch, -1);
       char_set_combhits(ch, 0);
@@ -4863,7 +4863,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 4:
         case 5:
           if (char_get_skill(ch, SKILL_PUNCH) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
             char_set_combo(ch, 0);
             success = true;
           }
@@ -4874,7 +4874,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 9:
         case 10:
           if (char_get_skill(ch, SKILL_KICK) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
             char_set_combo(ch, 1);
             success = true;
           }
@@ -4884,7 +4884,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 13:
         case 14:
           if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
             char_set_combo(ch, 2);
             success = true;
           }
@@ -4893,7 +4893,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 16:
         case 17:
           if (char_get_skill(ch, SKILL_KNEE) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
             char_set_combo(ch, 3);
             success = true;
           }
@@ -4901,7 +4901,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 18:
         case 19:
           if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
             char_set_combo(ch, 4);
             success = true;
           }
@@ -4909,21 +4909,21 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
         case 20:
         case 21:
           if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
             char_set_combo(ch, 5);
             success = true;
           }
           break;
         case 22:
           if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
             char_set_combo(ch, 8);
             success = true;
           }
           break;
         case 24:
           if (char_get_skill(ch, SKILL_SLAM) > 0) {
-            send_to_char_printf(g, ch, "@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
+            send_to_char(g, ch, "@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
             char_set_combo(ch, 6);
             success = true;
           }
@@ -4946,7 +4946,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 7:
           case 8:
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
               success = true;
             }
@@ -4960,7 +4960,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 15:
           case 16:
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
               success = true;
             }
@@ -4971,7 +4971,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 20:
           case 21:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
               success = true;
             }
@@ -4982,7 +4982,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 25:
           case 26:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
               success = true;
             }
@@ -4991,23 +4991,23 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 28:
           case 29:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
@@ -5018,23 +5018,23 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 33:
           case 34:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
@@ -5053,7 +5053,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 9:
           case 10:
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
               success = true;
             }
@@ -5069,7 +5069,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 19:
           case 20:
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
               success = true;
             }
@@ -5078,7 +5078,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 22:
           case 23:
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
               success = true;
             }
@@ -5087,7 +5087,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 26:
           case 27:
             if (char_get_skill(ch, SKILL_KICK) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
               success = true;
             }
@@ -5095,7 +5095,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 29:
           case 30:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
               success = true;
             }
@@ -5105,45 +5105,45 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 33:
           case 34:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
               success = true;
             }
             break;
           case 35:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
             break;
           case 36:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             }
@@ -5157,7 +5157,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 4:
           case 5:
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
               success = true;
             }
@@ -5168,7 +5168,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 9:
           case 10:
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
               success = true;
             }
@@ -5182,7 +5182,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 17:
           case 18:
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
               success = true;
             }
@@ -5196,7 +5196,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 25:
           case 26:
             if (char_get_skill(ch, SKILL_KICK) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
               success = true;
             }
@@ -5205,7 +5205,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 28:
           case 29:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
               success = true;
             }
@@ -5213,7 +5213,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 30:
           case 31:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
               success = true;
             }
@@ -5221,38 +5221,38 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 32:
           case 33:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
             break;
           case 34:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             }
@@ -5265,7 +5265,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 3:
           case 4:
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
               success = true;
             }
@@ -5275,7 +5275,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 7:
           case 8:
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
               success = true;
             }
@@ -5291,7 +5291,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 17:
           case 18:
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
               success = true;
             }
@@ -5301,14 +5301,14 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 21:
           case 22:
             if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             }
             break;
           case 23:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             }
@@ -5316,42 +5316,42 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 24:
           case 25:
             if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             }
             break;
           case 26:
             if (char_get_skill(ch, SKILL_HEELDROP) > 0 && rand_number(g, 1, 3) == 3) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             }
             break;
           case 27:
             if (char_get_skill(ch, SKILL_SLAM) > 0 && rand_number(g, 1, 3) == 3) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
             break;
           case 28:
             if (char_get_skill(ch, SKILL_KICK) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
               success = true;
             }
             break;
           case 29:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
               success = true;
             }
             break;
           case 30:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
               success = true;
             }
@@ -5363,7 +5363,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 2:
           case 3:
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
               success = true;
             }
@@ -5372,7 +5372,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 5:
           case 6:
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
               success = true;
             }
@@ -5382,7 +5382,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 9:
           case 10:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
               success = true;
             }
@@ -5392,7 +5392,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 13:
           case 14:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0 && rand_number(g, 1, 2) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
               success = true;
             }
@@ -5402,7 +5402,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 17:
           case 18:
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
               success = true;
             }
@@ -5412,23 +5412,23 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 21:
           case 22:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
               success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
               success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
               success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0 && rand_number(g, 1, 3) == 2) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
               success = true;
             }
@@ -5442,7 +5442,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
           case 29:
           case 30:
             if (char_get_skill(ch, SKILL_KICK) > 0) {
-              send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
+              send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
               success = true;
             }
@@ -5454,9 +5454,9 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
   }
   if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) >= physical_mastery(ch)) {
     char_set_combhits(ch, char_get_combhits(ch) + (1));
-    send_to_char_printf(g, ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", char_get_combhits(ch));
+    send_to_char(g, ch, "@D(@GC-c-combo Bonus @gx{:d}@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", char_get_combhits(ch));
   } else if (char_get_combo(ch) != char_get_lastattack(ch) && char_get_combo(ch) > -1) {
-    send_to_char_printf(g, ch, "@GCombo failed! Try harder next time!@n\r\n");
+    send_to_char(g, ch, "@GCombo failed! Try harder next time!@n\r\n");
     char_set_combo(ch, -1);
     char_set_combhits(ch, 0);
     return 0;
@@ -5537,7 +5537,7 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
           act(g, "@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 45, skill, SKILL_SPIRAL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]

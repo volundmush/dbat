@@ -134,12 +134,12 @@ void House_delete_file(room_vnum vnum)
     return;
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT)
-      mud_log_printf("SYSERR: Error deleting house file #%d. (1): %s", vnum, strerror(errno));
+      mud_log("SYSERR: Error deleting house file #{:d}. (1): {}", vnum, strerror(errno));
     return;
   }
   fclose(fl);
   if (remove(filename) < 0)
-    mud_log_printf("SYSERR: Error deleting house file #%d. (2): %s", vnum, strerror(errno));
+    mud_log("SYSERR: Error deleting house file #{:d}. (2): {}", vnum, strerror(errno));
 }
 
 /******************************************************************
@@ -185,7 +185,7 @@ void House_boot(GameWorld *g)
 
   if (!(fl = fopen(HCONTROL_FILE, "rb"))) {
     if (errno == ENOENT)
-      mud_log_printf("   No houses to load. File '%s' does not exist.", HCONTROL_FILE);
+      mud_log("   No houses to load. File '{}' does not exist.", HCONTROL_FILE);
     else
       perror("SYSERR: " HCONTROL_FILE);
     return;
@@ -230,12 +230,11 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
   char built_on[128], last_pay[128], own_name[MAX_NAME_LENGTH + 1];
 
   if (!g->num_of_houses) {
-    send_to_char_printf(g, ch, "No houses have been defined.\r\n");
+    send_to_char(g, ch, "No houses have been defined.\r\n");
     return;
   }
-  send_to_char_printf(g, ch,
-                      "Address  Atrium  Build Date  Guests  Owner        Last Paymt\r\n"
-                      "-------  ------  ----------  ------  ------------ ----------\r\n");
+  send_to_char(g, ch,
+               "Address  Atrium  Build Date  Guests  Owner        Last Paymt\r\n-------  ------  ----------  ------  ------------ ----------\r\n");
 
   for (i = 0; i < g->num_of_houses; i++) {
     /* Avoid seeing <UNDEF> entries from self-deleted people. -gg 6/21/98 */
@@ -258,9 +257,9 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
     strcpy(own_name, temp); /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
-    send_to_char_printf(g, ch, "%7d %-10s    %2d    %-12s %s\r\n",
-                        g->house_control[i].vnum, built_on,
-                        g->house_control[i].num_of_guests, CAP(own_name), last_pay);
+    send_to_char(g, ch, "{:>7d} {:<10}    {:>2d}    {:<12} {}\r\n",
+                 g->house_control[i].vnum, built_on,
+                 g->house_control[i].num_of_guests, CAP(own_name), last_pay);
 
     House_list_guests(g, ch, i, true);
   }
@@ -276,50 +275,50 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
   long owner;
 
   if (g->num_of_houses >= MAX_HOUSES) {
-    send_to_char_printf(g, ch, "Max houses already defined.\r\n");
+    send_to_char(g, ch, "Max houses already defined.\r\n");
     return;
   }
 
   /* first arg: house's vnum */
   arg1 = take_arg(arg);
   if (arg1.empty()) {
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
     return;
   }
   virt_house = parse_int(arg1);
   if (!room_of(g, real_house = virt_house)) {
-    send_to_char_printf(g, ch, "No such room exists.\r\n");
+    send_to_char(g, ch, "No such room exists.\r\n");
     return;
   }
   if ((find_house(g, virt_house)) != NOWHERE) {
-    send_to_char_printf(g, ch, "House already exists.\r\n");
+    send_to_char(g, ch, "House already exists.\r\n");
     return;
   }
 
   /* second arg: direction of house's exit */
   arg1 = take_arg(arg);
   if (arg1.empty()) {
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
     return;
   }
   if ((exit_num = search_block(arg1, dirs, false)) < 0 &&
       (exit_num = search_block(arg1, abbr_dirs, false)) < 0) {
-    send_to_char_printf(g, ch, "'%s' is not a valid direction.\r\n", arg1.c_str());
+    send_to_char(g, ch, "'{}' is not a valid direction.\r\n", arg1.c_str());
     return;
   }
   if (room_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
-    send_to_char_printf(g, ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
+    send_to_char(g, ch, "There is no exit {} from room {:d}.\r\n", dirs[exit_num], virt_house);
     return;
   }
 
   /* third arg: player's name */
   arg1 = take_arg(arg);
   if (arg1.empty()) {
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
     return;
   }
   if ((owner = get_id_by_name(g, arg1.c_str())) < 0) {
-    send_to_char_printf(g, ch, "Unknown player '%s'.\r\n", arg1.c_str());
+    send_to_char(g, ch, "Unknown player '{}'.\r\n", arg1.c_str());
     return;
   }
 
@@ -336,7 +335,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
   room_set_flag(g, real_house, ROOM_HOUSE, true);
   House_crashsave(g, virt_house);
 
-  send_to_char_printf(g, ch, "House built.  Mazel tov!\r\n");
+  send_to_char(g, ch, "House built.  Mazel tov!\r\n");
   House_save_control(g);
 }
 
@@ -346,20 +345,20 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::stri
   room_vnum real_atrium, real_house;
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
     return;
   }
   if ((i = find_house(g, parse_int(arg))) == NOWHERE) {
-    send_to_char_printf(g, ch, "Unknown house.\r\n");
+    send_to_char(g, ch, "Unknown house.\r\n");
     return;
   }
   if (!room_of(g, real_atrium = g->house_control[i].atrium))
-    mud_log_printf("SYSERR: House %d had invalid atrium %d!", parse_int(arg), g->house_control[i].atrium);
+    mud_log("SYSERR: House {:d} had invalid atrium {:d}!", parse_int(arg), g->house_control[i].atrium);
   else
     room_set_flag(g, real_atrium, ROOM_ATRIUM, false);
 
   if (!room_of(g, real_house = g->house_control[i].vnum))
-    mud_log_printf("SYSERR: House %d had invalid vnum %d!", parse_int(arg), g->house_control[i].vnum);
+    mud_log("SYSERR: House {:d} had invalid vnum {:d}!", parse_int(arg), g->house_control[i].vnum);
   else {
     room_set_flag(g, real_house, ROOM_HOUSE, false);
     room_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
@@ -372,7 +371,7 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::stri
 
   g->num_of_houses--;
 
-  send_to_char_printf(g, ch, "House deleted.\r\n");
+  send_to_char(g, ch, "House deleted.\r\n");
   House_save_control(g);
 
   /*
@@ -390,15 +389,15 @@ static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_v
   int i;
 
   if (arg.empty())
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
   else if ((i = find_house(g, parse_int(arg))) == NOWHERE)
-    send_to_char_printf(g, ch, "Unknown house.\r\n");
+    send_to_char(g, ch, "Unknown house.\r\n");
   else {
-    mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house %s collected by %s.", std::string(arg).c_str(), char_get_name(ch));
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house {} collected by {}.", std::string(arg).c_str(), char_get_name(ch));
 
     g->house_control[i].last_payment = game_now(g);
     House_save_control(g);
-    send_to_char_printf(g, ch, "Payment recorded.\r\n");
+    send_to_char(g, ch, "Payment recorded.\r\n");
   }
 }
 
@@ -420,7 +419,7 @@ ACMD(do_hcontrol)
   else if (is_abbrev(arg1, "show"))
     hcontrol_list_houses(g, ch);
   else
-    send_to_char_printf(g, ch, "%s", HCONTROL_FORMAT);
+    send_to_char(g, ch, "{}", HCONTROL_FORMAT);
 }
 
 /* The house command, used by mortal house owners to assign guests */
@@ -433,17 +432,17 @@ ACMD(do_house)
   arg                   = take_arg(rest);
 
   if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
-    send_to_char_printf(g, ch, "You must be in your house to set guests.\r\n");
+    send_to_char(g, ch, "You must be in your house to set guests.\r\n");
   else if ((i = find_house(g, char_get_in_room(ch))) == NOWHERE)
-    send_to_char_printf(g, ch, "Um.. this house seems to be screwed up.\r\n");
+    send_to_char(g, ch, "Um.. this house seems to be screwed up.\r\n");
   else if (char_get_idnum(ch) != g->house_control[i].owner)
-    send_to_char_printf(g, ch, "Only the primary owner can set guests.\r\n");
+    send_to_char(g, ch, "Only the primary owner can set guests.\r\n");
   else if (arg.empty())
     House_list_guests(g, ch, i, false);
   else if ((id = get_id_by_name(g, arg.c_str())) < 0)
-    send_to_char_printf(g, ch, "No such player.\r\n");
+    send_to_char(g, ch, "No such player.\r\n");
   else if (id == char_get_idnum(ch))
-    send_to_char_printf(g, ch, "It's your house!\r\n");
+    send_to_char(g, ch, "It's your house!\r\n");
   else {
     for (j = 0; j < g->house_control[i].num_of_guests; j++)
       if (g->house_control[i].guests[j] == id) {
@@ -451,17 +450,17 @@ ACMD(do_house)
           g->house_control[i].guests[j] = g->house_control[i].guests[j + 1];
         g->house_control[i].num_of_guests--;
         House_save_control(g);
-        send_to_char_printf(g, ch, "Guest deleted.\r\n");
+        send_to_char(g, ch, "Guest deleted.\r\n");
         return;
       }
     if (g->house_control[i].num_of_guests == MAX_GUESTS) {
-      send_to_char_printf(g, ch, "You have too many guests.\r\n");
+      send_to_char(g, ch, "You have too many guests.\r\n");
       return;
     }
     j                          = g->house_control[i].num_of_guests++;
     g->house_control[i].guests[j] = id;
     House_save_control(g);
-    send_to_char_printf(g, ch, "Guest added.\r\n");
+    send_to_char(g, ch, "Guest added.\r\n");
   }
 }
 
@@ -508,11 +507,11 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
 
   if (g->house_control[i].num_of_guests == 0) {
     if (!quiet)
-      send_to_char_printf(g, ch, "  Guests: None\r\n");
+      send_to_char(g, ch, "  Guests: None\r\n");
     return;
   }
 
-  send_to_char_printf(g, ch, "  Guests: ");
+  send_to_char(g, ch, "  Guests: ");
 
   for (num_printed = j = 0; j < g->house_control[i].num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
@@ -520,13 +519,13 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
       continue;
 
     num_printed++;
-    send_to_char_printf(g, ch, "%c%s ", toupper(*temp), temp + 1);
+    send_to_char(g, ch, "{:c}{} ", as_char(toupper(*temp)), temp + 1);
   }
 
   if (num_printed == 0)
-    send_to_char_printf(g, ch, "all dead");
+    send_to_char(g, ch, "all dead");
 
-  send_to_char_printf(g, ch, "\r\n");
+  send_to_char(g, ch, "\r\n");
 }
 
 static bool House_load(GameWorld *g, room_vnum rvnum)
@@ -677,7 +676,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
             }
             case 'A':
               if (j >= MAX_OBJ_AFFECT) {
-                mud_log_printf("SYSERR: Too many object affectations in loading house file");
+                mud_log("SYSERR: Too many object affectations in loading house file");
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
@@ -706,8 +705,8 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
                 sscanf(line, "%" SCNd64, &uid);
                 /* -1 is an object not yet given one; no real one is negative. */
                 if (uid < -1) {
-                  mud_log_printf("SYSERR: Object #%d has unique id %" PRId64 ", which can't be; giving it a new one.",
-                                 obj_get_vnum(g, temp), uid);
+                  mud_log("SYSERR: Object #{:d} has unique id {:d}, which can't be; giving it a new one.",
+                          obj_get_vnum(g, temp), uid);
                   uid = -1;
                 }
                 obj_set_unique_id(temp, uid);
@@ -716,7 +715,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
               break;
             case 'S':
               if (j >= SPELLBOOK_SIZE) {
-                mud_log_printf("SYSERR: Too many spells in spellbook loading rent file");
+                mud_log("SYSERR: Too many spells in spellbook loading rent file");
               }
               get_line(fl, line);
               sscanf(line, "%d %d", t, t + 1);

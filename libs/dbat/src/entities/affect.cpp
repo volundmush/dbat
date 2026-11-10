@@ -160,7 +160,7 @@ static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mo
       break;
 
     default:
-      mud_log_printf("SYSERR: Unknown apply adjust %d attempt (%s, affect_modify).", loc, __FILE__);
+      mud_log("SYSERR: Unknown apply adjust {:d} attempt ({}, affect_modify).", loc, __FILE__);
       break;
 
   } /* switch */

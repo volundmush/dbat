@@ -32,7 +32,7 @@ static void ASSIGNMOB(GameWorld *g, mob_vnum mob, SPECIAL(fn))
   if (mob_proto_of(g, rnum = mob))
     mob_index_of(g, rnum)->func = fn;
   else if (!g->mini_mud)
-    mud_log_printf("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
+    mud_log("SYSERR: Attempt to assign spec to non-existant mob #{:d}", mob);
 }
 
 static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
@@ -42,7 +42,7 @@ static void ASSIGNOBJ(GameWorld *g, obj_vnum obj, SPECIAL(fn))
   if (obj_proto_of(g, rnum = obj))
     obj_index_of(g, rnum)->func = fn;
   else if (!g->mini_mud)
-    mud_log_printf("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
+    mud_log("SYSERR: Attempt to assign spec to non-existant obj #{:d}", obj);
 }
 
 static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fn))
@@ -52,7 +52,7 @@ static void ASSIGNROOM(GameWorld *g, room_vnum room, SPECIAL(fn))
   if (room_of(g, rnum = room))
     room_set_func(g, rnum, fn);
   else if (!g->mini_mud)
-    mud_log_printf("SYSERR: Attempt to assign spec to non-existant room #%d", room);
+    mud_log("SYSERR: Attempt to assign spec to non-existant room #{:d}", room);
 }
 
 /* ********************************************************************

@@ -44,7 +44,7 @@ int cook_element(GameWorld *g, room_vnum room)
 bool room_is_dark(GameWorld *g, room_vnum room)
 {
   if (!room_is_valid(g, room)) {
-    mud_log_printf("room_is_dark: Invalid room %d.", room);
+    mud_log("room_is_dark: Invalid room {:d}.", room);
     return (false);
   }
 

@@ -124,7 +124,7 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
 
   if (room_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
-    send_to_char_printf(g, caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
+    send_to_char(g, caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
     act(g, "White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr, nullptr, TO_ROOM);
     return (0);
   }
@@ -219,7 +219,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         act(g, "$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
       if (obj_get_value(obj, VAL_STAFF_CHARGES) <= 0) {
-        send_to_char_printf(g, ch, "It seems powerless.\r\n");
+        send_to_char(g, ch, "It seems powerless.\r\n");
         act(g, "Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
       } else {
         obj_set_value(obj, VAL_STAFF_CHARGES, obj_get_value(obj, VAL_STAFF_CHARGES) - 1);
@@ -273,7 +273,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
       }
 
       if (obj_get_value(obj, VAL_WAND_CHARGES) <= 0) {
-        send_to_char_printf(g, ch, "It seems powerless.\r\n");
+        send_to_char(g, ch, "It seems powerless.\r\n");
         act(g, "Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
         return;
       }
@@ -333,8 +333,8 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         extract_obj(g, obj);
       break;
     default:
-      mud_log_printf("SYSERR: Unknown object_type %d in mag_objectmagic.",
-                     obj_get_type_flag(obj));
+      mud_log("SYSERR: Unknown object_type {:d} in mag_objectmagic.",
+              obj_get_type_flag(obj));
       break;
   }
 }

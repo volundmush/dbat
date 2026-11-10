@@ -42,9 +42,8 @@ void assemblyBootAssemblies(GameWorld *g)
   FILE *pFile                    = nullptr;
 
   if ((pFile = fopen(ASSEMBLIES_FILE, "rt")) == nullptr) {
-    mud_log_printf("SYSERR: assemblyBootAssemblies(): Couldn't open file '%s' for "
-                   "reading.",
-                   ASSEMBLIES_FILE);
+    mud_log("SYSERR: assemblyBootAssemblies(): Couldn't open file '{}' for reading.",
+            ASSEMBLIES_FILE);
     return;
   }
 
@@ -57,34 +56,29 @@ void assemblyBootAssemblies(GameWorld *g)
 
     if (strcasecmp(szTag, "Component") == 0) {
       if (sscanf(szLine, "#%d %d %d", &lPartVnum, &iExtract, &iInRoom) != 3) {
-        mud_log_printf("SYSERR: bootAssemblies(): Invalid format in file %s, line %ld: "
-                       "szTag=%s, szLine=%s.",
-                       ASSEMBLIES_FILE, lLineCount, szTag, szLine);
+        mud_log("SYSERR: bootAssemblies(): Invalid format in file {}, line {:d}: szTag={}, szLine={}.",
+                ASSEMBLIES_FILE, lLineCount, szTag, szLine);
       } else if (!assemblyAddComponent(g, lVnum, lPartVnum, iExtract, iInRoom)) {
-        mud_log_printf("SYSERR: bootAssemblies(): Could not add component #%d to "
-                       "assembly #%d.",
-                       lPartVnum, lVnum);
+        mud_log("SYSERR: bootAssemblies(): Could not add component #{:d} to assembly #{:d}.",
+                lPartVnum, lVnum);
       }
     } else if (strcasecmp(szTag, "Vnum") == 0) {
       if (sscanf(szLine, "#%d %s", &lVnum, szType) != 2) {
-        mud_log_printf("SYSERR: bootAssemblies(): Invalid format in file %s, "
-                       "line %ld.",
-                       ASSEMBLIES_FILE, lLineCount);
+        mud_log("SYSERR: bootAssemblies(): Invalid format in file {}, line {:d}.",
+                ASSEMBLIES_FILE, lLineCount);
         lVnum = NOTHING;
       } else if ((iType = search_block(szType, AssemblyTypes, true)) < 0) {
-        mud_log_printf("SYSERR: bootAssemblies(): Invalid type '%s' for assembly "
-                       "vnum #%d at line %ld.",
-                       szType, lVnum, lLineCount);
+        mud_log("SYSERR: bootAssemblies(): Invalid type '{}' for assembly vnum #{:d} at line {:d}.",
+                szType, lVnum, lLineCount);
         lVnum = NOTHING;
       } else if (!assemblyCreate(g, lVnum, iType)) {
-        mud_log_printf("SYSERR: bootAssemblies(): Could not create assembly for vnum "
-                       "#%d, type %s.",
-                       lVnum, szType);
+        mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum #{:d}, type {}.",
+                lVnum, szType);
         lVnum = NOTHING;
       }
     } else {
-      mud_log_printf("SYSERR: Invalid tag '%s' in file %s, line #%ld.", szTag,
-                     ASSEMBLIES_FILE, lLineCount);
+      mud_log("SYSERR: Invalid tag '{}' in file {}, line #{:d}.", szTag,
+              ASSEMBLIES_FILE, lLineCount);
     }
 
     *szLine = '\0';
@@ -104,9 +98,8 @@ void assemblySaveAssemblies(GameWorld *g)
   FILE *pFile                    = nullptr;
 
   if ((pFile = atomic_open(&af, ASSEMBLIES_FILE, false)) == nullptr) {
-    mud_log_printf("SYSERR: assemblySaveAssemblies(): Couldn't open file '%s' for "
-                   "writing.",
-                   ASSEMBLIES_FILE);
+    mud_log("SYSERR: assemblySaveAssemblies(): Couldn't open file '{}' for writing.",
+            ASSEMBLIES_FILE);
     return;
   }
 
@@ -138,38 +131,38 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
   obj_vnum lRnum                    = 0; // An object vnum, checked against obj_proto.
 
   if (pCharacter == nullptr) {
-    mud_log_printf("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
+    mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
     return;
   }
   if (g->g_pAssemblyTable == nullptr) {
-    send_to_char_printf(g, pCharacter, "No assemblies exist.\r\n");
+    send_to_char(g, pCharacter, "No assemblies exist.\r\n");
     return;
   }
 
   /* Send out a "header" of sorts. */
-  send_to_char_printf(g, pCharacter, "The following assemblies exists:\r\n");
+  send_to_char(g, pCharacter, "The following assemblies exists:\r\n");
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].lVnum)) {
-      send_to_char_printf(g, pCharacter, "[-----] ***RESERVED***\r\n");
-      mud_log_printf("SYSERR: assemblyListToChar(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
+      send_to_char(g, pCharacter, "[-----] ***RESERVED***\r\n");
+      mud_log("SYSERR: assemblyListToChar(): Invalid vnum #{:d} in assembly table.", g->g_pAssemblyTable[i].lVnum);
     } else {
       sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
       sprintf(szBuffer, "[%5d] %s (%s)\r\n", g->g_pAssemblyTable[i].lVnum,
               obj_get_short_description(obj_proto_of(g, lRnum)), szAssmType);
-      send_to_char_printf(g, pCharacter, "%s", szBuffer);
+      send_to_char(g, pCharacter, "{}", szBuffer);
 
       for (j = 0; j < g->g_pAssemblyTable[i].lNumComponents; j++) {
         if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].pComponents[j].lVnum)) {
-          send_to_char_printf(g, pCharacter, " -----: ***RESERVED***\r\n");
-          mud_log_printf("SYSERR: assemblyListToChar(): Invalid component vnum #%d in assembly for vnum #%d.",
-                         g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
+          send_to_char(g, pCharacter, " -----: ***RESERVED***\r\n");
+          mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #{:d} in assembly for vnum #{:d}.",
+                  g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
         } else {
           sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g->g_pAssemblyTable[i].pComponents[j].lVnum,
                   obj_get_short_description(obj_proto_of(g, lRnum)),
                   (g->g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                   (g->g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
-          send_to_char_printf(g, pCharacter, "%s", szBuffer);
+          send_to_char(g, pCharacter, "{}", szBuffer);
         }
       }
     }
@@ -181,12 +174,12 @@ bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
   ASSEMBLY *pAssembly = nullptr;
 
   if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
-    mud_log_printf("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%d.", lVnum);
+    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #{:d}.", lVnum);
     return (false);
   }
   if (!obj_proto_of(g, lComponentVnum)) {
-    mud_log_printf("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%d.",
-                   lComponentVnum);
+    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #{:d}.",
+            lComponentVnum);
     return (false);
   }
   /* Removed as of 1.02.29 release */
@@ -225,11 +218,11 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
   ASSEMBLY *pAssembly                  = nullptr;
 
   if (pCharacter == nullptr) {
-    mud_log_printf("SYSERR: NULL assemblyCheckComponents(): 'pCharacter'.");
+    mud_log("SYSERR: NULL assemblyCheckComponents(): 'pCharacter'.");
     return (false);
   }
   if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
-    mud_log_printf("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%d.", lVnum);
+    mud_log("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #{:d}.", lVnum);
     return (false);
   }
 
@@ -340,7 +333,7 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
 
   /* Find the assembly with this vnum. */
   if (g->g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex(g, lVnum)) < 0) {
-    mud_log_printf("SYSERR: assemblyDestroy(): Invalid 'lVnum' #%d.", lVnum);
+    mud_log("SYSERR: assemblyDestroy(): Invalid 'lVnum' #{:d}.", lVnum);
     return (false);
   }
 
@@ -377,7 +370,7 @@ int assemblyGetType(GameWorld *g, obj_vnum lVnum)
   ASSEMBLY *pAssembly = nullptr;
 
   if ((pAssembly = assemblyGetAssemblyPtr(g, lVnum)) == nullptr) {
-    mud_log_printf("SYSERR: assemblyGetType(): Invalid 'lVnum' #%d.", lVnum);
+    mud_log("SYSERR: assemblyGetType(): Invalid 'lVnum' #{:d}.", lVnum);
     return (-1);
   }
 
@@ -396,7 +389,7 @@ obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].lVnum))
-      mud_log_printf("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g->g_pAssemblyTable[i].lVnum);
+      mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #{:d} in assembly table.", g->g_pAssemblyTable[i].lVnum);
     else if (isname(pszAssemblyName, obj_get_name(obj_proto_of(g, lRnum))))
       return (g->g_pAssemblyTable[i].lVnum);
   }

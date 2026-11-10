@@ -26,8 +26,8 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   int i;
 
   if (char_get_in_room(ch) == NOWHERE) {
-    mud_log_printf("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
-                   char_get_name(ch), __FILE__);
+    mud_log("SYSERR: NOWHERE extracting char {}. ({}, extract_char_final)",
+            char_get_name(ch), __FILE__);
     exit(1);
   }
 
@@ -70,7 +70,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
           desc_set_connected(d, CON_CLOSE);
       }
       desc_set_connected(char_get_desc(ch), CON_MENU);
-      write_to_output_printf(g, char_get_desc(ch), "%s", CONFIG_MENU.c_str());
+      write_to_output(g, char_get_desc(ch), "{}", CONFIG_MENU.c_str());
     }
   }
   /* On with the character's assets... */
@@ -282,7 +282,7 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
 
   if (obj_get_worn_by(obj) != nullptr)
     if (unequip_char(g, obj_get_worn_by(obj), obj_get_worn_on(obj)) != obj)
-      mud_log_printf("SYSERR: Inconsistent worn_by and worn_on pointers!!");
+      mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
   if (obj_get_in_room(obj) != NOWHERE)
     obj_from_room(g, obj);
   else if (obj_get_carried_by(obj))
@@ -358,7 +358,7 @@ void finish_extractions(GameWorld *g)
 static void finish_character_extractions(GameWorld *g)
 {
   if (g->extractions_pending < 0)
-    mud_log_printf("SYSERR: Negative (%d) extractions pending.", g->extractions_pending);
+    mud_log("SYSERR: Negative ({:d}) extractions pending.", g->extractions_pending);
 
   for (char_data *vict : each_char(g)) {
     if (!g->extractions_pending)
@@ -376,7 +376,7 @@ static void finish_character_extractions(GameWorld *g)
   }
 
   if (g->extractions_pending > 0)
-    mud_log_printf("SYSERR: Couldn't find %d extractions as counted.", g->extractions_pending);
+    mud_log("SYSERR: Couldn't find {:d} extractions as counted.", g->extractions_pending);
 
   g->extractions_pending = 0;
 }

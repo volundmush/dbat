@@ -21,7 +21,8 @@ Conversion (printf -> std::format):
   std::format's own run-time widths can't be checked when compiled by clang with libstdc++.
   With no arguments a call is plain text: the replacements' std::string_view overload prints it as it is, so
   only %% is undone and braces are left alone.
-Calls it leaves alone (and prints): a format that isn't a string literal, %n, %p, an integer precision
+  %p wraps its argument in as_pointer(), which prints a null pointer as "(nil)" as glibc's printf does.
+Calls it leaves alone (and prints): a format that isn't a string literal, %n, an integer precision
 (%.3d), a * width whose arguments it can't find.
 """
 import os, re, subprocess, sys, tempfile
@@ -37,8 +38,13 @@ def convert_spec(flags, width, prec, conv):
     """One printf conversion -> (std::format field, notes), notes being a list of
     'unsigned' (wrap the value in as_unsigned()), 'width' / 'prec' (a * argument comes before the value)."""
     notes = []
-    if conv in 'np':
-        raise Unsupported('%' + conv)
+    if conv == 'n':
+        raise Unsupported('%n')
+    if conv == 'p':
+        if flags or width is not None or prec is not None:
+            raise Unsupported('%p with a width or flags')
+        notes.append('pointer')
+        return '{}', notes
     spec = ''
     left = '-' in flags
     if width is not None:
@@ -249,7 +255,9 @@ def rewrite_file(path, funcs, fmt_index):
                 value = arg_texts[k]
                 k += 1
                 lead = value[:len(value) - len(value.lstrip())]
-                if 'unsigned' in n or 'char' in n:
+                if 'pointer' in n:
+                    value = f'{lead}as_pointer({value.strip()})'
+                elif 'unsigned' in n or 'char' in n:
                     value = f'{lead}{"as_unsigned" if "unsigned" in n else "as_char"}({value.strip()})'
                 elif 'width' in n or 'width-left' in n:
                     value = f'{lead}printf_width({value.strip()}, {runtime}, {"true" if "width-left" in n else "false"})'
@@ -299,6 +307,7 @@ SAMPLES = {
     'x': ['0u', '255u', '3735928559u'], 'X': ['0u', '255u', '3735928559u'], 'o': ['0u', '8u', '511u'],
     'c': ["'a'", "'Z'", "' '", "200", "-56", "toupper('q')"],
     's': ['""', '"x"', '"hello"', '"a long string of text"'],
+    'p': ['(void *)nullptr', '(void *)0x1234', '(void *)0x7ffd3a1eae60'],
     'f': ['0.0', '1.5', '-2.25', '1234.5678', '0.000123'], 'F': ['0.0', '1.5'],
     'e': ['0.0', '1.5', '-123456.789'], 'E': ['1.5'],
     'g': ['0.0', '1.5', '100000.0', '1234567.0', '0.0001', '0.00001'], 'G': ['1e-10'],
@@ -322,7 +331,7 @@ def selftest(root):
     for spec in codebase_specs(root):
         m = SPEC.fullmatch(spec)
         flags, width, prec, length, conv = m.groups()
-        if conv in '%np':
+        if conv in '%n':
             continue
         try:
             field, notes = convert_spec(flags, width, prec, conv)
@@ -342,7 +351,9 @@ def selftest(root):
             if prec == '*':
                 pf_args.append('3')
             pf_args.append(v)
-            if 'unsigned' in notes:
+            if 'pointer' in notes:
+                val = f'as_pointer({v})'
+            elif 'unsigned' in notes:
                 val = f'as_unsigned({v})'
             elif 'char' in notes:
                 val = f'as_char({v})'

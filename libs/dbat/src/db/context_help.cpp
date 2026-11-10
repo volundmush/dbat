@@ -263,7 +263,7 @@ bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
       strlcpy(actbuf, g->context_help_list[context] + 1, sizeof(actbuf));
       do_help(g, d->character, actbuf, 0, 0);
     } else {
-      write_to_output_printf(g, d, "\r\n%s\r\n>  ", g->context_help_list[context]);
+      write_to_output(g, d, "\r\n{}\r\n>  ", g->context_help_list[context]);
     }
     return true;
   }
@@ -285,7 +285,7 @@ void boot_context_help(GameWorld *g)
     g->context_help_list[i] = const_cast<char *>(NO_HELP); /* never freed: see below */
 
   if (!fl) {
-    mud_log_printf("No context help found : %s", strerror(errno));
+    mud_log("No context help found : {}", strerror(errno));
     return;
   }
   while (get_line(fl, line)) {

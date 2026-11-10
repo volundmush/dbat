@@ -23,7 +23,7 @@
 
 static void log_audit_problem(void *, const char *problem)
 {
-  mud_log_printf("SYSERR: World audit: %s", problem);
+  mud_log("SYSERR: World audit: {}", problem);
 }
 
 int main(int argc, char **argv)
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
         break;
       case 'x':
         g->xap_objs = 1;
-        mud_log_printf("Loading player objects from secondary (ascii) files.");
+        mud_log("Loading player objects from secondary (ascii) files.");
         break;
       case 'h':
         /* From: Anil Mahajan <amahajan@proxicom.com> */
@@ -166,19 +166,19 @@ int main(int argc, char **argv)
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-  mud_log_printf("Using %s for configuration.", CONFIG_CONFFILE.c_str());
+  mud_log("Using {} for configuration.", CONFIG_CONFFILE.c_str());
   g->xap_objs = 1;
   if (chdir(dir) < 0) {
     perror("SYSERR: Fatal error changing to data directory");
     exit(1);
   }
-  mud_log_printf("Using %s as data directory.", dir);
+  mud_log("Using {} as data directory.", dir);
 
   if (g->scheck) {
     boot_world(g);
     world_audit(g, log_audit_problem, nullptr);
   } else {
-    mud_log_printf("Running game on port %d.", g->port);
+    mud_log("Running game on port {:d}.", g->port);
     init_game(g, g->port);
   }
 
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 
   game_world_destroy(g);
 
-  mud_log_printf("Done.");
+  mud_log("Done.");
 
   return (0);
 }

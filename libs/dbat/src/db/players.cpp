@@ -68,7 +68,7 @@ void build_player_index(GameWorld *g)
   sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
   if (!(plr_index = fopen(index_name, "r"))) {
     g->top_of_p_table = -1;
-    mud_log_printf("No player index file!  First new char will be IMP!");
+    mud_log("No player index file!  First new char will be IMP!");
     return;
   }
 
@@ -143,7 +143,7 @@ void save_player_index(GameWorld *g)
 
   sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
   if (!(index_file = atomic_open(&af, index_name, true))) {
-    mud_log_printf("SYSERR: Could not write player index file");
+    mud_log("SYSERR: Could not write player index file");
     return;
   }
 
@@ -229,7 +229,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
     if (!get_filename(fname, sizeof(fname), PLR_FILE, g->player_table[id].name))
       return (-1);
     if (!(fl = fopen(fname, "r"))) {
-      mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s", fname);
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file {}", fname);
       return (-1);
     }
 
@@ -663,17 +663,17 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
   }
 
   if (!char_get_time_created(ch)) {
-    mud_log_printf("No creation timestamp for user %s, using current time", char_get_name(ch));
+    mud_log("No creation timestamp for user {}, using current time", char_get_name(ch));
     char_set_time_created(ch, game_now(g));
   }
 
   if (!char_get_time_birth(ch)) {
-    mud_log_printf("No birthday for user %s, using standard starting age determination", char_get_name(ch));
+    mud_log("No birthday for user {}, using standard starting age determination", char_get_name(ch));
     char_set_time_birth(ch, game_now(g) - birth_age(g, ch));
   }
 
   if (!char_get_time_maxage(ch)) {
-    mud_log_printf("No max age for user %s, using standard max age determination", char_get_name(ch));
+    mud_log("No max age for user {}, using standard max age determination", char_get_name(ch));
     time_t maxage;
     if (ckd_add(&maxage, char_get_time_birth(ch), max_age(ch)))
       maxage = char_get_time_birth(ch);
@@ -766,7 +766,7 @@ void save_char(GameWorld *g, struct char_data *ch)
   if (!get_filename(fname, sizeof(fname), PLR_FILE, char_get_name(ch)))
     return;
   if (!(fl = atomic_open(&af, fname, true))) {
-    mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s for write", fname);
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file {} for write", fname);
     return;
   }
 
@@ -810,7 +810,7 @@ void save_char(GameWorld *g, struct char_data *ch)
    */
 
   if ((i >= MAX_AFFECT) && aff != char_affects(ch).end() && std::next(aff) != char_affects(ch).end())
-    mud_log_printf("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
+    mud_log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
 
   while (!char_affects(ch).empty())
     affect_remove(g, ch, &char_affects(ch).front());
@@ -1155,7 +1155,7 @@ static void load_affects(GameWorld *g, FILE *fl, struct char_data *ch)
       if (affect_is_loadable(&af))
         affect_to_char(g, ch, &af);
       else
-        mud_log_printf("SYSERR: %s has an impossible saved affect: %s", char_get_name(ch), line);
+        mud_log("SYSERR: {} has an impossible saved affect: {}", char_get_name(ch), line);
     }
   } while (num != 0);
 }
@@ -1298,9 +1298,10 @@ void remove_player(GameWorld *g, int pfilepos)
       unlink(fname);
   }
 
-  mud_log_printf("PCLEAN: %s Lev: %d Last: %s",
-                 g->player_table[pfilepos].name, g->player_table[pfilepos].level,
-                 asctime(localtime(&g->player_table[pfilepos].last)));
+  std::string last = asctime(localtime(&g->player_table[pfilepos].last));
+  if (!last.empty() && last.back() == '\n')
+    last.pop_back();
+  mud_log("PCLEAN: {} Lev: {:d} Last: {}", g->player_table[pfilepos].name, g->player_table[pfilepos].level, last);
   g->player_table[pfilepos].name[0] = '\0';
   save_player_index(g);
 }

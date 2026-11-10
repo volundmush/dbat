@@ -28,18 +28,18 @@ static void display_races_sub(GameWorld *g, descriptor_data *d)
   for (int r = 0; r < NUM_RACES; r++) {
     if (!race_is_playable(r) || !race_valid_sex(r, char_get_sex(d->character)))
       continue;
-    send_to_char_printf(g, d->character, "@C%-15s@D[@R%i RPP@D]@n%s", race_name(r), race_rpp_cost(r), !(++i % 2) ? "\r\n" : "   ");
+    send_to_char(g, d->character, "@C{:<15}@D[@R{:d} RPP@D]@n{}", race_name(r), race_rpp_cost(r), !(++i % 2) ? "\r\n" : "   ");
   }
 }
 
 void display_races(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char_printf(g, d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+  send_to_char(g, d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
   display_races_sub(g, d);
 
-  send_to_char_printf(g, d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
-  send_to_char_printf(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-  send_to_char_printf(g, d->character, "\n@WRace: @n");
+  send_to_char(g, d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
+  send_to_char(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+  send_to_char(g, d->character, "\n@WRace: @n");
 }
 
 static void display_classes_sub(GameWorld *g, descriptor_data *d)
@@ -48,36 +48,36 @@ static void display_classes_sub(GameWorld *g, descriptor_data *d)
   for (int s = 0; s < NUM_CLASSES; s++) {
     if (!sensei_is_pc_ok(s) || !sensei_available_for_race(s, char_get_race(d->character)))
       continue;
-    send_to_char_printf(g, d->character, "@C%s@n%s", sensei_name(s), !(++i % 2) ? "\r\n" : "	");
+    send_to_char(g, d->character, "@C{}@n{}", sensei_name(s), !(++i % 2) ? "\r\n" : "	");
   }
 }
 
 static void display_classes(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char_printf(g, d->character, "\r\n@YSensei SELECTION menu:\r\n@D--------------------------------------\r\n@n");
+  send_to_char(g, d->character, "\r\n@YSensei SELECTION menu:\r\n@D--------------------------------------\r\n@n");
   display_classes_sub(g, d);
 
-  send_to_char_printf(g, d->character, "\n @BR@W) @CRandom Sensei Selection!\r\n@n");
-  send_to_char_printf(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-  send_to_char_printf(g, d->character, "\n@WSensei: @n");
+  send_to_char(g, d->character, "\n @BR@W) @CRandom Sensei Selection!\r\n@n");
+  send_to_char(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+  send_to_char(g, d->character, "\n@WSensei: @n");
 }
 
 static void display_races_help(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char_printf(g, d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
+  send_to_char(g, d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
   display_races_sub(g, d);
 
-  send_to_char_printf(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-  send_to_char_printf(g, d->character, "\n@WHelp on Race #: @n");
+  send_to_char(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+  send_to_char(g, d->character, "\n@WHelp on Race #: @n");
 }
 
 static void display_classes_help(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char_printf(g, d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
+  send_to_char(g, d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
   display_classes_sub(g, d);
 
-  send_to_char_printf(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-  send_to_char_printf(g, d->character, "\n@WHelp on Class #: @n");
+  send_to_char(g, d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+  send_to_char(g, d->character, "\n@WHelp on Class #: @n");
 }
 
 /* This is the bonus/negatives menu for Character Creation */
@@ -140,29 +140,29 @@ static void display_bonus_menu(GameWorld *g, struct char_data *ch, int type)
   };
 
   if (type == 0) {
-    send_to_char_printf(g, ch, "\r\n@YBonus Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+    send_to_char(g, ch, "\r\n@YBonus Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
     for (x = 0; x < BonusCount; x++) {
-      send_to_char_printf(g, ch, "@C%-2d@D)@c %s <@g%s@D>\n", x + 1, bonus[x], char_get_bonuses(ch, x) > 0 ? "X" : " ");
+      send_to_char(g, ch, "@C{:<2d}@D)@c {} <@g{}@D>\n", x + 1, bonus[x], char_get_bonuses(ch, x) > 0 ? "X" : " ");
     }
-    send_to_char_printf(g, ch, "\n");
+    send_to_char(g, ch, "\n");
   }
 
   if (type == 1) {
     y = BonusCount;
-    send_to_char_printf(g, ch, "@YNegative Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+    send_to_char(g, ch, "@YNegative Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
     while (y < NegCount) {
-      send_to_char_printf(g, ch, "@R%-2d@D)@r %s <@g%s@D>\n", y - 14, bonus[y], char_get_bonuses(ch, y) > 0 ? "X" : " ");
+      send_to_char(g, ch, "@R{:<2d}@D)@r {} <@g{}@D>\n", y - 14, bonus[y], char_get_bonuses(ch, y) > 0 ? "X" : " ");
       y += 1;
     }
   }
 
   if (type == 0) {
-    send_to_char_printf(g, ch, "\n@CN@D)@c Show Negatives@n\n");
+    send_to_char(g, ch, "\n@CN@D)@c Show Negatives@n\n");
   } else {
-    send_to_char_printf(g, ch, "\n@CB@D)@c Show Bonuses@n\n");
+    send_to_char(g, ch, "\n@CB@D)@c Show Bonuses@n\n");
   }
-  send_to_char_printf(g, ch, "@CX@D)@c Exit Traits Section and complete your character@n\n");
-  send_to_char_printf(g, ch, "@D---------------------------------------\n[@WCurrent Points Pool@W: @y%d@D] [@WPTS From Neg@W: @y%d@D]@w\n", char_get_ccpoints(ch), char_get_negcount(ch));
+  send_to_char(g, ch, "@CX@D)@c Exit Traits Section and complete your character@n\n");
+  send_to_char(g, ch, "@D---------------------------------------\n[@WCurrent Points Pool@W: @y{:d}@D] [@WPTS From Neg@W: @y{:d}@D]@w\n", char_get_ccpoints(ch), char_get_negcount(ch));
 }
 
 /* Return -1 if not an acceptable menu option *
@@ -377,299 +377,299 @@ static bool opp_bonus(GameWorld *g, struct char_data *ch, int value, int type)
     case 0:
       if (char_get_bonuses(ch, BONUS_IMPULSE)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
         give = false;
       }
       break;
     case 2:
       if (char_get_bonuses(ch, 40) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
         give = false;
       }
       break;
     case 3:
       if (char_is_android(ch)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "You can not take %s as an android!@n\r\n", list_bonus[3]);
+        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[3]);
         give = false;
       }
       break;
     case 6:
       if (char_get_bonuses(ch, 39) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
         give = false;
       }
       break;
     case 8:
       if (char_get_bonuses(ch, 50) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
         give = false;
       }
       break;
     case 9:
       if (char_get_bonuses(ch, 43) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
         give = false;
       }
       break;
     case 10:
       if (char_get_bonuses(ch, 44) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
         give = false;
       }
       break;
     case 11:
       if (char_get_bonuses(ch, 45) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
         give = false;
       }
       break;
     case 12:
       if (char_get_bonuses(ch, 46) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
         give = false;
       }
       break;
     case 13:
       if (char_get_bonuses(ch, 47) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
         give = false;
       }
       break;
     case 14:
       if (char_get_bonuses(ch, 48) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
         give = false;
       }
       break;
     case 15:
       if (char_get_bonuses(ch, 33) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
         give = false;
       }
       break;
     case 16:
       if (char_is_android(ch)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "You are an android and can not suppress anyway.\n\n");
+        send_to_char(g, ch, "You are an android and can not suppress anyway.\n\n");
         give = false;
       }
       break;
     case 17:
       if (char_is_demon(ch)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "As a demon you are already fireproof.\r\n");
+        send_to_char(g, ch, "As a demon you are already fireproof.\r\n");
         give = false;
       } else if (char_get_bonuses(ch, 34) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
         give = false;
       }
       break;
     case 18:
       if (char_get_bonuses(ch, 26) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
         give = false;
       }
       break;
     case 19:
       if (char_get_bonuses(ch, 29) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
         give = false;
       }
       break;
     case 20:
       if (char_get_bonuses(ch, 27) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
         give = false;
       } else if (char_is_android(ch)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
+        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[value]);
         give = false;
       }
       break;
     case 21:
       if (char_get_bonuses(ch, 30) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
         give = false;
       }
       break;
     case 22:
       if (char_get_bonuses(ch, 31) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
         give = false;
       }
       break;
     case 23:
       if (char_get_bonuses(ch, 32) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
         give = false;
       }
       break;
     case 24:
       if (char_get_bonuses(ch, 35) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
         give = false;
       }
       break;
     case 25:
       if (char_get_bonuses(ch, 51) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
         give = false;
       }
       break;
     case 26:
       if (char_get_bonuses(ch, 18) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
         give = false;
       }
       break;
     case 27:
       if (char_get_bonuses(ch, 20) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
         give = false;
       } else if (char_is_android(ch)) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
+        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[value]);
         give = false;
       }
       break;
     case 29:
       if (char_get_bonuses(ch, 19) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
         give = false;
       }
       break;
     case 30:
       if (char_get_bonuses(ch, 21) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
         give = false;
       }
       break;
     case 31:
       if (char_get_bonuses(ch, 22) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
         give = false;
       }
       break;
     case 32:
       if (char_get_bonuses(ch, 23) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
         give = false;
       }
       break;
     case 33:
       if (char_get_bonuses(ch, 15) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
         give = false;
       }
       break;
     case 34:
       if (char_get_bonuses(ch, 17) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
         give = false;
       }
       break;
     case 35:
       if (char_get_bonuses(ch, 24) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
         give = false;
       }
       break;
     case 39:
       if (char_get_bonuses(ch, 6) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
         give = false;
       }
       break;
     case 40:
       if (char_get_bonuses(ch, 2) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
         give = false;
       }
       break;
     case 43:
       if (char_get_bonuses(ch, 9) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
         give = false;
       }
       break;
     case 44:
       if (char_get_bonuses(ch, 10) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
         give = false;
       }
       break;
     case 45:
       if (char_get_bonuses(ch, 11) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
         give = false;
       }
       break;
     case 46:
       if (char_get_bonuses(ch, 12) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
         give = false;
       }
       break;
     case 47:
       if (char_get_bonuses(ch, 13) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
         give = false;
       }
       break;
     case 48:
       if (char_get_bonuses(ch, 14) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
         give = false;
       }
       break;
     case 50:
       if (char_get_bonuses(ch, 8) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
         give = false;
       }
       break;
     case 51:
       if (char_get_bonuses(ch, 25) > 0) {
         display_bonus_menu(g, ch, type);
-        send_to_char_printf(g, ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
+        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
         give = false;
       }
       break;
@@ -691,7 +691,7 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
 
   if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] < 0) {
     display_bonus_menu(g, ch, type);
-    send_to_char_printf(g, ch, "@RYou must unselect some bonus traits first.\r\n");
+    send_to_char(g, ch, "@RYou must unselect some bonus traits first.\r\n");
     return;
   }
   if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] >= 0) {
@@ -701,18 +701,18 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
     }
     char_set_bonuses(ch, value, 0);
     display_bonus_menu(g, ch, type);
-    send_to_char_printf(g, ch, "@GYou cancel your selection of %s.\r\n", list_bonus[value]);
+    send_to_char(g, ch, "@GYou cancel your selection of {}.\r\n", list_bonus[value]);
     return;
   }
   if (type == 0) {
     if (value > 25) {
       display_bonus_menu(g, ch, type);
-      send_to_char_printf(g, ch, "@RYou are not in the negatives menu, enter B to switch.\r\n");
+      send_to_char(g, ch, "@RYou are not in the negatives menu, enter B to switch.\r\n");
       return;
     }
     if (char_get_ccpoints(ch) + list_bonus_cost[value] < 0) {
       display_bonus_menu(g, ch, type);
-      send_to_char_printf(g, ch, "@RYou do not have enough points for %s.\r\n", list_bonus[value]);
+      send_to_char(g, ch, "@RYou do not have enough points for {}.\r\n", list_bonus[value]);
       return;
     }
     if (!opp_bonus(g, ch, value, type)) {
@@ -722,14 +722,14 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
       char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
       char_set_bonuses(ch, value, 1);
       display_bonus_menu(g, ch, type);
-      send_to_char_printf(g, ch, "@GYou select the bonus %s\r\n", list_bonus[value]);
+      send_to_char(g, ch, "@GYou select the bonus {}\r\n", list_bonus[value]);
       return;
     }
   } else {
 
     if (value < 26) {
       display_bonus_menu(g, ch, type);
-      send_to_char_printf(g, ch, "@RYou are not in the bonuses menu, enter B to switch.\r\n");
+      send_to_char(g, ch, "@RYou are not in the bonuses menu, enter B to switch.\r\n");
       return;
     }
 
@@ -743,7 +743,7 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
 
     if (list_bonus_cost[value] + count > 10) {
       display_bonus_menu(g, ch, type);
-      send_to_char_printf(g, ch, "@RYou can not have more than +10 points from negatives.\r\n");
+      send_to_char(g, ch, "@RYou can not have more than +10 points from negatives.\r\n");
       return;
     }
     if (!opp_bonus(g, ch, value, type)) {
@@ -753,7 +753,7 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
     char_set_negcount(ch, char_get_negcount(ch) + (list_bonus_cost[value]));
     char_set_bonuses(ch, value, 2);
     display_bonus_menu(g, ch, type);
-    send_to_char_printf(g, ch, "@GYou select the negative %s\r\n", list_bonus[value]);
+    send_to_char(g, ch, "@GYou select the negative {}\r\n", list_bonus[value]);
     return;
   }
 }
@@ -774,7 +774,7 @@ static int menu_choice(const char *arg, const char *keys)
 
 static void reject_option(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "That is not an acceptable option.\r\n");
+  write_to_output(g, d, "That is not an acceptable option.\r\n");
 }
 
 /* Races with hair (rather than horns, a forelock, antennae or nothing). */
@@ -785,52 +785,52 @@ static bool has_hair(const struct char_data *ch)
 
 static void show_sex_prompt(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
+  write_to_output(g, d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
 }
 
 /* Hair, horn, forelock or antenna length. */
 static void show_length_menu(GameWorld *g, struct descriptor_data *d, const char *part, const char *shortest)
 {
-  write_to_output_printf(g, d, "@Y%s Length SELECTION menu:\r\n", part);
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C %s  @B2@W)@C Short  @B3@W)@C Medium\r\n", shortest);
-  write_to_output_printf(g, d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@Y{} Length SELECTION menu:\r\n", part);
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C {}  @B2@W)@C Short  @B3@W)@C Medium\r\n", shortest);
+  write_to_output(g, d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 /* Hair colour, or wing colour for female Arlians. */
 static void show_color_menu(GameWorld *g, struct descriptor_data *d, const char *part)
 {
-  write_to_output_printf(g, d, "@Y%s color SELECTION menu:\r\n", part);
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Black  @B2@W)@C Brown  @B3@W)@C Blonde\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Grey   @B5@W)@C Red    @B6@W)@C Orange@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C Green  @B8@W)@C Blue   @B9@W)@C Pink\r\n");
-  write_to_output_printf(g, d, "@BA@W)@C Purple @BB@W)@C Silver @BC@W)@C Crimson@n\r\n");
-  write_to_output_printf(g, d, "@BD@W)@C White@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@Y{} color SELECTION menu:\r\n", part);
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Black  @B2@W)@C Brown  @B3@W)@C Blonde\r\n");
+  write_to_output(g, d, "@B4@W)@C Grey   @B5@W)@C Red    @B6@W)@C Orange@n\r\n");
+  write_to_output(g, d, "@B7@W)@C Green  @B8@W)@C Blue   @B9@W)@C Pink\r\n");
+  write_to_output(g, d, "@BA@W)@C Purple @BB@W)@C Silver @BC@W)@C Crimson@n\r\n");
+  write_to_output(g, d, "@BD@W)@C White@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 static void show_hair_style_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@YHair style SELECTION menu:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Plain     @B2@W)@C Mohawk    @B3@W)@C Spiky\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Curly     @B5@W)@C Uneven    @B6@W)@C Ponytail@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C Afro      @B8@W)@C Fade      @B9@W)@C Crew Cut\r\n");
-  write_to_output_printf(g, d, "@BA@W)@C Feathered @BB@W)@C Dred Locks@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@YHair style SELECTION menu:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Plain     @B2@W)@C Mohawk    @B3@W)@C Spiky\r\n");
+  write_to_output(g, d, "@B4@W)@C Curly     @B5@W)@C Uneven    @B6@W)@C Ponytail@n\r\n");
+  write_to_output(g, d, "@B7@W)@C Afro      @B8@W)@C Fade      @B9@W)@C Crew Cut\r\n");
+  write_to_output(g, d, "@BA@W)@C Feathered @BB@W)@C Dred Locks@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 static void show_skin_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@YSkin color SELECTION menu:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Orange @B5@W)@C Yellow @B6@W)@C Red@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
-  write_to_output_printf(g, d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@YSkin color SELECTION menu:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
+  write_to_output(g, d, "@B4@W)@C Orange @B5@W)@C Yellow @B6@W)@C Red@n\r\n");
+  write_to_output(g, d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
+  write_to_output(g, d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 /* Starts the skin question: the step after hair, or instead of it. */
@@ -842,37 +842,37 @@ static void ask_skin(GameWorld *g, struct descriptor_data *d)
 
 static void show_eye_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@YEye color SELECTION menu:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Blue  @B2@W)@C Black  @B3@W)@C Green\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Brown @B5@W)@C Red    @B6@W)@C Aqua@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C Pink  @B8@W)@C Purple @B9@W)@C Crimson\r\n");
-  write_to_output_printf(g, d, "@BA@W)@C Gold  @BB@W)@C Amber  @BC@W)@C Emerald@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@YEye color SELECTION menu:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Blue  @B2@W)@C Black  @B3@W)@C Green\r\n");
+  write_to_output(g, d, "@B4@W)@C Brown @B5@W)@C Red    @B6@W)@C Aqua@n\r\n");
+  write_to_output(g, d, "@B7@W)@C Pink  @B8@W)@C Purple @B9@W)@C Crimson\r\n");
+  write_to_output(g, d, "@BA@W)@C Gold  @BB@W)@C Amber  @BC@W)@C Emerald@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 static void show_feature_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct char_data *ch = d->character;
 
-  write_to_output_printf(g, d, "@YWhat do you want to be your most distinguishing feature:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C My Eyes@n\r\n");
+  write_to_output(g, d, "@YWhat do you want to be your most distinguishing feature:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C My Eyes@n\r\n");
   if (char_is_majin(ch)) {
-    write_to_output_printf(g, d, "@B2@W)@C My Forelock@n\r\n");
+    write_to_output(g, d, "@B2@W)@C My Forelock@n\r\n");
   } else if (char_is_namek(ch) || char_is_arlian(ch)) {
-    write_to_output_printf(g, d, "@B2@W)@C My Antennae@n\r\n");
+    write_to_output(g, d, "@B2@W)@C My Antennae@n\r\n");
   } else if (char_is_icer(ch) || char_is_demon(ch)) {
-    write_to_output_printf(g, d, "@B2@W)@C My Horns@n\r\n");
+    write_to_output(g, d, "@B2@W)@C My Horns@n\r\n");
   } else if (char_get_hairl(ch) == HAIRL_BALD) {
-    write_to_output_printf(g, d, "@B2@W)@C My Baldness@n\r\n");
+    write_to_output(g, d, "@B2@W)@C My Baldness@n\r\n");
   } else {
-    write_to_output_printf(g, d, "@B2@W)@C My Hair@n\r\n");
+    write_to_output(g, d, "@B2@W)@C My Hair@n\r\n");
   }
-  write_to_output_printf(g, d, "@B3@W)@C My Skin@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C My Height@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C My Weight@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@B3@W)@C My Skin@n\r\n");
+  write_to_output(g, d, "@B4@W)@C My Height@n\r\n");
+  write_to_output(g, d, "@B5@W)@C My Weight@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 /* Height (cm) and weight (kg) ranges offered at creation. */
@@ -912,72 +912,72 @@ static void show_size_menu(GameWorld *g, struct descriptor_data *d)
   int count;
   const struct size_range *sizes = size_ranges(d->character, &count);
 
-  write_to_output_printf(g, d, "@YWhat Height/Weight Range do you prefer:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@YWhat Height/Weight Range do you prefer:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
   for (int i = 0; i < count; i++)
-    write_to_output_printf(g, d, "@B%d@W)@C %d-%dcm, %d-%dkg@n\r\n", i + 1, sizes[i].min_height, sizes[i].max_height, sizes[i].min_weight, sizes[i].max_weight);
-  write_to_output_printf(g, d, "\n@WMake a selection:@n ");
+    write_to_output(g, d, "@B{:d}@W)@C {:d}-{:d}cm, {:d}-{:d}kg@n\r\n", i + 1, sizes[i].min_height, sizes[i].max_height, sizes[i].min_weight, sizes[i].max_weight);
+  write_to_output(g, d, "\n@WMake a selection:@n ");
 }
 
 static void show_aura_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@YAura color SELECTION menu:\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C White  @B2@W)@C Blue@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Red    @B4@W)@C Green@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C Pink   @B6@W)@C Purple@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C Yellow @B8@W)@C Black@n\r\n");
-  write_to_output_printf(g, d, "@B9@W)@C Orange@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@YAura color SELECTION menu:\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C White  @B2@W)@C Blue@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Red    @B4@W)@C Green@n\r\n");
+  write_to_output(g, d, "@B5@W)@C Pink   @B6@W)@C Purple@n\r\n");
+  write_to_output(g, d, "@B7@W)@C Yellow @B8@W)@C Black@n\r\n");
+  write_to_output(g, d, "@B9@W)@C Orange@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 /* Question 1, after the caller's own introduction. */
 static void ask_question1(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Ask someone with more experience what to do.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C Jump in with some nice classic pushups!@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Search for something magical to increase my strength.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Ask someone with more experience what to do.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C Jump in with some nice classic pushups!@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Search for something magical to increase my strength.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
+  write_to_output(g, d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q1);
 }
 
 /* rubbery_less picks between the two wordings the original menus used. */
 static void show_mutation_menu(GameWorld *g, struct descriptor_data *d, const char *heading, bool rubbery_less)
 {
-  write_to_output_printf(g, d, "%s", heading);
-  write_to_output_printf(g, d, "@D--------------------------------------------------------@n\n");
-  write_to_output_printf(g, d, "@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n", "%");
-  write_to_output_printf(g, d, "@B 2@W) @CInc. Cell Regen     @c-LF regen refills 12%s instead of 5%s@C@n\n", "%", "%");
-  write_to_output_printf(g, d, "@B 3@W) @CExtreme Reflexes    @c-+10 to parry, block, and dodge. +10 agility at creation.@C@n\n");
-  write_to_output_printf(g, d, "@B 4@W) @CInfravision         @c-+5 to spot hiding, can see in dark @C@n\n");
-  write_to_output_printf(g, d, "@B 5@W) @CNatural Camo        @c-+10 to hide/sneak rolls@C@n\n");
-  write_to_output_printf(g, d, "@B 6@W) @CLimb Regen          @c-Limbs regen almost instantly.@C@n\n");
-  write_to_output_printf(g, d, "@B 7@W) @CPoisonous           @c-Immune to poison, poison bite attack.@C@n\n");
+  write_to_output(g, d, "{}", heading);
+  write_to_output(g, d, "@D--------------------------------------------------------@n\n");
+  write_to_output(g, d, "@B 1@W) @CExtreme Speed       @c-+30{} to Speed Index @C@n\n", "%");
+  write_to_output(g, d, "@B 2@W) @CInc. Cell Regen     @c-LF regen refills 12{} instead of 5{}@C@n\n", "%", "%");
+  write_to_output(g, d, "@B 3@W) @CExtreme Reflexes    @c-+10 to parry, block, and dodge. +10 agility at creation.@C@n\n");
+  write_to_output(g, d, "@B 4@W) @CInfravision         @c-+5 to spot hiding, can see in dark @C@n\n");
+  write_to_output(g, d, "@B 5@W) @CNatural Camo        @c-+10 to hide/sneak rolls@C@n\n");
+  write_to_output(g, d, "@B 6@W) @CLimb Regen          @c-Limbs regen almost instantly.@C@n\n");
+  write_to_output(g, d, "@B 7@W) @CPoisonous           @c-Immune to poison, poison bite attack.@C@n\n");
   if (rubbery_less)
-    write_to_output_printf(g, d, "@B 8@W) @CRubbery Body        @c-10%s less physical dmg to you is reduced and attacker takes that much loss in stamina.@C@n\n", "%");
+    write_to_output(g, d, "@B 8@W) @CRubbery Body        @c-10{} less physical dmg to you is reduced and attacker takes that much loss in stamina.@C@n\n", "%");
   else
-    write_to_output_printf(g, d, "@B 8@W) @CRubbery Body        @c-10%s of physical dmg to you is reduced and attacker takes that much loss in stamina.@C@n\n", "%");
-  write_to_output_printf(g, d, "@B 9@w) @CInnate Telepathy    @c-Start with telepathy at SLVL 50@n\n");
-  write_to_output_printf(g, d, "@B10@w) @CNatural Energy      @c-Get 5%s of your ki damage refunded back into your current ki total.@n\n", "%");
+    write_to_output(g, d, "@B 8@W) @CRubbery Body        @c-10{} of physical dmg to you is reduced and attacker takes that much loss in stamina.@C@n\n", "%");
+  write_to_output(g, d, "@B 9@w) @CInnate Telepathy    @c-Start with telepathy at SLVL 50@n\n");
+  write_to_output(g, d, "@B10@w) @CNatural Energy      @c-Get 5{} of your ki damage refunded back into your current ki total.@n\n", "%");
 }
 
 static void show_genome_menu(GameWorld *g, struct descriptor_data *d, const char *heading)
 {
-  write_to_output_printf(g, d, "%s", heading);
-  write_to_output_printf(g, d, "@D--------------------------------------------------------@n\n");
-  write_to_output_printf(g, d, "@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
-  write_to_output_printf(g, d, "@B2@W) @CSaiyan  @c- @CSaiyan fight gains (halved)@n\n");
-  write_to_output_printf(g, d, "@B3@W) @CNamek   @c- @CNo food needed@n\n");
-  write_to_output_printf(g, d, "@B4@W) @CIcer    @c- @C+20%s damage for Tier 4 attacks@n\n", "%");
-  write_to_output_printf(g, d, "@B5@W) @CTruffle @c- @CGrant Truffle Auto-train bonus@n\n");
-  write_to_output_printf(g, d, "@B6@W) @CArlian  @c- @CGrants Arlian Adrenaline ability@n\n\n");
-  write_to_output_printf(g, d, "@B7@W) @CKai     @c- @CStart with SLVL 30 Telepathy and SLVL 30 Focus.\r\n");
-  write_to_output_printf(g, d, "@B8@w) @CKonatsu @c- @C40%s higher chance to multihit on physical attacks.\r\n", "%");
+  write_to_output(g, d, "{}", heading);
+  write_to_output(g, d, "@D--------------------------------------------------------@n\n");
+  write_to_output(g, d, "@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
+  write_to_output(g, d, "@B2@W) @CSaiyan  @c- @CSaiyan fight gains (halved)@n\n");
+  write_to_output(g, d, "@B3@W) @CNamek   @c- @CNo food needed@n\n");
+  write_to_output(g, d, "@B4@W) @CIcer    @c- @C+20{} damage for Tier 4 attacks@n\n", "%");
+  write_to_output(g, d, "@B5@W) @CTruffle @c- @CGrant Truffle Auto-train bonus@n\n");
+  write_to_output(g, d, "@B6@W) @CArlian  @c- @CGrants Arlian Adrenaline ability@n\n\n");
+  write_to_output(g, d, "@B7@W) @CKai     @c- @CStart with SLVL 30 Telepathy and SLVL 30 Focus.\r\n");
+  write_to_output(g, d, "@B8@w) @CKonatsu @c- @C40{} higher chance to multihit on physical attacks.\r\n", "%");
 }
 
 static const char *const mutation_names[] = {
@@ -1008,15 +1008,15 @@ static const char *const genome_names[] = {
 
 static void show_chosen_genomes(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "@D----[@gGenome 1@W: @G%s@D]----[@gGenome 2@W: @G%s@D]----", genome_names[char_get_genome(d->character, 0)], genome_names[char_get_genome(d->character, 1)]);
+  write_to_output(g, d, "@D----[@gGenome 1@W: @G{}@D]----[@gGenome 2@W: @G{}@D]----", genome_names[char_get_genome(d->character, 0)], genome_names[char_get_genome(d->character, 1)]);
 }
 
 /* The traits menu that follows skills, mutations or genomes. */
 static void ask_bonuses(GameWorld *g, struct descriptor_data *d, const char *choose)
 {
   display_bonus_menu(g, d->character, 0);
-  write_to_output_printf(g, d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
-  write_to_output_printf(g, d, "%s", choose);
+  write_to_output(g, d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
+  write_to_output(g, d, "{}", choose);
   desc_set_connected(d, CON_BONUS);
 }
 
@@ -1024,23 +1024,21 @@ static void ask_bonuses(GameWorld *g, struct descriptor_data *d, const char *cho
 static void finish_bonuses(GameWorld *g, struct descriptor_data *d)
 {
   char_set_negcount(d->character, 0);
-  write_to_output_printf(g, d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
+  write_to_output(g, d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
   if (char_get_ccpoints(d->character) > 0) {
-    write_to_output_printf(g, d, "\r\n@GYour left over points were spent on Practice Sessions@w");
+    write_to_output(g, d, "\r\n@GYour left over points were spent on Practice Sessions@w");
     char_set_practice_points(g, d->character, char_get_practice_points(g, d->character) + ((100 * char_get_ccpoints(d->character))));
   }
-  write_to_output_printf(g, d, "\r\n*** PRESS RETURN: ");
+  write_to_output(g, d, "\r\n*** PRESS RETURN: ");
   desc_set_connected(d, CON_QROLLSTATS);
 }
 
 static void show_rolled_stats(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output_printf(g, d, "\r\n@rStr@w: [@m%2d@w] @rDex@w: [@m%2d@w]\r\n"
-                               "@rCon@w: [@m%2d@w] @rInt@w: [@m%2d@w]\r\n"
-                               "@rWis@w: [@m%2d@w] @rCha@w: [@m%2d@w]@n",
-                         char_get_aff_abils_str(d->character), char_get_aff_abils_dex(d->character),
-                         char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
-                         char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character));
+  write_to_output(g, d, "\r\n@rStr@w: [@m{:>2d}@w] @rDex@w: [@m{:>2d}@w]\r\n@rCon@w: [@m{:>2d}@w] @rInt@w: [@m{:>2d}@w]\r\n@rWis@w: [@m{:>2d}@w] @rCha@w: [@m{:>2d}@w]@n",
+                  char_get_aff_abils_str(d->character), char_get_aff_abils_dex(d->character),
+                  char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
+                  char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character));
 }
 
 /* Saves the finished character and shows the MOTD. */
@@ -1052,11 +1050,11 @@ static void finish_creation(GameWorld *g, struct descriptor_data *d)
   init_char(g, d->character);
   save_char(g, d->character);
   save_player_index(g);
-  write_to_output_printf(g, d, "%s\r\n*** PRESS RETURN: ", g->motd.c_str());
+  write_to_output(g, d, "{}\r\n*** PRESS RETURN: ", g->motd.c_str());
   desc_set_connected(d, CON_RMOTD);
-  mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "New player: %s [%s %s]",
-                char_get_name(d->character), char_true_race_name(d->character),
-                char_sensei_name(d->character));
+  mudlog(g, LOG_CMP, ADMLVL_GOD, true, "New player: {} [{} {}]",
+         char_get_name(d->character), char_true_race_name(d->character),
+         char_sensei_name(d->character));
 }
 
 /* ---- Appearance ------------------------------------------------------- */
@@ -1089,7 +1087,7 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
   int chosen_race;
 
   if (!*arg || (strlen(arg) == 1 && toupper(*arg) != 'T')) {
-    write_to_output_printf(g, d, "\r\nThat's not a race.\r\nRace: ");
+    write_to_output(g, d, "\r\nThat's not a race.\r\nRace: ");
     return;
   }
   if (strlen(arg) == 1) { /* T: toggle between the selection and help menus */
@@ -1105,7 +1103,7 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
 
   chosen_race = race_find(arg, char_get_sex(d->character), true);
   if (chosen_race == RACE_UNDEFINED) {
-    write_to_output_printf(g, d, "\r\nThat's not a race.\r\nRace: ");
+    write_to_output(g, d, "\r\nThat's not a race.\r\nRace: ");
     return;
   }
   if (desc_get_connected(d) == CON_RACE_HELP) {
@@ -1113,22 +1111,22 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (race_rpp_cost(chosen_race)) {
-    write_to_output_printf(g, d, "\r\n%i RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
+    write_to_output(g, d, "\r\n{:d} RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
   }
   char_set_race(d->character, chosen_race);
 
   if (char_is_halfbreed(d->character)) {
-    write_to_output_printf(g, d, "@YWhat race do you prefer to by identified with?\r\n");
-    write_to_output_printf(g, d, "@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
-    write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output_printf(g, d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
-    write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+    write_to_output(g, d, "@YWhat race do you prefer to by identified with?\r\n");
+    write_to_output(g, d, "@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
+    write_to_output(g, d, "@D---------------------------------------@n\r\n");
+    write_to_output(g, d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
+    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
     desc_set_connected(d, CON_RACIAL);
   } else if (char_is_android(d->character)) {
-    write_to_output_printf(g, d, "@YWhat do you want to be identified as at first glance?\r\n");
-    write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output_printf(g, d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
-    write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+    write_to_output(g, d, "@YWhat do you want to be identified as at first glance?\r\n");
+    write_to_output(g, d, "@D---------------------------------------@n\r\n");
+    write_to_output(g, d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
+    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
     desc_set_connected(d, CON_RACIAL);
   } else if (char_is_namek(d->character)) {
     char_set_sex(d->character, SEX_NEUTRAL);
@@ -1163,8 +1161,7 @@ static void state_qsex(GameWorld *g, struct descriptor_data *d, char *arg)
     int choice = menu_choice(arg, "mfn");
 
     if (choice < 0) {
-      write_to_output_printf(g, d, "That is not a sex..\r\n"
-                                   "What IS your sex? ");
+      write_to_output(g, d, "That is not a sex..\r\nWhat IS your sex? ");
       return;
     }
     char_set_sex(ch, sexes[choice]);
@@ -1326,7 +1323,7 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
 
   if (strlen(arg) == 1) {
     if (toupper(*arg) != 'T') {
-      write_to_output_printf(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
+      write_to_output(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
     } else if (desc_get_connected(d) == CON_CLASS_HELP) { /* T: toggle between the selection and help menus */
       desc_set_connected(d, CON_QCLASS);
       display_classes(g, d);
@@ -1339,7 +1336,7 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
 
   chosen_sensei = sensei_find(arg);
   if (chosen_sensei == CLASS_UNDEFINED) {
-    write_to_output_printf(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
+    write_to_output(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
     return;
   }
   if (desc_get_connected(d) == CON_CLASS_HELP) {
@@ -1348,22 +1345,22 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
   }
   /* only the senseis the menu offers this race */
   if (!sensei_is_pc_ok(chosen_sensei) || !sensei_available_for_race(chosen_sensei, char_get_race(d->character))) {
-    write_to_output_printf(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
+    write_to_output(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
     return;
   }
   char_set_class(d->character, chosen_sensei);
 
   if (char_is_android(d->character)) {
-    write_to_output_printf(g, d, "\r\n@YChoose your model type.\r\n");
-    write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output_printf(g, d, "@B1@W)@C Absorbtion Model@n\r\n");
-    write_to_output_printf(g, d, "@B2@W)@C Repair Model@n\r\n");
-    write_to_output_printf(g, d, "@B3@W)@C Sense, Powersense Model@n\r\n");
-    write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+    write_to_output(g, d, "\r\n@YChoose your model type.\r\n");
+    write_to_output(g, d, "@D---------------------------------------@n\r\n");
+    write_to_output(g, d, "@B1@W)@C Absorbtion Model@n\r\n");
+    write_to_output(g, d, "@B2@W)@C Repair Model@n\r\n");
+    write_to_output(g, d, "@B3@W)@C Sense, Powersense Model@n\r\n");
+    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
     desc_set_connected(d, CON_ANDROID);
   } else {
-    write_to_output_printf(g, d, "\r\n@RAnswer The following questions carefully, they construct your alignment\r\nand affect your stats.\r\n\r\n");
-    write_to_output_printf(g, d, "@WQuestion (@G1@W out of @g10@W)\r\n");
+    write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they construct your alignment\r\nand affect your stats.\r\n\r\n");
+    write_to_output(g, d, "@WQuestion (@G1@W out of @g10@W)\r\n");
     ask_question1(g, d);
   }
 }
@@ -1374,19 +1371,19 @@ static void state_android(GameWorld *g, struct descriptor_data *d, char *arg)
   switch (*arg) {
     case '1':
       char_plr_set(d->character, PLR_ABSORB, true);
-      write_to_output_printf(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
-      write_to_output_printf(g, d, "\r\n@WQuestion (@G1@W out of @g10@W)");
+      write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
+      write_to_output(g, d, "\r\n@WQuestion (@G1@W out of @g10@W)");
       break;
     case '2':
       char_plr_set(d->character, PLR_REPAIR, true);
-      write_to_output_printf(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
+      write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
       break;
     case '3':
       char_plr_set(d->character, PLR_SENSEM, true);
-      write_to_output_printf(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
+      write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
       break;
     default:
-      write_to_output_printf(g, d, "@wThat is not a correct selection, try again.@n\r\n");
+      write_to_output(g, d, "@wThat is not a correct selection, try again.@n\r\n");
       return;
   }
   ask_question1(g, d);
@@ -1471,16 +1468,16 @@ static void state_q1(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G2@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Kill my opponent in a very brutal fashion!@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C Disable my opponent, but spare their life.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Kill my opponent, I have no other choice.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C Try to evade my opponent till I can get away.@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C Take their head clean off and bathe in their blood!@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G2@W out of @g10@W)\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Kill my opponent in a very brutal fashion!@n\r\n");
+  write_to_output(g, d, "@B2@W)@C Disable my opponent, but spare their life.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Kill my opponent, I have no other choice.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C Try to evade my opponent till I can get away.@n\r\n");
+  write_to_output(g, d, "@B5@W)@C Take their head clean off and bathe in their blood!@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q2);
 }
 
@@ -1495,15 +1492,15 @@ static void state_q2(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   char_set_alignment(d->character, char_get_alignment(d->character) + (alignment[choice]));
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Hell yeah I take the opportunity to get stronger!@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C I refuse to gain unnatural strength.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C I refuse to gain strength at the cost of the innocent.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C I kill that many innocents before breakfast anyway...@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Hell yeah I take the opportunity to get stronger!@n\r\n");
+  write_to_output(g, d, "@B2@W)@C I refuse to gain unnatural strength.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C I refuse to gain strength at the cost of the innocent.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C I kill that many innocents before breakfast anyway...@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q3);
 }
 
@@ -1528,15 +1525,15 @@ static void state_q3(GameWorld *g, struct descriptor_data *d, char *arg)
   char_set_basepl(d->character, getBasePL(d->character) + answers[choice].pl);
   char_set_basest(d->character, getBaseST(d->character) + answers[choice].st);
   char_set_baseki(d->character, getBaseKI(d->character) + answers[choice].ki);
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C I take the opportunity, with more money I can train better later.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C I refuse to waste my time. What I need is some nice hard training.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Hmm. With more money I can live better, certainly that is worth the time.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C I choose to earn a little money while still training instead.@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C I take the opportunity, with more money I can train better later.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C I refuse to waste my time. What I need is some nice hard training.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Hmm. With more money I can live better, certainly that is worth the time.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C I choose to earn a little money while still training instead.@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q4);
 }
 
@@ -1572,15 +1569,15 @@ static void state_q4(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou are introduced to a new way of training one day, what do you do?\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C I prefer my way, it has worked so far.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C I am open to new possibilites, sure.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C I will at least try it, for a little while.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C No way is superior to eating spinach everyday...@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou are introduced to a new way of training one day, what do you do?\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C I prefer my way, it has worked so far.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C I am open to new possibilites, sure.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C I will at least try it, for a little while.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C No way is superior to eating spinach everyday...@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q5);
 }
 
@@ -1600,16 +1597,16 @@ static void state_q5(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, pl_range[choice][0], pl_range[choice][1]));
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C I prefer to defend rather than attack.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C I prefer to throw a strong punch at the enemy's throat.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C I prefer to send a devestating kick at the enemy's neck.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C I prefer to smash them with a two-handed slam!@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C I prefer to throw one of my many energy attacks!@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
+  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C I prefer to defend rather than attack.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C I prefer to throw a strong punch at the enemy's throat.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C I prefer to send a devestating kick at the enemy's neck.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C I prefer to smash them with a two-handed slam!@n\r\n");
+  write_to_output(g, d, "@B5@W)@C I prefer to throw one of my many energy attacks!@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q6);
 }
 
@@ -1642,15 +1639,15 @@ static void state_q6(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G7@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C One day, I am going to conquer every one of those.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C I really wish I had brought that special someone along as this is a great night for romance@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C You'd very much like to travel into space to get to one of these stars to study all that it holds.@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G7@W out of @g10@W)\r\n");
+  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C One day, I am going to conquer every one of those.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C I really wish I had brought that special someone along as this is a great night for romance@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C You'd very much like to travel into space to get to one of these stars to study all that it holds.@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q7);
 }
 
@@ -1676,15 +1673,15 @@ static void state_q7(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G8@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C It's clear that they are quite chuffed about something, you could stop the fight now but they may just try again later. It's best to investigate and find out the source of the problem.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Pick the one you like the most and help them to win.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G8@W out of @g10@W)\r\n");
+  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C It's clear that they are quite chuffed about something, you could stop the fight now but they may just try again later. It's best to investigate and find out the source of the problem.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Pick the one you like the most and help them to win.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q8);
 }
 
@@ -1712,15 +1709,15 @@ static void state_q8(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G9@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.@n\r\n");
-  write_to_output_printf(g, d, "@B2@W)@C Surrender the donut for now but come back later with your friends and gain your revenge.@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.@n\r\n");
-  write_to_output_printf(g, d, "@B4@W)@C It's better just to do as he says and leave it to that. After all its only a donut.@n\r\n");
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G9@W out of @g10@W)\r\n");
+  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.@n\r\n");
+  write_to_output(g, d, "@B2@W)@C Surrender the donut for now but come back later with your friends and gain your revenge.@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.@n\r\n");
+  write_to_output(g, d, "@B4@W)@C It's better just to do as he says and leave it to that. After all its only a donut.@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_Q9);
 }
 
@@ -1753,26 +1750,26 @@ static void state_q9(GameWorld *g, struct descriptor_data *d, char *arg)
       reject_option(g, d);
       return;
   }
-  write_to_output_printf(g, d, "\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
-  write_to_output_printf(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output_printf(g, d, "@wWhat do you wish your starting age to be?@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@B1@W)@C  8@n    @B2@W)@C 10@n\r\n");
-  write_to_output_printf(g, d, "@B3@W)@C 12@n    @B4@W)@C 14@n\r\n");
-  write_to_output_printf(g, d, "@B5@W)@C 16@n    @B6@W)@C 18@n\r\n");
-  write_to_output_printf(g, d, "@B7@W)@C 20@n    @B8@W)@C 22@n\r\n");
-  write_to_output_printf(g, d, "@B9@W)@C 24@n    @BA@W)@C 26@n\r\n");
-  write_to_output_printf(g, d, "@BB@W)@C 28@n    @BC@W)@C 30@n\r\n");
-  write_to_output_printf(g, d, "@BD@W)@C 40@n    @BE@W)@C 50@n\r\n");
-  write_to_output_printf(g, d, "@BF@W)@C 60@n    @BG@W)@C 65@n\r\n");
+  write_to_output(g, d, "\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
+  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
+  write_to_output(g, d, "@wWhat do you wish your starting age to be?@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@B1@W)@C  8@n    @B2@W)@C 10@n\r\n");
+  write_to_output(g, d, "@B3@W)@C 12@n    @B4@W)@C 14@n\r\n");
+  write_to_output(g, d, "@B5@W)@C 16@n    @B6@W)@C 18@n\r\n");
+  write_to_output(g, d, "@B7@W)@C 20@n    @B8@W)@C 22@n\r\n");
+  write_to_output(g, d, "@B9@W)@C 24@n    @BA@W)@C 26@n\r\n");
+  write_to_output(g, d, "@BB@W)@C 28@n    @BC@W)@C 30@n\r\n");
+  write_to_output(g, d, "@BD@W)@C 40@n    @BE@W)@C 50@n\r\n");
+  write_to_output(g, d, "@BF@W)@C 60@n    @BG@W)@C 65@n\r\n");
   if (long_lived(d->character)) {
-    write_to_output_printf(g, d, "@BH@W)@C 500@n   @BI@W)@C 800@n\r\n");
+    write_to_output(g, d, "@BH@W)@C 500@n   @BI@W)@C 800@n\r\n");
   } else if (char_is_namek(d->character)) {
-    write_to_output_printf(g, d, "@BH@W)@C 250@n   @BI@W)@C 400@n\r\n");
+    write_to_output(g, d, "@BH@W)@C 250@n   @BI@W)@C 400@n\r\n");
   } else {
-    write_to_output_printf(g, d, "@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
+    write_to_output(g, d, "@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
   }
-  write_to_output_printf(g, d, "@w\r\nMake a selection:@n\r\n");
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
   desc_set_connected(d, CON_QX);
 }
 
@@ -1801,24 +1798,24 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
   char_set_time_birth(d->character, game_now(g) - (age * SECS_PER_MUD_YEAR));
 
   char_set_ccpoints(d->character, char_is_hoshijin(d->character) ? 10 : 5);
-  write_to_output_printf(g, d, "@C             Alignment Menu@n\r\n");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@cCurrent Alignment@D: %s%s@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
-  write_to_output_printf(g, d, "@YThis is the alignment your character has based on your choices.\r\n");
-  write_to_output_printf(g, d, "Choose to keep this alignment with no penalty, or choose new\r\n");
-  write_to_output_printf(g, d, "alignment and suffer a -5%s PL and -1 stat (random) penalty.\r\n@n", "%");
-  write_to_output_printf(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output_printf(g, d, "@BK@W) @wKeep This Alignment@n\r\n");
-  write_to_output_printf(g, d, "@B1@W) @wSaintly@n\r\n");
-  write_to_output_printf(g, d, "@B2@W) @wValiant@n\r\n");
-  write_to_output_printf(g, d, "@B3@W) @wHero@n\r\n");
-  write_to_output_printf(g, d, "@B4@W) @wDo-gooder@n\r\n");
-  write_to_output_printf(g, d, "@B5@W) @wNeutral\r\n");
-  write_to_output_printf(g, d, "@B6@W) @wCrook@n\r\n");
-  write_to_output_printf(g, d, "@B7@W) @wVillain@n\r\n");
-  write_to_output_printf(g, d, "@B8@W) @wTerrible@n\r\n");
-  write_to_output_printf(g, d, "@B9@W) @wHorribly Evil@n\r\n");
-  write_to_output_printf(g, d, "Choose: \r\n");
+  write_to_output(g, d, "@C             Alignment Menu@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@cCurrent Alignment@D: {}{}@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
+  write_to_output(g, d, "@YThis is the alignment your character has based on your choices.\r\n");
+  write_to_output(g, d, "Choose to keep this alignment with no penalty, or choose new\r\n");
+  write_to_output(g, d, "alignment and suffer a -5{} PL and -1 stat (random) penalty.\r\n@n", "%");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@BK@W) @wKeep This Alignment@n\r\n");
+  write_to_output(g, d, "@B1@W) @wSaintly@n\r\n");
+  write_to_output(g, d, "@B2@W) @wValiant@n\r\n");
+  write_to_output(g, d, "@B3@W) @wHero@n\r\n");
+  write_to_output(g, d, "@B4@W) @wDo-gooder@n\r\n");
+  write_to_output(g, d, "@B5@W) @wNeutral\r\n");
+  write_to_output(g, d, "@B6@W) @wCrook@n\r\n");
+  write_to_output(g, d, "@B7@W) @wVillain@n\r\n");
+  write_to_output(g, d, "@B8@W) @wTerrible@n\r\n");
+  write_to_output(g, d, "@B9@W) @wHorribly Evil@n\r\n");
+  write_to_output(g, d, "Choose: \r\n");
   desc_set_connected(d, CON_ALIGN);
 }
 
@@ -1829,11 +1826,11 @@ static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
   int choice                    = menu_choice(arg, "k123456789");
 
   if (choice < 0) {
-    write_to_output_printf(g, d, "That is not an acceptable option! Choose again...\r\n");
+    write_to_output(g, d, "That is not an acceptable option! Choose again...\r\n");
     return;
   }
   if (choice == 0) {
-    write_to_output_printf(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
+    write_to_output(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
   } else {
     char_set_alignment(d->character, alignments[choice - 1]);
     loseBasePLPercent(d->character, .2, false);
@@ -1857,9 +1854,9 @@ static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
         char_set_real_abils_dex(d->character, char_get_real_abils_dex(d->character) - 1);
         break;
     }
-    write_to_output_printf(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
+    write_to_output(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
   }
-  write_to_output_printf(g, d, "keep or forget: \r\n");
+  write_to_output(g, d, "keep or forget: \r\n");
   desc_set_connected(d, CON_SKILLS);
 }
 
@@ -1869,7 +1866,7 @@ static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
   bool forget = !strcasecmp(arg, "forget");
 
   if (!forget && strcasecmp(arg, "keep")) {
-    write_to_output_printf(g, d, "keep or forget: \r\n");
+    write_to_output(g, d, "keep or forget: \r\n");
     return;
   }
   if (forget) {
@@ -1885,7 +1882,7 @@ static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
     show_mutation_menu(g, d, "\n@RSelect a mutation. A second will be chosen automatically..\n", forget);
   else
     show_genome_menu(g, d, "\n@RSelect two genomes to be your primary DNA strains.\n");
-  write_to_output_printf(g, d, "@wChoose: ");
+  write_to_output(g, d, "@wChoose: ");
   char_set_genome(d->character, 0, 0);
   char_set_genome(d->character, 1, 0);
   desc_set_connected(d, CON_GENOME);
@@ -1897,7 +1894,7 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
   struct char_data *ch = d->character;
 
   show_mutation_menu(g, d, "\n@RSelect a mutation. A second will be chosen automatically..\n", true);
-  write_to_output_printf(g, d, "\n@wChoose: ");
+  write_to_output(g, d, "\n@wChoose: ");
 
   if (char_get_genome(ch, 0) > 0 && char_get_genome(ch, 1) <= 0) {
     int num = rand_number(g, 1, 8);
@@ -1906,20 +1903,20 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     if (num == 3) {
       char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
     }
-    write_to_output_printf(g, d, "@CRolling second mutation... Your second mutation is @D[@Y%s@D]@n\r\n", mutation_names[num]);
+    write_to_output(g, d, "@CRolling second mutation... Your second mutation is @D[@Y{}@D]@n\r\n", mutation_names[num]);
     char_set_genome(ch, 1, num);
   } else if (char_get_genome(ch, 1) > 0) {
     ask_bonuses(g, d, "\n@wChoose: ");
   } else if (!*arg) {
-    write_to_output_printf(g, d, "That is not an acceptable choice!\r\n");
-    write_to_output_printf(g, d, "\n@wChoose: ");
+    write_to_output(g, d, "That is not an acceptable choice!\r\n");
+    write_to_output(g, d, "\n@wChoose: ");
   } else {
     int choice = atoi(arg);
     if (choice < 1 || choice > 10) {
-      write_to_output_printf(g, d, "That is not an acceptable choice!\r\n");
+      write_to_output(g, d, "That is not an acceptable choice!\r\n");
       return;
     }
-    write_to_output_printf(g, d, "@CYou have chosen the mutation @D[@Y%s@D]@n\r\n", mutation_names[choice]);
+    write_to_output(g, d, "@CYou have chosen the mutation @D[@Y{}@D]@n\r\n", mutation_names[choice]);
     char_set_genome(ch, 0, choice);
     if (choice == 3) {
       char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
@@ -1942,20 +1939,20 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
   if (!*arg) {
     show_genome_menu(g, d, "@RSelect two genomes to be your primary DNA strains.\n");
     show_chosen_genomes(g, d);
-    write_to_output_printf(g, d, "\n@wChoose: ");
+    write_to_output(g, d, "\n@wChoose: ");
     return;
   }
   select = atoi(arg);
   if (select > 8 || select < 1) {
     show_genome_menu(g, d, "@RSelect two genomes to be your primary DNA strains.\n");
-    write_to_output_printf(g, d, "@RThat is not an acceptable selection. @WTry again:@n\n");
+    write_to_output(g, d, "@RThat is not an acceptable selection. @WTry again:@n\n");
     return;
   }
   if (char_get_genome(ch, 0) == 0) {
     char_set_genome(ch, 0, select);
   } else if (char_get_genome(ch, 0) == select) {
-    write_to_output_printf(g, d, "You can't choose the same thing for both genomes!\r\n");
-    write_to_output_printf(g, d, "\n@wChoose: ");
+    write_to_output(g, d, "You can't choose the same thing for both genomes!\r\n");
+    write_to_output(g, d, "\n@wChoose: ");
     return;
   } else {
     char_set_genome(ch, 1, select);
@@ -1986,14 +1983,14 @@ static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
 
   if (!*arg) {
     display_bonus_menu(g, d->character, menu);
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@wChoose: ");
   } else if (!strcasecmp(arg, negatives ? "n" : "b")) {
     display_bonus_menu(g, d->character, menu);
-    send_to_char_printf(g, d->character, "@RYou are already in that menu.\r\n");
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@RYou are already in that menu.\r\n");
+    send_to_char(g, d->character, "@wChoose: ");
   } else if (!strcasecmp(arg, negatives ? "b" : "n")) {
     display_bonus_menu(g, d->character, !menu);
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@wChoose: ");
     desc_set_connected(d, negatives ? CON_BONUS : CON_NEGATIVE);
   } else if (!strcasecmp(arg, "x")) {
     if (negatives) { /* negatives can take base stats to zero or below */
@@ -2010,14 +2007,14 @@ static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
     finish_bonuses(g, d);
   } else if ((value = parse_bonuses(arg)) == -1) {
     display_bonus_menu(g, d->character, menu);
-    send_to_char_printf(g, d->character, "@RThat is not an option.\r\n");
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@RThat is not an option.\r\n");
+    send_to_char(g, d->character, "@wChoose: ");
   } else if (value != 1337) {
     exchange_ccpoints(g, d->character, negatives ? value + 15 : value);
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@wChoose: ");
   } else {
     display_bonus_menu(g, d->character, menu);
-    send_to_char_printf(g, d->character, "@wChoose: ");
+    send_to_char(g, d->character, "@wChoose: ");
   }
 }
 
@@ -2029,7 +2026,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
     if (toupper(*arg) != 'Y') {
       cedit_creation(g, d->character);
       show_rolled_stats(g, d);
-      write_to_output_printf(g, d, "\r\n\r\nKeep these stats? (y/N)");
+      write_to_output(g, d, "\r\n\r\nKeep these stats? (y/N)");
       return;
     }
   } else if (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_2 ||
@@ -2039,9 +2036,9 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
       if (toupper(*arg) != 'Y') {
         cedit_creation(g, d->character);
         show_rolled_stats(g, d);
-        write_to_output_printf(g, d, "Initial statistics, you may reassign individual numbers\r\n");
-        write_to_output_printf(g, d, "between statistics after choosing yes.\r\n");
-        write_to_output_printf(g, d, "\r\n\r\nKeep these stats? (y/N)");
+        write_to_output(g, d, "Initial statistics, you may reassign individual numbers\r\n");
+        write_to_output(g, d, "between statistics after choosing yes.\r\n");
+        write_to_output(g, d, "\r\n\r\nKeep these stats? (y/N)");
         return;
       }
     } else
@@ -2080,11 +2077,10 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
           char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 +
           char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
   total -= 30;
-  mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "Str: %2d Dex: %2d Con: %2d Int: %2d "
-                                              "Wis:  %2d Cha: %2d mod total: %2d",
-                char_get_aff_abils_str(d->character),
-                char_get_aff_abils_dex(d->character), char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
-                char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character), total);
+  mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Str: {:>2d} Dex: {:>2d} Con: {:>2d} Int: {:>2d} Wis:  {:>2d} Cha: {:>2d} mod total: {:>2d}",
+         char_get_aff_abils_str(d->character),
+         char_get_aff_abils_dex(d->character), char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
+         char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character), total);
 }
 
 static const struct nanny_state chargen_states[] = {

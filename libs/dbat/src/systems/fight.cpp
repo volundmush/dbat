@@ -64,12 +64,12 @@ int group_bonus(GameWorld *g, struct char_data *ch, int type)
       }
       if (type == 0) {
         incCurLFPercent(g, fol, .25, true);
-        send_to_char_printf(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
+        send_to_char(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
         return (true);
       }
       if (type == 1) {
         incCurLFPercent(g, fol, .4, true);
-        send_to_char_printf(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
+        send_to_char(g, fol, "@CIncensed by the death of your comrade your life force swells!@n");
         return (true);
       }
       if (type == 2) {
@@ -692,7 +692,7 @@ void impact_sound(GameWorld *g, struct char_data *ch, const char *mssg)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(g, ch, door))
-      send_to_room_printf(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "%s", mssg);
+      send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "{}", mssg);
 }
 
 /* For removing body parts */
@@ -886,7 +886,7 @@ void fight_stack(GameWorld *g)
           decCurLFPercent(g, ch, 2, -1);
         }
 
-        send_to_char_printf(g, ch, "@YYour life force has kept you strong@n!\r\n");
+        send_to_char(g, ch, "@YYour life force has kept you strong@n!\r\n");
       }
     }
 
@@ -941,7 +941,7 @@ void fight_stack(GameWorld *g)
       hurt(g, 0, 0, ch, char_get_grappling(g, ch), nullptr, damg, 0);
     }
     if (char_get_grappled(g, ch) && rand_number(g, 1, 2) == 2) {
-      send_to_char_printf(g, ch, "@CTry 'escape' to break free from the hold!@n\r\n");
+      send_to_char(g, ch, "@CTry 'escape' to break free from the hold!@n\r\n");
     }
     if (char_is_halfbreed(ch) && char_plr_flagged(ch, PLR_FURY)) {
       char_set_rage_meter(ch, char_get_rage_meter(ch) + (1));
@@ -950,7 +950,7 @@ void fight_stack(GameWorld *g)
         incCurHealthPercent(g, ch, .15, true);
         incCurKIPercent(g, ch, .15, true);
         incCurSTPercent(g, ch, .15, true);
-        send_to_char_printf(g, ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
+        send_to_char(g, ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
       }
     }
 
@@ -999,7 +999,7 @@ void fight_stack(GameWorld *g)
     }
 
     if (!char_is_npc(ch) && char_get_wimp_level(g, ch) && getCurPL(g, ch) < char_get_wimp_level(g, ch) && getCurPL(g, ch) > 0 && char_get_fighting(g, ch)) {
-      send_to_char_printf(g, ch, "You wimp out, and attempt to flee!\r\n");
+      send_to_char(g, ch, "You wimp out, and attempt to flee!\r\n");
       do_flee(g, ch, "", 0, 0);
     }
     if (char_is_npc(ch) && getCurPL(g, ch) < getEffMaxPL(g, ch) / 10 && getCurPL(g, ch) > 0 && char_get_fighting(g, ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
@@ -1012,7 +1012,7 @@ void fight_stack(GameWorld *g)
     }
     if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_fighting(g, ch)) {
       if (char_get_skill(ch, SKILL_DISGUISE) < rand_number(g, 1, 125)) {
-        send_to_char_printf(g, ch, "Your disguise comes off because of your swift movements!\r\n");
+        send_to_char(g, ch, "Your disguise comes off because of your swift movements!\r\n");
         char_plr_set(ch, PLR_DISGUISED, false);
         act(g, "@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
       }
@@ -1227,7 +1227,7 @@ void fight_stack(GameWorld *g)
       }
     }
     if ((char_get_position(ch) == POS_SLEEPING || char_get_position(ch) == POS_RESTING) && (char_plr_flagged(ch, PLR_CHARGE) || char_get_charge(ch) >= 1)) {
-      send_to_char_printf(g, ch, "You stop charging and release all your pent up energy!\r\n");
+      send_to_char(g, ch, "You stop charging and release all your pent up energy!\r\n");
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1248,7 +1248,7 @@ void fight_stack(GameWorld *g)
       char_set_chargeto(ch, 0);
     }
     if (char_plr_flagged(ch, PLR_CHARGE) && char_get_bonuses(ch, BONUS_UNFOCUSED) > 0 && rand_number(g, 1, 80) >= 70) {
-      send_to_char_printf(g, ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
+      send_to_char(g, ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
       switch (rand_number(g, 1, 3)) {
         case 1:
           act(g, "$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1274,7 +1274,7 @@ void fight_stack(GameWorld *g)
     if (!char_plr_flagged(ch, PLR_CHARGE) && rand_number(g, 1, 40) >= 38 && !char_get_fighting(g, ch) && (char_get_preference(ch) != PREFERENCE_KI || char_get_charge(ch) > getMaxKI(g, ch) * 0.1)) {
       if (char_get_charge(ch) >= getMaxKI(g, ch) / 100) {
         int64_t loss = 0;
-        send_to_char_printf(g, ch, "You lose some of your energy slowly.\r\n");
+        send_to_char(g, ch, "You lose some of your energy slowly.\r\n");
         switch (rand_number(g, 1, 3)) {
           case 1:
             act(g, "$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1292,7 +1292,7 @@ void fight_stack(GameWorld *g)
         loss = char_get_charge(ch) / 20;
         char_set_charge(ch, char_get_charge(ch) - (loss));
       } else if (char_get_charge(ch) < getMaxKI(g, ch) / 100 && char_get_charge(ch) != 0) {
-        send_to_char_printf(g, ch, "Your charged energy is completely gone as your aura fades.\r\n");
+        send_to_char(g, ch, "Your charged energy is completely gone as your aura fades.\r\n");
         act(g, "$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_charge(ch, 0);
       }
@@ -1346,11 +1346,11 @@ void fight_stack(GameWorld *g)
         perc = perc * 0.5;
       }
       if ((getCurKI(g, ch)) <= 0) {
-        send_to_char_printf(g, ch, "You can not charge anymore, you have charged all your energy!\r\n");
+        send_to_char(g, ch, "You can not charge anymore, you have charged all your energy!\r\n");
         act(g, "$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_plr_set(ch, PLR_CHARGE, false);
       } else if (((getMaxKI(g, ch) * 0.01) * perc) >= (getCurKI(g, ch))) {
-        send_to_char_printf(g, ch, "You have charged the last that you can.\r\n");
+        send_to_char(g, ch, "You have charged the last that you can.\r\n");
         act(g, "$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_charge(ch, char_get_charge(ch) + ((getCurKI(g, ch))));
         decCurKIPercent(g, ch, 1, 0);
@@ -1358,14 +1358,14 @@ void fight_stack(GameWorld *g)
         char_plr_set(ch, PLR_CHARGE, false);
       } else {
         if (char_get_charge(ch) >= char_get_chargeto(ch)) {
-          send_to_char_printf(g, ch, "You have already reached the maximum that you wished to charge.\r\n");
+          send_to_char(g, ch, "You have already reached the maximum that you wished to charge.\r\n");
           act(g, "$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_chargeto(ch, 0);
           char_plr_set(ch, PLR_CHARGE, false);
         } else if (char_get_charge(ch) + (((getMaxKI(g, ch) * 0.01) * perc) + 1) >= char_get_chargeto(ch)) {
           decCurKI(g, ch, char_get_chargeto(ch) - char_get_charge(ch), 0);
           char_set_charge(ch, char_get_chargeto(ch));
-          send_to_char_printf(g, ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
+          send_to_char(g, ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
           act(g, "$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_chargeto(ch, 0);
           char_plr_set(ch, PLR_CHARGE, false);
@@ -1375,15 +1375,15 @@ void fight_stack(GameWorld *g)
           switch (rand_number(g, 1, 3)) {
             case 1:
               act(g, "$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr, nullptr, TO_ROOM);
-              send_to_char_printf(g, ch, "Your aura grows bright as you charge more ki.\r\n");
+              send_to_char(g, ch, "Your aura grows bright as you charge more ki.\r\n");
               break;
             case 2:
               act(g, "$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr, TO_ROOM);
-              send_to_char_printf(g, ch, "Your aura ripples with power as you charge more ki.\r\n");
+              send_to_char(g, ch, "Your aura ripples with power as you charge more ki.\r\n");
               break;
             case 3:
               act(g, "$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
-              send_to_char_printf(g, ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
+              send_to_char(g, ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
               break;
             default:
               break;
@@ -1391,7 +1391,7 @@ void fight_stack(GameWorld *g)
           if (char_get_charge(ch) >= char_get_chargeto(ch)) {
             char_set_charge(ch, char_get_chargeto(ch));
             char_set_charge(ch, char_get_charge(ch) + (char_get_level(ch)));
-            send_to_char_printf(g, ch, "You have finished charging!\r\n");
+            send_to_char(g, ch, "You have finished charging!\r\n");
             act(g, "$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
             char_plr_set(ch, PLR_CHARGE, false);
             char_set_chargeto(ch, 0);
@@ -1593,53 +1593,53 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
   switch (char_get_death_type(ch)) {
     case DTYPE_HEAD:
       *buf2        = '\0';
-      obj_set_name(corpse, str_format_printf("headless corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("headless corpse {}", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_format_printf("The headless corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The headless corpse of {} is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_format_printf("The headless remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The headless remains of {}'s corpse", char_get_name(ch)));
       obj_set_value(corpse, VAL_CORPSE_HEAD, 0);
       break;
     case DTYPE_HALF:
       *buf2        = '\0';
-      obj_set_name(corpse, str_format_printf("half corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("half corpse {}", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_format_printf("Half of %s's corpse is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("Half of {}'s corpse is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_format_printf("Half of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("Half of {}'s corpse", char_get_name(ch)));
       break;
     case DTYPE_VAPOR:
       *buf2        = '\0';
-      obj_set_name(corpse, str_format_printf("burnt chunks corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("burnt chunks corpse {}", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_format_printf("The burnt chunks of %s's corpse are scattered here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The burnt chunks of {}'s corpse are scattered here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_format_printf("The burnt chunks of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The burnt chunks of {}'s corpse", char_get_name(ch)));
       break;
     case DTYPE_PULP:
       *buf2        = '\0';
-      obj_set_name(corpse, str_format_printf("beaten bloody corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("beaten bloody corpse {}", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_format_printf("The bloody and beaten corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The bloody and beaten corpse of {} is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_format_printf("The bloody and beaten remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("The bloody and beaten remains of {}'s corpse", char_get_name(ch)));
       break;
     default:
-      obj_set_name(corpse, str_format_printf("corpse %s", char_get_name(ch)));
+      obj_set_name(corpse, str_format("corpse {}", char_get_name(ch)));
 
       *descBuf            = '\0';
-      obj_set_description(corpse, str_format_printf("The corpse of %s is lying here", char_get_name(ch)));
+      obj_set_description(corpse, str_format("The corpse of {} is lying here", char_get_name(ch)));
 
       *descBuf                  = '\0';
-      obj_set_short_description(corpse, str_format_printf("the remains of %s's corpse", char_get_name(ch)));
+      obj_set_short_description(corpse, str_format("the remains of {}'s corpse", char_get_name(ch)));
       break;
   }
 
@@ -1711,7 +1711,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
     if (!char_is_npc(tch) && char_get_skill(tch, SKILL_SURVIVAL)) {
       int skill = char_get_skill(tch, SKILL_SURVIVAL);
       if (!char_is_humanoid(ch) && char_prf_flagged(g, tch, PRF_CARVE) && axion_dice(g, 0) < skill) {
-        send_to_char_printf(g, tch, "The choice edible meat is preserved because of your skill.\r\n");
+        send_to_char(g, tch, "The choice edible meat is preserved because of your skill.\r\n");
         meat = read_object(g, 1612);
         obj_to_char(g, meat, ch);
         char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -1813,7 +1813,7 @@ void death_cry(GameWorld *g, struct char_data *ch)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(g, ch, door))
-      send_to_room_printf(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+      send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
 }
 
 /* Let's clean up necessary things after "death" */
@@ -1903,7 +1903,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
 
   if (killer && !char_is_npc(killer)) {
     if (!char_is_npc(killer) && !char_is_npc(ch)) {
-      send_to_imm_printf(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(killer), char_get_name(ch), char_get_in_room(killer));
+      send_to_imm(g, "[PK] {} killed {} at room [{:d}]\r\n", char_get_name(killer), char_get_name(ch), char_get_in_room(killer));
     }
     if ((char_is_saiyan(killer) && rand_number(g, 1, 2) == 2) || !char_is_saiyan(killer)) {
       if (rand_number(g, 1, 6) >= 5 && (level_exp(killer, char_get_level(killer) + 1) - char_get_exp(killer) > 0 || char_get_level(killer) == 100)) {
@@ -1921,51 +1921,51 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
         }
         if (char_is_npc(ch) && char_mob_flagged(ch, MOB_HUSK) && char_get_practice_points(g, killer) > 50 && char_is_bio(ch)) {
           psreward = 0;
-          send_to_char_printf(g, killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
         } else {
           char_set_practice_points(g, killer, char_get_practice_points(g, killer) + (psreward));
-          send_to_char_printf(g, killer, "@D[@G+%d @BPS@D]@n\r\n", psreward);
+          send_to_char(g, killer, "@D[@G+{:d} @BPS@D]@n\r\n", psreward);
         }
       }
     }
     if (char_is_android(killer) && !char_is_npc(killer) && !char_plr_flagged(killer, PLR_ABSORB)) {
       if (char_plr_flagged(killer, PLR_REPAIR)) {
         if (char_get_level(killer) > char_get_level(ch) + 15) {
-          send_to_char_printf(g, killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 10) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (3));
-          send_to_char_printf(g, killer, "@D[@G+3 @mUpgrade Point@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+3 @mUpgrade Point@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 8) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (6));
-          send_to_char_printf(g, killer, "@D[@G+6 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+6 @mUpgrade Points@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 4) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (12));
-          send_to_char_printf(g, killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 2) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (16));
-          send_to_char_printf(g, killer, "@D[@G+16 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+16 @mUpgrade Points@D]@n\r\n");
         } else {
           char_set_upgrade(killer, char_get_upgrade(killer) + (28));
-          send_to_char_printf(g, killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
         }
       } else {
         if (char_get_level(killer) > char_get_level(ch) + 15) {
-          send_to_char_printf(g, killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 10) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (5));
-          send_to_char_printf(g, killer, "@D[@G+5 @mUpgrade Point@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+5 @mUpgrade Point@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 6) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (12));
-          send_to_char_printf(g, killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 4) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (18));
-          send_to_char_printf(g, killer, "@D[@G+18 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+18 @mUpgrade Points@D]@n\r\n");
         } else if (char_get_level(killer) > char_get_level(ch) + 2) {
           char_set_upgrade(killer, char_get_upgrade(killer) + (28));
-          send_to_char_printf(g, killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
         } else {
           char_set_upgrade(killer, char_get_upgrade(killer) + (36));
-          send_to_char_printf(g, killer, "@D[@G+36 @mUpgrade Points@D]@n\r\n");
+          send_to_char(g, killer, "@D[@G+36 @mUpgrade Points@D]@n\r\n");
         }
       }
     }
@@ -1982,7 +1982,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     if (char_is_shadow_dragon1(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON1       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 20);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -1990,7 +1990,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon2(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON2       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 21);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -1998,7 +1998,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon3(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON3       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 22);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2006,7 +2006,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon4(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON4       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 23);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2014,7 +2014,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon5(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON5       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 24);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2022,7 +2022,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon6(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON6       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 25);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2030,7 +2030,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     } else if (char_is_shadow_dragon7(g, ch)) {
       struct obj_data *obj = nullptr;
       g->SHADOW_DRAGON7       = -1;
-      send_to_room_printf(g, char_get_in_room(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
+      send_to_room(g, char_get_in_room(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
       obj = read_object(g, 26);
       obj_to_room(g, obj, char_get_in_room(ch));
@@ -2088,22 +2088,18 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
         restore(g, ch, false);
         teleport_to(g, ch, 17900);
         android_lose = false;
-        send_to_char_printf(g, ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
+        send_to_char(g, ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
         break;
       case Past:
         restore(g, ch, false);
         teleport_to(g, ch, 1561);
         android_lose = false;
-        send_to_char_printf(g, ch, "You wake up and realise that you died, but only in your mind.\r\n");
+        send_to_char(g, ch, "You wake up and realise that you died, but only in your mind.\r\n");
         break;
       case Newbie:
         restore(g, ch, false);
         teleport_to(g, ch, sensei_start_room(char_get_class(ch)));
-        send_to_char_printf(g, ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
-                                   "should learn to be more careful. Since when you die past that point and\r\n"
-                                   "actually reach the afterlife you need to realise that being revived will\r\n"
-                                   "not be very easy. So treat your character's dying with as much care as\r\n"
-                                   "possible.@n\r\n");
+        send_to_char(g, ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\nshould learn to be more careful. Since when you die past that point and\r\nactually reach the afterlife you need to realise that being revived will\r\nnot be very easy. So treat your character's dying with as much care as\r\npossible.@n\r\n");
         break;
     }
 
@@ -2111,7 +2107,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
       if (char_is_android(ch) && !char_plr_flagged(ch, PLR_ABSORB) && android_lose && char_get_upgrade(ch) > 5) {
         int loss = char_get_upgrade(ch) / 5;
         char_set_upgrade(ch, char_get_upgrade(ch) - (loss));
-        send_to_char_printf(g, ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
+        send_to_char(g, ch, "@rYou lose @R{}@r upgrade points!@n\r\n", add_commas(loss));
       }
       Crash_delete_crashfile(ch);
       save_char(g, ch);
@@ -2191,12 +2187,12 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
     cleanup_arena_watch(g, ch);
     if (killer != nullptr) {
       cleanup_arena_watch(g, killer);
-      send_to_all_printf(g, "@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", char_get_name(killer), char_get_name(ch));
+      send_to_all(g, "@R{}@r manages to defeat @R{}@r in the Arena!@n\r\n", char_get_name(killer), char_get_name(ch));
       final_combat_resolve(g, killer);
       final_combat_resolve(g, ch);
       teleport_to(g, killer, 17875);
     } else {
-      send_to_all_printf(g, "@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", char_get_name(ch));
+      send_to_all(g, "@R{}@r dies in the water of the Arena and is disqualified!@n\r\n", char_get_name(ch));
     }
     char_from_room(g, ch);
     char_to_room(g, ch, 17875);
@@ -2213,7 +2209,7 @@ void die(GameWorld *g, struct char_data *ch, struct char_data *killer)
     if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
       char_set_deathtime(ch, game_now(g));
     } else if (room_flagged(g, char_get_in_room(ch), ROOM_AL) || room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
-      send_to_char_printf(g, ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
+      send_to_char(g, ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
     } else {
       if (killer != nullptr && char_is_npc(killer)) {
         char_set_deathtime(ch, game_now(g) + 7200);
@@ -2291,7 +2287,7 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
       }
     }
     if (checkit == false) {
-      send_to_char_printf(g, ch, "@RYou didn't do most of the work for this kill.@n\r\n");
+      send_to_char(g, ch, "@RYou didn't do most of the work for this kill.@n\r\n");
       share = 1;
     }
   }
@@ -2326,31 +2322,31 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
     share += (share * 0.02) * ((char_get_combatexpertise(ch) + 1) / 20);
   }
   if (group_bonus(g, ch, 2) == 2) {
-    send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
+    send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (2));
   } else if (group_bonus(g, ch, 2) == 3) {
-    send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+    send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G+5{} Exp!@D]@n\r\n", "%");
     share += share * 0.05;
   } else if (group_bonus(g, ch, 2) == 5) {
     incCurKIPercent(g, ch, .04, true);
-    send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
+    send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G4{} Ki Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(g, ch, 2) == 6) {
     incCurKIPercent(g, ch, .02, true);
     incCurSTPercent(g, ch, .02, true);
     incCurHealthPercent(g, ch, .02, true);
-    send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
+    send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G2{} PL/ST/Ki Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(g, ch, 2) == 7) {
     if (char_is_android(ch)) {
       if (char_plr_flagged(leader, PLR_ABSORB)) {
         incCurKIPercent(g, ch, .02, true);
         incCurSTPercent(g, ch, .02, true);
-        send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
+        send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G2{} PL/ST/Ki Recovered!@D]@n\r\n", "%");
       } else if (char_plr_flagged(leader, PLR_REPAIR)) {
         incCurHealthPercent(g, ch, .02, true);
-        send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
+        send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G5{} PL Repaired@D]@n\r\n", "%");
       } else if (char_plr_flagged(leader, PLR_SENSEM) && !char_plr_flagged(ch, PLR_ABSORB)) {
         char_set_upgrade(ch, char_get_upgrade(ch) + (5));
-        send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+        send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
       }
     } else {
       incCurHealthPercent(g, ch, .01, true);
@@ -2359,21 +2355,21 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
     }
   } else if (group_bonus(g, ch, 2) == 11) {
     incCurSTPercent(g, ch, .04, true);
-    send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
+    send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G4{} ST Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(g, ch, 2) == 13) {
     if (char_get_starphase(leader) == 1) {
       share += share * 0.05;
-      send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+      send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G+5{} Exp!@D]@n\r\n", "%");
     } else if (char_get_starphase(leader) == 2) {
       share += share * 0.1;
-      send_to_char_printf(g, ch, "You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
+      send_to_char(g, ch, "You receive a bonus from your group's leader! @D[@G+10{} Exp!@D]@n\r\n", "%");
     }
   }
   share = gear_exp(g, ch, share);
   if (share > 1)
-    send_to_char_printf(g, ch, "You receive your share of experience -- %s points.\r\n", add_commas(share));
+    send_to_char(g, ch, "You receive your share of experience -- {} points.\r\n", add_commas(share));
   else
-    send_to_char_printf(g, ch, "You receive your share of experience -- one measly little point!\r\n");
+    send_to_char(g, ch, "You receive your share of experience -- one measly little point!\r\n");
 
   gain_exp(g, ch, share);
   /*change_alignment(ch, victim);*/
@@ -2439,9 +2435,9 @@ void group_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
     perform_group_gain(k, base, victim);
    } else {
     if (k == ch) {
-     send_to_char_printf(ch, "You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
+     send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
     } else {
-     send_to_char_printf(ch, "You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
+     send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
     }
    }
   }
@@ -2487,7 +2483,7 @@ void solo_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
     }
   }
   if (char_get_lasthit(victim) != 0 && char_get_lasthit(victim) != char_get_idnum(ch)) {
-    send_to_char_printf(g, ch, "@RYou didn't do most of the work for this victory.@n\r\n");
+    send_to_char(g, ch, "@RYou didn't do most of the work for this victory.@n\r\n");
     exp = 1;
   }
   if (char_is_npc(victim) && char_mob_flagged(victim, MOB_HUSK)) {
@@ -2512,9 +2508,9 @@ void solo_gain(GameWorld *g, struct char_data *ch, struct char_data *victim)
   exp = MAX(exp, 1);
 
   if (exp > 1)
-    send_to_char_printf(g, ch, "You receive %s experience points.\r\n", add_commas(exp));
+    send_to_char(g, ch, "You receive {} experience points.\r\n", add_commas(exp));
   else {
-    send_to_char_printf(g, ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
+    send_to_char(g, ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
   }
   if (!char_is_npc(ch)) {
     gain_exp(g, ch, exp);

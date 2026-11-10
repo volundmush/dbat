@@ -44,7 +44,7 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
   }
 
   if (found == true) {
-    send_to_room_printf(g, obj_get_in_room(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
+    send_to_room(g, obj_get_in_room(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
   }
 }
 
@@ -275,7 +275,7 @@ static MapStruct findcoord(GameWorld *g, room_vnum rnum)
     }
   }
 
-  mud_log_printf("SYSERR: findcoord for non-map rnum");
+  mud_log("SYSERR: findcoord for non-map rnum");
   return coords;
 }
 
@@ -300,7 +300,7 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
   }
 
   if (type == 0) {
-    send_to_char_printf(g, ch, "@b______________________________________________________________________@n\n");
+    send_to_char(g, ch, "@b______________________________________________________________________@n\n");
   }
 
   for (y = coord.y - sightradius; y <= coord.y + sightradius; y++) {
@@ -391,11 +391,11 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
     lasty = false;
   }
 
-  send_to_char_printf(g, ch, "%s", buf);
+  send_to_char(g, ch, "{}", buf);
   *buf2 = '\0';
   *buf  = '\0';
   if (type == 0) {
-    send_to_char_printf(g, ch, "\n@b______________________________________________________________________@n");
+    send_to_char(g, ch, "\n@b______________________________________________________________________@n");
   }
 }
 
@@ -406,11 +406,11 @@ void update_space(GameWorld *g)
   int rowcounter, colcounter;
   room_vnum vnum_read;
 
-  mud_log_printf("Updated Space Map. ");
+  mud_log("Updated Space Map. ");
 
   //Load the map vnums from a file into an array
   if (!(mapfile = fopen("../data/surface.map", "r"))) {
-    mud_log_printf("SYSERR: update_space: can't open ../data/surface.map: %s", strerror(errno));
+    mud_log("SYSERR: update_space: can't open ../data/surface.map: {}", strerror(errno));
     return;
   }
 

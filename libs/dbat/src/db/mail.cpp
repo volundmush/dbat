@@ -142,7 +142,7 @@ static mail_index_type *find_char_in_index(GameWorld *g, long searchee)
   mail_index_type *tmp;
 
   if (searchee < 0) {
-    mud_log_printf("SYSERR: Mail system -- non fatal error #1 (searchee == %ld).", searchee);
+    mud_log("SYSERR: Mail system -- non fatal error #1 (searchee == {:d}).", searchee);
     return (nullptr);
   }
   for (tmp = g->mail_index; (tmp && tmp->recipient != searchee); tmp = tmp->next);
@@ -162,7 +162,7 @@ static bool mail_begin(GameWorld *g)
   FILE *fl;
 
   if (!(fl = fopen(MAIL_FILE, "rb"))) {
-    mud_log_printf("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
+    mud_log("SYSERR: Unable to open mail file '{}'.", MAIL_FILE);
     g->no_mail = true;
     return false;
   }
@@ -172,7 +172,7 @@ static bool mail_begin(GameWorld *g)
   g->mail_buf       = str_alloc(g->mail_buf_alloc);
   rewind(fl);
   if (g->mail_buf_len && fread(g->mail_buf, g->mail_buf_len, 1, fl) != 1) {
-    mud_log_printf("SYSERR: Unable to read mail file '%s'.", MAIL_FILE);
+    mud_log("SYSERR: Unable to read mail file '{}'.", MAIL_FILE);
     fclose(fl);
     free(g->mail_buf);
     g->mail_buf = nullptr;
@@ -204,7 +204,7 @@ static void mail_commit(GameWorld *g)
       written = atomic_commit(&af);
   }
   if (!written) { /* the in-memory index no longer matches the file */
-    mud_log_printf("SYSERR: Mail system disabled! Unable to write mail file '%s'.", MAIL_FILE);
+    mud_log("SYSERR: Mail system disabled! Unable to write mail file '{}'.", MAIL_FILE);
     g->no_mail = true;
   }
   g->file_end_pos = g->mail_buf_len;
@@ -222,12 +222,12 @@ static void mail_commit(GameWorld *g)
 static void write_to_file(GameWorld *g, void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
-    mud_log_printf("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
+    mud_log("SYSERR: Mail system -- fatal error #2!!! (invalid file position {:d})", filepos);
     g->no_mail = true;
     return;
   }
   if (!g->mail_buf) {
-    mud_log_printf("SYSERR: Mail system -- write outside a mail operation (position %ld)", filepos);
+    mud_log("SYSERR: Mail system -- write outside a mail operation (position {:d})", filepos);
     g->no_mail = true;
     return;
   }
@@ -258,12 +258,12 @@ static void write_to_file(GameWorld *g, void *buf, int size, long filepos)
 static void read_from_file(GameWorld *g, void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
-    mud_log_printf("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
+    mud_log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read {:d})", filepos);
     g->no_mail = true;
     return;
   }
   if (!g->mail_buf) {
-    mud_log_printf("SYSERR: Mail system -- read outside a mail operation (position %ld)", filepos);
+    mud_log("SYSERR: Mail system -- read outside a mail operation (position {:d})", filepos);
     g->no_mail = true;
     return;
   }
@@ -278,7 +278,7 @@ static void index_mail(GameWorld *g, long id_to_index, long pos)
   position_list_type *new_position;
 
   if (id_to_index < 0) {
-    mud_log_printf("SYSERR: Mail system -- non-fatal error #4. (id_to_index == %ld)", id_to_index);
+    mud_log("SYSERR: Mail system -- non-fatal error #4. (id_to_index == {:d})", id_to_index);
     return;
   }
   if (!(new_index = find_char_in_index(g, id_to_index))) {
@@ -311,7 +311,7 @@ bool scan_file(GameWorld *g)
   int total_messages = 0, block_num = 0;
 
   if (!(mail_file = fopen(MAIL_FILE, "rb"))) {
-    mud_log_printf("   Mail file non-existant... creating new file.");
+    mud_log("   Mail file non-existant... creating new file.");
     touch(MAIL_FILE);
     return true;
   }
@@ -329,13 +329,13 @@ bool scan_file(GameWorld *g)
 
   g->file_end_pos = ftell(mail_file);
   fclose(mail_file);
-  mud_log_printf("   %ld bytes read.", g->file_end_pos);
+  mud_log("   {:d} bytes read.", g->file_end_pos);
   if (g->file_end_pos % BLOCK_SIZE) {
-    mud_log_printf("SYSERR: Error booting mail system -- Mail file corrupt!");
-    mud_log_printf("SYSERR: Mail disabled!");
+    mud_log("SYSERR: Error booting mail system -- Mail file corrupt!");
+    mud_log("SYSERR: Mail disabled!");
     return false;
   }
-  mud_log_printf("   Mail file read -- %d messages.", total_messages);
+  mud_log("   Mail file read -- {:d} messages.", total_messages);
   return true;
 } /* end of scan_file */
 
@@ -376,7 +376,7 @@ void store_mail(GameWorld *g, long to, long from, char *message_pointer)
   }
 
   if ((from < 0 && from != -1337) || to < 0 || !*message_pointer) {
-    mud_log_printf("SYSERR: Mail system -- non-fatal error #5. (from == %ld, to == %ld)", from, to);
+    mud_log("SYSERR: Mail system -- non-fatal error #5. (from == {:d}, to == {:d})", from, to);
     return;
   }
   memset((char *)&header, 0, sizeof(header)); /* clear the record */
@@ -471,15 +471,15 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   char *to;
 
   if (recipient < 0) {
-    mud_log_printf("SYSERR: Mail system -- non-fatal error #6. (recipient: %ld)", recipient);
+    mud_log("SYSERR: Mail system -- non-fatal error #6. (recipient: {:d})", recipient);
     return (nullptr);
   }
   if (!(mail_pointer = find_char_in_index(g, recipient))) {
-    mud_log_printf("SYSERR: Mail system -- post office spec_proc error?  Error #7. (invalid character in index)");
+    mud_log("SYSERR: Mail system -- post office spec_proc error?  Error #7. (invalid character in index)");
     return (nullptr);
   }
   if (!(position_pointer = mail_pointer->list_start)) {
-    mud_log_printf("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer %p)", (void *)position_pointer);
+    mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer {})", as_pointer((void *)position_pointer));
     return (nullptr);
   }
   if (!(position_pointer->next)) { /* just 1 entry in list. */
@@ -513,10 +513,10 @@ static char *read_delete(GameWorld *g, long recipient, char **from)
   read_from_file(g, &header, BLOCK_SIZE, mail_address);
 
   if (header.block_type != HEADER_BLOCK) {
-    mud_log_printf("SYSERR: Oh dear. (Header block %ld != %d)", header.block_type, HEADER_BLOCK);
+    mud_log("SYSERR: Oh dear. (Header block {:d} != {:d})", header.block_type, HEADER_BLOCK);
     mail_end(g);
     g->no_mail = true;
-    mud_log_printf("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
+    mud_log("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
     return (nullptr);
   }
   tmstr                        = asctime(localtime(&header.header_data.mail_time));
@@ -581,7 +581,7 @@ SPECIAL(postmaster)
     return (0);
 
   if (g->no_mail) {
-    send_to_char_printf(g, ch, "Sorry, the mail system is having technical difficulties.\r\n");
+    send_to_char(g, ch, "Sorry, the mail system is having technical difficulties.\r\n");
     return (0);
   }
 
@@ -715,7 +715,7 @@ void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id)
 
   for (descriptor_data *d : each_desc(g)) {
     if ((desc_is_playing(d)) && (char_get_idnum(d->character) == recipient_id) && (has_mail(g, char_get_idnum(d->character)))) {
-      send_to_char_printf(g, d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
+      send_to_char(g, d->character, "\r\n\007\007\007@G@lYou have new mudmail from {}.@n\r\n", char_get_name(from));
     }
   }
 }
