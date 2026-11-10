@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/graph.hpp"
@@ -143,10 +144,11 @@ ACMD(do_sradar)
 {
   struct obj_data *vehicle = nullptr, *controls = nullptr;
   int dir = 0, noship = false;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   char planet[20];
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) < 1) {
     send_to_char(g, ch, "You are not flying a ship, maybe you want detect?\r\n");
@@ -174,7 +176,7 @@ ACMD(do_sradar)
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     if (char_get_admlevel(ch) >= 1 && noship == true) {
       printmap(g, char_get_in_room(ch), ch, 0, -1);
     } else {
@@ -197,42 +199,42 @@ ACMD(do_sradar)
   }
 
   if (noship == false) {
-    if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
+    if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 40979);
       sprintf(planet, "Earth");
-    } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
+    } else if (str_eq_nocase(arg, "frigid") || str_eq_nocase(arg, "Frigid")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 30889);
       sprintf(planet, "Frigid");
-    } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
+    } else if (str_eq_nocase(arg, "konack") || str_eq_nocase(arg, "Konack")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 27065);
       sprintf(planet, "Konack");
-    } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
+    } else if (str_eq_nocase(arg, "vegeta") || str_eq_nocase(arg, "Vegeta")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 32365);
       sprintf(planet, "Vegeta");
-    } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
+    } else if (str_eq_nocase(arg, "aether") || str_eq_nocase(arg, "Aether")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 41959);
       sprintf(planet, "Aether");
-    } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
+    } else if (str_eq_nocase(arg, "namek") || str_eq_nocase(arg, "Namek")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 42880);
       sprintf(planet, "Namek");
-    } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy One");
-    } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy Two");
-    } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
       sprintf(planet, "Buoy Three");
@@ -243,42 +245,42 @@ ACMD(do_sradar)
   }
 
   if (noship == true) {
-    if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
+    if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, char_get_in_room(ch), 40979);
       sprintf(planet, "Earth");
-    } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
+    } else if (str_eq_nocase(arg, "frigid") || str_eq_nocase(arg, "Frigid")) {
       dir = find_first_step(g, char_get_in_room(ch), 30889);
       sprintf(planet, "Frigid");
-    } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
+    } else if (str_eq_nocase(arg, "konack") || str_eq_nocase(arg, "Konack")) {
       dir = find_first_step(g, char_get_in_room(ch), 27065);
       sprintf(planet, "Konack");
-    } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
+    } else if (str_eq_nocase(arg, "vegeta") || str_eq_nocase(arg, "Vegeta")) {
       dir = find_first_step(g, char_get_in_room(ch), 32365);
       sprintf(planet, "Vegeta");
-    } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
+    } else if (str_eq_nocase(arg, "aether") || str_eq_nocase(arg, "Aether")) {
       dir = find_first_step(g, char_get_in_room(ch), 41959);
       sprintf(planet, "Aether");
-    } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
+    } else if (str_eq_nocase(arg, "namek") || str_eq_nocase(arg, "Namek")) {
       dir = find_first_step(g, char_get_in_room(ch), 42880);
       sprintf(planet, "Namek");
-    } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) <= 0) {
+    } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
-    } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy One");
-    } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy Two");
-    } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
+    } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
       sprintf(planet, "Buoy Three");
@@ -396,7 +398,7 @@ ACMD(do_radar)
 
 ACMD(do_track)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct char_data *vict;
   int count = 0, dir;
 
@@ -410,12 +412,13 @@ ACMD(do_track)
     return;
   }
 
-  one_argument(argument, arg);
-  if (!*arg && !char_get_fighting(g, ch)) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Whom are you trying to sense?\r\n");
     return;
   }
-  if (!*arg && char_get_fighting(g, ch)) {
+  if (arg.empty() && char_get_fighting(g, ch)) {
     vict = char_get_fighting(g, ch);
     send_to_char(g, ch, "You focus on the one your are fighting.\r\n");
     if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
@@ -479,7 +482,7 @@ ACMD(do_track)
   }
 
   /* Scanning the entire planet. */
-  if (!strcasecmp(arg, "scan")) {
+  if (str_eq_nocase(arg, "scan")) {
     for (descriptor_data *i : each_desc(g)) {
       if (desc_get_connected(i) != CON_PLAYING) {
         continue;

@@ -60,6 +60,7 @@
 - `mload mob <vnum> <room>` loads the mob into that room. The room came with the space before it, so it was never taken for a number and the mob was not loaded. [Volund]
 - `mzoneecho`, `ozoneecho` and `wzoneecho` no longer overflow a buffer of `MAX_INPUT_LENGTH` with a message longer than that, which a script line can be once its variables are filled in. [Volund]
 - `search_replace()` on a `std::string` with nothing to find changes nothing; `mechoaround` and `oechoaround` use it instead of copying the message into a buffer. [Volund]
+- The special procedures, guilds and vehicles (`systems/`) take their arguments apart with `dbat/args.hpp`. The guild's practice, gain, forget, study and grand handlers take a `std::string_view`, and so do `rIntro()` and the vehicles' landing and boarding lookups. The shopkeeper's buy, sell, value, list and appraise still work on a `char *` line. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

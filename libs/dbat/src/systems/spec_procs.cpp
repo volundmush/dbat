@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/spec_procs.hpp"
 #include "dbat/utils.hpp"
@@ -147,7 +148,8 @@ void npc_steal(GameWorld *g, struct char_data *ch, struct char_data *victim)
 
 SPECIAL(pet_shops)
 {
-  char buf[MAX_STRING_LENGTH], pet_name[MAX_INPUT_LENGTH];
+  char buf[MAX_STRING_LENGTH];
+  std::string pet_name;
   room_vnum pet_room;
   struct char_data *pet;
 
@@ -169,9 +171,11 @@ SPECIAL(pet_shops)
   }
   if (CMD_IS(g, "buy")) {
 
-    two_arguments(argument, buf, pet_name);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string which     = take_arg(rest);
+    pet_name              = take_arg(rest);
 
-    if (!(pet = get_char_room(g, buf, nullptr, pet_room)) || !char_is_npc(pet)) {
+    if (!(pet = get_char_room(g, which, nullptr, pet_room)) || !char_is_npc(pet)) {
       send_to_char(g, ch, "There is no such pet!\r\n");
       return (true);
     }
@@ -185,12 +189,12 @@ SPECIAL(pet_shops)
     char_set_exp(pet, 0);
     char_aff_set(pet, AFF_CHARM, true);
 
-    if (*pet_name) {
-      snprintf(buf, sizeof(buf), "%s %s", char_get_alias(pet), pet_name);
+    if (!pet_name.empty()) {
+      snprintf(buf, sizeof(buf), "%s %s", char_get_alias(pet), pet_name.c_str());
       char_set_alias(pet, buf);
 
       snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-               char_get_ddesc(pet), pet_name);
+               char_get_ddesc(pet), pet_name.c_str());
       char_set_ddesc(pet, buf);
     }
     char_to_room(g, pet, char_get_in_room(ch));
@@ -339,17 +343,19 @@ SPECIAL(auction)
     return (true);
   }
   if (CMD_IS(g, "auction")) {
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    std::string arg, arg2;
     int value = 0;
 
-    two_arguments(argument, arg, arg2);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
+    arg2                  = take_arg(rest);
 
-    if (!*arg || !*arg2) {
+    if (arg.empty() || arg2.empty()) {
       send_to_char(g, ch, "Auction what item and for how much?\r\n");
       return (true);
     }
 
-    value = atoi(arg2);
+    value = parse_int(arg2);
 
     if (!(obj2 = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You don't have that item to auction.\r\n");
@@ -412,8 +418,9 @@ SPECIAL(auction)
 SPECIAL(healtank)
 {
   struct obj_data *htank = nullptr;
-  char arg[MAX_INPUT_LENGTH];
-  one_argument(argument, arg);
+  std::string arg;
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 65) {
@@ -428,13 +435,13 @@ SPECIAL(healtank)
       return (false);
     }
 
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "@WHealing Tank Commands:\r\n"
                        "htank [ enter | exit | check ]@n");
       return (true);
     }
 
-    if (!strcasecmp("enter", arg)) {
+    if (str_eq_nocase("enter", arg)) {
       if (char_plr_flagged(ch, PLR_HEALT)) {
         send_to_char(g, ch, "You are already inside a healing tank!\r\n");
         return (true);
@@ -476,7 +483,7 @@ SPECIAL(healtank)
 
     } // End of Enter argument
 
-    else if (!strcasecmp("exit", arg)) {
+    else if (str_eq_nocase("exit", arg)) {
       if (!char_plr_flagged(ch, PLR_HEALT)) {
         send_to_char(g, ch, "You are not inside a healing tank.\r\n");
         return (true);
@@ -489,7 +496,7 @@ SPECIAL(healtank)
       return (true);
     } // End of Exit argument
 
-    else if (!strcasecmp("check", arg)) {
+    else if (str_eq_nocase("check", arg)) {
       if (obj_get_healcharge(htank) < 20 && obj_get_healcharge(htank) > 0) {
         send_to_char(g, ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", obj_get_healcharge(htank));
       } else if (obj_get_healcharge(htank) <= 0) {
@@ -515,9 +522,10 @@ SPECIAL(healtank)
 /* This controls stat augmenter functions */
 SPECIAL(augmenter)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (CMD_IS(g, "augment")) {
     int strength = char_get_real_abils_str(ch);
@@ -534,7 +542,7 @@ SPECIAL(augmenter)
     int agicost = agility * 1200;
     int specost = speed * 1200;
 
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "@D                        -----@WBody Augmentations@D-----@n\r\n");
       send_to_char(g, ch, "@RStrength    @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", strength, add_commas(strcost));
       send_to_char(g, ch, "@BIntelligence@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", intel, add_commas(intcost));
@@ -545,7 +553,7 @@ SPECIAL(augmenter)
       send_to_char(g, ch, "\r\n");
       return (true);
     }
-    if (!strcasecmp("strength", arg) || !strcasecmp("str", arg)) {
+    if (str_eq_nocase("strength", arg) || str_eq_nocase("str", arg)) {
       if (strength >= 100)
         send_to_char(g, ch, "Your strength is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < strcost)
@@ -557,7 +565,7 @@ SPECIAL(augmenter)
         char_set_gold(ch, char_get_gold(ch) - (strcost));
         save_char(g, ch);
       }
-    } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
+    } else if (str_eq_nocase("intelligence", arg) || str_eq_nocase("int", arg)) {
       if (intel >= 100)
         send_to_char(g, ch, "Your intelligence is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < intcost)
@@ -569,7 +577,7 @@ SPECIAL(augmenter)
         char_set_gold(ch, char_get_gold(ch) - (intcost));
         save_char(g, ch);
       }
-    } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
+    } else if (str_eq_nocase("constitution", arg) || str_eq_nocase("con", arg)) {
       if (consti >= 100)
         send_to_char(g, ch, "Your constitution is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < concost)
@@ -581,7 +589,7 @@ SPECIAL(augmenter)
         char_set_gold(ch, char_get_gold(ch) - (concost));
         save_char(g, ch);
       }
-    } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
+    } else if (str_eq_nocase("speed", arg) || str_eq_nocase("spe", arg)) {
       if (speed >= 100)
         send_to_char(g, ch, "Your speed is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < specost)
@@ -593,7 +601,7 @@ SPECIAL(augmenter)
         char_set_gold(ch, char_get_gold(ch) - (specost));
         save_char(g, ch);
       }
-    } else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg)) {
+    } else if (str_eq_nocase("agility", arg) || str_eq_nocase("agi", arg)) {
       if (agility >= 100)
         send_to_char(g, ch, "Your agility is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < agicost)
@@ -605,7 +613,7 @@ SPECIAL(augmenter)
         char_set_gold(ch, char_get_gold(ch) - (agicost));
         save_char(g, ch);
       }
-    } else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg)) {
+    } else if (str_eq_nocase("wisdom", arg) || str_eq_nocase("wis", arg)) {
       if (wisdom >= 100)
         send_to_char(g, ch, "Your wisdom how somehow been measured is already as high as it can possibly go.\r\n");
       else if (char_get_gold(ch) < wiscost)
@@ -630,10 +638,11 @@ SPECIAL(augmenter)
 SPECIAL(gravity)
 {
   struct obj_data *obj = nullptr;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int match = false;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
   for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 11) {
       obj = i;
@@ -642,7 +651,7 @@ SPECIAL(gravity)
     }
   }
   if (CMD_IS(g, "gravity") || CMD_IS(g, "generator")) {
-    if (!*arg) {
+    if (arg.empty()) {
       send_to_char(g, ch, "@WGravity Commands:@n\r\n");
       send_to_char(g, ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n"
                        "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
@@ -652,11 +661,11 @@ SPECIAL(gravity)
       send_to_char(g, ch, "It's broken!\r\n");
       return (true);
     }
-    if ((!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) && obj_get_weight(obj) == 0) {
+    if ((str_eq_nocase("N", arg) || str_eq_nocase("n", arg) || str_eq_nocase("0", arg)) && obj_get_weight(obj) == 0) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
+    if (str_eq_nocase("N", arg) || str_eq_nocase("n", arg) || str_eq_nocase("0", arg)) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10)) {
@@ -668,15 +677,15 @@ SPECIAL(gravity)
       }
       match = true;
     }
-    if (!strcasecmp("10", arg) && obj_get_weight(obj) == 10) {
+    if (str_eq_nocase("10", arg) && obj_get_weight(obj) == 10) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("10", arg) && room_get_gravity(g, char_get_in_room(ch)) == 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
+    if (str_eq_nocase("10", arg) && room_get_gravity(g, char_get_in_room(ch)) == 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(g, ch, "The gravity around you is already at that.\r\n");
       return (true);
     }
-    if (!strcasecmp("10", arg) && room_get_gravity(g, char_get_in_room(ch)) != 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
+    if (str_eq_nocase("10", arg) && room_get_gravity(g, char_get_in_room(ch)) != 10 && (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) || room_flagged(g, char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -686,18 +695,18 @@ SPECIAL(gravity)
       room_set_gravity(g, char_get_in_room(ch), 10);
       obj_set_weight(obj, 0);
       match = true;
-    } else if (!strcasecmp("10", arg)) {
+    } else if (str_eq_nocase("10", arg)) {
       send_to_char(g, ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       room_set_gravity(g, char_get_in_room(ch), 10);
       obj_set_weight(obj, 10);
       match = true;
     }
-    if (!strcasecmp("20", arg) && obj_get_weight(obj) == 20) {
+    if (str_eq_nocase("20", arg) && obj_get_weight(obj) == 20) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("20", arg)) {
+    if (str_eq_nocase("20", arg)) {
       send_to_char(g, ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -708,11 +717,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 20);
       match = true;
     }
-    if (!strcasecmp("30", arg) && obj_get_weight(obj) == 30) {
+    if (str_eq_nocase("30", arg) && obj_get_weight(obj) == 30) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("30", arg)) {
+    if (str_eq_nocase("30", arg)) {
       send_to_char(g, ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -723,11 +732,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 30);
       match = true;
     }
-    if (!strcasecmp("40", arg) && obj_get_weight(obj) == 40) {
+    if (str_eq_nocase("40", arg) && obj_get_weight(obj) == 40) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("40", arg)) {
+    if (str_eq_nocase("40", arg)) {
       send_to_char(g, ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -738,11 +747,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 40);
       match = true;
     }
-    if (!strcasecmp("50", arg) && obj_get_weight(obj) == 50) {
+    if (str_eq_nocase("50", arg) && obj_get_weight(obj) == 50) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("50", arg)) {
+    if (str_eq_nocase("50", arg)) {
       send_to_char(g, ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -753,11 +762,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 50);
       match = true;
     }
-    if (!strcasecmp("100", arg) && obj_get_weight(obj) == 100) {
+    if (str_eq_nocase("100", arg) && obj_get_weight(obj) == 100) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("100", arg)) {
+    if (str_eq_nocase("100", arg)) {
       send_to_char(g, ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -768,11 +777,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 100);
       match = true;
     }
-    if (!strcasecmp("200", arg) && obj_get_weight(obj) == 200) {
+    if (str_eq_nocase("200", arg) && obj_get_weight(obj) == 200) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("200", arg)) {
+    if (str_eq_nocase("200", arg)) {
       send_to_char(g, ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -783,11 +792,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 200);
       match = true;
     }
-    if (!strcasecmp("300", arg) && obj_get_weight(obj) == 300) {
+    if (str_eq_nocase("300", arg) && obj_get_weight(obj) == 300) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("300", arg)) {
+    if (str_eq_nocase("300", arg)) {
       send_to_char(g, ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -798,11 +807,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 300);
       match = true;
     }
-    if (!strcasecmp("400", arg) && obj_get_weight(obj) == 400) {
+    if (str_eq_nocase("400", arg) && obj_get_weight(obj) == 400) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("400", arg)) {
+    if (str_eq_nocase("400", arg)) {
       send_to_char(g, ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -813,11 +822,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 400);
       match = true;
     }
-    if (!strcasecmp("500", arg) && obj_get_weight(obj) == 500) {
+    if (str_eq_nocase("500", arg) && obj_get_weight(obj) == 500) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("500", arg)) {
+    if (str_eq_nocase("500", arg)) {
       send_to_char(g, ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -828,11 +837,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 500);
       match = true;
     }
-    if (!strcasecmp("1000", arg) && obj_get_weight(obj) == 1000) {
+    if (str_eq_nocase("1000", arg) && obj_get_weight(obj) == 1000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("1000", arg)) {
+    if (str_eq_nocase("1000", arg)) {
       send_to_char(g, ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -843,11 +852,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 1000);
       match = true;
     }
-    if (!strcasecmp("5000", arg) && obj_get_weight(obj) == 5000) {
+    if (str_eq_nocase("5000", arg) && obj_get_weight(obj) == 5000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("5000", arg)) {
+    if (str_eq_nocase("5000", arg)) {
       send_to_char(g, ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -858,11 +867,11 @@ SPECIAL(gravity)
       obj_set_weight(obj, 5000);
       match = true;
     }
-    if (!strcasecmp("10000", arg) && obj_get_weight(obj) == 10000) {
+    if (str_eq_nocase("10000", arg) && obj_get_weight(obj) == 10000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
       return (true);
     }
-    if (!strcasecmp("10000", arg)) {
+    if (str_eq_nocase("10000", arg)) {
       send_to_char(g, ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
       act(g, "@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
@@ -911,17 +920,19 @@ SPECIAL(bank)
     return (true);
   }
   if (CMD_IS(g, "wire")) {
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    std::string arg, arg2;
     struct char_data *vict = nullptr;
 
-    two_arguments(argument, arg, arg2);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    arg                   = take_arg(rest);
+    arg2                  = take_arg(rest);
 
     if ((obj && obj_extra_flagged(obj, ITEM_BROKEN))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
       return (true);
     }
 
-    if ((amount = atoi(arg)) <= 0) {
+    if ((amount = parse_int(arg)) <= 0) {
       send_to_char(g, ch, "How much do you want to transfer?\r\n");
       return (true);
     }
@@ -929,7 +940,7 @@ SPECIAL(bank)
       send_to_char(g, ch, "You don't have that much zenni in the bank (plus 1%s charge)!\r\n", "%");
       return (true);
     }
-    if (!*arg2) {
+    if (arg2.empty()) {
       send_to_char(g, ch, "You want to transfer it to who?!\r\n");
       return (true);
     }
@@ -983,7 +994,7 @@ SPECIAL(bank)
       return (true);
     }
 
-    if ((amount = atoi(argument)) <= 0) {
+    if ((amount = parse_int(argument)) <= 0) {
       send_to_char(g, ch, "How much do you want to deposit?\r\n");
       return (true);
     }
@@ -1004,7 +1015,7 @@ SPECIAL(bank)
       return (true);
     }
 
-    if ((amount = atoi(argument)) <= 0) {
+    if ((amount = parse_int(argument)) <= 0) {
       send_to_char(g, ch, "How much do you want to withdraw?\r\n");
       return (true);
     }

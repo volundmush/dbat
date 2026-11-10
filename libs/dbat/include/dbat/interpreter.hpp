@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 #include "dbat/command.hpp"
@@ -13,7 +14,7 @@ extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, const char *name);
 bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen);
-const char *rIntro(struct char_data *ch, char *arg);
+const char *rIntro(struct char_data *ch, std::string_view arg);
 bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg);
 void fingerUser(GameWorld *g, struct char_data *ch, const std::string &name);
 bool readUserIndex(const std::string &name);

@@ -223,7 +223,7 @@ void userDelete(GameWorld *g, struct descriptor_data *d)
 }
 
 /* For transfering money or doing things with an offline player */
-const char *rIntro(struct char_data *ch, char *arg)
+const char *rIntro(struct char_data *ch, std::string_view arg)
 {
   char fname[40], filler[50] = "", scrap[100] = "", line[256] = "";
   static char name[80];
@@ -245,7 +245,7 @@ const char *rIntro(struct char_data *ch, char *arg)
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%49s %99s", filler, scrap);
-    if (!strcasecmp(arg, scrap)) {
+    if (str_eq_nocase(arg, scrap)) {
       known = true;
       sprintf(name, "%s", filler);
     }

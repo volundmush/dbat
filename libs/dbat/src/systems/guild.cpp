@@ -138,18 +138,20 @@ ACMD(do_teach)
   if (char_is_npc(ch))
     return;
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg, arg2;
   int skill = 100;
   struct char_data *vict;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "What skill are you wanting to teach?\r\n");
     return;
   }
 
-  skill = find_skill_num(g, arg, SKTYPE_SKILL);
+  skill = find_skill_num(g, arg.data(), SKTYPE_SKILL);
 
   if (skill < 0 || skill >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -162,7 +164,7 @@ ACMD(do_teach)
     return;
   }
 
-  if (!*arg2) {
+  if (arg2.empty()) {
     send_to_char(g, ch, "@wWho are you wanting to teach @C%s@w to?@n\r\n", g->spell_info[skill].name);
     send_to_char(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
     return;
@@ -746,19 +748,19 @@ static bool prereq_pass(GameWorld *g, struct char_data *ch, int snum)
   return true;
 }
 
-static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, char *argument)
+static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
 
   int skill_num;
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "What skill do you want to start to forget?\r\n");
     return;
   }
 
-  skill_num = find_skill_num(g, argument, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
 
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -790,24 +792,24 @@ static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_d
   }
 }
 
-static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, char *argument)
+static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
 
   int skill_num;
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   if (!char_can_grand_master(ch)) {
     send_to_char(g, ch, "Your race can not become a Grand Master in a skill through this process.\r\n");
     return;
   }
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "What skill do you want to become a Grand Master in?");
     return;
   }
 
-  skill_num = find_skill_num(g, argument, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
@@ -845,15 +847,15 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
   char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (1000));
 }
 
-static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, char *argument)
+static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
   //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
   char buf[MAX_STRING_LENGTH];
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
-  if (!*argument) {
+  if (text.empty()) {
     what_does_guild_know(g, guild_nr, ch);
     return;
   }
@@ -868,13 +870,13 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
     return;
   }
 
-  skill_num = find_skill_num(g, argument, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
 
-  if (strstr(sensei_style[char_get_class(ch)], argument)) {
+  if (strstr(sensei_style[char_get_class(ch)], text.c_str())) {
     skill_num = 539;
   }
 
@@ -1023,11 +1025,10 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
   }
 }
 
-static void handle_gain(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, char *argument)
+static void handle_gain(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
   int whichclass = char_get_class(ch);
 
-  skip_spaces(&argument);
   int rpp_cost = rpp_to_level(ch);
 
   if (char_get_level(ch) < 100 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1)) {
@@ -1071,7 +1072,7 @@ int rpp_to_level(struct char_data *ch)
   }
 }
 
-static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, char *argument)
+static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
 
   int expcost = 25000, goldcost = 750, fail = false, reward = 25, goldadjust = 0, expadjust = 0;
@@ -1138,7 +1139,7 @@ SPECIAL(guild)
   struct char_data *keeper = (struct char_data *)me;
   struct {
     const char *cmd{};
-    void (*func)(GameWorld *, struct char_data *, struct guild_data *, struct char_data *, char *){};
+    void (*func)(GameWorld *, struct char_data *, struct guild_data *, struct char_data *, std::string_view){};
   } guild_cmd_tab[] = {
       {"practice", handle_practice},
       {"gain",     handle_gain    },
