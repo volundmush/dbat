@@ -339,3 +339,10 @@ void send_to_imm_printf(GameWorld *g, const char *messg, ...)
   mud_vlog_printf(messg, args);
   va_end(args);
 }
+
+void send_to_imm(GameWorld *g, std::string_view text)
+{
+  if (text.empty()) /* as send_to_imm_printf() skips an empty message */
+    return;
+  send_to_imm_printf(g, "%.*s", (int)text.size(), text.data());
+}

@@ -86,7 +86,7 @@ void search_room(GameWorld *g, struct char_data *ch)
   double bonus = 1.0, terrain = 1.0;
 
   if ((getCurST(g, ch)) < getMaxST(g, ch) * 0.001) {
-    send_to_char_printf(g, ch, "You do not have enough stamina.\r\n");
+    send_to_char(g, ch, "You do not have enough stamina.\r\n");
     return;
   }
 
@@ -136,7 +136,7 @@ void search_room(GameWorld *g, struct char_data *ch)
   decCurSTPercent(g, ch, .001, 0);
 
   if (found == 0) {
-    send_to_char_printf(g, ch, "You find nothing hidden.\r\n");
+    send_to_char(g, ch, "You find nothing hidden.\r\n");
     return;
   }
 }
@@ -666,20 +666,20 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 
   if (num == 1) {
     /* Map Key */
-    send_to_char_printf(g, ch, "@W               @D-[@CArea Map@D]-\r\n");
-    send_to_char_printf(g, ch, "@D-------------------------------------------@w\r\n");
-    send_to_char_printf(g, ch, "@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
-    send_to_char_printf(g, ch, "@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
-    send_to_char_printf(g, ch, "@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
-    send_to_char_printf(g, ch, "@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
-    send_to_char_printf(g, ch, "@WLastly @RX@W = You.\r\n");
-    send_to_char_printf(g, ch, "@D-------------------------------------------\r\n");
-    send_to_char_printf(g, ch, "@D                  @CNorth@w\r\n");
-    send_to_char_printf(g, ch, "@D                    @c^@w\r\n");
-    send_to_char_printf(g, ch, "@D             @CWest @c< O > @CEast@w\r\n");
-    send_to_char_printf(g, ch, "@D                    @cv@w\r\n");
-    send_to_char_printf(g, ch, "@D                  @CSouth@w\r\n");
-    send_to_char_printf(g, ch, "@D                ---------@w\r\n");
+    send_to_char(g, ch, "@W               @D-[@CArea Map@D]-\r\n");
+    send_to_char(g, ch, "@D-------------------------------------------@w\r\n");
+    send_to_char(g, ch, "@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
+    send_to_char(g, ch, "@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
+    send_to_char(g, ch, "@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
+    send_to_char(g, ch, "@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
+    send_to_char(g, ch, "@WLastly @RX@W = You.\r\n");
+    send_to_char(g, ch, "@D-------------------------------------------\r\n");
+    send_to_char(g, ch, "@D                  @CNorth@w\r\n");
+    send_to_char(g, ch, "@D                    @c^@w\r\n");
+    send_to_char(g, ch, "@D             @CWest @c< O > @CEast@w\r\n");
+    send_to_char(g, ch, "@D                    @cv@w\r\n");
+    send_to_char(g, ch, "@D                  @CSouth@w\r\n");
+    send_to_char(g, ch, "@D                ---------@w\r\n");
   }
 
   /* blank the map */
@@ -776,27 +776,27 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 
     if (num != 1) {
       if (key == 0) {
-        send_to_char_printf(g, ch, "%s    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n", buf2);
+        send_to_char(g, ch, "{}    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n", buf2);
       }
       if (key == 1) {
-        send_to_char_printf(g, ch, "%s    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n", buf2);
+        send_to_char(g, ch, "{}    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n", buf2);
       }
       if (key == 2) {
-        send_to_char_printf(g, ch, "%s    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n", buf2);
+        send_to_char(g, ch, "{}    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n", buf2);
       }
       if (key == 3) {
-        send_to_char_printf(g, ch, "%s    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n", buf2);
+        send_to_char(g, ch, "{}    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n", buf2);
       }
       if (key == 4) {
-        send_to_char_printf(g, ch, "%s    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n", buf2);
+        send_to_char(g, ch, "{}    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n", buf2);
       }
       key += 1;
     } else {
-      send_to_char_printf(g, ch, "%s", buf2);
+      send_to_char(g, ch, "{}", buf2);
     }
   }
   if (num == 1) {
-    send_to_char_printf(g, ch, "@D                ---------@w\r\n");
+    send_to_char(g, ch, "@D                ---------@w\r\n");
   }
 }
 
@@ -808,41 +808,41 @@ ACMD(do_scan)
       "North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
 
   if (char_get_position(ch) < POS_SLEEPING) {
-    send_to_char_printf(g, ch, "You can't see anything but stars!\n\r");
+    send_to_char(g, ch, "You can't see anything but stars!\n\r");
     return;
   }
   if (!char_is_awake(ch)) {
-    send_to_char_printf(g, ch, "You must be dreaming.\n\r");
+    send_to_char(g, ch, "You must be dreaming.\n\r");
     return;
   }
   if (char_aff_flagged(ch, AFF_BLIND)) {
-    send_to_char_printf(g, ch, "You can't see a damn thing, you're blind!\n\r");
+    send_to_char(g, ch, "You can't see a damn thing, you're blind!\n\r");
     return;
   }
   if (char_plr_flagged(ch, PLR_EYEC)) {
-    send_to_char_printf(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
+    send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
   for (i = 0; i < 10; i++) {
     if (char_get_exit(g, ch, i)) {
       if (room_is_dark(g, char_get_in_room(ch)) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
           (!char_aff_flagged(ch, AFF_INFRAVISION))) {
-        send_to_char_printf(g, ch, "%s: DARK\n\r", dirnames[i]);
+        send_to_char(g, ch, "{}: DARK\n\r", dirnames[i]);
         continue;
       }
       if (char_can_go(g, ch, i)) {
         newroom = room_get_dir_option(g, char_get_in_room(ch), i)->to_room;
-        send_to_char_printf(g, ch, "@w-----------------------------------------@n\r\n");
-        send_to_char_printf(g, ch, "          %s%s: %s %s\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
-        send_to_char_printf(g, ch, "@W          -----------------          @n\r\n");
+        send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
+        send_to_char(g, ch, "          {}{}: {} {}\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
+        send_to_char(g, ch, "@W          -----------------          @n\r\n");
 
         list_obj_to_char(g, room_get_contents(g, newroom), ch, SHOW_OBJ_LONG, false);
         list_char_to_char(g, room_get_people(g, newroom), ch);
         if (room_get_geffect(g, newroom) >= 1 && room_get_geffect(g, newroom) <= 5) {
-          send_to_char_printf(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
+          send_to_char(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
         if (room_get_geffect(g, newroom) >= 6) {
-          send_to_char_printf(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
+          send_to_char(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
         }
         /* Check 2nd room away */
         if (char_get_exit2(g, ch, i) && char_get_exit2(g, ch, i)->to_room) {
@@ -850,27 +850,27 @@ ACMD(do_scan)
 
           if ((newroom != NOWHERE) && (!IS_SET(char_get_exit2(g, ch, i)->exit_info, EX_CLOSED))) {
             if (!room_is_dark(g, char_get_exit2(g, ch, i)->to_room)) {
-              send_to_char_printf(g, ch, "@w-----------------------------------------@n\r\n");
-              send_to_char_printf(g, ch, "          %sFar %s: %s %s\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
-              send_to_char_printf(g, ch, "@W          -----------------          @n\r\n");
+              send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
+              send_to_char(g, ch, "          {}Far {}: {} {}\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
+              send_to_char(g, ch, "@W          -----------------          @n\r\n");
 
               list_obj_to_char(g, room_get_contents(g, newroom), ch, SHOW_OBJ_LONG, false);
               list_char_to_char(g, room_get_people(g, newroom), ch);
               if (room_get_geffect(g, newroom) >= 1 && room_get_geffect(g, newroom) <= 5) {
-                send_to_char_printf(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
+                send_to_char(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
               }
               if (room_get_geffect(g, newroom) >= 6) {
-                send_to_char_printf(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
+                send_to_char(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
               }
             } else {
-              send_to_char_printf(g, ch, "%s<-> %sFar %s: Too dark to tell! %s<->%s\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);
+              send_to_char(g, ch, "{}<-> {}Far {}: Too dark to tell! {}<->{}\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);
             }
           }
         }
       }
     }
   }
-  send_to_char_printf(g, ch, "@w-----------------------------------------@n\r\n");
+  send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
 }
 
 #define DOOR_DCHIDE(g, ch, door) (char_get_exit(g, ch, door)->dchide)
@@ -879,7 +879,7 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
 {
   int check = false, skill_lvl, dchide = 20;
 
-  send_to_char_printf(g, ch, "You search for secret doors.\r\n");
+  send_to_char(g, ch, "You search for secret doors.\r\n");
   act(g, "$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
@@ -898,17 +898,17 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
   if (char_get_exit(g, ch, dir)) {
     if (exit_description(char_get_exit(g, ch, dir)) &&
         !room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
-      send_to_char_printf(g, ch, "%s", exit_description(char_get_exit(g, ch, dir)));
+      send_to_char(g, ch, "{}", exit_description(char_get_exit(g, ch, dir)));
     else if (!room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
-      send_to_char_printf(g, ch, "There is a normal exit there.\r\n");
+      send_to_char(g, ch, "There is a normal exit there.\r\n");
     else if (room_exit_flagged(char_get_exit(g, ch, dir), EX_ISDOOR) &&
              room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) &&
              exit_keyword(char_get_exit(g, ch, dir)) && (check == true))
-      send_to_char_printf(g, ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                          fname(exit_keyword(char_get_exit(g, ch, dir))),
-                          (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) ? "" : "open ");
+      send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n",
+                   fname(exit_keyword(char_get_exit(g, ch, dir))),
+                   (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) ? "" : "open ");
     else
-      send_to_char_printf(g, ch, "There is no exit there.\r\n");
+      send_to_char(g, ch, "There is no exit there.\r\n");
   } else
-    send_to_char_printf(g, ch, "There is no exit there.\r\n");
+    send_to_char(g, ch, "There is no exit there.\r\n");
 }

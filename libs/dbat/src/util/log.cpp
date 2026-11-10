@@ -106,3 +106,13 @@ void core_dump_real(const char *who, int line)
   mud_log_printf("SYSERR: Assertion failed at %s:%d!", who, line);
   log_backtrace();
 }
+
+void mud_log(std::string_view text)
+{
+  mud_log_printf("%.*s", (int)text.size(), text.data());
+}
+
+void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
+{
+  mudlog_printf(g, type, level, file, "%.*s", (int)text.size(), text.data());
+}

@@ -2,10 +2,12 @@
 #include <cstdarg>
 #include <cstdio>
 #include <string>
+#include <string_view>
 
 #include <sys/socket.h>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/format.hpp"
 #include "dbat/descriptor.hpp"
 
 /*
@@ -31,6 +33,66 @@ void send_to_outdoor_printf(GameWorld *g, const char *messg, ...) __attribute__(
 void send_to_moon_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));
 void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
+
+/* send_to_room_printf() for text as it is */
+void send_to_room(GameWorld *g, room_vnum room, std::string_view text);
+/* send_to_room_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_room(GameWorld *g, room_vnum room, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_room(g, room, str_format(fmt, std::forward<Args>(args)...));
+}
+
+/* send_to_all_printf() for text as it is */
+void send_to_all(GameWorld *g, std::string_view text);
+/* send_to_all_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_all(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_all(g, str_format(fmt, std::forward<Args>(args)...));
+}
+
+/* send_to_outdoor_printf() for text as it is */
+void send_to_outdoor(GameWorld *g, std::string_view text);
+/* send_to_outdoor_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_outdoor(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_outdoor(g, str_format(fmt, std::forward<Args>(args)...));
+}
+
+/* send_to_moon_printf() for text as it is */
+void send_to_moon(GameWorld *g, std::string_view text);
+/* send_to_moon_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_moon(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_moon(g, str_format(fmt, std::forward<Args>(args)...));
+}
+
+/* send_to_planet_printf() for text as it is */
+void send_to_planet(GameWorld *g, int type, int planet, std::string_view text);
+/* send_to_planet_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_planet(GameWorld *g, int type, int planet, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_planet(g, type, planet, str_format(fmt, std::forward<Args>(args)...));
+}
+
+/* send_to_range_printf() for text as it is */
+void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text);
+/* send_to_range_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_string<Args...> fmt, Args &&...args)
+{
+  send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
+}
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
@@ -50,6 +112,15 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 int write_to_descriptor(int desc, const char *txt);
 size_t write_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
 size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
+/* Queues text for d as it is */
+size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::string_view text);
+/* Queues text for d, formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::format_string<Args...> fmt, Args &&...args)
+{
+  return write_to_output(g, d, str_format(fmt, std::forward<Args>(args)...));
+}
 void string_add(GameWorld *g, struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, std::string *txt, size_t len, long mailto);
 /* Starts the editor on target with what is there now, without string_write()'s player flags */

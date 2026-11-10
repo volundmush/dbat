@@ -15,7 +15,8 @@ Conversion (printf -> std::format):
   modifiers hh h l ll z j t L and <cinttypes>' PRId64-style macros.
   printf right-aligns strings and std::format left-aligns them, so a width always gets an explicit < or >.
   %d becomes {:d}, so a char argument prints as a number as it did; %c becomes {:c}.
-  %u %x %X %o wrap their argument in as_unsigned(), as printf reads it unsigned.
+  %u %x %X %o wrap their argument in as_unsigned(), as printf reads it unsigned; %c wraps it in as_char(), as
+  printf prints any int as the byte it ends in (std::format throws on one out of char's range).
   A * width or precision comes after its value in std::format, so the two arguments swap.
   With no arguments a call is plain text: the replacements' std::string_view overload prints it as it is, so
   only %% is undone and braces are left alone.
@@ -74,6 +75,7 @@ def convert_spec(flags, width, prec, conv):
         notes.append('unsigned')
     elif conv == 'c':
         spec += 'c'
+        notes.append('char')
     elif conv in 'eEfFgG':
         spec += conv
     elif conv == 's':
@@ -173,9 +175,37 @@ def literal_value(text):
     return ''.join(parts)
 
 
+def comment_spans(src):
+    """(start, end) of each comment in src, strings and character literals passed over."""
+    spans, i = [], 0
+    while i < len(src):
+        c = src[i]
+        if c == '"':
+            i = skip_string(src, i)
+        elif c == "'":
+            i += 1
+            while i < len(src) and src[i] != "'":
+                i += 2 if src[i] == '\\' else 1
+            i += 1
+        elif src.startswith('//', i):
+            j = src.find('\n', i)
+            j = len(src) if j < 0 else j
+            spans.append((i, j))
+            i = j
+        elif src.startswith('/*', i):
+            j = src.find('*/', i + 2)
+            j = len(src) if j < 0 else j + 2
+            spans.append((i, j))
+            i = j
+        else:
+            i += 1
+    return spans
+
+
 def rewrite_file(path, funcs, fmt_index):
     """fmt_index: {func: index of its format argument}. Returns list of (line, reason) left alone."""
     src = open(path).read()
+    comments = comment_spans(src)
     out, i, left = [], 0, []
     call = re.compile(r'\b(' + '|'.join(re.escape(f) for f in funcs) + r')_printf\s*\(')
     while True:
@@ -184,6 +214,10 @@ def rewrite_file(path, funcs, fmt_index):
             out.append(src[i:])
             break
         func = m.group(1)
+        if any(a <= m.start() < b for a, b in comments):  # code in a comment: only its old name back
+            out.append(src[i:m.start()] + func + '(')
+            i = m.end()
+            continue
         paren = m.end() - 1
         spans, close = split_args(src, paren)
         fi = fmt_index[func]
@@ -212,9 +246,9 @@ def rewrite_file(path, funcs, fmt_index):
                     k += 1
                 value = arg_texts[k]
                 k += 1
-                if 'unsigned' in n:
+                if 'unsigned' in n or 'char' in n:
                     lead = value[:len(value) - len(value.lstrip())]
-                    value = f'{lead}as_unsigned({value.strip()})'
+                    value = f'{lead}{"as_unsigned" if "unsigned" in n else "as_char"}({value.strip()})'
                 new_args.append(value)
                 new_args.extend(extra)  # std::format takes the value before its width and precision
             lead = fmt_src[:len(fmt_src) - len(fmt_src.lstrip())]
@@ -258,7 +292,7 @@ SAMPLES = {
     'i': ['0', '-3', '99'],
     'u': ['0u', '7u', '4294967295u'],
     'x': ['0u', '255u', '3735928559u'], 'X': ['0u', '255u', '3735928559u'], 'o': ['0u', '8u', '511u'],
-    'c': ["'a'", "'Z'", "' '"],
+    'c': ["'a'", "'Z'", "' '", "200", "-56", "toupper('q')"],
     's': ['""', '"x"', '"hello"', '"a long string of text"'],
     'f': ['0.0', '1.5', '-2.25', '1234.5678', '0.000123'], 'F': ['0.0', '1.5'],
     'e': ['0.0', '1.5', '-123456.789'], 'E': ['1.5'],
@@ -272,9 +306,10 @@ TYPE = {'hh': {'d': 'signed char', 'i': 'signed char', 'u': 'unsigned char', 'x'
 
 
 def selftest(root):
-    lines = ['#include <cstdio>', '#include <cstdint>', '#include <cstddef>', '#include <format>', '#include <string>',
+    lines = ['#include <cstdio>', '#include <cctype>', '#include <cstdint>', '#include <cstddef>', '#include <format>', '#include <string>',
              '#include <type_traits>',
              'template <class T> auto as_unsigned(T v) { return static_cast<std::make_unsigned_t<T>>(v); }',
+             'template <class T> char as_char(T v) { return static_cast<char>(v); }',
              'static int bad = 0;',
              'template <class... A> static void same(const char *pf, const char *sf, const std::string &got, const char *want) {',
              '  if (got != want) { std::printf("MISMATCH %s -> %s: printf \\"%s\\", std::format \\"%s\\"\\n", pf, sf, want, got.c_str()); bad++; }',
@@ -303,7 +338,7 @@ def selftest(root):
             if prec == '*':
                 pf_args.append('3')
             pf_args.append(v)
-            val = f'as_unsigned({v})' if 'unsigned' in notes else v
+            val = f'as_unsigned({v})' if 'unsigned' in notes else f'as_char({v})' if 'char' in notes else v
             sf_args.append(val)
             if width == '*':
                 sf_args.append('7')

@@ -855,3 +855,8 @@ ACMD(do_think)
   send_to_imm_printf(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), std::string(argument).c_str());
   return;
 }
+
+void log_imm_action(GameWorld *g, std::string_view text)
+{
+  log_imm_action_printf(g, "%.*s", (int)text.size(), text.data());
+}

@@ -60,9 +60,9 @@ ACMD(do_time)
   /* 30 days in a month, 6 days a week */
   weekday = day % 6;
 
-  send_to_char_printf(g, ch, "It is %d o'clock %s, on %s.\r\n",
-                      (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12),
-                      g->time_info.hours >= 12 ? "PM" : "AM", weekdays[weekday]);
+  send_to_char(g, ch, "It is {:d} o'clock {}, on {}.\r\n",
+               (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12),
+               g->time_info.hours >= 12 ? "PM" : "AM", weekdays[weekday]);
 
   /*
    * Peter Ajamian <peter@PAJAMIAN.DHS.ORG> supplied the following as a fix
@@ -88,8 +88,8 @@ ACMD(do_time)
     }
   }
 
-  send_to_char_printf(g, ch, "The %d%s Day of the %s, Year %d.\r\n",
-                      day, suf, month_name[g->time_info.month], g->time_info.year);
+  send_to_char(g, ch, "The {:d}{} Day of the {}, Year {:d}.\r\n",
+               day, suf, month_name[g->time_info.month], g->time_info.year);
 }
 
 ACMD(do_weather)
@@ -101,16 +101,16 @@ ACMD(do_weather)
       "lit by flashes of lightning"};
 
   if (char_is_outside(g, ch)) {
-    send_to_char_printf(g, ch, "The sky is %s and %s.\r\n", sky_look[g->weather_info.sky],
-                        g->weather_info.change >= 0 ? "you feel a warm wind from south" : "your foot tells you bad weather is due");
+    send_to_char(g, ch, "The sky is {} and {}.\r\n", sky_look[g->weather_info.sky],
+                 g->weather_info.change >= 0 ? "you feel a warm wind from south" : "your foot tells you bad weather is due");
     if (char_adm_flagged(ch, ADM_KNOWWEATHER))
-      send_to_char_printf(g, ch, "Pressure: %d (change: %d), Sky: %d (%s)\r\n",
-                          g->weather_info.pressure,
-                          g->weather_info.change,
-                          g->weather_info.sky,
-                          sky_look[g->weather_info.sky]);
+      send_to_char(g, ch, "Pressure: {:d} (change: {:d}), Sky: {:d} ({})\r\n",
+                   g->weather_info.pressure,
+                   g->weather_info.change,
+                   g->weather_info.sky,
+                   sky_look[g->weather_info.sky]);
   } else
-    send_to_char_printf(g, ch, "You have no feeling about the weather at all.\r\n");
+    send_to_char(g, ch, "You have no feeling about the weather at all.\r\n");
 }
 
 /* puts -'s instead of spaces */
@@ -161,15 +161,15 @@ ACMD(do_help)
   std::string text(skip_spaces(argument));
 
   if (g->help_table.empty()) {
-    send_to_char_printf(g, ch, "No help available.\r\n");
+    send_to_char(g, ch, "No help available.\r\n");
     return;
   }
 
   if (text.empty()) {
     if (char_get_admlevel(ch) < ADMLVL_IMMORT)
-      send_to_char_printf(g, ch, "%s", g->help.c_str());
+      send_to_char(g, ch, "{}", g->help.c_str());
     else
-      send_to_char_printf(g, ch, "%s", g->ihelp.c_str());
+      send_to_char(g, ch, "{}", g->ihelp.c_str());
     return;
   }
 
@@ -177,9 +177,9 @@ ACMD(do_help)
 
   if ((mid = search_help(g, text.c_str(), char_get_admlevel(ch))) == NOWHERE) {
     int i, found = 0;
-    send_to_char_printf(g, ch, "There is no help on that word.\r\n");
+    send_to_char(g, ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), text.c_str());
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "{} tried to get help on {}", char_get_name(ch), text.c_str());
     }
     for (i = 0; i < (int)g->help_table.size(); i++) {
       if (g->help_table[i].min_level > char_get_admlevel(ch))
@@ -189,16 +189,16 @@ ACMD(do_help)
         continue;
       if (levenshtein_distance(text.c_str(), g->help_table[i].keywords.c_str()) <= 2) {
         if (!found) {
-          send_to_char_printf(g, ch, "\r\nDid you mean:\r\n");
+          send_to_char(g, ch, "\r\nDid you mean:\r\n");
           found = 1;
         }
-        send_to_char_printf(g, ch, "  %s\r\n", g->help_table[i].keywords.c_str());
+        send_to_char(g, ch, "  {}\r\n", g->help_table[i].keywords.c_str());
       }
     }
     return;
   }
   if (g->help_table[mid].min_level > char_get_admlevel(ch)) {
-    send_to_char_printf(g, ch, "There is no help on that word.\r\n");
+    send_to_char(g, ch, "There is no help on that word.\r\n");
     return;
   }
   snprintf(buf, sizeof(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
@@ -207,7 +207,7 @@ ACMD(do_help)
   if (char_get_admlevel(ch) > 0) {
     snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", g->help_table[mid].min_level);
   }
-  send_to_char_printf(g, ch, "%s", buf);
+  send_to_char(g, ch, "{}", buf);
 }
 
 /* Shows one of the fixed text files (credits, news, motd, ...) */
@@ -220,44 +220,44 @@ ACMD(do_gen_ps)
 
   switch (subcmd) {
     case SCMD_CREDITS:
-      send_to_char_printf(g, ch, "%s", g->credits.c_str());
+      send_to_char(g, ch, "{}", g->credits.c_str());
       break;
     case SCMD_NEWS:
-      send_to_char_printf(g, ch, "%s", g->news.c_str());
+      send_to_char(g, ch, "{}", g->news.c_str());
       char_set_lastpl(ch, game_now(g));
       break;
     case SCMD_INFO:
-      send_to_char_printf(g, ch, "%s", g->info.c_str());
+      send_to_char(g, ch, "{}", g->info.c_str());
       break;
     case SCMD_WIZLIST:
-      send_to_char_printf(g, ch, "%s", g->wizlist.c_str());
+      send_to_char(g, ch, "{}", g->wizlist.c_str());
       break;
     case SCMD_IMMLIST:
-      send_to_char_printf(g, ch, "%s", g->immlist.c_str());
+      send_to_char(g, ch, "{}", g->immlist.c_str());
       break;
     case SCMD_HANDBOOK:
-      send_to_char_printf(g, ch, "%s", g->handbook.c_str());
+      send_to_char(g, ch, "{}", g->handbook.c_str());
       break;
     case SCMD_POLICIES:
       snprintf(bum, sizeof(bum), "--------------------\r\n%s\r\n--------------------\r\n", g->policies.c_str());
-      send_to_char_printf(g, ch, "%s", bum);
+      send_to_char(g, ch, "{}", bum);
       break;
     case SCMD_MOTD:
-      send_to_char_printf(g, ch, "%s", g->motd.c_str());
+      send_to_char(g, ch, "{}", g->motd.c_str());
       break;
     case SCMD_IMOTD:
-      send_to_char_printf(g, ch, "%s", g->imotd.c_str());
+      send_to_char(g, ch, "{}", g->imotd.c_str());
       break;
     case SCMD_CLEAR:
-      send_to_char_printf(g, ch, "\033[H\033[J");
+      send_to_char(g, ch, "\033[H\033[J");
       break;
     case SCMD_VERSION:
       break;
     case SCMD_WHOAMI:
-      send_to_char_printf(g, ch, "%s\r\n", char_get_name(ch));
+      send_to_char(g, ch, "{}\r\n", char_get_name(ch));
       break;
     default:
-      mud_log_printf("SYSERR: Unhandled case in do_gen_ps. (%d)", subcmd);
+      mud_log("SYSERR: Unhandled case in do_gen_ps. ({:d})", subcmd);
       /*  SYSERR_DESC:
      *  General page string function for such things as 'credits', 'news',
      *  'wizlist', 'clear', 'version'.  This occurs when a call is made to
@@ -285,11 +285,11 @@ ACMD(do_color)
   arg                   = take_word(rest);
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Usage: color [ off | on ]\r\n");
+    send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
   if ((tp = search_block(arg, ctypes, false)) == -1) {
-    send_to_char_printf(g, ch, "Usage: color [ off | on ]\r\n");
+    send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
   switch (tp) {
@@ -300,7 +300,7 @@ ACMD(do_color)
       char_prf_set(g, ch, PRF_COLOR, true);
       break;
   }
-  send_to_char_printf(g, ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);
+  send_to_char(g, ch, "Your color is now @o{}@n.\r\n", ctypes[tp]);
 }
 
 ACMD(do_toggle)
@@ -316,92 +316,57 @@ ACMD(do_toggle)
     snprintf(buf2, sizeof(buf2), "%-3.3d", char_get_wimp_level(g, ch)); /* sprintf: OK */
 
   if (char_get_admlevel(ch)) {
-    send_to_char_printf(g, ch,
-                        "      Buildwalk: %-3s    "
-                        "Clear Screen in OLC: %-3s\r\n",
-                        ONOFF(char_prf_flagged(g, ch, PRF_BUILDWALK)),
-                        ONOFF(char_prf_flagged(g, ch, PRF_CLS)));
+    send_to_char(g, ch,
+                 "      Buildwalk: {:<3}    Clear Screen in OLC: {:<3}\r\n",
+                 ONOFF(char_prf_flagged(g, ch, PRF_BUILDWALK)),
+                 ONOFF(char_prf_flagged(g, ch, PRF_CLS)));
 
-    send_to_char_printf(g, ch,
-                        "      No Hassle: %-3s    "
-                        "      Holylight: %-3s    "
-                        "     Room Flags: %-3s\r\n",
-                        ONOFF(char_prf_flagged(g, ch, PRF_NOHASSLE)),
-                        ONOFF(char_prf_flagged(g, ch, PRF_HOLYLIGHT)),
-                        ONOFF(char_prf_flagged(g, ch, PRF_ROOMFLAGS)));
+    send_to_char(g, ch,
+                 "      No Hassle: {:<3}          Holylight: {:<3}         Room Flags: {:<3}\r\n",
+                 ONOFF(char_prf_flagged(g, ch, PRF_NOHASSLE)),
+                 ONOFF(char_prf_flagged(g, ch, PRF_HOLYLIGHT)),
+                 ONOFF(char_prf_flagged(g, ch, PRF_ROOMFLAGS)));
   }
 
-  send_to_char_printf(g, ch,
-                      "Hit Pnt Display: %-3s    "
-                      "     Brief Mode: %-3s    "
-                      " Summon Protect: %-3s\r\n"
+  send_to_char(g, ch,
+               "Hit Pnt Display: {:<3}         Brief Mode: {:<3}     Summon Protect: {:<3}\r\n   Move Display: {:<3}       Compact Mode: {:<3}           On Quest: {:<3}\r\n    Exp Display: {:<3}             NoTell: {:<3}       Repeat Comm.: {:<3}\r\n     Ki Display: {:<3}               Deaf: {:<3}         Wimp Level: {:<3}\r\n Gossip Channel: {:<3}    Auction Channel: {:<3}      Grats Channel: {:<3}\r\n      Auto Loot: {:<3}          Auto Gold: {:<3}        Color Level: {}\r\n     Auto Split: {:<3}           Auto Sac: {:<3}           Auto Mem: {:<3}\r\n     View Order: {:<3}        Auto Assist: {:<3}     Auto Show Exit: {:<3}\r\n    TNL Display: {:<3}    ",
 
-                      "   Move Display: %-3s    "
-                      "   Compact Mode: %-3s    "
-                      "       On Quest: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_DISPHP)),
+               ONOFF(char_prf_flagged(g, ch, PRF_BRIEF)),
+               ONOFF(!char_prf_flagged(g, ch, PRF_SUMMONABLE)),
 
-                      "    Exp Display: %-3s    "
-                      "         NoTell: %-3s    "
-                      "   Repeat Comm.: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_DISPMOVE)),
+               ONOFF(char_prf_flagged(g, ch, PRF_COMPACT)),
+               YESNO(char_prf_flagged(g, ch, PRF_QUEST)),
 
-                      "     Ki Display: %-3s    "
-                      "           Deaf: %-3s    "
-                      "     Wimp Level: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_DISPEXP)),
+               ONOFF(char_prf_flagged(g, ch, PRF_NOTELL)),
+               YESNO(!char_prf_flagged(g, ch, PRF_NOREPEAT)),
 
-                      " Gossip Channel: %-3s    "
-                      "Auction Channel: %-3s    "
-                      "  Grats Channel: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_DISPKI)),
+               YESNO(char_prf_flagged(g, ch, PRF_DEAF)),
+               buf2,
 
-                      "      Auto Loot: %-3s    "
-                      "      Auto Gold: %-3s    "
-                      "    Color Level: %s\r\n"
+               ONOFF(!char_prf_flagged(g, ch, PRF_NOGOSS)),
+               ONOFF(!char_prf_flagged(g, ch, PRF_NOAUCT)),
+               ONOFF(!char_prf_flagged(g, ch, PRF_NOGRATZ)),
 
-                      "     Auto Split: %-3s    "
-                      "       Auto Sac: %-3s    "
-                      "       Auto Mem: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOLOOT)),
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOGOLD)),
+               ctypes[COLOR_LEV(g, ch)],
 
-                      "     View Order: %-3s    "
-                      "    Auto Assist: %-3s    "
-                      " Auto Show Exit: %-3s\r\n"
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOSPLIT)),
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOSAC)),
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOMEM)),
 
-                      "    TNL Display: %-3s    ",
+               ONOFF(char_prf_flagged(g, ch, PRF_VIEWORDER)),
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOASSIST)),
+               ONOFF(char_prf_flagged(g, ch, PRF_AUTOEXIT)),
 
-                      ONOFF(char_prf_flagged(g, ch, PRF_DISPHP)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_BRIEF)),
-                      ONOFF(!char_prf_flagged(g, ch, PRF_SUMMONABLE)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_DISPMOVE)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_COMPACT)),
-                      YESNO(char_prf_flagged(g, ch, PRF_QUEST)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_DISPEXP)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_NOTELL)),
-                      YESNO(!char_prf_flagged(g, ch, PRF_NOREPEAT)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_DISPKI)),
-                      YESNO(char_prf_flagged(g, ch, PRF_DEAF)),
-                      buf2,
-
-                      ONOFF(!char_prf_flagged(g, ch, PRF_NOGOSS)),
-                      ONOFF(!char_prf_flagged(g, ch, PRF_NOAUCT)),
-                      ONOFF(!char_prf_flagged(g, ch, PRF_NOGRATZ)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOLOOT)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOGOLD)),
-                      ctypes[COLOR_LEV(g, ch)],
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOSPLIT)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOSAC)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOMEM)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_VIEWORDER)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOASSIST)),
-                      ONOFF(char_prf_flagged(g, ch, PRF_AUTOEXIT)),
-
-                      ONOFF(char_prf_flagged(g, ch, PRF_DISPTNL)));
+               ONOFF(char_prf_flagged(g, ch, PRF_DISPTNL)));
 
   if (CONFIG_ENABLE_COMPRESSION) {
-    send_to_char_printf(g, ch, "    Compression: %-3s\r\n", ONOFF(!char_prf_flagged(g, ch, PRF_NOCOMPRESS)));
+    send_to_char(g, ch, "    Compression: {:<3}\r\n", ONOFF(!char_prf_flagged(g, ch, PRF_NOCOMPRESS)));
   }
 }
 
@@ -443,11 +408,11 @@ ACMD(do_commands)
 
   if (!arg.empty()) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
-      send_to_char_printf(g, ch, "Who is that?\r\n");
+      send_to_char(g, ch, "Who is that?\r\n");
       return;
     }
     if (char_get_level(ch) < char_get_level(vict)) {
-      send_to_char_printf(g, ch, "You can't see the commands of people above your level.\r\n");
+      send_to_char(g, ch, "You can't see the commands of people above your level.\r\n");
       return;
     }
   } else
@@ -458,10 +423,10 @@ ACMD(do_commands)
   else if (subcmd == SCMD_WIZHELP)
     wizhelp = 1;
 
-  send_to_char_printf(g, ch, "The following %s%s are available to %s:\r\n",
-                      wizhelp ? "privileged " : "",
-                      socials ? "socials" : "commands",
-                      vict == ch ? "you" : char_get_name(vict));
+  send_to_char(g, ch, "The following {}{} are available to {}:\r\n",
+               wizhelp ? "privileged " : "",
+               socials ? "socials" : "commands",
+               vict == ch ? "you" : char_get_name(vict));
 
   /* cmd_num starts at 1, not 0, to remove 'RESERVED' */
   for (no = 1, cmd_num = 1; g->complete_cmd_info[g->cmd_sort_info[cmd_num]].command[0] != '\n'; cmd_num++) {
@@ -487,11 +452,11 @@ ACMD(do_commands)
     else
       snprintf(label, sizeof(label), "%s", g->complete_cmd_info[i].command);
 
-    send_to_char_printf(g, ch, "%-11s%s", label, no++ % 7 == 0 ? "\r\n" : "");
+    send_to_char(g, ch, "{:<11}{}", label, no++ % 7 == 0 ? "\r\n" : "");
   }
 
   if (no % 7 != 1)
-    send_to_char_printf(g, ch, "\r\n");
+    send_to_char(g, ch, "\r\n");
 }
 
 ACMD(do_history)
@@ -506,16 +471,16 @@ ACMD(do_history)
   if (arg.empty() || type < 0) {
     int i;
 
-    send_to_char_printf(g, ch, "Usage: history <");
+    send_to_char(g, ch, "Usage: history <");
     for (i = 0; *history_types[i] != '\n'; i++) {
       if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
-        send_to_char_printf(g, ch, " %s ", history_types[i]);
+        send_to_char(g, ch, " {} ", history_types[i]);
       }
       if (*history_types[i + 1] == '\n') {
-        send_to_char_printf(g, ch, ">\r\n");
+        send_to_char(g, ch, ">\r\n");
       } else {
         if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
-          send_to_char_printf(g, ch, "|");
+          send_to_char(g, ch, "|");
         }
       }
     }
@@ -525,13 +490,13 @@ ACMD(do_history)
   std::deque<std::string> *history = char_comm_hist(g, ch, type);
   if (history && !history->empty() && !history->front().empty()) {
     for (const std::string &line : *history)
-      send_to_char_printf(g, ch, "%s", line.c_str());
+      send_to_char(g, ch, "{}", line.c_str());
 /* Make this a 1 if you want history to cear after viewing */
 #if 0 
       free_history(ch, type);
 #endif
   } else
-    send_to_char_printf(g, ch, "You have no history in that channel.\r\n");
+    send_to_char(g, ch, "You have no history in that channel.\r\n");
 }
 
 void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)

@@ -12,6 +12,7 @@
 #pragma once
 #include <string>
 #include <string_view>
+#include "dbat/format.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/pulse.hpp"
 #include "dbat/consts/types.hpp"
@@ -228,6 +229,16 @@ void do_sstat_character(GameWorld *g, char_data *ch, char_data *k);
 void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc);
 void script_vlog_printf(GameWorld *g, const char *format, va_list args) __attribute__((format(printf, 2, 0)));
 void script_log_printf(GameWorld *g, const char *format, ...) __attribute__((format(printf, 2, 3)));
+
+/* script_log_printf() for text as it is */
+void script_log(GameWorld *g, std::string_view text);
+/* script_log_printf() for text formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+void script_log(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
+{
+  script_log(g, str_format(fmt, std::forward<Args>(args)...));
+}
 char *matching_quote(char *p);
 struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj);
 void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument);

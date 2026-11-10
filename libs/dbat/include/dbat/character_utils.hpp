@@ -1,9 +1,11 @@
 #pragma once
 #include <deque>
 #include <string>
+#include <string_view>
 #include <cstdint>
 #include <ctime>
 
+#include "dbat/format.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/autoexit.hpp"
 #include "dbat/consts/types.hpp"
@@ -747,6 +749,17 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
 bool know_skill(GameWorld *g, struct char_data *ch, int skill);
 
 size_t send_to_char_printf(GameWorld *g, struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 3, 4)));
+/* Sends text to ch's connection, if it has one, as it is */
+size_t send_to_char(GameWorld *g, struct char_data *ch, std::string_view text);
+/* Sends text to ch's connection, if it has one, formatted as std::format does */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+size_t send_to_char(GameWorld *g, struct char_data *ch, std::format_string<Args...> fmt, Args &&...args)
+{
+  if (fmt.get().empty())
+    return 0;
+  return send_to_char(g, ch, str_format(fmt, std::forward<Args>(args)...));
+}
 void admin_set(GameWorld *g, struct char_data *ch, int value);
 char *sense_location(GameWorld *g, struct char_data *ch);
 void null_affect(GameWorld *g, struct char_data *ch, int aff_flag);

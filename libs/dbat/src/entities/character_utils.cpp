@@ -4253,6 +4253,13 @@ size_t send_to_char_printf(GameWorld *g, struct char_data *ch, const char *messg
   return 0;
 }
 
+size_t send_to_char(GameWorld *g, struct char_data *ch, std::string_view text)
+{
+  if (ch->desc && !text.empty())
+    return write_to_output(g, ch->desc, text);
+  return 0;
+}
+
 int init_skill(GameWorld *g, struct char_data *ch, int snum)
 {
   int skill = 0;

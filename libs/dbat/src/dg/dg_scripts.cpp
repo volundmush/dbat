@@ -1404,3 +1404,8 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
 
   atomic_commit(&af);
 }
+
+void script_log(GameWorld *g, std::string_view text)
+{
+  script_log_printf(g, "%.*s", (int)text.size(), text.data());
+}

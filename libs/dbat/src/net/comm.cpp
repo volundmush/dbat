@@ -1700,25 +1700,44 @@ static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, con
 }
 #undef NEW_STRING_LENGTH
 
+/* As big as a descriptor's whole output buffer, so one long text (help, lists) is never cut short here. */
+static char pending_text[LARGE_BUFSIZE];
+
+static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size);
+
 /* Add a new string to a player's output queue. */
 size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const char *format, va_list args)
 {
-  /* As big as a descriptor's whole output buffer, so one long text (help, lists) is never cut short here. */
-  static char txt[LARGE_BUFSIZE];
-  size_t wantsize;
-  int size;
-
   /* if we're in the overflow state already, ignore this new output */
   if (t->bufspace == 0)
     return (0);
 
-  wantsize = size = vsnprintf(txt, sizeof(txt), format, args);
+  return queue_output(g, t, vsnprintf(pending_text, sizeof(pending_text), format, args));
+}
+
+size_t write_to_output(GameWorld *g, struct descriptor_data *t, std::string_view text)
+{
+  /* if we're in the overflow state already, ignore this new output */
+  if (t->bufspace == 0)
+    return (0);
+
+  size_t n = std::min(text.size(), sizeof(pending_text) - 1); /* as much as vsnprintf() would have kept */
+  memcpy(pending_text, text.data(), n);
+  pending_text[n] = '\0';
+  return queue_output(g, t, (int)text.size());
+}
+
+/* Queues pending_text, which holds the first sizeof(txt) - 1 chars of a text size long */
+static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
+{
+  size_t wantsize = size;
+
   if (t->character)
-    wantsize = size = proc_colors(g, txt, sizeof(txt), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
+    wantsize = size = proc_colors(g, pending_text, sizeof(pending_text), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
   /* If exceeding the size of the buffer, truncate it for the overflow message */
-  if (size < 0 || wantsize >= sizeof(txt)) {
-    size = sizeof(txt) - 1;
-    strcpy(txt + size - strlen(text_overflow), text_overflow); /* strcpy: OK */
+  if (size < 0 || wantsize >= sizeof(pending_text)) {
+    size = sizeof(pending_text) - 1;
+    strcpy(pending_text + size - strlen(text_overflow), text_overflow); /* strcpy: OK */
   }
 
   /*
@@ -1728,7 +1747,7 @@ size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const ch
    */
   if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
     size      = LARGE_BUFSIZE - t->bufptr - 1;
-    txt[size] = '\0';
+    pending_text[size] = '\0';
     if (t->character)
       char_set_overf(t->character, true);
     g->buf_overflows++;
@@ -1741,7 +1760,7 @@ size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const ch
    * the overflow state).
    */
   if (t->bufspace > size || (t->large_outbuf && t->bufspace == size)) {
-    strcpy(t->output + t->bufptr, txt); /* strcpy: OK (size checked above) */
+    strcpy(t->output + t->bufptr, pending_text); /* strcpy: OK (size checked above) */
     t->bufspace -= size;
     t->bufptr += size;
     return (t->bufspace);
@@ -1761,7 +1780,7 @@ size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const ch
 
   strcpy(t->large_outbuf->text, t->output); /* strcpy: OK (size checked previously) */
   t->output = t->large_outbuf->text;        /* make big buffer primary */
-  strcat(t->output, txt);                   /* strcat: OK (size checked) */
+  strcat(t->output, pending_text);          /* strcat: OK (size checked) */
 
   /* set the pointer for the next write */
   t->bufptr = strlen(t->output);
@@ -3207,4 +3226,40 @@ void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const
       }
     }
   }
+}
+
+void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
+{
+  send_to_room_printf(g, room, "%.*s", (int)text.size(), text.data());
+}
+
+void send_to_all(GameWorld *g, std::string_view text)
+{
+  send_to_all_printf(g, "%.*s", (int)text.size(), text.data());
+}
+
+void send_to_outdoor(GameWorld *g, std::string_view text)
+{
+  if (text.empty()) /* as send_to_outdoor_printf() skips an empty message */
+    return;
+  send_to_outdoor_printf(g, "%.*s", (int)text.size(), text.data());
+}
+
+void send_to_moon(GameWorld *g, std::string_view text)
+{
+  if (text.empty()) /* as send_to_moon_printf() skips an empty message */
+    return;
+  send_to_moon_printf(g, "%.*s", (int)text.size(), text.data());
+}
+
+void send_to_planet(GameWorld *g, int type, int planet, std::string_view text)
+{
+  if (text.empty()) /* as send_to_planet_printf() skips an empty message */
+    return;
+  send_to_planet_printf(g, type, planet, "%.*s", (int)text.size(), text.data());
+}
+
+void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text)
+{
+  send_to_range_printf(g, start, finish, "%.*s", (int)text.size(), text.data());
 }
