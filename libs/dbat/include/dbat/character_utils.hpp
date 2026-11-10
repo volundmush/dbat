@@ -748,7 +748,6 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict);
 void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
 bool know_skill(GameWorld *g, struct char_data *ch, int skill);
 
-size_t send_to_char_printf(GameWorld *g, struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 3, 4)));
 /* Sends text to ch's connection, if it has one, as it is */
 size_t send_to_char(GameWorld *g, struct char_data *ch, std::string_view text);
 /* Sends text to ch's connection, if it has one, formatted as std::format does */

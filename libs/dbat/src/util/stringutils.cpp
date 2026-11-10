@@ -434,34 +434,6 @@ void search_replace(std::string &s, std::string_view find, std::string_view repl
   }
 }
 
-char *str_printf(const char *format, ...)
-{
-  va_list args;
-  char *s;
-
-  va_start(args, format);
-  if (vasprintf(&s, format, args) < 0) {
-    perror("SYSERR: str_printf");
-    abort();
-  }
-  va_end(args);
-  return s;
-}
-
-std::string str_format_printf(const char *format, ...)
-{
-  va_list args;
-  char *s;
-
-  va_start(args, format);
-  if (vasprintf(&s, format, args) < 0) {
-    perror("SYSERR: str_format");
-    abort();
-  }
-  va_end(args);
-  return take_string(s);
-}
-
 std::string take_string(char *s)
 {
   std::string out = s ? s : "";

@@ -227,12 +227,10 @@ void do_sstat_room(GameWorld *g, struct char_data *ch, struct room_data *rm);
 void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j);
 void do_sstat_character(GameWorld *g, char_data *ch, char_data *k);
 void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc);
-void script_vlog_printf(GameWorld *g, const char *format, va_list args) __attribute__((format(printf, 2, 0)));
-void script_log_printf(GameWorld *g, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
-/* script_log_printf() for text as it is */
+/* script_log(): the text as it is */
 void script_log(GameWorld *g, std::string_view text);
-/* script_log_printf() for text formatted as std::format does */
+/* script_log(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void script_log(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)

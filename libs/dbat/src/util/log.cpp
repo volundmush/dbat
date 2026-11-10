@@ -16,7 +16,7 @@ void log_death_trap(GameWorld *g, struct char_data *ch)
 
 /* New variable argument log() function.  Works the same as the old for
  * previously written code but is very nice for new code.  */
-void mud_vlog_printf(const char *format, va_list args)
+void mud_log(std::string_view text)
 {
   time_t ct    = time(nullptr);
   char *time_s = asctime(localtime(&ct));
@@ -26,51 +26,23 @@ void mud_vlog_printf(const char *format, va_list args)
     return;
   }
 
-  if (format == nullptr)
-    format = "SYSERR: log() received a NULL format.";
-
   time_s[strlen(time_s) - 1] = '\0';
 
   fprintf(logfile, "%-15.15s :: ", time_s + 4);
-  vfprintf(logfile, format, args);
+  fwrite(text.data(), 1, text.size(), logfile);
   fputc('\n', logfile);
   fflush(logfile);
 }
 
-/* So mudlog() can use the same function. */
-void mud_log_printf(const char *format, ...)
-{
-  va_list args;
-
-  va_start(args, format);
-  mud_vlog_printf(format, args);
-  va_end(args);
-}
-
 /* mudlog -- log mud messages to a file & to online imm's syslogs
  * based on syslog by Fen Jul 3, 1992 */
-void mudlog_printf(GameWorld *g, int type, int level, int file, const char *str, ...)
+void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
 {
-  char buf[MAX_STRING_LENGTH];
-  va_list args;
-
-  if (str == nullptr)
-    return; /* eh, oh well. */
-
-  if (file) {
-    va_start(args, str);
-    mud_vlog_printf(str, args);
-    va_end(args);
-  }
+  if (file)
+    mud_log(text);
 
   if (level < ADMLVL_IMMORT)
     level = ADMLVL_IMMORT;
-
-  strcpy(buf, "[ "); /* strcpy: OK */
-  va_start(args, str);
-  vsnprintf(buf + 2, sizeof(buf) - 6, str, args);
-  va_end(args);
-  strcat(buf, " ]\r\n"); /* strcat: OK */
 
   for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
@@ -82,7 +54,7 @@ void mudlog_printf(GameWorld *g, int type, int level, int file, const char *str,
     if (type > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
-    send_to_char(g, i->character, "@g{}@n", buf);
+    send_to_char(g, i->character, "@g[ {} ]\r\n@n", text);
   }
 }
 
@@ -107,12 +79,3 @@ void core_dump_real(const char *who, int line)
   log_backtrace();
 }
 
-void mud_log(std::string_view text)
-{
-  (mud_log_printf)("%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
-{
-  (mudlog_printf)(g, type, level, file, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}

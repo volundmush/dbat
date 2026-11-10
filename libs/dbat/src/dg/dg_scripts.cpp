@@ -267,20 +267,15 @@ void dg_context_str(GameWorld *g, char *buf, size_t len)
  *  Logs any errors caused by scripts to the system log.
  *  Will eventually allow on-line view of script errors.
  */
-void script_vlog_printf(GameWorld *g, const char *format, va_list args)
+void script_log(GameWorld *g, std::string_view text)
 {
-  char output[MAX_STRING_LENGTH];
-  char print_to[MAX_STRING_LENGTH];
   char ctx[MAX_STRING_LENGTH];
 
-  vsnprintf(print_to, sizeof(print_to), format, args);
   dg_context_str(g, ctx, sizeof(ctx));
 
-  mud_log("SCRIPT ERR: {}{}", print_to, ctx);
+  mud_log("SCRIPT ERR: {}{}", text, ctx);
 
   /* the rest is mostly a rip from basic_mud_log() */
-  snprintf(output, sizeof(output), "[ %s%s ]\r\n", print_to, ctx);
-
   for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
@@ -291,17 +286,8 @@ void script_vlog_printf(GameWorld *g, const char *format, va_list args)
     if (LOG_NRM > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
-    send_to_char(g, i->character, "@g{}@n", output);
+    send_to_char(g, i->character, "@g[ {}{} ]\r\n@n", text, ctx);
   }
-}
-
-void script_log_printf(GameWorld *g, const char *format, ...)
-{
-  va_list args;
-
-  va_start(args, format);
-  script_vlog_printf(g, format, args);
-  va_end(args);
 }
 
 /* processes any 'wait' commands in a trigger */
@@ -1405,7 +1391,3 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   atomic_commit(&af);
 }
 
-void script_log(GameWorld *g, std::string_view text)
-{
-  (script_log_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}

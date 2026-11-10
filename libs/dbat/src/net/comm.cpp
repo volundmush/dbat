@@ -1519,19 +1519,6 @@ static void flush_queues(GameWorld *g, struct descriptor_data *d)
   flush_input_queue(d);
 }
 
-/* Add a new string to a player's output queue. For outside use. */
-size_t write_to_output_printf(GameWorld *g, struct descriptor_data *t, const char *txt, ...)
-{
-  va_list args;
-  size_t left;
-
-  va_start(args, txt);
-  left = vwrite_to_output_printf(g, t, txt, args);
-  va_end(args);
-
-  return left;
-}
-
 #define COLOR_ON(g, ch) (COLOR_LEV(g, ch) > 0)
 
 /* Color replacement arrays. Orig. Renx -- 011100, now modified */
@@ -1705,29 +1692,19 @@ static char pending_text[LARGE_BUFSIZE];
 
 static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size);
 
-/* Add a new string to a player's output queue. */
-size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const char *format, va_list args)
-{
-  /* if we're in the overflow state already, ignore this new output */
-  if (t->bufspace == 0)
-    return (0);
-
-  return queue_output(g, t, vsnprintf(pending_text, sizeof(pending_text), format, args));
-}
-
 size_t write_to_output(GameWorld *g, struct descriptor_data *t, std::string_view text)
 {
   /* if we're in the overflow state already, ignore this new output */
   if (t->bufspace == 0)
     return (0);
 
-  size_t n = std::min(text.size(), sizeof(pending_text) - 1); /* as much as vsnprintf() would have kept */
+  size_t n = std::min(text.size(), sizeof(pending_text) - 1); /* as much as fits; queue_output() marks the rest lost */
   memcpy(pending_text, text.data(), n);
   pending_text[n] = '\0';
   return queue_output(g, t, (int)text.size());
 }
 
-/* Queues pending_text, which holds the first sizeof(txt) - 1 chars of a text size long */
+/* Queues pending_text, which holds the first sizeof(pending_text) - 1 chars of a text size long */
 static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
 {
   size_t wantsize = size;
@@ -2724,71 +2701,55 @@ int arena_watch(GameWorld *g, struct char_data *ch)
   return (room);
 }
 
-void send_to_all_printf(GameWorld *g, const char *messg, ...)
+void send_to_all(GameWorld *g, std::string_view text)
 {
-  va_list args;
-
-  if (messg == nullptr)
-    return;
 
   for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
-
-    va_start(args, messg);
-    vwrite_to_output_printf(g, i, messg, args);
-    va_end(args);
+    write_to_output(g, i, text);
   }
 }
 
-void send_to_outdoor_printf(GameWorld *g, const char *messg, ...)
+void send_to_outdoor(GameWorld *g, std::string_view text)
 {
 
-  if (!messg || !*messg)
+  if (text.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
-    va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
       continue;
     if (!char_is_awake(i->character) || !char_is_outside(g, i->character))
       continue;
-
-    va_start(args, messg);
-    vwrite_to_output_printf(g, i, messg, args);
-    va_end(args);
+    write_to_output(g, i, text);
   }
 }
 
-void send_to_moon_printf(GameWorld *g, const char *messg, ...)
+void send_to_moon(GameWorld *g, std::string_view text)
 {
 
-  if (!messg || !*messg)
+  if (text.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
-    va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
       continue;
     if (!char_is_awake(i->character) || !char_has_moon(g, i->character))
       continue;
-
-    va_start(args, messg);
-    vwrite_to_output_printf(g, i, messg, args);
-    va_end(args);
+    write_to_output(g, i, text);
   }
 }
 
-void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg, ...)
+void send_to_planet(GameWorld *g, int type, int planet, std::string_view text)
 {
 
-  if (!messg || !*messg)
+  if (text.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
-    va_list args;
 
     if (desc_get_connected(i) != CON_PLAYING || i->character == nullptr)
       continue;
@@ -2796,32 +2757,23 @@ void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg
       continue;
     else {
       if (type == 0) {
-        va_start(args, messg);
-        vwrite_to_output_printf(g, i, messg, args);
-        va_end(args);
+        write_to_output(g, i, text);
       } else if (char_is_outside(g, i->character) && char_get_skill(i->character, SKILL_SPOT) >= axion_dice(g, -5)) {
-        va_start(args, messg);
-        vwrite_to_output_printf(g, i, messg, args);
-        va_end(args);
+        write_to_output(g, i, text);
       }
     }
   }
 }
 
-void send_to_room_printf(GameWorld *g, room_vnum room, const char *messg, ...)
+void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
 {
-  va_list args;
-
-  if (messg == nullptr || room == NOWHERE)
+  if (room == NOWHERE)
     return;
 
   for (char_data *i : room_people(g, room)) {
     if (!char_get_desc(i))
       continue;
-
-    va_start(args, messg);
-    vwrite_to_output_printf(g, char_get_desc(i), messg, args);
-    va_end(args);
+    write_to_output(g, char_get_desc(i), text);
   }
 
   for (descriptor_data *d : each_desc(g)) {
@@ -2830,23 +2782,13 @@ void send_to_room_printf(GameWorld *g, room_vnum room, const char *messg, ...)
 
     if (char_prf_flagged(g, d->character, PRF_ARENAWATCH)) {
       if (arena_watch(g, d->character) == room) {
-        char buf[2000];
-        *buf = '\0';
-        sprintf(buf, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", messg);
-        va_start(args, messg);
-        vwrite_to_output_printf(g, d, buf, args);
-        va_end(args);
+        write_to_output(g, d, "@c-----@CArena@c-----@n\r\n{}\r\n@c-----@CArena@c-----@n\r\n", text);
       }
     }
     if (char_get_listenroom(d->character) > 0) {
       int roll = rand_number(g, 1, 101);
       if (char_get_listenroom(d->character) == room && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
-        char buf[1000];
-        *buf = '\0';
-        sprintf(buf, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", messg);
-        va_start(args, messg);
-        vwrite_to_output_printf(g, d, buf, args);
-        va_end(args);
+        write_to_output(g, d, "-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", text);
       }
     }
   }
@@ -3203,63 +3145,21 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 }
 
 /* Thx to Jamie Nelson of 4D for this contribution */
-void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...)
+void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text)
 {
-  va_list args;
 
   if (start > finish) {
     mud_log("send_to_range passed start room value greater then finish.");
     return;
   }
-  if (messg == nullptr)
-    return;
-
   for (room_vnum j : g->rooms.vnums()) {
     if (j >= start && j <= finish) {
       for (char_data *i : room_people(g, j)) {
         if (!char_get_desc(i))
           continue;
-
-        va_start(args, messg);
-        vwrite_to_output_printf(g, char_get_desc(i), messg, args);
-        va_end(args);
+        write_to_output(g, char_get_desc(i), text);
       }
     }
   }
 }
 
-void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
-{
-  (send_to_room_printf)(g, room, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void send_to_all(GameWorld *g, std::string_view text)
-{
-  (send_to_all_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void send_to_outdoor(GameWorld *g, std::string_view text)
-{
-  if (text.empty()) /* as send_to_outdoor() skips an empty message */
-    return;
-  (send_to_outdoor_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void send_to_moon(GameWorld *g, std::string_view text)
-{
-  if (text.empty()) /* as send_to_moon() skips an empty message */
-    return;
-  (send_to_moon_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void send_to_planet(GameWorld *g, int type, int planet, std::string_view text)
-{
-  if (text.empty()) /* as send_to_planet() skips an empty message */
-    return;
-  (send_to_planet_printf)(g, type, planet, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}
-
-void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text)
-{
-  (send_to_range_printf)(g, start, finish, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}

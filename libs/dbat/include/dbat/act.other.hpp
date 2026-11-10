@@ -8,11 +8,10 @@
 // variables
 
 // functions
-void log_imm_action_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 
-/* log_imm_action_printf() for text as it is */
+/* log_imm_action(): the text as it is */
 void log_imm_action(GameWorld *g, std::string_view text);
-/* log_imm_action_printf() for text formatted as std::format does */
+/* log_imm_action(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void log_imm_action(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)

@@ -55,7 +55,7 @@
 #include "other_internal.hpp"
 
 // definitions
-void log_imm_action_printf(GameWorld *g, const char *messg, ...)
+void log_imm_action(GameWorld *g, std::string_view text)
 {
 
   FILE *fl;
@@ -89,15 +89,11 @@ void log_imm_action_printf(GameWorld *g, const char *messg, ...)
   time_t ct    = game_now(g);
   char *time_s = asctime(localtime(&ct));
 
-  va_list args;
-
-  va_start(args, messg);
   time_s[strlen(time_s) - 1] = '\0';
 
   fprintf(fl, "%-15.15s :: ", time_s + 4);
-  vfprintf(fl, messg, args);
+  fwrite(text.data(), 1, text.size(), fl);
   fprintf(fl, "\n");
-  va_end(args);
 
   fclose(fl);
 }
@@ -856,7 +852,3 @@ ACMD(do_think)
   return;
 }
 
-void log_imm_action(GameWorld *g, std::string_view text)
-{
-  (log_imm_action_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}

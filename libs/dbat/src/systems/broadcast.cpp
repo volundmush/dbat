@@ -307,10 +307,9 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
   }
 }
 
-void send_to_imm_printf(GameWorld *g, const char *messg, ...)
+void send_to_imm(GameWorld *g, std::string_view text)
 {
-
-  if (!messg || !*messg)
+  if (text.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
@@ -327,22 +326,9 @@ void send_to_imm_printf(GameWorld *g, const char *messg, ...)
       continue;
     }
     write_to_output(g, i, "@g[ Log: ");
-    va_list args;
-    va_start(args, messg);
-
-    vwrite_to_output_printf(g, i, messg, args);
+    write_to_output(g, i, text);
     write_to_output(g, i, " ]@n\n");
-    va_end(args);
   }
-  va_list args;
-  va_start(args, messg);
-  mud_vlog_printf(messg, args);
-  va_end(args);
+  mud_log(text);
 }
 
-void send_to_imm(GameWorld *g, std::string_view text)
-{
-  if (text.empty()) /* as send_to_imm() skips an empty message */
-    return;
-  (send_to_imm_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
-}

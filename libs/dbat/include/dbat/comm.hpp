@@ -27,16 +27,10 @@ constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run bef
 
 /* comm.c */
 int arena_watch(GameWorld *g, struct char_data *ch);
-void send_to_all_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_room_printf(GameWorld *g, room_vnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
-void send_to_outdoor_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_moon_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));
-void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
 
-/* send_to_room_printf() for text as it is */
+/* send_to_room(): the text as it is */
 void send_to_room(GameWorld *g, room_vnum room, std::string_view text);
-/* send_to_room_printf() for text formatted as std::format does */
+/* send_to_room(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_room(GameWorld *g, room_vnum room, std::format_string<Args...> fmt, Args &&...args)
@@ -44,9 +38,9 @@ void send_to_room(GameWorld *g, room_vnum room, std::format_string<Args...> fmt,
   send_to_room(g, room, str_format(fmt, std::forward<Args>(args)...));
 }
 
-/* send_to_all_printf() for text as it is */
+/* send_to_all(): the text as it is */
 void send_to_all(GameWorld *g, std::string_view text);
-/* send_to_all_printf() for text formatted as std::format does */
+/* send_to_all(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_all(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
@@ -54,9 +48,9 @@ void send_to_all(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
   send_to_all(g, str_format(fmt, std::forward<Args>(args)...));
 }
 
-/* send_to_outdoor_printf() for text as it is */
+/* send_to_outdoor(): the text as it is */
 void send_to_outdoor(GameWorld *g, std::string_view text);
-/* send_to_outdoor_printf() for text formatted as std::format does */
+/* send_to_outdoor(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_outdoor(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
@@ -64,9 +58,9 @@ void send_to_outdoor(GameWorld *g, std::format_string<Args...> fmt, Args &&...ar
   send_to_outdoor(g, str_format(fmt, std::forward<Args>(args)...));
 }
 
-/* send_to_moon_printf() for text as it is */
+/* send_to_moon(): the text as it is */
 void send_to_moon(GameWorld *g, std::string_view text);
-/* send_to_moon_printf() for text formatted as std::format does */
+/* send_to_moon(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_moon(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
@@ -74,9 +68,9 @@ void send_to_moon(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
   send_to_moon(g, str_format(fmt, std::forward<Args>(args)...));
 }
 
-/* send_to_planet_printf() for text as it is */
+/* send_to_planet(): the text as it is */
 void send_to_planet(GameWorld *g, int type, int planet, std::string_view text);
-/* send_to_planet_printf() for text formatted as std::format does */
+/* send_to_planet(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_planet(GameWorld *g, int type, int planet, std::format_string<Args...> fmt, Args &&...args)
@@ -84,9 +78,9 @@ void send_to_planet(GameWorld *g, int type, int planet, std::format_string<Args.
   send_to_planet(g, type, planet, str_format(fmt, std::forward<Args>(args)...));
 }
 
-/* send_to_range_printf() for text as it is */
+/* send_to_range(): the text as it is */
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text);
-/* send_to_range_printf() for text formatted as std::format does */
+/* send_to_range(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_string<Args...> fmt, Args &&...args)
@@ -110,8 +104,6 @@ constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 /* I/O functions */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 int write_to_descriptor(int desc, const char *txt);
-size_t write_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
-size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
 /* Queues text for d as it is */
 size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::string_view text);
 /* Queues text for d, formatted as std::format does */

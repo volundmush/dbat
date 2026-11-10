@@ -74,6 +74,7 @@
 - OLC (`olc/`) and the DG scripts (`dg/`) send and log their text with `std::format`; `mob_log()`, `obj_log()` and `wld_log()` and the editor's `tb_format()` take a `std::format` string too, and no longer cut what they format at a fixed length. [Volund]
 - Everything else (`systems/`, `db/`, `net/`, `entities/`, `util/` and the tests) sends and logs its text with `std::format`: no call to a `_printf` function is left outside the functions themselves. `tools/printf_to_format.py` turns `%p` into `as_pointer()`, and world_audit's `problem()` takes a `std::format` string. [Volund]
 - The boot log's `PCLEAN` lines show when each cleaned-out player last played. They showed the time of the boot instead: the date came from `asctime()`, whose buffer the logger's own `asctime()` call overwrote before printing it. [Volund]
+- The `_printf` output functions are gone. `send_to_char()`, `write_to_output()`, the `send_to_*()` family, `send_to_imm()`, `log_imm_action()`, `mud_log()`, `mudlog()` and `script_log()` work on the text itself, and none formats into a fixed buffer any more (the arena and eavesdrop copies of a room message went through ones of 2000 and 1000 bytes). `str_printf()` and `str_format_printf()` are gone; `str_format()` replaces them. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

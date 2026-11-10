@@ -4239,20 +4239,6 @@ bool limb_ok(GameWorld *g, struct char_data *ch, int type)
   return true;
 }
 
-size_t send_to_char_printf(GameWorld *g, struct char_data *ch, const char *messg, ...)
-{
-  if (ch->desc && messg && *messg) {
-    size_t left;
-    va_list args;
-
-    va_start(args, messg);
-    left = vwrite_to_output_printf(g, ch->desc, messg, args);
-    va_end(args);
-    return left;
-  }
-  return 0;
-}
-
 size_t send_to_char(GameWorld *g, struct char_data *ch, std::string_view text)
 {
   if (ch->desc && !text.empty())

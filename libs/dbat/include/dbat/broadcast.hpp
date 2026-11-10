@@ -5,11 +5,10 @@
 #include "dbat/consts/types.hpp"
 
 // functions
-void send_to_imm_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 
-/* send_to_imm_printf() for text as it is */
+/* send_to_imm(): the text as it is */
 void send_to_imm(GameWorld *g, std::string_view text);
-/* send_to_imm_printf() for text formatted as std::format does */
+/* send_to_imm(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
 void send_to_imm(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
