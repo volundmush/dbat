@@ -210,7 +210,7 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
   g->dg_ctx.active     = true;
   g->dg_ctx.owner_type = type;
   g->dg_ctx.trig_vnum  = (long long)trig_get_vnum(g, trig);
-  snprintf(g->dg_ctx.trig_name, sizeof(g->dg_ctx.trig_name), "%s", trig->name.c_str());
+  g->dg_ctx.trig_name  = trig->name;
   g->dg_ctx.room_vnum = -1;
 
   if (!go)
@@ -218,19 +218,19 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
 
   switch (type) {
     case MOB_TRIGGER:
-      snprintf(g->dg_ctx.owner_name, sizeof(g->dg_ctx.owner_name), "%s", char_get_name((char_data *)go) ? char_get_name((char_data *)go) : "");
+      g->dg_ctx.owner_name = writable_copy(char_get_name((char_data *)go));
       g->dg_ctx.owner_vnum = (long long)char_get_mob_vnum(g, (char_data *)go);
       g->dg_ctx.owner_uid  = char_get_id((char_data *)go);
       room              = char_get_in_room((char_data *)go);
       break;
     case OBJ_TRIGGER:
-      snprintf(g->dg_ctx.owner_name, sizeof(g->dg_ctx.owner_name), "%s", obj_get_short_description((obj_data *)go) ? obj_get_short_description((obj_data *)go) : "");
+      g->dg_ctx.owner_name = writable_copy(obj_get_short_description((obj_data *)go));
       g->dg_ctx.owner_vnum = (long long)obj_get_vnum(g, (obj_data *)go);
       g->dg_ctx.owner_uid  = obj_get_id((obj_data *)go);
       room              = obj_room((obj_data *)go);
       break;
     case WLD_TRIGGER:
-      snprintf(g->dg_ctx.owner_name, sizeof(g->dg_ctx.owner_name), "%s", room_get_name((room_data *)go) ? room_get_name((room_data *)go) : "");
+      g->dg_ctx.owner_name = writable_copy(room_get_name((room_data *)go));
       g->dg_ctx.owner_vnum = (long long)room_get_number((room_data *)go);
       g->dg_ctx.owner_uid  = room_get_number((room_data *)go) + ROOM_ID_BASE;
       g->dg_ctx.room_vnum  = g->dg_ctx.owner_vnum;
@@ -243,24 +243,22 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
 
 static void dg_ctx_set_line(GameWorld *g, const char *cmd)
 {
-  snprintf(g->dg_ctx.line, sizeof(g->dg_ctx.line), "%s", cmd ? cmd : "");
+  g->dg_ctx.line = writable_copy(cmd);
 }
 
-/* Writes " [trig ... ]" describing the running trigger, or "" when none is. */
-void dg_context_str(GameWorld *g, char *buf, size_t len)
+/* " [trig ... ]" describing the running trigger, or "" when none is. */
+std::string dg_context(GameWorld *g)
 {
   static const char *owner_types[] = {"mob", "obj", "room"};
 
-  if (!g->dg_ctx.active) {
-    snprintf(buf, len, "%s", "");
-    return;
-  }
+  if (!g->dg_ctx.active)
+    return {};
 
-  snprintf(buf, len, " [trig #%lld '%s' on %s '%s' #%lld uid %ld in room %lld; line: %s]",
-           g->dg_ctx.trig_vnum, g->dg_ctx.trig_name,
-           (g->dg_ctx.owner_type >= 0 && g->dg_ctx.owner_type <= 2) ? owner_types[g->dg_ctx.owner_type] : "?",
-           g->dg_ctx.owner_name, g->dg_ctx.owner_vnum, g->dg_ctx.owner_uid, g->dg_ctx.room_vnum,
-           *g->dg_ctx.line ? g->dg_ctx.line : "(none)");
+  return str_format(" [trig #{:d} '{}' on {} '{}' #{:d} uid {:d} in room {:d}; line: {}]",
+                    g->dg_ctx.trig_vnum, g->dg_ctx.trig_name,
+                    (g->dg_ctx.owner_type >= 0 && g->dg_ctx.owner_type <= 2) ? owner_types[g->dg_ctx.owner_type] : "?",
+                    g->dg_ctx.owner_name, g->dg_ctx.owner_vnum, g->dg_ctx.owner_uid, g->dg_ctx.room_vnum,
+                    !g->dg_ctx.line.empty() ? g->dg_ctx.line.c_str() : "(none)");
 }
 
 /*
@@ -269,9 +267,7 @@ void dg_context_str(GameWorld *g, char *buf, size_t len)
  */
 void script_log(GameWorld *g, std::string_view text)
 {
-  char ctx[MAX_STRING_LENGTH];
-
-  dg_context_str(g, ctx, sizeof(ctx));
+  std::string ctx = dg_context(g);
 
   mud_log("SCRIPT ERR: {}{}", text, ctx);
 

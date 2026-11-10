@@ -388,15 +388,13 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
 {
   FILE *fl = nullptr;
   char filename[MAX_STRING_LENGTH];
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   struct obj_data *obj;
   int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0;
-  size_t len;
   long long timed = 0;
   int t[10];
   obj_vnum nr;
   char line[MAX_STRING_LENGTH];
-  char *sdesc;
 
   if (get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     fl = fopen(filename, "rb");
@@ -431,9 +429,6 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
       send_to_char(g, ch, "Undef\r\n");
       break;
   }
-  buf[0] = 0;
-  len    = 0;
-
   while (!feof(fl)) {
     get_line(fl, line);
     if (*line == '#') { /* swell - its an item */
@@ -441,40 +436,22 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
       if (nr != NOTHING) { /* then we can dispense with it easily */
         if (obj_proto_of(g, nr)) {
           obj = read_object(g, nr);
-          if (len + 255 < sizeof(buf)) {
-            len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
+          buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n",
                             nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
-          } else {
-            snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
-            break;
-          }
           extract_obj(g, obj);
-        } else {
-          if (len + 255 < sizeof(buf)) {
-            len += snprintf(buf + len, sizeof(buf) - len,
-                            "[-----] NONEXISTANT OBJECT #%d\r\n", nr);
-          } else {
-            snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
-            break;
-          }
-        }
+        } else
+          buf += str_format("[-----] NONEXISTANT OBJECT #{:d}\r\n", nr);
       } else {                                       /* its nothing, and a unique item. bleh. partial parse.*/
         get_line(fl, line);                          /* this is obj+val */
         get_line(fl, line);                          /* this is XAP */
-        fread_string(fl, ", listrent reading name"); /* screw the name */
-        sdesc = fread_string(fl, ", listrent reading sdesc");
-        fread_string(fl, ", listrent reading desc");  /* screw the long desc */
-        fread_string(fl, ", listrent reading adesc"); /* screw the action desc. */
+        free(fread_string(fl, ", listrent reading name")); /* screw the name */
+        std::string sdesc = take_string(fread_string(fl, ", listrent reading sdesc"));
+        free(fread_string(fl, ", listrent reading desc"));  /* screw the long desc */
+        free(fread_string(fl, ", listrent reading adesc")); /* screw the action desc. */
         get_line(fl, line);                           /* this is an important line.rent..*/
         sscanf(line, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4);
         /* great we got it all, make the buf */
-        if (len + 255 < sizeof(buf)) {
-          len += snprintf(buf + len, sizeof(buf) - len,
-                          "[%5d] (%5dau) %-20s\r\n", nr, t[4], sdesc);
-        } else {
-          snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
-          break;
-        }
+        buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n", nr, t[4], sdesc.empty() ? "(null)" : sdesc);
         /* best of all, we don't care if there's descs, or stuff..*/
         /* since we're only doing operations on lines beginning in # */
         /* i suppose you don't want to make exdescs start with # .:) */
@@ -482,7 +459,7 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
     }
   }
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
   fclose(fl);
 }
 

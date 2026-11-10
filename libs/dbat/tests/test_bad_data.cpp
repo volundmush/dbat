@@ -1372,6 +1372,44 @@ static void check_guild_with_no_customers(void)
   th_shutdown(g);
 }
 
+/* hindex lists every matching help entry however many there are (it added up what snprintf() wanted to write, so
+ * a long enough list went on writing past the end of its buffer) */
+static void check_long_help_index(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
+
+  for (int i = 0; i < 4000; i++) {
+    help_index_element entry;
+    entry.keywords = str_format("ZZZZ{:04d}", i);
+    entry.entry    = "text\r\n";
+    g->help_table.push_back(entry);
+  }
+  th_type(g, ch, "hindex zzzz");
+  CHECK(saw(ch, "ZZZZ3999"));
+  CHECK(saw(ch, "4000 Help files in index."));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* Listing a rent file with a unique item in it reads past the item's strings without keeping them */
+static void check_rent_listing_keeps_no_copies(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
+  char path[256];
+
+  save_path("plrobjs", "new", "tester", path, sizeof(path));
+  write_file(path, "1 0 0 0 0 1\n#-1\n0\nXAP\nthing~\na unique thing~\nA thing lies here.~\nIt does things.~\n0 0 0 0 7\n$~\n");
+  Crash_listrent(g, ch, writable_copy("tester").data());
+  CHECK(saw(ch, "a unique thing"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+#ifdef __SANITIZE_ADDRESS__
+  CHECK(__lsan_do_recoverable_leak_check() == 0); /* the run ends in _exit(), which LeakSanitizer doesn't see */
+#endif
+}
+
 /* log_imm_action() appends its line, plain or formatted, to the request file */
 static void check_imm_action_reaches_the_log(void)
 {
@@ -1759,6 +1797,8 @@ static const struct {
     {"sensing_keeps_no_copies",                     check_sensing_keeps_no_copies                    },
     {"shop_with_no_customers",                      check_shop_with_no_customers                     },
     {"guild_with_no_customers",                     check_guild_with_no_customers                    },
+    {"long_help_index",                             check_long_help_index                            },
+    {"rent_listing_keeps_no_copies",                check_rent_listing_keeps_no_copies               },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

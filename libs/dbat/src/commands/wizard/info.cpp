@@ -810,7 +810,6 @@ ACMD(do_varstat)
   /* Display their global variables */
   if (char_get_script(vict) && char_get_script(vict)->global_vars) {
     struct trig_var_data *tv;
-    char uname[MAX_INPUT_LENGTH];
 
     send_to_char(g, ch, "{}'s Global Variables:\r\n", char_get_name(vict));
 
@@ -818,8 +817,7 @@ ACMD(do_varstat)
     /* not displayed here. in the future, this might change */
     for (tv = char_get_script(vict)->global_vars; tv; tv = tv->next) {
       if (tv->value[0] == UID_CHAR) {
-        find_uid_name(g, tv->value.data(), uname, sizeof(uname));
-        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv->name, uname);
+        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv->name, find_uid_name(g, tv->value));
       } else
         send_to_char(g, ch, "    {:>10}:  {}\r\n", tv->name, tv->value);
     }

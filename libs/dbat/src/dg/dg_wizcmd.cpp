@@ -23,62 +23,56 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc);
 static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 {
   struct cmdlist_element *cmd_list;
-  char sb[MAX_STRING_LENGTH];
+  std::string sb;
   std::string buf;
-  int len = 0;
 
   if (!trig) {
     mud_log("SYSERR: NULL trigger passed to do_stat_trigger.");
     return;
   }
 
-  len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-                  trig->name.c_str(), trig_get_vnum(g, trig), g->trig_index.place(trig_get_vnum(g, trig)));
+  sb = str_format("Name: '@y{}@n',  VNum: [@g{:>5d}@n], RNum: [{:>5d}]\r\n",
+                  trig->name, trig_get_vnum(g, trig), g->trig_index.place(trig_get_vnum(g, trig)));
 
   if (trig->attach_type == OBJ_TRIGGER) {
-    len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Objects\r\n");
+    sb += "Trigger Intended Assignment: Objects\r\n";
     buf = sprintbit(trig->trigger_type, otrig_types);
   } else if (trig->attach_type == WLD_TRIGGER) {
-    len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Rooms\r\n");
+    sb += "Trigger Intended Assignment: Rooms\r\n";
     buf = sprintbit(trig->trigger_type, wtrig_types);
   } else {
-    len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Mobiles\r\n");
+    sb += "Trigger Intended Assignment: Mobiles\r\n";
     buf = sprintbit(trig->trigger_type, trig_types);
   }
 
-  len += snprintf(sb + len, sizeof(sb) - len, "Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
-                  buf.c_str(), trig->narg,
-                  !trig->arglist.empty() ? trig->arglist.c_str() : "None");
+  sb += str_format("Trigger Type: {}, Numeric Arg: {:d}, Arg list: {}\r\n",
+                   buf, trig->narg,
+                   !trig->arglist.empty() ? trig->arglist.c_str() : "None");
 
-  len += snprintf(sb + len, sizeof(sb) - len, "Commands:\r\n");
+  sb += "Commands:\r\n";
 
   cmd_list = trig->cmdlist;
   while (cmd_list) {
     if (!cmd_list->cmd.empty())
-      len += snprintf(sb + len, sizeof(sb) - len, "%s\r\n", cmd_list->cmd.c_str());
-
-    if (len > MAX_STRING_LENGTH - 80) {
-      len += snprintf(sb + len, sizeof(sb) - len, "*** Overflow - script too long! ***\r\n");
-      break;
-    }
+      sb += str_format("{}\r\n", cmd_list->cmd);
     cmd_list = cmd_list->next;
   }
 
-  send_to_char(g, ch, "{}", sb);
+  send_to_char(g, ch, sb);
 }
 
 /* find the name of what the uid points to */
-void find_uid_name(GameWorld *g, char *uid, char *name, size_t nlen)
+std::string find_uid_name(GameWorld *g, std::string_view uid)
 {
   char_data *ch;
   obj_data *obj;
 
   if ((ch = get_char(g, uid)))
-    snprintf(name, nlen, "%s", char_get_alias(ch));
+    return str_format("{}", char_get_alias(ch));
   else if ((obj = get_obj(g, uid)))
-    snprintf(name, nlen, "%s", obj_get_name(obj));
+    return str_format("{}", obj_get_name(obj));
   else
-    snprintf(name, nlen, "uid = %s, (not found)", uid + 1);
+    return str_format("uid = {}, (not found)", uid.substr(1));
 }
 
 /* general function to display stats on script sc */
@@ -86,7 +80,6 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 {
   struct trig_var_data *tv;
   trig_data *t;
-  char name[MAX_INPUT_LENGTH];
   std::string namebuf;
   std::string buf1;
 
@@ -96,8 +89,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
   for (tv = sc->global_vars; tv; tv = tv->next) {
     namebuf = str_format("{}:{:d}", tv->name, tv->context);
     if (tv->value[0] == UID_CHAR) {
-      find_uid_name(g, tv->value.data(), name, sizeof(name));
-      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), name);
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), find_uid_name(g, tv->value));
     } else
       send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), tv->value);
   }
@@ -129,8 +121,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
       for (tv = t->var_list; tv; tv = tv->next) {
         if (tv->value[0] == UID_CHAR) {
-          find_uid_name(g, tv->value.data(), name, sizeof(name));
-          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, name);
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, find_uid_name(g, tv->value));
         } else
           send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, tv->value);
       }

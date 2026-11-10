@@ -110,10 +110,7 @@ static void hedit_setup_new(GameWorld *g, struct descriptor_data *d)
 {
   OLC_HELP(d) = new help_index_element();
 
-  char buf3[MAX_INPUT_LENGTH];
-  sprintf(buf3, "<<X<< Put helpfile keywords here in caps");
-
-  OLC_HELP(d)->keywords = buf3;
+  OLC_HELP(d)->keywords = "<<X<< Put helpfile keywords here in caps";
   OLC_HELP(d)->entry    = "\r\nThis help file is unfinished.\r\n";
   OLC_VAL(d)         = 0;
 
@@ -397,9 +394,8 @@ void hedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 
 ACMD(do_helpcheck)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   int i, count = 0;
-  size_t len = 0, nlen;
 
   send_to_char(g, ch, "Commands without help entries:\r\n");
 
@@ -408,27 +404,21 @@ ACMD(do_helpcheck)
       if (search_help(g, g->complete_cmd_info[i].command, ADMLVL_IMPL) == NOWHERE) {
         /*if (search_help(complete_cmd_info[i].command, ADMLVL_IMPL) == 
 NOWHERE) {*/
-        nlen = snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", g->complete_cmd_info[i].command,
-                        (++count % 3 ? "" : "\r\n"));
-        if (len + nlen >= sizeof(buf))
-          break;
-        len += nlen;
+        buf += str_format("{:<20.20}{}", g->complete_cmd_info[i].command, (++count % 3 ? "" : "\r\n"));
       }
     }
   }
-  if (count % 3 && len < sizeof(buf))
-    nlen = snprintf(buf + len, sizeof(buf) - len, "\r\n");
+  if (count % 3)
+    buf += "\r\n";
 
   if (char_get_desc(ch))
-    send_to_char(g, ch, "{}", buf);
-
-  *buf = '\0';
+    send_to_char(g, ch, buf);
 }
 
 ACMD(do_hindex)
 {
-  int len, count = 0, i, num = 0;
-  char buf[MAX_STRING_LENGTH];
+  int count = 0, i, num = 0;
+  std::string buf;
 
   std::string text(skip_spaces(argument));
 
@@ -443,22 +433,20 @@ ACMD(do_hindex)
     return;
   }
 
-  len = sprintf(buf, "Help index entries based on '%s':\r\n", text.c_str());
+  buf = str_format("Help index entries based on '{}':\r\n", text);
   for (i = 0; i < (int)g->help_table.size(); i++) {
     num++;
     if (is_abbrev(text, g->help_table[i].keywords.c_str()) && (char_get_admlevel(ch) >= g->help_table[i].min_level))
-      len +=
-          snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", g->help_table[i].keywords.c_str(),
-                   (++count % 3 ? "" : "\r\n"));
+      buf += str_format("{:<20.20}{}", g->help_table[i].keywords, (++count % 3 ? "" : "\r\n"));
   }
   if (count % 3)
-    len += snprintf(buf + len, sizeof(buf) - len, "\r\n");
+    buf += "\r\n";
 
   if (!count)
-    len += snprintf(buf + len, sizeof(buf) - len, "  None.\r\n");
+    buf += "  None.\r\n";
 
   if (count > 0 && char_get_admlevel(ch) > 0) {
-    len += snprintf(buf + len, sizeof(buf) - len, "  %d Help files in index.\r\n", count);
+    buf += str_format("  {:d} Help files in index.\r\n", count);
   }
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 }

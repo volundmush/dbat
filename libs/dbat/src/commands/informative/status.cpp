@@ -307,29 +307,29 @@ ACMD(do_score)
     send_to_char(g, ch, "  @cO@D-----------------------------[  @cPersonal  @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "  @D|  @CName@D: @W{:>15}@D,   @CTitle@D: @W{:<38}@D|@n\n", char_get_name(ch), char_get_title(ch));
     if (char_is_android(ch)) {
-      char model[100] = "@WNone", version[100];
+      std::string model = "@WNone", version;
       int absorb = 0;
       if (char_plr_flagged(ch, PLR_ABSORB)) {
-        snprintf(model, sizeof(model), "@CAbsorption");
+        model = "@CAbsorption";
       } else if (char_plr_flagged(ch, PLR_REPAIR)) {
-        snprintf(model, sizeof(model), "@GSelf Repairing");
+        model = "@GSelf Repairing";
       } else if (char_plr_flagged(ch, PLR_SENSEM)) {
-        snprintf(model, sizeof(model), "@RSensor Equiped");
+        model = "@RSensor Equiped";
       }
       if (char_plr_flagged(ch, PLR_TRANS1)) {
-        snprintf(version, sizeof(version), "Beta 1.0");
+        version = "Beta 1.0";
       } else if (char_plr_flagged(ch, PLR_TRANS2)) {
-        snprintf(version, sizeof(version), "ANS 2.0");
+        version = "ANS 2.0";
       } else if (char_plr_flagged(ch, PLR_TRANS3)) {
-        snprintf(version, sizeof(version), "ANS 3.0");
+        version = "ANS 3.0";
       } else if (char_plr_flagged(ch, PLR_TRANS4)) {
-        snprintf(version, sizeof(version), "ANS 4.0");
+        version = "ANS 4.0";
       } else if (char_plr_flagged(ch, PLR_TRANS5)) {
-        snprintf(version, sizeof(version), "ANS 5.0");
+        version = "ANS 5.0";
       } else if (char_plr_flagged(ch, PLR_TRANS6)) {
-        snprintf(version, sizeof(version), "ANS 6.0");
+        version = "ANS 6.0";
       } else {
-        snprintf(version, sizeof(version), "Alpha 0.5");
+        version = "Alpha 0.5";
       }
       send_to_char(g, ch, "  @D| @CModel@D: {:>15}@D,    @CUGP@D: @G{:>15}@D,  @CVersion@D: @r{:<12}@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
     }
@@ -1353,8 +1353,8 @@ ACMD(do_equipment)
 
 ACMD(do_levels)
 {
-  char buf[MAX_STRING_LENGTH];
-  size_t i, len = 0;
+  std::string buf;
+  size_t i;
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You ain't nothin' but a hound-dog.\r\n");
@@ -1363,13 +1363,13 @@ ACMD(do_levels)
 
   for (i = 1; i < 101; i++) {
     if (i == 100)
-      len += snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
+      buf += str_format("[100] {:>8}          : \r\n", add_commas(level_exp(ch, 100)));
     else
-      len += snprintf(buf + len, sizeof(buf) - len, "[%2zu] %8s-%-8s : \r\n", i,
-                      add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
+      buf += str_format("[{:>2d}] {:>8}-{:<8} : \r\n", i,
+                        add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
   }
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 }
 
 ACMD(do_consider)

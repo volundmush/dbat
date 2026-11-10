@@ -222,7 +222,8 @@ obj_data *get_obj_in_list(GameWorld *g, std::string_view name, const id_list &li
 obj_data *get_object_in_equip(GameWorld *g, char_data *ch, std::string_view name);
 void script_trigger_check(GameWorld *g);
 void check_time_triggers(GameWorld *g);
-void find_uid_name(GameWorld *g, char *uid, char *name, size_t nlen);
+/* the name of what uid (a UID variable's value) points to, or that it was not found */
+std::string find_uid_name(GameWorld *g, std::string_view uid);
 void do_sstat_room(GameWorld *g, struct char_data *ch, struct room_data *rm);
 void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j);
 void do_sstat_character(GameWorld *g, char_data *ch, char_data *k);
@@ -331,13 +332,13 @@ static inline bool trigger_ready(const trig_data *t, bitvector_t type)
 struct dg_run_ctx {
   bool active{};
   long long trig_vnum{};
-  char trig_name[64]{};
+  std::string trig_name;
   int owner_type{};
-  char owner_name[64]{};
+  std::string owner_name;
   long long owner_vnum{};
   long owner_uid{};
   long long room_vnum{};
-  char line[256]{};
+  std::string line;
 };
 
 

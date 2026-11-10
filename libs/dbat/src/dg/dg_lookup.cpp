@@ -523,10 +523,9 @@ static const char *uid_range_name(long uid)
 /* found_other: the uid belongs to an entity of the other kind */
 static void log_lookup_miss(GameWorld *g, const char *what, long uid, bool found_other)
 {
-  char ctx[MAX_STRING_LENGTH];
-  bool is_obj = !strcmp(what, "find_obj");
+  std::string ctx = dg_context(g);
+  bool is_obj     = !strcmp(what, "find_obj");
 
-  dg_context_str(g, ctx, sizeof(ctx));
   if (found_other)
     mud_log("{}: uid {:d} ({} range) belongs to a {}, not a {}{}",
             what, uid, uid_range_name(uid), is_obj ? "character" : "object",

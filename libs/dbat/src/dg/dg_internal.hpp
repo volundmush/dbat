@@ -10,7 +10,8 @@
 struct script_data **script_slot(void *go, int type);
 
 /* dg_scripts.c */
-void dg_context_str(GameWorld *g, char *buf, size_t len);
+/* " [trig ... ]" describing the running trigger, or "" when none is */
+std::string dg_context(GameWorld *g);
 
 /* dg_lookup.c */
 room_data *find_room(GameWorld *g, long n);
