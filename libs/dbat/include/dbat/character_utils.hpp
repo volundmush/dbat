@@ -760,7 +760,8 @@ size_t send_to_char(GameWorld *g, struct char_data *ch, std::format_string<Args.
   return send_to_char(g, ch, str_format(fmt, std::forward<Args>(args)...));
 }
 void admin_set(GameWorld *g, struct char_data *ch, int value);
-char *sense_location(GameWorld *g, struct char_data *ch);
+/* the name of the place ch is in, as sensing them tells it */
+const char *sense_location(GameWorld *g, struct char_data *ch);
 void null_affect(GameWorld *g, struct char_data *ch, int aff_flag);
 bool is_affected(struct char_data *ch, int aff_flag);
 void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag);

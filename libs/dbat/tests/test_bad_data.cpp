@@ -35,6 +35,7 @@
 #include "dbat/handler.hpp"
 #include "dbat/help.hpp"
 #include "dbat/boards.hpp"
+#include "dbat/broadcast.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
@@ -1300,6 +1301,31 @@ static void check_deleted_object_leaves_no_put_command(void)
   th_shutdown(g);
 }
 
+/* Sensing someone on the same planet names where they are without leaving a copy of the name behind (it was
+ * allocated for each sensing player, and only some callers freed it) */
+static void check_sensing_keeps_no_copies(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Sensed", 0);
+  struct char_data *tch = th_player(g, "Senser", 0);
+
+  SET_BIT_AR(room_get_room_flags(g, 300), ROOM_EARTH);
+  SET_BIT_AR(room_get_room_flags(g, 301), ROOM_EARTH);
+  char_from_room(g, ch);
+  char_to_room(g, ch, 300);
+  char_from_room(g, tch);
+  char_to_room(g, tch, 301);
+  char_set_skills_base(tch, SKILL_SENSE, 50);
+
+  send_to_sense(g, 1, "landing on the planet", ch);
+  CHECK(saw(tch, "landing on the planet"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+#ifdef __SANITIZE_ADDRESS__
+  CHECK(__lsan_do_recoverable_leak_check() == 0); /* the run ends in _exit(), which LeakSanitizer doesn't see */
+#endif
+}
+
 /* log_imm_action() appends its line, plain or formatted, to the request file */
 static void check_imm_action_reaches_the_log(void)
 {
@@ -1684,6 +1710,7 @@ static const struct {
     {"wiznet_keeps_no_copies",                      check_wiznet_keeps_no_copies                     },
     {"deleted_object_leaves_no_put_command",        check_deleted_object_leaves_no_put_command       },
     {"imm_action_reaches_the_log",                  check_imm_action_reaches_the_log                 },
+    {"sensing_keeps_no_copies",                     check_sensing_keeps_no_copies                    },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

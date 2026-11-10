@@ -68,7 +68,7 @@ static long long wrap_div(long long a, long long b)
 static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text)
 {
   char *lhs = lhs_text.data(), *rhs = rhs_text.data();
-  char result[32]; /* a number, or 0 or 1 */
+  std::string result; /* a number, or 0 or 1 */
   unsigned char *p;
 
   /* strip off extra spaces at begin and end */
@@ -86,84 +86,84 @@ static std::string eval_op(const char *op, std::string lhs_text, std::string rhs
   /* find the op, and figure out the value */
   if (!strcmp("||", op)) {
     if ((!*lhs || (*lhs == '0')) && (!*rhs || (*rhs == '0')))
-      strcpy(result, "0");
+      result = "0";
     else
-      strcpy(result, "1");
+      result = "1";
   }
 
   else if (!strcmp("&&", op)) {
     if (!*lhs || (*lhs == '0') || !*rhs || (*rhs == '0'))
-      strcpy(result, "0");
+      result = "0";
     else
-      strcpy(result, "1");
+      result = "1";
   }
 
   else if (!strcmp("==", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) == atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) == atoll(rhs));
     else
-      sprintf(result, "%d", !strcasecmp(lhs, rhs));
+      result = str_format("{:d}", !strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("!=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) != atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) != atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs));
+      result = str_format("{:d}", strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("<=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) <= atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) <= atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
+      result = str_format("{:d}", strcasecmp(lhs, rhs) <= 0);
   }
 
   else if (!strcmp(">=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) >= atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) >= atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs) >= 0);
+      result = str_format("{:d}", strcasecmp(lhs, rhs) >= 0);
   }
 
   else if (!strcmp("<", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) < atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) < atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
+      result = str_format("{:d}", strcasecmp(lhs, rhs) < 0);
   }
 
   else if (!strcmp(">", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoll(lhs) > atoll(rhs));
+      result = str_format("{:d}", atoll(lhs) > atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
+      result = str_format("{:d}", strcasecmp(lhs, rhs) > 0);
   }
 
   else if (!strcmp("/=", op))
-    sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
+    result = str_str(lhs, rhs) ? "1" : "0";
 
   else if (!strcmp("*", op))
-    sprintf(result, "%lld", wrap_mul(atoll(lhs), atoll(rhs)));
+    result = str_format("{:d}", wrap_mul(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("/", op))
-    sprintf(result, "%lld", wrap_div(atoll(lhs), atoll(rhs)));
+    result = str_format("{:d}", wrap_div(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("+", op))
-    sprintf(result, "%lld", wrap_add(atoll(lhs), atoll(rhs)));
+    result = str_format("{:d}", wrap_add(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("-", op))
-    sprintf(result, "%lld", wrap_sub(atoll(lhs), atoll(rhs)));
+    result = str_format("{:d}", wrap_sub(atoll(lhs), atoll(rhs)));
 
   else if (!strcmp("!", op)) {
     if (is_num(rhs))
-      sprintf(result, "%d", !atoll(rhs));
+      result = str_format("{:d}", !atoll(rhs));
     else
-      sprintf(result, "%d", !*rhs);
+      result = str_format("{:d}", !*rhs);
   }
 
   else
-    *result = '\0';
+    result.clear();
   return result;
 }
 

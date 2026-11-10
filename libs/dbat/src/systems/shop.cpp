@@ -1126,13 +1126,13 @@ static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct
 static char *list_object(GameWorld *g, struct obj_data *obj, int cnt, int aindex, struct shop_data *shop, struct char_data *keeper, struct char_data *ch)
 {
   static char result[256];
-  char itemname[128],
-      quantity[16]; /* "Unlimited" or "%d" */
+  char itemname[128];
+  std::string quantity; /* "Unlimited" or "%d" */
 
   if (shop_producing(g, obj, shop))
-    strcpy(quantity, "Unlimited"); /* strcpy: OK (for 'quantity >= 10') */
+    quantity = "Unlimited"; /* strcpy: OK (for 'quantity >= 10') */
   else
-    sprintf(quantity, "%d", cnt); /* sprintf: OK (for 'quantity >= 11', 32-bit int) */
+    quantity = str_format("{:d}", cnt); /* sprintf: OK (for 'quantity >= 11', 32-bit int) */
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_DRINKCON:
@@ -1164,7 +1164,7 @@ static char *list_object(GameWorld *g, struct obj_data *obj, int cnt, int aindex
   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
-  snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
+  snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity.c_str(),
            count_color_chars(itemname) + 36, itemname, displevel, add_commas(buy_price(g, obj, shop, keeper, ch)));
   return (result);
 }

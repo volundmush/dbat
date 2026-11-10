@@ -549,10 +549,9 @@ ACMD(do_track)
           send_to_char(g, ch, "@wYou sense an extremely evil ki from them.@n\n");
         }
 
-        char *blah = sense_location(g, i->character);
+        const char *blah = sense_location(g, i->character);
         send_to_char(g, ch, "@wLastly you sense that they are at... @C{}@n\n", blah);
         ++count;
-        free(blah);
       }
     }
     if (count == 0) {
@@ -591,72 +590,62 @@ ACMD(do_track)
   if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) && (room_flagged(g, char_get_in_room(vict), ROOM_YARDRAT)))) {
     send_to_char(g, ch, "@WSense@D: @YYardrat@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) && (room_flagged(g, char_get_in_room(vict), ROOM_EARTH)))) {
     send_to_char(g, ch, "@WSense@D: @GEarth@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) && (room_flagged(g, char_get_in_room(vict), ROOM_VEGETA)))) {
     send_to_char(g, ch, "@WSense@D: @YVegeta@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) && (room_flagged(g, char_get_in_room(vict), ROOM_NAMEK)))) {
     send_to_char(g, ch, "@WSense@D: @gNamek@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) && (room_flagged(g, char_get_in_room(vict), ROOM_FRIGID)))) {
     send_to_char(g, ch, "@WSense@D: @CFrigid@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) && (room_flagged(g, char_get_in_room(vict), ROOM_AETHER)))) {
     send_to_char(g, ch, "@WSense@D: @mAetherh@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) && (room_flagged(g, char_get_in_room(vict), ROOM_KONACK)))) {
     send_to_char(g, ch, "@WSense@D: @MKonack@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) && (room_flagged(g, char_get_in_room(vict), ROOM_KANASSA)))) {
     send_to_char(g, ch, "@WSense@D: @cKanassa@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) && (room_flagged(g, char_get_in_room(vict), ROOM_ARLIA)))) {
     send_to_char(g, ch, "@WSense@D: @yArlia@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_planet_zenith(g, char_get_in_room(ch))) && (room_planet_zenith(g, char_get_in_room(vict))))) {
     send_to_char(g, ch, "@WSense@D: @CZenith@n\r\n");
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      char *blah = sense_location(g, vict);
+      const char *blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-      free(blah);
     }
   } else {
 
@@ -745,10 +734,9 @@ ACMD(do_track)
         break;
       default: /* Success! */
         if ((char_get_skills_base(ch, SKILL_SENSE) >= 75)) {
-          char *blah = sense_location(g, vict);
+          const char *blah = sense_location(g, vict);
           send_to_char(g, ch, "You sense them {} from here!\r\n", dirs[dir]);
           send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
-          free(blah);
         } else {
           send_to_char(g, ch, "You sense them {} from here!\r\n", dirs[dir]);
           break;

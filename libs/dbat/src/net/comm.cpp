@@ -788,267 +788,181 @@ static void record_usage(GameWorld *g)
           sockets_connected, sockets_playing);
 }
 
-static char *make_prompt(GameWorld *g, struct descriptor_data *d)
+static std::string make_prompt(GameWorld *g, struct descriptor_data *d)
 {
-  static char prompt[MAX_PROMPT_LENGTH];
+  std::string prompt;
   struct obj_data *chair = nullptr;
   int flagged            = false;
 
-  /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h). snprintf() returns the length it
-     wanted, so len is clamped: it must never pass the end, or the next append is handed a negative size. */
+  /* Note, prompt is truncated at MAX_PROMPT_LENGTH - 1 chars, at the end. */
 
   if (d->str) {
     if (desc_get_connected(d) == CON_EXDESC) {
-      strcpy(prompt, "Enter Description(/h for editor help)> ");
+      prompt = "Enter Description(/h for editor help)> ";
     } else if (char_plr_flagged(d->character, PLR_WRITING) && !char_plr_flagged(d->character, PLR_MAILING)) {
-      strcpy(prompt, "Enter Message(/h for editor help)> ");
+      prompt = "Enter Message(/h for editor help)> ";
     } else if (char_plr_flagged(d->character, PLR_MAILING)) {
-      strcpy(prompt, "Enter Mail Message(/h for editor help)> ");
+      prompt = "Enter Mail Message(/h for editor help)> ";
     } else {
-      strcpy(prompt, "Enter Message> ");
+      prompt = "Enter Message> ";
     }
   } else if (desc_get_connected(d) == CON_PLAYING && !char_is_npc(d->character)) {
-    int count;
-    size_t len = 0;
-
-    *prompt = '\0';
-
-    if (char_get_invis_level(g, d->character) && len < sizeof(prompt)) {
-      count = snprintf(prompt + len, sizeof(prompt) - len, "i%d ", char_get_invis_level(g, d->character));
-      if (count >= 0)
-        len = MIN(len + count, sizeof(prompt) - 1);
+    if (char_get_invis_level(g, d->character)) {
+      prompt += str_format("i{:d} ", char_get_invis_level(g, d->character));
     }
     /* show only when below 25% */
-    if (char_prf_flagged(g, d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500 && len < sizeof(prompt)) {
+    if (char_prf_flagged(g, d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500) {
       struct char_data *ch = d->character;
       if (getCurPL(g, ch) << 2 < getEffMaxPL(g, ch)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" PRId64 " ", getCurPL(g, ch));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+        prompt += str_format("PL: {:d} ", getCurPL(g, ch));
       }
-      if ((getCurST(g, ch)) << 2 < getMaxST(g, ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" PRId64 " ", (getCurST(g, ch)));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if ((getCurST(g, ch)) << 2 < getMaxST(g, ch)) {
+        prompt += str_format("STA: {:d} ", (getCurST(g, ch)));
       }
-      if (char_get_ki(ch) << 2 < char_get_max_ki(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" PRId64 " ", char_get_ki(ch));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (char_get_ki(ch) << 2 < char_get_max_ki(ch)) {
+        prompt += str_format("KI: {:d} ", char_get_ki(ch));
       }
     } else { /* not auto prompt */
-      if (len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@w");
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
-      }
-      if (char_plr_flagged(d->character, PLR_SELFD) && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RSELF-D@r: @w%s@D]@n", char_plr_flagged(d->character, PLR_SELFD2) ? "READY" : "PREP");
+      prompt += "@w";
+      if (char_plr_flagged(d->character, PLR_SELFD)) {
+        prompt += str_format("@D[@RSELF-D@r: @w{}@D]@n", char_plr_flagged(d->character, PLR_SELFD2) ? "READY" : "PREP");
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_is_halfbreed(d->character) && !char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(g, d->character, PRF_FURY)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @r%d@D]@w", char_get_fury(d->character));
+        prompt += str_format("@D[@mFury@W: @r{:d}@D]@w", char_get_fury(d->character));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_is_halfbreed(d->character) && char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(g, d->character, PRF_FURY)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @rENGAGED@D]@w");
+        prompt += "@D[@mFury@W: @rENGAGED@D]@w";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (has_mail(g, char_get_idnum(d->character)) && !char_prf_flagged(g, d->character, PRF_NMWARN) && (char_get_admlevel(d->character) > 0) && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
+      if (has_mail(g, char_get_idnum(d->character)) && !char_prf_flagged(g, d->character, PRF_NMWARN) && (char_get_admlevel(d->character) > 0)) {
+        prompt += "CHECK MAIL - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) > 0) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
+        prompt += str_format("KAIOKEN X{:d} - ", char_get_kaioken(d->character));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_powerattack(d->character) > 0) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[char_get_powerattack(d->character)]);
+        prompt += str_format("{} - ", song_types[char_get_powerattack(d->character)]);
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) <= 0) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
+        prompt += str_format("KAIOKEN X{:d} - ", char_get_kaioken(d->character));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (has_mail(g, char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(g, d->character, PRF_NMWARN) && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
+      if (has_mail(g, char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(g, d->character, PRF_NMWARN)) {
+        prompt += "CHECK MAIL - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (d->snooping && d->snooping->character != nullptr && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Snooping: (%s) - ", char_get_name(d->snooping->character));
+      if (d->snooping && d->snooping->character != nullptr) {
+        prompt += str_format("Snooping: ({}) - ", char_get_name(d->snooping->character));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_drag(g, d->character) && char_get_drag(g, d->character) != nullptr && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(char_get_drag(g, d->character)));
+      if (char_get_drag(g, d->character) && char_get_drag(g, d->character) != nullptr) {
+        prompt += str_format("Dragging: ({}) - ", char_get_name(char_get_drag(g, d->character)));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_prf_flagged(g, d->character, PRF_BUILDWALK) && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "BUILDWALKING - ");
+      if (char_prf_flagged(g, d->character, PRF_BUILDWALK)) {
+        prompt += "BUILDWALKING - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_aff_flagged(d->character, AFF_FLYING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "FLYING - ");
+      if (char_aff_flagged(d->character, AFF_FLYING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        prompt += "FLYING - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_aff_flagged(d->character, AFF_HIDE) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "HIDING - ");
+      if (char_aff_flagged(d->character, AFF_HIDE) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        prompt += "HIDING - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_plr_flagged(d->character, PLR_SPAR) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "SPARRING - ");
+      if (char_plr_flagged(d->character, PLR_SPAR) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        prompt += "SPARRING - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_plr_flagged(d->character, PLR_NOSHOUT) && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "MUTED - ");
+      if (char_plr_flagged(d->character, PLR_NOSHOUT)) {
+        prompt += "MUTED - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 51 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Bash) - ");
+      if (char_get_combo(d->character) == 51) {
+        prompt += "Combo (Bash) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 52 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Headbutt) - ");
+      if (char_get_combo(d->character) == 52) {
+        prompt += "Combo (Headbutt) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 56 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Tailwhip) - ");
+      if (char_get_combo(d->character) == 56) {
+        prompt += "Combo (Tailwhip) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 0 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Punch) - ");
+      if (char_get_combo(d->character) == 0) {
+        prompt += "Combo (Punch) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 1 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Kick) - ");
+      if (char_get_combo(d->character) == 1) {
+        prompt += "Combo (Kick) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 2 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Elbow) - ");
+      if (char_get_combo(d->character) == 2) {
+        prompt += "Combo (Elbow) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 3 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Knee) - ");
+      if (char_get_combo(d->character) == 3) {
+        prompt += "Combo (Knee) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 4 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Roundhouse) - ");
+      if (char_get_combo(d->character) == 4) {
+        prompt += "Combo (Roundhouse) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 5 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Uppercut) - ");
+      if (char_get_combo(d->character) == 5) {
+        prompt += "Combo (Uppercut) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 6 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Slam) - ");
+      if (char_get_combo(d->character) == 6) {
+        prompt += "Combo (Slam) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_get_combo(d->character) == 8 && len < sizeof(prompt)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Heeldrop) - ");
+      if (char_get_combo(d->character) == 8) {
+        prompt += "Combo (Heeldrop) - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_prf_flagged(g, d->character, PRF_AFK) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "AFK - ");
+      if (char_prf_flagged(g, d->character, PRF_AFK) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        prompt += "AFK - ";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_plr_flagged(d->character, PLR_FISHING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "FISHING -");
+      if (char_plr_flagged(d->character, PLR_FISHING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        prompt += "FISHING -";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (flagged == true && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@n\n");
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (flagged == true) {
+        prompt += "@n\n";
       }
-      if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, PLR_HEALT)) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
         chair   = char_get_sits(g, d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "@c<@CFloating inside a healing tank@c>@n\r\n");
+        prompt += "@c<@CFloating inside a healing tank@c>@n\r\n";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SITTING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
         chair   = char_get_sits(g, d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", obj_get_short_description(chair));
+        prompt += str_format("Sitting on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_RESTING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
         chair   = char_get_sits(g, d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", obj_get_short_description(chair));
+        prompt += str_format("Resting on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SLEEPING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
         chair   = char_get_sits(g, d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", obj_get_short_description(chair));
+        prompt += str_format("Sleeping on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (char_aff_flagged(d->character, AFF_POSITION) && len < sizeof(prompt) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_aff_flagged(d->character, AFF_POSITION) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
         chair   = char_get_sits(g, d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "(Best Position)\r\n");
+        prompt += "(Best Position)\r\n";
         flagged = true;
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_charge(d->character) < getMaxKI(g, d->character) * .01 && char_get_charge(d->character) > 0) {
         char_set_charge(d->character, 0);
@@ -1057,201 +971,117 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         int64_t charge = char_get_charge(d->character);
         if (!char_prf_flagged(g, d->character, PRF_NODEC) && !char_prf_flagged(g, d->character, PRF_DISPERC)) {
           if (charge >= getMaxKI(g, d->character)) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .95) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=========-@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .9) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========@g-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=========@g-@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .85) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========-@g-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G========-@g-@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .80) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========@g--@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G========@g--@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .75) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======-@g--@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=======-@g--@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .70) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======@g---@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=======@g---@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .65) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======-@g---@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G======-@g---@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .60) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======@g----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G======@g----@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .55) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====-@g----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=====-@g----@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .50) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====@g-----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=====@g-----@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .45) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====-@g-----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G====-@g-----@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .40) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====@g------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G====@g------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .35) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===-@g------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G===-@g------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .30) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===@g-------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G===@g-------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .25) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==-@g-------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G==-@g-------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .20) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@g--------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G==@g--------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .15) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=-@g--------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=-@g--------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .10) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=@g---------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G=@g---------@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .05) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G-@g---------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@G-@g---------@D]@n\n";
           } else {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@g----------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@CCharge @D[@g----------@D]@n\n";
           }
         }
         if (char_prf_flagged(g, d->character, PRF_DISPERC) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
           if (char_get_charge(d->character) > 0) {
             int64_t perc = (char_get_charge(d->character) * 100) / getMaxKI(g, d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" PRId64 "%s@D]@n\n", perc, "%");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += str_format("@D[@BCharge@Y: @C{:d}{}@D]@n\n", perc, "%");
           }
         }
         if (char_prf_flagged(g, d->character, PRF_NODEC)) {
           if (charge > 0) {
             int64_t perc = (charge * 100) / getMaxKI(g, d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" PRId64 " percent.\n", perc);
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += str_format("Ki is charged to {:d} percent.\n", perc);
           }
         }
       }
       if (char_aff_flagged(d->character, AFF_FIRESHIELD)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D(@rF@RI@YR@rE@RS@YH@rI@RE@YL@rD@D)@n\n");
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+        prompt += "@D(@rF@RI@YR@rE@RS@YH@rI@RE@YL@rD@D)@n\n";
       }
       if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
         if (char_prf_flagged(g, d->character, PRF_DISPERC) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(g, d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" PRId64 "%s@D]@n\n", perc, "%");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += str_format("@D[@GBarrier@Y: @B{:d}{}@D]@n\n", perc, "%");
           }
         }
 
         if (!char_prf_flagged(g, d->character, PRF_NODEC) && !char_prf_flagged(g, d->character, PRF_DISPERC)) {
           if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .75) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==MAX==@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C==MAX==@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .70) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=======@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C=======@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .65) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C======-@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .60) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======@c-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C======@c-@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .55) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====-@c-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C=====-@c-@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .50) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====@c--@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C=====@c--@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .45) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====-@c--@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C====-@c--@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .40) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====@c---@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C====@c---@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .35) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===-@c---@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C===-@c---@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .30) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===@c----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C===@c----@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .25) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==-@c----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C==-@c----@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .20) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==@c-----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C==@c-----@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .15) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=-@c-----@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C=-@c-----@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .10) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=@c------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C=@c------@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .05) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C-@c------@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C-@c------@D]@n\n";
           } else if (char_get_barrier(d->character) < getMaxKI(g, d->character) * .05) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C--Low-@D]@n\n");
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += "@BBarrier @D[@C--Low-@D]@n\n";
           }
         }
         if (char_prf_flagged(g, d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(g, d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" PRId64 " percent surrounds you.@n\n", perc);
-            if (count >= 0)
-              len = MIN(len + count, sizeof(prompt) - 1);
+            prompt += str_format("A barrier charged to {:d} percent surrounds you.@n\n", perc);
           }
         }
       }
       if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPHP) && len < sizeof(prompt)) {
+        if (char_prf_flagged(g, d->character, PRF_DISPHP)) {
           const char *col      = "n";
           struct char_data *ch = d->character;
           if (getMaxPL(g, ch) > getMaxPLTrans(g, ch))
@@ -1265,8 +1095,7 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
           else if (getCurHealthPercent(g, ch) <= .1)
             col = "r";
 
-          if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col, add_commas(getCurPL(g, ch)))) > 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@RPL@n@Y: @{}{}@D]@n", col, add_commas(getCurPL(g, ch)));
         }
       } else if (char_prf_flagged(g, d->character, PRF_DISPHP)) {
 
@@ -1284,25 +1113,18 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         else
           col = "r";
 
-        if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%d%s@D]@n", col, (int)perc, "@w%")) > 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+        prompt += str_format("@D[@RPL@n@Y: @{}{:d}{}@D]@n", col, (int)perc, "@w%");
       }
       if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+        if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
             (getCurKI(g, d->character)) > getMaxKI(g, d->character) / 2) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas((getCurKI(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
-        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+          prompt += str_format("@D[@CKI@Y: @c{}@D]@n", add_commas((getCurKI(g, d->character))));
+        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
                    (getCurKI(g, d->character)) > getMaxKI(g, d->character) / 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas((getCurKI(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
-        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+          prompt += str_format("@D[@CKI@Y: @y{}@D]@n", add_commas((getCurKI(g, d->character))));
+        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
                    (getCurKI(g, d->character)) <= getMaxKI(g, d->character) / 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas((getCurKI(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@Y: @r{}@D]@n", add_commas((getCurKI(g, d->character))));
         }
       } else if (char_prf_flagged(g, d->character, PRF_DISPKI)) {
         int64_t power = (getCurKI(g, d->character)), maxpower = getMaxKI(g, d->character);
@@ -1315,43 +1137,27 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         }
         perc = (power * 100) / maxpower;
         if (perc > 100) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @G%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@n@Y: @G{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 70) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @c%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@n@Y: @c{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 51) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @Y%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@n@Y: @Y{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 20) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @y%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@n@Y: @y{:d}{}@D]@n", perc, "@w%");
         } else {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @r%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@CKI@n@Y: @r{:d}{}@D]@n", perc, "@w%");
         }
       }
       if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+        if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
             (getCurST(g, d->character)) > getMaxST(g, d->character) / 2) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas((getCurST(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
-        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+          prompt += str_format("@D[@GSTA@Y: @c{}@D]@n", add_commas((getCurST(g, d->character))));
+        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
                    (getCurST(g, d->character)) > getMaxST(g, d->character) / 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas((getCurST(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
-        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+          prompt += str_format("@D[@GSTA@Y: @y{}@D]@n", add_commas((getCurST(g, d->character))));
+        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
                    (getCurST(g, d->character)) <= getMaxST(g, d->character) / 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas((getCurST(g, d->character))));
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@Y: @r{}@D]@n", add_commas((getCurST(g, d->character))));
         }
       } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE)) {
         int64_t power = (getCurST(g, d->character)), maxpower = getMaxST(g, d->character);
@@ -1364,112 +1170,87 @@ static char *make_prompt(GameWorld *g, struct descriptor_data *d)
         }
         perc = (power * 100) / maxpower;
         if (perc > 100) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @G%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@n@Y: @G{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 70) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @c%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@n@Y: @c{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 51) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @Y%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@n@Y: @Y{:d}{}@D]@n", perc, "@w%");
         } else if (perc >= 20) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @y%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@n@Y: @y{:d}{}@D]@n", perc, "@w%");
         } else {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @r%d%s@D]@n", perc, "@w%");
-          if (count >= 0)
-            len = MIN(len + count, sizeof(prompt) - 1);
+          prompt += str_format("@D[@GSTA@n@Y: @r{:d}{}@D]@n", perc, "@w%");
         }
       }
-      if (char_prf_flagged(g, d->character, PRF_DISPTNL) && len < sizeof(prompt) && char_get_level(d->character) < 100) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@yTNL@Y: @W%s@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - char_get_exp(d->character)));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (char_prf_flagged(g, d->character, PRF_DISPTNL) && char_get_level(d->character) < 100) {
+        prompt += str_format("@D[@yTNL@Y: @W{}@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - char_get_exp(d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISTIME) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@W%2d %s@D]@n", (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12), g->time_info.hours >= 12 ? "PM" : "AM");
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (char_prf_flagged(g, d->character, PRF_DISTIME)) {
+        prompt += str_format("@D[@W{:>2d} {}@D]@n", (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12), g->time_info.hours >= 12 ? "PM" : "AM");
       }
-      if (char_prf_flagged(g, d->character, PRF_DISGOLD) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@YZen@y: @W%s@D]@n", add_commas(char_get_gold(d->character)));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (char_prf_flagged(g, d->character, PRF_DISGOLD)) {
+        prompt += str_format("@D[@YZen@y: @W{}@D]@n", add_commas(char_get_gold(d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n", add_commas(char_get_practice_points(g, d->character)));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (char_prf_flagged(g, d->character, PRF_DISPRAC)) {
+        prompt += str_format("@D[@mPS@y: @W{}@D]@n", add_commas(char_get_practice_points(g, d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISHUTH) && len < sizeof(prompt)) {
+      if (char_prf_flagged(g, d->character, PRF_DISHUTH)) {
         int hun = char_get_conditions(g, d->character, HUNGER), thir = char_get_conditions(g, d->character, THIRST);
-        count = snprintf(prompt + len, sizeof(prompt) - len, "\n@D[@mHung@y:");
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+        prompt += "\n@D[@mHung@y:";
         if (hun >= 48) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WFull@D]@n");
+          prompt += " @WFull@D]@n";
         } else if (hun >= 40) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WAlmost Full@D]@n");
+          prompt += " @WAlmost Full@D]@n";
         } else if (hun >= 30) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WNeed Snack@D]@n");
+          prompt += " @WNeed Snack@D]@n";
         } else if (hun >= 20) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WHungry@D]@n");
+          prompt += " @WHungry@D]@n";
         } else if (hun >= 15) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WVery Hungry@D]@n");
+          prompt += " @WVery Hungry@D]@n";
         } else if (hun >= 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WAlmost Starving@D]@n");
+          prompt += " @WAlmost Starving@D]@n";
         } else if (hun >= 5) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WNear Starving@D]@n");
+          prompt += " @WNear Starving@D]@n";
         } else if (hun >= 0) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WStarving@D]@n");
+          prompt += " @WStarving@D]@n";
         } else {
-          count = snprintf(prompt + len, sizeof(prompt) - len, " @WN/A@D]@n");
+          prompt += " @WN/A@D]@n";
         }
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
         if (thir >= 48) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WQuenched@D]@n");
+          prompt += "@D[@mThir@y: @WQuenched@D]@n";
         } else if (thir >= 40) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WNeed Sip@D]@n");
+          prompt += "@D[@mThir@y: @WNeed Sip@D]@n";
         } else if (thir >= 30) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WNeed Drink@D]@n");
+          prompt += "@D[@mThir@y: @WNeed Drink@D]@n";
         } else if (thir >= 20) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WThirsty@D]@n");
+          prompt += "@D[@mThir@y: @WThirsty@D]@n";
         } else if (thir >= 15) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WVery Thirsty@D]@n");
+          prompt += "@D[@mThir@y: @WVery Thirsty@D]@n";
         } else if (thir >= 10) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WAlmost Dehydrated@D]@n");
+          prompt += "@D[@mThir@y: @WAlmost Dehydrated@D]@n";
         } else if (thir >= 5) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WNear Dehydration@D]@n");
+          prompt += "@D[@mThir@y: @WNear Dehydration@D]@n";
         } else if (thir >= 0) {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WDehydrated@D]@n");
+          prompt += "@D[@mThir@y: @WDehydrated@D]@n";
         } else {
-          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WN/A@D]@n");
+          prompt += "@D[@mThir@y: @WN/A@D]@n";
         }
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
       }
-      if (len < sizeof(prompt) && has_group(g, d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "\n%s", report_party_health(g, d->character));
-        if (count >= 0)
-          len = MIN(len + count, sizeof(prompt) - 1);
+      if (has_group(g, d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
+        prompt += str_format("\n{}", report_party_health(g, d->character));
       }
-      if (len < sizeof(prompt))
-        count = snprintf(prompt + len, sizeof(prompt) - len, "\n"); /* strncat: OK */
+      prompt += "\n";
     }
-    if (len < sizeof(prompt) && len < 5)
-      strncat(prompt, ">\n", sizeof(prompt) - len - 1); /* strncat: OK */
+    if (prompt.size() < 5)
+      prompt += ">\n";
 
-  } else if (desc_get_connected(d) == CON_PLAYING && char_is_npc(d->character))
-    snprintf(prompt, sizeof(prompt), "%s>\n", CAP(writable_copy(char_get_name(d->character)).data()));
-  else
-    *prompt = '\0';
+  } else if (desc_get_connected(d) == CON_PLAYING && char_is_npc(d->character)) {
+    std::string name = writable_copy(char_get_name(d->character));
+    prompt           = str_format("{}>\n", CAP(name));
+  }
 
-  return (prompt);
+  if (prompt.size() >= MAX_PROMPT_LENGTH)
+    prompt.resize(MAX_PROMPT_LENGTH - 1); /* the room process_output() keeps for it */
+  return prompt;
 }
 
 /*
@@ -1999,7 +1780,7 @@ static int process_output(GameWorld *g, struct descriptor_data *t)
 
   /* add a prompt */
 
-  strcat(i, make_prompt(g, t)); /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
+  strcat(i, make_prompt(g, t).c_str()); /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
   if (desc_get_connected(t) == CON_PLAYING) {
     proc_colors(g, i, sizeof(i), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
   }

@@ -325,7 +325,7 @@ def noncode(src):
     return mask
 
 
-DECL_LINE = re.compile(r'^([ \t]+)char[ \t]+([^;()]*);[ \t]*$', re.M)
+DECL_LINE = re.compile(r'^([ \t]+)char[ \t]+([^;()]*);([ \t]*(?:/\*.*\*/|//.*))?[ \t]*$', re.M)
 DECLARATOR = re.compile(r'\s*([A-Za-z_]\w*)\s*\[([^\]]+)\]\s*(?:=\s*(?:""|\{\s*(?:0|\'\\0\'|"")?\s*\}))?\s*')
 WRITERS = {'snprintf': 2, 'sprintf': 1, 'strcpy': None, 'strlcpy': None, 'strcat': None, 'strlcat': None}
 # functions that take a std::string_view, to which a std::string is passed as it is
@@ -536,6 +536,9 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
                 if only and func != 'str_format' and re.match(r'\s*\)', after):
                     edits.append((p - len(only.group(0)), e, name))  # printed as it is
             continue
+        # returned: a function returning a std::string takes it, one returning a char * fails to compile
+        if re.search(r'\breturn\s*\(?\s*$', before) and re.match(r'\s*\)?\s*;', after):
+            continue
         # one side of a ?:
         if (re.search(r'\?\s*$', before) or re.search(r'(?<!:):\s*$', before)) and re.match(r'\s*[:),;]', after):
             edits.append((p, e, f'{name}.c_str()'))
@@ -590,7 +593,7 @@ def merge_first_value(src, decl_end, name):
     """src[:decl_end] ends with 'std::string name;'. If the next statement is name = x; or name.clear();, the
     declaration takes it over."""
     m = re.compile(r'\s*' + re.escape(name) + r'( = |\.clear\(\);)').match(src, decl_end)
-    if not m:
+    if not m or not src[:decl_end].endswith(';'):  # one with a comment after it stays as it is
         return src
     if m.group(1) != ' = ':
         return src[:decl_end] + src[m.end():]  # a new string is empty already
@@ -647,7 +650,7 @@ def convert_buffers(path):
         lines = []
         if k:
             lines.append(indent + 'char ' + ', '.join(x.group(0).strip() for x in decls[:k]) + ';')
-        lines.append(indent + f'std::string {name};')
+        lines.append(indent + f'std::string {name};' + (dm.group(3) or ''))
         if k + 1 < len(decls):
             lines.append(indent + 'char ' + ', '.join(x.group(0).strip() for x in decls[k + 1:]) + ';')
         edits.append((dm.start(), dm.end(), '\n'.join(lines)))

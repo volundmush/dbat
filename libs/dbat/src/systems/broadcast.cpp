@@ -96,7 +96,7 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
         write_to_output(g, i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
       }
     } else if (planet_check(g, ch, tch)) {
-      char *blah = sense_location(g, ch);
+      const char *blah = sense_location(g, ch);
       std::string power;
       std::string align;
       if (getCurPL(g, ch) > getCurPL(g, tch) * 10) {
@@ -247,7 +247,7 @@ void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int 
         write_to_output(g, i, "@D[Blip@D]@w {}. @RPL@D:@Y {}@n\r\n\r\n", messg, add_commas(getCurPL(g, ch)));
       }
     } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
-      char *blah = sense_location(g, ch);
+      const char *blah = sense_location(g, ch);
       if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {} at... @G{}. @RPL@D:@Y ??????????\r\n", messg, blah);
       } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {

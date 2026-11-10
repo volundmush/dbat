@@ -518,9 +518,8 @@ ACMD(do_snet)
           hist = str_format("@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg), arg2.empty() ? "" : arg2.c_str());
           add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
-            char *blah = sense_location(g, ch);
+            const char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
-            free(blah);
           }
           continue;
         } /* It is the right freq */
@@ -530,9 +529,8 @@ ACMD(do_snet)
           hist = str_format("@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
           add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
-            char *blah = sense_location(g, ch);
+            const char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
-            free(blah);
           }
           continue;
         } else if (call > -1 && char_get_id(i->character) == call) {
@@ -541,9 +539,8 @@ ACMD(do_snet)
           hist = str_format("@C{} is heard @W(@c{}@W), @D[@R#@W{:d} @Ycalling YOU@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
           add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
-            char *blah = sense_location(g, ch);
+            const char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
-            free(blah);
           }
           reached = true;
         }
@@ -648,7 +645,7 @@ ACMD(do_scouter)
             break;
         }
 
-        char *blah = sense_location(g, i->character);
+        const char *blah = sense_location(g, i->character);
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, i->character) >= 150000) {
           send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway.c_str() : blah);
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, i->character) >= 5000000) {
@@ -659,7 +656,6 @@ ACMD(do_scouter)
           send_to_char(g, ch, "@D<@GPowerlevel Detected@D: [@Y{}@D]@w ---> @C{}@n\r\n", add_commas(getCurPL(g, i->character)), same == true ? pathway.c_str() : blah);
         }
         ++count;
-        free(blah);
       }
     }
     if (count == 0) {

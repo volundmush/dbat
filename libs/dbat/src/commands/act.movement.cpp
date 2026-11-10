@@ -580,7 +580,7 @@ ACMD(do_land)
     send_to_char(g, ch, "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
     char_from_room(g, ch);
     char_to_room(g, ch, landing);
-    char *blah = sense_location(g, ch);
+    const char *blah = sense_location(g, ch);
     std::string sendback;
     char_from_room(g, ch);
     char_to_room(g, ch, was_in);
