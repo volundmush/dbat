@@ -34,6 +34,28 @@ template <class T> constexpr auto as_unsigned(T v)
   return static_cast<std::make_unsigned_t<T>>(v);
 }
 
+/* v padded as printf's %*s, %-*s and %*d pad it to a width given at run time (a negative width pads on the right).
+ * std::format's own run-time widths ({:{}}) can't be checked when compiled by clang with libstdc++. */
+template <class T>
+std::string printf_width(T &&v, int width, bool left)
+{
+  if (width < 0) {
+    left  = true;
+    width = -width;
+  }
+  auto &&value = dbat_format::arg(std::forward<T>(v));
+  return left ? std::vformat("{:<{}}", std::make_format_args(value, width))
+              : std::vformat("{:>{}}", std::make_format_args(value, width));
+}
+
+/* the start of a string, as printf's %.*s keeps it (a negative precision keeps it all) */
+template <class T>
+std::string_view printf_precision(T &&v, int precision)
+{
+  std::string_view text = dbat_format::arg(std::forward<T>(v));
+  return precision < 0 ? text : text.substr(0, precision);
+}
+
 /* v as the char printf's %c prints, the byte it ends in; std::format's {:c} throws on an int out of char's range */
 template <class T> constexpr char as_char(T v)
   requires std::is_integral_v<T>

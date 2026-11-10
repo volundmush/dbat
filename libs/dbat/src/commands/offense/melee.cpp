@@ -52,12 +52,12 @@ ACMD(do_uppercut)
   }
 
   if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-    send_to_char_printf(g, ch, "Your hands are full!\r\n");
+    send_to_char(g, ch, "Your hands are full!\r\n");
     return;
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -236,7 +236,7 @@ ACMD(do_uppercut)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -246,7 +246,7 @@ ACMD(do_uppercut)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -275,14 +275,14 @@ ACMD(do_roundhouse)
     return;
   }
   if (char_get_limb_condition(ch, (3) - 1) > 0 && char_get_limb_condition(ch, (3) - 1) < 50 && char_get_limb_condition(ch, (4) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (3) - 1) < 0) {
       act(g, "@RYour right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (4) - 1) > 0 && char_get_limb_condition(ch, (4) - 1) < 50 && char_get_limb_condition(ch, (3) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (4) - 1) < 0) {
       act(g, "@RYour left leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -291,7 +291,7 @@ ACMD(do_roundhouse)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -467,7 +467,7 @@ ACMD(do_roundhouse)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -477,7 +477,7 @@ ACMD(do_roundhouse)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -507,12 +507,12 @@ ACMD(do_elbow)
   }
 
   if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-    send_to_char_printf(g, ch, "Your hands are full!\r\n");
+    send_to_char(g, ch, "Your hands are full!\r\n");
     return;
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -688,7 +688,7 @@ ACMD(do_elbow)
 
     return;
   }
-  send_to_char_printf(g, ch, "Error! Please report.\r\n");
+  send_to_char(g, ch, "Error! Please report.\r\n");
   return;
 }
 
@@ -716,14 +716,14 @@ ACMD(do_kick)
     return;
   }
   if (char_get_limb_condition(ch, (3) - 1) > 0 && char_get_limb_condition(ch, (3) - 1) < 50 && char_get_limb_condition(ch, (4) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (3) - 1) < 0) {
       act(g, "@RYour right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (4) - 1) > 0 && char_get_limb_condition(ch, (4) - 1) < 50 && char_get_limb_condition(ch, (3) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (4) - 1) < 0) {
       act(g, "@RYour left leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -732,7 +732,7 @@ ACMD(do_kick)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -907,7 +907,7 @@ ACMD(do_kick)
 
     return;
   }
-  send_to_char_printf(g, ch, "Error! Please report.\r\n");
+  send_to_char(g, ch, "Error! Please report.\r\n");
   return;
 }
 
@@ -935,14 +935,14 @@ ACMD(do_knee)
     return;
   }
   if (char_get_limb_condition(ch, (3) - 1) > 0 && char_get_limb_condition(ch, (3) - 1) < 50 && char_get_limb_condition(ch, (4) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken right leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (3) - 1) < 0) {
       act(g, "@RYour right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (4) - 1) > 0 && char_get_limb_condition(ch, (4) - 1) < 50 && char_get_limb_condition(ch, (3) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken left leg has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (4) - 1) < 0) {
       act(g, "@RYour left leg has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -951,7 +951,7 @@ ACMD(do_knee)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -1125,7 +1125,7 @@ ACMD(do_knee)
 
     return;
   }
-  send_to_char_printf(g, ch, "Error! Please report.\r\n");
+  send_to_char(g, ch, "Error! Please report.\r\n");
   return;
 }
 
@@ -1154,12 +1154,12 @@ ACMD(do_punch)
   }
 
   if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-    send_to_char_printf(g, ch, "Your hands are full!\r\n");
+    send_to_char(g, ch, "Your hands are full!\r\n");
     return;
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -1325,7 +1325,7 @@ ACMD(do_punch)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -1335,7 +1335,7 @@ ACMD(do_punch)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

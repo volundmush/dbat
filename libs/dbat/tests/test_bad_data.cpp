@@ -23,6 +23,7 @@
 #include "dbat/consts/shadowdragons.hpp"
 #include "dbat/consts/skills.hpp"
 #include "dbat/db.hpp"
+#include "dbat/act.other.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/genobj.hpp"
 #include "dbat/genzon.hpp"
@@ -1299,6 +1300,26 @@ static void check_deleted_object_leaves_no_put_command(void)
   th_shutdown(g);
 }
 
+/* log_imm_action() appends its line, plain or formatted, to the request file */
+static void check_imm_action_reaches_the_log(void)
+{
+  GameWorld *g = th_boot();
+
+  write_file(REQUEST_FILE, ""); /* it only appends to a file that is there */
+  log_imm_action(g, "IMM: {} gave {} zenni", "Giver", 42);
+  log_imm_action(g, "IMM: plain text, 100% of it");
+  std::string text;
+  if (FILE *fl = fopen(REQUEST_FILE, "r")) {
+    char line[512];
+    while (fgets(line, sizeof(line), fl))
+      text += line;
+    fclose(fl);
+  }
+  CHECK(text.find(":: IMM: Giver gave 42 zenni\n") != std::string::npos);
+  CHECK(text.find(":: IMM: plain text, 100% of it\n") != std::string::npos);
+  th_shutdown(g);
+}
+
 static void check_message_about_an_object_with_no_description(void)
 {
   GameWorld *g = th_boot();
@@ -1662,6 +1683,7 @@ static const struct {
     {"emote_of_many_hashes",                        check_emote_of_many_hashes                       },
     {"wiznet_keeps_no_copies",                      check_wiznet_keeps_no_copies                     },
     {"deleted_object_leaves_no_put_command",        check_deleted_object_leaves_no_put_command       },
+    {"imm_action_reaches_the_log",                  check_imm_action_reaches_the_log                 },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

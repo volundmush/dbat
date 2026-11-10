@@ -64,19 +64,19 @@ ACMD(do_willpower)
     return;
 
   if (char_get_majinize(ch) <= 0) {
-    send_to_char_printf(g, ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
+    send_to_char(g, ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
     return;
   }
   if (char_get_practice_points(g, ch) < 100 && char_get_level(ch) < 100) {
-    send_to_char_printf(g, ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+    send_to_char(g, ch, "You do not have enough PS to focus your attempt to break free.\r\n");
     fail = true;
   }
   if (char_get_practice_points(g, ch) < 200 && char_get_level(ch) >= 100) {
-    send_to_char_printf(g, ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+    send_to_char(g, ch, "You do not have enough PS to focus your attempt to break free.\r\n");
     fail = true;
   }
   if (char_get_exp(ch) < level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) < 100) {
-    send_to_char_printf(g, ch, "You need a full level's worth of experience stored up to try and break free.\r\n");
+    send_to_char(g, ch, "You need a full level's worth of experience stored up to try and break free.\r\n");
     fail = true;
   }
   if (fail == true) {
@@ -120,7 +120,7 @@ ACMD(do_infuse)
   }
 
   if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 100) {
-    send_to_char_printf(g, ch, "You don't have enough ki to infuse into your attacks!\r\n");
+    send_to_char(g, ch, "You don't have enough ki to infuse into your attacks!\r\n");
     return;
   }
   reveal_hiding(g, ch, 0);
@@ -143,7 +143,7 @@ ACMD(do_paralyze)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Who are you wanting to paralyze?\r\n");
+    send_to_char(g, ch, "Who are you wanting to paralyze?\r\n");
     return;
   }
 
@@ -152,19 +152,19 @@ ACMD(do_paralyze)
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "That target isn't here.\r\n");
+    send_to_char(g, ch, "That target isn't here.\r\n");
     return;
   }
   if (!can_kill(g, ch, vict, nullptr, 0)) {
     return;
   }
   if (char_aff_flagged(vict, AFF_PARA)) {
-    send_to_char_printf(g, ch, "They are already partially paralyzed!\r\n");
+    send_to_char(g, ch, "They are already partially paralyzed!\r\n");
     return;
   }
 
   if ((getCurKI(g, ch)) < getCurPL(g, vict) / 10 + (getMaxKI(g, ch) / 20)) {
-    send_to_char_printf(g, ch, "You realize you can't paralyze them. You don't have enough ki to restrain them!\r\n");
+    send_to_char(g, ch, "You realize you can't paralyze them. You don't have enough ki to restrain them!\r\n");
     return;
   }
 
@@ -214,17 +214,17 @@ ACMD(do_taisha)
   }
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
-    send_to_char_printf(g, ch, "This area already has an aura of regeneration around it.\r\n");
+    send_to_char(g, ch, "This area already has an aura of regeneration around it.\r\n");
     return;
   }
 
   if (room_get_gravity(g, char_get_in_room(ch)) > 0) {
-    send_to_char_printf(g, ch, "This area's gravity is too hostile to an aura.\r\n");
+    send_to_char(g, ch, "This area's gravity is too hostile to an aura.\r\n");
     return;
   }
 
   if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 3) {
-    send_to_char_printf(g, ch, "You don't have enough ki.\r\n");
+    send_to_char(g, ch, "You don't have enough ki.\r\n");
     return;
   }
 
@@ -253,7 +253,7 @@ ACMD(do_kura)
   }
 
   if ((getCurKI(g, ch)) >= getMaxKI(g, ch)) {
-    send_to_char_printf(g, ch, "Your ki is already maxed out!\r\n");
+    send_to_char(g, ch, "Your ki is already maxed out!\r\n");
     return;
   }
 
@@ -262,7 +262,7 @@ ACMD(do_kura)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Syntax: kuraiiro (1-100).\r\n");
+    send_to_char(g, ch, "Syntax: kuraiiro (1-100).\r\n");
     return;
   }
 
@@ -271,11 +271,11 @@ ACMD(do_kura)
   int64_t cost = 0, bonus = 0;
 
   if (num > skill) {
-    send_to_char_printf(g, ch, "The number can not be greater than your skill.\r\n");
+    send_to_char(g, ch, "The number can not be greater than your skill.\r\n");
     return;
   }
   if (num <= 0) {
-    send_to_char_printf(g, ch, "The number can not be less than 1.\r\n");
+    send_to_char(g, ch, "The number can not be less than 1.\r\n");
     return;
   }
 
@@ -283,7 +283,7 @@ ACMD(do_kura)
   bonus = cost;
 
   if ((getCurST(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough stamina for that high a number.\r\n");
+    send_to_char(g, ch, "You do not have enough stamina for that high a number.\r\n");
     return;
   }
 
@@ -317,16 +317,16 @@ ACMD(do_candy)
   arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
-    send_to_char_printf(g, ch, "You are not a majin, how can you do that?\r\n");
+    send_to_char(g, ch, "You are not a majin, how can you do that?\r\n");
     return;
   }
   //if (FIGHTING(ch)) {
-  //send_to_char_printf(ch, "You are too busy fighting!\r\n");
+  //send_to_char(ch, "You are too busy fighting!\r\n");
   //return;
   //}
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "Turn who into candy?\r\n");
+    send_to_char(g, ch, "Turn who into candy?\r\n");
     return;
   }
   if (!can_kill(g, ch, vict, nullptr, 0)) {
@@ -337,23 +337,23 @@ ACMD(do_candy)
   int64_t vict_max = getMaxPLTrans(g, vict);
 
   if (!char_is_npc(vict)) {
-    send_to_char_printf(g, ch, "You can't turn them into candy.\r\n");
+    send_to_char(g, ch, "You can't turn them into candy.\r\n");
     return;
   }
   if (vict_max > ch_max * 2) {
-    send_to_char_printf(g, ch, "They are too powerful.\r\n");
+    send_to_char(g, ch, "They are too powerful.\r\n");
     return;
   }
   if (vict_max < ch_max * .25 && char_get_level(ch) < 100) {
-    send_to_char_printf(g, ch, "They are too weak.\r\n");
+    send_to_char(g, ch, "They are too weak.\r\n");
     return;
   }
   if (vict_max < ch_max * .09 && char_get_level(ch) == 100) {
-    send_to_char_printf(g, ch, "They are too weak.\r\n");
+    send_to_char(g, ch, "They are too weak.\r\n");
     return;
   }
   if ((getCurKI(g, ch)) < ch_max / 15) {
-    send_to_char_printf(g, ch, "You do not have enough ki.\r\n");
+    send_to_char(g, ch, "You do not have enough ki.\r\n");
     return;
   }
   if (rand_number(g, 1, 6) == 6) {
@@ -375,19 +375,19 @@ ACMD(do_candy)
   act(g, "@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", true, ch, nullptr, vict, TO_CHAR);
   act(g, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", true, ch, nullptr, vict, TO_NOTVICT);
   if (vict_max >= ch_max * 1.5) {
-    send_to_char_printf(g, ch, "You grab the candy as it falls.\r\n");
+    send_to_char(g, ch, "You grab the candy as it falls.\r\n");
     obj = read_object(g, 95);
     obj_to_char(g, obj, ch);
   } else if (vict_max >= ch_max) {
-    send_to_char_printf(g, ch, "You grab the candy as it falls.\r\n");
+    send_to_char(g, ch, "You grab the candy as it falls.\r\n");
     obj = read_object(g, 94);
     obj_to_char(g, obj, ch);
   } else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && char_get_level(ch) < 100) || ((vict_max >= ch_max * .1) && char_get_level(ch) >= 100))) {
-    send_to_char_printf(g, ch, "You grab the candy as it falls.\r\n");
+    send_to_char(g, ch, "You grab the candy as it falls.\r\n");
     obj = read_object(g, 93);
     obj_to_char(g, obj, ch);
   } else if (vict_max < ch_max && (((vict_max < ch_max * .5) && char_get_level(ch) < 100) || ((vict_max < ch_max * .1) && char_get_level(ch) >= 100))) {
-    send_to_char_printf(g, ch, "You grab the candy as it falls.\r\n");
+    send_to_char(g, ch, "You grab the candy as it falls.\r\n");
     obj = read_object(g, 53);
     obj_to_char(g, obj, ch);
   }
@@ -403,47 +403,47 @@ ACMD(do_future)
   arg                    = take_arg(rest);
 
   if (char_is_npc(ch) || !char_is_kanassan(ch)) {
-    send_to_char_printf(g, ch, "You are incapable of this ability.\r\n");
+    send_to_char(g, ch, "You are incapable of this ability.\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Bestow advance future sight on who?\r\n");
+    send_to_char(g, ch, "Bestow advance future sight on who?\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "Bestow advance future sight on who?\r\n");
+    send_to_char(g, ch, "Bestow advance future sight on who?\r\n");
     return;
   }
 
   if (char_aff_flagged(vict, AFF_FUTURE)) {
-    send_to_char_printf(g, ch, "They already can see the future.\r\n");
+    send_to_char(g, ch, "They already can see the future.\r\n");
     return;
   }
 
   if (char_is_npc(vict)) {
-    send_to_char_printf(g, ch, "You can't target them, there would be no point.\r\n");
+    send_to_char(g, ch, "You can't target them, there would be no point.\r\n");
     return;
   }
 
   if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 40) {
-    send_to_char_printf(g, ch, "You do not have enough ki.\r\n");
+    send_to_char(g, ch, "You do not have enough ki.\r\n");
     return;
   }
 
   if (char_get_practice_points(g, ch) < 100) {
-    send_to_char_printf(g, ch, "You do not have enough PS to activate or pass on this ability.\r\n");
+    send_to_char(g, ch, "You do not have enough PS to activate or pass on this ability.\r\n");
     return;
   }
 
   if (vict != ch) {
     if (char_get_real_abils_cha(vict) + 5 > 70 && char_get_bonuses(vict, BONUS_SLOW) > 0) {
-      send_to_char_printf(g, ch, "They can't handle having their speed increased beyond 70.\r\n");
+      send_to_char(g, ch, "They can't handle having their speed increased beyond 70.\r\n");
       return;
     }
     if (char_get_real_abils_intel(vict) + 2 > 70 && char_get_bonuses(vict, BONUS_DULL) > 0) {
-      send_to_char_printf(g, ch, "They can't handle having their intelligence increased beyond 70.\r\n");
+      send_to_char(g, ch, "They can't handle having their intelligence increased beyond 70.\r\n");
       return;
     }
     decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
@@ -459,11 +459,11 @@ ACMD(do_future)
     save_char(g, vict);
   } else {
     if (char_get_real_abils_cha(ch) + 5 > 70 && char_get_bonuses(ch, BONUS_SLOW) > 0) {
-      send_to_char_printf(g, ch, "You can't handle having your speed increased beyond 70.\r\n");
+      send_to_char(g, ch, "You can't handle having your speed increased beyond 70.\r\n");
       return;
     }
     if (char_get_real_abils_intel(ch) + 2 > 70 && char_get_bonuses(ch, BONUS_DULL) > 0) {
-      send_to_char_printf(g, ch, "You can't handle having your intelligence increased beyond 70.\r\n");
+      send_to_char(g, ch, "You can't handle having your intelligence increased beyond 70.\r\n");
       return;
     }
     decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
@@ -490,24 +490,24 @@ ACMD(do_suppress)
     return;
 
   if (char_is_android(ch)) {
-    send_to_char_printf(g, ch, "You are unable to suppress your powerlevel.\r\n");
+    send_to_char(g, ch, "You are unable to suppress your powerlevel.\r\n");
     return;
   }
   if (char_get_bonuses(ch, BONUS_ARROGANT) > 0) {
-    send_to_char_printf(g, ch, "You are far too arrogant to hide your strength.\r\n");
+    send_to_char(g, ch, "You are far too arrogant to hide your strength.\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {
-    send_to_char_printf(g, ch, "You are currently powering up, can't suppress.\r\n");
+    send_to_char(g, ch, "You are currently powering up, can't suppress.\r\n");
     return;
   }
   if (char_get_kaioken(ch)) {
-    send_to_char_printf(g, ch, "You are currently concentrating on kaioken!\r\n");
+    send_to_char(g, ch, "You are currently concentrating on kaioken!\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n");
+    send_to_char(g, ch, "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n");
     return;
   }
 
@@ -519,14 +519,14 @@ ACMD(do_suppress)
       char_set_suppression(ch, 0);
       return;
     }
-    send_to_char_printf(g, ch, "You are not suppressing!\r\n");
+    send_to_char(g, ch, "You are not suppressing!\r\n");
     return;
   }
 
   int num = parse_int(arg);
 
   if (num > 99 || num <= 0) {
-    send_to_char_printf(g, ch, "Out of suppression range.\r\nSyntax: suppress (1 - 99 | release)\r\n");
+    send_to_char(g, ch, "Out of suppression range.\r\nSyntax: suppress (1 - 99 | release)\r\n");
     return;
   }
 
@@ -553,7 +553,7 @@ ACMD(do_hass)
     return;
   }
   if ((getCurST(g, ch)) < getMaxST(g, ch) / 30) {
-    send_to_char_printf(g, ch, "You do not have enough stamina.\r\n");
+    send_to_char(g, ch, "You do not have enough stamina.\r\n");
     return;
   }
 
@@ -596,14 +596,14 @@ ACMD(do_implant)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Syntax: implant (rarm | larm | rleg | lleg) (target)\r\n");
+    send_to_char(g, ch, "Syntax: implant (rarm | larm | rleg | lleg) (target)\r\n");
     return;
   }
 
   if (arg2.empty()) {
     vict = ch;
   } else if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "That person isn't here.\r\n");
+    send_to_char(g, ch, "That person isn't here.\r\n");
     return;
   }
 
@@ -614,17 +614,17 @@ ACMD(do_implant)
     }
   }
   if (found == false) {
-    send_to_char_printf(g, ch, "You do not have a cybernetic limb to implant.\r\n");
+    send_to_char(g, ch, "You do not have a cybernetic limb to implant.\r\n");
     return;
   }
 
   if (!(arg != "rarm")) {
     if (char_get_limb_condition(vict, (1) - 1) >= 1) {
       if (vict != ch) {
-        send_to_char_printf(g, ch, "They already have a right arm!\r\n");
+        send_to_char(g, ch, "They already have a right arm!\r\n");
       }
       if (vict == ch) {
-        send_to_char_printf(g, ch, "You already have a right arm!\r\n");
+        send_to_char(g, ch, "You already have a right arm!\r\n");
       }
       return;
     }
@@ -647,10 +647,10 @@ ACMD(do_implant)
   if (!(arg != "larm")) {
     if (char_get_limb_condition(vict, (2) - 1) >= 1) {
       if (vict != ch) {
-        send_to_char_printf(g, ch, "They already have a left arm!\r\n");
+        send_to_char(g, ch, "They already have a left arm!\r\n");
       }
       if (vict == ch) {
-        send_to_char_printf(g, ch, "You already have a left arm!\r\n");
+        send_to_char(g, ch, "You already have a left arm!\r\n");
       }
       return;
     }
@@ -673,10 +673,10 @@ ACMD(do_implant)
   if (!(arg != "rleg")) {
     if (char_get_limb_condition(vict, (3) - 1) >= 1) {
       if (vict != ch) {
-        send_to_char_printf(g, ch, "They already have a right leg!\r\n");
+        send_to_char(g, ch, "They already have a right leg!\r\n");
       }
       if (vict == ch) {
-        send_to_char_printf(g, ch, "You already have a right leg!\r\n");
+        send_to_char(g, ch, "You already have a right leg!\r\n");
       }
       return;
     }
@@ -699,10 +699,10 @@ ACMD(do_implant)
   if (!(arg != "lleg")) {
     if (char_get_limb_condition(vict, (4) - 1) >= 1) {
       if (vict != ch) {
-        send_to_char_printf(g, ch, "They already have a left leg!\r\n");
+        send_to_char(g, ch, "They already have a left leg!\r\n");
       }
       if (vict == ch) {
-        send_to_char_printf(g, ch, "You already have a left leg!\r\n");
+        send_to_char(g, ch, "You already have a left leg!\r\n");
       }
       return;
     }
@@ -722,7 +722,7 @@ ACMD(do_implant)
     extract_obj(g, limb);
     return;
   }
-  send_to_char_printf(g, ch, "Syntax: implant (rarm | larm | rleg | rleg)\r\n");
+  send_to_char(g, ch, "Syntax: implant (rarm | larm | rleg | rleg)\r\n");
   return;
 }
 
@@ -737,17 +737,17 @@ ACMD(do_fury)
   arg                   = take_arg(rest);
 
   if (!char_is_halfbreed(ch) || char_is_npc(ch)) {
-    send_to_char_printf(g, ch, "You are furious, but you'll get over it.\r\n");
+    send_to_char(g, ch, "You are furious, but you'll get over it.\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_FURY)) {
-    send_to_char_printf(g, ch, "You are already furious, your next attack will devestate, hurry use it!\r\n");
+    send_to_char(g, ch, "You are already furious, your next attack will devestate, hurry use it!\r\n");
     return;
   }
 
   if (char_get_fury(ch) < 100) {
-    send_to_char_printf(g, ch, "You do not have enough anger to release your fury upon your foes!\r\n");
+    send_to_char(g, ch, "You do not have enough anger to release your fury upon your foes!\r\n");
     return;
   }
 
@@ -765,7 +765,7 @@ ACMD(do_fury)
   } else if (str_eq_nocase(arg, "attack")) {
     char_set_fury(ch, 50);
   } else {
-    send_to_char_printf(g, ch, "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n");
+    send_to_char(g, ch, "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n");
     return;
   }
 
@@ -785,47 +785,47 @@ ACMD(do_majinize)
   arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
-    send_to_char_printf(g, ch, "You are not a majin and can not majinize anyone.\r\n");
+    send_to_char(g, ch, "You are not a majin and can not majinize anyone.\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Who do you want to majinize?\r\n");
+    send_to_char(g, ch, "Who do you want to majinize?\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "That target isn't here.\r\n");
+    send_to_char(g, ch, "That target isn't here.\r\n");
     return;
   }
 
   if (char_is_npc(vict)) {
-    send_to_char_printf(g, ch, "Why would you waste your time majinizing them?\r\n");
+    send_to_char(g, ch, "Why would you waste your time majinizing them?\r\n");
     return;
   }
   if (vict == ch) {
-    send_to_char_printf(g, ch, "You can't majinize yourself.\r\n");
+    send_to_char(g, ch, "You can't majinize yourself.\r\n");
     return;
   }
   if (char_plr_flagged(vict, PLR_PR)) {
-    send_to_char_printf(g, ch, "You can't majinize them their potential has been released!\r\n");
+    send_to_char(g, ch, "You can't majinize them their potential has been released!\r\n");
     return;
   }
   int alignmentTotal = char_get_alignment(ch) - char_get_alignment(vict);
   if (char_get_majinize(vict) > 0 && char_get_majinize(vict) != char_get_id(ch)) {
-    send_to_char_printf(g, ch, "They are already majinized before by someone else.\r\n");
+    send_to_char(g, ch, "They are already majinized before by someone else.\r\n");
     return;
   }
   if ((char_get_master(g, vict) != ch)) {
-    send_to_char_printf(g, ch, "They must be following you in order for you to majinize them.\r\n");
+    send_to_char(g, ch, "They must be following you in order for you to majinize them.\r\n");
     return;
   }
 
   else if (!((alignmentTotal >= -1500) && (alignmentTotal <= 1500))) {
-    send_to_char_printf(g, ch, "Their alignment is so opposed to your's that they resist your attempts to enslave them!\r\n");
+    send_to_char(g, ch, "Their alignment is so opposed to your's that they resist your attempts to enslave them!\r\n");
     return;
   } else if (getEffMaxPL(g, vict) > getEffMaxPL(g, ch) * 4) {
-    send_to_char_printf(g, ch, "Their powerlevel is so much higher than yours they resist your attempts to enslave them!\r\n");
+    send_to_char(g, ch, "Their powerlevel is so much higher than yours they resist your attempts to enslave them!\r\n");
     return;
   }
   /* Rillao: transloc, add new transes here */
@@ -843,15 +843,15 @@ ACMD(do_majinize)
     loseBasePL(vict, char_get_majinizer(vict), false);
     return;
   } else if (char_get_boosts(ch) == 0) {
-    send_to_char_printf(g, ch, "You are incapable of majinizing%s.\r\n", char_get_level(ch) < 100 ? " right now" : " anymore");
+    send_to_char(g, ch, "You are incapable of majinizing{}.\r\n", char_get_level(ch) < 100 ? " right now" : " anymore");
     if (char_get_level(ch) < 25) {
-      send_to_char_printf(g, ch, "Your next available majinize will be at level 25\r\n");
+      send_to_char(g, ch, "Your next available majinize will be at level 25\r\n");
     } else if (char_get_level(ch) < 50) {
-      send_to_char_printf(g, ch, "Your next available majinize will be at level 50\r\n");
+      send_to_char(g, ch, "Your next available majinize will be at level 50\r\n");
     } else if (char_get_level(ch) < 75) {
-      send_to_char_printf(g, ch, "Your next available majinize will be at level 75\r\n");
+      send_to_char(g, ch, "Your next available majinize will be at level 75\r\n");
     } else if (char_get_level(ch) < 100) {
-      send_to_char_printf(g, ch, "Your next available majinize will be at level 100\r\n");
+      send_to_char(g, ch, "Your next available majinize will be at level 100\r\n");
     }
     return;
   } else {
@@ -882,17 +882,17 @@ ACMD(do_spit)
     return;
   }
   if (char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "You can't manage to spit in this fight!\r\n");
+    send_to_char(g, ch, "You can't manage to spit in this fight!\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Yes but who do you want to petrify?\r\n");
+    send_to_char(g, ch, "Yes but who do you want to petrify?\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "That target isn't here.\r\n");
+    send_to_char(g, ch, "That target isn't here.\r\n");
     return;
   }
   if (!can_kill(g, ch, vict, nullptr, 0)) {
@@ -903,14 +903,14 @@ ACMD(do_spit)
     return;
   }
   if (char_get_fighting(g, vict)) {
-    send_to_char_printf(g, vict, "You can't manage to spit on them, they are moving around too much!\r\n");
+    send_to_char(g, vict, "You can't manage to spit on them, they are moving around too much!\r\n");
     return;
   }
 
   cost = ((getMaxKI(g, ch) / MAX(char_get_skill(ch, SKILL_SPIT) / 4, 1)) + getMaxKI(g, ch) / 100);
 
   if ((getCurKI(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki to petrifiy with your spit!\r\n");
+    send_to_char(g, ch, "You do not have enough ki to petrifiy with your spit!\r\n");
     return;
   }
 
@@ -972,28 +972,28 @@ ACMD(do_absorb)
   }
   if (!char_is_npc(ch)) {
     if (char_is_bio(ch) && !char_plr_flagged(ch, PLR_TAIL)) {
-      send_to_char_printf(g, ch, "You have no tail!\r\n");
+      send_to_char(g, ch, "You have no tail!\r\n");
       return;
     }
   }
 
   if (!char_is_android(ch) && !char_is_bio(ch)) {
-    send_to_char_printf(g, ch, "You shouldn't have this skill, you are incapable of absorbing.\r\n");
-    send_to_imm_printf(g, "ERROR: Absorb skill on %s when they are not a bio or android.", char_get_name(ch));
+    send_to_char(g, ch, "You shouldn't have this skill, you are incapable of absorbing.\r\n");
+    send_to_imm(g, "ERROR: Absorb skill on {} when they are not a bio or android.", char_get_name(ch));
     return;
   }
 
   if (char_get_fighting(g, ch) && !char_is_android(ch)) {
-    send_to_char_printf(g, ch, "You are too busy fighting!\r\n");
+    send_to_char(g, ch, "You are too busy fighting!\r\n");
     return;
   }
 
   if (char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are currently being grappled with! Try 'escape'!\r\n");
+    send_to_char(g, ch, "You are currently being grappled with! Try 'escape'!\r\n");
     return;
   }
   if (char_get_grappling(g, ch)) {
-    send_to_char_printf(g, ch, "You are currently grappling with someone!\r\n");
+    send_to_char(g, ch, "You are currently grappling with someone!\r\n");
     return;
   }
 
@@ -1009,35 +1009,35 @@ ACMD(do_absorb)
   }
 
   if (arg.empty() && char_is_android(ch)) {
-    send_to_char_printf(g, ch, "Who do you want to absorb?\r\n");
+    send_to_char(g, ch, "Who do you want to absorb?\r\n");
     return;
   }
 
   if (char_is_android(ch)) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Absorb %s?\r\n", char_is_android(ch) ? "from who" : "who");
+      send_to_char(g, ch, "Absorb {}?\r\n", char_is_android(ch) ? "from who" : "who");
       return;
     }
   }
   if (char_is_bio(ch)) {
     if (arg.empty()) {
-      send_to_char_printf(g, ch, "Syntax: absorb (swallow | extract) (target)\r\n");
+      send_to_char(g, ch, "Syntax: absorb (swallow | extract) (target)\r\n");
       return;
     }
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Syntax: absorb (swallow | extract) (target)\r\n");
+      send_to_char(g, ch, "Syntax: absorb (swallow | extract) (target)\r\n");
       return;
     }
   }
   if (char_aff_flagged(vict, AFF_SANCTUARY)) {
-    send_to_char_printf(g, ch, "You can't absorb them, they have a barrier!\r\n");
+    send_to_char(g, ch, "You can't absorb them, they have a barrier!\r\n");
     return;
   }
 
   if (char_is_android(ch)) {
     if (!char_is_npc(ch)) {
       if (!char_plr_flagged(ch, PLR_ABSORB)) {
-        send_to_char_printf(g, ch, "You are not an absorbtion model.\r\n");
+        send_to_char(g, ch, "You are not an absorbtion model.\r\n");
         return;
       }
     }
@@ -1045,19 +1045,19 @@ ACMD(do_absorb)
       return;
     }
     if (char_get_absorbby(g, vict)) {
-      send_to_char_printf(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
+      send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (getEffMaxPL(g, vict) > getEffMaxPL(g, ch) * 2) {
-      send_to_char_printf(g, ch, "They are too strong for you to absorb from.\r\n");
+      send_to_char(g, ch, "They are too strong for you to absorb from.\r\n");
       return;
     }
     if (getEffMaxPL(g, vict) * 20 < getEffMaxPL(g, ch)) {
-      send_to_char_printf(g, ch, "They are too weak for you to bother absorbing from.\r\n");
+      send_to_char(g, ch, "They are too weak for you to bother absorbing from.\r\n");
       return;
     }
     if ((getCurST(g, vict)) < (getMaxST(g, vict) / 20) && (getCurKI(g, vict)) < (getMaxKI(g, vict) / 20)) {
-      send_to_char_printf(g, ch, "They have nothing to absorb right now, they are drained...\r\n");
+      send_to_char(g, ch, "They have nothing to absorb right now, they are drained...\r\n");
       return;
     }
     reveal_hiding(g, ch, 0);
@@ -1089,18 +1089,18 @@ ACMD(do_absorb)
 
   else if (char_is_bio(ch) && !(arg != "swallow")) {
     if (char_get_absorbby(g, vict)) {
-      send_to_char_printf(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
+      send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
     if (char_get_absorbs(ch) < 1) {
-      send_to_char_printf(g, ch, "You already have already absorbed 3 people.\r\n");
+      send_to_char(g, ch, "You already have already absorbed 3 people.\r\n");
       return;
     }
     if (getEffMaxPL(g, vict) >= (getBasePL(ch)) * 3) {
-      send_to_char_printf(g, ch, "You are too weak to absorb them into your cellular structure!\r\n");
+      send_to_char(g, ch, "You are too weak to absorb them into your cellular structure!\r\n");
       return;
     }
     reveal_hiding(g, ch, 0);
@@ -1131,11 +1131,11 @@ ACMD(do_absorb)
       gainBaseKI(ch, ki, true);
 
       if (!char_is_npc(vict) && !char_is_npc(ch)) {
-        send_to_imm_printf(g, "[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
+        send_to_imm(g, "[PK] {} killed {} at room [{:d}]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
         char_plr_set(vict, PLR_ABSORBED, true);
       }
 
-      send_to_char_printf(g, ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
+      send_to_char(g, ch, "@D[@gABSORB@D] @rPL@W: @D(@y{}@D) @cKi@W: @D(@y{}@D) @gSt@W: @D(@y{}@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
       improve_skill(g, ch, SKILL_ABSORB, 1);
       die(g, vict, nullptr);
     }
@@ -1146,26 +1146,26 @@ ACMD(do_absorb)
       failthresh += (char_get_level(vict) - 95) * 2;
     }
     if (char_get_absorbby(g, vict)) {
-      send_to_char_printf(g, ch, "%s is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
+      send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
     if (getEffMaxPL(g, vict) >= getEffMaxPL(g, ch)) {
-      send_to_char_printf(g, ch, "You are too weak to absorb them into your cellular structure!\r\n");
+      send_to_char(g, ch, "You are too weak to absorb them into your cellular structure!\r\n");
       return;
     }
     if (getEffMaxPL(g, vict) < getEffMaxPL(g, ch) / 5) {
-      send_to_char_printf(g, ch, "They would be worthless to you at your strength!\r\n");
+      send_to_char(g, ch, "They would be worthless to you at your strength!\r\n");
       return;
     }
     if (!char_is_npc(vict)) {
-      send_to_char_printf(g, ch, "You can't absorb their bio extract, you need to swallow them with your tail!\r\n");
+      send_to_char(g, ch, "You can't absorb their bio extract, you need to swallow them with your tail!\r\n");
       return;
     }
     if (is_soft_cap(ch, 0, 1.0)) {
-      send_to_char_printf(g, ch, "You can not handle any more bio extract at your current level.\r\n");
+      send_to_char(g, ch, "You can not handle any more bio extract at your current level.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_ABSORB) < failthresh) {
@@ -1199,7 +1199,7 @@ ACMD(do_absorb)
       gainBaseST(ch, stam, true);
       gainBaseKI(ch, ki, true);
       incCurLFPercent(g, ch, .05, true);
-      send_to_char_printf(g, ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
+      send_to_char(g, ch, "@D[@gABSORB@D] @rPL@W: @D(@y{}@D) @cKi@W: @D(@y{}@D) @gSt@W: @D(@y{}@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
       improve_skill(g, ch, SKILL_ABSORB, 0);
       char_set_wait(ch, PULSE_4SEC);
       char_mob_set(vict, MOB_HUSK, true);
@@ -1209,10 +1209,10 @@ ACMD(do_absorb)
 
   else {
     if (!char_is_bio(ch) && !char_is_android(ch)) {
-      send_to_char_printf(g, ch, "You have the absorb skill but are incapable of absorbing. This error has been reported.\r\n");
-      send_to_imm_printf(g, "ERROR: Absorb attempted by %s even though they are not bio or android.", char_get_name(ch));
+      send_to_char(g, ch, "You have the absorb skill but are incapable of absorbing. This error has been reported.\r\n");
+      send_to_imm(g, "ERROR: Absorb attempted by {} even though they are not bio or android.", char_get_name(ch));
     } else {
-      send_to_char_printf(g, ch, "Syntax: absorb (extract | swallow) (target)\r\n");
+      send_to_char(g, ch, "Syntax: absorb (extract | swallow) (target)\r\n");
     }
     return;
   } // Error
@@ -1231,7 +1231,7 @@ ACMD(do_regenerate)
   skill = init_skill(g, ch, SKILL_REGENERATE);
 
   if (skill < 1) {
-    send_to_char_printf(g, ch, "You are incapable of regenerating.\r\n");
+    send_to_char(g, ch, "You are incapable of regenerating.\r\n");
     return;
   }
   if (char_get_suppression(ch) > 0) {
@@ -1239,39 +1239,39 @@ ACMD(do_regenerate)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Regenerate how much PL?\r\nMax percent you can regen: %d\r\nSyntax: regenerate (1 - 100)\r\n", skill);
+    send_to_char(g, ch, "Regenerate how much PL?\r\nMax percent you can regen: {:d}\r\nSyntax: regenerate (1 - 100)\r\n", skill);
     return;
   }
 
   if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
-    send_to_char_printf(g, ch, "You do not need to regenerate, you are at full health.\r\n");
+    send_to_char(g, ch, "You do not need to regenerate, you are at full health.\r\n");
     return;
   }
 
   if (char_get_suppression(ch) > 0 && getCurPL(g, ch) >= ((getEffMaxPL(g, ch) / 100) * char_get_suppression(ch))) {
-    send_to_char_printf(g, ch, "You do not need to regenerate, you are at full health.\r\n");
+    send_to_char(g, ch, "You do not need to regenerate, you are at full health.\r\n");
     return;
   }
 
   int num = parse_int(arg);
 
   if (num <= 0) {
-    send_to_char_printf(g, ch, "What is the point of that?\r\nSyntax: regenerate (1 - 100)\r\n");
+    send_to_char(g, ch, "What is the point of that?\r\nSyntax: regenerate (1 - 100)\r\n");
     return;
   }
 
   if (num > 100) {
-    send_to_char_printf(g, ch, "You can't regenerate that much!\r\nMax you can regen: %d\r\n", skill);
+    send_to_char(g, ch, "You can't regenerate that much!\r\nMax you can regen: {:d}\r\n", skill);
     return;
   }
 
   if (num > skill) {
-    send_to_char_printf(g, ch, "You can't regenerate that much!\r\nMax you can regen: %d\r\n", skill);
+    send_to_char(g, ch, "You can't regenerate that much!\r\nMax you can regen: {:d}\r\n", skill);
     return;
   }
 
   if (char_get_suppression(ch) > 0 && num > char_get_suppression(ch)) {
-    send_to_char_printf(g, ch, "You can't regenerate that much!\r\nMax you can regen: %d\r\n", skill);
+    send_to_char(g, ch, "You can't regenerate that much!\r\nMax you can regen: {:d}\r\n", skill);
     return;
   }
 
@@ -1286,8 +1286,8 @@ ACMD(do_regenerate)
   int64_t life = ((getCurLF(g, ch)) - amt * 0.8), energy = ((getCurKI(g, ch)) - amt * 0.2);
 
   if ((life <= 0 || energy <= 0) && !char_is_npc(ch)) {
-    send_to_char_printf(g, ch, "Your life force or ki are too low to regenerate that much.\r\n");
-    send_to_char_printf(g, ch, "@YLF Needed@D: @C%s@w, @YKi Needed@D: @C%s@w.@n\r\n", add_commas(amt * 0.8), add_commas(amt * 0.2));
+    send_to_char(g, ch, "Your life force or ki are too low to regenerate that much.\r\n");
+    send_to_char(g, ch, "@YLF Needed@D: @C{}@w, @YKi Needed@D: @C{}@w.@n\r\n", add_commas(amt * 0.8), add_commas(amt * 0.2));
     return;
   }
   if (char_is_npc(ch) && energy <= 0) {
@@ -1321,7 +1321,7 @@ ACMD(do_regenerate)
   }
   improve_skill(g, ch, SKILL_REGENERATE, 0);
   if (char_aff_flagged(ch, AFF_BURNED)) {
-    send_to_char_printf(g, ch, "Your burns are healed now.\r\n");
+    send_to_char(g, ch, "Your burns are healed now.\r\n");
     act(g, "$n@w's burns are now healed.@n", true, ch, nullptr, nullptr, TO_ROOM);
     null_affect(g, ch, AFF_BURNED);
   }
@@ -1407,27 +1407,25 @@ ACMD(do_kaioken)
     return;
   }
   if (char_get_alignment(ch) <= -50) {
-    send_to_char_printf(g, ch, "Your heart is too corrupt to use that technique!\r\n");
+    send_to_char(g, ch, "Your heart is too corrupt to use that technique!\r\n");
     return;
   }
   if (!char_is_npc(ch)) {
     if (char_plr_flagged(ch, PLR_HEALT)) {
-      send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+      send_to_char(g, ch, "You are inside a healing tank!\r\n");
       return;
     }
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "What level of kaioken do you want to try and achieve?\r\n"
-                               "Syntax: kaioken 1-20\r\n");
+    send_to_char(g, ch, "What level of kaioken do you want to try and achieve?\r\nSyntax: kaioken 1-20\r\n");
     return;
   }
 
   x = parse_int(arg);
 
   if (x < 0 || x > 20) {
-    send_to_char_printf(g, ch, "That level of kaioken dosn't exist...\r\n"
-                               "Syntax: kaioken 0-20\r\n");
+    send_to_char(g, ch, "That level of kaioken dosn't exist...\r\nSyntax: kaioken 0-20\r\n");
     return;
   }
 
@@ -1436,18 +1434,18 @@ ACMD(do_kaioken)
       remove_kaioken(g, ch, 1);
       return;
     }
-    send_to_char_printf(g, ch, "You are not in kaioken!\r\n");
+    send_to_char(g, ch, "You are not in kaioken!\r\n");
     return;
   }
 
   if (x == char_get_kaioken(ch)) {
-    send_to_char_printf(g, ch, "You are already at that kaioken level! To release, try kaioken 0\r\n");
+    send_to_char(g, ch, "You are already at that kaioken level! To release, try kaioken 0\r\n");
     return;
   }
 
   if (!char_is_npc(ch)) {
     if ((char_is_transformed(ch) || (char_is_hoshijin(ch) && char_get_starphase(ch) > 0)) && x > 5) {
-      send_to_char_printf(g, ch, "You can not manage a kaioken level higher than 5 when transformed.\r\n");
+      send_to_char(g, ch, "You can not manage a kaioken level higher than 5 when transformed.\r\n");
       return;
     }
   }
@@ -1462,7 +1460,7 @@ ACMD(do_kaioken)
   }
 
   if ((getCurKI(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki to focus into your body for that level.\r\n");
+    send_to_char(g, ch, "You do not have enough ki to focus into your body for that level.\r\n");
     return;
   }
 
@@ -1474,7 +1472,7 @@ ACMD(do_kaioken)
   improve_skill(g, ch, SKILL_KAIOKEN, 1);
 
   if (init_skill(g, ch, SKILL_KAIOKEN) < roll) {
-    send_to_char_printf(g, ch, "You try to focus your ki into your body but mess up somehow.\r\n");
+    send_to_char(g, ch, "You try to focus your ki into your body but mess up somehow.\r\n");
     act(g, "$n tries to use kaioken but messes up somehow.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_1SEC);
     return;
@@ -1503,12 +1501,12 @@ ACMD(do_zanzoken)
 
   if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
     char_aff_set(ch, AFF_ZANZOKEN, false);
-    send_to_char_printf(g, ch, "You release the ki you had prepared for a zanzoken.\r\n");
+    send_to_char(g, ch, "You release the ki you had prepared for a zanzoken.\r\n");
     return;
   }
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are busy in a grapple!\r\n");
+    send_to_char(g, ch, "You are busy in a grapple!\r\n");
     return;
   }
 
@@ -1531,12 +1529,12 @@ ACMD(do_zanzoken)
   }
 
   if ((getCurKI(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki.\r\n");
+    send_to_char(g, ch, "You do not have enough ki.\r\n");
     return;
   }
 
   if (prob < perc) {
-    send_to_char_printf(g, ch, "You focus your ki in preparation of a zanzoken but mess up and waste your ki!\r\n");
+    send_to_char(g, ch, "You focus your ki in preparation of a zanzoken but mess up and waste your ki!\r\n");
     improve_skill(g, ch, SKILL_ZANZOKEN, 2);
     decCurKI(g, ch, cost, 0);
     char_set_wait(ch, PULSE_2SEC);
@@ -1598,7 +1596,7 @@ ACMD(do_solar)
   }
 
   if ((getCurKI(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki.\r\n");
+    send_to_char(g, ch, "You do not have enough ki.\r\n");
     return;
   }
 
@@ -1658,12 +1656,12 @@ ACMD(do_heal)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "You want to heal WHO?\r\n");
+    send_to_char(g, ch, "You want to heal WHO?\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "You do not see the target here.\r\n");
+    send_to_char(g, ch, "You do not see the target here.\r\n");
     return;
   }
 
@@ -1699,21 +1697,21 @@ ACMD(do_heal)
   }
 
   if ((getCurKI(g, ch)) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki.\r\n");
+    send_to_char(g, ch, "You do not have enough ki.\r\n");
     return;
   }
 
   if (getCurPL(g, vict) >= getEffMaxPL(g, vict)) {
     if (vict != ch) {
-      send_to_char_printf(g, ch, "They are already at full health.\r\n");
+      send_to_char(g, ch, "They are already at full health.\r\n");
     } else {
-      send_to_char_printf(g, ch, "You are already at full health.\r\n");
+      send_to_char(g, ch, "You are already at full health.\r\n");
     }
     return;
   }
 
   if (char_get_suppression(vict) > 0 && getCurPL(g, vict) >= ((getEffMaxPL(g, vict) / 100) * char_get_suppression(vict))) {
-    send_to_char_printf(g, ch, "They are already at full health.\r\n");
+    send_to_char(g, ch, "They are already at full health.\r\n");
     return;
   }
 
@@ -1753,25 +1751,25 @@ ACMD(do_heal)
     if (char_is_nail(ch)) {
       if (char_get_skill(ch, SKILL_HEAL) >= 100) {
         incCurST(g, vict, heal * .4, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
         incCurST(g, vict, heal * .2, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
         incCurST(g, vict, heal * .1, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       }
     }
 
     null_affect(g, vict, AFF_POISON);
     null_affect(g, vict, AFF_BLIND);
     if (char_aff_flagged(vict, AFF_BURNED)) {
-      send_to_char_printf(g, vict, "Your burns are healed now.\r\n");
+      send_to_char(g, vict, "Your burns are healed now.\r\n");
       act(g, "$n@w's burns are now healed.@n", true, vict, nullptr, nullptr, TO_ROOM);
       char_aff_set(vict, AFF_BURNED, false);
     }
     if (is_affected(vict, AFF_HYDROZAP)) {
-      send_to_char_printf(g, vict, "You no longer feel a great thirst.\r\n");
+      send_to_char(g, vict, "You no longer feel a great thirst.\r\n");
       act(g, "$n@w no longer looks as if they could drink an ocean.@n", true, vict, nullptr, nullptr, TO_ROOM);
       remove_affect(g, vict, AFF_HYDROZAP);
     }
@@ -1787,7 +1785,7 @@ ACMD(do_heal)
     }
     if (getCurLF(g, vict) <= getMaxLF(g, vict) * 0.5 && !char_is_android(vict)) {
       incCurLF(g, vict, (getMaxLF(g, vict)) * .35, true);
-      send_to_char_printf(g, vict, "You feel that your lifeforce has recovered some!\r\n");
+      send_to_char(g, vict, "You feel that your lifeforce has recovered some!\r\n");
     }
     improve_skill(g, ch, SKILL_HEAL, 0);
     if (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) {
@@ -1811,13 +1809,13 @@ ACMD(do_heal)
     if (char_is_nail(ch)) {
       if (char_get_skill(ch, SKILL_HEAL) >= 100) {
         incCurST(g, vict, heal * .4, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
         incCurST(g, vict, heal * .2, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
         incCurST(g, vict, heal * .1, true);
-        send_to_char_printf(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
+        send_to_char(g, vict, "@GYou feel some of your stamina return as well!@n\r\n");
       }
     }
     null_affect(g, vict, AFF_POISON);
@@ -1852,7 +1850,7 @@ ACMD(do_barrier)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "[Syntax] barrier < 1-75 | release >\r\n");
+    send_to_char(g, ch, "[Syntax] barrier < 1-75 | release >\r\n");
     return;
   }
 
@@ -1864,17 +1862,17 @@ ACMD(do_barrier)
     return;
   }
   if (str_eq_nocase("release", arg)) {
-    send_to_char_printf(g, ch, "You don't have a barrier.\r\n");
+    send_to_char(g, ch, "You don't have a barrier.\r\n");
     return;
   }
 
   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
-    send_to_char_printf(g, ch, "You already have a barrier, try releasing it.\r\n");
+    send_to_char(g, ch, "You already have a barrier, try releasing it.\r\n");
     return;
   }
 
   if (char_get_con_cooldown(ch) > 0) {
-    send_to_char_printf(g, ch, "You must wait a short period before concentrating again.\r\n");
+    send_to_char(g, ch, "You must wait a short period before concentrating again.\r\n");
     return;
   }
 
@@ -1891,19 +1889,19 @@ ACMD(do_barrier)
   cost = (getMaxKI(g, ch) * 0.01) * (size * 0.5);
 
   if (size > prob) {
-    send_to_char_printf(g, ch, "You can not create a barrier that is stronger than your skill in barrier.\r\n");
+    send_to_char(g, ch, "You can not create a barrier that is stronger than your skill in barrier.\r\n");
     return;
   }
   if (size < 1) {
-    send_to_char_printf(g, ch, "You have to put at least some ki into the barrier!\r\n");
+    send_to_char(g, ch, "You have to put at least some ki into the barrier!\r\n");
     return;
   }
   if (size > 75) {
-    send_to_char_printf(g, ch, "You can't control a barrier with more than 75 percent!\r\n");
+    send_to_char(g, ch, "You can't control a barrier with more than 75 percent!\r\n");
     return;
   }
   if (char_get_charge(ch) < cost) {
-    send_to_char_printf(g, ch, "You do not have enough ki charged up!\r\n");
+    send_to_char(g, ch, "You do not have enough ki charged up!\r\n");
     return;
   }
   if (prob < perc) {
@@ -1954,35 +1952,35 @@ ACMD(do_instant)
     if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
       char_prf_set(g, ch, PRF_ARENAWATCH, false);
       char_set_arenawatch(ch, -1);
-      send_to_char_printf(g, ch, "You stop watching the arena action.\r\n");
+      send_to_char(g, ch, "You stop watching the arena action.\r\n");
     }
   }
   if (!know_skill(g, ch, SKILL_INSTANTT)) {
     return;
   }
   if (!char_get_skill(ch, SKILL_SENSE) && !char_plr_flagged(ch, PLR_SENSEM)) {
-    send_to_char_printf(g, ch, "You can't sense them to go to there!\r\n");
+    send_to_char(g, ch, "You can't sense them to go to there!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
   if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-    send_to_char_printf(g, ch, "@rYou are in a pocket dimension!@n\r\n");
+    send_to_char(g, ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
   }
   if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL) || room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
-    send_to_char_printf(g, ch, "You can not leave where you are at!\r\n");
+    send_to_char(g, ch, "You can not leave where you are at!\r\n");
     return;
   }
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
-    send_to_char_printf(g, ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
+    send_to_char(g, ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
+    send_to_char(g, ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
     return;
   }
 
@@ -1997,7 +1995,7 @@ ACMD(do_instant)
   }
 
   if ((getCurKI(g, ch)) - cost < 0) {
-    send_to_char_printf(g, ch, "You do not have enough ki to instantaneously move.\r\n");
+    send_to_char(g, ch, "You do not have enough ki to instantaneously move.\r\n");
     return;
   }
 
@@ -2018,25 +2016,25 @@ ACMD(do_instant)
   } else if (str_eq_nocase(arg, "planet-aether")) {
     location = 12024;
   } else if (!(tar = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char_printf(g, ch, "@RThat target was not found.@n\r\n");
-    send_to_char_printf(g, ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
-    send_to_char_printf(g, ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
+    send_to_char(g, ch, "@RThat target was not found.@n\r\n");
+    send_to_char(g, ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
+    send_to_char(g, ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
     return;
   }
 
   if (skill < perc || (char_get_fighting(g, ch) && rand_number(g, 1, 2) <= 1)) {
     if (tar != nullptr) {
       if (tar != ch) {
-        send_to_char_printf(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+        send_to_char(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
         decCurKI(g, ch, cost, 0);
         improve_skill(g, ch, skill_num, 2);
         char_set_wait(ch, PULSE_2SEC);
         return;
       }
-      send_to_char_printf(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
+      send_to_char(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
-    send_to_char_printf(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+    send_to_char(g, ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
     decCurKI(g, ch, cost, 0);
     improve_skill(g, ch, skill_num, 2);
     char_set_wait(ch, PULSE_2SEC);
@@ -2047,35 +2045,35 @@ ACMD(do_instant)
   char_set_wait(ch, PULSE_2SEC);
   if (tar != nullptr) {
     if (tar == ch) {
-      send_to_char_printf(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
+      send_to_char(g, ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
     if (char_get_grappling(g, ch) && char_get_grappling(g, ch) == tar) {
-      send_to_char_printf(g, ch, "You are already in the same room with them and are grappling with them!\r\n");
+      send_to_char(g, ch, "You are already in the same room with them and are grappling with them!\r\n");
       return;
     }
     if (!read_sense_memory(g, ch, tar)) {
-      send_to_char_printf(g, ch, "You've never sensed them up close so you do not have a good bearing on their ki signal.\r\n");
+      send_to_char(g, ch, "You've never sensed them up close so you do not have a good bearing on their ki signal.\r\n");
       return;
     }
     if (char_get_admlevel(tar) > 0 && char_get_admlevel(ch) < 1) {
-      send_to_char_printf(g, ch, "That immortal prevents you from reaching them.\r\n");
+      send_to_char(g, ch, "That immortal prevents you from reaching them.\r\n");
       return;
     }
     if (char_is_android(tar) || getCurPL(g, tar) < (getCurPL(g, ch) * 0.001) + 1) {
-      send_to_char_printf(g, ch, "You can't sense them well enough.\r\n");
+      send_to_char(g, ch, "You can't sense them well enough.\r\n");
       return;
     }
     if (!room_flagged(g, char_get_in_room(ch), ROOM_AL) && room_flagged(g, char_get_in_room(tar), ROOM_AL)) {
-      send_to_char_printf(g, ch, "They are dead and can't be reached.\r\n");
+      send_to_char(g, ch, "They are dead and can't be reached.\r\n");
       return;
     }
     if (!room_flagged(g, char_get_in_room(ch), ROOM_RHELL) && room_flagged(g, char_get_in_room(tar), ROOM_RHELL)) {
-      send_to_char_printf(g, ch, "They are dead and can't be reached.\r\n");
+      send_to_char(g, ch, "They are dead and can't be reached.\r\n");
       return;
     }
     if (room_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT)) {
-      send_to_char_printf(g, ch, "You can not go there as it is a protected area!\r\n");
+      send_to_char(g, ch, "You can not go there as it is a protected area!\r\n");
       return;
     }
 
@@ -2102,7 +2100,7 @@ ACMD(do_transform)
   char buf3[MAX_INPUT_LENGTH];
 
   if (!race_can_transform(char_get_race(ch))) {
-    send_to_char_printf(g, ch, "You do not have a transformation.\r\n");
+    send_to_char(g, ch, "You do not have a transformation.\r\n");
     return;
   }
 
@@ -2110,7 +2108,7 @@ ACMD(do_transform)
 
   /*R: Hidden transformation stuff following this*/
   if (!npc && (getBasePL(ch)) < 50000) {
-    send_to_char_printf(g, ch, "@RYou are too weak to comprehend transforming!@n\r\n");
+    send_to_char(g, ch, "@RYou are too weak to comprehend transforming!@n\r\n");
     return;
   }
 
@@ -2139,11 +2137,11 @@ ACMD(do_transform)
   // check for revert.
   if (str_eq_nocase("revert", arg)) {
     if (!can_revert) {
-      send_to_char_printf(g, ch, "That would be unthinkable.\r\n");
+      send_to_char(g, ch, "That would be unthinkable.\r\n");
       return;
     }
     if (!cur_form.flag) {
-      send_to_char_printf(g, ch, "You are not transformed.\r\n");
+      send_to_char(g, ch, "You are not transformed.\r\n");
       return;
     }
     // We are all clear to revert.
@@ -2162,24 +2160,24 @@ ACMD(do_transform)
   // Search for available transformations. Error out if we can't find one.
   transform_bonus trans;
   if (!race_find_form(ch, arg, &trans)) {
-    send_to_char_printf(g, ch, "You don't have that form.\r\n");
+    send_to_char(g, ch, "You don't have that form.\r\n");
     return;
   }
 
   int to_tier = race_flag_to_tier(trans.flag);
 
   if (char_plr_flagged(ch, trans.flag)) {
-    send_to_char_printf(g, ch, "You are already in that form! Try 'revert'.\r\n");
+    send_to_char(g, ch, "You are already in that form! Try 'revert'.\r\n");
     return;
   }
 
   if (!npc && (getBasePL(ch)) < trans_req(ch, to_tier)) {
-    send_to_char_printf(g, ch, "You are not strong enough to handle that transformation!\r\n");
+    send_to_char(g, ch, "You are not strong enough to handle that transformation!\r\n");
     return;
   }
 
   if (!npc && (getCurST(g, ch)) <= getMaxST(g, ch) * trans.drain) {
-    send_to_char_printf(g, ch, "You do not have enough stamina!");
+    send_to_char(g, ch, "You do not have enough stamina!");
     return;
   }
 
@@ -2236,11 +2234,11 @@ ACMD(do_aid)
   arg2                  = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Syntax: aid heal (target)\r\n");
-    send_to_char_printf(g, ch, "        aid adrenex\r\n");
-    send_to_char_printf(g, ch, "        aid antitoxin\r\n");
-    send_to_char_printf(g, ch, "        aid salve\r\n");
-    send_to_char_printf(g, ch, "        aid formula-82\r\n");
+    send_to_char(g, ch, "Syntax: aid heal (target)\r\n");
+    send_to_char(g, ch, "        aid adrenex\r\n");
+    send_to_char(g, ch, "        aid antitoxin\r\n");
+    send_to_char(g, ch, "        aid salve\r\n");
+    send_to_char(g, ch, "        aid formula-82\r\n");
     return;
   }
 
@@ -2267,47 +2265,47 @@ ACMD(do_aid)
 
   if (found == false || aid_obj == nullptr) {
     if (num == 47) {
-      send_to_char_printf(g, ch, "You need bandages to be able to use first aid.\r\n");
+      send_to_char(g, ch, "You need bandages to be able to use first aid.\r\n");
     } else {
-      send_to_char_printf(g, ch, "You need a TCX-Medical Equipment Construction Kit.\r\n");
+      send_to_char(g, ch, "You need a TCX-Medical Equipment Construction Kit.\r\n");
     }
     return;
   }
   if (num == 47) {
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Apply first aid to who?\r\n");
+      send_to_char(g, ch, "Apply first aid to who?\r\n");
       return;
     }
     if (char_is_npc(vict)) {
-      send_to_char_printf(g, ch, "What ever for?\r\n");
+      send_to_char(g, ch, "What ever for?\r\n");
       return;
     }
     if (char_is_android(vict)) {
-      send_to_char_printf(g, ch, "They are an android!\r\n");
+      send_to_char(g, ch, "They are an android!\r\n");
       return;
     }
 
     if (!char_aff_flagged(vict, AFF_SPIRIT) && !char_plr_flagged(vict, PLR_BANDAGED)) {
       if (vict != ch) {
-        send_to_char_printf(g, ch, "You attempt to lend first aid to %s.\r\n", char_get_name(vict));
+        send_to_char(g, ch, "You attempt to lend first aid to {}.\r\n", char_get_name(vict));
       }
       act(g, "$n attempts to bandage $N's wounds.", true, ch, nullptr, vict, TO_ROOM);
       dc = axion_dice(g, 0);
       if ((char_get_skill(ch, SKILL_FIRST_AID) + 1) > dc) {
-        send_to_char_printf(g, ch, "You bandage %s's wounds.\r\n", char_get_name(vict));
+        send_to_char(g, ch, "You bandage {}'s wounds.\r\n", char_get_name(vict));
         int64_t roll = (getEffMaxPL(g, vict) / 100) * (char_get_aff_abils_wis(ch) / 4) + getEffMaxPL(g, vict) * 0.25;
         if (char_get_bonuses(ch, BONUS_HEALER) > 0) {
           roll += roll * .1;
         }
         incCurHealth(g, vict, roll, true);
 
-        send_to_char_printf(g, vict, "Your wounds are bandaged by %s!\r\n", char_get_name(ch));
+        send_to_char(g, vict, "Your wounds are bandaged by {}!\r\n", char_get_name(ch));
         act(g, "$n's wounds are stablized by $N!", true, vict, nullptr, ch, TO_NOTVICT);
         char_plr_set(vict, PLR_BANDAGED, true);
         extract_obj(g, aid_obj);
       } else {
         if (vict != ch) {
-          send_to_char_printf(g, ch, "You fail to bandage their wounds properly, wasting the set of bandages...\r\n");
+          send_to_char(g, ch, "You fail to bandage their wounds properly, wasting the set of bandages...\r\n");
           act(g, "$N fails to bandage $n's wounds properly, wasting an entire set of bandages...", true, vict, nullptr, ch, TO_NOTVICT);
           act(g, "$N fails to bandage your wounds properly, wasting an entire set of bandages...", true, vict, nullptr, ch, TO_CHAR);
         } else {
@@ -2318,15 +2316,15 @@ ACMD(do_aid)
       }
       improve_skill(g, ch, SKILL_FIRST_AID, 1);
     } else if (char_plr_flagged(vict, PLR_BANDAGED)) {
-      send_to_char_printf(g, ch, "They are already bandaged!\r\n");
+      send_to_char(g, ch, "They are already bandaged!\r\n");
     } else if (char_aff_flagged(vict, AFF_SPIRIT)) {
-      send_to_char_printf(g, ch, "The dead don't need first aid.\r\n");
+      send_to_char(g, ch, "The dead don't need first aid.\r\n");
     } else {
-      send_to_char_printf(g, ch, "They apparently do not need bandaging.\r\n");
+      send_to_char(g, ch, "They apparently do not need bandaging.\r\n");
     }
   } else if (num2 == 381) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 65) {
-      send_to_char_printf(g, ch, "You need at least a skill level of 65 in First Aid.\r\n");
+      send_to_char(g, ch, "You need at least a skill level of 65 in First Aid.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(g, 15)) {
@@ -2344,7 +2342,7 @@ ACMD(do_aid)
     }
   } else if (num2 == 382) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 50) {
-      send_to_char_printf(g, ch, "You need at least a skill level of 50 in First Aid.\r\n");
+      send_to_char(g, ch, "You need at least a skill level of 50 in First Aid.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(g, 10)) {
@@ -2362,7 +2360,7 @@ ACMD(do_aid)
     }
   } else if (num2 == 383) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
-      send_to_char_printf(g, ch, "You need at least a skill level of 40 in First Aid.\r\n");
+      send_to_char(g, ch, "You need at least a skill level of 40 in First Aid.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(g, 5)) {
@@ -2380,7 +2378,7 @@ ACMD(do_aid)
     }
   } else if (num2 == 385) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
-      send_to_char_printf(g, ch, "You need at least a skill level of 40 in First Aid.\r\n");
+      send_to_char(g, ch, "You need at least a skill level of 40 in First Aid.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(g, 15)) {
@@ -2409,27 +2407,27 @@ ACMD(do_aura)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Syntax: aura light\r\n");
+    send_to_char(g, ch, "Syntax: aura light\r\n");
     return;
   }
 
   if (char_get_charge(ch)) {
-    send_to_char_printf(g, ch, "You can't focus enough on this while charging.");
+    send_to_char(g, ch, "You can't focus enough on this while charging.");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_POWERUP)) {
-    send_to_char_printf(g, ch, "You are busy powering up!\r\n");
+    send_to_char(g, ch, "You are busy powering up!\r\n");
     return;
   }
 
   if (str_eq_nocase(arg, "light")) {
     if (char_get_skill(ch, SKILL_FOCUS) < 75 || char_get_skill(ch, SKILL_CONCENTRATION) < 75) {
-      send_to_char_printf(g, ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
+      send_to_char(g, ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
       return;
     }
     if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-      send_to_char_printf(g, ch, "Your aura fades as you stop shining light.\r\n");
+      send_to_char(g, ch, "Your aura fades as you stop shining light.\r\n");
       act(g, "$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_AURALIGHT, false);
       room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
@@ -2440,14 +2438,14 @@ ACMD(do_aura)
       }
       reveal_hiding(g, ch, 0);
       decCurKIPercent(g, ch, .12, 0);
-      send_to_char_printf(g, ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
+      send_to_char(g, ch, "A bright {} aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
       char bloom[MAX_INPUT_LENGTH];
       snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
       act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_AURALIGHT, true);
 
     } else {
-      send_to_char_printf(g, ch, "You don't have enough KI to do that.\r\n");
+      send_to_char(g, ch, "You don't have enough KI to do that.\r\n");
       return;
     }
   }

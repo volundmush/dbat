@@ -66,16 +66,16 @@ ACMD(do_grapple)
   }
 
   if (char_plr_flagged(ch, PLR_THANDW)) {
-    send_to_char_printf(g, ch, "Your are too busy wielding your weapon with two hands!\r\n");
+    send_to_char(g, ch, "Your are too busy wielding your weapon with two hands!\r\n");
     return;
   }
 
   if (char_get_absorbing(g, ch)) {
-    send_to_char_printf(g, ch, "You are currently absorbing from someone!\r\n");
+    send_to_char(g, ch, "You are currently absorbing from someone!\r\n");
     return;
   }
   if (char_get_absorbby(g, ch)) {
-    send_to_char_printf(g, ch, "You are currently being absorbed by someone! Try 'escape'!\r\n");
+    send_to_char(g, ch, "You are currently being absorbed by someone! Try 'escape'!\r\n");
     return;
   }
 
@@ -91,12 +91,12 @@ ACMD(do_grapple)
   }
 
   if (char_get_grappled(g, ch) != nullptr) {
-    send_to_char_printf(g, ch, "You are currently a victim of grappling! Try 'escape' to break free!\r\n");
+    send_to_char(g, ch, "You are currently a victim of grappling! Try 'escape' to break free!\r\n");
     return;
   }
 
   if (!char_has_arms(g, ch)) {
-    send_to_char_printf(g, ch, "You have no available arms!\r\n");
+    send_to_char(g, ch, "You have no available arms!\r\n");
     return;
   }
 
@@ -108,13 +108,13 @@ ACMD(do_grapple)
   arg2                  = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
-    send_to_char_printf(g, ch, "Syntax: grapple (target) (hold | choke | grab)\r\n");
+    send_to_char(g, ch, "Syntax: grapple (target) (hold | choke | grab)\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (!char_get_fighting(g, ch)) {
-      send_to_char_printf(g, ch, "That target isn't here.\r\n");
+      send_to_char(g, ch, "That target isn't here.\r\n");
       return;
     }
     vict = char_get_fighting(g, ch);
@@ -125,22 +125,22 @@ ACMD(do_grapple)
   }
 
   if (char_aff_flagged(vict, AFF_KNOCKED)) {
-    send_to_char_printf(g, ch, "They are unconcious. What would be the point?\r\n");
+    send_to_char(g, ch, "They are unconcious. What would be the point?\r\n");
     return;
   }
 
   if (char_get_grappled(g, vict)) {
-    send_to_char_printf(g, ch, "They are currently in someone else's grasp!\r\n");
+    send_to_char(g, ch, "They are currently in someone else's grasp!\r\n");
     return;
   }
 
   if (char_get_absorbby(g, vict)) {
-    send_to_char_printf(g, ch, "They are currently in someone else's grasp!\r\n");
+    send_to_char(g, ch, "They are currently in someone else's grasp!\r\n");
     return;
   }
 
   if (char_get_absorbing(g, vict)) {
-    send_to_char_printf(g, ch, "They are currently absorbing from someone!\r\n");
+    send_to_char(g, ch, "They are currently absorbing from someone!\r\n");
     return;
   }
 
@@ -148,7 +148,7 @@ ACMD(do_grapple)
     int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(g, 0), cost = getMaxST(g, ch) / 100;
 
     if ((getCurST(g, ch)) < cost) {
-      send_to_char_printf(g, ch, "You do not have enough stamina to grapple!\r\n");
+      send_to_char(g, ch, "You do not have enough stamina to grapple!\r\n");
       return;
     }
 
@@ -216,7 +216,7 @@ ACMD(do_grapple)
       return;
     }
     if (!char_has_arms(g, vict) && str_eq_nocase("grab", arg2)) {
-      send_to_char_printf(g, ch, "They don't even have an arm to grab onto!\r\n");
+      send_to_char(g, ch, "They don't even have an arm to grab onto!\r\n");
       return;
     }
     if (str_eq_nocase("hold", arg2)) {
@@ -257,7 +257,7 @@ ACMD(do_grapple)
     }
     if (str_eq_nocase("wrap", arg2)) {
       if (!char_is_majin(ch)) {
-        send_to_char_printf(g, ch, "Your body is not flexible enough to wrap around a target!\r\n");
+        send_to_char(g, ch, "Your body is not flexible enough to wrap around a target!\r\n");
         return;
       }
 
@@ -300,7 +300,7 @@ ACMD(do_grapple)
       return;
     }
   } else { /* You need to learn proper syntax! */
-    send_to_char_printf(g, ch, "Syntax: grapple (target) (hold | choke | grab | wrap)\r\n");
+    send_to_char(g, ch, "Syntax: grapple (target) (hold | choke | grab | wrap)\r\n");
     return;
   }
 }
@@ -321,7 +321,7 @@ ACMD(do_trip)
   int64_t cost = getEffMaxPL(g, ch) / 200;
 
   if (cost > (getCurST(g, ch))) {
-    send_to_char_printf(g, ch, "You don't have enough stamina.\r\n");
+    send_to_char(g, ch, "You don't have enough stamina.\r\n");
     return;
   }
 
@@ -337,7 +337,7 @@ ACMD(do_trip)
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else {
-      send_to_char_printf(g, ch, "That target isn't here.\r\n");
+      send_to_char(g, ch, "That target isn't here.\r\n");
       return;
     }
   }
@@ -348,15 +348,15 @@ ACMD(do_trip)
 
   if (vict != nullptr) {
     if (char_aff_flagged(vict, AFF_FLYING)) {
-      send_to_char_printf(g, ch, "They are flying and are not on their feet!\r\n");
+      send_to_char(g, ch, "They are flying and are not on their feet!\r\n");
       return;
     }
     if (char_get_position(vict) == POS_SITTING) {
-      send_to_char_printf(g, ch, "They are not on their feet!\r\n");
+      send_to_char(g, ch, "They are not on their feet!\r\n");
       return;
     }
     if (char_plr_flagged(vict, PLR_HEALT)) {
-      send_to_char_printf(g, ch, "They are inside a healing tank!\r\n");
+      send_to_char(g, ch, "They are inside a healing tank!\r\n");
       return;
     }
 
@@ -430,7 +430,7 @@ ACMD(do_trip)
       return;
     }
   } else {
-    send_to_char_printf(g, ch, "ERROR: Report to Iovan.\r\n");
+    send_to_char(g, ch, "ERROR: Report to Iovan.\r\n");
     return;
   }
 }
@@ -447,23 +447,23 @@ ACMD(do_rip)
     return;
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Rip the tail off who?\r\n");
+    send_to_char(g, ch, "Rip the tail off who?\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "That target isn't here.\r\n");
+    send_to_char(g, ch, "That target isn't here.\r\n");
     return;
   }
 
   if (!char_plr_flagged(vict, PLR_TAIL) && !char_plr_flagged(vict, PLR_STAIL)) {
-    send_to_char_printf(g, ch, "They do not have a tail to rip off!\r\n");
+    send_to_char(g, ch, "They do not have a tail to rip off!\r\n");
     return;
   }
 
   if (ch != vict && char_get_position(ch) > POS_SLEEPING) {
     if ((getCurST(g, ch)) < getMaxST(g, ch) / 20) {
-      send_to_char_printf(g, ch, "You are too tired to manage to grab their tail!\r\n");
+      send_to_char(g, ch, "You are too tired to manage to grab their tail!\r\n");
       return;
     }
     if (char_get_speedi(g, ch) > char_get_speedi(g, vict)) {
@@ -496,7 +496,7 @@ ACMD(do_rip)
     char_lose_tail(g, vict);
   } else {
     if ((getCurST(g, ch)) < getMaxST(g, ch) / 20) {
-      send_to_char_printf(g, ch, "You are too tired to manage to grab their tail!\r\n");
+      send_to_char(g, ch, "You are too tired to manage to grab their tail!\r\n");
       return;
     }
     decCurST(g, ch, getMaxKI(g, ch) / 20, 0);
@@ -530,47 +530,47 @@ ACMD(do_drag)
   }
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
 
   if (char_get_carrying(g, ch)) {
-    send_to_char_printf(g, ch, "You are busy carrying someone at the moment.\r\n");
+    send_to_char(g, ch, "You are busy carrying someone at the moment.\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Who do you want to drag?\r\n");
+    send_to_char(g, ch, "Who do you want to drag?\r\n");
     return;
   }
 
   if (char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "You are a bit busy fighting right now!\r\n");
+    send_to_char(g, ch, "You are a bit busy fighting right now!\r\n");
     return;
   }
 
   if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM) {
-    send_to_char_printf(g, ch, "You decide to not be a tugboat instead.\r\n");
+    send_to_char(g, ch, "You decide to not be a tugboat instead.\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "Drag who?\r\n");
+    send_to_char(g, ch, "Drag who?\r\n");
     return;
   }
 
   if (vict == ch) {
-    send_to_char_printf(g, ch, "You can't drag yourself.\r\n");
+    send_to_char(g, ch, "You can't drag yourself.\r\n");
     return;
   }
 
   if (char_get_dragged(g, vict)) {
-    send_to_char_printf(g, ch, "They are already being dragged!\r\n");
+    send_to_char(g, ch, "They are already being dragged!\r\n");
     return;
   }
 
   if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL)) {
-    send_to_char_printf(g, ch, "They are not to be touched!\r\n");
+    send_to_char(g, ch, "They are not to be touched!\r\n");
     return;
   }
 
@@ -596,7 +596,7 @@ ACMD(do_drag)
   char_set_drag(ch, vict);
   char_set_dragged(vict, ch);
   if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(g, 1, 3)) {
-    send_to_char_printf(g, vict, "You feel your sleeping body being moved.\r\n");
+    send_to_char(g, vict, "You feel your sleeping body being moved.\r\n");
     if (char_is_npc(vict) && !char_get_fighting(g, vict)) {
       set_fighting(g, vict, ch);
     }
@@ -610,7 +610,7 @@ ACMD(do_stop)
     return;
 
   if (!char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "You are not even fighting!\r\n");
+    send_to_char(g, ch, "You are not even fighting!\r\n");
     return;
   }
   act(g, "@CYou move out of your fighting posture.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -624,7 +624,7 @@ ACMD(do_escape)
 {
 
   if (!char_get_absorbby(g, ch) && !char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are not in anyone's grasp!\r\n");
+    send_to_char(g, ch, "You are not in anyone's grasp!\r\n");
     return;
   }
   int num = char_get_aff_abils_str(ch);
@@ -747,7 +747,7 @@ ACMD(do_block)
 
   if (arg.empty()) {
     if (!char_get_blocks(g, ch)) {
-      send_to_char_printf(g, ch, "You want to block who?\r\n");
+      send_to_char(g, ch, "You want to block who?\r\n");
       return;
     }
     if (char_get_blocks(g, ch)) {
@@ -762,22 +762,22 @@ ACMD(do_block)
   }
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "You do not see the target here.\r\n");
+    send_to_char(g, ch, "You do not see the target here.\r\n");
     return;
   }
 
   if (char_get_blocks(g, ch) == vict) {
-    send_to_char_printf(g, ch, "They are already blocked by you!\r\n");
+    send_to_char(g, ch, "They are already blocked by you!\r\n");
     return;
   }
 
   if (ch == vict) {
-    send_to_char_printf(g, ch, "You can't block yourself, are you mental?\r\n");
+    send_to_char(g, ch, "You can't block yourself, are you mental?\r\n");
     return;
   }
 
   if (char_get_blocked(g, vict)) {
-    send_to_char_printf(g, ch, "They are already blocked by someone else!\r\n");
+    send_to_char(g, ch, "They are already blocked by someone else!\r\n");
     return;
   }
 
@@ -808,10 +808,10 @@ ACMD(do_steal)
 {
 
   if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
-    send_to_char_printf(g, ch, "You learn the very veeeery basics of theft. Which is don't get caught.\r\n");
+    send_to_char(g, ch, "You learn the very veeeery basics of theft. Which is don't get caught.\r\n");
     char_set_skills_base(ch, SKILL_SLEIGHT_OF_HAND, 1);
   } else if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-    send_to_char_printf(g, ch, "You can't learn any more skills and thus can not steal right now!\r\n");
+    send_to_char(g, ch, "You can't learn any more skills and thus can not steal right now!\r\n");
     return;
   }
 
@@ -829,32 +829,32 @@ ACMD(do_steal)
   }
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "An important basic of theft is actually having a victim!\r\n");
+    send_to_char(g, ch, "An important basic of theft is actually having a victim!\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "Steal what from who?\r\n");
+    send_to_char(g, ch, "Steal what from who?\r\n");
     return;
   }
   if (vict == ch) {
-    send_to_char_printf(g, ch, "Come on now, that's rather stupid!\r\n");
+    send_to_char(g, ch, "Come on now, that's rather stupid!\r\n");
     return;
   }
   if (!can_kill(g, ch, vict, nullptr, 0)) {
     return;
   }
   if (char_get_level(ch) <= 8) {
-    send_to_char_printf(g, ch, "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n");
+    send_to_char(g, ch, "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n");
     return;
   }
   if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE) {
-    send_to_char_printf(g, ch, "That isn't such a good idea...\r\n");
+    send_to_char(g, ch, "That isn't such a good idea...\r\n");
     return;
   }
 
   if ((getCurST(g, ch)) < (getMaxST(g, ch) / 40) + char_get_carry_weight(ch)) {
-    send_to_char_printf(g, ch, "You do not have enough stamina.\r\n");
+    send_to_char(g, ch, "You do not have enough stamina.\r\n");
     return;
   }
 
@@ -907,24 +907,24 @@ ACMD(do_steal)
             gold = char_get_gold(vict);
           }
           if (gold + char_get_gold(ch) > char_gold_carry(ch)) {
-            send_to_char_printf(g, ch, "You can't hold that much more zenni on your person!\r\n");
+            send_to_char(g, ch, "You can't hold that much more zenni on your person!\r\n");
             return;
           }
           char_set_gold(vict, char_get_gold(vict) - (gold));
           char_set_gold(ch, char_get_gold(ch) + (gold));
           if (!char_is_npc(vict)) {
             char_plr_set(vict, PLR_STOLEN, true);
-            mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "THEFT: %s has stolen %s zenni@n from %s", char_get_name(ch), add_commas(gold), char_get_name(vict));
+            mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "THEFT: {} has stolen {} zenni@n from {}", char_get_name(ch), add_commas(gold), char_get_name(vict));
           }
           if (gold > 1)
-            send_to_char_printf(g, ch, "Bingo!  You got %d zenni.\r\n", gold);
+            send_to_char(g, ch, "Bingo!  You got {:d} zenni.\r\n", gold);
           else
-            send_to_char_printf(g, ch, "You manage to swipe a solitary zenni.\r\n");
+            send_to_char(g, ch, "You manage to swipe a solitary zenni.\r\n");
           if (axion_dice(g, 0) > prob) {
-            send_to_char_printf(g, ch, "You think that your movements might have been a bit obvious.\r\n");
+            send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
             reveal_hiding(g, ch, 0);
             act(g, "@R$n@r just stole zenni from @R$N@r!@n", true, ch, nullptr, vict, TO_ROOM);
-            send_to_char_printf(g, vict, "You feel like something may be missing...\r\n");
+            send_to_char(g, vict, "You feel like something may be missing...\r\n");
             if (char_is_npc(vict) && rand_number(g, 1, 3) == 3) {
               set_fighting(g, vict, ch);
             }
@@ -933,7 +933,7 @@ ACMD(do_steal)
           improve_skill(g, ch, SKILL_SLEIGHT_OF_HAND, 1);
           return;
         }
-        send_to_char_printf(g, ch, "It appears like they are broke...\r\n");
+        send_to_char(g, ch, "It appears like they are broke...\r\n");
         return;
       } else { /* Failure! */
         reveal_hiding(g, ch, 0);
@@ -960,47 +960,47 @@ ACMD(do_steal)
           return;
         }
         if (char_get_position(vict) > POS_SLEEPING) {
-          send_to_char_printf(g, ch, "Steal worn equipment from them while they are awake? That's a stupid idea...\r\n");
+          send_to_char(g, ch, "Steal worn equipment from them while they are awake? That's a stupid idea...\r\n");
           return;
         }
         if (!give_otrigger(g, obj, vict, ch) || !receive_mtrigger(g, ch, vict, obj)) {
-          send_to_char_printf(g, ch, "Impossible!\r\n");
+          send_to_char(g, ch, "Impossible!\r\n");
           return;
         }
         if (obj_get_vnum(g, obj) >= 20000) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_get_vnum(g, obj) >= 18800 && obj_get_vnum(g, obj) <= 18999) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_get_vnum(g, obj) >= 19100 && obj_get_vnum(g, obj) <= 19199) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_get_type_flag(obj) == ITEM_KEY) {
-          send_to_char_printf(g, ch, "No stealing keys!\r\n");
+          send_to_char(g, ch, "No stealing keys!\r\n");
           return;
         }
         if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(g, ch)) {
-          send_to_char_printf(g, ch, "You can't carry that much weight.\r\n");
+          send_to_char(g, ch, "You can't carry that much weight.\r\n");
           return;
         }
         if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
-          send_to_char_printf(g, ch, "You don't have the room for it right now!\r\n");
+          send_to_char(g, ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right off their back :) */
           act(g, "You unequip $p and steal it.", false, ch, obj, vict, TO_CHAR);
           if (axion_dice(g, 0) > prob) {
-            send_to_char_printf(g, ch, "You think that your movements might have been a bit obvious.\r\n");
+            send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
             reveal_hiding(g, ch, 0);
             act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, TO_ROOM);
-            send_to_char_printf(g, vict, "You feel your body being disturbed.\r\n");
+            send_to_char(g, vict, "You feel your body being disturbed.\r\n");
             improve_skill(g, vict, SKILL_SPOT, 1);
           }
           obj_to_char(g, unequip_char(g, vict, eq_pos), ch);
@@ -1023,27 +1023,27 @@ ACMD(do_steal)
         }
       } else { /* It's in their inventory */
         if (!give_otrigger(g, obj, vict, ch) || !receive_mtrigger(g, ch, vict, obj)) {
-          send_to_char_printf(g, ch, "Impossible!\r\n");
+          send_to_char(g, ch, "Impossible!\r\n");
           return;
         }
         if (obj_get_vnum(g, obj) >= 20000) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
-          send_to_char_printf(g, ch, "You can't steal that!\r\n");
+          send_to_char(g, ch, "You can't steal that!\r\n");
           return;
         }
         if (obj_get_type_flag(obj) == ITEM_KEY) {
-          send_to_char_printf(g, ch, "No stealing keys!\r\n");
+          send_to_char(g, ch, "No stealing keys!\r\n");
           return;
         }
         if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(g, ch)) {
-          send_to_char_printf(g, ch, "You can't carry that much weight.\r\n");
+          send_to_char(g, ch, "You can't carry that much weight.\r\n");
           return;
         }
         if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
-          send_to_char_printf(g, ch, "You don't have the room for it right now!\r\n");
+          send_to_char(g, ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right out of their pockets */
           act(g, "You steal $p from $N.", false, ch, obj, vict, TO_CHAR);
@@ -1051,13 +1051,13 @@ ACMD(do_steal)
           obj_to_char(g, obj, ch);
           if (!char_is_npc(vict)) {
             char_plr_set(vict, PLR_STOLEN, true);
-            mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj_get_short_description(obj), char_get_name(vict));
+            mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "THEFT: {} has stolen {}@n from {}", char_get_name(ch), obj_get_short_description(obj), char_get_name(vict));
           }
           if (axion_dice(g, 0) > prob) {
             reveal_hiding(g, ch, 0);
-            send_to_char_printf(g, ch, "You think that your movements might have been a bit obvious.\r\n");
+            send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
             act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, TO_ROOM);
-            send_to_char_printf(g, vict, "You feel like something may be missing...\r\n");
+            send_to_char(g, vict, "You feel like something may be missing...\r\n");
             if (char_is_npc(vict) && rand_number(g, 1, 3) == 3) {
               set_fighting(g, vict, ch);
             }

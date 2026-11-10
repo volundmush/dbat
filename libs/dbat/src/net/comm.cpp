@@ -3230,36 +3230,36 @@ void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const
 
 void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
 {
-  send_to_room_printf(g, room, "%.*s", (int)text.size(), text.data());
+  (send_to_room_printf)(g, room, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void send_to_all(GameWorld *g, std::string_view text)
 {
-  send_to_all_printf(g, "%.*s", (int)text.size(), text.data());
+  (send_to_all_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void send_to_outdoor(GameWorld *g, std::string_view text)
 {
   if (text.empty()) /* as send_to_outdoor_printf() skips an empty message */
     return;
-  send_to_outdoor_printf(g, "%.*s", (int)text.size(), text.data());
+  (send_to_outdoor_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void send_to_moon(GameWorld *g, std::string_view text)
 {
   if (text.empty()) /* as send_to_moon_printf() skips an empty message */
     return;
-  send_to_moon_printf(g, "%.*s", (int)text.size(), text.data());
+  (send_to_moon_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void send_to_planet(GameWorld *g, int type, int planet, std::string_view text)
 {
   if (text.empty()) /* as send_to_planet_printf() skips an empty message */
     return;
-  send_to_planet_printf(g, type, planet, "%.*s", (int)text.size(), text.data());
+  (send_to_planet_printf)(g, type, planet, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::string_view text)
 {
-  send_to_range_printf(g, start, finish, "%.*s", (int)text.size(), text.data());
+  (send_to_range_printf)(g, start, finish, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }

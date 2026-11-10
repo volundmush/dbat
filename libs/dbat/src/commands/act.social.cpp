@@ -42,14 +42,14 @@ ACMD(do_action)
   struct obj_data *targ;
 
   if ((act_nr = find_action(g, cmd)) < 0) {
-    send_to_char_printf(g, ch, "That action is not supported.\r\n");
+    send_to_char(g, ch, "That action is not supported.\r\n");
     return;
   }
 
   action = &g->soc_mess_list[act_nr];
 
   if (argument.empty()) {
-    send_to_char_printf(g, ch, "%s\r\n", action->char_no_arg);
+    send_to_char(g, ch, "{}\r\n", action->char_no_arg);
     act(g, action->others_no_arg, action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
@@ -59,7 +59,7 @@ ACMD(do_action)
   part                  = take_arg(rest);
 
   if ((!action->char_body_found) && !part.empty()) {
-    send_to_char_printf(g, ch, "Sorry, this social does not support body parts.\r\n");
+    send_to_char(g, ch, "Sorry, this social does not support body parts.\r\n");
     return;
   }
 
@@ -78,17 +78,17 @@ ACMD(do_action)
       }
     }
     if (action->not_found)
-      send_to_char_printf(g, ch, "%s\r\n", action->not_found);
+      send_to_char(g, ch, "{}\r\n", action->not_found);
     else
-      send_to_char_printf(g, ch, "I don't see anything by that name here.\r\n");
+      send_to_char(g, ch, "I don't see anything by that name here.\r\n");
     return;
   }
 
   if (vict == ch) {
     if (action->char_auto)
-      send_to_char_printf(g, ch, "%s\r\n", action->char_auto);
+      send_to_char(g, ch, "{}\r\n", action->char_auto);
     else
-      send_to_char_printf(g, ch, "Erm, no.\r\n");
+      send_to_char(g, ch, "Erm, no.\r\n");
     act(g, action->others_auto, action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
@@ -118,10 +118,10 @@ ACMD(do_insult)
 
   if (!arg.empty()) {
     if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-      send_to_char_printf(g, ch, "Can't hear you!\r\n");
+      send_to_char(g, ch, "Can't hear you!\r\n");
     else {
       if (victim != ch) {
-        send_to_char_printf(g, ch, "You insult %s.\r\n", char_get_name(victim));
+        send_to_char(g, ch, "You insult {}.\r\n", char_get_name(victim));
 
         switch (rand_number(g, 0, 2)) {
           case 0:
@@ -149,11 +149,11 @@ ACMD(do_insult)
 
         act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
       } else { /* ch == victim */
-        send_to_char_printf(g, ch, "You feel insulted.\r\n");
+        send_to_char(g, ch, "You feel insulted.\r\n");
       }
     }
   } else
-    send_to_char_printf(g, ch, "I'm sure you don't want to insult *everybody*...\r\n");
+    send_to_char(g, ch, "I'm sure you don't want to insult *everybody*...\r\n");
 }
 
 void boot_social_messages(GameWorld *g)
@@ -165,7 +165,7 @@ void boot_social_messages(GameWorld *g)
   if (CONFIG_NEW_SOCIALS == true) {
     /* open social file */
     if (!(fl = fopen(SOCMESS_FILE_NEW, "r"))) {
-      mud_log_printf("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE_NEW, strerror(errno));
+      mud_log("SYSERR: can't open socials file '{}': {}", SOCMESS_FILE_NEW, strerror(errno));
       /*  SYSERR_DESC:
        *  This error, from boot_social_messages(), occurs when the server
        *  fails to open the file containing the social messages.  The error
@@ -183,7 +183,7 @@ void boot_social_messages(GameWorld *g)
 
     /* open social file */
     if (!(fl = fopen(SOCMESS_FILE, "r"))) {
-      mud_log_printf("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE, strerror(errno));
+      mud_log("SYSERR: can't open socials file '{}': {}", SOCMESS_FILE, strerror(errno));
       exit(1);
     }
     /* count socials */
@@ -193,7 +193,7 @@ void boot_social_messages(GameWorld *g)
     }
   }
 
-  mud_log_printf("Social table contains %d socials.", g->top_of_socialt);
+  mud_log("Social table contains {:d} socials.", g->top_of_socialt);
   if (g->top_of_socialt < 0) { /* a game with no socials can still run */
     fclose(fl);
     return;
@@ -207,14 +207,14 @@ void boot_social_messages(GameWorld *g)
     fscanf(fl, " %64935s ", next_soc); /* MAX_STRING_LENGTH */
     if (*next_soc == '$') break;
     if (curr_soc >= g->top_of_socialt) {
-      mud_log_printf("SYSERR: more socials than were counted in the social file, near '%s'", next_soc);
+      mud_log("SYSERR: more socials than were counted in the social file, near '{}'", next_soc);
       exit(1);
     }
 
     if (CONFIG_NEW_SOCIALS == true) {
       if (fscanf(fl, " %16383s %d %d %d %d \n", /* MAX_INPUT_LENGTH */
                  sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
-        mud_log_printf("SYSERR: format error in social file near social '%s'", next_soc);
+        mud_log("SYSERR: format error in social file near social '{}'", next_soc);
         /*  SYSERR_DESC:
        *  From boot_social_messages(), this error is output when the
        *  server is expecting to find the remainder of the first line of the
@@ -234,7 +234,7 @@ void boot_social_messages(GameWorld *g)
       g->soc_mess_list[curr_soc].min_level_char      = min_lvl;
     } else { /* old style */
       if (fscanf(fl, " %d %d \n", &hide, &min_pos) != 2) {
-        mud_log_printf("SYSERR: format error in social file near social '%s'", next_soc);
+        mud_log("SYSERR: format error in social file near social '{}'", next_soc);
         exit(1);
       }
       curr_soc++;
@@ -321,7 +321,7 @@ void create_command_list(GameWorld *g)
   g->complete_cmd_info[k].minimum_level    = 0;
   g->complete_cmd_info[k].minimum_admlevel = 0;
   g->complete_cmd_info[k].subcmd           = 0;
-  mud_log_printf("Command info rebuilt, %d total commands.", k);
+  mud_log("Command info rebuilt, {:d} total commands.", k);
 }
 
 void free_command_list(GameWorld *g)
@@ -345,7 +345,7 @@ static char *fread_action(FILE *fl, int nr)
 
   fgets(buf, MAX_STRING_LENGTH, fl);
   if (feof(fl)) {
-    mud_log_printf("SYSERR: fread_action: unexpected EOF near action #%d", nr);
+    mud_log("SYSERR: fread_action: unexpected EOF near action #{:d}", nr);
     /*  SYSERR_DESC:
      *  fread_action() will fail if it discovers an end of file marker
      *  before it is able to read in the expected string.  This can be
@@ -439,7 +439,7 @@ ACMD(do_gmote)
   }
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
-    send_to_char_printf(g, ch, "The walls seem to absorb your actions.\r\n");
+    send_to_char(g, ch, "The walls seem to absorb your actions.\r\n");
     return;
   }
 
@@ -450,16 +450,16 @@ ACMD(do_gmote)
 
   if (arg.empty()) {
     if (!action->others_no_arg || !*action->others_no_arg) {
-      send_to_char_printf(g, ch, "Who are you going to do that to?\r\n");
+      send_to_char(g, ch, "Who are you going to do that to?\r\n");
       return;
     }
     snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
   } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char_printf(g, ch, "%s\r\n", action->not_found);
+    send_to_char(g, ch, "{}\r\n", action->not_found);
     return;
   } else if (vict == ch) {
     if (!action->others_auto || !*action->others_auto) {
-      send_to_char_printf(g, ch, "%s\r\n", action->char_auto);
+      send_to_char(g, ch, "{}\r\n", action->char_auto);
       return;
     }
     snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);

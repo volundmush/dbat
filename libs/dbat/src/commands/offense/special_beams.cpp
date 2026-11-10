@@ -51,7 +51,7 @@ ACMD(do_honoo)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -116,10 +116,10 @@ ACMD(do_honoo)
       }
       pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
       if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-        send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+        send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
         room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
       } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-        send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+        send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
         room_set_geffect(g, char_get_in_room(ch), 0);
       }
       return;
@@ -146,10 +146,10 @@ ACMD(do_honoo)
           hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
 
           if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-            send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+            send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
             room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
           } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-            send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+            send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
             room_set_geffect(g, char_get_in_room(ch), 0);
           }
           return;
@@ -158,7 +158,7 @@ ACMD(do_honoo)
           act(g, "@C$N@W manages to dodge your honoo, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W honoo, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W honoo, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 21, skill, SKILL_HONOO); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -177,10 +177,10 @@ ACMD(do_honoo)
           hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
 
           if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-            send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+            send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
             room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
           } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-            send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+            send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
             room_set_geffect(g, char_get_in_room(ch), 0);
           }
 
@@ -197,10 +197,10 @@ ACMD(do_honoo)
         }
         hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
         if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-          send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+          send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
           room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
         } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-          send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+          send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
           room_set_geffect(g, char_get_in_room(ch), 0);
         }
 
@@ -215,10 +215,10 @@ ACMD(do_honoo)
         pcost(g, ch, attperc, 0);
       }
       if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-        send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+        send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
         room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
       } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-        send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+        send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
         room_set_geffect(g, char_get_in_room(ch), 0);
       }
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
@@ -288,14 +288,14 @@ ACMD(do_honoo)
         break;
     }
     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-      send_to_char_printf(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char_printf(g, ch, "@RThey are burned by the attack!@n\r\n");
+      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
+      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-      send_to_char_printf(g, ch, "@RThey appear to be fireproof!@n\r\n");
+      send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
     } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-      send_to_char_printf(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char_printf(g, ch, "@RThey are easily burned!@n\r\n");
+      send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+      send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     }
     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
@@ -304,10 +304,10 @@ ACMD(do_honoo)
       pcost(g, ch, attperc, 0);
     }
     if (room_get_geffect(g, char_get_in_room(ch)) < -1) {
-      send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+      send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
       room_set_geffect(g, char_get_in_room(ch), room_get_geffect(g, char_get_in_room(ch)) + (1));
     } else if (room_get_geffect(g, char_get_in_room(ch)) == -1) {
-      send_to_room_printf(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+      send_to_room(g, char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
       room_set_geffect(g, char_get_in_room(ch), 0);
     }
     char_aff_set(vict, AFF_ASHED, false);
@@ -318,7 +318,7 @@ ACMD(do_honoo)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 21, skill, attperc);
@@ -331,7 +331,7 @@ ACMD(do_honoo)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -364,7 +364,7 @@ ACMD(do_psyblast)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -458,7 +458,7 @@ ACMD(do_psyblast)
           act(g, "@C$N@W manages to dodge your psychic blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W psychic blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W psychic blast, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 20, skill, SKILL_PSYBLAST); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -562,7 +562,7 @@ ACMD(do_psyblast)
       if (char_get_charge(vict) < 0) {
         char_set_charge(vict, 0);
       }
-      send_to_char_printf(g, vict, "@RYou lose some of your charged ki!@n\r\n");
+      send_to_char(g, vict, "@RYou lose some of your charged ki!@n\r\n");
     }
 
     if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
@@ -582,7 +582,7 @@ ACMD(do_psyblast)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 20, skill, attperc);
@@ -593,7 +593,7 @@ ACMD(do_psyblast)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -626,7 +626,7 @@ ACMD(do_sbc)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -684,7 +684,7 @@ ACMD(do_sbc)
           act(g, "@C$N@W manages to dodge your special beam cannon, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W special beam cannon, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W special beam cannon, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 27, skill, SKILL_SBC); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -779,7 +779,7 @@ ACMD(do_sbc)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 27, skill, attperc);
@@ -790,7 +790,7 @@ ACMD(do_sbc)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -823,7 +823,7 @@ ACMD(do_kousengan)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -895,7 +895,7 @@ ACMD(do_kousengan)
           act(g, "@C$N@W manages to dodge your kousengan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W kousengan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W kousengan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 17, skill, SKILL_KOUSENGAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -989,8 +989,8 @@ ACMD(do_kousengan)
         break;
     }
     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict)) {
-      send_to_char_printf(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char_printf(g, ch, "@RThey are burned by the attack!@n\r\n");
+      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
+      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     }
     pcost(g, ch, attperc, 0);
@@ -1002,7 +1002,7 @@ ACMD(do_kousengan)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 42, skill, attperc);
@@ -1013,7 +1013,7 @@ ACMD(do_kousengan)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -1046,7 +1046,7 @@ ACMD(do_deathbeam)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -1145,7 +1145,7 @@ ACMD(do_deathbeam)
           act(g, "@C$N@W manages to dodge your deathbeam, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W deathbeam, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W deathbeam, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 17, skill, SKILL_DEATHBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1284,7 +1284,7 @@ ACMD(do_deathbeam)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 17, skill, attperc);
@@ -1298,7 +1298,7 @@ ACMD(do_deathbeam)
     }
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

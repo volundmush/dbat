@@ -81,53 +81,53 @@ ACMD(do_quit)
     return;
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-    send_to_char_printf(g, ch, "This is the past, you can't quit here!\r\n");
+    send_to_char(g, ch, "This is the past, you can't quit here!\r\n");
     return;
   }
   if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
-    send_to_char_printf(g, ch, "You can't quit in the arena!\r\n");
+    send_to_char(g, ch, "You can't quit in the arena!\r\n");
     return;
   }
   if (char_get_in_room(ch) >= 101 && char_get_in_room(ch) <= 139) {
-    send_to_char_printf(g, ch, "You can't quit in the mud school!\r\n");
+    send_to_char(g, ch, "You can't quit in the mud school!\r\n");
     return;
   }
   if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-    send_to_char_printf(g, ch, "You can't quit in a pocket dimension!\r\n");
+    send_to_char(g, ch, "You can't quit in a pocket dimension!\r\n");
     return;
   }
   if (char_get_in_room(ch) == 2069) {
-    send_to_char_printf(g, ch, "You can't quit here!\r\n");
+    send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
   if (char_get_mindlink(g, ch) && char_get_linker(ch) == 0) {
-    send_to_char_printf(g, ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
+    send_to_char(g, ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
     if (char_get_in_room(char_get_mindlink(g, ch)) != NOWHERE) {
       look_at_room(g, char_get_in_room(char_get_mindlink(g, ch)), ch, 0);
-      send_to_char_printf(g, ch, "You get an impression of where this interference is originating from.\r\n");
+      send_to_char(g, ch, "You get an impression of where this interference is originating from.\r\n");
     }
     return;
   }
   if (char_get_in_room(ch) == 2070) {
-    send_to_char_printf(g, ch, "You can't quit here!\r\n");
+    send_to_char(g, ch, "You can't quit here!\r\n");
     return;
   }
   if (dball_count(g, ch)) {
-    send_to_char_printf(g, ch, "You can not quit while you have dragon balls! Place them somewhere first.");
+    send_to_char(g, ch, "You can not quit while you have dragon balls! Place them somewhere first.");
     return;
   }
 
   if (subcmd != SCMD_QUIT)
-    send_to_char_printf(g, ch, "You have to type quit--no less, to quit!\r\n");
+    send_to_char(g, ch, "You have to type quit--no less, to quit!\r\n");
   else if (char_get_position(ch) == POS_FIGHTING)
-    send_to_char_printf(g, ch, "No way!  You're fighting for your life!\r\n");
+    send_to_char(g, ch, "No way!  You're fighting for your life!\r\n");
   else if (char_get_position(ch) < POS_STUNNED) {
-    send_to_char_printf(g, ch, "You die before your time...\r\n");
+    send_to_char(g, ch, "You die before your time...\r\n");
     die(g, ch, nullptr);
   } else {
     act(g, "$n has left the game.", true, ch, nullptr, nullptr, TO_ROOM);
-    mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s has quit the game.", char_get_name(ch));
-    send_to_char_printf(g, ch, "Goodbye, friend.. Come back soon!\r\n");
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} has quit the game.", char_get_name(ch));
+    send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
     if (char_get_followers(ch) || char_get_master(g, ch))
       die_follower(g, ch);
     if (ch == auction_seller(g))
@@ -157,7 +157,7 @@ ACMD(do_quit)
   }
   /* Remove any snoopers */
   if (char_get_desc(ch)->snoop_by) {
-    write_to_output_printf(g, char_get_desc(ch)->snoop_by, "Your victim is no longer among us.\r\n");
+    write_to_output(g, char_get_desc(ch)->snoop_by, "Your victim is no longer among us.\r\n");
     char_get_desc(ch)->snoop_by->snooping = nullptr;
     char_get_desc(ch)->snoop_by           = nullptr;
   }
@@ -178,7 +178,7 @@ ACMD(do_save)
      * immortal advances from mortality, you may want < instead of <=.
      */
     if (CONFIG_AUTO_SAVE && char_get_admlevel(ch) < 1) {
-      send_to_char_printf(g, ch, "Saving.\r\n");
+      send_to_char(g, ch, "Saving.\r\n");
       write_aliases(g, ch);
       save_char(g, ch);
       Crash_crashsave(g, ch);
@@ -189,7 +189,7 @@ ACMD(do_save)
       }
       return;
     }
-    send_to_char_printf(g, ch, "Saving.\r\n");
+    send_to_char(g, ch, "Saving.\r\n");
   }
 
   write_aliases(g, ch);
@@ -206,7 +206,7 @@ ACMD(do_save)
    special procedures - i.e., shop commands, mail commands, etc. */
 ACMD(do_not_here)
 {
-  send_to_char_printf(g, ch, "Sorry, but you cannot do that here!\r\n");
+  send_to_char(g, ch, "Sorry, but you cannot do that here!\r\n");
 }
 
 ACMD(do_practice)
@@ -220,9 +220,9 @@ ACMD(do_practice)
   arg                   = take_arg(rest);
 
   if (!arg.empty())
-    send_to_char_printf(g, ch, "You can only practice skills with your trainer.\r\n");
+    send_to_char(g, ch, "You can only practice skills with your trainer.\r\n");
   else
-    send_to_char_printf(g, ch, "Use the skills command unless you are at your trainer.\r\n");
+    send_to_char(g, ch, "Use the skills command unless you are at your trainer.\r\n");
   /*list_skills(ch);*/
 }
 
@@ -249,11 +249,11 @@ ACMD(do_visible)
   if (char_aff_flagged(ch, AFF_INVISIBLE)) {
     appear(g, ch);
     appeared = 1;
-    send_to_char_printf(g, ch, "You break the spell of invisibility.\r\n");
+    send_to_char(g, ch, "You break the spell of invisibility.\r\n");
   }
 
   if (!appeared)
-    send_to_char_printf(g, ch, "You are already visible.\r\n");
+    send_to_char(g, ch, "You are already visible.\r\n");
 }
 
 ACMD(do_title)
@@ -262,16 +262,16 @@ ACMD(do_title)
   delete_doubledollar(text);
 
   if (char_is_npc(ch))
-    send_to_char_printf(g, ch, "Your title is fine... go away.\r\n");
+    send_to_char(g, ch, "Your title is fine... go away.\r\n");
   else if (char_plr_flagged(ch, PLR_NOTITLE))
-    send_to_char_printf(g, ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
+    send_to_char(g, ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
   else if (text.contains("(") || text.contains(")"))
-    send_to_char_printf(g, ch, "Titles can't contain the ( or ) characters.\r\n");
+    send_to_char(g, ch, "Titles can't contain the ( or ) characters.\r\n");
   else if (text.size() > MAX_TITLE_LENGTH)
-    send_to_char_printf(g, ch, "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH);
+    send_to_char(g, ch, "Sorry, titles can't be longer than {:d} characters.\r\n", MAX_TITLE_LENGTH);
   else {
     set_title(g, ch, text.c_str());
-    send_to_char_printf(g, ch, "Okay, you're now %s %s.\r\n", char_get_name(ch), char_get_title(ch));
+    send_to_char(g, ch, "Okay, you're now {} {}.\r\n", char_get_name(ch), char_get_title(ch));
   }
 }
 
@@ -322,16 +322,16 @@ static void print_group(GameWorld *g, struct char_data *ch)
   struct char_data *k;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
-    send_to_char_printf(g, ch, "But you are not the member of a group!\r\n");
+    send_to_char(g, ch, "But you are not the member of a group!\r\n");
   else {
     char buf[MAX_STRING_LENGTH];
 
-    send_to_char_printf(g, ch, "Your group consists of:\r\n");
+    send_to_char(g, ch, "Your group consists of:\r\n");
 
     k = (char_get_master(g, ch) ? char_get_master(g, ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP)) {
-      send_to_char_printf(g, ch, "@D----------------@n\r\n");
+      send_to_char(g, ch, "@D----------------@n\r\n");
       if (getCurPL(g, k) > getEffMaxPL(g, k) / 10) {
         snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                  add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
@@ -348,7 +348,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
     for (char_data *fol : char_followers(g, k)) {
       if (!char_aff_flagged(fol, AFF_GROUP))
         continue;
-      send_to_char_printf(g, ch, "@D----------------@n\r\n");
+      send_to_char(g, ch, "@D----------------@n\r\n");
       if (getCurPL(g, fol) > (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                  add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
@@ -361,7 +361,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
       }
       act(g, buf, false, ch, nullptr, fol, TO_CHAR);
     }
-    send_to_char_printf(g, ch, "@D----------------@n\r\n");
+    send_to_char(g, ch, "@D----------------@n\r\n");
   }
 }
 
@@ -376,7 +376,7 @@ ACMD(do_group)
   buf                   = take_arg(rest);
 
   if (char_get_bonuses(ch, BONUS_LONER) > 0) {
-    send_to_char_printf(g, ch, "You can not group as you prefer to be alone.\r\n");
+    send_to_char(g, ch, "You can not group as you prefer to be alone.\r\n");
     return;
   }
 
@@ -424,18 +424,18 @@ ACMD(do_group)
       }
     }
     if (!found)
-      send_to_char_printf(g, ch, "Everyone following you is already in your group.\r\n");
+      send_to_char(g, ch, "Everyone following you is already in your group.\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char_printf(g, ch, "%s", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
   else if ((char_get_master(g, vict) != ch) && (vict != ch))
     act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
       if (!char_aff_flagged(ch, AFF_GROUP)) {
-        send_to_char_printf(g, ch, "You form a group, with you as leader.\r\n");
+        send_to_char(g, ch, "You form a group, with you as leader.\r\n");
         char_aff_set(ch, AFF_GROUP, true);
       }
       perform_group(g, ch, vict, highlvl, lowlvl, highpl, lowpl);
@@ -459,7 +459,7 @@ ACMD(do_ungroup)
 
   if (buf.empty()) {
     if (char_get_master(g, ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
-      send_to_char_printf(g, ch, "But you lead no group!\r\n");
+      send_to_char(g, ch, "But you lead no group!\r\n");
       return;
     }
 
@@ -475,20 +475,20 @@ ACMD(do_ungroup)
 
     char_aff_set(ch, AFF_GROUP, false);
     char_set_combatexpertise(ch, 0);
-    send_to_char_printf(g, ch, "You disband the group.\r\n");
+    send_to_char(g, ch, "You disband the group.\r\n");
     return;
   }
   if (!(tch = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char_printf(g, ch, "There is no such person!\r\n");
+    send_to_char(g, ch, "There is no such person!\r\n");
     return;
   }
   if (char_get_master(g, tch) != ch) {
-    send_to_char_printf(g, ch, "That person is not following you!\r\n");
+    send_to_char(g, ch, "That person is not following you!\r\n");
     return;
   }
 
   if (!char_aff_flagged(tch, AFF_GROUP)) {
-    send_to_char_printf(g, ch, "That person isn't in your group.\r\n");
+    send_to_char(g, ch, "That person isn't in your group.\r\n");
     return;
   }
 
@@ -520,11 +520,11 @@ ACMD(do_split)
   if (is_number(buf)) {
     amount = parse_int(buf);
     if (amount <= 0) {
-      send_to_char_printf(g, ch, "Sorry, you can't do that.\r\n");
+      send_to_char(g, ch, "Sorry, you can't do that.\r\n");
       return;
     }
     if (amount > char_get_gold(ch)) {
-      send_to_char_printf(g, ch, "You don't seem to have that much gold to split.\r\n");
+      send_to_char(g, ch, "You don't seem to have that much gold to split.\r\n");
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
@@ -545,7 +545,7 @@ ACMD(do_split)
       share = amount / num;
       rest  = amount % num;
     } else {
-      send_to_char_printf(g, ch, "With whom do you wish to share your gold?\r\n");
+      send_to_char(g, ch, "With whom do you wish to share your gold?\r\n");
       return;
     }
 
@@ -561,7 +561,7 @@ ACMD(do_split)
     if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) &&
         !char_is_npc(k) && k != ch) {
       char_set_gold(k, char_get_gold(k) + (share));
-      send_to_char_printf(g, k, "%s", msg);
+      send_to_char(g, k, "{}", msg);
     }
 
     for (char_data *foll : char_followers(g, k)) {
@@ -571,19 +571,19 @@ ACMD(do_split)
           foll != ch) {
 
         char_set_gold(foll, char_get_gold(foll) + (share));
-        send_to_char_printf(g, foll, "%s", msg);
+        send_to_char(g, foll, "{}", msg);
       }
     }
-    send_to_char_printf(g, ch, "You split %d zenni among %d members -- %d zenni each.\r\n",
-                        amount, num, share);
+    send_to_char(g, ch, "You split {:d} zenni among {:d} members -- {:d} zenni each.\r\n",
+                 amount, num, share);
 
     if (rest) {
-      send_to_char_printf(g, ch, "%d zenni %s not splitable, so you keep the money.\r\n",
-                          rest, (rest == 1) ? "was" : "were");
+      send_to_char(g, ch, "{:d} zenni {} not splitable, so you keep the money.\r\n",
+                   rest, (rest == 1) ? "was" : "were");
       char_set_gold(ch, char_get_gold(ch) + (rest));
     }
   } else {
-    send_to_char_printf(g, ch, "How much zenni do you wish to split with your group?\r\n");
+    send_to_char(g, ch, "How much zenni do you wish to split with your group?\r\n");
     return;
   }
 }
@@ -593,13 +593,13 @@ ACMD(do_display)
   size_t i;
 
   if (char_is_npc(ch)) {
-    send_to_char_printf(g, ch, "Mosters don't need displays.  Go away.\r\n");
+    send_to_char(g, ch, "Mosters don't need displays.  Go away.\r\n");
     return;
   }
   argument = skip_spaces(argument);
 
   if (argument.empty()) {
-    send_to_char_printf(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
+    send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
     return;
   }
 
@@ -662,18 +662,18 @@ ACMD(do_display)
           break;
         case 'f':
           if (!char_is_halfbreed(ch)) {
-            send_to_char_printf(g, ch, "Only halfbreeds use fury.\r\n");
+            send_to_char(g, ch, "Only halfbreeds use fury.\r\n");
           }
           char_prf_toggle(g, ch, PRF_FURY);
           break;
         default:
-          send_to_char_printf(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
+          send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
           return;
       }
     }
   }
 
-  send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
+  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
 }
 
 ACMD(do_gen_write)
@@ -702,7 +702,7 @@ ACMD(do_gen_write)
   tmp = asctime(localtime(&ct));
 
   if (char_is_npc(ch)) {
-    send_to_char_printf(g, ch, "Monsters can't have ideas - Go away.\r\n");
+    send_to_char(g, ch, "Monsters can't have ideas - Go away.\r\n");
     return;
   }
 
@@ -710,10 +710,10 @@ ACMD(do_gen_write)
   delete_doubledollar(text);
 
   if (text.empty()) {
-    send_to_char_printf(g, ch, "That must be a mistake...\r\n");
+    send_to_char(g, ch, "That must be a mistake...\r\n");
     return;
   }
-  send_to_imm_printf(g, "[A new %s has been filed by: %s]\r\n", CMD_NAME, char_get_name(ch));
+  send_to_imm(g, "[A new {} has been filed by: {}]\r\n", CMD_NAME, char_get_name(ch));
 
   if (stat(filename, &fbuf) < 0) {
     perror("SYSERR: Can't stat() file");
@@ -725,7 +725,7 @@ ACMD(do_gen_write)
     return;
   }
   if (fbuf.st_size >= CONFIG_MAX_FILESIZE) {
-    send_to_char_printf(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
+    send_to_char(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
     return;
   }
   if (!(fl = fopen(filename, "a"))) {
@@ -736,13 +736,13 @@ ACMD(do_gen_write)
      *  at the end of the line should explain what the problem is.
      */
 
-    send_to_char_printf(g, ch, "Could not open the file.  Sorry.\r\n");
+    send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
   fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text.c_str());
   fprintf(fl, "@D-------------------------------@n\n");
   fclose(fl);
-  send_to_char_printf(g, ch, "Okay.  Thanks!\r\n");
+  send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }
 
 constexpr int TOG_OFF = 0;
@@ -905,7 +905,7 @@ ACMD(do_gen_tog)
       else {
         act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
         if (has_mail(g, char_get_idnum(ch)))
-          send_to_char_printf(g, ch, "You have mail waiting.\r\n");
+          send_to_char(g, ch, "You have mail waiting.\r\n");
       }
       break;
     case SCMD_AUTOLOOT:
@@ -919,16 +919,16 @@ ACMD(do_gen_tog)
       break;
     case SCMD_BUILDWALK:
       if (char_get_admlevel(ch) < ADMLVL_IMMORT) {
-        send_to_char_printf(g, ch, "Immortals only, sorry.\r\n");
+        send_to_char(g, ch, "Immortals only, sorry.\r\n");
         return;
       }
       result = char_prf_toggle(g, ch, PRF_BUILDWALK);
       if (char_prf_flagged(g, ch, PRF_BUILDWALK))
-        mudlog_printf(g, LOG_CMP, char_get_level(ch), true,
-                      "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), char_get_olc_zone(g, ch));
+        mudlog(g, LOG_CMP, char_get_level(ch), true,
+               "OLC: {} turned buildwalk on. Allowed zone {:d}", char_get_name(ch), char_get_olc_zone(g, ch));
       else
-        mudlog_printf(g, LOG_CMP, char_get_level(ch), true,
-                      "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), char_get_olc_zone(g, ch));
+        mudlog(g, LOG_CMP, char_get_level(ch), true,
+               "OLC: {} turned buildwalk off. Allowed zone {:d}", char_get_name(ch), char_get_olc_zone(g, ch));
       break;
     case SCMD_AUTOSPLIT:
       result = char_prf_toggle(g, ch, PRF_AUTOSPLIT);
@@ -941,18 +941,18 @@ ACMD(do_gen_tog)
       break;
     case SCMD_HIDE:
       if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(g, ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
-        send_to_char_printf(g, ch, "You stand out too much to hide right now!\r\n");
+        send_to_char(g, ch, "You stand out too much to hide right now!\r\n");
         return;
       }
       if (char_plr_flagged(ch, PLR_HEALT)) {
-        send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+        send_to_char(g, ch, "You are inside a healing tank!\r\n");
         return;
       }
       if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
-        send_to_char_printf(g, ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
+        send_to_char(g, ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
         char_set_skills_base(ch, SKILL_HIDE, rand_number(g, 1, 5));
       } else if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-        send_to_char_printf(g, ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
+        send_to_char(g, ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
         return;
       }
       result = char_aff_toggle(ch, AFF_HIDE);
@@ -966,13 +966,13 @@ ACMD(do_gen_tog)
     case SCMD_TEST:
       if (char_get_admlevel(ch) >= 1) {
         char_prf_toggle(g, ch, PRF_TEST);
-        send_to_char_printf(g, ch, "Okay. Testing is now: %s\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
+        send_to_char(g, ch, "Okay. Testing is now: {}\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
         if (char_prf_flagged(g, ch, PRF_TEST)) {
-          send_to_char_printf(g, ch, "Make sure to remove nohassle as well.\r\n");
+          send_to_char(g, ch, "Make sure to remove nohassle as well.\r\n");
         }
         return;
       }
-      send_to_char_printf(g, ch, "You are not an immortal.\r\n");
+      send_to_char(g, ch, "You are not an immortal.\r\n");
       return;
       break;
     case SCMD_NOCOMPRESS:
@@ -980,7 +980,7 @@ ACMD(do_gen_tog)
         result = char_prf_toggle(g, ch, PRF_NOCOMPRESS);
         break;
       }
-      send_to_char_printf(g, ch, "Sorry, compression is globally disabled.\r\n");
+      send_to_char(g, ch, "Sorry, compression is globally disabled.\r\n");
       return;
     case SCMD_AUTOASSIST:
       result = char_prf_toggle(g, ch, PRF_AUTOASSIST);
@@ -1025,7 +1025,7 @@ ACMD(do_gen_tog)
       result = char_prf_toggle(g, ch, PRF_IHEALTH);
       break;
     default:
-      mud_log_printf("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);
+      mud_log("SYSERR: Unknown subcmd {:d} in do_gen_toggle.", subcmd);
       /*  SYSERR_DESC:
      *  This is the same as the unhandled case in do_gen_ps(), but in the
      *  function which handles 'compact', 'brief', and so forth.
@@ -1034,9 +1034,9 @@ ACMD(do_gen_tog)
   }
 
   if (result)
-    send_to_char_printf(g, ch, "%s", tog_messages[subcmd][TOG_ON]);
+    send_to_char(g, ch, "{}", tog_messages[subcmd][TOG_ON]);
   else
-    send_to_char_printf(g, ch, "%s", tog_messages[subcmd][TOG_OFF]);
+    send_to_char(g, ch, "{}", tog_messages[subcmd][TOG_OFF]);
 
   return;
 }
@@ -1084,7 +1084,7 @@ ACMD(do_file)
     for (i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_level(ch))
         snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-    send_to_char_printf(g, ch, "%s", buf);
+    send_to_char(g, ch, "{}", buf);
     return;
   }
 
@@ -1097,12 +1097,12 @@ ACMD(do_file)
       break;
 
   if (*(fields[l].cmd) == '\n') {
-    send_to_char_printf(g, ch, "That is not a valid option!\r\n");
+    send_to_char(g, ch, "That is not a valid option!\r\n");
     return;
   }
 
   if (char_get_admlevel(ch) < fields[l].level) {
-    send_to_char_printf(g, ch, "You are not godly enough to view that file!\r\n");
+    send_to_char(g, ch, "You are not godly enough to view that file!\r\n");
     return;
   }
 
@@ -1116,9 +1116,9 @@ ACMD(do_file)
     req_lines = parse_int(value);
 
   if (!(req_file = fopen(fields[l].file, "r"))) {
-    mudlog_printf(g, LOG_BRF, ADMLVL_IMPL, true,
-                  "SYSERR: Error opening file %s using 'file' command.",
-                  fields[l].file);
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true,
+           "SYSERR: Error opening file {} using 'file' command.",
+           fields[l].file);
     return;
   }
 
@@ -1143,7 +1143,7 @@ ACMD(do_file)
   }
   fclose(req_file);
 
-  send_to_char_printf(g, ch, "%s", buf);
+  send_to_char(g, ch, "{}", buf);
 }
 
 /* Returns true if the spell/skillnum is innate to the character

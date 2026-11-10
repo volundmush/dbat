@@ -344,5 +344,5 @@ void send_to_imm(GameWorld *g, std::string_view text)
 {
   if (text.empty()) /* as send_to_imm_printf() skips an empty message */
     return;
-  send_to_imm_printf(g, "%.*s", (int)text.size(), text.data());
+  (send_to_imm_printf)(g, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }

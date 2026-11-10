@@ -62,7 +62,7 @@ static void load_shadow_dragon(GameWorld *g, int *room, mob_vnum vnum)
   r_num  = vnum;
   r_room = *room;
   if (!mob_proto_of(g, r_num) || !room_of(g, r_room)) {
-    mud_log_printf("SYSERR: Can't put shadow dragon (mob %d) back in room %d: one of them doesn't exist.", vnum, *room);
+    mud_log("SYSERR: Can't put shadow dragon (mob {:d}) back in room {:d}: one of them doesn't exist.", vnum, *room);
     *room = -1;
     return;
   }
@@ -88,17 +88,17 @@ void wishSYS(GameWorld *g)
     if (g->SELFISHMETER < 10) {
       switch (g->DRAGONC) {
         case 300:
-          send_to_room_printf(g, g->DRAGONR, "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
-          send_to_planet_printf(g, 0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
+          send_to_room(g, g->DRAGONR, "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
+          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 295:
-          send_to_room_printf(g, g->DRAGONR, "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
-          send_to_planet_printf(g, 0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
+          send_to_room(g, g->DRAGONR, "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
+          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 290:
-          send_to_room_printf(g, g->DRAGONR, "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
+          send_to_room(g, g->DRAGONR, "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
           if (char_data *dragon = char_by_id(g, g->EDRAGON_uid)) {
             char_from_room(g, dragon);
             char_to_room(g, dragon, g->DRAGONR);
@@ -106,32 +106,32 @@ void wishSYS(GameWorld *g)
           g->DRAGONC -= 1;
           break;
         case 285:
-          send_to_planet_printf(g, 0, ROOM_EARTH, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
+          send_to_planet(g, 0, ROOM_EARTH, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 280:
-          send_to_room_printf(g, g->DRAGONR, "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
+          send_to_room(g, g->DRAGONR, "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 275:
-          send_to_room_printf(g, g->DRAGONR, "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
+          send_to_room(g, g->DRAGONR, "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 180:
-          send_to_room_printf(g, g->DRAGONR, "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
+          send_to_room(g, g->DRAGONR, "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 120:
-          send_to_room_printf(g, g->DRAGONR, "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
+          send_to_room(g, g->DRAGONR, "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 60:
-          send_to_room_printf(g, g->DRAGONR, "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
+          send_to_room(g, g->DRAGONR, "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 0:
-          send_to_room_printf(g, g->DRAGONR, "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
-          send_to_planet_printf(g, 0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
+          send_to_room(g, g->DRAGONR, "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
+          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
           if (char_data *dragon = char_by_id(g, g->EDRAGON_uid))
             extract_char(g, dragon);
           g->SHENRON = false;
@@ -148,7 +148,7 @@ void wishSYS(GameWorld *g)
         g->WISH[1] = 0;
       }
     } else {
-      send_to_room_printf(g, g->DRAGONR, "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
+      send_to_room(g, g->DRAGONR, "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
       room_vnum num = rand_number(g, 200, 20000);
       int done = false, place = 1;
       g->DRAGONC = 0;
@@ -306,16 +306,16 @@ ACMD(do_summon)
   mob_vnum r_num;
 
   if (!room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
-    send_to_char_printf(g, ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
+    send_to_char(g, ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
     return;
   } // are they on earth?
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT) || room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
-    send_to_char_printf(g, ch, "You can not summon shenron in this protected area!\r\n");
+    send_to_char(g, ch, "You can not summon shenron in this protected area!\r\n");
     return;
   }
   if (room_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
-    send_to_char_printf(g, ch, "Go outside to summon Shenron!\r\n");
+    send_to_char(g, ch, "Go outside to summon Shenron!\r\n");
     return;
   }
 
@@ -376,7 +376,7 @@ ACMD(do_summon)
     if (!room_of(g, g->DRAGONR)) {
       g->DRAGONR = char_get_in_room(ch);
     }
-    send_to_imm_printf(g, "Shenron summoned to room: %d\r\n", g->DRAGONR);
+    send_to_imm(g, "Shenron summoned to room: {:d}\r\n", g->DRAGONR);
 
     if (struct zone_data *zone = find_zone_by_thing(g, g->DRAGONR))
       g->DRAGONZ = zone->number;
@@ -428,7 +428,7 @@ ACMD(do_summon)
       continue;
     }
     if (!mob_proto_of(g, r_num = 21)) {
-      send_to_imm_printf(g, "Shenron doesn't exist!");
+      send_to_imm(g, "Shenron doesn't exist!");
       return;
     }
     mob = read_mobile(g, r_num);
@@ -436,7 +436,7 @@ ACMD(do_summon)
     g->EDRAGON_uid = char_get_id(mob);
     return;
   }
-  send_to_char_printf(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
+  send_to_char(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
   return;
 }
 

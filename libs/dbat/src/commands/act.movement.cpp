@@ -110,7 +110,7 @@ void handle_teleport(GameWorld *g, struct char_data *ch, struct char_data *tar, 
       char_set_grap(ch, -1);
     }
   } else { /* Wut... */
-    mud_log_printf("ERROR: handle_teleport called without a destination.");
+    mud_log("ERROR: handle_teleport called without a destination.");
     return;
   }
 }
@@ -126,12 +126,12 @@ ACMD(do_carry)
   std::string arg;
 
   if (char_get_drag(g, ch)) {
-    send_to_char_printf(g, ch, "You are busy dragging someone at the moment.\r\n");
+    send_to_char(g, ch, "You are busy dragging someone at the moment.\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
 
@@ -147,27 +147,27 @@ ACMD(do_carry)
     arg                   = take_arg(rest);
 
     if (arg.empty()) {
-      send_to_char_printf(g, ch, "You want to carry who?\r\n");
+      send_to_char(g, ch, "You want to carry who?\r\n");
       return;
     }
 
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "That person isn't here.\r\n");
+      send_to_char(g, ch, "That person isn't here.\r\n");
       return;
     }
 
     if (char_is_npc(vict)) {
-      send_to_char_printf(g, ch, "There's no point in carrying them.\r\n");
+      send_to_char(g, ch, "There's no point in carrying them.\r\n");
       return;
     }
 
     if (char_get_carried_by(g, vict) != nullptr) {
-      send_to_char_printf(g, ch, "Someone is already carrying them!\r\n");
+      send_to_char(g, ch, "Someone is already carrying them!\r\n");
       return;
     }
 
     if (char_get_position(vict) > POS_SLEEPING) {
-      send_to_char_printf(g, ch, "They are not unconcious.\r\n");
+      send_to_char(g, ch, "They are not unconcious.\r\n");
       return;
     }
 
@@ -270,7 +270,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Satan City")) {
       return (13020);
     }
-    send_to_char_printf(g, ch, "You don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "You don't know where that made up place is, but decided to land anyway.");
     return (300);
   } else if (char_get_in_room(ch) == 51) { // Above Frigid
     if (str_eq_nocase(arg, "Ice Crown City")) {
@@ -309,7 +309,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Koltoan Mine")) {
       return (4944);
     }
-    send_to_char_printf(g, ch, "You don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "You don't know where that made up place is, but decided to land anyway.");
     return (4264);
   } else if (char_get_in_room(ch) == 52) { // Above Konack
     if (str_eq_nocase(arg, "Tiranoc City")) {
@@ -360,7 +360,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Furian Citadel")) {
       return (9949);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (8006);
   } else if (char_get_in_room(ch) == 53) { // Above Vegeta
     if (str_eq_nocase(arg, "Vegetos City")) {
@@ -384,7 +384,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Ruby Cave")) {
       return (2615);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (2226);
   } else if (char_get_in_room(ch) == 54) { // Above Namek
     if (str_eq_nocase(arg, "Senzu Village")) {
@@ -405,7 +405,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Kakureta Village")) {
       return (10922);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (11600);
   } else if (char_get_in_room(ch) == 55) { // Above Aether
     if (str_eq_nocase(arg, "Haven City")) {
@@ -423,7 +423,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Silent Glade")) {
       return (12480);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (12010);
   } else if (char_get_in_room(ch) == 56) { // Above Yardrat
     if (str_eq_nocase(arg, "Yardra City")) {
@@ -438,7 +438,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Mount Valaria")) {
       return (14300);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (14008);
   } else if (char_get_in_room(ch) == 198) { // Above Cerria
     if (str_eq_nocase(arg, "Cerria Colony")) {
@@ -450,7 +450,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Fistarl Volcano")) {
       return (17420);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (17531);
   } else if (char_get_in_room(ch) == 57) { // Above Zennith
     if (str_eq_nocase(arg, "Utatlan City")) {
@@ -462,7 +462,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Ancient Castle")) {
       return (19600);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (3412);
   } else if (char_get_in_room(ch) == 58) { // Above Kanassa
     if (str_eq_nocase(arg, "Aquis City")) {
@@ -471,7 +471,7 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Yunkai Pirate Base")) {
       return (15655);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (14904);
   } else if (char_get_in_room(ch) == 59) { // Above Arlia
     if (str_eq_nocase(arg, "Janacre")) {
@@ -483,10 +483,10 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
     if (str_eq_nocase(arg, "Arlia Mine")) {
       return (16600);
     }
-    send_to_char_printf(g, ch, "you don't know where that made up place is, but decided to land anyway.");
+    send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (16009);
   }
-  send_to_char_printf(g, ch, "You are not above a planet!\r\n");
+  send_to_char(g, ch, "You are not above a planet!\r\n");
   return (-1);
 }
 
@@ -494,61 +494,61 @@ static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_v
 static void disp_locations(GameWorld *g, struct char_data *ch)
 {
   if (char_get_in_room(ch) == 50) { // Above Earth
-    send_to_char_printf(g, ch, "@D------------------[ @GEarth@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
-    send_to_char_printf(g, ch, "Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
-    send_to_char_printf(g, ch, "Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @GEarth@D ]------------------@c\n");
+    send_to_char(g, ch, "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
+    send_to_char(g, ch, "Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
+    send_to_char(g, ch, "Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 51) { // Above Frigid
-    send_to_char_printf(g, ch, "@D------------------[ @CFrigid@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
-    send_to_char_printf(g, ch, "Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
-    send_to_char_printf(g, ch, "Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @CFrigid@D ]------------------@c\n");
+    send_to_char(g, ch, "Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
+    send_to_char(g, ch, "Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
+    send_to_char(g, ch, "Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 52) { // Above Konack
-    send_to_char_printf(g, ch, "@D------------------[ @MKonack@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
-    send_to_char_printf(g, ch, "Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
-    send_to_char_printf(g, ch, "Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
-    send_to_char_printf(g, ch, "Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @MKonack@D ]------------------@c\n");
+    send_to_char(g, ch, "Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
+    send_to_char(g, ch, "Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
+    send_to_char(g, ch, "Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
+    send_to_char(g, ch, "Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 53) { // Above Vegeta
-    send_to_char_printf(g, ch, "@D------------------[ @YVegeta@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
-    send_to_char_printf(g, ch, "Pride Forest, Pride tower, Ruby Cave.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @YVegeta@D ]------------------@c\n");
+    send_to_char(g, ch, "Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
+    send_to_char(g, ch, "Pride Forest, Pride tower, Ruby Cave.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 198) { // Above Cerria
-    send_to_char_printf(g, ch, "@D------------------[ @MCerria@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @MCerria@D ]------------------@c\n");
+    send_to_char(g, ch, "Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 54) { // Above Namek
-    send_to_char_printf(g, ch, "@D------------------[ @gNamek@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
-    send_to_char_printf(g, ch, "Frieza's Ship, Kakureta Village.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @gNamek@D ]------------------@c\n");
+    send_to_char(g, ch, "Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
+    send_to_char(g, ch, "Frieza's Ship, Kakureta Village.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 55) { // Above Aether
-    send_to_char_printf(g, ch, "@D------------------[ @BAether@D ]-----------------@c\n");
-    send_to_char_printf(g, ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
-    send_to_char_printf(g, ch, "Silent Glade.\n");
-    send_to_char_printf(g, ch, "@D--------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @BAether@D ]-----------------@c\n");
+    send_to_char(g, ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
+    send_to_char(g, ch, "Silent Glade.\n");
+    send_to_char(g, ch, "@D--------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 56) { // Above Yardrat
-    send_to_char_printf(g, ch, "@D-----------------[ @mYardrat@D ]-----------------@c\n");
-    send_to_char_printf(g, ch, "Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
-    send_to_char_printf(g, ch, "@D-------------------------------------------@n\n");
+    send_to_char(g, ch, "@D-----------------[ @mYardrat@D ]-----------------@c\n");
+    send_to_char(g, ch, "Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
+    send_to_char(g, ch, "@D-------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 57) { // Above Zennith
-    send_to_char_printf(g, ch, "@D-----------------[ @CZennith@D ]-----------------@c\n");
-    send_to_char_printf(g, ch, "Utatlan City, Zenith Jungle, Ancient Castle.\n");
-    send_to_char_printf(g, ch, "@D-------------------------------------------@n\n");
+    send_to_char(g, ch, "@D-----------------[ @CZennith@D ]-----------------@c\n");
+    send_to_char(g, ch, "Utatlan City, Zenith Jungle, Ancient Castle.\n");
+    send_to_char(g, ch, "@D-------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 58) { // Above Kanassa
-    send_to_char_printf(g, ch, "@D-----------------[ @CKanassa@D ]-----------------@c\n");
-    send_to_char_printf(g, ch, "Aquis City, Yunkai Pirate Base.\n");
-    send_to_char_printf(g, ch, "@D-------------------------------------------@n\n");
+    send_to_char(g, ch, "@D-----------------[ @CKanassa@D ]-----------------@c\n");
+    send_to_char(g, ch, "Aquis City, Yunkai Pirate Base.\n");
+    send_to_char(g, ch, "@D-------------------------------------------@n\n");
   } else if (char_get_in_room(ch) == 59) { // Above Arlia
-    send_to_char_printf(g, ch, "@D------------------[ @MArlia@D ]------------------@c\n");
-    send_to_char_printf(g, ch, "Janacre, Arlian Wasteland, Arlia Mine.\n");
-    send_to_char_printf(g, ch, "@D---------------------------------------------@n\n");
+    send_to_char(g, ch, "@D------------------[ @MArlia@D ]------------------@c\n");
+    send_to_char(g, ch, "Janacre, Arlian Wasteland, Arlia Mine.\n");
+    send_to_char(g, ch, "@D---------------------------------------------@n\n");
   } else {
-    send_to_char_printf(g, ch, "You are not above a planet!\r\n");
+    send_to_char(g, ch, "You are not above a planet!\r\n");
   }
 }
 
@@ -565,11 +565,11 @@ ACMD(do_land)
 
   if (argument.empty()) {
     if (above_planet == true) {
-      send_to_char_printf(g, ch, "Land where?\n");
+      send_to_char(g, ch, "Land where?\n");
       disp_locations(g, ch);
       return;
     }
-    send_to_char_printf(g, ch, "You are not even in the lower atmosphere of a planet!\r\n");
+    send_to_char(g, ch, "You are not even in the lower atmosphere of a planet!\r\n");
     return;
   }
 
@@ -577,7 +577,7 @@ ACMD(do_land)
 
   if (landing != -1) {
     room_vnum was_in = char_get_in_room(ch);
-    send_to_char_printf(g, ch, "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
+    send_to_char(g, ch, "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
     char_from_room(g, ch);
     char_to_room(g, ch, landing);
     char *blah = sense_location(g, ch);
@@ -680,7 +680,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     return false;
   /* charmed? */
   if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(g, ch) && char_get_in_room(ch) == char_get_in_room(char_get_master(g, ch))) {
-    send_to_char_printf(g, ch, "The thought of leaving your master makes you weep.\r\n");
+    send_to_char(g, ch, "The thought of leaving your master makes you weep.\r\n");
     act(g, "$n bursts into tears.", false, ch, nullptr, nullptr, TO_ROOM);
     return false;
   }
@@ -692,7 +692,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
       if (dir != 4) {
         willfall = true;
       } else {
-        send_to_char_printf(g, ch, "You need to fly to go there!\r\n");
+        send_to_char(g, ch, "You need to fly to go there!\r\n");
         return false;
       }
     }
@@ -736,18 +736,18 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     if (!has_o2(ch) && ((group_bonus(g, ch, 2) != 10 && (getCurKI(g, ch)) < getMaxKI(g, ch) / 200) || (group_bonus(g, ch, 2) == 10 &&
                                                                                               (getCurKI(g, ch)) < getMaxKI(g, ch) / 800))) {
       if (getCurPL(g, ch) >= getEffMaxPL(g, ch) / 20) {
-        send_to_char_printf(g, ch, "@RYou struggle to breath!@n\r\n");
+        send_to_char(g, ch, "@RYou struggle to breath!@n\r\n");
         decCurHealth(g, ch, getMaxPL(g, ch) / 20, 0);
       }
       if (getCurPL(g, ch) < getEffMaxPL(g, ch) / 20) {
-        send_to_char_printf(g, ch, "@rYou drown!@n\r\n");
+        send_to_char(g, ch, "@rYou drown!@n\r\n");
         die(g, ch, nullptr);
         return false;
       }
     }
     if (!has_o2(ch) && ((group_bonus(g, ch, 2) != 10 && (getCurKI(g, ch)) >= getMaxKI(g, ch) / 200) || (group_bonus(g, ch, 2) == 10 &&
                                                                                                (getCurKI(g, ch)) >= getMaxKI(g, ch) / 800))) {
-      send_to_char_printf(g, ch, "@CYou hold your breath!@n\r\n");
+      send_to_char(g, ch, "@CYou hold your breath!@n\r\n");
       if (group_bonus(g, ch, 2) == 10) {
         decCurKI(g, ch, getMaxKI(g, ch) / 800, 0);
       } else {
@@ -798,9 +798,9 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if ((getCurST(g, ch)) < need_movement && !char_aff_flagged(ch, AFF_FLYING) && !char_is_npc(ch)) {
     if (need_specials_check && char_get_master(g, ch)) {
-      send_to_char_printf(g, ch, "You are too exhausted to follow.\r\n");
+      send_to_char(g, ch, "You are too exhausted to follow.\r\n");
     } else {
-      send_to_char_printf(g, ch, "You are too exhausted.\r\n");
+      send_to_char(g, ch, "You are too exhausted.\r\n");
     }
 
     return false;
@@ -809,33 +809,33 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   /* Check if the character needs a skill check to go that way. */
   if (char_get_exit(g, ch, dir)->dcskill != 0) {
     if (char_get_exit(g, ch, dir)->dcmove > roll_skill(g, ch, char_get_exit(g, ch, dir)->dcskill)) {
-      send_to_char_printf(g, ch, "Your skill in %s isn't enough to move that way!\r\n", g->spell_info[char_get_exit(g, ch, dir)->dcskill].name);
+      send_to_char(g, ch, "Your skill in {} isn't enough to move that way!\r\n", g->spell_info[char_get_exit(g, ch, dir)->dcskill].name);
       /* A failed skill check still spends the movement points! */
       if (!char_adm_flagged(ch, ADM_WALKANYWHERE) && !char_is_npc(ch) && !char_aff_flagged(ch, AFF_FLYING))
         decCurST(g, ch, need_movement, 0);
       return false;
     }
-    send_to_char_printf(g, ch, "Your skill in %s aids in your movement.\r\n", g->spell_info[char_get_exit(g, ch, dir)->dcskill].name);
+    send_to_char(g, ch, "Your skill in {} aids in your movement.\r\n", g->spell_info[char_get_exit(g, ch, dir)->dcskill].name);
   }
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_ATRIUM)) {
     if (!House_can_enter(g, ch, char_get_exit(g, ch, dir)->to_room)) {
-      send_to_char_printf(g, ch, "That's private property -- no trespassing!\r\n");
+      send_to_char(g, ch, "That's private property -- no trespassing!\r\n");
       return false;
     }
   }
   if (room_flagged(g, char_get_exit(g, ch, dir)->to_room, ROOM_TUNNEL) &&
       (num_pc_in_room(g, room_of(g, char_get_exit(g, ch, dir)->to_room)) >= CONFIG_TUNNEL_SIZE)) {
     if (CONFIG_TUNNEL_SIZE > 1)
-      send_to_char_printf(g, ch, "There isn't enough room for you to go there!\r\n");
+      send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
-      send_to_char_printf(g, ch, "There isn't enough room there for more than one person!\r\n");
+      send_to_char(g, ch, "There isn't enough room there for more than one person!\r\n");
     return false;
   }
   /* Mortals and low level gods cannot enter greater god rooms. */
   if (room_flagged(g, char_get_exit(g, ch, dir)->to_room, ROOM_GODROOM) &&
       char_get_admlevel(ch) < ADMLVL_GRGOD) {
-    send_to_char_printf(g, ch, "You aren't godly enough to use that room!\r\n");
+    send_to_char(g, ch, "You aren't godly enough to use that room!\r\n");
     return false;
   }
 
@@ -845,30 +845,30 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (!char_is_npc(ch) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
       (char_get_level(ch) < zone_get_min_level(g, room_get_zone(rm))) && (zone_get_min_level(g, room_get_zone(rm)) > 0)) {
-    send_to_char_printf(g, ch, "Sorry, you are too low a level to enter this zone.\r\n");
+    send_to_char(g, ch, "Sorry, you are too low a level to enter this zone.\r\n");
     return false;
   }
 
   if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && (char_get_level(ch) > zone_get_max_level(g, room_get_zone(rm))) &&
       (zone_get_max_level(g, room_get_zone(rm)) > 0)) {
-    send_to_char_printf(g, ch, "Sorry, you are too high a level to enter this zone.\r\n");
+    send_to_char(g, ch, "Sorry, you are too high a level to enter this zone.\r\n");
     return false;
   }
 
   if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && zone_flagged(g, room_get_zone(rm), ZONE_CLOSED)) {
-    send_to_char_printf(g, ch, "This zone is currently closed to mortals.\r\n");
+    send_to_char(g, ch, "This zone is currently closed to mortals.\r\n");
     return false;
   }
 
   if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GRGOD) && zone_flagged(g, room_get_zone(rm), ZONE_NOIMMORT)) {
-    send_to_char_printf(g, ch, "This zone is closed to all.\r\n");
+    send_to_char(g, ch, "This zone is closed to all.\r\n");
     return false;
   }
 
   /* No low level immortal scouting */
   if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GOD) &&
       !can_edit_zone(g, ch, room_get_zone(rm)) && zone_flagged(g, room_get_zone(rm), ZONE_QUEST)) {
-    send_to_char_printf(g, ch, "This is a Quest zone.\r\n");
+    send_to_char(g, ch, "This is a Quest zone.\r\n");
     return false;
   }
 
@@ -882,10 +882,10 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     if (char_get_skill(ch, SKILL_MOVE_SILENTLY)) {
       improve_skill(g, ch, SKILL_MOVE_SILENTLY, 0);
     } else if (slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-      send_to_char_printf(g, ch, "@RYour skill slots are full. You can not learn Move Silently.\r\n");
+      send_to_char(g, ch, "@RYour skill slots are full. You can not learn Move Silently.\r\n");
       char_aff_set(ch, AFF_SNEAK, false);
     } else {
-      send_to_char_printf(g, ch, "@GYou learn the very basics of moving silently.@n\r\n");
+      send_to_char(g, ch, "@GYou learn the very basics of moving silently.@n\r\n");
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(g, 5, 10));
       act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(g, 1, 30)) {
@@ -948,7 +948,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
       obj_to_room(g, char_get_sits(g, char_get_drag(g, ch)), char_get_in_room(ch));
     }
     if (!char_aff_flagged(char_get_drag(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_drag(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
       if (char_is_npc(char_get_drag(g, ch)) && !char_get_fighting(g, char_get_drag(g, ch))) {
         set_fighting(g, char_get_drag(g, ch), ch);
       }
@@ -960,14 +960,14 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     char_from_room(g, char_get_carrying(g, ch));
     char_to_room(g, char_get_carrying(g, ch), char_get_in_room(ch));
     if (!char_aff_flagged(char_get_carrying(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
     }
   }
 
   if (char_get_desc(ch) != nullptr) {
     look_at_room(g, char_get_in_room(ch), ch, 0);
     if (char_aff_flagged(ch, AFF_SNEAK) && !char_is_npc(ch) && char_get_skill(ch, SKILL_MOVE_SILENTLY) && char_get_skill(ch, SKILL_MOVE_SILENTLY) < rand_number(g, 1, 101)) {
-      send_to_char_printf(g, ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
+      send_to_char(g, ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
       act(g, "@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       reveal_hiding(g, ch, 0);
       char_aff_set(ch, AFF_SNEAK, false);
@@ -1030,12 +1030,12 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
   room_vnum was_in;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return false;
   }
 
   if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
-    send_to_char_printf(g, ch, "You are struggling with someone!\r\n");
+    send_to_char(g, ch, "You are struggling with someone!\r\n");
     return false;
   }
 
@@ -1046,20 +1046,20 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
   if (ch == nullptr || dir < 0 || dir >= NUM_OF_DIRS)
     return false;
   else if ((!char_get_exit(g, ch, dir) && !buildwalk(g, ch, dir)) || char_get_exit(g, ch, dir)->to_room == NOWHERE || (room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) && (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED))))
-    send_to_char_printf(g, ch, "Alas, you cannot go that way...\r\n");
+    send_to_char(g, ch, "Alas, you cannot go that way...\r\n");
   else if (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) {
     if (exit_keyword(char_get_exit(g, ch, dir)))
-      send_to_char_printf(g, ch, "The %s seems to be closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
+      send_to_char(g, ch, "The {} seems to be closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
     else
-      send_to_char_printf(g, ch, "It seems to be closed.\r\n");
+      send_to_char(g, ch, "It seems to be closed.\r\n");
   } else if (char_get_exit(g, ch, dir)->to_room == 0 || char_get_exit(g, ch, dir)->to_room == 1) {
-    send_to_char_printf(g, ch, "Report this direction, it is illegal.\r\n");
+    send_to_char(g, ch, "Report this direction, it is illegal.\r\n");
   } else {
 
     for (obj_data *wall : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_vnum(g, wall) == 79) {
         if (obj_get_cost(wall) == dir) {
-          send_to_char_printf(g, ch, "That direction has a glacial wall blocking it.\r\n");
+          send_to_char(g, ch, "That direction has a glacial wall blocking it.\r\n");
           return false;
         }
       }
@@ -1110,36 +1110,36 @@ ACMD(do_move)
     return;
   }
   if (char_plr_flagged(ch, PLR_SELFD)) {
-    send_to_char_printf(g, ch, "You are preparing to blow up!\r\n");
+    send_to_char(g, ch, "You are preparing to blow up!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
-    send_to_char_printf(g, ch, "You are liquefied right now!\r\n");
+    send_to_char(g, ch, "You are liquefied right now!\r\n");
     return;
   }
   if (char_get_charge(ch) >= getMaxKI(g, ch) * .51) {
-    send_to_char_printf(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
+    send_to_char(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
   if ((char_get_charge(ch) >= getMaxKI(g, ch) * .5 && char_get_charge(ch) < getMaxKI(g, ch) * .51) && char_get_skill(ch, SKILL_CONCENTRATION) < 100) {
-    send_to_char_printf(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
+    send_to_char(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
   if ((char_get_charge(ch) >= getMaxKI(g, ch) * .4 && char_get_charge(ch) < getMaxKI(g, ch) * .5) && char_get_skill(ch, SKILL_CONCENTRATION) < 80) {
-    send_to_char_printf(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
+    send_to_char(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
   if ((char_get_charge(ch) >= getMaxKI(g, ch) * .3 && char_get_charge(ch) < getMaxKI(g, ch) * .4) && char_get_skill(ch, SKILL_CONCENTRATION) < 70) {
-    send_to_char_printf(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
+    send_to_char(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
   if ((char_get_charge(ch) >= getMaxKI(g, ch) * .2 && char_get_charge(ch) < getMaxKI(g, ch) * .3) && char_get_skill(ch, SKILL_CONCENTRATION) < 60) {
-    send_to_char_printf(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
+    send_to_char(g, ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
 
   if (char_get_conditions(g, ch, DRUNK) > 4 && (rand_number(g, 1, 9) + char_get_conditions(g, ch, DRUNK)) >= rand_number(g, 14, 20)) {
-    send_to_char_printf(g, ch, "You wobble around and then fall on your ass.\r\n");
+    send_to_char(g, ch, "You wobble around and then fall on your ass.\r\n");
     act(g, "@C$n@W wobbles around before falling on $s ass@n.", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_position(ch, POS_SITTING);
     return;
@@ -1166,12 +1166,12 @@ ACMD(do_move)
       noship = true;
     }
     if (noship == true) {
-      send_to_char_printf(g, ch, "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
+      send_to_char(g, ch, "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
       return;
     }
     if (controls != nullptr && vehicle != nullptr) {
       if (obj_get_value(controls, 2) <= 0) {
-        send_to_char_printf(g, ch, "The ship is out of fuel!\r\n");
+        send_to_char(g, ch, "The ship is out of fuel!\r\n");
         return;
       }
       drive_in_direction(g, ch, vehicle, subcmd - 1);
@@ -1187,7 +1187,7 @@ ACMD(do_move)
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
   if (!char_is_npc(ch)) {
@@ -1198,27 +1198,27 @@ ACMD(do_move)
       }
     }
     if (fail == true) {
-      send_to_char_printf(g, ch, "You are too busy controlling your attack!\r\n");
+      send_to_char(g, ch, "You are too busy controlling your attack!\r\n");
       return;
     }
   }
 
   if (!char_is_npc(ch) && char_get_limb_condition(ch, (1) - 1) <= 0 && char_get_limb_condition(ch, (2) - 1) <= 0 && char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
-    send_to_char_printf(g, ch, "Unless you fly, you can't get far with no limbs.\r\n");
+    send_to_char(g, ch, "Unless you fly, you can't get far with no limbs.\r\n");
     return;
   }
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return;
   }
   if (char_get_absorbing(g, ch)) {
-    send_to_char_printf(g, ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(g, ch)));
+    send_to_char(g, ch, "You are busy absorbing from {}!\r\n", char_get_name(char_get_absorbing(g, ch)));
     return;
   }
   if (char_get_absorbby(g, ch)) {
     if (axion_dice(g, 0) < char_get_skill(char_get_absorbby(g, ch), SKILL_ABSORB)) {
-      send_to_char_printf(g, ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(g, ch)));
-      send_to_char_printf(g, char_get_absorbby(g, ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
+      send_to_char(g, ch, "You are being held by {}, they are absorbing you!\r\n", char_get_name(char_get_absorbby(g, ch)));
+      send_to_char(g, char_get_absorbby(g, ch), "{} struggles in your grasp!\r\n", char_get_name(ch));
       char_set_wait(ch, PULSE_2SEC);
       return;
     }
@@ -1232,7 +1232,7 @@ ACMD(do_move)
     return;
   }
   if (char_get_listenroom(ch) > 0) {
-    send_to_char_printf(g, ch, "You stop eavesdropping.\r\n");
+    send_to_char(g, ch, "You stop eavesdropping.\r\n");
     char_set_listenroom(ch, 0);
   }
   if (!char_is_npc(ch)) {
@@ -1244,65 +1244,65 @@ ACMD(do_move)
       char_set_load_room(g, ch, char_get_in_room(ch));
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 10 && getEffMaxPL(g, ch) <= 10000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_1SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 20 && getEffMaxPL(g, ch) <= 30000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_2SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 30 && getEffMaxPL(g, ch) <= 100000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 40 && getEffMaxPL(g, ch) <= 200000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 50 && getEffMaxPL(g, ch) <= 300000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 100 && getEffMaxPL(g, ch) <= 500000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 200 && getEffMaxPL(g, ch) <= 1000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 300 && getEffMaxPL(g, ch) <= 8000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 400 && getEffMaxPL(g, ch) <= 15000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_3SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 500 && getEffMaxPL(g, ch) <= 25000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_4SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 1000 && getEffMaxPL(g, ch) <= 35000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_5SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 5000 && getEffMaxPL(g, ch) <= 100000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_5SEC);
     }
     if (room_get_gravity(g, char_get_in_room(ch)) == 10000 && getEffMaxPL(g, ch) <= 200000000) {
-      send_to_char_printf(g, ch, "The gravity slows you down some.\r\n");
+      send_to_char(g, ch, "The gravity slows you down some.\r\n");
       char_set_wait(ch, PULSE_5SEC);
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE) && char_get_admlevel(ch) < 1) {
-      send_to_char_printf(g, ch, "You struggle to cross the vast distance.\r\n");
+      send_to_char(g, ch, "You struggle to cross the vast distance.\r\n");
       char_set_wait(ch, PULSE_6SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && char_get_limb_condition(ch, (1) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
       act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (2) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
           act(g, "@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1314,7 +1314,7 @@ ACMD(do_move)
       act(g, "@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (1) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
           act(g, "@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1326,7 +1326,7 @@ ACMD(do_move)
       act(g, "@wYou slowly pull yourself along with your arms...@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@w slowly pulls $mself along with one arms...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (2) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour left arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (2) - 1) <= 0) {
           act(g, "@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1334,7 +1334,7 @@ ACMD(do_move)
         }
       }
       if (char_get_limb_condition(ch, (1) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour right arm is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (1) - 1) <= 0) {
           act(g, "@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1346,7 +1346,7 @@ ACMD(do_move)
       act(g, "@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (4) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour left leg is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour left leg is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (4) - 1) <= 0) {
           act(g, "@RYour left leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1358,7 +1358,7 @@ ACMD(do_move)
       act(g, "@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_limb_condition(ch, (3) - 1) < 50) {
-        send_to_char_printf(g, ch, "@RYour right leg is damaged by the forced use!@n\r\n");
+        send_to_char(g, ch, "@RYour right leg is damaged by the forced use!@n\r\n");
         char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) - (rand_number(g, 1, 5)));
         if (char_get_limb_condition(ch, (3) - 1) <= 0) {
           act(g, "@RYour right leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1385,7 +1385,7 @@ ACMD(do_move)
       }
       char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_position(ch) < POS_RESTING) {
-      send_to_char_printf(g, ch, "You are in no condition to move! Try standing...\r\n");
+      send_to_char(g, ch, "You are in no condition to move! Try standing...\r\n");
       return;
     }
   }
@@ -1404,7 +1404,7 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
   if (!dir.empty()) { /* a direction was specified */
     if ((door = search_block(dir, dirs, false)) < 0 &&
         (door = search_block(dir, abbr_dirs, false)) < 0) { /* Partial Match */
-      send_to_char_printf(g, ch, "That's not a direction.\r\n");
+      send_to_char(g, ch, "That's not a direction.\r\n");
       return (-1);
     }
     if (char_get_exit(g, ch, door)) { /* Braces added according to indent. -gg */
@@ -1412,18 +1412,18 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
         if (is_name(type, exit_keyword(char_get_exit(g, ch, door))))
           return (door);
         else {
-          send_to_char_printf(g, ch, "I see no %s there.\r\n", type);
+          send_to_char(g, ch, "I see no {} there.\r\n", type);
           return (-1);
         }
       } else
         return (door);
     } else {
-      send_to_char_printf(g, ch, "I really don't see how you can %s anything there.\r\n", cmdname);
+      send_to_char(g, ch, "I really don't see how you can {} anything there.\r\n", cmdname);
       return (-1);
     }
   } else { /* try to locate the keyword */
     if (!*type) {
-      send_to_char_printf(g, ch, "What is it you want to %s?\r\n", cmdname);
+      send_to_char(g, ch, "What is it you want to {}?\r\n", cmdname);
       return (-1);
     }
     for (door = 0; door < NUM_OF_DIRS; door++)
@@ -1432,7 +1432,7 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
           if (is_name(type, exit_keyword(char_get_exit(g, ch, door))))
             return (door);
 
-    send_to_char_printf(g, ch, "There doesn't seem to be %s %s that could be manipulated in that way here.\r\n", AN(type), type);
+    send_to_char(g, ch, "There doesn't seem to be {} {} that could be manipulated in that way here.\r\n", AN(type), type);
     return (-1);
   }
 }
@@ -1526,15 +1526,15 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         if ((obj) && obj_get_type_flag(obj) == ITEM_HATCH && (vehicle)) {
           OPEN_DOOR(g, char_get_in_room(ch), vehicle, door);
           if (obj_get_vnum(g, obj) > 19199) {
-            send_to_room_printf(g, char_get_in_room(ch), "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
-            send_to_room_printf(g, obj_get_in_room(vehicle), "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+            send_to_room(g, char_get_in_room(ch), "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
+            send_to_room(g, obj_get_in_room(vehicle), "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
             if (room_flagged(g, obj_get_in_room(vehicle), ROOM_SPACE)) {
-              send_to_room_printf(g, char_get_in_room(ch), "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
+              send_to_room(g, char_get_in_room(ch), "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
             }
           } else {
             act(g, "@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
             act(g, "@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
-            send_to_room_printf(g, obj_get_in_room(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", obj_get_short_description(vehicle));
+            send_to_room(g, obj_get_in_room(vehicle), "@wThe door to {}@w is opened from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
         }
@@ -1543,15 +1543,15 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
           char_from_room(g, ch);
           char_to_room(g, ch, num);
           if (obj_get_vnum(g, obj) > 19199) {
-            send_to_room_printf(g, num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-            send_to_room_printf(g, obj_get_in_room(hatch), "@wThe ship hatch opens slowly.\r\n");
+            send_to_room(g, num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+            send_to_room(g, obj_get_in_room(hatch), "@wThe ship hatch opens slowly.\r\n");
             if (obj_get_in_room(obj) != NOWHERE && room_flagged(g, obj_get_in_room(obj), ROOM_SPACE)) {
-              send_to_room_printf(g, num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
+              send_to_room(g, num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
             }
           } else {
             act(g, "@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
             act(g, "@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
-            send_to_room_printf(g, obj_get_in_room(hatch), "@wThe door is opened from the other side.\r\n");
+            send_to_room(g, obj_get_in_room(hatch), "@wThe door is opened from the other side.\r\n");
           }
           hatch = nullptr;
         }
@@ -1561,9 +1561,9 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         OPEN_DOOR(g, other_room, obj, rev_dir[door]);
       }
       if (!obj) {
-        send_to_char_printf(g, ch, "You open the %s that leads %s.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
+        send_to_char(g, ch, "You open the {} that leads {}.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
       } else if (obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH) {
-        send_to_char_printf(g, ch, "You open %s.\r\n", obj_get_short_description(obj));
+        send_to_char(g, ch, "You open {}.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1572,15 +1572,15 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         if ((obj) && obj_get_type_flag(obj) == ITEM_HATCH && (vehicle)) {
           CLOSE_DOOR(g, char_get_in_room(ch), vehicle, door);
           if (obj_get_vnum(g, obj) > 19199) {
-            send_to_room_printf(g, char_get_in_room(ch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-            send_to_room_printf(g, obj_get_in_room(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
+            send_to_room(g, char_get_in_room(ch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
+            send_to_room(g, obj_get_in_room(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
             if (room_flagged(g, obj_get_in_room(vehicle), ROOM_SPACE)) {
-              send_to_room_printf(g, char_get_in_room(ch), "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
+              send_to_room(g, char_get_in_room(ch), "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
             }
           } else {
             act(g, "@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
             act(g, "@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
-            send_to_room_printf(g, obj_get_in_room(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(vehicle));
+            send_to_room(g, obj_get_in_room(vehicle), "@wThe door to {}@w is closed from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
         }
@@ -1589,15 +1589,15 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
           char_from_room(g, ch);
           char_to_room(g, ch, num);
           if (obj_get_vnum(g, obj) > 19199) {
-            send_to_room_printf(g, num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-            send_to_room_printf(g, obj_get_in_room(hatch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
+            send_to_room(g, num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
+            send_to_room(g, obj_get_in_room(hatch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
             if (obj_get_in_room(obj) != NOWHERE && room_flagged(g, obj_get_in_room(obj), ROOM_SPACE)) {
-              send_to_room_printf(g, num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
+              send_to_room(g, num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
             }
           } else {
             act(g, "@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
             act(g, "@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
-            send_to_room_printf(g, obj_get_in_room(hatch), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(hatch));
+            send_to_room(g, obj_get_in_room(hatch), "@wThe door to {}@w is closed from the other side.\r\n", obj_get_short_description(hatch));
           }
           hatch = nullptr;
         }
@@ -1607,9 +1607,9 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         CLOSE_DOOR(g, other_room, obj, rev_dir[door]);
       }
       if (!obj) {
-        send_to_char_printf(g, ch, "You close the %s that leads %s.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
+        send_to_char(g, ch, "You close the {} that leads {}.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
       } else if (obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH) {
-        send_to_char_printf(g, ch, "You close %s.\r\n", obj_get_short_description(obj));
+        send_to_char(g, ch, "You close {}.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1631,9 +1631,9 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         LOCK_DOOR(g, other_room, obj, rev_dir[door]);
       }
       if (!obj) {
-        send_to_char_printf(g, ch, "You lock the %s that leads %s.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
+        send_to_char(g, ch, "You lock the {} that leads {}.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
       } else {
-        send_to_char_printf(g, ch, "You lock %s.\r\n", obj_get_short_description(obj));
+        send_to_char(g, ch, "You lock {}.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1655,9 +1655,9 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         UNLOCK_DOOR(g, other_room, obj, rev_dir[door]);
       }
       if (!obj) {
-        send_to_char_printf(g, ch, "You unlock the %s that leads %s.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
+        send_to_char(g, ch, "You unlock the {} that leads {}.\r\n", exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
       } else {
-        send_to_char_printf(g, ch, "You unlock %s.\r\n", obj_get_short_description(obj));
+        send_to_char(g, ch, "You unlock {}.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1665,7 +1665,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
       TOGGLE_LOCK(g, char_get_in_room(ch), obj, door);
       if (back)
         TOGGLE_LOCK(g, other_room, obj, rev_dir[door]);
-      send_to_char_printf(g, ch, "The lock quickly yields to your skills.\r\n");
+      send_to_char(g, ch, "The lock quickly yields to your skills.\r\n");
       len = strlcpy(buf, "$n skillfully picks the lock on ", sizeof(buf));
       break;
   }
@@ -1685,12 +1685,12 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {
-    send_to_room_printf(g, char_get_exit(g, ch, door)->to_room, "The %s that leads %s is %s%s from the other side.\r\n",
-                        exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd],
-                        scmd == SCMD_CLOSE ? "d" : "ed");
+    send_to_room(g, char_get_exit(g, ch, door)->to_room, "The {} that leads {} is {}{} from the other side.\r\n",
+                 exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd],
+                 scmd == SCMD_CLOSE ? "d" : "ed");
   } else if (back && (scmd == SCMD_LOCK || scmd == SCMD_UNLOCK)) {
-    send_to_room_printf(g, char_get_exit(g, ch, door)->to_room, "The %s that leads %s is %sed from the other side.\r\n",
-                        exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd]);
+    send_to_room(g, char_get_exit(g, ch, door)->to_room, "The {} that leads {} is {}ed from the other side.\r\n",
+                 exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd]);
   }
   *dbuf = '\0';
 }
@@ -1710,15 +1710,15 @@ static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pic
 
   /* PICKING_LOCKS is not an untrained skill */
   if (!char_get_skill(ch, SKILL_OPEN_LOCK)) {
-    send_to_char_printf(g, ch, "You have no idea how!\r\n");
+    send_to_char(g, ch, "You have no idea how!\r\n");
     return false;
   }
   if (found == false) {
-    send_to_char_printf(g, ch, "You need a lock picking kit.\r\n");
+    send_to_char(g, ch, "You need a lock picking kit.\r\n");
     return false;
   }
   if (hatch != nullptr && (obj_get_type_flag(hatch) == ITEM_HATCH || obj_get_type_flag(hatch) == ITEM_VEHICLE)) {
-    send_to_char_printf(g, ch, "No picking ship hatches.\r\n");
+    send_to_char(g, ch, "No picking ship hatches.\r\n");
     hatch = nullptr;
     return false;
   }
@@ -1728,19 +1728,18 @@ static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pic
   }
 
   if (keynum == NOTHING) {
-    send_to_char_printf(g, ch, "Odd - you can't seem to find a keyhole.\r\n");
+    send_to_char(g, ch, "Odd - you can't seem to find a keyhole.\r\n");
   } else if (pickproof) {
-    send_to_char_printf(g, ch, "It resists your attempts to pick it.\r\n");
+    send_to_char(g, ch, "It resists your attempts to pick it.\r\n");
     act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, nullptr, nullptr, TO_ROOM);
     /* The -2 is here because that is a penality for not having a set of
    * thieves' tools. If the player has them, that modifier will be accounted
    * for in roll_skill, and negate (or surpass) this. 
    */
   } else if ((getCurST(g, ch)) < getMaxST(g, ch) / 30) {
-    send_to_char_printf(g, ch, "You don't have the stamina to try, it takes percision to pick locks."
-                               "Not shaking tired hands.\r\n");
+    send_to_char(g, ch, "You don't have the stamina to try, it takes percision to pick locks.Not shaking tired hands.\r\n");
   } else if (dclock > (skill_lvl - 2)) {
-    send_to_char_printf(g, ch, "You failed to pick the lock...\r\n");
+    send_to_char(g, ch, "You failed to pick the lock...\r\n");
     act(g, "@c$n@w puts a set of lockpick tools away.@n", true, ch, nullptr, nullptr, TO_ROOM);
     decCurST(g, ch, getCurST(g, ch) / 30, 0);
   } else {
@@ -1782,7 +1781,7 @@ ACMD(do_gen_door)
 
   argument = skip_spaces(argument);
   if (argument.empty()) {
-    send_to_char_printf(g, ch, "%c%s what?\r\n", toupper(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
+    send_to_char(g, ch, "{:c}{} what?\r\n", as_char(toupper(*cmd_door[subcmd])), cmd_door[subcmd] + 1);
     return;
   }
   std::string_view rest = argument;
@@ -1809,19 +1808,19 @@ ACMD(do_gen_door)
       act(g, "You can't $F that!", false, ch, nullptr, cmd_door[subcmd], TO_CHAR);
     else if (!DOOR_IS_OPEN(g, ch, obj, door) &&
              IS_SET(flags_door[subcmd], NEED_OPEN))
-      send_to_char_printf(g, ch, "But it's already closed!\r\n");
+      send_to_char(g, ch, "But it's already closed!\r\n");
     else if (!DOOR_IS_CLOSED(g, ch, obj, door) &&
              IS_SET(flags_door[subcmd], NEED_CLOSED))
-      send_to_char_printf(g, ch, "But it's currently open!\r\n");
+      send_to_char(g, ch, "But it's currently open!\r\n");
     else if (!(DOOR_IS_LOCKED(g, ch, obj, door)) &&
              IS_SET(flags_door[subcmd], NEED_LOCKED))
-      send_to_char_printf(g, ch, "Oh.. it wasn't locked, after all..\r\n");
+      send_to_char(g, ch, "Oh.. it wasn't locked, after all..\r\n");
     else if (!(DOOR_IS_UNLOCKED(g, ch, obj, door)) &&
              IS_SET(flags_door[subcmd], NEED_UNLOCKED))
-      send_to_char_printf(g, ch, "It seems to be locked.\r\n");
+      send_to_char(g, ch, "It seems to be locked.\r\n");
     else if (!has_key(g, ch, keynum) && !char_adm_flagged(ch, ADM_NOKEYS) &&
              ((subcmd == SCMD_LOCK) || (subcmd == SCMD_UNLOCK)))
-      send_to_char_printf(g, ch, "You don't seem to have the proper key.\r\n");
+      send_to_char(g, ch, "You don't seem to have the proper key.\r\n");
     else if (!obj && ok_pick(g, ch, keynum, DOOR_IS_PICKPROOF(g, ch, obj, door), DOOR_DCLOCK(g, ch, obj, door), subcmd, nullptr))
       do_doorcmd(g, ch, obj, door, subcmd);
     else if (ok_pick(g, ch, keynum, DOOR_IS_PICKPROOF(g, ch, obj, door), DOOR_DCLOCK(g, ch, obj, door), subcmd, obj) && obj)
@@ -1841,7 +1840,7 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_r
   /* charmed? */
   if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(g, ch) &&
       char_get_in_room(ch) == char_get_in_room(char_get_master(g, ch))) {
-    send_to_char_printf(g, ch, "The thought of leaving your master makes you weep.\r\n");
+    send_to_char(g, ch, "The thought of leaving your master makes you weep.\r\n");
     act(g, "$n bursts into tears.", false, ch, nullptr, nullptr, TO_ROOM);
     return -1;
   }
@@ -1858,24 +1857,24 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_r
   }
   if ((getCurST(g, ch)) < need_movement && !char_aff_flagged(ch, AFF_FLYING) && !char_is_npc(ch)) {
     if (need_specials_check && char_get_master(g, ch))
-      send_to_char_printf(g, ch, "You are too exhausted to follow.\r\n");
+      send_to_char(g, ch, "You are too exhausted to follow.\r\n");
     else
-      send_to_char_printf(g, ch, "You are too exhausted.\r\n");
+      send_to_char(g, ch, "You are too exhausted.\r\n");
 
     return -1;
   }
   if (room_flagged(g, char_get_in_room(ch), ROOM_ATRIUM)) {
     if (!House_can_enter(g, ch, dest_room)) {
-      send_to_char_printf(g, ch, "That's private property -- no trespassing!\r\n");
+      send_to_char(g, ch, "That's private property -- no trespassing!\r\n");
       return -1;
     }
   }
   if (room_flagged(g, dest_room, ROOM_TUNNEL) &&
       num_pc_in_room(g, room_of(g, dest_room)) >= CONFIG_TUNNEL_SIZE) {
     if (CONFIG_TUNNEL_SIZE > 1)
-      send_to_char_printf(g, ch, "There isn't enough room for you to go there!\r\n");
+      send_to_char(g, ch, "There isn't enough room for you to go there!\r\n");
     else
-      send_to_char_printf(g, ch, "There isn't enough room there for more than one person!\r\n");
+      send_to_char(g, ch, "There isn't enough room there for more than one person!\r\n");
     return -1;
   }
   return need_movement;
@@ -1892,7 +1891,7 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
   /* Mortals and low level gods cannot enter greater god rooms. */
   if (room_flagged(g, dest_room, ROOM_GODROOM) &&
       char_get_admlevel(ch) < ADMLVL_GRGOD) {
-    send_to_char_printf(g, ch, "You aren't godly enough to use that room!\r\n");
+    send_to_char(g, ch, "You aren't godly enough to use that room!\r\n");
     return false;
   }
   /* Now we know we're allowed to go into the room. */
@@ -1926,7 +1925,7 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
     act(g, "@wYou drag @C$N@w with you.@n", true, ch, nullptr, char_get_drag(g, ch), TO_CHAR);
     act(g, "@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, char_get_drag(g, ch), TO_ROOM);
     if (!char_aff_flagged(char_get_drag(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_drag(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
       if (char_is_npc(char_get_drag(g, ch)) && !char_get_fighting(g, char_get_drag(g, ch))) {
         set_fighting(g, char_get_drag(g, ch), ch);
       }
@@ -1942,7 +1941,7 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
     act(g, "@wYou carry @C$N@w with you.@n", true, ch, nullptr, char_get_carrying(g, ch), TO_CHAR);
     act(g, "@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, char_get_carrying(g, ch), TO_ROOM);
     if (!char_aff_flagged(char_get_carrying(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
     }
     char_from_room(g, char_get_carrying(g, ch));
     char_to_room(g, char_get_carrying(g, ch), char_get_in_room(ch));
@@ -1974,14 +1973,14 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
   int could_move   = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return (0);
   }
 
   if (obj_get_type_flag(obj) == ITEM_VEHICLE ||
       obj_get_type_flag(obj) == ITEM_PORTAL) {
     if (obj_val_flagged(obj, CONT_CLOSED)) {
-      send_to_char_printf(g, ch, "But it's closed!\r\n");
+      send_to_char(g, ch, "But it's closed!\r\n");
     } else if ((obj_get_value(obj, VAL_PORTAL_DEST) != NOWHERE) &&
                (room_of(g, obj_get_value(obj, VAL_PORTAL_DEST)))) {
       if (obj_get_value(obj, VAL_PORTAL_DEST) >= 45000 && obj_get_value(obj, VAL_PORTAL_DEST) <= 45099) {
@@ -1992,7 +1991,7 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
           }
         }
         if (filled == true) {
-          send_to_char_printf(g, ch, "Only one person can fit in there at a time.\r\n");
+          send_to_char(g, ch, "Only one person can fit in there at a time.\r\n");
           return (0);
         }
       }
@@ -2004,11 +2003,11 @@ static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data
             perform_enter_obj(g, fol, obj, 1);
           }
     } else {
-      send_to_char_printf(g, ch,
-                          "It doesn't look like you can enter it at the moment.\r\n");
+      send_to_char(g, ch,
+                   "It doesn't look like you can enter it at the moment.\r\n");
     }
   } else {
-    send_to_char_printf(g, ch, "You can't enter that!\r\n");
+    send_to_char(g, ch, "You can't enter that!\r\n");
   }
   return could_move;
 }
@@ -2045,10 +2044,10 @@ ACMD(do_enter)
       if (move_dir > -1)
         perform_move(g, ch, move_dir, 1);
       else
-        send_to_char_printf(g, ch, "There is no %s here.\r\n", buf.c_str());
+        send_to_char(g, ch, "There is no {} here.\r\n", buf.c_str());
     }
   } else if (room_flagged(g, char_get_in_room(ch), ROOM_INDOORS)) {
-    send_to_char_printf(g, ch, "You are already indoors.\r\n");
+    send_to_char(g, ch, "You are already indoors.\r\n");
   } else {
     /* try to locate an entrance */
     for (door = 0; door < NUM_OF_DIRS; door++)
@@ -2060,7 +2059,7 @@ ACMD(do_enter)
     if (move_dir > -1)
       perform_move(g, ch, move_dir, 1);
     else
-      send_to_char_printf(g, ch, "You can't seem to find anything to enter.\r\n");
+      send_to_char(g, ch, "You can't seem to find anything to enter.\r\n");
   }
 }
 
@@ -2076,24 +2075,24 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   }
 
   if (vehicle == nullptr && obj_get_type_flag(obj) != ITEM_PORTAL) {
-    send_to_char_printf(g, ch, "That doesn't appear to lead anywhere.\r\n");
+    send_to_char(g, ch, "That doesn't appear to lead anywhere.\r\n");
     return false;
   }
 
   if (obj_get_type_flag(obj) == ITEM_PORTAL && obj_val_flagged(obj, CONT_CLOSED)) {
-    send_to_char_printf(g, ch, "But it's closed!\r\n");
+    send_to_char(g, ch, "But it's closed!\r\n");
     return false;
   }
 
   if (vehicle != nullptr) {
     if ((dest_room = obj_get_in_room(vehicle)) == NOWHERE) {
-      send_to_char_printf(g, ch, "That doesn't appear to lead anywhere.\r\n");
+      send_to_char(g, ch, "That doesn't appear to lead anywhere.\r\n");
       return false;
     }
   }
   if (vehicle == nullptr) {
     if (!room_of(g, dest_room = obj_get_value(obj, VAL_PORTAL_DEST))) {
-      send_to_char_printf(g, ch, "That doesn't appear to lead anywhere.\r\n");
+      send_to_char(g, ch, "That doesn't appear to lead anywhere.\r\n");
       return false;
     }
   }
@@ -2138,7 +2137,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
       obj_to_room(g, char_get_sits(g, char_get_drag(g, ch)), char_get_in_room(ch));
     }
     if (!char_aff_flagged(char_get_drag(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_drag(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_drag(g, ch), "You feel your sleeping body being moved.\r\n");
       if (char_is_npc(char_get_drag(g, ch)) && !char_get_fighting(g, char_get_drag(g, ch))) {
         set_fighting(g, char_get_drag(g, ch), ch);
       }
@@ -2154,7 +2153,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
       obj_to_room(g, char_get_sits(g, char_get_carrying(g, ch)), char_get_in_room(ch));
     }
     if (!char_aff_flagged(char_get_carrying(g, ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(g, ch), AFF_SLEEP) && rand_number(g, 1, 3)) {
-      send_to_char_printf(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
+      send_to_char(g, char_get_carrying(g, ch), "You feel your sleeping body being moved.\r\n");
     }
   }
 
@@ -2187,12 +2186,12 @@ static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data
   int could_move   = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You are grappling with someone!\r\n");
+    send_to_char(g, ch, "You are grappling with someone!\r\n");
     return (0);
   }
 
   if (obj_val_flagged(obj, CONT_CLOSED)) {
-    send_to_char_printf(g, ch, "But the way out is closed.\r\n");
+    send_to_char(g, ch, "But the way out is closed.\r\n");
   } else {
     if (obj_get_value(obj, VAL_HATCH_DEST) != NOWHERE)
       if ((could_move = do_simple_leave(g, ch, obj, need_specials_check)))
@@ -2211,7 +2210,7 @@ ACMD(do_leave)
   int door;
 
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
@@ -2223,7 +2222,7 @@ ACMD(do_leave)
       }
 
   if (char_is_outside(g, ch))
-    send_to_char_printf(g, ch, "You are outside.. where do you want to go?\r\n");
+    send_to_char(g, ch, "You are outside.. where do you want to go?\r\n");
   else {
     for (door = 0; door < NUM_OF_DIRS; door++)
       if (char_get_exit(g, ch, door))
@@ -2233,7 +2232,7 @@ ACMD(do_leave)
             perform_move(g, ch, door, 1);
             return;
           }
-    send_to_char_printf(g, ch, "I see no obvious exits to the outside.\r\n");
+    send_to_char(g, ch, "I see no obvious exits to the outside.\r\n");
   }
 }
 
@@ -2286,14 +2285,14 @@ static int check_swim(GameWorld *g, struct char_data *ch)
     if (getCurKI(g, ch) >= space_cost)
       can = true;
     decCurKI(g, ch, space_cost, 0);
-    if (!can) send_to_char_printf(g, ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
+    if (!can) send_to_char(g, ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
     return can;
   }
   int64_t swim_cost = (getCurCarriedWeight(ch)) - 1;
   if (getCurST(g, ch) >= swim_cost)
     can = true;
   decCurST(g, ch, swim_cost, 0);
-  if (!can) send_to_char_printf(g, ch, "You are too tired to swim!\r\n");
+  if (!can) send_to_char(g, ch, "You are too tired to swim!\r\n");
   return can;
 }
 
@@ -2319,7 +2318,7 @@ static void fly_to_space(GameWorld *g, struct char_data *ch, room_vnum space)
   char_from_room(g, ch);
   char_to_room(g, ch, space);
   act(g, "@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  send_to_char_printf(g, ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
+  send_to_char(g, ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
   if (!char_is_android(ch)) {
     decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
   }
@@ -2334,27 +2333,27 @@ ACMD(do_fly)
   arg                   = take_arg(rest);
 
   if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
-    send_to_char_printf(g, ch, "You can't fly, you are struggling with someone right now!");
+    send_to_char(g, ch, "You can't fly, you are struggling with someone right now!");
     return;
   }
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
-    send_to_char_printf(g, ch, "You can't fly, you are struggling with someone right now!");
+    send_to_char(g, ch, "You can't fly, you are struggling with someone right now!");
     return;
   }
   if (!char_is_npc(ch)) {
     if (char_plr_flagged(ch, PLR_HEALT)) {
-      send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+      send_to_char(g, ch, "You are inside a healing tank!\r\n");
       return;
     }
     if (char_plr_flagged(ch, PLR_PILOTING)) {
-      send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+      send_to_char(g, ch, "You are busy piloting a ship!\r\n");
       return;
     }
   }
 
   if (!char_is_npc(ch) && char_get_skill(ch, SKILL_FOCUS) < 30 && !char_is_android(ch)) {
-    send_to_char_printf(g, ch, "You do not have enough focus to hold yourself aloft.\r\n");
-    send_to_char_printf(g, ch, "@wOOC@D: @WYou need the skill Focus at @m30@W.@n\r\n");
+    send_to_char(g, ch, "You do not have enough focus to hold yourself aloft.\r\n");
+    send_to_char(g, ch, "@wOOC@D: @WYou need the skill Focus at @m30@W.@n\r\n");
     return;
   }
 
@@ -2383,7 +2382,7 @@ ACMD(do_fly)
       return;
     }
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 100 && !char_is_android(ch)) {
-      send_to_char_printf(g, ch, "You do not have the ki to fly.");
+      send_to_char(g, ch, "You do not have the ki to fly.");
       return;
     }
     reveal_hiding(g, ch, 0);
@@ -2402,7 +2401,7 @@ ACMD(do_fly)
   }
   if (str_eq_nocase("high", arg)) {
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 100 && !char_is_android(ch)) {
-      send_to_char_printf(g, ch, "You do not have the ki to fly.");
+      send_to_char(g, ch, "You do not have the ki to fly.");
       return;
     }
     reveal_hiding(g, ch, 0);
@@ -2421,15 +2420,15 @@ ACMD(do_fly)
   }
   if (str_eq_nocase("space", arg)) {
     if (!char_is_outside(g, ch)) {
-      send_to_char_printf(g, ch, "You are not outside!");
+      send_to_char(g, ch, "You are not outside!");
       return;
     }
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 10 && !char_is_android(ch)) {
-      send_to_char_printf(g, ch, "You do not have the ki to fly to space.");
+      send_to_char(g, ch, "You do not have the ki to fly to space.");
       return;
     }
     if (char_get_fighting(g, ch)) {
-      send_to_char_printf(g, ch, "You are too busy fighting!");
+      send_to_char(g, ch, "You are too busy fighting!");
       return;
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
@@ -2448,7 +2447,7 @@ ACMD(do_fly)
       if (char_get_in_room(ch) == 14904) {
         fly_to_space(g, ch, 58);
       } else {
-        send_to_char_printf(g, ch, "You can only fly off the planet from the launchpad of Aquis.\r\n");
+        send_to_char(g, ch, "You can only fly off the planet from the launchpad of Aquis.\r\n");
       }
       return;
     }
@@ -2480,7 +2479,7 @@ ACMD(do_fly)
       fly_to_space(g, ch, 57);
       return;
     }
-    send_to_char_printf(g, ch, "You are not on a planet.\r\n");
+    send_to_char(g, ch, "You are not on a planet.\r\n");
     return;
   }
 }
@@ -2489,24 +2488,24 @@ ACMD(do_stand)
 {
   struct obj_data *chair;
   if (char_aff_flagged(ch, AFF_KNOCKED)) {
-    send_to_char_printf(g, ch, "You are knocked out cold for right now!\r\n");
+    send_to_char(g, ch, "You are knocked out cold for right now!\r\n");
     return;
   }
   if (!char_is_npc(ch) && char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) {
-    send_to_char_printf(g, ch, "With what legs will you be standing up on?\r\n");
+    send_to_char(g, ch, "With what legs will you be standing up on?\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
   switch (char_get_position(ch)) {
     case POS_STANDING:
-      send_to_char_printf(g, ch, "You are already standing.\r\n");
+      send_to_char(g, ch, "You are already standing.\r\n");
       break;
     case POS_SITTING:
       reveal_hiding(g, ch, 0);
-      send_to_char_printf(g, ch, "You stand up.\r\n");
+      send_to_char(g, ch, "You stand up.\r\n");
       act(g, "$n clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(g, ch)) {
         if (obj_wear_flagged(char_get_sits(g, ch), ITEM_WEAR_TAKE) && obj_get_type_flag(char_get_sits(g, ch)) != ITEM_CHAIR && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(g, ch)) <= getMaxCarryWeight(g, ch)) {
@@ -2523,7 +2522,7 @@ ACMD(do_stand)
       char_set_position(ch, char_get_fighting(g, ch) ? POS_FIGHTING : POS_STANDING);
       break;
     case POS_RESTING:
-      send_to_char_printf(g, ch, "You stop resting, and stand up.\r\n");
+      send_to_char(g, ch, "You stop resting, and stand up.\r\n");
       act(g, "$n stops resting, and clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_get_sits(g, ch)) {
         if (obj_wear_flagged(char_get_sits(g, ch), ITEM_WEAR_TAKE) && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(g, ch)) <= getMaxCarryWeight(g, ch)) {
@@ -2539,10 +2538,10 @@ ACMD(do_stand)
       char_set_position(ch, POS_STANDING);
       break;
     case POS_SLEEPING:
-      send_to_char_printf(g, ch, "You have to wake up first!\r\n");
+      send_to_char(g, ch, "You have to wake up first!\r\n");
       break;
     default:
-      send_to_char_printf(g, ch, "You stop floating around, and put your feet on the ground.\r\n");
+      send_to_char(g, ch, "You stop floating around, and put your feet on the ground.\r\n");
       act(g, "$n stops floating around, and puts $s feet on the ground.",
           true, ch, nullptr, nullptr, TO_ROOM);
       char_set_position(ch, POS_STANDING);
@@ -2558,11 +2557,11 @@ ACMD(do_sit)
   arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
@@ -2573,7 +2572,7 @@ ACMD(do_sit)
     char_set_drag(ch, nullptr);
   }
   if (char_get_carrying(g, ch)) {
-    send_to_char_printf(g, ch, "You are busy carrying someone!\r\n");
+    send_to_char(g, ch, "You are busy carrying someone!\r\n");
     return;
   }
 
@@ -2585,53 +2584,53 @@ ACMD(do_sit)
     switch (char_get_position(ch)) {
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
-        send_to_char_printf(g, ch, "You sit down.\r\n");
+        send_to_char(g, ch, "You sit down.\r\n");
         act(g, "$n sits down.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
       case POS_SITTING:
-        send_to_char_printf(g, ch, "You're sitting already.\r\n");
+        send_to_char(g, ch, "You're sitting already.\r\n");
         break;
       case POS_RESTING:
-        send_to_char_printf(g, ch, "You stop resting, and sit up.\r\n");
+        send_to_char(g, ch, "You stop resting, and sit up.\r\n");
         act(g, "$n stops resting.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You have to wake up first.\r\n");
+        send_to_char(g, ch, "You have to wake up first.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Sit down while fighting? Are you MAD?\r\n");
+        send_to_char(g, ch, "Sit down while fighting? Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and sit down.\r\n");
+        send_to_char(g, ch, "You stop floating around, and sit down.\r\n");
         act(g, "$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
     }
   } else {
     if (char_get_sits(g, ch)) {
-      send_to_char_printf(g, ch, "You are already on something!\r\n");
+      send_to_char(g, ch, "You are already on something!\r\n");
       return;
     }
     if (!(chair = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char_printf(g, ch, "That isn't here.\r\n");
+      send_to_char(g, ch, "That isn't here.\r\n");
       return;
     }
     if (obj_get_vnum(g, chair) == 65) {
-      send_to_char_printf(g, ch, "You can't get on that!\r\n");
+      send_to_char(g, ch, "You can't get on that!\r\n");
       return;
     }
     if (obj_get_sitting(g, chair)) {
-      send_to_char_printf(g, ch, "Someone is already on that one!\r\n");
+      send_to_char(g, ch, "Someone is already on that one!\r\n");
       return;
     }
     if (obj_get_type_flag(chair) != ITEM_CHAIR && obj_get_type_flag(chair) != ITEM_BED) {
-      send_to_char_printf(g, ch, "You can't sit on that!\r\n");
+      send_to_char(g, ch, "You can't sit on that!\r\n");
       return;
     }
     if (obj_get_size(chair) + 1 < get_size(ch)) {
-      send_to_char_printf(g, ch, "You are too large for it!\r\n");
+      send_to_char(g, ch, "You are too large for it!\r\n");
       return;
     }
     switch (char_get_position(ch)) {
@@ -2644,19 +2643,19 @@ ACMD(do_sit)
         obj_set_sitting(chair, ch);
         break;
       case POS_SITTING:
-        send_to_char_printf(g, ch, "You should stand up first.\r\n");
+        send_to_char(g, ch, "You should stand up first.\r\n");
         break;
       case POS_RESTING:
-        send_to_char_printf(g, ch, "You should stand up first.\r\n");
+        send_to_char(g, ch, "You should stand up first.\r\n");
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You have to wake up first.\r\n");
+        send_to_char(g, ch, "You have to wake up first.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Sit down while fighting? Are you MAD?\r\n");
+        send_to_char(g, ch, "Sit down while fighting? Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and sit down.\r\n");
+        send_to_char(g, ch, "You stop floating around, and sit down.\r\n");
         act(g, "$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SITTING);
         break;
@@ -2672,32 +2671,32 @@ ACMD(do_rest)
   arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
   if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
-    send_to_char_printf(g, ch, "You can't rest here!\r\n");
+    send_to_char(g, ch, "You can't rest here!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
     if (char_get_skill(ch, SKILL_BARRIER)) {
-      send_to_char_printf(g, ch, "You have a barrier around you and can't rest.\r\n");
+      send_to_char(g, ch, "You have a barrier around you and can't rest.\r\n");
       return;
     }
     char_set_barrier(ch, 0);
     char_aff_set(ch, AFF_SANCTUARY, false);
   }
   if (char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "You are a bit busy at the moment!\r\n");
+    send_to_char(g, ch, "You are a bit busy at the moment!\r\n");
     return;
   }
   if (char_get_kaioken(ch) > 0) {
-    send_to_char_printf(g, ch, "You are utilizing kaioken and can't rest!\r\n");
+    send_to_char(g, ch, "You are utilizing kaioken and can't rest!\r\n");
     return;
   }
 
@@ -2709,7 +2708,7 @@ ACMD(do_rest)
   }
 
   if (char_get_carrying(g, ch)) {
-    send_to_char_printf(g, ch, "You are carrying someone!\r\n");
+    send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
@@ -2721,60 +2720,60 @@ ACMD(do_rest)
     if (char_get_sits(g, ch)) {
       chair = char_get_sits(g, ch);
       if (obj_get_type_flag(chair) != ITEM_BED) {
-        send_to_char_printf(g, ch, "You can't lay on that!\r\n");
+        send_to_char(g, ch, "You can't lay on that!\r\n");
         return;
       }
     }
     switch (char_get_position(ch)) {
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
-        send_to_char_printf(g, ch, "You lay down and rest your tired bones.\r\n");
+        send_to_char(g, ch, "You lay down and rest your tired bones.\r\n");
         act(g, "$n lays down and rests.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
       case POS_SITTING:
-        send_to_char_printf(g, ch, "You rest your tired bones.\r\n");
+        send_to_char(g, ch, "You rest your tired bones.\r\n");
         act(g, "$n rests.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
       case POS_RESTING:
-        send_to_char_printf(g, ch, "You are already resting.\r\n");
+        send_to_char(g, ch, "You are already resting.\r\n");
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You have to wake up first.\r\n");
+        send_to_char(g, ch, "You have to wake up first.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Rest while fighting?  Are you MAD?\r\n");
+        send_to_char(g, ch, "Rest while fighting?  Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
+        send_to_char(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
         act(g, "$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
     }
   } else {
     if (char_get_sits(g, ch)) {
-      send_to_char_printf(g, ch, "You are already on something!\r\n");
+      send_to_char(g, ch, "You are already on something!\r\n");
       return;
     }
     if (!(chair = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char_printf(g, ch, "That isn't here.\r\n");
+      send_to_char(g, ch, "That isn't here.\r\n");
       return;
     }
     if (obj_get_vnum(g, chair) == 65) {
-      send_to_char_printf(g, ch, "You can't get on that!\r\n");
+      send_to_char(g, ch, "You can't get on that!\r\n");
       return;
     }
     if (obj_get_sitting(g, chair)) {
-      send_to_char_printf(g, ch, "Someone is already on that one!\r\n");
+      send_to_char(g, ch, "Someone is already on that one!\r\n");
       return;
     }
     if (obj_get_type_flag(chair) != ITEM_BED) {
-      send_to_char_printf(g, ch, "You can't lay on that!\r\n");
+      send_to_char(g, ch, "You can't lay on that!\r\n");
       return;
     }
     if (obj_get_size(chair) + 1 < get_size(ch)) {
-      send_to_char_printf(g, ch, "You are too large for it!\r\n");
+      send_to_char(g, ch, "You are too large for it!\r\n");
       return;
     }
     switch (char_get_position(ch)) {
@@ -2787,19 +2786,19 @@ ACMD(do_rest)
         char_set_position(ch, POS_RESTING);
         break;
       case POS_SITTING:
-        send_to_char_printf(g, ch, "You should get up first.\r\n");
+        send_to_char(g, ch, "You should get up first.\r\n");
         break;
       case POS_RESTING:
-        send_to_char_printf(g, ch, "You are already resting.\r\n");
+        send_to_char(g, ch, "You are already resting.\r\n");
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You have to wake up first.\r\n");
+        send_to_char(g, ch, "You have to wake up first.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Rest while fighting?  Are you MAD?\r\n");
+        send_to_char(g, ch, "Rest while fighting?  Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
+        send_to_char(g, ch, "You stop floating around, and stop to rest your tired bones.\r\n");
         act(g, "$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_RESTING);
         break;
@@ -2818,50 +2817,50 @@ ACMD(do_sleep)
     if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
       char_prf_set(g, ch, PRF_ARENAWATCH, false);
       char_set_arenawatch(ch, -1);
-      send_to_char_printf(g, ch, "You stop watching the arena action.\r\n");
+      send_to_char(g, ch, "You stop watching the arena action.\r\n");
     }
   }
 
   if (char_get_bonuses(ch, BONUS_INSOMNIAC)) {
-    send_to_char_printf(g, ch, "You don't feel the least bit tired.\r\n");
+    send_to_char(g, ch, "You don't feel the least bit tired.\r\n");
     return;
   }
 
   if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
-    send_to_char_printf(g, ch, "You can't rest here!\r\n");
+    send_to_char(g, ch, "You can't rest here!\r\n");
     return;
   }
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
-    send_to_char_printf(g, ch, "You are busy piloting a ship!\r\n");
+    send_to_char(g, ch, "You are busy piloting a ship!\r\n");
     return;
   }
   if (char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "You are a bit busy at the moment!\r\n");
+    send_to_char(g, ch, "You are a bit busy at the moment!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {
-    send_to_char_printf(g, ch, "You are busy powering up!\r\n");
+    send_to_char(g, ch, "You are busy powering up!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
     if (char_get_skill(ch, SKILL_BARRIER) > 0) {
-      send_to_char_printf(g, ch, "You have a barrier around you and can't sleep.\r\n");
+      send_to_char(g, ch, "You have a barrier around you and can't sleep.\r\n");
       return;
     }
     char_set_barrier(ch, 0);
     char_aff_set(ch, AFF_SANCTUARY, false);
   }
   if (char_get_kaioken(ch) > 0) {
-    send_to_char_printf(g, ch, "You are utilizing kaioken and can't sleep!\r\n");
+    send_to_char(g, ch, "You are utilizing kaioken and can't sleep!\r\n");
     return;
   }
   if (char_get_sleeptime(ch) > 0) {
-    send_to_char_printf(g, ch, "You aren't sleepy enough.\r\n");
+    send_to_char(g, ch, "You aren't sleepy enough.\r\n");
     return;
   }
   if (char_get_drag(g, ch)) {
@@ -2871,7 +2870,7 @@ ACMD(do_sleep)
     char_set_drag(ch, nullptr);
   }
   if (char_get_carrying(g, ch)) {
-    send_to_char_printf(g, ch, "You are carrying someone!\r\n");
+    send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
 
@@ -2883,7 +2882,7 @@ ACMD(do_sleep)
     if (char_get_sits(g, ch)) {
       chair = char_get_sits(g, ch);
       if (obj_get_type_flag(chair) != ITEM_BED) {
-        send_to_char_printf(g, ch, "You can't sleep on %s.\r\n", obj_get_short_description(chair));
+        send_to_char(g, ch, "You can't sleep on {}.\r\n", obj_get_short_description(chair));
         return;
       }
     }
@@ -2892,26 +2891,26 @@ ACMD(do_sleep)
       case POS_SITTING:
       case POS_RESTING:
         reveal_hiding(g, ch, 0);
-        send_to_char_printf(g, ch, "You go to sleep.\r\n");
+        send_to_char(g, ch, "You go to sleep.\r\n");
         act(g, "$n lies down and falls asleep.", true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
         /* Fury Mode Loss for halfbreeds */
 
         if (char_plr_flagged(ch, PLR_FURY)) {
-          send_to_char_printf(g, ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
+          send_to_char(g, ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
           char_plr_set(ch, PLR_FURY, false);
         }
 
         /* Fury Mode Loss for halfbreeds */
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You are already sound asleep.\r\n");
+        send_to_char(g, ch, "You are already sound asleep.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Sleep while fighting?  Are you MAD?\r\n");
+        send_to_char(g, ch, "Sleep while fighting?  Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and lie down to sleep.\r\n");
+        send_to_char(g, ch, "You stop floating around, and lie down to sleep.\r\n");
         act(g, "$n stops floating around, and lie down to sleep.",
             true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
@@ -2919,33 +2918,33 @@ ACMD(do_sleep)
     }
   } else {
     if (char_get_sits(g, ch)) {
-      send_to_char_printf(g, ch, "You are already on something!\r\n");
+      send_to_char(g, ch, "You are already on something!\r\n");
       return;
     }
     if (!(chair = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char_printf(g, ch, "That isn't here.\r\n");
+      send_to_char(g, ch, "That isn't here.\r\n");
       return;
     }
     if (obj_get_vnum(g, chair) == 65) {
-      send_to_char_printf(g, ch, "You can't get on that!\r\n");
+      send_to_char(g, ch, "You can't get on that!\r\n");
       return;
     }
     if (obj_get_sitting(g, chair)) {
-      send_to_char_printf(g, ch, "Someone is already on that one!\r\n");
+      send_to_char(g, ch, "Someone is already on that one!\r\n");
       return;
     }
     if (obj_get_type_flag(chair) != ITEM_BED) {
-      send_to_char_printf(g, ch, "You can't sleep on that!\r\n");
+      send_to_char(g, ch, "You can't sleep on that!\r\n");
       return;
     }
     if (obj_get_size(chair) + 1 < get_size(ch)) {
-      send_to_char_printf(g, ch, "You are too large for it!\r\n");
+      send_to_char(g, ch, "You are too large for it!\r\n");
       return;
     }
     switch (char_get_position(ch)) {
       case POS_RESTING:
       case POS_SITTING:
-        send_to_char_printf(g, ch, "You need to get up first!\r\n");
+        send_to_char(g, ch, "You need to get up first!\r\n");
         break;
       case POS_STANDING:
         reveal_hiding(g, ch, 0);
@@ -2954,7 +2953,7 @@ ACMD(do_sleep)
         /* Fury Mode Loss for halfbreeds */
 
         if (char_plr_flagged(ch, PLR_FURY)) {
-          send_to_char_printf(g, ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
+          send_to_char(g, ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
           char_plr_set(ch, PLR_FURY, false);
         }
 
@@ -2964,13 +2963,13 @@ ACMD(do_sleep)
         char_set_position(ch, POS_SLEEPING);
         break;
       case POS_SLEEPING:
-        send_to_char_printf(g, ch, "You are already sound asleep.\r\n");
+        send_to_char(g, ch, "You are already sound asleep.\r\n");
         break;
       case POS_FIGHTING:
-        send_to_char_printf(g, ch, "Sleep while fighting?  Are you MAD?\r\n");
+        send_to_char(g, ch, "Sleep while fighting?  Are you MAD?\r\n");
         break;
       default:
-        send_to_char_printf(g, ch, "You stop floating around, and lie down to sleep.\r\n");
+        send_to_char(g, ch, "You stop floating around, and lie down to sleep.\r\n");
         act(g, "$n stops floating around, and lie down to sleep.",
             true, ch, nullptr, nullptr, TO_ROOM);
         char_set_position(ch, POS_SLEEPING);
@@ -2989,20 +2988,20 @@ ACMD(do_wake)
   arg                   = take_arg(rest);
 
   if (char_aff_flagged(ch, AFF_KNOCKED)) {
-    send_to_char_printf(g, ch, "You are knocked out cold for right now!\r\n");
+    send_to_char(g, ch, "You are knocked out cold for right now!\r\n");
     return;
   }
 
   if (char_get_bonuses(ch, BONUS_LATE) && char_get_position(ch) == POS_SLEEPING) {
-    send_to_char_printf(g, ch, "Nah you're enjoying sleeping too much.\r\n");
+    send_to_char(g, ch, "Nah you're enjoying sleeping too much.\r\n");
     return;
   }
 
   if (!arg.empty()) {
     if (char_get_position(ch) == POS_SLEEPING)
-      send_to_char_printf(g, ch, "Maybe you should wake yourself up first.\r\n");
+      send_to_char(g, ch, "Maybe you should wake yourself up first.\r\n");
     else if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)) == nullptr)
-      send_to_char_printf(g, ch, "%s", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
     else if (vict == ch)
       self = 1;
     else if (char_is_awake(vict))
@@ -3012,9 +3011,9 @@ ACMD(do_wake)
     else if (char_get_position(vict) < POS_SLEEPING)
       act(g, "$E's in pretty bad shape!", false, ch, nullptr, vict, TO_CHAR);
     else if (char_aff_flagged(vict, AFF_KNOCKED))
-      send_to_char_printf(g, ch, "They are knocked out cold for right now!\r\n");
+      send_to_char(g, ch, "They are knocked out cold for right now!\r\n");
     else if (char_get_bonuses(ch, BONUS_LATE))
-      send_to_char_printf(g, ch, "They say 'Yeah yeah...' and then roll back over.\r\n");
+      send_to_char(g, ch, "They say 'Yeah yeah...' and then roll back over.\r\n");
     else {
       act(g, "You wake $M up.", false, ch, nullptr, vict, TO_CHAR);
       act(g, "You are awakened by $n.", false, ch, nullptr, vict, TO_VICT | TO_SLEEP);
@@ -3037,11 +3036,11 @@ ACMD(do_wake)
       return;
   }
   if (char_aff_flagged(ch, AFF_SLEEP))
-    send_to_char_printf(g, ch, "You can't wake up!\r\n");
+    send_to_char(g, ch, "You can't wake up!\r\n");
   else if (char_get_position(ch) > POS_SLEEPING)
-    send_to_char_printf(g, ch, "You are already awake...\r\n");
+    send_to_char(g, ch, "You are already awake...\r\n");
   else {
-    send_to_char_printf(g, ch, "You awaken, and sit up.\r\n");
+    send_to_char(g, ch, "You awaken, and sit up.\r\n");
     act(g, "$n awakens.", true, ch, nullptr, nullptr, TO_ROOM);
     if (char_get_dragged(g, ch)) {
       act(g, "@WYou stop dragging @C$N@W!@n", true, char_get_dragged(g, ch), nullptr, ch, TO_CHAR);
@@ -3070,17 +3069,17 @@ ACMD(do_follow)
   buf                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
 
   if (!buf.empty()) {
     if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "%s", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
       return;
     }
   } else {
-    send_to_char_printf(g, ch, "Whom do you wish to follow?\r\n");
+    send_to_char(g, ch, "Whom do you wish to follow?\r\n");
     return;
   }
 
@@ -3093,13 +3092,13 @@ ACMD(do_follow)
   } else { /* Not Charmed follow person */
     if (leader == ch) {
       if (!char_get_master(g, ch)) {
-        send_to_char_printf(g, ch, "You are already following yourself.\r\n");
+        send_to_char(g, ch, "You are already following yourself.\r\n");
         return;
       }
       stop_follower(g, ch);
     } else {
       if (circle_follow(g, ch, leader)) {
-        send_to_char_printf(g, ch, "Sorry, but following in loops is not allowed.\r\n");
+        send_to_char(g, ch, "Sorry, but following in loops is not allowed.\r\n");
         return;
       }
       if (char_get_master(g, ch))

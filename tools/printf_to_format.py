@@ -17,7 +17,8 @@ Conversion (printf -> std::format):
   %d becomes {:d}, so a char argument prints as a number as it did; %c becomes {:c}.
   %u %x %X %o wrap their argument in as_unsigned(), as printf reads it unsigned; %c wraps it in as_char(), as
   printf prints any int as the byte it ends in (std::format throws on one out of char's range).
-  A * width or precision comes after its value in std::format, so the two arguments swap.
+  A * width or precision (%*d, %-*s, %.*s) becomes printf_width() or printf_precision() around the value:
+  std::format's own run-time widths can't be checked when compiled by clang with libstdc++.
   With no arguments a call is plain text: the replacements' std::string_view overload prints it as it is, so
   only %% is undone and braces are left alone.
 Calls it leaves alone (and prints): a format that isn't a string literal, %n, %p, an integer precision
@@ -56,16 +57,20 @@ def convert_spec(flags, width, prec, conv):
     if width is not None and '0' in flags and not left and conv not in 'sc':
         spec += '0'
     if width == '*':
-        spec += '{}'
-        notes.append('width')
+        if prec is not None or flags.strip('-') or conv not in 'sdi':
+            raise Unsupported('a * width with more than - on %' + conv)
+        notes.append('width-left' if left else 'width')
+        return '{}', notes
     elif width is not None:
         spec += width
     if prec is not None:
         if conv in 'diouxXc':
             raise Unsupported('integer precision')
         if prec == '*':
-            spec += '.{}'
+            if width is not None or flags or conv != 's':
+                raise Unsupported('a * precision with more than %.*s')
             notes.append('prec')
+            return '{}', notes
         else:
             spec += '.' + (prec or '0')
     if conv in 'di':
@@ -231,26 +236,26 @@ def rewrite_file(path, funcs, fmt_index):
                 raise Unsupported('format not a literal')
             values = spans[fi + 1:]
             new_fmt, notes = convert_format(fmt, with_args=bool(values))
-            consumed = sum(1 + ('width' in n) + ('prec' in n) for n in notes)
+            consumed = sum(1 + any(x.startswith('width') or x == 'prec' for x in n) for n in notes)
             if consumed != len(values):
                 raise Unsupported(f'{consumed} conversions for {len(values)} arguments')
             arg_texts = [src[a:b] for a, b in values]
             new_args, k = [], 0
             for n in notes:
-                extra = []
-                if 'width' in n:
-                    extra.append(arg_texts[k])
-                    k += 1
-                if 'prec' in n:
-                    extra.append(arg_texts[k])
+                runtime = None
+                if any(x.startswith('width') or x == 'prec' for x in n):
+                    runtime = arg_texts[k].strip()  # printf takes a * width or precision before its value
                     k += 1
                 value = arg_texts[k]
                 k += 1
+                lead = value[:len(value) - len(value.lstrip())]
                 if 'unsigned' in n or 'char' in n:
-                    lead = value[:len(value) - len(value.lstrip())]
                     value = f'{lead}{"as_unsigned" if "unsigned" in n else "as_char"}({value.strip()})'
+                elif 'width' in n or 'width-left' in n:
+                    value = f'{lead}printf_width({value.strip()}, {runtime}, {"true" if "width-left" in n else "false"})'
+                elif 'prec' in n:
+                    value = f'{lead}printf_precision({value.strip()}, {runtime})'
                 new_args.append(value)
-                new_args.extend(extra)  # std::format takes the value before its width and precision
             lead = fmt_src[:len(fmt_src) - len(fmt_src.lstrip())]
             new_fmt_src = lead + '"' + new_fmt + '"'
             head = src[m.start():spans[fi][0]].replace(func + '_printf', func, 1)
@@ -308,8 +313,7 @@ TYPE = {'hh': {'d': 'signed char', 'i': 'signed char', 'u': 'unsigned char', 'x'
 def selftest(root):
     lines = ['#include <cstdio>', '#include <cctype>', '#include <cstdint>', '#include <cstddef>', '#include <format>', '#include <string>',
              '#include <type_traits>',
-             'template <class T> auto as_unsigned(T v) { return static_cast<std::make_unsigned_t<T>>(v); }',
-             'template <class T> char as_char(T v) { return static_cast<char>(v); }',
+             '#include "dbat/format.hpp"',
              'static int bad = 0;',
              'template <class... A> static void same(const char *pf, const char *sf, const std::string &got, const char *want) {',
              '  if (got != want) { std::printf("MISMATCH %s -> %s: printf \\"%s\\", std::format \\"%s\\"\\n", pf, sf, want, got.c_str()); bad++; }',
@@ -338,12 +342,17 @@ def selftest(root):
             if prec == '*':
                 pf_args.append('3')
             pf_args.append(v)
-            val = f'as_unsigned({v})' if 'unsigned' in notes else f'as_char({v})' if 'char' in notes else v
+            if 'unsigned' in notes:
+                val = f'as_unsigned({v})'
+            elif 'char' in notes:
+                val = f'as_char({v})'
+            elif 'width' in notes or 'width-left' in notes:
+                val = f'printf_width({v}, 7, {"true" if "width-left" in notes else "false"})'
+            elif 'prec' in notes:
+                val = f'printf_precision({v}, 3)'
+            else:
+                val = v
             sf_args.append(val)
-            if width == '*':
-                sf_args.append('7')
-            if prec == '*':
-                sf_args.append('3')
             fmt = '[' + spec + ']'
             sfmt = '[' + field + ']'
             lines.append(f'  std::snprintf(buf, sizeof(buf), "{fmt}", {", ".join(pf_args)});')
@@ -353,7 +362,8 @@ def selftest(root):
     with tempfile.TemporaryDirectory() as tmp:
         cpp, exe = os.path.join(tmp, 'check.cpp'), os.path.join(tmp, 'check')
         open(cpp, 'w').write('\n'.join(lines) + '\n')
-        r = subprocess.run(['g++', '-std=c++26', '-Wno-format', '-o', exe, cpp], capture_output=True, text=True)
+        inc = os.path.join(root, 'dbat', 'include')
+        r = subprocess.run(['g++', '-std=c++26', '-Wno-format', '-I', inc, '-o', exe, cpp], capture_output=True, text=True)
         if r.returncode:
             print(r.stderr[:4000])
             return 2

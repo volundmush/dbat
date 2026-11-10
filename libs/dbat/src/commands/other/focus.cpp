@@ -63,15 +63,15 @@ ACMD(do_focus)
   name                  = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char_printf(g, ch, "Yes but what do you want to focus?\r\n");
+    send_to_char(g, ch, "Yes but what do you want to focus?\r\n");
     return;
   }
   if (char_plr_flagged(ch, PLR_HEALT)) {
-    send_to_char_printf(g, ch, "You are inside a healing tank!\r\n");
+    send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
   if (char_aff_flagged(ch, AFF_CURSE)) {
-    send_to_char_printf(g, ch, "You are cursed and can't focus!\r\n");
+    send_to_char(g, ch, "You are cursed and can't focus!\r\n");
     return;
   }
   if (!(arg != "tough")) {
@@ -80,11 +80,11 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_STONESKIN)) {
-        send_to_char_printf(g, ch, "You already have tough skin!\r\n");
+        send_to_char(g, ch, "You already have tough skin!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into your skin.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into your skin.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(g, 0)) {
@@ -105,26 +105,26 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Focus your ki into who's skin?\r\n");
+        send_to_char(g, ch, "Focus your ki into who's skin?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_STONESKIN)) {
-        send_to_char_printf(g, ch, "They already have tough skin!\r\n");
+        send_to_char(g, ch, "They already have tough skin!\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into their skin.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into their skin.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(g, 0)) {
@@ -153,19 +153,19 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_MIGHT)) {
-        send_to_char_printf(g, ch, "You already have mighty muscles!\r\n");
+        send_to_char(g, ch, "You already have mighty muscles!\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_WIMP) > 0 && char_get_aff_abils_str(ch) + 10 > 70) {
-        send_to_char_printf(g, ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
+        send_to_char(g, ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && char_get_aff_abils_str(ch) + 2 > 70) {
-        send_to_char_printf(g, ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
+        send_to_char(g, ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into your muscles.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into your muscles.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(g, 0)) {
@@ -188,34 +188,34 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Focus your ki into who's muscles?\r\n");
+        send_to_char(g, ch, "Focus your ki into who's muscles?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_MIGHT)) {
-        send_to_char_printf(g, ch, "They already have mighty muscles!\r\n");
+        send_to_char(g, ch, "They already have mighty muscles!\r\n");
         return;
       }
       if (char_get_bonuses(vict, BONUS_WIMP) > 0 && char_get_aff_abils_str(vict) + 10 > 70) {
-        send_to_char_printf(g, ch, "Their body is not able to withstand increasing its strength beyond 70.\r\n");
+        send_to_char(g, ch, "Their body is not able to withstand increasing its strength beyond 70.\r\n");
         return;
       }
       if (char_get_bonuses(vict, BONUS_FRAIL) > 0 && char_get_aff_abils_con(vict) + 2 > 70) {
-        send_to_char_printf(g, ch, "Their body is not able to withstand increasing its constitution beyond 70.\r\n");
+        send_to_char(g, ch, "Their body is not able to withstand increasing its constitution beyond 70.\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into their muscles.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into their muscles.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(g, 0)) {
@@ -244,22 +244,22 @@ ACMD(do_focus)
       return;
     }
     if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Focus your ki into who's muscles?\r\n");
+      send_to_char(g, ch, "Focus your ki into who's muscles?\r\n");
       return;
     }
     if (ch == vict) {
-      send_to_char_printf(g, ch, "You don't want to wither your own body!\r\n");
+      send_to_char(g, ch, "You don't want to wither your own body!\r\n");
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 2)) {
       return;
     }
     if (is_affected(vict, AFF_WITHER)) {
-      send_to_char_printf(g, ch, "They already have been withered!\r\n");
+      send_to_char(g, ch, "They already have been withered!\r\n");
       return;
     }
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-      send_to_char_printf(g, ch, "You do not have enough ki to wither them.\r\n");
+      send_to_char(g, ch, "You do not have enough ki to wither them.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_WITHER) < axion_dice(g, 0)) {
@@ -286,15 +286,15 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_ENLIGHTEN)) {
-        send_to_char_printf(g, ch, "You already have superior wisdom!\r\n");
+        send_to_char(g, ch, "You already have superior wisdom!\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && char_get_aff_abils_wis(ch) + 10 > 70) {
-        send_to_char_printf(g, ch, "You're not able to withstand increasing your wisdom beyond 70.\r\n");
+        send_to_char(g, ch, "You're not able to withstand increasing your wisdom beyond 70.\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to use this skill.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to use this skill.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(g, 0)) {
@@ -317,15 +317,15 @@ ACMD(do_focus)
         if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
           gain = level_exp(ch, char_get_level(ch) + 1) * 0.15;
           char_set_exp(ch, char_get_exp(ch) + (gain));
-          send_to_char_printf(g, ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@GYou gain @g{}@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
         } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 60) {
           gain = level_exp(ch, char_get_level(ch) + 1) * 0.10;
           char_set_exp(ch, char_get_exp(ch) + (gain));
-          send_to_char_printf(g, ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@GYou gain @g{}@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
         } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 40) {
           gain = level_exp(ch, char_get_level(ch) + 1) * 0.05;
           char_set_exp(ch, char_get_exp(ch) + (gain));
-          send_to_char_printf(g, ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
+          send_to_char(g, ch, "@GYou gain @g{}@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
         }
       }
       return;
@@ -333,30 +333,30 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Focus your ki into who's mind?\r\n");
+        send_to_char(g, ch, "Focus your ki into who's mind?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_ENLIGHTEN)) {
-        send_to_char_printf(g, ch, "They already have superior wisdom!\r\n");
+        send_to_char(g, ch, "They already have superior wisdom!\r\n");
         return;
       }
       if (char_get_bonuses(vict, BONUS_FOOLISH) > 0 && char_get_aff_abils_wis(vict) + 10 > 70) {
-        send_to_char_printf(g, ch, "They're not able to withstand increasing their wisdom beyond 70.\r\n");
+        send_to_char(g, ch, "They're not able to withstand increasing their wisdom beyond 70.\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to use this skill.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to use this skill.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(g, 0)) {
@@ -381,15 +381,15 @@ ACMD(do_focus)
         if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
           gain = level_exp(vict, char_get_level(vict) + 1) * 0.15;
           char_set_exp(vict, char_get_exp(vict) + (gain));
-          send_to_char_printf(g, vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
+          send_to_char(g, vict, "@GYou gain @g{}@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
         } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 60) {
           gain = level_exp(vict, char_get_level(vict) + 1) * 0.10;
           char_set_exp(vict, char_get_exp(vict) + (gain));
-          send_to_char_printf(g, vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
+          send_to_char(g, vict, "@GYou gain @g{}@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
         } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 40) {
           gain = level_exp(vict, char_get_level(vict) + 1) * 0.05;
           char_set_exp(vict, char_get_exp(vict) + (gain));
-          send_to_char_printf(g, vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
+          send_to_char(g, vict, "@GYou gain @g{}@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
         }
       }
       return;
@@ -403,15 +403,15 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_GENIUS)) {
-        send_to_char_printf(g, ch, "You already have superior intelligence!\r\n");
+        send_to_char(g, ch, "You already have superior intelligence!\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_DULL) > 0 && char_get_aff_abils_intel(ch) + 10 > 70) {
-        send_to_char_printf(g, ch, "You're not able to withstand increasing your intelligence beyond 70.\r\n");
+        send_to_char(g, ch, "You're not able to withstand increasing your intelligence beyond 70.\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into your mind.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into your mind.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(g, 0)) {
@@ -433,30 +433,30 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Focus your ki into who's mind?\r\n");
+        send_to_char(g, ch, "Focus your ki into who's mind?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_GENIUS)) {
-        send_to_char_printf(g, ch, "They already have superior intelligence!\r\n");
+        send_to_char(g, ch, "They already have superior intelligence!\r\n");
         return;
       }
       if (char_get_bonuses(vict, BONUS_DULL) > 0 && char_get_aff_abils_intel(vict) + 10 > 70) {
-        send_to_char_printf(g, ch, "They're not able to withstand increasing their intelligence beyond 70.\r\n");
+        send_to_char(g, ch, "They're not able to withstand increasing their intelligence beyond 70.\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into their mind.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into their mind.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(g, 0)) {
@@ -492,15 +492,15 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_FLEX)) {
-        send_to_char_printf(g, ch, "You already have superior agility!\r\n");
+        send_to_char(g, ch, "You already have superior agility!\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && char_get_aff_abils_dex(ch) + 10 > 70) {
-        send_to_char_printf(g, ch, "You're not able to withstand increasing your agility beyond 70.\r\n");
+        send_to_char(g, ch, "You're not able to withstand increasing your agility beyond 70.\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into your limbs.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into your limbs.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_FLEX) < axion_dice(g, 0)) {
@@ -523,30 +523,30 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Focus your ki into who's limbs?\r\n");
+        send_to_char(g, ch, "Focus your ki into who's limbs?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_FLEX)) {
-        send_to_char_printf(g, ch, "They already have superior agility!\r\n");
+        send_to_char(g, ch, "They already have superior agility!\r\n");
         return;
       }
       if (char_get_bonuses(vict, BONUS_CLUMSY) > 0 && char_get_aff_abils_dex(vict) + 3 > 70) {
-        send_to_char_printf(g, ch, "They're not able to withstand increasing their agility beyond 70.\r\n");
+        send_to_char(g, ch, "They're not able to withstand increasing their agility beyond 70.\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to infuse into their limbs.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to infuse into their limbs.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_FLEX) < axion_dice(g, 0)) {
@@ -582,11 +582,11 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_BLESS)) {
-        send_to_char_printf(g, ch, "You already are blessed!\r\n");
+        send_to_char(g, ch, "You already are blessed!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to bless.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to bless.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_BLESS) < axion_dice(g, 0)) {
@@ -610,7 +610,7 @@ ACMD(do_focus)
       act(g, "You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_aff_flagged(ch, AFF_CURSE)) {
-        send_to_char_printf(g, ch, "Your cursing was nullified!\r\n");
+        send_to_char(g, ch, "Your cursing was nullified!\r\n");
         null_affect(g, ch, AFF_CURSE);
       }
       return;
@@ -618,26 +618,26 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Bless who?\r\n");
+        send_to_char(g, ch, "Bless who?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_BLESS)) {
-        send_to_char_printf(g, ch, "They already have been blessed!\r\n");
+        send_to_char(g, ch, "They already have been blessed!\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to bless.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to bless.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_BLESS) < axion_dice(g, 0)) {
@@ -668,7 +668,7 @@ ACMD(do_focus)
         }
       }
       if (char_aff_flagged(vict, AFF_CURSE)) {
-        send_to_char_printf(g, vict, "Your cursing was nullified!\r\n");
+        send_to_char(g, vict, "Your cursing was nullified!\r\n");
         null_affect(g, vict, AFF_CURSE);
       }
       return;
@@ -682,15 +682,15 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (char_aff_flagged(ch, AFF_CURSE)) {
-        send_to_char_printf(g, ch, "You already are cursed!\r\n");
+        send_to_char(g, ch, "You already are cursed!\r\n");
         return;
       }
       if (char_is_demon(ch)) {
-        send_to_char_printf(g, ch, "You are immune to curses!\r\n");
+        send_to_char(g, ch, "You are immune to curses!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to CURSE.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to CURSE.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_CURSE) < axion_dice(g, 0)) {
@@ -709,7 +709,7 @@ ACMD(do_focus)
       act(g, "You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_aff_flagged(ch, AFF_BLESS)) {
-        send_to_char_printf(g, ch, "Your blessing was nullified!\r\n");
+        send_to_char(g, ch, "Your blessing was nullified!\r\n");
         null_affect(g, ch, AFF_BLESS);
       }
       return;
@@ -717,30 +717,30 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "Curse who?\r\n");
+        send_to_char(g, ch, "Curse who?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 0)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_CURSE)) {
-        send_to_char_printf(g, ch, "They already have been cursed!\r\n");
+        send_to_char(g, ch, "They already have been cursed!\r\n");
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if (char_is_demon(vict)) {
-        send_to_char_printf(g, ch, "They are immune to curses!\r\n");
+        send_to_char(g, ch, "They are immune to curses!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to CURSE.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to CURSE.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_CURSE) < axion_dice(g, 0)) {
@@ -761,7 +761,7 @@ ACMD(do_focus)
       act(g, "$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", true, ch, nullptr, vict, TO_VICT);
       act(g, "$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", true, ch, nullptr, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
-        send_to_char_printf(g, vict, "Your blessing was nullified!\r\n");
+        send_to_char(g, vict, "Your blessing was nullified!\r\n");
         null_affect(g, vict, AFF_BLESS);
       }
       return;
@@ -774,26 +774,26 @@ ACMD(do_focus)
       return;
     }
     if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Use Yoikominminken on who?\r\n");
+      send_to_char(g, ch, "Use Yoikominminken on who?\r\n");
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
     if (char_aff_flagged(vict, AFF_SLEEP)) {
-      send_to_char_printf(g, ch, "They already have been put to sleep!\r\n");
+      send_to_char(g, ch, "They already have been put to sleep!\r\n");
       return;
     }
     if (char_plr_flagged(vict, PLR_EYEC)) {
-      send_to_char_printf(g, ch, "Their eyes are closed!\r\n");
+      send_to_char(g, ch, "Their eyes are closed!\r\n");
       return;
     }
     if (char_aff_flagged(vict, AFF_BLIND)) {
-      send_to_char_printf(g, ch, "They appear to be blind!\r\n");
+      send_to_char(g, ch, "They appear to be blind!\r\n");
       return;
     }
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-      send_to_char_printf(g, ch, "You do not have enough ki to use Yoikominminken.\r\n");
+      send_to_char(g, ch, "You do not have enough ki to use Yoikominminken.\r\n");
       return;
     }
     if (char_get_bonuses(vict, BONUS_INSOMNIAC)) {
@@ -834,7 +834,7 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 10) {
-        send_to_char_printf(g, ch, "You do not have enough ki to use vigor.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to use vigor.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(g, 0)) {
@@ -846,7 +846,7 @@ ACMD(do_focus)
         return;
       }
       if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
-        send_to_char_printf(g, ch, "You already have full stamina.\r\n");
+        send_to_char(g, ch, "You already have full stamina.\r\n");
         return;
       }
       if (char_get_bonuses(ch, BONUS_HEALER) > 0) {
@@ -866,22 +866,22 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "VIGOR who?\r\n");
+        send_to_char(g, ch, "VIGOR who?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (char_is_npc(vict)) {
-        send_to_char_printf(g, ch, "Whatever would you waste your ki on them for?\r\n");
+        send_to_char(g, ch, "Whatever would you waste your ki on them for?\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 10) {
-        send_to_char_printf(g, ch, "You do not have enough ki to use vigor.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to use vigor.\r\n");
         return;
       }
       if ((getCurST(g, vict)) >= getMaxST(g, vict)) {
-        send_to_char_printf(g, ch, "They already have full stamina.\r\n");
+        send_to_char(g, ch, "They already have full stamina.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(g, 0)) {
@@ -916,11 +916,11 @@ ACMD(do_focus)
     }
     if (name.empty()) {
       if (!char_aff_flagged(ch, AFF_POISON)) {
-        send_to_char_printf(g, ch, "You are not poisoned!\r\n");
+        send_to_char(g, ch, "You are not poisoned!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to cure.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to cure.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_CURE) < axion_dice(g, 0)) {
@@ -941,22 +941,22 @@ ACMD(do_focus)
 
     else {
       if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char_printf(g, ch, "cure who?\r\n");
+        send_to_char(g, ch, "cure who?\r\n");
         return;
       }
       if (!can_kill(g, ch, vict, nullptr, 2)) {
         return;
       }
       if (ch == vict) {
-        send_to_char_printf(g, ch, "Use focus %s, not focus %s %s.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
         return;
       }
       if (!char_aff_flagged(vict, AFF_POISON)) {
-        send_to_char_printf(g, ch, "They are not poisoned!\r\n");
+        send_to_char(g, ch, "They are not poisoned!\r\n");
         return;
       }
       if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-        send_to_char_printf(g, ch, "You do not have enough ki to cure.\r\n");
+        send_to_char(g, ch, "You do not have enough ki to cure.\r\n");
         return;
       }
       if (char_get_skill(ch, SKILL_CURE) < axion_dice(g, 0)) {
@@ -985,28 +985,28 @@ ACMD(do_focus)
       return;
     }
     if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char_printf(g, ch, "Poison who?\r\n");
+      send_to_char(g, ch, "Poison who?\r\n");
       return;
     }
     if (!can_kill(g, ch, vict, nullptr, 0)) {
       return;
     }
     if (ch == vict) {
-      send_to_char_printf(g, ch, "Why poison yourself?\r\n");
+      send_to_char(g, ch, "Why poison yourself?\r\n");
       return;
     }
     if (char_is_npc(vict)) {
       if (char_mob_flagged(vict, MOB_NOPOISON)) {
-        send_to_char_printf(g, ch, "You get the feeling that this being is immune to poison.\r\n");
+        send_to_char(g, ch, "You get the feeling that this being is immune to poison.\r\n");
         return;
       }
     }
     if (char_aff_flagged(vict, AFF_POISON)) {
-      send_to_char_printf(g, ch, "They already have been poisoned!\r\n");
+      send_to_char(g, ch, "They already have been poisoned!\r\n");
       return;
     }
     if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 20) {
-      send_to_char_printf(g, ch, "You do not have enough ki to poison.\r\n");
+      send_to_char(g, ch, "You do not have enough ki to poison.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_POISON) < axion_dice(g, 0)) {
@@ -1032,7 +1032,7 @@ ACMD(do_focus)
     } else {
       char_set_poisonby(vict, ch);
       if (char_get_charge(vict) > 0) {
-        send_to_char_printf(g, vict, "You lose your concentration and release your charged ki!\r\n");
+        send_to_char(g, vict, "You lose your concentration and release your charged ki!\r\n");
         do_charge(g, vict, "release", 0, 0);
       }
       int duration = char_get_aff_abils_intel(ch) / 20;
@@ -1042,7 +1042,7 @@ ACMD(do_focus)
   } // End of POISON
 
   else {
-    send_to_char_printf(g, ch, "What do you want to focus?\r\n");
+    send_to_char(g, ch, "What do you want to focus?\r\n");
     return;
   }
 }

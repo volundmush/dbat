@@ -51,7 +51,7 @@ ACMD(do_attack)
   }
 
   if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2)) {
-    send_to_char_printf(g, ch, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+    send_to_char(g, ch, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
     return;
   }
 
@@ -60,7 +60,7 @@ ACMD(do_attack)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
   if (char_get_equipment(ch, WEAR_WIELD1)) {
@@ -211,7 +211,7 @@ ACMD(do_attack)
       guncost = 2;
     }
     if (char_get_gold(ch) < guncost) {
-      send_to_char_printf(g, ch, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n", guncost);
+      send_to_char(g, ch, "You do not have enough zenni. You need {:d} zenni per shot for that level of gun.\r\n", guncost);
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (guncost));
@@ -226,7 +226,7 @@ ACMD(do_attack)
       guncost = 2;
     }
     if (char_get_gold(ch) < guncost) {
-      send_to_char_printf(g, ch, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n", guncost);
+      send_to_char(g, ch, "You do not have enough zenni. You need {:d} zenni per shot for that level of gun.\r\n", guncost);
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (guncost));
@@ -419,7 +419,7 @@ ACMD(do_attack)
     if (char_plr_flagged(ch, PLR_THANDW) && gun == true) {
       if (hitspot != 4 && boom_headshot(g, ch)) {
         hitspot = 4;
-        send_to_char_printf(g, ch, "@GBoom headshot!@n\r\n");
+        send_to_char(g, ch, "@GBoom headshot!@n\r\n");
       }
     }
     switch (wtype) {
@@ -747,7 +747,7 @@ ACMD(do_attack)
           int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
           hurt(g, 0, 0, vict, nullptr, char_get_equipment(ch, WEAR_WIELD1), damdam, 0);
         } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
-          send_to_char_printf(g, vict, "@RThey appear to be fireproof!@n\r\n");
+          send_to_char(g, vict, "@RThey appear to be fireproof!@n\r\n");
         }
         pcost(g, ch, 0, stcost);
       } else {
@@ -769,7 +769,7 @@ ACMD(do_attack)
         if (!char_get_skill(ch, SKILL_TWOHAND) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
           int numb = rand_number(g, 10, 15);
           char_set_skills_base(ch, SKILL_TWOHAND, numb);
-          send_to_char_printf(g, ch, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
+          send_to_char(g, ch, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
         } else {
           improve_skill(g, ch, SKILL_TWOHAND, 0);
         }
@@ -779,7 +779,7 @@ ACMD(do_attack)
       if (!char_get_skill(ch, SKILL_DUALWIELD) && slot_count(ch) + 1 <= char_get_skill_slots(ch) && (obj_get_type_flag(char_get_equipment(ch, WEAR_WIELD2)) != ITEM_LIGHT)) {
         int numb = rand_number(g, 10, 15);
         char_set_skills_base(ch, SKILL_DUALWIELD, numb);
-        send_to_char_printf(g, ch, "@GYou learn the very basics of dual-wielding!@n\r\n");
+        send_to_char(g, ch, "@GYou learn the very basics of dual-wielding!@n\r\n");
       } else {
         improve_skill(g, ch, SKILL_DUALWIELD, 0);
       }
@@ -793,7 +793,7 @@ ACMD(do_attack)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -804,7 +804,7 @@ ACMD(do_attack)
       pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -837,18 +837,18 @@ static ACMD(do_attack2)
   }
 
   if (!char_has_arms(g, ch)) {
-    send_to_char_printf(g, ch, "With what arms!?\r\n");
+    send_to_char(g, ch, "With what arms!?\r\n");
     return;
   }
   if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50 && char_get_limb_condition(ch, (2) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
       act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
-    send_to_char_printf(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
+    send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
       act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -943,7 +943,7 @@ static ACMD(do_attack2)
 
   if (gun2 == true) {
     if (char_get_gold(ch) < 1) {
-      send_to_char_printf(g, ch, "You do not have enough zenni. You need 1 zenni per shot.\r\n");
+      send_to_char(g, ch, "You do not have enough zenni. You need 1 zenni per shot.\r\n");
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (1));
@@ -1100,7 +1100,7 @@ static ACMD(do_attack2)
     }
     if (gun2 == true) {
       if (dualwield == 3 && rand_number(g, 1, 3) == 3) {
-        send_to_char_printf(g, ch, "@GYour masterful aim scores a critical!@n\r\n");
+        send_to_char(g, ch, "@GYour masterful aim scores a critical!@n\r\n");
         hitspot = 2;
       }
     }
@@ -1426,7 +1426,7 @@ static ACMD(do_attack2)
         int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
         hurt(g, 0, 0, vict, nullptr, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
       } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
-        send_to_char_printf(g, vict, "@RThey appear to be fireproof!@n\r\n");
+        send_to_char(g, vict, "@RThey appear to be fireproof!@n\r\n");
       }
       pcost(g, ch, 0, stcost);
     }
@@ -1435,7 +1435,7 @@ static ACMD(do_attack2)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -1446,7 +1446,7 @@ static ACMD(do_attack2)
       pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

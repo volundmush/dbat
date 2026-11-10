@@ -55,7 +55,7 @@ ACMD(do_rogafufuken)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -224,7 +224,7 @@ ACMD(do_rogafufuken)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 23, skill, attperc);
@@ -235,7 +235,7 @@ ACMD(do_rogafufuken)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -264,7 +264,7 @@ ACMD(do_heeldrop)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -503,7 +503,7 @@ ACMD(do_heeldrop)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -513,7 +513,7 @@ ACMD(do_heeldrop)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -531,7 +531,7 @@ ACMD(do_bite)
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) {
-    send_to_char_printf(g, ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
+    send_to_char(g, ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
     return;
   }
   if (!can_grav(g, ch)) {
@@ -727,7 +727,7 @@ ACMD(do_bite)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -757,12 +757,12 @@ ACMD(do_slam)
   }
 
   if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-    send_to_char_printf(g, ch, "Your hands are full!\r\n");
+    send_to_char(g, ch, "Your hands are full!\r\n");
     return;
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
   if (!check_points(g, ch, 0, getEffMaxPL(g, ch) / 100)) {
@@ -1046,7 +1046,7 @@ ACMD(do_slam)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -1056,7 +1056,7 @@ ACMD(do_slam)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -1085,12 +1085,12 @@ ACMD(do_tailwhip)
     return;
   }
   if (!char_plr_flagged(ch, PLR_TAIL) && !char_is_npc(ch)) {
-    send_to_char_printf(g, ch, "You have no tail!\r\n");
+    send_to_char(g, ch, "You have no tail!\r\n");
     return;
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char_printf(g, ch, "Direct it at who?\r\n");
+    send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -1263,7 +1263,7 @@ ACMD(do_tailwhip)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char_printf(g, ch, "It is broken already!\r\n");
+      send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -1273,7 +1273,7 @@ ACMD(do_tailwhip)
     pcost(g, ch, 0, stcost);
 
   } else {
-    send_to_char_printf(g, ch, "Error! Please report.\r\n");
+    send_to_char(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

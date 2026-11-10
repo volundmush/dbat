@@ -109,10 +109,10 @@ void core_dump_real(const char *who, int line)
 
 void mud_log(std::string_view text)
 {
-  mud_log_printf("%.*s", (int)text.size(), text.data());
+  (mud_log_printf)("%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
 
 void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
 {
-  mudlog_printf(g, type, level, file, "%.*s", (int)text.size(), text.data());
+  (mudlog_printf)(g, type, level, file, "%.*s", (int)text.size(), text.data()); /* (name) so tools/printf_to_format.py leaves it be */
 }
