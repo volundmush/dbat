@@ -498,12 +498,15 @@ ACMD(do_return)
 
 ACMD(do_load)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
+  std::string buf, buf2, buf3;
   int i = 0, n = 1;
 
-  one_argument(two_arguments(argument, buf, buf2), buf3);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  buf2                  = take_arg(rest);
+  buf3                  = take_arg(rest);
 
-  if (!*buf || !*buf2 || !isdigit(*buf2)) {
+  if (buf.empty() || buf2.empty() || !isdigit(buf2[0])) {
     send_to_char(g, ch, "Usage: load { obj | mob } <vnum> (amt)\r\n");
     return;
   }
@@ -512,11 +515,11 @@ ACMD(do_load)
     return;
   }
 
-  if (atoi(buf3) > 0) {
-    if (atoi(buf3) >= 100) {
+  if (parse_int(buf3) > 0) {
+    if (parse_int(buf3) >= 100) {
       n = 100;
-    } else if (atoi(buf3) < 100) {
-      n = atoi(buf3);
+    } else if (parse_int(buf3) < 100) {
+      n = parse_int(buf3);
     }
   } else {
     n = 1;
@@ -526,7 +529,7 @@ ACMD(do_load)
     struct char_data *mob = nullptr;
     mob_vnum r_num;
 
-    if (!mob_proto_of(g, r_num = atoi(buf2))) {
+    if (!mob_proto_of(g, r_num = parse_int(buf2))) {
       send_to_char(g, ch, "There is no monster with that number.\r\n");
       return;
     }
@@ -543,7 +546,7 @@ ACMD(do_load)
     struct obj_data *obj;
     obj_vnum r_num;
 
-    if (!obj_proto_of(g, r_num = atoi(buf2))) {
+    if (!obj_proto_of(g, r_num = parse_int(buf2))) {
       send_to_char(g, ch, "There is no object with that number.\r\n");
       return;
     }

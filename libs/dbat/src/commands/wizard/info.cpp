@@ -1087,8 +1087,7 @@ ACMD(do_show)
   int8_t self            = false;
   struct char_data *vict = nullptr;
   struct affected_type *aff;
-  char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], *strp,
-      arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
+  char *strp, buf[MAX_STRING_LENGTH];
 
   struct show_struct {
     const char *cmd{};
@@ -1114,9 +1113,9 @@ ACMD(do_show)
       {"\n",         0            }
   };
 
-  skip_spaces(&argument);
+  std::string_view rest = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
 
-  if (!*argument) {
+  if (rest.empty()) {
     send_to_char(g, ch, "Game Info options:\r\n");
     for (j = 0, i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_admlevel(ch))
@@ -1125,17 +1124,18 @@ ACMD(do_show)
     return;
   }
 
-  strcpy(arg, two_arguments(argument, field, value)); /* strcpy: OK (argument <= MAX_INPUT_LENGTH == arg) */
+  std::string field = take_arg(rest);
+  std::string value = take_arg(rest);
 
   for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (!strncmp(field, fields[l].cmd, strlen(field)))
+    if (std::string_view(fields[l].cmd).starts_with(field))
       break;
 
   if (char_get_admlevel(ch) < fields[l].level) {
     send_to_char(g, ch, "You are not godly enough for that!\r\n");
     return;
   }
-  if (!strcmp(value, "."))
+  if (value == ".")
     self = true;
   buf[0] = '\0';
 
@@ -1145,8 +1145,8 @@ ACMD(do_show)
       /* tightened up by JE 4/6/93 */
       if (self)
         print_zone_to_buf(g, buf, sizeof(buf), room_get_zone(g, char_get_in_room(ch)), 1);
-      else if (*value && is_number(value)) {
-        if ((zrn = find_zone(g, atoi(value))))
+      else if (!value.empty() && is_number(value)) {
+        if ((zrn = find_zone(g, parse_int(value))))
           print_zone_to_buf(g, buf, sizeof(buf), zrn, 1);
         else {
           send_to_char(g, ch, "That is not a valid zone.\r\n");
@@ -1166,7 +1166,7 @@ ACMD(do_show)
 
     /* show player */
     case 2:
-      if (!*value) {
+      if (value.empty()) {
         send_to_char(g, ch, "A name would help.\r\n");
         return;
       }
@@ -1174,7 +1174,7 @@ ACMD(do_show)
       vict = new char_data();
       clear_char(vict);
       char_make_player_specials(vict);
-      if (load_char(g, value, vict) < 0) {
+      if (load_char(g, value.c_str(), vict) < 0) {
         send_to_char(g, ch, "There is no such player.\r\n");
         free_char(g, vict);
         return;
@@ -1201,11 +1201,11 @@ ACMD(do_show)
 
     /* show rent */
     case 3:
-      if (!*value) {
+      if (value.empty()) {
         send_to_char(g, ch, "A name would help.\r\n");
         return;
       }
-      Crash_listrent(g, ch, value);
+      Crash_listrent(g, ch, value.data());
       break;
 
     /* show stats */
@@ -1305,7 +1305,7 @@ ACMD(do_show)
 
     /* show shops */
     case 8:
-      show_shops(g, ch, value);
+      show_shops(g, ch, value.data());
       break;
 
     /* show houses */
@@ -1336,7 +1336,7 @@ ACMD(do_show)
       break;
     /* show guilds */
     case 12:
-      show_guild(g, ch, value);
+      show_guild(g, ch, value.data());
       break;
 
     /* show level tables */
@@ -1345,9 +1345,9 @@ ACMD(do_show)
       break;
 
     case 14:
-      if (*value) {
-        if (sscanf(value, "%d-%d", &low, &high) != 2) {
-          if (sscanf(value, "%d", &low) != 1) {
+      if (!value.empty()) {
+        if (sscanf(value.c_str(), "%d-%d", &low, &high) != 2) {
+          if (sscanf(value.c_str(), "%d", &low) != 1) {
             send_to_char(g, ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
             return;
           }
@@ -1365,7 +1365,7 @@ ACMD(do_show)
     case 15:
     case 16: {
       std::vector<struct char_data *> victs; /* everyone affected, newest first, or the one asked about */
-      if (!*value) {
+      if (value.empty()) {
         low = 1;
         g->affect_list.visit([&](long, struct char_data *affected) { victs.push_back(affected); });
       } else {
@@ -1401,8 +1401,7 @@ ACMD(do_show)
             if (aff->modifier)
               j += snprintf(strp + j, k - j, ", ");
 
-            strcpy(field, affected_bits[aff->bitvector]);
-            j += snprintf(strp + j, k - j, "sets %s", field);
+            j += snprintf(strp + j, k - j, "sets %s", affected_bits[aff->bitvector]);
           }
           j += snprintf(strp + j, k - j, "\r\n");
         }
@@ -1424,48 +1423,47 @@ ACMD(do_show)
 ACMD(do_plist)
 {
   int i, len = 0, count = 0;
-  char mode, buf[MAX_STRING_LENGTH], name_search[MAX_INPUT_LENGTH], time_str[MAX_STRING_LENGTH];
+  char mode, buf[MAX_STRING_LENGTH], time_str[MAX_STRING_LENGTH];
   struct time_info_data time_away;
   int low = 0, high = 100, low_day = 0, high_day = 10000, low_hr = 0, high_hr = 24;
 
-  skip_spaces(&argument);
-  strcpy(buf, argument); /* strcpy: OK (sizeof: argument == buf) */
-  name_search[0] = '\0';
+  std::string name_search;
+  std::string_view rest = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
 
-  while (*buf) {
-    char arg[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH];
-
-    half_chop(buf, arg, buf1);
-    if (isdigit(*arg)) {
-      if (sscanf(arg, "%d-%d", &low, &high) == 1)
+  while (!rest.empty()) {
+    std::string arg = take_word(rest);
+    rest            = skip_spaces(rest);
+    if (isdigit(arg[0])) {
+      if (sscanf(arg.c_str(), "%d-%d", &low, &high) == 1)
         high = low;
-      strcpy(buf, buf1); /* strcpy: OK (sizeof: buf1 == buf) */
-    } else if (*arg == '-') {
-      mode = *(arg + 1); /* just in case; we destroy arg in the switch */
+    } else if (arg[0] == '-') {
+      mode = arg[1]; /* '\0' for a bare "-" */
       switch (mode) {
         case 'l':
-          half_chop(buf1, arg, buf);
-          sscanf(arg, "%d-%d", &low, &high);
+          arg  = take_word(rest);
+          rest = skip_spaces(rest);
+          sscanf(arg.c_str(), "%d-%d", &low, &high);
           break;
         case 'n':
-          half_chop(buf1, name_search, buf);
+          name_search = take_word(rest);
+          rest        = skip_spaces(rest);
           break;
         case 'i':
-          strcpy(buf, buf1);
           low = 1;
           break;
         case 'm':
-          strcpy(buf, buf1);
           high = 100;
           break;
         case 'd':
-          half_chop(buf1, arg, buf);
-          if (sscanf(arg, "%d-%d", &low_day, &high_day) == 1)
+          arg  = take_word(rest);
+          rest = skip_spaces(rest);
+          if (sscanf(arg.c_str(), "%d-%d", &low_day, &high_day) == 1)
             high_day = low_day;
           break;
         case 'h':
-          half_chop(buf1, arg, buf);
-          if (sscanf(arg, "%d-%d", &low_hr, &high_hr) == 1)
+          arg  = take_word(rest);
+          rest = skip_spaces(rest);
+          if (sscanf(arg.c_str(), "%d-%d", &low_hr, &high_hr) == 1)
             high_hr = low_hr;
           break;
         default:
@@ -1495,7 +1493,7 @@ ACMD(do_plist)
 
     time_away = *real_time_passed(game_now(g), g->player_table[i].last);
 
-    if (*name_search && strcasecmp(name_search, g->player_table[i].name))
+    if (!name_search.empty() && !str_eq_nocase(name_search, g->player_table[i].name))
       continue;
 
     if (time_away.day > high_day || time_away.day < low_day)
@@ -2233,12 +2231,12 @@ ACMD(do_findkey)
 {
   int dir;
   obj_vnum key;
-  char arg[MAX_INPUT_LENGTH];
   char buf[MAX_STRING_LENGTH];
 
-  any_one_arg(argument, arg); /* Because "in" is a valid direction */
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_word(rest);          /* not take_arg(): "in" is a valid direction */
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Format: findkey <dir>\r\n");
   } else if ((dir = search_block(arg, dirs, false)) >= 0 ||
              (dir = search_block(arg, abbr_dirs, false)) >= 0) {

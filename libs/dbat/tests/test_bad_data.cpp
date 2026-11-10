@@ -24,6 +24,9 @@
 #include "dbat/consts/skills.hpp"
 #include "dbat/db.hpp"
 #include "dbat/dg_scripts.hpp"
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/lsan_interface.h>
+#endif
 #include "dbat/game_world.hpp"
 #include "dbat/genwld.hpp"
 #include "dbat/handler.hpp"
@@ -1244,6 +1247,35 @@ static void check_mload_mob_into_a_room(void)
   th_shutdown(g);
 }
 
+/* An emote of many #s (each one becomes "$n") fits in the room's output (it was rewritten in place in a buffer of
+ * MAX_INPUT_LENGTH, which doubling overflowed) */
+static void check_emote_of_many_hashes(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Emoter", ADMLVL_NONE);
+
+  std::string line = "emote " + std::string(MAX_INPUT_LENGTH - 16, '#');
+  th_type(g, ch, line.c_str());
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A wiznet line goes into each listener's history without leaving a copy behind (each was strdup()ed and kept by no
+ * one; under ASan the leak fails the run) */
+static void check_wiznet_keeps_no_copies(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
+
+  th_type(g, ch, "wiznet hello there");
+  CHECK(saw(ch, "hello there"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+#ifdef __SANITIZE_ADDRESS__
+  CHECK(__lsan_do_recoverable_leak_check() == 0); /* the run ends in _exit(), which LeakSanitizer doesn't see */
+#endif
+}
+
 static void check_message_about_an_object_with_no_description(void)
 {
   GameWorld *g = th_boot();
@@ -1604,6 +1636,8 @@ static const struct {
     {"mjunk_by_name",                               check_mjunk_by_name                              },
     {"long_zone_echo",                              check_long_zone_echo                             },
     {"mload_mob_into_a_room",                       check_mload_mob_into_a_room                      },
+    {"emote_of_many_hashes",                        check_emote_of_many_hashes                       },
+    {"wiznet_keeps_no_copies",                      check_wiznet_keeps_no_copies                     },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

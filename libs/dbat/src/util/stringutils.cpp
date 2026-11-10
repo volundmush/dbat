@@ -264,6 +264,19 @@ void skip_spaces(char **string)
  *
  * Modifies the string in-place.
  */
+void delete_doubledollar(std::string &s)
+{
+  std::string out;
+
+  out.reserve(s.size());
+  for (size_t i = 0; i < s.size(); i++) {
+    out += s[i];
+    if (s[i] == '$' && i + 1 < s.size() && s[i + 1] == '$')
+      i++; /* skip the second of 2 $'s in a row */
+  }
+  s = std::move(out);
+}
+
 char *delete_doubledollar(char *string)
 {
   char *ddread, *ddwrite;
@@ -409,12 +422,16 @@ void search_replace(char *string, const char *find, const char *replace)
 
 void search_replace(std::string &s, std::string_view find, std::string_view replace)
 {
-  size_t pos;
+  size_t pos = 0;
 
   if (find.empty()) /* would match forever */
     return;
-  while ((pos = s.find(find)) != std::string::npos)
+  /* After replacing the first match there is none before it, so the next one, made by the replacement or not, starts
+   * no sooner than find.size() - 1 before it: searching on from there finds what searching from the start would. */
+  while ((pos = s.find(find, pos)) != std::string::npos) {
     s.replace(pos, find.size(), replace);
+    pos = pos >= find.size() - 1 ? pos - (find.size() - 1) : 0;
+  }
 }
 
 char *str_printf(const char *format, ...)

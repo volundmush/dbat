@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <string>
+#include <string_view>
 #include "dbat/consts/types.hpp"
 
 struct command_info {
@@ -26,7 +27,7 @@ constexpr int ALIAS_SEP_CHAR  = ';';
 constexpr int ALIAS_VAR_CHAR  = '$';
 constexpr int ALIAS_GLOB_CHAR = '*';
 
-struct alias_data *find_alias(std::list<alias_data> &aliases, const char *str);
+struct alias_data *find_alias(std::list<alias_data> &aliases, std::string_view str);
 
 int find_command(GameWorld *g, const char *command);
 

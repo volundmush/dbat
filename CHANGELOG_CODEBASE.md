@@ -61,6 +61,10 @@
 - `mzoneecho`, `ozoneecho` and `wzoneecho` no longer overflow a buffer of `MAX_INPUT_LENGTH` with a message longer than that, which a script line can be once its variables are filled in. [Volund]
 - `search_replace()` on a `std::string` with nothing to find changes nothing; `mechoaround` and `oechoaround` use it instead of copying the message into a buffer. [Volund]
 - The special procedures, guilds and vehicles (`systems/`) take their arguments apart with `dbat/args.hpp`. The guild's practice, gain, forget, study and grand handlers take a `std::string_view`, and so do `rIntro()` and the vehicles' landing and boarding lookups. The shopkeeper's buy, sell, value, list and appraise still work on a `char *` line. [Volund]
+- The house, ban, alias, disable and mail commands (`db/`) and the last of the wizard commands (`show`, `plist`, `load`, `findkey`, `echo`, `gecho`, `ginfo`, `poofset`, `newsedit`, `wiznet`) take their arguments apart with `dbat/args.hpp`. `find_alias()` takes a `std::string_view`, `delete_doubledollar()` has a `std::string` version, and `add_history()` takes a `const char *`. [Volund]
+- An emote or smote of many `#`s no longer overflows the stack: each `#` became `$n` in place in a buffer of `MAX_INPUT_LENGTH`. The `std::string` `search_replace()` searches on from each replacement instead of from the start (what it finds is the same), so a long one takes no time. [Volund]
+- `act()` stops at the end of its buffer: a message whose `$` codes expand past `MAX_STRING_LENGTH` (an emote of many `#`s, say) is cut short instead of overrunning the stack. [Volund]
+- `wiznet` no longer leaks a copy of each line for each immortal who hears it. [Volund]
 - `tools/verify.sh` round trip now saves every zone's mob, object, room, shop, guild, trigger and zone files as well as players. A zone's triggers are written by `save_triggers()`, which trigedit's save now calls. Players' script variables are loaded and saved back too. [Volund]
 
 # 2.9.3

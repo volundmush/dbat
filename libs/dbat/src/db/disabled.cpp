@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/disabled.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/command.hpp"
@@ -36,9 +37,9 @@ ACMD(do_disable)
     return;
   }
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
 
-  if (!*argument) {      /* Nothing specified. Show disabled commands. */
+  if (text.empty()) {       /* Nothing specified. Show disabled commands. */
     if (!g->disabled_first) /* Any disabled at all ? */
       send_to_char(g, ch, "There are no disabled commands.\r\n");
     else {
@@ -53,8 +54,8 @@ ACMD(do_disable)
   }
 
   /* command given - first check if it is one of the disabled commands */
-  for (length = strlen(argument), p = g->disabled_first; p; p = p->next)
-    if (!strncmp(argument, p->command->command, length))
+  for (length = text.size(), p = g->disabled_first; p; p = p->next)
+    if (!strncmp(text.c_str(), p->command->command, length))
       break;
 
   if (p) { /* this command is disabled */
@@ -75,8 +76,8 @@ ACMD(do_disable)
 
   } else { /* not a disabled command, check if the command exists */
 
-    for (length = strlen(argument), i = 0; *cmd_info[i].command != '\n'; i++)
-      if (!strncmp(cmd_info[i].command, argument, length))
+    for (length = text.size(), i = 0; *cmd_info[i].command != '\n'; i++)
+      if (!strncmp(cmd_info[i].command, text.c_str(), length))
         if (char_get_level(ch) >= cmd_info[i].minimum_level &&
             char_get_admlevel(ch) >= cmd_info[i].minimum_admlevel)
           break;

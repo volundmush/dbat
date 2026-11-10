@@ -15,6 +15,7 @@
 
 #include <linux/limits.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -316,11 +317,12 @@ void reboot_wizlists(GameWorld *g)
  */
 ACMD(do_reboot)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!strcasecmp(arg, "all") || *arg == '*') {
+  if (str_eq_nocase(arg, "all") || arg[0] == '*') {
     if (load_levels(g) < 0)
       send_to_char(g, ch, "Cannot read level configurations\r\n");
     if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
@@ -351,56 +353,56 @@ ACMD(do_reboot)
       send_to_char(g, ch, "Cannot read background\r\n");
     free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
-  } else if (!strcasecmp(arg, "levels")) {
+  } else if (str_eq_nocase(arg, "levels")) {
     if (load_levels(g) < 0)
       send_to_char(g, ch, "Cannot read level configurations\r\n");
-  } else if (!strcasecmp(arg, "wizlist")) {
+  } else if (str_eq_nocase(arg, "wizlist")) {
     if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
       send_to_char(g, ch, "Cannot read wizlist\r\n");
-  } else if (!strcasecmp(arg, "immlist")) {
+  } else if (str_eq_nocase(arg, "immlist")) {
     if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
       send_to_char(g, ch, "Cannot read immlist\r\n");
-  } else if (!strcasecmp(arg, "news")) {
+  } else if (str_eq_nocase(arg, "news")) {
     if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
       send_to_char(g, ch, "Cannot read news\r\n");
-  } else if (!strcasecmp(arg, "credits")) {
+  } else if (str_eq_nocase(arg, "credits")) {
     if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
       send_to_char(g, ch, "Cannot read credits\r\n");
-  } else if (!strcasecmp(arg, "motd")) {
+  } else if (str_eq_nocase(arg, "motd")) {
     if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
       send_to_char(g, ch, "Cannot read motd\r\n");
-  } else if (!strcasecmp(arg, "imotd")) {
+  } else if (str_eq_nocase(arg, "imotd")) {
     if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
       send_to_char(g, ch, "Cannot read imotd\r\n");
-  } else if (!strcasecmp(arg, "help")) {
+  } else if (str_eq_nocase(arg, "help")) {
     if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
       send_to_char(g, ch, "Cannot read help front page\r\n");
-  } else if (!strcasecmp(arg, "info")) {
+  } else if (str_eq_nocase(arg, "info")) {
     if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
       send_to_char(g, ch, "Cannot read info\r\n");
-  } else if (!strcasecmp(arg, "policy")) {
+  } else if (str_eq_nocase(arg, "policy")) {
     if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
       send_to_char(g, ch, "Cannot read policy\r\n");
-  } else if (!strcasecmp(arg, "handbook")) {
+  } else if (str_eq_nocase(arg, "handbook")) {
     if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
       send_to_char(g, ch, "Cannot read handbook\r\n");
-  } else if (!strcasecmp(arg, "background")) {
+  } else if (str_eq_nocase(arg, "background")) {
     if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
       send_to_char(g, ch, "Cannot read background\r\n");
-  } else if (!strcasecmp(arg, "greetings")) {
+  } else if (str_eq_nocase(arg, "greetings")) {
     if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
       prune_crlf(g->GREETINGS);
     else
       send_to_char(g, ch, "Cannot read greetings.\r\n");
-  } else if (!strcasecmp(arg, "greetansi")) {
+  } else if (str_eq_nocase(arg, "greetansi")) {
     if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
       prune_crlf(g->GREETANSI);
     else
       send_to_char(g, ch, "Cannot read greetings.\r\n");
-  } else if (!strcasecmp(arg, "xhelp")) {
+  } else if (str_eq_nocase(arg, "xhelp")) {
     free_help_table(g);
     index_boot(g, DB_BOOT_HLP);
-  } else if (!strcasecmp(arg, "ihelp")) {
+  } else if (str_eq_nocase(arg, "ihelp")) {
     if (file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp) < 0)
       send_to_char(g, ch, "Cannot read help front page\r\n");
   } else {

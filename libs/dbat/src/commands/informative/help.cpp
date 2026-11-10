@@ -534,7 +534,7 @@ ACMD(do_history)
     send_to_char(g, ch, "You have no history in that channel.\r\n");
 }
 
-void add_history(GameWorld *g, struct char_data *ch, char *str, int type)
+void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)
 {
   char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
   std::deque<std::string> *history;

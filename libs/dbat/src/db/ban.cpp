@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/ban.hpp"
 #include "dbat/utils.hpp"
@@ -127,7 +128,8 @@ static void write_ban_list(GameWorld *g)
 #define BAN_LIST_FORMAT "%-40.40s  %-8.8s  %-10.10s  %-16.16s\r\n"
 ACMD(do_ban)
 {
-  char flag[MAX_INPUT_LENGTH], site[MAX_INPUT_LENGTH], *nextchar;
+  char *nextchar;
+  std::string flag, site;
   char timestr[16];
   int i;
   struct ban_list_element *ban_node;
@@ -160,38 +162,40 @@ ACMD(do_ban)
     return;
   }
 
-  two_arguments(argument, flag, site);
-  if (!*site || !*flag) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  flag                  = take_arg(rest);
+  site                  = take_arg(rest);
+  if (site.empty() || flag.empty()) {
     send_to_char(g, ch, "Usage: ban {all | select | new} site_name\r\n");
     return;
   }
-  if (!(!strcasecmp(flag, "select") || !strcasecmp(flag, "all") || !strcasecmp(flag, "new"))) {
+  if (!(str_eq_nocase(flag, "select") || str_eq_nocase(flag, "all") || str_eq_nocase(flag, "new"))) {
     send_to_char(g, ch, "Flag must be ALL, SELECT, or NEW.\r\n");
     return;
   }
   for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
-    if (!strcasecmp(ban_node->site, site)) {
+    if (!strcasecmp(ban_node->site, site.c_str())) {
       send_to_char(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
   }
 
   ban_node = new ban_list_element();
-  strlcpy(ban_node->site, site, sizeof(ban_node->site));
+  strlcpy(ban_node->site, site.c_str(), sizeof(ban_node->site));
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
   strlcpy(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
   ban_node->date = game_now(g);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
-    if (!strcasecmp(flag, ban_types[i]))
+    if (str_eq_nocase(flag, ban_types[i]))
       ban_node->type = i;
 
   ban_node->next = g->ban_list;
   g->ban_list       = ban_node;
 
   mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s has banned %s for %s players.",
-         char_get_name(ch), site, ban_types[ban_node->type]);
+         char_get_name(ch), site.c_str(), ban_types[ban_node->type]);
   send_to_char(g, ch, "Site banned.\r\n");
   write_ban_list(g);
 }
@@ -199,18 +203,19 @@ ACMD(do_ban)
 
 ACMD(do_unban)
 {
-  char site[MAX_INPUT_LENGTH];
+  std::string site;
   struct ban_list_element *ban_node, *temp;
   int found = 0;
 
-  one_argument(argument, site);
-  if (!*site) {
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  site                  = take_arg(rest);
+  if (site.empty()) {
     send_to_char(g, ch, "A site to unban might help.\r\n");
     return;
   }
   ban_node = g->ban_list;
   while (ban_node && !found) {
-    if (!strcasecmp(ban_node->site, site))
+    if (!strcasecmp(ban_node->site, site.c_str()))
       found = 1;
     else
       ban_node = ban_node->next;

@@ -251,8 +251,7 @@ ACMD(do_newsedit)
   send_to_char(g, ch, "not just push enter. Happy editing!@n\n");
   send_to_char(g, ch, "@D---------------------------------------------------------@n\n");
   send_editor_help(g, char_get_desc(ch));
-  skip_spaces(&argument);
-  char_get_desc(ch)->newsbuf = argument;
+  char_get_desc(ch)->newsbuf = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
   g->TOP_OF_NEWS       = lookup;
   g->LASTNEWS          = lookup;
   char_get_desc(ch)->draft.clear();
@@ -262,15 +261,15 @@ ACMD(do_newsedit)
 
 ACMD(do_echo)
 {
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
   bool NoName = false;
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "Yes.. but what?\r\n");
     return;
   }
 
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   char name[128];
   int found              = false;
   struct char_data *tch  = nullptr;
@@ -280,14 +279,14 @@ ACMD(do_echo)
       continue;
     if (found == false) {
       snprintf(name, sizeof(name), "*%s", char_get_name(vict));
-      if (strstr(argument, CAP(name))) {
+      if (strstr(text.c_str(), CAP(name))) {
         found = true;
         tch   = vict;
       }
       if (found == false && !char_is_npc(vict)) {
         if (readIntro(ch, vict) == 1) {
           snprintf(name, sizeof(name), "*%s", get_i_name(ch, vict));
-          if (strstr(argument, CAP(name))) {
+          if (strstr(text.c_str(), CAP(name))) {
             found = true;
             tch   = vict;
           }
@@ -297,20 +296,20 @@ ACMD(do_echo)
   }
 
   if (subcmd == SCMD_SMOTE) {
-    if (!strstr(argument, "#")) {
+    if (text.find('#') == std::string::npos) {
       NoName = true;
     }
-    strlcpy(buf, argument, sizeof(buf));
+    buf = text;
     search_replace(buf, "#", "$n");
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
     if (found == true) {
       search_replace(buf, name, "$N");
-    } else if (strstr(buf, "*")) {
+    } else if (buf.find('*') != std::string::npos) {
       search_replace(buf, "*", "");
     }
   } else if (subcmd == SCMD_EMOTE) {
-    snprintf(buf, sizeof(buf), "$n %s", argument);
+    buf = "$n " + text;
     search_replace(buf, "#", "$n");
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
@@ -318,7 +317,7 @@ ACMD(do_echo)
       search_replace(buf, name, "$N");
     }
   } else {
-    snprintf(buf, sizeof(buf), "%s", argument);
+    buf = text;
   }
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
@@ -329,13 +328,13 @@ ACMD(do_echo)
     act(g, blom, false, ch, nullptr, nullptr, TO_ROOM);
   }
   if (found == false) {
-    act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
-    act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
   } else {
-    act(g, buf, false, ch, nullptr, tch, TO_CHAR);
-    act(g, buf, false, ch, nullptr, tch, TO_NOTVICT);
+    act(g, buf.c_str(), false, ch, nullptr, tch, TO_CHAR);
+    act(g, buf.c_str(), false, ch, nullptr, tch, TO_NOTVICT);
     search_replace(buf, "$N", "you");
-    act(g, buf, false, ch, nullptr, tch, TO_VICT);
+    act(g, buf.c_str(), false, ch, nullptr, tch, TO_VICT);
   }
 }
 
@@ -393,40 +392,40 @@ ACMD(do_syslog)
 ACMD(do_gecho)
 {
 
-  skip_spaces(&argument);
-  delete_doubledollar(argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  delete_doubledollar(text);
 
-  if (!*argument)
+  if (text.empty())
     send_to_char(g, ch, "That must be a mistake...\r\n");
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "%s\r\n", argument);
+        send_to_char(g, pt->character, "%s\r\n", text.c_str());
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
-      send_to_char(g, ch, "%s\r\n", argument);
+      send_to_char(g, ch, "%s\r\n", text.c_str());
   }
 }
 
 ACMD(do_ginfo)
 {
 
-  skip_spaces(&argument);
-  delete_doubledollar(argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  delete_doubledollar(text);
 
-  if (!*argument)
+  if (text.empty())
     send_to_char(g, ch, "That must be a mistake...\r\n");
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", argument);
+        send_to_char(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
-      send_to_char(g, ch, "@D[@GINFO@D] @g%s@n\r\n", argument);
+      send_to_char(g, ch, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
   }
 }
 
@@ -442,9 +441,7 @@ ACMD(do_poofset)
     default: return;
   }
 
-  skip_spaces(&argument);
-
-  *msg = argument;
+  *msg = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
 
   send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }
@@ -452,33 +449,36 @@ ACMD(do_poofset)
 ACMD(do_wiznet)
 {
   char buf1[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32],
-      buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32], *msg;
+      buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32];
   char emote = false;
   int level  = ADMLVL_IMMORT;
 
-  skip_spaces(&argument);
-  delete_doubledollar(argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  delete_doubledollar(text);
+  std::string_view msg = text; /* what's left to send */
 
-  if (!*argument) {
+  if (msg.empty()) {
     send_to_char(g, ch, "Usage: wiznet <text> | #<level> <text> | *<emotetext> |\r\n        wiznet @<level> *<emotetext> | wiz @\r\n");
     return;
   }
-  switch (*argument) {
+  switch (msg[0]) {
     case '*':
       emote = true;
       [[fallthrough]];
-    case '#':
-      one_argument(argument + 1, buf1);
-      if (is_number(buf1)) {
-        half_chop(argument + 1, buf1, argument);
-        level = MAX(atoi(buf1), ADMLVL_IMMORT);
+    case '#': {
+      std::string_view after = msg.substr(1), peek = after;
+      if (is_number(take_arg(peek))) { /* fill words are passed over here, but not in the level taken below */
+        std::string number = take_word(after);
+        msg                = skip_spaces(after);
+        level              = MAX(parse_int(number), ADMLVL_IMMORT);
         if (level > char_get_admlevel(ch)) {
           send_to_char(g, ch, "You can't wizline above your own level.\r\n");
           return;
         }
       } else if (emote)
-        argument++;
+        msg.remove_prefix(1);
       break;
+    }
 
     case '@':
       send_to_char(g, ch, "God channel status:\r\n");
@@ -496,7 +496,7 @@ ACMD(do_wiznet)
       return;
 
     case '\\':
-      ++argument;
+      msg.remove_prefix(1);
       break;
     default:
       break;
@@ -505,18 +505,18 @@ ACMD(do_wiznet)
     send_to_char(g, ch, "You are offline!\r\n");
     return;
   }
-  skip_spaces(&argument);
+  std::string said(skip_spaces(msg));
 
-  if (!*argument) {
+  if (said.empty()) {
     send_to_char(g, ch, "Don't bother the gods like that!\r\n");
     return;
   }
   if (level > ADMLVL_IMMORT) {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: <@C%d@D> @G%s%s@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", argument);
-    snprintf(buf2, sizeof(buf1), "@cSomeone@D: <@C%d@D> @G%s%s@n\r\n", level, emote ? "<--- " : "", argument);
+    snprintf(buf1, sizeof(buf1), "@c%s@D: <@C%d@D> @G%s%s@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", said.c_str());
+    snprintf(buf2, sizeof(buf1), "@cSomeone@D: <@C%d@D> @G%s%s@n\r\n", level, emote ? "<--- " : "", said.c_str());
   } else {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: @G%s%s@n\r\n", char_get_name(ch), emote ? "<--- " : "", argument);
-    snprintf(buf2, sizeof(buf1), "@cSomeone@D: @G%s%s@n\r\n", emote ? "<--- " : "", argument);
+    snprintf(buf1, sizeof(buf1), "@c%s@D: @G%s%s@n\r\n", char_get_name(ch), emote ? "<--- " : "", said.c_str());
+    snprintf(buf2, sizeof(buf1), "@cSomeone@D: @G%s%s@n\r\n", emote ? "<--- " : "", said.c_str());
   }
 
   for (descriptor_data *d : each_desc(g)) {
@@ -524,13 +524,12 @@ ACMD(do_wiznet)
         (!char_prf_flagged(g, d->character, PRF_NOWIZ)) &&
         (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(g, d->character, PRF_NOREPEAT)))) {
       if (char_can_see(g, d->character, ch)) {
-        msg = strdup(buf1);
         send_to_char(g, d->character, "%s", buf1);
+        add_history(g, d->character, buf1, HIST_WIZNET);
       } else {
-        msg = strdup(buf2);
         send_to_char(g, d->character, "%s", buf2);
+        add_history(g, d->character, buf2, HIST_WIZNET);
       }
-      add_history(g, d->character, msg, HIST_WIZNET);
     }
   }
 

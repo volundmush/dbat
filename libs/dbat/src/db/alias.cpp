@@ -14,6 +14,7 @@
 
 #include <linux/limits.h>
 
+#include "dbat/args.hpp"
 #include "dbat/alias.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
@@ -150,17 +151,17 @@ void delete_aliases(const char *charname)
 /* The interface to the outside world: do_alias */
 ACMD(do_alias)
 {
-  char arg[MAX_INPUT_LENGTH];
-  char *repl;
   struct alias_data *a;
   std::list<alias_data> *aliases;
 
   if (char_is_npc(ch) || !(aliases = char_aliases(g, ch)))
     return;
 
-  repl = any_one_arg(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string arg       = take_word(rest);
+  std::string repl(rest); /* the rest of the line, from the space after the alias */
 
-  if (!*arg) { /* no argument specified -- list currently defined aliases */
+  if (arg.empty()) { /* no argument specified -- list currently defined aliases */
     send_to_char(g, ch, "Currently defined aliases:\r\n");
     if (aliases->empty())
       send_to_char(g, ch, " None.\r\n");
@@ -173,13 +174,13 @@ ACMD(do_alias)
     if (had)
       aliases->remove_if([a](const alias_data &each) { return &each == a; });
     /* if no replacement string is specified, assume we want to delete */
-    if (!*repl) {
+    if (repl.empty()) {
       if (!had)
         send_to_char(g, ch, "No such alias.\r\n");
       else
         send_to_char(g, ch, "Alias deleted.\r\n");
     } else { /* otherwise, either add or redefine an alias */
-      if (!strcasecmp(arg, "alias")) {
+      if (str_eq_nocase(arg, "alias")) {
         send_to_char(g, ch, "You can't alias 'alias'.\r\n");
         return;
       }
@@ -187,7 +188,7 @@ ACMD(do_alias)
       added.alias = arg;
       delete_doubledollar(repl);
       added.replacement = repl;
-      if (strchr(repl, ALIAS_SEP_CHAR) || strchr(repl, ALIAS_VAR_CHAR))
+      if (repl.find(ALIAS_SEP_CHAR) != std::string::npos || repl.find(ALIAS_VAR_CHAR) != std::string::npos)
         added.type = ALIAS_COMPLEX;
       else
         added.type = ALIAS_SIMPLE;

@@ -2844,6 +2844,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
 {
   const char *i = nullptr;
   char lbuf[MAX_STRING_LENGTH], *buf, *j;
+  char *const end                   = lbuf + sizeof(lbuf) - 3; /* the last char of the message; then "\r\n" and its end */
   bool uppercasenext                = false;
   const struct char_data *dg_victim = nullptr;
   const struct obj_data *dg_target  = nullptr;
@@ -2932,7 +2933,8 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
           return;
           break;
       }
-      while ((*buf = *(i++))) {
+      for (; *i && buf < end; i++) { /* what doesn't fit is left off */
+        *buf = *i;
         if (uppercasenext && !isspace((int)*buf)) {
           *buf          = toupper(*buf);
           uppercasenext = false;
@@ -2940,11 +2942,17 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         buf++;
       }
       orig++;
-    } else if (!(*(buf++) = *(orig++))) {
+    } else if (!*orig) {
+      *(buf++) = '\0';
       break;
-    } else if (uppercasenext && !isspace((int)*(buf - 1))) {
-      *(buf - 1)    = toupper(*(buf - 1));
-      uppercasenext = false;
+    } else if (buf >= end) { /* what doesn't fit is left off */
+      orig++;
+    } else {
+      *(buf++) = *(orig++);
+      if (uppercasenext && !isspace((int)*(buf - 1))) {
+        *(buf - 1)    = toupper(*(buf - 1));
+        uppercasenext = false;
+      }
     }
   }
 

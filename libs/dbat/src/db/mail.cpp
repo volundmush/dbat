@@ -15,6 +15,7 @@ Written by Jeremy Elson (jelson@circlemud.org)
 *************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/utils.hpp"
@@ -33,9 +34,9 @@ Written by Jeremy Elson (jelson@circlemud.org)
 /* local globals */
 
 /* local functions */
-static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, std::string_view arg);
+static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, std::string_view arg);
+static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman, int cmd, std::string_view arg);
 static void push_free_list(GameWorld *g, long pos);
 static long pop_free_list(GameWorld *g);
 static mail_index_type *find_char_in_index(GameWorld *g, long searchee);
@@ -600,7 +601,7 @@ SPECIAL(postmaster)
 }
 
 static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
-                                 int cmd, char *arg)
+                                 int cmd, std::string_view arg)
 {
   long recipient;
   char buf[MAX_INPUT_LENGTH];
@@ -610,9 +611,9 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
     act(g, buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
-  one_argument(arg, buf);
+  std::string name = take_arg(arg);
 
-  if (!*buf) { /* you'll get no argument from me! */
+  if (name.empty()) { /* you'll get no argument from me! */
     act(g, "$n tells you, 'You need to specify an addressee!'",
         false, mailman, nullptr, ch, TO_VICT);
     return;
@@ -624,7 +625,7 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
     act(g, buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
-  if ((recipient = get_id_by_name(g, buf)) < 0 || !mail_recip_ok(g, buf)) {
+  if ((recipient = get_id_by_name(g, name.c_str())) < 0 || !mail_recip_ok(g, name.c_str())) {
     act(g, "$n tells you, 'No one by that name is registered here!'",
         false, mailman, nullptr, ch, TO_VICT);
     return;
@@ -645,7 +646,7 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
 }
 
 static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
-                                  int cmd, char *arg)
+                                  int cmd, std::string_view arg)
 {
   if (has_mail(g, char_get_idnum(ch)))
     act(g, "$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
@@ -654,7 +655,7 @@ static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct cha
 }
 
 static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
-                                    int cmd, char *arg)
+                                    int cmd, std::string_view arg)
 {
   char buf[256];
   struct obj_data *obj;

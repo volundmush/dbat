@@ -818,7 +818,7 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
   }
 }
 
-struct alias_data *find_alias(std::list<alias_data> &aliases, const char *str)
+struct alias_data *find_alias(std::list<alias_data> &aliases, std::string_view str)
 {
   for (struct alias_data &a : aliases)
     if (a.alias == str)

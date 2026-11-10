@@ -32,6 +32,8 @@ int parse_int(std::string_view s);
 void half_chop(char *string, char *arg1, char *arg2);
 void skip_spaces(char **string);
 char *delete_doubledollar(char *string);
+/* s with each "$$" made "$", as the char * version does */
+void delete_doubledollar(std::string &s);
 int search_block(char *arg, const char *const *list, int exact);
 /* search_block() without lowercasing arg in place */
 int search_block(std::string_view arg, const char *const *list, int exact);

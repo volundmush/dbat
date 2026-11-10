@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/house.hpp"
 #include "dbat/comm.hpp"
@@ -35,9 +36,9 @@ static bool House_load(GameWorld *g, room_vnum vnum);
 static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location);
 static void House_restore_weight(GameWorld *g, const id_list &list);
 
-static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg);
-static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg);
-static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg);
+static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string_view arg);
+static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::string_view arg);
+static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_view arg);
 
 /* First, the basics: finding the filename; loading/saving objects */
 
@@ -265,9 +266,9 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
   }
 }
 
-static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
+static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
-  char arg1[MAX_INPUT_LENGTH];
+  std::string arg1;
   struct house_control_rec temp_house;
   room_vnum virt_house;
   room_vnum real_house;
@@ -280,12 +281,12 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   }
 
   /* first arg: house's vnum */
-  arg = one_argument(arg, arg1);
-  if (!*arg1) {
+  arg1 = take_arg(arg);
+  if (arg1.empty()) {
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  virt_house = atoi(arg1);
+  virt_house = parse_int(arg1);
   if (!room_of(g, real_house = virt_house)) {
     send_to_char(g, ch, "No such room exists.\r\n");
     return;
@@ -296,14 +297,14 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   }
 
   /* second arg: direction of house's exit */
-  arg = one_argument(arg, arg1);
-  if (!*arg1) {
+  arg1 = take_arg(arg);
+  if (arg1.empty()) {
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
   if ((exit_num = search_block(arg1, dirs, false)) < 0 &&
       (exit_num = search_block(arg1, abbr_dirs, false)) < 0) {
-    send_to_char(g, ch, "'%s' is not a valid direction.\r\n", arg1);
+    send_to_char(g, ch, "'%s' is not a valid direction.\r\n", arg1.c_str());
     return;
   }
   if (room_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
@@ -312,13 +313,13 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   }
 
   /* third arg: player's name */
-  one_argument(arg, arg1);
-  if (!*arg1) {
+  arg1 = take_arg(arg);
+  if (arg1.empty()) {
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  if ((owner = get_id_by_name(g, arg1)) < 0) {
-    send_to_char(g, ch, "Unknown player '%s'.\r\n", arg1);
+  if ((owner = get_id_by_name(g, arg1.c_str())) < 0) {
+    send_to_char(g, ch, "Unknown player '%s'.\r\n", arg1.c_str());
     return;
   }
 
@@ -339,26 +340,26 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, char *arg)
   House_save_control(g);
 }
 
-static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg)
+static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   int i, j;
   room_vnum real_atrium, real_house;
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  if ((i = find_house(g, atoi(arg))) == NOWHERE) {
+  if ((i = find_house(g, parse_int(arg))) == NOWHERE) {
     send_to_char(g, ch, "Unknown house.\r\n");
     return;
   }
   if (!room_of(g, real_atrium = g->house_control[i].atrium))
-    mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), g->house_control[i].atrium);
+    mud_log("SYSERR: House %d had invalid atrium %d!", parse_int(arg), g->house_control[i].atrium);
   else
     room_set_flag(g, real_atrium, ROOM_ATRIUM, false);
 
   if (!room_of(g, real_house = g->house_control[i].vnum))
-    mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), g->house_control[i].vnum);
+    mud_log("SYSERR: House %d had invalid vnum %d!", parse_int(arg), g->house_control[i].vnum);
   else {
     room_set_flag(g, real_house, ROOM_HOUSE, false);
     room_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
@@ -384,16 +385,16 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, char *arg
       room_set_flag(g, real_atrium, ROOM_ATRIUM, true);
 }
 
-static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg)
+static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   int i;
 
-  if (!*arg)
+  if (arg.empty())
     send_to_char(g, ch, "%s", HCONTROL_FORMAT);
-  else if ((i = find_house(g, atoi(arg))) == NOWHERE)
+  else if ((i = find_house(g, parse_int(arg))) == NOWHERE)
     send_to_char(g, ch, "Unknown house.\r\n");
   else {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house %s collected by %s.", arg, char_get_name(ch));
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house %s collected by %s.", std::string(arg).c_str(), char_get_name(ch));
 
     g->house_control[i].last_payment = game_now(g);
     House_save_control(g);
@@ -404,9 +405,11 @@ static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, char *arg)
 /* The hcontrol command itself, used by imms to create/destroy houses */
 ACMD(do_hcontrol)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string arg1, arg2;
 
-  half_chop(argument, arg1, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg1                  = take_word(rest);
+  arg2                  = skip_spaces(rest);
 
   if (is_abbrev(arg1, "build"))
     hcontrol_build_house(g, ch, arg2);
@@ -423,10 +426,11 @@ ACMD(do_hcontrol)
 /* The house command, used by mortal house owners to assign guests */
 ACMD(do_house)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   int i, j, id;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
   if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
     send_to_char(g, ch, "You must be in your house to set guests.\r\n");
@@ -434,9 +438,9 @@ ACMD(do_house)
     send_to_char(g, ch, "Um.. this house seems to be screwed up.\r\n");
   else if (char_get_idnum(ch) != g->house_control[i].owner)
     send_to_char(g, ch, "Only the primary owner can set guests.\r\n");
-  else if (!*arg)
+  else if (arg.empty())
     House_list_guests(g, ch, i, false);
-  else if ((id = get_id_by_name(g, arg)) < 0)
+  else if ((id = get_id_by_name(g, arg.c_str())) < 0)
     send_to_char(g, ch, "No such player.\r\n");
   else if (id == char_get_idnum(ch))
     send_to_char(g, ch, "It's your house!\r\n");
