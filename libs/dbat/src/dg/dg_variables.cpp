@@ -42,7 +42,7 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
   struct trig_var_data *vd;
 
   if (strchr(name, '.')) {
-    mud_log_printf("add_var() : Attempt to add illegal var: %s", name);
+    mud_log("add_var() : Attempt to add illegal var: {}", name);
     return;
   }
 
@@ -51,7 +51,7 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
   /* copied before replacing the old value, which value may be */
   std::string copy(value, strnlen(value, MAX_DG_VAR_LENGTH + 1));
   if (copy.size() > MAX_DG_VAR_LENGTH) {
-    mud_log_printf("SYSERR: Script variable %s is longer than %zu characters; cutting it there.", name, MAX_DG_VAR_LENGTH);
+    mud_log("SYSERR: Script variable {} is longer than {:d} characters; cutting it there.", name, as_unsigned(MAX_DG_VAR_LENGTH));
     copy.resize(MAX_DG_VAR_LENGTH);
   }
 
@@ -177,7 +177,7 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
   if (!strcasecmp(field, "strlen")) { /* strlen    */
     char limit[200];
     sprintf(limit, "%zu", strlen(vd->value.c_str()));
-    str = str_format_printf("%d", atoi(limit));
+    str = str_format("{:d}", atoi(limit));
     return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
     /* trim whitespace from ends */
@@ -191,7 +191,7 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
       return true;
     }
     *(++p2) = '\0'; /* +1 ok (see above) */
-    str     = str_format_printf("%s", p);
+    str     = str_format("{}", p);
     return true;
   } else if (!strcasecmp(field, "contains")) { /* contains  */
     if (str_str(vd->value.c_str(), subfield))
@@ -211,14 +211,14 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
     while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
-    str = str_format_printf("%s", cdr);
+    str = str_format("{}", cdr);
     return true;
   } else if (!strcasecmp(field, "charat")) { /* CharAt    */
     size_t len = strlen(vd->value.c_str()), dgindex = atoi(subfield);
     if (dgindex > len || dgindex < 1)
       str = "";
     else
-      str = str_format_printf("%c", vd->value[dgindex - 1]);
+      str = str_format("{:c}", as_char(vd->value[dgindex - 1]));
     return true;
   }
   if (!strcasecmp(field, "mudcommand")) {
@@ -235,7 +235,7 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     if (*cmd_info[cmd].command == '\n')
       str = "";
     else
-      str = str_format_printf("%s", cmd_info[cmd].command);
+      str = str_format("{}", cmd_info[cmd].command);
     return true;
   }
 
@@ -277,14 +277,14 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         } else
           str = "0";
       } else if (!strcasecmp(field, "alias"))
-        str = str_format_printf("%s", char_get_pc_name(c));
+        str = str_format("{}", char_get_pc_name(c));
 
       else if (!strcasecmp(field, "align")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
           char_set_alignment(c, MAX(-1000, MIN(addition, 1000)));
         }
-        str = str_format_printf("%d", char_get_alignment(c));
+        str = str_format("{:d}", char_get_alignment(c));
       }
       break;
     case 'b':
@@ -293,7 +293,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           int addition = atoi(subfield);
           char_set_bank_gold(c, char_get_bank_gold(c) + (addition));
         }
-        str = str_format_printf("%d", char_get_gold(c));
+        str = str_format("{:d}", char_get_gold(c));
       }
       break;
     case 'c':
@@ -311,9 +311,9 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         str = "0";
       } else if (!strcasecmp(field, "class")) {
         if (!char_is_npc(c))
-          str = str_format_printf("%s", char_sensei_name(c));
+          str = str_format("{}", char_sensei_name(c));
         else
-          str = str_format_printf("blank");
+          str = str_format("blank");
       }
 
       else if (!strcasecmp(field, "con")) {
@@ -324,7 +324,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_con(c) > max) char_set_aff_abils_con(c, max);
           if (char_get_aff_abils_con(c) < 3) char_set_aff_abils_con(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_con(c));
+        str = str_format("{:d}", char_get_aff_abils_con(c));
       } else if (!strcasecmp(field, "cha")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
@@ -333,7 +333,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_cha(c) > max) char_set_aff_abils_cha(c, max);
           if (char_get_aff_abils_cha(c) < 3) char_set_aff_abils_cha(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_cha(c));
+        str = str_format("{:d}", char_get_aff_abils_cha(c));
       }
       break;
     case 'd':
@@ -343,7 +343,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         else
           str = "0";
       } else if (!strcasecmp(field, "death")) {
-        str = str_format_printf("%lld", (long long)char_get_deathtime(c));
+        str = str_format("{:d}", (long long)char_get_deathtime(c));
       } else if (!strcasecmp(field, "dex")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
@@ -352,7 +352,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_dex(c) > max) char_set_aff_abils_dex(c, max);
           if (char_get_aff_abils_dex(c) < 3) char_set_aff_abils_dex(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_dex(c));
+        str = str_format("{:d}", char_get_aff_abils_dex(c));
       } else if (!strcasecmp(field, "drag")) {
         if (!char_is_npc(c) && char_get_drag(g, c))
           str = "1";
@@ -363,7 +363,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           int addition = atoi(subfield);
           char_set_conditions(g, c, DRUNK, MAX(-1, MIN(addition, 24)));
         }
-        str = str_format_printf("%d", char_get_conditions(g, c, DRUNK));
+        str = str_format("{:d}", char_get_conditions(g, c, DRUNK));
       }
       break;
     case 'e':
@@ -384,7 +384,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !char_get_equipment(c, pos))
           str = "";
         else
-          str = str_format_printf("%c%d", UID_CHAR, obj_get_id(char_get_equipment(c, pos)));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(char_get_equipment(c, pos)));
       }
       if (!strcasecmp(field, "exp")) {
         if (subfield && *subfield) {
@@ -392,13 +392,13 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
 
           gain_exp(g, c, addition);
         }
-        str = str_format_printf("%" PRId64 "", char_get_exp(c));
+        str = str_format("{:d}", char_get_exp(c));
       }
       break;
     case 'f':
       if (!strcasecmp(field, "fighting")) {
         if (char_get_fighting(g, c))
-          str = str_format_printf("%c%d", UID_CHAR, char_get_id(char_get_fighting(g, c)));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(char_get_fighting(g, c)));
         else
           str = "";
       } else if (!strcasecmp(field, "flying")) {
@@ -410,7 +410,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         if (!char_get_followers(c))
           str = "";
         else
-          str = str_format_printf("%c%ld", UID_CHAR, char_get_followers(c).newest());
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_followers(c).newest());
       }
       break;
     case 'g':
@@ -419,7 +419,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           int addition = atoi(subfield);
           char_set_gold(c, char_get_gold(c) + (addition));
         }
-        str = str_format_printf("%d", char_get_gold(c));
+        str = str_format("{:d}", char_get_gold(c));
       }
       break;
     case 'h':
@@ -427,15 +427,15 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         if (!(subfield && *subfield))
           str = "";
         else
-          str = str_format_printf("%d", char_has_item(g, subfield, c));
+          str = str_format("{:d}", char_has_item(g, subfield, c));
       } else if (!strcasecmp(field, "hisher"))
-        str = str_format_printf("%s", char_hshr(c));
+        str = str_format("{}", char_hshr(c));
 
       else if (!strcasecmp(field, "heshe"))
-        str = str_format_printf("%s", char_hssh(c));
+        str = str_format("{}", char_hssh(c));
 
       else if (!strcasecmp(field, "himher"))
-        str = str_format_printf("%s", char_hmhr(c));
+        str = str_format("{}", char_hmhr(c));
 
       else if (!strcasecmp(field, "hitp")) {
         if (subfield && *subfield) {
@@ -448,18 +448,18 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
 
           update_pos(g, c);
         }
-        str = str_format_printf("%" PRId64 "", getCurPL(g, c));
+        str = str_format("{:d}", getCurPL(g, c));
       } else if (!strcasecmp(field, "hunger")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
           char_set_conditions(g, c, HUNGER, MAX(-1, MIN(addition, 24)));
         }
-        str = str_format_printf("%d", char_get_conditions(g, c, HUNGER));
+        str = str_format("{:d}", char_get_conditions(g, c, HUNGER));
       }
       break;
     case 'i':
       if (!strcasecmp(field, "id"))
-        str = str_format_printf("%d", char_get_id(c));
+        str = str_format("{:d}", char_get_id(c));
 
       /* new check for pc/npc status */
       else if (!strcasecmp(field, "is_pc")) {
@@ -473,14 +473,14 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         if (subfield && *subfield) {
           for (obj_data *obj : char_inventory(g, c)) {
             if (obj_get_vnum(g, obj) == atoi(subfield)) {
-              str = str_format_printf("%c%d", UID_CHAR, obj_get_id(obj)); /* arg given, found */
+              str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(obj)); /* arg given, found */
               return;
             }
           }
           str = "";      /* arg given, not found */
         } else {         /* no arg given */
           if (char_get_inventory(c)) {
-            str = str_format_printf("%c%ld", UID_CHAR, char_get_inventory(c).newest());
+            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_inventory(c).newest());
           } else {
             str = "";
           }
@@ -521,19 +521,19 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_intel(c) > max) char_set_aff_abils_intel(c, max);
           if (char_get_aff_abils_intel(c) < 3) char_set_aff_abils_intel(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_intel(c));
+        str = str_format("{:d}", char_get_aff_abils_intel(c));
       }
       break;
     case 'l':
       if (!strcasecmp(field, "level"))
-        str = str_format_printf("%d", char_get_level(c));
+        str = str_format("{:d}", char_get_level(c));
       break;
     case 'm':
       if (!strcasecmp(field, "maxhitp")) {
         if (subfield && *subfield) {
           //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
         }
-        str = str_format_printf("%" PRId64 "", getEffMaxPL(g, c));
+        str = str_format("{:d}", getEffMaxPL(g, c));
       }
 
       else if (!strcasecmp(field, "mana")) {
@@ -545,12 +545,12 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
             decCurKI(g, c, addition, 0);
           }
         }
-        str = str_format_printf("%" PRId64 "", (getCurKI(g, c)));
+        str = str_format("{:d}", (getCurKI(g, c)));
       } else if (!strcasecmp(field, "maxmana")) {
         if (subfield && *subfield) {
           //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
         }
-        str = str_format_printf("%" PRId64 "", getMaxKI(g, c));
+        str = str_format("{:d}", getMaxKI(g, c));
       }
 
       else if (!strcasecmp(field, "move")) {
@@ -562,29 +562,29 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
             decCurST(g, c, addition, 0);
           }
         }
-        str = str_format_printf("%" PRId64 "", (getCurST(g, c)));
+        str = str_format("{:d}", (getCurST(g, c)));
       }
 
       else if (!strcasecmp(field, "maxmove")) {
         if (subfield && *subfield) {
           //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
         }
-        str = str_format_printf("%" PRId64 "", getMaxST(g, c));
+        str = str_format("{:d}", getMaxST(g, c));
       }
 
       else if (!strcasecmp(field, "master")) {
         if (!char_get_master(g, c))
           str = "";
         else
-          str = str_format_printf("%c%d", UID_CHAR, char_get_id(char_get_master(g, c)));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(char_get_master(g, c)));
       }
       break;
     case 'n':
       if (!strcasecmp(field, "name")) {
-        str = str_format_printf("%s", char_get_name(c));
+        str = str_format("{}", char_get_name(c));
       } else if (!strcasecmp(field, "next_in_room")) {
         if (char_data *next = char_next_in_room(g, c))
-          str = str_format_printf("%c%d", UID_CHAR, char_get_id(next));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(next));
         else
           str = "";
       }
@@ -602,18 +602,18 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
             }
           }
         }
-        str = str_format_printf("%s", position_types[char_get_position(c)]);
+        str = str_format("{}", position_types[char_get_position(c)]);
       } else if (!strcasecmp(field, "prac")) {
         if (char_is_npc(c)) {
           if (char_get_in_room(c) != NOWHERE) {
-            send_to_room_printf(g, char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
+            send_to_room(g, char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
           }
         }
         if (subfield && *subfield) {
           int addition = atoi(subfield);
           char_set_practice_points(g, c, MAX(0, char_get_practice_points(g, c) + addition));
         }
-        str = str_format_printf("%d", char_get_practice_points(g, c));
+        str = str_format("{:d}", char_get_practice_points(g, c));
       } else if (!strcasecmp(field, "plr")) {
         if (subfield && *subfield) {
           int plr = get_flag_by_name(player_bits, subfield);
@@ -637,23 +637,23 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
     case 'r':
       if (!strcasecmp(field, "room")) { /* in NOWHERE, return the void */
                                         /* see note in dg_scripts.hpp */
-                                        str = str_format_printf("%c%d", UID_CHAR,
-                                                                (char_get_in_room(c) != NOWHERE) ? char_get_in_room(c) + ROOM_ID_BASE : ROOM_ID_BASE);
+                                        str = str_format("{:c}{:d}", as_char(UID_CHAR),
+                                                         (char_get_in_room(c) != NOWHERE) ? char_get_in_room(c) + ROOM_ID_BASE : ROOM_ID_BASE);
       } else if (!strcasecmp(field, "race")) {
-        str = str_format_printf("%s", char_true_race_name(c));
+        str = str_format("{}", char_true_race_name(c));
       } else if (!strcasecmp(field, "rpp")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
           char_set_rp(c, char_get_rp(c) + (addition));
         }
 
-        str = str_format_printf("%d", char_get_rp(c));
+        str = str_format("{:d}", char_get_rp(c));
       }
 
       break;
     case 's':
       if (!strcasecmp(field, "sex"))
-        str = str_format_printf("%s", genders[(int)char_get_sex(c)]);
+        str = str_format("{}", genders[(int)char_get_sex(c)]);
 
       else if (!strcasecmp(field, "str")) {
         if (subfield && *subfield) {
@@ -663,7 +663,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_str(c) > max) char_set_aff_abils_str(c, max);
           if (char_get_aff_abils_str(c) < 3) char_set_aff_abils_str(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_str(c));
+        str = str_format("{:d}", char_get_aff_abils_str(c));
       }
 
       else if (!strcasecmp(field, "size")) {
@@ -677,7 +677,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       }
 
       else if (!strcasecmp(field, "skill"))
-        str = str_format_printf("%s", skill_percent(g, c, subfield));
+        str = str_format("{}", skill_percent(g, c, subfield));
 
       else if (!strcasecmp(field, "skillset")) {
         if (!char_is_npc(c) && subfield && *subfield) {
@@ -702,18 +702,18 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           int addition = atoi(subfield);
           char_set_conditions(g, c, THIRST, MAX(-1, MIN(addition, 24)));
         }
-        str = str_format_printf("%d", char_get_conditions(g, c, THIRST));
+        str = str_format("{:d}", char_get_conditions(g, c, THIRST));
       } else if (!strcasecmp(field, "tnl")) {
-        str = str_format_printf("%lld", (long long)level_exp(c, char_get_level(c) + 1));
+        str = str_format("{:d}", (long long)level_exp(c, char_get_level(c) + 1));
       }
       break;
     case 'v':
       if (!strcasecmp(field, "vnum")) {
         if (subfield && *subfield) {
-          str = str_format_printf("%d", char_is_npc(c) ? (int)(char_get_mob_vnum(g, c) == atoi(subfield)) : -1);
+          str = str_format("{:d}", char_is_npc(c) ? (int)(char_get_mob_vnum(g, c) == atoi(subfield)) : -1);
         } else {
           if (char_is_npc(c))
-            str = str_format_printf("%d", char_get_mob_vnum(g, c));
+            str = str_format("{:d}", char_get_mob_vnum(g, c));
           else
             /*
            * for compatibility with unsigned indexes
@@ -738,7 +738,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       break;
     case 'w':
       if (!strcasecmp(field, "weight"))
-        str = str_format_printf("%d", char_get_weight(c));
+        str = str_format("{:d}", char_get_weight(c));
       else if (!strcasecmp(field, "wis")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
@@ -747,7 +747,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           if (char_get_aff_abils_wis(c) > max) char_set_aff_abils_wis(c, max);
           if (char_get_aff_abils_wis(c) < 3) char_set_aff_abils_wis(c, 3);
         }
-        str = str_format_printf("%d", char_get_aff_abils_wis(c));
+        str = str_format("{:d}", char_get_aff_abils_wis(c));
       }
       break;
     case 'z':
@@ -756,7 +756,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
           int addition = atoi(subfield);
           char_set_gold(c, char_get_gold(c) + (addition));
         }
-        str = str_format_printf("%d", char_get_gold(c));
+        str = str_format("{:d}", char_get_gold(c));
       }
       break;
   } /* switch *field */
@@ -767,16 +767,16 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format_printf("%s", vd->value.c_str());
+        str = str_format("{}", vd->value.c_str());
       else {
         str = "";
-        script_log_printf(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
-                          trig->name.c_str(), trig_get_vnum(g, trig), field);
+        script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
+                   trig->name.c_str(), trig_get_vnum(g, trig), field);
       }
     } else {
       str = "";
-      script_log_printf(g, "Trigger: %s, VNum %d. unknown char field: '%s'",
-                        trig->name.c_str(), trig_get_vnum(g, trig), field);
+      script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
+                 trig->name.c_str(), trig_get_vnum(g, trig), field);
     }
   }
 }
@@ -792,11 +792,11 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
       if (!strcasecmp(field, "affects")) {
         if (subfield && *subfield) {
           if (check_flags_by_name_ar(obj_get_bitvector(o), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
-            str = str_format_printf("1");
+            str = str_format("1");
           else
-            str = str_format_printf("0");
+            str = str_format("0");
         } else
-          str = str_format_printf("0");
+          str = str_format("0");
       }
       break;
     case 'c':
@@ -805,7 +805,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           int addition = atoi(subfield);
           obj_set_cost(o, MAX(0, addition + obj_get_cost(o)));
         }
-        str = str_format_printf("%d", obj_get_cost(o));
+        str = str_format("{:d}", obj_get_cost(o));
       }
 
       else if (!strcasecmp(field, "cost_per_day")) {
@@ -813,26 +813,26 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           int addition = atoi(subfield);
           obj_set_cost_per_day(o, MAX(0, addition + obj_get_cost_per_day(o)));
         }
-        str = str_format_printf("%d", obj_get_cost_per_day(o));
+        str = str_format("{:d}", obj_get_cost_per_day(o));
       }
 
       else if (!strcasecmp(field, "carried_by")) {
         if (obj_get_carried_by(o))
-          str = str_format_printf("%c%d", UID_CHAR, char_get_id(obj_get_carried_by(o)));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(obj_get_carried_by(o)));
         else
           str = "";
       }
 
       else if (!strcasecmp(field, "contents")) {
         if (obj_get_contains(o))
-          str = str_format_printf("%c%ld", UID_CHAR, obj_get_contains(o).newest());
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_contains(o).newest());
         else
           str = "";
       }
       /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
       else if (!strcasecmp(field, "count")) {
         if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          str = str_format_printf("%d", item_in_list(g, subfield, obj_get_contains(o)));
+          str = str_format("{:d}", item_in_list(g, subfield, obj_get_contains(o)));
         else
           str = "0";
       }
@@ -841,11 +841,11 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
       if (!strcasecmp(field, "extra")) {
         if (subfield && *subfield) {
           if (check_flags_by_name_ar(obj_get_extra_flags(o), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
-            str = str_format_printf("1");
+            str = str_format("1");
           else
-            str = str_format_printf("0");
+            str = str_format("0");
         } else
-          str = str_format_printf("0");
+          str = str_format("0");
       } else {
         str = sprintbitarray(obj_get_extra_flags(o), extra_bits, EF_ARRAY_MAX);
       }
@@ -854,7 +854,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
       /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
       if (!strcasecmp(field, "has_in")) {
         if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          str = str_format_printf("%s", (item_in_list(g, subfield, obj_get_contains(o)) ? "1" : "0"));
+          str = str_format("{}", (item_in_list(g, subfield, obj_get_contains(o)) ? "1" : "0"));
         else
           str = "0";
       }
@@ -865,16 +865,16 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           if (obj_extra_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
             obj_extra_set(o, ITEM_BROKEN, false);
         }
-        str = str_format_printf("%d", obj_get_value(o, VAL_ALL_HEALTH));
+        str = str_format("{:d}", obj_get_value(o, VAL_ALL_HEALTH));
       }
       break;
     case 'i':
       if (!strcasecmp(field, "id"))
-        str = str_format_printf("%d", obj_get_id(o));
+        str = str_format("{:d}", obj_get_id(o));
 
       else if (!strcasecmp(field, "is_inroom")) {
         if (obj_get_in_room(o) != NOWHERE)
-          str = str_format_printf("%c%d", UID_CHAR, obj_get_in_room(o) + ROOM_ID_BASE);
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_in_room(o) + ROOM_ID_BASE);
         else
           str = "";
       } else if (!strcasecmp(field, "is_pc")) {
@@ -892,13 +892,13 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
       break;
     case 'l':
       if (!strcasecmp(field, "level"))
-        str = str_format_printf("%d", obj_get_level(o));
+        str = str_format("{:d}", obj_get_level(o));
       break;
 
     case 'n':
       if (!strcasecmp(field, "name")) {
         if (!subfield || !*subfield)
-          str = str_format_printf("%s", obj_get_name(o));
+          str = str_format("{}", obj_get_name(o));
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s %s", obj_get_name(o), subfield);
@@ -906,7 +906,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         }
       } else if (!strcasecmp(field, "next_in_list")) {
         if (obj_data *next = obj_next_in_list(g, o))
-          str = str_format_printf("%c%d", UID_CHAR, obj_get_id(next));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(next));
         else
           str = "";
       }
@@ -914,7 +914,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
     case 'r':
       if (!strcasecmp(field, "room")) {
         if (obj_room(o) != NOWHERE)
-          str = str_format_printf("%c%d", UID_CHAR, obj_room(o) + ROOM_ID_BASE);
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_room(o) + ROOM_ID_BASE);
         else
           str = "";
       }
@@ -922,7 +922,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
     case 's':
       if (!strcasecmp(field, "shortdesc")) {
         if (!subfield || !*subfield)
-          str = str_format_printf("%s", obj_get_short_description(o));
+          str = str_format("{}", obj_get_short_description(o));
         else {
           char blah[500];
           snprintf(blah, sizeof(blah), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(o), subfield);
@@ -933,7 +933,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           int ns;
           if ((ns = check_flags_by_name_ar(obj_get_bitvector(o), NUM_AFF_FLAGS, subfield, affected_bits)) > 0) {
             obj_aff_toggle(o, ns);
-            str = str_format_printf("1");
+            str = str_format("1");
           }
         }
       } else if (!strcasecmp(field, "setextra")) {
@@ -941,7 +941,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           int ns;
           if ((ns = check_flags_by_name_ar(obj_get_extra_flags(o), NUM_ITEM_FLAGS, subfield, extra_bits)) > 0) {
             obj_extra_toggle(o, ns);
-            str = str_format_printf("1");
+            str = str_format("1");
           }
         }
       }
@@ -961,38 +961,38 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         str = sprinttype(obj_get_type_flag(o), item_types);
 
       else if (!strcasecmp(field, "timer"))
-        str = str_format_printf("%d", obj_get_timer(o));
+        str = str_format("{:d}", obj_get_timer(o));
       break;
     case 'v':
       if (!strcasecmp(field, "vnum"))
         if (subfield && *subfield) {
-          str = str_format_printf("%d", (int)(obj_get_vnum(g, o) == atoi(subfield)));
+          str = str_format("{:d}", (int)(obj_get_vnum(g, o) == atoi(subfield)));
         } else {
-          str = str_format_printf("%d", obj_get_vnum(g, o));
+          str = str_format("{:d}", obj_get_vnum(g, o));
         }
       else if (!strcasecmp(field, "val0"))
-        str = str_format_printf("%d", obj_get_value(o, 0));
+        str = str_format("{:d}", obj_get_value(o, 0));
 
       else if (!strcasecmp(field, "val1"))
-        str = str_format_printf("%d", obj_get_value(o, 1));
+        str = str_format("{:d}", obj_get_value(o, 1));
 
       else if (!strcasecmp(field, "val2"))
-        str = str_format_printf("%d", obj_get_value(o, 2));
+        str = str_format("{:d}", obj_get_value(o, 2));
 
       else if (!strcasecmp(field, "val3"))
-        str = str_format_printf("%d", obj_get_value(o, 3));
+        str = str_format("{:d}", obj_get_value(o, 3));
 
       else if (!strcasecmp(field, "val4"))
-        str = str_format_printf("%d", obj_get_value(o, 4));
+        str = str_format("{:d}", obj_get_value(o, 4));
 
       else if (!strcasecmp(field, "val5"))
-        str = str_format_printf("%d", obj_get_value(o, 5));
+        str = str_format("{:d}", obj_get_value(o, 5));
 
       else if (!strcasecmp(field, "val6"))
-        str = str_format_printf("%d", obj_get_value(o, 6));
+        str = str_format("{:d}", obj_get_value(o, 6));
 
       else if (!strcasecmp(field, "val7"))
-        str = str_format_printf("%d", obj_get_value(o, 7));
+        str = str_format("{:d}", obj_get_value(o, 7));
       break;
     case 'w':
       if (!strcasecmp(field, "weight")) {
@@ -1006,12 +1006,12 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
           }
           obj_weight_changed(g, o, obj_get_weight(o) - before);
         }
-        str = str_format_printf("%" PRId64 "", obj_get_weight(o));
+        str = str_format("{:d}", obj_get_weight(o));
       }
 
       else if (!strcasecmp(field, "worn_by")) {
         if (obj_get_worn_by(o))
-          str = str_format_printf("%c%d", UID_CHAR, char_get_id(obj_get_worn_by(o)));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(obj_get_worn_by(o)));
         else
           str = "";
       }
@@ -1024,19 +1024,19 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format_printf("%s", vd->value.c_str());
+        str = str_format("{}", vd->value.c_str());
       else {
         str = "";
         if (strcasecmp(trig->name.c_str(), "Rename Object")) {
-          script_log_printf(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                            trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+          script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
+                     trig->name.c_str(), trig_get_vnum(g, trig), type, field);
         }
       }
     } else {
       str = "";
       if (strcasecmp(trig->name.c_str(), "Rename Object")) {
-        script_log_printf(g, "Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                          trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+        script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
+                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
       }
     }
   }
@@ -1048,14 +1048,14 @@ static void room_exit_field(GameWorld *g, struct room_data *r, int dir, char *su
   if (room_get_dir_option(r, dir)) {
     if (subfield && *subfield) {
       if (!strcasecmp(subfield, "vnum"))
-        str = str_format_printf("%d", room_get_dir_option(r, dir)->to_room);
+        str = str_format("{:d}", room_get_dir_option(r, dir)->to_room);
       else if (!strcasecmp(subfield, "key"))
-        str = str_format_printf("%d", room_get_dir_option(r, dir)->key);
+        str = str_format("{:d}", room_get_dir_option(r, dir)->key);
       else if (!strcasecmp(subfield, "bits"))
         str = sprintbit(room_get_dir_option(r, dir)->exit_info, exit_bits);
       else if (!strcasecmp(subfield, "room")) {
         if (room_get_dir_option(r, dir)->to_room != NOWHERE)
-          str = str_format_printf("%c%d", UID_CHAR, room_get_dir_option(r, dir)->to_room + ROOM_ID_BASE);
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_dir_option(r, dir)->to_room + ROOM_ID_BASE);
         else
           str = "";
       }
@@ -1104,47 +1104,47 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
   if (room_get_number(r) == 0) {
     if (!room_get_script(r)) {
       str = "";
-      script_log_printf(g, "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                        trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
+      script_log(g, "Trigger: {}, Vnum {:d}, type {:d}. Trying to access Global var list of void. Apparently this has not been set up!",
+                 trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
     } else {
       for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format_printf("%s", vd->value.c_str());
+        str = str_format("{}", vd->value.c_str());
       else
         str = "";
     }
   }
 
   else if (!strcasecmp(field, "name"))
-    str = str_format_printf("%s", room_get_name(r));
+    str = str_format("{}", room_get_name(r));
 
   else if (!strcasecmp(field, "sector"))
     str = sprinttype(room_get_sector_type(r), sector_types);
 
   else if (!strcasecmp(field, "gravity"))
-    str = str_format_printf("%d", room_get_gravity(r));
+    str = str_format("{:d}", room_get_gravity(r));
 
   else if (!strcasecmp(field, "vnum")) {
     if (subfield && *subfield) {
-      str = str_format_printf("%d", (int)(room_get_number(r) == atoi(subfield)));
+      str = str_format("{:d}", (int)(room_get_number(r) == atoi(subfield)));
     } else {
-      str = str_format_printf("%d", room_get_number(r));
+      str = str_format("{:d}", room_get_number(r));
     }
   } else if (!strcasecmp(field, "contents")) {
     if (subfield && *subfield) {
       for (obj_data *obj : obj_list(g, room_get_contents(r))) {
         if (obj_get_vnum(g, obj) == atoi(subfield)) {
           /* arg given, found */
-          str = str_format_printf("%c%d", UID_CHAR, obj_get_id(obj));
+          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(obj));
           return;
         }
       }
       str = "";      /* arg given, not found */
     } else {         /* no arg given */
       if (room_get_contents(r)) {
-        str = str_format_printf("%c%ld", UID_CHAR, room_get_contents(r).newest());
+        str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_contents(r).newest());
       } else {
         str = "";
       }
@@ -1153,13 +1153,13 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
 
   else if (!strcasecmp(field, "people")) {
     if (room_get_people(r))
-      str = str_format_printf("%c%ld", UID_CHAR, room_get_people(r).newest());
+      str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_people(r).newest());
     else
       str = "";
   } else if (!strcasecmp(field, "id")) {
     room_vnum rnum = room_get_number(r);
     if (room_of(g, rnum))
-      str = str_format_printf("%d", rnum + ROOM_ID_BASE);
+      str = str_format("{:d}", rnum + ROOM_ID_BASE);
     else
       str = "";
   } else if (!strcasecmp(field, "weather")) {
@@ -1170,28 +1170,28 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
         "lightning"};
 
     if (!room_flagged(r, ROOM_INDOORS))
-      str = str_format_printf("%s", sky_look[g->weather_info.sky]);
+      str = str_format("{}", sky_look[g->weather_info.sky]);
     else
       str = "";
   } else if (!strcasecmp(field, "fishing")) {
     room_vnum thisroom = room_get_number(r);
     if (room_flagged(g, thisroom, ROOM_FISHING))
-      str = str_format_printf("1");
+      str = str_format("1");
     else
-      str = str_format_printf("0");
+      str = str_format("0");
   } else if (!strcasecmp(field, "zonenumber"))
-    str = str_format_printf("%d", room_get_zone(r)->number);
+    str = str_format("{:d}", room_get_zone(r)->number);
   else if (!strcasecmp(field, "zonename"))
-    str = str_format_printf("%s", room_get_zone(r)->name.c_str());
+    str = str_format("{}", room_get_zone(r)->name.c_str());
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
       room_vnum thisroom = room_get_number(r);
       if (check_flags_by_name_ar(room_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
-        str = str_format_printf("1");
+        str = str_format("1");
       else
-        str = str_format_printf("0");
+        str = str_format("0");
     } else
-      str = str_format_printf("0");
+      str = str_format("0");
   } else if ((dir = room_exit_field_dir(field)) >= 0) {
     room_exit_field(g, r, dir, subfield, str);
   } else {
@@ -1200,16 +1200,16 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format_printf("%s", vd->value.c_str());
+        str = str_format("{}", vd->value.c_str());
       else {
         str = "";
-        script_log_printf(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                          trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+        script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
+                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
       }
     } else {
       str = "";
-      script_log_printf(g, "Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                        trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+      script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
+                 trig->name.c_str(), trig_get_vnum(g, trig), type, field);
     }
   }
 }
@@ -1259,54 +1259,54 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
   if (!*field) {
     if (vd)
-      str = str_format_printf("%s", vd->value.c_str());
+      str = str_format("{}", vd->value.c_str());
     else {
       if (!strcasecmp(var, "self")) {
         switch (type) {
           case MOB_TRIGGER:
-            str = str_format_printf("%c%d", UID_CHAR, char_get_id((char_data *)go));
+            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id((char_data *)go));
             break;
           case OBJ_TRIGGER:
-            str = str_format_printf("%c%d", UID_CHAR, obj_get_id((obj_data *)go));
+            str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id((obj_data *)go));
             break;
           case WLD_TRIGGER:
-            str = str_format_printf("%c%d", UID_CHAR, room_get_number((room_data *)go) + ROOM_ID_BASE);
+            str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_number((room_data *)go) + ROOM_ID_BASE);
             break;
         }
       } else if (!strcasecmp(var, "global")) {
         /* so "remote varname %global%" will work */
-        str = str_format_printf("%d", ROOM_ID_BASE);
+        str = str_format("{:d}", ROOM_ID_BASE);
         return;
       } else if (!strcasecmp(var, "ctime"))
-        str = str_format_printf("%lld", (long long)game_now(g));
+        str = str_format("{:d}", (long long)game_now(g));
       else if (!strcasecmp(var, "door"))
-        str = str_format_printf("%s", door[type]);
+        str = str_format("{}", door[type]);
       else if (!strcasecmp(var, "force"))
-        str = str_format_printf("%s", force[type]);
+        str = str_format("{}", force[type]);
       else if (!strcasecmp(var, "load"))
-        str = str_format_printf("%s", load[type]);
+        str = str_format("{}", load[type]);
       else if (!strcasecmp(var, "purge"))
-        str = str_format_printf("%s", purge[type]);
+        str = str_format("{}", purge[type]);
       else if (!strcasecmp(var, "teleport"))
-        str = str_format_printf("%s", teleport[type]);
+        str = str_format("{}", teleport[type]);
       else if (!strcasecmp(var, "damage"))
-        str = str_format_printf("%s", xdamage[type]);
+        str = str_format("{}", xdamage[type]);
       else if (!strcasecmp(var, "send"))
-        str = str_format_printf("%s", send_cmd[type]);
+        str = str_format("{}", send_cmd[type]);
       else if (!strcasecmp(var, "echo"))
-        str = str_format_printf("%s", echo_cmd[type]);
+        str = str_format("{}", echo_cmd[type]);
       else if (!strcasecmp(var, "echoaround"))
-        str = str_format_printf("%s", echoaround_cmd[type]);
+        str = str_format("{}", echoaround_cmd[type]);
       else if (!strcasecmp(var, "zoneecho"))
-        str = str_format_printf("%s", zoneecho[type]);
+        str = str_format("{}", zoneecho[type]);
       else if (!strcasecmp(var, "asound"))
-        str = str_format_printf("%s", asound[type]);
+        str = str_format("{}", asound[type]);
       else if (!strcasecmp(var, "at"))
-        str = str_format_printf("%s", at[type]);
+        str = str_format("{}", at[type]);
       else if (!strcasecmp(var, "transform"))
-        str = str_format_printf("%s", transform[type]);
+        str = str_format("{}", transform[type]);
       else if (!strcasecmp(var, "recho"))
-        str = str_format_printf("%s", recho[type]);
+        str = str_format("{}", recho[type]);
       else
         str = "";
     }
@@ -1385,7 +1385,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
         struct script_data *thescript = room_get_script(g, 0);
         str                           = "";
         if (!thescript) {
-          script_log_printf(g, "Attempt to find global var. Apparently the void has no script.");
+          script_log(g, "Attempt to find global var. Apparently the void has no script.");
           return;
         }
         for (vd = thescript->global_vars; vd; vd = vd->next)
@@ -1393,21 +1393,21 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
             break;
 
         if (vd)
-          str = str_format_printf("%s", vd->value.c_str());
+          str = str_format("{}", vd->value.c_str());
 
         return;
       } else if (!strcasecmp(var, "people")) {
-        str = str_format_printf("%d", ((num = atoi(field)) > 0) ? trgvar_in_room(g, num) : 0);
+        str = str_format("{:d}", ((num = atoi(field)) > 0) ? trgvar_in_room(g, num) : 0);
         return;
       } else if (!strcasecmp(var, "time")) {
         if (!strcasecmp(field, "hour"))
-          str = str_format_printf("%d", g->time_info.hours);
+          str = str_format("{:d}", g->time_info.hours);
         else if (!strcasecmp(field, "day"))
-          str = str_format_printf("%d", g->time_info.day + 1);
+          str = str_format("{:d}", g->time_info.day + 1);
         else if (!strcasecmp(field, "month"))
-          str = str_format_printf("%d", g->time_info.month + 1);
+          str = str_format("{:d}", g->time_info.month + 1);
         else if (!strcasecmp(field, "year"))
-          str = str_format_printf("%d", g->time_info.year);
+          str = str_format("{:d}", g->time_info.year);
         else str = "";
         return;
       }
@@ -1435,14 +1435,14 @@ in the vault (vnum: 453) now and then. you can just use
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
       else if (!strcasecmp(var, "findmob")) {
         if (!field || !*field || !subfield || !*subfield) {
-          script_log_printf(g, "findmob.vnum(mvnum) - illegal syntax");
+          script_log(g, "findmob.vnum(mvnum) - illegal syntax");
           str = "0";
         } else {
           room_vnum rrnum = atoi(field);
           mob_vnum mvnum  = atoi(subfield);
 
           if (!room_of(g, rrnum)) {
-            script_log_printf(g, "findmob.vnum(ovnum): No room with vnum %d", atoi(field));
+            script_log(g, "findmob.vnum(ovnum): No room with vnum {:d}", atoi(field));
             str = "0";
           } else {
             i = 0;
@@ -1450,24 +1450,24 @@ in the vault (vnum: 453) now and then. you can just use
               if (char_get_mob_vnum(g, vict) == mvnum)
                 i++;
 
-            str = str_format_printf("%d", i);
+            str = str_format("{:d}", i);
           }
         }
       }
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
       else if (!strcasecmp(var, "findobj")) {
         if (!field || !*field || !subfield || !*subfield) {
-          script_log_printf(g, "findobj.vnum(ovnum) - illegal syntax");
+          script_log(g, "findobj.vnum(ovnum) - illegal syntax");
           str = "0";
         } else {
           room_vnum rrnum = atoi(field);
 
           if (!room_of(g, rrnum)) {
-            script_log_printf(g, "findobj.vnum(ovnum): No room with vnum %d", atoi(field));
+            script_log(g, "findobj.vnum(ovnum): No room with vnum {:d}", atoi(field));
             str = "0";
           } else {
             /* item_in_list looks within containers as well. */
-            str = str_format_printf("%d", item_in_list(g, subfield, room_get_contents(g, rrnum)));
+            str = str_format("{:d}", item_in_list(g, subfield, room_get_contents(g, rrnum)));
           }
         }
       } else if (!strcasecmp(var, "random")) {
@@ -1506,7 +1506,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 
           if (rndm)
-            str = str_format_printf("%c%d", UID_CHAR, char_get_id(rndm));
+            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(rndm));
           else
             str = "";
         }
@@ -1542,11 +1542,11 @@ in the vault (vnum: 453) now and then. you can just use
                 if (room_get_dir_option(room, doors))
                   break;
               }
-              str = str_format_printf("%s", dirs[doors]);
+              str = str_format("{}", dirs[doors]);
             }
           }
         } else
-          str = str_format_printf("%d", ((num = atoi(field)) > 0) ? rand_number(g, 1, num) : 0);
+          str = str_format("{:d}", ((num = atoi(field)) > 0) ? rand_number(g, 1, num) : 0);
 
         return;
       }

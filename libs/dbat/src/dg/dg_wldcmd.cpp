@@ -30,7 +30,13 @@
 #define WCMD(name) \
   void(name)(GameWorld * g, room_data * room, char *argument, int cmd, int subcmd)
 
-static void wld_log_printf(GameWorld *g, room_data *room, const char *format, ...) __attribute__((format(printf, 3, 4)));
+static void wld_log(GameWorld *g, room_data *room, std::string_view text);
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+static void wld_log(GameWorld *g, room_data *room, std::format_string<Args...> fmt, Args &&...args)
+{
+  wld_log(g, room, str_format(fmt, std::forward<Args>(args)...));
+}
 static void act_to_room(GameWorld *g, char *str, room_data *room);
 static WCMD(do_wasound);
 static WCMD(do_wecho);
@@ -57,16 +63,9 @@ constexpr int SCMD_WSEND       = 0;
 constexpr int SCMD_WECHOAROUND = 1;
 
 /* attaches room vnum to msg and sends it to script_log */
-static void wld_log_printf(GameWorld *g, room_data *room, const char *format, ...)
+static void wld_log(GameWorld *g, room_data *room, std::string_view text)
 {
-  va_list args;
-  char output[MAX_STRING_LENGTH];
-
-  va_start(args, format);
-  vsnprintf(output, sizeof(output), format, args);
-  va_end(args);
-
-  script_log_printf(g, "Room %d :: %s", room_get_number(room), output);
+  script_log(g, "Room {:d} :: {}", room_get_number(room), text);
 }
 
 /* sends str to room */
@@ -100,12 +99,12 @@ static WCMD(do_weffect)
   arg2                  = take_arg(rest);
 
   if (arg.empty()) {
-    wld_log_printf(g, room, "weffect called without type argument");
+    wld_log(g, room, "weffect called without type argument");
     return;
   }
 
   if (arg2.empty()) {
-    wld_log_printf(g, room, "weffect called without setting argument");
+    wld_log(g, room, "weffect called without setting argument");
     return;
   }
 
@@ -116,13 +115,13 @@ static WCMD(do_weffect)
 
   if (str_eq_nocase(arg, "gravity")) { /* Set gravity */
     if (num < 0 || num > 10000) {
-      wld_log_printf(g, room, "weffect setting out of bounds, 0 - 10000 only.");
+      wld_log(g, room, "weffect setting out of bounds, 0 - 10000 only.");
       return;
     }
     room_set_gravity(g, room_get_number(room), num);
   } else if (str_eq_nocase(arg, "light")) {
     if (!room_of(g, target)) {
-      wld_log_printf(g, room, "weffect target is NOWHERE.");
+      wld_log(g, room, "weffect target is NOWHERE.");
       return;
     }
     if (!room_flagged(g, target, ROOM_INDOORS)) {
@@ -132,13 +131,13 @@ static WCMD(do_weffect)
     }
   } else if (str_eq_nocase(arg, "lava")) {
     if (!room_of(g, target)) {
-      wld_log_printf(g, room, "weffect target is NOWHERE.");
+      wld_log(g, room, "weffect target is NOWHERE.");
       return;
     }
     if (room_get_geffect(g, target) != 0) {
       room_set_geffect(g, target, 5);
     } else {
-      wld_log_printf(g, room, "weffect target already has lava.");
+      wld_log(g, room, "weffect target already has lava.");
       return;
     }
   }
@@ -152,7 +151,7 @@ static WCMD(do_wasound)
   skip_spaces(&argument);
 
   if (!*argument) {
-    wld_log_printf(g, room, "wasound called with no argument");
+    wld_log(g, room, "wasound called with no argument");
     return;
   }
 
@@ -170,7 +169,7 @@ static WCMD(do_wecho)
   skip_spaces(&argument);
 
   if (!*argument)
-    wld_log_printf(g, room, "wecho called with no args");
+    wld_log(g, room, "wecho called with no args");
 
   else
     act_to_room(g, argument, room);
@@ -184,14 +183,14 @@ static WCMD(do_wsend)
   msg = any_one_arg(argument, buf);
 
   if (!*buf) {
-    wld_log_printf(g, room, "wsend called with no args");
+    wld_log(g, room, "wsend called with no args");
     return;
   }
 
   skip_spaces(&msg);
 
   if (!*msg) {
-    wld_log_printf(g, room, "wsend called without a message");
+    wld_log(g, room, "wsend called without a message");
     return;
   }
 
@@ -203,7 +202,7 @@ static WCMD(do_wsend)
   }
 
   else
-    wld_log_printf(g, room, "no target found for wsend");
+    wld_log(g, room, "no target found for wsend");
 }
 
 static WCMD(do_wzoneecho)
@@ -215,10 +214,10 @@ static WCMD(do_wzoneecho)
   skip_spaces(&msg);
 
   if (!*room_num || !*msg)
-    wld_log_printf(g, room, "wzoneecho called with too few args");
+    wld_log(g, room, "wzoneecho called with too few args");
 
   else if ((zone = find_zone_by_thing(g, atoi(room_num))) == nullptr)
-    wld_log_printf(g, room, "wzoneecho called for nonexistant zone");
+    wld_log(g, room, "wzoneecho called for nonexistant zone");
 
   else {
     send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
@@ -236,9 +235,9 @@ static WCMD(do_wrecho)
   skip_spaces(&msg);
 
   if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
-    wld_log_printf(g, room, "wrecho: too few args");
+    wld_log(g, room, "wrecho: too few args");
   else
-    send_to_range_printf(g, atoi(start), atoi(finish), "%s\r\n", msg);
+    send_to_range(g, atoi(start), atoi(finish), "{}\r\n", msg);
 }
 
 static WCMD(do_wdoor)
@@ -253,27 +252,27 @@ static WCMD(do_wdoor)
   skip_spaces(&value);
 
   if (!*target || !*direction || !*field) {
-    wld_log_printf(g, room, "wdoor called with too few args");
+    wld_log(g, room, "wdoor called with too few args");
     return;
   }
   if ((rm = get_room(g, target)) == nullptr) {
-    wld_log_printf(g, room, "wdoor: invalid target");
+    wld_log(g, room, "wdoor: invalid target");
     return;
   }
   if (atoi(direction) >= 0 && atoi(direction) <= 11) {
     dir = atoi(direction);
   } else {
-    wld_log_printf(g, room, "wdoor: invalid direction");
+    wld_log(g, room, "wdoor: invalid direction");
     return;
   }
 
   if ((fd = search_block(field, dg_door_fields, false)) == -1) {
-    wld_log_printf(g, room, "wdoor: invalid field");
+    wld_log(g, room, "wdoor: invalid field");
     return;
   }
 
   if (!dg_door_apply(g, rm, dir, fd, value))
-    wld_log_printf(g, room, "wdoor: invalid door target");
+    wld_log(g, room, "wdoor: invalid door target");
 }
 
 static WCMD(do_wteleport)
@@ -287,7 +286,7 @@ static WCMD(do_wteleport)
   arg2                  = take_arg(rest);
 
   if (arg1.empty() || arg2.empty()) {
-    wld_log_printf(g, room, "wteleport called with too few args");
+    wld_log(g, room, "wteleport called with too few args");
     return;
   }
 
@@ -295,11 +294,11 @@ static WCMD(do_wteleport)
   target = nr;
 
   if (!room_of(g, target))
-    wld_log_printf(g, room, "wteleport target is an invalid room");
+    wld_log(g, room, "wteleport target is an invalid room");
 
   else if (str_eq_nocase(arg1, "all")) {
     if (nr == room_get_number(room)) {
-      wld_log_printf(g, room, "wteleport all target is itself");
+      wld_log(g, room, "wteleport all target is itself");
       return;
     }
 
@@ -322,7 +321,7 @@ static WCMD(do_wteleport)
     }
 
     else
-      wld_log_printf(g, room, "wteleport: no target found");
+      wld_log(g, room, "wteleport: no target found");
   }
 }
 
@@ -334,7 +333,7 @@ static WCMD(do_wforce)
   line = one_argument(argument, arg1);
 
   if (!*arg1 || !*line) {
-    wld_log_printf(g, room, "wforce called with too few args");
+    wld_log(g, room, "wforce called with too few args");
     return;
   }
 
@@ -355,7 +354,7 @@ static WCMD(do_wforce)
     }
 
     else
-      wld_log_printf(g, room, "wforce: no target found");
+      wld_log(g, room, "wforce: no target found");
   }
 }
 
@@ -397,13 +396,13 @@ static WCMD(do_wpurge)
     if (obj) {
       extract_obj(g, obj);
     } else
-      wld_log_printf(g, room, "wpurge: bad argument");
+      wld_log(g, room, "wpurge: bad argument");
 
     return;
   }
 
   if (!char_is_npc(ch)) {
-    wld_log_printf(g, room, "wpurge: purging a PC");
+    wld_log(g, room, "wpurge: purging a PC");
     return;
   }
 
@@ -425,7 +424,7 @@ static WCMD(do_wload)
   target = two_arguments(argument, arg1, arg2);
 
   if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
-    wld_log_printf(g, room, "wload: bad syntax");
+    wld_log(g, room, "wload: bad syntax");
     return;
   }
 
@@ -436,12 +435,12 @@ static WCMD(do_wload)
       rnum = room_get_number(room);
     } else {
       if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
-        wld_log_printf(g, room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);
+        wld_log(g, room, "wload: room target vnum doesn't exist (loading mob vnum {:d} to room {})", number, target);
         return;
       }
     }
     if ((mob = read_mobile(g, number)) == nullptr) {
-      wld_log_printf(g, room, "mload: bad mob vnum");
+      wld_log(g, room, "mload: bad mob vnum");
       return;
     }
     char_to_room(g, mob, rnum);
@@ -455,7 +454,7 @@ static WCMD(do_wload)
 
   else if (is_abbrev(arg1, "obj")) {
     if ((object = read_object(g, number)) == nullptr) {
-      wld_log_printf(g, room, "wload: bad object vnum");
+      wld_log(g, room, "wload: bad object vnum");
       return;
     }
     /* special handling to make objects able to load on a person/in a container/worn etc. */
@@ -500,7 +499,7 @@ static WCMD(do_wload)
   }
 
   else
-    wld_log_printf(g, room, "wload: bad type");
+    wld_log(g, room, "wload: bad type");
 }
 
 static WCMD(do_wdamage)
@@ -515,7 +514,7 @@ static WCMD(do_wdamage)
 
   /* who cares if it's a number ? if not it'll just be 0 */
   if (name.empty() || amount.empty()) {
-    wld_log_printf(g, room, "wdamage: bad syntax");
+    wld_log(g, room, "wdamage: bad syntax");
     return;
   }
 
@@ -523,7 +522,7 @@ static WCMD(do_wdamage)
   ch  = get_char_by_room(g, room, name);
 
   if (!ch) {
-    wld_log_printf(g, room, "wdamage: target not found");
+    wld_log(g, room, "wdamage: target not found");
     return;
   }
 
@@ -539,14 +538,14 @@ static WCMD(do_wat)
   command = any_one_arg(argument, arg);
 
   if (!*arg) {
-    wld_log_printf(g, room, "wat called with no args");
+    wld_log(g, room, "wat called with no args");
     return;
   }
 
   skip_spaces(&command);
 
   if (!*command) {
-    wld_log_printf(g, room, "wat called without a command");
+    wld_log(g, room, "wat called without a command");
     return;
   }
 
@@ -557,7 +556,7 @@ static WCMD(do_wat)
   }
 
   if (!room_of(g, loc)) {
-    wld_log_printf(g, room, "wat: location not found (%s)", arg);
+    wld_log(g, room, "wat: location not found ({})", arg);
     return;
   }
 
@@ -607,7 +606,7 @@ void wld_command_interpreter(GameWorld *g, room_data *room, char *argument)
       break;
 
   if (*wld_cmd_info[cmd].command == '\n')
-    wld_log_printf(g, room, "Unknown world cmd: '%s'", argument);
+    wld_log(g, room, "Unknown world cmd: '{}'", argument);
   else
     ((*wld_cmd_info[cmd].command_pointer)(g, room, line, cmd, wld_cmd_info[cmd].subcmd));
 }

@@ -69,30 +69,17 @@ bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg)
 
 bool stats_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char_printf(g, d->character,
-                      "\r\n"
-                      "@W-<[@y==========@B[ @YCWG @B]@y==========@W]>-\r\n"
-                      " <| Total Points Left: @m%3d@W    |>     You should select the letter of the score you\r\n"
-                      " <|                           |>     wish to adjust.  When prompted, enter the new score,\r\n"
-                      " <| = Select a stat:          |>     NOT the amount to add.  NOTE: If you quit before you\r\n"
-                      " <| @BS@W) @rStrength     : @m%3d@W     |>     assign all the points, you will lose them forever.\r\n"
-                      " <| @BD@W) @rDexterity    : @m%3d@W     |>     If your points are at zero, you may still reassign\r\n"
-                      " <| @BN@W) @rConstitution : @m%3d@W     |>     points by lowering any statistic, then add those\r\n"
-                      " <| @BI@W) @rIntelligence : @m%3d@W     |>     points to the statistic of your choice.\r\n"
-                      " <| @BW@W) @rWisdom       : @m%3d@W     |>\r\n"
-                      " <| @BC@W) @rCharisma     : @m%3d@W     |>\r\n"
-                      " <| @BQ@W) @CQuit@W                   |>\r\n"
-                      "-<[@y===========================@W]>-@n\r\n"
-                      "\r\n",
-                      OLC_VAL(d),
-                      char_get_real_abils_str(d->character),
-                      char_get_real_abils_dex(d->character),
-                      char_get_real_abils_con(d->character),
-                      char_get_real_abils_intel(d->character),
-                      char_get_real_abils_wis(d->character),
-                      char_get_real_abils_cha(d->character));
+  send_to_char(g, d->character,
+               "\r\n@W-<[@y==========@B[ @YCWG @B]@y==========@W]>-\r\n <| Total Points Left: @m{:>3d}@W    |>     You should select the letter of the score you\r\n <|                           |>     wish to adjust.  When prompted, enter the new score,\r\n <| = Select a stat:          |>     NOT the amount to add.  NOTE: If you quit before you\r\n <| @BS@W) @rStrength     : @m{:>3d}@W     |>     assign all the points, you will lose them forever.\r\n <| @BD@W) @rDexterity    : @m{:>3d}@W     |>     If your points are at zero, you may still reassign\r\n <| @BN@W) @rConstitution : @m{:>3d}@W     |>     points by lowering any statistic, then add those\r\n <| @BI@W) @rIntelligence : @m{:>3d}@W     |>     points to the statistic of your choice.\r\n <| @BW@W) @rWisdom       : @m{:>3d}@W     |>\r\n <| @BC@W) @rCharisma     : @m{:>3d}@W     |>\r\n <| @BQ@W) @CQuit@W                   |>\r\n-<[@y===========================@W]>-@n\r\n\r\n",
+               OLC_VAL(d),
+               char_get_real_abils_str(d->character),
+               char_get_real_abils_dex(d->character),
+               char_get_real_abils_con(d->character),
+               char_get_real_abils_intel(d->character),
+               char_get_real_abils_wis(d->character),
+               char_get_real_abils_cha(d->character));
 
-  send_to_char_printf(g, d->character, "Enter Letter to Change: ");
+  send_to_char(g, d->character, "Enter Letter to Change: ");
 
   OLC_MODE(d) = STAT_PARSE_MENU;
 
@@ -106,27 +93,27 @@ static bool parse_stat_menu(GameWorld *g, struct descriptor_data *d, char *arg)
   switch (*arg) {
     case 's':
       OLC_MODE(d) = STAT_GET_STR;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'i':
       OLC_MODE(d) = STAT_GET_INT;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'w':
       OLC_MODE(d) = STAT_GET_WIS;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'd':
       OLC_MODE(d) = STAT_GET_DEX;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'n':
       OLC_MODE(d) = STAT_GET_CON;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'c':
       OLC_MODE(d) = STAT_GET_CHA;
-      send_to_char_printf(g, d->character, "Enter new value: ");
+      send_to_char(g, d->character, "Enter new value: ");
       break;
     case 'q':
       OLC_MODE(d) = STAT_QUIT;
@@ -162,7 +149,7 @@ static int stats_assign_stat(GameWorld *g, int abil, char *arg, struct descripto
   if (OLC_VAL(d) <= 0) {
     temp       = 0;
     OLC_VAL(d) = 0;
-    mudlog_printf(g, LOG_NRM, ADMLVL_IMMORT, true, "Stat total below 0: possible code error");
+    mudlog(g, LOG_NRM, ADMLVL_IMMORT, true, "Stat total below 0: possible code error");
   }
   abil = temp;
   OLC_VAL(d) -= temp;

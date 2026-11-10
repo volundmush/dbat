@@ -310,7 +310,7 @@ ACMD(do_oasis_cedit)
   buf1                  = take_arg(rest);
 
   if (char_get_admlevel(ch) < ADMLVL_GRGOD) {
-    send_to_char_printf(g, ch, "You can't modify the game configuration.\r\n");
+    send_to_char(g, ch, "You can't modify the game configuration.\r\n");
     return;
   }
 
@@ -324,18 +324,18 @@ ACMD(do_oasis_cedit)
     act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_WRITING, true);
 
-    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true,
-                  "OLC: %s starts editing the game configuration.", char_get_name(ch));
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
+           "OLC: {} starts editing the game configuration.", char_get_name(ch));
     return;
   }
   if (!str_eq_nocase("save", buf1)) {
-    send_to_char_printf(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+    send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
     return;
   }
 
-  send_to_char_printf(g, ch, "Saving the game configuration.\r\n");
-  mudlog_printf(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
-                "OLC: %s saves the game configuration.", char_get_name(ch));
+  send_to_char(g, ch, "Saving the game configuration.\r\n");
+  mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
+         "OLC: {} saves the game configuration.", char_get_name(ch));
 
   save_config(g, nullptr);
 }
@@ -387,7 +387,7 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
   if (!o) {
     for (size_t i = 0; i < countof(obsolete); i++)
       if (!strcasecmp(tag, obsolete[i]))
-        mud_log_printf("Ignoring obsolete config option %s", obsolete[i]);
+        mud_log("Ignoring obsolete config option {}", obsolete[i]);
     return;
   }
 
@@ -517,18 +517,8 @@ static void cedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   /*
    * Menu header
    */
-  write_to_output_printf(g, d,
-                         "OasisOLC MUD Configuration Editor\r\n"
-                         "@WA@B) @CAutowiz Options\r\n"
-                         "@WC@B) @CCrashsave/Rent Options\r\n"
-                         "@WD@B) @CaDvancement Options\r\n"
-                         "@WG@B) @CGame Play Options\r\n"
-                         "@WN@B) @CNew Character Creation Options\r\n"
-                         "@WO@B) @COperation Options\r\n"
-                         "@WR@B) @CRoom Numbers\r\n"
-                         "@WT@B) @CGame Tick Options\r\n"
-                         "@WQ@B) @CQuit\r\n"
-                         "@WEnter your choice : @n");
+  write_to_output(g, d,
+                  "OasisOLC MUD Configuration Editor\r\n@WA@B) @CAutowiz Options\r\n@WC@B) @CCrashsave/Rent Options\r\n@WD@B) @CaDvancement Options\r\n@WG@B) @CGame Play Options\r\n@WN@B) @CNew Character Creation Options\r\n@WO@B) @COperation Options\r\n@WR@B) @CRoom Numbers\r\n@WT@B) @CGame Tick Options\r\n@WQ@B) @CQuit\r\n@WEnter your choice : @n");
 
   OLC_MODE(d) = CEDIT_MAIN_MENU;
 }
@@ -572,10 +562,10 @@ static void cedit_disp_option(GameWorld *g, struct descriptor_data *d, const str
   }
 
   if (o->type == CT_TEXT)
-    write_to_output_printf(g, d, "@W%c@B) @C%s: \r\n@n%s@n\r\n", o->choice, o->label, value);
+    write_to_output(g, d, "@W{:c}@B) @C{}: \r\n@n{}@n\r\n", as_char(o->choice), o->label, value);
   else /* a message ends in its own newline */
-    write_to_output_printf(g, d, "@W%c@B) @C%s: @c%s%s%s", o->choice, o->label, value, o->suffix ? o->suffix : "",
-                           o->type == CT_MSG ? "" : "\r\n");
+    write_to_output(g, d, "@W{:c}@B) @C{}: @c{}{}{}", as_char(o->choice), o->label, value, o->suffix ? o->suffix : "",
+                    o->type == CT_MSG ? "" : "\r\n");
 }
 
 /* A submenu lists its options by key, letters first. */
@@ -584,13 +574,12 @@ static void cedit_disp_submenu(GameWorld *g, struct descriptor_data *d, char men
   static const char order[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
 
   clear_screen(g, d);
-  write_to_output_printf(g, d, "\r\n\r\n");
+  write_to_output(g, d, "\r\n\r\n");
   for (const char *key = order; *key; key++)
     for (int i = 0; i < NUM_CEDIT_OPTIONS; i++)
       if (cedit_options[i].menu == menu && cedit_options[i].choice == *key)
         cedit_disp_option(g, d, &cedit_options[i]);
-  write_to_output_printf(g, d, "@WQ@B) @CExit To The Main Menu\r\n"
-                               "@WEnter your choice : @n");
+  write_to_output(g, d, "@WQ@B) @CExit To The Main Menu\r\n@WEnter your choice : @n");
 
   OLC_MODE(d) = CEDIT_SUBMENU;
   OLC_VAL(d)  = menu;
@@ -608,18 +597,18 @@ static void cedit_prompt(GameWorld *g, struct descriptor_data *d, int i)
   if (o->type == CT_METHOD) {
     clear_screen(g, d);
     for (int m = 0; m < NUM_CREATION_METHODS; m++)
-      write_to_output_printf(g, d, "@W%d@B) @C%s@n\r\n", m, creation_methods[m]);
-    write_to_output_printf(g, d, "Choose character creation type: ");
+      write_to_output(g, d, "@W{:d}@B) @C{}@n\r\n", m, creation_methods[m]);
+    write_to_output(g, d, "Choose character creation type: ");
   } else if (o->type == CT_TEXT) {
     text = string_field(OLC_CONFIG(d), o);
     clear_screen(g, d);
     send_editor_help(g, d);
-    write_to_output_printf(g, d, "%s", o->prompt);
+    write_to_output(g, d, "{}", o->prompt);
     if (!text->empty())
-      write_to_output_printf(g, d, "%s", text->c_str());
+      write_to_output(g, d, "{}", text->c_str());
     string_write(d, text, MAX_INPUT_LENGTH, 0);
   } else
-    write_to_output_printf(g, d, "%s", o->prompt);
+    write_to_output(g, d, "{}", o->prompt);
 }
 
 /* Reads an integer, allowing trailing spaces only. */
@@ -681,14 +670,14 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
         break;
       if ((o->flags & CO_RANGE) && (num < o->min || num > o->max)) {
         if (o->max == INT_MAX)
-          write_to_output_printf(g, d, "Please enter a number %d or higher.\r\n", o->min);
+          write_to_output(g, d, "Please enter a number {:d} or higher.\r\n", o->min);
         else
-          write_to_output_printf(g, d, "Please enter a number between %d - %d.\r\n", o->min, o->max);
+          write_to_output(g, d, "Please enter a number between {:d} - {:d}.\r\n", o->min, o->max);
         cedit_prompt(g, d, i);
         return false;
       }
       if (o->type == CT_ROOM && !room_of(g, num)) {
-        write_to_output_printf(g, d, "That room doesn't exist!\r\n");
+        write_to_output(g, d, "That room doesn't exist!\r\n");
         cedit_prompt(g, d, i);
         return false;
       }
@@ -699,7 +688,7 @@ static bool cedit_set_value(GameWorld *g, struct descriptor_data *d, int i, char
       return true;
   }
 
-  write_to_output_printf(g, d, "That is an invalid choice!\r\n");
+  write_to_output(g, d, "That is an invalid choice!\r\n");
   cedit_prompt(g, d, i);
   return false;
 }
@@ -712,33 +701,33 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           cedit_save_internally(g, d);
-          mudlog_printf(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: %s modifies the game configuration.", char_get_name(d->character));
+          mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: {} modifies the game configuration.", char_get_name(d->character));
           cleanup_olc(g, d, CLEANUP_CONFIG);
           if (CONFIG_OLC_SAVE) {
             save_config(g, nullptr);
-            write_to_output_printf(g, d, "Game configuration saved to disk.\r\n");
+            write_to_output(g, d, "Game configuration saved to disk.\r\n");
           } else
-            write_to_output_printf(g, d, "Game configuration saved to memory.\r\n");
+            write_to_output(g, d, "Game configuration saved to memory.\r\n");
           return;
         case 'n':
         case 'N':
-          write_to_output_printf(g, d, "Game configuration not saved to memory.\r\n");
+          write_to_output(g, d, "Game configuration not saved to memory.\r\n");
           cleanup_olc(g, d, CLEANUP_CONFIG);
           return;
         default:
-          write_to_output_printf(g, d, "\r\nThat is an invalid choice!\r\n");
-          write_to_output_printf(g, d, "Do you wish to save your changes? : ");
+          write_to_output(g, d, "\r\nThat is an invalid choice!\r\n");
+          write_to_output(g, d, "Do you wish to save your changes? : ");
           return;
       }
 
     case CEDIT_MAIN_MENU:
       if (toupper(*arg) == 'Q') {
-        write_to_output_printf(g, d, "Do you wish to save your changes? : ");
+        write_to_output(g, d, "Do you wish to save your changes? : ");
         OLC_MODE(d) = CEDIT_CONFIRM_SAVESTRING;
       } else if (*arg && strchr("ACDGNORT", toupper(*arg)))
         cedit_disp_submenu(g, d, toupper(*arg));
       else {
-        write_to_output_printf(g, d, "That is an invalid choice!\r\n");
+        write_to_output(g, d, "That is an invalid choice!\r\n");
         cedit_disp_menu(g, d);
       }
       return;
@@ -763,11 +752,11 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         flag  = (int *)option_field(OLC_CONFIG(d), o);
         *flag = *flag == 1 ? 0 : 1;
         if (o->note)
-          send_to_char_printf(g, d->character, "%s", o->note);
+          send_to_char(g, d->character, "{}", o->note);
         cedit_disp_submenu(g, d, menu);
         return;
       }
-      write_to_output_printf(g, d, "\r\nThat is an invalid choice!\r\n");
+      write_to_output(g, d, "\r\nThat is an invalid choice!\r\n");
       cedit_disp_submenu(g, d, menu);
       return;
     }
@@ -782,8 +771,8 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
        * We should never get here, but just in case...
        */
       cleanup_olc(g, d, CLEANUP_CONFIG);
-      mudlog_printf(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
-      write_to_output_printf(g, d, "Oops...\r\n");
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
+      write_to_output(g, d, "Oops...\r\n");
       break;
   }
 }

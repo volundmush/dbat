@@ -72,7 +72,7 @@ struct guild_data *add_guild(GameWorld *g, struct guild_data *ngld)
   if (rznum != nullptr) {
     add_to_save_list(g, rznum->number, SL_GLD);
   } else
-    mudlog_printf(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
 
   return guild;
 }
@@ -88,13 +88,13 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
   struct guild_data *guild;
 
   if (!zone_num) {
-    mud_log_printf("SYSERR: no zone given.");
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_num->number);
   if (!(guild_file = atomic_open(&af, fname, false))) {
-    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
     return false;
   }
 
@@ -143,7 +143,7 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
   if (in_save_list(g, zone_num->number, SL_GLD)) {
     remove_from_save_list(g, zone_num->number, SL_GLD);
     create_world_index(g, zone_num->number, "gld");
-    mud_log_printf("GenOLC: save_guilds: Saving guilds '%s'", fname);
+    mud_log("GenOLC: save_guilds: Saving guilds '{}'", fname);
   }
   return true;
 }

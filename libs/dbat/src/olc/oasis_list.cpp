@@ -63,7 +63,7 @@ ACMD(do_oasis_list)
     rzone = find_zone(g, parse_int(smin));
 
     if (rzone == nullptr) {
-      send_to_char_printf(g, ch, "Sorry, there's no zone with that number\r\n");
+      send_to_char(g, ch, "Sorry, there's no zone with that number\r\n");
       return;
     }
   } else {
@@ -72,11 +72,11 @@ ACMD(do_oasis_list)
     vmax = parse_int(smax);
 
     if (vmin + 500 < vmax) {
-      send_to_char_printf(g, ch, "Really? Over 500?! You need to view that many at once? Come on...\r\n");
+      send_to_char(g, ch, "Really? Over 500?! You need to view that many at once? Come on...\r\n");
       return;
     }
     if (vmin > vmax) {
-      send_to_char_printf(g, ch, "List from %d to %d - Aren't we funny today!\r\n", vmin, vmax);
+      send_to_char(g, ch, "List from {:d} to {:d} - Aren't we funny today!\r\n", vmin, vmax);
       return;
     }
   }
@@ -89,9 +89,9 @@ ACMD(do_oasis_list)
     case SCMD_OASIS_SLIST: list_shops(g, ch, rzone, vmin, vmax); break;
     case SCMD_OASIS_GLIST: list_guilds(g, ch, rzone, vmin, vmax); break;
     default:
-      send_to_char_printf(g, ch, "You can't list that!\r\n");
-      mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true,
-                    "SYSERR: do_oasis_list: Unknown list option: %d", subcmd);
+      send_to_char(g, ch, "You can't list that!\r\n");
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
+             "SYSERR: do_oasis_list: Unknown list option: {:d}", subcmd);
   }
 }
 
@@ -116,23 +116,23 @@ ACMD(do_oasis_links)
   }
 
   if (zrnum == nullptr || zvnum == NOWHERE) {
-    send_to_char_printf(g, ch, "No zone was found with that number.\n\r");
+    send_to_char(g, ch, "No zone was found with that number.\n\r");
     return;
   }
 
   last  = zrnum->top;
   first = zrnum->bot;
 
-  send_to_char_printf(g, ch, "Zone %d is linked to the following zones:\r\n", zvnum);
+  send_to_char(g, ch, "Zone {:d} is linked to the following zones:\r\n", zvnum);
   for (room_vnum nr : g->rooms.vnums_in(first, last)) {
     for (j = 0; j < NUM_OF_DIRS; j++) {
       if (room_get_dir_option(g, nr, j)) {
         to_room = room_get_dir_option(g, nr, j)->to_room;
         if (to_room != NOWHERE && (zrnum != room_get_zone(g, to_room)))
-          send_to_char_printf(g, ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                              room_get_zone(g, to_room)->number,
-                              room_get_zone(g, to_room)->name.c_str(),
-                              nr, dirs[j], to_room);
+          send_to_char(g, ch, "{:>3d} {:<30} at {:>5d} ({:<5}) ---> {:>5d}\r\n",
+                       room_get_zone(g, to_room)->number,
+                       room_get_zone(g, to_room)->name.c_str(),
+                       nr, dirs[j], to_room);
       }
     }
   }
@@ -160,9 +160,8 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
     top    = vmax;
   }
 
-  send_to_char_printf(g, ch,
-                      "@nIndex VNum    Room Name                                Exits\r\n"
-                      "----- ------- ---------------------------------------- -----@n\r\n");
+  send_to_char(g, ch,
+               "@nIndex VNum    Room Name                                Exits\r\n----- ------- ---------------------------------------- -----@n\r\n");
 
   for (room_vnum i : g->rooms.vnums_in(bottom, top)) {
 
@@ -170,9 +169,9 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
     if ((i >= bottom) && (i <= top)) {
       counter++;
 
-      send_to_char_printf(g, ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                          counter, i, count_color_chars(room_get_name(g, i)) + 44,
-                          room_get_name(g, i), room_get_proto_script(g, i) ? "[TRIG] " : "");
+      send_to_char(g, ch, "{:>4d}) [@g{:<5d}@n] @[1]{}@n {}",
+                   counter, i,
+                   printf_width(room_get_name(g, i), count_color_chars(room_get_name(g, i)) + 44, true), room_get_proto_script(g, i) ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
         if (room_get_dir_option(g, i, j) == nullptr)
@@ -181,15 +180,15 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
           continue;
 
         if (room_get_zone(g, room_get_dir_option(g, i, j)->to_room) != room_get_zone(g, i))
-          send_to_char_printf(g, ch, "(@y%d@n)", room_get_dir_option(g, i, j)->to_room);
+          send_to_char(g, ch, "(@y{:d}@n)", room_get_dir_option(g, i, j)->to_room);
       }
 
-      send_to_char_printf(g, ch, "\r\n");
+      send_to_char(g, ch, "\r\n");
     }
   }
 
   if (counter == 0) {
-    send_to_char_printf(g, ch, "No rooms found for zone/range specified.\r\n");
+    send_to_char(g, ch, "No rooms found for zone/range specified.\r\n");
   }
 }
 
@@ -209,9 +208,8 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *r
     top    = vmax;
   }
 
-  send_to_char_printf(g, ch,
-                      "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
-                      "----- ------- -------------------------      --------- --------- -----\r\n");
+  send_to_char(g, ch,
+               "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n----- ------- -------------------------      --------- --------- -----\r\n");
 
   if (g->mob_proto.empty())
     return;
@@ -220,14 +218,14 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *r
     if (mob_index_of(g, i)->vnum >= bottom && mob_index_of(g, i)->vnum <= top) {
       counter++;
 
-      send_to_char_printf(g, ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                          counter, mob_index_of(g, i)->vnum, count_color_chars(char_get_sdesc(mob_proto_of(g, i))) + 30, char_get_sdesc(mob_proto_of(g, i)), char_true_race_name((mob_proto_of(g, i))), char_sensei_name((mob_proto_of(g, i))),
-                          char_get_class_level(mob_proto_of(g, i)) + char_get_level_adj(mob_proto_of(g, i)) + char_get_race_level(mob_proto_of(g, i)), char_get_proto_script(mob_proto_of(g, i)) ? " [TRIG]" : "");
+      send_to_char(g, ch, "@g{:>4d}@n) [@g{:<5d}@n] @[3]{} @C{:<9} @c{:<9} @y[{:>4d}]@n {}\r\n",
+                   counter, mob_index_of(g, i)->vnum, printf_width(char_get_sdesc(mob_proto_of(g, i)), count_color_chars(char_get_sdesc(mob_proto_of(g, i))) + 30, true), char_true_race_name((mob_proto_of(g, i))), char_sensei_name((mob_proto_of(g, i))),
+                   char_get_class_level(mob_proto_of(g, i)) + char_get_level_adj(mob_proto_of(g, i)) + char_get_race_level(mob_proto_of(g, i)), char_get_proto_script(mob_proto_of(g, i)) ? " [TRIG]" : "");
     }
   }
 
   if (counter == 0) {
-    send_to_char_printf(g, ch, "None found.\r\n");
+    send_to_char(g, ch, "None found.\r\n");
   }
 }
 
@@ -247,9 +245,8 @@ static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *r
     top    = vmax;
   }
 
-  send_to_char_printf(g, ch,
-                      "@nIndex VNum    Object Name                                  Object Type\r\n"
-                      "----- ------- -------------------------------------------- ----------------\r\n");
+  send_to_char(g, ch,
+               "@nIndex VNum    Object Name                                  Object Type\r\n----- ------- -------------------------------------------- ----------------\r\n");
 
   if (g->obj_proto.empty())
     return;
@@ -258,15 +255,15 @@ static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *r
     if (obj_index_of(g, i)->vnum >= bottom && obj_index_of(g, i)->vnum <= top) {
       counter++;
 
-      send_to_char_printf(g, ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                          counter, obj_index_of(g, i)->vnum, count_color_chars(obj_get_short_description(obj_proto_of(g, i))) + 44,
-                          obj_get_short_description(obj_proto_of(g, i)), item_types[obj_get_type_flag(obj_proto_of(g, i))],
-                          obj_get_proto_script(obj_proto_of(g, i)) ? " [TRIG]" : "");
+      send_to_char(g, ch, "@g{:>4d}@n) [@g{:<5d}@n] @[2]{} @y[{}]@n{}\r\n",
+                   counter, obj_index_of(g, i)->vnum,
+                   printf_width(obj_get_short_description(obj_proto_of(g, i)), count_color_chars(obj_get_short_description(obj_proto_of(g, i))) + 44, true), item_types[obj_get_type_flag(obj_proto_of(g, i))],
+                   obj_get_proto_script(obj_proto_of(g, i)) ? " [TRIG]" : "");
     }
   }
 
   if (counter == 0) {
-    send_to_char_printf(g, ch, "None found.\r\n");
+    send_to_char(g, ch, "None found.\r\n");
   }
 }
 
@@ -289,33 +286,32 @@ static void list_shops(GameWorld *g, struct char_data *ch, struct zone_data *rnu
   /****************************************************************************/
   /** Store the header for the shop listing.                                 **/
   /****************************************************************************/
-  send_to_char_printf(g, ch,
-                      "Index VNum    Shop Room(s)\r\n"
-                      "----- ------- ---------------------------------------------\r\n");
+  send_to_char(g, ch,
+               "Index VNum    Shop Room(s)\r\n----- ------- ---------------------------------------------\r\n");
 
   for (struct shop_data *i : g->shops.all()) {
     if (shop_get_vnum(i) >= bottom && shop_get_vnum(i) <= top) {
       counter++;
 
-      send_to_char_printf(g, ch, "@g%4d@n) [@g%-5d@n]", counter, shop_get_vnum(i));
+      send_to_char(g, ch, "@g{:>4d}@n) [@g{:<5d}@n]", counter, shop_get_vnum(i));
 
       /************************************************************************/
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
 
       for (j = 0; j < (int)shop_rooms(i).size(); j++)
-        send_to_char_printf(g, ch, "%s@c[@y%d@c]@n",
-                            ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop_rooms(i)[j]);
+        send_to_char(g, ch, "{}@c[@y{:d}@c]@n",
+                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop_rooms(i)[j]);
 
       if (j == 0)
-        send_to_char_printf(g, ch, "@cNone.@n");
+        send_to_char(g, ch, "@cNone.@n");
 
-      send_to_char_printf(g, ch, "\r\n");
+      send_to_char(g, ch, "\r\n");
     }
   }
 
   if (counter == 0)
-    send_to_char_printf(g, ch, "None found.\r\n");
+    send_to_char(g, ch, "None found.\r\n");
 }
 
 /*
@@ -324,17 +320,16 @@ static void list_shops(GameWorld *g, struct char_data *ch, struct zone_data *rnu
 static void list_zones(GameWorld *g, struct char_data *ch)
 {
 
-  send_to_char_printf(g, ch,
-                      "VNum  Zone Name                      Builder(s)\r\n"
-                      "----- ------------------------------ --------------------------------------\r\n");
+  send_to_char(g, ch,
+               "VNum  Zone Name                      Builder(s)\r\n----- ------------------------------ --------------------------------------\r\n");
 
   if (g->zones.empty())
     return;
 
   for (struct zone_data *i : g->zones.all())
-    send_to_char_printf(g, ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
-                        i->number, count_color_chars(i->name.c_str()) + 30, i->name.c_str(),
-                        i->builders.c_str());
+    send_to_char(g, ch, "[@g{:>3d}@n] @c{} @y{:<1}@n\r\n",
+                 i->number, printf_width(i->name.c_str(), count_color_chars(i->name.c_str()) + 30, true),
+                 i->builders.c_str());
 }
 
 /*
@@ -349,7 +344,7 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   char bits[MAX_STRING_LENGTH];
 
   if ((rnum = find_zone(g, vnum)) == nullptr) {
-    send_to_char_printf(g, ch, "Zone #%d does not exist in the database.\r\n", vnum);
+    send_to_char(g, ch, "Zone #{:d} does not exist in the database.\r\n", vnum);
     return;
   }
 
@@ -388,31 +383,14 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   /****************************************************************************/
   /** Display all of the zone information at once.                           **/
   /****************************************************************************/
-  send_to_char_printf(g, ch,
-                      "@gVirtual Number = @c%d\r\n"
-                      "@gName of zone   = @c%s\r\n"
-                      "@gBuilders       = @c%s\r\n"
-                      "@gLifespan       = @c%d\r\n"
-                      "@gAge            = @c%d\r\n"
-                      "@gBottom of Zone = @c%d\r\n"
-                      "@gTop of Zone    = @c%d\r\n"
-                      "@gReset Mode     = @c%s\r\n"
-                      "@gMin Level      = @c%d\r\n"
-                      "@gMax Level      = @c%d\r\n"
-                      "@gZone Flags     = @c%s\r\n"
-                      "@gSize\r\n"
-                      "@g   Rooms       = @c%d\r\n"
-                      "@g   Objects     = @c%d\r\n"
-                      "@g   Mobiles     = @c%d\r\n"
-                      "@g   Shops       = @c%d\r\n"
-                      "@g   Triggers    = @c%d\r\n"
-                      "@g   Guilds      = @c%d@n\r\n",
-                      rnum->number, rnum->name.c_str(),
-                      rnum->builders.c_str(), rnum->lifespan,
-                      rnum->age, rnum->bot, rnum->top,
-                      rnum->reset_mode ? ((rnum->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-                      rnum->min_level, rnum->max_level, bits,
-                      size_rooms, size_objects, size_mobiles, size_shops, size_triggers, size_guilds);
+  send_to_char(g, ch,
+               "@gVirtual Number = @c{:d}\r\n@gName of zone   = @c{}\r\n@gBuilders       = @c{}\r\n@gLifespan       = @c{:d}\r\n@gAge            = @c{:d}\r\n@gBottom of Zone = @c{:d}\r\n@gTop of Zone    = @c{:d}\r\n@gReset Mode     = @c{}\r\n@gMin Level      = @c{:d}\r\n@gMax Level      = @c{:d}\r\n@gZone Flags     = @c{}\r\n@gSize\r\n@g   Rooms       = @c{:d}\r\n@g   Objects     = @c{:d}\r\n@g   Mobiles     = @c{:d}\r\n@g   Shops       = @c{:d}\r\n@g   Triggers    = @c{:d}\r\n@g   Guilds      = @c{:d}@n\r\n",
+               rnum->number, rnum->name.c_str(),
+               rnum->builders.c_str(), rnum->lifespan,
+               rnum->age, rnum->bot, rnum->top,
+               rnum->reset_mode ? ((rnum->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
+               rnum->min_level, rnum->max_level, bits,
+               size_rooms, size_objects, size_mobiles, size_shops, size_triggers, size_guilds);
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
@@ -432,9 +410,8 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
   }
 
   /** Store the header for the room listing. **/
-  send_to_char_printf(g, ch,
-                      "Index VNum    Trigger Name                        Type\r\n"
-                      "----- ------- -------------------------------------------------------\r\n");
+  send_to_char(g, ch,
+               "Index VNum    Trigger Name                        Type\r\n----- ------- -------------------------------------------------------\r\n");
 
   /** Loop through the world and find each room. **/
   for (struct index_data *i : g->trig_index.all()) {
@@ -442,23 +419,23 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
     if ((i->vnum >= bottom) && (i->vnum <= top)) {
       counter++;
 
-      send_to_char_printf(g, ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-                          counter, i->vnum, i->proto->name.c_str());
+      send_to_char(g, ch, "{:>4d}) [@g{:>5d}@n] @[1]{:<45.45} ",
+                   counter, i->vnum, i->proto->name.c_str());
 
       if (i->proto->attach_type == OBJ_TRIGGER) {
         sprintbit(i->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
-        send_to_char_printf(g, ch, "obj @y%s@n\r\n", trgtypes);
+        send_to_char(g, ch, "obj @y{}@n\r\n", trgtypes);
       } else if (i->proto->attach_type == WLD_TRIGGER) {
         sprintbit(i->proto->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
-        send_to_char_printf(g, ch, "wld @y%s@n\r\n", trgtypes);
+        send_to_char(g, ch, "wld @y{}@n\r\n", trgtypes);
       } else {
         sprintbit(i->proto->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
-        send_to_char_printf(g, ch, "mob @y%s@n\r\n", trgtypes);
+        send_to_char(g, ch, "mob @y{}@n\r\n", trgtypes);
       }
     }
   }
 
   if (counter == 0) {
-    send_to_char_printf(g, ch, "No triggers found from %d to %d.\r\n", vmin, vmax);
+    send_to_char(g, ch, "No triggers found from {:d} to {:d}.\r\n", vmin, vmax);
   }
 }

@@ -33,10 +33,10 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
   switch (terminator) {
     case STRINGADD_SAVE:
       if (d->draft.empty())
-        mudlog_printf(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
+        mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
       else if (!(fl = fopen(storage, "a"))) {
-        mudlog_printf(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
-        write_to_output_printf(g, d, "The news file couldn't be opened; your entry was not saved.\r\n");
+        mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
+        write_to_output(g, d, "The news file couldn't be opened; your entry was not saved.\r\n");
       } else {
         char *tmstr;
         time_t mytime                = game_now(g);
@@ -58,17 +58,17 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
           if (char_plr_flagged(i->character, PLR_WRITING))
             continue;
           if (g->NEWSUPDATE > char_get_lastpl(i->character))
-            send_to_char_printf(g, i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", char_get_name(d->character), g->TOP_OF_NEWS);
+            send_to_char(g, i->character, "\r\n@GA news entry has been made by {}, type 'news {:d}' to see it.@n\r\n", char_get_name(d->character), g->TOP_OF_NEWS);
         }
         do_reboot(g, d->character, "news", 0, 0);
       }
       break;
     case STRINGADD_ABORT:
-      write_to_output_printf(g, d, "Edit aborted.\r\n");
+      write_to_output(g, d, "Edit aborted.\r\n");
       act(g, "$n stops editing the news.", true, d->character, nullptr, nullptr, TO_ROOM);
       break;
     default:
-      mud_log_printf("SYSERR: news_string_cleanup: Unknown terminator status.");
+      mud_log("SYSERR: news_string_cleanup: Unknown terminator status.");
       break;
   }
 
@@ -90,7 +90,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
   switch (terminator) {
     case STRINGADD_SAVE:
       if (!(fl = atomic_open(&af, storage, false)))
-        mudlog_printf(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
+        mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
       else {
         if (!text->empty() && !(strcmp(storage, "text/news"))) {
           char *tmstr;
@@ -105,11 +105,11 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
           fputs(text->c_str(), fl);
         }
         if (!atomic_commit(&af)) {
-          write_to_output_printf(g, d, "Could not write the file; nothing was changed.\r\n");
+          write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");
           break;
         }
-        mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "OLC: %s saves '%s'.", char_get_name(d->character), storage);
-        write_to_output_printf(g, d, "Saved.\r\n");
+        mudlog(g, LOG_CMP, ADMLVL_GOD, true, "OLC: {} saves '{}'.", char_get_name(d->character), storage);
+        write_to_output(g, d, "Saved.\r\n");
 
         if (!(strcmp(storage, "text/news"))) {
           g->NEWSUPDATE = game_now(g);
@@ -121,18 +121,18 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
             if (char_plr_flagged(i->character, PLR_WRITING))
               continue;
             if (g->NEWSUPDATE > char_get_lastpl(i->character))
-              send_to_char_printf(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
+              send_to_char(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
           }
           do_reboot(g, d->character, "all", 0, 0);
         }
       }
       break;
     case STRINGADD_ABORT:
-      write_to_output_printf(g, d, "Edit aborted.\r\n");
+      write_to_output(g, d, "Edit aborted.\r\n");
       act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
       break;
     default:
-      mud_log_printf("SYSERR: tedit_string_cleanup: Unknown terminator status.");
+      mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
       break;
   }
 
@@ -174,18 +174,18 @@ ACMD(do_tedit)
   field                 = take_arg(rest);
 
   if (field.empty()) {
-    send_to_char_printf(g, ch, "Files available to be edited:\r\n");
+    send_to_char(g, ch, "Files available to be edited:\r\n");
     for (l = 0; *fields[l].cmd != '\n'; l++) {
       if (char_get_admlevel(ch) >= fields[l].level) {
-        send_to_char_printf(g, ch, "%-11.11s ", fields[l].cmd);
+        send_to_char(g, ch, "{:<11.11} ", fields[l].cmd);
         if (!(++i % 7))
-          send_to_char_printf(g, ch, "\r\n");
+          send_to_char(g, ch, "\r\n");
       }
     }
     if (i % 7)
-      send_to_char_printf(g, ch, "\r\n");
+      send_to_char(g, ch, "\r\n");
     if (i == 0)
-      send_to_char_printf(g, ch, "None.\r\n");
+      send_to_char(g, ch, "None.\r\n");
     return;
   }
   for (l = 0; *(fields[l].cmd) != '\n'; l++)
@@ -193,28 +193,28 @@ ACMD(do_tedit)
       break;
 
   if (*fields[l].cmd == '\n') {
-    send_to_char_printf(g, ch, "Invalid text editor option.\r\n");
+    send_to_char(g, ch, "Invalid text editor option.\r\n");
     return;
   }
 
   if (char_get_admlevel(ch) < fields[l].level) {
-    send_to_char_printf(g, ch, "You are not godly enough for that!\r\n");
+    send_to_char(g, ch, "You are not godly enough for that!\r\n");
     return;
   }
 
   /* set up editor stats */
   clear_screen(g, char_get_desc(ch));
   send_editor_help(g, char_get_desc(ch));
-  send_to_char_printf(g, ch, "Edit file below:\r\n\r\n");
+  send_to_char(g, ch, "Edit file below:\r\n\r\n");
 
   if (char_get_desc(ch)->olc) {
-    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
     delete char_get_desc(ch)->olc;
   }
   char_get_desc(ch)->olc = new oasis_olc_data();
 
   if (!fields[l].buffer->empty()) {
-    send_to_char_printf(g, ch, "%s", fields[l].buffer->c_str());
+    send_to_char(g, ch, "{}", fields[l].buffer->c_str());
   }
 
   OLC_STORAGE(char_get_desc(ch)) = fields[l].filename;

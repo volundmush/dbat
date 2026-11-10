@@ -53,7 +53,7 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
         update_mobile_strings(live_mob, mob_proto_of(g, rnum));
 
     add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
-    mud_log_printf("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
+    mud_log("GenOLC: add_mobile: Updated existing mobile #{:d}.", vnum);
     return rnum;
   }
 
@@ -66,7 +66,7 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
   index->func   = nullptr;
   found         = vnum;
 
-  mud_log_printf("GenOLC: add_mobile: Added mobile %d at index #%d.", vnum, found);
+  mud_log("GenOLC: add_mobile: Added mobile {:d} at index #{:d}.", vnum, found);
 
 #if CONFIG_GENOLC_MOBPROG
   GET_MPROG(OLC_MOB(d))      = OLC_MPROGL(d);
@@ -103,7 +103,7 @@ mob_vnum delete_mobile(GameWorld *g, mob_vnum refpt)
   mob_vnum vnum;
 
   if (refpt == NOBODY || !mob_index_of(g, refpt)) {
-    mud_log_printf("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
+    mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum {:d}.", refpt);
     return NOBODY;
   }
 
@@ -216,13 +216,13 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
   struct atomic_file af;
 
   if (!zone_num) {
-    mud_log_printf("SYSERR: no zone given.");
+    mud_log("SYSERR: no zone given.");
     return false;
   }
 
   snprintf(mobfname, sizeof(mobfname), "%s%d.mob", MOB_PREFIX, zone_num->number);
   if ((mobfd = atomic_open(&af, mobfname, false)) == nullptr) {
-    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return false;
   }
 
@@ -231,7 +231,7 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
       continue;
     check_mobile_strings(g, mob_proto_of(g, rmob));
     if (!write_mobile_record(g, i, mob_proto_of(g, rmob), mobfd))
-      mud_log_printf("SYSERR: GenOLC: Error writing mobile #%d.", i);
+      mud_log("SYSERR: GenOLC: Error writing mobile #{:d}.", i);
   }
   fputs("$\n", mobfd);
   if (!atomic_commit(&af))
@@ -241,7 +241,7 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
   if (in_save_list(g, zone_num->number, SL_MOB)) {
     remove_from_save_list(g, zone_num->number, SL_MOB);
     create_world_index(g, zone_num->number, "mob");
-    mud_log_printf("GenOLC: save_mobiles: Saving mobiles '%s'", usedfname);
+    mud_log("GenOLC: save_mobiles: Saving mobiles '{}'", usedfname);
   }
   return true;
 }
@@ -350,13 +350,13 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
           char_get_position(mob), char_get_mob_specials_default_pos(mob), char_get_sex(mob));
 
   if (!write_mobile_espec(g, mvnum, mob, fd))
-    mud_log_printf("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
+    mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #{:d}.", mvnum);
 
   script_save_to_disk(fd, mob, MOB_TRIGGER);
 
 #if CONFIG_GENOLC_MOBPROG
   if (write_mobile_mobprog(mvnum, mob, fd) < 0)
-    mud_log_printf("SYSERR: GenOLC: Error writing MobProgs for mobile #%d.", mvnum);
+    mud_log("SYSERR: GenOLC: Error writing MobProgs for mobile #{:d}.", mvnum);
 #endif
 
   return true;
@@ -376,7 +376,7 @@ static void check_mobile_string(GameWorld *g, mob_vnum i, std::string *string, c
   if (string->empty()) {
     char smbuf[128];
     sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
-    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "%s", smbuf);
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "{}", smbuf);
     *string = "An undefined string.";
   }
 }

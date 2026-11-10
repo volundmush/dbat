@@ -66,12 +66,12 @@ ACMD(do_oasis_medit)
   buf2                  = take_arg(rest);
 
   if (buf1.empty()) {
-    send_to_char_printf(g, ch, "Specify a mobile VNUM to edit.\r\n");
+    send_to_char(g, ch, "Specify a mobile VNUM to edit.\r\n");
     return;
   }
   if (!isdigit(buf1[0])) {
     if (!str_eq_nocase("save", buf1)) {
-      send_to_char_printf(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+      send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
 
@@ -89,7 +89,7 @@ ACMD(do_oasis_medit)
     }
 
     if (number == NOWHERE) {
-      send_to_char_printf(g, ch, "Save which zone?\r\n");
+      send_to_char(g, ch, "Save which zone?\r\n");
       return;
     }
   }
@@ -106,8 +106,8 @@ ACMD(do_oasis_medit)
   for (descriptor_data *dd : each_desc(g)) {
     if (desc_get_connected(dd) == CON_MEDIT) {
       if (dd->olc && OLC_NUM(dd) == number) {
-        send_to_char_printf(g, ch, "That mobile is currently being edited by %s.\r\n",
-                            char_get_name(dd->character));
+        send_to_char(g, ch, "That mobile is currently being edited by {}.\r\n",
+                     char_get_name(dd->character));
         return;
       }
     }
@@ -119,8 +119,8 @@ ACMD(do_oasis_medit)
   /** Give descriptor an OLC structure.                                      **/
   /****************************************************************************/
   if (d->olc) {
-    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true,
-                  "SYSERR: do_oasis_medit: Player already had olc structure.");
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
+           "SYSERR: do_oasis_medit: Player already had olc structure.");
     delete d->olc;
   }
 
@@ -131,7 +131,7 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
   if (OLC_ZNUM(d) == nullptr) {
-    send_to_char_printf(g, ch, "Sorry, there is no zone for that number!\r\n");
+    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
     return;
@@ -151,11 +151,11 @@ ACMD(do_oasis_medit)
   /** If save is TRUE, save the mobiles.                                     **/
   /****************************************************************************/
   if (save) {
-    send_to_char_printf(g, ch, "Saving all mobiles in zone %d.\r\n",
-                        OLC_ZNUM(d)->number);
-    mudlog_printf(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
-                  "OLC: %s saves mobile info for zone %d.",
-                  char_get_name(ch), OLC_ZNUM(d)->number);
+    send_to_char(g, ch, "Saving all mobiles in zone {:d}.\r\n",
+                 OLC_ZNUM(d)->number);
+    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
+           "OLC: {} saves mobile info for zone {:d}.",
+           char_get_name(ch), OLC_ZNUM(d)->number);
 
     /**************************************************************************/
     /** Save the mobiles.                                                    **/
@@ -191,8 +191,8 @@ ACMD(do_oasis_medit)
   act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
-  mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
-                char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} starts editing zone {:d} allowed zone {:d}",
+         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 static void medit_save_to_disk(GameWorld *g, zone_vnum foo)
@@ -295,7 +295,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   mob_vnum new_rnum;
 
   if ((new_rnum = add_mobile(g, OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
-    mud_log_printf("medit_save_internally: add_mobile failed.");
+    mud_log("medit_save_internally: add_mobile failed.");
     return;
   }
 
@@ -337,9 +337,9 @@ static void medit_disp_positions(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
 
   for (i = 0; *position_types[i] != '\n'; i++) {
-    write_to_output_printf(g, d, "@g%2d@n) %s\r\n", i, position_types[i]);
+    write_to_output(g, d, "@g{:>2d}@n) {}\r\n", i, position_types[i]);
   }
-  write_to_output_printf(g, d, "Enter position number : ");
+  write_to_output(g, d, "Enter position number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -354,9 +354,9 @@ static void medit_disp_sex(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
 
   for (i = 0; i < NUM_GENDERS; i++) {
-    write_to_output_printf(g, d, "@g%2d@n) %s\r\n", i, genders[i]);
+    write_to_output(g, d, "@g{:>2d}@n) {}\r\n", i, genders[i]);
   }
-  write_to_output_printf(g, d, "Enter gender number : ");
+  write_to_output(g, d, "Enter gender number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -371,8 +371,8 @@ static void medit_disp_mob_flags(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
   olc_list_columns(g, d, action_bits, NUM_MOB_FLAGS, 1, "  ", 2);
   sprintbitarray(char_get_act(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
-  write_to_output_printf(g, d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
-                         flags);
+  write_to_output(g, d, "\r\nCurrent flags : @c{}@n\r\nEnter mob flags (0 to quit) : ",
+                  flags);
 }
 
 /*-------------------------------------------------------------------*/
@@ -380,10 +380,10 @@ static void medit_disp_mob_flags(GameWorld *g, struct descriptor_data *d)
 static void medit_disp_personality(GameWorld *g, struct descriptor_data *d)
 {
 
-  write_to_output_printf(g, d, "@GPersonalities\n");
-  write_to_output_printf(g, d, "@D--------------@n\n");
+  write_to_output(g, d, "@GPersonalities\n");
+  write_to_output(g, d, "@D--------------@n\n");
   for (int i = 0; i < MAX_PERSONALITIES; i++)
-    write_to_output_printf(g, d, "@w%d@D) @W%s@n\n", i + 1, npc_personality[i]);
+    write_to_output(g, d, "@w{:d}@D) @W{}@n\n", i + 1, npc_personality[i]);
 }
 
 /*
@@ -396,8 +396,8 @@ static void medit_disp_aff_flags(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
   olc_list_columns(g, d, affected_bits + 1, NUM_AFF_FLAGS, 1, "  ", 2);
   sprintbitarray(char_get_affected_by(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
-  write_to_output_printf(g, d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
-                         flags);
+  write_to_output(g, d, "\r\nCurrent flags   : @c{}@n\r\nEnter aff flags (0 to quit) : ",
+                  flags);
 }
 
 /*-------------------------------------------------------------------*/
@@ -415,9 +415,9 @@ static void medit_disp_class(GameWorld *g, struct descriptor_data *d)
     if (!sensei_exists(i))
       continue;
     sprintf(buf, "@g%2d@n) %s\r\n", i, sensei_name(i));
-    write_to_output_printf(g, d, "%s", buf);
+    write_to_output(g, d, "{}", buf);
   }
-  write_to_output_printf(g, d, "Enter class number : ");
+  write_to_output(g, d, "Enter class number : ");
 }
 /*-------------------------------------------------------------------*/
 /*
@@ -432,9 +432,9 @@ static void medit_disp_race(GameWorld *g, struct descriptor_data *d)
   for (int r = 0; r < NUM_RACES; r++) {
     sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race_name(r),
             !(++columns % 2) ? "\r\n" : "");
-    write_to_output_printf(g, d, "%s", buf);
+    write_to_output(g, d, "{}", buf);
   }
-  write_to_output_printf(g, d, "Enter race number : ");
+  write_to_output(g, d, "Enter race number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -451,9 +451,9 @@ static void medit_disp_size(GameWorld *g, struct descriptor_data *d)
     sprintf(buf, "@g%2d@n) %-20.20s  %s", i,
             (i == SIZE_UNDEFINED) ? "DEFAULT" : size_names[i],
             !(++columns % 2) ? "\r\n" : "");
-    write_to_output_printf(g, d, "%s", buf);
+    write_to_output(g, d, "{}", buf);
   }
-  write_to_output_printf(g, d, "Enter size number (-1 for default): ");
+  write_to_output(g, d, "Enter size number (-1 for default): ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -469,44 +469,25 @@ static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
   mob = OLC_MOB(d);
   clear_screen(g, d);
 
-  write_to_output_printf(g, d,
-                         "-- Mob Number:  [@c%d@n]\r\n"
-                         "@g1@n) Sex: @y%-7.7s@n	         @g2@n) Alias: @y%s\r\n"
-                         "@g3@n) S-Desc: @y%s\r\n"
-                         "@g4@n) L-Desc:-\r\n@y%s"
-                         "@g5@n) D-Desc:-\r\n@y%s"
-                         "@g6@n) Level:       [@c%4d@n],  @g7@n) Alignment:    [@c%5d@n]\r\n"
-                         "@g8@n) Accuracy Mod:[@c%4d@n],  @g9@n) Damage Mod:   [@c%5d@n]\r\n"
-                         "@gA@n) NumDamDice:  [@c%4d@n],  @gB@n) SizeDamDice:  [@c%5d@n]\r\n"
-                         "@gC@n) Num HP Dice: [@c%4" PRId64 "@n],  @gD@n) Size HP Dice: [@c%5" PRId64 "@n],  @gE@n) HP Bonus: [@c%5" PRId64 "@n]\r\n"
-                         "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" PRId64 "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
+  write_to_output(g, d,
+                  "-- Mob Number:  [@c{:d}@n]\r\n@g1@n) Sex: @y{:<7.7}@n	         @g2@n) Alias: @y{}\r\n@g3@n) S-Desc: @y{}\r\n@g4@n) L-Desc:-\r\n@y{}@g5@n) D-Desc:-\r\n@y{}@g6@n) Level:       [@c{:>4d}@n],  @g7@n) Alignment:    [@c{:>5d}@n]\r\n@g8@n) Accuracy Mod:[@c{:>4d}@n],  @g9@n) Damage Mod:   [@c{:>5d}@n]\r\n@gA@n) NumDamDice:  [@c{:>4d}@n],  @gB@n) SizeDamDice:  [@c{:>5d}@n]\r\n@gC@n) Num HP Dice: [@c{:>4d}@n],  @gD@n) Size HP Dice: [@c{:>5d}@n],  @gE@n) HP Bonus: [@c{:>5d}@n]\r\n@gF@n) Armor Class: [@c{:>4d}@n],  @gG@n) Exp:      [@c{:d}@n],  @gH@n) Gold:  [@c{:>8d}@n]\r\n",
 
-                         OLC_NUM(d), genders[(int)char_get_sex(mob)], char_get_alias(mob),
-                         char_get_sdesc(mob), char_get_ldesc(mob), char_get_ddesc(mob), char_get_race_level(mob),
-                         char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
-                         char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob), getCurPL(g, mob), (getCurKI(g, mob)),
-                         (getCurST(g, mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob));
+                  OLC_NUM(d), genders[(int)char_get_sex(mob)], char_get_alias(mob),
+                  char_get_sdesc(mob), char_get_ldesc(mob), char_get_ddesc(mob), char_get_race_level(mob),
+                  char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
+                  char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob), getCurPL(g, mob), (getCurKI(g, mob)),
+                  (getCurST(g, mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob));
   sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
-  write_to_output_printf(g, d,
-                         "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
-                         "@gK@n) Personality: @Y%s@n\r\n"
-                         "@gL@n) NPC Flags  : @c%s\r\n"
-                         "@gM@n) AFF Flags  : @c%s\r\n"
-                         "@gN@n) Class      : @y%-10s@n,	 @gO@n) Race      : @y%-10s\r\n"
-                         "@gS@n) Script     : @c%s\r\n"
-                         "@gW@n) Copy mob              ,	 @gX@n) Delete mob\r\n"
-                         "@gY@n) Size       : @y%s\r\n"
-                         "@gZ@n) Wiznet     :\r\n"
-                         "@gQ@n) Quit\r\n"
-                         "Enter choice : ",
+  write_to_output(g, d,
+                  "@gI@n) Position   : @y{:<10}@n,	 @gJ@n) Default   : @y{:<10}\r\n@gK@n) Personality: @Y{}@n\r\n@gL@n) NPC Flags  : @c{}\r\n@gM@n) AFF Flags  : @c{}\r\n@gN@n) Class      : @y{:<10}@n,	 @gO@n) Race      : @y{:<10}\r\n@gS@n) Script     : @c{}\r\n@gW@n) Copy mob              ,	 @gX@n) Delete mob\r\n@gY@n) Size       : @y{}\r\n@gZ@n) Wiznet     :\r\n@gQ@n) Quit\r\nEnter choice : ",
 
-                         position_types[(int)char_get_position(mob)],
-                         position_types[(int)char_get_mob_specials_default_pos(mob)],
-                         npc_personality[char_get_personality(mob)],
-                         flags, flag2, char_sensei_name(mob),
-                         char_true_race_name(mob),
-                         OLC_SCRIPT(d) ? "Set." : "Not Set.", size_names[get_size(mob)]);
+                  position_types[(int)char_get_position(mob)],
+                  position_types[(int)char_get_mob_specials_default_pos(mob)],
+                  npc_personality[char_get_personality(mob)],
+                  flags, flag2, char_sensei_name(mob),
+                  char_true_race_name(mob),
+                  OLC_SCRIPT(d) ? "Set." : "Not Set.", size_names[get_size(mob)]);
 
   OLC_MODE(d) = MEDIT_MAIN_MENU;
 }
@@ -523,7 +504,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
     i = atoi(arg);
     if (!*arg || !(isdigit(arg[0]) || (arg[0] == '-' && isdigit(arg[1])))) {
-      write_to_output_printf(g, d, "Field must be numerical, try again : ");
+      write_to_output(g, d, "Field must be numerical, try again : ");
       return;
     }
   } else { /* String response. */
@@ -545,13 +526,13 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
        * Save the mob in memory and to disk.
        */
           medit_save_internally(g, d);
-          mudlog_printf(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
-                        "OLC: %s edits mob %d", char_get_name(d->character), OLC_NUM(d));
+          mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
+                 "OLC: {} edits mob {:d}", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             medit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d))->number);
-            write_to_output_printf(g, d, "Mobile saved to disk.\r\n");
+            write_to_output(g, d, "Mobile saved to disk.\r\n");
           } else
-            write_to_output_printf(g, d, "Mobile saved to memory.\r\n");
+            write_to_output(g, d, "Mobile saved to memory.\r\n");
           cleanup_olc(g, d, CLEANUP_ALL);
           return;
         case 'n':
@@ -563,8 +544,8 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           cleanup_olc(g, d, CLEANUP_ALL);
           return;
         default:
-          write_to_output_printf(g, d, "Invalid choice!\r\n");
-          write_to_output_printf(g, d, "Do you wish to save the mobile? : ");
+          write_to_output(g, d, "Invalid choice!\r\n");
+          write_to_output(g, d, "Do you wish to save the mobile? : ");
           return;
       }
       break;
@@ -576,7 +557,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'q':
         case 'Q':
           if (OLC_VAL(d)) { /* Anything been changed? */
-            write_to_output_printf(g, d, "Do you wish to save your changes? : ");
+            write_to_output(g, d, "Do you wish to save your changes? : ");
             OLC_MODE(d) = MEDIT_CONFIRM_SAVESTRING;
           } else
             cleanup_olc(g, d, CLEANUP_ALL);
@@ -600,9 +581,9 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case '5':
           OLC_MODE(d) = MEDIT_D_DESC;
           send_editor_help(g, d);
-          write_to_output_printf(g, d, "Enter mob description:\r\n\r\n");
+          write_to_output(g, d, "Enter mob description:\r\n\r\n");
           if (char_get_ddesc(OLC_MOB(d))) {
-            write_to_output_printf(g, d, "%s", char_get_ddesc(OLC_MOB(d)));
+            write_to_output(g, d, "{}", char_get_ddesc(OLC_MOB(d)));
           }
           string_write(d, char_description_slot(OLC_MOB(d)), MAX_MOB_DESC, 0);
           OLC_VAL(d) = 1;
@@ -705,12 +686,12 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         case 'w':
         case 'W':
-          write_to_output_printf(g, d, "Copy what mob? ");
+          write_to_output(g, d, "Copy what mob? ");
           OLC_MODE(d) = MEDIT_COPY;
           return;
         case 'x':
         case 'X':
-          write_to_output_printf(g, d, "Are you sure you want to delete this mobile? ");
+          write_to_output(g, d, "Are you sure you want to delete this mobile? ");
           OLC_MODE(d) = MEDIT_DELETE;
           return;
         case 'y':
@@ -730,11 +711,11 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if (i == 0)
         break;
       else if (i == 1)
-        write_to_output_printf(g, d, "\r\nEnter new value : ");
+        write_to_output(g, d, "\r\nEnter new value : ");
       else if (i == -1)
-        write_to_output_printf(g, d, "\r\nEnter new text :\r\n] ");
+        write_to_output(g, d, "\r\nEnter new text :\r\n] ");
       else
-        write_to_output_printf(g, d, "Oops...\r\n");
+        write_to_output(g, d, "Oops...\r\n");
       return;
       /*-------------------------------------------------------------------*/
     case OLC_SCRIPT_EDIT:
@@ -754,7 +735,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
     case MEDIT_L_DESC:
       smash_tilde(arg);
       if (arg && *arg) {
-        char_set_ldesc(OLC_MOB(d), str_format_printf("%s\r\n", arg));
+        char_set_ldesc(OLC_MOB(d), str_format("{}\r\n", arg));
       } else
         char_set_ldesc(OLC_MOB(d), "undefined");
 
@@ -765,8 +746,8 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * We should never get here.
      */
       cleanup_olc(g, d, CLEANUP_ALL);
-      mudlog_printf(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
-      write_to_output_printf(g, d, "Oops...\r\n");
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
+      write_to_output(g, d, "Oops...\r\n");
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_NPC_FLAGS:
@@ -903,15 +884,15 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if (mob_proto_of(g, rnum = atoi(arg))) {
         medit_setup_existing(g, d, rnum);
       } else
-        write_to_output_printf(g, d, "That mob does not exist.\r\n");
+        write_to_output(g, d, "That mob does not exist.\r\n");
       break;
 
     case MEDIT_DELETE:
       if (*arg == 'y' || *arg == 'Y') {
         if (delete_mobile(g, char_get_nr(OLC_MOB(d))) != NOBODY)
-          write_to_output_printf(g, d, "Mobile deleted.\r\n");
+          write_to_output(g, d, "Mobile deleted.\r\n");
         else
-          write_to_output_printf(g, d, "Couldn't delete the mobile!\r\n");
+          write_to_output(g, d, "Couldn't delete the mobile!\r\n");
 
         cleanup_olc(g, d, CLEANUP_ALL);
         return;
@@ -921,12 +902,12 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         OLC_MODE(d) = MEDIT_MAIN_MENU;
         return;
       } else
-        write_to_output_printf(g, d, "Please answer 'Y' or 'N': ");
+        write_to_output(g, d, "Please answer 'Y' or 'N': ");
       break;
 
     case MEDIT_RACE:
       if (!race_exists(i)) {
-        write_to_output_printf(g, d, "That's not a race!");
+        write_to_output(g, d, "That's not a race!");
         break;
       }
       char_set_race(OLC_MOB(d), i);
@@ -944,8 +925,8 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
      * We should never get here.
      */
       cleanup_olc(g, d, CLEANUP_ALL);
-      mudlog_printf(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached default case!");
-      write_to_output_printf(g, d, "Oops...\r\n");
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached default case!");
+      write_to_output(g, d, "Oops...\r\n");
       break;
   }
   /*-------------------------------------------------------------------*/

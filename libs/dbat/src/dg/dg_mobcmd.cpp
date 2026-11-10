@@ -62,19 +62,18 @@
 /*
  * Local functions.
  */
-static void mob_log_printf(GameWorld *g, char_data *mob, const char *format, ...) __attribute__((format(printf, 3, 4)));
+static void mob_log(GameWorld *g, char_data *mob, std::string_view text);
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+static void mob_log(GameWorld *g, char_data *mob, std::format_string<Args...> fmt, Args &&...args)
+{
+  mob_log(g, mob, str_format(fmt, std::forward<Args>(args)...));
+}
 
 /* attaches mob's name and vnum to msg and sends it to script_log */
-static void mob_log_printf(GameWorld *g, char_data *mob, const char *format, ...)
+static void mob_log(GameWorld *g, char_data *mob, std::string_view text)
 {
-  va_list args;
-  char output[MAX_STRING_LENGTH];
-
-  va_start(args, format);
-  vsnprintf(output, sizeof(output), format, args);
-  va_end(args);
-
-  script_log_printf(g, "Mob (%s, VNum %d):: %s", char_get_sdesc(mob), char_get_mob_vnum(g, mob), output);
+  script_log(g, "Mob ({}, VNum {:d}):: {}", char_get_sdesc(mob), char_get_mob_vnum(g, mob), text);
 }
 
 /*
@@ -91,7 +90,7 @@ static void mob_log_printf(GameWorld *g, char_data *mob, const char *format, ...
 static bool mob_cmd_allowed(GameWorld *g, char_data *ch, bool check_charm)
 {
   if (!MOB_OR_IMPL(ch)) {
-    send_to_char_printf(g, ch, "Huh?!?\r\n");
+    send_to_char(g, ch, "Huh?!?\r\n");
     return false;
   }
   if (check_charm && char_aff_flagged(ch, AFF_CHARM))
@@ -111,7 +110,7 @@ ACMD(do_masound)
     return;
 
   if (argument.empty()) {
-    mob_log_printf(g, ch, "masound called with no argument");
+    mob_log(g, ch, "masound called with no argument");
     return;
   }
 
@@ -144,7 +143,7 @@ ACMD(do_mheal)
   arg2                  = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
-    mob_log_printf(g, ch, "mheal called without an argument");
+    mob_log(g, ch, "mheal called without an argument");
     return;
   }
 
@@ -157,7 +156,7 @@ ACMD(do_mheal)
   } else if (str_eq_nocase(arg, "st")) {
     incCurSTPercent(g, ch, num, true);
   } else {
-    mob_log_printf(g, ch, "mheal called with wrong argument [pl | ki | st]");
+    mob_log(g, ch, "mheal called with wrong argument [pl | ki | st]");
     return;
   }
 }
@@ -176,27 +175,27 @@ ACMD(do_mkill)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mkill called with no argument");
+    mob_log(g, ch, "mkill called with no argument");
     return;
   }
 
   if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log_printf(g, ch, "mkill: victim (%s) not found", arg.c_str());
+      mob_log(g, ch, "mkill: victim ({}) not found", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log_printf(g, ch, "mkill: victim (%s) not found", arg.c_str());
+    mob_log(g, ch, "mkill: victim ({}) not found", arg.c_str());
     return;
   }
 
   if (victim == ch) {
-    mob_log_printf(g, ch, "mkill: victim is self");
+    mob_log(g, ch, "mkill: victim is self");
     return;
   }
 
   if (!char_is_npc(victim) && char_prf_flagged(g, victim, PRF_NOHASSLE)) {
-    mob_log_printf(g, ch, "mkill: target has nohassle on");
+    mob_log(g, ch, "mkill: target has nohassle on");
     return;
   }
 
@@ -246,7 +245,7 @@ ACMD(do_mjunk)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mjunk called with no argument");
+    mob_log(g, ch, "mjunk called with no argument");
     return;
   }
 
@@ -286,17 +285,17 @@ ACMD(do_mechoaround)
   std::string p(skip_spaces(rest));
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mechoaround called with no argument");
+    mob_log(g, ch, "mechoaround called with no argument");
     return;
   }
 
   if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log_printf(g, ch, "mechoaround: victim (%s) does not exist", arg.c_str());
+      mob_log(g, ch, "mechoaround: victim ({}) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log_printf(g, ch, "mechoaround: victim (%s) does not exist", arg.c_str());
+    mob_log(g, ch, "mechoaround: victim ({}) does not exist", arg.c_str());
     return;
   }
 
@@ -319,17 +318,17 @@ ACMD(do_msend)
   std::string p(skip_spaces(rest));
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "msend called with no argument");
+    mob_log(g, ch, "msend called with no argument");
     return;
   }
 
   if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log_printf(g, ch, "msend: victim (%s) does not exist", arg.c_str());
+      mob_log(g, ch, "msend: victim ({}) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_room_vis(g, ch, arg, nullptr))) {
-    mob_log_printf(g, ch, "msend: victim (%s) does not exist", arg.c_str());
+    mob_log(g, ch, "msend: victim ({}) does not exist", arg.c_str());
     return;
   }
 
@@ -343,7 +342,7 @@ ACMD(do_mecho)
     return;
 
   if (argument.empty()) {
-    mob_log_printf(g, ch, "mecho called with no arguments");
+    mob_log(g, ch, "mecho called with no arguments");
     return;
   }
   std::string p(skip_spaces(argument));
@@ -363,10 +362,10 @@ ACMD(do_mzoneecho)
   std::string msg(skip_spaces(rest));
 
   if (room_number.empty() || msg.empty())
-    mob_log_printf(g, ch, "mzoneecho called with too few args");
+    mob_log(g, ch, "mzoneecho called with too few args");
 
   else if ((zone = find_zone_by_thing(g, parse_int(room_number))) == nullptr)
-    mob_log_printf(g, ch, "mzoneecho called for nonexistant zone");
+    mob_log(g, ch, "mzoneecho called for nonexistant zone");
 
   else {
     send_to_zone(g, (msg + "\r\n").c_str(), zone);
@@ -396,7 +395,7 @@ ACMD(do_mload)
   std::string target(skip_spaces(rest)); /* where to load it */
 
   if (arg1.empty() || arg2.empty() || !is_number(arg2) || ((number = parse_int(arg2)) < 0)) {
-    mob_log_printf(g, ch, "mload: bad syntax");
+    mob_log(g, ch, "mload: bad syntax");
     return;
   }
 
@@ -407,14 +406,13 @@ ACMD(do_mload)
       rnum = char_get_in_room(ch);
     } else {
       if (!isdigit(target[0]) || !room_of(g, rnum = parse_int(target))) {
-        mob_log_printf(g, ch, "mload: room target vnum doesn't exist "
-                              "(loading mob vnum %d to room %s)",
-                       number, target.c_str());
+        mob_log(g, ch, "mload: room target vnum doesn't exist (loading mob vnum {:d} to room {})",
+                number, target.c_str());
         return;
       }
     }
     if ((mob = read_mobile(g, number)) == nullptr) {
-      mob_log_printf(g, ch, "mload: bad mob vnum");
+      mob_log(g, ch, "mload: bad mob vnum");
       return;
     }
     char_to_room(g, mob, rnum);
@@ -428,7 +426,7 @@ ACMD(do_mload)
 
   else if (is_abbrev(arg1, "obj")) {
     if ((object = read_object(g, number)) == nullptr) {
-      mob_log_printf(g, ch, "mload: bad object vnum");
+      mob_log(g, ch, "mload: bad object vnum");
       return;
     }
     if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
@@ -479,7 +477,7 @@ ACMD(do_mload)
   }
 
   else
-    mob_log_printf(g, ch, "mload: bad type");
+    mob_log(g, ch, "mload: bad type");
 }
 
 /*
@@ -528,13 +526,13 @@ ACMD(do_mpurge)
       extract_obj(g, obj);
       obj = nullptr;
     } else
-      mob_log_printf(g, ch, "mpurge: bad argument");
+      mob_log(g, ch, "mpurge: bad argument");
 
     return;
   }
 
   if (!char_is_npc(victim)) {
-    mob_log_printf(g, ch, "mpurge: purging a PC");
+    mob_log(g, ch, "mpurge: purging a PC");
     return;
   }
 
@@ -556,12 +554,12 @@ ACMD(do_mgoto)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mgoto called with no argument");
+    mob_log(g, ch, "mgoto called with no argument");
     return;
   }
 
   if ((location = find_target_room(g, ch, arg)) == NOWHERE && char_get_mob_vnum(g, ch) != 3) {
-    mob_log_printf(g, ch, "mgoto: invalid location");
+    mob_log(g, ch, "mgoto: invalid location");
     return;
   }
   if ((location = find_target_room(g, ch, arg)) == NOWHERE) {
@@ -588,12 +586,12 @@ ACMD(do_mat)
   std::string arg       = take_arg(rest);
 
   if (arg.empty() || rest.empty()) {
-    mob_log_printf(g, ch, "mat: bad argument");
+    mob_log(g, ch, "mat: bad argument");
     return;
   }
 
   if ((location = find_target_room(g, ch, arg)) == NOWHERE) {
-    mob_log_printf(g, ch, "mat: invalid location");
+    mob_log(g, ch, "mat: invalid location");
     return;
   }
 
@@ -627,20 +625,20 @@ ACMD(do_mteleport)
   arg2                  = take_arg(rest);
 
   if (arg1.empty() || arg2.empty()) {
-    mob_log_printf(g, ch, "mteleport: bad syntax");
+    mob_log(g, ch, "mteleport: bad syntax");
     return;
   }
 
   target = find_target_room(g, ch, arg2);
 
   if (target == NOWHERE) {
-    mob_log_printf(g, ch, "mteleport target is an invalid room");
+    mob_log(g, ch, "mteleport target is an invalid room");
     return;
   }
 
   if (str_eq_nocase(arg1, "all")) {
     if (target == char_get_in_room(ch)) {
-      mob_log_printf(g, ch, "mteleport all target is itself");
+      mob_log(g, ch, "mteleport all target is itself");
       return;
     }
 
@@ -655,11 +653,11 @@ ACMD(do_mteleport)
   } else {
     if (arg1[0] == UID_CHAR) {
       if (!(vict = get_char(g, arg1))) {
-        mob_log_printf(g, ch, "mteleport: victim (%s) does not exist", arg1.c_str());
+        mob_log(g, ch, "mteleport: victim ({}) does not exist", arg1.c_str());
         return;
       }
     } else if (!(vict = get_char_vis(g, ch, arg1, nullptr, FIND_CHAR_WORLD))) {
-      mob_log_printf(g, ch, "mteleport: victim (%s) does not exist", arg1.c_str());
+      mob_log(g, ch, "mteleport: victim ({}) does not exist", arg1.c_str());
       return;
     }
 
@@ -686,18 +684,18 @@ ACMD(do_mdamage)
 
   /* who cares if it's a number ? if not it'll just be 0 */
   if (name.empty() || amount.empty()) {
-    mob_log_printf(g, ch, "mdamage: bad syntax");
+    mob_log(g, ch, "mdamage: bad syntax");
     return;
   }
 
   dam = parse_int(amount);
   if (name[0] == UID_CHAR) {
     if (!(vict = get_char(g, name))) {
-      mob_log_printf(g, ch, "mdamage: victim (%s) does not exist", name.c_str());
+      mob_log(g, ch, "mdamage: victim ({}) does not exist", name.c_str());
       return;
     }
   } else if (!(vict = get_char_room_vis(g, ch, name, nullptr))) {
-    mob_log_printf(g, ch, "mdamage: victim (%s) does not exist", name.c_str());
+    mob_log(g, ch, "mdamage: victim ({}) does not exist", name.c_str());
     return;
   }
   script_damage(g, vict, dam);
@@ -717,7 +715,7 @@ ACMD(do_mforce)
   std::string arg       = take_arg(rest);
 
   if (arg.empty() || rest.empty()) {
-    mob_log_printf(g, ch, "mforce: bad syntax");
+    mob_log(g, ch, "mforce: bad syntax");
     return;
   }
 
@@ -741,16 +739,16 @@ ACMD(do_mforce)
 
     if (arg[0] == UID_CHAR) {
       if (!(victim = get_char(g, arg))) {
-        mob_log_printf(g, ch, "mforce: victim (%s) does not exist", arg.c_str());
+        mob_log(g, ch, "mforce: victim ({}) does not exist", arg.c_str());
         return;
       }
     } else if ((victim = get_char_room_vis(g, ch, arg, nullptr)) == nullptr) {
-      mob_log_printf(g, ch, "mforce: no such victim");
+      mob_log(g, ch, "mforce: no such victim");
       return;
     }
 
     if (victim == ch) {
-      mob_log_printf(g, ch, "mforce: forcing self");
+      mob_log(g, ch, "mforce: forcing self");
       return;
     }
 
@@ -772,17 +770,17 @@ ACMD(do_mremember)
   std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mremember: bad syntax");
+    mob_log(g, ch, "mremember: bad syntax");
     return;
   }
 
   if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log_printf(g, ch, "mremember: victim (%s) does not exist", arg.c_str());
+      mob_log(g, ch, "mremember: victim ({}) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    mob_log_printf(g, ch, "mremember: victim (%s) does not exist", arg.c_str());
+    mob_log(g, ch, "mremember: victim ({}) does not exist", arg.c_str());
     return;
   }
 
@@ -816,17 +814,17 @@ ACMD(do_mforget)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    mob_log_printf(g, ch, "mforget: bad syntax");
+    mob_log(g, ch, "mforget: bad syntax");
     return;
   }
 
   if (arg[0] == UID_CHAR) {
     if (!(victim = get_char(g, arg))) {
-      mob_log_printf(g, ch, "mforget: victim (%s) does not exist", arg.c_str());
+      mob_log(g, ch, "mforget: victim ({}) does not exist", arg.c_str());
       return;
     }
   } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    mob_log_printf(g, ch, "mforget: victim (%s) does not exist", arg.c_str());
+    mob_log(g, ch, "mforget: victim ({}) does not exist", arg.c_str());
     return;
   }
 
@@ -863,7 +861,7 @@ ACMD(do_mtransform)
     return;
 
   if (char_get_desc(ch)) {
-    send_to_char_printf(g, ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
+    send_to_char(g, ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
     return;
   }
 
@@ -871,9 +869,9 @@ ACMD(do_mtransform)
   arg                   = take_arg(rest);
 
   if (arg.empty())
-    mob_log_printf(g, ch, "mtransform: missing argument");
+    mob_log(g, ch, "mtransform: missing argument");
   else if (!isdigit(arg[0]) && arg[0] != '-')
-    mob_log_printf(g, ch, "mtransform: bad argument");
+    mob_log(g, ch, "mtransform: bad argument");
   else {
     if (isdigit(arg[0]))
       m = read_mobile(g, parse_int(arg));
@@ -881,7 +879,7 @@ ACMD(do_mtransform)
       m = read_mobile(g, parse_int(std::string_view(arg).substr(1)));
     }
     if (m == nullptr) {
-      mob_log_printf(g, ch, "mtransform: bad mobile vnum");
+      mob_log(g, ch, "mtransform: bad mobile vnum");
       return;
     }
 
@@ -943,27 +941,27 @@ ACMD(do_mdoor)
   std::string value(skip_spaces(rest));
 
   if (target.empty() || direction.empty() || field.empty()) {
-    mob_log_printf(g, ch, "mdoor called with too few args");
+    mob_log(g, ch, "mdoor called with too few args");
     return;
   }
 
   if ((rm = get_room(g, target)) == nullptr) {
-    mob_log_printf(g, ch, "mdoor: invalid target");
+    mob_log(g, ch, "mdoor: invalid target");
     return;
   }
 
   if ((dir = search_block(direction, dirs, false)) == -1) {
-    mob_log_printf(g, ch, "mdoor: invalid direction");
+    mob_log(g, ch, "mdoor: invalid direction");
     return;
   }
 
   if ((fd = search_block(field, dg_door_fields, false)) == -1) {
-    mob_log_printf(g, ch, "odoor: invalid field");
+    mob_log(g, ch, "odoor: invalid field");
     return;
   }
 
   if (!dg_door_apply(g, rm, dir, fd, value.data()))
-    mob_log_printf(g, ch, "mdoor: invalid door target");
+    mob_log(g, ch, "mdoor: invalid door target");
 }
 
 ACMD(do_mfollow)
@@ -978,17 +976,17 @@ ACMD(do_mfollow)
   buf                   = take_arg(rest);
 
   if (buf.empty()) {
-    mob_log_printf(g, ch, "mfollow: bad syntax");
+    mob_log(g, ch, "mfollow: bad syntax");
     return;
   }
 
   if (buf[0] == UID_CHAR) {
     if (!(leader = get_char(g, buf))) {
-      mob_log_printf(g, ch, "mfollow: victim (%s) does not exist", buf.c_str());
+      mob_log(g, ch, "mfollow: victim ({}) does not exist", buf.c_str());
       return;
     }
   } else if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    mob_log_printf(g, ch, "mfollow: victim (%s) not found", buf.c_str());
+    mob_log(g, ch, "mfollow: victim ({}) not found", buf.c_str());
     return;
   }
 
@@ -1008,7 +1006,7 @@ ACMD(do_mfollow)
     return;
 
   if (circle_follow(g, ch, leader)) {
-    mob_log_printf(g, ch, "mfollow: Following in circles.");
+    mob_log(g, ch, "mfollow: Following in circles.");
     return;
   }
 
@@ -1031,7 +1029,7 @@ ACMD(do_mrecho)
   std::string msg(skip_spaces(rest));
 
   if (msg.empty() || start.empty() || finish.empty() || !is_number(start) || !is_number(finish))
-    mob_log_printf(g, ch, "mrecho called with too few args");
+    mob_log(g, ch, "mrecho called with too few args");
   else
-    send_to_range_printf(g, parse_int(start), parse_int(finish), "%s\r\n", msg.c_str());
+    send_to_range(g, parse_int(start), parse_int(finish), "{}\r\n", msg.c_str());
 }

@@ -339,8 +339,8 @@ bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
           continue;
 
         if (t->arglist.empty()) {
-          mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #%d has no text argument!",
-                        trig_get_vnum(g, t));
+          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #{:d} has no text argument!",
+                 trig_get_vnum(g, t));
           continue;
         }
 
@@ -375,8 +375,8 @@ void speech_mtrigger(GameWorld *g, char_data *actor, char *str)
           continue;
 
         if (t->arglist.empty()) {
-          mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #%d has no text argument!",
-                        trig_get_vnum(g, t));
+          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #{:d} has no text argument!",
+                 trig_get_vnum(g, t));
           continue;
         }
 
@@ -402,8 +402,8 @@ void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor
         continue;
 
       if (t->arglist.empty()) {
-        mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #%d has no text argument!",
-                      trig_get_vnum(g, t));
+        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #{:d} has no text argument!",
+               trig_get_vnum(g, t));
         continue;
       }
 
@@ -722,8 +722,8 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
 
       if (IS_SET(t->narg, type) &&
           t->arglist.empty()) {
-        mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #%d has no text argument!",
-                      trig_get_vnum(g, t));
+        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #{:d} has no text argument!",
+               trig_get_vnum(g, t));
         continue;
       }
 
@@ -1104,8 +1104,8 @@ int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
       continue;
 
     if (t->arglist.empty()) {
-      mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #%d has no text argument!",
-                    trig_get_vnum(g, t));
+      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #{:d} has no text argument!",
+             trig_get_vnum(g, t));
       continue;
     }
 
@@ -1138,8 +1138,8 @@ void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
       continue;
 
     if (t->arglist.empty()) {
-      mudlog_printf(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #%d has no text argument!",
-                    trig_get_vnum(g, t));
+      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #{:d} has no text argument!",
+             trig_get_vnum(g, t));
       continue;
     }
 

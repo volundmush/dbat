@@ -27,7 +27,7 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
   int len = 0;
 
   if (!trig) {
-    mud_log_printf("SYSERR: NULL trigger passed to do_stat_trigger.");
+    mud_log("SYSERR: NULL trigger passed to do_stat_trigger.");
     return;
   }
 
@@ -63,7 +63,7 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
     cmd_list = cmd_list->next;
   }
 
-  send_to_char_printf(g, ch, "%s", sb);
+  send_to_char(g, ch, "{}", sb);
 }
 
 /* find the name of what the uid points to */
@@ -89,49 +89,49 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
   char namebuf[512];
   char buf1[MAX_STRING_LENGTH];
 
-  send_to_char_printf(g, ch, "Global Variables: %s\r\n", sc->global_vars ? "" : "None");
-  send_to_char_printf(g, ch, "Global context: %ld\r\n", sc->context);
+  send_to_char(g, ch, "Global Variables: {}\r\n", sc->global_vars ? "" : "None");
+  send_to_char(g, ch, "Global context: {:d}\r\n", sc->context);
 
   for (tv = sc->global_vars; tv; tv = tv->next) {
     snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name.c_str(), tv->context);
     if (tv->value[0] == UID_CHAR) {
       find_uid_name(g, tv->value.data(), name, sizeof(name));
-      send_to_char_printf(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name.c_str(), name);
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf : tv->name.c_str(), name);
     } else
-      send_to_char_printf(g, ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name.c_str(), tv->value.c_str());
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf : tv->name.c_str(), tv->value.c_str());
   }
 
   for (t = sc->trig_list; t; t = t->next) {
-    send_to_char_printf(g, ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-                        t->name.c_str(), trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
+    send_to_char(g, ch, "\r\n  Trigger: @y{}@n, VNum: [@y{:>5d}@n], RNum: [{:>5d}]\r\n",
+                 t->name.c_str(), trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
 
     if (t->attach_type == OBJ_TRIGGER) {
-      send_to_char_printf(g, ch, "  Trigger Intended Assignment: Objects\r\n");
+      send_to_char(g, ch, "  Trigger Intended Assignment: Objects\r\n");
       sprintbit(t->trigger_type, otrig_types, buf1, sizeof(buf1));
     } else if (t->attach_type == WLD_TRIGGER) {
-      send_to_char_printf(g, ch, "  Trigger Intended Assignment: Rooms\r\n");
+      send_to_char(g, ch, "  Trigger Intended Assignment: Rooms\r\n");
       sprintbit(t->trigger_type, wtrig_types, buf1, sizeof(buf1));
     } else {
-      send_to_char_printf(g, ch, "  Trigger Intended Assignment: Mobiles\r\n");
+      send_to_char(g, ch, "  Trigger Intended Assignment: Mobiles\r\n");
       sprintbit(t->trigger_type, trig_types, buf1, sizeof(buf1));
     }
 
-    send_to_char_printf(g, ch, "  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
-                        buf1, t->narg,
-                        !t->arglist.empty() ? t->arglist.c_str() : "None");
+    send_to_char(g, ch, "  Trigger Type: {}, Numeric Arg: {:d}, Arg list: {}\r\n",
+                 buf1, t->narg,
+                 !t->arglist.empty() ? t->arglist.c_str() : "None");
 
     if (t->wait_event) {
-      send_to_char_printf(g, ch, "    Wait: %ld, Current line: %s\r\n",
-                          event_time(g, t->wait_event),
-                          t->curr_state ? t->curr_state->cmd.c_str() : "End of Script");
-      send_to_char_printf(g, ch, "  Variables: %s\r\n", t->var_list ? "" : "None");
+      send_to_char(g, ch, "    Wait: {:d}, Current line: {}\r\n",
+                   event_time(g, t->wait_event),
+                   t->curr_state ? t->curr_state->cmd.c_str() : "End of Script");
+      send_to_char(g, ch, "  Variables: {}\r\n", t->var_list ? "" : "None");
 
       for (tv = t->var_list; tv; tv = tv->next) {
         if (tv->value[0] == UID_CHAR) {
           find_uid_name(g, tv->value.data(), name, sizeof(name));
-          send_to_char_printf(g, ch, "    %15s:  %s\r\n", tv->name.c_str(), name);
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name.c_str(), name);
         } else
-          send_to_char_printf(g, ch, "    %15s:  %s\r\n", tv->name.c_str(), tv->value.c_str());
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name.c_str(), tv->value.c_str());
       }
     }
   }
@@ -139,9 +139,9 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
 void do_sstat_room(GameWorld *g, struct char_data *ch, struct room_data *rm)
 {
-  send_to_char_printf(g, ch, "Triggers:\r\n");
+  send_to_char(g, ch, "Triggers:\r\n");
   if (!room_get_script(rm)) {
-    send_to_char_printf(g, ch, "  None.\r\n");
+    send_to_char(g, ch, "  None.\r\n");
     return;
   }
 
@@ -150,9 +150,9 @@ void do_sstat_room(GameWorld *g, struct char_data *ch, struct room_data *rm)
 
 void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j)
 {
-  send_to_char_printf(g, ch, "Triggers:\r\n");
+  send_to_char(g, ch, "Triggers:\r\n");
   if (!obj_get_script(j)) {
-    send_to_char_printf(g, ch, "  None.\r\n");
+    send_to_char(g, ch, "  None.\r\n");
     return;
   }
 
@@ -161,9 +161,9 @@ void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j)
 
 void do_sstat_character(GameWorld *g, char_data *ch, char_data *k)
 {
-  send_to_char_printf(g, ch, "Script information:\r\n");
+  send_to_char(g, ch, "Script information:\r\n");
   if (!char_get_script(k)) {
-    send_to_char_printf(g, ch, "  None.\r\n");
+    send_to_char(g, ch, "  None.\r\n");
     return;
   }
 
@@ -218,7 +218,7 @@ ACMD(do_attach)
   loc_name              = take_arg(rest);
 
   if (arg.empty() || targ_name.empty() || trig_name.empty()) {
-    send_to_char_printf(g, ch, "Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
+    send_to_char(g, ch, "Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
     return;
   }
 
@@ -233,29 +233,29 @@ ACMD(do_attach)
                           [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
 
       if (!victim) {
-        send_to_char_printf(g, ch, "That mob does not exist.\r\n");
+        send_to_char(g, ch, "That mob does not exist.\r\n");
         return;
       }
     }
     if (!char_is_npc(victim)) {
-      send_to_char_printf(g, ch, "Players can't have scripts.\r\n");
+      send_to_char(g, ch, "Players can't have scripts.\r\n");
       return;
     }
     if (!can_edit_zone(g, ch, room_get_zone(g, char_get_in_room(ch)))) {
-      send_to_char_printf(g, ch, "You can only attach triggers in your own zone\r\n");
+      send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
     /* have a valid mob, now get trigger */
     rn = find_trigger(g, tn);
     if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char_printf(g, ch, "That trigger does not exist.\r\n");
+      send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
 
     add_trigger(g, dg_ensure_script(char_script_slot(victim)), trig, loc);
 
-    send_to_char_printf(g, ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                        tn, trig->name.c_str(), char_get_sdesc(victim), char_get_mob_vnum(g, victim));
+    send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
+                 tn, trig->name.c_str(), char_get_sdesc(victim), char_get_mob_vnum(g, victim));
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
@@ -268,29 +268,29 @@ ACMD(do_attach)
         object = find_first(char_inventory(g, ch), [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
         if (!object) {
-          send_to_char_printf(g, ch, "That object does not exist.\r\n");
+          send_to_char(g, ch, "That object does not exist.\r\n");
           return;
         }
       }
     }
 
     if (!can_edit_zone(g, ch, room_get_zone(g, char_get_in_room(ch)))) {
-      send_to_char_printf(g, ch, "You can only attach triggers in your own zone\r\n");
+      send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
     /* have a valid obj, now get trigger */
     rn = find_trigger(g, tn);
     if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char_printf(g, ch, "That trigger does not exist.\r\n");
+      send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
 
     add_trigger(g, dg_ensure_script(obj_script_slot(object)), trig, loc);
 
-    send_to_char_printf(g, ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                        tn, trig->name.c_str(),
-                        (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
-                        obj_get_vnum(g, object));
+    send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
+                 tn, trig->name.c_str(),
+                 (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
+                 obj_get_vnum(g, object));
   }
 
   else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
@@ -302,18 +302,18 @@ ACMD(do_attach)
       rnum = NOWHERE;
 
     if (rnum == NOWHERE) {
-      send_to_char_printf(g, ch, "You need to supply a room number or . for current room.\r\n");
+      send_to_char(g, ch, "You need to supply a room number or . for current room.\r\n");
       return;
     }
 
     if (!can_edit_zone(g, ch, room_get_zone(g, rnum))) {
-      send_to_char_printf(g, ch, "You can only attach triggers in your own zone\r\n");
+      send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
     /* have a valid room, now get trigger */
     rn = find_trigger(g, tn);
     if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char_printf(g, ch, "That trigger does not exist.\r\n");
+      send_to_char(g, ch, "That trigger does not exist.\r\n");
       return;
     }
 
@@ -321,12 +321,12 @@ ACMD(do_attach)
 
     add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
-    send_to_char_printf(g, ch, "Trigger %d (%s) attached to room %d.\r\n",
-                        tn, trig->name.c_str(), rnum);
+    send_to_char(g, ch, "Trigger {:d} ({}) attached to room {:d}.\r\n",
+                 tn, trig->name.c_str(), rnum);
   }
 
   else
-    send_to_char_printf(g, ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
+    send_to_char(g, ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
 }
 
 /*
@@ -410,8 +410,7 @@ ACMD(do_detach)
   arg3                  = take_arg(rest);
 
   if (arg1.empty() || arg2.empty()) {
-    send_to_char_printf(g, ch, "Usage: detach [ mob | object | room ] { target } { trigger |"
-                               " 'all' }\r\n");
+    send_to_char(g, ch, "Usage: detach [ mob | object | room ] { target } { trigger | 'all' }\r\n");
     return;
   }
 
@@ -421,21 +420,21 @@ ACMD(do_detach)
   if (str_eq_nocase(arg1, "room") || str_eq_nocase(arg1, "wtr")) {
     room = room_of(g, char_get_in_room(ch));
     if (!can_edit_zone(g, ch, room_get_zone(room))) {
-      send_to_char_printf(g, ch, "You can only detach triggers in your own zone\r\n");
+      send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
       return;
     }
     if (!room_get_script(room))
-      send_to_char_printf(g, ch, "This room does not have any triggers.\r\n");
+      send_to_char(g, ch, "This room does not have any triggers.\r\n");
     else if (str_eq_nocase(arg2, "all")) {
       extract_script(g, room, WLD_TRIGGER);
-      send_to_char_printf(g, ch, "All triggers removed from room.\r\n");
+      send_to_char(g, ch, "All triggers removed from room.\r\n");
     } else if (remove_trigger(g, room_get_script(room), arg2.data())) {
-      send_to_char_printf(g, ch, "Trigger removed.\r\n");
+      send_to_char(g, ch, "Trigger removed.\r\n");
       if (!room_get_script(room)->trig_list) {
         extract_script(g, room, WLD_TRIGGER);
       }
     } else
-      send_to_char_printf(g, ch, "That trigger was not found.\r\n");
+      send_to_char(g, ch, "That trigger was not found.\r\n");
   }
 
   else {
@@ -446,13 +445,13 @@ ACMD(do_detach)
                             [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
 
         if (!victim) {
-          send_to_char_printf(g, ch, "No such mobile around.\r\n");
+          send_to_char(g, ch, "No such mobile around.\r\n");
           return;
         }
       }
 
       if (arg3.empty())
-        send_to_char_printf(g, ch, "You must specify a trigger to remove.\r\n");
+        send_to_char(g, ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = &arg3;
     }
@@ -467,14 +466,14 @@ ACMD(do_detach)
           object = find_first(char_inventory(g, ch), [&](obj_data *o) { return obj_get_vnum(g, o) == num_arg; });
 
           if (!object) { /* give up */
-            send_to_char_printf(g, ch, "No such object around.\r\n");
+            send_to_char(g, ch, "No such object around.\r\n");
             return;
           }
         }
       }
 
       if (arg3.empty())
-        send_to_char_printf(g, ch, "You must specify a trigger to remove.\r\n");
+        send_to_char(g, ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = &arg3;
     } else {
@@ -492,54 +491,54 @@ ACMD(do_detach)
       else if ((object = get_obj_vis(g, ch, arg1, nullptr)))
         ;
       else
-        send_to_char_printf(g, ch, "Nothing around by that name.\r\n");
+        send_to_char(g, ch, "Nothing around by that name.\r\n");
 
       trigger = &arg2;
     }
 
     if (victim) {
       if (!char_is_npc(victim))
-        send_to_char_printf(g, ch, "Players don't have triggers.\r\n");
+        send_to_char(g, ch, "Players don't have triggers.\r\n");
 
       else if (!char_get_script(victim))
-        send_to_char_printf(g, ch, "That mob doesn't have any triggers.\r\n");
+        send_to_char(g, ch, "That mob doesn't have any triggers.\r\n");
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, char_get_mob_vnum(g, victim)))) {
-        send_to_char_printf(g, ch, "You can only detach triggers in your own zone\r\n");
+        send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && str_eq_nocase(*trigger, "all")) {
         extract_script(g, victim, MOB_TRIGGER);
-        send_to_char_printf(g, ch, "All triggers removed from %s.\r\n", char_get_sdesc(victim));
+        send_to_char(g, ch, "All triggers removed from {}.\r\n", char_get_sdesc(victim));
       }
 
       else if (trigger && remove_trigger(g, char_get_script(victim), trigger->data())) {
-        send_to_char_printf(g, ch, "Trigger removed.\r\n");
+        send_to_char(g, ch, "Trigger removed.\r\n");
         if (!char_get_script(victim)->trig_list) {
           extract_script(g, victim, MOB_TRIGGER);
         }
       } else
-        send_to_char_printf(g, ch, "That trigger was not found.\r\n");
+        send_to_char(g, ch, "That trigger was not found.\r\n");
     }
 
     else if (object) {
       if (!obj_get_script(object))
-        send_to_char_printf(g, ch, "That object doesn't have any triggers.\r\n");
+        send_to_char(g, ch, "That object doesn't have any triggers.\r\n");
 
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, obj_get_vnum(g, object)))) {
-        send_to_char_printf(g, ch, "You can only detach triggers in your own zone\r\n");
+        send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && str_eq_nocase(*trigger, "all")) {
         extract_script(g, object, OBJ_TRIGGER);
-        send_to_char_printf(g, ch, "All triggers removed from %s.\r\n",
-                            obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
+        send_to_char(g, ch, "All triggers removed from {}.\r\n",
+                     obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
       }
 
       else if (trigger && remove_trigger(g, obj_get_script(object), trigger->data())) {
-        send_to_char_printf(g, ch, "Trigger removed.\r\n");
+        send_to_char(g, ch, "Trigger removed.\r\n");
         if (!obj_get_script(object)->trig_list) {
           extract_script(g, object, OBJ_TRIGGER);
         }
       } else
-        send_to_char_printf(g, ch, "That trigger was not found.\r\n");
+        send_to_char(g, ch, "That trigger was not found.\r\n");
     }
   }
 }
@@ -561,14 +560,14 @@ ACMD(do_vdelete)
   uid_s                 = take_arg(rest);
 
   if (var.empty() || uid_s.empty()) {
-    send_to_char_printf(g, ch, "Usage: vdelete { <variablename> | * | all } <id>\r\n");
+    send_to_char(g, ch, "Usage: vdelete { <variablename> | * | all } <id>\r\n");
     return;
   }
 
   /* find the target script from the uid number */
   uid = parse_int(uid_s);
   if (uid <= 0) {
-    send_to_char_printf(g, ch, "vdelete: illegal id specified.\r\n");
+    send_to_char(g, ch, "vdelete: illegal id specified.\r\n");
     return;
   }
 
@@ -579,33 +578,33 @@ ACMD(do_vdelete)
   } else if ((obj = find_obj(g, uid))) {
     sc_remote = obj_get_script(obj);
   } else {
-    send_to_char_printf(g, ch, "vdelete: cannot resolve specified id.\r\n");
+    send_to_char(g, ch, "vdelete: cannot resolve specified id.\r\n");
     return;
   }
 
   if (sc_remote == nullptr) {
-    send_to_char_printf(g, ch, "That id represents no global variables.(1)\r\n");
+    send_to_char(g, ch, "That id represents no global variables.(1)\r\n");
     return;
   }
 
   if (sc_remote->global_vars == nullptr) {
-    send_to_char_printf(g, ch, "That id represents no global variables.(2)\r\n");
+    send_to_char(g, ch, "That id represents no global variables.(2)\r\n");
     return;
   }
 
   if (var[0] == '*' || is_abbrev(var, "all")) {
     free_varlist(sc_remote->global_vars);
     sc_remote->global_vars = nullptr;
-    send_to_char_printf(g, ch, "All variables deleted from that id.\r\n");
+    send_to_char(g, ch, "All variables deleted from that id.\r\n");
     return;
   }
 
   if (!remove_var(&sc_remote->global_vars, var.c_str())) {
-    send_to_char_printf(g, ch, "That variable cannot be located.\r\n");
+    send_to_char(g, ch, "That variable cannot be located.\r\n");
     return;
   }
 
-  send_to_char_printf(g, ch, "Deleted.\r\n");
+  send_to_char(g, ch, "Deleted.\r\n");
 }
 ACMD(do_tstat)
 {
@@ -617,11 +616,11 @@ ACMD(do_tstat)
   if (!str.empty()) {
     rnum = find_trigger(g, parse_int(str));
     if (rnum == nullptr) {
-      send_to_char_printf(g, ch, "That vnum does not exist.\r\n");
+      send_to_char(g, ch, "That vnum does not exist.\r\n");
       return;
     }
 
     do_stat_trigger(g, ch, rnum->proto);
   } else
-    send_to_char_printf(g, ch, "Usage: tstat <vnum>\r\n");
+    send_to_char(g, ch, "Usage: tstat <vnum>\r\n");
 }

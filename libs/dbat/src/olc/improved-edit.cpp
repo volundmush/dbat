@@ -20,9 +20,9 @@ static int replace_str(std::string *string, char *pattern, char *replacement, in
 void send_editor_help(GameWorld *g, struct descriptor_data *d)
 {
   if (using_improved_editor)
-    write_to_output_printf(g, d, "Instructions: /s to save, /h for more options.\r\n");
+    write_to_output(g, d, "Instructions: /s to save, /h for more options.\r\n");
   else
-    write_to_output_printf(g, d, "Instructions: Type @ on a line by itself to end.\r\n");
+    write_to_output(g, d, "Instructions: Type @ on a line by itself to end.\r\n");
 }
 
 /* ---- a growing text buffer, so nothing is assembled in a fixed-size array ---- */
@@ -48,17 +48,12 @@ static void tb_puts(struct textbuf *b, const char *text)
   tb_add(b, text, strlen(text));
 }
 
-static void tb_printf(struct textbuf *b, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
-static void tb_printf(struct textbuf *b, const char *fmt, ...)
+/* Adds text formatted as std::format does */
+template <class... Args>
+static void tb_format(struct textbuf *b, std::format_string<Args...> fmt, Args &&...args)
 {
-  char piece[128];
-  va_list args;
-
-  va_start(args, fmt);
-  int n = vsnprintf(piece, sizeof(piece), fmt, args);
-  va_end(args);
-  if (n > 0)
-    tb_add(b, piece, MIN((size_t)n, sizeof(piece) - 1));
+  std::string piece = str_format(fmt, std::forward<Args>(args)...);
+  tb_add(b, piece.data(), piece.size());
 }
 
 /* Replaces the text being edited with the buffer's contents. */
@@ -112,9 +107,9 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
     case 'c':
       if (!d->edit_text.empty()) {
         d->edit_text.clear();
-        write_to_output_printf(g, d, "Current buffer cleared.\r\n");
+        write_to_output(g, d, "Current buffer cleared.\r\n");
       } else
-        write_to_output_printf(g, d, "Current buffer empty.\r\n");
+        write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'd':
       parse_edit_action(g, PARSE_DELETE, actions, d);
@@ -126,13 +121,13 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
       if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_FORMAT, actions, d);
       else
-        write_to_output_printf(g, d, "Current buffer empty.\r\n");
+        write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'i':
       if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_INSERT, actions, d);
       else
-        write_to_output_printf(g, d, "Current buffer empty.\r\n");
+        write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'h':
       parse_edit_action(g, PARSE_HELP, actions, d);
@@ -141,13 +136,13 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
       if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_LIST_NORM, actions, d);
       else
-        write_to_output_printf(g, d, "Current buffer empty.\r\n");
+        write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'n':
       if (!d->edit_text.empty())
         parse_edit_action(g, PARSE_LIST_NUM, actions, d);
       else
-        write_to_output_printf(g, d, "Current buffer empty.\r\n");
+        write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'r':
       parse_edit_action(g, PARSE_REPLACE, actions, d);
@@ -155,7 +150,7 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
     case 's':
       return STRINGADD_SAVE;
     default:
-      write_to_output_printf(g, d, "Invalid option.\r\n");
+      write_to_output(g, d, "Invalid option.\r\n");
       break;
   }
   return STRINGADD_ACTION;
@@ -169,11 +164,11 @@ static bool list_range(GameWorld *g, struct descriptor_data *d, const char *stri
   if (*string && scan_range(string, low, high) == 1)
     *high = *low;
   if (*low < 1) {
-    write_to_output_printf(g, d, "Line numbers must be greater than 0.\r\n");
+    write_to_output(g, d, "Line numbers must be greater than 0.\r\n");
     return false;
   }
   if (*high < *low) {
-    write_to_output_printf(g, d, "That range is invalid.\r\n");
+    write_to_output(g, d, "That range is invalid.\r\n");
     return false;
   }
   return true;
@@ -192,29 +187,13 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
 
   switch (command) {
     case PARSE_HELP:
-      write_to_output_printf(g, d,
-                             "Editor command formats: /<letter>\r\n\r\n"
-                             "/a         -  aborts editor\r\n"
-                             "/c         -  clears buffer\r\n"
-                             "/d#        -  deletes a line #\r\n"
-                             "/e# <text> -  changes the line at # with <text>\r\n"
-                             "/f         -  formats text\r\n"
-                             "/fi        -  indented formatting of text\r\n"
-                             "/fi#       -  indented formatting on a specific line\r\n"
-                             "/fi #-#    -  indented formating on specific lines\r\n"
-                             "/h         -  list text editor commands\r\n"
-                             "/i# <text> -  inserts <text> before line #\r\n"
-                             "/l         -  lists buffer\r\n"
-                             "/n         -  lists buffer with line numbers\r\n"
-                             "/r 'a' 'b' -  replace 1st occurance of text <a> in buffer with text <b>\r\n"
-                             "/ra 'a' 'b'-  replace all occurances of text <a> within buffer with text <b>\r\n"
-                             "              usage: /r[a] 'pattern' 'replacement'\r\n"
-                             "/s         -  saves text\r\n");
+      write_to_output(g, d,
+                      "Editor command formats: /<letter>\r\n\r\n/a         -  aborts editor\r\n/c         -  clears buffer\r\n/d#        -  deletes a line #\r\n/e# <text> -  changes the line at # with <text>\r\n/f         -  formats text\r\n/fi        -  indented formatting of text\r\n/fi#       -  indented formatting on a specific line\r\n/fi #-#    -  indented formating on specific lines\r\n/h         -  list text editor commands\r\n/i# <text> -  inserts <text> before line #\r\n/l         -  lists buffer\r\n/n         -  lists buffer with line numbers\r\n/r 'a' 'b' -  replace 1st occurance of text <a> in buffer with text <b>\r\n/ra 'a' 'b'-  replace all occurances of text <a> within buffer with text <b>\r\n              usage: /r[a] 'pattern' 'replacement'\r\n/s         -  saves text\r\n");
       break;
 
     case PARSE_FORMAT:
       if (desc_get_connected(d) == CON_TRIGEDIT) {
-        write_to_output_printf(g, d, "Script %sformatted.\r\n", format_script(g, d) ? "" : "not ");
+        write_to_output(g, d, "Script {}formatted.\r\n", format_script(g, d) ? "" : "not ");
         return;
       }
       while (isalpha(string[j]) && j < 2) {
@@ -233,7 +212,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           break;
         case 2:
           if (line_high < line_low) {
-            write_to_output_printf(g, d, "That range is invalid.\r\n");
+            write_to_output(g, d, "That range is invalid.\r\n");
             return;
           }
           break;
@@ -242,7 +221,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       line_low = MAX(1, line_low);
 
       if (format_text(g, &d->edit_text, flags, d, d->max_str, line_low, line_high))
-        write_to_output_printf(g, d, "Text formatted with%s indent.\r\n", (indent ? "" : "out"));
+        write_to_output(g, d, "Text formatted with{} indent.\r\n", (indent ? "" : "out"));
       break;
 
     case PARSE_REPLACE:
@@ -251,19 +230,19 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           rep_all = 1;
 
       if ((s = strtok(string, "'")) == nullptr) {
-        write_to_output_printf(g, d, "Invalid format.\r\n");
+        write_to_output(g, d, "Invalid format.\r\n");
         return;
       }
       if ((s = strtok(nullptr, "'")) == nullptr) {
-        write_to_output_printf(g, d, "Target string must be enclosed in single quotes.\r\n");
+        write_to_output(g, d, "Target string must be enclosed in single quotes.\r\n");
         return;
       }
       if ((t = strtok(nullptr, "'")) == nullptr) {
-        write_to_output_printf(g, d, "No replacement string.\r\n");
+        write_to_output(g, d, "No replacement string.\r\n");
         return;
       }
       if ((t = strtok(nullptr, "'")) == nullptr) {
-        write_to_output_printf(g, d, "Replacement string must be enclosed in single quotes.\r\n");
+        write_to_output(g, d, "Replacement string must be enclosed in single quotes.\r\n");
         return;
         /*wb's fix for empty buffer replacement crashing */
       }
@@ -272,41 +251,41 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       }
       if ((total_len = ((strlen(t) - strlen(s)) + d->edit_text.size())) <= d->max_str) {
         if ((replaced = replace_str(&d->edit_text, s, t, rep_all, d->max_str)) > 0) {
-          write_to_output_printf(g, d, "Replaced %d occurance%sof '%s' with '%s'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
+          write_to_output(g, d, "Replaced {:d} occurance{}of '{}' with '{}'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
         } else if (replaced == 0) {
-          write_to_output_printf(g, d, "String '%s' not found.\r\n", s);
+          write_to_output(g, d, "String '{}' not found.\r\n", s);
         } else
-          write_to_output_printf(g, d, "ERROR: Replacement string causes buffer overflow, aborted replace.\r\n");
+          write_to_output(g, d, "ERROR: Replacement string causes buffer overflow, aborted replace.\r\n");
       } else
-        write_to_output_printf(g, d, "Not enough space left in buffer.\r\n");
+        write_to_output(g, d, "Not enough space left in buffer.\r\n");
       break;
 
     case PARSE_DELETE:
       switch (scan_range(string, &line_low, &line_high)) {
         case 0:
-          write_to_output_printf(g, d, "You must specify a line number or range to delete.\r\n");
+          write_to_output(g, d, "You must specify a line number or range to delete.\r\n");
           return;
         case 1:
           line_high = line_low;
           break;
         case 2:
           if (line_high < line_low) {
-            write_to_output_printf(g, d, "That range is invalid.\r\n");
+            write_to_output(g, d, "That range is invalid.\r\n");
             return;
           }
           break;
       }
 
       if (d->edit_text.empty()) {
-        write_to_output_printf(g, d, "Buffer is empty.\r\n");
+        write_to_output(g, d, "Buffer is empty.\r\n");
         return;
       }
       if (line_low <= 0) {
-        write_to_output_printf(g, d, "Invalid, line numbers to delete must be higher than 0.\r\n");
+        write_to_output(g, d, "Invalid, line numbers to delete must be higher than 0.\r\n");
         return;
       }
       if (!(s = line_start(d->edit_text.data(), line_low))) {
-        write_to_output_printf(g, d, "Line(s) out of range; not deleting.\r\n");
+        write_to_output(g, d, "Line(s) out of range; not deleting.\r\n");
         return;
       }
       /* t is where the deleted lines start; s walks to the end of line_high */
@@ -326,18 +305,18 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
         *t = '\0';
       }
       d->edit_text.resize(strlen(d->edit_text.c_str())); /* to where the text now ends */
-      write_to_output_printf(g, d, "%u line%sdeleted.\r\n", total_len, (total_len != 1 ? "s " : " "));
+      write_to_output(g, d, "{:d} line{}deleted.\r\n", as_unsigned(total_len), (total_len != 1 ? "s " : " "));
       break;
 
     case PARSE_LIST_NORM:
       if (!list_range(g, d, string, &line_low, &line_high))
         return;
       if (!(s = line_start(d->edit_text.data(), line_low))) {
-        write_to_output_printf(g, d, "Line(s) out of range; no buffer listing.\r\n");
+        write_to_output(g, d, "Line(s) out of range; no buffer listing.\r\n");
         return;
       }
       if (line_high < 999999 || line_low > 1)
-        tb_printf(&out, "Current buffer range [%d - %d]:\r\n", line_low, line_high);
+        tb_format(&out, "Current buffer range [{:d} - {:d}]:\r\n", line_low, line_high);
       t         = s;
       i         = line_low;
       total_len = 0;
@@ -351,15 +330,15 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       /*
      * This is kind of annoying...but some people like it.
      */
-      tb_printf(&out, "\r\n%u line%sshown.\r\n", total_len, (total_len != 1) ? "s " : " ");
-      write_to_output_printf(g, d, "%s", out.s);
+      tb_format(&out, "\r\n{:d} line{}shown.\r\n", as_unsigned(total_len), (total_len != 1) ? "s " : " ");
+      write_to_output(g, d, "{}", out.s);
       break;
 
     case PARSE_LIST_NUM:
       if (!list_range(g, d, string, &line_low, &line_high))
         return;
       if (!(s = line_start(d->edit_text.data(), line_low))) {
-        write_to_output_printf(g, d, "Line(s) out of range; no buffer listing.\r\n");
+        write_to_output(g, d, "Line(s) out of range; no buffer listing.\r\n");
         return;
       }
       i = line_low;
@@ -368,33 +347,33 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           tb_puts(&out, s); /* a last line with no newline is shown without a number */
           break;
         }
-        tb_printf(&out, "%4d: ", i++);
+        tb_format(&out, "{:>4d}: ", i++);
         tb_add(&out, s, (size_t)(t + 1 - s));
         s = t + 1;
       }
-      write_to_output_printf(g, d, "%s", out.s ? out.s : "");
+      write_to_output(g, d, "{}", out.s ? out.s : "");
       break;
 
     case PARSE_INSERT:
     case PARSE_EDIT:
       half_chop(string, num, text);
       if (*num == '\0') {
-        write_to_output_printf(g, d, command == PARSE_INSERT ? "You must specify a line number before which to insert text.\r\n" : "You must specify a line number at which to change text.\r\n");
+        write_to_output(g, d, command == PARSE_INSERT ? "You must specify a line number before which to insert text.\r\n" : "You must specify a line number at which to change text.\r\n");
         return;
       }
       line_low = atoi(num);
       strcat(text, "\r\n"); /* (room reserved in its size) */
 
       if (d->edit_text.empty()) {
-        write_to_output_printf(g, d, command == PARSE_INSERT ? "Buffer is empty, nowhere to insert.\r\n" : "Buffer is empty, nothing to change.\r\n");
+        write_to_output(g, d, command == PARSE_INSERT ? "Buffer is empty, nowhere to insert.\r\n" : "Buffer is empty, nothing to change.\r\n");
         return;
       }
       if (line_low <= 0) {
-        write_to_output_printf(g, d, "Line number must be higher than 0.\r\n");
+        write_to_output(g, d, "Line number must be higher than 0.\r\n");
         return;
       }
       if (!(s = line_start(d->edit_text.data(), line_low))) {
-        write_to_output_printf(g, d, command == PARSE_INSERT ? "Line number out of range; insert aborted.\r\n" : "Line number out of range; change aborted.\r\n");
+        write_to_output(g, d, command == PARSE_INSERT ? "Line number out of range; insert aborted.\r\n" : "Line number out of range; change aborted.\r\n");
         return;
       }
 
@@ -403,7 +382,7 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
       if (command == PARSE_INSERT) {
         if (out.len + strlen(s) + 2 > d->max_str) {
           free(out.s);
-          write_to_output_printf(g, d, "Insert text pushes buffer over maximum size, insert aborted.\r\n");
+          write_to_output(g, d, "Insert text pushes buffer over maximum size, insert aborted.\r\n");
           return;
         }
         tb_puts(&out, s); /* then the line it went before, and the rest */
@@ -412,17 +391,17 @@ static void parse_edit_action(GameWorld *g, int command, char *string, struct de
           tb_puts(&out, t + 1); /* the lines after the one replaced */
         if (out.len > d->max_str) {
           free(out.s);
-          write_to_output_printf(g, d, "Change causes new length to exceed buffer maximum size, aborted.\r\n");
+          write_to_output(g, d, "Change causes new length to exceed buffer maximum size, aborted.\r\n");
           return;
         }
       }
       tb_install(&out, &d->edit_text);
-      write_to_output_printf(g, d, command == PARSE_INSERT ? "Line inserted.\r\n" : "Line changed.\r\n");
+      write_to_output(g, d, command == PARSE_INSERT ? "Line inserted.\r\n" : "Line changed.\r\n");
       return;
 
     default:
-      write_to_output_printf(g, d, "Invalid option.\r\n");
-      mudlog_printf(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: invalid command passed to parse_edit_action");
+      write_to_output(g, d, "Invalid option.\r\n");
+      mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: invalid command passed to parse_edit_action");
       return;
   }
   free(out.s);
@@ -448,7 +427,7 @@ static bool format_text(GameWorld *g, std::string *text, int mode, struct descri
   for (i = 0; i < low - 1; i++) {
     start = strtok(str, "\n");
     if (!start || !(flow = strchr(flow, '\n'))) {
-      write_to_output_printf(g, d, "There aren't that many lines!\r\n");
+      write_to_output(g, d, "There aren't that many lines!\r\n");
       free(str);
       free(formatted.s);
       return false;
@@ -558,7 +537,7 @@ static bool format_text(GameWorld *g, std::string *text, int mode, struct descri
         line_chars  = 0;
         color_chars = count_color_chars(start);
       } else if (*flow == '\"' || *flow == '\'') {
-        tb_printf(&formatted, "%c ", *flow);
+        tb_format(&formatted, "{:c} ", as_char(*flow));
         flow++;
         line_chars++;
       } else {

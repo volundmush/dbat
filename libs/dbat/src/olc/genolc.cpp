@@ -83,7 +83,7 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)
 {
   for (int i = 0; i < count; i++)
-    write_to_output_printf(g, d, "@g%2d@n) %-20.20s%s%s", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
+    write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}{}", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
 }
 
 char *str_udup(const char *txt)
@@ -98,15 +98,15 @@ bool save_all(GameWorld *g)
     if (g->save_list->type < 0 || g->save_list->type > SL_MAX) {
       switch (g->save_list->type) {
         case SL_ACT:
-          mud_log_printf("Actions not saved - can not autosave. Use 'aedit save'.");
+          mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
           g->save_list = g->save_list->next; /* Fatal error, skip this one. */
           break;
         case SL_HLP:
-          mud_log_printf("Help not saved - can not autosave. Use 'hedit save'.");
+          mud_log("Help not saved - can not autosave. Use 'hedit save'.");
           g->save_list = g->save_list->next; /* Fatal error, skip this one. */
           break;
         default:
-          mud_log_printf("SYSERR: GenOLC: Invalid save type %d in save list.\n", g->save_list->type);
+          mud_log("SYSERR: GenOLC: Invalid save type {:d} in save list.\n", g->save_list->type);
           break;
       }
     } else if (!save_types[g->save_list->type].func(g, find_zone(g, g->save_list->zone)))
@@ -146,7 +146,7 @@ bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
       break;
 
   if (ritem == nullptr) {
-    mud_log_printf("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
+    mud_log("SYSERR: remove_from_save_list: Saved item not found. ({:d}/{:d})", zone, type);
     return false;
   }
   REMOVE_FROM_LIST(ritem, g->save_list, next, temp);
@@ -165,7 +165,7 @@ bool add_to_save_list(GameWorld *g, zone_vnum zone, int type)
   rznum = find_zone(g, zone);
   if (rznum == nullptr) {
     if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      mud_log_printf("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
+      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. ({:d})", zone);
       return false;
     }
   }
@@ -207,16 +207,16 @@ void free_save_list(GameWorld *g)
 ACMD(do_show_save_list)
 {
   if (g->save_list == nullptr)
-    send_to_char_printf(g, ch, "All world files are up to date.\r\n");
+    send_to_char(g, ch, "All world files are up to date.\r\n");
   else {
     struct save_list_data *item;
 
-    send_to_char_printf(g, ch, "The following files need saving:\r\n");
+    send_to_char(g, ch, "The following files need saving:\r\n");
     for (item = g->save_list; item; item = item->next) {
       if (item->type != SL_CFG)
-        send_to_char_printf(g, ch, " - %s data for zone %d.\r\n", save_types[item->type].message, item->zone);
+        send_to_char(g, ch, " - {} data for zone {:d}.\r\n", save_types[item->type].message, item->zone);
       else
-        send_to_char_printf(g, ch, " - Game configuration data.\r\n");
+        send_to_char(g, ch, " - Game configuration data.\r\n");
     }
   }
 }

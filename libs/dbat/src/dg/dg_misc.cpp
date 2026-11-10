@@ -58,12 +58,12 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
     case OBJ_TRIGGER:
       caster_room = dg_room_of_obj(g, (struct obj_data *)go);
       if (!caster_room) {
-        script_log_printf(g, "dg_do_cast: unknown room for object-caster!");
+        script_log(g, "dg_do_cast: unknown room for object-caster!");
         return;
       }
       break;
     default:
-      script_log_printf(g, "dg_do_cast: unknown trigger type!");
+      script_log(g, "dg_do_cast: unknown trigger type!");
       return;
   }
 
@@ -71,14 +71,14 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   /* get: blank, spell name, target name */
   s = strtok(cmd, "'");
   if (s == nullptr) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_cast needs spell name.",
-                      trig->name.c_str(), trig_get_vnum(g, trig));
+    script_log(g, "Trigger: {}, VNum {:d}. dg_cast needs spell name.",
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
   s = strtok(nullptr, "'");
   if (s == nullptr) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_cast needs spell name in `'s.",
-                      trig->name.c_str(), trig_get_vnum(g, trig));
+    script_log(g, "Trigger: {}, VNum {:d}. dg_cast needs spell name in `'s.",
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
   t = strtok(nullptr, "\0");
@@ -86,8 +86,8 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   /* spellnum = search_block(s, spells, 0); */
   spellnum = find_skill_num(g, s, SKTYPE_SPELL);
   if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!IS_SET(skill_type(g, spellnum), SKTYPE_SPELL)))) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_cast: invalid spell name (%s)",
-                      trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
+    script_log(g, "Trigger: {}, VNum {:d}. dg_cast: invalid spell name ({})",
+               trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
     return;
   }
 
@@ -116,22 +116,22 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
     }
 
     if (!target) {
-      script_log_printf(g, "Trigger: %s, VNum %d. dg_cast: target not found (%s)",
-                        trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
+      script_log(g, "Trigger: {}, VNum {:d}. dg_cast: target not found ({})",
+                 trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
       return;
     }
   }
 
   if (IS_SET(SINFO.routines, MAG_GROUPS)) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_cast: group spells not permitted (%s)",
-                      trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
+    script_log(g, "Trigger: {}, VNum {:d}. dg_cast: group spells not permitted ({})",
+               trig->name.c_str(), trig_get_vnum(g, trig), orig_cmd);
     return;
   }
 
   if (!caster) {
     caster = read_mobile(g, DG_CASTER_PROXY);
     if (!caster) {
-      script_log_printf(g, "dg_cast: Cannot load the caster mob!");
+      script_log(g, "dg_cast: Cannot load the caster mob!");
       return;
     }
     /* set the caster's name to that of the object, or the gods.... */
@@ -172,18 +172,18 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   /* make sure all parameters are present */
   if (!*charname || !*property ||
       !*value_p || !*duration_p) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_affect usage: <target> <property> <value> <duration>",
-                      trig->name.c_str(), trig_get_vnum(g, trig));
+    script_log(g, "Trigger: {}, VNum {:d}. dg_affect usage: <target> <property> <value> <duration>",
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
 
   value    = atoi(value_p);
   duration = atoi(duration_p);
   if (duration <= 0) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_affect: need positive duration!",
-                      trig->name.c_str(), trig_get_vnum(g, trig));
-    script_log_printf(g, "Line was: dg_affect %s %s %s %s (%d)",
-                      charname, property, value_p, duration_p, duration);
+    script_log(g, "Trigger: {}, VNum {:d}. dg_affect: need positive duration!",
+               trig->name.c_str(), trig_get_vnum(g, trig));
+    script_log(g, "Line was: dg_affect {} {} {} {} ({:d})",
+               charname, property, value_p, duration_p, duration);
     return;
   }
 
@@ -209,16 +209,16 @@ void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   }
 
   if (!type) { /* property not found */
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_affect: unknown property '%s'!",
-                      trig->name.c_str(), trig_get_vnum(g, trig), property);
+    script_log(g, "Trigger: {}, VNum {:d}. dg_affect: unknown property '{}'!",
+               trig->name.c_str(), trig_get_vnum(g, trig), property);
     return;
   }
 
   /* locate the target */
   ch = get_char(g, charname);
   if (!ch) {
-    script_log_printf(g, "Trigger: %s, VNum %d. dg_affect: cannot locate target!",
-                      trig->name.c_str(), trig_get_vnum(g, trig));
+    script_log(g, "Trigger: {}, VNum {:d}. dg_affect: cannot locate target!",
+               trig->name.c_str(), trig_get_vnum(g, trig));
     return;
   }
 
@@ -248,25 +248,25 @@ static void send_char_pos(GameWorld *g, struct char_data *ch, int dam)
   switch (char_get_position(ch)) {
     case POS_MORTALLYW:
       act(g, "$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
-      send_to_char_printf(g, ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
+      send_to_char(g, ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
       break;
     case POS_INCAP:
       act(g, "$n is incapacitated and will slowly die, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
-      send_to_char_printf(g, ch, "You are incapacitated and will slowly die, if not aided.\r\n");
+      send_to_char(g, ch, "You are incapacitated and will slowly die, if not aided.\r\n");
       break;
     case POS_STUNNED:
       act(g, "$n is stunned, but will probably regain consciousness again.", true, ch, nullptr, nullptr, TO_ROOM);
-      send_to_char_printf(g, ch, "You're stunned, but will probably regain consciousness again.\r\n");
+      send_to_char(g, ch, "You're stunned, but will probably regain consciousness again.\r\n");
       break;
     case POS_DEAD:
       act(g, "$n is dead!  R.I.P.", false, ch, nullptr, nullptr, TO_ROOM);
-      send_to_char_printf(g, ch, "You are dead!  Sorry...\r\n");
+      send_to_char(g, ch, "You are dead!  Sorry...\r\n");
       break;
     default: /* >= POSITION SLEEPING */
       if (dam > (getEffMaxPL(g, ch) >> 2))
         act(g, "That really did HURT!", false, ch, nullptr, nullptr, TO_CHAR);
       if (getCurPL(g, ch) < (getEffMaxPL(g, ch) >> 2))
-        send_to_char_printf(g, ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
+        send_to_char(g, ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }
 }
 
@@ -295,8 +295,7 @@ bool valid_dg_target(GameWorld *g, struct char_data *ch, int bitvector)
 void script_damage(GameWorld *g, struct char_data *vict, int dam)
 {
   if (char_adm_flagged(vict, ADM_NODAMAGE) && (dam > 0)) {
-    send_to_char_printf(g, vict, "Being the cool immortal you are, you sidestep a trap, "
-                                 "obviously placed to kill you.\r\n");
+    send_to_char(g, vict, "Being the cool immortal you are, you sidestep a trap, obviously placed to kill you.\r\n");
     return;
   }
 
@@ -307,8 +306,8 @@ void script_damage(GameWorld *g, struct char_data *vict, int dam)
 
   if (char_get_position(vict) == POS_DEAD) {
     if (!char_is_npc(vict))
-      mudlog_printf(g, LOG_BRF, 0, true, "%s killed by script at %s",
-                    char_get_name(vict), room_get_name(g, char_get_in_room(vict)));
+      mudlog(g, LOG_BRF, 0, true, "{} killed by script at {}",
+             char_get_name(vict), room_get_name(g, char_get_in_room(vict)));
     die(g, vict, nullptr);
   }
 }
