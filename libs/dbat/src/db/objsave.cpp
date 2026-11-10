@@ -49,7 +49,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
 
 static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
 {
-  mud_log("SYSERR: %s:%d: %s failed for %s: %s", file, line, operation, filename, strerror(errno));
+  mud_log_printf("SYSERR: %s:%d: %s failed for %s: %s", file, line, operation, filename, strerror(errno));
 }
 
 static bool Crash_build_save_filename(char *dst, size_t dst_size, const char *filename, const char *suffix,
@@ -58,7 +58,7 @@ static bool Crash_build_save_filename(char *dst, size_t dst_size, const char *fi
   int written = snprintf(dst, dst_size, "%s%s", filename, suffix);
 
   if (written < 0 || (size_t)written >= dst_size) {
-    mud_log("SYSERR: %s:%d: crashsave path too long for %s%s", file, line, filename, suffix);
+    mud_log_printf("SYSERR: %s:%d: crashsave path too long for %s%s", file, line, filename, suffix);
     return false;
   }
 
@@ -73,7 +73,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
   FILE *fp;
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch))) {
-    mud_log("SYSERR: %s:%d: get_filename failed for %s of %s", __FILE__, __LINE__, save_type, char_get_name(ch));
+    mud_log_printf("SYSERR: %s:%d: get_filename failed for %s of %s", __FILE__, __LINE__, save_type, char_get_name(ch));
     return false;
   }
 
@@ -92,7 +92,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
     if (char_get_equipment(ch, j)) {
       if (!Crash_save(g, char_get_equipment(ch, j), fp, j + 1)) {
         Crash_restore_weight(g, char_get_equipment(ch, j));
-        mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
+        mud_log_printf("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
         atomic_abort(&af);
         return false;
       }
@@ -107,7 +107,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
 
   if (!Crash_save_list(g, char_get_inventory(ch), fp, 0)) {
     Crash_restore_weight_list(g, char_get_inventory(ch));
-    mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
+    mud_log_printf("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     atomic_abort(&af);
     return false;
   }
@@ -132,7 +132,7 @@ void delete_inv_backup(struct char_data *ch)
   fclose(source);
 
   if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("ERROR: Couldn't delete backup inv.");
+    mud_log_printf("ERROR: Couldn't delete backup inv.");
   /*  SYSERR_DESC:
    *  When an alias file cannot be removed, this error will occur,
    *  and the reason why will be the tail end of the error.
@@ -252,7 +252,7 @@ static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         else
           equip_char(g, ch, obj, j);
       } else { /* Oops, saved a player with double equipment? */
-        mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
+        mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
         location = LOC_INVENTORY;
       }
     }
@@ -276,14 +276,14 @@ bool Crash_delete_file(const char *name)
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails but NOT because of no file */
-      mud_log("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
+      mud_log_printf("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
     return false;
   }
   fclose(fl);
 
   /* if it fails, NOT because of no file */
   if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("SYSERR: deleting crash file %s (2): %s", filename, strerror(errno));
+    mud_log_printf("SYSERR: deleting crash file %s (2): %s", filename, strerror(errno));
 
   return true;
 }
@@ -301,7 +301,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails, NOT because of no file */
-      mud_log("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
+      mud_log_printf("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
     return false;
   }
 
@@ -330,7 +330,7 @@ static bool Crash_clean_file(GameWorld *g, char *name)
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails, NOT because of no file */
-      mud_log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
+      mud_log_printf("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
     return false;
   }
 
@@ -360,14 +360,14 @@ static bool Crash_clean_file(GameWorld *g, char *name)
             filetype = "UNKNOWN!";
             break;
         }
-        mud_log("    Deleting %s's %s file.", name, filetype);
+        mud_log_printf("    Deleting %s's %s file.", name, filetype);
         return true;
       }
       /* Must retrieve rented items w/in 30 days */
     } else if (rentcode == RENT_RENTED)
       if (timed < game_now(g) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
         Crash_delete_file(name);
-        mud_log("    Deleting %s's rent file.", name);
+        mud_log_printf("    Deleting %s's rent file.", name);
         return true;
       }
   }
@@ -400,11 +400,11 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
   if (get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     fl = fopen(filename, "rb");
   if (!fl) {
-    send_to_char(g, ch, "%s has no rent file.\r\n", name);
+    send_to_char_printf(g, ch, "%s has no rent file.\r\n", name);
     return;
   }
 
-  send_to_char(g, ch, "%s\r\n", filename);
+  send_to_char_printf(g, ch, "%s\r\n", filename);
 
   if (!feof(fl)) {
     get_line(fl, line);
@@ -414,20 +414,20 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
 
   switch (rentcode) {
     case RENT_RENTED:
-      send_to_char(g, ch, "Rent\r\n");
+      send_to_char_printf(g, ch, "Rent\r\n");
       break;
     case RENT_CRASH:
-      send_to_char(g, ch, "Crash\r\n");
+      send_to_char_printf(g, ch, "Crash\r\n");
       break;
     case RENT_CRYO:
-      send_to_char(g, ch, "Cryo\r\n");
+      send_to_char_printf(g, ch, "Cryo\r\n");
       break;
     case RENT_TIMEDOUT:
     case RENT_FORCED:
-      send_to_char(g, ch, "TimedOut\r\n");
+      send_to_char_printf(g, ch, "TimedOut\r\n");
       break;
     default:
-      send_to_char(g, ch, "Undef\r\n");
+      send_to_char_printf(g, ch, "Undef\r\n");
       break;
   }
   buf[0] = 0;
@@ -481,7 +481,7 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
     }
   }
 
-  send_to_char(g, ch, "%s", buf);
+  send_to_char_printf(g, ch, "%s", buf);
   fclose(fl);
 }
 
@@ -668,22 +668,22 @@ int Crash_load(GameWorld *g, struct char_data *ch)
 
   snprintf(buf1, sizeof(buf1), "SYSERR: READING OBJECT FILE %s (5)", cmfname);
   perror(buf1);
-  send_to_char(g, ch,
-               "\r\n********************* NOTICE *********************\r\n"
-               "There was a problem loading your objects from disk.\r\n"
-               "Trying your backup object file.\r\n");
+  send_to_char_printf(g, ch,
+                      "\r\n********************* NOTICE *********************\r\n"
+                      "There was a problem loading your objects from disk.\r\n"
+                      "Trying your backup object file.\r\n");
 
   if ((fl = fopen(cmfnamebak, "rb"))) {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
+    mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
     return Crash_load_file(g, ch, fl, cmfnamebak);
   }
 
   Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
-  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
-  send_to_char(g, ch,
-               "\r\n********************* NOTICE *********************\r\n"
-               "There was a problem loading your objects from backup.\r\n"
-               "Contact staff for assistance.\r\n");
+  mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
+  send_to_char_printf(g, ch,
+                      "\r\n********************* NOTICE *********************\r\n"
+                      "There was a problem loading your objects from backup.\r\n"
+                      "Contact staff for assistance.\r\n");
 
   return -1;
 }
@@ -713,20 +713,20 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   }
   switch (orig_rent_code = rentcode) {
     case RENT_RENTED:
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-renting and entering game.", char_get_name(ch));
+      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-renting and entering game.", char_get_name(ch));
       break;
     case RENT_CRASH:
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
+      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
       break;
     case RENT_CRYO:
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-cryo'ing and entering game.", char_get_name(ch));
+      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s un-cryo'ing and entering game.", char_get_name(ch));
       break;
     case RENT_FORCED:
     case RENT_TIMEDOUT:
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving force-saved items and entering game.", char_get_name(ch));
+      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s retrieving force-saved items and entering game.", char_get_name(ch));
       break;
     default:
-      mudlog(g, LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
+      mudlog_printf(g, LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
       break;
   }
 
@@ -854,7 +854,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
             }
             case 'A':
               if (j >= MAX_OBJ_AFFECT) {
-                mud_log("SYSERR: Too many object affectations in loading rent file");
+                mud_log_printf("SYSERR: Too many object affectations in loading rent file");
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
@@ -882,8 +882,8 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
                 sscanf(line, "%" SCNd64, &uid);
                 /* -1 is an object not yet given one; no real one is negative. */
                 if (uid < -1) {
-                  mud_log("SYSERR: Object #%d has unique id %" PRId64 ", which can't be; giving it a new one.",
-                          obj_get_vnum(g, temp), uid);
+                  mud_log_printf("SYSERR: Object #%d has unique id %" PRId64 ", which can't be; giving it a new one.",
+                                 obj_get_vnum(g, temp), uid);
                   uid = -1;
                 }
                 obj_set_unique_id(temp, uid);
@@ -892,7 +892,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
               break;
             case 'S':
               if (j >= SPELLBOOK_SIZE) {
-                mud_log("SYSERR: Too many spells in spellbook loading rent file");
+                mud_log_printf("SYSERR: Too many spells in spellbook loading rent file");
               }
               get_line(fl, line);
               sscanf(line, "%d %d", t, t + 1);
@@ -1027,8 +1027,8 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
   }
 
   /* Little hoarding check. -gg 3/1/98 */
-  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s (level %d) has %d objects (max %d).",
-         char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
+  mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "%s (level %d) has %d objects (max %d).",
+                char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);
 

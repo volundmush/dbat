@@ -36,7 +36,7 @@
 #define OCMD(name) \
   void(name)(GameWorld * g, obj_data * obj, char *argument, int cmd, int subcmd)
 
-static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...) __attribute__((format(printf, 3, 4)));
+static void obj_log_printf(GameWorld *g, obj_data *obj, const char *format, ...) __attribute__((format(printf, 3, 4)));
 static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, std::string_view rawroomstr);
 static OCMD(do_oecho);
 static OCMD(do_oforce);
@@ -67,7 +67,7 @@ constexpr int SCMD_OSEND       = 0;
 constexpr int SCMD_OECHOAROUND = 1;
 
 /* attaches object name and vnum to msg and sends it to script_log */
-static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...)
+static void obj_log_printf(GameWorld *g, obj_data *obj, const char *format, ...)
 {
   va_list args;
   char output[MAX_STRING_LENGTH];
@@ -76,7 +76,7 @@ static void obj_log(GameWorld *g, obj_data *obj, const char *format, ...)
   vsnprintf(output, sizeof(output), format, args);
   va_end(args);
 
-  script_log(g, "Obj (%s, VNum %d):: %s", obj_get_short_description(obj), obj_get_vnum(g, obj), output);
+  script_log_printf(g, "Obj (%s, VNum %d):: %s", obj_get_short_description(obj), obj_get_vnum(g, obj), output);
 }
 
 /* returns the real room number that the object or object's carrier is in */
@@ -142,7 +142,7 @@ static OCMD(do_oecho)
   skip_spaces(&argument);
 
   if (!*argument)
-    obj_log(g, obj, "oecho called with no args");
+    obj_log_printf(g, obj, "oecho called with no args");
 
   else if ((room = obj_room(obj)) != NOWHERE) {
     if (room_get_people(g, room)) {
@@ -152,7 +152,7 @@ static OCMD(do_oecho)
   }
 
   else
-    obj_log(g, obj, "oecho called by object in NOWHERE");
+    obj_log_printf(g, obj, "oecho called by object in NOWHERE");
 }
 
 static OCMD(do_oforce)
@@ -164,13 +164,13 @@ static OCMD(do_oforce)
   line = one_argument(argument, arg1);
 
   if (!*arg1 || !*line) {
-    obj_log(g, obj, "oforce called with too few args");
+    obj_log_printf(g, obj, "oforce called with too few args");
     return;
   }
 
   if (!strcasecmp(arg1, "all")) {
     if ((room = obj_room(obj)) == NOWHERE)
-      obj_log(g, obj, "oforce called by object in NOWHERE");
+      obj_log_printf(g, obj, "oforce called by object in NOWHERE");
     else {
       for (char_data *tch : room_people(g, room)) {
         if (valid_dg_target(g, tch, 0)) {
@@ -188,7 +188,7 @@ static OCMD(do_oforce)
     }
 
     else
-      obj_log(g, obj, "oforce: no target found");
+      obj_log_printf(g, obj, "oforce: no target found");
   }
 }
 
@@ -201,10 +201,10 @@ static OCMD(do_ozoneecho)
   skip_spaces(&msg);
 
   if (!*room_number || !*msg)
-    obj_log(g, obj, "ozoneecho called with too few args");
+    obj_log_printf(g, obj, "ozoneecho called with too few args");
 
   else if ((zone = find_zone_by_thing(g, atoi(room_number))) == nullptr)
-    obj_log(g, obj, "ozoneecho called for nonexistant zone");
+    obj_log_printf(g, obj, "ozoneecho called for nonexistant zone");
 
   else {
     send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
@@ -219,14 +219,14 @@ static OCMD(do_osend)
   msg = any_one_arg(argument, buf);
 
   if (!*buf) {
-    obj_log(g, obj, "osend called with no args");
+    obj_log_printf(g, obj, "osend called with no args");
     return;
   }
 
   skip_spaces(&msg);
 
   if (!*msg) {
-    obj_log(g, obj, "osend called without a message");
+    obj_log_printf(g, obj, "osend called without a message");
     return;
   }
 
@@ -244,7 +244,7 @@ static OCMD(do_osend)
   }
 
   else
-    obj_log(g, obj, "no target found for osend");
+    obj_log_printf(g, obj, "no target found for osend");
 }
 
 /* prints the message to everyone in the range of numbers */
@@ -258,9 +258,9 @@ static OCMD(do_orecho)
   skip_spaces(&msg);
 
   if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
-    obj_log(g, obj, "orecho: too few args");
+    obj_log_printf(g, obj, "orecho: too few args");
   else
-    send_to_range(g, atoi(start), atoi(finish), "%s\r\n", msg);
+    send_to_range_printf(g, atoi(start), atoi(finish), "%s\r\n", msg);
 }
 
 /* set the object's timer value */
@@ -272,9 +272,9 @@ static OCMD(do_otimer)
   arg                   = take_arg(rest);
 
   if (arg.empty())
-    obj_log(g, obj, "otimer: missing argument");
+    obj_log_printf(g, obj, "otimer: missing argument");
   else if (!isdigit(arg[0]))
-    obj_log(g, obj, "otimer: bad argument");
+    obj_log_printf(g, obj, "otimer: bad argument");
   else
     obj_set_timer(obj, parse_int(arg));
 }
@@ -293,13 +293,13 @@ static OCMD(do_otransform)
   arg                   = take_arg(rest);
 
   if (arg.empty())
-    obj_log(g, obj, "otransform: missing argument");
+    obj_log_printf(g, obj, "otransform: missing argument");
   else if (!isdigit(arg[0]))
-    obj_log(g, obj, "otransform: bad argument");
+    obj_log_printf(g, obj, "otransform: bad argument");
   else {
     o = read_object(g, parse_int(arg));
     if (o == nullptr) {
-      obj_log(g, obj, "otransform: bad object vnum");
+      obj_log_printf(g, obj, "otransform: bad object vnum");
       return;
     }
 
@@ -372,13 +372,13 @@ static OCMD(do_opurge)
         g->dg_owner_purged = 1;
       extract_obj(g, o);
     } else
-      obj_log(g, obj, "opurge: bad argument");
+      obj_log_printf(g, obj, "opurge: bad argument");
 
     return;
   }
 
   if (!char_is_npc(ch)) {
-    obj_log(g, obj, "opurge: purging a PC");
+    obj_log_printf(g, obj, "opurge: purging a PC");
     return;
   }
 
@@ -397,16 +397,16 @@ static OCMD(do_ogoto)
   arg1                  = take_arg(rest);
 
   if (arg1.empty()) {
-    obj_log(g, obj, "ogoto called with too few args");
+    obj_log_printf(g, obj, "ogoto called with too few args");
     return;
   }
 
   target = find_obj_target_room(g, obj, arg1);
 
   if (target == NOWHERE) {
-    obj_log(g, obj, "ogoto target is an invalid room");
+    obj_log_printf(g, obj, "ogoto target is an invalid room");
   } else if (obj_get_in_room(obj) == NOWHERE) {
-    obj_log(g, obj, "ogoto tried to leave nowhere");
+    obj_log_printf(g, obj, "ogoto tried to leave nowhere");
   } else {
     obj_from_room(g, obj);
     obj_to_room(g, obj, target);
@@ -424,19 +424,19 @@ static OCMD(do_oteleport)
   arg2                  = take_arg(rest);
 
   if (arg1.empty() || arg2.empty()) {
-    obj_log(g, obj, "oteleport called with too few args");
+    obj_log_printf(g, obj, "oteleport called with too few args");
     return;
   }
 
   target = find_obj_target_room(g, obj, arg2);
 
   if (target == NOWHERE)
-    obj_log(g, obj, "oteleport target is an invalid room");
+    obj_log_printf(g, obj, "oteleport target is an invalid room");
 
   else if (str_eq_nocase(arg1, "all")) {
     rm = obj_room(obj);
     if (target == rm)
-      obj_log(g, obj, "oteleport target is itself");
+      obj_log_printf(g, obj, "oteleport target is itself");
 
     for (char_data *tch : room_people(g, rm)) {
       if (!valid_dg_target(g, tch, DG_ALLOW_GODS))
@@ -457,7 +457,7 @@ static OCMD(do_oteleport)
     }
 
     else
-      obj_log(g, obj, "oteleport: no target found");
+      obj_log_printf(g, obj, "oteleport: no target found");
   }
 }
 
@@ -476,12 +476,12 @@ static OCMD(do_dgoload)
   target = two_arguments(argument, arg1, arg2);
 
   if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
-    obj_log(g, obj, "oload: bad syntax");
+    obj_log_printf(g, obj, "oload: bad syntax");
     return;
   }
 
   if ((room = obj_room(obj)) == NOWHERE) {
-    obj_log(g, obj, "oload: object in NOWHERE trying to load");
+    obj_log_printf(g, obj, "oload: object in NOWHERE trying to load");
     return;
   }
 
@@ -492,14 +492,14 @@ static OCMD(do_dgoload)
       rnum = room;
     } else {
       if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
-        obj_log(g, obj, "oload: room target vnum doesn't exist "
-                     "(loading mob vnum %d to room %s)",
-                number, target);
+        obj_log_printf(g, obj, "oload: room target vnum doesn't exist "
+                               "(loading mob vnum %d to room %s)",
+                       number, target);
         return;
       }
     }
     if ((mob = read_mobile(g, number)) == nullptr) {
-      obj_log(g, obj, "oload: bad mob vnum");
+      obj_log_printf(g, obj, "oload: bad mob vnum");
       return;
     }
     char_to_room(g, mob, rnum);
@@ -515,7 +515,7 @@ static OCMD(do_dgoload)
 
   else if (is_abbrev(arg1, "obj")) {
     if ((object = read_object(g, number)) == nullptr) {
-      obj_log(g, obj, "oload: bad object vnum");
+      obj_log_printf(g, obj, "oload: bad object vnum");
       return;
     }
 
@@ -561,7 +561,7 @@ static OCMD(do_dgoload)
   }
 
   else
-    obj_log(g, obj, "oload: bad type");
+    obj_log_printf(g, obj, "oload: bad type");
 }
 
 static OCMD(do_odamage)
@@ -576,7 +576,7 @@ static OCMD(do_odamage)
 
   /* who cares if it's a number ? if not it'll just be 0 */
   if (name.empty() || amount.empty()) {
-    obj_log(g, obj, "odamage: bad syntax");
+    obj_log_printf(g, obj, "odamage: bad syntax");
     return;
   }
 
@@ -584,7 +584,7 @@ static OCMD(do_odamage)
   ch  = get_char_by_obj(g, obj, name);
 
   if (!ch) {
-    obj_log(g, obj, "odamage: target not found");
+    obj_log_printf(g, obj, "odamage: target not found");
     return;
   }
   script_damage(g, ch, dam);
@@ -598,12 +598,12 @@ static OCMD(do_oasound)
   skip_spaces(&argument);
 
   if (!*argument) {
-    obj_log(g, obj, "oasound called with no args");
+    obj_log_printf(g, obj, "oasound called with no args");
     return;
   }
 
   if ((room = obj_room(obj)) == NOWHERE) {
-    obj_log(g, obj, "oecho called by object in NOWHERE");
+    obj_log_printf(g, obj, "oecho called by object in NOWHERE");
     return;
   }
 
@@ -630,27 +630,27 @@ static OCMD(do_odoor)
   skip_spaces(&value);
 
   if (!*target || !*direction || !*field) {
-    obj_log(g, obj, "odoor called with too few args");
+    obj_log_printf(g, obj, "odoor called with too few args");
     return;
   }
 
   if ((rm = get_room(g, target)) == nullptr) {
-    obj_log(g, obj, "odoor: invalid target");
+    obj_log_printf(g, obj, "odoor: invalid target");
     return;
   }
 
   if ((dir = search_block(direction, dirs, false)) == -1) {
-    obj_log(g, obj, "odoor: invalid direction");
+    obj_log_printf(g, obj, "odoor: invalid direction");
     return;
   }
 
   if ((fd = search_block(field, dg_door_fields, false)) == -1) {
-    obj_log(g, obj, "odoor: invalid field");
+    obj_log_printf(g, obj, "odoor: invalid field");
     return;
   }
 
   if (!dg_door_apply(g, rm, dir, fd, value))
-    obj_log(g, obj, "odoor: invalid door target");
+    obj_log_printf(g, obj, "odoor: invalid door target");
 }
 
 static OCMD(do_osetval)
@@ -663,7 +663,7 @@ static OCMD(do_osetval)
   arg2                  = take_arg(rest);
   if (arg1.empty() || arg2.empty() ||
       !is_number(arg1) || !is_number(arg2)) {
-    obj_log(g, obj, "osetval: bad syntax");
+    obj_log_printf(g, obj, "osetval: bad syntax");
     return;
   }
 
@@ -672,7 +672,7 @@ static OCMD(do_osetval)
   if (position >= 0 && position < NUM_OBJ_VAL_POSITIONS)
     obj_set_value(obj, position, new_value);
   else
-    obj_log(g, obj, "osetval: position out of bounds!");
+    obj_log_printf(g, obj, "osetval: position out of bounds!");
 }
 
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
@@ -686,14 +686,14 @@ static OCMD(do_oat)
   command = any_one_arg(argument, arg);
 
   if (!*arg) {
-    obj_log(g, obj, "oat called with no args");
+    obj_log_printf(g, obj, "oat called with no args");
     return;
   }
 
   skip_spaces(&command);
 
   if (!*command) {
-    obj_log(g, obj, "oat called without a command");
+    obj_log_printf(g, obj, "oat called without a command");
     return;
   }
 
@@ -703,7 +703,7 @@ static OCMD(do_oat)
     loc = char_get_in_room(ch);
 
   if (!room_of(g, loc)) {
-    obj_log(g, obj, "oat: location not found (%s)", arg);
+    obj_log_printf(g, obj, "oat: location not found (%s)", arg);
     return;
   }
 
@@ -766,7 +766,7 @@ void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument)
       break;
 
   if (*obj_cmd_info[cmd].command == '\n')
-    obj_log(g, obj, "Unknown object cmd: '%s'", argument);
+    obj_log_printf(g, obj, "Unknown object cmd: '%s'", argument);
   else
     ((*obj_cmd_info[cmd].command_pointer)(g, obj, line, cmd, obj_cmd_info[cmd].subcmd));
 }

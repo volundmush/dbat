@@ -108,12 +108,12 @@ void handle_ingest_learn(GameWorld *g, struct char_data *ch, struct char_data *v
 {
 
   int i = 1;
-  send_to_char(g, ch, "@YAll your current skills improve somewhat!@n\r\n");
+  send_to_char_printf(g, ch, "@YAll your current skills improve somewhat!@n\r\n");
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
 
     if (char_get_skills_base(ch, i) > 0 && char_get_skills_base(vict, i) > 0 && i != 141) {
-      send_to_char(g, ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", g->spell_info[i].name);
+      send_to_char_printf(g, ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", g->spell_info[i].name);
 
       if (char_get_skills_base(ch, i) + 10 < 100) {
         char_set_skills_base(ch, i, char_get_skills_base(ch, i) + (10));
@@ -125,7 +125,7 @@ void handle_ingest_learn(GameWorld *g, struct char_data *ch, struct char_data *v
     }
     if (((i >= 481 && i <= 489) || i == 517 || i == 535) && ((char_get_skills_base(ch, i) <= 0) && char_get_skills_base(vict, i) > 0)) {
       char_set_skills_base(ch, i, char_get_skills_base(ch, i) + rand_number(g, 10, 25));
-      send_to_char(g, ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", g->spell_info[i].name);
+      send_to_char_printf(g, ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", g->spell_info[i].name);
       char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
       char_set_ingestLearned(ch, 1);
     }
@@ -147,32 +147,32 @@ ACMD(do_teach)
   arg2                  = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char(g, ch, "What skill are you wanting to teach?\r\n");
+    send_to_char_printf(g, ch, "What skill are you wanting to teach?\r\n");
     return;
   }
 
   skill = find_skill_num(g, arg.data(), SKTYPE_SKILL);
 
   if (skill < 0 || skill >= SKILL_TABLE_SIZE) {
-    send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
+    send_to_char_printf(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
 
   if (char_get_skills_base(ch, skill) < 101) {
-    send_to_char(g, ch, "You are not a Grand Master in that skill!\r\n");
-    send_to_char(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
+    send_to_char_printf(g, ch, "You are not a Grand Master in that skill!\r\n");
+    send_to_char_printf(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
     return;
   }
 
   if (arg2.empty()) {
-    send_to_char(g, ch, "@wWho are you wanting to teach @C%s@w to?@n\r\n", g->spell_info[skill].name);
-    send_to_char(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
+    send_to_char_printf(g, ch, "@wWho are you wanting to teach @C%s@w to?@n\r\n", g->spell_info[skill].name);
+    send_to_char_printf(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "@wTeach who?@n\r\n");
-    send_to_char(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
+    send_to_char_printf(g, ch, "@wTeach who?@n\r\n");
+    send_to_char_printf(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
     return;
   }
 
@@ -193,23 +193,23 @@ ACMD(do_teach)
     cost = 1;
 
   if (!char_get_master(g, vict)) {
-    send_to_char(g, ch, "They must be following you in order for you to teach them.\r\n");
+    send_to_char_printf(g, ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }
   if (char_get_master(g, vict) != ch) {
-    send_to_char(g, ch, "They must be following you in order for you to teach them.\r\n");
+    send_to_char_printf(g, ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }
   if (char_get_forgeting(vict) == skill) {
-    send_to_char(g, ch, "They are trying to forget that skill!\r\n");
+    send_to_char_printf(g, ch, "They are trying to forget that skill!\r\n");
     return;
   }
   if (char_get_practice_points(g, vict) < cost) {
-    send_to_char(g, ch, "They do not have enough practice sessions for you to teach them.\r\n");
+    send_to_char_printf(g, ch, "They do not have enough practice sessions for you to teach them.\r\n");
     return;
   }
   if (char_get_skills_base(vict, skill) >= 80) {
-    send_to_char(g, ch, "You can not teach them anymore.\r\n");
+    send_to_char_printf(g, ch, "You can not teach them anymore.\r\n");
     return;
   }
   if (char_get_skills_base(vict, skill) > 0) {
@@ -224,11 +224,11 @@ ACMD(do_teach)
     if (free == false) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (cost));
     } else {
-      send_to_char(g, ch, "@GYou teach your lesson so well that it cost them nothing to learn from you!@n\r\n");
-      send_to_char(g, vict, "@GYour teacher taught you the lesson so well that it cost you nothing!@n\r\n");
+      send_to_char_printf(g, ch, "@GYou teach your lesson so well that it cost them nothing to learn from you!@n\r\n");
+      send_to_char_printf(g, vict, "@GYour teacher taught you the lesson so well that it cost you nothing!@n\r\n");
     }
   } else {
-    send_to_char(g, ch, "They do not even know the basics. It's a waste of your teaching skills.\r\n");
+    send_to_char_printf(g, ch, "They do not even know the basics. It's a waste of your teaching skills.\r\n");
     return;
   }
 }
@@ -395,7 +395,7 @@ void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  send_to_char(g, ch, "%s", buf2);
+  send_to_char_printf(g, ch, "%s", buf2);
 }
 
 static bool is_guild_open(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, int msg)
@@ -651,97 +651,97 @@ static void what_does_guild_know(GameWorld *g, struct guild_data *guild_nr, stru
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  send_to_char(g, ch, "%s", buf2);
+  send_to_char_printf(g, ch, "%s", buf2);
 }
 
 static bool prereq_pass(GameWorld *g, struct char_data *ch, int snum)
 {
   if (snum == SKILL_KOUSENGAN || snum == SKILL_TSUIHIDAN || snum == SKILL_RENZO || snum == SKILL_SHOGEKIHA) {
     if (char_get_skills_base(ch, SKILL_KIBALL) < 40 || char_get_skills_base(ch, SKILL_KIBLAST) < 40 || char_get_skills_base(ch, SKILL_BEAM) < 40) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Kiball, Kiblast, and Beam to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Kiball, Kiblast, and Beam to Skill LVL 40.");
       return false;
     }
   } else if (snum == SKILL_INSTANTT) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 90 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 90 || char_get_skills_base(ch, SKILL_ZANZOKEN) < 90) {
-      send_to_char(g, ch, "You can not train instant transmission until you have Focus, Concentration, and Zanzoken up to Skill LVL 90.");
+      send_to_char_printf(g, ch, "You can not train instant transmission until you have Focus, Concentration, and Zanzoken up to Skill LVL 90.");
       return false;
     }
   } else if (snum == SKILL_SLAM) {
     if (char_get_skills_base(ch, SKILL_UPPERCUT) < 50) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained uppercut to Skill LVL 50.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained uppercut to Skill LVL 50.");
       return false;
     }
   } else if (snum == SKILL_UPPERCUT) {
     if (char_get_skills_base(ch, SKILL_ELBOW) < 40) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained elbow to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained elbow to Skill LVL 40.");
       return false;
     }
   } else if (snum == SKILL_HEELDROP) {
     if (char_get_skills_base(ch, SKILL_ROUNDHOUSE) < 50) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained roundhouse to Skill LVL 50.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained roundhouse to Skill LVL 50.");
       return false;
     }
   } else if (snum == SKILL_ROUNDHOUSE) {
     if (char_get_skills_base(ch, SKILL_KNEE) < 40) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained knee to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained knee to Skill LVL 40.");
       return false;
     }
   } else if (snum == SKILL_KIBALL || snum == SKILL_KIBLAST || snum == SKILL_BEAM) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 30) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 30.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 30.");
       return false;
     }
   } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER2) || IS_SET(g->spell_info[snum].flags, SKFLAG_TIER3)) {
     if (snum != 530 && snum != 531) {
       if (char_get_skills_base(ch, SKILL_TSUIHIDAN) < 40 || char_get_skills_base(ch, SKILL_RENZO) < 40 || char_get_skills_base(ch, SKILL_SHOGEKIHA) < 40) {
-        send_to_char(g, ch, "You can not train that skill until you at least have trained Tsuihidan, Renzokou Energy Dan, and Shogekiha to Skill LVL 40.");
+        send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Tsuihidan, Renzokou Energy Dan, and Shogekiha to Skill LVL 40.");
         return false;
       }
     }
   } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER4)) {
     if (char_is_roshi(ch) && (char_get_skills_base(ch, SKILL_KAMEHAMEHA) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
       return false;
     }
     if (char_is_tsuna(ch) && (char_get_skills_base(ch, SKILL_WRAZOR) < 40 || char_get_skills_base(ch, SKILL_WSPIKE) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Water Razor and Water Spikes to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Water Razor and Water Spikes to Skill LVL 40.");
       return false;
     }
     if (char_is_piccolo(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_SBC) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Masenko and Special Beam Cannon to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Masenko and Special Beam Cannon to Skill LVL 40.");
       return false;
     }
     if (char_is_frieza(ch) && (char_get_skills_base(ch, SKILL_DEATHBEAM) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Deathbeam and Kienzan to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Deathbeam and Kienzan to Skill LVL 40.");
       return false;
     }
     if (char_is_ginyu(ch) && (char_get_skills_base(ch, SKILL_CRUSHER) < 40 || char_get_skills_base(ch, SKILL_ERASER) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Crusher Ball and Eraser Cannon to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Crusher Ball and Eraser Cannon to Skill LVL 40.");
       return false;
     }
     if (char_is_bardock(ch) && (char_get_skills_base(ch, SKILL_GALIKGUN) < 40 || char_get_skills_base(ch, SKILL_FINALFLASH) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Galik Gun and Final Flash to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Galik Gun and Final Flash to Skill LVL 40.");
       return false;
     }
     if (char_is_tapion(ch) && (char_get_skills_base(ch, SKILL_TSLASH) < 40 || char_get_skills_base(ch, SKILL_DDSLASH) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Twin Slash and Darkness Dragon Slash to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Twin Slash and Darkness Dragon Slash to Skill LVL 40.");
       return false;
     }
     if (char_is_nail(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_KOUSENGAN) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Masenko and Kousengan to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Masenko and Kousengan to Skill LVL 40.");
       return false;
     }
     if (char_is_android(ch) && (char_get_skills_base(ch, SKILL_DUALBEAM) < 40 || char_get_skills_base(ch, SKILL_HELLFLASH) < 40)) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Dual Beam and Hell Flash to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Dual Beam and Hell Flash to Skill LVL 40.");
       return false;
     }
     if (char_is_jinto(ch) && char_get_skills_base(ch, SKILL_BREAKER) < 40) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
       return false;
     }
   } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER5)) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 60 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 80) {
-      send_to_char(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 60 and concentration to Skill LVL 80.");
+      send_to_char_printf(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 60 and concentration to Skill LVL 80.");
       return false;
     }
   }
@@ -756,37 +756,37 @@ static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_d
   std::string text(skip_spaces(argument));
 
   if (text.empty()) {
-    send_to_char(g, ch, "What skill do you want to start to forget?\r\n");
+    send_to_char_printf(g, ch, "What skill do you want to start to forget?\r\n");
     return;
   }
 
   skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
 
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
-    send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
+    send_to_char_printf(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
 
   if (char_get_skills_base(ch, skill_num) > 30) {
-    send_to_char(g, ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
+    send_to_char_printf(g, ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
     return;
   }
   if (skill_num == SKILL_MIMIC && char_get_mimic(ch) > 0) {
-    send_to_char(g, ch, "@MYou can not forget mimic while you are using it!\r\n");
+    send_to_char_printf(g, ch, "@MYou can not forget mimic while you are using it!\r\n");
   } else if (skill_num == SKILL_FOCUS) {
-    send_to_char(g, ch, "@MYou can not forget such a fundamental skill!@n\r\n");
+    send_to_char_printf(g, ch, "@MYou can not forget such a fundamental skill!@n\r\n");
   } else if (char_get_skills_base(ch, skill_num) <= 0) {
-    send_to_char(g, ch, "@MYou can not forget a skill you don't know!@n\r\n");
+    send_to_char_printf(g, ch, "@MYou can not forget a skill you don't know!@n\r\n");
   } else if (char_get_forgeting(ch) == skill_num) {
-    send_to_char(g, ch, "@MYou stop forgetting %s@n\r\n", g->spell_info[skill_num].name);
+    send_to_char_printf(g, ch, "@MYou stop forgetting %s@n\r\n", g->spell_info[skill_num].name);
     char_set_forgetcount(ch, 0);
     char_set_forgeting(ch, 0);
   } else if (char_get_forgeting(ch) != 0) {
-    send_to_char(g, ch, "@MYou stop forgetting %s, and start trying to forget %s.@n\r\n", g->spell_info[char_get_forgeting(ch)].name, g->spell_info[skill_num].name);
+    send_to_char_printf(g, ch, "@MYou stop forgetting %s, and start trying to forget %s.@n\r\n", g->spell_info[char_get_forgeting(ch)].name, g->spell_info[skill_num].name);
     char_set_forgetcount(ch, 0);
     char_set_forgeting(ch, skill_num);
   } else {
-    send_to_char(g, ch, "@MYou start trying to forget %s.@n\r\n", g->spell_info[skill_num].name);
+    send_to_char_printf(g, ch, "@MYou start trying to forget %s.@n\r\n", g->spell_info[skill_num].name);
     char_set_forgetcount(ch, 0);
     char_set_forgeting(ch, skill_num);
   }
@@ -800,18 +800,18 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
   std::string text(skip_spaces(argument));
 
   if (!char_can_grand_master(ch)) {
-    send_to_char(g, ch, "Your race can not become a Grand Master in a skill through this process.\r\n");
+    send_to_char_printf(g, ch, "Your race can not become a Grand Master in a skill through this process.\r\n");
     return;
   }
 
   if (text.empty()) {
-    send_to_char(g, ch, "What skill do you want to become a Grand Master in?");
+    send_to_char_printf(g, ch, "What skill do you want to become a Grand Master in?");
     return;
   }
 
   skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
-    send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
+    send_to_char_printf(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
   char buf[MAX_STRING_LENGTH];
@@ -823,25 +823,25 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
   }
 
   if (char_get_skills_base(ch, skill_num) <= 0) {
-    send_to_char(g, ch, "You do not know that skill!\r\n");
+    send_to_char_printf(g, ch, "You do not know that skill!\r\n");
     return;
   }
   if (char_get_skills_base(ch, skill_num) < 100) {
-    send_to_char(g, ch, "You haven't even mastered that skill. How can you become a Grand Master in it?\r\n");
+    send_to_char_printf(g, ch, "You haven't even mastered that skill. How can you become a Grand Master in it?\r\n");
     return;
   }
   if (char_get_skills_base(ch, skill_num) >= 103) {
-    send_to_char(g, ch, "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
+    send_to_char_printf(g, ch, "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
     return;
   }
   if (char_get_practice_points(g, ch) < 1000) {
-    send_to_char(g, ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
+    send_to_char_printf(g, ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
     return;
   }
   if (char_get_skills_base(ch, skill_num) == 100) {
-    send_to_char(g, ch, "@YYou have ascended to Grand Master in the skill, @C%s@Y.\r\n", g->spell_info[skill_num].name);
+    send_to_char_printf(g, ch, "@YYou have ascended to Grand Master in the skill, @C%s@Y.\r\n", g->spell_info[skill_num].name);
   } else {
-    send_to_char(g, ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", g->spell_info[skill_num].name);
+    send_to_char_printf(g, ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", g->spell_info[skill_num].name);
   }
   char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
   char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (1000));
@@ -861,18 +861,18 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
   }
 
   if (char_get_practice_points(g, ch) <= 0) {
-    send_to_char(g, ch, "You do not seem to be able to practice now.\r\n");
+    send_to_char_printf(g, ch, "You do not seem to be able to practice now.\r\n");
     return;
   }
 
   if (char_aff_flagged(ch, AFF_SHOCKED)) {
-    send_to_char(g, ch, "You can not practice while your mind is shocked!\r\n");
+    send_to_char_printf(g, ch, "You can not practice while your mind is shocked!\r\n");
     return;
   }
 
   skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
-    send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
+    send_to_char_printf(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
   }
 
@@ -881,7 +881,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
   }
 
   if (skill_num == char_get_forgeting(ch)) {
-    send_to_char(g, ch, "You can't practice that! You are trying to forget it!@n\r\n");
+    send_to_char_printf(g, ch, "You can't practice that! You are trying to forget it!@n\r\n");
     return;
   }
 
@@ -907,8 +907,8 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
         highest = highest_skill_value(char_get_level(ch), learntype);
         break;
       default:
-        mud_log("Unknown SKLEARN type for skill %d in practice", skill_num);
-        send_to_char(g, ch, "You can't learn that.\r\n");
+        mud_log_printf("Unknown SKLEARN type for skill %d in practice", skill_num);
+        send_to_char_printf(g, ch, "You can't learn that.\r\n");
         return;
     }
     pointcost = calculate_skill_cost(g, ch, skill_num);
@@ -917,68 +917,68 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= highest) {
-        send_to_char(g, ch, "You cannot increase that skill again until you progress further.\r\n");
+        send_to_char_printf(g, ch, "You cannot increase that skill again until you progress further.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 75 && char_get_bonuses(ch, BONUS_MASOCHISTIC) > 0) {
         if (skill_num == SKILL_PARRY || skill_num == SKILL_ZANZOKEN || skill_num == SKILL_DODGE || skill_num == SKILL_BARRIER || skill_num == SKILL_BLOCK || skill_num == SKILL_TSKIN) {
-          send_to_char(g, ch, "You cannot increase that skill again because it would deny you the pain you enjoy.\r\n");
+          send_to_char_printf(g, ch, "You cannot increase that skill again because it would deny you the pain you enjoy.\r\n");
           return;
         }
       }
       if (char_get_skills_base(ch, skill_num) >= 75 && char_is_tapion(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 75 && char_is_dabura(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 75 && char_is_jinto(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 75 && char_is_tsuna(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 50 && char_is_frieza(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 50 && char_is_andsix(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 50 && char_is_kurzak(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 50 && char_is_ginyu(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 50 && char_is_bardock(ch) && skill_num == SKILL_SENSE) {
-        send_to_char(g, ch, "You cannot practice that anymore.\r\n");
+        send_to_char_printf(g, ch, "You cannot practice that anymore.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) >= 100) {
-        send_to_char(g, ch, "You know everything about that skill.\r\n");
+        send_to_char_printf(g, ch, "You know everything about that skill.\r\n");
         return;
       }
       if (char_get_skills_base(ch, skill_num) == 0) {
         if (slot_count(ch) < char_get_skill_slots(ch)) {
           if (skill_num != 539)
-            send_to_char(g, ch, "You practice and master the basics!\r\n");
+            send_to_char_printf(g, ch, "You practice and master the basics!\r\n");
           else
-            send_to_char(g, ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
+            send_to_char_printf(g, ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
           char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(g, 10, 25));
           char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (pointcost));
           if (char_get_forgeting(ch) != 0 && char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
             char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
             if (char_get_forgetcount(ch) >= 5) {
               char_set_skills_base(ch, char_get_forgeting(ch), 0);
-              send_to_char(g, ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", g->spell_info[char_get_forgeting(ch)].name);
+              send_to_char_printf(g, ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", g->spell_info[char_get_forgeting(ch)].name);
               char_set_forgeting(ch, 0);
               char_set_forgetcount(ch, 0);
               save_char(g, ch);
@@ -987,18 +987,18 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
             char_set_forgeting(ch, 0);
           }
         } else {
-          send_to_char(g, ch, "You already know the maximum number of skills you can for the time being!\r\n");
+          send_to_char_printf(g, ch, "You already know the maximum number of skills you can for the time being!\r\n");
           return;
         }
       } else {
         if (skill_num != 539)
-          send_to_char(g, ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
+          send_to_char_printf(g, ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
         else
-          send_to_char(g, ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
+          send_to_char_printf(g, ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
         char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
         char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (pointcost));
         if (char_get_skills_base(ch, skill_num) >= 100) {
-          send_to_char(g, ch, "You learned a lot by mastering that skill.\r\n");
+          send_to_char_printf(g, ch, "You learned a lot by mastering that skill.\r\n");
           if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
             char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
           }
@@ -1008,7 +1008,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
           char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
           if (char_get_forgetcount(ch) >= 5) {
             char_set_skills_base(ch, char_get_forgeting(ch), 0);
-            send_to_char(g, ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", g->spell_info[char_get_forgeting(ch)].name);
+            send_to_char_printf(g, ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", g->spell_info[char_get_forgeting(ch)].name);
             char_set_forgeting(ch, 0);
             char_set_forgetcount(ch, 0);
             save_char(g, ch);
@@ -1016,8 +1016,8 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
         }
       }
     } else {
-      send_to_char(g, ch, "You need %d practice session%s to increase that skill.\r\n",
-                   pointcost, (pointcost == 1) ? "" : "s");
+      send_to_char_printf(g, ch, "You need %d practice session%s to increase that skill.\r\n",
+                          pointcost, (pointcost == 1) ? "" : "s");
     }
   } else {
     snprintf(buf, sizeof(buf), guild_nr->no_such_skill.c_str(), char_get_name(ch));
@@ -1033,18 +1033,18 @@ static void handle_gain(GameWorld *g, struct char_data *keeper, struct guild_dat
 
   if (char_get_level(ch) < 100 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1)) {
     if (char_get_rp(ch) < rpp_cost) {
-      send_to_char(g, ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
+      send_to_char_printf(g, ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
     } else if (rpp_cost <= char_get_rp(ch)) {
       char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
       char_get_desc(ch)->rpp = char_get_rp(ch);
       userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-      send_to_char(g, ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
+      send_to_char_printf(g, ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
       gain_level(g, ch, whichclass);
     } else {
       gain_level(g, ch, whichclass);
     }
   } else {
-    send_to_char(g, ch, "You are not yet ready for further advancement.\r\n");
+    send_to_char_printf(g, ch, "You are not yet ready for further advancement.\r\n");
   }
 }
 
@@ -1110,12 +1110,12 @@ static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_da
   expcost += expadjust;
 
   if (char_get_exp(ch) < expcost) {
-    send_to_char(g, ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost));
+    send_to_char_printf(g, ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost));
     fail = true;
   }
 
   if (char_get_gold(ch) < goldcost) {
-    send_to_char(g, ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost));
+    send_to_char_printf(g, ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost));
     fail = true;
   }
 
@@ -1128,7 +1128,7 @@ static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_da
 
   act(g, "@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
   act(g, "@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
-  send_to_char(g, ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
+  send_to_char_printf(g, ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
 }
 
 SPECIAL(guild)
@@ -1210,7 +1210,7 @@ static std::string read_guild_message(GameWorld *g, guild_vnum vnum, FILE *gm_f,
     return fallback;
 
   if ((problem = npc_msg_format_problem(msg.c_str(), false))) {
-    mud_log("SYSERR: Guild #%d %s: %s; using the default.", vnum, field, problem);
+    mud_log_printf("SYSERR: Guild #%d %s: %s; using the default.", vnum, field, problem);
     return fallback;
   }
   return msg;
@@ -1220,7 +1220,7 @@ static std::string read_guild_message(GameWorld *g, guild_vnum vnum, FILE *gm_f,
 static void read_guild_skill_line(FILE *gm_f, char *buf, int *t1, int *t2, int *rv, int guild)
 {
   if (!get_line(gm_f, buf)) {
-    mud_log("SYSERR: Guild file ends in the middle of guild #%d", guild);
+    mud_log_printf("SYSERR: Guild file ends in the middle of guild #%d", guild);
     exit(1);
   }
   *t1 = 0;
@@ -1254,24 +1254,24 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
           if (t1 < SKILL_TABLE_SIZE)
             guild->skills[(int)t1] = 1;
           else
-            mud_log("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
+            mud_log_printf("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
         } else if (rv == 2) { /* new style guilds, skills and feats */
           if (t2 == 1) {
             if (t1 < SKILL_TABLE_SIZE)
               guild->skills[(int)t1] = 1;
             else
-              mud_log("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
+              mud_log_printf("SYSERR: Guild #%d teaches impossible skill %d", temp, t1);
           } else if (t2 == 2) {
             if (t1 < NUM_FEATS_DEFINED)
               guild->feats[(int)t1] = 1;
             else
-              mud_log("SYSERR: Guild #%d teaches impossible feat %d", temp, t1);
+              mud_log_printf("SYSERR: Guild #%d teaches impossible feat %d", temp, t1);
           } else {
-            mud_log("SYSERR: Invalid 2nd arg in guild file!");
+            mud_log_printf("SYSERR: Invalid 2nd arg in guild file!");
             exit(1);
           }
         } else {
-          mud_log("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
+          mud_log_printf("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
           exit(1);
         }
         read_guild_skill_line(gm_f, buf3, &t1, &t2, &rv, temp);
@@ -1299,7 +1299,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
           if (!p || !*p)
             break;
           if (sscanf(p, "%d", &val) != 1) {
-            mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
+            mud_log_printf("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
             break;
           }
           guild_get_with_who(guild)
@@ -1318,7 +1318,7 @@ void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
         buf = fread_string(gm_f, buf2);
       }
       if (g->guilds.find(vnum))
-        mud_log("SYSERR: Guild #%d is defined twice; ignoring the second one.", vnum);
+        mud_log_printf("SYSERR: Guild #%d is defined twice; ignoring the second one.", vnum);
       else
         g->guilds.insert(vnum, std::move(made));
     } else {
@@ -1401,7 +1401,7 @@ static void list_all_guilds(GameWorld *g, struct char_data *ch)
                     guild_get_vnum(gm_nr), buf1, guild_get_charge(gm_nr), guild_customer_string(g, gm_nr, false));
   }
 
-  send_to_char(g, ch, "%s", buf);
+  send_to_char_printf(g, ch, "%s", buf);
 }
 
 static void list_detailed_guild(GameWorld *g, struct char_data *ch, struct guild_data *gm_nr)
@@ -1433,7 +1433,7 @@ static void list_detailed_guild(GameWorld *g, struct char_data *ch, struct guild
 
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", buf2);
 
-  send_to_char(g, ch, "%s", buf);
+  send_to_char_printf(g, ch, "%s", buf);
 }
 
 void show_guild(GameWorld *g, struct char_data *ch, char *arg)
@@ -1452,7 +1452,7 @@ void show_guild(GameWorld *g, struct char_data *ch, char *arg)
     if (gm_num > 0) {
       gm_nr = g->guilds.find(gm_num);
       if (!gm_nr) {
-        send_to_char(g, ch, "Illegal guild master number.\n\r");
+        send_to_char_printf(g, ch, "Illegal guild master number.\n\r");
         return;
       }
       list_detailed_guild(g, ch, gm_nr);
@@ -1479,9 +1479,9 @@ void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, gui
   /****************************************************************************/
   /** Store the header for the guild listing.                                **/
   /****************************************************************************/
-  send_to_char(g, ch,
-               "Index VNum    Guild Master\r\n"
-               "----- ------- ---------------------------------------------\r\n");
+  send_to_char_printf(g, ch,
+                      "Index VNum    Guild Master\r\n"
+                      "----- ------- ---------------------------------------------\r\n");
 
   if (g->guilds.empty())
     return;
@@ -1490,22 +1490,22 @@ void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, gui
     if (guild_get_vnum(i) >= bottom && guild_get_vnum(i) <= top) {
       counter++;
 
-      send_to_char(g, ch, "@g%4d@n) [@c%-5d@n]", counter, guild_get_vnum(i));
+      send_to_char_printf(g, ch, "@g%4d@n) [@c%-5d@n]", counter, guild_get_vnum(i));
 
       /************************************************************************/
       /** Retrieve the list of rooms for this guild.                         **/
       /************************************************************************/
 
-      send_to_char(g, ch, " @c[@y%d@c]@y %s@n",
-                   (guild_get_gm(i) == NOBODY) ? -1 : mob_index_of(g, guild_get_gm(i))->vnum,
-                   (guild_get_gm(i) == NOBODY) ? "" : char_get_sdesc(mob_proto_of(g, guild_get_gm(i))));
+      send_to_char_printf(g, ch, " @c[@y%d@c]@y %s@n",
+                          (guild_get_gm(i) == NOBODY) ? -1 : mob_index_of(g, guild_get_gm(i))->vnum,
+                          (guild_get_gm(i) == NOBODY) ? "" : char_get_sdesc(mob_proto_of(g, guild_get_gm(i))));
 
-      send_to_char(g, ch, "\r\n");
+      send_to_char_printf(g, ch, "\r\n");
     }
   }
 
   if (counter == 0)
-    send_to_char(g, ch, "None found.\r\n");
+    send_to_char_printf(g, ch, "None found.\r\n");
 }
 
 void destroy_guilds(GameWorld *g)

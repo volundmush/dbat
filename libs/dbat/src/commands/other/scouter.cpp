@@ -73,20 +73,20 @@ ACMD(do_telepathy)
   }
 
   if (char_in_arena(g, ch)) {
-    send_to_char(g, ch, "Lol, no.\r\n");
+    send_to_char_printf(g, ch, "Lol, no.\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char(g, ch, "Syntax: telepathy [ read ] (target)\r\n"
-                     "        telepathy [ link ] (target)\r\n"
-                     "        telepathy [  far ] (target)\r\n"
-                     "        telepathy (target) (message)\r\n");
+    send_to_char_printf(g, ch, "Syntax: telepathy [ read ] (target)\r\n"
+                               "        telepathy [ link ] (target)\r\n"
+                               "        telepathy [  far ] (target)\r\n"
+                               "        telepathy (target) (message)\r\n");
     return;
   }
 
   else if ((getCurKI(g, ch)) < getMaxKI(g, ch) / 40) {
-    send_to_char(g, ch, "You do not have enough ki to focus your mental abilities.\r\n");
+    send_to_char_printf(g, ch, "You do not have enough ki to focus your mental abilities.\r\n");
     return;
   }
   if (!(arg != "far")) {
@@ -94,49 +94,49 @@ ACMD(do_telepathy)
       return;
     }
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD))) {
-      send_to_char(g, ch, "Look through who's eyes?\r\n");
+      send_to_char_printf(g, ch, "Look through who's eyes?\r\n");
       return;
     }
     if (vict == ch) {
-      send_to_char(g, ch, "Oh that makes a lot of sense...\r\n");
+      send_to_char_printf(g, ch, "Oh that makes a lot of sense...\r\n");
       return;
     }
     if (char_is_npc(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such a thing.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such a thing.\r\n");
       return;
     }
     if (char_get_admlevel(vict) > char_get_admlevel(ch)) {
-      send_to_char(g, ch, "Their mental power oustrips your's by unfathomable measurements!\r\n");
+      send_to_char_printf(g, ch, "Their mental power oustrips your's by unfathomable measurements!\r\n");
       return;
     }
     if (char_aff_flagged(ch, AFF_SHOCKED)) {
-      send_to_char(g, ch, "Your mind has been shocked by telepathic feedback! You are not able to use telepathy right now.\r\n");
+      send_to_char_printf(g, ch, "Your mind has been shocked by telepathic feedback! You are not able to use telepathy right now.\r\n");
       return;
     }
     if (char_is_android(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such an artificial being.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     }
     if (char_get_skill(vict, SKILL_TELEPATHY) + char_get_aff_abils_intel(vict) > char_get_skill(ch, SKILL_TELEPATHY) + char_get_aff_abils_intel(ch)) {
-      send_to_char(g, ch, "They throw off your attempt with their own telepathic abilities!\r\n");
+      send_to_char_printf(g, ch, "They throw off your attempt with their own telepathic abilities!\r\n");
       return;
     }
     if (char_get_in_room(ch) == char_get_in_room(vict)) {
-      send_to_char(g, ch, "They are in the same room as you!\r\n");
+      send_to_char_printf(g, ch, "They are in the same room as you!\r\n");
       return;
     }
     if (char_aff_flagged(vict, AFF_BLIND)) {
-      send_to_char(g, ch, "They are blind!\r\n");
+      send_to_char_printf(g, ch, "They are blind!\r\n");
       return;
     }
     if (char_plr_flagged(vict, PLR_EYEC)) {
-      send_to_char(g, ch, "Their eyes are closed!\r\n");
+      send_to_char_printf(g, ch, "Their eyes are closed!\r\n");
       return;
     }
     look_at_room(g, char_get_in_room(vict), ch, 0);
-    send_to_char(g, ch, "You see all this through their eyes!\r\n");
+    send_to_char_printf(g, ch, "You see all this through their eyes!\r\n");
     if (char_get_aff_abils_intel(vict) > char_get_aff_abils_intel(ch)) {
-      send_to_char(g, ch, "You feel like someone was using your mind for something...\r\n");
+      send_to_char_printf(g, ch, "You feel like someone was using your mind for something...\r\n");
     }
     decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
     return;
@@ -154,27 +154,27 @@ ACMD(do_telepathy)
       return;
     }
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD))) {
-      send_to_char(g, ch, "Link with the mind of who?\r\n");
+      send_to_char_printf(g, ch, "Link with the mind of who?\r\n");
       return;
     }
     if (vict == ch) {
-      send_to_char(g, ch, "Oh that makes a lot of sense...\r\n");
+      send_to_char_printf(g, ch, "Oh that makes a lot of sense...\r\n");
       return;
     }
     if (char_is_npc(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such a thing.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such a thing.\r\n");
       return;
     }
     if (char_is_android(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such an artificial being.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     }
     if (char_get_skill(vict, SKILL_TELEPATHY)) {
-      send_to_char(g, ch, "Kinda pointless when you are both telepathic huh?\r\n");
+      send_to_char_printf(g, ch, "Kinda pointless when you are both telepathic huh?\r\n");
       return;
     }
     if (char_get_mindlink(g, vict)) {
-      send_to_char(g, ch, "Someone else is already telepathically linked with them.\r\n");
+      send_to_char_printf(g, ch, "Someone else is already telepathically linked with them.\r\n");
       return;
     }
     if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(g, char_get_aff_abils_intel(vict) * 0.1)) {
@@ -184,7 +184,7 @@ ACMD(do_telepathy)
     }
     act(g, "@CYou link your mind with @w$N.@n", true, ch, nullptr, vict, TO_CHAR);
     act(g, "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", true, ch, nullptr, vict, TO_VICT);
-    send_to_char(g, vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
+    send_to_char_printf(g, vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
     char_set_mindlink(vict, ch);
     char_set_mindlink(ch, vict);
     char_set_linker(ch, 1);
@@ -192,15 +192,15 @@ ACMD(do_telepathy)
   }
   if (!(arg != "read")) {
     if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(g, ch, "Read the mind of who?\r\n");
+      send_to_char_printf(g, ch, "Read the mind of who?\r\n");
       return;
     }
     if (vict == ch) {
-      send_to_char(g, ch, "Oh that makes a lot of sense...\r\n");
+      send_to_char_printf(g, ch, "Oh that makes a lot of sense...\r\n");
       return;
     }
     if (char_is_android(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such an artificial being.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     } else {
       if (axion_dice(g, 0) > char_get_skill(ch, SKILL_TELEPATHY)) {
@@ -221,45 +221,45 @@ ACMD(do_telepathy)
         improve_skill(g, ch, SKILL_TELEPATHY, 0);
         return;
       } else {
-        send_to_char(g, ch, "@wYou peer into their mind:\r\n");
+        send_to_char_printf(g, ch, "@wYou peer into their mind:\r\n");
         decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
-        send_to_char(g, ch, "@GName      @D: @W%s@n\r\n", char_get_name(vict));
-        send_to_char(g, ch, "@GRace      @D: @W%s@n\r\n", char_true_race_name(vict));
-        send_to_char(g, ch, "@GSensei    @D: @W%s@n\r\n", char_sensei_name(vict));
-        send_to_char(g, ch, "@GStr       @D: @W%d@n\r\n", char_get_aff_abils_str(vict));
-        send_to_char(g, ch, "@GCon       @D: @W%d@n\r\n", char_get_aff_abils_con(vict));
-        send_to_char(g, ch, "@GInt       @D: @W%d@n\r\n", char_get_aff_abils_intel(vict));
-        send_to_char(g, ch, "@GWis       @D: @W%d@n\r\n", char_get_aff_abils_wis(vict));
-        send_to_char(g, ch, "@GSpd       @D: @W%d@n\r\n", char_get_aff_abils_cha(vict));
-        send_to_char(g, ch, "@GAgi       @D: @W%d@n\r\n", char_get_aff_abils_dex(vict));
-        send_to_char(g, ch, "@GZenni     @D: @W%s@n\r\n", add_commas(char_get_gold(vict)));
-        send_to_char(g, ch, "@GBank Zenni@D: @W%s@n\r\n", add_commas(char_get_bank_gold(vict)));
+        send_to_char_printf(g, ch, "@GName      @D: @W%s@n\r\n", char_get_name(vict));
+        send_to_char_printf(g, ch, "@GRace      @D: @W%s@n\r\n", char_true_race_name(vict));
+        send_to_char_printf(g, ch, "@GSensei    @D: @W%s@n\r\n", char_sensei_name(vict));
+        send_to_char_printf(g, ch, "@GStr       @D: @W%d@n\r\n", char_get_aff_abils_str(vict));
+        send_to_char_printf(g, ch, "@GCon       @D: @W%d@n\r\n", char_get_aff_abils_con(vict));
+        send_to_char_printf(g, ch, "@GInt       @D: @W%d@n\r\n", char_get_aff_abils_intel(vict));
+        send_to_char_printf(g, ch, "@GWis       @D: @W%d@n\r\n", char_get_aff_abils_wis(vict));
+        send_to_char_printf(g, ch, "@GSpd       @D: @W%d@n\r\n", char_get_aff_abils_cha(vict));
+        send_to_char_printf(g, ch, "@GAgi       @D: @W%d@n\r\n", char_get_aff_abils_dex(vict));
+        send_to_char_printf(g, ch, "@GZenni     @D: @W%s@n\r\n", add_commas(char_get_gold(vict)));
+        send_to_char_printf(g, ch, "@GBank Zenni@D: @W%s@n\r\n", add_commas(char_get_bank_gold(vict)));
         if (char_get_alignment(vict) >= 1000) {
-          send_to_char(g, ch, "@GAlignment @D: @wSaint         @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wSaint         @n\r\n");
         } else if (char_get_alignment(vict) > 750) {
-          send_to_char(g, ch, "@GAlignment @D: @wExtremely Good@n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wExtremely Good@n\r\n");
         } else if (char_get_alignment(vict) > 500) {
-          send_to_char(g, ch, "@GAlignment @D: @wReally Good   @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wReally Good   @n\r\n");
         } else if (char_get_alignment(vict) > 250) {
-          send_to_char(g, ch, "@GAlignment @D: @wGood          @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wGood          @n\r\n");
         } else if (char_get_alignment(vict) > 100) {
-          send_to_char(g, ch, "@GAlignment @D: @wPretty Good   @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wPretty Good   @n\r\n");
         } else if (char_get_alignment(vict) > 50) {
-          send_to_char(g, ch, "@GAlignment @D: @wSorta Good    @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wSorta Good    @n\r\n");
         } else if (char_get_alignment(vict) > -50) {
-          send_to_char(g, ch, "@GAlignment @D: @wNeutral       @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wNeutral       @n\r\n");
         } else if (char_get_alignment(vict) > -100) {
-          send_to_char(g, ch, "@GAlignment @D: @wSorta Evil    @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wSorta Evil    @n\r\n");
         } else if (char_get_alignment(vict) > -500) {
-          send_to_char(g, ch, "@GAlignment @D: @wPretty Evil   @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wPretty Evil   @n\r\n");
         } else if (char_get_alignment(vict) >= -750) {
-          send_to_char(g, ch, "@GAlignment @D: @wEvil          @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wEvil          @n\r\n");
         } else if (char_get_alignment(vict) < -750) {
-          send_to_char(g, ch, "@GAlignment @D: @wExtremely Evil@n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wExtremely Evil@n\r\n");
         } else if (char_get_alignment(vict) <= -1000) {
-          send_to_char(g, ch, "@GAlignment @D: @wDevil         @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wDevil         @n\r\n");
         } else {
-          send_to_char(g, ch, "@GAlignment @D: @wUnknown       @n\r\n");
+          send_to_char_printf(g, ch, "@GAlignment @D: @wUnknown       @n\r\n");
         }
       } // End of read success
     } // End of vict is there
@@ -271,25 +271,25 @@ ACMD(do_telepathy)
     if (char_get_mindlink(g, ch)) {
       vict = char_get_mindlink(g, ch);
     } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-      send_to_char(g, ch, "Send your thoughts to who?\r\n");
+      send_to_char_printf(g, ch, "Send your thoughts to who?\r\n");
       return;
     }
     if (vict == ch) {
-      send_to_char(g, ch, "Oh that makes a lot of sense...\r\n");
+      send_to_char_printf(g, ch, "Oh that makes a lot of sense...\r\n");
       return;
     }
     if (char_is_android(vict)) {
-      send_to_char(g, ch, "You can't touch the mind of such an artificial being.\r\n");
+      send_to_char_printf(g, ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     } else {
       if (!char_get_mindlink(g, ch)) {
-        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2.c_str());
-        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2.c_str());
-        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2.c_str());
+        send_to_char_printf(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2.c_str());
+        send_to_char_printf(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2.c_str());
+        send_to_imm_printf(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2.c_str());
       } else {
-        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), std::string(argument).c_str());
-        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), std::string(argument).c_str());
-        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), std::string(argument).c_str());
+        send_to_char_printf(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), std::string(argument).c_str());
+        send_to_char_printf(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), std::string(argument).c_str());
+        send_to_imm_printf(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), std::string(argument).c_str());
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
     } // End of vict is here
@@ -305,18 +305,18 @@ ACMD(do_eavesdrop)
   buf                   = take_arg(rest);
 
   if (char_get_listenroom(ch) > 0) {
-    send_to_char(g, ch, "You stop eavesdropping.\r\n");
+    send_to_char_printf(g, ch, "You stop eavesdropping.\r\n");
     char_set_listenroom(ch, 0);
     char_set_eavesdir(ch, -1);
     return;
   }
 
   if (buf.empty()) {
-    send_to_char(g, ch, "In which direction would you like to eavesdrop?\r\n");
+    send_to_char_printf(g, ch, "In which direction would you like to eavesdrop?\r\n");
     return;
   }
   if ((dir = search_block(buf, dirs, false)) < 0) {
-    send_to_char(g, ch, "Which directions is that?\r\n");
+    send_to_char_printf(g, ch, "Which directions is that?\r\n");
     return;
   }
   if (!know_skill(g, ch, SKILL_EAVESDROP)) {
@@ -324,14 +324,14 @@ ACMD(do_eavesdrop)
   }
   if (char_get_exit(g, ch, dir)) {
     if (IS_SET(char_get_exit(g, ch, dir)->exit_info, EX_CLOSED) && exit_keyword(char_get_exit(g, ch, dir))) {
-      send_to_char(g, ch, "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
+      send_to_char_printf(g, ch, "The %s is closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
     } else {
       char_set_listenroom(ch, char_get_exit(g, ch, dir)->to_room);
       char_set_eavesdir(ch, dir);
-      send_to_char(g, ch, "Okay.\r\n");
+      send_to_char_printf(g, ch, "Okay.\r\n");
     }
   } else
-    send_to_char(g, ch, "There is not a room there...\r\n");
+    send_to_char_printf(g, ch, "There is not a room there...\r\n");
 }
 
 void check_eq(GameWorld *g, struct char_data *ch)
@@ -391,35 +391,35 @@ ACMD(do_snet)
   struct obj_data *obj2 = nullptr;
 
   if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-    send_to_char(g, ch, "This is a different dimension!\r\n");
+    send_to_char_printf(g, ch, "This is a different dimension!\r\n");
     return;
   }
   if (char_in_arena(g, ch)) {
-    send_to_char(g, ch, "Lol, no.\r\n");
+    send_to_char_printf(g, ch, "Lol, no.\r\n");
     return;
   }
   if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-    send_to_char(g, ch, "This is the past, you can't talk on scouter net!\r\n");
+    send_to_char_printf(g, ch, "This is the past, you can't talk on scouter net!\r\n");
     return;
   }
   if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
-    send_to_char(g, ch, "The fire eats your transmission!\r\n");
+    send_to_char_printf(g, ch, "The fire eats your transmission!\r\n");
     return;
   }
   if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-    send_to_char(g, ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
+    send_to_char_printf(g, ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
     return;
   }
 
   if (char_get_equipment(ch, WEAR_EYE)) {
     obj = char_get_equipment(ch, WEAR_EYE);
   } else {
-    send_to_char(g, ch, "You do not have a scouter on.\r\n");
+    send_to_char_printf(g, ch, "You do not have a scouter on.\r\n");
     return;
   }
 
   if (arg.empty()) {
-    send_to_char(g, ch, "[Syntax] snet < [1-999] | check | #(scouter number) | * message | message>\r\n");
+    send_to_char_printf(g, ch, "[Syntax] snet < [1-999] | check | #(scouter number) | * message | message>\r\n");
     return;
   }
 
@@ -427,13 +427,13 @@ ACMD(do_snet)
     std::erase(arg, '#');
     call = parse_int(arg);
     if (call <= -1) {
-      send_to_char(g, ch, "Call what personal scouter number?\r\n");
+      send_to_char_printf(g, ch, "Call what personal scouter number?\r\n");
       return;
     }
   }
 
   if (str_eq_nocase(arg, "check")) {
-    send_to_char(g, ch, "Your personal scouter number is: %d\r\n", char_get_id(ch));
+    send_to_char_printf(g, ch, "Your personal scouter number is: %d\r\n", char_get_id(ch));
     return;
   }
 
@@ -451,7 +451,7 @@ ACMD(do_snet)
     return;
   } else {
     if (char_get_bonuses(ch, BONUS_MUTE) > 0) {
-      send_to_char(g, ch, "You are unable to speak though.\r\n");
+      send_to_char_printf(g, ch, "You are unable to speak though.\r\n");
       return;
     }
     if (obj_get_scoutfreq(obj) == 0) {
@@ -482,7 +482,7 @@ ACMD(do_snet)
         } else {
           snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, arg2.empty() ? "" : CAP(arg2).c_str());
         }
-        send_to_char(g, i->character, "%s", hist);
+        send_to_char_printf(g, i->character, "%s", hist);
         add_history(g, i->character, hist, HIST_SNET);
         continue;
       }
@@ -516,36 +516,36 @@ ACMD(do_snet)
           obj_set_scoutfreq(obj2, 1);
         }
         if (global == false && call <= -1 && obj_get_scoutfreq(obj2) == obj_get_scoutfreq(obj) && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
+          send_to_char_printf(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
           *hist = '\0';
           snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
-            send_to_char(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+            send_to_char_printf(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
             free(blah);
           }
           continue;
         } /* It is the right freq */
         else if (global == true && call <= -1 && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
+          send_to_char_printf(g, i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
           *hist = '\0';
           snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
-            send_to_char(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+            send_to_char_printf(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
             free(blah);
           }
           continue;
         } else if (call > -1 && char_get_id(i->character) == call) {
-          send_to_char(g, i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
+          send_to_char_printf(g, i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
           *hist = '\0';
           snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
           add_history(g, i->character, hist, HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
-            send_to_char(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
+            send_to_char_printf(g, i->character, "@WScanner@D: @Y%s@n\r\n", blah);
             free(blah);
           }
           reached = true;
@@ -555,7 +555,7 @@ ACMD(do_snet)
     if (call <= -1) {
       if (global == false) {
         reveal_hiding(g, ch, 3);
-        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
+        send_to_char_printf(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
         *hist = '\0';
         snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
         add_history(g, ch, hist, HIST_SNET);
@@ -563,12 +563,12 @@ ACMD(do_snet)
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
-          send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
+          send_to_char_printf(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
       }
       if (global == true) {
         reveal_hiding(g, ch, 3);
-        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
+        send_to_char_printf(g, ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         *hist = '\0';
         snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         add_history(g, ch, hist, HIST_SNET);
@@ -576,12 +576,12 @@ ACMD(do_snet)
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
-          send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
+          send_to_char_printf(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
       }
     } else {
       reveal_hiding(g, ch, 3);
-      send_to_char(g, ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
+      send_to_char_printf(g, ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
       *hist = '\0';
       snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
       add_history(g, ch, hist, HIST_SNET);
@@ -589,7 +589,7 @@ ACMD(do_snet)
       snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
       act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
       if (reached == false) {
-        send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
+        send_to_char_printf(g, ch, "@mThe transmission didn't reach them.@n\r\n");
       }
     }
   } /* end if statement */
@@ -605,18 +605,18 @@ ACMD(do_scouter)
   arg                   = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
-    send_to_char(g, ch, "You have no available arms!\r\n");
+    send_to_char_printf(g, ch, "You have no available arms!\r\n");
     return;
   }
 
   struct obj_data *obj = char_get_equipment(ch, WEAR_EYE);
   if (!obj) {
-    send_to_char(g, ch, "You do not even have a scouter!");
+    send_to_char_printf(g, ch, "You do not even have a scouter!");
     obj = nullptr;
     return;
   }
   if (arg.empty()) {
-    send_to_char(g, ch, "[Syntax] scouter < target | scan>\r\n");
+    send_to_char_printf(g, ch, "[Syntax] scouter < target | scan>\r\n");
     return;
   }
   reveal_hiding(g, ch, 3);
@@ -647,61 +647,61 @@ ACMD(do_scouter)
             snprintf(pathway, sizeof(pathway), "@RHERE");
             break;
           case BFS_NO_PATH:
-            send_to_char(g, ch, "@MUNKNOWN");
+            send_to_char_printf(g, ch, "@MUNKNOWN");
             break;
           default:
-            send_to_char(g, ch, "@G%s\r\n", dirs[dir]);
+            send_to_char_printf(g, ch, "@G%s\r\n", dirs[dir]);
             break;
         }
 
         char *blah = sense_location(g, i->character);
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, i->character) >= 150000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
+          send_to_char_printf(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, i->character) >= 5000000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
+          send_to_char_printf(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, i->character) >= 15000000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
+          send_to_char_printf(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == true ? pathway : blah);
         } else {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(getCurPL(g, i->character)), same == true ? pathway : blah);
+          send_to_char_printf(g, ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(getCurPL(g, i->character)), same == true ? pathway : blah);
         }
         ++count;
         free(blah);
       }
     }
     if (count == 0) {
-      send_to_char(g, ch, "You didn't detect anyone of notice.\r\n");
+      send_to_char_printf(g, ch, "You didn't detect anyone of notice.\r\n");
       return;
     }
     if (count >= 1) {
-      send_to_char(g, ch, "%d powerlevels detected.\r\n", count);
+      send_to_char_printf(g, ch, "%d powerlevels detected.\r\n", count);
       return;
     }
   }
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "They don't seem to be here.\r\n");
+    send_to_char_printf(g, ch, "They don't seem to be here.\r\n");
     return;
   }
   if (char_is_android(vict)) {
     act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
     act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-    send_to_char(g, ch, "@D,==================================|@n\r\n");
-    send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
-    send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-    send_to_char(g, ch, "@D`==================================|@n\r\n");
+    send_to_char_printf(g, ch, "@D,==================================|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D`==================================|@n\r\n");
     return;
   }
   if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, vict) >= 150000) {
     act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
     act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
-    send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
+    send_to_char_printf(g, ch, "Your scouter overloads and explodes!\r\n");
     act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
@@ -711,7 +711,7 @@ ACMD(do_scouter)
     act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
     act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
-    send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
+    send_to_char_printf(g, ch, "Your scouter overloads and explodes!\r\n");
     act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
@@ -721,7 +721,7 @@ ACMD(do_scouter)
     act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
     act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
     perform_remove(g, ch, WEAR_EYE);
-    send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
+    send_to_char_printf(g, ch, "Your scouter overloads and explodes!\r\n");
     act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(g, obj);
     save_char(g, ch);
@@ -740,56 +740,56 @@ ACMD(do_scouter)
   percent = (cur / max) * 100;
   act(g, "$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
   act(g, "$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-  send_to_char(g, ch, "@D,==================================|@n\r\n");
-  send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-  send_to_char(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-  send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-  send_to_char(g, ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(getCurPL(g, vict)));
+  send_to_char_printf(g, ch, "@D,==================================|@n\r\n");
+  send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char_printf(g, ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+  send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char_printf(g, ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(getCurPL(g, vict)));
   if (!char_is_npc(vict)) {
-    send_to_char(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
+    send_to_char_printf(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
   } else if (char_is_npc(vict)) {
-    send_to_char(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_mobcharge(vict) * rand_number(g, char_get_level(ch) * 50, char_get_level(ch) * 200)));
+    send_to_char_printf(g, ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_mobcharge(vict) * rand_number(g, char_get_level(ch) * 50, char_get_level(ch) * 200)));
   }
   if (percent < 10)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
   else if (percent < 25)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
   else if (percent < 50)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
   else if (percent < 75)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
   else if (percent < 90)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
   else if (percent < 100)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
   else if (percent >= 100)
-    send_to_char(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
-  send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char_printf(g, ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
+  send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
   int check = false;
-  send_to_char(g, ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
+  send_to_char_printf(g, ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
   if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
-    send_to_char(g, ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
+    send_to_char_printf(g, ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
     check = true;
   }
   if (char_aff_flagged(vict, AFF_HASS)) {
-    send_to_char(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Accelerated Arms");
+    send_to_char_printf(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Accelerated Arms");
     check = true;
   }
   if (char_aff_flagged(vict, AFF_HEALGLOW)) {
-    send_to_char(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Healing Glow Prepared");
+    send_to_char_printf(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Healing Glow Prepared");
     check = true;
   }
   if (char_aff_flagged(vict, AFF_POISON)) {
-    send_to_char(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
+    send_to_char_printf(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
     check = true;
   }
   if (char_plr_flagged(vict, PLR_SELFD)) {
-    send_to_char(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Explosive Energy");
+    send_to_char_printf(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Explosive Energy");
     check = true;
   }
   if (check == false) {
-    send_to_char(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
+    send_to_char_printf(g, ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
   }
-  send_to_char(g, ch, "@D|@1                                  @n@D|@n\r\n");
-  send_to_char(g, ch, "@D`==================================|@n\r\n");
+  send_to_char_printf(g, ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char_printf(g, ch, "@D`==================================|@n\r\n");
 }

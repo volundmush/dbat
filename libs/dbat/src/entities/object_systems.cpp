@@ -40,21 +40,21 @@ void broken_update(GameWorld *g)
       if (grav_change == true && obj_get_in_room(k) != NOWHERE) {
         room_set_gravity(g, obj_get_in_room(k), rand_gravity[grav_roll]);
         obj_set_weight(k, rand_gravity[grav_roll]);
-        send_to_room(g, obj_get_in_room(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+        send_to_room_printf(g, obj_get_in_room(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
       }
     } /* End Gravity Section */
 
     if (obj_get_vnum(g, k) == 3034 && obj_get_in_room(k) != NOWHERE) { /* ATM */
       if (health <= 10) {
-        send_to_room(g, obj_get_in_room(k), "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
+        send_to_room_printf(g, obj_get_in_room(k), "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
       } else if (health <= 40 && dice <= 8) {
-        send_to_room(g, obj_get_in_room(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+        send_to_room_printf(g, obj_get_in_room(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
       } else if (health <= 80 && dice == 4) {
-        send_to_room(g, obj_get_in_room(k), "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
+        send_to_room_printf(g, obj_get_in_room(k), "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
         money = create_money(g, rand_number(g, 1, 30));
         obj_to_room(g, money, obj_get_in_room(k));
       } else if (health <= 99 && dice < 4) {
-        send_to_room(g, obj_get_in_room(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+        send_to_room_printf(g, obj_get_in_room(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
       }
     } /* End ATM */
 

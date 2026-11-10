@@ -228,7 +228,7 @@ std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_da
 
   /* each operator or bracket goes one deeper; real scripts reach about 40, and the stack is finite */
   if (g->dg_eval_depth >= MAX_EVAL_DEPTH) {
-    script_log(g, "Trigger VNum %d has an expression nested too deeply.", trig ? trig_get_vnum(g, trig) : NOTHING);
+    script_log_printf(g, "Trigger VNum %d has an expression nested too deeply.", trig ? trig_get_vnum(g, trig) : NOTHING);
     return result;
   }
   g->dg_eval_depth++;
@@ -326,7 +326,7 @@ struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_e
   const char *p;
 
   if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
-    script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 1)", trig_get_vnum(g, trig));
+    script_log_printf(g, "Trigger VNum %d has 'if' without 'end'. (error 1)", trig_get_vnum(g, trig));
     return cl;
   }
 
@@ -340,13 +340,13 @@ struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_e
 
     /* thanks to Russell Ryan for this fix */
     if (!c->next) { /* rryan: this is the last line, we didn't find an end. */
-      script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 2)", trig_get_vnum(g, trig));
+      script_log_printf(g, "Trigger VNum %d has 'if' without 'end'. (error 2)", trig_get_vnum(g, trig));
       return c;
     }
   }
 
   /* rryan: we didn't find an end. */
-  script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 3)", trig_get_vnum(g, trig));
+  script_log_printf(g, "Trigger VNum %d has 'if' without 'end'. (error 3)", trig_get_vnum(g, trig));
   return c;
 }
 
@@ -387,7 +387,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
 
     /* thanks to Russell Ryan for this fix */
     if (!c->next) { /* rryan: this is the last line, return. */
-      script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 4)", trig_get_vnum(g, trig));
+      script_log_printf(g, "Trigger VNum %d has 'if' without 'end'. (error 4)", trig_get_vnum(g, trig));
       return c;
     }
   }
@@ -395,7 +395,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
   /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
   for (p = c->cmd.c_str(); *p && isspace(*p); p++); /* skip spaces */
   if (strncasecmp("end", p, 3))
-    script_log(g, "Trigger VNum %d has 'if' without 'end'. (error 5)", trig_get_vnum(g, trig));
+    script_log_printf(g, "Trigger VNum %d has 'if' without 'end'. (error 5)", trig_get_vnum(g, trig));
   return c;
 }
 /*

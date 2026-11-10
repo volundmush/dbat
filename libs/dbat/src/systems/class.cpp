@@ -314,7 +314,7 @@ void do_start(GameWorld *g, struct char_data *ch)
   }
 
   if (char_get_class(ch) < 0 || char_get_class(ch) > NUM_CLASSES) {
-    mud_log("Unknown character class %d in do_start, resetting.", char_get_class(ch));
+    mud_log_printf("Unknown character class %d in do_start, resetting.", char_get_class(ch));
     //GET_CLASS(ch) = 0;
   }
   if (char_get_alignment(ch) < 51 && char_get_alignment(ch) > -51) {
@@ -402,9 +402,9 @@ void do_start(GameWorld *g, struct char_data *ch)
     obj_to_char(g, throw_obj, ch);
   }
 
-  send_to_imm(g, "New character created, %s, by user, %s.", char_get_name(ch), char_get_user(ch));
+  send_to_imm_printf(g, "New character created, %s, by user, %s.", char_get_name(ch), char_get_user(ch));
   advance_level(g, ch, char_get_class(ch));
-  /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
+  /*mudlog_printf(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
   char_set_basepl(ch, MAX(getBasePL(ch), 100L));
   char_set_baseki(ch, MAX(getBaseKI(ch), 100L));
@@ -461,7 +461,7 @@ void do_start(GameWorld *g, struct char_data *ch)
 
   if (char_get_race(ch) == RACE_SAIYAN && rand_number(g, 1, 100) >= 95) {
     char_plr_set(ch, PLR_LSSJ, true);
-    write_to_output(g, char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
+    write_to_output_printf(g, char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
   restoreVitals(ch, true);
 
@@ -492,12 +492,12 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
   char buf[MAX_STRING_LENGTH];
 
   if (whichclass < 0 || whichclass >= NUM_CLASSES) {
-    mud_log("Invalid class %d passed to advance_level, resetting.", whichclass);
+    mud_log_printf("Invalid class %d passed to advance_level, resetting.", whichclass);
     whichclass = 0;
   }
 
   if (!CONFIG_ALLOW_MULTICLASS && whichclass != char_get_class(ch)) {
-    mud_log("Attempt to gain a second class without multiclass enabled for %s", char_get_name(ch));
+    mud_log_printf("Attempt to gain a second class without multiclass enabled for %s", char_get_name(ch));
     whichclass = char_get_class(ch);
   }
   ranks = char_get_class_ranks(ch, whichclass);
@@ -778,7 +778,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     }
   }
   if (rand_number(g, 1, 4) == 4) {
-    send_to_char(g, ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
+    send_to_char_printf(g, ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
     add_prac += rand_number(g, 4, 12);
   }
 
@@ -824,15 +824,15 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
   sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
   if (char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_level(ch) == 20 || char_get_level(ch) == 40 || char_get_level(ch) == 60 || char_get_level(ch) == 80 || char_get_level(ch) == 100)) {
     char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-    send_to_char(g, ch, "@CYou feel like you could remember a new skill!@n\r\n");
+    send_to_char_printf(g, ch, "@CYou feel like you could remember a new skill!@n\r\n");
   }
   if (char_is_namek(ch) && rand_number(g, 1, 100) <= 5) {
     char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-    send_to_char(g, ch, "@CYou feel as though you could learn another skill.@n\r\n");
+    send_to_char_printf(g, ch, "@CYou feel as though you could learn another skill.@n\r\n");
   }
   if (char_is_icer(ch) && rand_number(g, 1, 100) <= 25) {
     bring_to_cap(ch);
-    send_to_char(g, ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
+    send_to_char_printf(g, ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
 
   int gain_stat = false;
@@ -859,7 +859,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         if (char_get_real_abils_dex(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_CLUMSY) <= 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your agility increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -867,13 +867,13 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(g, ch, "@RBoth agility and speed are capped!@n");
+          send_to_char_printf(g, ch, "@RBoth agility and speed are capped!@n");
           raise = true;
         }
       } // End while
@@ -884,7 +884,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         if (char_get_real_abils_con(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_con(ch) < 45 || char_get_bonuses(ch, BONUS_FRAIL) <= 0) {
             char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your constitution increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your constitution increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -892,13 +892,13 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(g, ch, "@RBoth constitution and speed are capped!@n");
+          send_to_char_printf(g, ch, "@RBoth constitution and speed are capped!@n");
           raise = true;
         }
       } // End while
@@ -909,7 +909,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         if (char_get_real_abils_str(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_str(ch) < 45 || char_get_bonuses(ch, BONUS_WIMP) <= 0) {
             char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your strength increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your strength increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
@@ -917,13 +917,13 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
         } else if (char_get_real_abils_dex(ch) < 100 && raise == false && stat_fail < 2) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
-            send_to_char(g, ch, "@GYou feel your agility increase!@n\r\n");
+            send_to_char_printf(g, ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 2;
           }
         } else if (stat_fail == 3) {
-          send_to_char(g, ch, "@RBoth strength and agility are capped!@n");
+          send_to_char_printf(g, ch, "@RBoth strength and agility are capped!@n");
           raise = true;
         }
       } // End while
@@ -932,26 +932,26 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
   } // End stat bonus on level gain
 
   strcat(buf, ".\r\n");
-  send_to_char(g, ch, "%s", buf);
+  send_to_char_printf(g, ch, "%s", buf);
 
   if (char_get_skill(ch, SKILL_POTENTIAL) && rand_number(g, 1, 4) == 4) {
-    send_to_char(g, ch, "You can now perform another Potential Release.\r\n");
+    send_to_char_printf(g, ch, "You can now perform another Potential Release.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 25) {
-    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
+    send_to_char_printf(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 50) {
-    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
+    send_to_char_printf(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 75) {
-    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
+    send_to_char_printf(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
   if (char_is_majin(ch) && char_get_level(ch) == 100) {
-    send_to_char(g, ch, "You can now perform another Majinization.\r\n");
+    send_to_char_printf(g, ch, "You can now perform another Majinization.\r\n");
     char_set_boosts(ch, char_get_boosts(ch) + (1));
   }
 
@@ -968,27 +968,27 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     case 100:
       if (char_get_bonuses(ch, BONUS_BRAWNY) > 0) {
         char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
-        send_to_char(g, ch, "@GYour muscles have grown stronger!@n\r\n");
+        send_to_char_printf(g, ch, "@GYour muscles have grown stronger!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SCHOLARLY) > 0) {
         char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
-        send_to_char(g, ch, "@GYour mind has grown sharper!@n\r\n");
+        send_to_char_printf(g, ch, "@GYour mind has grown sharper!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SAGE) > 0) {
         char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
-        send_to_char(g, ch, "@GYour understanding about life has improved!@n\r\n");
+        send_to_char_printf(g, ch, "@GYour understanding about life has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_AGILE) > 0) {
         char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 2);
-        send_to_char(g, ch, "@GYour body has grown more agile!@n\r\n");
+        send_to_char_printf(g, ch, "@GYour body has grown more agile!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_QUICK) > 0) {
         char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
-        send_to_char(g, ch, "@GYou feel like your speed has improved!@n\r\n");
+        send_to_char_printf(g, ch, "@GYou feel like your speed has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_STURDY) > 0) {
         char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
-        send_to_char(g, ch, "@GYour body feels tougher now!@n\r\n");
+        send_to_char_printf(g, ch, "@GYour body feels tougher now!@n\r\n");
       }
       break;
   }
@@ -1530,8 +1530,8 @@ int load_levels(GameWorld *g)
   int linenum = 0, tp, cls, sect_type = -1;
 
   if (!(fp = fopen(LEVEL_CONFIG, "r"))) {
-    mud_log("SYSERR: Could not open level configuration file, error: %s!",
-            strerror(errno));
+    mud_log_printf("SYSERR: Could not open level configuration file, error: %s!",
+                   strerror(errno));
     return -1;
   }
 
@@ -1545,7 +1545,7 @@ int load_levels(GameWorld *g)
   for (;;) {
     linenum++;
     if (!fgets(line, READ_SIZE, fp)) { /* eof check */
-      mud_log("SYSERR: Unexpected EOF in file %s.", LEVEL_CONFIG);
+      mud_log_printf("SYSERR: Unexpected EOF in file %s.", LEVEL_CONFIG);
       return -1;
     } else if (*line == '$') { /* end of file */
       break;
@@ -1553,19 +1553,19 @@ int load_levels(GameWorld *g)
       continue;
     } else if (*line == '#') { /* start of a section */
       if ((tp = sscanf(line, "#%s", sect_name)) != 1) {
-        mud_log("SYSERR: Format error in file %s, line number %d - text: %s.",
-                LEVEL_CONFIG, linenum, line);
+        mud_log_printf("SYSERR: Format error in file %s, line number %d - text: %s.",
+                       LEVEL_CONFIG, linenum, line);
         return -1;
       }
       if ((sect_type = search_block(sect_name, config_sect, false)) == -1) {
-        mud_log("SYSERR: Invalid section in file %s, line number %d: %s.",
-                LEVEL_CONFIG, linenum, sect_name);
+        mud_log_printf("SYSERR: Invalid section in file %s, line number %d: %s.",
+                       LEVEL_CONFIG, linenum, sect_name);
         return -1;
       }
     } else {
       if (sect_type == CONFIG_LEVEL_VERSION) {
         if (!strncmp(line, "Suntzu", 6)) {
-          mud_log("SYSERR: Suntzu %s config files are not compatible with rasputin", LEVEL_CONFIG);
+          mud_log_printf("SYSERR: Suntzu %s config files are not compatible with rasputin", LEVEL_CONFIG);
           return -1;
         }
         strcpy(g->level_version, line); /* OK - both are READ_SIZE */
@@ -1578,28 +1578,28 @@ int load_levels(GameWorld *g)
                  sect_type == CONFIG_LEVEL_BASEHIT) {
         for (ptr = line; ptr && *ptr && !isdigit(*ptr); ptr++);
         if (!ptr || !*ptr || !isdigit(*ptr)) {
-          mud_log("SYSERR: Cannot find class number in file %s, line number %d, section %s.",
-                  LEVEL_CONFIG, linenum, sect_name);
+          mud_log_printf("SYSERR: Cannot find class number in file %s, line number %d, section %s.",
+                         LEVEL_CONFIG, linenum, sect_name);
           return -1;
         }
         cls = atoi(ptr);
         for (; ptr && *ptr && isdigit(*ptr); ptr++);
         for (; ptr && *ptr && !isdigit(*ptr); ptr++);
         if (ptr && *ptr && !isdigit(*ptr)) {
-          mud_log("SYSERR: Non-numeric entry in file %s, line number %d, section %s.",
-                  LEVEL_CONFIG, linenum, sect_name);
+          mud_log_printf("SYSERR: Non-numeric entry in file %s, line number %d, section %s.",
+                         LEVEL_CONFIG, linenum, sect_name);
           return -1;
         }
         if (ptr && *ptr) /* There's a value */
           tp = atoi(ptr);
         else {
-          mud_log("SYSERR: Need 1 value in %s, line number %d, section %s.",
-                  LEVEL_CONFIG, linenum, sect_name);
+          mud_log_printf("SYSERR: Need 1 value in %s, line number %d, section %s.",
+                         LEVEL_CONFIG, linenum, sect_name);
           return -1;
         }
         if (cls < 0 || cls >= NUM_CLASSES) {
-          mud_log("SYSERR: Invalid class number %d in file %s, line number %d.",
-                  cls, LEVEL_CONFIG, linenum);
+          mud_log_printf("SYSERR: Invalid class number %d in file %s, line number %d.",
+                         cls, LEVEL_CONFIG, linenum);
           return -1;
         }
         if (sect_type == CONFIG_LEVEL_BASEHIT) {
@@ -1608,7 +1608,7 @@ int load_levels(GameWorld *g)
           g->save_classes[SAVING_FORTITUDE + sect_type - CONFIG_LEVEL_FORTITUDE][cls] = tp;
         }
       } else {
-        mud_log("Unsupported level config option");
+        mud_log_printf("Unsupported level config option");
       }
     }
   }

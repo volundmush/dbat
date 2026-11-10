@@ -98,7 +98,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
   }
 
   if (instrument == 0) {
-    send_to_char(g, ch, "You do not have an instrument.\r\n");
+    send_to_char_printf(g, ch, "You do not have an instrument.\r\n");
     act(g, "@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_powerattack(ch, 0);
     return;
@@ -133,28 +133,28 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
                 if (char_get_limb_condition(vict, (1) - 1) < 100) {
                   char_set_limb_condition(vict, (1) - 1, char_get_limb_condition(vict, (1) - 1) + (1 + (skill * 0.1)));
                   if (char_get_limb_condition(vict, (1) - 1) > 100) {
-                    send_to_char(g, vict, "Your right arm is no longer broken!@n\r\n");
+                    send_to_char_printf(g, vict, "Your right arm is no longer broken!@n\r\n");
                     char_set_limb_condition(vict, (1) - 1, 100);
                   }
                 }
                 if (char_get_limb_condition(vict, (2) - 1) < 100) {
                   char_set_limb_condition(vict, (2) - 1, char_get_limb_condition(vict, (2) - 1) + (1 + (skill * 0.1)));
                   if (char_get_limb_condition(vict, (2) - 1) > 100) {
-                    send_to_char(g, vict, "Your left arm is no longer broken!@n\r\n");
+                    send_to_char_printf(g, vict, "Your left arm is no longer broken!@n\r\n");
                     char_set_limb_condition(vict, (2) - 1, 100);
                   }
                 }
                 if (char_get_limb_condition(vict, (3) - 1) < 100) {
                   char_set_limb_condition(vict, (3) - 1, char_get_limb_condition(vict, (3) - 1) + (1 + (skill * 0.1)));
                   if (char_get_limb_condition(vict, (3) - 1) > 100) {
-                    send_to_char(g, vict, "Your right leg is no longer broken!@n\r\n");
+                    send_to_char_printf(g, vict, "Your right leg is no longer broken!@n\r\n");
                     char_set_limb_condition(vict, (3) - 1, 100);
                   }
                 }
                 if (char_get_limb_condition(vict, (1) - 1) < 100) {
                   char_set_limb_condition(vict, (4) - 1, char_get_limb_condition(vict, (4) - 1) + (1 + (skill * 0.1)));
                   if (char_get_limb_condition(vict, (4) - 1) > 100) {
-                    send_to_char(g, vict, "Your left leg is no longer broken!@n\r\n");
+                    send_to_char_printf(g, vict, "Your left leg is no longer broken!@n\r\n");
                     char_set_limb_condition(vict, (4) - 1, 100);
                   }
                 }
@@ -169,7 +169,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
           }
         }
         if ((getCurKI(g, ch)) <= 0) {
-          send_to_char(g, ch, "You no longer have the ki necessary to play your song.\r\n");
+          send_to_char_printf(g, ch, "You no longer have the ki necessary to play your song.\r\n");
           act(g, "@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
@@ -191,7 +191,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
           apply_shadow_sitch(g, ch, vict, skill);
         }
         if ((getCurKI(g, ch)) <= 0) {
-          send_to_char(g, ch, "You no longer have the ki necessary to play your song.\r\n");
+          send_to_char_printf(g, ch, "You no longer have the ki necessary to play your song.\r\n");
           act(g, "@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
@@ -340,7 +340,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
           }
         }
         if ((getCurKI(g, ch)) <= 0) {
-          send_to_char(g, ch, "You no longer have the ki necessary to play your song.\r\n");
+          send_to_char_printf(g, ch, "You no longer have the ki necessary to play your song.\r\n");
           act(g, "@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
@@ -407,7 +407,7 @@ ACMD(do_song)
 {
 
   if (!char_get_skill(ch, SKILL_MYSTICMUSIC)) {
-    send_to_char(g, ch, "You do not know how to play mystical music.\r\n");
+    send_to_char_printf(g, ch, "You do not know how to play mystical music.\r\n");
     return;
   }
 
@@ -420,7 +420,7 @@ ACMD(do_song)
   }
 
   if (instrument == 0) {
-    send_to_char(g, ch, "You do not have an instrument.\r\n");
+    send_to_char_printf(g, ch, "You do not have an instrument.\r\n");
     return;
   }
 
@@ -438,9 +438,9 @@ ACMD(do_song)
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
   if (arg.empty()) {
-    send_to_char(g, ch, "@YSongs Known\n@c-------------------@n\r\n");
-    send_to_char(g, ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
-    send_to_char(g, ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+    send_to_char_printf(g, ch, "@YSongs Known\n@c-------------------@n\r\n");
+    send_to_char_printf(g, ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
+    send_to_char_printf(g, ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
     return;
   }
   int64_t cost = getMaxKI(g, ch) * 0.01;
@@ -464,11 +464,11 @@ ACMD(do_song)
   }
 
   if (modifier == 0) {
-    send_to_char(g, ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+    send_to_char_printf(g, ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
     return;
   }
   if (modifier == 3 && (getCurKI(g, ch)) < cost) {
-    send_to_char(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    send_to_char_printf(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
     return;
   }
   if (modifier == 3) {
@@ -479,11 +479,11 @@ ACMD(do_song)
     return;
   }
   if (modifier == 8 && (getCurKI(g, ch)) < cost) {
-    send_to_char(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    send_to_char_printf(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
     return;
   }
   if (modifier == 8 && skill <= 49) {
-    send_to_char(g, ch, "You do not posess the skill to play such a song!\r\n");
+    send_to_char_printf(g, ch, "You do not posess the skill to play such a song!\r\n");
     return;
   }
   if (modifier == 8) {
@@ -494,20 +494,20 @@ ACMD(do_song)
     return;
   }
   if (modifier == 50 && (getCurKI(g, ch)) < cost) {
-    send_to_char(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    send_to_char_printf(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
     return;
   }
   if (modifier == 50 && skill <= 79) {
-    send_to_char(g, ch, "You do not posess the skill to play such a song!\r\n");
+    send_to_char_printf(g, ch, "You do not posess the skill to play such a song!\r\n");
     return;
   }
   if (modifier == 50) {
     if (arg2.empty()) {
-      send_to_char(g, ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
+      send_to_char_printf(g, ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
       return;
     }
     if (char_aff_flagged(ch, AFF_SPIRIT)) {
-      send_to_char(g, ch, "Not while you're dead!\r\n");
+      send_to_char_printf(g, ch, "Not while you're dead!\r\n");
       return;
     }
     if (str_eq_nocase(arg2, "earth")) {
@@ -527,7 +527,7 @@ ACMD(do_song)
     } else if (str_eq_nocase(arg2, "aether")) {
       char_set_powerattack(ch, SONG_TELEPORT_AETHER);
     } else {
-      send_to_char(g, ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
+      send_to_char_printf(g, ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
       return;
     }
     act(g, "@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -536,11 +536,11 @@ ACMD(do_song)
     return;
   }
   if (modifier == 20 && (getCurKI(g, ch)) < cost) {
-    send_to_char(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    send_to_char_printf(g, ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
     return;
   }
   if (modifier == 20 && skill <= 98) {
-    send_to_char(g, ch, "You do not posess the skill to play such a song!\r\n");
+    send_to_char_printf(g, ch, "You do not posess the skill to play such a song!\r\n");
     return;
   }
   if (modifier == 20) {

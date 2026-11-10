@@ -56,18 +56,18 @@ ACMD(do_tslash)
   }
 
   if (!char_has_arms(g, ch)) {
-    send_to_char(g, ch, "You have no available arms!\r\n");
+    send_to_char_printf(g, ch, "You have no available arms!\r\n");
     return;
   }
   if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50 && char_get_limb_condition(ch, (2) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
       act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
       act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -76,16 +76,16 @@ ACMD(do_tslash)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
   if (!char_get_equipment(ch, WEAR_WIELD1)) {
-    send_to_char(g, ch, "You need to wield a sword to use this.\r\n");
+    send_to_char_printf(g, ch, "You need to wield a sword to use this.\r\n");
     return;
   }
   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-    send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
+    send_to_char_printf(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
     return;
   }
 
@@ -190,7 +190,7 @@ ACMD(do_tslash)
           act(g, "@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 19, skill, SKILL_TSLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -390,7 +390,7 @@ ACMD(do_tslash)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 19, skill, attperc);
@@ -401,7 +401,7 @@ ACMD(do_tslash)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -434,18 +434,18 @@ ACMD(do_pslash)
   }
 
   if (!char_has_arms(g, ch)) {
-    send_to_char(g, ch, "You have no available arms!\r\n");
+    send_to_char_printf(g, ch, "You have no available arms!\r\n");
     return;
   }
   if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50 && char_get_limb_condition(ch, (2) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
       act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
       act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -454,7 +454,7 @@ ACMD(do_pslash)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -468,11 +468,11 @@ ACMD(do_pslash)
     return;
   }
   if (!char_get_equipment(ch, WEAR_WIELD1)) {
-    send_to_char(g, ch, "You need to wield a sword to use this.\r\n");
+    send_to_char_printf(g, ch, "You need to wield a sword to use this.\r\n");
     return;
   }
   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-    send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
+    send_to_char_printf(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
     return;
   }
 
@@ -618,14 +618,14 @@ ACMD(do_pslash)
         break;
     }
     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 4 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
+      send_to_char_printf(g, vict, "@RYou are burned by the attack!@n\r\n");
+      send_to_char_printf(g, ch, "@RThey are burned by the attack!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-      send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
+      send_to_char_printf(g, ch, "@RThey appear to be fireproof!@n\r\n");
     } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-      send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
+      send_to_char_printf(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+      send_to_char_printf(g, ch, "@RThey are easily burned!@n\r\n");
       char_aff_set(vict, AFF_BURNED, true);
     }
     pcost(g, ch, attperc, 0);
@@ -637,7 +637,7 @@ ACMD(do_pslash)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 37, skill, attperc);
@@ -650,7 +650,7 @@ ACMD(do_pslash)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -683,18 +683,18 @@ ACMD(do_ddslash)
   }
 
   if (!char_has_arms(g, ch)) {
-    send_to_char(g, ch, "You have no available arms!\r\n");
+    send_to_char_printf(g, ch, "You have no available arms!\r\n");
     return;
   }
   if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50 && char_get_limb_condition(ch, (2) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
       act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
-    send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
+    send_to_char_printf(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
       act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -703,7 +703,7 @@ ACMD(do_ddslash)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -718,11 +718,11 @@ ACMD(do_ddslash)
   }
 
   if (!char_get_equipment(ch, WEAR_WIELD1)) {
-    send_to_char(g, ch, "You need to wield a sword to use this.\r\n");
+    send_to_char_printf(g, ch, "You need to wield a sword to use this.\r\n");
     return;
   }
   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-    send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
+    send_to_char_printf(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
     return;
   }
 
@@ -880,7 +880,7 @@ ACMD(do_ddslash)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 30, skill, attperc);
@@ -891,7 +891,7 @@ ACMD(do_ddslash)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -924,7 +924,7 @@ ACMD(do_kienzan)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -982,7 +982,7 @@ ACMD(do_kienzan)
           act(g, "@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room(g, char_get_in_room(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
+          send_to_room_printf(g, char_get_in_room(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
 
           dodge_ki(g, ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1213,7 +1213,7 @@ ACMD(do_kienzan)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 25, skill, attperc);
@@ -1224,7 +1224,7 @@ ACMD(do_kienzan)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

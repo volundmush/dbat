@@ -180,11 +180,11 @@ static EVENTFUNC(trig_wait_event)
       });
     }
     if (!found) {
-      mud_log("Trigger restarted on unknown entity. Vnum: %d", trig_get_vnum(g, trig));
-      mud_log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj"
-                                                                                    : "Room");
-      mud_log("attached %d places", trig->index->number);
-      script_log(g, "Trigger restart attempt on unknown entity.");
+      mud_log_printf("Trigger restarted on unknown entity. Vnum: %d", trig_get_vnum(g, trig));
+      mud_log_printf("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj"
+                                                                                           : "Room");
+      mud_log_printf("attached %d places", trig->index->number);
+      script_log_printf(g, "Trigger restart attempt on unknown entity.");
       return 0;
     }
   }
@@ -267,7 +267,7 @@ void dg_context_str(GameWorld *g, char *buf, size_t len)
  *  Logs any errors caused by scripts to the system log.
  *  Will eventually allow on-line view of script errors.
  */
-void script_vlog(GameWorld *g, const char *format, va_list args)
+void script_vlog_printf(GameWorld *g, const char *format, va_list args)
 {
   char output[MAX_STRING_LENGTH];
   char print_to[MAX_STRING_LENGTH];
@@ -276,7 +276,7 @@ void script_vlog(GameWorld *g, const char *format, va_list args)
   vsnprintf(print_to, sizeof(print_to), format, args);
   dg_context_str(g, ctx, sizeof(ctx));
 
-  mud_log("SCRIPT ERR: %s%s", print_to, ctx);
+  mud_log_printf("SCRIPT ERR: %s%s", print_to, ctx);
 
   /* the rest is mostly a rip from basic_mud_log() */
   snprintf(output, sizeof(output), "[ %s%s ]\r\n", print_to, ctx);
@@ -291,16 +291,16 @@ void script_vlog(GameWorld *g, const char *format, va_list args)
     if (LOG_NRM > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
-    send_to_char(g, i->character, "@g%s@n", output);
+    send_to_char_printf(g, i->character, "@g%s@n", output);
   }
 }
 
-void script_log(GameWorld *g, const char *format, ...)
+void script_log_printf(GameWorld *g, const char *format, ...)
 {
   va_list args;
 
   va_start(args, format);
-  script_vlog(g, format, args);
+  script_vlog_printf(g, format, args);
   va_end(args);
 }
 
@@ -330,8 +330,8 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
   skip_spaces(&arg);
 
   if (!*arg) {
-    script_log(g, "Trigger: %s, VNum %d. wait w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cl->cmd.c_str());
+    script_log_printf(g, "Trigger: %s, VNum %d. wait w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cl->cmd.c_str());
     return;
   }
 
@@ -340,8 +340,8 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
     /* valid forms of time are 14:30 and 1430 */
     int fields = sscanf(arg, "until %ld:%ld", &hr, &min);
     if (fields < 1) {
-      script_log(g, "Trigger: %s, VNum %d. wait until w/o a time: '%s'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), cl->cmd.c_str());
+      script_log_printf(g, "Trigger: %s, VNum %d. wait until w/o a time: '%s'",
+                        trig->name.c_str(), trig_get_vnum(g, trig), cl->cmd.c_str());
       return;
     }
     if (fields == 2)
@@ -391,8 +391,8 @@ static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, c
   skip_spaces(&value);
 
   if (!*name) {
-    script_log(g, "Trigger: %s, VNum %d. set w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. set w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -411,8 +411,8 @@ void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
   skip_spaces(&expr);
 
   if (!*name) {
-    script_log(g, "Trigger: %s, VNum %d. eval w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. eval w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -437,22 +437,22 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   skip_spaces(&id_p);
 
   if (!*trignum_s) {
-    script_log(g, "Trigger: %s, VNum %d. attach w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. attach w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
   if (!id_p || !*id_p || atoi(id_p) == 0) {
-    script_log(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* parse and locate the id specified */
   std::string result = eval_expr(g, id_p, go, sc, trig, type);
   if (!(id = atoi(result.c_str()))) {
-    script_log(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
   c = find_char(g, id);
@@ -461,8 +461,8 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
     if (!o) {
       r = find_room(g, id);
       if (!r) {
-        script_log(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
-                   trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+        script_log_printf(g, "Trigger: %s, VNum %d. attach invalid id arg: '%s'",
+                          trig->name.c_str(), trig_get_vnum(g, trig), cmd);
         return;
       }
     }
@@ -471,15 +471,15 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   /* locate and load the trigger specified */
   trignum = find_trigger(g, atoi(trignum_s));
   if (trignum == nullptr || !(newtrig = read_trigger(g, trignum))) {
-    script_log(g, "Trigger: %s, VNum %d. attach invalid trigger: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), trignum_s);
+    script_log_printf(g, "Trigger: %s, VNum %d. attach invalid trigger: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), trignum_s);
     return;
   }
 
   if (c) {
     if (!char_is_npc(c)) {
-      script_log(g, "Trigger: %s, VNum %d. attach invalid target: '%s'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), char_get_name(c));
+      script_log_printf(g, "Trigger: %s, VNum %d. attach invalid target: '%s'",
+                        trig->name.c_str(), trig_get_vnum(g, trig), char_get_name(c));
       return;
     }
     add_trigger(g, dg_ensure_script(char_script_slot(c)), newtrig, -1);
@@ -512,22 +512,22 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
   skip_spaces(&id_p);
 
   if (!*trignum_s) {
-    script_log(g, "Trigger: %s, VNum %d. detach w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. detach w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
   if (!id_p || !*id_p || atoi(id_p) == 0) {
-    script_log(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* parse and locate the id specified */
   std::string result = eval_expr(g, id_p, go, sc, trig, type);
   if (!(id = atoi(result.c_str()))) {
-    script_log(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
   c = find_char(g, id);
@@ -536,8 +536,8 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
     if (!o) {
       r = find_room(g, id);
       if (!r) {
-        script_log(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
-                   trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+        script_log_printf(g, "Trigger: %s, VNum %d. detach invalid id arg: '%s'",
+                          trig->name.c_str(), trig_get_vnum(g, trig), cmd);
         return;
       }
     }
@@ -607,15 +607,15 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
   half_chop(cmd, name, cmd);    /* if the above was obj, mob or room, this is the name */
 
   if (!*varname) {
-    script_log(g, "Trigger: %s, VNum %d. makeuid w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. makeuid w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
 
     return;
   }
 
   if (!*arg) {
-    script_log(g, "Trigger: %s, VNum %d. makeuid invalid id arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. makeuid invalid id arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -625,8 +625,8 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
     snprintf(uid, sizeof(uid), "%c%s", UID_CHAR, result.c_str());
   } else { /* a lot more work without it */
     if (!*name) {
-      script_log(g, "Trigger: %s, VNum %d. makeuid needs name: '%s'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+      script_log_printf(g, "Trigger: %s, VNum %d. makeuid needs name: '%s'",
+                        trig->name.c_str(), trig_get_vnum(g, trig), cmd);
       return;
     }
 
@@ -679,8 +679,8 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       if (room_of(g, r))
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, r + ROOM_ID_BASE);
     } else {
-      script_log(g, "Trigger: %s, VNum %d. makeuid syntax error: '%s'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+      script_log_printf(g, "Trigger: %s, VNum %d. makeuid syntax error: '%s'",
+                        trig->name.c_str(), trig_get_vnum(g, trig), cmd);
 
       return;
     }
@@ -700,8 +700,8 @@ static int process_return(GameWorld *g, trig_data *trig, char *cmd)
   two_arguments(cmd, arg1, arg2);
 
   if (!*arg2) {
-    script_log(g, "Trigger: %s, VNum %d. return w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. return w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
 
     return 1;
   }
@@ -722,8 +722,8 @@ static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig,
   skip_spaces(&var);
 
   if (!*var) {
-    script_log(g, "Trigger: %s, VNum %d. unset w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. unset w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -754,8 +754,8 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
   skip_spaces(&uid_p);
 
   if (!*buf || !*buf2) {
-    script_log(g, "Trigger: %s, VNum %d. remote: invalid arguments '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. remote: invalid arguments '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -771,15 +771,15 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
         break;
 
   if (!vd) {
-    script_log(g, "Trigger: %s, VNum %d. local var '%s' not found in remote call",
-               trig->name.c_str(), trig_get_vnum(g, trig), buf);
+    script_log_printf(g, "Trigger: %s, VNum %d. local var '%s' not found in remote call",
+                      trig->name.c_str(), trig_get_vnum(g, trig), buf);
     return;
   }
   /* find the target script from the uid number */
   uid = atoi(buf2);
   if (uid <= 0) {
-    script_log(g, "Trigger: %s, VNum %d. remote: illegal uid '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), buf2);
+    script_log_printf(g, "Trigger: %s, VNum %d. remote: illegal uid '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), buf2);
     return;
   }
 
@@ -795,8 +795,8 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
   } else if ((obj = find_obj(g, uid))) {
     sc_remote = obj_get_script(obj);
   } else {
-    script_log(g, "Trigger: %s, VNum %d. remote: uid '%ld' invalid",
-               trig->name.c_str(), trig_get_vnum(g, trig), uid);
+    script_log_printf(g, "Trigger: %s, VNum %d. remote: uid '%ld' invalid",
+                      trig->name.c_str(), trig_get_vnum(g, trig), uid);
     return;
   }
 
@@ -828,16 +828,16 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
   skip_spaces(&uid_p);
 
   if (!*buf || !*buf2) {
-    script_log(g, "Trigger: %s, VNum %d. rdelete: invalid arguments '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. rdelete: invalid arguments '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* find the target script from the uid number */
   uid = atoi(buf2);
   if (uid <= 0) {
-    script_log(g, "Trigger: %s, VNum %d. rdelete: illegal uid '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), buf2);
+    script_log_printf(g, "Trigger: %s, VNum %d. rdelete: illegal uid '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), buf2);
     return;
   }
 
@@ -848,8 +848,8 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
   } else if ((obj = find_obj(g, uid))) {
     sc_remote = obj_get_script(obj);
   } else {
-    script_log(g, "Trigger: %s, VNum %d. remote: uid '%ld' invalid",
-               trig->name.c_str(), trig_get_vnum(g, trig), uid);
+    script_log_printf(g, "Trigger: %s, VNum %d. remote: uid '%ld' invalid",
+                      trig->name.c_str(), trig_get_vnum(g, trig), uid);
     return;
   }
 
@@ -884,8 +884,8 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
   skip_spaces(&var);
 
   if (!*var) {
-    script_log(g, "Trigger: %s, VNum %d. global w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. global w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -894,8 +894,8 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
       break;
 
   if (!vd) {
-    script_log(g, "Trigger: %s, VNum %d. local var '%s' not found in global call",
-               trig->name.c_str(), trig_get_vnum(g, trig), var);
+    script_log_printf(g, "Trigger: %s, VNum %d. local var '%s' not found in global call",
+                      trig->name.c_str(), trig_get_vnum(g, trig), var);
     return;
   }
 
@@ -913,8 +913,8 @@ static void process_context(GameWorld *g, struct script_data *sc, trig_data *tri
   skip_spaces(&var);
 
   if (!*var) {
-    script_log(g, "Trigger: %s, VNum %d. context w/o an arg: '%s'",
-               trig->name.c_str(), trig_get_vnum(g, trig), cmd);
+    script_log_printf(g, "Trigger: %s, VNum %d. context w/o an arg: '%s'",
+                      trig->name.c_str(), trig_get_vnum(g, trig), cmd);
     return;
   }
 
@@ -931,14 +931,14 @@ static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig,
   buf3 = any_one_arg(cmd, buf);
   half_chop(buf3, buf2, buf);
   if (strlen(buf2) >= sizeof(to)) {
-    script_log(g, "extract: variable name is longer than %zu characters", sizeof(to) - 1);
+    script_log_printf(g, "extract: variable name is longer than %zu characters", sizeof(to) - 1);
     return;
   }
   strcpy(to, buf2); /* strcpy: OK (length checked above) */
 
   num = atoi(buf);
   if (num < 1) {
-    script_log(g, "extract number < 1!");
+    script_log_printf(g, "extract number < 1!");
     return;
   }
 
@@ -984,16 +984,16 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
 
   num = atoi(num_s);
 
-  script_log(g, "The use of dg_letter is deprecated");
-  script_log(g, "- Use 'set <new variable> %%<text/var>.charat(index)%%' instead.");
+  script_log_printf(g, "The use of dg_letter is deprecated");
+  script_log_printf(g, "- Use 'set <new variable> %%<text/var>.charat(index)%%' instead.");
 
   if (num < 1) {
-    script_log(g, "Trigger #%d : dg_letter number < 1!", trig_get_vnum(g, trig));
+    script_log_printf(g, "Trigger #%d : dg_letter number < 1!", trig_get_vnum(g, trig));
     return;
   }
 
   if ((size_t)num > strlen(string)) {
-    script_log(g, "Trigger #%d : dg_letter number > strlen!", trig_get_vnum(g, trig));
+    script_log_printf(g, "Trigger #%d : dg_letter number > strlen!", trig_get_vnum(g, trig));
     return;
   }
 
@@ -1080,7 +1080,7 @@ static enum dg_line_result dg_run_command(GameWorld *g, void *go_adress, void *g
     process_detach(g, go, sc, trig, type, cmd);
 
   else if (!strncasecmp(cmd, "version", 7))
-    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
+    mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
 
   else {
     switch (type) {
@@ -1154,19 +1154,19 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
   sc = script_of(go, type);
 
   if (g->script_depth > MAX_SCRIPT_DEPTH) {
-    script_log(g, "Trigger %d recursed beyond maximum allowed depth.", trig_get_vnum(g, trig));
+    script_log_printf(g, "Trigger %d recursed beyond maximum allowed depth.", trig_get_vnum(g, trig));
     switch (type) {
       case MOB_TRIGGER:
-        script_log(g, "It was attached to %s [%d]",
-                   char_get_name((char_data *)go), char_get_mob_vnum(g, (char_data *)go));
+        script_log_printf(g, "It was attached to %s [%d]",
+                          char_get_name((char_data *)go), char_get_mob_vnum(g, (char_data *)go));
         break;
       case OBJ_TRIGGER:
-        script_log(g, "It was attached to %s [%d]",
-                   obj_get_short_description((obj_data *)go), obj_get_vnum(g, (obj_data *)go));
+        script_log_printf(g, "It was attached to %s [%d]",
+                          obj_get_short_description((obj_data *)go), obj_get_vnum(g, (obj_data *)go));
         break;
       case WLD_TRIGGER:
-        script_log(g, "It was attached to %s [%d]",
-                   room_get_name((room_data *)go), room_get_number((room_data *)go));
+        script_log_printf(g, "It was attached to %s [%d]",
+                          room_get_name((room_data *)go), room_get_number((room_data *)go));
         break;
     }
 
@@ -1216,8 +1216,8 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
        * if not in an if-block, ignore the extra 'else[if]' and warn about it
        */
       if (trig->depth == 1) {
-        script_log(g, "Trigger VNum %d has 'else' without 'if'.",
-                   trig_get_vnum(g, trig));
+        script_log_printf(g, "Trigger VNum %d has 'else' without 'if'.",
+                          trig_get_vnum(g, trig));
         continue;
       }
       cl = find_end(g, trig, cl);
@@ -1228,8 +1228,8 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
       while (*end && isspace(*end))
         end++;
       if (temp == cl || strncasecmp("done", end, 4)) {
-        script_log(g, "Trigger VNum %d has 'while' without 'done'.",
-                   trig_get_vnum(g, trig));
+        script_log_printf(g, "Trigger VNum %d has 'while' without 'done'.",
+                          trig_get_vnum(g, trig));
         break; /* end the run normally, so depth and the trigger's state are reset */
       }
       if (process_if(g, p + 6, go, sc, trig, type)) {
@@ -1245,8 +1245,8 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
        * if not in an if-block, ignore the extra 'end' and warn about it.
        */
       if (trig->depth == 1) {
-        script_log(g, "Trigger VNum %d has 'end' without 'if'.",
-                   trig_get_vnum(g, trig));
+        script_log_printf(g, "Trigger VNum %d has 'end' without 'if'.",
+                          trig_get_vnum(g, trig));
         continue;
       }
       trig->depth--;
@@ -1267,8 +1267,8 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
             return ret_val;
           }
           if (trig->loops >= 5000) {
-            script_log(g, "Trigger VNum %d has looped 5,000 times!!!",
-                       trig_get_vnum(g, trig));
+            script_log_printf(g, "Trigger VNum %d has looped 5,000 times!!!",
+                              trig_get_vnum(g, trig));
             break;
           }
         } else {
@@ -1342,7 +1342,7 @@ void read_saved_vars(struct char_data *ch)
 
   /* if we failed to open the file, return */
   if (!file) {
-    mud_log("%s had no variable file", char_get_name(ch));
+    mud_log_printf("%s had no variable file", char_get_name(ch));
     return;
   }
   /* walk through each line in the file parsing variables */
@@ -1389,9 +1389,9 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
 
   file = atomic_open(&af, fn, true);
   if (!file) {
-    mudlog(g, LOG_NRM, ADMLVL_GOD, true,
-           "SYSERR: Could not open player variable file %s for writing.:%s",
-           fn, strerror(errno));
+    mudlog_printf(g, LOG_NRM, ADMLVL_GOD, true,
+                  "SYSERR: Could not open player variable file %s for writing.:%s",
+                  fn, strerror(errno));
     return;
   }
   /* note that currently, context will always be zero. this may change */

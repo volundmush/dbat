@@ -61,25 +61,25 @@ static const char *const custom_weapon[7] = {
 /* This displays the custom equipment construction menu to the player. */
 void disp_custom_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output(g, d, "@GCustom Equipment Construction Menu@n\n");
-  write_to_output(g, d, "@D-----------------------------------------@n\n");
-  write_to_output(g, d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name.c_str());
-  write_to_output(g, d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short.c_str());
-  write_to_output(g, d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long.c_str());
-  write_to_output(g, d, "@C4@D) @WEquipment Type   @D: @w%s@n\n", custom_types[d->obj_type]);
-  write_to_output(g, d, "@C5@D) @WWeapon Type      @D: @w%s@n\n", custom_weapon[d->obj_weapon]);
-  write_to_output(g, d, "@CQ@D) @WQuit Menu@n\n");
+  write_to_output_printf(g, d, "@GCustom Equipment Construction Menu@n\n");
+  write_to_output_printf(g, d, "@D-----------------------------------------@n\n");
+  write_to_output_printf(g, d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name.c_str());
+  write_to_output_printf(g, d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short.c_str());
+  write_to_output_printf(g, d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long.c_str());
+  write_to_output_printf(g, d, "@C4@D) @WEquipment Type   @D: @w%s@n\n", custom_types[d->obj_type]);
+  write_to_output_printf(g, d, "@C5@D) @WWeapon Type      @D: @w%s@n\n", custom_weapon[d->obj_weapon]);
+  write_to_output_printf(g, d, "@CQ@D) @WQuit Menu@n\n");
 }
 
 /* This displays the equipment restring menu, as if you couldn't tell. */
 void disp_restring_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output(g, d, "@GEquipment Restring Menu@n\n");
-  write_to_output(g, d, "@D-----------------------------------------@n\n");
-  write_to_output(g, d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name.c_str());
-  write_to_output(g, d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short.c_str());
-  write_to_output(g, d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long.c_str());
-  write_to_output(g, d, "@CQ@D) @WQuit Menu@n\n");
+  write_to_output_printf(g, d, "@GEquipment Restring Menu@n\n");
+  write_to_output_printf(g, d, "@D-----------------------------------------@n\n");
+  write_to_output_printf(g, d, "@C1@D) @WKeyword Name     @D: @w%s@n\n", d->obj_name.c_str());
+  write_to_output_printf(g, d, "@C2@D) @WShort Description@D: @w%s@n\n", d->obj_short.c_str());
+  write_to_output_printf(g, d, "@C3@D) @WLong Description @D: @w%s@n\n", d->obj_long.c_str());
+  write_to_output_printf(g, d, "@CQ@D) @WQuit Menu@n\n");
 }
 
 /* This handles the player level object construction process. */
@@ -95,26 +95,26 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       case EDIT_RESTRING_MAIN:
         switch (*arg) {
           case '1': /* Name Editing */
-            write_to_output(g, d, "@wCurrent Equipment's Keyword Name @D<@Y%s@D>@n\r\n", d->obj_name.c_str());
-            write_to_output(g, d, "@wEnter Name @D(@RDo not use colorcode!@D)@w:@n \n");
+            write_to_output_printf(g, d, "@wCurrent Equipment's Keyword Name @D<@Y%s@D>@n\r\n", d->obj_name.c_str());
+            write_to_output_printf(g, d, "@wEnter Name @D(@RDo not use colorcode!@D)@w:@n \n");
             d->obj_editval = EDIT_RESTRING_NAME;
             break;
 
           case '2': /* Short Desc Editing */
-            write_to_output(g, d, "@wCurrent Equipment's Short Desc @D<@Y%s@D>@n\r\n", d->obj_short.c_str());
-            write_to_output(g, d, "@wEnter Short Desc@w:@n \n");
+            write_to_output_printf(g, d, "@wCurrent Equipment's Short Desc @D<@Y%s@D>@n\r\n", d->obj_short.c_str());
+            write_to_output_printf(g, d, "@wEnter Short Desc@w:@n \n");
             d->obj_editval = EDIT_RESTRING_SDESC;
             break;
 
           case '3': /* Long Desc Editing */
-            write_to_output(g, d, "@wCurrent Equipment's Long Desc @D<@Y%s@D>@n\r\n", d->obj_long.c_str());
-            write_to_output(g, d, "@wEnter Long Desc@w:@n \n");
+            write_to_output_printf(g, d, "@wCurrent Equipment's Long Desc @D<@Y%s@D>@n\r\n", d->obj_long.c_str());
+            write_to_output_printf(g, d, "@wEnter Long Desc@w:@n \n");
             d->obj_editval = EDIT_RESTRING_LDESC;
             break;
 
           case 'Q': /* Quit Editing */
           case 'q':
-            write_to_output(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
+            write_to_output_printf(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
             d->obj_editval = EDIT_RESTRING_QUIT;
             break;
 
@@ -126,19 +126,19 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_RESTRING_NAME: /* Name menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_restring_menu(g, d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
         }
         if (strstr(arg, "@")) {
-          write_to_output(g, d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         if (strlen(arg) > 100) {
-          write_to_output(g, d, "@wToo long. Limit is 100 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 100 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf        = '\0';
@@ -149,14 +149,14 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_RESTRING_SDESC: /* Short Desc Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
         }
         if (strlen(arg) > 150) {
-          write_to_output(g, d, "@wToo long. Limit is 200 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 200 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf         = '\0';
@@ -167,14 +167,14 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_RESTRING_LDESC: /* Long Desc Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
         }
         if (strlen(arg) > 200) {
-          write_to_output(g, d, "@wToo long. Limit is 200 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 200 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf        = '\0';
@@ -185,12 +185,12 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_RESTRING_QUIT:
         if (!*arg) {
-          write_to_output(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
+          write_to_output_printf(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
           return;
         }
         if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
           if (!(obj = obj_by_id(g, d->obj_point_uid))) { /* it went while being restrung */
-            write_to_output(g, d, "That item no longer exists. Canceling purchase at no cost.\r\n");
+            write_to_output_printf(g, d, "That item no longer exists. Canceling purchase at no cost.\r\n");
             d->obj_editval = EDIT_NONE;
             desc_set_connected(d, CON_PLAYING);
             break;
@@ -209,16 +209,16 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           d->obj_editval  = EDIT_NONE;
           char_set_gold(d->character, char_get_gold(d->character) - 5000);
           obj_extra_set(obj, ITEM_RESTRING, true);
-          write_to_output(g, d, "Purchase complete.");
-          send_to_imm(g, "Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj_get_short_description(obj), d->obj_was.c_str());
+          write_to_output_printf(g, d, "Purchase complete.");
+          send_to_imm_printf(g, "Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj_get_short_description(obj), d->obj_was.c_str());
           desc_set_connected(d, CON_PLAYING);
         } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
-          write_to_output(g, d, "Canceling purchase at no cost.\r\n");
-          send_to_imm(g, "Restring Eq: %s has canceled their equipment restring.", char_get_name(d->character));
+          write_to_output_printf(g, d, "Canceling purchase at no cost.\r\n");
+          send_to_imm_printf(g, "Restring Eq: %s has canceled their equipment restring.", char_get_name(d->character));
           d->obj_editval = EDIT_NONE;
           desc_set_connected(d, CON_PLAYING);
         } else {
-          write_to_output(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
+          write_to_output_printf(g, d, "Save current changes and be charged?\r\nYes or No\r\n");
           return;
         }
         break;
@@ -236,45 +236,45 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       case EDIT_CUSTOM_MAIN: /* The main menu of custom equipment edit */
         switch (*arg) {
           case '1': /* Let them name it. */
-            write_to_output(g, d, "@wEnter Equipment's Keyword Name @D(@RDo not use colorcode!@D)@w.@n\r\n");
-            write_to_output(g, d, "@wEnter: @n\n");
+            write_to_output_printf(g, d, "@wEnter Equipment's Keyword Name @D(@RDo not use colorcode!@D)@w.@n\r\n");
+            write_to_output_printf(g, d, "@wEnter: @n\n");
             d->obj_editval = EDIT_CUSTOM_NAME;
             break;
           case '2': /* Let them give it a short description. */
-            write_to_output(g, d, "@wEnter Equipment's Short Description. This is the colored name you see in your inventory or when the eq is used.@n\r\n");
-            write_to_output(g, d, "@wEnter: @n\n");
+            write_to_output_printf(g, d, "@wEnter Equipment's Short Description. This is the colored name you see in your inventory or when the eq is used.@n\r\n");
+            write_to_output_printf(g, d, "@wEnter: @n\n");
             d->obj_editval = EDIT_CUSTOM_SDESC;
             break;
           case '3': /* Let them give it a long description. */
-            write_to_output(g, d, "@wEnter Equipment's Long Description. This is the colored name you see when it's seen in a room. @D(@RNo punctuation at the end!@D)@n\r\n");
-            write_to_output(g, d, "@wEnter: @n\n");
+            write_to_output_printf(g, d, "@wEnter Equipment's Long Description. This is the colored name you see when it's seen in a room. @D(@RNo punctuation at the end!@D)@n\r\n");
+            write_to_output_printf(g, d, "@wEnter: @n\n");
             d->obj_editval = EDIT_CUSTOM_LDESC;
             break;
           case '4': /* Let them choose what type of equipment it is. */
-            write_to_output(g, d, "@wEnter number to select type of equipment you want it to be: @n\n");
-            write_to_output(g, d, "@D[ @C--1@W) @cArmor Slot  @C--2@W) @cGi Slot     @C--3@W) @cWrist Slot   @D]@n\n");
-            write_to_output(g, d, "@D[ @C--4@W) @cEar Slot    @C--5@W) @cFinger Slot @C--6@W) @cEye Slot     @D]@n\n");
-            write_to_output(g, d, "@D[ @C--7@W) @cHands Slot  @C--8@W) @cFeet Slot   @C--9@W) @cBelt Slot    @D]@n\n");
-            write_to_output(g, d, "@D[ @C-10@W) @cLegs Slot   @C-11@W) @cArms Slot   @C-12@W) @cHead Slot    @D]@n\n");
-            write_to_output(g, d, "@D[ @C-13@W) @cNeck Slot   @C-14@W) @cBack Slot   @C-15@W) @cShoulder Slot@D]@n\n");
-            write_to_output(g, d, "@D[ @C-16@W) @cWeapon@n\r\n");
-            write_to_output(g, d, "@wEnter: @n\n");
+            write_to_output_printf(g, d, "@wEnter number to select type of equipment you want it to be: @n\n");
+            write_to_output_printf(g, d, "@D[ @C--1@W) @cArmor Slot  @C--2@W) @cGi Slot     @C--3@W) @cWrist Slot   @D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C--4@W) @cEar Slot    @C--5@W) @cFinger Slot @C--6@W) @cEye Slot     @D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C--7@W) @cHands Slot  @C--8@W) @cFeet Slot   @C--9@W) @cBelt Slot    @D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C-10@W) @cLegs Slot   @C-11@W) @cArms Slot   @C-12@W) @cHead Slot    @D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C-13@W) @cNeck Slot   @C-14@W) @cBack Slot   @C-15@W) @cShoulder Slot@D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C-16@W) @cWeapon@n\r\n");
+            write_to_output_printf(g, d, "@wEnter: @n\n");
             d->obj_editval = EDIT_CUSTOM_TYPE;
             break;
           case '5': /* If it's a weapon then let them choose what type. */
             if (d->obj_type != 16) {
-              write_to_output(g, d, "@wYou can only use this part of the menu if you select the weapon type.@n\r\n");
+              write_to_output_printf(g, d, "@wYou can only use this part of the menu if you select the weapon type.@n\r\n");
               return;
             }
-            write_to_output(g, d, "@wEnter number to select type of weapon you want it to be: @n\n");
-            write_to_output(g, d, "@D[ @C--1@W) @cSword       @C--2@W) @cDagger      @C--3@W) @cSpear        @D]@n\n");
-            write_to_output(g, d, "@D[ @C--4@W) @cClub        @C--5@W) @cGun         @C--6@W) @cBrawling     @D]@n\n");
-            write_to_output(g, d, "@wEnter: @n\n");
+            write_to_output_printf(g, d, "@wEnter number to select type of weapon you want it to be: @n\n");
+            write_to_output_printf(g, d, "@D[ @C--1@W) @cSword       @C--2@W) @cDagger      @C--3@W) @cSpear        @D]@n\n");
+            write_to_output_printf(g, d, "@D[ @C--4@W) @cClub        @C--5@W) @cGun         @C--6@W) @cBrawling     @D]@n\n");
+            write_to_output_printf(g, d, "@wEnter: @n\n");
             d->obj_editval = EDIT_CUSTOM_WEAPON;
             break;
           case 'q': /* They are exiting, time to finalize purchase or clear it. */
           case 'Q':
-            write_to_output(g, d, "@wPurchase this custom piece? (Y or N)@n\r\n");
+            write_to_output_printf(g, d, "@wPurchase this custom piece? (Y or N)@n\r\n");
             d->obj_editval = EDIT_CUSTOM_QUIT;
             break;
           default: /* They entered nothing, show them the menu. */
@@ -285,19 +285,19 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_NAME: /* Name menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
         }
         if (strstr(arg, "@")) {
-          write_to_output(g, d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         if (strlen(arg) > 100) {
-          write_to_output(g, d, "@wToo long. Limit is 100 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 100 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf        = '\0';
@@ -308,14 +308,14 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_SDESC: /* Short Desc Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
         }
         if (strlen(arg) > 150) {
-          write_to_output(g, d, "@wToo long. Limit is 200 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 200 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf         = '\0';
@@ -326,14 +326,14 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_LDESC: /* Long Desc Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Keeping what was previously entered.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
         }
         if (strlen(arg) > 200) {
-          write_to_output(g, d, "@wToo long. Limit is 200 character.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wToo long. Limit is 200 character.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           return;
         }
         *buf        = '\0';
@@ -344,15 +344,15 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_TYPE: /* Type Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Returning to main menu.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Returning to main menu.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
         }
         d->obj_type = atoi(arg);
         if (d->obj_type < 1 || d->obj_type > 16) {
-          write_to_output(g, d, "@wValue must be between 1 and 16.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wValue must be between 1 and 16.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           d->obj_type = 1;
           return;
         }
@@ -365,15 +365,15 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_WEAPON: /* Weapon Menu */
         if (!*arg) {
-          write_to_output(g, d, "@wNothing entered. Returning to main menu.@n\r\n");
+          write_to_output_printf(g, d, "@wNothing entered. Returning to main menu.@n\r\n");
           disp_custom_menu(g, d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
         }
         d->obj_weapon = atoi(arg);
         if (d->obj_weapon < 1 || d->obj_weapon > 6) {
-          write_to_output(g, d, "@wValue must be between 1 and 6.@n\r\n");
-          write_to_output(g, d, "@wEnter: @n\n");
+          write_to_output_printf(g, d, "@wValue must be between 1 and 6.@n\r\n");
+          write_to_output_printf(g, d, "@wEnter: @n\n");
           d->obj_weapon = 0;
           return;
         }
@@ -383,11 +383,11 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 
       case EDIT_CUSTOM_QUIT: /* Quiting */
         if (!*arg) {
-          write_to_output(g, d, "@wPurchase this custom piece? (Y or N)@n\r\n");
+          write_to_output_printf(g, d, "@wPurchase this custom piece? (Y or N)@n\r\n");
           return;
         }
         if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
-          write_to_output(g, d, "@wPurchase complete.@n\r\n");
+          write_to_output_printf(g, d, "@wPurchase complete.@n\r\n");
           desc_set_connected(d, CON_PLAYING);
           if (d->obj_weapon == 0) {
             obj = read_object(g, 20099);
@@ -485,12 +485,12 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           userWrite(g, d, 0, 0, 0, "index");
           obj_set_size(obj, get_size(d->character));
           obj_extra_set(obj, ITEM_CUSTOM, true);
-          send_to_imm(g, "Custom Eq: %s has bought: %s.", char_get_name(d->character), obj_get_short_description(obj));
+          send_to_imm_printf(g, "Custom Eq: %s has bought: %s.", char_get_name(d->character), obj_get_short_description(obj));
           customWrite(d->character, obj);
           log_custom(g, d, obj);
         } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
-          write_to_output(g, d, "Canceling purchase at no cost.\r\n");
-          send_to_imm(g, "Custom Eq: %s has canceled their custom eq construction.", char_get_name(d->character));
+          write_to_output_printf(g, d, "Canceling purchase at no cost.\r\n");
+          send_to_imm_printf(g, "Custom Eq: %s has canceled their custom eq construction.", char_get_name(d->character));
           d->obj_editval = EDIT_NONE;
 
           desc_set_connected(d, CON_PLAYING);

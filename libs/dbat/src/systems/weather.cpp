@@ -44,9 +44,9 @@ static void grow_plants(GameWorld *g)
       if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
         if (obj_get_value(k, VAL_WATERLEVEL) > -10) {
-          send_to_room(g, obj_get_in_room(k), "%s@y withers a bit.\r\n", obj_get_short_description(k));
+          send_to_room_printf(g, obj_get_in_room(k), "%s@y withers a bit.\r\n", obj_get_short_description(k));
         } else {
-          send_to_room(g, obj_get_in_room(k), "%s@y has withered to a dried up dead husk.\r\n", obj_get_short_description(k));
+          send_to_room_printf(g, obj_get_in_room(k), "%s@y has withered to a dried up dead husk.\r\n", obj_get_short_description(k));
         }
       } else if (obj_get_value(k, VAL_WATERLEVEL) >= 0) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
@@ -57,7 +57,7 @@ static void grow_plants(GameWorld *g)
             obj_set_value(k, VAL_MATURITY, obj_get_value(k, VAL_MATURITY) + (1));
           }
           if (obj_get_value(k, VAL_MATURITY) >= obj_get_value(k, VAL_MAXMATURE)) {
-            send_to_room(g, obj_get_in_room(k), "%s@G is now fully grown!@n\r\n", obj_get_short_description(k));
+            send_to_room_printf(g, obj_get_in_room(k), "%s@G is now fully grown!@n\r\n", obj_get_short_description(k));
           }
         }
       }
@@ -81,14 +81,14 @@ static void another_hour(GameWorld *g, int mode)
     switch (g->time_info.hours) {
       case 4:
         if (MOON_DATE) {
-          send_to_moon(g, "The full moon disappears.\r\n");
+          send_to_moon_printf(g, "The full moon disappears.\r\n");
         } else if (g->time_info.day == 22) {
-          send_to_moon(g, "The full moon disappears.\r\n");
+          send_to_moon_printf(g, "The full moon disappears.\r\n");
         }
         break;
       case 5:
         g->weather_info.sunlight = SUN_RISE;
-        send_to_outdoor(g, "The sun rises in the east.\r\n");
+        send_to_outdoor_printf(g, "The sun rises in the east.\r\n");
         if (g->time_info.day <= 14) {
           star_phase(g, nullptr, 1);
         } else if (g->time_info.day <= 21) {
@@ -99,19 +99,19 @@ static void another_hour(GameWorld *g, int mode)
         break;
       case 6:
         g->weather_info.sunlight = SUN_LIGHT;
-        send_to_outdoor(g, "The day has begun.\r\n");
+        send_to_outdoor_printf(g, "The day has begun.\r\n");
         break;
       case 19:
         g->weather_info.sunlight = SUN_SET;
-        send_to_outdoor(g, "The sun slowly disappears in the west.\r\n");
+        send_to_outdoor_printf(g, "The sun slowly disappears in the west.\r\n");
         break;
       case 20:
         g->weather_info.sunlight = SUN_DARK;
-        send_to_outdoor(g, "The night has begun.\r\n");
+        send_to_outdoor_printf(g, "The night has begun.\r\n");
         break;
       case 21:
         if (MOON_DATE) {
-          send_to_moon(g, "The full moon has risen.\r\n");
+          send_to_moon_printf(g, "The full moon has risen.\r\n");
         }
         break;
       default:
@@ -215,27 +215,27 @@ static void weather_change(GameWorld *g)
     case 0:
       break;
     case 1:
-      send_to_outdoor(g, "The sky starts to get cloudy.\r\n");
+      send_to_outdoor_printf(g, "The sky starts to get cloudy.\r\n");
       g->weather_info.sky = SKY_CLOUDY;
       break;
     case 2:
-      send_to_outdoor(g, "It starts to rain.\r\n");
+      send_to_outdoor_printf(g, "It starts to rain.\r\n");
       g->weather_info.sky = SKY_RAINING;
       break;
     case 3:
-      send_to_outdoor(g, "The clouds disappear.\r\n");
+      send_to_outdoor_printf(g, "The clouds disappear.\r\n");
       g->weather_info.sky = SKY_CLOUDLESS;
       break;
     case 4:
-      send_to_outdoor(g, "Lightning starts to show in the sky.\r\n");
+      send_to_outdoor_printf(g, "Lightning starts to show in the sky.\r\n");
       g->weather_info.sky = SKY_LIGHTNING;
       break;
     case 5:
-      send_to_outdoor(g, "The rain stops.\r\n");
+      send_to_outdoor_printf(g, "The rain stops.\r\n");
       g->weather_info.sky = SKY_CLOUDY;
       break;
     case 6:
-      send_to_outdoor(g, "The lightning stops.\r\n");
+      send_to_outdoor_printf(g, "The lightning stops.\r\n");
       g->weather_info.sky = SKY_RAINING;
       break;
     default:
@@ -314,7 +314,7 @@ static void check_hoshi_phase(GameWorld *g, struct char_data *ch, int type)
       }
       break; // Powerup Phase 2
     default:
-      send_to_imm(g, "Strange Error in star_phase by: %s", char_get_name(ch));
+      send_to_imm_printf(g, "Strange Error in star_phase by: %s", char_get_name(ch));
       break; // Error
   }
 }
@@ -357,7 +357,7 @@ static void phase_powerup(GameWorld *g, struct char_data *ch, int phase)
       bonus = 8;
       break;
     default:
-      send_to_imm(g, "Error: phase_powerup called with GET_PHASE equal to zero by: %s", char_get_name(ch));
+      send_to_imm_printf(g, "Error: phase_powerup called with GET_PHASE equal to zero by: %s", char_get_name(ch));
       return;
   }
 

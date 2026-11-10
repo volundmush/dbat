@@ -68,7 +68,7 @@ bool tech_handle_charge(GameWorld *g, char_data *ch, std::string_view arg, doubl
   if (!arg.empty()) {
     double adjust = (double)(parse_int(arg)) * 0.01;
     if (adjust < 0.01 || adjust > 1.00) {
-      send_to_char(g, ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
+      send_to_char_printf(g, ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
       return false;
     }
     if (adjust < *attperc && adjust >= minimum) {
@@ -90,7 +90,7 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, std::string &arg, char_d
       return true;
     }
     if (!(*obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char(g, ch, "Nothing around here by that name.\r\n");
+      send_to_char_printf(g, ch, "Nothing around here by that name.\r\n");
       return false;
     }
     return true;
@@ -114,16 +114,16 @@ void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const 
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(g, 0, 0, vict, ch, nullptr, dmg, 0);
     if (char_get_bonuses(ch, BONUS_FIREPRONE)) {
-      send_to_char(g, ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char(g, vict, "@RThey are easily burned!@n\r\n");
+      send_to_char_printf(g, ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+      send_to_char_printf(g, vict, "@RThey are easily burned!@n\r\n");
       char_aff_set(ch, AFF_BURNED, true);
     } else if (char_get_aff_abils_con(ch) < axion_dice(g, 0)) {
-      send_to_char(g, ch, "@RYou are badly burned!@n\r\n");
-      send_to_char(g, vict, "@RThey are burned!@n\r\n");
+      send_to_char_printf(g, ch, "@RYou are badly burned!@n\r\n");
+      send_to_char_printf(g, vict, "@RThey are burned!@n\r\n");
       char_aff_set(ch, AFF_BURNED, true);
     }
   } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
-    send_to_char(g, vict, "@RThey appear to be fireproof!@n\r\n");
+    send_to_char_printf(g, vict, "@RThey appear to be fireproof!@n\r\n");
   }
 }
 

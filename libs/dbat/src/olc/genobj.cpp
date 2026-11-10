@@ -140,13 +140,13 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   struct obj_data *obj;
 
   if (!zone_num) {
-    mud_log("SYSERR: no zone given.");
+    mud_log_printf("SYSERR: no zone given.");
     return false;
   }
 
   snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_num->number);
   if (!(fp = atomic_open(&af, cmfname, false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
+    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
     return false;
   }
   /*
@@ -217,7 +217,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
          * Sanity check to prevent nasty protection faults.
          */
         if (ex_desc.keyword.empty() || ex_desc.description.empty()) {
-          mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
+          mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
           continue;
         }
         strlcpy(buf, ex_desc.description.c_str(), sizeof(buf));
@@ -262,7 +262,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   if (in_save_list(g, zone_num->number, SL_OBJ)) {
     remove_from_save_list(g, zone_num->number, SL_OBJ);
     create_world_index(g, zone_num->number, "obj");
-    mud_log("GenOLC: save_objects: Saving objects '%s'", buf);
+    mud_log_printf("GenOLC: save_objects: Saving objects '%s'", buf);
   }
   return true;
 }
@@ -305,7 +305,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
   add_to_save_list(g, zrnum->number, SL_OBJ);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(g, obj), obj_get_short_description(obj));
+  mud_log_printf("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
   /* extract_obj() may free more than tmp, so start again from the top each time. */
   while ((tmp = first_object_of_proto(g, obj))) {

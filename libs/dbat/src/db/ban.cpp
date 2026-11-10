@@ -51,9 +51,9 @@ void load_banned(GameWorld *g)
 
   if (!(fl = fopen(BAN_FILE, "r"))) {
     if (errno != ENOENT) {
-      mud_log("SYSERR: Unable to open banfile '%s': %s", BAN_FILE, strerror(errno));
+      mud_log_printf("SYSERR: Unable to open banfile '%s': %s", BAN_FILE, strerror(errno));
     } else
-      mud_log("   Ban file '%s' doesn't exist.", BAN_FILE);
+      mud_log_printf("   Ban file '%s' doesn't exist.", BAN_FILE);
     return;
   }
   while (fscanf(fl, " %99s %50s %d %20s ", ban_type, site_name, &date, name) == 4) {
@@ -136,19 +136,19 @@ ACMD(do_ban)
 
   if (argument.empty()) {
     if (!g->ban_list) {
-      send_to_char(g, ch, "No sites are banned.\r\n");
+      send_to_char_printf(g, ch, "No sites are banned.\r\n");
       return;
     }
-    send_to_char(g, ch, BAN_LIST_FORMAT,
-                 "Banned Site Name",
-                 "Ban Type",
-                 "Banned On",
-                 "Banned By");
-    send_to_char(g, ch, BAN_LIST_FORMAT,
-                 "---------------------------------",
-                 "---------------------------------",
-                 "---------------------------------",
-                 "---------------------------------");
+    send_to_char_printf(g, ch, BAN_LIST_FORMAT,
+                        "Banned Site Name",
+                        "Ban Type",
+                        "Banned On",
+                        "Banned By");
+    send_to_char_printf(g, ch, BAN_LIST_FORMAT,
+                        "---------------------------------",
+                        "---------------------------------",
+                        "---------------------------------",
+                        "---------------------------------");
 
     for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
       if (ban_node->date) {
@@ -157,7 +157,7 @@ ACMD(do_ban)
       } else
         strcpy(timestr, "Unknown"); /* strcpy: OK (strlen("Unknown") < 16) */
 
-      send_to_char(g, ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
+      send_to_char_printf(g, ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
     }
     return;
   }
@@ -166,16 +166,16 @@ ACMD(do_ban)
   flag                  = take_arg(rest);
   site                  = take_arg(rest);
   if (site.empty() || flag.empty()) {
-    send_to_char(g, ch, "Usage: ban {all | select | new} site_name\r\n");
+    send_to_char_printf(g, ch, "Usage: ban {all | select | new} site_name\r\n");
     return;
   }
   if (!(str_eq_nocase(flag, "select") || str_eq_nocase(flag, "all") || str_eq_nocase(flag, "new"))) {
-    send_to_char(g, ch, "Flag must be ALL, SELECT, or NEW.\r\n");
+    send_to_char_printf(g, ch, "Flag must be ALL, SELECT, or NEW.\r\n");
     return;
   }
   for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
     if (!strcasecmp(ban_node->site, site.c_str())) {
-      send_to_char(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
+      send_to_char_printf(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
   }
@@ -194,9 +194,9 @@ ACMD(do_ban)
   ban_node->next = g->ban_list;
   g->ban_list       = ban_node;
 
-  mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s has banned %s for %s players.",
-         char_get_name(ch), site.c_str(), ban_types[ban_node->type]);
-  send_to_char(g, ch, "Site banned.\r\n");
+  mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s has banned %s for %s players.",
+                char_get_name(ch), site.c_str(), ban_types[ban_node->type]);
+  send_to_char_printf(g, ch, "Site banned.\r\n");
   write_ban_list(g);
 }
 #undef BAN_LIST_FORMAT
@@ -210,7 +210,7 @@ ACMD(do_unban)
   std::string_view rest = argument;
   site                  = take_arg(rest);
   if (site.empty()) {
-    send_to_char(g, ch, "A site to unban might help.\r\n");
+    send_to_char_printf(g, ch, "A site to unban might help.\r\n");
     return;
   }
   ban_node = g->ban_list;
@@ -222,13 +222,13 @@ ACMD(do_unban)
   }
 
   if (!found) {
-    send_to_char(g, ch, "That site is not currently banned.\r\n");
+    send_to_char_printf(g, ch, "That site is not currently banned.\r\n");
     return;
   }
   REMOVE_FROM_LIST(ban_node, g->ban_list, next, temp);
-  send_to_char(g, ch, "Site unbanned.\r\n");
-  mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s removed the %s-player ban on %s.",
-         char_get_name(ch), ban_types[ban_node->type], ban_node->site);
+  send_to_char_printf(g, ch, "Site unbanned.\r\n");
+  mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "%s removed the %s-player ban on %s.",
+                char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
   delete ban_node;
   write_ban_list(g);
@@ -316,7 +316,7 @@ void Read_Invalid_List(GameWorld *g)
     g->invalid_list[g->num_invalid++] = strdup(temp);
 
   if (g->num_invalid >= MAX_INVALID_NAMES) {
-    mud_log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
+    mud_log_printf("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
     exit(1);
   }
 

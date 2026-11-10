@@ -43,7 +43,7 @@ void write_aliases(GameWorld *g, struct char_data *ch)
   }
 
   if ((file = atomic_open(&af, fn, true)) == nullptr) {
-    mud_log("SYSERR: Couldn't save aliases for %s in '%s': %s", char_get_name(ch), fn, strerror(errno));
+    mud_log_printf("SYSERR: Couldn't save aliases for %s in '%s': %s", char_get_name(ch), fn, strerror(errno));
     /*  SYSERR_DESC:
      *  This error occurs when the server fails to open the relevant alias
      *  file for writing.  The text at the end of the error should give a
@@ -106,7 +106,7 @@ void read_aliases(GameWorld *g, struct char_data *ch)
 
   if ((file = fopen(xbuf, "r")) == nullptr) {
     if (errno != ENOENT) {
-      mud_log("SYSERR: Couldn't open alias file '%s' for %s: %s", xbuf, char_get_name(ch), strerror(errno));
+      mud_log_printf("SYSERR: Couldn't open alias file '%s' for %s: %s", xbuf, char_get_name(ch), strerror(errno));
       /*  SYSERR_DESC:
        *  This error occurs when the server fails to open the relevant alias
        *  file for reading.  The text at the end version should give a valid
@@ -141,7 +141,7 @@ void delete_aliases(const char *charname)
     return;
 
   if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("SYSERR: deleting alias file %s: %s", filename, strerror(errno));
+    mud_log_printf("SYSERR: deleting alias file %s: %s", filename, strerror(errno));
   /*  SYSERR_DESC:
      *  When an alias file cannot be removed, this error will occur,
      *  and the reason why will be the tail end of the error.
@@ -162,12 +162,12 @@ ACMD(do_alias)
   std::string repl(rest); /* the rest of the line, from the space after the alias */
 
   if (arg.empty()) { /* no argument specified -- list currently defined aliases */
-    send_to_char(g, ch, "Currently defined aliases:\r\n");
+    send_to_char_printf(g, ch, "Currently defined aliases:\r\n");
     if (aliases->empty())
-      send_to_char(g, ch, " None.\r\n");
+      send_to_char_printf(g, ch, " None.\r\n");
     else
       for (const struct alias_data &each : *aliases)
-        send_to_char(g, ch, "%-15s %s\r\n", each.alias.c_str(), each.replacement.c_str());
+        send_to_char_printf(g, ch, "%-15s %s\r\n", each.alias.c_str(), each.replacement.c_str());
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
     bool had = (a = find_alias(*aliases, arg)) != nullptr;
@@ -176,12 +176,12 @@ ACMD(do_alias)
     /* if no replacement string is specified, assume we want to delete */
     if (repl.empty()) {
       if (!had)
-        send_to_char(g, ch, "No such alias.\r\n");
+        send_to_char_printf(g, ch, "No such alias.\r\n");
       else
-        send_to_char(g, ch, "Alias deleted.\r\n");
+        send_to_char_printf(g, ch, "Alias deleted.\r\n");
     } else { /* otherwise, either add or redefine an alias */
       if (str_eq_nocase(arg, "alias")) {
-        send_to_char(g, ch, "You can't alias 'alias'.\r\n");
+        send_to_char_printf(g, ch, "You can't alias 'alias'.\r\n");
         return;
       }
       struct alias_data added;
@@ -193,7 +193,7 @@ ACMD(do_alias)
       else
         added.type = ALIAS_SIMPLE;
       aliases->push_front(std::move(added));
-      send_to_char(g, ch, "Alias added.\r\n");
+      send_to_char_printf(g, ch, "Alias added.\r\n");
     }
   }
 }

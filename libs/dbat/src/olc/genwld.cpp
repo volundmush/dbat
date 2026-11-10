@@ -46,14 +46,14 @@ room_vnum add_room(GameWorld *g, struct room_data *room)
     slot->people   = people;
     slot->contents = contents;
     add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
-    mud_log("GenOLC: add_room: Updated existing room #%d.", vnum);
+    mud_log_printf("GenOLC: add_room: Updated existing room #%d.", vnum);
     return vnum;
   }
 
   slot  = g->rooms.emplace(vnum);
   *slot = *room;
   copy_room_strings(slot, room);
-  mud_log("GenOLC: add_room: Added room %d.", vnum);
+  mud_log_printf("GenOLC: add_room: Added room %d.", vnum);
 
   add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
   return vnum;
@@ -71,21 +71,21 @@ bool delete_room(GameWorld *g, room_vnum vnum)
 
   /* Everyone with nowhere else to go ends up here. */
   if (vnum == g->r_mortal_start_room || vnum == CONFIG_MORTAL_START) {
-    mud_log("GenOLC: delete_room: Refusing to delete the mortal start room, #%d.", vnum);
+    mud_log_printf("GenOLC: delete_room: Refusing to delete the mortal start room, #%d.", vnum);
     return false;
   }
 
   add_to_save_list(g, room_get_zone(room)->number, SL_WLD);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_room: Deleting room #%d (%s).", vnum, room_get_name(room));
+  mud_log_printf("GenOLC: delete_room: Deleting room #%d (%s).", vnum, room_get_name(room));
 
   if (g->r_immort_start_room == vnum) {
-    mud_log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
+    mud_log_printf("WARNING: GenOLC: delete_room: Deleting immortal start room!");
     g->r_immort_start_room = 0; /* The Void */
   }
   if (g->r_frozen_start_room == vnum) {
-    mud_log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
+    mud_log_printf("WARNING: GenOLC: delete_room: Deleting frozen start room!");
     g->r_frozen_start_room = 0; /* The Void */
   }
 
@@ -146,7 +146,7 @@ bool delete_room(GameWorld *g, room_vnum vnum)
           /* Known zone entries we don't care about. */
           break;
         default:
-          mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
+          mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
       }
 
   /* Remove this room from all shop lists. */
@@ -171,12 +171,12 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
 
   if (!zone_num) {
-    mud_log("SYSERR: no zone given.");
+    mud_log_printf("SYSERR: no zone given.");
     return false;
   }
 
-  mud_log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
-          zone_num->number, genolc_zone_bottom(g, zone_num), zone_num->top);
+  mud_log_printf("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
+                 zone_num->number, genolc_zone_bottom(g, zone_num), zone_num->top);
 
   snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, zone_num->number);
   if (!(sf = atomic_open(&af, filename, false))) {
@@ -289,7 +289,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   if (in_save_list(g, zone_num->number, SL_WLD)) {
     remove_from_save_list(g, zone_num->number, SL_WLD);
     create_world_index(g, zone_num->number, "wld");
-    mud_log("GenOLC: save_rooms: Saving rooms '%s'", buf);
+    mud_log_printf("GenOLC: save_rooms: Saving rooms '%s'", buf);
   }
   return true;
 }
@@ -319,7 +319,7 @@ static bool copy_room(struct room_data *to, struct room_data *from)
 static bool copy_room_strings(struct room_data *dest, struct room_data *source)
 {
   if (dest == nullptr || source == nullptr) {
-    mud_log("SYSERR: GenOLC: copy_room_strings: NULL values passed.");
+    mud_log_printf("SYSERR: GenOLC: copy_room_strings: NULL values passed.");
     return false;
   }
 

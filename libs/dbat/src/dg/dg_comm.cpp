@@ -124,7 +124,7 @@ static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[]
   strcat(sb, tokens[i]);
   strcat(sb, "\n\r");
   sb[0] = toupper(sb[0]);
-  send_to_char(g, ch, "%s", sb);
+  send_to_char_printf(g, ch, "%s", sb);
 }
 
 void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis, int targets)
@@ -208,5 +208,5 @@ void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone)
     if (!i->connected && i->character && char_is_awake(i->character) &&
         (char_get_in_room(i->character) != NOWHERE) &&
         (room_get_zone(g, char_get_in_room(i->character)) == zone))
-      write_to_output(g, i, "%s", messg);
+      write_to_output_printf(g, i, "%s", messg);
 }

@@ -11,12 +11,12 @@
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)
 {
-  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), char_get_in_room(ch), room_get_name(g, char_get_in_room(ch)));
+  mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), char_get_in_room(ch), room_get_name(g, char_get_in_room(ch)));
 }
 
 /* New variable argument log() function.  Works the same as the old for
  * previously written code but is very nice for new code.  */
-void mud_vlog(const char *format, va_list args)
+void mud_vlog_printf(const char *format, va_list args)
 {
   time_t ct    = time(nullptr);
   char *time_s = asctime(localtime(&ct));
@@ -37,19 +37,19 @@ void mud_vlog(const char *format, va_list args)
   fflush(logfile);
 }
 
-/* So mudlog() can use the same function. */
-void mud_log(const char *format, ...)
+/* So mudlog_printf() can use the same function. */
+void mud_log_printf(const char *format, ...)
 {
   va_list args;
 
   va_start(args, format);
-  mud_vlog(format, args);
+  mud_vlog_printf(format, args);
   va_end(args);
 }
 
 /* mudlog -- log mud messages to a file & to online imm's syslogs
  * based on syslog by Fen Jul 3, 1992 */
-void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
+void mudlog_printf(GameWorld *g, int type, int level, int file, const char *str, ...)
 {
   char buf[MAX_STRING_LENGTH];
   va_list args;
@@ -59,7 +59,7 @@ void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
 
   if (file) {
     va_start(args, str);
-    mud_vlog(str, args);
+    mud_vlog_printf(str, args);
     va_end(args);
   }
 
@@ -82,7 +82,7 @@ void mudlog(GameWorld *g, int type, int level, int file, const char *str, ...)
     if (type > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
-    send_to_char(g, i->character, "@g%s@n", buf);
+    send_to_char_printf(g, i->character, "@g%s@n", buf);
   }
 }
 
@@ -103,6 +103,6 @@ void log_backtrace(void)
 /* core_dump(): an "impossible" state was reached. Log where, with a backtrace, and keep running. */
 void core_dump_real(const char *who, int line)
 {
-  mud_log("SYSERR: Assertion failed at %s:%d!", who, line);
+  mud_log_printf("SYSERR: Assertion failed at %s:%d!", who, line);
   log_backtrace();
 }

@@ -33,7 +33,7 @@ ACMD(do_disable)
   DISABLED_DATA *p, *temp;
 
   if (char_is_npc(ch)) {
-    send_to_char(g, ch, "Monsters can't disable commands, silly.\r\n");
+    send_to_char_printf(g, ch, "Monsters can't disable commands, silly.\r\n");
     return;
   }
 
@@ -41,14 +41,14 @@ ACMD(do_disable)
 
   if (text.empty()) {       /* Nothing specified. Show disabled commands. */
     if (!g->disabled_first) /* Any disabled at all ? */
-      send_to_char(g, ch, "There are no disabled commands.\r\n");
+      send_to_char_printf(g, ch, "There are no disabled commands.\r\n");
     else {
-      send_to_char(g, ch,
-                   "Commands that are currently disabled:\r\n\r\n"
-                   " Command       Disabled by     Level\r\n"
-                   "-----------   --------------  -------\r\n");
+      send_to_char_printf(g, ch,
+                          "Commands that are currently disabled:\r\n\r\n"
+                          " Command       Disabled by     Level\r\n"
+                          "-----------   --------------  -------\r\n");
       for (p = g->disabled_first; p; p = p->next)
-        send_to_char(g, ch, " %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
+        send_to_char_printf(g, ch, " %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
     }
     return;
   }
@@ -62,14 +62,14 @@ ACMD(do_disable)
 
     /* Was it disabled by a higher level imm? */
     if (char_get_admlevel(ch) < p->level) {
-      send_to_char(g, ch, "This command was disabled by a higher power.\r\n");
+      send_to_char_printf(g, ch, "This command was disabled by a higher power.\r\n");
       return;
     }
 
     REMOVE_FROM_LIST(p, g->disabled_first, next, temp);
-    send_to_char(g, ch, "Command '%s' enabled.\r\n", p->command->command);
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
-           char_get_name(ch), p->command->command);
+    send_to_char_printf(g, ch, "Command '%s' enabled.\r\n", p->command->command);
+    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
+                  char_get_name(ch), p->command->command);
     free(p->disabled_by);
     delete p;
     save_disabled(g); /* save to disk */
@@ -84,12 +84,12 @@ ACMD(do_disable)
 
     /*  Found?     */
     if (*cmd_info[i].command == '\n') {
-      send_to_char(g, ch, "You don't know of any such command.\r\n");
+      send_to_char_printf(g, ch, "You don't know of any such command.\r\n");
       return;
     }
 
     if (!strcmp(cmd_info[i].command, "disable")) {
-      send_to_char(g, ch, "You cannot disable the disable command.\r\n");
+      send_to_char_printf(g, ch, "You cannot disable the disable command.\r\n");
       return;
     }
 
@@ -101,9 +101,9 @@ ACMD(do_disable)
     p->subcmd      = cmd_info[i].subcmd;        /* the subcommand if any  */
     p->next        = g->disabled_first;
     g->disabled_first = p; /* add before the current first element */
-    send_to_char(g, ch, "Command '%s' disabled.\r\n", p->command->command);
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
-           char_get_name(ch), p->command->command);
+    send_to_char_printf(g, ch, "Command '%s' disabled.\r\n", p->command->command);
+    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
+                  char_get_name(ch), p->command->command);
     save_disabled(g); /* save to disk */
   }
 }
@@ -145,7 +145,7 @@ void load_disabled(GameWorld *g)
       if (!strcasecmp(cmd_info[i].command, name))
         break;
     if (*cmd_info[i].command == '\n') { /* command does not exist? */
-      mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
+      mud_log_printf("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
       delete p;
     } else { /* add new disabled command */
       p->disabled_by = strdup(temp);
@@ -171,7 +171,7 @@ static void save_disabled(GameWorld *g)
   }
 
   if ((fp = atomic_open(&af, DISABLED_FILE, false)) == nullptr) {
-    mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
+    mud_log_printf("SYSERR: Could not open " DISABLED_FILE " for writing");
     return;
   }
 

@@ -49,7 +49,7 @@ void search_replace(std::string &s, std::string_view find, std::string_view repl
 /* A new string formatted as by printf(); aborts if out of memory. */
 char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
 /* The same, as a std::string */
-std::string str_format(const char *format, ...) __attribute__((format(printf, 1, 2)));
+std::string str_format_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
 /* s, a malloc'd string (null for none), as a std::string; s is freed */
 std::string take_string(char *s);
 /* A zero-filled buffer of n chars. Like strdup()'s strings, it is released with free(), so that a field can hold

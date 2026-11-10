@@ -43,7 +43,7 @@ void affect_update(GameWorld *g)
         if (af->type > 0)
           if (!next || (next->type != af->type) || (next->duration > 0)) {
             if (g->spell_info[af->type].wear_off_msg)
-              send_to_char(g, i, "%s\r\n", g->spell_info[af->type].wear_off_msg);
+              send_to_char_printf(g, i, "%s\r\n", g->spell_info[af->type].wear_off_msg);
             if (char_get_speedboost(i) > 0 && af->type == SPELL_HAYASA) {
               char_set_speedboost(i, 0);
             }
@@ -111,7 +111,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
     if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-      send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+      send_to_char_printf(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
   }
@@ -149,7 +149,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
     case SPELL_BLINDNESS:
       if (char_mob_flagged(victim, MOB_NOBLIND)) {
-        send_to_char(g, ch, "You fail.\r\n");
+        send_to_char_printf(g, ch, "You fail.\r\n");
         return;
       }
 
@@ -288,7 +288,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].bitvector = AFF_SLEEP;
 
       if (char_get_position(victim) > POS_SLEEPING) {
-        send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
+        send_to_char_printf(g, victim, "You feel very sleepy...  Zzzz......\r\n");
         act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
@@ -304,7 +304,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].bitvector = AFF_SLEEP;
 
       if (char_get_position(victim) > POS_SLEEPING) {
-        send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
+        send_to_char_printf(g, victim, "You feel very sleepy...  Zzzz......\r\n");
         act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
@@ -348,7 +348,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+        send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
         return;
       }
 
@@ -357,7 +357,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 
@@ -522,17 +522,17 @@ void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data 
   switch (spellnum) {
     case SPELL_CURE_LIGHT:
       healing = dice(g, 1, 8) + MIN(level, 5);
-      send_to_char(g, victim, "You feel better.\r\n");
+      send_to_char_printf(g, victim, "You feel better.\r\n");
       break;
     case SPELL_CURE_CRITIC:
       healing = dice(g, 4, 8) + MIN(level, 20);
-      send_to_char(g, victim, "You feel a lot better!\r\n");
+      send_to_char_printf(g, victim, "You feel a lot better!\r\n");
       break;
     case SPELL_HEAL:
       healing = 100 + dice(g, 3, 8);
-      send_to_char(g, victim, "A warm feeling floods your body.\r\n");
+      send_to_char_printf(g, victim, "A warm feeling floods your body.\r\n");
       if (char_aff_flagged(ch, AFF_CDEATH)) {
-        send_to_char(g, ch, "Your nerves settle slightly\r\n");
+        send_to_char_printf(g, ch, "Your nerves settle slightly\r\n");
       }
       break;
     case SPELL_SENSU:
@@ -594,7 +594,7 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
 
   if (!affected_by_spell(victim, spell)) {
     if (msg_not_affected)
-      send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+      send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 
@@ -656,7 +656,7 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
   }
 
   if (to_char == nullptr)
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
   else
     act(g, to_char, true, ch, obj, nullptr, TO_CHAR);
 
@@ -680,14 +680,14 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
       z = 10;
       break;
     default:
-      send_to_char(g, ch, "Spell unimplemented, it would seem.\r\n");
+      send_to_char_printf(g, ch, "Spell unimplemented, it would seem.\r\n");
       return;
   }
 
   if (!(tobj = read_object(g, z))) {
-    send_to_char(g, ch, "I seem to have goofed.\r\n");
-    mud_log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
-            spellnum, z);
+    send_to_char_printf(g, ch, "I seem to have goofed.\r\n");
+    mud_log_printf("SYSERR: spell_creations, spell %d, obj %d: obj not found",
+                   spellnum, z);
     return;
   }
   add_unique_id(g, tobj);
@@ -717,7 +717,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
     if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
-      send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
+      send_to_char_printf(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
   }
@@ -746,7 +746,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
       break;
     case ART_QUIVERING_PALM:
       if (char_get_level(ch) <= char_get_level(victim)) {
-        send_to_char(g, ch, "They are too high level for that.\r\n");
+        send_to_char_printf(g, ch, "They are too high level for that.\r\n");
         return;
       }
       af[0].duration  = MAX(6, 20 - level);
@@ -787,7 +787,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 
     case SPELL_FLARE:
       if (char_mob_flagged(victim, MOB_NOBLIND)) {
-        send_to_char(g, ch, "You fail.\r\n");
+        send_to_char_printf(g, ch, "You fail.\r\n");
         return;
       }
       af[0].location  = APPLY_ACCURACY;
@@ -815,7 +815,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
   if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
       if (char_aff_flagged(victim, af[i].bitvector)) {
-        send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+        send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
         return;
       }
   /*
@@ -823,7 +823,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
    * not have an accumulative effect, then fail the spell.
    */
   if (affected_by_spell(victim, spellnum) && !(accum_duration || accum_affect)) {
-    send_to_char(g, ch, "%s", CONFIG_NOEFFECT.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_NOEFFECT.c_str());
     return;
   }
 

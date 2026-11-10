@@ -65,8 +65,8 @@ void mobile_activity(GameWorld *g)
     /* Examine call for special procedure */
     if (char_mob_flagged(ch, MOB_SPEC) && !g->no_specials) {
       if (mob_index_of(g, char_get_nr(ch))->func == nullptr) {
-        mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
-                char_get_name(ch), char_get_mob_vnum(g, ch));
+        mud_log_printf("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
+                       char_get_name(ch), char_get_mob_vnum(g, ch));
         char_mob_set(ch, MOB_SPEC, false);
       } else {
         char actbuf[MAX_INPUT_LENGTH] = "";

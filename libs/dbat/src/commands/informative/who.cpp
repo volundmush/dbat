@@ -58,11 +58,11 @@ ACMD(do_finger)
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
-    send_to_char(g, ch, "What user are you wanting to look at?\r\n");
+    send_to_char_printf(g, ch, "What user are you wanting to look at?\r\n");
     return;
   }
   if (!readUserIndex(arg)) {
-    send_to_char(g, ch, "That user does not exist\r\n");
+    send_to_char_printf(g, ch, "That user does not exist\r\n");
     return;
   }
   fingerUser(g, ch, arg);
@@ -102,7 +102,7 @@ ACMD(do_who)
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
   int num_ranks = countof(rank);
-  send_to_char(g, ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
+  send_to_char_printf(g, ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
   for (descriptor_data *d : each_desc(g)) {
     if (short_list)
       break;
@@ -148,9 +148,9 @@ ACMD(do_who)
       continue;
 
     if (short_list)
-      send_to_char(g, ch, "Players\r\n-------\r\n");
+      send_to_char_printf(g, ch, "Players\r\n-------\r\n");
     else
-      send_to_char(g, ch, "%s", rank[i].disp);
+      send_to_char_printf(g, ch, "%s", rank[i].disp);
 
     for (descriptor_data *dd : each_desc(g)) {
       if (!desc_is_playing(dd))
@@ -187,106 +187,106 @@ ACMD(do_who)
         continue;
 
       if (short_list) {
-        send_to_char(g, ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                     char_get_level(tch), char_race_abbr(tch), char_class_abbr(tch), char_get_name(tch),
-                     ((!(++num_can_see % 4)) ? "\r\n" : ""));
+        send_to_char_printf(g, ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
+                            char_get_level(tch), char_race_abbr(tch), char_class_abbr(tch), char_get_name(tch),
+                            ((!(++num_can_see % 4)) ? "\r\n" : ""));
       } else {
         num_can_see++;
 
         char usr[100];
         snprintf(usr, sizeof(usr), "@W(@R%s@W)%s", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
-        send_to_char(g, ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr : "", line_color);
+        send_to_char_printf(g, ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr : "", line_color);
 
         if (char_get_admlevel(tch)) {
-          send_to_char(g, ch, " (%s)", admin_level_names[char_get_admlevel(tch)]);
+          send_to_char_printf(g, ch, " (%s)", admin_level_names[char_get_admlevel(tch)]);
         }
 
         if (dd->snooping && dd->snooping->character != ch && char_get_admlevel(ch) >= 3)
-          send_to_char(g, ch, " (Snoop: %s)", char_get_name(dd->snooping->character));
+          send_to_char_printf(g, ch, " (Snoop: %s)", char_get_name(dd->snooping->character));
         if (char_get_invis_level(g, tch))
-          send_to_char(g, ch, " (i%d)", char_get_invis_level(g, tch));
+          send_to_char_printf(g, ch, " (i%d)", char_get_invis_level(g, tch));
         else if (char_aff_flagged(tch, AFF_INVISIBLE))
-          send_to_char(g, ch, " (invis)");
+          send_to_char_printf(g, ch, " (invis)");
 
         if (char_plr_flagged(tch, PLR_MAILING))
-          send_to_char(g, ch, " (mailing)");
+          send_to_char_printf(g, ch, " (mailing)");
         else if (dd->olc)
-          send_to_char(g, ch, " (OLC)");
+          send_to_char_printf(g, ch, " (OLC)");
         else if (char_plr_flagged(tch, PLR_WRITING))
-          send_to_char(g, ch, " (writing)");
+          send_to_char_printf(g, ch, " (writing)");
 
         if (dd->original)
-          send_to_char(g, ch, " (out of body)");
+          send_to_char_printf(g, ch, " (out of body)");
 
         if (dd->connected == CON_OEDIT)
-          send_to_char(g, ch, " (O Edit)");
+          send_to_char_printf(g, ch, " (O Edit)");
         if (dd->connected == CON_MEDIT)
-          send_to_char(g, ch, " (M Edit)");
+          send_to_char_printf(g, ch, " (M Edit)");
         if (dd->connected == CON_ZEDIT)
-          send_to_char(g, ch, " (Z Edit)");
+          send_to_char_printf(g, ch, " (Z Edit)");
         if (dd->connected == CON_SEDIT)
-          send_to_char(g, ch, " (S Edit)");
+          send_to_char_printf(g, ch, " (S Edit)");
         if (dd->connected == CON_REDIT)
-          send_to_char(g, ch, " (R Edit)");
+          send_to_char_printf(g, ch, " (R Edit)");
         if (dd->connected == CON_TEDIT)
-          send_to_char(g, ch, " (T Edit)");
+          send_to_char_printf(g, ch, " (T Edit)");
         if (dd->connected == CON_TRIGEDIT)
-          send_to_char(g, ch, " (T Edit)");
+          send_to_char_printf(g, ch, " (T Edit)");
         if (dd->connected == CON_AEDIT)
-          send_to_char(g, ch, " (S Edit)");
+          send_to_char_printf(g, ch, " (S Edit)");
         if (dd->connected == CON_CEDIT)
-          send_to_char(g, ch, " (C Edit)");
+          send_to_char_printf(g, ch, " (C Edit)");
         if (dd->connected == CON_HEDIT)
-          send_to_char(g, ch, " (H Edit)");
+          send_to_char_printf(g, ch, " (H Edit)");
         if (char_prf_flagged(g, tch, PRF_DEAF))
-          send_to_char(g, ch, " (DEAF)");
+          send_to_char_printf(g, ch, " (DEAF)");
         if (char_prf_flagged(g, tch, PRF_NOTELL))
-          send_to_char(g, ch, " (NO TELL)");
+          send_to_char_printf(g, ch, " (NO TELL)");
         if (char_prf_flagged(g, tch, PRF_NOGOSS))
-          send_to_char(g, ch, " (NO OOC)");
+          send_to_char_printf(g, ch, " (NO OOC)");
         if (char_plr_flagged(tch, PLR_NOSHOUT))
-          send_to_char(g, ch, " (MUTED)");
+          send_to_char_printf(g, ch, " (MUTED)");
         if (char_prf_flagged(g, tch, PRF_HIDE))
-          send_to_char(g, ch, " (WH)");
+          send_to_char_printf(g, ch, " (WH)");
         if (char_prf_flagged(g, tch, PRF_BUILDWALK))
-          send_to_char(g, ch, " (Buildwalking)");
+          send_to_char_printf(g, ch, " (Buildwalking)");
         if (char_prf_flagged(g, tch, PRF_AFK))
-          send_to_char(g, ch, " (AFK)");
+          send_to_char_printf(g, ch, " (AFK)");
         if (char_plr_flagged(tch, PLR_FISHING) && char_get_admlevel(ch) >= ADMLVL_IMMORT)
-          send_to_char(g, ch, " (@BFISHING@n)");
+          send_to_char_printf(g, ch, " (@BFISHING@n)");
         if (char_prf_flagged(g, tch, PRF_NOWIZ))
-          send_to_char(g, ch, " (NO WIZ)");
-        send_to_char(g, ch, "@n\r\n");
+          send_to_char_printf(g, ch, " (NO WIZ)");
+        send_to_char_printf(g, ch, "@n\r\n");
       }
     }
-    send_to_char(g, ch, "\r\n");
+    send_to_char_printf(g, ch, "\r\n");
     if (short_list)
       break;
   }
 
   if (!num_can_see)
-    send_to_char(g, ch, "                            Nobody at all!\r\n");
+    send_to_char_printf(g, ch, "                            Nobody at all!\r\n");
   else if (num_can_see == 1)
-    send_to_char(g, ch, "                         One lonely character displayed.\r\n");
+    send_to_char_printf(g, ch, "                         One lonely character displayed.\r\n");
   else {
-    send_to_char(g, ch, "                           @Y%d@w characters displayed.\r\n", num_can_see);
+    send_to_char_printf(g, ch, "                           @Y%d@w characters displayed.\r\n", num_can_see);
     if (hide > 0) {
       int bam = false;
       if (hide > 1) {
         bam = true;
       }
-      send_to_char(g, ch, "                           and @Y%d@w character%s hidden.\r\n", hide, bam ? "s" : "");
+      send_to_char_printf(g, ch, "                           and @Y%d@w character%s hidden.\r\n", hide, bam ? "s" : "");
     }
   }
   if (g->circle_restrict > 0 && g->circle_restrict <= 100) {
-    send_to_char(g, ch, "                      @rThe mud has been wizlocked to lvl %d@n\r\n", g->circle_restrict);
+    send_to_char_printf(g, ch, "                      @rThe mud has been wizlocked to lvl %d@n\r\n", g->circle_restrict);
   }
   if (g->circle_restrict == 101) {
-    send_to_char(g, ch, "                      @rThe mud has been wizlocked to IMMs only.@n\r\n");
+    send_to_char_printf(g, ch, "                      @rThe mud has been wizlocked to IMMs only.@n\r\n");
   }
-  send_to_char(g, ch, "      @r{@b=================================================================@r}@n\r\n");
-  send_to_char(g, ch, "           @cHighest Logon Count Ever@D: @Y%d@w, on %s\r\n", g->HIGHPCOUNT, tmstr);
-  send_to_char(g, ch, "                        @cHighest Logon Count Today@D: @Y%d@n\r\n", g->PCOUNT);
+  send_to_char_printf(g, ch, "      @r{@b=================================================================@r}@n\r\n");
+  send_to_char_printf(g, ch, "           @cHighest Logon Count Ever@D: @Y%d@w, on %s\r\n", g->HIGHPCOUNT, tmstr);
+  send_to_char_printf(g, ch, "                        @cHighest Logon Count Today@D: @Y%d@n\r\n", g->PCOUNT);
 }
 
 #define USERS_FORMAT \
@@ -338,18 +338,18 @@ ACMD(do_users)
           rest        = skip_spaces(rest);
           break;
         default:
-          send_to_char(g, ch, "%s", USERS_FORMAT);
+          send_to_char_printf(g, ch, "%s", USERS_FORMAT);
           return;
       } /* end of switch */
 
     } else { /* endif */
-      send_to_char(g, ch, "%s", USERS_FORMAT);
+      send_to_char_printf(g, ch, "%s", USERS_FORMAT);
       return;
     }
   } /* end while (parser) */
-  send_to_char(g, ch,
-               "Num Name                 User-name            State          Idl Login    C\r\n"
-               "--- -------------------- -------------------- -------------- --- -------- -\r\n");
+  send_to_char_printf(g, ch,
+                      "Num Name                 User-name            State          Idl Login    C\r\n"
+                      "--- -------------------- -------------------- -------------- --- -------- -\r\n");
 
   for (descriptor_data *d : each_desc(g)) {
     if (desc_get_connected(d) != CON_PLAYING && playing)
@@ -412,12 +412,12 @@ ACMD(do_users)
     }
     if (desc_get_connected(d) != CON_PLAYING ||
         (desc_get_connected(d) == CON_PLAYING && char_can_see(g, ch, d->character))) {
-      send_to_char(g, ch, "%s", line);
+      send_to_char_printf(g, ch, "%s", line);
       num_can_see++;
     }
   }
 
-  send_to_char(g, ch, "\r\n%d visible sockets connected.\r\n", num_can_see);
+  send_to_char_printf(g, ch, "\r\n%d visible sockets connected.\r\n", num_can_see);
 }
 
 static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::string &arg)
@@ -425,7 +425,7 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::
   struct char_data *i;
 
   if (arg.empty()) {
-    send_to_char(g, ch, "Players in your Zone\r\n--------------------\r\n");
+    send_to_char_printf(g, ch, "Players in your Zone\r\n--------------------\r\n");
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || d->character == ch)
         continue;
@@ -435,7 +435,7 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::
         continue;
       if (room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(i)))
         continue;
-      send_to_char(g, ch, "%-20s - %s\r\n", char_get_name(i), room_get_name(g, char_get_in_room(i)));
+      send_to_char_printf(g, ch, "%-20s - %s\r\n", char_get_name(i), room_get_name(g, char_get_in_room(i)));
     }
   } else { /* print only FIRST char, not all. */
     for (char_data *tch : each_char(g)) {
@@ -445,10 +445,10 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::
         continue;
       if (!isname(arg, char_get_alias(tch)))
         continue;
-      send_to_char(g, ch, "%-25s - %s\r\n", char_get_name(tch), room_get_name(g, char_get_in_room(tch)));
+      send_to_char_printf(g, ch, "%-25s - %s\r\n", char_get_name(tch), room_get_name(g, char_get_in_room(tch)));
       return;
     }
-    send_to_char(g, ch, "Nobody around by that name.\r\n");
+    send_to_char_printf(g, ch, "Nobody around by that name.\r\n");
   }
 }
 
@@ -456,25 +456,25 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
                                   int recur)
 {
   if (num > 0)
-    send_to_char(g, ch, "O%3d. %-25s - ", num, obj_get_short_description(obj));
+    send_to_char_printf(g, ch, "O%3d. %-25s - ", num, obj_get_short_description(obj));
   else
-    send_to_char(g, ch, "%33s", " - ");
+    send_to_char_printf(g, ch, "%33s", " - ");
 
   if (obj_get_script(obj))
-    send_to_char(g, ch, "[T%d]", obj_get_proto_script(obj)->vnum);
+    send_to_char_printf(g, ch, "[T%d]", obj_get_proto_script(obj)->vnum);
 
   if (obj_get_in_room(obj) != NOWHERE)
-    send_to_char(g, ch, "[%5d] %s\r\n", obj_get_in_room(obj), room_get_name(g, obj_get_in_room(obj)));
+    send_to_char_printf(g, ch, "[%5d] %s\r\n", obj_get_in_room(obj), room_get_name(g, obj_get_in_room(obj)));
   else if (obj_get_carried_by(obj))
-    send_to_char(g, ch, "carried by %s in room [%d]\r\n", char_pers(g, obj_get_carried_by(obj), ch), char_get_in_room(obj_get_carried_by(obj)));
+    send_to_char_printf(g, ch, "carried by %s in room [%d]\r\n", char_pers(g, obj_get_carried_by(obj), ch), char_get_in_room(obj_get_carried_by(obj)));
   else if (obj_get_worn_by(obj))
-    send_to_char(g, ch, "worn by %s in room [%d]\r\n", char_pers(g, obj_get_worn_by(obj), ch), char_get_in_room(obj_get_worn_by(obj)));
+    send_to_char_printf(g, ch, "worn by %s in room [%d]\r\n", char_pers(g, obj_get_worn_by(obj), ch), char_get_in_room(obj_get_worn_by(obj)));
   else if (obj_get_in_obj(obj)) {
-    send_to_char(g, ch, "inside %s%s\r\n", obj_get_short_description(obj_get_in_obj(obj)), (recur ? ", which is" : " "));
+    send_to_char_printf(g, ch, "inside %s%s\r\n", obj_get_short_description(obj_get_in_obj(obj)), (recur ? ", which is" : " "));
     if (recur)
       print_object_location(g, 0, obj_get_in_obj(obj), ch, recur);
   } else
-    send_to_char(g, ch, "in an unknown location\r\n");
+    send_to_char_printf(g, ch, "in an unknown location\r\n");
 }
 
 static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::string &arg)
@@ -495,8 +495,8 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::
                             "@RUNKOWN@n"};
 
   if (arg.empty()) {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
-    send_to_char(g, ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
+    mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
+    send_to_char_printf(g, ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (descriptor_data *d : each_desc(g))
       if (desc_is_playing(d)) {
         if (char_get_in_room(d->character) != NOWHERE) {
@@ -527,28 +527,28 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::
         i = (d->original ? d->original : d->character);
         if (i && char_can_see(g, ch, i) && (char_get_in_room(i) != NOWHERE)) {
           if (d->original)
-            send_to_char(g, ch, "%-20s - [%5d]   %s (in %s)\r\n",
-                         char_get_name(i), char_get_in_room(d->character),
-                         room_get_name(g, char_get_in_room(d->character)), char_get_name(d->character));
+            send_to_char_printf(g, ch, "%-20s - [%5d]   %s (in %s)\r\n",
+                                char_get_name(i), char_get_in_room(d->character),
+                                room_get_name(g, char_get_in_room(d->character)), char_get_name(d->character));
           else {
-            send_to_char(g, ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), char_get_in_room(i), planet[num2], room_get_name(g, char_get_in_room(i)));
+            send_to_char_printf(g, ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), char_get_in_room(i), planet[num2], room_get_name(g, char_get_in_room(i)));
           }
         }
       }
   } else {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg.c_str());
+    mudlog_printf(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg.c_str());
     for (char_data *tch : each_char(g)) {
       if (char_can_see(g, ch, tch) && char_get_in_room(tch) != NOWHERE && isname(arg, char_get_alias(tch))) {
         found = 1;
-        send_to_char(g, ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(tch),
-                     char_get_in_room(tch), room_get_name(g, char_get_in_room(tch)));
+        send_to_char_printf(g, ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(tch),
+                            char_get_in_room(tch), room_get_name(g, char_get_in_room(tch)));
         if (char_is_npc(tch) && char_get_script(tch)) {
           if (!char_get_script(tch)->trig_list->next)
-            send_to_char(g, ch, "[T%5d] ", trig_get_vnum(g, char_get_script(tch)->trig_list));
+            send_to_char_printf(g, ch, "[T%5d] ", trig_get_vnum(g, char_get_script(tch)->trig_list));
           else
-            send_to_char(g, ch, "[TRIGS] ");
+            send_to_char_printf(g, ch, "[TRIGS] ");
         }
-        send_to_char(g, ch, "\r\n");
+        send_to_char_printf(g, ch, "\r\n");
       }
     }
     for (obj_data *k : each_obj(g))
@@ -557,9 +557,9 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::
         print_object_location(g, ++num, k, ch, true);
       }
     if (!found) {
-      send_to_char(g, ch, "Couldn't find any such thing.\r\n");
+      send_to_char_printf(g, ch, "Couldn't find any such thing.\r\n");
     } else {
-      send_to_char(g, ch, "\r\nFound %d matches.\r\n", num);
+      send_to_char_printf(g, ch, "\r\nFound %d matches.\r\n", num);
     }
   }
 }
@@ -590,11 +590,11 @@ ACMD(do_toplist)
 
   /* Read Introduction File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
-    send_to_char(g, ch, "The toplist file does not exist.");
+    send_to_char_printf(g, ch, "The toplist file does not exist.");
     return;
   }
   if (!(file = fopen(fname, "r"))) {
-    send_to_char(g, ch, "The toplist file does not exist.");
+    send_to_char_printf(g, ch, "The toplist file does not exist.");
     return;
   }
   while (!feof(file) || count < 25) {
@@ -608,117 +608,117 @@ ACMD(do_toplist)
     count++;
     *filler = '\0';
   }
-  send_to_char(g, ch, "@D-=[@BDBAT Top Lists for @REra@C %d@D]=-@n\r\n", CURRENT_ERA);
+  send_to_char_printf(g, ch, "@D-=[@BDBAT Top Lists for @REra@C %d@D]=-@n\r\n", CURRENT_ERA);
   while (x <= count) {
     switch (x) {
       /* Powerlevel Area */
       case 0:
-        send_to_char(g, ch, "       @D-@RPowerlevel@D-@n\r\n");
-        send_to_char(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "       @D-@RPowerlevel@D-@n\r\n");
+        send_to_char_printf(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 1:
-        send_to_char(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 2:
-        send_to_char(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 3:
-        send_to_char(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 4:
-        send_to_char(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       /* Ki Area */
       case 5:
-        send_to_char(g, ch, "       @D-@BKi        @D-@n\r\n");
-        send_to_char(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "       @D-@BKi        @D-@n\r\n");
+        send_to_char_printf(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 6:
-        send_to_char(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 7:
-        send_to_char(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 8:
-        send_to_char(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 9:
-        send_to_char(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       /* Stamina Area */
       case 10:
-        send_to_char(g, ch, "       @D-@GStamina   @D-@n\r\n");
-        send_to_char(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "       @D-@GStamina   @D-@n\r\n");
+        send_to_char_printf(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 11:
-        send_to_char(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 12:
-        send_to_char(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 13:
-        send_to_char(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 14:
-        send_to_char(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       /* Stamina Area */
       case 15:
-        send_to_char(g, ch, "       @D-@gZenni     @D-@n\r\n");
-        send_to_char(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "       @D-@gZenni     @D-@n\r\n");
+        send_to_char_printf(g, ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 16:
-        send_to_char(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 17:
-        send_to_char(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 18:
-        send_to_char(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       case 19:
-        send_to_char(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
+        send_to_char_printf(g, ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);
         free(title[x]);
         break;
       /* Rpp Area */
       case 20:
-        /*send_to_char(ch, "       @D-@mRPP       @D-@n\r\n");
-     send_to_char(ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);*/
+        /*send_to_char_printf(ch, "       @D-@mRPP       @D-@n\r\n");
+     send_to_char_printf(ch, "    @D|@c1@W: @C%13s@D|@n\r\n", title[x]);*/
         free(title[x]);
         break;
       case 21:
-        /*send_to_char(ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);*/
+        /*send_to_char_printf(ch, "    @D|@c2@W: @C%13s@D|@n\r\n", title[x]);*/
         free(title[x]);
         break;
       case 22:
-        /*send_to_char(ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);*/
+        /*send_to_char_printf(ch, "    @D|@c3@W: @C%13s@D|@n\r\n", title[x]);*/
         free(title[x]);
         break;
       case 23:
-        /*send_to_char(ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);*/
+        /*send_to_char_printf(ch, "    @D|@c4@W: @C%13s@D|@n\r\n", title[x]);*/
         free(title[x]);
         break;
       case 24:
-        /*send_to_char(ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);*/
+        /*send_to_char_printf(ch, "    @D|@c5@W: @C%13s@D|@n\r\n", title[x]);*/
         free(title[x]);
         break;
     }
@@ -745,24 +745,24 @@ ACMD(do_whois)
   argument                 = skip_spaces(argument);
 
   if (argument.empty()) {
-    send_to_char(g, ch, "Who?\r\n");
+    send_to_char_printf(g, ch, "Who?\r\n");
   } else {
     victim = new char_data();
     clear_char(victim);
     char_make_player_specials(victim);
     if (load_char(g, std::string(argument).c_str(), victim) >= 0) {
       clan = false;
-      send_to_char(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
+      send_to_char_printf(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
       if (char_get_admlevel(victim) >= ADMLVL_IMMORT) {
-        send_to_char(g, ch, "@cName     @D: @G%s\r\n", char_get_name(victim));
-        send_to_char(g, ch, "@cImm Level@D: @G%s\r\n", immlevels[char_get_admlevel(victim)]);
-        send_to_char(g, ch, "@cTitle    @D: @G%s\r\n", char_get_title(victim));
+        send_to_char_printf(g, ch, "@cName     @D: @G%s\r\n", char_get_name(victim));
+        send_to_char_printf(g, ch, "@cImm Level@D: @G%s\r\n", immlevels[char_get_admlevel(victim)]);
+        send_to_char_printf(g, ch, "@cTitle    @D: @G%s\r\n", char_get_title(victim));
       } else {
-        send_to_char(g, ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), char_sensei_name(victim), char_true_race_name(victim), char_get_title(victim), clan ? buf : "None.");
+        send_to_char_printf(g, ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), char_sensei_name(victim), char_true_race_name(victim), char_get_title(victim), clan ? buf : "None.");
       }
-      send_to_char(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
+      send_to_char_printf(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     } else {
-      send_to_char(g, ch, "There is no such player.\r\n");
+      send_to_char_printf(g, ch, "There is no such player.\r\n");
     }
     free_char(g, victim);
   }

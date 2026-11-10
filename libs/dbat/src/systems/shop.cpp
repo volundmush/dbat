@@ -320,7 +320,7 @@ static int pop(struct stack_data *stack)
   if (stack->len > 0)
     return (stack->data[--stack->len]);
   else {
-    mud_log("SYSERR: Illegal expression %d in shop keyword list.", stack->len);
+    mud_log_printf("SYSERR: Illegal expression %d in shop keyword list.", stack->len);
     return (0);
   }
 }
@@ -389,7 +389,7 @@ static int evaluate_expression(struct obj_data *obj, const char *expr)
 
         if (temp == OPER_CLOSE_PAREN) {
           if ((temp = pop(&ops)) != OPER_OPEN_PAREN) {
-            mud_log("SYSERR: Illegal parenthesis in shop keyword expression.");
+            mud_log_printf("SYSERR: Illegal parenthesis in shop keyword expression.");
             return (false);
           }
         } else
@@ -402,7 +402,7 @@ static int evaluate_expression(struct obj_data *obj, const char *expr)
     evaluate_operation(&ops, &vals);
   temp = pop(&vals);
   if (top(&vals) != -1) {
-    mud_log("SYSERR: Extra operands left on shop keyword expression stack.");
+    mud_log_printf("SYSERR: Extra operands left on shop keyword expression stack.");
     return (false);
   }
   return (temp);
@@ -718,12 +718,12 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   act(g, "@c$N@W hands @C$n@W @G$p@W for a moment and let's $m examine it before taking it back.@n", true, ch, obj, keeper, TO_ROOM);
 
   if (!char_get_skill(ch, SKILL_APPRAISE)) {
-    send_to_char(g, ch, "You are unskilled at appraising.\r\n");
+    send_to_char_printf(g, ch, "You are unskilled at appraising.\r\n");
     return;
   }
   improve_skill(g, ch, SKILL_APPRAISE, 1);
   if (char_get_skill(ch, SKILL_APPRAISE) < rand_number(g, 1, 101)) {
-    send_to_char(g, ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj_get_short_description(obj));
+    send_to_char_printf(g, ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj_get_short_description(obj));
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
@@ -732,72 +732,72 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
-  send_to_char(g, ch, "@c---------------------------------------------------------------@n\n");
-  send_to_char(g, ch, "@GItem Name   @W: @w%s@n\n", obj_get_short_description(obj));
-  send_to_char(g, ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(obj_get_cost(obj)));
-  send_to_char(g, ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
+  send_to_char_printf(g, ch, "@c---------------------------------------------------------------@n\n");
+  send_to_char_printf(g, ch, "@GItem Name   @W: @w%s@n\n", obj_get_short_description(obj));
+  send_to_char_printf(g, ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(obj_get_cost(obj)));
+  send_to_char_printf(g, ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
   if (obj_get_value(obj, VAL_ALL_HEALTH) >= 100) {
-    send_to_char(g, ch, "@GCondition   @W: @C%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+    send_to_char_printf(g, ch, "@GCondition   @W: @C%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
   } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 50) {
-    send_to_char(g, ch, "@GCondition   @W: @y%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+    send_to_char_printf(g, ch, "@GCondition   @W: @y%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
   } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 1) {
-    send_to_char(g, ch, "@GCondition   @W: @r%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+    send_to_char_printf(g, ch, "@GCondition   @W: @r%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
   } else {
-    send_to_char(g, ch, "@GCondition   @W: @D%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+    send_to_char_printf(g, ch, "@GCondition   @W: @D%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
   }
-  send_to_char(g, ch, "@GItem Size   @W:@w %s@n\n", size_names[obj_get_size(obj)]);
-  send_to_char(g, ch, "@GItem Weight @W: @w%s@n\n", add_commas(obj_get_weight(obj)));
+  send_to_char_printf(g, ch, "@GItem Size   @W:@w %s@n\n", size_names[obj_get_size(obj)]);
+  send_to_char_printf(g, ch, "@GItem Weight @W: @w%s@n\n", add_commas(obj_get_weight(obj)));
   if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "GToken Slots  @W: @m0/1@n\n");
+    send_to_char_printf(g, ch, "GToken Slots  @W: @m0/1@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "GToken Slots  @W: @m1/1@n\n");
+    send_to_char_printf(g, ch, "GToken Slots  @W: @m1/1@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "GToken Slots  @W: @m0/2@n\n");
+    send_to_char_printf(g, ch, "GToken Slots  @W: @m0/2@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "GToken Slots  @W: @m1/2@n\n");
+    send_to_char_printf(g, ch, "GToken Slots  @W: @m1/2@n\n");
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "GToken Slots  @W: @m2/2@n\n");
+    send_to_char_printf(g, ch, "GToken Slots  @W: @m2/2@n\n");
   }
   char bits[MAX_STRING_LENGTH];
   sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
   search_replace(bits, "TAKE", "");
-  send_to_char(g, ch, "@GWear Loc.   @W:@w%s\n", bits);
+  send_to_char_printf(g, ch, "@GWear Loc.   @W:@w%s\n", bits);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
     if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
-      send_to_char(g, ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
+      send_to_char_printf(g, ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
-      send_to_char(g, ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
+      send_to_char_printf(g, ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
-      send_to_char(g, ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
+      send_to_char_printf(g, ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
-      send_to_char(g, ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
+      send_to_char_printf(g, ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
     } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
-      send_to_char(g, ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
+      send_to_char_printf(g, ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
     }
   }
-  send_to_char(g, ch, "@GItem Bonuses@W:@w");
+  send_to_char_printf(g, ch, "@GItem Bonuses@W:@w");
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj_get_affected(obj)[i].modifier) {
       sprinttype(obj_get_affected(obj)[i].location, apply_types, buf, sizeof(buf));
-      send_to_char(g, ch, "%s %+d to %s", found++ ? "," : "", obj_get_affected(obj)[i].modifier, buf);
+      send_to_char_printf(g, ch, "%s %+d to %s", found++ ? "," : "", obj_get_affected(obj)[i].modifier, buf);
       switch (obj_get_affected(obj)[i].location) {
         case APPLY_FEAT:
-          send_to_char(g, ch, " (%s)", g->feat_list[obj_get_affected(obj)[i].specific].name);
+          send_to_char_printf(g, ch, " (%s)", g->feat_list[obj_get_affected(obj)[i].specific].name);
           break;
         case APPLY_SKILL:
-          send_to_char(g, ch, " (%s)", g->spell_info[obj_get_affected(obj)[i].specific].name);
+          send_to_char_printf(g, ch, " (%s)", g->spell_info[obj_get_affected(obj)[i].specific].name);
           break;
       }
     }
   }
   if (!found)
-    send_to_char(g, ch, " None@n");
+    send_to_char_printf(g, ch, " None@n");
   else
-    send_to_char(g, ch, "@n");
+    send_to_char_printf(g, ch, "@n");
   char buf2[MAX_STRING_LENGTH];
   sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
-  send_to_char(g, ch, "\n@GSpecial     @W:@w %s", buf2);
-  send_to_char(g, ch, "\n@c---------------------------------------------------------------@n\n");
+  send_to_char_printf(g, ch, "\n@GSpecial     @W:@w %s", buf2);
+  send_to_char_printf(g, ch, "\n@c---------------------------------------------------------------@n\n");
 }
 
 static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
@@ -848,11 +848,11 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
     }
   }
   if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
-    send_to_char(g, ch, "%s: You can't carry any more items.\r\n", fname(obj_get_name(obj)));
+    send_to_char_printf(g, ch, "%s: You can't carry any more items.\r\n", fname(obj_get_name(obj)));
     return;
   }
   if (char_get_carry_weight(ch) + obj_get_weight(obj) > getMaxCarryWeight(g, ch)) {
-    send_to_char(g, ch, "%s: You can't carry that much weight.\r\n", fname(obj_get_name(obj)));
+    send_to_char_printf(g, ch, "%s: You can't carry that much weight.\r\n", fname(obj_get_name(obj)));
     return;
   }
   while (obj && (char_get_gold(ch) >= buy_price(g, obj, shop, keeper, ch) || char_adm_flagged(ch, ADM_MONEY)) && char_get_carry_items(ch) < char_can_carry_n(ch) && bought < buynum && char_get_carry_weight(ch) + obj_get_weight(obj) <= getMaxCarryWeight(g, ch)) {
@@ -877,8 +877,8 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
     if (!char_adm_flagged(ch, ADM_MONEY))
       char_set_gold(ch, char_get_gold(ch) - (charged));
     else {
-      send_to_imm(g, "IMM PURCHASE: %s has purchased %s for free.", char_get_name(ch), obj_get_short_description(obj));
-      log_imm_action(g, "IMM PURCHASE: %s has purchased %s for free.", char_get_name(ch), obj_get_short_description(obj));
+      send_to_imm_printf(g, "IMM PURCHASE: %s has purchased %s for free.", char_get_name(ch), obj_get_short_description(obj));
+      log_imm_action_printf(g, "IMM PURCHASE: %s has purchased %s for free.", char_get_name(ch), obj_get_short_description(obj));
     }
 
     last_obj = obj;
@@ -913,7 +913,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   snprintf(tempbuf, sizeof(tempbuf), shop->message_buy.c_str(), char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
 
-  send_to_char(g, ch, "You now have %s.\r\n", tempstr);
+  send_to_char_printf(g, ch, "You now have %s.\r\n", tempstr);
 
   if (shop_uses_bank(shop))
     if (char_get_gold(keeper) > MAX_OUTSIDE_BANK) {
@@ -954,7 +954,7 @@ static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char
       snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_USED_WANDSTAFF);
       break;
     default:
-      mud_log("SYSERR: Illegal return value of %d from trade_with() (%s)", result, __FILE__); /* Someone might rename it... */
+      mud_log_printf("SYSERR: Illegal return value of %d from trade_with() (%s)", result, __FILE__); /* Someone might rename it... */
       snprintf(buf, sizeof(buf), "%s An error has occurred.", char_get_name(ch));
       break;
   }
@@ -1092,12 +1092,12 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
   snprintf(tempbuf, sizeof(tempbuf), shop->message_sell.c_str(), char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf, g->cmd_tell, 0);
 
-  send_to_char(g, ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt));
+  send_to_char_printf(g, ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt));
   if (char_get_gold(ch) + goldamt > char_gold_carry(ch)) {
     goldamt = (char_get_gold(ch) + goldamt) - char_gold_carry(ch);
     char_set_gold(ch, char_gold_carry(ch));
     char_set_bank_gold(ch, char_get_bank_gold(ch) + (goldamt));
-    send_to_char(g, ch, "You couldn't hold all of the money. The rest was deposited for you.\r\n");
+    send_to_char_printf(g, ch, "You couldn't hold all of the money. The rest was deposited for you.\r\n");
   } else {
     char_set_gold(ch, char_get_gold(ch) + (goldamt));
   }
@@ -1222,9 +1222,9 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
       }
   lindex++;
   if (!last_obj) /* we actually have nothing in our list for sale, period */
-    send_to_char(g, ch, "Currently, there is nothing for sale.\r\n");
+    send_to_char_printf(g, ch, "Currently, there is nothing for sale.\r\n");
   else if (*name && !found) /* nothing the char was looking for was found */
-    send_to_char(g, ch, "Presently, none of those are for sale.\r\n");
+    send_to_char_printf(g, ch, "Presently, none of those are for sale.\r\n");
   else {
     char zen[80];
     if (!*name || isname(name, obj_get_name(last_obj))) /* show last obj */
@@ -1235,7 +1235,7 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
       sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(char_get_gold(ch)));
       strncat(buf, zen, sizeof(buf) - len - 1);
     }
-    send_to_char(g, ch, "%s", buf);
+    send_to_char_printf(g, ch, "%s", buf);
   }
 }
 
@@ -1311,7 +1311,7 @@ static bool add_to_list(GameWorld *g, shop_vnum vnum, std::vector<shop_buy_data>
 {
   if (*val != NOTHING && *val >= 0) { /* necessary after changing to unsigned v/rnums -- Welcor */
     if (type == LIST_TRADE && *val >= NUM_ITEM_TYPES) {
-      mud_log("SYSERR: Shop #%d buys item type %d, which doesn't exist; ignoring it.", vnum, *val);
+      mud_log_printf("SYSERR: Shop #%d buys item type %d, which doesn't exist; ignoring it.", vnum, *val);
       return (false);
     }
     if (list.size() < MAX_SHOP_OBJ) {
@@ -1332,7 +1332,7 @@ static void end_read_list(const std::vector<shop_buy_data> &list, int error)
 {
   /* The count includes the -1 that ended the old lists. */
   if (error)
-    mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.hpp to %d", (int)list.size() + 1 + error);
+    mud_log_printf("SYSERR: Raise MAX_SHOP_OBJ constant in shop.hpp to %d", (int)list.size() + 1 + error);
 }
 
 static void read_line(GameWorld *g, shop_vnum vnum, FILE *shop_f, const char *string, void *data)
@@ -1340,7 +1340,7 @@ static void read_line(GameWorld *g, shop_vnum vnum, FILE *shop_f, const char *st
   char buf[READ_SIZE];
 
   if (!get_line(shop_f, buf) || !sscanf(buf, string, data)) {
-    mud_log("SYSERR: Error in shop #%d, near '%s' with '%s'", vnum, buf, string);
+    mud_log_printf("SYSERR: Error in shop #%d, near '%s' with '%s'", vnum, buf, string);
     exit(1);
   }
 }
@@ -1428,7 +1428,7 @@ static std::string read_shop_message(enum shop_message mnum, room_vnum shr, FILE
     return shop_default_msgs[mnum];
 
   if ((problem = npc_msg_format_problem(text.c_str(), mnum == SHOP_MSG_BUY || mnum == SHOP_MSG_SELL))) {
-    mud_log("SYSERR: Shop #%d message #%d: %s; using the default.", shr, mnum, problem);
+    mud_log_printf("SYSERR: Shop #%d message #%d: %s; using the default.", shr, mnum, problem);
     return shop_default_msgs[mnum];
   }
   return text;
@@ -1446,7 +1446,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
   while (!done) {
     buf = fread_string(shop_f, buf2);
     if (!buf) { /* an empty record: nothing to read, and no end of file either */
-      mud_log("SYSERR: Empty record in %s; skipping it.", buf2);
+      mud_log_printf("SYSERR: Empty record in %s; skipping it.", buf2);
       continue;
     }
     if (*buf == '#') { /* New shop */
@@ -1485,7 +1485,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
         if (!p || !*p)
           break;
         if (sscanf(p, "%d", &count) != 1) {
-          mud_log("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
+          mud_log_printf("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
           break;
         }
         shop_get_with_who(shop)
@@ -1514,7 +1514,7 @@ void boot_the_shops(GameWorld *g, FILE *shop_f, char *filename, int rec_count)
       shop_set_lastsort(shop, 0);
       shop_set_func(shop, nullptr);
       if (g->shops.find(vnum))
-        mud_log("SYSERR: Shop #%d is defined twice; ignoring the second one.", vnum);
+        mud_log_printf("SYSERR: Shop #%d is defined twice; ignoring the second one.", vnum);
       else
         g->shops.insert(vnum, std::move(made));
     } else {
@@ -1608,7 +1608,7 @@ static void list_all_shops(GameWorld *g, struct char_data *ch)
                     customer_string(g, shop, false));
   }
 
-  send_to_char(g, ch, "%s", buf);
+  send_to_char_printf(g, ch, "%s", buf);
 }
 
 static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_data *shop)
@@ -1623,9 +1623,9 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
     if (other == shop)
       break;
   }
-  send_to_char(g, ch, "Vnum:       [%5d], Rnum: [%5d]\r\n", shop_get_vnum(shop), place);
+  send_to_char_printf(g, ch, "Vnum:       [%5d], Rnum: [%5d]\r\n", shop_get_vnum(shop), place);
 
-  send_to_char(g, ch, "Rooms:      ");
+  send_to_char_printf(g, ch, "Rooms:      ");
   column = 12; /* ^^^ strlen ^^^ */
   for (sindex = 0; sindex < (int)shop_rooms(shop).size(); sindex++) {
     char buf1[128];
@@ -1633,7 +1633,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
     room_vnum temp;
 
     if (sindex) {
-      send_to_char(g, ch, ", ");
+      send_to_char_printf(g, ch, ", ");
       column += 2;
     }
 
@@ -1644,41 +1644,41 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
-      send_to_char(g, ch, "\r\n            ");
+      send_to_char_printf(g, ch, "\r\n            ");
       /* 12 is to line up with "Rooms:" printed first, and spaces above. */
       column = 12;
     }
 
-    if (!send_to_char(g, ch, "%s", buf1))
+    if (!send_to_char_printf(g, ch, "%s", buf1))
       return;
     column += linelen;
   }
   if (!sindex)
-    send_to_char(g, ch, "Rooms:      None!");
+    send_to_char_printf(g, ch, "Rooms:      None!");
 
-  send_to_char(g, ch, "\r\nShopkeeper: ");
+  send_to_char_printf(g, ch, "\r\nShopkeeper: ");
   if (shop_get_keeper(shop) != NOBODY) {
-    send_to_char(g, ch, "%s (#%d), Special Function: %s\r\n",
-                 char_get_name(mob_proto_of(g, shop_get_keeper(shop))),
-                 mob_index_of(g, shop_get_keeper(shop))->vnum,
-                 YESNO(shop_get_func(shop)));
+    send_to_char_printf(g, ch, "%s (#%d), Special Function: %s\r\n",
+                        char_get_name(mob_proto_of(g, shop_get_keeper(shop))),
+                        mob_index_of(g, shop_get_keeper(shop))->vnum,
+                        YESNO(shop_get_func(shop)));
 
     if ((k = get_char_num(g, shop_get_keeper(shop))))
-      send_to_char(g, ch, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
-                   char_get_gold(k), shop_get_bank(shop), char_get_gold(k) + shop_get_bank(shop));
+      send_to_char_printf(g, ch, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
+                          char_get_gold(k), shop_get_bank(shop), char_get_gold(k) + shop_get_bank(shop));
   } else
-    send_to_char(g, ch, "<NONE>\r\n");
+    send_to_char_printf(g, ch, "<NONE>\r\n");
 
-  send_to_char(g, ch, "Customers:  %s\r\n", (ptrsave = customer_string(g, shop, true)) ? ptrsave : "None");
+  send_to_char_printf(g, ch, "Customers:  %s\r\n", (ptrsave = customer_string(g, shop, true)) ? ptrsave : "None");
 
-  send_to_char(g, ch, "Produces:   ");
+  send_to_char_printf(g, ch, "Produces:   ");
   column = 12; /* ^^^ strlen ^^^ */
   for (sindex = 0; sindex < (int)shop_products(shop).size(); sindex++) {
     char buf1[128];
     int linelen;
 
     if (sindex) {
-      send_to_char(g, ch, ", ");
+      send_to_char_printf(g, ch, ", ");
       column += 2;
     }
     linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
@@ -1687,26 +1687,26 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
-      send_to_char(g, ch, "\r\n            ");
+      send_to_char_printf(g, ch, "\r\n            ");
       /* 12 is to line up with "Produces:" printed first, and spaces above. */
       column = 12;
     }
 
-    if (!send_to_char(g, ch, "%s", buf1))
+    if (!send_to_char_printf(g, ch, "%s", buf1))
       return;
     column += linelen;
   }
   if (!sindex)
-    send_to_char(g, ch, "Produces:   Nothing!");
+    send_to_char_printf(g, ch, "Produces:   Nothing!");
 
-  send_to_char(g, ch, "\r\nBuys:       ");
+  send_to_char_printf(g, ch, "\r\nBuys:       ");
   column = 12; /* ^^^ strlen ^^^ */
   for (sindex = 0; sindex < (int)shop_buy_types(shop).size(); sindex++) {
     char buf1[128];
     size_t linelen;
 
     if (sindex) {
-      send_to_char(g, ch, ", ");
+      send_to_char_printf(g, ch, ", ");
       column += 2;
     }
 
@@ -1717,27 +1717,27 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
-      send_to_char(g, ch, "\r\n            ");
+      send_to_char_printf(g, ch, "\r\n            ");
       /* 12 is to line up with "Buys:" printed first, and spaces above. */
       column = 12;
     }
 
-    if (!send_to_char(g, ch, "%s", buf1))
+    if (!send_to_char_printf(g, ch, "%s", buf1))
       return;
     column += linelen;
   }
   if (!sindex)
-    send_to_char(g, ch, "Buys:       Nothing!");
+    send_to_char_printf(g, ch, "Buys:       Nothing!");
 
-  send_to_char(g, ch, "\r\nBuy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]\r\n",
-               shop_get_profit_sell(shop), shop_get_profit_buy(shop), shop_get_open1(shop),
-               shop_get_close1(shop), shop_get_open2(shop), shop_get_close2(shop));
+  send_to_char_printf(g, ch, "\r\nBuy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]\r\n",
+                      shop_get_profit_sell(shop), shop_get_profit_buy(shop), shop_get_open1(shop),
+                      shop_get_close1(shop), shop_get_open2(shop), shop_get_close2(shop));
 
   /* Need a local buffer. */
   {
     char buf1[128];
     sprintbit(shop_get_bitvector(shop), shop_bits, buf1, sizeof(buf1));
-    send_to_char(g, ch, "Bits:       %s\r\n", buf1);
+    send_to_char_printf(g, ch, "Bits:       %s\r\n", buf1);
   }
 }
 
@@ -1751,7 +1751,7 @@ void show_shops(GameWorld *g, struct char_data *ch, char *arg)
     if (!strcasecmp(arg, ".")) {
       shop = find_first(g->shops.all(), [&](shop_data *s) { return ok_shop_room(g, s, char_get_in_room(ch)); });
       if (!shop) {
-        send_to_char(g, ch, "This isn't a shop!\r\n");
+        send_to_char_printf(g, ch, "This isn't a shop!\r\n");
         return;
       }
     } else if (is_number(arg)) {
@@ -1761,7 +1761,7 @@ void show_shops(GameWorld *g, struct char_data *ch, char *arg)
       shop = nullptr;
 
     if (!shop) {
-      send_to_char(g, ch, "Illegal shop number.\r\n");
+      send_to_char_printf(g, ch, "Illegal shop number.\r\n");
       return;
     }
     list_detailed_shop(g, ch, shop);

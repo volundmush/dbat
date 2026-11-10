@@ -5,7 +5,7 @@
 // variables
 
 // functions
-void log_imm_action(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void log_imm_action_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void hint_system(GameWorld *g, struct char_data *ch, int num);
 bool dball_count(GameWorld *g, struct char_data *ch);
 void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj);

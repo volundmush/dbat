@@ -73,12 +73,12 @@ struct event *event_create(GameWorld *g, EVENTFUNC(*func), void *event_obj, void
 void event_cancel(GameWorld *g, struct event *event)
 {
   if (!event) {
-    mud_log("SYSERR:  Attempted to cancel a NULL event");
+    mud_log_printf("SYSERR:  Attempted to cancel a NULL event");
     return;
   }
 
   if (!event->q_el) {
-    mud_log("SYSERR:  Attempted to cancel a non-NULL unqueued event, freeing anyway");
+    mud_log_printf("SYSERR:  Attempted to cancel a non-NULL unqueued event, freeing anyway");
   } else
     queue_deq(g->event_q, event->q_el);
 
@@ -95,7 +95,7 @@ void event_process(GameWorld *g)
 
   while ((long)g->pulse >= queue_key(g, g->event_q)) {
     if (!(the_event = (struct event *)queue_head(g, g->event_q))) {
-      mud_log("SYSERR: Attempt to get a NULL event");
+      mud_log_printf("SYSERR: Attempt to get a NULL event");
       return;
     }
 

@@ -338,7 +338,7 @@ const char *money_desc(int amount)
   };
 
   if (amount <= 0) {
-    mud_log("SYSERR: Try to create negative or 0 money (%d).", amount);
+    mud_log_printf("SYSERR: Try to create negative or 0 money (%d).", amount);
     return (nullptr);
   }
 
@@ -357,7 +357,7 @@ struct obj_data *create_money(GameWorld *g, int amount)
   int y;
 
   if (amount <= 0) {
-    mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
+    mud_log_printf("SYSERR: Try to create negative or 0 money. (%d)", amount);
     return (nullptr);
   }
   obj = create_obj(g);

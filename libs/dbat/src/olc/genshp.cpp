@@ -76,7 +76,7 @@ struct shop_data *add_shop(GameWorld *g, struct shop_data *nshp)
   if (rznum != nullptr)
     add_to_save_list(g, rznum->number, SL_SHP);
   else
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
+    mudlog_printf(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
   return shop;
 }
@@ -92,17 +92,17 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
   struct shop_data *shop;
 
   if (!zone_num) {
-    mud_log("SYSERR: no zone given.");
+    mud_log_printf("SYSERR: no zone given.");
     return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_num->number);
   if (!(shop_file = atomic_open(&af, fname, false))) {
-    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
+    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
     return false;
   }
   if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
-    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
+    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
     atomic_abort(&af);
     return false;
   }
@@ -191,7 +191,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
   if (in_save_list(g, zone_num->number, SL_SHP)) {
     remove_from_save_list(g, zone_num->number, SL_SHP);
     create_world_index(g, zone_num->number, "shp");
-    mud_log("GenOLC: save_shops: Saving shops '%s'", oldname);
+    mud_log_printf("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
   return true;
 }

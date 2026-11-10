@@ -56,7 +56,7 @@ ACMD(do_pbarrage)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -127,7 +127,7 @@ ACMD(do_pbarrage)
           act(g, "@C$N@W manages to dodge your psychic barrage, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W psychic barrage, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W psychic barrage, letting it slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
+          send_to_room_printf(g, char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(g, ch, vict, 0, 31, skill, SKILL_PBARRAGE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -231,7 +231,7 @@ ACMD(do_pbarrage)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 31, skill, attperc);
@@ -242,7 +242,7 @@ ACMD(do_pbarrage)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -275,7 +275,7 @@ ACMD(do_scatter)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -361,7 +361,7 @@ ACMD(do_scatter)
           act(g, "@C$N@W manages to dodge your scatter shot kiballs, letting them slam into the surroundings!@n", false, ch, nullptr, vict, TO_CHAR);
           act(g, "@WYou dodge @C$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", false, ch, nullptr, vict, TO_VICT);
           act(g, "@C$N@W manages to dodge @c$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", false, ch, nullptr, vict, TO_NOTVICT);
-          send_to_room(g, char_get_in_room(vict), "@wBright explosions erupts from the impacts!\r\n");
+          send_to_room_printf(g, char_get_in_room(vict), "@wBright explosions erupts from the impacts!\r\n");
 
           dodge_ki(g, ch, vict, 0, 35, skill, SKILL_SCATTER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -456,7 +456,7 @@ ACMD(do_scatter)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 35, skill, attperc);
@@ -467,7 +467,7 @@ ACMD(do_scatter)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -541,7 +541,7 @@ ACMD(do_kakusanha)
     count += 1;
   }
   if (count <= 0) {
-    send_to_char(g, ch, "There is no one worth targeting around.\r\n");
+    send_to_char_printf(g, ch, "There is no one worth targeting around.\r\n");
     return;
   } /* No one worth targeting */
   else {
@@ -620,8 +620,8 @@ ACMD(do_kakusanha)
     } /* Hitting targets! */
 
     if (count < 5 && !room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
-      send_to_room(g, char_get_in_room(ch), "The rest of the beams slam into the ground!@n\r\n");
-      send_to_room(g, char_get_in_room(ch), "@wBright explosions erupt from the impacts!\r\n");
+      send_to_room_printf(g, char_get_in_room(ch), "The rest of the beams slam into the ground!@n\r\n");
+      send_to_room_printf(g, char_get_in_room(ch), "@wBright explosions erupt from the impacts!\r\n");
 
       if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
         impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
@@ -764,7 +764,7 @@ ACMD(do_renzo)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
   if (!tech_handle_targeting(g, ch, arg, &vict, &obj)) return;
@@ -830,9 +830,9 @@ ACMD(do_renzo)
       master_pass = 2;
 
     if (master_pass == 1)
-      send_to_char(g, ch, "@GYour mastery of the technique has made your use of energy more efficient!@n\r\n");
+      send_to_char_printf(g, ch, "@GYour mastery of the technique has made your use of energy more efficient!@n\r\n");
     else if (master_pass == 2)
-      send_to_char(g, ch, "@GYour mastery of the technique has made your use of energy as efficient as possible!@n\r\n");
+      send_to_char_printf(g, ch, "@GYour mastery of the technique has made your use of energy as efficient as possible!@n\r\n");
 
     /*=============================*/
 
@@ -1007,7 +1007,7 @@ ACMD(do_renzo)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 12, skill, attperc);
@@ -1018,7 +1018,7 @@ ACMD(do_renzo)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }
@@ -1051,7 +1051,7 @@ ACMD(do_tsuihidan)
   }
 
   if (arg.empty() && !char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "Direct it at who?\r\n");
+    send_to_char_printf(g, ch, "Direct it at who?\r\n");
     return;
   }
 
@@ -1250,7 +1250,7 @@ ACMD(do_tsuihidan)
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
+      send_to_char_printf(g, ch, "It is broken already!\r\n");
       return;
     }
     dmg = damtype(g, ch, 11, skill, attperc);
@@ -1261,7 +1261,7 @@ ACMD(do_tsuihidan)
     pcost(g, ch, attperc, 0);
 
   } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
+    send_to_char_printf(g, ch, "Error! Please report.\r\n");
     return;
   }
 }

@@ -56,7 +56,7 @@ ACMD(do_oasis_trigedit)
    */
   argument = skip_spaces(argument);
   if (argument.empty() || !isdigit(argument[0])) {
-    send_to_char(g, ch, "Specify a trigger VNUM to edit.\r\n");
+    send_to_char_printf(g, ch, "Specify a trigger VNUM to edit.\r\n");
     return;
   }
 
@@ -68,8 +68,8 @@ ACMD(do_oasis_trigedit)
   for (descriptor_data *dd : each_desc(g)) {
     if (desc_get_connected(dd) == CON_TRIGEDIT) {
       if (dd->olc && OLC_NUM(dd) == number) {
-        send_to_char(g, ch, "That trigger is currently being edited by %s.\r\n",
-                     char_get_name(dd->character));
+        send_to_char_printf(g, ch, "That trigger is currently being edited by %s.\r\n",
+                            char_get_name(dd->character));
         return;
       }
     }
@@ -79,8 +79,8 @@ ACMD(do_oasis_trigedit)
    * Give descriptor an OLC structure.
    */
   if (d->olc) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
-           "SYSERR: do_oasis_trigedit: Player already had olc structure.");
+    mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true,
+                  "SYSERR: do_oasis_trigedit: Player already had olc structure.");
     delete d->olc;
   }
   d->olc = new oasis_olc_data();
@@ -89,7 +89,7 @@ ACMD(do_oasis_trigedit)
    * Find the zone.
    */
   if ((OLC_ZNUM(d) = find_zone_by_thing(g, number)) == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
+    send_to_char_printf(g, ch, "Sorry, there is no zone for that number!\r\n");
     delete d->olc;
     d->olc = nullptr;
     return;
@@ -124,8 +124,8 @@ ACMD(do_oasis_trigedit)
   act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
-  mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
+  mudlog_printf(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",
+                char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
 /* called when a mob or object is being saved to disk, so its script can */
@@ -141,7 +141,7 @@ void script_save_to_disk(FILE *fp, void *item, int type)
   else if (type == WLD_TRIGGER)
     t = room_get_proto_script((struct room_data *)item);
   else {
-    mud_log("SYSERR: Invalid type passed to script_save_to_disk()");
+    mud_log_printf("SYSERR: Invalid type passed to script_save_to_disk()");
     return;
   }
 
@@ -221,26 +221,26 @@ static void trigedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 
   clear_screen(g, d);
 
-  write_to_output(g, d,
-                  "Trigger Editor [@c%d@n]\r\n\r\n"
-                  "@g1@n) Name         : @y%s\r\n"
-                  "@g2@n) Intended for : @y%s\r\n"
-                  "@g3@n) Trigger types: @y%s\r\n"
-                  "@g4@n) Numeric Arg  : @y%d\r\n"
-                  "@g5@n) Arguments    : @y%s\r\n"
-                  "@g6@n) Commands:\r\n@c%s\r\n"
-                  "@gW@n) Copy Trigger\r\n"
-                  "@gZ@n) Wiznet\r\n"
-                  "@gQ@n) Quit\r\n"
-                  "Enter Choice :",
+  write_to_output_printf(g, d,
+                         "Trigger Editor [@c%d@n]\r\n\r\n"
+                         "@g1@n) Name         : @y%s\r\n"
+                         "@g2@n) Intended for : @y%s\r\n"
+                         "@g3@n) Trigger types: @y%s\r\n"
+                         "@g4@n) Numeric Arg  : @y%d\r\n"
+                         "@g5@n) Arguments    : @y%s\r\n"
+                         "@g6@n) Commands:\r\n@c%s\r\n"
+                         "@gW@n) Copy Trigger\r\n"
+                         "@gZ@n) Wiznet\r\n"
+                         "@gQ@n) Quit\r\n"
+                         "Enter Choice :",
 
-                  OLC_NUM(d),              /* vnum on the title line */
-                  trig->name.c_str(),      /* name                   */
-                  attach_type,             /* attach type            */
-                  trgtypes,                /* greet/drop/etc         */
-                  trig->narg,              /* numeric arg            */
-                  trig->arglist.c_str(),   /* strict arg             */
-                  OLC_STORAGE(d).c_str()); /* the command list       */
+                         OLC_NUM(d),              /* vnum on the title line */
+                         trig->name.c_str(),      /* name                   */
+                         attach_type,             /* attach type            */
+                         trgtypes,                /* greet/drop/etc         */
+                         trig->narg,              /* numeric arg            */
+                         trig->arglist.c_str(),   /* strict arg             */
+                         OLC_STORAGE(d).c_str()); /* the command list       */
 
   OLC_MODE(d) = TRIGEDIT_MAIN_MENU;
 }
@@ -267,11 +267,11 @@ static void trigedit_disp_types(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
 
   for (i = 0; i < NUM_TRIG_TYPE_FLAGS; i++) {
-    write_to_output(g, d, "@g%2d@n) %-20.20s  %s", i + 1, types[i],
-                    !(++columns % 2) ? "\r\n" : "");
+    write_to_output_printf(g, d, "@g%2d@n) %-20.20s  %s", i + 1, types[i],
+                           !(++columns % 2) ? "\r\n" : "");
   }
   sprintbit(OLC_TRIG(d)->trigger_type, types, bitbuf, sizeof(bitbuf));
-  write_to_output(g, d, "\r\nCurrent types : @c%s@n\r\nEnter type (0 to quit) : ", bitbuf);
+  write_to_output_printf(g, d, "\r\nCurrent types : @c%s@n\r\nEnter type (0 to quit) : ", bitbuf);
 }
 
 void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
@@ -285,20 +285,20 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'q':
           if (OLC_VAL(d)) { /* Anything been changed? */
             if (!OLC_TRIG(d)->trigger_type) {
-              write_to_output(g, d, "Invalid Trigger Type! Answer a to abort quit!\r\n");
+              write_to_output_printf(g, d, "Invalid Trigger Type! Answer a to abort quit!\r\n");
             }
-            write_to_output(g, d, "Do you wish to save your changes? : ");
+            write_to_output_printf(g, d, "Do you wish to save your changes? : ");
             OLC_MODE(d) = TRIGEDIT_CONFIRM_SAVESTRING;
           } else
             cleanup_olc(g, d, CLEANUP_ALL);
           return;
         case '1':
           OLC_MODE(d) = TRIGEDIT_NAME;
-          write_to_output(g, d, "Name: ");
+          write_to_output_printf(g, d, "Name: ");
           break;
         case '2':
           OLC_MODE(d) = TRIGEDIT_INTENDED;
-          write_to_output(g, d, "0: Mobiles, 1: Objects, 2: Rooms: ");
+          write_to_output_printf(g, d, "0: Mobiles, 1: Objects, 2: Rooms: ");
           break;
         case '3':
           OLC_MODE(d) = TRIGEDIT_TYPES;
@@ -306,16 +306,16 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case '4':
           OLC_MODE(d) = TRIGEDIT_NARG;
-          write_to_output(g, d, "Numeric argument: ");
+          write_to_output_printf(g, d, "Numeric argument: ");
           break;
         case '5':
           OLC_MODE(d) = TRIGEDIT_ARGUMENT;
-          write_to_output(g, d, "Argument: ");
+          write_to_output_printf(g, d, "Argument: ");
           break;
         case '6':
           OLC_MODE(d) = TRIGEDIT_COMMANDS;
-          write_to_output(g, d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
-          write_to_output(g, d, "%s", OLC_STORAGE(d).c_str());
+          write_to_output_printf(g, d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
+          write_to_output_printf(g, d, "%s", OLC_STORAGE(d).c_str());
           string_edit_begin(d, &OLC_STORAGE(d), MAX_CMD_LENGTH);
           d->mail_to = 0;
           OLC_VAL(d) = 1;
@@ -323,7 +323,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'w':
         case 'W':
-          write_to_output(g, d, "Copy what trigger? ");
+          write_to_output_printf(g, d, "Copy what trigger? ");
           OLC_MODE(d) = TRIGEDIT_COPY;
           break;
         case 'Z':
@@ -341,9 +341,9 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       switch (tolower(*arg)) {
         case 'y':
           trigedit_save(g, d);
-          mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
-                 "OLC: %s edits trigger %d", char_get_name(d->character),
-                 OLC_NUM(d));
+          mudlog_printf(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
+                        "OLC: %s edits trigger %d", char_get_name(d->character),
+                        OLC_NUM(d));
           [[fallthrough]];
         case 'n':
           cleanup_olc(g, d, CLEANUP_ALL);
@@ -351,8 +351,8 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'a': /* abort quitting */
           break;
         default:
-          write_to_output(g, d, "Invalid choice!\r\n");
-          write_to_output(g, d, "Do you wish to save the trigger? : ");
+          write_to_output_printf(g, d, "Invalid choice!\r\n");
+          write_to_output_printf(g, d, "Do you wish to save the trigger? : ");
           return;
       }
       break;
@@ -401,7 +401,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if ((rnum = find_trigger(g, atoi(arg))) != nullptr) {
         trigedit_setup_existing(g, d, rnum);
       } else
-        write_to_output(g, d, "That trigger does not exist.\r\n");
+        write_to_output_printf(g, d, "That trigger does not exist.\r\n");
       break;
   }
 
@@ -508,7 +508,7 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
 
   snprintf(fname, sizeof(fname), "%s%d.trg", TRG_PREFIX, zone);
   if (!(trig_file = atomic_open(&af, fname, false))) {
-    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't open trig file \"%s\"", fname);
+    mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't open trig file \"%s\"", fname);
     return false;
   }
 
@@ -517,7 +517,7 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
       trig = rnum->proto;
 
       if (fprintf(trig_file, "#%d\n", i) < 0) {
-        mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't write trig file!");
+        mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't write trig file!");
         atomic_abort(&af);
         return false;
       }
@@ -557,9 +557,9 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
 static void trigedit_write_zone_file(GameWorld *g, struct descriptor_data *d)
 {
   if (save_triggers(g, OLC_ZNUM(d)))
-    write_to_output(g, d, "Trigger saved to disk.\r\n");
+    write_to_output_printf(g, d, "Trigger saved to disk.\r\n");
   else
-    write_to_output(g, d, "Could not write the trigger file; nothing was changed.\r\n");
+    write_to_output_printf(g, d, "Could not write the trigger file; nothing was changed.\r\n");
 }
 
 /* save the zone's triggers to internal memory and to disk */
@@ -611,28 +611,28 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
   OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
 
   clear_screen(g, d);
-  write_to_output(g, d, "     Script Editor\r\n\r\n     Trigger List:\r\n");
+  write_to_output_printf(g, d, "     Script Editor\r\n\r\n     Trigger List:\r\n");
 
   editscript = OLC_SCRIPT(d);
 
   while (editscript) {
-    write_to_output(g, d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
-                    find_trigger(g, editscript->vnum)->proto->name.c_str());
+    write_to_output_printf(g, d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
+                           find_trigger(g, editscript->vnum)->proto->name.c_str());
     if (find_trigger(g, editscript->vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
-      write_to_output(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
+      write_to_output_printf(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
     else
-      write_to_output(g, d, "\r\n");
+      write_to_output_printf(g, d, "\r\n");
 
     editscript = editscript->next;
   }
   if (i == 0)
-    write_to_output(g, d, "     <none>\r\n");
+    write_to_output_printf(g, d, "     <none>\r\n");
 
-  write_to_output(g, d, "\r\n"
-                     " @gN@n)  New trigger for this script\r\n"
-                     " @gD@n)  Delete a trigger in this script\r\n"
-                     " @gX@n)  Exit Script Editor\r\n\r\n"
-                     "     Enter choice :");
+  write_to_output_printf(g, d, "\r\n"
+                               " @gN@n)  New trigger for this script\r\n"
+                               " @gD@n)  Delete a trigger in this script\r\n"
+                               " @gX@n)  Exit Script Editor\r\n\r\n"
+                               "     Enter choice :");
 }
 
 bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
@@ -674,11 +674,11 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
            */
           return false;
         case 'n':
-          write_to_output(g, d, "\r\nPlease enter position, vnum   (ex: 1, 200):");
+          write_to_output_printf(g, d, "\r\nPlease enter position, vnum   (ex: 1, 200):");
           OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_NEW_TRIGGER;
           break;
         case 'd':
-          write_to_output(g, d, "     Which entry should be deleted?  0 to abort :");
+          write_to_output_printf(g, d, "     Which entry should be deleted?  0 to abort :");
           OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_DEL_TRIGGER;
           break;
         default:
@@ -701,8 +701,8 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       if (vnum == 0) break; /* this aborts a new trigger entry */
 
       if (find_trigger(g, vnum) == nullptr) {
-        write_to_output(g, d, "Invalid Trigger VNUM!\r\n"
-                           "Please enter position, vnum   (ex: 1, 200):");
+        write_to_output_printf(g, d, "Invalid Trigger VNUM!\r\n"
+                                     "Please enter position, vnum   (ex: 1, 200):");
         return true;
       }
 
@@ -792,7 +792,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
     } else if (!strncasecmp(t, "end", 3) ||
                !strncasecmp(t, "done", 4)) {
       if (!indent) {
-        write_to_output(g, d, "Unmatched 'end' or 'done' (line %d)!\r\n", line_num);
+        write_to_output_printf(g, d, "Unmatched 'end' or 'done' (line %d)!\r\n", line_num);
         free(sc);
         return false;
       }
@@ -800,7 +800,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
       indent_next = false;
     } else if (!strncasecmp(t, "else", 4)) {
       if (!indent) {
-        write_to_output(g, d, "Unmatched 'else' (line %d)!\r\n", line_num);
+        write_to_output_printf(g, d, "Unmatched 'else' (line %d)!\r\n", line_num);
         free(sc);
         return false;
       }
@@ -809,7 +809,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
     } else if (!strncasecmp(t, "case", 4) ||
                !strncasecmp(t, "default", 7)) {
       if (!indent) {
-        write_to_output(g, d, "Case/default outside switch (line %d)!\r\n", line_num);
+        write_to_output_printf(g, d, "Case/default outside switch (line %d)!\r\n", line_num);
         free(sc);
         return false;
       }
@@ -818,7 +818,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
       found_case = true;
     } else if (!strncasecmp(t, "break", 5)) {
       if (!found_case || !indent) {
-        write_to_output(g, d, "Break not in case (line %d)!\r\n", line_num);
+        write_to_output_printf(g, d, "Break not in case (line %d)!\r\n", line_num);
         free(sc);
         return false;
       }
@@ -833,7 +833,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
     }
     llen = snprintf(line + nlen, sizeof(line) - nlen, "%s\r\n", t);
     if (llen < 0 || llen + nlen + len > d->max_str - 1) {
-      write_to_output(g, d, "String too long, formatting aborted\r\n");
+      write_to_output_printf(g, d, "String too long, formatting aborted\r\n");
       free(sc);
       return false;
     }
@@ -848,7 +848,7 @@ bool format_script(GameWorld *g, struct descriptor_data *d)
   }
 
   if (indent)
-    write_to_output(g, d, "Unmatched if, while or switch ignored.\r\n");
+    write_to_output_printf(g, d, "Unmatched if, while or switch ignored.\r\n");
 
   d->edit_text = nsc;
   free(sc);

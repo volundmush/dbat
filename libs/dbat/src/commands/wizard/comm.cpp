@@ -81,14 +81,14 @@ ACMD(do_news)
   /* Check the file for the entry so we may edit it if need be*/
 
   if (arg.empty()) {
-    send_to_char(g, ch, "Syntax: news (number | list)\r\n");
+    send_to_char_printf(g, ch, "Syntax: news (number | list)\r\n");
     return;
   }
 
   lookup = parse_int(arg);
 
   if (!(fl = fopen(filename, "r"))) {
-    mud_log("SYSERR: opening news file for reading");
+    mud_log_printf("SYSERR: opening news file for reading");
     return;
   }
 
@@ -151,9 +151,9 @@ ACMD(do_news)
     if (entries > 0) {
       char_set_lastpl(ch, game_now(g));
       char_set_wait(ch, PULSE_1SEC);
-      send_to_char(g, ch, "%s", buf);
+      send_to_char_printf(g, ch, "%s", buf);
     } else {
-      send_to_char(g, ch, "The news file is empty right now.\r\n");
+      send_to_char_printf(g, ch, "The news file is empty right now.\r\n");
     }
     *buf      = '\0';
     *title    = '\0';
@@ -161,12 +161,12 @@ ACMD(do_news)
     return;
   } else {
     fclose(fl);
-    send_to_char(g, ch, "Syntax: news (number | list)\r\n");
+    send_to_char_printf(g, ch, "Syntax: news (number | list)\r\n");
     return;
   }
 
   if (found == true) {
-    send_to_char(g, ch, "%s\r\n", buf);
+    send_to_char_printf(g, ch, "%s\r\n", buf);
     char_set_lastpl(ch, game_now(g));
     *buf      = '\0';
     *title    = '\0';
@@ -174,7 +174,7 @@ ACMD(do_news)
     char_set_wait(ch, PULSE_1SEC);
     return;
   }
-  send_to_char(g, ch, "That news entry does not exist.\r\n");
+  send_to_char_printf(g, ch, "That news entry does not exist.\r\n");
   return;
 }
 
@@ -195,22 +195,22 @@ ACMD(do_newsedit)
   filename = NEWS_FILE;
 
   if (argument.empty()) {
-    send_to_char(g, ch, "Syntax: newsedit (title)\r\n");
+    send_to_char_printf(g, ch, "Syntax: newsedit (title)\r\n");
     return;
   }
   if (argument.size() > 50) {
-    send_to_char(g, ch, "Limit of 50 characters for title.\r\n");
+    send_to_char_printf(g, ch, "Limit of 50 characters for title.\r\n");
     return;
   }
   if (argument.contains("#")) {
-    send_to_char(g, ch, "# is a forbidden character for news entries as it is used by the file system.\r\n");
+    send_to_char_printf(g, ch, "# is a forbidden character for news entries as it is used by the file system.\r\n");
     return;
   }
 
   /* Check the file for the entry so we may edit it if need be*/
 
   if (!(fl = fopen(filename, "r"))) {
-    mud_log("SYSERR: Couldn't open news file for reading");
+    mud_log_printf("SYSERR: Couldn't open news file for reading");
     return;
   }
 
@@ -236,20 +236,20 @@ ACMD(do_newsedit)
     if (entries == 0) {
       lookup = 1;
     } else { /* Uh oh */
-      send_to_imm(g, "ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
+      send_to_imm_printf(g, "ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
       return;
     }
   } else {
     lookup = lastentry + 1;
   }
   act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
-  send_to_char(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
-  send_to_char(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
-  send_to_char(g, ch, "character will be eaten because it is required for the news\n");
-  send_to_char(g, ch, "file as a delimiter. Also if you want to create an empty line\n");
-  send_to_char(g, ch, "between paragraphs you will need to enter a single space and\n");
-  send_to_char(g, ch, "not just push enter. Happy editing!@n\n");
-  send_to_char(g, ch, "@D---------------------------------------------------------@n\n");
+  send_to_char_printf(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
+  send_to_char_printf(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
+  send_to_char_printf(g, ch, "character will be eaten because it is required for the news\n");
+  send_to_char_printf(g, ch, "file as a delimiter. Also if you want to create an empty line\n");
+  send_to_char_printf(g, ch, "between paragraphs you will need to enter a single space and\n");
+  send_to_char_printf(g, ch, "not just push enter. Happy editing!@n\n");
+  send_to_char_printf(g, ch, "@D---------------------------------------------------------@n\n");
   send_editor_help(g, char_get_desc(ch));
   char_get_desc(ch)->newsbuf = skip_spaces(argument);
   g->TOP_OF_NEWS       = lookup;
@@ -265,7 +265,7 @@ ACMD(do_echo)
   bool NoName = false;
 
   if (text.empty()) {
-    send_to_char(g, ch, "Yes.. but what?\r\n");
+    send_to_char_printf(g, ch, "Yes.. but what?\r\n");
     return;
   }
 
@@ -320,7 +320,7 @@ ACMD(do_echo)
     buf = text;
   }
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
   }
   if (NoName == true) {
     char blom[MAX_INPUT_LENGTH];
@@ -348,18 +348,18 @@ ACMD(do_send)
   buf                   = skip_spaces(rest);
 
   if (arg.empty()) {
-    send_to_char(g, ch, "Send what to who?\r\n");
+    send_to_char_printf(g, ch, "Send what to who?\r\n");
     return;
   }
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_NOPERSON.c_str());
     return;
   }
-  send_to_char(g, vict, "%s\r\n", buf.c_str());
+  send_to_char_printf(g, vict, "%s\r\n", buf.c_str());
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-    send_to_char(g, ch, "Sent.\r\n");
+    send_to_char_printf(g, ch, "Sent.\r\n");
   else
-    send_to_char(g, ch, "You send '%s' to %s.\r\n", buf.c_str(), char_get_name(vict));
+    send_to_char_printf(g, ch, "You send '%s' to %s.\r\n", buf.c_str(), char_get_name(vict));
 }
 
 static const char *const logtypes[] = {
@@ -373,12 +373,12 @@ ACMD(do_syslog)
   std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty()) {
-    send_to_char(g, ch, "Your syslog is currently %s.\r\n",
-                 logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
+    send_to_char_printf(g, ch, "Your syslog is currently %s.\r\n",
+                        logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
   if ((tp = search_block(arg, logtypes, false)) == -1) {
-    send_to_char(g, ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
+    send_to_char_printf(g, ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
   char_prf_set(g, ch, PRF_LOG1, false);
@@ -386,7 +386,7 @@ ACMD(do_syslog)
   if (tp & 1) char_prf_set(g, ch, PRF_LOG1, true);
   if (tp & 2) char_prf_set(g, ch, PRF_LOG2, true);
 
-  send_to_char(g, ch, "Your syslog is now %s.\r\n", logtypes[tp]);
+  send_to_char_printf(g, ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
 
 ACMD(do_gecho)
@@ -396,16 +396,16 @@ ACMD(do_gecho)
   delete_doubledollar(text);
 
   if (text.empty())
-    send_to_char(g, ch, "That must be a mistake...\r\n");
+    send_to_char_printf(g, ch, "That must be a mistake...\r\n");
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "%s\r\n", text.c_str());
+        send_to_char_printf(g, pt->character, "%s\r\n", text.c_str());
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
+      send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
     else
-      send_to_char(g, ch, "%s\r\n", text.c_str());
+      send_to_char_printf(g, ch, "%s\r\n", text.c_str());
   }
 }
 
@@ -416,16 +416,16 @@ ACMD(do_ginfo)
   delete_doubledollar(text);
 
   if (text.empty())
-    send_to_char(g, ch, "That must be a mistake...\r\n");
+    send_to_char_printf(g, ch, "That must be a mistake...\r\n");
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
+        send_to_char_printf(g, pt->character, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "%s", CONFIG_OK.c_str());
+      send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
     else
-      send_to_char(g, ch, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
+      send_to_char_printf(g, ch, "@D[@GINFO@D] @g%s@n\r\n", text.c_str());
   }
 }
 
@@ -443,7 +443,7 @@ ACMD(do_poofset)
 
   *msg = skip_spaces(argument);
 
-  send_to_char(g, ch, "%s", CONFIG_OK.c_str());
+  send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
 }
 
 ACMD(do_wiznet)
@@ -458,7 +458,7 @@ ACMD(do_wiznet)
   std::string_view msg = text; /* what's left to send */
 
   if (msg.empty()) {
-    send_to_char(g, ch, "Usage: wiznet <text> | #<level> <text> | *<emotetext> |\r\n        wiznet @<level> *<emotetext> | wiz @\r\n");
+    send_to_char_printf(g, ch, "Usage: wiznet <text> | #<level> <text> | *<emotetext> |\r\n        wiznet @<level> *<emotetext> | wiz @\r\n");
     return;
   }
   switch (msg[0]) {
@@ -472,7 +472,7 @@ ACMD(do_wiznet)
         msg                = skip_spaces(after);
         level              = MAX(parse_int(number), ADMLVL_IMMORT);
         if (level > char_get_admlevel(ch)) {
-          send_to_char(g, ch, "You can't wizline above your own level.\r\n");
+          send_to_char_printf(g, ch, "You can't wizline above your own level.\r\n");
           return;
         }
       } else if (emote)
@@ -481,17 +481,17 @@ ACMD(do_wiznet)
     }
 
     case '@':
-      send_to_char(g, ch, "God channel status:\r\n");
+      send_to_char_printf(g, ch, "God channel status:\r\n");
       for (descriptor_data *d : each_desc(g)) {
         if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(d->character) < ADMLVL_IMMORT)
           continue;
         if (!char_can_see(g, ch, d->character))
           continue;
 
-        send_to_char(g, ch, "  %-*s%s%s%s\r\n", MAX_NAME_LENGTH, char_get_name(d->character),
-                     char_plr_flagged(d->character, PLR_WRITING) ? " (Writing)" : "",
-                     char_plr_flagged(d->character, PLR_MAILING) ? " (Writing mail)" : "",
-                     char_prf_flagged(g, d->character, PRF_NOWIZ) ? " (Offline)" : "");
+        send_to_char_printf(g, ch, "  %-*s%s%s%s\r\n", MAX_NAME_LENGTH, char_get_name(d->character),
+                            char_plr_flagged(d->character, PLR_WRITING) ? " (Writing)" : "",
+                            char_plr_flagged(d->character, PLR_MAILING) ? " (Writing mail)" : "",
+                            char_prf_flagged(g, d->character, PRF_NOWIZ) ? " (Offline)" : "");
       }
       return;
 
@@ -502,13 +502,13 @@ ACMD(do_wiznet)
       break;
   }
   if (char_prf_flagged(g, ch, PRF_NOWIZ)) {
-    send_to_char(g, ch, "You are offline!\r\n");
+    send_to_char_printf(g, ch, "You are offline!\r\n");
     return;
   }
   std::string said(skip_spaces(msg));
 
   if (said.empty()) {
-    send_to_char(g, ch, "Don't bother the gods like that!\r\n");
+    send_to_char_printf(g, ch, "Don't bother the gods like that!\r\n");
     return;
   }
   if (level > ADMLVL_IMMORT) {
@@ -524,15 +524,15 @@ ACMD(do_wiznet)
         (!char_prf_flagged(g, d->character, PRF_NOWIZ)) &&
         (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(g, d->character, PRF_NOREPEAT)))) {
       if (char_can_see(g, d->character, ch)) {
-        send_to_char(g, d->character, "%s", buf1);
+        send_to_char_printf(g, d->character, "%s", buf1);
         add_history(g, d->character, buf1, HIST_WIZNET);
       } else {
-        send_to_char(g, d->character, "%s", buf2);
+        send_to_char_printf(g, d->character, "%s", buf2);
         add_history(g, d->character, buf2, HIST_WIZNET);
       }
     }
   }
 
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-    send_to_char(g, ch, "%s", CONFIG_OK.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_OK.c_str());
 }

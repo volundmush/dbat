@@ -143,7 +143,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
     /* Do nothing. */;
   else if (text.empty()) {
     if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
-      send_to_char(g, d->character, "String too long - Truncated.\r\n");
+      send_to_char_printf(g, d->character, "String too long - Truncated.\r\n");
       strcpy(str + (d->max_str - 3), "\r\n");
       text = str;
       if (!using_improved_editor)
@@ -152,7 +152,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
       text = str;
   } else {
     if (strlen(str) + text.size() + 3 > d->max_str) { /* \r\n\0 */
-      send_to_char(g, d->character, "String too long.  Last line skipped.\r\n");
+      send_to_char_printf(g, d->character, "String too long.  Last line skipped.\r\n");
       if (!using_improved_editor)
         action = STRINGADD_SAVE;
       else if (action == STRINGADD_OK)
@@ -186,7 +186,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
           break;
 
         default:
-          mud_log("SYSERR: string_add: Aborting write from unknown origin.");
+          mud_log_printf("SYSERR: string_add: Aborting write from unknown origin.");
           break;
       }
       break;
@@ -244,10 +244,10 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
   if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && !d->edit_text.empty()) {
       store_mail(g, d->mail_to, char_get_idnum(d->character), d->edit_text.data());
-      write_to_output(g, d, "Message sent!\r\n");
+      write_to_output_printf(g, d, "Message sent!\r\n");
       notify_if_playing(g, d->character, d->mail_to);
     } else {
-      write_to_output(g, d, "Mail aborted.\r\n");
+      write_to_output_printf(g, d, "Mail aborted.\r\n");
     }
     d->draft.clear(); /* store_mail() keeps its own copy */
   }
@@ -258,11 +258,11 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
 
       if (action == STRINGADD_ABORT) {
         if (board_discard_message(board, d->str))
-          write_to_output(g, d, "Post aborted.\r\n");
+          write_to_output_printf(g, d, "Post aborted.\r\n");
         else
-          write_to_output(g, d, "Unable to find your message to delete it!\r\n");
+          write_to_output_printf(g, d, "Unable to find your message to delete it!\r\n");
       } else {
-        write_to_output(g, d, "\r\nPost saved.\r\n");
+        write_to_output_printf(g, d, "\r\nPost saved.\r\n");
         save_board(g, board);
       }
     }
@@ -274,9 +274,9 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
 static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int action)
 {
   if (action == STRINGADD_ABORT)
-    write_to_output(g, d, "Description aborted.\r\n");
+    write_to_output_printf(g, d, "Description aborted.\r\n");
 
-  write_to_output(g, d, "%s", CONFIG_MENU.c_str());
+  write_to_output_printf(g, d, "%s", CONFIG_MENU.c_str());
   desc_set_connected(d, CON_MENU);
 }
 
@@ -302,26 +302,26 @@ ACMD(do_skillset)
   std::string name      = take_arg(rest);
 
   if (name.empty()) { /* no arguments. print an informative text */
-    send_to_char(g, ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
-                     "Skill being one of the following:\r\n");
+    send_to_char_printf(g, ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
+                               "Skill being one of the following:\r\n");
     for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++) {
       if (g->spell_info[i].name == unused_spellname) /* This is valid. */
         continue;
-      send_to_char(g, ch, "%18s", g->spell_info[i].name);
+      send_to_char_printf(g, ch, "%18s", g->spell_info[i].name);
       if (qend++ % 4 == 3)
-        send_to_char(g, ch, "\r\n");
+        send_to_char_printf(g, ch, "\r\n");
     }
     if (qend % 4 != 0)
-      send_to_char(g, ch, "\r\n");
+      send_to_char_printf(g, ch, "\r\n");
     return;
   }
 
   if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "%s", CONFIG_NOPERSON.c_str());
+    send_to_char_printf(g, ch, "%s", CONFIG_NOPERSON.c_str());
     return;
   }
   if (char_is_npc(vict)) {
-    send_to_char(g, ch, "NPCs don't have skills.\r\n");
+    send_to_char_printf(g, ch, "NPCs don't have skills.\r\n");
     return;
   }
   rest = skip_spaces(rest);
@@ -340,37 +340,37 @@ ACMD(do_skillset)
     }
     if (len == sizeof(help_text) - 1)
       strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    send_to_char(g, ch, "%s", help_text);
+    send_to_char_printf(g, ch, "%s", help_text);
     return;
   }
 
   if (rest[0] != '\'') {
-    send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
+    send_to_char_printf(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
   /* Locate the closing quote; the magic words between are lowercased */
   size_t close = rest.find('\'', 1);
   if (close == std::string_view::npos) {
-    send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
+    send_to_char_printf(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
   std::string skillname(rest.substr(1, close - 1));
   for (char &c : skillname)
     c = tolower(c);
   if ((skill = find_skill_num(g, skillname.data(), SKTYPE_SKILL)) <= 0) {
-    send_to_char(g, ch, "Unrecognized skill.\r\n");
+    send_to_char_printf(g, ch, "Unrecognized skill.\r\n");
     return;
   }
   rest.remove_prefix(close + 1); /* skip to next parameter */
   std::string buf = take_arg(rest);
 
   if (buf.empty()) {
-    send_to_char(g, ch, "Learned value expected.\r\n");
+    send_to_char_printf(g, ch, "Learned value expected.\r\n");
     return;
   }
   value = parse_int(buf);
   if (value < 0) {
-    send_to_char(g, ch, "Minimum value for learned is 0.\r\n");
+    send_to_char_printf(g, ch, "Minimum value for learned is 0.\r\n");
     return;
   }
 
@@ -379,6 +379,6 @@ ACMD(do_skillset)
    * checked for the -1 above so we are safe here.
    */
   char_set_skills_base(vict, skill, value);
-  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), g->spell_info[skill].name, value);
-  send_to_char(g, ch, "You change %s's %s to %d.\r\n", char_get_name(vict), g->spell_info[skill].name, value);
+  mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), g->spell_info[skill].name, value);
+  send_to_char_printf(g, ch, "You change %s's %s to %d.\r\n", char_get_name(vict), g->spell_info[skill].name, value);
 }

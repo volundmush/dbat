@@ -48,8 +48,8 @@ bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_na
   char name[PATH_MAX], *ptr;
 
   if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
-    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), %p or %p.",
-            orig_name, filename);
+    mud_log_printf("SYSERR: NULL pointer or empty string passed to get_filename(), %p or %p.",
+                   orig_name, filename);
     return false;
   }
 
@@ -158,7 +158,7 @@ int touch(const char *path)
   FILE *fl;
 
   if (!(fl = fopen(path, "a"))) {
-    mud_log("SYSERR: %s: %s", path, strerror(errno));
+    mud_log_printf("SYSERR: %s: %s", path, strerror(errno));
     return (-1);
   }
   fclose(fl);
@@ -173,11 +173,11 @@ void topLoad(GameWorld *g)
 
   /* Read Toplist File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
-    mud_log("ERROR: Toplist file does not exist.");
+    mud_log_printf("ERROR: Toplist file does not exist.");
     return;
   }
   if (!(file = fopen(fname, "r"))) {
-    mud_log("ERROR: Toplist file does not exist.");
+    mud_log_printf("ERROR: Toplist file does not exist.");
     return;
   }
 
@@ -264,9 +264,9 @@ void topWrite(GameWorld *g, struct char_data *ch)
   } /* End Save New Spots*/
 
   if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the powerlevel section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the powerlevel section.@D]\r\n", char_get_name(ch));
   } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas placed in the powerlevel section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas placed in the powerlevel section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
@@ -312,9 +312,9 @@ void topWrite(GameWorld *g, struct char_data *ch)
   } /* End Save New Spots*/
 
   if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the ki section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the ki section.@D]\r\n", char_get_name(ch));
   } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas placed in the ki section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas placed in the ki section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
@@ -361,9 +361,9 @@ void topWrite(GameWorld *g, struct char_data *ch)
   } /* End Save New Spots*/
 
   if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the stamina section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the stamina section.@D]\r\n", char_get_name(ch));
   } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas placed in the stamina section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas placed in the stamina section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
@@ -410,9 +410,9 @@ void topWrite(GameWorld *g, struct char_data *ch)
   } /* End Save New Spots*/
 
   if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the zenni section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the zenni section.@D]\r\n", char_get_name(ch));
   } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas placed in the zenni section.@D]\r\n", char_get_name(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas placed in the zenni section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
@@ -459,9 +459,9 @@ void topWrite(GameWorld *g, struct char_data *ch)
   } /* End Save New Spots*/
 
   if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the RPP section.@D]\r\n", char_get_user(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas moved up in rank in the RPP section.@D]\r\n", char_get_user(ch));
   } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C%s @Whas placed in the RPP section.@D]\r\n", char_get_user(ch));
+    send_to_all_printf(g, "@D[@GToplist@W: @C%s @Whas placed in the RPP section.@D]\r\n", char_get_user(ch));
   }
 
   location = -1;
@@ -477,7 +477,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
       return;
 
     if (!(fl = atomic_open(&af, fname, false))) {
-      mud_log("ERROR: could not save Toplist File, %s.", fname);
+      mud_log_printf("ERROR: could not save Toplist File, %s.", fname);
       return;
     }
     x = 0;

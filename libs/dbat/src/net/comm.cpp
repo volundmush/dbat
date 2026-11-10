@@ -141,7 +141,7 @@ static void close_orphaned_sockets(GameWorld *g)
     }
   }
   if (closed)
-    mud_log("SYSERR: copyover_recover: closed %d connections that weren't in the copyover file.", closed);
+    mud_log_printf("SYSERR: copyover_recover: closed %d connections that weren't in the copyover file.", closed);
 }
 
 /* Brings one player back from a line of the copyover file. */
@@ -154,7 +154,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   bool fOld = true;
 
   if (fstat(desc, &info) < 0 || !S_ISSOCK(info.st_mode)) {
-    mud_log("SYSERR: copyover_recover: descriptor %d for %s isn't a connection.", desc, name);
+    mud_log_printf("SYSERR: copyover_recover: descriptor %d for %s isn't a connection.", desc, name);
     return;
   }
 
@@ -215,13 +215,13 @@ static void copyover_recover(GameWorld *g)
   int desc, restrict_level;
   room_vnum saved_loadroom;
 
-  mud_log("Copyover recovery initiated");
+  mud_log_printf("Copyover recovery initiated");
   g->PCOUNTDAY = game_now(g) + 60;
   fp        = fopen(COPYOVER_FILE, "r");
 
   if (!fp) {
     /* Carry on: anyone already connected gets told below, and everyone else can still log in. */
-    mud_log("SYSERR: copyover_recover: can't open %s: %s", COPYOVER_FILE, strerror(errno));
+    mud_log_printf("SYSERR: copyover_recover: can't open %s: %s", COPYOVER_FILE, strerror(errno));
     close_orphaned_sockets(g);
     return;
   }
@@ -234,7 +234,7 @@ static void copyover_recover(GameWorld *g)
       break;
     }
     if (sscanf(line, "%d %127s %127s %d %99s", &desc, name, host, &saved_loadroom, username) != 5) {
-      mud_log("SYSERR: copyover_recover: skipping a malformed line in %s.", COPYOVER_FILE);
+      mud_log_printf("SYSERR: copyover_recover: skipping a malformed line in %s.", COPYOVER_FILE);
       continue;
     }
     copyover_recover_player(g, desc, name, host, saved_loadroom, username);
@@ -251,11 +251,11 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   circle_srandom(g, game_now(g));
 
-  mud_log("Finding player limit.");
+  mud_log_printf("Finding player limit.");
   g->max_players = get_max_players(g);
 
   if (!g->fCopyOver) { /* If copyover mother_desc is already set up */
-    mud_log("Opening mother connection.");
+    mud_log_printf("Opening mother connection.");
     g->mother_desc = init_socket(g, cmport);
   }
 
@@ -267,14 +267,14 @@ void init_game(GameWorld *g, uint16_t cmport)
   int rowcounter, colcounter;
   room_vnum vnum_read;
 
-  mud_log("Signal trapping.");
+  mud_log_printf("Signal trapping.");
   signal_setup();
 
-  mud_log("Loading Space Map. ");
+  mud_log_printf("Loading Space Map. ");
 
   //Load the map vnums from a file into an array
   if (!(mapfile = fopen("../data/surface.map", "r"))) {
-    mud_log("SYSERR: Unable to open ../data/surface.map: %s", strerror(errno));
+    mud_log_printf("SYSERR: Unable to open ../data/surface.map: %s", strerror(errno));
     exit(1);
   }
 
@@ -295,13 +295,13 @@ void init_game(GameWorld *g, uint16_t cmport)
   if (g->fCopyOver) /* reload players */
     copyover_recover(g);
 
-  mud_log("Entering game loop.");
+  mud_log_printf("Entering game loop.");
 
   game_loop(g, g->mother_desc);
 
   Crash_save_all(g);
 
-  mud_log("Closing all sockets.");
+  mud_log_printf("Closing all sockets.");
   close_all_sockets(g);
 
   close(g->mother_desc);
@@ -309,14 +309,14 @@ void init_game(GameWorld *g, uint16_t cmport)
   if (g->circle_reboot != 2)
     save_all(g);
 
-  mud_log("Saving current MUD time.");
+  mud_log_printf("Saving current MUD time.");
   save_mud_time(g, &g->time_info);
 
   if (g->circle_reboot) {
-    mud_log("Rebooting.");
+    mud_log_printf("Rebooting.");
     exit(52); /* what's so great about HHGTTG, anyhow? */
   }
-  mud_log("Normal termination of game.");
+  mud_log_printf("Normal termination of game.");
 }
 
 /*
@@ -408,11 +408,11 @@ static int get_max_players(GameWorld *g)
   max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
 
   if (max_descs <= 0) {
-    mud_log("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
-            max_descs, how);
+    mud_log_printf("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
+                   max_descs, how);
     exit(1);
   }
-  mud_log("   Setting player limit to %d using %s.", max_descs, how);
+  mud_log_printf("   Setting player limit to %d using %s.", max_descs, how);
   return (max_descs);
 }
 
@@ -487,7 +487,7 @@ void game_finish_descriptors(GameWorld *g)
   /* Print prompts for other descriptors who had no other output */
   for (descriptor_data *d : each_desc(g)) {
     if (!d->has_prompt) {
-      write_to_output(g, d, "@n");
+      write_to_output_printf(g, d, "@n");
       /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
       d->has_prompt = true;
     }
@@ -521,7 +521,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
 
     /* SIGHUP/SIGINT/SIGTERM: leave the loop so init_game() saves everyone and closes down properly */
     if (shutdown_signal) {
-      mud_log("Received signal %d (SIGHUP, SIGINT or SIGTERM).  Shutting down...", (int)shutdown_signal);
+      mud_log_printf("Received signal %d (SIGHUP, SIGINT or SIGTERM).  Shutting down...", (int)shutdown_signal);
       g->circle_shutdown = 1;
       break;
     }
@@ -530,14 +530,14 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     if (g->descriptors.empty()) {
       struct pollfd mother = {.fd = cmmother_desc, .events = POLLIN};
 
-      mud_log("No connections.  Going to sleep.");
+      mud_log_printf("No connections.  Going to sleep.");
       if (poll(&mother, 1, -1) < 0) {
         if (errno == EINTR)
-          mud_log("Waking up to process signal.");
+          mud_log_printf("Waking up to process signal.");
         else
           perror("SYSERR: poll coma");
       } else
-        mud_log("New connection.  Waking up.");
+        mud_log_printf("New connection.  Waking up.");
       last_time = monotonic_ns();
       if (shutdown_signal)
         continue;
@@ -615,7 +615,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
         if (process_output(g, d) < 0) {
           // commented out close_socket since process_output already does this, so having it here causes a double-free crash
           //close_socket(d);
-          mud_log("ERROR: Tried to send output to dead socket!");
+          mud_log_printf("ERROR: Tried to send output to dead socket!");
         } else
           d->has_prompt = 1;
       }
@@ -631,13 +631,13 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     missed_pulses++;
 
     if (missed_pulses <= 0) {
-      mud_log("SYSERR: **BAD** MISSED_PULSES NONPOSITIVE (%d), TIME GOING BACKWARDS!!", missed_pulses);
+      mud_log_printf("SYSERR: **BAD** MISSED_PULSES NONPOSITIVE (%d), TIME GOING BACKWARDS!!", missed_pulses);
       missed_pulses = 1;
     }
 
     /* If we missed more than 30 seconds worth of pulses, just do 30 secs */
     if (missed_pulses > 30 * PASSES_PER_SEC) {
-      mud_log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
+      mud_log_printf("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
       missed_pulses = 30 * PASSES_PER_SEC;
     }
 
@@ -648,12 +648,12 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     /* Check for any signals we may have received. */
     if (reread_wizlist) {
       reread_wizlist = false;
-      mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
+      mudlog_printf(g, LOG_CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
       reboot_wizlists(g);
     }
     if (emergency_unban) {
       emergency_unban = false;
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
+      mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
       free_ban_list(g);
       g->circle_restrict = 0;
       g->num_invalid     = 0;
@@ -784,8 +784,8 @@ static void record_usage(GameWorld *g)
       sockets_playing++;
   }
 
-  mud_log("nusage: %-3d sockets connected, %-3d sockets playing",
-          sockets_connected, sockets_playing);
+  mud_log_printf("nusage: %-3d sockets connected, %-3d sockets playing",
+                 sockets_connected, sockets_playing);
 }
 
 static char *make_prompt(GameWorld *g, struct descriptor_data *d)
@@ -1520,13 +1520,13 @@ static void flush_queues(GameWorld *g, struct descriptor_data *d)
 }
 
 /* Add a new string to a player's output queue. For outside use. */
-size_t write_to_output(GameWorld *g, struct descriptor_data *t, const char *txt, ...)
+size_t write_to_output_printf(GameWorld *g, struct descriptor_data *t, const char *txt, ...)
 {
   va_list args;
   size_t left;
 
   va_start(args, txt);
-  left = vwrite_to_output(g, t, txt, args);
+  left = vwrite_to_output_printf(g, t, txt, args);
   va_end(args);
 
   return left;
@@ -1701,7 +1701,7 @@ static size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, con
 #undef NEW_STRING_LENGTH
 
 /* Add a new string to a player's output queue. */
-size_t vwrite_to_output(GameWorld *g, struct descriptor_data *t, const char *format, va_list args)
+size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *t, const char *format, va_list args)
 {
   /* As big as a descriptor's whole output buffer, so one long text (help, lists) is never cut short here. */
   static char txt[LARGE_BUFSIZE];
@@ -1810,17 +1810,17 @@ static struct in_addr *get_bind_addr(GameWorld *g)
   } else {
     /* If the parsing fails, use INADDR_ANY */
     if (!inet_aton(CONFIG_DFLT_IP.c_str(), &bind_addr)) {
-      mud_log("SYSERR: DFLT_IP of %s appears to be an invalid IP address",
-              CONFIG_DFLT_IP.c_str());
+      mud_log_printf("SYSERR: DFLT_IP of %s appears to be an invalid IP address",
+                     CONFIG_DFLT_IP.c_str());
       bind_addr.s_addr = htonl(INADDR_ANY);
     }
   }
 
   /* Put the address that we've finally decided on into the logs */
   if (bind_addr.s_addr == htonl(INADDR_ANY))
-    mud_log("Binding to all IP interfaces on this host.");
+    mud_log_printf("Binding to all IP interfaces on this host.");
   else
-    mud_log("Binding only to IP address %s", inet_ntoa(bind_addr));
+    mud_log_printf("Binding only to IP address %s", inet_ntoa(bind_addr));
 
   return (&bind_addr);
 }
@@ -1878,12 +1878,12 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
     char_set_desc(d->character, d);
   }
   char_prf_set(g, d->character, PRF_COLOR, true);
-  write_to_output(g, d, "%s", g->GREETANSI.c_str());
-  write_to_output(g, d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
-  write_to_output(g, d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", g->PCOUNT);
-  write_to_output(g, d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", g->HIGHPCOUNT);
-  write_to_output(g, d, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA, add_commas(g->ERAPLAYERS));
-  write_to_output(g, d, "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
+  write_to_output_printf(g, d, "%s", g->GREETANSI.c_str());
+  write_to_output_printf(g, d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
+  write_to_output_printf(g, d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", g->PCOUNT);
+  write_to_output_printf(g, d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", g->HIGHPCOUNT);
+  write_to_output_printf(g, d, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA, add_commas(g->ERAPLAYERS));
+  write_to_output_printf(g, d, "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
   set_empty_account(d);
   return;
 }
@@ -1948,7 +1948,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
     write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
     close(desc);
-    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [%s] refused: already %d connections from it", newd->host, from_same_ip);
+    mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [%s] refused: already %d connections from it", newd->host, from_same_ip);
     delete newd;
     return (0);
   }
@@ -1956,7 +1956,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
   /* determine if the site is banned */
   if (isbanned(g, newd->host) == BAN_ALL) {
     close(desc);
-    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [%s]", newd->host);
+    mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [%s]", newd->host);
     delete newd;
     return (0);
   }
@@ -2028,7 +2028,7 @@ static int process_output(GameWorld *g, struct descriptor_data *t)
 
   /* Handle snooping: prepend "% " and send to snooper. */
   if (t->snoop_by)
-    write_to_output(g, t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n", t->output);
+    write_to_output_printf(g, t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n", t->output);
   /* The common case: all saved output was handed off to the kernel buffer. */
   if (result >= t->bufptr) {
     /*
@@ -2103,7 +2103,7 @@ static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
 
   if (result == 0) {
     /* This should never happen! */
-    mud_log("SYSERR: Huh??  write() returned 0???  Please report this!");
+    mud_log_printf("SYSERR: Huh??  write() returned 0???  Please report this!");
     return (-1);
   }
 
@@ -2171,7 +2171,7 @@ static ssize_t perform_socket_read(int desc, char *read_point, size_t space_left
 
   /* read() returned 0, meaning we got an EOF. */
   if (ret == 0) {
-    mud_log("WARNING: EOF on socket read (connection broken by peer)");
+    mud_log_printf("WARNING: EOF on socket read (connection broken by peer)");
     return (-1);
   }
 
@@ -2223,7 +2223,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
 
   do {
     if (space_left <= 0) {
-      mud_log("WARNING: process_input: about to close connection: input overflow");
+      mud_log_printf("WARNING: process_input: about to close connection: input overflow");
       return (-1);
     }
 
@@ -2301,7 +2301,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
         return (-1);
     }
     if (t->snoop_by)
-      write_to_output(g, t->snoop_by, "%% %s\r\n", tmp);
+      write_to_output_printf(g, t->snoop_by, "%% %s\r\n", tmp);
     failed_subst = 0;
 
     if (*tmp == '!' && !(*(tmp + 1))) /* Redo last command. */
@@ -2316,7 +2316,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
         if (!t->history[cnt].empty() && is_abbrev(commandln, t->history[cnt].c_str())) {
           strcpy(tmp, t->history[cnt].c_str()); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
           strcpy(t->last_input, tmp);   /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-          write_to_output(g, t, "%s\r\n", tmp);
+          write_to_output_printf(g, t, "%s\r\n", tmp);
           break;
         }
         if (cnt == 0) /* At top, loop to bottom. */
@@ -2333,7 +2333,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
     }
     /* the '--' command flushes the queue - Jamdog - 9th May 2007 */
     if ((*tmp == '-') && (*(tmp + 1) == '-') && !(*(tmp + 2))) {
-      write_to_output(g, t, "All queued commands cancelled.\r\n");
+      write_to_output_printf(g, t, "All queued commands cancelled.\r\n");
       flush_input_queue(t); /* only the commands: pending output stays */
       failed_subst = 1;     /* and don't queue the -- itself */
     }
@@ -2341,7 +2341,7 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
       /* commands run at most one per pulse; a client sending far faster is flooding */
       if (t->input.typed >= MAX_QUEUED_INPUT) {
         write_to_descriptor(t->descriptor, "\r\nToo many commands waiting to run; disconnecting.\r\n");
-        mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [%s]: more than %d commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
+        mudlog_printf(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [%s]: more than %d commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
         return (-1);
       }
       write_to_q(tmp, &t->input, 0);
@@ -2385,7 +2385,7 @@ static bool perform_subst(GameWorld *g, struct descriptor_data *t, char *orig, c
 
   /* now find the second '^' */
   if (!(second = strchr(first, '^'))) {
-    write_to_output(g, t, "Invalid substitution.\r\n");
+    write_to_output_printf(g, t, "Invalid substitution.\r\n");
     return true;
   }
   /* terminate "first" at the position of the '^' and make 'second' point
@@ -2394,7 +2394,7 @@ static bool perform_subst(GameWorld *g, struct descriptor_data *t, char *orig, c
 
   /* now, see if the contents of the first string appear in the original */
   if (!(strpos = strstr(orig, first))) {
-    write_to_output(g, t, "Invalid substitution.\r\n");
+    write_to_output_printf(g, t, "Invalid substitution.\r\n");
     return true;
   }
   /* now, we construct the new string for output. */
@@ -2427,7 +2427,7 @@ static void free_user(struct descriptor_data *d)
   d->user_freed = 1;
 
   if (!d->user.empty() && strcasecmp(d->user.c_str(), "Empty"))
-    mud_log("Freeing User: %s", d->user.c_str());
+    mud_log_printf("Freeing User: %s", d->user.c_str());
 
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
     account_slot(d, n)->clear();
@@ -2453,7 +2453,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
     d->snooping->snoop_by = nullptr;
 
   if (d->snoop_by) {
-    write_to_output(g, d->snoop_by, "Your victim is no longer among us.\r\n");
+    write_to_output_printf(g, d->snoop_by, "Your victim is no longer among us.\r\n");
     d->snoop_by->snooping = nullptr;
   }
 
@@ -2471,13 +2471,13 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
       /* We are guaranteed to have a person. */
       act(g, "$n has lost $s link.", true, link_challenged, nullptr, nullptr, TO_ROOM);
       save_char(g, link_challenged);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, link_challenged)), true, "Closing link to: %s.", char_get_name(link_challenged));
+      mudlog_printf(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, link_challenged)), true, "Closing link to: %s.", char_get_name(link_challenged));
     } else {
       free_char(g, d->character);
       d->character = nullptr; /* (free_char() can't clear it: ->desc was cut above) */
     }
   } else
-    mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "Losing descriptor without char.");
+    mudlog_printf(g, LOG_CMP, ADMLVL_IMMORT, true, "Losing descriptor without char.");
 
   /* JE 2/22/95 -- part of my unending quest to make switch stable */
   if (d->original && char_get_desc(d->original))
@@ -2502,7 +2502,7 @@ static void check_idle_passwords(GameWorld *g)
       d->idle_tics++;
       continue;
     }
-    write_to_output(g, d, "\r\nTimed out... goodbye.\r\n");
+    write_to_output_printf(g, d, "\r\nTimed out... goodbye.\r\n");
     desc_set_connected(d, CON_CLOSE);
   }
 }
@@ -2515,10 +2515,10 @@ static void check_idle_menu(GameWorld *g)
       continue;
     if (!d->idle_tics) {
       d->idle_tics++;
-      write_to_output(g, d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
+      write_to_output_printf(g, d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
       continue;
     }
-    write_to_output(g, d, "\r\nTimed out... goodbye.\r\n");
+    write_to_output_printf(g, d, "\r\nTimed out... goodbye.\r\n");
     desc_set_connected(d, CON_CLOSE);
   }
 }
@@ -2570,7 +2570,7 @@ static void checkpointing(int sig)
 {
 #ifndef MEMORY_DEBUG
   if (!tics_passed) {
-    mud_log("SYSERR: CHECKPOINT shutdown: tics not updated. (Infinite loop suspected)");
+    mud_log_printf("SYSERR: CHECKPOINT shutdown: tics not updated. (Infinite loop suspected)");
     abort();
   } else
     tics_passed = 0;
@@ -2705,7 +2705,7 @@ int arena_watch(GameWorld *g, struct char_data *ch)
   return (room);
 }
 
-void send_to_all(GameWorld *g, const char *messg, ...)
+void send_to_all_printf(GameWorld *g, const char *messg, ...)
 {
   va_list args;
 
@@ -2717,12 +2717,12 @@ void send_to_all(GameWorld *g, const char *messg, ...)
       continue;
 
     va_start(args, messg);
-    vwrite_to_output(g, i, messg, args);
+    vwrite_to_output_printf(g, i, messg, args);
     va_end(args);
   }
 }
 
-void send_to_outdoor(GameWorld *g, const char *messg, ...)
+void send_to_outdoor_printf(GameWorld *g, const char *messg, ...)
 {
 
   if (!messg || !*messg)
@@ -2737,12 +2737,12 @@ void send_to_outdoor(GameWorld *g, const char *messg, ...)
       continue;
 
     va_start(args, messg);
-    vwrite_to_output(g, i, messg, args);
+    vwrite_to_output_printf(g, i, messg, args);
     va_end(args);
   }
 }
 
-void send_to_moon(GameWorld *g, const char *messg, ...)
+void send_to_moon_printf(GameWorld *g, const char *messg, ...)
 {
 
   if (!messg || !*messg)
@@ -2757,12 +2757,12 @@ void send_to_moon(GameWorld *g, const char *messg, ...)
       continue;
 
     va_start(args, messg);
-    vwrite_to_output(g, i, messg, args);
+    vwrite_to_output_printf(g, i, messg, args);
     va_end(args);
   }
 }
 
-void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
+void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg, ...)
 {
 
   if (!messg || !*messg)
@@ -2778,18 +2778,18 @@ void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...)
     else {
       if (type == 0) {
         va_start(args, messg);
-        vwrite_to_output(g, i, messg, args);
+        vwrite_to_output_printf(g, i, messg, args);
         va_end(args);
       } else if (char_is_outside(g, i->character) && char_get_skill(i->character, SKILL_SPOT) >= axion_dice(g, -5)) {
         va_start(args, messg);
-        vwrite_to_output(g, i, messg, args);
+        vwrite_to_output_printf(g, i, messg, args);
         va_end(args);
       }
     }
   }
 }
 
-void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...)
+void send_to_room_printf(GameWorld *g, room_vnum room, const char *messg, ...)
 {
   va_list args;
 
@@ -2801,7 +2801,7 @@ void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...)
       continue;
 
     va_start(args, messg);
-    vwrite_to_output(g, char_get_desc(i), messg, args);
+    vwrite_to_output_printf(g, char_get_desc(i), messg, args);
     va_end(args);
   }
 
@@ -2815,7 +2815,7 @@ void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...)
         *buf = '\0';
         sprintf(buf, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", messg);
         va_start(args, messg);
-        vwrite_to_output(g, d, buf, args);
+        vwrite_to_output_printf(g, d, buf, args);
         va_end(args);
       }
     }
@@ -2826,7 +2826,7 @@ void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...)
         *buf = '\0';
         sprintf(buf, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", messg);
         va_start(args, messg);
-        vwrite_to_output(g, d, buf, args);
+        vwrite_to_output_printf(g, d, buf, args);
         va_end(args);
       }
     }
@@ -2961,7 +2961,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
   *(++buf) = '\0';
 
   if (char_get_desc(to))
-    write_to_output(g, char_get_desc(to), "%s", CAP(lbuf));
+    write_to_output_printf(g, char_get_desc(to), "%s", CAP(lbuf));
 
   if ((char_is_npc(to) && g->dg_act_check) && (to != ch))
     act_mtrigger(g, to, lbuf, ch, dg_victim, obj, dg_target, dg_arg);
@@ -3180,16 +3180,16 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 
   if (found == g->help_table.end() || strncasecmp(found->keywords.c_str(), entry, len))
     return;
-  write_to_output(g, t, "\r\n%s\r\n", found->entry.c_str());
+  write_to_output_printf(g, t, "\r\n%s\r\n", found->entry.c_str());
 }
 
 /* Thx to Jamie Nelson of 4D for this contribution */
-void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...)
+void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...)
 {
   va_list args;
 
   if (start > finish) {
-    mud_log("send_to_range passed start room value greater then finish.");
+    mud_log_printf("send_to_range passed start room value greater then finish.");
     return;
   }
   if (messg == nullptr)
@@ -3202,7 +3202,7 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *
           continue;
 
         va_start(args, messg);
-        vwrite_to_output(g, char_get_desc(i), messg, args);
+        vwrite_to_output_printf(g, char_get_desc(i), messg, args);
         va_end(args);
       }
     }

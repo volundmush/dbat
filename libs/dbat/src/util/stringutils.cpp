@@ -448,7 +448,7 @@ char *str_printf(const char *format, ...)
   return s;
 }
 
-std::string str_format(const char *format, ...)
+std::string str_format_printf(const char *format, ...)
 {
   va_list args;
   char *s;

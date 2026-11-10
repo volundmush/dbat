@@ -32,9 +32,9 @@ void fly_zone(GameWorld *g, struct zone_data *zone, const char *messg, struct ch
   for (descriptor_data *i : each_desc(g)) {
     if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(g, i->character) && (char_get_in_room(i->character) != NOWHERE) && (room_get_zone(g, char_get_in_room(i->character)) == zone) && i->character != ch) {
       if (char_plr_flagged(i->character, PLR_DISGUISED)) {
-        write_to_output(g, i, "A disguised figure %s", messg);
+        write_to_output_printf(g, i, "A disguised figure %s", messg);
       } else {
-        write_to_output(g, i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ", get_i_name(i->character, ch), messg);
+        write_to_output_printf(g, i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ", get_i_name(i->character, ch), messg);
       }
     }
   }
@@ -80,20 +80,20 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
     }
     if (type == 0) {
       if (getEffMaxPL(g, ch) > getEffMaxPL(g, tch)) {
-        write_to_output(g, i, "%s who is stronger than you. They are nearby.\r\n", messg);
+        write_to_output_printf(g, i, "%s who is stronger than you. They are nearby.\r\n", messg);
       } else if (getEffMaxPL(g, ch) >= getEffMaxPL(g, tch) * .9) {
-        write_to_output(g, i, "%s who is near your strength. They are nearby.\r\n", messg);
+        write_to_output_printf(g, i, "%s who is near your strength. They are nearby.\r\n", messg);
       } else if (getEffMaxPL(g, ch) >= getEffMaxPL(g, tch) * .6) {
-        write_to_output(g, i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
+        write_to_output_printf(g, i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
       } else if (getEffMaxPL(g, ch) >= getEffMaxPL(g, tch) * .4) {
-        write_to_output(g, i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
+        write_to_output_printf(g, i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
       } else {
         continue;
       }
       if (readIntro(tch, ch) == 1) {
-        write_to_output(g, i, "@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
+        write_to_output_printf(g, i, "@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
       } else if (read_sense_memory(g, ch, tch)) {
-        write_to_output(g, i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
+        write_to_output_printf(g, i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
       }
     } else if (planet_check(g, ch, tch)) {
       char *blah = sense_location(g, ch);
@@ -136,9 +136,9 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
         sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
       }
       if (strstr(messg, "land"))
-        write_to_output(g, i, "@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah);
+        write_to_output_printf(g, i, "@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah);
       else
-        write_to_output(g, i, "@YYou sense %s%s%s %s!@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
+        write_to_output_printf(g, i, "@YYou sense %s%s%s %s!@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
     }
   }
 }
@@ -217,45 +217,45 @@ void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int 
     if (type == 0) {
       if (num == 1) {
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
-          write_to_output(g, i, "%s@n", messg);
+          write_to_output_printf(g, i, "%s@n", messg);
         }
       } else {
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
-          write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
+          write_to_output_printf(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
-          write_to_output(g, i, "%s\r\n", messg);
+          write_to_output_printf(g, i, "%s\r\n", messg);
         }
       }
     } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
       if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
       } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
       } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
       } else {
-        write_to_output(g, i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(getCurPL(g, ch)));
+        write_to_output_printf(g, i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(getCurPL(g, ch)));
       }
     } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
       char *blah = sense_location(g, ch);
       if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
       } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
       } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
-        write_to_output(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+        write_to_output_printf(g, i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
       } else {
-        write_to_output(g, i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(getCurPL(g, ch)));
+        write_to_output_printf(g, i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(getCurPL(g, ch)));
       }
     }
   }
@@ -284,30 +284,30 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
       continue;
     }
     if (room_flagged(g, char_get_in_room(i->character), ROOM_EARTH) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_VEGETA) && room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_planet_zenith(g, char_get_in_room(i->character)) && room_planet_zenith(g, char_get_in_room(ch))) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_NAMEK) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KONACK) && room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_YARDRAT) && room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_FRIGID) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KANASSA) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_ARLIA) && room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_AETHER) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
-      send_to_char(g, i->character, "%s", message);
+      send_to_char_printf(g, i->character, "%s", message);
     }
   }
 }
 
-void send_to_imm(GameWorld *g, const char *messg, ...)
+void send_to_imm_printf(GameWorld *g, const char *messg, ...)
 {
 
   if (!messg || !*messg)
@@ -326,16 +326,16 @@ void send_to_imm(GameWorld *g, const char *messg, ...)
     if (char_plr_flagged(i->character, PLR_WRITING)) {
       continue;
     }
-    write_to_output(g, i, "@g[ Log: ");
+    write_to_output_printf(g, i, "@g[ Log: ");
     va_list args;
     va_start(args, messg);
 
-    vwrite_to_output(g, i, messg, args);
-    write_to_output(g, i, " ]@n\n");
+    vwrite_to_output_printf(g, i, messg, args);
+    write_to_output_printf(g, i, " ]@n\n");
     va_end(args);
   }
   va_list args;
   va_start(args, messg);
-  mud_vlog(messg, args);
+  mud_vlog_printf(messg, args);
   va_end(args);
 }

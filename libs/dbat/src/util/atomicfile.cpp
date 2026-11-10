@@ -9,7 +9,7 @@
 
 static void atomic_log(const char *operation, const char *filename)
 {
-  mud_log("SYSERR: atomic save: %s failed for %s: %s", operation, filename, strerror(errno));
+  mud_log_printf("SYSERR: atomic save: %s failed for %s: %s", operation, filename, strerror(errno));
 }
 
 FILE *atomic_open(struct atomic_file *af, const char *path, bool backup)
@@ -18,7 +18,7 @@ FILE *atomic_open(struct atomic_file *af, const char *path, bool backup)
   af->backup = backup;
   if (snprintf(af->path, sizeof(af->path), "%s", path) >= (int)sizeof(af->path) ||
       snprintf(af->tmp, sizeof(af->tmp), "%s.tmp", path) >= (int)sizeof(af->tmp)) {
-    mud_log("SYSERR: atomic save: path too long: %s", path);
+    mud_log_printf("SYSERR: atomic save: path too long: %s", path);
     return nullptr;
   }
   if (!(af->fp = fopen(af->tmp, "w")))

@@ -41,11 +41,11 @@ void game_world_destroy(GameWorld *g)
 
 void game_world_free_contents(GameWorld *g)
 {
-  mud_log("Clearing game world.");
+  mud_log_printf("Clearing game world.");
   destroy_db(g);
 
   if (!g->scheck) {
-    mud_log("Clearing other memory.");
+    mud_log_printf("Clearing other memory.");
     free_bufpool(g);                        /* comm.c */
     free_player_index(g);                   /* players.c */
     clear_free_list(g);                     /* mail.c */

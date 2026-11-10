@@ -44,7 +44,7 @@
 void clear_screen(GameWorld *g, struct descriptor_data *d)
 {
   if (char_prf_flagged(g, d->character, PRF_CLS))
-    write_to_output(g, d, "[H[J");
+    write_to_output_printf(g, d, "[H[J");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -145,7 +145,7 @@ ACMD(do_oasis)
       break;
 
     default:
-      mud_log("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - (%d)", subcmd);
+      mud_log_printf("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - (%d)", subcmd);
       return;
   }
 
@@ -184,7 +184,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
         delete OLC_ROOM(d);
         break;
       default: /* The caller has screwed up. */
-        mud_log("SYSERR: cleanup_olc: Unknown type!");
+        mud_log_printf("SYSERR: cleanup_olc: Unknown type!");
         break;
     }
   }
@@ -283,13 +283,13 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
 
     if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", char_get_name(d->character));
+      mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_TEDIT)
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", char_get_name(d->character));
+      mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_HEDIT)
-      mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
+      mudlog_printf(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), OLC_ZNUM(d) ? OLC_ZNUM(d)->number : NOWHERE, char_get_olc_zone(g, d->character));
+      mudlog_printf(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), OLC_ZNUM(d) ? OLC_ZNUM(d)->number : NOWHERE, char_get_olc_zone(g, d->character));
 
     desc_set_connected(d, CON_PLAYING);
   }
@@ -372,10 +372,10 @@ bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum)
 
 void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone)
 {
-  send_to_char(g, ch, "You do not have permission to edit zone %d.", zone);
+  send_to_char_printf(g, ch, "You do not have permission to edit zone %d.", zone);
   if (char_get_olc_zone(g, ch) != NOWHERE)
-    send_to_char(g, ch, "  Try zone %d.", char_get_olc_zone(g, ch));
-  send_to_char(g, ch, "\r\n");
-  mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
-         char_get_name(ch), zone, char_get_olc_zone(g, ch));
+    send_to_char_printf(g, ch, "  Try zone %d.", char_get_olc_zone(g, ch));
+  send_to_char_printf(g, ch, "\r\n");
+  mudlog_printf(g, LOG_BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
+                char_get_name(ch), zone, char_get_olc_zone(g, ch));
 }

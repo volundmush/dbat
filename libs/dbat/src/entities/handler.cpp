@@ -56,10 +56,10 @@ void update_char_objects(GameWorld *g, struct char_data *ch)
         j = obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS);
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, 3);
         if (j == 1) {
-          send_to_char(g, ch, "Your light begins to flicker and fade.\r\n");
+          send_to_char_printf(g, ch, "Your light begins to flicker and fade.\r\n");
           act(g, "$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
         } else if (j == 0) {
-          send_to_char(g, ch, "Your light sputters out and dies.\r\n");
+          send_to_char_printf(g, ch, "Your light sputters out and dies.\r\n");
           act(g, "$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
           room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
         }

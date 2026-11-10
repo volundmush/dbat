@@ -52,7 +52,7 @@ int trgvar_in_room(GameWorld *g, room_vnum vnum)
   int i          = 0;
 
   if (!room_of(g, rnum)) {
-    script_log(g, "people.vnum: world[rnum] does not exist");
+    script_log_printf(g, "people.vnum: world[rnum] does not exist");
     return (-1);
   }
 
@@ -528,12 +528,12 @@ static void log_lookup_miss(GameWorld *g, const char *what, long uid, bool found
 
   dg_context_str(g, ctx, sizeof(ctx));
   if (found_other)
-    mud_log("%s: uid %ld (%s range) belongs to a %s, not a %s%s",
-            what, uid, uid_range_name(uid), is_obj ? "character" : "object",
-            is_obj ? "object" : "character", ctx);
+    mud_log_printf("%s: uid %ld (%s range) belongs to a %s, not a %s%s",
+                   what, uid, uid_range_name(uid), is_obj ? "character" : "object",
+                   is_obj ? "object" : "character", ctx);
   else
-    mud_log("%s: no entity with uid %ld (%s range; next mob uid %ld, next obj uid %ld)%s",
-            what, uid, uid_range_name(uid), g->max_mob_id, g->max_obj_id, ctx);
+    mud_log_printf("%s: no entity with uid %ld (%s range; next mob uid %ld, next obj uid %ld)%s",
+                   what, uid, uid_range_name(uid), g->max_mob_id, g->max_obj_id, ctx);
 }
 
 static struct char_data *find_char_by_uid_in_lookup_table(GameWorld *g, long uid)
@@ -571,7 +571,7 @@ void char_register(GameWorld *g, struct char_data *ch)
     return;
   if (g->characters.find(id) == ch)
     return;
-  mud_log("SYSERR: char_register: uid %ld already maps to another character; replacing it with this character.", id);
+  mud_log_printf("SYSERR: char_register: uid %ld already maps to another character; replacing it with this character.", id);
   g->characters.remove(id, g->characters.find(id));
   g->characters.add(id, ch);
 }
@@ -584,7 +584,7 @@ void obj_register(GameWorld *g, struct obj_data *obj)
     return;
   if (g->objects.find(id) == obj)
     return;
-  mud_log("SYSERR: obj_register: uid %ld already maps to another object; replacing it with this object.", id);
+  mud_log_printf("SYSERR: obj_register: uid %ld already maps to another object; replacing it with this object.", id);
   g->objects.remove(id, g->objects.find(id));
   g->objects.add(id, obj);
 }
@@ -610,7 +610,7 @@ static long next_uid(GameWorld *g, long *counter, long base, long max, const cha
   long tries;
 
   if (!*warned && *counter - base >= (max - base) / 10 * 9) {
-    mud_log("SYSERR: %s UIDs are 90%% used (next %ld of %ld..%ld).", what, *counter, base, max);
+    mud_log_printf("SYSERR: %s UIDs are 90%% used (next %ld of %ld..%ld).", what, *counter, base, max);
     *warned = true;
   }
 
@@ -618,7 +618,7 @@ static long next_uid(GameWorld *g, long *counter, long base, long max, const cha
     long uid;
 
     if (*counter < base || *counter > max) {
-      mud_log("SYSERR: %s UID range exhausted; wrapping to %ld and reusing free UIDs.", what, base);
+      mud_log_printf("SYSERR: %s UID range exhausted; wrapping to %ld and reusing free UIDs.", what, base);
       *counter = base;
     }
     uid = (*counter)++;
@@ -626,7 +626,7 @@ static long next_uid(GameWorld *g, long *counter, long base, long max, const cha
       return uid;
   }
 
-  mud_log("SYSERR: no free %s UIDs left!", what);
+  mud_log_printf("SYSERR: no free %s UIDs left!", what);
   return base;
 }
 
@@ -642,10 +642,10 @@ long dg_new_obj_uid(GameWorld *g)
 
 void dg_log_uid_stats(GameWorld *g)
 {
-  mud_log("DG UIDs: next mob %ld (%.4f%% used), next obj %ld (%.4f%% used), lookup entries %ld",
-          g->max_mob_id, 100.0 * (g->max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
-          g->max_obj_id, 100.0 * (g->max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
-          (long)(g->characters.size() + g->objects.size()));
+  mud_log_printf("DG UIDs: next mob %ld (%.4f%% used), next obj %ld (%.4f%% used), lookup entries %ld",
+                 g->max_mob_id, 100.0 * (g->max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
+                 g->max_obj_id, 100.0 * (g->max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
+                 (long)(g->characters.size() + g->objects.size()));
 }
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[])

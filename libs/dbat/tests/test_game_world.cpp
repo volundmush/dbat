@@ -381,7 +381,7 @@ static void check_random_color(GameWorld *a, GameWorld *b)
 
   circle_srandom(a, 42);
   circle_srandom(b, 42);
-  write_to_output(a, &d, "@xrandom colour");
+  write_to_output_printf(a, &d, "@xrandom colour");
   (void)circle_random(b);
   second = circle_random(b);
   CHECK(circle_random(a) == second);
@@ -525,7 +525,7 @@ static void check_objects_off_the_ground(void)
 
   /* nobody is listening nowhere */
   g = make_world(700, 1);
-  send_to_room(g, NOWHERE, "unheard");
+  send_to_room_printf(g, NOWHERE, "unheard");
   free_world(g);
 
   delete holder;

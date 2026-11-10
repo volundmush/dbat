@@ -75,7 +75,7 @@ static bool prereset_gauntlet_zone(GameWorld *g)
       {2441, 2419}
   };
 
-  mud_log("Special Reset: zone %d: Resetting Gauntlet", RESET_GAUNTLET);
+  mud_log_printf("Special Reset: zone %d: Resetting Gauntlet", RESET_GAUNTLET);
 
   /* Count the number of players currently in the gauntlet */
   for (i = 0; i < NUM_GAUNTLET_ROOMS; i++) {
@@ -84,11 +84,11 @@ static bool prereset_gauntlet_zone(GameWorld *g)
 
   /* No players in the gauntlet - normal reset will do */
   if (gauntlet_players == 0) {
-    mud_log("Special Reset: zone %d: No players in Gauntlet - executing normal reset", RESET_GAUNTLET);
+    mud_log_printf("Special Reset: zone %d: No players in Gauntlet - executing normal reset", RESET_GAUNTLET);
     return PERFORM_NORMAL_RESET;
   }
 
-  mud_log("Special Reset: zone %d: %d players in Gauntlet - special reset only", RESET_GAUNTLET, gauntlet_players);
+  mud_log_printf("Special Reset: zone %d: %d players in Gauntlet - special reset only", RESET_GAUNTLET, gauntlet_players);
 
   for (i = 0; i < NUM_GAUNTLET_ROOMS; i++) {
     if (check_mob_in_room(g, gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == false) {
@@ -100,7 +100,7 @@ static bool prereset_gauntlet_zone(GameWorld *g)
           if ((mob = read_mobile(g, gauntlet_mobs[i].vmob)) != nullptr) {
             /* And put it in the room */
             char_to_room(g, mob, gauntlet_mobs[i].vroom);
-            mud_log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET, gauntlet_mobs[i].vmob, char_get_name(mob));
+            mud_log_printf("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET, gauntlet_mobs[i].vmob, char_get_name(mob));
           }
         }
       }

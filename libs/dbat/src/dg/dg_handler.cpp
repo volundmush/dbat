@@ -260,5 +260,5 @@ void delete_variables(const char *charname)
     return;
 
   if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
+    mud_log_printf("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
 }

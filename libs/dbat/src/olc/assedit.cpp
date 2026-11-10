@@ -49,7 +49,7 @@ ACMD(do_assedit)
 
   for (descriptor_data *dd : each_desc(g)) {
     if (dd->connected == CON_ASSEDIT) {
-      send_to_char(g, ch, "Assemblies are already being editted by someone.\r\n");
+      send_to_char_printf(g, ch, "Assemblies are already being editted by someone.\r\n");
       return;
     }
   }
@@ -70,11 +70,11 @@ ACMD(do_assedit)
       if (!isdigit(buf2[0])) {
         nodigit(g, d);
       } else if (!obj_proto_of(g, parse_int(buf2))) {
-        send_to_char(g, d->character, "You need to create the assembly object before you can create the new assembly.\r\n");
+        send_to_char_printf(g, d->character, "You need to create the assembly object before you can create the new assembly.\r\n");
         return;
       } else {
         assemblyCreate(g, parse_int(buf2), 0);
-        send_to_char(g, d->character, "Assembly Created.\r\n");
+        send_to_char_printf(g, d->character, "Assembly Created.\r\n");
         assemblySaveAssemblies(g);
         return;
       }
@@ -83,7 +83,7 @@ ACMD(do_assedit)
         nodigit(g, d);
       else {
         assemblyDestroy(g, parse_int(buf2));
-        send_to_char(g, d->character, "Assembly Deleted.\r\n");
+        send_to_char_printf(g, d->character, "Assembly Deleted.\r\n");
         assemblySaveAssemblies(g);
         return;
       }
@@ -110,7 +110,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
   OLC_ASSEDIT(d)         = new ASSEMBLY();
 
   if ((pOldAssembly = assemblyGetAssemblyPtr(g, number)) == nullptr) {
-    send_to_char(g, d->character, "That assembly does not exist\r\n");
+    send_to_char_printf(g, d->character, "That assembly does not exist\r\n");
     cleanup_olc(g, d, CLEANUP_ALL);
     return;
   }
@@ -131,7 +131,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
      */
 
   if (!obj_proto_of(g, g->lRnum = OLC_ASSEDIT(d)->lVnum)) {
-    send_to_char(g, d->character, "Assembled item may not exist, check the vnum and assembles (show assemblies). \r\n");
+    send_to_char_printf(g, d->character, "Assembled item may not exist, check the vnum and assembles (show assemblies). \r\n");
     cleanup_olc(g, d, CLEANUP_ALL); /* for right now we just get out! */
     return;
   }
@@ -150,41 +150,41 @@ static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   sprinttype(OLC_ASSEDIT(d)->uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
 
 #if defined(CLEAR_SCREEN)
-  send_to_char(g, d->character, "%c[H%c[J", 27, 27);
+  send_to_char_printf(g, d->character, "%c[H%c[J", 27, 27);
 #endif
 
-  send_to_char(g, d->character,
-               "Assembly Number: @c%d@n\r\n"
-               "Assembly Name  : @y%s@n\r\n"
-               "Assembly Type  : @y%s@n\r\n"
-               "Components:\r\n",
-               OLC_ASSEDIT(d)->lVnum,
-               obj_get_short_description(obj_proto_of(g, OLC_ASSEDIT(d)->lVnum)),
-               szAssmType);
+  send_to_char_printf(g, d->character,
+                      "Assembly Number: @c%d@n\r\n"
+                      "Assembly Name  : @y%s@n\r\n"
+                      "Assembly Type  : @y%s@n\r\n"
+                      "Components:\r\n",
+                      OLC_ASSEDIT(d)->lVnum,
+                      obj_get_short_description(obj_proto_of(g, OLC_ASSEDIT(d)->lVnum)),
+                      szAssmType);
 
   if (OLC_ASSEDIT(d)->lNumComponents <= 0)
-    send_to_char(g, d->character, "   < NONE > \r\n");
+    send_to_char_printf(g, d->character, "   < NONE > \r\n");
   else {
     for (i = 0; i < OLC_ASSEDIT(d)->lNumComponents; i++) {
       if (!obj_proto_of(g, g->lRnum = OLC_ASSEDIT(d)->pComponents[i].lVnum)) {
-        send_to_char(g, d->character, "@g%2d@n) @y ERROR --- Contact an Implementor @n\r\n ", i + 1);
+        send_to_char_printf(g, d->character, "@g%2d@n) @y ERROR --- Contact an Implementor @n\r\n ", i + 1);
       } else {
-        send_to_char(g, d->character,
-                     "@g%2d@n) [@c%5d@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
-                     i + 1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
-                     obj_get_short_description(obj_proto_of(g, g->lRnum)),
-                     (OLC_ASSEDIT(d)->pComponents[i].bInRoom ? "Yes" : "No"),
-                     (OLC_ASSEDIT(d)->pComponents[i].bExtract ? "Yes" : "No"));
+        send_to_char_printf(g, d->character,
+                            "@g%2d@n) [@c%5d@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
+                            i + 1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
+                            obj_get_short_description(obj_proto_of(g, g->lRnum)),
+                            (OLC_ASSEDIT(d)->pComponents[i].bInRoom ? "Yes" : "No"),
+                            (OLC_ASSEDIT(d)->pComponents[i].bExtract ? "Yes" : "No"));
       }
     }
   }
-  send_to_char(g, d->character,
-               "@gA@n) Add a new component.\r\n"
-               "@gE@n) Edit a component.\r\n"
-               "@gD@n) Delete a component.\r\n"
-               "@gT@n) Change Assembly Type.\r\n"
-               "@gQ@n) Quit.\r\n"
-               "\r\nEnter your choice : ");
+  send_to_char_printf(g, d->character,
+                      "@gA@n) Add a new component.\r\n"
+                      "@gE@n) Edit a component.\r\n"
+                      "@gD@n) Delete a component.\r\n"
+                      "@gT@n) Change Assembly Type.\r\n"
+                      "@gQ@n) Quit.\r\n"
+                      "\r\nEnter your choice : ");
 
   OLC_MODE(d) = ASSEDIT_MAIN_MENU;
 
@@ -218,7 +218,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
                                  OLC_ASSEDIT(d)->pComponents[i].bExtract,
                                  OLC_ASSEDIT(d)->pComponents[i].bInRoom);
           }
-          send_to_char(g, d->character, "\r\nSaving all assemblies\r\n");
+          send_to_char_printf(g, d->character, "\r\nSaving all assemblies\r\n");
           assemblySaveAssemblies(g);
 
           /*       free(pTComponents);
@@ -230,34 +230,34 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 't':
         case 'T':
 #if defined(CLEAR_SCREEN)
-          send_to_char(g, d->character, "%c[H%c[J", 27, 27);
+          send_to_char_printf(g, d->character, "%c[H%c[J", 27, 27);
 #endif
           for (counter = 0; counter < MAX_ASSM; counter++) {
-            send_to_char(g, d->character, "@g%2d@n) %-20.20s %s", counter + 1,
-                         AssemblyTypes[counter], !(++columns % 2) ? "\r\n" : "");
+            send_to_char_printf(g, d->character, "@g%2d@n) %-20.20s %s", counter + 1,
+                                AssemblyTypes[counter], !(++columns % 2) ? "\r\n" : "");
           }
-          send_to_char(g, d->character, "Enter the assembly type : ");
+          send_to_char_printf(g, d->character, "Enter the assembly type : ");
           OLC_MODE(d) = ASSEDIT_EDIT_TYPES;
 
           break;
         case 'a':
         case 'A': /* add a new component */
-          send_to_char(g, d->character, "\r\nWhat is the vnum of the new component?");
+          send_to_char_printf(g, d->character, "\r\nWhat is the vnum of the new component?");
           OLC_MODE(d) = ASSEDIT_ADD_COMPONENT;
           break;
 
         case 'e':
         case 'E': /* edit a component */
-          send_to_char(g, d->character, "\r\nEdit which component? ");
+          send_to_char_printf(g, d->character, "\r\nEdit which component? ");
           OLC_MODE(d) = ASSEDIT_EDIT_COMPONENT;
           break;
         case 'd':
         case 'D': /* delete a component */
           if ((pos < 0) || pos > OLC_ASSEDIT(d)->lNumComponents) {
-            send_to_char(g, d->character, "\r\nWhich component do you wish to remove?");
+            send_to_char_printf(g, d->character, "\r\nWhich component do you wish to remove?");
             assedit_disp_menu(g, d);
           } else {
-            send_to_char(g, d->character, "\r\nWhich component do you wish to remove?");
+            send_to_char_printf(g, d->character, "\r\nWhich component do you wish to remove?");
             OLC_MODE(d) = ASSEDIT_DELETE_COMPONENT;
           }
           break;
@@ -307,7 +307,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         assedit_disp_menu(g, d);
 
       } else {
-        send_to_char(g, d->character, "That object does not exist. Please try again\r\n");
+        send_to_char_printf(g, d->character, "That object does not exist. Please try again\r\n");
         assedit_disp_menu(g, d);
       }
       break;
@@ -363,7 +363,7 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
 
         default:
-          send_to_char(g, d->character, "Is the item to be extracted when the assembly is created? (Y/N)");
+          send_to_char_printf(g, d->character, "Is the item to be extracted when the assembly is created? (Y/N)");
           break;
       }
       break;
@@ -382,39 +382,39 @@ void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
 
         default:
-          send_to_char(g, d->character, "Object in the room when assembly is created? (n =  in inventory):");
+          send_to_char_printf(g, d->character, "Object in the room when assembly is created? (n =  in inventory):");
           break;
       }
       break;
 
     default: /* default for whole assedit parse function */
              /* we should never get here */
-      mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC assedit_parse(): Reached default case!");
-      send_to_char(g, d->character, "Opps...\r\n");
-      desc_set_connected(d, CON_PLAYING);
-      break;
+             mudlog_printf(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC assedit_parse(): Reached default case!");
+             send_to_char_printf(g, d->character, "Opps...\r\n");
+             desc_set_connected(d, CON_PLAYING);
+             break;
   }
 }
 /* End of Assedit Parse */
 
 static void assedit_edit_extract(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char(g, d->character, "Is the item to be extracted when the assembly is created? (Y/N):");
+  send_to_char_printf(g, d->character, "Is the item to be extracted when the assembly is created? (Y/N):");
   OLC_MODE(d) = ASSEDIT_EDIT_EXTRACT;
   return;
 }
 
 static void assedit_edit_inroom(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char(g, d->character, "Should the object be in the room when assembly is created (n = in inventory)?");
+  send_to_char_printf(g, d->character, "Should the object be in the room when assembly is created (n = in inventory)?");
   OLC_MODE(d) = ASSEDIT_EDIT_INROOM;
   return;
 }
 
 static void nodigit(GameWorld *g, struct descriptor_data *d)
 {
-  send_to_char(g, d->character, "Usage: assedit <vnum>\r\n");
-  send_to_char(g, d->character, "     : assedit new <vnum>\r\n");
-  send_to_char(g, d->character, "     : assedit delete <vnum>\r\n");
+  send_to_char_printf(g, d->character, "Usage: assedit <vnum>\r\n");
+  send_to_char_printf(g, d->character, "     : assedit new <vnum>\r\n");
+  send_to_char_printf(g, d->character, "     : assedit delete <vnum>\r\n");
   return;
 }

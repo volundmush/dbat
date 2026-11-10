@@ -25,12 +25,12 @@ constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run bef
 
 /* comm.c */
 int arena_watch(GameWorld *g, struct char_data *ch);
-void send_to_all(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_room(GameWorld *g, room_vnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
-void send_to_outdoor(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_moon(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
-void send_to_planet(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));
-void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
+void send_to_all_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_room_printf(GameWorld *g, room_vnum room, const char *messg, ...) __attribute__((format(printf, 3, 4)));
+void send_to_outdoor_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_moon_printf(GameWorld *g, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_to_planet_printf(GameWorld *g, int type, int planet, const char *messg, ...) __attribute__((format(printf, 4, 5)));
+void send_to_range_printf(GameWorld *g, room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 4, 5)));
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
@@ -48,8 +48,8 @@ constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 /* I/O functions */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 int write_to_descriptor(int desc, const char *txt);
-size_t write_to_output(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
-size_t vwrite_to_output(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
+size_t write_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 3, 4)));
+size_t vwrite_to_output_printf(GameWorld *g, struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 3, 0)));
 void string_add(GameWorld *g, struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, std::string *txt, size_t len, long mailto);
 /* Starts the editor on target with what is there now, without string_write()'s player flags */
