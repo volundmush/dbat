@@ -197,8 +197,7 @@ ACMD(do_multiform)
 
 static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
 {
-  char blamo[MAX_INPUT_LENGTH];
-  snprintf(blamo, sizeof(blamo), "p.%s", char_get_name(ch));
+  std::string blamo = str_format("p.{}", char_get_name(ch));
 
   mob_vnum r_num;
   if (!mob_proto_of(g, r_num = 25)) {
@@ -206,21 +205,18 @@ static void generate_multiform(GameWorld *g, struct char_data *ch, int count)
     return;
   }
 
-  char clone_name[MAX_INPUT_LENGTH];
-  snprintf(clone_name, sizeof(clone_name), "%s's Clone", char_get_alias(ch));
+  std::string clone_name = str_format("{}'s Clone", char_get_alias(ch));
 
-  char clone_sdesc[MAX_INPUT_LENGTH];
-  snprintf(clone_sdesc, sizeof(clone_sdesc), "%s's @CClone@n", char_get_alias(ch));
-  char clone_ldesc[MAX_INPUT_LENGTH];
-  snprintf(clone_ldesc, sizeof(clone_ldesc), "%s's @CClone@w is standing here.@n\n", char_get_alias(ch));
+  std::string clone_sdesc = str_format("{}'s @CClone@n", char_get_alias(ch));
+  std::string clone_ldesc = str_format("{}'s @CClone@w is standing here.@n\n", char_get_alias(ch));
 
   for (int i = 0; i < count; i++) {
     char_data *clone = nullptr;
     clone            = read_mobile(g, r_num);
 
-    char_set_alias(clone, clone_name);
-    char_set_sdesc(clone, clone_sdesc);
-    char_set_ldesc(clone, clone_ldesc);
+    char_set_alias(clone, clone_name.c_str());
+    char_set_sdesc(clone, clone_sdesc.c_str());
+    char_set_ldesc(clone, clone_ldesc.c_str());
     if (char_get_ddesc(ch))
       char_set_ddesc(clone, char_get_ddesc(ch));
     char_set_race(clone, char_get_race(ch));
@@ -1250,7 +1246,8 @@ ACMD(do_hydromancy)
 
       int last = char_get_lastattack(ch);
       char_set_lastattack(ch, 500);
-      char bun[MAX_STRING_LENGTH], bunn[MAX_STRING_LENGTH];
+      std::string bun;
+      std::string bunn;
 
       if (skill < chance) {
         act(g, "@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1259,10 +1256,10 @@ ACMD(do_hydromancy)
         char_set_wait(ch, PULSE_2SEC);
       } else {
         decCurKI(g, ch, cost, 0);
-        snprintf(bun, sizeof(bun), "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n", dirs[attempt]);
-        snprintf(bunn, sizeof(bunn), "@B$n@B uses $s ki to create a rush of water flooding away toward the @C%s@B!@n", dirs[attempt]);
-        act(g, bun, true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, bunn, true, ch, nullptr, nullptr, TO_ROOM);
+        bun  = str_format("@BUsing your ki you create a rush of water flooding away toward the @C{}@B!@n", dirs[attempt]);
+        bunn = str_format("@B$n@B uses $s ki to create a rush of water flooding away toward the @C{}@B!@n", dirs[attempt]);
+        act(g, bun.c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, bunn.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
 
         for (char_data *vict : room_people(g, char_get_in_room(ch))) {
           if (vict == ch)

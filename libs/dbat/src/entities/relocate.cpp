@@ -61,18 +61,20 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
           obj_to_room(g, vehicle, obj_get_value(object, 3));
           if (obj_get_action_description(object)) {
             if (strlen(obj_get_action_description(object))) {
-              char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+              std::string nick;
+              std::string nick2;
+              std::string nick3;
               if (obj_get_vnum(g, vehicle) <= 46099 && obj_get_vnum(g, vehicle) >= 46000) {
-                sprintf(nick, "Saiyan Pod %s", obj_get_action_description(object));
-                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w", obj_get_action_description(object));
+                nick  = str_format("Saiyan Pod {}", obj_get_action_description(object));
+                nick2 = str_format("@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C{}@D)@w", obj_get_action_description(object));
               } else if (obj_get_vnum(g, vehicle) >= 46100 && obj_get_vnum(g, vehicle) <= 46199) {
-                sprintf(nick, "EDI Xenofighter MK. II %s", obj_get_action_description(object));
-                sprintf(nick2, "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w", obj_get_action_description(object));
+                nick  = str_format("EDI Xenofighter MK. II {}", obj_get_action_description(object));
+                nick2 = str_format("@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C{}@D)@w", obj_get_action_description(object));
               }
-              snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-              obj_set_name(vehicle, nick);
-              obj_set_short_description(vehicle, nick2);
-              obj_set_description(vehicle, nick3);
+              nick3 = str_format("{} is resting here@w", nick2);
+              obj_set_name(vehicle, nick.c_str());
+              obj_set_short_description(vehicle, nick2.c_str());
+              obj_set_description(vehicle, nick3.c_str());
             }
           }
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));

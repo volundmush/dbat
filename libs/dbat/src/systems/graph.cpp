@@ -145,7 +145,7 @@ ACMD(do_sradar)
   struct obj_data *vehicle = nullptr, *controls = nullptr;
   int dir = 0, noship = false;
   std::string arg;
-  char planet[20];
+  std::string planet;
 
   std::string_view rest = argument;
   arg                   = take_arg(rest);
@@ -201,22 +201,22 @@ ACMD(do_sradar)
   if (noship == false) {
     if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 40979);
-      sprintf(planet, "Earth");
+      planet = "Earth";
     } else if (str_eq_nocase(arg, "frigid") || str_eq_nocase(arg, "Frigid")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 30889);
-      sprintf(planet, "Frigid");
+      planet = "Frigid";
     } else if (str_eq_nocase(arg, "konack") || str_eq_nocase(arg, "Konack")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 27065);
-      sprintf(planet, "Konack");
+      planet = "Konack";
     } else if (str_eq_nocase(arg, "vegeta") || str_eq_nocase(arg, "Vegeta")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 32365);
-      sprintf(planet, "Vegeta");
+      planet = "Vegeta";
     } else if (str_eq_nocase(arg, "aether") || str_eq_nocase(arg, "Aether")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 41959);
-      sprintf(planet, "Aether");
+      planet = "Aether";
     } else if (str_eq_nocase(arg, "namek") || str_eq_nocase(arg, "Namek")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 42880);
-      sprintf(planet, "Namek");
+      planet = "Namek";
     } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
@@ -229,15 +229,15 @@ ACMD(do_sradar)
     } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
-      sprintf(planet, "Buoy One");
+      planet        = "Buoy One";
     } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
-      sprintf(planet, "Buoy Two");
+      planet        = "Buoy Two";
     } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
       dir           = find_first_step(g, obj_get_in_room(vehicle), rad);
-      sprintf(planet, "Buoy Three");
+      planet        = "Buoy Three";
     } else {
       send_to_char(g, ch, "@wThat is not an existing planet.@n\r\n");
       return;
@@ -247,22 +247,22 @@ ACMD(do_sradar)
   if (noship == true) {
     if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, char_get_in_room(ch), 40979);
-      sprintf(planet, "Earth");
+      planet = "Earth";
     } else if (str_eq_nocase(arg, "frigid") || str_eq_nocase(arg, "Frigid")) {
       dir = find_first_step(g, char_get_in_room(ch), 30889);
-      sprintf(planet, "Frigid");
+      planet = "Frigid";
     } else if (str_eq_nocase(arg, "konack") || str_eq_nocase(arg, "Konack")) {
       dir = find_first_step(g, char_get_in_room(ch), 27065);
-      sprintf(planet, "Konack");
+      planet = "Konack";
     } else if (str_eq_nocase(arg, "vegeta") || str_eq_nocase(arg, "Vegeta")) {
       dir = find_first_step(g, char_get_in_room(ch), 32365);
-      sprintf(planet, "Vegeta");
+      planet = "Vegeta";
     } else if (str_eq_nocase(arg, "aether") || str_eq_nocase(arg, "Aether")) {
       dir = find_first_step(g, char_get_in_room(ch), 41959);
-      sprintf(planet, "Aether");
+      planet = "Aether";
     } else if (str_eq_nocase(arg, "namek") || str_eq_nocase(arg, "Namek")) {
       dir = find_first_step(g, char_get_in_room(ch), 42880);
-      sprintf(planet, "Namek");
+      planet = "Namek";
     } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) <= 0) {
       send_to_char(g, ch, "@wYou haven't launched that buoy.\r\n");
       return;
@@ -275,15 +275,15 @@ ACMD(do_sradar)
     } else if (str_eq_nocase(arg, "buoy1") && char_get_radar1(ch) > 0) {
       room_vnum rad = char_get_radar1(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
-      sprintf(planet, "Buoy One");
+      planet        = "Buoy One";
     } else if (str_eq_nocase(arg, "buoy2") && char_get_radar2(ch) > 0) {
       room_vnum rad = char_get_radar2(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
-      sprintf(planet, "Buoy Two");
+      planet        = "Buoy Two";
     } else if (str_eq_nocase(arg, "buoy3") && char_get_radar3(ch) > 0) {
       room_vnum rad = char_get_radar3(ch);
       dir           = find_first_step(g, char_get_in_room(ch), rad);
-      sprintf(planet, "Buoy Three");
+      planet        = "Buoy Three";
     } else {
       send_to_char(g, ch, "@wThat is not an existing planet.@n\r\n");
       return;

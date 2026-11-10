@@ -213,13 +213,15 @@ ACMD(do_teach)
     return;
   }
   if (char_get_skills_base(vict, skill) > 0) {
-    char tochar[MAX_STRING_LENGTH], tovict[MAX_STRING_LENGTH], toother[MAX_STRING_LENGTH];
-    sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
-    sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
-    sprintf(toother, "@y$n@Y instructs @y$N@Y in the finer points of @C%s@Y.@n\r\n", g->spell_info[skill].name);
-    act(g, tochar, true, ch, nullptr, vict, TO_CHAR);
-    act(g, tovict, true, ch, nullptr, vict, TO_VICT);
-    act(g, toother, true, ch, nullptr, vict, TO_NOTVICT);
+    std::string tochar;
+    std::string tovict;
+    std::string toother;
+    tochar  = str_format("@YYou instruct @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
+    tovict  = str_format("@y$n@Y instructs you in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
+    toother = str_format("@y$n@Y instructs @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
+    act(g, tochar.c_str(), true, ch, nullptr, vict, TO_CHAR);
+    act(g, tovict.c_str(), true, ch, nullptr, vict, TO_VICT);
+    act(g, toother.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
     char_set_skills_base(vict, skill, char_get_skills_base(vict, skill) + 1);
     if (free == false) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (cost));
@@ -246,7 +248,7 @@ int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxs
 {
   size_t len = 0;
   int i, t, known, nlen = 0, count = 0, canknow = 0;
-  char buf2[READ_SIZE];
+  std::string buf2;
 
   std::string arg = take_arg(argument);
 
@@ -272,13 +274,13 @@ int print_skills_by_type(GameWorld *g, struct char_data *ch, char *buf, int maxs
                       g->spell_info[i].name, char_get_skills_base(ch, i) ? "known" : "unknown");
     } else if (t & SKTYPE_SKILL) {
       if (char_get_skills_mod(ch, i))
-        snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", char_get_skills_base(ch, i), char_get_skills_mod(ch, i));
+        buf2 = str_format(" (base {:d} + bonus {:d})", char_get_skills_base(ch, i), char_get_skills_mod(ch, i));
       else
-        buf2[0] = 0;
+        buf2.clear();
       count++;
       canknow = highest_skill_value(char_get_level(ch), char_get_skill(ch, i));
       nlen    = snprintf(buf + len, maxsz - len, "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
-                         g->spell_info[i].name, count, char_get_skill(ch, i), canknow, char_get_skills_perf(ch, i) > 0 ? (char_get_skills_perf(ch, i) == 1 ? "@ROver Charge" : (char_get_skills_perf(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", char_get_skills_base(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
+                         g->spell_info[i].name, count, char_get_skill(ch, i), canknow, char_get_skills_perf(ch, i) > 0 ? (char_get_skills_perf(ch, i) == 1 ? "@ROver Charge" : (char_get_skills_perf(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", char_get_skills_base(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2.c_str());
     }
     if (nlen < 0 || len + nlen >= (size_t)maxsz)
       break;
@@ -400,17 +402,16 @@ void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg)
 
 static bool is_guild_open(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, int msg)
 {
-  char buf[200];
-  *buf = 0;
+  std::string buf;
 
   if (guild_get_open(guild_nr) > g->time_info.hours &&
       guild_get_close(guild_nr) < g->time_info.hours)
-    strlcpy(buf, MSG_TRAINER_NOT_OPEN, sizeof(buf));
+    buf = MSG_TRAINER_NOT_OPEN;
 
-  if (!*buf)
+  if (buf.empty())
     return (true);
   if (msg)
-    do_say(g, keeper, buf, g->cmd_tell, 0);
+    do_say(g, keeper, buf.c_str(), g->cmd_tell, 0);
 
   return (false);
 }
@@ -1227,7 +1228,7 @@ static void read_guild_skill_line(FILE *gm_f, char *buf, int *t1, int *t2, int *
   *rv = sscanf(buf, "%d %d", t1, t2);
 }
 
-void boot_the_guilds(GameWorld *g, FILE *gm_f, char *filename, int rec_count)
+void boot_the_guilds(GameWorld *g, FILE *gm_f, const char *filename, int rec_count)
 {
   char *buf, buf2[256], *p, buf3[READ_SIZE];
   room_vnum temp;
@@ -1385,7 +1386,8 @@ static void list_all_guilds(GameWorld *g, struct char_data *ch)
       "Virtual   G.Master	Charge   Members\r\n"
       "----------------------------------------------------------------------\r\n";
   int headerlen = strlen(list_all_guilds_header);
-  char buf[MAX_STRING_LENGTH], buf1[16];
+  char buf[MAX_STRING_LENGTH];
+  std::string buf1;
 
   strcpy(buf, list_all_guilds_header); /* strcpy: OK (a short constant) */
   size_t len = headerlen;
@@ -1393,12 +1395,12 @@ static void list_all_guilds(GameWorld *g, struct char_data *ch)
     if (len >= sizeof(buf))
       break;
     if (guild_get_gm(gm_nr) == NOBODY)
-      strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
+      buf1 = "<NONE>"; /* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", mob_index_of(g, guild_get_gm(gm_nr))->vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+      buf1 = str_format("{:>6d}", mob_index_of(g, guild_get_gm(gm_nr))->vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-                    guild_get_vnum(gm_nr), buf1, guild_get_charge(gm_nr), guild_customer_string(g, gm_nr, false));
+                    guild_get_vnum(gm_nr), buf1.c_str(), guild_get_charge(gm_nr), guild_customer_string(g, gm_nr, false));
   }
 
   send_to_char(g, ch, "{}", buf);
@@ -1407,33 +1409,34 @@ static void list_all_guilds(GameWorld *g, struct char_data *ch)
 static void list_detailed_guild(GameWorld *g, struct char_data *ch, struct guild_data *gm_nr)
 {
   int i;
-  char buf[MAX_STRING_LENGTH];
-  char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
+  std::string buf;
+  std::string buf1;
+  std::string buf2;
 
   if (guild_get_gm(gm_nr) < NOBODY)
-    strcpy(buf1, "<NONE>");
+    buf1 = "<NONE>";
   else
-    sprintf(buf1, "%6d   ", mob_index_of(g, guild_get_gm(gm_nr))->vnum);
+    buf1 = str_format("{:>6d}   ", mob_index_of(g, guild_get_gm(gm_nr))->vnum);
 
-  snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Hours: %4d to %4d,  Surcharge: %5.2f\r\n",
-           guild_get_open(gm_nr), guild_get_close(gm_nr), guild_get_charge(gm_nr));
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Min Level will train: %d\r\n", guild_get_minlvl(gm_nr));
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Whom will train: %s\r\n", guild_customer_string(g, gm_nr, true));
+  buf = str_format(" Guild Master: {}\r\n", buf1);
+  buf += str_format(" Hours: {:>4d} to {:>4d},  Surcharge: {:>5.2f}\r\n",
+                    guild_get_open(gm_nr), guild_get_close(gm_nr), guild_get_charge(gm_nr));
+  buf += str_format(" Min Level will train: {:d}\r\n", guild_get_minlvl(gm_nr));
+  buf += str_format(" Whom will train: {}\r\n", guild_customer_string(g, gm_nr, true));
 
   /* now for the REAL reason why someone would want to see a Guild :) */
 
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " The GM can teach the following:\r\n");
+  buf += " The GM can teach the following:\r\n";
 
-  *buf2 = '\0';
+  buf2.clear();
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (does_guild_know(g, gm_nr, i))
-      snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2), " %s \r\n", g->spell_info[i].name);
+      buf2 += str_format(" {} \r\n", g->spell_info[i].name);
   }
 
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", buf2);
+  buf += str_format("{}", buf2);
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 }
 
 void show_guild(GameWorld *g, struct char_data *ch, char *arg)

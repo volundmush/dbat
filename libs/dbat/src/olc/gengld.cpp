@@ -84,7 +84,7 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
   struct atomic_file af;
   int j;
   FILE *guild_file;
-  char fname[64];
+  std::string fname;
   struct guild_data *guild;
 
   if (!zone_num) {
@@ -92,8 +92,8 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_num->number);
-  if (!(guild_file = atomic_open(&af, fname, false))) {
+  fname = str_format("{}{:d}.gld", GLD_PREFIX, zone_num->number);
+  if (!(guild_file = atomic_open(&af, fname.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
     return false;
   }

@@ -71,7 +71,8 @@ static void print_lockout(GameWorld *g, struct char_data *ch)
     return;
 
   FILE *file;
-  char fname[40], filler[50], line[256], buf[MAX_STRING_LENGTH * 4];
+  char fname[40], filler[50], line[256];
+  std::string buf;
   int count = 0, first = true;
 
   /* Read Introduction File */
@@ -83,31 +84,31 @@ static void print_lockout(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "The lockout file does not exist.");
     return;
   }
-  snprintf(buf, sizeof(buf), "@b------------------[ @RLOCKOUT @b]------------------@n\n");
+  buf = "@b------------------[ @RLOCKOUT @b]------------------@n\n";
   while (!feof(file)) {
     get_line(file, line);
     sscanf(line, "%49s\n", filler);
-    if (first != true && strstr(buf, filler) == nullptr) {
+    if (first != true && strstr(buf.c_str(), filler) == nullptr) {
       if (count == 0) {
-        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-23s@D|@n", filler);
+        buf += str_format("{:<23}@D|@n", filler);
         count = 1;
       } else {
-        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-23s\n", filler);
+        buf += str_format("{:<23}\n", filler);
         count = 0;
       }
     } else if (first == true) {
-      snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-23s@D|@n", filler);
+      buf += str_format("{:<23}@D|@n", filler);
       first = false;
       count = 1;
     }
     *filler = '\0';
   }
   if (count == 1) {
-    snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "\n");
+    buf += "\n";
   }
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@b------------------[ @RLOCKOUT @b]------------------@n\n");
+  buf += "@b------------------[ @RLOCKOUT @b]------------------@n\n";
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 
   fclose(file);
 }
@@ -191,13 +192,13 @@ static void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
   }
   if (found == false) {
     fprintf(fl, "%s\n", capped.c_str());
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped.c_str(), char_get_name(ch));
-    mud_log("LOCKOUT: {} sentenced by {}.", capped.c_str(), char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped.c_str(), char_get_name(ch));
+    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped, char_get_name(ch));
+    mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
+    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
   } else {
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, has had lockout removed by @c{}@W.@n\r\n", capped.c_str(), char_get_name(ch));
-    mud_log("LOCKOUT: {} sentenced by {}.", capped.c_str(), char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped.c_str(), char_get_name(ch));
+    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, has had lockout removed by @c{}@W.@n\r\n", capped, char_get_name(ch));
+    mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
+    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
   }
 
   atomic_commit(&af);
@@ -246,8 +247,8 @@ ACMD(do_reward)
     if (vict != nullptr) {
       send_to_char(g, ch, "@WYou award @C{} @D(@G{:d}@D)@W RP points.@n\r\n", char_get_name(vict), amt);
       send_to_char(g, vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G{:d}@D)@W RP points by @C{}@W.@n\r\n", amt, char_get_name(ch));
-      send_to_imm(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg.c_str(), amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg.c_str(), amt, char_get_name(ch));
+      send_to_imm(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
       char_set_rp(vict, char_get_rp(vict) + amt);
       char_set_rp(vict, char_get_rp(vict));
       if (amt <= 29) {
@@ -256,9 +257,9 @@ ACMD(do_reward)
       char_get_desc(vict)->rpp += amt;
       userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
     } else {
-      send_to_char(g, ch, "@WYou award user @C{} @D(@G{:d}@D)@W RP points.@n\r\n", arg.c_str(), amt);
-      send_to_imm(g, "ROLEPLAY: User {} has been awarded {:d} RP points by {}.", arg.c_str(), amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg.c_str(), amt, char_get_name(ch));
+      send_to_char(g, ch, "@WYou award user @C{} @D(@G{:d}@D)@W RP points.@n\r\n", arg, amt);
+      send_to_imm(g, "ROLEPLAY: User {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
       userWrite(g, nullptr, 0, amt, 0, arg.c_str());
     }
   } else {
@@ -272,9 +273,9 @@ ACMD(do_reward)
       char_get_desc(vict)->rpp += amt;
       userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
     } else {
-      send_to_char(g, ch, "@WYou deduct @D(@G{:d}@D)@W RP points from user @C{}@W.@n\r\n", amt, arg.c_str());
-      send_to_imm(g, "ROLEPLAY: User {} has had {:d} RP points deducted by {}.", arg.c_str(), amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg.c_str(), amt, char_get_name(ch));
+      send_to_char(g, ch, "@WYou deduct @D(@G{:d}@D)@W RP points from user @C{}@W.@n\r\n", amt, arg);
+      send_to_imm(g, "ROLEPLAY: User {} has had {:d} RP points deducted by {}.", arg, amt, char_get_name(ch));
+      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
       userWrite(g, nullptr, 0, amt, 0, arg.c_str());
     }
   }
@@ -444,7 +445,7 @@ ACMD(do_advance)
         false, ch, nullptr, victim, TO_VICT);
   }
 
-  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+  send_to_char(g, ch, CONFIG_OK);
 
   if (newlevel < oldlevel)
     mud_log("(GC) {} demoted {} from level {:d} to {:d}.",
@@ -500,12 +501,12 @@ ACMD(do_restore)
     }
     send_to_char(g, ch, "Okay.\r\n");
   } else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (!char_is_npc(vict) && ch != vict && char_get_admlevel(vict) >= char_get_admlevel(ch))
     send_to_char(g, ch, "They don't need your help.\r\n");
   else {
     restore_by(g, vict, ch);
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
     send_to_imm(g, "[Log: {} restored {}.]", char_get_name(ch), char_get_name(vict));
     log_imm_action(g, "RESTORE: {} has restored {}.", char_get_name(ch), char_get_name(vict));
   }
@@ -838,7 +839,7 @@ static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vi
     /*    value = parse_int(val_arg); */
     send_to_char(g, ch, "{}'s {} set to {:d}.\r\n", char_get_name(vict), set_fields[mode].cmd, value);
   } else
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
 
   switch (mode) {
     case 0:
@@ -1455,7 +1456,7 @@ ACMD(do_chown)
 
     if (!(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
       if (!k && !(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
-        send_to_char(g, ch, "{} does not appear to have the {}.\r\n", char_get_name(victim), buf2.c_str());
+        send_to_char(g, ch, "{} does not appear to have the {}.\r\n", char_get_name(victim), buf2);
         return;
       }
     }

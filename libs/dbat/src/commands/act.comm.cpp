@@ -44,7 +44,7 @@ static bool is_tell_ok(GameWorld *g, struct char_data *ch, struct char_data *vic
 static void handle_whisper(GameWorld *g, std::string &buf, struct char_data *ch, struct char_data *vict);
 static const char *overhear(GameWorld *g, std::string &buf, int type);
 static void list_languages(GameWorld *g, struct char_data *ch);
-static void garble_text(GameWorld *g, char *string, int known, int lang);
+static void garble_text(GameWorld *g, std::string &string, int known, int lang);
 
 static const char *const languages[] =
     {
@@ -101,7 +101,7 @@ ACMD(do_voice)
     return;
   }
   if (char_get_voice(ch) != nullptr) {
-    send_to_char(g, ch, "Your voice has now been set to: {}\r\n", text.c_str());
+    send_to_char(g, ch, "Your voice has now been set to: {}\r\n", text);
     char_set_voice(ch, text);
     char_set_rp(ch, char_get_rp(ch) - (1));
     char_get_desc(ch)->rpp = char_get_rp(ch);
@@ -109,7 +109,7 @@ ACMD(do_voice)
     send_to_char(g, ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
     return;
   }
-  send_to_char(g, ch, "Your voice has now been set to: {}\r\n", text.c_str());
+  send_to_char(g, ch, "Your voice has now been set to: {}\r\n", text);
   char_set_voice(ch, text);
   return;
 }
@@ -144,7 +144,7 @@ ACMD(do_languages)
   }
 }
 
-static void garble_text(GameWorld *g, char *string, int known, int lang)
+static void garble_text(GameWorld *g, std::string &string, int known, int lang)
 {
   char letters[50] = "";
   int i;
@@ -161,7 +161,7 @@ static void garble_text(GameWorld *g, char *string, int known, int lang)
       break;
   }
 
-  for (i = 0; i < (int)strlen(string); ++i) {
+  for (i = 0; i < (int)string.size(); ++i) {
     if (isalpha(string[i]) && (!known)) {
       string[i] = letters[rand_number(g, 0, (int)strlen(letters) - 1)];
     }
@@ -180,18 +180,18 @@ ACMD(do_osay)
     send_to_char(g, ch, "Yes, but WHAT do you want to osay?\r\n");
     return;
   }
-  char buf[MAX_INPUT_LENGTH];
-  char buf2[MAX_INPUT_LENGTH];
+  std::string buf;
+  std::string buf2;
 
-  snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", std::string(argument).c_str());
+  buf = str_format("@WYou @D[@mOSAY@D] @W'@w{}@W'@n", argument);
   if (!char_prf_flagged(g, ch, PRF_HIDE)) {
-    snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), std::string(argument).c_str());
+    buf2 = str_format("@W{} @D[@mOSAY@D] @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), argument);
   }
   if (char_prf_flagged(g, ch, PRF_HIDE)) {
-    snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", std::string(argument).c_str());
+    buf2 = str_format("@WAnonymous @D[@mOSAY@D] @W'@w{}@W'@n", argument);
   }
-  act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
-  act(g, buf2, false, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
+  act(g, buf2.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
 }
 
 ACMD(do_say)
@@ -199,8 +199,7 @@ ACMD(do_say)
   struct char_data *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *sch = nullptr;
   struct obj_data *obj = nullptr;
   int granted          = false;
-  char buf2[MAX_INPUT_LENGTH];
-  *buf2 = '\0';
+  std::string buf2;
 
   std::string text(skip_spaces(argument));
 
@@ -216,15 +215,15 @@ ACMD(do_say)
     send_to_char(g, ch, "Yes, but WHAT do you want to say?\r\n");
     return;
   } else {
-    char buf[MAX_INPUT_LENGTH + 70];
-    char verb[10];
+    std::string buf;
+    std::string verb;
 
     if (text[text.size() - 1] == '!') {
-      strcpy(verb, "exclaim");
+      verb = "exclaim";
     } else if (text[text.size() - 1] == '?') {
-      strcpy(verb, "ask");
+      verb = "ask";
     } else {
-      strcpy(verb, "say");
+      verb = "say";
     }
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
@@ -246,26 +245,26 @@ ACMD(do_say)
       }
     }
     if (!sch) {
-      snprintf(buf, sizeof(buf), "@w$n @W%ss, '@C%s@W'@n", verb, text.c_str());
-      act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+      buf = str_format("@w$n @W{}s, '@C{}@W'@n", verb, text);
+      act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
     } else {
-      snprintf(buf, sizeof(buf), "@w$n @Wsays to @g$N@W, '@C%s@W'@n", text.c_str());
-      snprintf(buf2, sizeof(buf2), "@w$n @Wsays to @gyou@W, '@C%s@W'@n", text.c_str());
-      act(g, buf2, true, ch, nullptr, sch, TO_VICT);
-      act(g, buf, true, ch, nullptr, sch, TO_NOTVICT);
+      buf  = str_format("@w$n @Wsays to @g$N@W, '@C{}@W'@n", text);
+      buf2 = str_format("@w$n @Wsays to @gyou@W, '@C{}@W'@n", text);
+      act(g, buf2.c_str(), true, ch, nullptr, sch, TO_VICT);
+      act(g, buf.c_str(), true, ch, nullptr, sch, TO_NOTVICT);
     }
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     } else {
-      if (strstr(verb, "says to")) {
+      if (strstr(verb.c_str(), "says to")) {
         char saytoo[200];
-        *verb = '\0';
+        verb.clear();
         snprintf(saytoo, sizeof(saytoo), "say to @g%s@W", char_get_name(sch));
-        strcpy(verb, saytoo);
+        verb = saytoo;
       }
-      snprintf(buf, sizeof(buf), "@WYou %s, '@C%s@W'@n\r\n", verb, text.c_str());
-      send_to_char(g, ch, "{}", buf);
-      add_history(g, ch, buf, HIST_SAY);
+      buf = str_format("@WYou {}, '@C{}@W'@n\r\n", verb, text);
+      send_to_char(g, ch, buf);
+      add_history(g, ch, buf.c_str(), HIST_SAY);
       if (g->SHENRON == true) {
         if (char_get_in_room(ch) == g->DRAGONR && char_by_id(g, g->EDRAGON_uid) && char_get_in_room(char_by_id(g, g->EDRAGON_uid)) == g->DRAGONR) {
           if (text.contains("wish")) {
@@ -729,7 +728,7 @@ ACMD(do_say)
 ACMD(do_gsay)
 {
   struct char_data *k;
-  char blah[MAX_INPUT_LENGTH];
+  std::string blah;
 
   argument = skip_spaces(argument);
 
@@ -744,22 +743,22 @@ ACMD(do_gsay)
   if (argument.empty())
     send_to_char(g, ch, "Yes, but WHAT do you want to group-say?\r\n");
   else {
-    char buf[MAX_STRING_LENGTH];
+    std::string buf;
 
     if (char_get_master(g, ch))
       k = char_get_master(g, ch);
     else
       k = ch;
 
-    snprintf(buf, sizeof(buf), "%s", std::string(argument).c_str());
+    buf = std::string(argument);
 
-    snprintf(blah, sizeof(blah), "$n@W tells the group @W'@G%s@W'@n\r\n", buf);
+    blah = str_format("$n@W tells the group @W'@G{}@W'@n\r\n", buf);
 
     if (char_aff_flagged(k, AFF_GROUP) && (k != ch) && char_is_awake(k)) {
       if (CONFIG_ENABLE_LANGUAGES) {
         send_to_char(g, k, "{}@W tells the group{} @W'@G{}@W'@n\r\n", char_can_see(g, k, ch) ? char_get_name(ch) : "Someone", char_get_skill(k, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
       } else {
-        act(g, blah, true, ch, nullptr, k, TO_VICT);
+        act(g, blah.c_str(), true, ch, nullptr, k, TO_VICT);
       }
     }
     for (char_data *fol : char_followers(g, k))
@@ -772,52 +771,53 @@ ACMD(do_gsay)
         if (CONFIG_ENABLE_LANGUAGES) {
           send_to_char(g, fol, "{}@W tells the group{} @W'{}@W'@n\r\n", char_can_see(g, fol, ch) ? char_get_name(ch) : "Someone", char_get_skill(fol, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
         } else {
-          act(g, blah, true, ch, nullptr, fol, TO_VICT | TO_SLEEP);
+          act(g, blah.c_str(), true, ch, nullptr, fol, TO_VICT | TO_SLEEP);
         }
       }
 
     if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     else
-      send_to_char(g, ch, "@WYou tell the group, '@G{}@W'@n\r\n", std::string(argument).c_str());
+      send_to_char(g, ch, "@WYou tell the group, '@G{}@W'@n\r\n", argument);
   }
 }
 
 static void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *arg)
 {
-  char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
+  std::string buf;
+  std::string buf2;
 
-  strcpy(buf, arg);
+  buf = arg;
 
   if (CONFIG_ENABLE_LANGUAGES) {
-    snprintf(buf2, sizeof(buf2), "@[13]%s tells you%s '%s@[13]'@n\r\n", char_can_see(g, vict, ch) ? char_get_name(ch) : "Someone", char_get_skill(vict, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
-    send_to_char(g, vict, "{}", buf2);
-    add_history(g, vict, buf2, HIST_TELL);
+    buf2 = str_format("@[13]{} tells you{} '{}@[13]'@n\r\n", char_can_see(g, vict, ch) ? char_get_name(ch) : "Someone", char_get_skill(vict, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", buf);
+    send_to_char(g, vict, buf2);
+    add_history(g, vict, buf2.c_str(), HIST_TELL);
   } else if (!char_is_npc(ch) && char_get_admlevel(vict) < 1) {
-    snprintf(buf2, sizeof(buf2), "@Y%s@Y tells you '%s'@n\r\n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), buf);
-    send_to_char(g, vict, "{}", buf2);
-    add_history(g, vict, buf2, HIST_TELL);
+    buf2 = str_format("@Y{}@Y tells you '{}'@n\r\n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), buf);
+    send_to_char(g, vict, buf2);
+    add_history(g, vict, buf2.c_str(), HIST_TELL);
   } else if (!char_is_npc(ch) && char_get_admlevel(vict) >= 1) {
-    snprintf(buf2, sizeof(buf2), "@Y%s(%s)@Y tells you '%s'@n\r\n", char_get_user(ch), char_get_name(ch), buf);
-    send_to_char(g, vict, "{}", buf2);
-    add_history(g, vict, buf2, HIST_TELL);
+    buf2 = str_format("@Y{}({})@Y tells you '{}'@n\r\n", char_get_user(ch), char_get_name(ch), buf);
+    send_to_char(g, vict, buf2);
+    add_history(g, vict, buf2.c_str(), HIST_TELL);
   } else if (char_is_npc(ch)) {
-    snprintf(buf2, sizeof(buf2), "@Y%s@Y tells you '%s'@n\r\n", char_get_name(ch), buf);
-    send_to_char(g, vict, "{}", buf2);
+    buf2 = str_format("@Y{}@Y tells you '{}'@n\r\n", char_get_name(ch), buf);
+    send_to_char(g, vict, buf2);
   }
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
   } else {
     if (!char_is_npc(ch)) {
-      snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n", char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
+      buf2 = str_format("@YYou tell {}, '{}'@n\r\n", char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
       if (char_get_admlevel(ch) < 5 && char_get_admlevel(vict) < 5 && !char_is_npc(ch) && !char_is_npc(vict)) {
         send_to_imm(g, "@GTELL: @C{}@G tells @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
       }
-      send_to_char(g, ch, "{}", buf2);
-      add_history(g, ch, buf2, HIST_TELL);
+      send_to_char(g, ch, buf2);
+      add_history(g, ch, buf2.c_str(), HIST_TELL);
     } else {
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     }
   }
 
@@ -897,7 +897,7 @@ ACMD(do_tell)
   if (found == false && !char_is_npc(ch))
     send_to_char(g, ch, "No user around with that name.");
   else if (char_is_npc(ch) && !(vict = get_player_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (is_tell_ok(g, ch, vict))
     perform_tell(g, ch, vict, buf2.c_str());
 }
@@ -984,29 +984,28 @@ ACMD(do_spec_comm)
   if (buf.empty() || buf2.empty())
     send_to_char(g, ch, "Whom do you want to {}.. and what??\r\n", action_sing);
   else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (vict == ch)
     send_to_char(g, ch, "You can't get your mouth close enough to your ear...\r\n");
   else {
-    char buf1[MAX_STRING_LENGTH];
-    char obuf[MAX_STRING_LENGTH];
+    std::string buf1;
+    std::string obuf;
 
     if (CONFIG_ENABLE_LANGUAGES) {
-      strcpy(obuf, buf2.c_str());
+      obuf = buf2;
       garble_text(g, obuf, char_get_skill(vict, char_get_speaking(ch)), char_get_speaking(ch));
-      snprintf(buf1, sizeof(buf1), "$n %s you%s '%s'", action_plur, char_get_skill(vict, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", obuf);
+      buf1 = str_format("$n {} you{} '{}'", action_plur, char_get_skill(vict, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", obuf);
     } else {
-      snprintf(buf1, sizeof(buf1), "@c$n @W%s you '@m%s@W'@n", action_plur, buf2.c_str());
+      buf1 = str_format("@c$n @W{} you '@m{}@W'@n", action_plur, buf2);
     }
 
-    act(g, buf1, false, ch, nullptr, vict, TO_VICT);
+    act(g, buf1.c_str(), false, ch, nullptr, vict, TO_VICT);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     } else {
-      char blum[MAX_INPUT_LENGTH];
-      snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2.c_str());
-      act(g, blum, true, ch, nullptr, vict, TO_CHAR);
+      std::string blum = str_format("@WYou {} @C$N@W, '@m{}@W'@n\r\n", action_sing, buf2);
+      act(g, blum.c_str(), true, ch, nullptr, vict, TO_CHAR);
     }
 
     if (subcmd == SCMD_WHISPER) {
@@ -1236,16 +1235,16 @@ ACMD(do_write)
   }
   if (!penname.empty()) { /* there were two arguments */
     if (!(paper = get_obj_in_list_vis(g, ch, papername, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "You have no {}.\r\n", papername.c_str());
+      send_to_char(g, ch, "You have no {}.\r\n", papername);
       return;
     }
     if (!(pen = get_obj_in_list_vis(g, ch, penname, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "You have no {}.\r\n", penname.c_str());
+      send_to_char(g, ch, "You have no {}.\r\n", penname);
       return;
     }
   } else { /* there was one arg.. let's see what we can find */
     if (!(paper = get_obj_in_list_vis(g, ch, papername, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "There is no {} in your inventory.\r\n", papername.c_str());
+      send_to_char(g, ch, "There is no {} in your inventory.\r\n", papername);
       return;
     }
     if (obj_get_type_flag(paper) == ITEM_PEN) { /* oops, a pen.. */
@@ -1257,7 +1256,7 @@ ACMD(do_write)
     }
     /* One object was found.. now for the other one. */
     if (!char_get_equipment(ch, WEAR_WIELD2)) {
-      send_to_char(g, ch, "You can't write with {} {} alone.\r\n", AN(papername), papername.c_str());
+      send_to_char(g, ch, "You can't write with {} {} alone.\r\n", AN(papername), papername);
       return;
     }
     if (!char_can_see_obj(g, ch, char_get_equipment(ch, WEAR_WIELD2))) {
@@ -1304,24 +1303,22 @@ ACMD(do_page)
   else if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to page?\r\n");
   else {
-    char buf[MAX_STRING_LENGTH];
-
-    snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2.c_str());
+    std::string buf = str_format("\007\007*$n* {}", buf2);
     if (str_eq_nocase(arg, "all")) {
       if (char_adm_flagged(ch, ADM_TELLALL)) {
         for (descriptor_data *d : each_desc(g))
           if (desc_get_connected(d) == CON_PLAYING && d->character)
-            act(g, buf, false, ch, nullptr, d->character, TO_VICT);
+            act(g, buf.c_str(), false, ch, nullptr, d->character, TO_VICT);
       } else
         send_to_char(g, ch, "You will never be godly enough to do that!\r\n");
       return;
     }
     if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) != nullptr) {
-      act(g, buf, false, ch, nullptr, vict, TO_VICT);
+      act(g, buf.c_str(), false, ch, nullptr, vict, TO_VICT);
       if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-        send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+        send_to_char(g, ch, CONFIG_OK);
       else
-        act(g, buf, false, ch, nullptr, vict, TO_CHAR);
+        act(g, buf.c_str(), false, ch, nullptr, vict, TO_CHAR);
     } else
       send_to_char(g, ch, "There is no such person in the game!\r\n");
   }
@@ -1333,7 +1330,7 @@ ACMD(do_page)
 
 ACMD(do_gen_comm)
 {
-  char color_on[24];
+  std::string color_on;
   char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], *msg;
 
   *buf1 = '\0';
@@ -1445,13 +1442,13 @@ ACMD(do_gen_comm)
   }
   delete_doubledollar(text);
   /* set up the color on code */
-  strlcpy(color_on, com_msgs[subcmd][3], sizeof(color_on));
+  color_on = com_msgs[subcmd][3];
 
   /* first, set up strings to be given to the communicator */
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
   } else {
-    snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
+    snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
     send_to_char(g, ch, "{}", buf2);
     add_history(g, ch, buf2, hist_type[subcmd]);
   }
@@ -1469,23 +1466,23 @@ ACMD(do_gen_comm)
         continue;
 
       if (CONFIG_ENABLE_LANGUAGES) {
-        garble_text(g, text.data(), char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
-        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", text.c_str(), color_on);
+        garble_text(g, text, char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
+        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on.c_str(), char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", text.c_str(), color_on.c_str());
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) != char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
+        snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) == char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
+        snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
       } else {
         if (char_get_admlevel(ch) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W$n %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W$n %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) < ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
+          snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on.c_str(), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) >= ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
         } else if (char_get_admlevel(i->character) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
         } else {
-          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on.c_str(), char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on.c_str());
         }
       }
 

@@ -91,10 +91,10 @@ ACMD(do_oasis_hedit)
   OLC_INDEX(d)   = search_help(g, OLC_STORAGE(d).c_str(), ADMLVL_IMPL);
 
   if (OLC_INDEX(d) == NOWHERE) {
-    send_to_char(g, ch, "Do you wish to add the '{}' help file? ", OLC_STORAGE(d).c_str());
+    send_to_char(g, ch, "Do you wish to add the '{}' help file? ", OLC_STORAGE(d));
     OLC_MODE(d) = HEDIT_CONFIRM_ADD;
   } else {
-    send_to_char(g, ch, "Do you wish to edit the '{}' help file? ", g->help_table[OLC_INDEX(d)].keywords.c_str());
+    send_to_char(g, ch, "Do you wish to edit the '{}' help file? ", g->help_table[OLC_INDEX(d)].keywords);
     OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
   }
 
@@ -149,11 +149,12 @@ static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
 {
   struct atomic_file af;
   FILE *fp;
-  char buf1[MAX_STRING_LENGTH], index_name[READ_SIZE];
+  std::string buf1;
+  std::string index_name;
   int i;
 
-  snprintf(index_name, sizeof(index_name), "%s%s", HLP_PREFIX, HELP_FILE);
-  if (!(fp = atomic_open(&af, index_name, false))) {
+  index_name = str_format("{}{}", HLP_PREFIX, HELP_FILE);
+  if (!(fp = atomic_open(&af, index_name.c_str(), false))) {
     mud_log("SYSERR: Could not write help index file");
     return;
   }
@@ -161,11 +162,11 @@ static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
   for (i = 0; i < (int)g->help_table.size(); i++) {
     if (g->help_table[i].duplicate)
       continue;
-    strlcpy(buf1, !g->help_table[i].entry.empty() ? g->help_table[i].entry.c_str() : "Empty\r\n", sizeof(buf1));
+    buf1 = !g->help_table[i].entry.empty() ? g->help_table[i].entry.c_str() : "Empty\r\n";
     strip_cr(buf1);
 
     /* Forget making a buffer, lets just write the thing now. */
-    fprintf(fp, "%s#%d\n", buf1, g->help_table[i].min_level);
+    fprintf(fp, "%s#%d\n", buf1.c_str(), g->help_table[i].min_level);
   }
   /* Write final line and close. */
   fprintf(fp, "$~\n");
@@ -210,9 +211,8 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             write_to_output(g, d, "\n@RYou must fill in the keywords before you save.@n\r\n");
           } else {
             write_to_output(g, d, "Help saved to disk.\r\n");
-            char buf[MAX_INPUT_LENGTH];
-            *buf = '\0';
-            snprintf(buf, sizeof(buf), "%s", OLC_HELP(d)->keywords.c_str());
+            std::string buf;
+            buf = OLC_HELP(d)->keywords;
             send_to_imm(g, "@gHedit@D: @w{}@G has just edited and saved, @Y{}@G.@n", char_get_alias(d->character), buf);
             hedit_save_internally(g, d);
             cleanup_olc(g, d, CLEANUP_STRUCTS);
@@ -254,17 +254,17 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           if (OLC_INDEX(d) >= (int)g->help_table.size()) {
             OLC_INDEX(d) = NOWHERE; /* what hedit_save_internally() takes to mean a new entry */
             write_to_output(g, d, "Do you wish to add the '{}' help file? ",
-                            OLC_STORAGE(d).c_str());
+                            OLC_STORAGE(d));
             OLC_MODE(d) = HEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '{}' help file? ",
-                            g->help_table[OLC_INDEX(d)].keywords.c_str());
+                            g->help_table[OLC_INDEX(d)].keywords);
             OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
           }
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\nDo you wish to edit the '{}' help file? ",
-                          g->help_table[OLC_INDEX(d)].keywords.c_str());
+                          g->help_table[OLC_INDEX(d)].keywords);
           break;
       }
       return;
@@ -284,7 +284,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\nDo you wish to add the '{}' help file? ",
-                          OLC_STORAGE(d).c_str());
+                          OLC_STORAGE(d));
           break;
       }
       return;
@@ -314,7 +314,7 @@ void hedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           send_editor_help(g, d);
           write_to_output(g, d, "Enter help entry: (/s saves /h for help)\r\n");
           if (!OLC_HELP(d)->entry.empty()) {
-            write_to_output(g, d, "{}", OLC_HELP(d)->entry.c_str());
+            write_to_output(g, d, OLC_HELP(d)->entry);
           }
           string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0);
           OLC_VAL(d) = 1;

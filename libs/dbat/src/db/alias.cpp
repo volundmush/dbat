@@ -167,7 +167,7 @@ ACMD(do_alias)
       send_to_char(g, ch, " None.\r\n");
     else
       for (const struct alias_data &each : *aliases)
-        send_to_char(g, ch, "{:<15} {}\r\n", each.alias.c_str(), each.replacement.c_str());
+        send_to_char(g, ch, "{:<15} {}\r\n", each.alias, each.replacement);
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
     bool had = (a = find_alias(*aliases, arg)) != nullptr;

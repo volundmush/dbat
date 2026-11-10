@@ -247,7 +247,7 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
         case 'T':
           send_to_char(g, ch, "{}Attach trigger @c{}@y [@c{:d}@y] to {}\r\n",
                        ZOCMD.if_flag ? " then " : "",
-                       find_trigger(g, ZOCMD.arg2)->proto->name.c_str(),
+                       find_trigger(g, ZOCMD.arg2)->proto->name,
                        ZOCMD.arg2,
                        ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" : ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
           break;
@@ -293,7 +293,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
   if (!room_get_ex_description(rm).empty()) {
     send_to_char(g, ch, "Extra descs:");
     for (const extra_descr_data &desc : room_get_ex_description(rm))
-      send_to_char(g, ch, " [@c{}@n]", desc.keyword.c_str());
+      send_to_char(g, ch, " [@c{}@n]", desc.keyword);
     send_to_char(g, ch, "\r\n");
   }
 
@@ -333,15 +333,15 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
   }
 
   for (i = 0; i < NUM_OF_DIRS; i++) {
-    char buf1[128];
+    std::string buf1;
 
     if (!room_get_dir_option(rm, i))
       continue;
 
     if (room_get_dir_option(rm, i)->to_room == NOWHERE)
-      snprintf(buf1, sizeof(buf1), " @cNONE@n");
+      buf1 = " @cNONE@n";
     else
-      snprintf(buf1, sizeof(buf1), "@c%5d@n", room_get_dir_option(rm, i)->to_room);
+      buf1 = str_format("@c{:>5d}@n", room_get_dir_option(rm, i)->to_room);
 
     sprintbit(room_get_dir_option(rm, i)->exit_info, exit_bits, buf2, sizeof(buf2));
 
@@ -407,7 +407,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   if (!obj_get_ex_description(j).empty()) {
     send_to_char(g, ch, "Extra descs:");
     for (const extra_descr_data &desc : obj_get_ex_description(j))
-      send_to_char(g, ch, " [@g{}@n]", desc.keyword.c_str());
+      send_to_char(g, ch, " [@g{}@n]", desc.keyword);
     send_to_char(g, ch, "\r\n");
   }
 
@@ -560,7 +560,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
 static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_data *k)
 {
   char buf[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf2;
   int i, i2, column, found = false;
   struct obj_data *chair;
   struct affected_type *aff;
@@ -595,7 +595,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   } else {
     snprintf(buf, sizeof(buf), "%s", char_sensei_name(k));
   }
-  snprintf(buf2, sizeof(buf2), "%s", char_true_race_name(k));
+  buf2 = str_format("{}", char_true_race_name(k));
   send_to_char(g, ch, "Class: {}, Race: {}, Lev: [@y{:>2d}({:d}HD+{:d}cl+{:d})@n], XP: [@y{:d}@n]\r\n",
                buf, buf2, char_get_level(k), char_get_race_level(k),
                char_get_class_level(k), char_get_level_adj(k), char_get_exp(k));
@@ -765,7 +765,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
           send_to_char(g, ch, "  ** Corrupted!\r\n");
         else {
           if (!mem->cmd.empty())
-            send_to_char(g, ch, "  {:<20.20}{}\r\n", char_get_name(mc), mem->cmd.c_str());
+            send_to_char(g, ch, "  {:<20.20}{}\r\n", char_get_name(mc), mem->cmd);
           else
             send_to_char(g, ch, "  {:<20.20} <default>\r\n", char_get_name(mc));
         }
@@ -825,9 +825,9 @@ ACMD(do_varstat)
     for (tv = char_get_script(vict)->global_vars; tv; tv = tv->next) {
       if (tv->value[0] == UID_CHAR) {
         find_uid_name(g, tv->value.data(), uname, sizeof(uname));
-        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv->name.c_str(), uname);
+        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv->name, uname);
       } else
-        send_to_char(g, ch, "    {:>10}:  {}\r\n", tv->name.c_str(), tv->value.c_str());
+        send_to_char(g, ch, "    {:>10}:  {}\r\n", tv->name, tv->value);
     }
   }
 }
@@ -2082,7 +2082,7 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 
   send_to_char(g, ch, "Checking load info for the {} trigger [{:d}] '{}':\r\n",
                trnum->proto->attach_type == MOB_TRIGGER ? "mobile" : (trnum->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-               tvnum, trnum->proto->name.c_str());
+               tvnum, trnum->proto->name);
 
   for (struct zone_data *zone : g->zones.all()) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -2218,7 +2218,7 @@ ACMD(do_findkey)
 {
   int dir;
   obj_vnum key;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   std::string_view rest = argument;
   std::string arg       = take_word(rest);          /* not take_arg(): "in" is a valid direction */
@@ -2232,8 +2232,8 @@ ACMD(do_findkey)
     } else if ((key = char_get_exit(g, ch, dir)->key) == NOTHING || key == 0) {
       send_to_char(g, ch, "There's no key for that exit.\r\n");
     } else {
-      snprintf(buf, sizeof(buf), "obj %d", key);
-      do_checkloadstatus(g, ch, buf, 0, 0);
+      buf = str_format("obj {:d}", key);
+      do_checkloadstatus(g, ch, buf.c_str(), 0, 0);
     }
   } else {
     send_to_char(g, ch, "What direction is that?!?\r\n");

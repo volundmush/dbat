@@ -245,7 +245,7 @@ ACMD(do_at)
 
 ACMD(do_goto)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   room_vnum location;
 
   if ((location = find_target_room(g, ch, argument)) == NOWHERE)
@@ -255,14 +255,14 @@ ACMD(do_goto)
     return;
   }
 
-  snprintf(buf, sizeof(buf), "$n %s", char_get_poofout(g, ch) ? char_get_poofout(g, ch) : "disappears in a puff of smoke.");
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  buf = str_format("$n {}", char_get_poofout(g, ch) ? char_get_poofout(g, ch) : "disappears in a puff of smoke.");
+  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
 
   char_from_room(g, ch);
   char_to_room(g, ch, location);
 
-  snprintf(buf, sizeof(buf), "$n %s", char_get_poofin(g, ch) ? char_get_poofin(g, ch) : "appears with an ear-splitting bang.");
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  buf = str_format("$n {}", char_get_poofin(g, ch) ? char_get_poofin(g, ch) : "appears with an ear-splitting bang.");
+  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(g, char_get_in_room(ch), ch, 0);
   enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
@@ -279,7 +279,7 @@ ACMD(do_trans)
     send_to_char(g, ch, "Whom do you wish to transfer?\r\n");
   else if (!str_eq_nocase("all", buf)) {
     if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, CONFIG_NOPERSON);
     else if (victim == ch)
       send_to_char(g, ch, "That doesn't make much sense, does it?\r\n");
     else {
@@ -318,7 +318,7 @@ ACMD(do_trans)
         look_at_room(g, char_get_in_room(victim), victim, 0);
         enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
       }
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
   }
 }
 
@@ -335,7 +335,7 @@ ACMD(do_teleport)
   if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to teleport?\r\n");
   else if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (victim == ch)
     send_to_char(g, ch, "Use 'goto' to teleport yourself.\r\n");
   else if (char_get_admlevel(victim) >= char_get_admlevel(ch))
@@ -347,7 +347,7 @@ ACMD(do_teleport)
       send_to_char(g, ch, "They are inside a healing tank!\r\n");
       return;
     }
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
     act(g, "$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
     char_from_room(g, victim);
     char_to_room(g, victim, target);
@@ -424,7 +424,7 @@ ACMD(do_snoop)
       send_to_char(g, ch, "You can't.\r\n");
       return;
     }
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
 
     if (char_get_desc(ch)->snooping)
       char_get_desc(ch)->snooping->snoop_by = nullptr;
@@ -457,7 +457,7 @@ ACMD(do_switch)
   else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
     send_to_char(g, ch, "You are not godly enough to use that room!\r\n");
   else {
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
 
     char_get_desc(ch)->character = victim;
     char_get_desc(ch)->original  = ch;
@@ -610,7 +610,7 @@ ACMD(do_purge)
       return;
     }
 
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
   } else { /* no argument. clean out the room */
     int i;
 
@@ -646,48 +646,48 @@ ACMD(do_purge)
 ACMD(do_force)
 {
   struct char_data *vict;
-  char buf1[MAX_INPUT_LENGTH + 32];
+  std::string buf1;
   std::string arg, to_force;
 
   std::string_view rest = argument;
   arg                   = take_word(rest);
   to_force              = skip_spaces(rest);
 
-  snprintf(buf1, sizeof(buf1), "$n has forced you to '%s'.", to_force.c_str());
+  buf1 = str_format("$n has forced you to '{}'.", to_force);
 
   if (arg.empty() || to_force.empty())
     send_to_char(g, ch, "Whom do you wish to force do what?\r\n");
   else if (!char_adm_flagged(ch, ADM_FORCEMASS) || (!str_eq_nocase("all", arg) && !str_eq_nocase("room", arg))) {
     if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
-      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, CONFIG_NOPERSON);
     else if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict))
       send_to_char(g, ch, "No, no, no!\r\n");
     else {
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
-      act(g, buf1, true, ch, nullptr, vict, TO_VICT);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} forced {} to {}", char_get_name(ch), char_get_name(vict), to_force.c_str());
+      send_to_char(g, ch, CONFIG_OK);
+      act(g, buf1.c_str(), true, ch, nullptr, vict, TO_VICT);
+      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} forced {} to {}", char_get_name(ch), char_get_name(vict), to_force);
       command_interpreter(g, vict, to_force);
     }
   } else if (str_eq_nocase("room", arg)) {
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
     mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} forced room {:d} to {}",
-           char_get_name(ch), char_get_in_room(ch), to_force.c_str());
+           char_get_name(ch), char_get_in_room(ch), to_force);
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
-      act(g, buf1, true, ch, nullptr, tch, TO_VICT);
+      act(g, buf1.c_str(), true, ch, nullptr, tch, TO_VICT);
       command_interpreter(g, tch, to_force);
     }
   } else { /* force all */
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} forced all to {}", char_get_name(ch), to_force.c_str());
+    send_to_char(g, ch, CONFIG_OK);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} forced all to {}", char_get_name(ch), to_force);
 
     for (descriptor_data *i : each_desc(g)) {
 
       if (desc_get_connected(i) != CON_PLAYING || !(vict = i->character) || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
         continue;
-      act(g, buf1, true, ch, nullptr, vict, TO_VICT);
+      act(g, buf1.c_str(), true, ch, nullptr, vict, TO_VICT);
       command_interpreter(g, vict, to_force);
     }
   }
@@ -723,9 +723,9 @@ ACMD(do_zreset)
   }
   if (i && (can_edit_zone(g, ch, i) || char_get_admlevel(ch) > ADMLVL_IMMORT)) {
     reset_zone(g, i);
-    send_to_char(g, ch, "Reset zone #{:d}: {}.\r\n", i->number, i->name.c_str());
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) {} reset zone {:d} ({})", char_get_name(ch), i->number, i->name.c_str());
-    log_imm_action(g, "RESET: {} has reset zone #{:d}: {}.", char_get_name(ch), i->number, i->name.c_str());
+    send_to_char(g, ch, "Reset zone #{:d}: {}.\r\n", i->number, i->name);
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "(GC) {} reset zone {:d} ({})", char_get_name(ch), i->number, i->name);
+    log_imm_action(g, "RESET: {} has reset zone #{:d}: {}.", char_get_name(ch), i->number, i->name);
   } else
     send_to_char(g, ch, "You do not have permission to reset this zone. Try {:d}.\r\n", char_get_olc_zone(g, ch));
 }

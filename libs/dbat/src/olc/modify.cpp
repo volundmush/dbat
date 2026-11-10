@@ -276,7 +276,7 @@ static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int a
   if (action == STRINGADD_ABORT)
     write_to_output(g, d, "Description aborted.\r\n");
 
-  write_to_output(g, d, "{}", CONFIG_MENU.c_str());
+  write_to_output(g, d, CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 
@@ -316,7 +316,7 @@ ACMD(do_skillset)
   }
 
   if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
     return;
   }
   if (char_is_npc(vict)) {

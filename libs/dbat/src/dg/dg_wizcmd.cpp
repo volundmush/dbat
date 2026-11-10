@@ -86,24 +86,24 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
   struct trig_var_data *tv;
   trig_data *t;
   char name[MAX_INPUT_LENGTH];
-  char namebuf[512];
+  std::string namebuf;
   char buf1[MAX_STRING_LENGTH];
 
   send_to_char(g, ch, "Global Variables: {}\r\n", sc->global_vars ? "" : "None");
   send_to_char(g, ch, "Global context: {:d}\r\n", sc->context);
 
   for (tv = sc->global_vars; tv; tv = tv->next) {
-    snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name.c_str(), tv->context);
+    namebuf = str_format("{}:{:d}", tv->name, tv->context);
     if (tv->value[0] == UID_CHAR) {
       find_uid_name(g, tv->value.data(), name, sizeof(name));
-      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf : tv->name.c_str(), name);
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), name);
     } else
-      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf : tv->name.c_str(), tv->value.c_str());
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), tv->value);
   }
 
   for (t = sc->trig_list; t; t = t->next) {
     send_to_char(g, ch, "\r\n  Trigger: @y{}@n, VNum: [@y{:>5d}@n], RNum: [{:>5d}]\r\n",
-                 t->name.c_str(), trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
+                 t->name, trig_get_vnum(g, t), g->trig_index.place(trig_get_vnum(g, t)));
 
     if (t->attach_type == OBJ_TRIGGER) {
       send_to_char(g, ch, "  Trigger Intended Assignment: Objects\r\n");
@@ -129,9 +129,9 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
       for (tv = t->var_list; tv; tv = tv->next) {
         if (tv->value[0] == UID_CHAR) {
           find_uid_name(g, tv->value.data(), name, sizeof(name));
-          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name.c_str(), name);
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, name);
         } else
-          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name.c_str(), tv->value.c_str());
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, tv->value);
       }
     }
   }
@@ -255,7 +255,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(char_script_slot(victim)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
-                 tn, trig->name.c_str(), char_get_sdesc(victim), char_get_mob_vnum(g, victim));
+                 tn, trig->name, char_get_sdesc(victim), char_get_mob_vnum(g, victim));
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
@@ -288,7 +288,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(obj_script_slot(object)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
-                 tn, trig->name.c_str(),
+                 tn, trig->name,
                  (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
                  obj_get_vnum(g, object));
   }
@@ -322,7 +322,7 @@ ACMD(do_attach)
     add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to room {:d}.\r\n",
-                 tn, trig->name.c_str(), rnum);
+                 tn, trig->name, rnum);
   }
 
   else

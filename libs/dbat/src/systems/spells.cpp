@@ -155,7 +155,7 @@ ASPELL(spell_summon)
 
 ASPELL(spell_locate_object)
 {
-  char name[MAX_INPUT_LENGTH];
+  std::string name;
   int j;
 
   /*
@@ -169,13 +169,13 @@ ASPELL(spell_locate_object)
     return;
   }
 
-  strlcpy(name, fname(obj_get_name(obj)), sizeof(name));
+  name = fname(obj_get_name(obj));
   j = level / 2;
 
   for (obj_data *i : each_obj(g)) {
     if (!((j > 0)))
       break;
-    if (!isname(name, obj_get_name(i)))
+    if (!isname(name.c_str(), obj_get_name(i)))
       continue;
 
     send_to_char(g, ch, "{:c}{}", as_char(toupper(*obj_get_short_description(i))), (obj_get_short_description(i)) + 1);
@@ -257,7 +257,7 @@ ASPELL(spell_identify)
 
   if (obj) {
     char bitbuf[MAX_STRING_LENGTH];
-    char buf2[MAX_STRING_LENGTH];
+    std::string buf2;
 
     sprinttype(obj_get_type_flag(obj), item_types, bitbuf, sizeof(bitbuf));
     send_to_char(g, ch, "You feel informed:\r\nObject '{}', Item type: {}\r\n", obj_get_short_description(obj), bitbuf);
@@ -322,13 +322,13 @@ ASPELL(spell_identify)
         sprinttype(obj_get_affected(obj)[i].location, apply_types, bitbuf, sizeof(bitbuf));
         switch (obj_get_affected(obj)[i].location) {
           case APPLY_FEAT:
-            snprintf(buf2, sizeof(buf2), " (%s)", g->feat_list[obj_get_affected(obj)[i].specific].name);
+            buf2 = str_format(" ({})", g->feat_list[obj_get_affected(obj)[i].specific].name);
             break;
           case APPLY_SKILL:
-            snprintf(buf2, sizeof(buf2), " (%s)", g->spell_info[obj_get_affected(obj)[i].specific].name);
+            buf2 = str_format(" ({})", g->spell_info[obj_get_affected(obj)[i].specific].name);
             break;
           default:
-            buf2[0] = 0;
+            buf2.clear();
             break;
         }
         send_to_char(g, ch, "   Affects: {}{} By {:d}\r\n", bitbuf, buf2,

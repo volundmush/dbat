@@ -74,14 +74,15 @@ ACMD(do_who)
 {
   struct char_data *tch;
   int i, num_can_see = 0;
-  char name_search[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
+  char name_search[MAX_INPUT_LENGTH];
+  std::string buf;
   int low = 0, high = CONFIG_LEVEL_CAP, localwho = 0, questwho = 0, hide = 0;
   int showclass = 0, short_list = 0, outlaws = 0;
   int who_room = 0, showgroup = 0, showleader = 0;
   const char *line_color = "@n";
 
   argument = skip_spaces(argument);
-  snprintf(buf, sizeof(buf), "%s", std::string(argument).c_str());
+  buf            = std::string(argument);
   name_search[0] = '\0';
 
   struct {
@@ -193,9 +194,8 @@ ACMD(do_who)
       } else {
         num_can_see++;
 
-        char usr[100];
-        snprintf(usr, sizeof(usr), "@W(@R%s@W)%s", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
-        send_to_char(g, ch, "{}               @D<@C{:<12}@D> {}@w{}", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr : "", line_color);
+        std::string usr = str_format("@W(@R{}@W){}", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
+        send_to_char(g, ch, "{}               @D<@C{:<12}@D> {}@w{}", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr.c_str() : "", line_color);
 
         if (char_get_admlevel(tch)) {
           send_to_char(g, ch, " ({})", admin_level_names[char_get_admlevel(tch)]);
@@ -295,7 +295,9 @@ ACMD(do_who)
 /* BIG OL' FIXME: Rewrite it all. Similar to do_who(). */
 ACMD(do_users)
 {
-  char line[200], line2[220], idletime[10];
+  std::string line;
+  char line2[220];
+  std::string idletime;
   char state[30], *timeptr, mode;
   std::string name_search, host_search;
   struct char_data *tch;
@@ -391,27 +393,27 @@ ACMD(do_users)
       strcpy(state, connected_types[desc_get_connected(d)]);
 
     if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
-      snprintf(idletime, sizeof(idletime), "%3d", char_get_timer(d->character) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
+      idletime = str_format("{:>3d}", char_get_timer(d->character) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
     else
-      strcpy(idletime, "");
+      idletime.clear();
 
-    snprintf(line, sizeof(line), "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
-             d->original && char_get_alias(d->original) ? char_get_alias(d->original) : d->character && char_get_alias(d->character) ? char_get_alias(d->character)
-                                                                                                                                     : "UNDEFINED",
-             !d->user.empty() ? d->user.c_str() : "UNKNOWN", state, idletime, timeptr,
-             "N");
+    line = str_format("{:>3d} {:<20} {:<20} {:<14} {:<3} {:<8} {:>1} ", d->desc_num,
+                      d->original && char_get_alias(d->original) ? char_get_alias(d->original) : d->character && char_get_alias(d->character) ? char_get_alias(d->character)
+                                                                                                                                              : "UNDEFINED",
+                      !d->user.empty() ? d->user.c_str() : "UNKNOWN", state, idletime, timeptr,
+                      "N");
     if (*d->host)
-      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN", d->host);
+      line += str_format("\n{:>3d} [{} Site: {}]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN", d->host);
     else
-      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN");
+      line += str_format("\n{:>3d} [{} Site: Hostname unknown]\r\n", d->desc_num, !d->user.empty() ? d->user.c_str() : "UNKNOWN");
 
     if (desc_get_connected(d) != CON_PLAYING) {
-      snprintf(line2, sizeof(line2), "@g%s@n", line);
-      strcpy(line, line2);
+      snprintf(line2, sizeof(line2), "@g%s@n", line.c_str());
+      line = line2;
     }
     if (desc_get_connected(d) != CON_PLAYING ||
         (desc_get_connected(d) == CON_PLAYING && char_can_see(g, ch, d->character))) {
-      send_to_char(g, ch, "{}", line);
+      send_to_char(g, ch, line);
       num_can_see++;
     }
   }
@@ -535,7 +537,7 @@ static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::
         }
       }
   } else {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: {} has checked where for the location of {}", char_get_name(ch), arg.c_str());
+    mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "GODCMD: {} has checked where for the location of {}", char_get_name(ch), arg);
     for (char_data *tch : each_char(g)) {
       if (char_can_see(g, ch, tch) && char_get_in_room(tch) != NOWHERE && isname(arg, char_get_alias(tch))) {
         found = 1;

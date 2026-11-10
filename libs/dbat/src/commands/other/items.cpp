@@ -226,7 +226,7 @@ ACMD(do_form)
     cost *= discount;
 
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     if (arg2.empty()) {
@@ -269,7 +269,7 @@ ACMD(do_form)
     cost *= discount;
 
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     if (arg2.empty()) {
@@ -316,7 +316,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 319);
@@ -338,7 +338,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 16);
@@ -359,7 +359,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     if (arg2.empty()) {
@@ -489,7 +489,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     if (arg2.empty()) {
@@ -549,7 +549,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 92);
@@ -573,7 +573,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 19053);
@@ -598,7 +598,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 91);
@@ -622,7 +622,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 1528);
@@ -646,7 +646,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 1532);
@@ -670,7 +670,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 72);
@@ -693,7 +693,7 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     obj = read_object(g, 87);
@@ -716,15 +716,15 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
       return;
     }
     if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
-      send_to_char(g, ch, "You need to be at full powerlevel to create {}\r\n", arg.c_str());
+      send_to_char(g, ch, "You need to be at full powerlevel to create {}\r\n", arg);
       return;
     }
     if (char_get_practice_points(g, ch) < 10) {
-      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 10.\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 10.\r\n", arg);
       return;
     }
     obj = read_object(g, 86);
@@ -749,19 +749,19 @@ ACMD(do_form)
       return;
     }
     if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}, you need full ki.\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough ki to create {}, you need full ki.\r\n", arg);
       return;
     }
     if (getCurPL(g, ch) <= cost2) {
-      send_to_char(g, ch, "You do not have enough powerlevel to create {}, you need to be at full.\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough powerlevel to create {}, you need to be at full.\r\n", arg);
       return;
     }
     if ((getCurST(g, ch)) < getMaxST(g, ch)) {
-      send_to_char(g, ch, "You do not have enough stamina to create {}, you need to be at full.\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough stamina to create {}, you need to be at full.\r\n", arg);
       return;
     }
     if (char_get_practice_points(g, ch) < 50) {
-      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 50.\r\n", arg.c_str());
+      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 50.\r\n", arg);
       return;
     }
     obj = read_object(g, 1);
@@ -1009,7 +1009,7 @@ ACMD(do_upgrade)
   }
 
   if (arg2.empty() && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
-    send_to_char(g, ch, "How many times do you want to increase {}?", arg.c_str());
+    send_to_char(g, ch, "How many times do you want to increase {}?", arg);
     return;
   }
 
@@ -1055,7 +1055,7 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg.c_str());
+    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
     gainBasePL(ch, bonus, true);
   } else if (str_eq_nocase("ki", arg)) {
     count = parse_int(arg2);
@@ -1089,7 +1089,7 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg.c_str());
+    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
     gainBaseKI(ch, bonus, true);
   } else if (str_eq_nocase("stamina", arg)) {
     count = parse_int(arg2);
@@ -1123,7 +1123,7 @@ ACMD(do_upgrade)
       return;
     }
     char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg.c_str());
+    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
     gainBaseST(ch, bonus, true);
   } else {
     send_to_char(g, ch, "That is not a valid upgrade option.\r\n");
@@ -1625,13 +1625,13 @@ ACMD(do_use)
       case SCMD_RECITE:
       case SCMD_QUAFF:
         if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg.c_str());
+          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
           return;
         }
         break;
       case SCMD_USE:
         if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg.c_str());
+          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
           return;
         }
         break;

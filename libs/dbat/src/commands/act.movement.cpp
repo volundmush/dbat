@@ -581,11 +581,11 @@ ACMD(do_land)
     char_from_room(g, ch);
     char_to_room(g, ch, landing);
     char *blah = sense_location(g, ch);
-    char sendback[MAX_INPUT_LENGTH];
+    std::string sendback;
     char_from_room(g, ch);
     char_to_room(g, ch, was_in);
-    snprintf(sendback, sizeof(sendback), "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", blah);
-    act(g, sendback, true, ch, nullptr, nullptr, TO_ROOM);
+    sendback = str_format("@C$n@Y flies down through the atmosphere toward @G{}@Y!@n", blah);
+    act(g, sendback.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
     char_from_room(g, ch);
     char_to_room(g, ch, landing);
     struct zone_data *zone = nullptr;
@@ -658,8 +658,8 @@ bool has_o2(struct char_data *ch)
  */
 bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
 {
-  char buf2[MAX_STRING_LENGTH];
-  char buf3[MAX_STRING_LENGTH];
+  std::string buf2;
+  std::string buf3;
   room_vnum was_in = char_get_in_room(ch);
   int need_movement;
   struct room_data *rm;
@@ -878,7 +878,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   }
 
   if (char_aff_flagged(ch, AFF_SNEAK) && !char_is_npc(ch)) {
-    snprintf(buf2, sizeof(buf2), "$n sneaks %s.", dirs[dir]);
+    buf2 = str_format("$n sneaks {}.", dirs[dir]);
     if (char_get_skill(ch, SKILL_MOVE_SILENTLY)) {
       improve_skill(g, ch, SKILL_MOVE_SILENTLY, 0);
     } else if (slot_count(ch) + 1 > char_get_skill_slots(ch)) {
@@ -887,7 +887,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     } else {
       send_to_char(g, ch, "@GYou learn the very basics of moving silently.@n\r\n");
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(g, 5, 10));
-      act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
+      act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(g, 1, 30)) {
         char_set_wait(ch, PULSE_1SEC);
       }
@@ -895,12 +895,12 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   }
 
   if (!char_aff_flagged(ch, AFF_SNEAK) && !char_aff_flagged(ch, AFF_FLYING)) {
-    snprintf(buf2, sizeof(buf2), "$n leaves %s.", dirs[dir]);
-    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
+    buf2 = str_format("$n leaves {}.", dirs[dir]);
+    act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!char_aff_flagged(ch, AFF_SNEAK) && char_aff_flagged(ch, AFF_FLYING)) {
-    snprintf(buf2, sizeof(buf2), "$n flies %s.", dirs[dir]);
-    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
+    buf2 = str_format("$n flies {}.", dirs[dir]);
+    act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   }
 
   was_in = char_get_in_room(ch);
@@ -915,8 +915,8 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   char_to_room(g, ch, room_get_dir_option(g, was_in, dir)->to_room);
   if ((room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, was_in)) && !char_is_npc(ch) && !char_is_android(ch)) {
     send_to_sense(g, 0, "You sense someone", ch);
-    snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(getCurPL(g, ch)));
-    send_to_scouter(g, buf3, ch, 0, 0);
+    buf3 = str_format("@D[@GBlip@D]@Y {}\r\n@RSomeone has entered your scouter detection range@n.", add_commas(getCurPL(g, ch)));
+    send_to_scouter(g, buf3.c_str(), ch, 0, 0);
   }
   /* move them first, then move them back if they aren't allowed to go. */
   /* see if an entry trigger disallows the move */
@@ -927,11 +927,11 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     return false;
   }
 
-  snprintf(buf2, sizeof(buf2), "%s%s",
-           ((dir == UP) || (dir == DOWN) ? "" : "the "),
-           (dir == UP ? "below" : (dir == DOWN) ? "above"
-                                                : dirs[rev_dir[dir]]));
-  act(g, "$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
+  buf2 = str_format("{}{}",
+                    ((dir == UP) || (dir == DOWN) ? "" : "the "),
+                    (dir == UP ? "below" : (dir == DOWN) ? "above"
+                                                         : dirs[rev_dir[dir]]));
+  act(g, "$n arrives from $T.", true, ch, nullptr, buf2.c_str(), TO_ROOM | TO_SNEAKRESIST);
   if (char_get_fighting(g, ch)) {
     if (room_sect(g, room_get_dir_option(g, was_in, dir)->to_room) != SECT_FLYING && room_sect(g, room_get_dir_option(g, was_in, dir)->to_room) != SECT_WATER_NOSWIM && room_get_geffect(g, room_get_dir_option(g, was_in, dir)->to_room) == 0) {
       roll_pursue(g, char_get_fighting(g, ch), ch);
@@ -1146,9 +1146,8 @@ ACMD(do_move)
   }
 
   if (char_get_fighting(g, ch) && !char_is_npc(ch)) {
-    char blah[MAX_INPUT_LENGTH];
-    snprintf(blah, sizeof(blah), "%s", dirs[subcmd - 1]);
-    do_flee(g, ch, blah, 0, 0);
+    std::string blah = str_format("{}", dirs[subcmd - 1]);
+    do_flee(g, ch, blah.c_str(), 0, 0);
     return;
   }
 
@@ -1671,15 +1670,15 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   }
 
   /* Notify the room. */
-  char dbuf[100];
+  std::string dbuf;
   if (!obj) {
-    snprintf(dbuf, sizeof(dbuf), "%s", dirs[door]);
+    dbuf = str_format("{}", dirs[door]);
   }
   if (len < sizeof(buf))
     snprintf(buf + len, sizeof(buf) - len, "%s%s%s%s.",
              obj ? "" : "the ", obj ? "$p" : exit_keyword(char_get_exit(g, ch, door)) ? "$F"
                                                                                       : "door",
-             obj ? "" : " that leads ", obj ? "" : dbuf);
+             obj ? "" : " that leads ", obj ? "" : dbuf.c_str());
   if (!obj || obj_get_in_room(obj) != NOWHERE)
     act(g, buf, false, ch, obj, obj ? nullptr : exit_keyword(char_get_exit(g, ch, door)), TO_ROOM);
 
@@ -1692,7 +1691,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     send_to_room(g, char_get_exit(g, ch, door)->to_room, "The {} that leads {} is {}ed from the other side.\r\n",
                  exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd]);
   }
-  *dbuf = '\0';
+  dbuf.clear();
 }
 
 static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
@@ -2044,7 +2043,7 @@ ACMD(do_enter)
       if (move_dir > -1)
         perform_move(g, ch, move_dir, 1);
       else
-        send_to_char(g, ch, "There is no {} here.\r\n", buf.c_str());
+        send_to_char(g, ch, "There is no {} here.\r\n", buf);
     }
   } else if (room_flagged(g, char_get_in_room(ch), ROOM_INDOORS)) {
     send_to_char(g, ch, "You are already indoors.\r\n");
@@ -2157,10 +2156,10 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
     }
   }
 
-  char buf3[MAX_STRING_LENGTH];
+  std::string buf3;
   send_to_sense(g, 0, "You sense someone ", ch);
-  snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n", add_commas(getCurPL(g, ch)));
-  send_to_scouter(g, buf3, ch, 0, 0);
+  buf3 = str_format("@D[@GBlip@D]@Y {}\r\n@RSomeone has entered your scouter detection range.@n", add_commas(getCurPL(g, ch)));
+  send_to_scouter(g, buf3.c_str(), ch, 0, 0);
 
   if (char_get_desc(ch) != nullptr) {
     act(g, obj_get_action_description(obj), true, ch, obj, nullptr, TO_CHAR);
@@ -3001,7 +3000,7 @@ ACMD(do_wake)
     if (char_get_position(ch) == POS_SLEEPING)
       send_to_char(g, ch, "Maybe you should wake yourself up first.\r\n");
     else if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)) == nullptr)
-      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, CONFIG_NOPERSON);
     else if (vict == ch)
       self = 1;
     else if (char_is_awake(vict))
@@ -3075,7 +3074,7 @@ ACMD(do_follow)
 
   if (!buf.empty()) {
     if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, CONFIG_NOPERSON);
       return;
     }
   } else {

@@ -445,9 +445,8 @@ static WCMD(do_wload)
     }
     char_to_room(g, mob, rnum);
     if (room_get_script(room)) { /* It _should_ have, but it might be detached. */
-      char buf[MAX_INPUT_LENGTH];
-      sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(room_get_script(room)->global_vars), "lastloaded", buf, 0);
+      std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(mob));
+      add_var(&(room_get_script(room)->global_vars), "lastloaded", buf.c_str(), 0);
     }
     load_mtrigger(g, mob);
   }
@@ -462,9 +461,8 @@ static WCMD(do_wload)
       add_unique_id(g, object);
       obj_to_room(g, object, room_get_number(room));
       if (room_get_script(room)) { /* It _should_ have, but it might be detached. */
-        char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-        add_var(&(room_get_script(room)->global_vars), "lastloaded", buf, 0);
+        std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
+        add_var(&(room_get_script(room)->global_vars), "lastloaded", buf.c_str(), 0);
       }
       load_otrigger(g, object);
       return;

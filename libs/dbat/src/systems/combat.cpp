@@ -218,7 +218,7 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   /* Success! */
   if (perc >= prob) {
-    char buf[MAX_INPUT_LENGTH];
+    std::string buf;
     act(g, "@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, nullptr, vict, TO_CHAR);
     act(g, "@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, nullptr, vict, TO_VICT);
     act(g, "@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -227,98 +227,98 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
     if (char_get_combo(ch) > -1) {
       switch (char_get_combo(ch)) {
         case 0:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_punch(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_punch(g, ch, buf.c_str(), 0, 0);
           break;
         case 1:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_kick(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_kick(g, ch, buf.c_str(), 0, 0);
           break;
         case 2:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_elbow(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_elbow(g, ch, buf.c_str(), 0, 0);
           break;
         case 3:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_knee(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_knee(g, ch, buf.c_str(), 0, 0);
           break;
         case 4:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_roundhouse(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_roundhouse(g, ch, buf.c_str(), 0, 0);
           break;
         case 5:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_uppercut(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_uppercut(g, ch, buf.c_str(), 0, 0);
           break;
         case 6:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_slam(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_slam(g, ch, buf.c_str(), 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 8:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_heeldrop(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_heeldrop(g, ch, buf.c_str(), 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 51:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_bash(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_bash(g, ch, buf.c_str(), 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 52:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_head(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_head(g, ch, buf.c_str(), 0, 0);
           break;
         case 56:
-          sprintf(buf, "%s", char_get_name(vict));
-          do_tailwhip(g, ch, buf, 0, 0);
+          buf = str_format("{}", char_get_name(vict));
+          do_tailwhip(g, ch, buf.c_str(), 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
       }
     } else {
       if (char_get_lastattack(ch) == -1) {
-        sprintf(buf, "%s", char_get_name(vict));
-        do_attack(g, ch, buf, 0, 0);
+        buf = str_format("{}", char_get_name(vict));
+        do_attack(g, ch, buf.c_str(), 0, 0);
       } else {
         /* Repeat the last physical attack command that was issued
            instead of always falling back to punch/kick. */
-        sprintf(buf, "%s", char_get_name(vict));
+        buf = str_format("{}", char_get_name(vict));
         switch (char_get_lastattack(ch)) {
           case 0:
-            do_punch(g, ch, buf, 0, 0);
+            do_punch(g, ch, buf.c_str(), 0, 0);
             break;
           case 1:
-            do_kick(g, ch, buf, 0, 0);
+            do_kick(g, ch, buf.c_str(), 0, 0);
             break;
           case 2:
-            do_elbow(g, ch, buf, 0, 0);
+            do_elbow(g, ch, buf.c_str(), 0, 0);
             break;
           case 3:
-            do_knee(g, ch, buf, 0, 0);
+            do_knee(g, ch, buf.c_str(), 0, 0);
             break;
           case 4:
-            do_roundhouse(g, ch, buf, 0, 0);
+            do_roundhouse(g, ch, buf.c_str(), 0, 0);
             break;
           case 5:
-            do_uppercut(g, ch, buf, 0, 0);
+            do_uppercut(g, ch, buf.c_str(), 0, 0);
             break;
           case 6:
-            do_slam(g, ch, buf, 0, 0);
+            do_slam(g, ch, buf.c_str(), 0, 0);
             break;
           case 8:
-            do_heeldrop(g, ch, buf, 0, 0);
+            do_heeldrop(g, ch, buf.c_str(), 0, 0);
             break;
           case 51:
-            do_bash(g, ch, buf, 0, 0);
+            do_bash(g, ch, buf.c_str(), 0, 0);
             break;
           case 52:
-            do_head(g, ch, buf, 0, 0);
+            do_head(g, ch, buf.c_str(), 0, 0);
             break;
           case 56:
-            do_tailwhip(g, ch, buf, 0, 0);
+            do_tailwhip(g, ch, buf.c_str(), 0, 0);
             break;
           default: /* unknown / weapon attack: fall back to punch */
-            do_punch(g, ch, buf, 0, 0);
+            do_punch(g, ch, buf.c_str(), 0, 0);
             break;
         }
       }
@@ -416,7 +416,9 @@ void handle_disarm(GameWorld *g, struct char_data *ch, struct char_data *vict)
 void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
 
-  char chbuf[MAX_INPUT_LENGTH], victbuf[MAX_INPUT_LENGTH], rmbuf[MAX_INPUT_LENGTH];
+  std::string chbuf;
+  std::string victbuf;
+  std::string rmbuf;
   int64_t bonus = 0;
   double maxki  = 0.0;
   int totalmem  = 1;
@@ -425,105 +427,105 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   switch (char_get_combine(ch)) {
     case 0: /* Kamehameha */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You cup your hands at your sides and a ball of @Benergy@W forms there. You chant @B'@CKaaaaameeeehaaaameeee@B'@W and then fire a @RKamehameha@W wave at @r$N@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W cups $s hands be $s side and chants @B'@CKaaaameeeehaaaameee@B'@W. A ball of energy forms in $s hands and he quickly brings them forward and fires a @RKamehameha @Wat @rYOU@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W cups $s hands be $s side and chants @B'@CKaaaameeeehaaaameee@B'@W. A ball of energy forms in $s hands and he quickly brings them forward and fires a @RKamehameha @Wat @r$N@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You cup your hands at your sides and a ball of @Benergy@W forms there. You chant @B'@CKaaaaameeeehaaaameeee@B'@W and then fire a @RKamehameha@W wave at @r$N@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W cups $s hands be $s side and chants @B'@CKaaaameeeehaaaameee@B'@W. A ball of energy forms in $s hands and he quickly brings them forward and fires a @RKamehameha @Wat @rYOU@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W cups $s hands be $s side and chants @B'@CKaaaameeeehaaaameee@B'@W. A ball of energy forms in $s hands and he quickly brings them forward and fires a @RKamehameha @Wat @r$N@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n@n";
       maxki = 0.15;
       attspd += 2;
       bonus += getMaxST(g, ch) * 0.02;
       break;
     case 1: /* Galik Gun */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You throw your hands forward and launch a purple beam of energy at @r$N@n while shouting @B'@mGalik Gun!@B'@W");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W throws $s arms forward and launches a purple beam at @rYOU@W while shouting @B'@mGalik Gun!@B'@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W throws $s arms forward and launches a purple beam at @r$N@W while shouting @B'@mGalik Gun!@B'@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You throw your hands forward and launch a purple beam of energy at @r$N@n while shouting @B'@mGalik Gun!@B'@W";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W throws $s arms forward and launches a purple beam at @rYOU@W while shouting @B'@mGalik Gun!@B'@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W throws $s arms forward and launches a purple beam at @r$N@W while shouting @B'@mGalik Gun!@B'@n";
       maxki = 0.15;
       attspd += 1;
       bonus += getMaxKI(g, ch) * 0.5;
       break;
     case 2: /* Masenko */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You raise your hands above your head with one resting atop the other and begin to pour your charged energy to that point. As soon as the energy is ready you shout @B'@RMasenko Ha!@B'@W and bringing your hands down you launch a bright reddish orange beam at @r$N@W!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises $s hands above $s head and energy quicly pools there. Suddenly $e brings $s hands down and shouts @B'@RMasenko Ha!@B'@W as a bright reddish orange beam launches toward @rYOU!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises $s hands above $s head and energy quicly pools there. Suddenly $e brings $s hands down and shouts @B'@RMasenko Ha!@B'@W as a bright reddish orange beam launches toward @r$N!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You raise your hands above your head with one resting atop the other and begin to pour your charged energy to that point. As soon as the energy is ready you shout @B'@RMasenko Ha!@B'@W and bringing your hands down you launch a bright reddish orange beam at @r$N@W!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises $s hands above $s head and energy quicly pools there. Suddenly $e brings $s hands down and shouts @B'@RMasenko Ha!@B'@W as a bright reddish orange beam launches toward @rYOU!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises $s hands above $s head and energy quicly pools there. Suddenly $e brings $s hands down and shouts @B'@RMasenko Ha!@B'@W as a bright reddish orange beam launches toward @r$N!@n";
       maxki = 0.15;
       attspd += 1;
       bonus += getMaxKI(g, ch) * 0.5;
       break;
     case 3: /* Deathbeam */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With a quick motion you point at @r$N@W and launch a lightning fast @MDeathbeam@W!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! With a quick motion $e points $s finger at @rYOU@W and launches a lightning fast @MDeathbeam@W!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! With a quick motion $e points $s finger at @r$N@W and launches a lightning fast @MDeathbeam@W!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With a quick motion you point at @r$N@W and launch a lightning fast @MDeathbeam@W!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! With a quick motion $e points $s finger at @rYOU@W and launches a lightning fast @MDeathbeam@W!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! With a quick motion $e points $s finger at @r$N@W and launches a lightning fast @MDeathbeam@W!@n";
       maxki = 0.1;
       attspd += 4;
       break;
     case 4: /* Honoo */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy ready you breath out toward @r$N@W jets of incredibly hot flames in the form of a deadly @rHonoo@W!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Sudden jets of flame burst forth from $s mouth at @RYOU@W in the form of a deadly @rHonoo@W!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Sudden jets of flame burst forth from $s mouth at @R$N@W in the form of a deadly @rHonoo@W!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy ready you breath out toward @r$N@W jets of incredibly hot flames in the form of a deadly @rHonoo@W!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Sudden jets of flame burst forth from $s mouth at @RYOU@W in the form of a deadly @rHonoo@W!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Sudden jets of flame burst forth from $s mouth at @R$N@W in the form of a deadly @rHonoo@W!@n";
       maxki = 0.125;
       attspd += 2;
       burn = true;
       break;
     case 5: /* Twin Slash */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy prepared you poor it into your blade and accelerate your body to incredible speeds toward @r$N! You leave two glowing green marks behind on $S body in a single instant as your @GTwin Slash@W hits!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Raising $s sword @Y$n@W accelerates toward @rYOU@W with incredible speed! Two glowing green slashes are left on YOUR body from $s successful @GTwin Slash@W!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Raising $s sword @Y$n@W accelerates toward @r$N@W with incredible speed! Two glowing green slashes are left on @R$N's@W body from the successful @GTwin Slash@W!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy prepared you poor it into your blade and accelerate your body to incredible speeds toward @r$N! You leave two glowing green marks behind on $S body in a single instant as your @GTwin Slash@W hits!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Raising $s sword @Y$n@W accelerates toward @rYOU@W with incredible speed! Two glowing green slashes are left on YOUR body from $s successful @GTwin Slash@W!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Raising $s sword @Y$n@W accelerates toward @r$N@W with incredible speed! Two glowing green slashes are left on @R$N's@W body from the successful @GTwin Slash@W!@n";
       maxki = 0.125;
       attspd += 2;
       blockable = false;
       break;
     case 6: /* Hell Flash */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You stick one of each of your hands in your armpits and detach them. With your hands detached your point the exposed arm cannons at @r$N@W and launch a massive @RHell Flash@W at $M!");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W sticks one of each of $s hands in $s armpits and detaches them there. With the hands detached $e aims $s exposed arm cannons at @RYOU@W and launches a massive @RHell Flash@W!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W sticks one of each of $s hands in $s armpits and detaches them there. With the hands detached $e aims $s exposed arm cannons at @R$N@W and launches a massive @RHell Flash@W!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You stick one of each of your hands in your armpits and detach them. With your hands detached your point the exposed arm cannons at @r$N@W and launch a massive @RHell Flash@W at $M!";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W sticks one of each of $s hands in $s armpits and detaches them there. With the hands detached $e aims $s exposed arm cannons at @RYOU@W and launches a massive @RHell Flash@W!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W sticks one of each of $s hands in $s armpits and detaches them there. With the hands detached $e aims $s exposed arm cannons at @R$N@W and launches a massive @RHell Flash@W!@n";
       maxki = 0.2;
       attspd += 1;
       break;
     case 7: /* Psychic Blast */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy ready you look at @R$N@W as the blue light of your @CPsychic Blast@W launches from your head toward $S!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! A blue light, identifying a @CPsychic Blast@W, launches from @Y$n's@W toward @RYOUR HEAD@W!");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! A blue light, identifying a @CPsychic Blast@W, launches from @Y$n's@W toward @R$N's@W head!");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy ready you look at @R$N@W as the blue light of your @CPsychic Blast@W launches from your head toward $S!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! A blue light, identifying a @CPsychic Blast@W, launches from @Y$n's@W toward @RYOUR HEAD@W!";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! A blue light, identifying a @CPsychic Blast@W, launches from @Y$n's@W toward @R$N's@W head!";
       maxki = 0.125;
       attspd += 1;
       shocked = true;
       break;
     case 8: /* Crusher Ball */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! Pooling your energy you form a large ball of red energy above an upraised palm. Slamming your other hand into it you launch it toward @r$N@W while shouting @B'@RCrusher Ball@B'@W!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises a palm above his head and red energy begins to pool there. As the energy completes the formation of a ball @Y$n@W slams $s other hand into it and launches it at @rYOU@W while shouting @B'@RCrusher Ball@B'@W!");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises a palm above his head and red energy begins to pool there. As the energy completes the formation of a ball @Y$n@W slams $s other hand into it and launches it at @r$N@W while shouting @B'@RCrusher Ball@B'@W!");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! Pooling your energy you form a large ball of red energy above an upraised palm. Slamming your other hand into it you launch it toward @r$N@W while shouting @B'@RCrusher Ball@B'@W!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises a palm above his head and red energy begins to pool there. As the energy completes the formation of a ball @Y$n@W slams $s other hand into it and launches it at @rYOU@W while shouting @B'@RCrusher Ball@B'@W!";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises a palm above his head and red energy begins to pool there. As the energy completes the formation of a ball @Y$n@W slams $s other hand into it and launches it at @r$N@W while shouting @B'@RCrusher Ball@B'@W!";
       maxki = 0.2;
       break;
     case 9: /* Water Spikes */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! Using your energy to form a ball of water between your hands you then raise the ball above your head. Several spiked of ice form from the ball of water and you hurl them at @r$N@W!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Forming a ball of water between $s palms with $s energy @Y$n@W then raises the ball of water above $s head. Suddenly several spikes of ice form from the water and $e launches them at @rYOU@W!");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Forming a ball of water between $s palms with $s energy @Y$n@W then raises the ball of water above $s head. Suddenly several spikes of ice form from the water and $e launches them at @r$N@W!");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! Using your energy to form a ball of water between your hands you then raise the ball above your head. Several spiked of ice form from the ball of water and you hurl them at @r$N@W!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! Forming a ball of water between $s palms with $s energy @Y$n@W then raises the ball of water above $s head. Suddenly several spikes of ice form from the water and $e launches them at @rYOU@W!";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Forming a ball of water between $s palms with $s energy @Y$n@W then raises the ball of water above $s head. Suddenly several spikes of ice form from the water and $e launches them at @r$N@W!";
       maxki = 0.14;
       break;
     case 10: /* Tribeam */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You form a triangle with your hands and aim the center of the triangle at @r$N@W. With the sudden shout @B'@YTribeam@B'@W you release your prepared energy at $M in the form of a beam!");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W forms a triangle with $s hands and aims the center at @rYOU@W! With the sudden shout @B'@YTribeam@B'@W a large beam of energy flashes toward @rYOU!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W forms a triangle with $s hands and aims the center at @r$N@W! With the sudden shout @B'@YTribeam@B'@W a large beam of energy flashes toward @r$N!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You form a triangle with your hands and aim the center of the triangle at @r$N@W. With the sudden shout @B'@YTribeam@B'@W you release your prepared energy at $M in the form of a beam!";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W forms a triangle with $s hands and aims the center at @rYOU@W! With the sudden shout @B'@YTribeam@B'@W a large beam of energy flashes toward @rYOU!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W forms a triangle with $s hands and aims the center at @r$N@W! With the sudden shout @B'@YTribeam@B'@W a large beam of energy flashes toward @r$N!@n";
       maxki = 0.2;
       attspd += 2;
       bonus += getEffMaxPL(g, ch) * 0.5;
       break;
     case 11: /* Starbreaker */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group, you call out to your allies to launch a group attack! You raise your right hand above your head as dark red energy begins to pool in your slightly cupped hand, while purple arcs of electricity flow up your left arm. Slamming both hands together, you shout @B'@YStarbreaker@B'@W and release your prepared energy at $M in the form of a ball!@n");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises $s right hand, pooling dark red energy in the palm. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @rYOU!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises their right hand above their head, pooling dark red energy. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @r$N!@n");
+      chbuf   = "@WPositioning yourself in the center of your group, you call out to your allies to launch a group attack! You raise your right hand above your head as dark red energy begins to pool in your slightly cupped hand, while purple arcs of electricity flow up your left arm. Slamming both hands together, you shout @B'@YStarbreaker@B'@W and release your prepared energy at $M in the form of a ball!@n";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises $s right hand, pooling dark red energy in the palm. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @rYOU!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises their right hand above their head, pooling dark red energy. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @r$N!@n";
       maxki = 0.2;
       bonus += getMaxKI(g, ch) * 0.6;
       break;
     case 12: /* Seishou Enko */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You open your mouth and aim at @r$N@W. You grunt as you release your prepared energy at $M in the form of a beam!");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W opens $s mouth and aims at @rYOUW! With the sudden grunt, a large beam flashes towards @rYOU@n!");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W opens $s mouth and aims at @rYOUW! With the sudden grunt, a large beam flashes toward @r$N@n!");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You open your mouth and aim at @r$N@W. You grunt as you release your prepared energy at $M in the form of a beam!";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W opens $s mouth and aims at @rYOUW! With the sudden grunt, a large beam flashes towards @rYOU@n!";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W opens $s mouth and aims at @rYOUW! With the sudden grunt, a large beam flashes toward @r$N@n!";
       maxki = 0.125;
       attspd += 35;
       break;
     case 13: /* Renzokou Energy Dan */
-      sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You slam your hands together and aim at @r$n@W. With the sudden shout @B'@YRenzoku Energy Dan@B'@W you release your prepared energy in the form of hundreds of ki blasts!");
-      sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W slams both $s hands together and aims at @rYOUW! With the sudden shout @B'@YRenzoku Energy Dan@B'@W hundreds of ki blasts flash towards @rYOU!@n");
-      sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W slams $s hands together and aims at @r$N@W! With the sudden shout @B'@YRenzoku Energy Dan@B'@W hundreds of ki blasts flash towards @r$N!@n");
+      chbuf   = "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You slam your hands together and aim at @r$n@W. With the sudden shout @B'@YRenzoku Energy Dan@B'@W you release your prepared energy in the form of hundreds of ki blasts!";
+      victbuf = "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W slams both $s hands together and aims at @rYOUW! With the sudden shout @B'@YRenzoku Energy Dan@B'@W hundreds of ki blasts flash towards @rYOU!@n";
+      rmbuf   = "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W slams $s hands together and aims at @r$N@W! With the sudden shout @B'@YRenzoku Energy Dan@B'@W hundreds of ki blasts flash towards @r$N!@n";
       maxki = 0.125;
       attspd += 6;
       break;
@@ -535,9 +537,9 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   int64_t totki = 0;
 
-  act(g, chbuf, true, ch, nullptr, vict, TO_CHAR);
-  act(g, victbuf, true, ch, nullptr, vict, TO_VICT);
-  act(g, rmbuf, true, ch, nullptr, vict, TO_NOTVICT);
+  act(g, chbuf.c_str(), true, ch, nullptr, vict, TO_CHAR);
+  act(g, victbuf.c_str(), true, ch, nullptr, vict, TO_VICT);
+  act(g, rmbuf.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
 
   if (char_get_charge(ch) >= getMaxKI(g, ch) * maxki) {
     totki += getMaxKI(g, ch) * maxki;
@@ -563,11 +565,12 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
     }
     totalmem += 1;
     attavg += char_get_skill(fol, attack_skills[char_get_combine(fol)]);
-    char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
-    sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
-    sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
-    act(g, folbuf, true, fol, nullptr, nullptr, TO_ROOM);
-    act(g, folbuf2, true, fol, nullptr, nullptr, TO_CHAR);
+    std::string folbuf;
+    std::string folbuf2;
+    folbuf  = str_format("@Y$n@W times and merges $s @B'@R{}@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
+    folbuf2 = str_format("@WYou time and merge your @B'@R{}@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
+    act(g, folbuf.c_str(), true, fol, nullptr, nullptr, TO_ROOM);
+    act(g, folbuf2.c_str(), true, fol, nullptr, nullptr, TO_CHAR);
   }
 
   totki += bonus;
@@ -927,14 +930,14 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
     } else {
       solo_gain(g, ch, vict);
     }
-    char corp[256];
+    std::string corp;
     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-      sprintf(corp, "all.zenni corpse");
-      do_get(g, ch, corp, 0, 0);
+      corp = "all.zenni corpse";
+      do_get(g, ch, corp.c_str(), 0, 0);
     }
     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-      sprintf(corp, "all corpse");
-      do_get(g, ch, corp, 0, 0);
+      corp = "all corpse";
+      do_get(g, ch, corp.c_str(), 0, 0);
     }
     return;
   } else { /* We've only succeeded in removing a limb. */
@@ -2394,9 +2397,9 @@ void handle_defense(GameWorld *g, struct char_data *vict, int *pry, int *blk, in
 
 void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, const char *sname, int prob, int perc, int skill, int type)
 {
-  char buf[200];
-  char buf2[200];
-  char buf3[200];
+  std::string buf;
+  std::string buf2;
+  std::string buf3;
   int foundv = false, foundo = false;
   int64_t dmg = 0;
 
@@ -2411,21 +2414,21 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
 
     if (rand_number(g, 1, 101) >= 90 && foundv == false) {
       if (handle_parry(g, tch) > rand_number(g, 1, 140)) {
-        sprintf(buf, "@C$N@W deflects your %s, sending it flying away!@n", sname);
-        sprintf(buf2, "@WYou deflect @C$n's@W %s sending it flying away!@n", sname);
-        sprintf(buf3, "@C$N@W deflects @c$n's@W %s sending it flying away!@n", sname);
-        act(g, buf, true, ch, nullptr, tch, TO_CHAR);
-        act(g, buf2, true, ch, nullptr, tch, TO_VICT);
-        act(g, buf3, true, ch, nullptr, tch, TO_NOTVICT);
+        buf  = str_format("@C$N@W deflects your {}, sending it flying away!@n", sname);
+        buf2 = str_format("@WYou deflect @C$n's@W {} sending it flying away!@n", sname);
+        buf3 = str_format("@C$N@W deflects @c$n's@W {} sending it flying away!@n", sname);
+        act(g, buf.c_str(), true, ch, nullptr, tch, TO_CHAR);
+        act(g, buf2.c_str(), true, ch, nullptr, tch, TO_VICT);
+        act(g, buf3.c_str(), true, ch, nullptr, tch, TO_NOTVICT);
         foundv = false;
       } else {
         foundv = true;
-        sprintf(buf, "@WYou watch as the deflected %s slams into @C$N@W, exploding with a roar of blinding light!@n", sname);
-        sprintf(buf2, "@c$n@W watches as the deflected %s slams into you! The %s explodes with a roar of blinding light!@n", sname, sname);
-        sprintf(buf3, "@c$n@W watches as the deflected %s slams into @C$N@W! The %s explodes with a roar of blinding light!@n", sname, sname);
-        act(g, buf, true, vict, nullptr, tch, TO_CHAR);
-        act(g, buf2, true, vict, nullptr, tch, TO_VICT);
-        act(g, buf3, true, vict, nullptr, tch, TO_NOTVICT);
+        buf    = str_format("@WYou watch as the deflected {} slams into @C$N@W, exploding with a roar of blinding light!@n", sname);
+        buf2   = str_format("@c$n@W watches as the deflected {} slams into you! The {} explodes with a roar of blinding light!@n", sname, sname);
+        buf3   = str_format("@c$n@W watches as the deflected {} slams into @C$N@W! The {} explodes with a roar of blinding light!@n", sname, sname);
+        act(g, buf.c_str(), true, vict, nullptr, tch, TO_CHAR);
+        act(g, buf2.c_str(), true, vict, nullptr, tch, TO_VICT);
+        act(g, buf3.c_str(), true, vict, nullptr, tch, TO_NOTVICT);
         dmg = damtype(g, ch, type, skill, attperc);
         hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
         return;
@@ -2440,20 +2443,20 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
       continue;
     if (rand_number(g, 1, 101) >= 80) {
       foundo = true;
-      sprintf(buf, "@WYou watch as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
-      sprintf(buf2, "@c$n@W watches as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
-      act(g, buf, true, vict, tob, nullptr, TO_CHAR);
-      act(g, buf2, true, vict, tob, nullptr, TO_ROOM);
+      buf    = str_format("@WYou watch as the deflected {} slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
+      buf2   = str_format("@c$n@W watches as the deflected {} slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
+      act(g, buf.c_str(), true, vict, tob, nullptr, TO_CHAR);
+      act(g, buf2.c_str(), true, vict, tob, nullptr, TO_ROOM);
       hurt(g, 0, 0, ch, nullptr, tob, 25, 1);
       return;
     }
   }
 
   if ((foundo == false || foundv == false) && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
-    sprintf(buf, "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
-    sprintf(buf2, "@WThe deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
-    act(g, buf, true, vict, nullptr, nullptr, TO_CHAR);
-    act(g, buf2, true, vict, nullptr, nullptr, TO_ROOM);
+    buf  = str_format("@WYou watch as the deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
+    buf2 = str_format("@WThe deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
+    act(g, buf.c_str(), true, vict, nullptr, nullptr, TO_CHAR);
+    act(g, buf2.c_str(), true, vict, nullptr, nullptr, TO_ROOM);
     if (room_sect(g, char_get_in_room(vict)) != SECT_INSIDE && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
       impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(g, 1, 8)) {
@@ -3907,9 +3910,8 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       }
       if (char_get_barrier(vict) - dmg > 0) {
         act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_CHAR);
-        char barr[MAX_INPUT_LENGTH];
-        sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg));
-        act(g, barr, true, ch, nullptr, vict, TO_VICT);
+        std::string barr = str_format("@CYour barrier absorbs the damage! @D[@B{}@D]@n", add_commas(dmg));
+        act(g, barr.c_str(), true, ch, nullptr, vict, TO_VICT);
         act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_barrier(vict, char_get_barrier(vict) - (dmg));
         dmg = 0;
@@ -4514,15 +4516,15 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       handle_evolution(g, vict, dmg);
     }
     if (dead == true) {
-      char corp[256];
+      std::string corp;
       if (!char_plr_flagged(ch, PLR_SELFD2)) {
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-          sprintf(corp, "all.zenni corpse");
-          do_get(g, ch, corp, 0, 0);
+          corp = "all.zenni corpse";
+          do_get(g, ch, corp.c_str(), 0, 0);
         }
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-          sprintf(corp, "all corpse");
-          do_get(g, ch, corp, 0, 0);
+          corp = "all corpse";
+          do_get(g, ch, corp.c_str(), 0, 0);
         }
       }
     }

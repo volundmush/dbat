@@ -355,31 +355,31 @@ void bringdesc(GameWorld *g, struct char_data *ch, struct char_data *tch)
 static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data *ch, int exit_mode)
 {
   int door, door_found = 0, has_light = false, i;
-  char dlist1[500];
-  char dlist2[500];
-  char dlist3[500];
-  char dlist4[500];
-  char dlist5[500];
-  char dlist6[500];
-  char dlist7[500];
-  char dlist8[500];
-  char dlist9[500];
-  char dlist10[500];
-  char dlist11[500];
-  char dlist12[500];
+  std::string dlist1;
+  std::string dlist2;
+  std::string dlist3;
+  std::string dlist4;
+  std::string dlist5;
+  std::string dlist6;
+  std::string dlist7;
+  std::string dlist8;
+  std::string dlist9;
+  std::string dlist10;
+  std::string dlist11;
+  std::string dlist12;
 
-  *dlist1  = '\0';
-  *dlist2  = '\0';
-  *dlist3  = '\0';
-  *dlist4  = '\0';
-  *dlist5  = '\0';
-  *dlist6  = '\0';
-  *dlist7  = '\0';
-  *dlist8  = '\0';
-  *dlist9  = '\0';
-  *dlist10 = '\0';
-  *dlist11 = '\0';
-  *dlist12 = '\0';
+  dlist1.clear();
+  dlist2.clear();
+  dlist3.clear();
+  dlist4.clear();
+  dlist5.clear();
+  dlist6.clear();
+  dlist7.clear();
+  dlist8.clear();
+  dlist9.clear();
+  dlist10.clear();
+  dlist11.clear();
+  dlist12.clear();
 
   if (exit_mode == EXIT_OFF) {
     send_to_char(g, ch, "@D------------------------------------------------------------------------@n\r\n");
@@ -440,31 +440,31 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
           snprintf(blam, sizeof(blam), "%s", dirs[door]);
           *blam = toupper(*blam);
           if (door == 6) {
-            snprintf(dlist1, sizeof(dlist1), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist1 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              char argh[100];
+              std::string argh;
               if (fname(exit_keyword(room_get_dir_option(g, target_room, door))) == nullptr) {
                 send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
                 mud_log("ERROR: {} found error direction NORTHWEST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist1 + strlen(dlist1), sizeof(dlist1) - strlen(dlist1), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist1 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 0) {
-            snprintf(dlist2, sizeof(dlist2), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist2 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -473,22 +473,21 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction NORTH at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[200];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist2 + strlen(dlist2), sizeof(dlist2) - strlen(dlist2), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist2 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 7) {
-            snprintf(dlist3, sizeof(dlist3), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist3 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -499,20 +498,20 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
               }
               char argh[100];
               snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist3 + strlen(dlist3), sizeof(dlist3) - strlen(dlist3), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              dlist3 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 1) {
-            snprintf(dlist4, sizeof(dlist4), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist4 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -521,22 +520,21 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction EAST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist4 + strlen(dlist4), sizeof(dlist4) - strlen(dlist4), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist4 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 8) {
-            snprintf(dlist5, sizeof(dlist5), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist5 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -547,20 +545,20 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
               }
               char argh[100];
               snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist5 + strlen(dlist5), sizeof(dlist5) - strlen(dlist5), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              dlist5 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 2) {
-            snprintf(dlist6, sizeof(dlist6), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist6 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -569,22 +567,21 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction SOUTH at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist6 + strlen(dlist6), sizeof(dlist6) - strlen(dlist6), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist6 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 9) {
-            snprintf(dlist7, sizeof(dlist7), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist7 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -595,20 +592,20 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
               }
               char argh[100];
               snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist7 + strlen(dlist7), sizeof(dlist7) - strlen(dlist7), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              dlist7 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 3) {
-            snprintf(dlist8, sizeof(dlist8), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist8 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -617,22 +614,21 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction WEST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist8 + strlen(dlist8), sizeof(dlist8) - strlen(dlist8), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist8 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 4) {
-            snprintf(dlist9, sizeof(dlist9), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist9 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -643,20 +639,20 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
               }
               char argh[100];
               snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist9 + strlen(dlist9), sizeof(dlist9) - strlen(dlist9), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              dlist9 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                   (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                    strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                       ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                       : "opening",
+                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                   IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 5) {
-            snprintf(dlist10, sizeof(dlist10), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist10 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -665,22 +661,21 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction DOWN at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist10 + strlen(dlist10), sizeof(dlist10) - strlen(dlist10), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist10 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                        : "opening",
+                                    strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 10) {
-            snprintf(dlist11, sizeof(dlist11), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist11 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -691,20 +686,20 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
               }
               char argh[100];
               snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist11 + strlen(dlist11), sizeof(dlist11) - strlen(dlist11), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              dlist11 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                        : "opening",
+                                    strstr(argh, "s ") != nullptr ? "are" : "is",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
           if (door == 11) {
-            snprintf(dlist12, sizeof(dlist12), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+            dlist12 = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", blam, room_get_dir_option(g, target_room, door)->to_room, room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             if (IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -713,18 +708,17 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction OUTSIDE at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
-              snprintf(dlist12 + strlen(dlist12), sizeof(dlist12) - strlen(dlist12), "                    The %s%s %s %s %s%s.\r\n",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(room_get_dir_option(g, target_room, door)) &&
-                        strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
-                           ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
-                           : "opening",
-                       strstr(argh, "s ") != nullptr ? "are" : "is",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
-                       IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist12 += str_format("                    The {}{} {} {} {}{}.\r\n",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
+                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
+                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
+                                        : "opening",
+                                    strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
             }
           }
         } else { /* This is what mortal characters see */
@@ -735,40 +729,40 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             snprintf(blam, sizeof(blam), "%s", dirs[door]);
             *blam = toupper(*blam);
             if (door == 6) {
-              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist1 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 0) {
-              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist2 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 7) {
-              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist3 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 1) {
-              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist4 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 8) {
-              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist5 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 2) {
-              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist6 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 9) {
-              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist7 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 3) {
-              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist8 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 4) {
-              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist9 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 5) {
-              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist10 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 10) {
-              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist11 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
             if (door == 11) {
-              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
+              dlist12 = str_format("@c{:<9} @D-@w {}\r\n", blam, room_is_dark(g, room_get_dir_option(g, target_room, door)->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, room_get_dir_option(g, target_room, door)->to_room));
             }
 
           } else if (CONFIG_DISP_CLOSED_DOORS &&
@@ -779,40 +773,40 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
             snprintf(blam, sizeof(blam), "%s", dirs[door]);
             *blam = toupper(*blam);
             if (door == 6) {
-              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist1 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 0) {
-              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist2 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 7) {
-              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist3 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 1) {
-              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist4 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 8) {
-              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist5 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 2) {
-              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist6 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 9) {
-              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist7 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 3) {
-              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist8 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 4) {
-              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist9 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 5) {
-              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist10 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 10) {
-              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist11 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
             if (door == 11) {
-              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              dlist12 = str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", blam, (exit_keyword(room_get_dir_option(g, target_room, door))) ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
             }
           }
         }
@@ -820,53 +814,53 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
     }
     if (!door_found)
       send_to_char(g, ch, " None.\r\n");
-    if (strstr(dlist1, "Northwest")) {
-      send_to_char(g, ch, "{}", dlist1);
-      *dlist1 = '\0';
+    if (strstr(dlist1.c_str(), "Northwest")) {
+      send_to_char(g, ch, dlist1);
+      dlist1.clear();
     }
-    if (strstr(dlist2, "North")) {
-      send_to_char(g, ch, "{}", dlist2);
-      *dlist2 = '\0';
+    if (strstr(dlist2.c_str(), "North")) {
+      send_to_char(g, ch, dlist2);
+      dlist2.clear();
     }
-    if (strstr(dlist3, "Northeast")) {
-      send_to_char(g, ch, "{}", dlist3);
-      *dlist3 = '\0';
+    if (strstr(dlist3.c_str(), "Northeast")) {
+      send_to_char(g, ch, dlist3);
+      dlist3.clear();
     }
-    if (strstr(dlist4, "East")) {
-      send_to_char(g, ch, "{}", dlist4);
-      *dlist4 = '\0';
+    if (strstr(dlist4.c_str(), "East")) {
+      send_to_char(g, ch, dlist4);
+      dlist4.clear();
     }
-    if (strstr(dlist5, "Southeast")) {
-      send_to_char(g, ch, "{}", dlist5);
-      *dlist5 = '\0';
+    if (strstr(dlist5.c_str(), "Southeast")) {
+      send_to_char(g, ch, dlist5);
+      dlist5.clear();
     }
-    if (strstr(dlist6, "South")) {
-      send_to_char(g, ch, "{}", dlist6);
-      *dlist6 = '\0';
+    if (strstr(dlist6.c_str(), "South")) {
+      send_to_char(g, ch, dlist6);
+      dlist6.clear();
     }
-    if (strstr(dlist7, "Southwest")) {
-      send_to_char(g, ch, "{}", dlist7);
-      *dlist7 = '\0';
+    if (strstr(dlist7.c_str(), "Southwest")) {
+      send_to_char(g, ch, dlist7);
+      dlist7.clear();
     }
-    if (strstr(dlist8, "West")) {
-      send_to_char(g, ch, "{}", dlist8);
-      *dlist8 = '\0';
+    if (strstr(dlist8.c_str(), "West")) {
+      send_to_char(g, ch, dlist8);
+      dlist8.clear();
     }
-    if (strstr(dlist9, "Up")) {
-      send_to_char(g, ch, "{}", dlist9);
-      *dlist9 = '\0';
+    if (strstr(dlist9.c_str(), "Up")) {
+      send_to_char(g, ch, dlist9);
+      dlist9.clear();
     }
-    if (strstr(dlist10, "Down")) {
-      send_to_char(g, ch, "{}", dlist10);
-      *dlist10 = '\0';
+    if (strstr(dlist10.c_str(), "Down")) {
+      send_to_char(g, ch, dlist10);
+      dlist10.clear();
     }
-    if (strstr(dlist11, "Inside")) {
-      send_to_char(g, ch, "{}", dlist11);
-      *dlist11 = '\0';
+    if (strstr(dlist11.c_str(), "Inside")) {
+      send_to_char(g, ch, dlist11);
+      dlist11.clear();
     }
-    if (strstr(dlist12, "Outside")) {
-      send_to_char(g, ch, "{}", dlist12);
-      *dlist12 = '\0';
+    if (strstr(dlist12.c_str(), "Outside")) {
+      send_to_char(g, ch, dlist12);
+      dlist12.clear();
     }
     send_to_char(g, ch, "@D------------------------------------------------------------------------@n\r\n");
     if (room_flagged(g, target_room, ROOM_HOUSE) && !room_flagged(g, target_room, ROOM_GARDEN1) && !room_flagged(g, target_room, ROOM_GARDEN2)) {
@@ -987,7 +981,7 @@ void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
     char buf[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
-    char buf3[MAX_STRING_LENGTH];
+    std::string buf3;
 
     sprintbitarray(room_get_room_flags(g, target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
     sprinttype(room_get_sector_type(rm), sector_types, buf2, sizeof(buf2));
@@ -1002,7 +996,7 @@ void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int
         send_to_char(g, ch, " {:d}", trig_get_vnum(g, t));
       send_to_char(g, ch, "@D] ");
     }
-    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n", buf, buf2, target_room);
+    buf3 = str_format("@D[ @G{}@D] @wSector: @D[ @G{} @D] @wVnum: @D[@G{:>5d}@D]@n", buf, buf2, target_room);
     send_to_char(g, ch, "@wFlags: {:<70}@w\r\n", buf3);
     if (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NODEC)) {
       send_to_char(g, ch, "@wO----------------------------------------------------------------------O@n\r\n");
@@ -1264,7 +1258,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &a
   if (arg.empty())
     send_to_char(g, ch, "Look in what?\r\n");
   else if (!(bits = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
-    send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg.c_str()), arg.c_str());
+    send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg.c_str()), arg);
   } else if (find_exdesc(arg, obj_get_ex_description(obj)) != nullptr && !bits)
     send_to_char(g, ch, "There's nothing inside that!\r\n");
   else if ((obj_get_type_flag(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) {
@@ -1715,7 +1709,7 @@ ACMD(do_look)
       for (const extra_descr_data &i : room_get_ex_description(g, char_get_in_room(ch))) {
         if (i.keyword[0] != '.') {
           send_to_char(g, ch, "{}{}:\r\n{}",
-                       (found ? "\r\n" : ""), i.keyword.c_str(), i.description.c_str());
+                       (found ? "\r\n" : ""), i.keyword, i.description);
           found = 1;
         }
       }

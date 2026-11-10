@@ -201,18 +201,14 @@ static void hsedit_disp_flags_menu(GameWorld *g, struct descriptor_data *d)
 
 static void hsedit_owner_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   struct house_control_rec *house;
 
   house = OLC_HOUSE(d);
 
-  sprintf(buf,
-          "@g1@D)@g Owner Name : @c%s@n\r\n"
-          "@g2@D)@g Owner ID   : @c%ld\r\n"
-          "@gQ@D)@g Back to main menu\r\n"
-          "@gEnter choice : @n",
-          get_name_by_id(g, house->owner), house->owner);
-  send_to_char(g, d->character, "{}", buf);
+  buf = str_format("@g1@D)@g Owner Name : @c{}@n\r\n@g2@D)@g Owner ID   : @c{:d}\r\n@gQ@D)@g Back to main menu\r\n@gEnter choice : @n",
+                   get_name_by_id(g, house->owner), house->owner);
+  send_to_char(g, d->character, buf);
 
   OLC_MODE(d) = HSEDIT_OWNER_MENU;
 }
@@ -291,51 +287,36 @@ static void hsedit_disp_type_menu(GameWorld *g, struct descriptor_data *d)
 
 static void hsedit_disp_guest_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH];
-  char not_set[128];
+  std::string buf;
+  std::string not_set;
   struct house_control_rec *house;
 
   house = OLC_HOUSE(d);
 
-  sprintf(not_set, "@D(@yNOT SET@D)@n");
+  not_set = "@D(@yNOT SET@D)@n";
 
-  sprintf(buf,
-          " @g1@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g2@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g3@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g4@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g5@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g6@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g7@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g8@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          " @g9@D)@c %s @D(@gID: @c%ld@D)@n\r\n"
-          "@g10@D)@c %s @D(@gID: @c%ld@D)@n\r\n\r\n"
-          "@gA@D)@g Add a guest\r\n"
-          "@gD@D)@g Delete a guest\r\n"
-          "@gC@D)@g Clear guest list\r\n"
-          "@gQ@D)@g Back to main menu\r\n"
-          "@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ",
+  buf = str_format(" @g1@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g2@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g3@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g4@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g5@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g6@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g7@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g8@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g9@D)@c {} @D(@gID: @c{:d}@D)@n\r\n@g10@D)@c {} @D(@gID: @c{:d}@D)@n\r\n\r\n@gA@D)@g Add a guest\r\n@gD@D)@g Delete a guest\r\n@gC@D)@g Clear guest list\r\n@gQ@D)@g Back to main menu\r\n@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ",
 
-          get_name_by_id(g, house->guests[0]) == nullptr ? not_set : get_name_by_id(g, house->guests[0]),
-          house->guests[0] < 1 ? 0 : house->guests[0],
-          get_name_by_id(g, house->guests[1]) == nullptr ? not_set : get_name_by_id(g, house->guests[1]),
-          house->guests[1] < 1 ? 0 : house->guests[1],
-          get_name_by_id(g, house->guests[2]) == nullptr ? not_set : get_name_by_id(g, house->guests[2]),
-          house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(g, house->guests[3]) == nullptr ? not_set : get_name_by_id(g, house->guests[3]),
-          house->guests[3] < 1 ? 0 : house->guests[3],
-          get_name_by_id(g, house->guests[4]) == nullptr ? not_set : get_name_by_id(g, house->guests[4]),
-          house->guests[4] < 1 ? 0 : house->guests[4],
-          get_name_by_id(g, house->guests[5]) == nullptr ? not_set : get_name_by_id(g, house->guests[5]),
-          house->guests[5] < 1 ? 0 : house->guests[5],
-          get_name_by_id(g, house->guests[6]) == nullptr ? not_set : get_name_by_id(g, house->guests[6]),
-          house->guests[6] < 1 ? 0 : house->guests[6],
-          get_name_by_id(g, house->guests[7]) == nullptr ? not_set : get_name_by_id(g, house->guests[7]),
-          house->guests[7] < 1 ? 0 : house->guests[7],
-          get_name_by_id(g, house->guests[8]) == nullptr ? not_set : get_name_by_id(g, house->guests[8]),
-          house->guests[8] < 1 ? 0 : house->guests[8],
-          get_name_by_id(g, house->guests[9]) == nullptr ? not_set : get_name_by_id(g, house->guests[9]),
-          house->guests[9] < 1 ? 0 : house->guests[9]);
-  send_to_char(g, d->character, "{}", buf);
+                   get_name_by_id(g, house->guests[0]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[0]),
+                   house->guests[0] < 1 ? 0 : house->guests[0],
+                   get_name_by_id(g, house->guests[1]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[1]),
+                   house->guests[1] < 1 ? 0 : house->guests[1],
+                   get_name_by_id(g, house->guests[2]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[2]),
+                   house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(g, house->guests[3]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[3]),
+                   house->guests[3] < 1 ? 0 : house->guests[3],
+                   get_name_by_id(g, house->guests[4]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[4]),
+                   house->guests[4] < 1 ? 0 : house->guests[4],
+                   get_name_by_id(g, house->guests[5]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[5]),
+                   house->guests[5] < 1 ? 0 : house->guests[5],
+                   get_name_by_id(g, house->guests[6]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[6]),
+                   house->guests[6] < 1 ? 0 : house->guests[6],
+                   get_name_by_id(g, house->guests[7]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[7]),
+                   house->guests[7] < 1 ? 0 : house->guests[7],
+                   get_name_by_id(g, house->guests[8]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[8]),
+                   house->guests[8] < 1 ? 0 : house->guests[8],
+                   get_name_by_id(g, house->guests[9]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[9]),
+                   house->guests[9] < 1 ? 0 : house->guests[9]);
+  send_to_char(g, d->character, buf);
 
   OLC_MODE(d) = HSEDIT_GUEST_MENU;
 }
@@ -368,8 +349,10 @@ static char *hsedit_list_guests(GameWorld *g, struct house_control_rec *thishous
 /* the main menu */
 static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH], built_on[128],
-      last_pay[128], buf2[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
+  std::string built_on;
+  std::string last_pay;
+  char buf2[MAX_STRING_LENGTH];
   char *timestr, no_name[128];
   struct house_control_rec *house;
 
@@ -379,16 +362,16 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   if (house->built_on) {
     timestr         = asctime(localtime(&(house->built_on)));
     *(timestr + 10) = '\0';
-    strlcpy(built_on, timestr, sizeof(built_on));
+    built_on        = timestr;
   } else
-    strcpy(built_on, "Unknown"); /* strcpy: OK (for 'strlen("Unknown") < 128') */
+    built_on = "Unknown"; /* strcpy: OK (for 'strlen("Unknown") < 128') */
 
   if (house->last_payment) {
     timestr         = asctime(localtime(&(house->last_payment)));
     *(timestr + 10) = '\0';
-    strlcpy(last_pay, timestr, sizeof(last_pay));
+    last_pay        = timestr;
   } else
-    strcpy(last_pay, "None"); /* strcpy: OK (for 'strlen("None") < 128') */
+    last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
   *buf2 = '\0';
   sprintbit(house->bitvector, house_flags, buf1, sizeof(buf1));
@@ -413,7 +396,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
            OLC_NUM(d), OLC_ZNUM(d)->number,
            house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name : get_name_by_id(g, house->owner),
            house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
-           house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(g, house, buf2), buf1);
+           house_types[(house->mode)], built_on.c_str(), last_pay.c_str(), hsedit_list_guests(g, house, buf2), buf1);
   send_to_char(g, d->character, "{}", buf);
 
   OLC_MODE(d) = HSEDIT_MAIN_MENU;

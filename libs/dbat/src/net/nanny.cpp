@@ -572,7 +572,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         } else {
           d->idle_tics = 0;
-          write_to_output(g, d, "\r\n{}\r\n{}", g->motd.c_str(), CONFIG_MENU.c_str());
+          write_to_output(g, d, "\r\n{}\r\n{}", g->motd, CONFIG_MENU);
           char_set_rp(d->character, d->rpp);
           desc_set_connected(d, CON_MENU);
         }
@@ -674,7 +674,7 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
       desc_set_connected(d, CON_CLOSE);
     } else {
       d->user = arg;
-      write_to_output(g, d, "You want you user name to be, {}?\r\n", d->user.c_str());
+      write_to_output(g, d, "You want you user name to be, {}?\r\n", d->user);
       write_to_output(g, d, "Yes or no: \n");
       desc_set_connected(d, CON_USER_CONF);
     }
@@ -684,7 +684,7 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
       userLoad(d, d->user.c_str());
       if (d->level == 0) {
         write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
-        send_to_imm(g, "{} rejected by wizlock", d->user.c_str());
+        send_to_imm(g, "{} rejected by wizlock", d->user);
         desc_set_connected(d, CON_CLOSE);
       } else {
         write_to_output(g, d, "Password: \r\n");
@@ -704,12 +704,12 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
 static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   if (!*arg) {
-    write_to_output(g, d, "You want your user name to be, {}?\r\n", d->user.c_str());
+    write_to_output(g, d, "You want your user name to be, {}?\r\n", d->user);
     write_to_output(g, d, "Yes or no: \n");
     return;
   }
   if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
-    write_to_output(g, d, "User Account, {}, created.\r\nEnter Email:\n", d->user.c_str());
+    write_to_output(g, d, "User Account, {}, created.\r\nEnter Email:\n", d->user);
     write_to_output(g, d, "Remember your email must be valid and matching the example given.\n");
     write_to_output(g, d, "[Example: iovan@@advent-truth.com]\n");
     send_to_imm(g, "Username, {}, creating.", CAP(d->user.data()));
@@ -719,7 +719,7 @@ static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Enter Username: \n");
     desc_set_connected(d, CON_GET_USER);
   } else {
-    write_to_output(g, d, "You want you user name to be, {}?\r\n", d->user.c_str());
+    write_to_output(g, d, "You want you user name to be, {}?\r\n", d->user);
     write_to_output(g, d, "Yes or no: \n");
     return;
   }
@@ -941,7 +941,7 @@ static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_RMOTD: read CR after printing motd */
 static void state_rmotd(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  write_to_output(g, d, "{}", CONFIG_MENU.c_str());
+  write_to_output(g, d, CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 
@@ -963,7 +963,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
         return;
       }
       load_result = enter_player_game(g, d);
-      send_to_char(g, d->character, "{}", CONFIG_WELC_MESSG.c_str());
+      send_to_char(g, d->character, CONFIG_WELC_MESSG);
       act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
 
       oldcount = update_player_count(g);
@@ -977,7 +977,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 
       if (char_get_level(d->character) == 0) {
         do_start(g, d->character);
-        send_to_char(g, d->character, "{}", CONFIG_START_MESSG.c_str());
+        send_to_char(g, d->character, CONFIG_START_MESSG);
       }
       if (char_get_in_room(d->character) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
         char_from_room(g, d->character);
@@ -1022,11 +1022,11 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
         }
       }
       if (!char_is_android(d->character)) {
-        char buf3[MAX_INPUT_LENGTH];
+        std::string buf3;
         send_to_sense(g, 0, "You sense someone appear suddenly", d->character);
-        sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
-                add_commas(getCurPL(g, d->character)));
-        send_to_scouter(g, buf3, d->character, 0, 0);
+        buf3 = str_format("@D[@GBlip@D]@Y {}\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
+                          add_commas(getCurPL(g, d->character)));
+        send_to_scouter(g, buf3.c_str(), d->character, 0, 0);
       }
       if (load_result == 2) { /* rented items lost */
         send_to_char(g, d->character, "\r\n\007You could not afford your rent!\r\nYour possesions have been donated to the Salvation Army!\r\n");
@@ -1060,7 +1060,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     default:
-      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n{}\r\n{}", g->motd.c_str(), CONFIG_MENU.c_str());
+      write_to_output(g, d, "\r\nThat's not a menu choice!\r\n{}\r\n{}", g->motd, CONFIG_MENU);
       break;
   }
 }
@@ -1129,7 +1129,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
       write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your {} character.@D]@n\r\n", refund, char_true_race_name(d->character));
       d->rpp += refund;
     }
-    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User {} has deleted character {} (lev {:d}).", d->user.c_str(), char_get_name(d->character), char_get_level(d->character));
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User {} has deleted character {} (lev {:d}).", d->user, char_get_name(d->character), char_get_level(d->character));
 
     empty_account_slots_named(d, char_get_name(d->character));
     userWrite(g, d, 0, 0, 0, "index");
@@ -1137,7 +1137,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_UMENU);
     return;
   }
-  write_to_output(g, d, "\r\nCharacter not deleted.\r\n{}\r\n{}", g->motd.c_str(), CONFIG_MENU.c_str());
+  write_to_output(g, d, "\r\nCharacter not deleted.\r\n{}\r\n{}", g->motd, CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
 }
 

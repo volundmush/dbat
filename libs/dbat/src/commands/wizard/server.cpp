@@ -307,7 +307,9 @@ static void save_players_without_connections(GameWorld *g)
 static void execute_copyover(GameWorld *g)
 {
   struct itimerval no_timer = {{0, 0}, {0, 0}};
-  char exe[PATH_MAX], fold[120], mother[32];
+  char exe[PATH_MAX];
+  std::string fold;
+  char mother[32];
   char **args;
   int num_args = 0;
 
@@ -326,7 +328,7 @@ static void execute_copyover(GameWorld *g)
   House_save_all(g);
   save_players_without_connections(g);
 
-  snprintf(fold, sizeof(fold), "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
+  fold = "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n";
   for (descriptor_data *d : each_desc(g)) {
     struct char_data *player = copyover_player(d);
 
@@ -341,7 +343,7 @@ static void execute_copyover(GameWorld *g)
       write_to_descriptor(d->descriptor, "\n\rWhatever you were editing has been lost.\n\r");
     Crash_rentsave(g, player, 0);
     save_char(g, player);
-    write_to_descriptor(d->descriptor, fold);
+    write_to_descriptor(d->descriptor, fold.c_str());
   }
 
   /* Everything the game was started with, so that it comes back the same, and in the same place. */

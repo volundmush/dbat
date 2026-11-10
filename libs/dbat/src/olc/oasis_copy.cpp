@@ -77,7 +77,7 @@ ACMD(do_dig)
   zone = room_get_zone(g, char_get_in_room(ch));
 
   if (dir < 0) {
-    send_to_char(g, ch, "Cannot create an exit to the '{}'.\r\n", sdir.c_str());
+    send_to_char(g, ch, "Cannot create an exit to the '{}'.\r\n", sdir);
     return;
   }
   /* Make sure that the builder has access to the zone he's in. */

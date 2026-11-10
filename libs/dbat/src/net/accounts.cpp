@@ -165,7 +165,7 @@ void userCreate(struct descriptor_data *d)
     return;
 
   if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save user, {}, to filename, {}.", d->user.c_str(), fname);
+    mud_log("ERROR: could not save user, {}, to filename, {}.", d->user, fname);
     return;
   }
 
@@ -276,7 +276,7 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
       return;
 
     if (!(fl = atomic_open(&af, fname, true))) {
-      mud_log("ERROR: could not save user, {}, to filename, {}.", d->user.c_str(), fname);
+      mud_log("ERROR: could not save user, {}, to filename, {}.", d->user, fname);
       return;
     }
 
@@ -529,8 +529,8 @@ void userRead(GameWorld *g, struct descriptor_data *d)
 {
   write_to_output(g, d, "                 @RUser Menu@n\n");
   write_to_output(g, d, "@D=============================================@n\r\n");
-  write_to_output(g, d, "@D|@gUser Account  @D: @w{:<27}@D|@n\n", d->user.c_str());
-  write_to_output(g, d, "@D|@gEmail Address @D: @w{:<27}@D|@n\n", d->email.c_str());
+  write_to_output(g, d, "@D|@gUser Account  @D: @w{:<27}@D|@n\n", d->user);
+  write_to_output(g, d, "@D|@gEmail Address @D: @w{:<27}@D|@n\n", d->email);
   write_to_output(g, d, "@D|@gMax Characters@D: @w{:<27d}@D|@n\n", d->total);
   write_to_output(g, d, "@D|@gRP Points     @D: @w{:<27d}@D|@n\n", d->rpp);
   write_to_output(g, d, "@D=============================================@n\r\n\r\n");

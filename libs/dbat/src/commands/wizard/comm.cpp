@@ -70,7 +70,9 @@ ACMD(do_news)
   FILE *fl;
   const char *filename;
   char line[256];
-  char buf[MAX_STRING_LENGTH], title[256], lastline[256];
+  std::string buf;
+  char title[256];
+  std::string lastline;
   std::string arg;
   int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
@@ -104,20 +106,20 @@ ACMD(do_news)
           continue;
         } else { /* One we want to read */
           sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-          snprintf(buf, sizeof(buf), "@w--------------------------------------------------------------\n@cNum@W: @D(@G%3d@D)                @cTitle@W: @g%-50s@n\n", nr, title);
+          buf   = str_format("@w--------------------------------------------------------------\n@cNum@W: @D(@G{:>3d}@D)                @cTitle@W: @g{:<50}@n\n", nr, title);
           found = true;
           while (!feof(fl) && exit == false) {
             get_line(fl, line);
             if (*line != '#') { /* As long as it isn't a new entry*/
               if (first == true) {
                 first = false;
-                snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s\n@w--------------------------------------------------------------\n", line);
-                snprintf(lastline, sizeof(lastline), "%s", line);
-              } else if (!strcasecmp(line, lastline)) {
+                buf += str_format("{}\n@w--------------------------------------------------------------\n", line);
+                lastline = str_format("{}", line);
+              } else if (!strcasecmp(line, lastline.c_str())) {
                 continue;
               } else {
-                snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s\n", line);
-                snprintf(lastline, sizeof(lastline), "%s", line);
+                buf += str_format("{}\n", line);
+                lastline = str_format("{}", line);
               }
             } else {
               exit = true;
@@ -137,11 +139,11 @@ ACMD(do_news)
         } else { /* One we want to read */
           if (first == true) {
             sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-            snprintf(buf, sizeof(buf), "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
+            buf   = str_format("@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
             first = false;
           } else {
             sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-            snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
+            buf += str_format("@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
           }
         }
       } /* End Check the entry */
@@ -151,13 +153,13 @@ ACMD(do_news)
     if (entries > 0) {
       char_set_lastpl(ch, game_now(g));
       char_set_wait(ch, PULSE_1SEC);
-      send_to_char(g, ch, "{}", buf);
+      send_to_char(g, ch, buf);
     } else {
       send_to_char(g, ch, "The news file is empty right now.\r\n");
     }
-    *buf      = '\0';
+    buf.clear();
     *title    = '\0';
-    *lastline = '\0';
+    lastline.clear();
     return;
   } else {
     fclose(fl);
@@ -168,9 +170,9 @@ ACMD(do_news)
   if (found == true) {
     send_to_char(g, ch, "{}\r\n", buf);
     char_set_lastpl(ch, game_now(g));
-    *buf      = '\0';
+    buf.clear();
     *title    = '\0';
-    *lastline = '\0';
+    lastline.clear();
     char_set_wait(ch, PULSE_1SEC);
     return;
   }
@@ -320,12 +322,11 @@ ACMD(do_echo)
     buf = text;
   }
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
   }
   if (NoName == true) {
-    char blom[MAX_INPUT_LENGTH];
-    snprintf(blom, sizeof(blom), "@D(@GOOC@W: @gSmote by user %s@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch));
-    act(g, blom, false, ch, nullptr, nullptr, TO_ROOM);
+    std::string blom = str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch));
+    act(g, blom.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
   }
   if (found == false) {
     act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
@@ -352,14 +353,14 @@ ACMD(do_send)
     return;
   }
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
     return;
   }
-  send_to_char(g, vict, "{}\r\n", buf.c_str());
+  send_to_char(g, vict, "{}\r\n", buf);
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, "Sent.\r\n");
   else
-    send_to_char(g, ch, "You send '{}' to {}.\r\n", buf.c_str(), char_get_name(vict));
+    send_to_char(g, ch, "You send '{}' to {}.\r\n", buf, char_get_name(vict));
 }
 
 static const char *const logtypes[] = {
@@ -400,12 +401,12 @@ ACMD(do_gecho)
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "{}\r\n", text.c_str());
+        send_to_char(g, pt->character, "{}\r\n", text);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     else
-      send_to_char(g, ch, "{}\r\n", text.c_str());
+      send_to_char(g, ch, "{}\r\n", text);
   }
 }
 
@@ -420,12 +421,12 @@ ACMD(do_ginfo)
   else {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "@D[@GINFO@D] @g{}@n\r\n", text.c_str());
+        send_to_char(g, pt->character, "@D[@GINFO@D] @g{}@n\r\n", text);
 
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+      send_to_char(g, ch, CONFIG_OK);
     else
-      send_to_char(g, ch, "@D[@GINFO@D] @g{}@n\r\n", text.c_str());
+      send_to_char(g, ch, "@D[@GINFO@D] @g{}@n\r\n", text);
   }
 }
 
@@ -443,7 +444,7 @@ ACMD(do_poofset)
 
   *msg = skip_spaces(argument);
 
-  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+  send_to_char(g, ch, CONFIG_OK);
 }
 
 ACMD(do_wiznet)
@@ -534,5 +535,5 @@ ACMD(do_wiznet)
   }
 
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
-    send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+    send_to_char(g, ch, CONFIG_OK);
 }

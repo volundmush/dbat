@@ -152,7 +152,7 @@ int search_help(GameWorld *g, const char *argument, int level)
 
 ACMD(do_help)
 {
-  char buf[MAX_STRING_LENGTH * 4];
+  std::string buf;
   int mid = 0;
 
   if (!char_get_desc(ch))
@@ -167,9 +167,9 @@ ACMD(do_help)
 
   if (text.empty()) {
     if (char_get_admlevel(ch) < ADMLVL_IMMORT)
-      send_to_char(g, ch, "{}", g->help.c_str());
+      send_to_char(g, ch, g->help);
     else
-      send_to_char(g, ch, "{}", g->ihelp.c_str());
+      send_to_char(g, ch, g->ihelp);
     return;
   }
 
@@ -179,7 +179,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(g, ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "{} tried to get help on {}", char_get_name(ch), text.c_str());
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "{} tried to get help on {}", char_get_name(ch), text);
     }
     for (i = 0; i < (int)g->help_table.size(); i++) {
       if (g->help_table[i].min_level > char_get_admlevel(ch))
@@ -192,7 +192,7 @@ ACMD(do_help)
           send_to_char(g, ch, "\r\nDid you mean:\r\n");
           found = 1;
         }
-        send_to_char(g, ch, "  {}\r\n", g->help_table[i].keywords.c_str());
+        send_to_char(g, ch, "  {}\r\n", g->help_table[i].keywords);
       }
     }
     return;
@@ -201,52 +201,52 @@ ACMD(do_help)
     send_to_char(g, ch, "There is no help on that word.\r\n");
     return;
   }
-  snprintf(buf, sizeof(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", g->help_table[mid].entry.c_str());
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+  buf = "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n";
+  buf += g->help_table[mid].entry;
+  buf += "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n";
   if (char_get_admlevel(ch) > 0) {
-    snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", g->help_table[mid].min_level);
+    buf += str_format("@WHelp File Level@w: @D(@R{:d}@D)@n\n", g->help_table[mid].min_level);
   }
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 }
 
 /* Shows one of the fixed text files (credits, news, motd, ...) */
 ACMD(do_gen_ps)
 {
   std::string arg;
-  char bum[10000];
+  std::string bum;
   std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   switch (subcmd) {
     case SCMD_CREDITS:
-      send_to_char(g, ch, "{}", g->credits.c_str());
+      send_to_char(g, ch, g->credits);
       break;
     case SCMD_NEWS:
-      send_to_char(g, ch, "{}", g->news.c_str());
+      send_to_char(g, ch, g->news);
       char_set_lastpl(ch, game_now(g));
       break;
     case SCMD_INFO:
-      send_to_char(g, ch, "{}", g->info.c_str());
+      send_to_char(g, ch, g->info);
       break;
     case SCMD_WIZLIST:
-      send_to_char(g, ch, "{}", g->wizlist.c_str());
+      send_to_char(g, ch, g->wizlist);
       break;
     case SCMD_IMMLIST:
-      send_to_char(g, ch, "{}", g->immlist.c_str());
+      send_to_char(g, ch, g->immlist);
       break;
     case SCMD_HANDBOOK:
-      send_to_char(g, ch, "{}", g->handbook.c_str());
+      send_to_char(g, ch, g->handbook);
       break;
     case SCMD_POLICIES:
-      snprintf(bum, sizeof(bum), "--------------------\r\n%s\r\n--------------------\r\n", g->policies.c_str());
-      send_to_char(g, ch, "{}", bum);
+      bum = str_format("--------------------\r\n{}\r\n--------------------\r\n", g->policies);
+      send_to_char(g, ch, bum);
       break;
     case SCMD_MOTD:
-      send_to_char(g, ch, "{}", g->motd.c_str());
+      send_to_char(g, ch, g->motd);
       break;
     case SCMD_IMOTD:
-      send_to_char(g, ch, "{}", g->imotd.c_str());
+      send_to_char(g, ch, g->imotd);
       break;
     case SCMD_CLEAR:
       send_to_char(g, ch, "\033[H\033[J");
@@ -401,7 +401,7 @@ ACMD(do_commands)
   int wizhelp = 0, socials = 0;
   struct char_data *vict;
   std::string arg;
-  char label[MAX_INPUT_LENGTH];
+  std::string label;
 
   std::string_view rest = argument;
   arg                   = take_arg(rest);
@@ -448,9 +448,9 @@ ACMD(do_commands)
       continue;
 
     if (check_disabled(g, &g->complete_cmd_info[i]))
-      snprintf(label, sizeof(label), "(%s)", g->complete_cmd_info[i].command);
+      label = str_format("({})", g->complete_cmd_info[i].command);
     else
-      snprintf(label, sizeof(label), "%s", g->complete_cmd_info[i].command);
+      label = str_format("{}", g->complete_cmd_info[i].command);
 
     send_to_char(g, ch, "{:<11}{}", label, no++ % 7 == 0 ? "\r\n" : "");
   }
@@ -490,7 +490,7 @@ ACMD(do_history)
   std::deque<std::string> *history = char_comm_hist(g, ch, type);
   if (history && !history->empty() && !history->front().empty()) {
     for (const std::string &line : *history)
-      send_to_char(g, ch, "{}", line.c_str());
+      send_to_char(g, ch, line);
 /* Make this a 1 if you want history to cear after viewing */
 #if 0 
       free_history(ch, type);
@@ -501,7 +501,8 @@ ACMD(do_history)
 
 void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)
 {
-  char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
+  char time_str[MAX_STRING_LENGTH];
+  std::string buf;
   std::deque<std::string> *history;
   time_t ct;
 
@@ -511,9 +512,9 @@ void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)
   ct = game_now(g);
   strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
-  snprintf(buf, sizeof(buf), "%s%s", time_str, str);
+  buf = str_format("{}{}", time_str, str);
 
-  history->push_back(buf);
+  history->push_back(buf.c_str());
   while (history->size() > HIST_LENGTH)
     history->pop_front();
   /* add this history message to ALL */

@@ -32,7 +32,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   struct atomic_file af;
   FILE *fp;
   struct zone_data *zone;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   if (vzone_num < 0) {
     *error = "You can't make negative zones.\r\n";
@@ -67,8 +67,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create the zone file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.zon", ZON_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return nullptr;
@@ -83,8 +83,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create the room file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.wld", WLD_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return nullptr;
@@ -99,8 +99,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create the mobile file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.mob", MOB_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return nullptr;
@@ -115,8 +115,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*  
    * Create the object file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.obj", OBJ_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return nullptr;
@@ -131,8 +131,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create the shop file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.shp", SHP_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return nullptr;
@@ -147,8 +147,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create the trigger file.
    */
-  snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}{:d}.trg", TRG_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return nullptr;
@@ -163,8 +163,8 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   /*
    * Create Gld file .
    */
-  snprintf(buf, sizeof(buf), "%s/%d.gld", GLD_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf, false))) {
+  buf = str_format("{}/{:d}.gld", GLD_PREFIX, vzone_num);
+  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return nullptr;
@@ -222,7 +222,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 {
   struct atomic_file index_af;
   FILE *newfile, *oldfile;
-  char old_name[32];
+  std::string old_name;
   const char *prefix;
   zone_vnum num;
   int found = false;
@@ -258,13 +258,13 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
       return;
   }
 
-  snprintf(old_name, sizeof(old_name), "%s/index", prefix);
+  old_name = str_format("{}/index", prefix);
 
-  if (!(oldfile = fopen(old_name, "r"))) {
+  if (!(oldfile = fopen(old_name.c_str(), "r"))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open {}.", old_name);
     return;
   }
-  if (!(newfile = atomic_open(&index_af, old_name, false))) {
+  if (!(newfile = atomic_open(&index_af, old_name.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open {}.", index_af.tmp);
     fclose(oldfile);
     return;
@@ -343,7 +343,8 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
 {
   int subcmd, arg4 = -1, arg5 = -1;
   IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
-  char fname[128], oldname[128];
+  std::string fname;
+  std::string oldname;
   const char *comment = nullptr;
   struct atomic_file af;
   FILE *zfile;
@@ -357,8 +358,8 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, zone_num->number);
-  if (!(zfile = atomic_open(&af, fname, false))) {
+  fname = str_format("{}{:d}.zon", ZON_PREFIX, zone_num->number);
+  if (!(zfile = atomic_open(&af, fname.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone {:d}.", zone_num->number);
     return false;
   }
@@ -497,7 +498,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
   fputs("S\n$\n", zfile);
   if (!atomic_commit(&af))
     return false;
-  snprintf(oldname, sizeof(oldname), "%s", fname);
+  oldname = fname;
 
   if (in_save_list(g, zone_num->number, SL_ZON)) {
     remove_from_save_list(g, zone_num->number, SL_ZON);

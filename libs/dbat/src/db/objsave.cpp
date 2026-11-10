@@ -119,19 +119,20 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
 void delete_inv_backup(struct char_data *ch)
 {
   FILE *source;
-  char source_file[20480], filename[20480];
+  char source_file[20480];
+  std::string filename;
 
   if (!get_filename(source_file, sizeof(source_file), NEW_OBJ_FILES, char_get_name(ch))) {
     return;
   }
-  snprintf(filename, sizeof(filename), "%s.bak", source_file);
+  filename = str_format("{}.bak", source_file);
 
-  if (!(source = fopen(filename, "r"))) {
+  if (!(source = fopen(filename.c_str(), "r"))) {
     return;
   }
   fclose(source);
 
-  if (remove(filename) < 0 && errno != ENOENT)
+  if (remove(filename.c_str()) < 0 && errno != ENOENT)
     mud_log("ERROR: Couldn't delete backup inv.");
   /*  SYSERR_DESC:
    *  When an alias file cannot be removed, this error will occur,
@@ -652,7 +653,8 @@ void Crash_save_all(GameWorld *g)
 int Crash_load(GameWorld *g, struct char_data *ch)
 {
   FILE *fl;
-  char cmfname[MAX_STRING_LENGTH], cmfnamebak[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
+  char cmfname[MAX_STRING_LENGTH], cmfnamebak[MAX_STRING_LENGTH];
+  std::string buf1;
 
   if (!get_filename(cmfname, sizeof(cmfname), NEW_OBJ_FILES, char_get_name(ch)))
     return 1;
@@ -666,8 +668,8 @@ int Crash_load(GameWorld *g, struct char_data *ch)
   if (errno == ENOENT && access(cmfnamebak, F_OK)) /* never had any, or lost them all and saved that */
     return 1;
 
-  snprintf(buf1, sizeof(buf1), "SYSERR: READING OBJECT FILE %s (5)", cmfname);
-  perror(buf1);
+  buf1 = str_format("SYSERR: READING OBJECT FILE {} (5)", cmfname);
+  perror(buf1.c_str());
   send_to_char(g, ch,
                "\r\n********************* NOTICE *********************\r\nThere was a problem loading your objects from disk.\r\nTrying your backup object file.\r\n");
 
@@ -686,7 +688,7 @@ int Crash_load(GameWorld *g, struct char_data *ch)
 
 static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename)
 {
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf2;
   char line[256] = "";
   int t[30] = {}, zwei = 0; /* a damaged line leaves some of these unread */
   int orig_rent_code;
@@ -840,10 +842,10 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
           switch (*line) {
             case 'E': {
               extra_descr_data descr;
-              sprintf(buf2, "rented object edesc keyword for object #%d", nr);
-              descr.keyword = take_string(fread_string(fl, buf2));
-              sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, descr.keyword.c_str());
-              descr.description = take_string(fread_string(fl, buf2));
+              buf2              = str_format("rented object edesc keyword for object #{:d}", nr);
+              descr.keyword     = take_string(fread_string(fl, buf2.c_str()));
+              buf2              = str_format("rented object edesc text for object #{:d} keyword {}", nr, descr.keyword);
+              descr.description = take_string(fread_string(fl, buf2.c_str()));
               obj_ex_description_slot(temp)->push_front(std::move(descr));
               get_line(fl, line);
               break;

@@ -131,7 +131,7 @@ ACMD(do_oasis_links)
         if (to_room != NOWHERE && (zrnum != room_get_zone(g, to_room)))
           send_to_char(g, ch, "{:>3d} {:<30} at {:>5d} ({:<5}) ---> {:>5d}\r\n",
                        room_get_zone(g, to_room)->number,
-                       room_get_zone(g, to_room)->name.c_str(),
+                       room_get_zone(g, to_room)->name,
                        nr, dirs[j], to_room);
       }
     }
@@ -329,7 +329,7 @@ static void list_zones(GameWorld *g, struct char_data *ch)
   for (struct zone_data *i : g->zones.all())
     send_to_char(g, ch, "[@g{:>3d}@n] @c{} @y{:<1}@n\r\n",
                  i->number, printf_width(i->name.c_str(), count_color_chars(i->name.c_str()) + 30, true),
-                 i->builders.c_str());
+                 i->builders);
 }
 
 /*
@@ -385,8 +385,8 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   /****************************************************************************/
   send_to_char(g, ch,
                "@gVirtual Number = @c{:d}\r\n@gName of zone   = @c{}\r\n@gBuilders       = @c{}\r\n@gLifespan       = @c{:d}\r\n@gAge            = @c{:d}\r\n@gBottom of Zone = @c{:d}\r\n@gTop of Zone    = @c{:d}\r\n@gReset Mode     = @c{}\r\n@gMin Level      = @c{:d}\r\n@gMax Level      = @c{:d}\r\n@gZone Flags     = @c{}\r\n@gSize\r\n@g   Rooms       = @c{:d}\r\n@g   Objects     = @c{:d}\r\n@g   Mobiles     = @c{:d}\r\n@g   Shops       = @c{:d}\r\n@g   Triggers    = @c{:d}\r\n@g   Guilds      = @c{:d}@n\r\n",
-               rnum->number, rnum->name.c_str(),
-               rnum->builders.c_str(), rnum->lifespan,
+               rnum->number, rnum->name,
+               rnum->builders, rnum->lifespan,
                rnum->age, rnum->bot, rnum->top,
                rnum->reset_mode ? ((rnum->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
                rnum->min_level, rnum->max_level, bits,
@@ -420,7 +420,7 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
       counter++;
 
       send_to_char(g, ch, "{:>4d}) [@g{:>5d}@n] @[1]{:<45.45} ",
-                   counter, i->vnum, i->proto->name.c_str());
+                   counter, i->vnum, i->proto->name);
 
       if (i->proto->attach_type == OBJ_TRIGGER) {
         sprintbit(i->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));

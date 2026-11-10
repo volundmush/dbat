@@ -1807,7 +1807,7 @@ static struct in_addr *get_bind_addr(GameWorld *g)
     /* If the parsing fails, use INADDR_ANY */
     if (!inet_aton(CONFIG_DFLT_IP.c_str(), &bind_addr)) {
       mud_log("SYSERR: DFLT_IP of {} appears to be an invalid IP address",
-              CONFIG_DFLT_IP.c_str());
+              CONFIG_DFLT_IP);
       bind_addr.s_addr = htonl(INADDR_ANY);
     }
   }
@@ -1874,7 +1874,7 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
     char_set_desc(d->character, d);
   }
   char_prf_set(g, d->character, PRF_COLOR, true);
-  write_to_output(g, d, "{}", g->GREETANSI.c_str());
+  write_to_output(g, d, g->GREETANSI);
   write_to_output(g, d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
   write_to_output(g, d, "@D                 ---(@CPeak Logon Count Today@W: @w{:>4d}@D)---@n\r\n", g->PCOUNT);
   write_to_output(g, d, "@D                 ---(@CHighest Logon Count   @W: @w{:>4d}@D)---@n\r\n", g->HIGHPCOUNT);
@@ -2290,10 +2290,8 @@ static int process_input(GameWorld *g, struct descriptor_data *t)
     *write_point = '\0';
 
     if ((space_left <= 0) && (ptr < nl_pos)) {
-      char buffer[MAX_INPUT_LENGTH + 64];
-
-      snprintf(buffer, sizeof(buffer), "Line too long.  Truncated to:\r\n%s\r\n", tmp);
-      if (write_to_descriptor(t->descriptor, buffer) < 0)
+      std::string buffer = str_format("Line too long.  Truncated to:\r\n{}\r\n", tmp);
+      if (write_to_descriptor(t->descriptor, buffer.c_str()) < 0)
         return (-1);
     }
     if (t->snoop_by)
@@ -2423,7 +2421,7 @@ static void free_user(struct descriptor_data *d)
   d->user_freed = 1;
 
   if (!d->user.empty() && strcasecmp(d->user.c_str(), "Empty"))
-    mud_log("Freeing User: {}", d->user.c_str());
+    mud_log("Freeing User: {}", d->user);
 
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
     account_slot(d, n)->clear();
@@ -3002,18 +3000,17 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
   }
 
   if (type == TO_GMOTE) {
-    char buf[MAX_STRING_LENGTH];
+    std::string buf;
     for (descriptor_data *i : each_desc(g)) {
       if (!i->connected && i->character &&
           (char_is_npc(i->character) || !char_prf_flagged(g, i->character, PRF_NOGOSS)) && /* someone switched */
           !char_plr_flagged(i->character, PLR_WRITING) &&
           !room_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
 
-        sprintf(buf, "@y%s@n", str);
-        perform_act(g, buf, ch, obj, vict_obj, i->character);
-        char buf2[MAX_STRING_LENGTH];
-        snprintf(buf2, sizeof(buf2), "%s\r\n", buf);
-        add_history(g, i->character, buf2, HIST_GOSSIP);
+        buf = str_format("@y{}@n", str);
+        perform_act(g, buf.c_str(), ch, obj, vict_obj, i->character);
+        std::string buf2 = str_format("{}\r\n", buf);
+        add_history(g, i->character, buf2.c_str(), HIST_GOSSIP);
       }
     }
     return g->last_act_message;
@@ -3040,10 +3037,9 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
         if (char_in_arena(g, ch)) {
           if (char_prf_flagged(g, d->character, PRF_ARENAWATCH)) {
             if (arena_watch(g, d->character) == char_get_in_room(ch)) {
-              char buf3[2000];
-              *buf3 = '\0';
-              sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
-              perform_act(g, buf3, ch, obj, vict_obj, d->character);
+              std::string buf3;
+              buf3 = str_format("@c-----@CArena@c-----@n\r\n{}\r\n@c-----@CArena@c-----@n\r\n", str);
+              perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
             }
           }
         }
@@ -3052,10 +3048,9 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
         int roll = rand_number(g, 1, 101);
         if (!resskill || (roll_skill(g, d->character, resskill) >= dcval)) {
           if (ch != nullptr && char_get_listenroom(d->character) == char_get_in_room(ch) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
-            char buf3[1000];
-            *buf3 = '\0';
-            sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
-            perform_act(g, buf3, ch, obj, vict_obj, d->character);
+            std::string buf3;
+            buf3 = str_format("-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", str);
+            perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
           } else if (obj != nullptr && char_get_listenroom(d->character) == obj_get_in_room(obj) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
             char buf3[1000];
             *buf3 = '\0';
@@ -3141,7 +3136,7 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
 
   if (found == g->help_table.end() || strncasecmp(found->keywords.c_str(), entry, len))
     return;
-  write_to_output(g, t, "\r\n{}\r\n", found->entry.c_str());
+  write_to_output(g, t, "\r\n{}\r\n", found->entry);
 }
 
 /* Thx to Jamie Nelson of 4D for this contribution */

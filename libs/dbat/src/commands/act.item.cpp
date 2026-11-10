@@ -1486,7 +1486,7 @@ ACMD(do_assemble)
 {
   obj_vnum lVnum           = NOTHING;
   struct obj_data *pObject = nullptr;
-  char msg[MAX_STRING_LENGTH];
+  std::string msg;
 
   int roll = 0;
 
@@ -1507,11 +1507,11 @@ ACMD(do_assemble)
     return;
   }
   if ((lVnum = assemblyFindAssembly(g, text.c_str())) < 0) {
-    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
     return;
   }
   if (assemblyGetType(g, lVnum) != subcmd) {
-    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
     return;
   }
   if (!assemblyCheckComponents(g, lVnum, ch, false)) {
@@ -1553,12 +1553,12 @@ ACMD(do_assemble)
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_BUILD) <= roll) {
       if ((pObject = read_object(g, lVnum)) == nullptr) {
-        send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+        send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
         return;
       }
 
       extract_obj(g, pObject);
-      send_to_char(g, ch, "You start to {} {} {}, but mess up royally!\r\n", CMD_NAME, AN(text), text.c_str());
+      send_to_char(g, ch, "You start to {} {} {}, but mess up royally!\r\n", CMD_NAME, AN(text), text);
 
       if (assemblyCheckComponents(g, lVnum, ch, true)) {
         roll = 9001; /* Just a place holder */
@@ -1574,12 +1574,12 @@ ACMD(do_assemble)
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_SURVIVAL) <= roll) {
       if ((pObject = read_object(g, lVnum)) == nullptr) {
-        send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+        send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
         return;
       }
 
       extract_obj(g, pObject);
-      send_to_char(g, ch, "You start to {} {} {}, but mess up royally!\r\n", CMD_NAME, AN(text), text.c_str());
+      send_to_char(g, ch, "You start to {} {} {}, but mess up royally!\r\n", CMD_NAME, AN(text), text);
 
       if (tool && rand_number(g, 1, 3) == 3 && obj_get_value(tool, VAL_ALL_HEALTH) > 0) {
         obj_set_value(tool, VAL_ALL_HEALTH, obj_get_value(tool, VAL_ALL_HEALTH) - (rand_number(g, 1, 5)));
@@ -1597,30 +1597,30 @@ ACMD(do_assemble)
 
   if (axion_dice(g, 0) - (char_get_aff_abils_intel(ch) / 5) > 95) {
     if ((pObject = read_object(g, lVnum)) == nullptr) {
-      send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+      send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
       return;
     }
 
     extract_obj(g, pObject);
-    send_to_char(g, ch, "You start to {} {} {}, but forget a couple of steps. You take it apart and give up.\r\n", CMD_NAME, AN(text), text.c_str());
+    send_to_char(g, ch, "You start to {} {} {}, but forget a couple of steps. You take it apart and give up.\r\n", CMD_NAME, AN(text), text);
     char_set_wait(ch, PULSE_6SEC);
     return;
   }
   if (rand_number(g, 1, 100) >= 92) {
     if ((pObject = read_object(g, lVnum)) == nullptr) {
-      send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+      send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
       return;
     }
 
     extract_obj(g, pObject);
-    send_to_char(g, ch, "You start to {} {} {}, but put it together wrong and have to stop. You take it apart and give up.\r\n", CMD_NAME, AN(text), text.c_str());
+    send_to_char(g, ch, "You start to {} {} {}, but put it together wrong and have to stop. You take it apart and give up.\r\n", CMD_NAME, AN(text), text);
     char_set_wait(ch, PULSE_4SEC);
     return;
   }
 
   /* Create the assembled object. */
   if ((pObject = read_object(g, lVnum)) == nullptr) {
-    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text.c_str());
+    send_to_char(g, ch, "You can't {} {} {}.\r\n", CMD_NAME, AN(text), text);
     return;
   }
   add_unique_id(g, pObject);
@@ -1667,12 +1667,12 @@ ACMD(do_assemble)
   }*/
 
   /* Tell the character they made something. */
-  snprintf(msg, sizeof(msg), "You %s $p.", CMD_NAME);
-  act(g, msg, false, ch, pObject, nullptr, TO_CHAR);
+  msg = str_format("You {} $p.", CMD_NAME);
+  act(g, msg.c_str(), false, ch, pObject, nullptr, TO_CHAR);
 
   /* Tell the room the character made something. */
-  snprintf(msg, sizeof(msg), "$n %ss $p.", CMD_NAME);
-  act(g, msg, false, ch, pObject, nullptr, TO_ROOM);
+  msg = str_format("$n {}s $p.", CMD_NAME);
+  act(g, msg.c_str(), false, ch, pObject, nullptr, TO_ROOM);
 
   if (assemblyCheckComponents(g, lVnum, ch, true)) {
     roll = 9001; /* Just a place holder */
@@ -1826,7 +1826,7 @@ ACMD(do_put)
   } else {
     generic_find(g, thecont, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
     if (!cont)
-      send_to_char(g, ch, "You don't see {} {} here.\r\n", AN(thecont), thecont.c_str());
+      send_to_char(g, ch, "You don't see {} {} here.\r\n", AN(thecont), thecont);
     else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
              (obj_get_type_flag(cont) != ITEM_PORTAL) &&
              (obj_get_type_flag(cont) != ITEM_VEHICLE))
@@ -1836,7 +1836,7 @@ ACMD(do_put)
     else {
       if (obj_dotmode == FIND_INDIV) { /* put <obj> <container> */
         if (!(obj = get_obj_in_list_vis(g, ch, theobj, nullptr, char_get_inventory(ch))))
-          send_to_char(g, ch, "You aren't carrying {} {}.\r\n", AN(theobj), theobj.c_str());
+          send_to_char(g, ch, "You aren't carrying {} {}.\r\n", AN(theobj), theobj);
         else if (obj == cont && howmany == 1)
           send_to_char(g, ch, "You attempt to fold it into itself, but fail.\r\n");
         else {
@@ -1863,7 +1863,7 @@ ACMD(do_put)
           if (obj_dotmode == FIND_ALL)
             send_to_char(g, ch, "You don't seem to have anything to put in it.\r\n");
           else
-            send_to_char(g, ch, "You don't seem to have any {}s.\r\n", theobj.c_str());
+            send_to_char(g, ch, "You don't seem to have any {}s.\r\n", theobj);
         }
       }
     }
@@ -1918,9 +1918,8 @@ static void get_check_money(GameWorld *g, struct char_data *ch, struct obj_data 
   } else {
     send_to_char(g, ch, "There were {:d} zenni.\r\n", value);
     if (char_is_affected(ch, AFF_GROUP) && char_prf_flagged(g, ch, PRF_AUTOSPLIT)) {
-      char split[MAX_INPUT_LENGTH];
-      snprintf(split, sizeof(split), "%d", value);
-      do_split(g, ch, split, 0, 0);
+      std::string split = str_format("{:d}", value);
+      do_split(g, ch, split.c_str(), 0, 0);
     }
   }
 }
@@ -1978,10 +1977,8 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
     act(g, "$p is closed.", false, ch, cont, nullptr, TO_CHAR);
   else if (obj_dotmode == FIND_INDIV) {
     if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, obj_get_contains(cont)))) {
-      char out[MAX_STRING_LENGTH];
-
-      snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg.c_str());
-      act(g, out, false, ch, cont, nullptr, TO_CHAR);
+      std::string out = str_format("There doesn't seem to be {} {} in $p.", AN(arg), arg);
+      act(g, out.c_str(), false, ch, cont, nullptr, TO_CHAR);
     } else {
       for (obj_data *match : obj_list_from(g, obj_get_contains(cont), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2007,10 +2004,8 @@ static void get_from_container(GameWorld *g, struct char_data *ch, struct obj_da
       if (obj_dotmode == FIND_ALL)
         act(g, "$p seems to be empty.", false, ch, cont, nullptr, TO_CHAR);
       else {
-        char out[MAX_STRING_LENGTH];
-
-        snprintf(out, sizeof(out), "You can't seem to find any %ss in $p.", arg.c_str());
-        act(g, out, false, ch, cont, nullptr, TO_CHAR);
+        std::string out = str_format("You can't seem to find any {}s in $p.", arg);
+        act(g, out.c_str(), false, ch, cont, nullptr, TO_CHAR);
       }
     }
   }
@@ -2076,7 +2071,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, i
 
   /* Are they trying to take something in a room extra description? */
   if (find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch))) != nullptr) {
-    send_to_char(g, ch, "You can't take {} {}.\r\n", AN(arg), arg.c_str());
+    send_to_char(g, ch, "You can't take {} {}.\r\n", AN(arg), arg);
     return;
   }
 
@@ -2086,7 +2081,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, i
     if ((descword = find_exdesc_keywords(arg, room_get_ex_description(g, char_get_in_room(ch)))) != nullptr)
       send_to_char(g, ch, "{}: you can't take that!\r\n", fname(descword));
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
-      send_to_char(g, ch, "You don't see {} {} here.\r\n", AN(arg), arg.c_str());
+      send_to_char(g, ch, "You don't see {} {} here.\r\n", AN(arg), arg);
     else {
       for (obj_data *match : obj_list_from(g, room_get_contents(g, char_get_in_room(ch)), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2112,7 +2107,7 @@ static void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, i
       if (dotmode == FIND_ALL)
         send_to_char(g, ch, "There doesn't seem to be anything here.\r\n");
       else
-        send_to_char(g, ch, "You don't see any {}s here.\r\n", arg.c_str());
+        send_to_char(g, ch, "You don't see any {}s here.\r\n", arg);
     }
   }
 }
@@ -2152,7 +2147,7 @@ ACMD(do_get)
     if (cont_dotmode == FIND_INDIV) {
       mode = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
       if (!cont)
-        send_to_char(g, ch, "You don't have {} {}.\r\n", AN(arg2), arg2.c_str());
+        send_to_char(g, ch, "You don't have {} {}.\r\n", AN(arg2), arg2);
       else if (obj_get_type_flag(cont) == ITEM_VEHICLE)
         send_to_char(g, ch, "You will need to enter it first.\r\n");
       else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
@@ -2191,7 +2186,7 @@ ACMD(do_get)
         if (cont_dotmode == FIND_ALL)
           send_to_char(g, ch, "You can't seem to find any containers.\r\n");
         else
-          send_to_char(g, ch, "You can't seem to find any {}s here.\r\n", arg2.c_str());
+          send_to_char(g, ch, "You can't seem to find any {}s here.\r\n", arg2);
       }
     }
   }
@@ -2217,15 +2212,15 @@ static void perform_drop_gold(GameWorld *g, struct char_data *ch, int amount,
         obj_to_room(g, obj, RDR);
         act(g, "$p suddenly appears in a puff of orange smoke!", 0, nullptr, obj, nullptr, TO_ROOM);
       } else {
-        char out[MAX_STRING_LENGTH];
+        std::string out;
 
         if (!drop_wtrigger(g, obj, ch)) {
           extract_obj(g, obj);
           return;
         }
 
-        snprintf(out, sizeof(out), "$n drops %s.", money_desc(amount));
-        act(g, out, true, ch, nullptr, nullptr, TO_ROOM);
+        out = str_format("$n drops {}.", money_desc(amount));
+        act(g, out.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
 
         send_to_char(g, ch, "You drop some zenni.\r\n");
         obj_to_room(g, obj, char_get_in_room(ch));
@@ -2239,10 +2234,8 @@ static void perform_drop_gold(GameWorld *g, struct char_data *ch, int amount,
         }
       }
     } else {
-      char out[MAX_STRING_LENGTH];
-
-      snprintf(out, sizeof(out), "$n drops %s which disappears in a puff of smoke!", money_desc(amount));
-      act(g, out, false, ch, nullptr, nullptr, TO_ROOM);
+      std::string out = str_format("$n drops {} which disappears in a puff of smoke!", money_desc(amount));
+      act(g, out.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
 
       send_to_char(g, ch, "You drop some zenni which disappears in a puff of smoke!\r\n");
     }
@@ -2255,7 +2248,7 @@ static void perform_drop_gold(GameWorld *g, struct char_data *ch, int amount,
 static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj,
                         int8_t mode, const char *sname, room_vnum RDR)
 {
-  char out[MAX_STRING_LENGTH];
+  std::string out;
   int value;
 
   if (!drop_otrigger(g, obj, ch))
@@ -2265,60 +2258,60 @@ static int perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj
     return 0;
 
   if (obj_get_vnum(g, obj) == 17 || obj_get_vnum(g, obj) == 17998) {
-    snprintf(out, sizeof(out), "You can't %s $p, it is grafted into your soul :P", sname);
-    act(g, out, false, ch, obj, nullptr, TO_CHAR);
+    out = str_format("You can't {} $p, it is grafted into your soul :P", sname);
+    act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
     return (0);
   }
   if (obj_get_vnum(g, obj) == 20 || obj_get_vnum(g, obj) == 21 || obj_get_vnum(g, obj) == 22 || obj_get_vnum(g, obj) == 23 || obj_get_vnum(g, obj) == 24 || obj_get_vnum(g, obj) == 25 || obj_get_vnum(g, obj) == 26) {
     if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
-      snprintf(out, sizeof(out), "You can't %s $p in space!", sname);
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = str_format("You can't {} $p in space!", sname);
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
-      snprintf(out, sizeof(out), "You can't %s $p in here. Read help garden.", sname);
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = str_format("You can't {} $p in here. Read help garden.", sname);
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
     if ((mode == SCMD_DROP) && obj_extra_flagged(obj, ITEM_NORENT)) {
-      snprintf(out, sizeof(out), "You drop $p but it gets lost on the ground!");
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = "You drop $p but it gets lost on the ground!";
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       obj_from_char(g, obj);
       extract_obj(g, obj);
       return (0);
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT)) {
-      snprintf(out, sizeof(out), "You can't %s $p in this protected area!", sname);
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = str_format("You can't {} $p in this protected area!", sname);
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_SHIP)) {
-      snprintf(out, sizeof(out), "You can't %s $p on a private ship!", sname);
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = str_format("You can't {} $p on a private ship!", sname);
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
     if (room_flagged(g, char_get_in_room(ch), ROOM_HOUSE)) {
-      snprintf(out, sizeof(out), "You can't %s $p in a private house!", sname);
-      act(g, out, false, ch, obj, nullptr, TO_CHAR);
+      out = str_format("You can't {} $p in a private house!", sname);
+      act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
       return (0);
     }
   }
   if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1) {
-    snprintf(out, sizeof(out), "You can't %s $p, it must be CURSED!", sname);
-    act(g, out, false, ch, obj, nullptr, TO_CHAR);
+    out = str_format("You can't {} $p, it must be CURSED!", sname);
+    act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
     return (0);
   }
   if ((mode == SCMD_DONATE || mode == SCMD_JUNK) && obj_extra_flagged(obj, ITEM_NODONATE)) {
-    snprintf(out, sizeof(out), "You can't %s $p!", sname);
-    act(g, out, false, ch, obj, nullptr, TO_CHAR);
+    out = str_format("You can't {} $p!", sname);
+    act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
     return (0);
   }
 
-  snprintf(out, sizeof(out), "You %s $p.", sname);
-  act(g, out, false, ch, obj, nullptr, TO_CHAR);
+  out = str_format("You {} $p.", sname);
+  act(g, out.c_str(), false, ch, obj, nullptr, TO_CHAR);
 
-  snprintf(out, sizeof(out), "$n %ss $p.", sname);
-  act(g, out, true, ch, obj, nullptr, TO_ROOM);
+  out = str_format("$n {}s $p.", sname);
+  act(g, out.c_str(), true, ch, obj, nullptr, TO_ROOM);
 
   obj_from_char(g, obj);
 
@@ -2433,7 +2426,7 @@ ACMD(do_drop)
     else if (arg.empty())
       send_to_char(g, ch, "What do you want to {} {:d} of?\r\n", sname, multi);
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg.c_str());
+      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg);
     else if (check_saveroom_count(g, ch, obj) > 150)
       send_to_char(g, ch, "The save room you are in can not hold anymore items! (150 max, count of items in containers is halved)\r\n");
     else {
@@ -2481,7 +2474,7 @@ ACMD(do_drop)
         return;
       }
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-        send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg.c_str());
+        send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg);
 
       for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2498,7 +2491,7 @@ ACMD(do_drop)
       }
     } else {
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-        send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg.c_str());
+        send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
       } else if (check_saveroom_count(g, ch, obj) > 150) {
         send_to_char(g, ch, "The item couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
       } else {
@@ -2591,9 +2584,9 @@ static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, std:
   if (name.empty())
     send_to_char(g, ch, "To who?\r\n");
   else if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
     if (char_is_npc(ch))
-      send_to_imm(g, "Mob Give: Victim, {}, doesn't exist.", name.c_str());
+      send_to_imm(g, "Mob Give: Victim, {}, doesn't exist.", name);
   } else if (vict == ch)
     send_to_char(g, ch, "What's the point of that?\r\n");
   else
@@ -2605,7 +2598,7 @@ static struct char_data *give_find_vict(GameWorld *g, struct char_data *ch, std:
 static void perform_give_gold(GameWorld *g, struct char_data *ch, struct char_data *vict,
                               int amount)
 {
-  char out[MAX_STRING_LENGTH];
+  std::string out;
 
   if (amount <= 0) {
     send_to_char(g, ch, "Heh heh heh ... we are jolly funny today, eh?\r\n");
@@ -2619,13 +2612,13 @@ static void perform_give_gold(GameWorld *g, struct char_data *ch, struct char_da
     send_to_char(g, ch, "They can't carry that much zenni.\r\n");
     return;
   }
-  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+  send_to_char(g, ch, CONFIG_OK);
 
-  snprintf(out, sizeof(out), "$n gives you %d zenni.", amount);
-  act(g, out, false, ch, nullptr, vict, TO_VICT);
+  out = str_format("$n gives you {:d} zenni.", amount);
+  act(g, out.c_str(), false, ch, nullptr, vict, TO_VICT);
 
-  snprintf(out, sizeof(out), "$n gives %s to $N.", money_desc(amount));
-  act(g, out, true, ch, nullptr, vict, TO_NOTVICT);
+  out = str_format("$n gives {} to $N.", money_desc(amount));
+  act(g, out.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
 
   if (char_is_npc(ch) || !char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(ch, char_get_gold(ch) - (amount));
@@ -2670,7 +2663,7 @@ ACMD(do_give)
     else if (!(vict = give_find_vict(g, ch, rest)))
       return;
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg.c_str());
+      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg);
     else {
       for (obj_data *match : obj_list_from(g, char_get_inventory(ch), obj)) {
         if (!obj_named_and_visible(g, ch, arg, match))
@@ -2694,7 +2687,7 @@ ACMD(do_give)
     dotmode = find_all_dots(arg);
     if (dotmode == FIND_INDIV) {
       if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-        send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg.c_str());
+        send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
       else {
         perform_give(g, ch, vict, obj);
         if (char_get_admlevel(ch) > 0 && !char_is_npc(vict)) {
@@ -2840,13 +2833,13 @@ ACMD(do_drink)
   }
   wasthirsty = char_get_conditions(g, ch, THIRST);
   if (arg.empty() && !char_is_npc(ch)) {
-    char out[MAX_STRING_LENGTH];
+    std::string out;
     switch (room_sect(g, char_get_in_room(ch))) {
       case SECT_WATER_SWIM:
       case SECT_WATER_NOSWIM:
       case SECT_UNDERWATER:
-        snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
-        act(g, out, true, ch, nullptr, nullptr, TO_ROOM);
+        out = "$n takes a refreshing drink from the surrounding water.";
+        act(g, out.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(g, ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(g, ch, THIRST, 1);
         if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(g, ch)) < getMaxKI(g, ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -2863,8 +2856,8 @@ ACMD(do_drink)
           send_to_char(g, ch, "Drink from what?\r\n");
           return;
         }
-        snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
-        act(g, out, true, ch, nullptr, nullptr, TO_ROOM);
+        out = "$n takes a refreshing drink from the surrounding water.";
+        act(g, out.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(g, ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(g, ch, THIRST, 1);
         if (char_get_skill(ch, SKILL_WELLSPRING) && !isFullKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -2938,10 +2931,8 @@ ACMD(do_drink)
     return;
 
   if (subcmd == SCMD_DRINK) {
-    char out[MAX_STRING_LENGTH];
-
-    snprintf(out, sizeof(out), "$n drinks %s from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
-    act(g, out, true, ch, temp, nullptr, TO_ROOM);
+    std::string out = str_format("$n drinks {} from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
+    act(g, out.c_str(), true, ch, temp, nullptr, TO_ROOM);
 
     send_to_char(g, ch, "You drink the {}.\r\n", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
     if (obj_get_action_description(temp))
@@ -3053,7 +3044,7 @@ ACMD(do_eat)
     return;
   }
   if (!(food = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg.c_str());
+    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
     return;
   }
   if (char_get_conditions(g, ch, THIRST) <= 1 && char_get_conditions(g, ch, HUNGER) >= 2) {
@@ -3281,7 +3272,7 @@ ACMD(do_pour)
       return;
     }
     if (!(from_obj = get_obj_in_list_vis(g, ch, arg2, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg2), arg2.c_str());
+      send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg2), arg2);
       return;
     }
     if (obj_get_type_flag(from_obj) != ITEM_FOUNTAIN && !obj_extra_flagged(from_obj, ITEM_BROKEN)) {
@@ -3344,7 +3335,7 @@ ACMD(do_pour)
     return;
   }
   if (subcmd == SCMD_POUR)
-    send_to_char(g, ch, "You pour the {} into the {}.", drinks[obj_get_value(from_obj, VAL_DRINKCON_LIQUID)], arg2.c_str());
+    send_to_char(g, ch, "You pour the {} into the {}.", drinks[obj_get_value(from_obj, VAL_DRINKCON_LIQUID)], arg2);
 
   if (subcmd == SCMD_FILL) {
     act(g, "You gently fill $p from $P.", false, ch, to_obj, from_obj, TO_CHAR);
@@ -3643,7 +3634,7 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
     if (said[0] != '!')
       for (char &c : said)
         c = tolower((unsigned char)c);
-    send_to_char(g, ch, "'{}'?  What part of your body is THAT?\r\n", said.c_str());
+    send_to_char(g, ch, "'{}'?  What part of your body is THAT?\r\n", said);
     return -1;
   }
   return (where);
@@ -3697,7 +3688,7 @@ ACMD(do_wear)
       return;
     }
     if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg1.c_str());
+      send_to_char(g, ch, "You don't seem to have any {}s.\r\n", arg1);
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(g, ch, "You are not experienced enough to use that.\r\n");
     else
@@ -3714,7 +3705,7 @@ ACMD(do_wear)
       }
   } else {
     if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch))))
-      send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg1), arg1.c_str());
+      send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg1), arg1);
     else if (obj_extra_flagged(obj, ITEM_BROKEN))
       send_to_char(g, ch, "But it seems to be broken!\r\n");
     else if (obj_extra_flagged(obj, ITEM_FORGED))
@@ -3743,7 +3734,7 @@ ACMD(do_wield)
   if (arg.empty())
     send_to_char(g, ch, "Wield what?\r\n");
   else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg.c_str());
+    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
   else {
     if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
       send_to_char(g, ch, "You can't wield that.\r\n");
@@ -3776,7 +3767,7 @@ ACMD(do_grab)
   if (arg.empty())
     send_to_char(g, ch, "Hold what?\r\n");
   else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch))))
-    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg.c_str());
+    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
   else if (char_get_level(ch) < obj_get_level(obj))
     send_to_char(g, ch, "You are not experienced enough to use that.\r\n");
   else if (char_plr_flagged(ch, PLR_THANDW))
@@ -3830,9 +3821,8 @@ void perform_remove(GameWorld *g, struct char_data *ch, int pos)
     act(g, "You stop using $p.", false, ch, obj, nullptr, TO_CHAR);
     act(g, "$n stops using $p.", true, ch, obj, nullptr, TO_ROOM);
     if (previous > getCurPL(g, ch)) {
-      char drop[MAX_INPUT_LENGTH];
-      snprintf(drop, sizeof(drop), "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - getCurPL(g, ch)));
-      act(g, drop, false, ch, obj, nullptr, TO_CHAR);
+      std::string drop = str_format("@RYour powerlevel has dropped from removing $p@R! @D[@r-{}@D]\r\n", add_commas(previous - getCurPL(g, ch)));
+      act(g, drop.c_str(), false, ch, obj, nullptr, TO_CHAR);
     }
   }
 }
@@ -3892,12 +3882,12 @@ ACMD(do_remove)
           }
         }
         if (!found) {
-          send_to_char(g, ch, "You don't seem to be using any {}s.\r\n", arg.c_str());
+          send_to_char(g, ch, "You don't seem to be using any {}s.\r\n", arg);
         }
       }
     } else {
       if ((i = get_obj_pos_in_equip_vis(g, ch, arg, nullptr, char_get_equipment_array(ch))) < 0) {
-        send_to_char(g, ch, "You don't seem to be using {} {}.\r\n", AN(arg), arg.c_str());
+        send_to_char(g, ch, "You don't seem to be using {} {}.\r\n", AN(arg), arg);
       } else {
         perform_remove(g, ch, i);
       }

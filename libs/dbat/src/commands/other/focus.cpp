@@ -112,7 +112,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_STONESKIN)) {
@@ -195,7 +195,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_MIGHT)) {
@@ -340,7 +340,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_ENLIGHTEN)) {
@@ -440,7 +440,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_GENIUS)) {
@@ -530,7 +530,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_FLEX)) {
@@ -625,7 +625,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_BLESS)) {
@@ -724,7 +724,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (char_aff_flagged(vict, AFF_CURSE)) {
@@ -948,7 +948,7 @@ ACMD(do_focus)
         return;
       }
       if (ch == vict) {
-        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg.c_str(), arg.c_str(), char_get_name(vict));
+        send_to_char(g, ch, "Use focus {}, not focus {} {}.\r\n", arg, arg, char_get_name(vict));
         return;
       }
       if (!char_aff_flagged(vict, AFF_POISON)) {

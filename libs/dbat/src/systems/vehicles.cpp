@@ -429,7 +429,7 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
 {
   struct obj_data *vehicle_in_out;
   room_vnum is_in, is_going_to;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (arg.empty()) {
     send_to_char(g, ch, "@wDrive into what?\r\n");
@@ -444,9 +444,9 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
     if (!room_flagged(g, is_going_to, ROOM_VEHICLE)) {
       send_to_char(g, ch, "@wThat ship can't carry other ships.");
     } else {
-      sprintf(buf, "%s @wenters %s.\n\r", obj_get_short_description(vehicle),
-              obj_get_short_description(vehicle_in_out));
-      send_to_room(g, obj_get_in_room(vehicle), "{}", buf);
+      buf = str_format("{} @wenters {}.\n\r", obj_get_short_description(vehicle),
+                       obj_get_short_description(vehicle_in_out));
+      send_to_room(g, obj_get_in_room(vehicle), buf);
 
       obj_from_room(g, vehicle);
       obj_to_room(g, vehicle, is_going_to);
@@ -455,8 +455,8 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
         act(g, "", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(g, ch, "@wThe ship flies onward:\r\n");
       look_at_room(g, obj_get_in_room(vehicle), ch, 0);
-      sprintf(buf, "%s @wenters.\r\n", obj_get_short_description(vehicle));
-      send_to_room(g, is_in, "{}", buf);
+      buf = str_format("{} @wenters.\r\n", obj_get_short_description(vehicle));
+      send_to_room(g, is_in, buf);
     }
   }
 }
@@ -498,7 +498,7 @@ static void drive_outof_vehicle(GameWorld *g, struct char_data *ch, struct obj_d
 /* Drive out vehicle in a certain direction */
 void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *vehicle, int dir)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!obj_get_exit(g, vehicle, dir) || obj_get_exit(g, vehicle, dir)->to_room == NOWHERE) {
     send_to_char(g, ch, "@wApparently {} doesn't exist there.\r\n", dirs[dir]);
@@ -516,8 +516,8 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
     /* But nothing!  Let's go that way! */
     room_vnum was_in, is_in;
 
-    sprintf(buf, "%s @wflies %s.\n\r", obj_get_short_description(vehicle), dirs[dir]);
-    send_to_room(g, obj_get_in_room(vehicle), "{}", buf);
+    buf = str_format("{} @wflies {}.\n\r", obj_get_short_description(vehicle), dirs[dir]);
+    send_to_room(g, obj_get_in_room(vehicle), buf);
 
     was_in = obj_get_in_room(vehicle);
     obj_from_room(g, vehicle);
@@ -558,10 +558,10 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
         send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
       }
     }
-    sprintf(buf, "%s @wflies in from the %s.\r\n",
-            obj_get_short_description(vehicle), dirs[rev_dir[dir]]);
+    buf = str_format("{} @wflies in from the {}.\r\n",
+                     obj_get_short_description(vehicle), dirs[rev_dir[dir]]);
 
-    send_to_room(g, is_in, "{}", buf);
+    send_to_room(g, is_in, buf);
   }
 }
 
@@ -1033,8 +1033,7 @@ ACMD(do_drive)
         } else if (!str_eq_nocase(arg2, "1") && !str_eq_nocase(arg2, "2") && !str_eq_nocase(arg2, "3") && !str_eq_nocase(arg2, "4")) {
           land_location = ship_land_location(g, ch, vehicle, arg2);
         }
-        char buf3[MAX_INPUT_LENGTH];
-        *buf3 = '\0';
+        std::string buf3;
 
         /* For Earth */
         act(g, "@wYou set the controls to descend.@n", false, ch, nullptr, nullptr, TO_CHAR);
@@ -1235,17 +1234,17 @@ ACMD(do_drive)
           send_to_char(g, ch, "@wYou are not where you can land, you need to be in a planet's low orbit.@n\r\n");
         }
         if (land_location <= 50) {
-          sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n", obj_get_short_description(vehicle));
+          buf3 = str_format("{} @wcomes in from above and slowly settles on the launch-pad.@n\r\n", obj_get_short_description(vehicle));
           look_at_room(g, obj_get_in_room(vehicle), ch, 0);
-          send_to_room(g, obj_get_in_room(vehicle), "{}", buf3);
+          send_to_room(g, obj_get_in_room(vehicle), buf3);
         } else {
-          sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n", obj_get_short_description(vehicle));
+          buf3 = str_format("{} @wcomes in from above and slams into the ground!@n\r\n", obj_get_short_description(vehicle));
           room_set_dmg(g, obj_get_in_room(vehicle), room_get_dmg(g, obj_get_in_room(vehicle)) + (1));
           if (room_get_dmg(g, obj_get_in_room(vehicle)) >= 10) {
             room_set_dmg(g, obj_get_in_room(vehicle), 10);
           }
           look_at_room(g, obj_get_in_room(vehicle), ch, 0);
-          send_to_room(g, obj_get_in_room(vehicle), "{}", buf3);
+          send_to_room(g, obj_get_in_room(vehicle), buf3);
         }
       } else if (str_eq_nocase(arg, "launch")) {
         int lnum       = 0;

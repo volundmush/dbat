@@ -18,13 +18,12 @@ bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const ch
   if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
       (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
     if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5))) {
-      char msg[MAX_INPUT_LENGTH];
-      snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_CHAR);
-      snprintf(msg, sizeof(msg), "@cYou disappear, avoiding @C$n's@c %s before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_VICT);
-      snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
+      std::string msg = str_format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
+      act(g, msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
+      msg = str_format("@cYou disappear, avoiding @C$n's@c {} before reappearing!@n", name);
+      act(g, msg.c_str(), true, ch, nullptr, vict, TO_VICT);
+      msg = str_format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
+      act(g, msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
       if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
@@ -103,13 +102,12 @@ void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const 
 
   if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
     const char *part_name = part ? part : "body";
-    char msg[MAX_INPUT_LENGTH];
-    snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_CHAR);
-    snprintf(msg, sizeof(msg), "@C$n's@W %s is burned by your fireshield!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_VICT);
-    snprintf(msg, sizeof(msg), "@c$n's@W %s is burned by @C$N's@W fireshield!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
+    std::string msg       = str_format("@c$N's@W fireshield burns your {}!@n", part_name);
+    act(g, msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
+    msg = str_format("@C$n's@W {} is burned by your fireshield!@n", part_name);
+    act(g, msg.c_str(), true, ch, nullptr, vict, TO_VICT);
+    msg = str_format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part_name);
+    act(g, msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
     int64_t dmg = getMaxKI(g, vict) * 0.02;
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(g, 0, 0, vict, ch, nullptr, dmg, 0);

@@ -222,19 +222,19 @@ ACMD(do_perf)
     }
   }
   if (found == false) {
-    send_to_char(g, ch, "The skill {} doesn't exist.\r\n", arg.c_str());
+    send_to_char(g, ch, "The skill {} doesn't exist.\r\n", arg);
     return;
   }
   if (!char_get_skill(ch, skill)) {
-    send_to_char(g, ch, "You don't know {}.\r\n", arg.c_str());
+    send_to_char(g, ch, "You don't know {}.\r\n", arg);
     return;
   }
   if (char_get_skill(ch, skill) < 100) {
-    send_to_char(g, ch, "You have not mastered the skill {} and thus can't perfect it.\r\n", arg.c_str());
+    send_to_char(g, ch, "You have not mastered the skill {} and thus can't perfect it.\r\n", arg);
     return;
   }
   if (char_get_skills_perf(ch, skill) > 0) {
-    send_to_char(g, ch, "You have already mastered the skill {} and chosen how to perfect it.\r\n", arg.c_str());
+    send_to_char(g, ch, "You have already mastered the skill {} and chosen how to perfect it.\r\n", arg);
     return;
   }
   if (!perf_skill(skill)) {
@@ -334,9 +334,10 @@ ACMD(do_score)
       send_to_char(g, ch, "  @D| @CModel@D: {:>15}@D,    @CUGP@D: @G{:>15}@D,  @CVersion@D: @r{:<12}@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
     }
     send_to_char(g, ch, "  @D|  @CRace@D: @W{:>10}@D,  @CSensei@D: @W{:>15}@D,     @CArt@D: @W{:<17}@D|@n\n", char_true_race_name(ch), char_sensei_name(ch), char_sensei_style(ch));
-    char hei[300], wei[300];
-    snprintf(hei, sizeof(hei), "%dcm", get_measure(ch, char_get_pc_height(g, ch), 0));
-    snprintf(wei, sizeof(wei), "%dkg", get_measure(ch, 0, char_get_pc_weight(g, ch)));
+    std::string hei;
+    std::string wei;
+    hei = str_format("{:d}cm", get_measure(ch, char_get_pc_height(g, ch), 0));
+    wei = str_format("{:d}kg", get_measure(ch, 0, char_get_pc_weight(g, ch)));
     send_to_char(g, ch, "  @D|   @CAge@D: @W{:>10}@D,  @CHeight@D: @W{:>15}@D,  @CWeight@D: @W{:<17}@D|@n\n", add_commas(char_get_age_years(g, ch)), hei, wei);
     send_to_char(g, ch, "  @D|@CGender@D: @W{:>10}@D,  @C  Size@D: @W{:>15}@D,  @C Align@D: @W{:<17}@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
   }
@@ -1430,7 +1431,7 @@ ACMD(do_diagnose)
 
   if (!buf.empty()) {
     if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+      send_to_char(g, ch, CONFIG_NOPERSON);
     else {
       send_to_char(g, ch, "{}", char_get_sex(vict) == SEX_MALE ? "He " : (char_get_sex(vict) == SEX_FEMALE ? "She " : "It "));
       diag_char_to_char(g, vict, ch);

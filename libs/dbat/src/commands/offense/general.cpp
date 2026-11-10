@@ -165,9 +165,8 @@ ACMD(do_charge)
       reveal_hiding(g, ch, 0);
       send_to_char(g, ch, "Your {} colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
       send_to_char(g, ch, "@D[@RCost@D: @r{}@D]@n\r\n", add_commas(spiritcost));
-      char bloom[MAX_INPUT_LENGTH];
-      snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
+      std::string bloom = str_format("@wA {} aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
+      act(g, bloom.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
       char_set_charge(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff);
       decCurKI(g, ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
     } else {
@@ -280,7 +279,7 @@ ACMD(do_rescue)
   if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to rescue?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (helpee == ch)
     send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else if (!char_get_fighting(g, helpee))
@@ -325,7 +324,7 @@ ACMD(do_assist)
   if (arg.empty())
     send_to_char(g, ch, "Whom do you wish to assist?\r\n");
   else if (!(helpee = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if (helpee == ch)
     send_to_char(g, ch, "You can't help yourself any more than this!\r\n");
   else {

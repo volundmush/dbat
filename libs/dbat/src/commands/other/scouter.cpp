@@ -280,13 +280,13 @@ ACMD(do_telepathy)
       return;
     } else {
       if (!char_get_mindlink(g, ch)) {
-        send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), arg2.c_str());
-        send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), arg2.c_str());
-        send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2.c_str());
+        send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), arg2);
+        send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), arg2);
+        send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2);
       } else {
-        send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), std::string(argument).c_str());
-        send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), std::string(argument).c_str());
-        send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), std::string(argument).c_str());
+        send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), argument);
+        send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), argument);
+        send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), argument);
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
     } // End of vict is here
@@ -376,9 +376,9 @@ static bool has_scanner(GameWorld *g, struct char_data *ch)
 ACMD(do_snet)
 {
   int channel = 0, global = false, call = -1, reached = false;
-  char voice[150];
+  std::string voice;
   std::string arg, arg2;
-  char hist[MAX_INPUT_LENGTH];
+  std::string hist;
 
   std::string_view rest = argument;
   arg                   = take_word(rest);
@@ -458,10 +458,10 @@ ACMD(do_snet)
       global = true;
     }
     if (char_get_voice(ch) != nullptr) {
-      snprintf(voice, sizeof(voice), "%s", char_get_voice(ch));
+      voice = str_format("{}", char_get_voice(ch));
     }
     if (char_get_voice(ch) == nullptr) {
-      snprintf(voice, sizeof(voice), "A generic voice");
+      voice = "A generic voice";
     }
     for (descriptor_data *i : each_desc(g)) {
       if (!i->character) {
@@ -473,14 +473,14 @@ ACMD(do_snet)
       /* It will always be heard and logged for admin. */
       if (char_get_admlevel(i->character) > 0) {
         if (call <= -1 && global == false) {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
+          hist = str_format("@C{} ({}) is heard, @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg), arg2.empty() ? "" : arg2.c_str());
         } else if (call <= -1) {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
+          hist = str_format("@C{} ({}) is heard, @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         } else {
-          snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, arg2.empty() ? "" : CAP(arg2).c_str());
+          hist = str_format("@C{} ({}) is heard, @D[@WCall to @R#@Y{:d}@D] @G{}@n\r\n", voice, char_get_name(ch), call, arg2.empty() ? "" : CAP(arg2).c_str());
         }
-        send_to_char(g, i->character, "{}", hist);
-        add_history(g, i->character, hist, HIST_SNET);
+        send_to_char(g, i->character, hist);
+        add_history(g, i->character, hist.c_str(), HIST_SNET);
         continue;
       }
       if (desc_get_connected(i) != CON_PLAYING) {
@@ -513,10 +513,10 @@ ACMD(do_snet)
           obj_set_scoutfreq(obj2, 1);
         }
         if (global == false && call <= -1 && obj_get_scoutfreq(obj2) == obj_get_scoutfreq(obj) && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
-          *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
-          add_history(g, i->character, hist, HIST_SNET);
+          send_to_char(g, i->character, "@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg), arg2.empty() ? "" : arg2.c_str());
+          hist.clear();
+          hist = str_format("@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg), arg2.empty() ? "" : arg2.c_str());
+          add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
@@ -525,10 +525,10 @@ ACMD(do_snet)
           continue;
         } /* It is the right freq */
         else if (global == true && call <= -1 && char_get_admlevel(i->character) < 1) {
-          send_to_char(g, i->character, "@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
-          *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2).c_str());
-          add_history(g, i->character, hist, HIST_SNET);
+          send_to_char(g, i->character, "@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
+          hist.clear();
+          hist = str_format("@C{} is heard @W(@c{}@W), @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
+          add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
@@ -537,9 +537,9 @@ ACMD(do_snet)
           continue;
         } else if (call > -1 && char_get_id(i->character) == call) {
           send_to_char(g, i->character, "@C{} is heard @W(@c{}@W), @D[@R#@W{:d} @Ycalling YOU@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
-          *hist = '\0';
-          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
-          add_history(g, i->character, hist, HIST_SNET);
+          hist.clear();
+          hist = str_format("@C{} is heard @W(@c{}@W), @D[@R#@W{:d} @Ycalling YOU@D] @G{}@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), arg2.empty() ? "" : CAP(arg2).c_str());
+          add_history(g, i->character, hist.c_str(), HIST_SNET);
           if (has_scanner(g, i->character)) {
             char *blah = sense_location(g, ch);
             send_to_char(g, i->character, "@WScanner@D: @Y{}@n\r\n", blah);
@@ -552,13 +552,12 @@ ACMD(do_snet)
     if (call <= -1) {
       if (global == false) {
         reveal_hiding(g, ch, 3);
-        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
-        *hist = '\0';
-        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg.c_str(), arg2.empty() ? "" : arg2.c_str());
-        add_history(g, ch, hist, HIST_SNET);
-        char over[MAX_STRING_LENGTH];
-        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg).c_str(), arg2.empty() ? "" : arg2.c_str());
-        act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
+        send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", obj_get_scoutfreq(obj), arg, arg2.empty() ? "" : arg2.c_str());
+        hist.clear();
+        hist = str_format("@CYou @D[@WSNET FREQ@D: @Y{:d}@D] @G{} {}@n\r\n", obj_get_scoutfreq(obj), arg, arg2.empty() ? "" : arg2.c_str());
+        add_history(g, ch, hist.c_str(), HIST_SNET);
+        std::string over = str_format("@C$n@W says into $s scouter, '@G@G{} {}@W'@n\r\n", CAP(arg), arg2.empty() ? "" : arg2.c_str());
+        act(g, over.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }
@@ -566,9 +565,9 @@ ACMD(do_snet)
       if (global == true) {
         reveal_hiding(g, ch, 3);
         send_to_char(g, ch, "@CYou @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
-        *hist = '\0';
-        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
-        add_history(g, ch, hist, HIST_SNET);
+        hist.clear();
+        hist = str_format("@CYou @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
+        add_history(g, ch, hist.c_str(), HIST_SNET);
         char over[MAX_STRING_LENGTH];
         snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
         act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
@@ -579,12 +578,11 @@ ACMD(do_snet)
     } else {
       reveal_hiding(g, ch, 3);
       send_to_char(g, ch, "@CYou call @D[@R#@W{:d}@D] @G{}@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
-      *hist = '\0';
-      snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
-      add_history(g, ch, hist, HIST_SNET);
-      char over[MAX_STRING_LENGTH];
-      snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
-      act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
+      hist.clear();
+      hist = str_format("@CYou call @D[@R#@W{:d}@D] @G{}@n\r\n", call, arg2.empty() ? "" : CAP(arg2).c_str());
+      add_history(g, ch, hist.c_str(), HIST_SNET);
+      std::string over = str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
+      act(g, over.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
       if (reached == false) {
         send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
       }
@@ -631,17 +629,17 @@ ACMD(do_scouter)
       if (planet_check(g, ch, i->character)) {
         int dir  = find_first_step(g, char_get_in_room(ch), char_get_in_room(i->character));
         int same = false;
-        char pathway[MAX_STRING_LENGTH];
+        std::string pathway;
 
         if (char_in_zone(g, ch) == char_in_zone(g, i->character))
           same = true;
 
         switch (dir) {
           case BFS_ERROR:
-            snprintf(pathway, sizeof(pathway), "@rERROR");
+            pathway = "@rERROR";
             break;
           case BFS_ALREADY_THERE:
-            snprintf(pathway, sizeof(pathway), "@RHERE");
+            pathway = "@RHERE";
             break;
           case BFS_NO_PATH:
             send_to_char(g, ch, "@MUNKNOWN");
@@ -653,13 +651,13 @@ ACMD(do_scouter)
 
         char *blah = sense_location(g, i->character);
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, i->character) >= 150000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway : blah);
+          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway.c_str() : blah);
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, i->character) >= 5000000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway : blah);
+          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway.c_str() : blah);
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, i->character) >= 15000000) {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway : blah);
+          send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same == true ? pathway.c_str() : blah);
         } else {
-          send_to_char(g, ch, "@D<@GPowerlevel Detected@D: [@Y{}@D]@w ---> @C{}@n\r\n", add_commas(getCurPL(g, i->character)), same == true ? pathway : blah);
+          send_to_char(g, ch, "@D<@GPowerlevel Detected@D: [@Y{}@D]@w ---> @C{}@n\r\n", add_commas(getCurPL(g, i->character)), same == true ? pathway.c_str() : blah);
         }
         ++count;
         free(blah);

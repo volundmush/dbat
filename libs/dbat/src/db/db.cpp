@@ -70,7 +70,7 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
-static void load_help(GameWorld *g, FILE *fl, char *name);
+static void load_help(GameWorld *g, FILE *fl, const char *name);
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -87,12 +87,12 @@ static void dragon_level(GameWorld *g, struct char_data *ch);
 static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val);
 static int check_object_level(GameWorld *g, struct obj_data *obj, int val);
 static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir);
-static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename);
+static void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename);
 static int check_object(GameWorld *g, struct obj_data *);
 static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr);
 static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr);
 static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr);
-static void load_zones(GameWorld *g, FILE *fl, char *zonename);
+static void load_zones(GameWorld *g, FILE *fl, const char *zonename);
 static int file_to_string(const char *name, std::string &text);
 static int file_to_string_alloc(const char *name, std::string *text);
 static int count_alias_records(FILE *fl);
@@ -410,7 +410,7 @@ ACMD(do_reboot)
     return;
   }
 
-  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+  send_to_char(g, ch, CONFIG_OK);
 }
 
 void boot_world(GameWorld *g)
@@ -708,7 +708,7 @@ void boot_db(GameWorld *g)
 
   for (struct zone_data *i : g->zones.all()) {
     mud_log("Resetting #{:d}: {} (rooms {:d}-{:d}).", i->number,
-            i->name.c_str(), i->bot, i->top);
+            i->name, i->bot, i->top);
     reset_zone(g, i);
   }
 
@@ -963,7 +963,8 @@ void index_boot(GameWorld *g, int mode)
   const char *index_filename, *prefix = nullptr; /* NULL or egcs 1.1 complains */
   FILE *db_index, *db_file;
   int rec_count = 0, size[2];
-  char buf2[PATH_MAX], buf1[MAX_STRING_LENGTH];
+  std::string buf2;
+  char buf1[MAX_STRING_LENGTH];
 
   switch (mode) {
     case DB_BOOT_WLD:
@@ -1000,8 +1001,8 @@ void index_boot(GameWorld *g, int mode)
   else
     index_filename = INDEX_FILE;
 
-  snprintf(buf2, sizeof(buf2), "%s%s", prefix, index_filename);
-  if (!(db_index = fopen(buf2, "r"))) {
+  buf2 = str_format("{}{}", prefix, index_filename);
+  if (!(db_index = fopen(buf2.c_str(), "r"))) {
     mud_log("SYSERR: opening index file '{}': {}", buf2, strerror(errno));
     exit(1);
   }
@@ -1009,8 +1010,8 @@ void index_boot(GameWorld *g, int mode)
   /* first, count the number of records in the file so we can malloc */
   read_index_entry(db_index, buf1);
   while (*buf1 != '$') {
-    snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
-    if (!(db_file = fopen(buf2, "r"))) {
+    buf2 = str_format("{}{}", prefix, buf1);
+    if (!(db_file = fopen(buf2.c_str(), "r"))) {
       mud_log("SYSERR: File '{}' listed in '{}{}': {}", buf2, prefix,
               index_filename, strerror(errno));
       read_index_entry(db_index, buf1);
@@ -1070,8 +1071,8 @@ void index_boot(GameWorld *g, int mode)
   rewind(db_index);
   read_index_entry(db_index, buf1);
   while (*buf1 != '$') {
-    snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
-    if (!(db_file = fopen(buf2, "r"))) {
+    buf2 = str_format("{}{}", prefix, buf1);
+    if (!(db_file = fopen(buf2.c_str(), "r"))) {
       mud_log("SYSERR: {}: {}", buf2, strerror(errno));
       exit(1);
     }
@@ -1080,19 +1081,19 @@ void index_boot(GameWorld *g, int mode)
       case DB_BOOT_OBJ:
       case DB_BOOT_MOB:
       case DB_BOOT_TRG:
-        discrete_load(g, db_file, mode, buf2);
+        discrete_load(g, db_file, mode, buf2.c_str());
         break;
       case DB_BOOT_ZON:
-        load_zones(g, db_file, buf2);
+        load_zones(g, db_file, buf2.c_str());
         break;
       case DB_BOOT_HLP:
-        load_help(g, db_file, buf2);
+        load_help(g, db_file, buf2.c_str());
         break;
       case DB_BOOT_SHP:
-        boot_the_shops(g, db_file, buf2, rec_count);
+        boot_the_shops(g, db_file, buf2.c_str(), rec_count);
         break;
       case DB_BOOT_GLD:
-        boot_the_guilds(g, db_file, buf2, rec_count);
+        boot_the_guilds(g, db_file, buf2.c_str(), rec_count);
         break;
     }
 
@@ -1108,7 +1109,7 @@ void index_boot(GameWorld *g, int mode)
   }
 }
 
-static void discrete_load(GameWorld *g, FILE *fl, int mode, char *filename)
+static void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename)
 {
   IDXTYPE nr = -1, last;
   char line[READ_SIZE];
@@ -1238,11 +1239,13 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 {
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
-  char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
+  char flags4[128];
+  std::string buf2;
+  std::string buf;
   char letter;
 
   /* This really had better fit or there are other problems. */
-  snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
+  buf2 = str_format("room #{:d}", virtual_nr);
 
   g->parse_room_zone = find_zone_by_thing(g, virtual_nr);
   if (g->parse_room_zone == nullptr) {
@@ -1258,8 +1261,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
   g->rooms.emplace(virtual_nr);
   room_set_zone(g, g->parse_room_index, g->parse_room_zone);
   room_set_number(g, g->parse_room_index, virtual_nr);
-  room_set_name(g, g->parse_room_index, take_string(fread_string(fl, buf2)));
-  room_set_description(g, g->parse_room_index, take_string(fread_string(fl, buf2)));
+  room_set_name(g, g->parse_room_index, take_string(fread_string(fl, buf2.c_str())));
+  room_set_description(g, g->parse_room_index, take_string(fread_string(fl, buf2.c_str())));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Expecting roomflags/sector type of room #{:d} but file ended!",
@@ -1344,11 +1347,11 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 
   room_ex_description_slot(room_of(g, g->parse_room_index))->clear();
 
-  snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
+  buf = str_format("SYSERR: Format error in room #{:d} (expecting D/E/S)", virtual_nr);
 
   for (;;) {
     if (!get_line(fl, line)) {
-      mud_log("{}", buf);
+      mud_log(buf);
       exit(1);
     }
     switch (*line) {
@@ -1357,8 +1360,8 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         break;
       case 'E': {
         extra_descr_data descr;
-        descr.keyword     = take_string(fread_string(fl, buf2));
-        descr.description = take_string(fread_string(fl, buf2));
+        descr.keyword     = take_string(fread_string(fl, buf2.c_str()));
+        descr.description = take_string(fread_string(fl, buf2.c_str()));
         /* fix for crashes in the editor when formatting
          * - e-descs are assumed to end with a \r\n
          * -- Welcor 09/03
@@ -1379,7 +1382,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         }
         return;
       default:
-        mud_log("{}", buf);
+        mud_log(buf);
         exit(1);
     }
   }
@@ -1389,15 +1392,14 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
 static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir)
 {
   int t[11], retval;
-  char line[READ_SIZE], buf2[128];
-
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room + 1, dir);
+  char line[READ_SIZE];
+  std::string buf2 = str_format("room #{:d}, direction D{:d}", room + 1, dir);
 
   struct room_direction_data *new_exit;
   new_exit = new room_direction_data();
   room_set_dir_option(g, room, dir, new_exit);
-  room_get_dir_option(g, room, dir)->general_description = take_string(fread_string(fl, buf2));
-  room_get_dir_option(g, room, dir)->keyword             = take_string(fread_string(fl, buf2));
+  room_get_dir_option(g, room, dir)->general_description = take_string(fread_string(fl, buf2.c_str()));
+  room_get_dir_option(g, room, dir)->keyword             = take_string(fread_string(fl, buf2.c_str()));
 
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Format error, {}", buf2);
@@ -1905,23 +1907,24 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
   int j, t[10], retval;
   char line[READ_SIZE], *tmpptr, letter;
   char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
-  char f7[128], f8[128], buf2[128];
+  char f7[128], f8[128];
+  std::string buf2;
   mob_vnum nr = mob_index_of(g, char_get_nr(ch))->vnum;
 
   /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
   char_drop_player_specials(ch);
-  sprintf(buf2, "mob vnum %d", nr); /* sprintf: OK (for 'buf2 >= 19') */
+  buf2 = str_format("mob vnum {:d}", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
-  char_set_alias(ch, take_string(fread_string(mob_f, buf2)));
-  tmpptr = fread_string(mob_f, buf2);
+  char_set_alias(ch, take_string(fread_string(mob_f, buf2.c_str())));
+  tmpptr = fread_string(mob_f, buf2.c_str());
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
         !strcasecmp(fname(tmpptr), "the"))
       *tmpptr = tolower(*tmpptr);
   char_set_sdesc(ch, take_string(tmpptr));
-  char_set_ldesc(ch, take_string(fread_string(mob_f, buf2)));
-  char_set_ddesc(ch, take_string(fread_string(mob_f, buf2)));
+  char_set_ldesc(ch, take_string(fread_string(mob_f, buf2.c_str())));
+  char_set_ddesc(ch, take_string(fread_string(mob_f, buf2.c_str())));
 
   /* *** Numeric data *** */
   if (!get_line(mob_f, line)) {
@@ -2372,7 +2375,7 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
 #define Z (*zone)
 
 /* load the zone table and command tables */
-static void load_zones(GameWorld *g, FILE *fl, char *zonename)
+static void load_zones(GameWorld *g, FILE *fl, const char *zonename)
 {
   std::unique_ptr<zone_data> made = std::make_unique<zone_data>();
   struct zone_data *zone          = made.get(); /* Z and ZCMD2 refer to it */
@@ -2555,7 +2558,7 @@ void free_help_table(GameWorld *g)
   g->help_table.clear();
 }
 
-static void load_help(GameWorld *g, FILE *fl, char *name)
+static void load_help(GameWorld *g, FILE *fl, const char *name)
 {
   char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
   size_t entrylen;
@@ -3549,7 +3552,7 @@ void zone_update(GameWorld *g)
     if (zone->reset_mode == 2 || is_empty(g, zone)) {
       g->reset_q.erase(it);
       reset_zone(g, zone);
-      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: {} (Zone {:d})", zone->name.c_str(), zone->number);
+      mudlog(g, LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: {} (Zone {:d})", zone->name, zone->number);
       break;
     }
   }
@@ -4224,7 +4227,7 @@ struct zone_data *find_zone(GameWorld *g, zone_vnum vnum)
  */
 static int check_object(GameWorld *g, struct obj_data *obj)
 {
-  char objname[MAX_INPUT_LENGTH + 32];
+  std::string objname;
   int error = false;
 
   if (obj_get_weight(obj) < 0 && (error = true))
@@ -4235,15 +4238,15 @@ static int check_object(GameWorld *g, struct obj_data *obj)
     mud_log("SYSERR: Object #{:d} ({}) has negative cost/day ({:d}).",
             obj_get_vnum(g, obj), obj_get_short_description(obj), obj_get_cost_per_day(obj));
 
-  snprintf(objname, sizeof(objname), "Object #%d (%s)", obj_get_vnum(g, obj), obj_get_short_description(obj));
+  objname = str_format("Object #{:d} ({})", obj_get_vnum(g, obj), obj_get_short_description(obj));
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_DRINKCON: {
-      char onealias[MAX_INPUT_LENGTH];
+      std::string onealias;
       const char *space = strrchr(obj_get_name(obj), ' ');
 
-      strlcpy(onealias, space ? space + 1 : obj_get_name(obj), sizeof(onealias));
-      if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
+      onealias = space ? space + 1 : obj_get_name(obj);
+      if (search_block(onealias.c_str(), drinknames, true) < 0 && (error = true)) {
         //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
       }
     }
@@ -4366,15 +4369,15 @@ static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate)
 {
   int counter2, i;
-  char buf1[MAX_STRING_LENGTH + 1];
+  std::string buf1;
   char ebuf0[MAX_STRING_LENGTH], ebuf1[MAX_STRING_LENGTH];
   char ebuf2[MAX_STRING_LENGTH], ebuf3[MAX_STRING_LENGTH];
 
   if (obj_get_action_description(obj)) {
-    strcpy(buf1, obj_get_action_description(obj));
+    buf1 = obj_get_action_description(obj);
     strip_cr(buf1);
   } else
-    *buf1 = 0;
+    buf1.clear();
 
   sprintascii(ebuf0, obj_get_extra_flags(obj)[0]);
   sprintascii(ebuf1, obj_get_extra_flags(obj)[1]);
@@ -4406,7 +4409,7 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
                         obj_get_name(obj) ? obj_get_name(obj) : "undefined",
                         obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
                         obj_get_description(obj) ? obj_get_description(obj) : "undefined",
-                        buf1, obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
+                        buf1.c_str(), obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
                         (int)obj_get_wear_flags(obj)[1], (int)obj_get_wear_flags(obj)[2], (int)obj_get_wear_flags(obj)[3],
                         obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
     return false;
@@ -4438,13 +4441,13 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
       if (ex_desc->keyword.empty() || ex_desc->description.empty()) {
         continue;
       }
-      strcpy(buf1, ex_desc->description.c_str());
+      buf1 = ex_desc->description;
       strip_cr(buf1);
       if (!OBJ_SAVE_FPRINTF(g, fp, obj, "extra description", "E\n"
                                                              "%s~\n"
                                                              "%s~\n",
                             ex_desc->keyword.c_str(),
-                            buf1))
+                            buf1.c_str()))
         return false;
     }
   }
@@ -4585,14 +4588,14 @@ void load_config(GameWorld *g)
   FILE *fl;
   char line[MAX_STRING_LENGTH];
   char tag[MAX_INPUT_LENGTH];
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   load_default_config(g);
 
-  snprintf(buf, sizeof(buf), "%s/%s", DFLT_DIR, CONFIG_CONFFILE.c_str());
-  if (!(fl = fopen(CONFIG_CONFFILE.c_str(), "r")) && !(fl = fopen(buf, "r"))) {
-    snprintf(buf, sizeof(buf), "Game Config File: %s", CONFIG_CONFFILE.c_str());
-    perror(buf);
+  buf = str_format("{}/{}", DFLT_DIR, CONFIG_CONFFILE);
+  if (!(fl = fopen(CONFIG_CONFFILE.c_str(), "r")) && !(fl = fopen(buf.c_str(), "r"))) {
+    buf = str_format("Game Config File: {}", CONFIG_CONFFILE);
+    perror(buf.c_str());
     return;
   }
 

@@ -166,7 +166,7 @@ int main(int argc, char **argv)
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-  mud_log("Using {} for configuration.", CONFIG_CONFFILE.c_str());
+  mud_log("Using {} for configuration.", CONFIG_CONFFILE);
   g->xap_objs = 1;
   if (chdir(dir) < 0) {
     perror("SYSERR: Fatal error changing to data directory");

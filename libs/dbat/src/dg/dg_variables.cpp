@@ -68,10 +68,8 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
 /* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context)
 {
-  char buf[MAX_INPUT_LENGTH];
-
-  snprintf(buf, sizeof(buf), "%c%d", UID_CHAR, char_get_id(c));
-  add_var(&trig->var_list, name, buf, context);
+  std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(c));
+  add_var(&trig->var_list, name, buf.c_str(), context);
 }
 
 /* sets trigger variable name to object o's UID, so the script can use %name% to refer to it */
@@ -175,9 +173,8 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     return false;
 
   if (!strcasecmp(field, "strlen")) { /* strlen    */
-    char limit[200];
-    sprintf(limit, "%zu", strlen(vd->value.c_str()));
-    str = str_format("{:d}", atoi(limit));
+    std::string limit = str_format("{:d}", as_unsigned(strlen(vd->value.c_str())));
+    str               = str_format("{:d}", atoi(limit.c_str()));
     return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
     /* trim whitespace from ends */
@@ -767,16 +764,16 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format("{}", vd->value.c_str());
+        str = str_format("{}", vd->value);
       else {
         str = "";
         script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
-                   trig->name.c_str(), trig_get_vnum(g, trig), field);
+                   trig->name, trig_get_vnum(g, trig), field);
       }
     } else {
       str = "";
       script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), field);
+                 trig->name, trig_get_vnum(g, trig), field);
     }
   }
 }
@@ -900,9 +897,8 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         if (!subfield || !*subfield)
           str = str_format("{}", obj_get_name(o));
         else {
-          char blah[500];
-          snprintf(blah, sizeof(blah), "%s %s", obj_get_name(o), subfield);
-          obj_set_name(o, blah);
+          std::string blah = str_format("{} {}", obj_get_name(o), subfield);
+          obj_set_name(o, blah.c_str());
         }
       } else if (!strcasecmp(field, "next_in_list")) {
         if (obj_data *next = obj_next_in_list(g, o))
@@ -1024,19 +1020,19 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format("{}", vd->value.c_str());
+        str = str_format("{}", vd->value);
       else {
         str = "";
         if (strcasecmp(trig->name.c_str(), "Rename Object")) {
           script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
-                     trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+                     trig->name, trig_get_vnum(g, trig), type, field);
         }
       }
     } else {
       str = "";
       if (strcasecmp(trig->name.c_str(), "Rename Object")) {
         script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
-                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+                   trig->name, trig_get_vnum(g, trig), type, field);
       }
     }
   }
@@ -1111,7 +1107,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format("{}", vd->value.c_str());
+        str = str_format("{}", vd->value);
       else
         str = "";
     }
@@ -1182,7 +1178,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
   } else if (!strcasecmp(field, "zonenumber"))
     str = str_format("{:d}", room_get_zone(r)->number);
   else if (!strcasecmp(field, "zonename"))
-    str = str_format("{}", room_get_zone(r)->name.c_str());
+    str = str_format("{}", room_get_zone(r)->name);
   else if (!strcasecmp(field, "roomflag")) {
     if (subfield && *subfield) {
       room_vnum thisroom = room_get_number(r);
@@ -1200,16 +1196,16 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
         if (!strcasecmp(vd->name.c_str(), field))
           break;
       if (vd)
-        str = str_format("{}", vd->value.c_str());
+        str = str_format("{}", vd->value);
       else {
         str = "";
         script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
-                   trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+                   trig->name, trig_get_vnum(g, trig), type, field);
       }
     } else {
       str = "";
       script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
-                 trig->name.c_str(), trig_get_vnum(g, trig), type, field);
+                 trig->name, trig_get_vnum(g, trig), type, field);
     }
   }
 }
@@ -1259,7 +1255,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
   if (!*field) {
     if (vd)
-      str = str_format("{}", vd->value.c_str());
+      str = str_format("{}", vd->value);
     else {
       if (!strcasecmp(var, "self")) {
         switch (type) {
@@ -1393,7 +1389,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
             break;
 
         if (vd)
-          str = str_format("{}", vd->value.c_str());
+          str = str_format("{}", vd->value);
 
         return;
       } else if (!strcasecmp(var, "people")) {

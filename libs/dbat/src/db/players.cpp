@@ -62,11 +62,12 @@ void build_player_index(GameWorld *g)
 {
   int rec_count = 0, i;
   FILE *plr_index;
-  char index_name[40], line[256], bits[64];
+  std::string index_name;
+  char line[256], bits[64];
   char arg2[80];
 
-  sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
-  if (!(plr_index = fopen(index_name, "r"))) {
+  index_name = str_format("{}{}", LIB_PLRFILES, INDEX_FILE);
+  if (!(plr_index = fopen(index_name.c_str(), "r"))) {
     g->top_of_p_table = -1;
     mud_log("No player index file!  First new char will be IMP!");
     return;
@@ -138,11 +139,12 @@ void save_player_index(GameWorld *g)
 {
   struct atomic_file af;
   int i;
-  char index_name[50], bits[64];
+  std::string index_name;
+  char bits[64];
   FILE *index_file;
 
-  sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
-  if (!(index_file = atomic_open(&af, index_name, true))) {
+  index_name = str_format("{}{}", LIB_PLRFILES, INDEX_FILE);
+  if (!(index_file = atomic_open(&af, index_name.c_str(), true))) {
     mud_log("SYSERR: Could not write player index file");
     return;
   }
@@ -220,7 +222,8 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
   int id, i, num = 0, num2 = 0, num3 = 0;
   FILE *fl;
   char fname[READ_SIZE];
-  char buf[128], buf2[128], line[MAX_INPUT_LENGTH + 1], tag[6];
+  std::string buf;
+  char buf2[128], line[MAX_INPUT_LENGTH + 1], tag[6];
   char f1[128], f2[128], f3[128], f4[128];
 
   if ((id = get_ptable_by_name(g, name)) < 0)
@@ -657,7 +660,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
           break;
 
         default:
-          sprintf(buf, "SYSERR: Unknown tag %s in pfile %s", tag, name);
+          buf = str_format("SYSERR: Unknown tag {} in pfile {}", tag, name);
       }
     }
   }
@@ -706,19 +709,16 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
    multiple definition error or if it you want to use a
    substitute
 */
-static void kill_ems(char *str)
+static void kill_ems(std::string &str)
 {
-  char *ptr1, *ptr2;
+  std::string out;
 
-  ptr1 = str;
-  ptr2 = str;
-
-  while (*ptr1) {
-    if ((*(ptr2++) = *(ptr1++)) == '\r')
-      if (*ptr1 == '\r')
-        ptr1++;
+  for (size_t i = 0; i < str.size(); ++i) {
+    out += str[i];
+    if (str[i] == '\r' && i + 1 < str.size() && str[i + 1] == '\r')
+      ++i; /* "\r\r" keeps one */
   }
-  *ptr2 = '\0';
+  str = std::move(out);
 }
 
 /*
@@ -731,7 +731,8 @@ void save_char(GameWorld *g, struct char_data *ch)
 {
   struct atomic_file af;
   FILE *fl;
-  char fname[40], buf[MAX_STRING_LENGTH];
+  char fname[40];
+  std::string buf;
   int i, id, save_index = false;
   struct affected_type tmp_aff[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
@@ -825,9 +826,9 @@ void save_char(GameWorld *g, struct char_data *ch)
   if (char_get_feature(ch)) fprintf(fl, "RPfe: %s\n", char_get_feature(ch));
   if (char_get_ability_trains(g, ch)) fprintf(fl, "Trns: %d\n", char_get_ability_trains(g, ch));
   if (char_get_ddesc(ch) && *char_get_ddesc(ch)) {
-    strcpy(buf, char_get_ddesc(ch));
+    buf = char_get_ddesc(ch);
     kill_ems(buf);
-    fprintf(fl, "Desc:\n%s~\n", buf);
+    fprintf(fl, "Desc:\n%s~\n", buf.c_str());
   }
 #ifdef ASCII_SAVE_POOFS
   if (char_get_poofin(g, ch)) fprintf(fl, "PfIn: %s\n", char_get_poofin(g, ch));
@@ -1004,20 +1005,20 @@ void save_char(GameWorld *g, struct char_data *ch)
   }
 
   /* Save Bonuses/Negatives */
-  char buff[200];
+  std::string buff;
   fprintf(fl, "Bonu:\n");
   for (i = 0; i < 52; i++) {
     if (char_get_bonuses(ch, i) && i == 0)
-      sprintf(buff, "%d", char_get_bonuses(ch, i));
+      buff = str_format("{:d}", char_get_bonuses(ch, i));
     else if (char_get_bonuses(ch, i) && i != 0)
-      sprintf(buff + strlen(buff), " %d", char_get_bonuses(ch, i));
+      buff += str_format(" {:d}", char_get_bonuses(ch, i));
     else if (i == 0)
-      sprintf(buff, "0");
+      buff = "0";
     else
-      sprintf(buff + strlen(buff), " 0");
+      buff += " 0";
   }
-  fprintf(fl, "%s\n", buff);
-  *buff = '\0';
+  fprintf(fl, "%s\n", buff.c_str());
+  buff.clear();
 
   /* Save skill bonuses */
   if (char_get_admlevel(ch) < ADMLVL_IMMORT) {

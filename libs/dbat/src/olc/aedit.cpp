@@ -92,11 +92,11 @@ ACMD(do_oasis_aedit)
 
   if (OLC_INDEX(d) > g->top_of_socialt) {
     if ((i = aedit_find_command(g, OLC_STORAGE(d).c_str())) != -1) {
-      send_to_char(g, ch, "The '{}' command already exists ({}).\r\n", OLC_STORAGE(d).c_str(), g->complete_cmd_info[i].command);
+      send_to_char(g, ch, "The '{}' command already exists ({}).\r\n", OLC_STORAGE(d), g->complete_cmd_info[i].command);
       cleanup_olc(g, d, CLEANUP_ALL);
       return;
     }
-    send_to_char(g, ch, "Do you wish to add the '{}' action? ", OLC_STORAGE(d).c_str());
+    send_to_char(g, ch, "Do you wish to add the '{}' action? ", OLC_STORAGE(d));
     OLC_MODE(d) = AEDIT_CONFIRM_ADD;
   } else {
     send_to_char(g, ch, "Do you wish to edit the '{}' action? ", g->soc_mess_list[OLC_INDEX(d)].command);
@@ -200,9 +200,8 @@ static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
   FILE *fp;
   int i;
   if (!(fp = atomic_open(&af, SOCMESS_FILE_NEW, false))) {
-    char error[MAX_STRING_LENGTH];
-    snprintf(error, sizeof(error), "Can't open socials file '%s'", SOCMESS_FILE);
-    perror(error);
+    std::string error = str_format("Can't open socials file '{}'", SOCMESS_FILE);
+    perror(error.c_str());
     exit(1);
   }
 
@@ -328,7 +327,7 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               break;
             }
             write_to_output(g, d, "Do you wish to add the '{}' action? ",
-                            OLC_STORAGE(d).c_str());
+                            OLC_STORAGE(d));
             OLC_MODE(d) = AEDIT_CONFIRM_ADD;
           } else {
             write_to_output(g, d, "Do you wish to edit the '{}' action? ",
@@ -357,7 +356,7 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         default:
           write_to_output(g, d, "Invalid choice!\r\nDo you wish to add the '{}' action? ",
-                          OLC_STORAGE(d).c_str());
+                          OLC_STORAGE(d));
           break;
       }
       return;

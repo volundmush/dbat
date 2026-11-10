@@ -227,7 +227,9 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
 {
   int i;
   char *timestr, *temp;
-  char built_on[128], last_pay[128], own_name[MAX_NAME_LENGTH + 1];
+  std::string built_on;
+  std::string last_pay;
+  char own_name[MAX_NAME_LENGTH + 1];
 
   if (!g->num_of_houses) {
     send_to_char(g, ch, "No houses have been defined.\r\n");
@@ -244,16 +246,16 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
     if (g->house_control[i].built_on) {
       timestr         = asctime(localtime(&(g->house_control[i].built_on)));
       *(timestr + 10) = '\0';
-      strlcpy(built_on, timestr, sizeof(built_on));
+      built_on        = timestr;
     } else
-      strcpy(built_on, "Unknown"); /* strcpy: OK (for 'strlen("Unknown") < 128') */
+      built_on = "Unknown"; /* strcpy: OK (for 'strlen("Unknown") < 128') */
 
     if (g->house_control[i].last_payment) {
       timestr         = asctime(localtime(&(g->house_control[i].last_payment)));
       *(timestr + 10) = '\0';
-      strlcpy(last_pay, timestr, sizeof(last_pay));
+      last_pay        = timestr;
     } else
-      strcpy(last_pay, "None"); /* strcpy: OK (for 'strlen("None") < 128') */
+      last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
     strcpy(own_name, temp); /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
@@ -303,7 +305,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
   }
   if ((exit_num = search_block(arg1, dirs, false)) < 0 &&
       (exit_num = search_block(arg1, abbr_dirs, false)) < 0) {
-    send_to_char(g, ch, "'{}' is not a valid direction.\r\n", arg1.c_str());
+    send_to_char(g, ch, "'{}' is not a valid direction.\r\n", arg1);
     return;
   }
   if (room_get_exit_to_room(g, real_house, exit_num) == NOWHERE) {
@@ -318,7 +320,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
     return;
   }
   if ((owner = get_id_by_name(g, arg1.c_str())) < 0) {
-    send_to_char(g, ch, "Unknown player '{}'.\r\n", arg1.c_str());
+    send_to_char(g, ch, "Unknown player '{}'.\r\n", arg1);
     return;
   }
 
@@ -393,7 +395,7 @@ static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_v
   else if ((i = find_house(g, parse_int(arg))) == NOWHERE)
     send_to_char(g, ch, "Unknown house.\r\n");
   else {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house {} collected by {}.", std::string(arg).c_str(), char_get_name(ch));
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "Payment for house {} collected by {}.", arg, char_get_name(ch));
 
     g->house_control[i].last_payment = game_now(g);
     House_save_control(g);
@@ -533,7 +535,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
   FILE *fl;
   char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
   char cmfname[MAX_STRING_LENGTH];
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
   char buf2[MAX_STRING_LENGTH];
   char line[256] = "";
   int t[21] = {}, zwei = 0; /* a damaged line leaves some of these unread */
@@ -551,8 +553,8 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
 
   if (!(fl = fopen(cmfname, "rb"))) {
     if (errno != ENOENT) { /* if it fails, NOT because of no file */
-      snprintf(buf1, sizeof(buf1), "SYSERR: READING HOUSE FILE %s (5)", cmfname);
-      perror(buf1);
+      buf1 = str_format("SYSERR: READING HOUSE FILE {} (5)", cmfname);
+      perror(buf1.c_str());
     }
     return false;
   }

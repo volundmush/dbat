@@ -126,7 +126,8 @@ static obj_vnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum,
 
 bool save_objects(GameWorld *g, struct zone_data *zone_num)
 {
-  char cmfname[128], buf[MAX_STRING_LENGTH];
+  std::string cmfname;
+  std::string buf;
   char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
   char ebuf3[MAX_STRING_LENGTH], ebuf4[MAX_STRING_LENGTH];
   char wbuf1[MAX_STRING_LENGTH], wbuf2[MAX_STRING_LENGTH];
@@ -144,8 +145,8 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_num->number);
-  if (!(fp = atomic_open(&af, cmfname, false))) {
+  cmfname = str_format("{}{:d}.obj", OBJ_PREFIX, zone_num->number);
+  if (!(fp = atomic_open(&af, cmfname.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file {}!", cmfname);
     return false;
   }
@@ -155,10 +156,10 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   for (obj_vnum counter : g->obj_proto.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if (obj_proto_of(g, realcounter = counter)) {
       if (obj_get_action_description(obj = obj_proto_of(g, realcounter))) {
-        strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
+        buf = obj_get_action_description(obj);
         strip_cr(buf);
       } else
-        *buf = '\0';
+        buf.clear();
 
       fprintf(fp,
               "#%d\n"
@@ -171,7 +172,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
               (obj_get_name(obj) && *obj_get_name(obj)) ? obj_get_name(obj) : "undefined",
               (obj_get_short_description(obj) && *obj_get_short_description(obj)) ? obj_get_short_description(obj) : "undefined",
               (obj_get_description(obj) && *obj_get_description(obj)) ? obj_get_description(obj) : "undefined",
-              buf);
+              buf.c_str());
 
       sprintascii(ebuf1, obj_get_extra_flags(obj)[0]);
       sprintascii(ebuf2, obj_get_extra_flags(obj)[1]);
@@ -220,12 +221,12 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
           mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
           continue;
         }
-        strlcpy(buf, ex_desc.description.c_str(), sizeof(buf));
+        buf = ex_desc.description;
         strip_cr(buf);
         fprintf(fp, "E\n"
                     "%s~\n"
                     "%s~\n",
-                ex_desc.keyword.c_str(), buf);
+                ex_desc.keyword.c_str(), buf.c_str());
       }
       /*
        * Do we have affects?
@@ -257,7 +258,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af))
     return false;
-  snprintf(buf, sizeof(buf), "%s", cmfname);
+  buf = cmfname;
 
   if (in_save_list(g, zone_num->number, SL_OBJ)) {
     remove_from_save_list(g, zone_num->number, SL_OBJ);

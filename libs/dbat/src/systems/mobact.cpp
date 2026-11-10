@@ -137,9 +137,8 @@ void mobile_activity(GameWorld *g)
           act(g, "@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_ROOM);
           act(g, "@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_VICT);
           if (char_is_humanoid(ch)) {
-            char tar[MAX_INPUT_LENGTH];
-            sprintf(tar, "%s", char_get_name(obj_get_user(g, hugeatk)));
-            do_punch(g, ch, tar, 0, 0);
+            std::string tar = str_format("{}", char_get_name(obj_get_user(g, hugeatk)));
+            do_punch(g, ch, tar.c_str(), 0, 0);
           } else {
             char tar[MAX_INPUT_LENGTH];
             sprintf(tar, "%s", char_get_name(obj_get_user(g, hugeatk)));
@@ -180,9 +179,7 @@ void mobile_activity(GameWorld *g)
           char_set_aggtimer(ch, char_get_aggtimer(ch) + 1);
         else {
           char_set_aggtimer(ch, 0);
-          char tar[MAX_INPUT_LENGTH];
-
-          sprintf(tar, "%s", char_get_name(vict));
+          std::string tar = str_format("{}", char_get_name(vict));
           if (char_is_humanoid(ch)) {
             if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
               act(g, "@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, TO_VICT);
@@ -199,7 +196,7 @@ void mobile_activity(GameWorld *g)
               do_fly(g, ch, "", 0, 0);
               continue;
             }
-            do_punch(g, ch, tar, 0, 0);
+            do_punch(g, ch, tar.c_str(), 0, 0);
           }
           if (!char_is_humanoid(ch)) {
             if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
@@ -217,7 +214,7 @@ void mobile_activity(GameWorld *g)
               act(g, "@C$n@w notices YOU.\n@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
               act(g, "@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
             }
-            do_bite(g, ch, tar, 0, 0);
+            do_bite(g, ch, tar.c_str(), 0, 0);
           }
           /*hit(ch, vict, TYPE_UNDEFINED);*/
           found = true;
@@ -229,16 +226,16 @@ void mobile_activity(GameWorld *g)
       struct char_data *original = char_get_original(g, ch);
 
       if (char_get_fighting(g, original) && !char_get_fighting(g, ch)) {
-        char target[MAX_INPUT_LENGTH];
+        std::string target;
         struct char_data *targ = char_get_fighting(g, original);
 
-        sprintf(target, "%s", char_get_alias(targ));
+        target = str_format("{}", char_get_alias(targ));
         if (rand_number(g, 1, 5) >= 4) {
-          do_kick(g, ch, target, 0, 0);
+          do_kick(g, ch, target.c_str(), 0, 0);
         } else if (rand_number(g, 1, 5) >= 4) {
-          do_elbow(g, ch, target, 0, 0);
+          do_elbow(g, ch, target.c_str(), 0, 0);
         } else {
-          do_punch(g, ch, target, 0, 0);
+          do_punch(g, ch, target.c_str(), 0, 0);
         }
       }
     }
@@ -252,24 +249,21 @@ void mobile_activity(GameWorld *g)
         if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 90) {
             act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, TO_ROOM);
-            char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%s", char_get_name(ally));
+            std::string buf = str_format("{}", char_get_name(ally));
             if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
-              do_heal(g, ch, buf, 0, 0);
+              do_heal(g, ch, buf.c_str(), 0, 0);
             } else {
-              do_rescue(g, ch, buf, 0, 0);
+              do_rescue(g, ch, buf.c_str(), 0, 0);
               if (rand_number(g, 1, 6) == 2) {
-                char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
-                do_kiblast(g, ch, tar, 0, 0);
+                std::string tar = str_format("{}", char_get_name(char_get_fighting(g, ally)));
+                do_kiblast(g, ch, tar.c_str(), 0, 0);
               } else if (rand_number(g, 1, 6) >= 4) {
                 char tar[MAX_INPUT_LENGTH];
                 sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
                 do_slam(g, ch, tar, 0, 0);
               } else {
-                char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(g, ally)));
-                do_punch(g, ch, tar, 0, 0);
+                std::string tar = str_format("{}", char_get_name(char_get_fighting(g, ally)));
+                do_punch(g, ch, tar.c_str(), 0, 0);
               }
             }
           }
@@ -347,10 +341,8 @@ void mobile_activity(GameWorld *g)
         if (char_get_mob_specials_memory(ch).contains(char_get_idnum(vict))) {
           found = true;
           act(g, "'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr, TO_ROOM);
-          char tar[MAX_INPUT_LENGTH];
-
-          sprintf(tar, "%s", char_get_name(vict));
-          do_punch(g, ch, tar, 0, 0);
+          std::string tar = str_format("{}", char_get_name(vict));
+          do_punch(g, ch, tar.c_str(), 0, 0);
         }
       }
     }

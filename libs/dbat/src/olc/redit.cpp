@@ -901,7 +901,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           send_editor_help(g, d);
           write_to_output(g, d, "Enter extra description:\r\n\r\n");
           if (!OLC_DESC(d)->description.empty()) {
-            write_to_output(g, d, "{}", OLC_DESC(d)->description.c_str());
+            write_to_output(g, d, OLC_DESC(d)->description);
           }
           string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0);
           return;

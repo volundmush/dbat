@@ -408,14 +408,14 @@ static void medit_disp_aff_flags(GameWorld *g, struct descriptor_data *d)
 static void medit_disp_class(GameWorld *g, struct descriptor_data *d)
 {
   int i;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   clear_screen(g, d);
 
   for (i = 0; i < NUM_CLASSES; i++) {
     if (!sensei_exists(i))
       continue;
-    sprintf(buf, "@g%2d@n) %s\r\n", i, sensei_name(i));
-    write_to_output(g, d, "{}", buf);
+    buf = str_format("@g{:>2d}@n) {}\r\n", i, sensei_name(i));
+    write_to_output(g, d, buf);
   }
   write_to_output(g, d, "Enter class number : ");
 }
@@ -444,14 +444,14 @@ static void medit_disp_race(GameWorld *g, struct descriptor_data *d)
 static void medit_disp_size(GameWorld *g, struct descriptor_data *d)
 {
   int i, columns = 0;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   clear_screen(g, d);
   for (i = -1; i < NUM_SIZES; i++) {
-    sprintf(buf, "@g%2d@n) %-20.20s  %s", i,
-            (i == SIZE_UNDEFINED) ? "DEFAULT" : size_names[i],
-            !(++columns % 2) ? "\r\n" : "");
-    write_to_output(g, d, "{}", buf);
+    buf = str_format("@g{:>2d}@n) {:<20.20}  {}", i,
+                     (i == SIZE_UNDEFINED) ? "DEFAULT" : size_names[i],
+                     !(++columns % 2) ? "\r\n" : "");
+    write_to_output(g, d, buf);
   }
   write_to_output(g, d, "Enter size number (-1 for default): ");
 }

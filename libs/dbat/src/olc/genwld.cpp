@@ -165,8 +165,9 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   struct room_data *room;
   struct atomic_file af;
   FILE *sf;
-  char filename[128];
-  char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
+  std::string filename;
+  std::string buf;
+  std::string buf1;
   char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
   char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
 
@@ -178,8 +179,8 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   mud_log("GenOLC: save_rooms: Saving rooms in zone #{:d} ({:d}-{:d}).",
           zone_num->number, genolc_zone_bottom(g, zone_num), zone_num->top);
 
-  snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, zone_num->number);
-  if (!(sf = atomic_open(&af, filename, false))) {
+  filename = str_format("{}{:d}.wld", WLD_PREFIX, zone_num->number);
+  if (!(sf = atomic_open(&af, filename.c_str(), false))) {
     perror("SYSERR: save_rooms");
     return false;
   }
@@ -195,7 +196,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
       /*
        * Copy the description and strip off trailing newlines.
        */
-      strlcpy(buf, room_get_description(room) ? room_get_description(room) : "Empty room.", sizeof(buf));
+      buf = room_get_description(room) ? room_get_description(room) : "Empty room.";
       strip_cr(buf);
 
       /*
@@ -211,7 +212,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
                   "%d %s %s %s %s %d\n",
               room_get_number(room),
               room_get_name(room) ? room_get_name(room) : "Untitled", STRING_TERMINATOR,
-              buf, STRING_TERMINATOR,
+              buf.c_str(), STRING_TERMINATOR,
               room_get_zone(room)->number,
               rbuf1, rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
 
@@ -222,10 +223,10 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
         if (room_get_dir_option(room, j)) {
           int dflag;
           if (exit_description(room_get_dir_option(room, j))) {
-            strlcpy(buf, exit_description(room_get_dir_option(room, j)), sizeof(buf));
+            buf = exit_description(room_get_dir_option(room, j));
             strip_cr(buf);
           } else
-            *buf = '\0';
+            buf.clear();
 
           /*
 	   * Figure out door flag.
@@ -244,9 +245,9 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
             dflag = 0;
 
           if (exit_keyword(room_get_dir_option(room, j)))
-            strlcpy(buf1, exit_keyword(room_get_dir_option(room, j)), sizeof(buf1));
+            buf1 = exit_keyword(room_get_dir_option(room, j));
           else
-            *buf1 = '\0';
+            buf1.clear();
 
           /*
 	   * Now write the exit to the file.
@@ -255,7 +256,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
                       "%s~\n"
                       "%s~\n"
                       "%d %d %d %d %d %d %d %d %d %d %d\n",
-                  j, buf, buf1, dflag,
+                  j, buf.c_str(), buf1.c_str(), dflag,
                   room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
                   room_get_dir_option(room, j)->to_room != NOWHERE ? room_get_dir_option(room, j)->to_room : -1,
                   room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
@@ -266,12 +267,12 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
       }
 
       for (const extra_descr_data &xdesc : room_get_ex_description(room)) {
-        strlcpy(buf, xdesc.description.c_str(), sizeof(buf));
+        buf = xdesc.description;
         strip_cr(buf);
         fprintf(sf, "E\n"
                     "%s~\n"
                     "%s~\n",
-                xdesc.keyword.c_str(), buf);
+                xdesc.keyword.c_str(), buf.c_str());
       }
       fprintf(sf, "S\n");
       script_save_to_disk(sf, room, WLD_TRIGGER);
@@ -284,7 +285,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   fprintf(sf, "$~\n");
   if (!atomic_commit(&af))
     return false;
-  snprintf(buf, sizeof(buf), "%s", filename);
+  buf = filename;
 
   if (in_save_list(g, zone_num->number, SL_WLD)) {
     remove_from_save_list(g, zone_num->number, SL_WLD);

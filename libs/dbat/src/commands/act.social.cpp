@@ -419,7 +419,7 @@ ACMD(do_gmote)
 {
   int act_nr, length;
   std::string arg, buf;
-  char out[MAX_INPUT_LENGTH];
+  std::string out;
   struct social_messg *action;
   struct char_data *vict = nullptr;
 
@@ -433,8 +433,8 @@ ACMD(do_gmote)
         break;
 
   if ((act_nr = find_action(g, cmd)) < 0) {
-    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), std::string(argument).c_str());
-    act(g, out, false, ch, nullptr, vict, TO_GMOTE);
+    out = str_format("@D[@BOOC@D: @g{} {}@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
+    act(g, out.c_str(), false, ch, nullptr, vict, TO_GMOTE);
     return;
   }
 
@@ -453,7 +453,7 @@ ACMD(do_gmote)
       send_to_char(g, ch, "Who are you going to do that to?\r\n");
       return;
     }
-    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
+    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_no_arg);
   } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "{}\r\n", action->not_found);
     return;
@@ -462,14 +462,14 @@ ACMD(do_gmote)
       send_to_char(g, ch, "{}\r\n", action->char_auto);
       return;
     }
-    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);
+    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_auto);
   } else {
     if (char_get_position(vict) < action->min_victim_position) {
       act(g, "$N is not in a proper position for that.",
           false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       return;
     }
-    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
+    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_found);
   }
-  act(g, out, false, ch, nullptr, vict, TO_GMOTE);
+  act(g, out.c_str(), false, ch, nullptr, vict, TO_GMOTE);
 }

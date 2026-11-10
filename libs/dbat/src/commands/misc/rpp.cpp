@@ -125,15 +125,16 @@ void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg)
     send_to_char(g, ch, "You do not have enough RPP in your Bank for that!\r\n");
     return;
   }
-  char sex[128], buf8[MAX_INPUT_LENGTH];
-  snprintf(sex, sizeof(sex), "%s", char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He"
-                                                                                                         : "It");
+  std::string sex;
+  std::string buf8;
+  sex = str_format("{}", char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He"
+                                                                                               : "It");
 
   char_set_rbank(ch, char_get_rbank(ch) - (cost));
-  snprintf(buf8, sizeof(buf8), "...%s has %s.", sex, arg.c_str());
+  buf8 = str_format("...{} has {}.", sex, arg);
   send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", cost);
   send_to_char(g, ch, "You now have the following line underneath you when someone sees you in a room as:\n@C{}@n\r\n", buf8);
-  char_set_feature(ch, buf8);
+  char_set_feature(ch, buf8.c_str());
   if (change == true) {
     send_to_imm(g, "{} has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n", char_get_user(ch));
     send_to_char(g, ch, "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
@@ -296,9 +297,8 @@ ACMD(do_arena)
           continue;
 
         if (char_in_arena(g, d->character)) {
-          char buf[MAX_INPUT_LENGTH];
-          snprintf(buf, sizeof(buf), "@YFighter Number@D: @w%d, $N.@n", char_get_idnum(d->character));
-          act(g, buf, true, ch, nullptr, d->character, TO_CHAR);
+          std::string buf = str_format("@YFighter Number@D: @w{:d}, $N.@n", char_get_idnum(d->character));
+          act(g, buf.c_str(), true, ch, nullptr, d->character, TO_CHAR);
           found = true;
         }
       }

@@ -42,7 +42,7 @@ struct dg_lint_block {
 static void dg_lint_warn(GameWorld *g, const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
 {
   mud_log("SCRIPT WARN: trig #{:d} '{}' line {:d}: {}", trig_get_vnum(g, trig),
-          trig->name.c_str(), line, msg);
+          trig->name, line, msg);
   if (d)
     write_to_output(g, d, "Warning: line {:d}: {}\r\n", line, msg);
 }
@@ -58,7 +58,7 @@ int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data 
 {
   struct dg_lint_block open[64];
   int depth = 0, line = 0, warnings = 0;
-  char msg[MAX_INPUT_LENGTH];
+  std::string msg;
 
   for (const struct cmdlist_element *cl = trig->cmdlist; cl; cl = cl->next) {
     const char *p = cl->cmd.c_str();
@@ -102,8 +102,8 @@ int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data 
       }
     } else if (!strncasecmp("done", p, 4)) {
       while (depth && !strcmp(open[depth - 1].kind, "if")) {
-        snprintf(msg, sizeof(msg), "'if' has no 'end' before the 'done' at line %d", line);
-        dg_lint_warn(g, trig, d, open[--depth].line, msg);
+        msg = str_format("'if' has no 'end' before the 'done' at line {:d}", line);
+        dg_lint_warn(g, trig, d, open[--depth].line, msg.c_str());
         warnings++;
       }
       if (depth)
@@ -117,8 +117,8 @@ int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data 
 
   while (depth) {
     depth--;
-    snprintf(msg, sizeof(msg), "'%s' has no '%s'", open[depth].kind, strcmp(open[depth].kind, "if") ? "done" : "end");
-    dg_lint_warn(g, trig, d, open[depth].line, msg);
+    msg = str_format("'{}' has no '{}'", open[depth].kind, strcmp(open[depth].kind, "if") ? "done" : "end");
+    dg_lint_warn(g, trig, d, open[depth].line, msg.c_str());
     warnings++;
   }
   return warnings;

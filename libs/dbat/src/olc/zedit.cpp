@@ -468,8 +468,8 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 
                OLC_NUM(d),
                OLC_ZNUM(d)->number,
-               OLC_ZONE(d)->builders.c_str(),
-               OLC_ZONE(d)->name.c_str(),
+               OLC_ZONE(d)->builders,
+               OLC_ZONE(d)->name,
                OLC_ZONE(d)->lifespan,
                OLC_ZONE(d)->bot,
                OLC_ZONE(d)->top,
@@ -537,7 +537,7 @@ static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
       case 'T':
         write_to_output(g, d, "{}Attach trigger @c{}@y [@c{:d}@y] to {}, % Chance {:d}",
                         MYCMD.if_flag ? " then " : "",
-                        find_trigger(g, MYCMD.arg2)->proto->name.c_str(),
+                        find_trigger(g, MYCMD.arg2)->proto->name,
                         MYCMD.arg2,
                         ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" : ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" : ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);
         break;

@@ -2368,14 +2368,14 @@ ACMD(do_spoil)
 
   struct obj_data *body_part;
   char part[1000];
-  char buf[1000];
-  char buf2[1000];
-  char buf3[1000];
+  std::string buf;
+  std::string buf2;
+  std::string buf3;
 
   *part = '\0';
-  *buf  = '\0';
-  *buf2 = '\0';
-  *buf3 = '\0';
+  buf.clear();
+  buf2.clear();
+  buf3.clear();
 
   body_part              = create_obj(g);
   obj_set_item_number(body_part, NOTHING);
@@ -2389,13 +2389,13 @@ ACMD(do_spoil)
   search_replace(part, "beaten", "");
   search_replace(part, "bloody", "");
   trim(part);
-  snprintf(buf, sizeof(buf), "bloody head %s", part);
-  snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part);
-  snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part);
+  buf  = str_format("bloody head {}", part);
+  buf2 = str_format("@wThe bloody head of {}@w is lying here@n", part);
+  buf3 = str_format("@wThe bloody head of {}@w@n", part);
 
-  obj_set_name(body_part, buf);
-  obj_set_description(body_part, buf2);
-  obj_set_short_description(body_part, buf3);
+  obj_set_name(body_part, buf.c_str());
+  obj_set_description(body_part, buf2.c_str());
+  obj_set_short_description(body_part, buf3.c_str());
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);

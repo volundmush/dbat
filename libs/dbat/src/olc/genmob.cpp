@@ -212,7 +212,8 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
 {
   FILE *mobfd;
   mob_vnum rmob;
-  char mobfname[64], usedfname[64];
+  std::string mobfname;
+  std::string usedfname;
   struct atomic_file af;
 
   if (!zone_num) {
@@ -220,8 +221,8 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  snprintf(mobfname, sizeof(mobfname), "%s%d.mob", MOB_PREFIX, zone_num->number);
-  if ((mobfd = atomic_open(&af, mobfname, false)) == nullptr) {
+  mobfname = str_format("{}{:d}.mob", MOB_PREFIX, zone_num->number);
+  if ((mobfd = atomic_open(&af, mobfname.c_str(), false)) == nullptr) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return false;
   }
@@ -236,7 +237,7 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
   fputs("$\n", mobfd);
   if (!atomic_commit(&af))
     return false;
-  snprintf(usedfname, sizeof(usedfname), "%s", mobfname);
+  usedfname = mobfname;
 
   if (in_save_list(g, zone_num->number, SL_MOB)) {
     remove_from_save_list(g, zone_num->number, SL_MOB);
@@ -249,18 +250,19 @@ bool save_mobiles(GameWorld *g, struct zone_data *zone_num)
 #if CONFIG_GENOLC_MOBPROG
 bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
-  char wmmarg[MAX_STRING_LENGTH], wmmcom[MAX_STRING_LENGTH];
+  std::string wmmarg;
+  std::string wmmcom;
   MPROG_DATA *mob_prog;
 
   for (mob_prog = GET_MPROG(mob); mob_prog; mob_prog = mob_prog->next) {
-    strlcpy(wmmarg, mob_prog->arglist, sizeof(wmmarg));
+    wmmarg = mob_prog->arglist;
     strip_cr(wmmarg);
-    strlcpy(wmmcom, mob_prog->comlist, sizeof(wmmcom));
+    wmmcom = mob_prog->comlist;
     strip_cr(wmmcom);
     fprintf(fd, "%s %s~\n"
                 "%s%c\n",
-            medit_get_mprog_type(mob_prog), wmmarg,
-            wmmcom, STRING_TERMINATOR);
+            medit_get_mprog_type(mob_prog), wmmarg.c_str(),
+            wmmcom.c_str(), STRING_TERMINATOR);
     if (mob_prog->next == nullptr)
       fputs("|\n", fd);
   }
@@ -304,15 +306,16 @@ static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *m
 static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
 
-  char ldesc[MAX_STRING_LENGTH], ddesc[MAX_STRING_LENGTH];
+  std::string ldesc;
+  std::string ddesc;
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
   char abuf1[MAX_STRING_LENGTH], abuf2[MAX_STRING_LENGTH];
   char abuf3[MAX_STRING_LENGTH], abuf4[MAX_STRING_LENGTH];
 
-  strlcpy(ldesc, char_get_ldesc(mob), sizeof(ldesc));
+  ldesc = char_get_ldesc(mob);
   strip_cr(ldesc);
-  strlcpy(ddesc, char_get_ddesc(mob), sizeof(ddesc));
+  ddesc = char_get_ddesc(mob);
   strip_cr(ddesc);
 
   fprintf(fd, "#%d\n"
@@ -323,8 +326,8 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
           mvnum,
           char_get_alias(mob), STRING_TERMINATOR,
           char_get_sdesc(mob), STRING_TERMINATOR,
-          ldesc, STRING_TERMINATOR,
-          ddesc, STRING_TERMINATOR);
+          ldesc.c_str(), STRING_TERMINATOR,
+          ddesc.c_str(), STRING_TERMINATOR);
 
   sprintascii(fbuf1, char_get_act(mob)[0]);
   sprintascii(fbuf2, char_get_act(mob)[1]);
@@ -374,9 +377,8 @@ static void check_mobile_strings(GameWorld *g, struct char_data *mob)
 static void check_mobile_string(GameWorld *g, mob_vnum i, std::string *string, const char *dscr)
 {
   if (string->empty()) {
-    char smbuf[128];
-    sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
-    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "{}", smbuf);
+    std::string smbuf = str_format("GenOLC: Mob #{:d} has an invalid {}.", i, dscr);
+    mudlog(g, LOG_BRF, ADMLVL_GOD, true, smbuf);
     *string = "An undefined string.";
   }
 }

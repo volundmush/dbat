@@ -195,7 +195,7 @@ ACMD(do_ban)
   g->ban_list       = ban_node;
 
   mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "{} has banned {} for {} players.",
-         char_get_name(ch), site.c_str(), ban_types[ban_node->type]);
+         char_get_name(ch), site, ban_types[ban_node->type]);
   send_to_char(g, ch, "Site banned.\r\n");
   write_ban_list(g);
 }

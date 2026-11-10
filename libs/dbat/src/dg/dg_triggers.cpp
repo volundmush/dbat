@@ -152,15 +152,15 @@ void random_mtrigger(GameWorld *g, char_data *ch)
 void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor, int amount)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!script_has_type(char_get_script(ch), MTRIG_BRIBE) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_BRIBE) && (amount >= t->narg)) {
-      snprintf(buf, sizeof(buf), "%d", amount);
-      add_var(&t->var_list, "amount", buf, 0);
+      buf = str_format("{:d}", amount);
+      add_var(&t->var_list, "amount", buf.c_str(), 0);
       add_char_uid_var(t, "actor", actor, 0);
       script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
@@ -628,7 +628,7 @@ int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 void time_mtrigger(GameWorld *g, char_data *ch)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   /*
    * This trigger is called if the hour is the same as specified in Narg.
@@ -640,8 +640,8 @@ void time_mtrigger(GameWorld *g, char_data *ch)
   for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_TIME) &&
         (g->time_info.hours == t->narg)) {
-      sprintf(buf, "%d", g->time_info.hours);
-      add_var(&t->var_list, "time", buf, 0);
+      buf = str_format("{:d}", g->time_info.hours);
+      add_var(&t->var_list, "time", buf.c_str(), 0);
       script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
     }
@@ -1012,7 +1012,7 @@ int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd)
 void time_otrigger(GameWorld *g, obj_data *obj)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!script_has_type(obj_get_script(obj), OTRIG_TIME))
     return;
@@ -1020,8 +1020,8 @@ void time_otrigger(GameWorld *g, obj_data *obj)
   for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_TIME) &&
         (g->time_info.hours == t->narg)) {
-      sprintf(buf, "%d", g->time_info.hours);
-      add_var(&t->var_list, "time", buf, 0);
+      buf = str_format("{:d}", g->time_info.hours);
+      add_var(&t->var_list, "time", buf.c_str(), 0);
       script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       break;
     }
@@ -1262,7 +1262,7 @@ int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 void time_wtrigger(GameWorld *g, struct room_data *room)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!script_has_type(room_get_script(room), WTRIG_TIME))
     return;
@@ -1270,8 +1270,8 @@ void time_wtrigger(GameWorld *g, struct room_data *room)
   for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_TIME) &&
         (g->time_info.hours == t->narg)) {
-      sprintf(buf, "%d", g->time_info.hours);
-      add_var(&t->var_list, "time", buf, 0);
+      buf = str_format("{:d}", g->time_info.hours);
+      add_var(&t->var_list, "time", buf.c_str(), 0);
       script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
       break;
     }

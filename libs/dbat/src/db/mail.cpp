@@ -604,11 +604,11 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
                                  int cmd, std::string_view arg)
 {
   long recipient;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
-    snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    buf = str_format("$n tells you, 'Sorry, you have to be level {:d} to send mail!'", MIN_MAIL_LEVEL);
+    act(g, buf.c_str(), false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   std::string name = take_arg(arg);
@@ -619,10 +619,9 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
     return;
   }
   if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
-    snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
-                               "$n tells you, '...which I see you can't afford.'",
-             STAMP_PRICE);
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    buf = str_format("$n tells you, 'A stamp costs {:d} zenni.'\r\n$n tells you, '...which I see you can't afford.'",
+                     STAMP_PRICE);
+    act(g, buf.c_str(), false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   if ((recipient = get_id_by_name(g, name.c_str())) < 0 || !mail_recip_ok(g, name.c_str())) {
@@ -631,11 +630,10 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
     return;
   }
   act(g, "$n starts to write some mail.", true, ch, nullptr, nullptr, TO_ROOM);
-  snprintf(buf, sizeof(buf), "$n tells you, 'I'll take %d zenni for the stamp.'\r\n"
-                             "$n tells you, 'Write your message. (/s saves /h for help).'",
-           STAMP_PRICE);
+  buf = str_format("$n tells you, 'I'll take {:d} zenni for the stamp.'\r\n$n tells you, 'Write your message. (/s saves /h for help).'",
+                   STAMP_PRICE);
 
-  act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+  act(g, buf.c_str(), false, mailman, nullptr, ch, TO_VICT);
   act(g, "@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
@@ -657,14 +655,14 @@ static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct cha
 static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
                                     int cmd, std::string_view arg)
 {
-  char buf[256];
+  std::string buf;
   struct obj_data *obj;
   int y;
   char *from;
 
   if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
-    snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    buf = "$n tells you, 'Sorry, you don't have any mail waiting.'";
+    act(g, buf.c_str(), false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   while (has_mail(g, char_get_idnum(ch))) {
@@ -680,14 +678,15 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
     obj_set_action_description(obj, take_string(read_delete(g, char_get_idnum(ch), &from)));
-    char bla[256], blm[256];
-    sprintf(bla, "@WA piece of mail@n");
-    sprintf(blm, "@WSomeone has left a piece of mail here@n");
-    obj_set_short_description(obj, bla);
-    obj_set_description(obj, blm);
+    std::string bla;
+    std::string blm;
+    bla = "@WA piece of mail@n";
+    blm = "@WSomeone has left a piece of mail here@n";
+    obj_set_short_description(obj, bla.c_str());
+    obj_set_description(obj, blm.c_str());
     obj_set_name(obj, "mail paper letter");
-    *bla                   = '\0';
-    *blm                   = '\0';
+    bla.clear();
+    blm.clear();
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
     add_unique_id(g, obj);
     obj_set_value(obj, 7, MATERIAL_PAPER);

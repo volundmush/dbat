@@ -1038,7 +1038,11 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
   struct char_data *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
   int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
   int64_t kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
-  char result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
+  std::string result1;
+  std::string result2;
+  std::string result3;
+  std::string result4;
+  std::string result5;
 
   const char *plcol[5] = {"@r",
                           "@y",
@@ -1199,11 +1203,11 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
         }
       }
     }
-    sprintf(result1, "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n", add_commas(char_get_combatexpertise(ch)));
-    sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
-    sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
+    result1         = str_format("@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y{}@R>@n\n", add_commas(char_get_combatexpertise(ch)));
+    result2         = str_format("@D[@BR@D]@C{:<15} {:<15} {:<15} {:<15}@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
+    result3         = str_format("@D[@BO@D]@RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{}@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+    result4         = str_format("@D[@BU@D]@cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{}@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+    result5         = str_format("@D[@BP@D]@gSt@D:{}{:>12} @gSt@D:{}{:>12} @gSt@D:{}{:>12} @gSt@D:{}{:>12}@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
     ch->temp_prompt = str_format("{}{}{}{}{}\n", result1, result2, result3, result4, result5);
     return ch->temp_prompt.c_str();
   }
@@ -1342,11 +1346,11 @@ const char *report_party_health(GameWorld *g, struct char_data *ch)
       } /* Is follower */
     } /* End for */
 
-    sprintf(result1, "@D[@BG@D]-------@YL@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D]@n\n");
-    sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
-    sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
+    result1         = "@D[@BG@D]-------@YL@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D]@n\n";
+    result2         = str_format("@D[@BR@D]@C{:<15} {:<15} {:<15} {:<15}@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
+    result3         = str_format("@D[@BO@D]@RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{} @RPL@D:{}{:>11d}@w{}@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+    result4         = str_format("@D[@BU@D]@cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{} @cCharge@D:@B{:>7d}@w{}@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+    result5         = str_format("@D[@BP@D]@gSt@D:{}{:>12} @gSt@D:{}{:>12} @gSt@D:{}{:>12} @gSt@D:{}{:>12}@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
     ch->temp_prompt = str_format("{}{}{}{}{}\n", result1, result2, result3, result4, result5);
     return ch->temp_prompt.c_str();
   }
@@ -3450,7 +3454,7 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
 {
   int percent = char_get_skill(ch, skill);
   int newpercent, roll = 1200;
-  char skillbuf[MAX_STRING_LENGTH];
+  std::string skillbuf;
 
   if (char_is_npc(ch))
     return;
@@ -3580,8 +3584,8 @@ void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num)
   percent += newpercent;
   char_set_skills_base(ch, skill, percent);
   if (newpercent >= 1) {
-    sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", g->spell_info[skill].name);
-    send_to_char(g, ch, "{}", skillbuf);
+    skillbuf = str_format("@WYou feel you have learned something new about @G{}@W.@n\r\n", g->spell_info[skill].name);
+    send_to_char(g, ch, skillbuf);
     if (char_get_skills_base(ch, skill) >= 100) {
       send_to_char(g, ch, "You learned a lot by mastering that skill.\r\n");
       if (perf_skill(skill)) {

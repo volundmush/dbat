@@ -97,43 +97,43 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
       }
     } else if (planet_check(g, ch, tch)) {
       char *blah = sense_location(g, ch);
-      char power[MAX_INPUT_LENGTH];
-      char align[MAX_INPUT_LENGTH];
+      std::string power;
+      std::string align;
       if (getCurPL(g, ch) > getCurPL(g, tch) * 10) {
-        sprintf(power, ", who is @Runbelievably stronger@Y than you");
+        power = ", who is @Runbelievably stronger@Y than you";
       } else if (getCurPL(g, ch) > getCurPL(g, tch) * 5) {
-        sprintf(power, ", who is much @Rstronger@Y than you");
+        power = ", who is much @Rstronger@Y than you";
       } else if (getCurPL(g, ch) > getCurPL(g, tch) * 2) {
-        sprintf(power, ", who is more than twice as @Rstrong@Y as you");
+        power = ", who is more than twice as @Rstrong@Y as you";
       } else if (getCurPL(g, ch) > getCurPL(g, tch)) {
-        sprintf(power, ", who is somewhat @mstronger@Y than you");
+        power = ", who is somewhat @mstronger@Y than you";
       } else if (getCurPL(g, ch) * 10 < getCurPL(g, tch)) {
-        sprintf(power, ", who is @Munbelievably weaker@Y than you");
+        power = ", who is @Munbelievably weaker@Y than you";
       } else if (getCurPL(g, ch) * 5 < getCurPL(g, tch)) {
-        sprintf(power, ", who is much @Mweaker@Y than you");
+        power = ", who is much @Mweaker@Y than you";
       } else if (getCurPL(g, ch) * 2 < getCurPL(g, tch)) {
-        sprintf(power, ", who is more than twice as @Mweak@Y as you");
+        power = ", who is more than twice as @Mweak@Y as you";
       } else if (getCurPL(g, ch) < getCurPL(g, tch)) {
-        sprintf(power, ", who is somewhat @Wweaker@Y than you");
+        power = ", who is somewhat @Wweaker@Y than you";
       } else {
-        sprintf(power, ", who is close to @Cequal@Y with you");
+        power = ", who is close to @Cequal@Y with you";
       }
       if (char_get_alignment(ch) >= 1000) {
-        sprintf(align, ", with a @wsaintly@Y aura,");
+        align = ", with a @wsaintly@Y aura,";
       } else if (char_get_alignment(ch) >= 500) {
-        sprintf(align, ", with a very @Cgood@Y aura,");
+        align = ", with a very @Cgood@Y aura,";
       } else if (char_get_alignment(ch) >= 200) {
-        sprintf(align, ", with a @cgood@Y aura,");
+        align = ", with a @cgood@Y aura,";
       } else if (char_get_alignment(ch) > -100) {
-        sprintf(align, ", with a near @Wneutral@Y aura,");
+        align = ", with a near @Wneutral@Y aura,";
       } else if (char_get_alignment(ch) > -200) {
-        sprintf(align, ", with a sorta @revil@Y aura,");
+        align = ", with a sorta @revil@Y aura,";
       } else if (char_get_alignment(ch) > -500) {
-        sprintf(align, ", with an @revil@Y aura,");
+        align = ", with an @revil@Y aura,";
       } else if (char_get_alignment(ch) > -900) {
-        sprintf(align, ", with a @rvery evil@Y aura,");
+        align = ", with a @rvery evil@Y aura,";
       } else {
-        sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
+        align = ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,";
       }
       if (strstr(messg, "land"))
         write_to_output(g, i, "@YYou sense {}{}{} {}! They appear to have landed at...@G{}@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah);
@@ -263,18 +263,18 @@ void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int 
 
 void send_to_worlds(GameWorld *g, struct char_data *ch)
 {
-  char message[MAX_INPUT_LENGTH];
+  std::string message;
 
   if (getEffMaxPL(g, ch) > 2000000000) {
-    sprintf(message, "@RThe whole planet begins to quake violently as if the world is ending!@n\r\n");
+    message = "@RThe whole planet begins to quake violently as if the world is ending!@n\r\n";
   } else if (getEffMaxPL(g, ch) > 1000000000) {
-    sprintf(message, "@RThe whole planet begins to quake violently with a thunderous roar!@n\r\n");
+    message = "@RThe whole planet begins to quake violently with a thunderous roar!@n\r\n";
   } else if (getEffMaxPL(g, ch) > 500000000) {
-    sprintf(message, "@RThe whole planet begins to quake violently!@n\r\n");
+    message = "@RThe whole planet begins to quake violently!@n\r\n";
   } else if (getEffMaxPL(g, ch) > 100000000) {
-    sprintf(message, "@RThe whole planet rumbles and shakes!@n\r\n");
+    message = "@RThe whole planet rumbles and shakes!@n\r\n";
   } else if (getEffMaxPL(g, ch) > 50000000) {
-    sprintf(message, "@RThe whole planet rumbles faintly!@n\r\n");
+    message = "@RThe whole planet rumbles faintly!@n\r\n";
   } else {
     return;
   }
@@ -284,25 +284,25 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
       continue;
     }
     if (room_flagged(g, char_get_in_room(i->character), ROOM_EARTH) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_VEGETA) && room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_planet_zenith(g, char_get_in_room(i->character)) && room_planet_zenith(g, char_get_in_room(ch))) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_NAMEK) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KONACK) && room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_YARDRAT) && room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_FRIGID) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KANASSA) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_ARLIA) && room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     } else if (room_flagged(g, char_get_in_room(i->character), ROOM_AETHER) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
-      send_to_char(g, i->character, "{}", message);
+      send_to_char(g, i->character, message);
     }
   }
 }

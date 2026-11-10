@@ -48,8 +48,8 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch);
 static void final_combat_resolve(GameWorld *g, struct char_data *ch);
 static void shadow_dragons_live(GameWorld *g);
 static void cleanup_arena_watch(GameWorld *g, struct char_data *ch);
-static void mob_attack(GameWorld *g, struct char_data *ch, char *buf);
-static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf);
+static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf);
+static bool pick_n_throw(GameWorld *g, struct char_data *ch, std::string_view buf);
 
 int group_bonus(GameWorld *g, struct char_data *ch, int type)
 {
@@ -208,9 +208,10 @@ void mutant_limb_regen(GameWorld *g, struct char_data *ch)
   }
 }
 
-static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf)
+static bool pick_n_throw(GameWorld *g, struct char_data *ch, std::string_view buf)
 {
-  char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
+  std::string buf2;
+  std::string buf3;
   ;
 
   if (rand_number(g, 1, 20) < 18) {
@@ -219,10 +220,10 @@ static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf)
 
   for (obj_data *cont : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_weight(cont) <= getMaxCarryWeight(g, ch) + char_get_carry_weight(ch)) {
-      snprintf(buf2, sizeof(buf2), "%s", obj_get_name(cont));
-      do_get(g, ch, buf2, 0, 0);
-      snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
-      do_throw(g, ch, buf3, 0, 0);
+      buf2 = str_format("{}", obj_get_name(cont));
+      do_get(g, ch, buf2.c_str(), 0, 0);
+      buf3 = str_format("{} {}", buf2, buf);
+      do_throw(g, ch, buf3.c_str(), 0, 0);
       return (true);
     }
   }
@@ -230,13 +231,13 @@ static bool pick_n_throw(GameWorld *g, struct char_data *ch, char *buf)
   return (false);
 }
 
-static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
+static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
 {
 
   int power   = rand_number(g, 1, 5);
   int bonus   = char_get_level(ch) * 0.1;
   int special = 0;
-  char buf2[MAX_INPUT_LENGTH];
+  std::string buf2;
 
   power += bonus;
 
@@ -294,12 +295,12 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
       return;
     } else if (special < 100) { /* Normal physical attack */
       if (char_get_class(ch) == CLASS_SHADOWDANCER && rand_number(g, 1, 3) == 3) {
-        sprintf(buf2, "ass %s", buf);
-        do_throw(g, ch, buf2, 0, 0);
+        buf2 = str_format("ass {}", buf);
+        do_throw(g, ch, buf2.c_str(), 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_REPAIR) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 16) {
         do_srepair(g, ch, "", 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_ABSORB) && rand_number(g, 1, 20) >= 19) {
-        do_absorb(g, ch, buf2, 0, 0);
+        do_absorb(g, ch, buf2.c_str(), 0, 0);
       } else if ((char_is_bio(ch) || char_is_majin(ch)) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 17) {
         do_regenerate(g, ch, "25", 0, 0);
       } else if (char_is_namek(ch) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) == 20) {
@@ -701,9 +702,9 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
   /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail, 6 = tail*/
 
   struct obj_data *body_part;
-  char part[1000];
-  char buf[1000];
-  char buf2[1000];
+  std::string part;
+  std::string buf;
+  std::string buf2;
 
   body_part              = create_obj(g);
   obj_set_item_number(body_part, NOTHING);
@@ -711,59 +712,59 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
 
   switch (num) {
     case 0:
-      snprintf(part, sizeof(part), "@C%s@w's bloody head@n", char_get_name(vict));
-      snprintf(buf, sizeof(buf), "%s bloody head", char_get_name(vict));
+      part = str_format("@C{}@w's bloody head@n", char_get_name(vict));
+      buf  = str_format("{} bloody head", char_get_name(vict));
       break;
     case 1:
-      snprintf(part, sizeof(part), "@w%s right arm@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "right arm");
+      part = str_format("@w{} right arm@n", char_true_race_name(vict));
+      buf  = "right arm";
       if (char_plr_flagged(vict, PLR_CRARM)) {
         char_plr_set(vict, PLR_CRARM, false);
       }
       break;
     case 2:
-      snprintf(part, sizeof(part), "@w%s left arm@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "left arm");
+      part = str_format("@w{} left arm@n", char_true_race_name(vict));
+      buf  = "left arm";
       if (char_plr_flagged(vict, PLR_CLARM)) {
         char_plr_set(vict, PLR_CLARM, false);
       }
       break;
     case 3:
-      snprintf(part, sizeof(part), "@w%s right leg@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "right leg");
+      part = str_format("@w{} right leg@n", char_true_race_name(vict));
+      buf  = "right leg";
       if (char_plr_flagged(vict, PLR_CRLEG)) {
         char_plr_set(vict, PLR_CRLEG, false);
       }
       break;
     case 4:
-      snprintf(part, sizeof(part), "@w%s left leg@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "left leg");
+      part = str_format("@w{} left leg@n", char_true_race_name(vict));
+      buf  = "left leg";
       if (char_plr_flagged(vict, PLR_CLLEG)) {
         char_plr_set(vict, PLR_CLLEG, false);
       }
       break;
     case 5:
-      snprintf(part, sizeof(part), "@wA %s tail@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "tail");
+      part = str_format("@wA {} tail@n", char_true_race_name(vict));
+      buf  = "tail";
       break;
     case 6:
-      snprintf(part, sizeof(part), "@wA %s tail@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "tail");
+      part = str_format("@wA {} tail@n", char_true_race_name(vict));
+      buf  = "tail";
       break;
     default:
-      snprintf(part, sizeof(part), "@w%s body part@n", char_true_race_name(vict));
-      snprintf(buf, sizeof(buf), "body part");
+      part = str_format("@w{} body part@n", char_true_race_name(vict));
+      buf  = "body part";
       break;
   }
 
-  obj_set_name(body_part, buf);
+  obj_set_name(body_part, buf.c_str());
   if (num > 0) {
-    snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
+    buf2 = str_format("@wA {} is lying here@n", part);
   } else {
-    snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
+    buf2 = str_format("{}@w is lying here@n", part);
   }
-  obj_set_description(body_part, buf2);
-  obj_set_short_description(body_part, part);
+  obj_set_description(body_part, buf2.c_str());
+  obj_set_short_description(body_part, part.c_str());
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);
@@ -1091,10 +1092,10 @@ void fight_stack(GameWorld *g)
         continue;
       }
       struct char_data *vict;
-      char buf[100];
+      std::string buf;
 
       vict = char_get_fighting(g, ch);
-      sprintf(buf, "%s", char_get_name(vict));
+      buf  = str_format("{}", char_get_name(vict));
       if (char_get_in_room(ch) == char_get_in_room(vict) && !char_mob_flagged(ch, MOB_DUMMY) && !char_aff_flagged(ch, AFF_KNOCKED) && char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_RESTING && char_get_position(ch) != POS_SLEEPING) {
 
         if (char_is_npc(ch) && rand_number(g, 1, 30) <= 12)
@@ -1116,7 +1117,7 @@ void fight_stack(GameWorld *g)
     }
 
     if (char_plr_flagged(ch, PLR_POWERUP) && rand_number(g, 1, 3) == 3) {
-      char buf3[MAX_STRING_LENGTH];
+      std::string buf3;
       int64_t ghit    = getCurPL(g, ch);
       int64_t gmaxhit = getEffMaxPL(g, ch);
       int64_t gki     = getCurKI(g, ch);
@@ -1133,8 +1134,8 @@ void fight_stack(GameWorld *g)
         act(g, "@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-        send_to_scouter(g, buf3, ch, 1, 0);
+        buf3 = str_format("@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+        send_to_scouter(g, buf3.c_str(), ch, 1, 0);
         char_plr_set(ch, PLR_POWERUP, false);
       } else if (ghit >= gmaxhit && gki >= (gmaxki * 0.0375) + 1 && char_get_preference(ch) == PREFERENCE_KI) {
         if (gki >= (gmaxki * 0.0375) + 1) {
@@ -1147,8 +1148,8 @@ void fight_stack(GameWorld *g)
         act(g, "@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-        send_to_scouter(g, buf3, ch, 1, 0);
+        buf3 = str_format("@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+        send_to_scouter(g, buf3.c_str(), ch, 1, 0);
         char_plr_set(ch, PLR_POWERUP, false);
       }
 
@@ -1162,16 +1163,16 @@ void fight_stack(GameWorld *g)
         act(g, "@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-        send_to_scouter(g, buf3, ch, 1, 0);
+        buf3 = str_format("@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+        send_to_scouter(g, buf3.c_str(), ch, 1, 0);
         char_plr_set(ch, PLR_POWERUP, false);
       } else if (gki < (gmaxki * 0.0375) + 1 && char_get_preference(ch) == PREFERENCE_KI) {
         decCurKI(g, ch, (gmaxki * 0.0375) + 1, 0);
         act(g, "@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_sense(g, 0, "You sense someone stop powering up", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-        send_to_scouter(g, buf3, ch, 1, 0);
+        buf3 = str_format("@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+        send_to_scouter(g, buf3.c_str(), ch, 1, 0);
         char_plr_set(ch, PLR_POWERUP, false);
       }
 
@@ -1221,8 +1222,8 @@ void fight_stack(GameWorld *g)
         }
         send_to_sense(g, 0, "You sense someone powering up", ch);
         send_to_worlds(g, ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-        send_to_scouter(g, buf3, ch, 1, 0);
+        buf3 = str_format("@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+        send_to_scouter(g, buf3.c_str(), ch, 1, 0);
         dispel_ash(g, ch);
       }
     }
@@ -1714,13 +1715,15 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
         send_to_char(g, tch, "The choice edible meat is preserved because of your skill.\r\n");
         meat = read_object(g, 1612);
         obj_to_char(g, meat, ch);
-        char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-        sprintf(nick, "@RRaw %s@R Steak@n", char_get_name(ch));
-        sprintf(nick2, "Raw %s Steak", char_get_alias(ch));
-        sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", char_get_name(ch));
-        obj_set_short_description(meat, nick);
-        obj_set_name(meat, nick2);
-        obj_set_description(meat, nick3);
+        std::string nick;
+        std::string nick2;
+        std::string nick3;
+        nick  = str_format("@RRaw {}@R Steak@n", char_get_name(ch));
+        nick2 = str_format("Raw {} Steak", char_get_alias(ch));
+        nick3 = str_format("@wA @Rraw {}@R steak@w is lying here@n", char_get_name(ch));
+        obj_set_short_description(meat, nick.c_str());
+        obj_set_name(meat, nick2.c_str());
+        obj_set_description(meat, nick3.c_str());
         obj_set_value(meat, 7, 14);
       }
     }

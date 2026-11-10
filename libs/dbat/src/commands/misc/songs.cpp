@@ -85,7 +85,7 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
   int skill             = char_get_skill(ch, SKILL_MYSTICMUSIC);
   obj_vnum instrument   = 0;
 
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (char_get_powerattack(ch) <= 0) {
     return;
@@ -105,9 +105,9 @@ static void resolve_song(GameWorld *g, struct char_data *ch)
   }
 
   if (skill > diceroll) {
-    snprintf(buf, sizeof(buf), "@c$n@C continues playing @y'@Y%s@y'@C.@n", char_get_powerattack(ch) == SONG_SAFETY ? "Song of Safety" : (char_get_powerattack(ch) == SONG_SHIELDING ? "Song of Shielding" : (char_get_powerattack(ch) == SONG_SHADOW_STITCH ? "Shadow Stitch Minuet" : "Teleportation Melody")));
+    buf = str_format("@c$n@C continues playing @y'@Y{}@y'@C.@n", char_get_powerattack(ch) == SONG_SAFETY ? "Song of Safety" : (char_get_powerattack(ch) == SONG_SHIELDING ? "Song of Shielding" : (char_get_powerattack(ch) == SONG_SHADOW_STITCH ? "Shadow Stitch Minuet" : "Teleportation Melody")));
     act(g, "@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   } else {
     act(g, "@CYou mess up a portion of the song, but continue playing.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@c$n@C messes up a portion of $s song, but continues to play.@n", true, ch, nullptr, nullptr, TO_ROOM);

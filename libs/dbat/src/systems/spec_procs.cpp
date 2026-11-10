@@ -148,7 +148,7 @@ void npc_steal(GameWorld *g, struct char_data *ch, struct char_data *victim)
 
 SPECIAL(pet_shops)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   std::string pet_name;
   room_vnum pet_room;
   struct char_data *pet;
@@ -190,12 +190,12 @@ SPECIAL(pet_shops)
     char_aff_set(pet, AFF_CHARM, true);
 
     if (!pet_name.empty()) {
-      snprintf(buf, sizeof(buf), "%s %s", char_get_alias(pet), pet_name.c_str());
-      char_set_alias(pet, buf);
+      buf = str_format("{} {}", char_get_alias(pet), pet_name);
+      char_set_alias(pet, buf.c_str());
 
-      snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-               char_get_ddesc(pet), pet_name.c_str());
-      char_set_ddesc(pet, buf);
+      buf = str_format("{}A small sign on a chain around the neck says 'My name is {}'\r\n",
+                       char_get_ddesc(pet), pet_name);
+      char_set_ddesc(pet, buf.c_str());
     }
     char_to_room(g, pet, char_get_in_room(ch));
     add_follower(g, pet, ch);
@@ -319,9 +319,8 @@ SPECIAL(auction)
           vict = new char_data();
           clear_char(vict);
           char_make_player_specials(vict);
-          char blam[50];
-          sprintf(blam, "%s", obj_get_auctname(obj2));
-          if ((player_i = load_char(g, blam, vict)) > -1) {
+          std::string blam = str_format("{}", obj_get_auctname(obj2));
+          if ((player_i = load_char(g, blam.c_str(), vict)) > -1) {
             is_file = true;
           } else {
             free_char(g, vict);
@@ -942,15 +941,15 @@ SPECIAL(bank)
     }
     if (!(vict = get_player_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD))) {
       int is_file = false, player_i = 0;
-      char name[MAX_INPUT_LENGTH];
+      std::string name;
 
       vict = new char_data();
       clear_char(vict);
       char_make_player_specials(vict);
 
-      sprintf(name, "%s", rIntro(ch, arg2));
+      name = str_format("{}", rIntro(ch, arg2));
 
-      if ((player_i = load_char(g, name, vict)) > -1) {
+      if ((player_i = load_char(g, name.c_str(), vict)) > -1) {
         is_file = true;
       } else {
         free_char(g, vict);

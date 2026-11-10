@@ -415,10 +415,8 @@ void config_load_option(GameWorld *g, const char *tag, char *line, FILE *fl)
       *s = line;
       break;
     case CT_TEXT: {
-      char error[MAX_INPUT_LENGTH];
-
-      snprintf(error, sizeof(error), "Reading %s in load_config()", o->key);
-      *s = take_string(fread_string(fl, error));
+      std::string error = str_format("Reading {} in load_config()", o->key);
+      *s                = take_string(fread_string(fl, error.c_str()));
       break;
     }
   }

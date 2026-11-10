@@ -70,7 +70,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
           desc_set_connected(d, CON_CLOSE);
       }
       desc_set_connected(char_get_desc(ch), CON_MENU);
-      write_to_output(g, char_get_desc(ch), "{}", CONFIG_MENU.c_str());
+      write_to_output(g, char_get_desc(ch), CONFIG_MENU);
     }
   }
   /* On with the character's assets... */

@@ -602,7 +602,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
 
   for (struct board_msg *msg = nth_message(board, 1, oldest_first); msg; msg = oldest_first ? msg->prev : msg->next) {
     snprintf(name, sizeof(name), "%s", msg->name.c_str());
-    send_to_char(g, ch, "@D[{}] (@C{:>2d}@D) : @W{:>6.10} @D(@G{:<10}@D) ::@w {:<45}\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject.c_str());
+    send_to_char(g, ch, "@D[{}] (@C{:>2d}@D) : @W{:>6.10} @D(@G{:<10}@D) ::@w {:<45}\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject);
   }
   send_to_char(g, ch, "@rO@b============================================================================@rO@n\n");
 
@@ -653,7 +653,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
                arg,
                board_time_str(&msg->timestamp),
                CAP(name),
-               msg->subject.c_str(),
+               msg->subject,
                !msg->data.empty() ? msg->data.c_str() : "Looks like this message is empty.");
 
   if (board_proto(g, board_vnum))
@@ -709,7 +709,8 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
 {
   struct board_info *board;
   struct board_msg *msg, *other;
-  char subject[READ_SIZE - 1], quote[MAX_MESSAGE_LENGTH + 128];
+  std::string subject;
+  char quote[MAX_MESSAGE_LENGTH + 128];
 
   if (!char_get_desc(ch))
     return;
@@ -734,8 +735,8 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   }
 
   /* a subject longer than a board file line can hold would not load back */
-  snprintf(subject, sizeof(subject), "Re: %s", other->subject.c_str());
-  msg = new_message(g, ch, subject);
+  subject = str_format("Re: {}", other->subject);
+  msg     = new_message(g, ch, subject.c_str());
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
   act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -767,7 +768,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
   struct board_info *board;
   struct board_msg *msg;
   struct obj_data *obj;
-  char buf[64];
+  std::string buf;
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "Nuts.. looks like you forgot your eraser back in mobland...\r\n");
@@ -805,7 +806,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
   free_message(msg);
   board->num_messages--;
   send_to_char(g, ch, "Message removed.\r\n");
-  snprintf(buf, sizeof(buf), "$n just removed message %d.", arg);
-  act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
+  buf = str_format("$n just removed message {:d}.", arg);
+  act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
   save_board(g, board);
 }

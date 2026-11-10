@@ -305,7 +305,7 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case '6':
           OLC_MODE(d) = TRIGEDIT_COMMANDS;
           write_to_output(g, d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
-          write_to_output(g, d, "{}", OLC_STORAGE(d).c_str());
+          write_to_output(g, d, OLC_STORAGE(d));
           string_edit_begin(d, &OLC_STORAGE(d), MAX_CMD_LENGTH);
           d->mail_to = 0;
           OLC_VAL(d) = 1;
@@ -491,13 +491,13 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
   room_vnum top;
   char bitBuf[MAX_INPUT_LENGTH];
   struct atomic_file af;
-  char fname[MAX_INPUT_LENGTH];
+  std::string fname;
 
   zone = in_zone->number;
   top  = in_zone->top;
 
-  snprintf(fname, sizeof(fname), "%s%d.trg", TRG_PREFIX, zone);
-  if (!(trig_file = atomic_open(&af, fname, false))) {
+  fname = str_format("{}{:d}.trg", TRG_PREFIX, zone);
+  if (!(trig_file = atomic_open(&af, fname.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't open trig file \"{}\"", fname);
     return false;
   }
@@ -607,7 +607,7 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
 
   while (editscript) {
     write_to_output(g, d, "     {:>2d}) [@c{:d}@n] @c{}@n", ++i, editscript->vnum,
-                    find_trigger(g, editscript->vnum)->proto->name.c_str());
+                    find_trigger(g, editscript->vnum)->proto->name);
     if (find_trigger(g, editscript->vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
       write_to_output(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
     else

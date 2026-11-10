@@ -489,7 +489,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
   int64_t add_hp = 0, add_move = 0, add_mana = 0;
   int add_prac      = 1, add_train, i, ranks;
   int add_gen_feats = 0;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   if (whichclass < 0 || whichclass >= NUM_CLASSES) {
     mud_log("Invalid class {:d} passed to advance_level, resetting.", whichclass);
@@ -821,7 +821,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     char_prf_set(g, ch, PRF_HOLYLIGHT, true);
   }
 
-  sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
+  buf = str_format("@D[@YGain@D: @RPl@D(@G{}@D) @gSt@D(@G{}@D) @CKi@D(@G{}@D) @bPS@D(@G{}@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
   if (char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_level(ch) == 20 || char_get_level(ch) == 40 || char_get_level(ch) == 60 || char_get_level(ch) == 80 || char_get_level(ch) == 100)) {
     char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
     send_to_char(g, ch, "@CYou feel like you could remember a new skill!@n\r\n");
@@ -931,8 +931,8 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
 
   } // End stat bonus on level gain
 
-  strcat(buf, ".\r\n");
-  send_to_char(g, ch, "{}", buf);
+  buf += ".\r\n";
+  send_to_char(g, ch, buf);
 
   if (char_get_skill(ch, SKILL_POTENTIAL) && rand_number(g, 1, 4) == 4) {
     send_to_char(g, ch, "You can now perform another Potential Release.\r\n");

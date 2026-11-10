@@ -324,7 +324,7 @@ static void print_group(GameWorld *g, struct char_data *ch)
   if (!char_aff_flagged(ch, AFF_GROUP))
     send_to_char(g, ch, "But you are not the member of a group!\r\n");
   else {
-    char buf[MAX_STRING_LENGTH];
+    std::string buf;
 
     send_to_char(g, ch, "Your group consists of:\r\n");
 
@@ -333,16 +333,16 @@ static void print_group(GameWorld *g, struct char_data *ch)
     if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(g, ch, "@D----------------@n\r\n");
       if (getCurPL(g, k) > getEffMaxPL(g, k) / 10) {
-        snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
-                 char_class_abbr(k), char_race_abbr(k));
+        buf = str_format("@gL@D: @w$N @W- @D[@RPL@Y: @c{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]@n",
+                         add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
+                         char_class_abbr(k), char_race_abbr(k));
       }
       if (getCurPL(g, k) <= (getEffMaxPL(g, k) - (getCurCarriedWeight(k))) / 10) {
-        snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
-                 char_class_abbr(k), char_race_abbr(k));
+        buf = str_format("@gL@D: @w$N @W- @D[@RPL@Y: @r{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]@n",
+                         add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
+                         char_class_abbr(k), char_race_abbr(k));
       }
-      act(g, buf, false, ch, nullptr, k, TO_CHAR);
+      act(g, buf.c_str(), false, ch, nullptr, k, TO_CHAR);
     }
 
     for (char_data *fol : char_followers(g, k)) {
@@ -350,16 +350,16 @@ static void print_group(GameWorld *g, struct char_data *ch)
         continue;
       send_to_char(g, ch, "@D----------------@n\r\n");
       if (getCurPL(g, fol) > (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
-        snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
-                 char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
+        buf = str_format("@gF@D: @w$N @W- @D[@RPL@Y: @c{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]",
+                         add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
+                         char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
       }
       if (getCurPL(g, fol) <= (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
-        snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
-                 char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
+        buf = str_format("@gF@D: @w$N @W- @D[@RPL@Y: @r{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]",
+                         add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
+                         char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
       }
-      act(g, buf, false, ch, nullptr, fol, TO_CHAR);
+      act(g, buf.c_str(), false, ch, nullptr, fol, TO_CHAR);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }
@@ -429,7 +429,7 @@ ACMD(do_group)
   }
 
   if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-    send_to_char(g, ch, "{}", CONFIG_NOPERSON.c_str());
+    send_to_char(g, ch, CONFIG_NOPERSON);
   else if ((char_get_master(g, vict) != ch) && (vict != ch))
     act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
   else {
@@ -673,7 +673,7 @@ ACMD(do_display)
     }
   }
 
-  send_to_char(g, ch, "{}", CONFIG_OK.c_str());
+  send_to_char(g, ch, CONFIG_OK);
 }
 
 ACMD(do_gen_write)
@@ -1051,7 +1051,7 @@ ACMD(do_file)
   int l;
   char line[READ_SIZE];
   std::string field, value;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   struct file_struct {
     const char *cmd{};
@@ -1080,11 +1080,11 @@ ACMD(do_file)
   argument = skip_spaces(argument);
 
   if (argument.empty()) {
-    strcpy(buf, "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n");
+    buf = "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n";
     for (i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_level(ch))
-        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-    send_to_char(g, ch, "{}", buf);
+        buf += str_format("{:<15}{}\r\n", fields[i].cmd, fields[i].file);
+    send_to_char(g, ch, buf);
     return;
   }
 
@@ -1131,19 +1131,19 @@ ACMD(do_file)
 
   req_lines = MIN(MIN(req_lines, num_lines), 5000);
 
-  buf[0] = '\0';
+  buf.clear();
 
   get_line(req_file, line);
   while (!feof(req_file)) {
     cur_line++;
     if (cur_line > (num_lines - req_lines))
-      snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s\r\n", line);
+      buf += str_format("{}\r\n", line);
 
     get_line(req_file, line);
   }
   fclose(req_file);
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
 }
 
 /* Returns true if the spell/skillnum is innate to the character

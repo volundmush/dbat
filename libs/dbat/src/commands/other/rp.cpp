@@ -846,9 +846,9 @@ ACMD(do_think)
   }
   struct char_data *tch;
   tch = char_get_mindlink(g, ch);
-  send_to_char(g, ch, "@c{}@w reads your thoughts, '@C{}@w'@n\r\n", char_get_name(tch), std::string(argument).c_str());
-  send_to_char(g, tch, "@c{}@w thinks, '@C{}@w'@n\r\n", char_get_name(ch), std::string(argument).c_str());
-  send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), std::string(argument).c_str());
+  send_to_char(g, ch, "@c{}@w reads your thoughts, '@C{}@w'@n\r\n", char_get_name(tch), argument);
+  send_to_char(g, tch, "@c{}@w thinks, '@C{}@w'@n\r\n", char_get_name(ch), argument);
+  send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);
   return;
 }
 

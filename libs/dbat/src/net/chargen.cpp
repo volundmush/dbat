@@ -1050,7 +1050,7 @@ static void finish_creation(GameWorld *g, struct descriptor_data *d)
   init_char(g, d->character);
   save_char(g, d->character);
   save_player_index(g);
-  write_to_output(g, d, "{}\r\n*** PRESS RETURN: ", g->motd.c_str());
+  write_to_output(g, d, "{}\r\n*** PRESS RETURN: ", g->motd);
   desc_set_connected(d, CON_RMOTD);
   mudlog(g, LOG_CMP, ADMLVL_GOD, true, "New player: {} [{} {}]",
          char_get_name(d->character), char_true_race_name(d->character),

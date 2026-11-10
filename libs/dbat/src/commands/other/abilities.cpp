@@ -2097,7 +2097,7 @@ ACMD(do_transform)
 {
 
   std::string arg, arg2;
-  char buf3[MAX_INPUT_LENGTH];
+  std::string buf3;
 
   if (!race_can_transform(char_get_race(ch))) {
     send_to_char(g, ch, "You do not have a transformation.\r\n");
@@ -2211,8 +2211,8 @@ ACMD(do_transform)
   }
 
   send_to_sense(g, 0, "You sense a nearby power grow unbelievably!", ch);
-  snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(getCurPL(g, ch)));
-  send_to_scouter(g, buf3, ch, 1, 0);
+  buf3 = str_format("@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y{}@D]", add_commas(getCurPL(g, ch)));
+  send_to_scouter(g, buf3.c_str(), ch, 1, 0);
 }
 
 ACMD(do_aid)
@@ -2439,9 +2439,8 @@ ACMD(do_aura)
       reveal_hiding(g, ch, 0);
       decCurKIPercent(g, ch, .12, 0);
       send_to_char(g, ch, "A bright {} aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
-      char bloom[MAX_INPUT_LENGTH];
-      snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
-      act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
+      std::string bloom = str_format("@wA {} aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
+      act(g, bloom.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
       char_plr_set(ch, PLR_AURALIGHT, true);
 
     } else {

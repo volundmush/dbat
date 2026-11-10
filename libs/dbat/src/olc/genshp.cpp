@@ -88,7 +88,8 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
   int j;
   struct atomic_file af;
   FILE *shop_file;
-  char fname[128], oldname[128];
+  std::string fname;
+  std::string oldname;
   struct shop_data *shop;
 
   if (!zone_num) {
@@ -96,8 +97,8 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
     return false;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_num->number);
-  if (!(shop_file = atomic_open(&af, fname, false))) {
+  fname = str_format("{}{:d}.shp", SHP_PREFIX, zone_num->number);
+  if (!(shop_file = atomic_open(&af, fname.c_str(), false))) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
     return false;
   }
@@ -186,7 +187,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
   fprintf(shop_file, "$~\n");
   if (!atomic_commit(&af))
     return false;
-  snprintf(oldname, sizeof(oldname), "%s", fname);
+  oldname = fname;
 
   if (in_save_list(g, zone_num->number, SL_SHP)) {
     remove_from_save_list(g, zone_num->number, SL_SHP);

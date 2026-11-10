@@ -92,13 +92,13 @@ static char *line_start(char *text, int n)
 
 int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
 {
-  char actions[MAX_INPUT_LENGTH];
+  std::string actions;
 
   if (*str != '/')
     return STRINGADD_OK;
 
   /* what follows "/x" (nothing for a lone "/", whose letter is the terminator) */
-  strlcpy(actions, str[1] ? str + 2 : "", sizeof(actions));
+  actions = str[1] ? str + 2 : "";
   *str = '\0';
 
   switch (str[1]) {
@@ -112,40 +112,40 @@ int improved_editor_execute(GameWorld *g, struct descriptor_data *d, char *str)
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'd':
-      parse_edit_action(g, PARSE_DELETE, actions, d);
+      parse_edit_action(g, PARSE_DELETE, actions.data(), d);
       break;
     case 'e':
-      parse_edit_action(g, PARSE_EDIT, actions, d);
+      parse_edit_action(g, PARSE_EDIT, actions.data(), d);
       break;
     case 'f':
       if (!d->edit_text.empty())
-        parse_edit_action(g, PARSE_FORMAT, actions, d);
+        parse_edit_action(g, PARSE_FORMAT, actions.data(), d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'i':
       if (!d->edit_text.empty())
-        parse_edit_action(g, PARSE_INSERT, actions, d);
+        parse_edit_action(g, PARSE_INSERT, actions.data(), d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'h':
-      parse_edit_action(g, PARSE_HELP, actions, d);
+      parse_edit_action(g, PARSE_HELP, actions.data(), d);
       break;
     case 'l':
       if (!d->edit_text.empty())
-        parse_edit_action(g, PARSE_LIST_NORM, actions, d);
+        parse_edit_action(g, PARSE_LIST_NORM, actions.data(), d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'n':
       if (!d->edit_text.empty())
-        parse_edit_action(g, PARSE_LIST_NUM, actions, d);
+        parse_edit_action(g, PARSE_LIST_NUM, actions.data(), d);
       else
         write_to_output(g, d, "Current buffer empty.\r\n");
       break;
     case 'r':
-      parse_edit_action(g, PARSE_REPLACE, actions, d);
+      parse_edit_action(g, PARSE_REPLACE, actions.data(), d);
       break;
     case 's':
       return STRINGADD_SAVE;

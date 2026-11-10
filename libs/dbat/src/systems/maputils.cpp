@@ -285,14 +285,14 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
   int y = 0;
   int sightradius;
   int count = 0, initline = 0;
-  char buf[MAX_STRING_LENGTH * 2];
+  std::string buf;
   char buf2[512];
   MapStruct coord;
 
   room_vnum start = rnum;
 
   coord = findcoord(g, rnum);
-  strcpy(buf, "\n");
+  buf   = "\n";
   if (type == 0) {
     sightradius = 12;
   } else {
@@ -306,94 +306,94 @@ void printmap(GameWorld *g, room_vnum rnum, struct char_data *ch, int type, obj_
   for (y = coord.y - sightradius; y <= coord.y + sightradius; y++) {
     if (type == 0) {
       if (count == initline) {
-        strcat(buf, "@b     [@CR. Key@b]     | ");
+        buf += "@b     [@CR. Key@b]     | ";
       } else if (count == initline + 1) {
-        strcat(buf, "@GEE@D:@w Earth@b         | ");
+        buf += "@GEE@D:@w Earth@b         | ";
       } else if (count == initline + 2) {
-        strcat(buf, "@gNN@D:@w Namek@b         | ");
+        buf += "@gNN@D:@w Namek@b         | ";
       } else if (count == initline + 3) {
-        strcat(buf, "@YVV@D:@w Vegeta@b        | ");
+        buf += "@YVV@D:@w Vegeta@b        | ";
       } else if (count == initline + 4) {
-        strcat(buf, "@CFF@D:@w Frigid@b        | ");
+        buf += "@CFF@D:@w Frigid@b        | ";
       } else if (count == initline + 5) {
-        strcat(buf, "@mKK@D:@w Konack@b        | ");
+        buf += "@mKK@D:@w Konack@b        | ";
       } else if (count == initline + 6) {
-        strcat(buf, "@BAA@D:@w Aether@b        | ");
+        buf += "@BAA@D:@w Aether@b        | ";
       } else if (count == initline + 7) {
-        strcat(buf, "@MYY@D:@w Yardrat@b       | ");
+        buf += "@MYY@D:@w Yardrat@b       | ";
       } else if (count == initline + 8) {
-        strcat(buf, "@CKK@D:@w Kanassa@b       | ");
+        buf += "@CKK@D:@w Kanassa@b       | ";
       } else if (count == initline + 9) {
-        strcat(buf, "@mAA@D:@w Arlia@b         | ");
+        buf += "@mAA@D:@w Arlia@b         | ";
       } else if (count == initline + 10) {
-        strcat(buf, "@cZZ@D:@w Zenith@b        | ");
+        buf += "@cZZ@D:@w Zenith@b        | ";
       } else if (count == initline + 11) {
-        strcat(buf, "@MCC@D:@w Cerria@b        | ");
+        buf += "@MCC@D:@w Cerria@b        | ";
       } else if (count == initline + 12) {
-        strcat(buf, "@WBB@D:@w Buoy@b          | ");
+        buf += "@WBB@D:@w Buoy@b          | ";
       } else if (count == initline + 13) {
-        strcat(buf, "@m&&@D:@w Nebula@b        | ");
+        buf += "@m&&@D:@w Nebula@b        | ";
       } else if (count == initline + 14) {
-        strcat(buf, "@yQQ@D:@w Asteroid@b      | ");
+        buf += "@yQQ@D:@w Asteroid@b      | ";
       } else if (count == initline + 15) {
-        strcat(buf, "@y::@D:@w Asteroid Field@b| ");
+        buf += "@y::@D:@w Asteroid Field@b| ";
       } else if (count == initline + 16) {
-        strcat(buf, "@b@1**@n@D:@w Wormhole@b      | ");
+        buf += "@b@1**@n@D:@w Wormhole@b      | ";
       } else if (count == initline + 17) {
-        strcat(buf, "@DSS@D:@w S. Station@b    | ");
+        buf += "@DSS@D:@w S. Station@b    | ";
       } else if (count == initline + 18) {
-        strcat(buf, " @r#@D:@w Unknown Ship@b  | ");
+        buf += " @r#@D:@w Unknown Ship@b  | ";
       } else if (count == initline + 19) {
-        strcat(buf, "@6  @n@D:@w Star@b          | ");
+        buf += "@6  @n@D:@w Star@b          | ";
       } else {
-        strcat(buf, "                  @b| ");
+        buf += "                  @b| ";
       }
       count++;
     } else {
       if (count == 0) {
-        strcat(buf, "      @RCompass@n           ");
+        buf += "      @RCompass@n           ";
       } else if (count == 2) {
         sprintf(buf2, "@w       @w|%s@w|            ", (room_get_dir_option(g, rnum, 0) ? " @CN " : "   "));
-        strcat(buf, buf2);
+        buf += buf2;
       } else if (count == 3) {
         sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 6) ? " @CNW" : "   "), (room_get_dir_option(g, rnum, 4) ? " @YU " : "   "), (room_get_dir_option(g, rnum, 7) ? "@CNE " : "   "));
-        strcat(buf, buf2);
+        buf += buf2;
       } else if (count == 4) {
         sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 3) ? "  @CW" : "   "), (room_get_dir_option(g, rnum, 10) ? "@m I " : (room_get_dir_option(g, rnum, 11) ? "@mOUT" : "   ")), (room_get_dir_option(g, rnum, 1) ? "@CE  " : "   "));
-        strcat(buf, buf2);
+        buf += buf2;
       } else if (count == 5) {
         sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (room_get_dir_option(g, rnum, 9) ? " @CSW" : "   "), (room_get_dir_option(g, rnum, 5) ? " @YD " : "   "), (room_get_dir_option(g, rnum, 8) ? "@CSE " : "   "));
-        strcat(buf, buf2);
+        buf += buf2;
       } else if (count == 6) {
         sprintf(buf2, "@w       @w|%s@w|            ", (room_get_dir_option(g, rnum, 2) ? " @CS " : "   "));
-        strcat(buf, buf2);
+        buf += buf2;
       } else {
-        strcat(buf, "                        ");
+        buf += "                        ";
       }
       count++;
     }
     for (x = coord.x - sightradius; x <= coord.x + sightradius; x++) {
       if (x == coord.x && y == coord.y) {
-        strcat(buf, getmapchar(g, g->mapnums[y][x], ch, start, vnum));
+        buf += getmapchar(g, g->mapnums[y][x], ch, start, vnum);
       } else if (x > MAP_COLS || x < 0) {
         if (lasty != true && y > -1 && y < 200) {
-          strcat(buf, "@D?");
+          buf += "@D?";
           lasty = true;
         }
       } else if (y > MAP_ROWS || y < 0) {
         if (y == -1 || y == 200) {
-          strcat(buf, "@D??");
+          buf += "@D??";
         }
       } else
-        strcat(buf, getmapchar(g, g->mapnums[y][x], ch, start, vnum));
+        buf += getmapchar(g, g->mapnums[y][x], ch, start, vnum);
     }
-    strcat(buf, "\n");
+    buf += "\n";
     lasty = false;
   }
 
-  send_to_char(g, ch, "{}", buf);
+  send_to_char(g, ch, buf);
   *buf2 = '\0';
-  *buf  = '\0';
+  buf.clear();
   if (type == 0) {
     send_to_char(g, ch, "\n@b______________________________________________________________________@n");
   }

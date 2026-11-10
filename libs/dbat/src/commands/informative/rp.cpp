@@ -131,12 +131,12 @@ ACMD(do_mimic)
     act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   char_set_mimic(ch, race);
   decCurKI(g, ch, cost, 0);
-  snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+  buf = str_format("@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be {} @M{}!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(g, ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be {} {}.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   return;
 }
 
@@ -192,9 +192,8 @@ ACMD(do_table)
     return;
   }
 
-  char buf[200];
-  snprintf(buf, sizeof(buf), "$n looks at %s on %s.\r\n", obj_get_short_description(obj2), obj_get_short_description(obj));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  std::string buf = str_format("$n looks at {} on {}.\r\n", obj_get_short_description(obj2), obj_get_short_description(obj));
+  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "{}", obj_get_action_description(obj2));
 }
 
@@ -326,9 +325,8 @@ ACMD(do_hand)
       act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
-      char buf[200];
-      snprintf(buf, sizeof(buf), "There are %d cards in the hand.", count);
-      act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+      std::string buf = str_format("There are {:d} cards in the hand.", count);
+      act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (str_eq_nocase("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
@@ -513,9 +511,8 @@ ACMD(do_nickname)
         send_to_char(g, ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
         return;
       }
-      char nick[MAX_INPUT_LENGTH];
-      snprintf(nick, sizeof(nick), "%s", CAP(arg2).c_str());
-      obj_set_action_description(ship2, nick);
+      std::string nick = CAP(arg2);
+      obj_set_action_description(ship2, nick.c_str());
       for (obj_data *k : each_obj(g)) {
         if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
           extract_obj(g, k);
@@ -537,12 +534,13 @@ ACMD(do_nickname)
     send_to_char(g, ch, "{}@w is a corpse!@n\r\n", obj_get_short_description(obj));
     return;
   }
-  send_to_char(g, ch, "@wYou nickname {}@w as '@C{}@w'.@n\r\n", obj_get_short_description(obj), arg2.c_str());
-  char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-  snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(obj), CAP(arg2).c_str());
-  snprintf(nick2, sizeof(nick2), "%s %s", obj_get_name(obj), arg2.c_str());
-  obj_set_short_description(obj, nick);
-  obj_set_name(obj, nick2);
+  send_to_char(g, ch, "@wYou nickname {}@w as '@C{}@w'.@n\r\n", obj_get_short_description(obj), arg2);
+  std::string nick;
+  std::string nick2;
+  nick  = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(obj), CAP(arg2));
+  nick2 = str_format("{} {}", obj_get_name(obj), arg2);
+  obj_set_short_description(obj, nick.c_str());
+  obj_set_name(obj, nick2.c_str());
   return;
 }
 
@@ -820,8 +818,8 @@ ACMD(do_rptrans)
   char_set_rp(ch, char_get_rp(ch) - (amt));
   char_get_desc(ch)->rpp -= amt;
   userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-  send_to_char(g, ch, "@WYou exchange @C{:d}@W RPP to user @c{}@W for a warm fuzzy feeling.\r\n", amt, CAP(arg).c_str());
-  mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: {} gave {:d} RPP to user {}", char_get_name(ch), amt, arg.c_str());
+  send_to_char(g, ch, "@WYou exchange @C{:d}@W RPP to user @c{}@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: {} gave {:d} RPP to user {}", char_get_name(ch), amt, arg);
   save_char(g, ch);
 }
 
@@ -839,7 +837,7 @@ ACMD(do_rdisplay)
   } else {
     std::string derp(argument);
 
-    send_to_char(g, ch, "You set your display to; {}\r\n", derp.c_str());
+    send_to_char(g, ch, "You set your display to; {}\r\n", derp);
     char_set_rdisplay(ch, derp);
   }
 }

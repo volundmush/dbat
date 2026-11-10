@@ -503,9 +503,8 @@ static OCMD(do_dgoload)
     char_to_room(g, mob, rnum);
 
     if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
-      char buf[MAX_INPUT_LENGTH];
-      sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf, 0);
+      std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(mob));
+      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf.c_str(), 0);
     }
 
     load_mtrigger(g, mob);

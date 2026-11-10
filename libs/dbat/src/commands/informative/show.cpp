@@ -169,19 +169,19 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         return;
       }
       if (obj_extra_flagged(obj, ITEM_BURIED)) {
-        char bury[MAX_INPUT_LENGTH];
+        std::string bury;
         if (!obj_is_corpse(obj)) {
           if (obj_get_weight(obj) < 10) {
-            snprintf(bury, sizeof(bury), "small mound of");
+            bury = "small mound of";
           } else if (obj_get_weight(obj) < 50) {
-            snprintf(bury, sizeof(bury), "medium sized mound of");
+            bury = "medium sized mound of";
           } else if (obj_get_weight(obj) < 1000) {
-            snprintf(bury, sizeof(bury), "large mound of");
+            bury = "large mound of";
           } else {
-            snprintf(bury, sizeof(bury), "gigantic mound of");
+            bury = "gigantic mound of";
           }
         } else {
-          snprintf(bury, sizeof(bury), "recent grave covered by");
+          bury = "recent grave covered by";
         }
         if (spotted == true && room_sect(g, obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(g, ch, "@yA {} soft dirt is here.@n\r\n", bury);
@@ -354,10 +354,8 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
       switch (obj_get_type_flag(obj)) {
         case ITEM_NOTE:
           if (obj_get_action_description(obj)) {
-            char notebuf[MAX_NOTE_LENGTH];
-
-            snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj_get_action_description(obj));
-            send_to_char(g, ch, "{}", notebuf);
+            std::string notebuf = str_format("There is something written on it:\r\n\r\n{}", obj_get_action_description(obj));
+            send_to_char(g, ch, notebuf);
           } else
             send_to_char(g, ch, "There appears to be nothing written on it.\r\n");
           return;
@@ -616,10 +614,9 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
       }
       if (!char_is_npc(ch) && obj_get_posted_to(g, obj) && obj_get_posttype(obj) <= 0) {
         struct obj_data *obj2 = obj_get_posted_to(g, obj);
-        char dvnum[200];
-        *dvnum = '\0';
-        snprintf(dvnum, sizeof(dvnum), "@D[@G%d@D] @w", obj_get_vnum(g, obj2));
-        send_to_char(g, ch, "\n...{}{} has been posted to it.", char_prf_flagged(g, ch, PRF_ROOMFLAGS) ? dvnum : "", obj_get_short_description(obj2));
+        std::string dvnum;
+        dvnum = str_format("@D[@G{:d}@D] @w", obj_get_vnum(g, obj2));
+        send_to_char(g, ch, "\n...{}{} has been posted to it.", char_prf_flagged(g, ch, PRF_ROOMFLAGS) ? dvnum.c_str() : "", obj_get_short_description(obj2));
       }
     }
     found++;
@@ -1015,9 +1012,8 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     }
 
     if (char_get_listenroom(i) > 0) {
-      char eaves[300];
-      snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-      act(g, eaves, true, i, nullptr, ch, TO_VICT);
+      std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
+      act(g, eaves.c_str(), true, i, nullptr, ch, TO_VICT);
     }
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
       act(g, "...$e is in the air!", false, i, nullptr, ch, TO_VICT);
@@ -1042,9 +1038,8 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
       act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
     if (char_get_feature(i)) {
-      char woo[MAX_STRING_LENGTH];
-      snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-      act(g, woo, false, i, nullptr, ch, TO_VICT);
+      std::string woo = str_format("@C{}@n", char_get_feature(i));
+      act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
     }
 
     return;
@@ -1325,9 +1320,8 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   send_to_char(g, ch, "@n\r\n");
 
   if (char_get_listenroom(i) > 0) {
-    char eaves[300];
-    snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-    act(g, eaves, true, i, nullptr, ch, TO_VICT);
+    std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
+    act(g, eaves.c_str(), true, i, nullptr, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
     if (char_plr_flagged(i, PLR_FISHING)) {
@@ -1335,9 +1329,8 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     }
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
-    char bloom[MAX_INPUT_LENGTH];
-    snprintf(bloom, sizeof(bloom), "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
-    act(g, bloom, true, i, nullptr, ch, TO_VICT);
+    std::string bloom = str_format("...is surrounded by a bright {} aura.@n", aura_types[char_get_aura(i)]);
+    act(g, bloom.c_str(), true, i, nullptr, ch, TO_VICT);
   }
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
     act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
@@ -1360,9 +1353,9 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
     act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
-    char aura[MAX_INPUT_LENGTH];
-    snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, nullptr, ch, TO_VICT);
+    std::string aura;
+    aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
+    act(g, aura.c_str(), true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
@@ -1382,16 +1375,14 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
   if (char_get_feature(i)) {
-    char woo[MAX_STRING_LENGTH];
-    snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-    act(g, woo, false, i, nullptr, ch, TO_VICT);
+    std::string woo = str_format("@C{}@n", char_get_feature(i));
+    act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
   }
 
   if (char_get_rdisplay(i)) {
     if (strcmp(char_get_rdisplay(i), "Empty")) {
-      char rdis[MAX_STRING_LENGTH];
-      snprintf(rdis, sizeof(rdis), "...%s", char_get_rdisplay(i));
-      act(g, rdis, false, i, nullptr, ch, TO_VICT);
+      std::string rdis = str_format("...{}", char_get_rdisplay(i));
+      act(g, rdis.c_str(), false, i, nullptr, ch, TO_VICT);
     }
   }
 }
