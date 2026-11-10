@@ -1439,7 +1439,7 @@ static void point_update_characters(GameWorld *g)
         act(g, "@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
         act(g, "@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
         if (char_is_npc(i) && char_is_humanoid(i) && rand_number(g, 1, 2) == 2) {
-          do_fly(g, i, nullptr, 0, 0);
+          do_fly(g, i, "", 0, 0);
         }
         decCurHealthPercent(g, i, .05, 0);
         if (getCurPL(g, i) < 0) {

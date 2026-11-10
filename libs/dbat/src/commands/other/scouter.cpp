@@ -64,7 +64,7 @@ ACMD(do_telepathy)
   std::string arg;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   arg2                  = skip_spaces(rest);
 
@@ -287,9 +287,9 @@ ACMD(do_telepathy)
         send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2.c_str());
         send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2.c_str());
       } else {
-        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), argument);
-        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), argument);
-        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), argument);
+        send_to_char(g, ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), std::string(argument).c_str());
+        send_to_char(g, vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), std::string(argument).c_str());
+        send_to_imm(g, "@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), std::string(argument).c_str());
       }
       decCurKI(g, ch, getMaxKI(g, ch) / 40, 0);
     } // End of vict is here
@@ -301,7 +301,7 @@ ACMD(do_eavesdrop)
 {
   int dir;
   std::string buf;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (char_get_listenroom(ch) > 0) {
@@ -383,7 +383,7 @@ ACMD(do_snet)
   std::string arg, arg2;
   char hist[MAX_INPUT_LENGTH];
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   arg2                  = skip_spaces(rest);
 
@@ -601,7 +601,7 @@ ACMD(do_scouter)
   int count = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {

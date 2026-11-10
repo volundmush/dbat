@@ -147,7 +147,7 @@ ACMD(do_sradar)
   std::string arg;
   char planet[20];
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) < 1) {
@@ -412,7 +412,7 @@ ACMD(do_track)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Whom are you trying to sense?\r\n");

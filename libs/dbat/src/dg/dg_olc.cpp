@@ -13,6 +13,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -53,13 +54,13 @@ ACMD(do_oasis_trigedit)
   /*
    * Parse any arguments.
    */
-  skip_spaces(&argument);
-  if (!*argument || !isdigit(*argument)) {
+  argument = skip_spaces(argument);
+  if (argument.empty() || !isdigit(argument[0])) {
     send_to_char(g, ch, "Specify a trigger VNUM to edit.\r\n");
     return;
   }
 
-  number = atoi(argument);
+  number = parse_int(argument);
 
   /*
    * Check that it isn't already being edited.

@@ -140,7 +140,7 @@ ACMD(do_form)
   struct obj_data *obj;
   std::string arg, arg2, arg3;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   arg2                  = take_word(rest);
   arg3                  = skip_spaces(rest); /* the rest of the line, as half_chop left it */
@@ -538,7 +538,7 @@ ACMD(do_form)
     boost_obj(g, obj, ch, 0);
     obj_to_char(g, obj, vict);
     obj_set_size(obj, get_size(vict));
-    do_wear(g, vict, writable{"all"}, 0, 0);
+    do_wear(g, vict, "all", 0, 0);
     reveal_hiding(g, ch, 0);
     char_set_con_cooldown(ch, 10);
     act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -908,7 +908,7 @@ ACMD(do_upgrade)
   std::string arg;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -940,7 +940,8 @@ ACMD(do_upgrade)
       send_to_char(g, ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(g, ch, writable{"Augmentation"}, nullptr, char_get_inventory(ch)))) {
+    std::string augmentation = "Augmentation";
+    if (!(obj = get_obj_in_list_vis(g, ch, augmentation, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }
@@ -1149,7 +1150,7 @@ ACMD(do_ingest)
     struct char_data *vict;
     std::string arg;
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
 
     if (arg.empty()) {
@@ -1276,7 +1277,7 @@ ACMD(do_plant)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   obj_name              = take_arg(rest);
   vict_name             = take_arg(rest);
 
@@ -1353,7 +1354,7 @@ ACMD(do_forgery)
   int found = false;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) {
@@ -1467,7 +1468,7 @@ ACMD(do_appraise)
   std::string arg;
   char buf[MAX_STRING_LENGTH];
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) {
@@ -1623,7 +1624,7 @@ ACMD(do_use)
   std::string buf, arg;
   struct obj_data *mag_item = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   buf                   = skip_spaces(rest);
   if (arg.empty()) {
@@ -1762,7 +1763,7 @@ ACMD(do_value)
   std::string arg;
   int value_lev;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1817,7 +1818,7 @@ ACMD(do_compare)
   int value1 = 0, value2 = 0, o1, o2;
   const char *msg = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1873,7 +1874,7 @@ ACMD(do_break)
   struct char_data *dummy = nullptr;
   int cmbrk;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1907,7 +1908,7 @@ ACMD(do_fix)
   struct char_data *dummy = nullptr;
   int cmbrk, found = false, self = false, custom = false;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_REPAIR)) {

@@ -103,7 +103,7 @@ ACMD(do_grapple)
   struct char_data *vict;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -311,7 +311,7 @@ ACMD(do_trip)
   std::string arg;
   struct char_data *vict = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_TRIP) && !char_is_npc(ch)) {
@@ -440,7 +440,7 @@ ACMD(do_rip)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -514,7 +514,7 @@ ACMD(do_drag)
   struct char_data *vict = nullptr;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -739,7 +739,7 @@ ACMD(do_block)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -820,7 +820,7 @@ ACMD(do_steal)
   std::string arg, arg2;
   int gold = 0, prob = char_get_skill(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

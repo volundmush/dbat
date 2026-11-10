@@ -118,7 +118,7 @@ ACMD(do_approve)
   std::string arg;
   struct char_data *vict = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -212,7 +212,7 @@ ACMD(do_reward)
   std::string arg;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -285,7 +285,7 @@ ACMD(do_permission)
   std::string arg;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -345,7 +345,7 @@ ACMD(do_hell)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -387,7 +387,7 @@ ACMD(do_advance)
   std::string name, level;
   int newlevel, oldlevel;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_arg(rest);
   level                 = take_arg(rest);
 
@@ -487,7 +487,7 @@ ACMD(do_restore)
   std::string buf;
   struct char_data *vict;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to restore?\r\n");
@@ -545,7 +545,7 @@ ACMD(do_invis)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty()) {
     if (char_get_invis_level(g, ch) > 0)
@@ -573,7 +573,7 @@ ACMD(do_wizutil)
   int taeller;
   long result;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -1338,7 +1338,7 @@ ACMD(do_set)
   int mode, player_i = 0, retval;
   char is_file = 0, is_player = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_word(rest);
   rest                  = skip_spaces(rest);
 
@@ -1431,7 +1431,7 @@ ACMD(do_chown)
   std::string buf3;
   int i, k = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf2                  = take_arg(rest);
   buf3                  = take_arg(rest);
 

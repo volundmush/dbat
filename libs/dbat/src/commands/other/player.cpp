@@ -216,7 +216,7 @@ ACMD(do_practice)
   /* if (IS_NPC(ch))
     return; */
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!arg.empty())
@@ -229,7 +229,7 @@ ACMD(do_practice)
 ACMD(do_skills)
 {
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (char_is_npc(ch)) {
     return;
@@ -258,19 +258,19 @@ ACMD(do_visible)
 
 ACMD(do_title)
 {
-  skip_spaces(&argument);
-  delete_doubledollar(argument);
+  std::string text(skip_spaces(argument));
+  delete_doubledollar(text);
 
   if (char_is_npc(ch))
     send_to_char(g, ch, "Your title is fine... go away.\r\n");
   else if (char_plr_flagged(ch, PLR_NOTITLE))
     send_to_char(g, ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
-  else if (strstr(argument, "(") || strstr(argument, ")"))
+  else if (text.contains("(") || text.contains(")"))
     send_to_char(g, ch, "Titles can't contain the ( or ) characters.\r\n");
-  else if (strlen(argument) > MAX_TITLE_LENGTH)
+  else if (text.size() > MAX_TITLE_LENGTH)
     send_to_char(g, ch, "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH);
   else {
-    set_title(g, ch, argument);
+    set_title(g, ch, text.c_str());
     send_to_char(g, ch, "Okay, you're now %s %s.\r\n", char_get_name(ch), char_get_title(ch));
   }
 }
@@ -372,7 +372,7 @@ ACMD(do_group)
   int found, highlvl = 0, lowlvl = 0;
   int64_t highpl = 0, lowpl = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (char_get_bonuses(ch, BONUS_LONER) > 0) {
@@ -454,7 +454,7 @@ ACMD(do_ungroup)
   std::string buf;
   struct char_data *tch;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (buf.empty()) {
@@ -514,7 +514,7 @@ ACMD(do_split)
   if (char_is_npc(ch))
     return;
 
-  std::string_view args = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view args = argument;
   buf                   = take_arg(args);
 
   if (is_number(buf)) {
@@ -596,14 +596,14 @@ ACMD(do_display)
     send_to_char(g, ch, "Mosters don't need displays.  Go away.\r\n");
     return;
   }
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
-  if (!*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
     return;
   }
 
-  if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
+  if (str_eq_nocase(argument, "on") || str_eq_nocase(argument, "all")) {
     char_prf_set(g, ch, PRF_DISPHP, true);
     char_prf_set(g, ch, PRF_DISPMOVE, true);
     char_prf_set(g, ch, PRF_DISPKI, true);
@@ -614,7 +614,7 @@ ACMD(do_display)
     char_prf_set(g, ch, PRF_DISPRAC, true);
     char_prf_set(g, ch, PRF_DISHUTH, true);
     char_prf_set(g, ch, PRF_DISPERC, true);
-  } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
+  } else if (str_eq_nocase(argument, "off") || str_eq_nocase(argument, "none")) {
     char_prf_set(g, ch, PRF_DISPHP, false);
     char_prf_set(g, ch, PRF_DISPKI, false);
     char_prf_set(g, ch, PRF_DISPMOVE, false);
@@ -631,7 +631,7 @@ ACMD(do_display)
     char_prf_set(ch, PRF_DISPTNL, false);
     char_prf_set(ch, PRF_DISPKI, false);*/
 
-    for (i = 0; i < strlen(argument); i++) {
+    for (i = 0; i < argument.size(); i++) {
       switch (tolower(argument[i])) {
         case 'p':
           char_prf_toggle(g, ch, PRF_DISPHP);
@@ -706,10 +706,10 @@ ACMD(do_gen_write)
     return;
   }
 
-  skip_spaces(&argument);
-  delete_doubledollar(argument);
+  std::string text(skip_spaces(argument));
+  delete_doubledollar(text);
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "That must be a mistake...\r\n");
     return;
   }
@@ -739,7 +739,7 @@ ACMD(do_gen_write)
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), argument);
+  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text.c_str());
   fprintf(fl, "@D-------------------------------@n\n");
   fclose(fl);
   send_to_char(g, ch, "Okay.  Thanks!\r\n");
@@ -1077,9 +1077,9 @@ ACMD(do_file)
       {"\n",       0,             "\n"                  }
   };
 
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
-  if (!*argument) {
+  if (argument.empty()) {
     strcpy(buf, "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n");
     for (i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_level(ch))
@@ -1088,7 +1088,7 @@ ACMD(do_file)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   field                 = take_arg(rest);
   value                 = take_arg(rest);
 

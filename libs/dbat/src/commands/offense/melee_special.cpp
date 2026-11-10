@@ -36,7 +36,7 @@ ACMD(do_rogafufuken)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -249,7 +249,7 @@ ACMD(do_heeldrop)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
@@ -527,7 +527,7 @@ ACMD(do_bite)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) {
@@ -741,7 +741,7 @@ ACMD(do_slam)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -1070,7 +1070,7 @@ ACMD(do_tailwhip)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {

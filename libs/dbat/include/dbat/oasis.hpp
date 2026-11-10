@@ -420,7 +420,7 @@ constexpr int HSEDIT_BUILDER            = 22;
  */
 #ifndef ACMD
 #define ACMD(name) \
-  void name(GameWorld *g, struct char_data *ch, char *argument, int cmd, int subcmd)
+  void name(GameWorld *g, struct char_data *ch, std::string_view argument, int cmd, int subcmd)
 #endif
 void clear_screen(GameWorld *g, struct descriptor_data *);
 ACMD(do_oasis);

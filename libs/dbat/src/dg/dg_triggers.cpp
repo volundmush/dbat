@@ -281,7 +281,7 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
         while (*link != mem) link = &(*link)->next;
         *link = mem->next;
 
-        if (!mem->cmd.empty()) command_interpreter(g, ch, mem->cmd.data());
+        if (!mem->cmd.empty()) command_interpreter(g, ch, mem->cmd);
         else {
           for (t = char_get_script(ch)->trig_list; t; t = t->next) {
             if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(g, 1, 100) <=

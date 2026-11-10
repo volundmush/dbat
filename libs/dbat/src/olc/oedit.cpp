@@ -68,7 +68,7 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf1                  = take_arg(rest);
   buf2                  = take_arg(rest);
 
@@ -1737,10 +1737,10 @@ ACMD(do_iedit)
   int found = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
-  if (arg.empty() || !*argument) {
+  if (arg.empty() || argument.empty()) {
     send_to_char(g, ch, "You must supply an object name.\r\n");
   }
 

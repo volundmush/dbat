@@ -74,7 +74,7 @@ static void list_languages(GameWorld *g, struct char_data *ch)
 
 ACMD(do_voice)
 {
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   if (char_is_npc(ch))
     return;
@@ -84,15 +84,15 @@ ACMD(do_voice)
     return;
   }
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "What are you changing your voice description to?\r\n");
     return;
   }
-  if (strlen(argument) > 75) {
+  if (text.size() > 75) {
     send_to_char(g, ch, "Your voice description can not be longer than 75 characters.\r\n");
     return;
   }
-  if (strstr(argument, "@")) {
+  if (text.contains("@")) {
     send_to_char(g, ch, "You can not use colorcode in voice descriptions.\r\n");
     return;
   }
@@ -101,16 +101,16 @@ ACMD(do_voice)
     return;
   }
   if (char_get_voice(ch) != nullptr) {
-    send_to_char(g, ch, "Your voice has now been set to: %s\r\n", argument);
-    char_set_voice(ch, argument);
+    send_to_char(g, ch, "Your voice has now been set to: %s\r\n", text.c_str());
+    char_set_voice(ch, text);
     char_set_rp(ch, char_get_rp(ch) - (1));
     char_get_desc(ch)->rpp = char_get_rp(ch);
     userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
     send_to_char(g, ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
     return;
   }
-  send_to_char(g, ch, "Your voice has now been set to: %s\r\n", argument);
-  char_set_voice(ch, argument);
+  send_to_char(g, ch, "Your voice has now been set to: %s\r\n", text.c_str());
+  char_set_voice(ch, text);
   return;
 }
 
@@ -120,7 +120,7 @@ ACMD(do_languages)
   std::string arg;
 
   if (CONFIG_ENABLE_LANGUAGES) {
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
     if (arg.empty())
       list_languages(g, ch);
@@ -171,24 +171,24 @@ static void garble_text(GameWorld *g, char *string, int known, int lang)
 ACMD(do_osay)
 {
 
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
   if (char_is_npc(ch))
     return;
 
-  if (!*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "Yes, but WHAT do you want to osay?\r\n");
     return;
   }
   char buf[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
 
-  snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+  snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", std::string(argument).c_str());
   if (!char_prf_flagged(g, ch, PRF_HIDE)) {
-    snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), argument);
+    snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), std::string(argument).c_str());
   }
   if (char_prf_flagged(g, ch, PRF_HIDE)) {
-    snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+    snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", std::string(argument).c_str());
   }
   act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
   act(g, buf2, false, ch, nullptr, nullptr, TO_ROOM);
@@ -202,7 +202,7 @@ ACMD(do_say)
   char buf2[MAX_INPUT_LENGTH];
   *buf2 = '\0';
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   if (char_get_bonuses(ch, BONUS_MUTE) > 0 && char_get_in_room(ch) > 160) {
     send_to_char(g, ch, "You are mute and unable to talk though.\r\n");
@@ -212,16 +212,16 @@ ACMD(do_say)
     send_to_char(g, ch, "You are mute and unable to talk though. You will be allowed to just for MUD School.");
   }
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "Yes, but WHAT do you want to say?\r\n");
     return;
   } else {
     char buf[MAX_INPUT_LENGTH + 70];
     char verb[10];
 
-    if (argument[strlen(argument) - 1] == '!') {
+    if (text[text.size() - 1] == '!') {
       strcpy(verb, "exclaim");
-    } else if (argument[strlen(argument) - 1] == '?') {
+    } else if (text[text.size() - 1] == '?') {
       strcpy(verb, "ask");
     } else {
       strcpy(verb, "say");
@@ -231,26 +231,26 @@ ACMD(do_say)
       if (tch != ch && char_get_desc(tch)) {
         char sayto[100];
         snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
-        if (strstr(argument, sayto)) {
-          search_replace(argument, sayto, "");
+        if (strstr(text.c_str(), sayto)) {
+          search_replace(text, sayto, "");
           sch = tch;
         } else if (!char_is_npc(tch) && !char_is_npc(ch)) {
           if (readIntro(ch, tch) == 1) {
             snprintf(sayto, sizeof(sayto), "to %s ", get_i_name(ch, tch));
           }
-          if (strstr(argument, sayto)) {
-            search_replace(argument, sayto, "");
+          if (strstr(text.c_str(), sayto)) {
+            search_replace(text, sayto, "");
             sch = tch;
           }
         }
       }
     }
     if (!sch) {
-      snprintf(buf, sizeof(buf), "@w$n @W%ss, '@C%s@W'@n", verb, argument);
+      snprintf(buf, sizeof(buf), "@w$n @W%ss, '@C%s@W'@n", verb, text.c_str());
       act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
     } else {
-      snprintf(buf, sizeof(buf), "@w$n @Wsays to @g$N@W, '@C%s@W'@n", argument);
-      snprintf(buf2, sizeof(buf2), "@w$n @Wsays to @gyou@W, '@C%s@W'@n", argument);
+      snprintf(buf, sizeof(buf), "@w$n @Wsays to @g$N@W, '@C%s@W'@n", text.c_str());
+      snprintf(buf2, sizeof(buf2), "@w$n @Wsays to @gyou@W, '@C%s@W'@n", text.c_str());
       act(g, buf2, true, ch, nullptr, sch, TO_VICT);
       act(g, buf, true, ch, nullptr, sch, TO_NOTVICT);
     }
@@ -263,34 +263,34 @@ ACMD(do_say)
         snprintf(saytoo, sizeof(saytoo), "say to @g%s@W", char_get_name(sch));
         strcpy(verb, saytoo);
       }
-      snprintf(buf, sizeof(buf), "@WYou %s, '@C%s@W'@n\r\n", verb, argument);
+      snprintf(buf, sizeof(buf), "@WYou %s, '@C%s@W'@n\r\n", verb, text.c_str());
       send_to_char(g, ch, "%s", buf);
       add_history(g, ch, buf, HIST_SAY);
       if (g->SHENRON == true) {
         if (char_get_in_room(ch) == g->DRAGONR && char_by_id(g, g->EDRAGON_uid) && char_get_in_room(char_by_id(g, g->EDRAGON_uid)) == g->DRAGONR) {
-          if (strstr(argument, "wish")) {
+          if (text.contains("wish")) {
 
             for (descriptor_data *d : each_desc(g)) {
               if (desc_get_connected(d) != CON_PLAYING)
                 continue;
 
-              if (strstr(argument, char_get_name(d->character)) && wch == nullptr) {
+              if (strstr(text.c_str(), char_get_name(d->character)) && wch == nullptr) {
                 wch = d->character;
-              } else if (strstr(argument, char_get_name(d->character)) && wch2 == nullptr) {
+              } else if (strstr(text.c_str(), char_get_name(d->character)) && wch2 == nullptr) {
                 wch2 = d->character;
-              } else if (strstr(argument, char_get_name(d->character)) && wch3 == nullptr) {
+              } else if (strstr(text.c_str(), char_get_name(d->character)) && wch3 == nullptr) {
                 wch3 = d->character;
               }
             } /* end repeat for */
 
-            if (wch == nullptr && strstr(argument, "myself")) {
+            if (wch == nullptr && text.contains("myself")) {
               wch = ch;
             }
             if (wch == nullptr) {
               return;
             }
 
-            if (granted == false && strstr(argument, "knowledge")) {
+            if (granted == false && text.contains("knowledge")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_practice_points(g, wch, char_get_practice_points(g, wch) + (rand_number(g, 2000, 5000)));
@@ -302,7 +302,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end knowledge wish if */
 
-            if (granted == false && strstr(argument, "speed")) {
+            if (granted == false && text.contains("speed")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_cha(wch, char_get_real_abils_cha(wch) + 10);
@@ -317,7 +317,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end speed wish if */
 
-            if (granted == false && strstr(argument, "tough")) {
+            if (granted == false && text.contains("tough")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_armor(wch, char_get_armor(wch) + (5000));
@@ -328,7 +328,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end tough wish if */
 
-            if (granted == false && strstr(argument, "strength")) {
+            if (granted == false && text.contains("strength")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_str(wch, char_get_real_abils_str(wch) + 10);
@@ -343,7 +343,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end strength wish if */
 
-            if (granted == false && strstr(argument, "intelligence")) {
+            if (granted == false && text.contains("intelligence")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_intel(wch, char_get_real_abils_intel(wch) + 10);
@@ -358,7 +358,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end intelligence wish if */
 
-            if (granted == false && strstr(argument, "wisdom")) {
+            if (granted == false && text.contains("wisdom")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_wis(wch, char_get_real_abils_wis(wch) + 10);
@@ -372,7 +372,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end wisdom wish if */
 
-            if (granted == false && strstr(argument, "agility")) {
+            if (granted == false && text.contains("agility")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_dex(wch, char_get_real_abils_dex(wch) + 10);
@@ -387,7 +387,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end agility wish if */
 
-            if (granted == false && strstr(argument, "constitution")) {
+            if (granted == false && text.contains("constitution")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_real_abils_con(wch, char_get_real_abils_con(wch) + 10);
@@ -402,7 +402,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end constitution wish if */
 
-            if (granted == false && strstr(argument, "skill")) {
+            if (granted == false && text.contains("skill")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 int roll = rand_number(g, 1, 3);
@@ -416,7 +416,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end skill wish if */
             /* Rillao: transloc, add new transes here */
-            if (granted == false && strstr(argument, "power")) {
+            if (granted == false && text.contains("power")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
                 /* send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has grown stronger!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -464,7 +464,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end power wish if */
 
-            if (granted == false && strstr(argument, "money")) {
+            if (granted == false && text.contains("money")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_set_bank_gold(wch, char_get_bank_gold(wch) + (1000000));
@@ -475,7 +475,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end money wish if */
 
-            if (granted == false && strstr(argument, "immunity")) {
+            if (granted == false && text.contains("immunity")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_aff_set(wch, AFF_IMMUNITY, true);
@@ -486,7 +486,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end money wish if */
 
-            if (granted == false && strstr(argument, "vitality")) {
+            if (granted == false && text.contains("vitality")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
                 /*send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now will never hunger or thirst again!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -499,7 +499,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end vitality if */
 
-            if (granted == false && strstr(argument, "revive")) {
+            if (granted == false && text.contains("revive")) {
               int count = 0;
               if (wch != nullptr) {
                 count += 1;
@@ -623,7 +623,7 @@ ACMD(do_say)
               } /* is there three targets for the wish? */
             } /* end revival if */
 
-            if (granted == false && strstr(argument, "immortal") && g->WISH[0] == 0) {
+            if (granted == false && text.contains("immortal") && g->WISH[0] == 0) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n", char_get_name(wch));
                 char_plr_set(wch, PLR_IMMORTAL, true);
@@ -636,13 +636,13 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end immortal wish if */
 
-            if (granted == false && strstr(argument, "immortal") && g->WISH[0] == 1) {
+            if (granted == false && text.contains("immortal") && g->WISH[0] == 1) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
               } /* is there a target for the wish? */
             }
 
-            if (granted == false && strstr(argument, " mortal")) {
+            if (granted == false && text.contains(" mortal")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 char_plr_set(wch, PLR_IMMORTAL, false);
@@ -653,7 +653,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end mortal wish if */
 
-            if (granted == false && strstr(argument, "senzu")) {
+            if (granted == false && text.contains("senzu")) {
               if (wch != nullptr) {
                 obj = read_object(g, 1);
                 obj_to_char(g, obj, ch);
@@ -682,7 +682,7 @@ ACMD(do_say)
               } /* is there a target for the wish? */
             } /* end senzu wish if */
 
-            if (granted == false && strstr(argument, "roleplay")) {
+            if (granted == false && text.contains("roleplay")) {
               if (wch != nullptr) {
                 send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, %s!%s@w'@n\r\n", char_get_name(wch), g->WISH[0] ? "" : " Now make your second wish.");
                 granted = true;
@@ -719,10 +719,10 @@ ACMD(do_say)
   }
 
   /* trigger check */
-  speech_mtrigger(g, ch, argument);
-  speech_wtrigger(g, ch, argument);
+  speech_mtrigger(g, ch, text.data());
+  speech_wtrigger(g, ch, text.data());
   if (g->SHENRON == false || (g->SHENRON == true && char_get_in_room(ch) != g->DRAGONR)) {
-    mob_talk(g, ch, argument);
+    mob_talk(g, ch, text.c_str());
   }
 }
 
@@ -731,7 +731,7 @@ ACMD(do_gsay)
   struct char_data *k;
   char blah[MAX_INPUT_LENGTH];
 
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
   if (!char_aff_flagged(ch, AFF_GROUP)) {
     send_to_char(g, ch, "But you are not the member of a group!\r\n");
@@ -741,7 +741,7 @@ ACMD(do_gsay)
     send_to_char(g, ch, "Lol, no.\r\n");
     return;
   }
-  if (!*argument)
+  if (argument.empty())
     send_to_char(g, ch, "Yes, but WHAT do you want to group-say?\r\n");
   else {
     char buf[MAX_STRING_LENGTH];
@@ -751,7 +751,7 @@ ACMD(do_gsay)
     else
       k = ch;
 
-    strcpy(buf, argument);
+    snprintf(buf, sizeof(buf), "%s", std::string(argument).c_str());
 
     snprintf(blah, sizeof(blah), "$n@W tells the group @W'@G%s@W'@n\r\n", buf);
 
@@ -779,7 +779,7 @@ ACMD(do_gsay)
     if (char_prf_flagged(g, ch, PRF_NOREPEAT))
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
     else
-      send_to_char(g, ch, "@WYou tell the group, '@G%s@W'@n\r\n", argument);
+      send_to_char(g, ch, "@WYou tell the group, '@G%s@W'@n\r\n", std::string(argument).c_str());
   }
 }
 
@@ -867,7 +867,7 @@ ACMD(do_tell)
   struct char_data *vict = nullptr;
   std::string buf, buf2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_word(rest);
   buf2                  = skip_spaces(rest);
 
@@ -918,11 +918,11 @@ ACMD(do_reply)
     return;
   }
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   if (char_get_last_tell(g, ch) == NOBODY)
     send_to_char(g, ch, "You have nobody to reply to!\r\n");
-  else if (!*argument)
+  else if (text.empty())
     send_to_char(g, ch, "What is your reply?\r\n");
   else {
     /*
@@ -942,7 +942,7 @@ ACMD(do_reply)
     if (tch == nullptr)
       send_to_char(g, ch, "They are no longer playing.\r\n");
     else if (is_tell_ok(g, ch, tch))
-      perform_tell(g, ch, tch, argument);
+      perform_tell(g, ch, tch, text.c_str());
   }
 }
 
@@ -977,7 +977,7 @@ ACMD(do_spec_comm)
       break;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_word(rest);
   buf2                  = skip_spaces(rest);
 
@@ -1223,7 +1223,7 @@ ACMD(do_write)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   papername             = take_arg(rest);
   penname               = take_arg(rest);
 
@@ -1295,7 +1295,7 @@ ACMD(do_page)
   struct char_data *vict;
   std::string buf2, arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   buf2                  = skip_spaces(rest);
 
@@ -1412,17 +1412,17 @@ ACMD(do_gen_comm)
   }
 
   /* skip leading spaces */
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
-  if (subcmd == SCMD_GOSSIP && (*argument == '*')) {
+  if (subcmd == SCMD_GOSSIP && (text[0] == '*')) {
     subcmd = SCMD_GEMOTE;
   }
 
   if (subcmd == SCMD_GEMOTE) {
-    if (*argument == '*' || *argument == ':')
-      do_gmote(g, ch, argument + 1, 0, 1);
+    if (text[0] == '*' || text[0] == ':')
+      do_gmote(g, ch, std::string_view(text).substr(1), 0, 1);
     else
-      do_gmote(g, ch, argument, 0, 1);
+      do_gmote(g, ch, text, 0, 1);
 
     return;
   }
@@ -1439,11 +1439,11 @@ ACMD(do_gen_comm)
   }
 
   /* make sure that there is something there to say! */
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "Yes, %s, fine, %s we must, but WHAT???\r\n", com_msgs[subcmd][1], com_msgs[subcmd][1]);
     return;
   }
-  delete_doubledollar(argument);
+  delete_doubledollar(text);
   /* set up the color on code */
   strlcpy(color_on, com_msgs[subcmd][3], sizeof(color_on));
 
@@ -1451,7 +1451,7 @@ ACMD(do_gen_comm)
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
   } else {
-    snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on, com_msgs[subcmd][1], argument, color_on);
+    snprintf(buf2, sizeof(buf2), "%s@WYou %s@W, '@w%s@W'%s@n\r\n", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
     send_to_char(g, ch, "%s", buf2);
     add_history(g, ch, buf2, hist_type[subcmd]);
   }
@@ -1469,23 +1469,23 @@ ACMD(do_gen_comm)
         continue;
 
       if (CONFIG_ENABLE_LANGUAGES) {
-        garble_text(g, argument, char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
-        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", argument, color_on);
+        garble_text(g, text.data(), char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
+        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", text.c_str(), color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) != char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
+        snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) == char_get_in_room(ch)) {
-        snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
+        snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
       } else {
         if (char_get_admlevel(ch) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W$n %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W$n %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) < ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], text.c_str(), color_on);
         } else if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && char_get_admlevel(i->character) >= ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
         } else if (char_get_admlevel(i->character) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
         } else {
-          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], text.c_str(), color_on);
         }
       }
 
@@ -1520,7 +1520,7 @@ ACMD(do_respond)
   if (obj)
     found = 1;
   if (obj) {
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     std::string number    = take_arg(rest);
     if (number.empty()) {
       send_to_char(g, ch, "Respond to what?\r\n");

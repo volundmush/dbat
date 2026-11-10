@@ -39,7 +39,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   if (!char_is_npc(ch) && !char_get_desc(ch)) {
     for (descriptor_data *d : each_desc(g))
       if (d->original == ch) {
-        do_return(g, d->character, nullptr, 0, 0);
+        do_return(g, d->character, "", 0, 0);
         break;
       }
   }
@@ -54,7 +54,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
      * body after the removal so dump them to the main menu.
      */
     if (char_get_desc(ch)->original)
-      do_return(g, ch, nullptr, 0, 0);
+      do_return(g, ch, "", 0, 0);
     else {
       /*
        * Now we boot anybody trying to log in with the same character, to

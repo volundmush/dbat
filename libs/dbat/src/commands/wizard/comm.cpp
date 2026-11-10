@@ -74,7 +74,7 @@ ACMD(do_news)
   std::string arg;
   int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   filename = NEWS_FILE;
 
@@ -194,15 +194,15 @@ ACMD(do_newsedit)
 
   filename = NEWS_FILE;
 
-  if (!*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "Syntax: newsedit (title)\r\n");
     return;
   }
-  if (strlen(argument) > 50) {
+  if (argument.size() > 50) {
     send_to_char(g, ch, "Limit of 50 characters for title.\r\n");
     return;
   }
-  if (strstr(argument, "#")) {
+  if (argument.contains("#")) {
     send_to_char(g, ch, "# is a forbidden character for news entries as it is used by the file system.\r\n");
     return;
   }
@@ -251,7 +251,7 @@ ACMD(do_newsedit)
   send_to_char(g, ch, "not just push enter. Happy editing!@n\n");
   send_to_char(g, ch, "@D---------------------------------------------------------@n\n");
   send_editor_help(g, char_get_desc(ch));
-  char_get_desc(ch)->newsbuf = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
+  char_get_desc(ch)->newsbuf = skip_spaces(argument);
   g->TOP_OF_NEWS       = lookup;
   g->LASTNEWS          = lookup;
   char_get_desc(ch)->draft.clear();
@@ -261,7 +261,7 @@ ACMD(do_newsedit)
 
 ACMD(do_echo)
 {
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
   bool NoName = false;
 
   if (text.empty()) {
@@ -343,7 +343,7 @@ ACMD(do_send)
   std::string arg, buf;
   struct char_data *vict;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   buf                   = skip_spaces(rest);
 
@@ -370,7 +370,7 @@ ACMD(do_syslog)
   std::string arg;
   int tp;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Your syslog is currently %s.\r\n",
@@ -392,7 +392,7 @@ ACMD(do_syslog)
 ACMD(do_gecho)
 {
 
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
   delete_doubledollar(text);
 
   if (text.empty())
@@ -412,7 +412,7 @@ ACMD(do_gecho)
 ACMD(do_ginfo)
 {
 
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
   delete_doubledollar(text);
 
   if (text.empty())
@@ -441,7 +441,7 @@ ACMD(do_poofset)
     default: return;
   }
 
-  *msg = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
+  *msg = skip_spaces(argument);
 
   send_to_char(g, ch, "%s", CONFIG_OK.c_str());
 }
@@ -453,7 +453,7 @@ ACMD(do_wiznet)
   char emote = false;
   int level  = ADMLVL_IMMORT;
 
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
   delete_doubledollar(text);
   std::string_view msg = text; /* what's left to send */
 

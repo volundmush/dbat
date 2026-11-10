@@ -37,7 +37,7 @@ ACMD(do_charge)
   std::string arg;
   int amt;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -274,7 +274,7 @@ ACMD(do_rescue)
   std::string arg;
   struct char_data *helpee, *opponent;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -319,7 +319,7 @@ ACMD(do_assist)
     send_to_char(g, ch, "You're already fighting!  How can you assist someone else?\r\n");
     return;
   }
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -365,7 +365,7 @@ ACMD(do_kill)
   if (char_is_npc(ch) || !char_adm_flagged(ch, ADM_INSTANTKILL)) {
     return;
   }
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -389,7 +389,7 @@ ACMD(do_flee)
   int i, attempt;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_get_position(ch) < POS_RESTING) {

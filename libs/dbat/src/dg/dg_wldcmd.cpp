@@ -95,7 +95,7 @@ static WCMD(do_weffect)
   room_vnum nr;
   room_vnum target;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -282,7 +282,7 @@ static WCMD(do_wteleport)
   room_vnum target, nr;
   std::string arg1, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -366,7 +366,7 @@ static WCMD(do_wpurge)
   char_data *ch;
   obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -509,7 +509,7 @@ static WCMD(do_wdamage)
   int dam = 0;
   char_data *ch;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_arg(rest);
   amount                = take_arg(rest);
 

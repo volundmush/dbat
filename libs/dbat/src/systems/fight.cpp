@@ -262,7 +262,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
 
   if (axion_dice(g, -10) > 90 && getCurHealthPercent(g, ch) <= .5 && !char_mob_flagged(ch, MOB_POWERUP) && char_get_mob_vnum(g, ch) != 25 &&
       !(char_is_android(ch) || char_is_animal(ch) || char_get_class(ch) == CLASS_NPC_COMMONER)) {
-    do_powerup(g, ch, nullptr, 0, 0);
+    do_powerup(g, ch, "", 0, 0);
     return;
   }
 
@@ -297,22 +297,22 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
         sprintf(buf2, "ass %s", buf);
         do_throw(g, ch, buf2, 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_REPAIR) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 16) {
-        do_srepair(g, ch, nullptr, 0, 0);
+        do_srepair(g, ch, "", 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_ABSORB) && rand_number(g, 1, 20) >= 19) {
         do_absorb(g, ch, buf2, 0, 0);
       } else if ((char_is_bio(ch) || char_is_majin(ch)) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 17) {
-        do_regenerate(g, ch, writable{"25"}, 0, 0);
+        do_regenerate(g, ch, "25", 0, 0);
       } else if (char_is_namek(ch) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) == 20) {
-        do_regenerate(g, ch, writable{"25"}, 0, 0);
+        do_regenerate(g, ch, "25", 0, 0);
       } else if (pick_n_throw(g, ch, buf)) {
         /* This determines if they throw and also handles it */
       } else if (char_mob_flagged(ch, MOB_KNOWKAIO) && rand_number(g, 1, 50) >= 46) {
         if (rand_number(g, 1, 10) == 10) {
-          do_kaioken(g, ch, writable{"20"}, 0, 0);
+          do_kaioken(g, ch, "20", 0, 0);
         } else if (rand_number(g, 1, 10) >= 8) {
-          do_kaioken(g, ch, writable{"10"}, 0, 0);
+          do_kaioken(g, ch, "10", 0, 0);
         } else {
-          do_kaioken(g, ch, writable{"5"}, 0, 0);
+          do_kaioken(g, ch, "5", 0, 0);
         }
       } else {
         switch (power) {
@@ -485,9 +485,9 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_kamehameha(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_FRIEZA:
                 if (special >= 100)
@@ -497,21 +497,21 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_deathbeam(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_KRANE:
                 if (special >= 100)
                   do_tribeam(g, ch, buf, 0, 0);
                 else if (special >= 80)
-                  do_hass(g, ch, nullptr, 0, 0);
+                  do_hass(g, ch, "", 0, 0);
                 else if (special >= 70)
                   do_dodonpa(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_PICCOLO:
                 if (special >= 100)
@@ -523,9 +523,9 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 60)
                   do_balefire(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_BARDOCK:
                 if (special >= 100)
@@ -535,9 +535,9 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_galikgun(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_ANDSIX:
                 if (special >= 100)
@@ -547,19 +547,19 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_dualbeam(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_NAIL:
                 if (special >= 100)
-                  do_regenerate(g, ch, writable{"50"}, 0, 0);
+                  do_regenerate(g, ch, "50", 0, 0);
                 else if (special >= 80)
-                  do_heal(g, ch, writable{"self"}, 0, 0);
+                  do_heal(g, ch, "self", 0, 0);
                 else if (special >= 70)
                   do_masenko(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, nullptr, 0, 0);
+                  do_zanzoken(g, ch, "", 0, 0);
                 break;
               case CLASS_KURZAK:
                 if (special >= 100)
@@ -569,9 +569,9 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_renzo(g, ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(g, ch, writable{"40"}, 0, 0);
+                  do_barrier(g, ch, "40", 0, 0);
                 else
-                  do_barrier(g, ch, writable{"25"}, 0, 0);
+                  do_barrier(g, ch, "25", 0, 0);
                 break;
               case CLASS_JINTO:
                 if (special >= 100)
@@ -581,7 +581,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_trip(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, writable{"40"}, 0, 0);
+                  do_zanzoken(g, ch, "40", 0, 0);
                 break;
               case CLASS_TSUNA:
                 if (special >= 100)
@@ -591,7 +591,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_spike(g, ch, buf, 0, 0);
                 else
-                  do_barrier(g, ch, writable{"20"}, 0, 0);
+                  do_barrier(g, ch, "20", 0, 0);
                 break;
               case CLASS_TAPION:
                 if (special >= 100)
@@ -601,7 +601,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_tslash(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, writable{"40"}, 0, 0);
+                  do_zanzoken(g, ch, "40", 0, 0);
                 break;
               case CLASS_KABITO:
                 if (special >= 100)
@@ -611,7 +611,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_heal(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, writable{"40"}, 0, 0);
+                  do_zanzoken(g, ch, "40", 0, 0);
                 break;
               case CLASS_DABURA:
                 if (special >= 100)
@@ -621,7 +621,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_fireshield(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, writable{"40"}, 0, 0);
+                  do_zanzoken(g, ch, "40", 0, 0);
                 break;
               case CLASS_GINYU:
                 if (special >= 100)
@@ -631,7 +631,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_eraser(g, ch, buf, 0, 0);
                 else
-                  do_zanzoken(g, ch, writable{"40"}, 0, 0);
+                  do_zanzoken(g, ch, "40", 0, 0);
                 break;
             }
           }
@@ -962,8 +962,8 @@ void fight_stack(GameWorld *g)
           act(g, "@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr, nullptr, TO_CHAR);
           act(g, "@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr, nullptr, TO_ROOM);
           if (char_get_kaioken(ch) < 1)
-            do_kaioken(g, ch, writable{"0"}, 0, 0);
-          do_transform(g, ch, writable{"revert"}, 0, 0);
+            do_kaioken(g, ch, "0", 0, 0);
+          do_transform(g, ch, "revert", 0, 0);
         }
       }
 
@@ -1000,11 +1000,11 @@ void fight_stack(GameWorld *g)
 
     if (!char_is_npc(ch) && char_get_wimp_level(g, ch) && getCurPL(g, ch) < char_get_wimp_level(g, ch) && getCurPL(g, ch) > 0 && char_get_fighting(g, ch)) {
       send_to_char(g, ch, "You wimp out, and attempt to flee!\r\n");
-      do_flee(g, ch, nullptr, 0, 0);
+      do_flee(g, ch, "", 0, 0);
     }
     if (char_is_npc(ch) && getCurPL(g, ch) < getEffMaxPL(g, ch) / 10 && getCurPL(g, ch) > 0 && char_get_fighting(g, ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
       if (rand_number(g, 1, 30) >= 25 && char_get_position(ch) > POS_SITTING) {
-        do_flee(g, ch, nullptr, 0, 0);
+        do_flee(g, ch, "", 0, 0);
       }
     }
     if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 6 || char_get_genome(ch, 1) == 6) && rand_number(g, 1, 200) >= 175) {
@@ -1032,25 +1032,25 @@ void fight_stack(GameWorld *g)
 
     if (!char_is_npc(ch) && !(char_get_desc(ch)) && char_get_position(ch) > POS_STUNNED && !char_is_affected(ch, AFF_FROZEN)) {
       if (char_get_fighting(g, ch)) {
-        do_flee(g, ch, nullptr, 0, 0);
+        do_flee(g, ch, "", 0, 0);
       }
     }
     /* Mobile Defense System */
     if (char_is_npc(ch) && char_get_grappled(g, ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(g, 1, 5) >= 4) {
-      do_escape(g, ch, nullptr, 0, 0);
+      do_escape(g, ch, "", 0, 0);
       continue;
     }
     if (char_get_fighting(g, ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
       if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
-        do_fly(g, ch, nullptr, 0, 0);
+        do_fly(g, ch, "", 0, 0);
         continue;
       }
       if (!char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
-        do_fly(g, ch, nullptr, 0, 0);
+        do_fly(g, ch, "", 0, 0);
         continue;
       }
       if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(g, ch))) {
-        do_fly(g, ch, writable{"high"}, 0, 0);
+        do_fly(g, ch, "high", 0, 0);
         continue;
       }
       if (char_aff_flagged(char_get_fighting(g, ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {
@@ -1073,11 +1073,11 @@ void fight_stack(GameWorld *g)
         }
       }
       if (char_get_position(ch) == POS_SITTING && sec_roll_check(g, ch) == 1) {
-        do_stand(g, ch, nullptr, 0, 0);
+        do_stand(g, ch, "", 0, 0);
         continue;
       }
       if (char_get_position(ch) == POS_RESTING && sec_roll_check(g, ch) == 1) {
-        do_stand(g, ch, nullptr, 0, 0);
+        do_stand(g, ch, "", 0, 0);
         continue;
       }
       if (char_is_affected(ch, AFF_PARA) && char_is_npc(ch) && char_get_aff_abils_intel(ch) + 10 < rand_number(g, 1, 60)) {
@@ -1086,8 +1086,8 @@ void fight_stack(GameWorld *g)
         continue;
       }
       if (char_get_position(ch) == POS_SLEEPING && !char_aff_flagged(ch, AFF_KNOCKED) && sec_roll_check(g, ch) == 1) {
-        do_wake(g, ch, nullptr, 0, 0);
-        do_stand(g, ch, nullptr, 0, 0);
+        do_wake(g, ch, "", 0, 0);
+        do_stand(g, ch, "", 0, 0);
         continue;
       }
       struct char_data *vict;

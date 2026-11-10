@@ -58,7 +58,7 @@ ACMD(do_focus)
   std::string arg;
   std::string name;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   name                  = take_arg(rest);
 
@@ -1033,7 +1033,7 @@ ACMD(do_focus)
       char_set_poisonby(vict, ch);
       if (char_get_charge(vict) > 0) {
         send_to_char(g, vict, "You lose your concentration and release your charged ki!\r\n");
-        do_charge(g, vict, writable{"release"}, 0, 0);
+        do_charge(g, vict, "release", 0, 0);
       }
       int duration = char_get_aff_abils_intel(ch) / 20;
       assign_affect(g, vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);

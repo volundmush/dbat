@@ -74,7 +74,7 @@ static void check_commands_wait_for_the_song_to_stop(void)
 {
   static const struct {
     const char *name;
-    void (*command)(GameWorld *, struct char_data *, char *, int, int);
+    void (*command)(GameWorld *, struct char_data *, std::string_view, int, int);
   } commands[] = {
       {"throw", do_throw}, {"tslash", do_tslash}, {"pslash", do_pslash}, {"ddslash", do_ddslash},
       {"kousengan", do_kousengan}, {"heeldrop", do_heeldrop}, {"attack", do_attack}, {"grapple", do_grapple},

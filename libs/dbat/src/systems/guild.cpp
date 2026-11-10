@@ -142,7 +142,7 @@ ACMD(do_teach)
   int skill = 100;
   struct char_data *vict;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

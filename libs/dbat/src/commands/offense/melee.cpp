@@ -36,7 +36,7 @@ ACMD(do_uppercut)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -260,7 +260,7 @@ ACMD(do_roundhouse)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -491,7 +491,7 @@ ACMD(do_elbow)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -701,7 +701,7 @@ ACMD(do_kick)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -920,7 +920,7 @@ ACMD(do_knee)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {
@@ -1138,7 +1138,7 @@ ACMD(do_punch)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!can_grav(g, ch)) {

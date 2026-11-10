@@ -157,7 +157,7 @@ ACMD(do_alias)
   if (char_is_npc(ch) || !(aliases = char_aliases(g, ch)))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_word(rest);
   std::string repl(rest); /* the rest of the line, from the space after the alias */
 

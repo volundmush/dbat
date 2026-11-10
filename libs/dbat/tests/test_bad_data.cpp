@@ -24,6 +24,8 @@
 #include "dbat/consts/skills.hpp"
 #include "dbat/db.hpp"
 #include "dbat/dg_scripts.hpp"
+#include "dbat/genobj.hpp"
+#include "dbat/genzon.hpp"
 #ifdef __SANITIZE_ADDRESS__
 #include <sanitizer/lsan_interface.h>
 #endif
@@ -741,9 +743,6 @@ static void check_name_matching_matches_the_old_code(void)
     name = a;
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
     mismatches += find_all_dots(name) != old_find_all_dots(old_buf) || name != old_buf;
-    snprintf(buf, sizeof(buf), "%s", a.c_str());
-    name = a;
-    mismatches += find_all_dots(buf) != find_all_dots(name) || buf != name;
 
     name = a;
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
@@ -1194,10 +1193,10 @@ static void check_mjunk_by_name(void)
     return n;
   };
 
-  do_mjunk(g, mob, writable{"sword"}, 0, 0);
+  do_mjunk(g, mob, "sword", 0, 0);
   CHECK(count("sword") == 0);
   CHECK(count("dagger") == 1);
-  do_mjunk(g, mob, writable{"all.pebble"}, 0, 0);
+  do_mjunk(g, mob, "all.pebble", 0, 0);
   CHECK(count("pebble") == 0);
   CHECK(count("dagger") == 1);
   CHECK_AUDIT(g);
@@ -1241,7 +1240,7 @@ static void check_mload_mob_into_a_room(void)
     return n;
   };
   int before = in_301();
-  do_mload(g, mob, writable{"mob 300 301"}, 0, 0);
+  do_mload(g, mob, "mob 300 301", 0, 0);
   CHECK(in_301() == before + 1);
   CHECK_AUDIT(g);
   th_shutdown(g);
@@ -1274,6 +1273,30 @@ static void check_wiznet_keeps_no_copies(void)
 #ifdef __SANITIZE_ADDRESS__
   CHECK(__lsan_do_recoverable_leak_check() == 0); /* the run ends in _exit(), which LeakSanitizer doesn't see */
 #endif
+}
+
+/* Deleting an object turns a zone's "put it in a container" commands into comments, as it does those that load it
+ * anywhere else, so saving the zone afterwards has no object to look up that isn't there (it checked only the
+ * container) */
+static void check_deleted_object_leaves_no_put_command(void)
+{
+  GameWorld *g           = th_boot();
+  struct zone_data *zone = find_zone_by_thing(g, 350);
+
+  CHECK(zone != nullptr && obj_proto_of(g, 350) && obj_proto_of(g, CONTAINER_VNUM));
+  reset_com put;
+  put.command = 'P';
+  put.arg1    = 350;
+  put.arg2    = 1;
+  put.arg3    = CONTAINER_VNUM;
+  zone->cmd.insert(zone->cmd.end() - 1, put); /* before the closing 'S' */
+  size_t at = zone->cmd.size() - 2;
+
+  CHECK(delete_object(g, 350) == 350);
+  CHECK(zone->cmd[at].command == '*');
+  CHECK(save_zone(g, zone));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
 }
 
 static void check_message_about_an_object_with_no_description(void)
@@ -1400,12 +1423,12 @@ static void check_board_post_saves_and_aborts(void)
     th_shutdown(g);
     return;
   }
-  write_board_message(g, 350, ch, writable{"A subject"});
+  write_board_message(g, 350, ch, "A subject");
   th_type(g, ch, "First post.");
   th_type(g, ch, "/s");
   CHECK(board->num_messages == 1);
 
-  write_board_message(g, 350, ch, writable{"Thrown away"});
+  write_board_message(g, 350, ch, "Thrown away");
   th_type(g, ch, "Never mind.");
   th_type(g, ch, "/a");
   CHECK(saw(ch, "Post aborted."));
@@ -1638,6 +1661,7 @@ static const struct {
     {"mload_mob_into_a_room",                       check_mload_mob_into_a_room                      },
     {"emote_of_many_hashes",                        check_emote_of_many_hashes                       },
     {"wiznet_keeps_no_copies",                      check_wiznet_keeps_no_copies                     },
+    {"deleted_object_leaves_no_put_command",        check_deleted_object_leaves_no_put_command       },
     {"specific_goes_with_its_location",             check_specific_goes_with_its_location            },
     {"affects_on_two_skills_stay_apart",            check_affects_on_two_skills_stay_apart           },
     {"saved_affects_are_cleaned_up",                check_saved_affects_are_cleaned_up               },

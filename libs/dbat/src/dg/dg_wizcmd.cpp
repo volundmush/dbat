@@ -211,7 +211,7 @@ ACMD(do_attach)
   IDXTYPE num_arg;
   room_vnum rnum;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   trig_name             = take_arg(rest);
   targ_name             = take_arg(rest);
@@ -404,7 +404,7 @@ ACMD(do_detach)
   std::string *trigger = nullptr; /* arg2 or arg3 */
   IDXTYPE num_arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
   arg3                  = take_arg(rest);
@@ -556,7 +556,7 @@ ACMD(do_vdelete)
   char_data *mob;
   obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   var                   = take_arg(rest);
   uid_s                 = take_arg(rest);
 
@@ -612,7 +612,7 @@ ACMD(do_tstat)
   struct index_data *rnum;
   std::string str;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   str                   = take_word(rest);
   if (!str.empty()) {
     rnum = find_trigger(g, parse_int(str));

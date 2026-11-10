@@ -319,7 +319,7 @@ ACMD(do_reboot)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (str_eq_nocase(arg, "all") || arg[0] == '*') {

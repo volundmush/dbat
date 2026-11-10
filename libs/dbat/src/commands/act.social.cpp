@@ -48,7 +48,7 @@ ACMD(do_action)
 
   action = &g->soc_mess_list[act_nr];
 
-  if (!argument || !*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "%s\r\n", action->char_no_arg);
     act(g, action->others_no_arg, action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
@@ -113,7 +113,7 @@ ACMD(do_insult)
   std::string arg;
   struct char_data *victim;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!arg.empty()) {
@@ -423,7 +423,7 @@ ACMD(do_gmote)
   struct social_messg *action;
   struct char_data *vict = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_word(rest);
   arg                   = skip_spaces(rest);
 
@@ -433,7 +433,7 @@ ACMD(do_gmote)
         break;
 
   if ((act_nr = find_action(g, cmd)) < 0) {
-    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
+    snprintf(out, sizeof(out), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), std::string(argument).c_str());
     act(g, out, false, ch, nullptr, vict, TO_GMOTE);
     return;
   }

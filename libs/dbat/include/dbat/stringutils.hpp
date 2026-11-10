@@ -58,15 +58,6 @@ char *str_alloc(size_t n);
 /* realloc() for a str_alloc() or strdup() buffer, aborting if out of memory. */
 char *str_realloc(char *s, size_t n);
 
-/* A writable copy of a fixed string, for passing to a function that may change its argument, as most commands
- * can: do_barrier(g, ch, writable{"40"}, 0, 0). The copy lasts until the end of the statement. A string
- * literal, or a compound literal like (char[]){"40"}, can be in read-only memory. */
-template <size_t N> struct writable {
-  char text[N]{};
-  operator char *() { return text; }
-};
-template <size_t N> writable(const char (&)[N]) -> writable<N>;
-
 /* A writable copy of s (null reads as ""), for a function that may change its argument: f(writable_copy(s).data()).
  * The copy lasts until the end of the statement. */
 inline std::string writable_copy(const char *s) { return s ? s : ""; }

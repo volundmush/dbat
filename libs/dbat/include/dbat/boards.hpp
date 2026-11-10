@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 #include "dbat/consts/types.hpp"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
@@ -47,7 +48,7 @@ void clear_boards(GameWorld *g);
 
 void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch);
 void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int arg);
-void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, char *arg);
+void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, std::string_view arg);
 void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int mnum);
 void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int arg);
 

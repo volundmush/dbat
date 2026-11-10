@@ -45,7 +45,7 @@ ACMD(do_oasis_list)
   std::string smin;
   std::string smax;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   smin                  = take_arg(rest);
   smax                  = take_arg(rest);
 
@@ -104,7 +104,7 @@ ACMD(do_oasis_links)
   int j;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg == "." || arg.empty()) {

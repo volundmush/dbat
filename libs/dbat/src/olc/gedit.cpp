@@ -63,7 +63,7 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf1                  = take_arg(rest);
   buf2                  = take_arg(rest);
 

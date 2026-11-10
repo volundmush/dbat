@@ -136,7 +136,7 @@ ACMD(do_multiform)
   }
 
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (str_eq_nocase(arg, "merge")) {
@@ -404,7 +404,7 @@ ACMD(do_liquefy)
 
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -533,7 +533,7 @@ ACMD(do_lifeforce)
   std::string arg;
   int setting = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -562,7 +562,7 @@ ACMD(do_defend)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty() && char_get_defending(g, ch) == nullptr) {
@@ -615,7 +615,7 @@ ACMD(do_scry)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -713,7 +713,7 @@ ACMD(do_ashcloud)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -832,7 +832,7 @@ ACMD(do_healglow)
 {
   struct char_data *vict;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_HEALGLOW)) {
@@ -957,7 +957,7 @@ ACMD(do_shimmer)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -1180,7 +1180,7 @@ ACMD(do_hydromancy)
 
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1317,7 +1317,7 @@ ACMD(do_kanso)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
@@ -1482,7 +1482,7 @@ ACMD(do_ensnare)
     std::string arg;
     struct char_data *vict;
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
 
     if (arg.empty()) {
@@ -1575,7 +1575,7 @@ ACMD(do_adrenaline)
     return;
   } else {
     std::string arg, arg2;
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
     arg2                  = take_arg(rest);
 
@@ -1698,7 +1698,7 @@ ACMD(do_warppool)
   int prob = axion_dice(g, 0), pass = false;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1862,7 +1862,7 @@ ACMD(do_obstruct)
   int prob = axion_dice(g, 0);
   int64_t cost = (getMaxKI(g, ch) / MAX(skill, 1)) * 2.5;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

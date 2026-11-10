@@ -936,7 +936,7 @@ ACMD(do_autoexit)
   if (char_is_npc(ch))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1653,7 +1653,7 @@ ACMD(do_look)
   } else {
     std::string arg, arg2;
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     if (subcmd == SCMD_READ) {
       arg = take_arg(rest);
       if (arg.empty())
@@ -1738,7 +1738,7 @@ ACMD(do_examine)
   struct obj_data *tmp_object;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

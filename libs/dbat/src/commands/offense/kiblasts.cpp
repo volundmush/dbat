@@ -37,7 +37,7 @@ ACMD(do_eraser)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -291,7 +291,7 @@ ACMD(do_bigbang)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -500,7 +500,7 @@ ACMD(do_balefire)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -726,7 +726,7 @@ ACMD(do_hellflash)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -975,7 +975,7 @@ ACMD(do_baku)
   double attperc = .15, minimum = .05;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
@@ -1132,7 +1132,7 @@ ACMD(do_shogekiha)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1377,7 +1377,7 @@ ACMD(do_kiblast)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

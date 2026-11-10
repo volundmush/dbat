@@ -36,7 +36,7 @@ ACMD(do_honoo)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -345,7 +345,7 @@ ACMD(do_psyblast)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -607,7 +607,7 @@ ACMD(do_sbc)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -804,7 +804,7 @@ ACMD(do_kousengan)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1027,7 +1027,7 @@ ACMD(do_deathbeam)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

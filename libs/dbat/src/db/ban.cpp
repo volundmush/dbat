@@ -134,7 +134,7 @@ ACMD(do_ban)
   int i;
   struct ban_list_element *ban_node;
 
-  if (!*argument) {
+  if (argument.empty()) {
     if (!g->ban_list) {
       send_to_char(g, ch, "No sites are banned.\r\n");
       return;
@@ -162,7 +162,7 @@ ACMD(do_ban)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   flag                  = take_arg(rest);
   site                  = take_arg(rest);
   if (site.empty() || flag.empty()) {
@@ -207,7 +207,7 @@ ACMD(do_unban)
   struct ban_list_element *ban_node, *temp;
   int found = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   site                  = take_arg(rest);
   if (site.empty()) {
     send_to_char(g, ch, "A site to unban might help.\r\n");

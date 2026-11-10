@@ -570,7 +570,7 @@ ACMD(do_warp)
   struct obj_data *vehicle, *controls;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -733,7 +733,7 @@ ACMD(do_drive)
   struct obj_data *vehicle, *controls;
   std::string arg3;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg3                  = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
@@ -817,7 +817,7 @@ ACMD(do_drive)
     std::string arg, arg2;
 
     /*argument = any_one_arg(argument, arg);*/
-    rest = argument ? argument : "";
+    rest = argument;
     arg  = take_word(rest);
     arg2 = skip_spaces(rest);
 

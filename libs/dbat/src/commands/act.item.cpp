@@ -270,7 +270,7 @@ ACMD(do_garden)
   std::string arg, arg2;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -614,7 +614,7 @@ ACMD(do_pack)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -767,7 +767,7 @@ ACMD(do_deploy)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1077,7 +1077,7 @@ ACMD(do_auction)
   struct obj_data *obj;
   int bid = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1167,7 +1167,7 @@ ACMD(do_bid)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1486,11 +1486,11 @@ ACMD(do_assemble)
 {
   obj_vnum lVnum           = NOTHING;
   struct obj_data *pObject = nullptr;
-  char text[MAX_STRING_LENGTH];
+  char msg[MAX_STRING_LENGTH];
 
   int roll = 0;
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   struct obj_data *tool = nullptr;
 
@@ -1502,16 +1502,16 @@ ACMD(do_assemble)
     }
   }
 
-  if (*argument == '\0') {
+  if (text.empty()) {
     send_to_char(g, ch, "What would you like to %s?\r\n", CMD_NAME);
     return;
   }
-  if ((lVnum = assemblyFindAssembly(g, argument)) < 0) {
-    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+  if ((lVnum = assemblyFindAssembly(g, text.c_str())) < 0) {
+    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
     return;
   }
   if (assemblyGetType(g, lVnum) != subcmd) {
-    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
     return;
   }
   if (!assemblyCheckComponents(g, lVnum, ch, false)) {
@@ -1522,12 +1522,12 @@ ACMD(do_assemble)
     send_to_char(g, ch, "You can't do that in space.");
     return;
   }
-  if (!char_get_skill(ch, SKILL_SURVIVAL) && !strcasecmp(argument, "campfire")) {
+  if (!char_get_skill(ch, SKILL_SURVIVAL) && str_eq_nocase(text, "campfire")) {
     send_to_char(g, ch, "You know nothing about building campfires.\r\n");
     return;
   }
 
-  if (strstr(argument, "Signal") || strstr(argument, "signal")) {
+  if (text.contains("Signal") || text.contains("signal")) {
     if (char_get_skill(ch, SKILL_BUILD) < 70) {
       send_to_char(g, ch, "You need at least a build skill level of 70.\r\n");
       return;
@@ -1539,7 +1539,7 @@ ACMD(do_assemble)
     roll = 20;
   }
 
-  if (strcasecmp(argument, "campfire")) {
+  if (!str_eq_nocase(text, "campfire")) {
     if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE) || room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sunken(g, char_get_in_room(ch))) {
       send_to_char(g, ch, "This area will not allow a fire to burn properly.\r\n");
       return;
@@ -1553,12 +1553,12 @@ ACMD(do_assemble)
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_BUILD) <= roll) {
       if ((pObject = read_object(g, lVnum)) == nullptr) {
-        send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+        send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
         return;
       }
 
       extract_obj(g, pObject);
-      send_to_char(g, ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
+      send_to_char(g, ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(text), text.c_str());
 
       if (assemblyCheckComponents(g, lVnum, ch, true)) {
         roll = 9001; /* Just a place holder */
@@ -1574,12 +1574,12 @@ ACMD(do_assemble)
     improve_skill(g, ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_SURVIVAL) <= roll) {
       if ((pObject = read_object(g, lVnum)) == nullptr) {
-        send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+        send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
         return;
       }
 
       extract_obj(g, pObject);
-      send_to_char(g, ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
+      send_to_char(g, ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(text), text.c_str());
 
       if (tool && rand_number(g, 1, 3) == 3 && obj_get_value(tool, VAL_ALL_HEALTH) > 0) {
         obj_set_value(tool, VAL_ALL_HEALTH, obj_get_value(tool, VAL_ALL_HEALTH) - (rand_number(g, 1, 5)));
@@ -1597,30 +1597,30 @@ ACMD(do_assemble)
 
   if (axion_dice(g, 0) - (char_get_aff_abils_intel(ch) / 5) > 95) {
     if ((pObject = read_object(g, lVnum)) == nullptr) {
-      send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+      send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
       return;
     }
 
     extract_obj(g, pObject);
-    send_to_char(g, ch, "You start to %s %s %s, but forget a couple of steps. You take it apart and give up.\r\n", CMD_NAME, AN(argument), argument);
+    send_to_char(g, ch, "You start to %s %s %s, but forget a couple of steps. You take it apart and give up.\r\n", CMD_NAME, AN(text), text.c_str());
     char_set_wait(ch, PULSE_6SEC);
     return;
   }
   if (rand_number(g, 1, 100) >= 92) {
     if ((pObject = read_object(g, lVnum)) == nullptr) {
-      send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+      send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
       return;
     }
 
     extract_obj(g, pObject);
-    send_to_char(g, ch, "You start to %s %s %s, but put it together wrong and have to stop. You take it apart and give up.\r\n", CMD_NAME, AN(argument), argument);
+    send_to_char(g, ch, "You start to %s %s %s, but put it together wrong and have to stop. You take it apart and give up.\r\n", CMD_NAME, AN(text), text.c_str());
     char_set_wait(ch, PULSE_4SEC);
     return;
   }
 
   /* Create the assembled object. */
   if ((pObject = read_object(g, lVnum)) == nullptr) {
-    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+    send_to_char(g, ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(text), text.c_str());
     return;
   }
   add_unique_id(g, pObject);
@@ -1667,12 +1667,12 @@ ACMD(do_assemble)
   }*/
 
   /* Tell the character they made something. */
-  snprintf(text, sizeof(text), "You %s $p.", CMD_NAME);
-  act(g, text, false, ch, pObject, nullptr, TO_CHAR);
+  snprintf(msg, sizeof(msg), "You %s $p.", CMD_NAME);
+  act(g, msg, false, ch, pObject, nullptr, TO_CHAR);
 
   /* Tell the room the character made something. */
-  snprintf(text, sizeof(text), "$n %ss $p.", CMD_NAME);
-  act(g, text, false, ch, pObject, nullptr, TO_ROOM);
+  snprintf(msg, sizeof(msg), "$n %ss $p.", CMD_NAME);
+  act(g, msg, false, ch, pObject, nullptr, TO_ROOM);
 
   if (assemblyCheckComponents(g, lVnum, ch, true)) {
     roll = 9001; /* Just a place holder */
@@ -1799,7 +1799,7 @@ ACMD(do_put)
   struct char_data *tmp_char;
   int obj_dotmode, cont_dotmode, found = 0, howmany = 1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
   arg3                  = take_arg(rest);
@@ -2125,7 +2125,7 @@ ACMD(do_get)
   struct obj_data *cont;
   struct char_data *tmp_char;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
   arg3                  = take_arg(rest);
@@ -2416,7 +2416,7 @@ ACMD(do_drop)
       break;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -2532,7 +2532,7 @@ static void perform_give(GameWorld *g, struct char_data *ch, struct char_data *v
   }
   if (char_is_npc(vict) && (obj_extra_flagged(obj, ITEM_FORGED) || obj_extra_flagged(obj, ITEM_FORGED))) {
     act(g, "$n tries to hand $p to $N.", true, ch, obj, vict, TO_NOTVICT);
-    do_say(g, vict, writable{"I don't want that piece of junk."}, 0, 0);
+    do_say(g, vict, "I don't want that piece of junk.", 0, 0);
     return;
   }
   if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {
@@ -2641,7 +2641,7 @@ ACMD(do_give)
   struct char_data *vict;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_has_arms(g, ch)) {
@@ -2821,7 +2821,7 @@ ACMD(do_drink)
   int amount, weight, wasthirsty = 0;
   int on_ground = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (char_is_npc(ch)) {
     return;
@@ -3030,7 +3030,7 @@ ACMD(do_eat)
   struct affected_type af = {};
   int amount;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch)) /* Cannot use GET_COND() on mobs. */
@@ -3245,7 +3245,7 @@ ACMD(do_pour)
   struct obj_data *from_obj = nullptr, *to_obj = nullptr;
   int amount = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3656,7 +3656,7 @@ ACMD(do_wear)
   struct obj_data *obj;
   int where, dotmode, items_worn = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3737,7 +3737,7 @@ ACMD(do_wield)
   std::string arg;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -3770,7 +3770,7 @@ ACMD(do_grab)
   std::string arg;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -3843,7 +3843,7 @@ ACMD(do_remove)
   std::string arg;
   int i, dotmode, found = 0, msg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

@@ -2112,10 +2112,10 @@ void homing_update(GameWorld *g)
                 solo_gain(g, ch, vict);
               }
               if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-                do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
+                do_get(g, ch, "all.zenni corpse", 0, 0);
               }
               if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-                do_get(g, ch, writable{"all corpse"}, 0, 0);
+                do_get(g, ch, "all corpse", 0, 0);
               }
             } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
               if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
@@ -2142,10 +2142,10 @@ void homing_update(GameWorld *g)
                     solo_gain(g, ch, vict);
                   }
                   if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-                    do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
+                    do_get(g, ch, "all.zenni corpse", 0, 0);
                   }
                   if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-                    do_get(g, ch, writable{"all corpse"}, 0, 0);
+                    do_get(g, ch, "all corpse", 0, 0);
                   }
                 }
               }
@@ -4107,7 +4107,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if ((getCurST(g, vict)) >= rollcost) {
         act(g, "@GYou roll to your feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_CHAR);
         act(g, "@G$n rolls to $s feet in an agile fashion!@n", true, vict, nullptr, nullptr, TO_ROOM);
-        do_stand(g, vict, nullptr, 0, 0);
+        do_stand(g, vict, "", 0, 0);
         decCurST(g, vict, rollcost, 0);
       }
     }
@@ -4184,7 +4184,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
 
     if (char_get_position(vict) == POS_SITTING && char_is_npc(vict) && getCurHealth(g, vict) >= ((getEffMaxPL(g, vict))) * .98) {
-      do_stand(g, vict, nullptr, 0, 0);
+      do_stand(g, vict, "", 0, 0);
     }
     int suppresso = false;
     if (is_sparring(ch) && is_sparring(vict) && (char_get_suppressed(vict) + getCurHealth(g, vict)) - dmg <= 0) {

@@ -415,29 +415,9 @@ int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &na
   return (-1);
 }
 
-struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_vnum room)
-{
-  return in_place(name, [&](std::string &s) { return get_char_room(g, s, number, room); });
-}
-
-struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int inroom)
-{
-  return in_place(name, [&](std::string &s) { return get_player_vis(g, ch, s, number, inroom); });
-}
-
-struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int where)
-{
-  return in_place(name, [&](std::string &s) { return get_char_vis(g, ch, s, number, where); });
-}
-
 struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
 {
   return in_place(name, [&](std::string &s) { return get_char_room_vis(g, ch, s, number); });
-}
-
-struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
-{
-  return in_place(name, [&](std::string &s) { return get_char_world_vis(g, ch, s, number); });
 }
 
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, const id_list &list)
@@ -445,19 +425,9 @@ struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *n
   return in_place(name, [&](std::string &s) { return get_obj_in_list_vis(g, ch, s, number, list); });
 }
 
-struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
-{
-  return in_place(name, [&](std::string &s) { return get_obj_vis(g, ch, s, number); });
-}
-
 struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
 {
   return in_place(arg, [&](std::string &s) { return get_obj_in_equip_vis(g, ch, s, number, equipment); });
-}
-
-int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
-{
-  return in_place(arg, [&](std::string &s) { return get_obj_pos_in_equip_vis(g, ch, s, number, equipment); });
 }
 
 /* a function to scan for "all" or "all.x" */
@@ -470,11 +440,6 @@ int find_all_dots(std::string &arg)
     return (FIND_ALLDOT);
   }
   return (FIND_INDIV);
-}
-
-int find_all_dots(char *arg)
-{
-  return in_place(arg, [](std::string &s) { return find_all_dots(s); });
 }
 
 /* Generic Find, designed to find any object/character

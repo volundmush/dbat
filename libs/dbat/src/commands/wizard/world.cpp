@@ -70,7 +70,7 @@ ACMD(do_transobj)
   std::string arg;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -214,7 +214,7 @@ ACMD(do_at)
   std::string command, buf;
   room_vnum location, original_loc;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_word(rest);
   command               = skip_spaces(rest);
   if (buf.empty()) {
@@ -234,7 +234,7 @@ ACMD(do_at)
   original_loc = char_get_in_room(ch);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  command_interpreter(g, ch, command.data());
+  command_interpreter(g, ch, command);
 
   /* check if the char is still there */
   if (char_get_in_room(ch) == location) {
@@ -273,7 +273,7 @@ ACMD(do_trans)
   std::string buf;
   struct char_data *victim;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   if (buf.empty())
     send_to_char(g, ch, "Whom do you wish to transfer?\r\n");
@@ -328,7 +328,7 @@ ACMD(do_teleport)
   struct char_data *victim;
   room_vnum target;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   buf2                  = take_arg(rest);
 
@@ -399,7 +399,7 @@ ACMD(do_snoop)
   if (!char_get_desc(ch))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -439,7 +439,7 @@ ACMD(do_switch)
   std::string arg;
   struct char_data *victim;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_get_desc(ch)->original)
@@ -501,7 +501,7 @@ ACMD(do_load)
   std::string buf, buf2, buf3;
   int i = 0, n = 1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   buf2                  = take_arg(rest);
   buf3                  = take_arg(rest);
@@ -577,7 +577,7 @@ ACMD(do_purge)
   struct char_data *vict;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   /* argument supplied. destroy single object or char */
@@ -649,7 +649,7 @@ ACMD(do_force)
   char buf1[MAX_INPUT_LENGTH + 32];
   std::string arg, to_force;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   to_force              = skip_spaces(rest);
 
@@ -666,7 +666,7 @@ ACMD(do_force)
       send_to_char(g, ch, "%s", CONFIG_OK.c_str());
       act(g, buf1, true, ch, nullptr, vict, TO_VICT);
       mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) %s forced %s to %s", char_get_name(ch), char_get_name(vict), to_force.c_str());
-      command_interpreter(g, vict, to_force.data());
+      command_interpreter(g, vict, to_force);
     }
   } else if (str_eq_nocase("room", arg)) {
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
@@ -677,7 +677,7 @@ ACMD(do_force)
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
       act(g, buf1, true, ch, nullptr, tch, TO_VICT);
-      command_interpreter(g, tch, to_force.data());
+      command_interpreter(g, tch, to_force);
     }
   } else { /* force all */
     send_to_char(g, ch, "%s", CONFIG_OK.c_str());
@@ -688,7 +688,7 @@ ACMD(do_force)
       if (desc_get_connected(i) != CON_PLAYING || !(vict = i->character) || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
         continue;
       act(g, buf1, true, ch, nullptr, vict, TO_VICT);
-      command_interpreter(g, vict, to_force.data());
+      command_interpreter(g, vict, to_force);
     }
   }
 }
@@ -699,7 +699,7 @@ ACMD(do_zreset)
   struct zone_data *i;
   zone_vnum j;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg[0] == '*') {
@@ -749,7 +749,7 @@ ACMD(do_raise)
   struct char_data *vict = nullptr;
   std::string name;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_arg(rest);
 
   if (char_get_admlevel(ch) < ADMLVL_BUILDER && !char_is_npc(ch)) {
@@ -792,7 +792,7 @@ ACMD(do_zpurge)
   room_vnum room;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

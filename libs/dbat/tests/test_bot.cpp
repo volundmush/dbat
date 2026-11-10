@@ -1035,6 +1035,7 @@ static unsigned long run_child(const char *dir, unsigned long seed, int steps, c
     setenv("TMPDIR", dir, 1);
     if ((!path && !journal_file) || !freopen(report, "w", stdout) || dup2(STDOUT_FILENO, STDERR_FILENO) < 0)
       _exit(2);
+    setvbuf(stdout, nullptr, _IOLBF, 0); /* whole lines, so they don't split around what stderr writes to the same file */
     if (path)
       play_journal(path);
     else

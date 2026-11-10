@@ -171,7 +171,7 @@ SPECIAL(pet_shops)
   }
   if (CMD_IS(g, "buy")) {
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     std::string which     = take_arg(rest);
     pet_name              = take_arg(rest);
 
@@ -346,7 +346,7 @@ SPECIAL(auction)
     std::string arg, arg2;
     int value = 0;
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
     arg2                  = take_arg(rest);
 
@@ -419,7 +419,7 @@ SPECIAL(healtank)
 {
   struct obj_data *htank = nullptr;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
@@ -524,7 +524,7 @@ SPECIAL(augmenter)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (CMD_IS(g, "augment")) {
@@ -641,7 +641,7 @@ SPECIAL(gravity)
   std::string arg;
   int match = false;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   for (obj_data *i : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_vnum(g, i) == 11) {
@@ -923,7 +923,7 @@ SPECIAL(bank)
     std::string arg, arg2;
     struct char_data *vict = nullptr;
 
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
     arg2                  = take_arg(rest);
 

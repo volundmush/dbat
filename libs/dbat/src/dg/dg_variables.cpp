@@ -254,8 +254,9 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
   else if (!strcasecmp(field, "global")) { /* get global of something else */
     str = "";
     if (char_is_npc(c) && char_get_script(c)) {
+      char no_field[] = "";
       find_replacement(g, go, char_get_script(c), nullptr, MOB_TRIGGER,
-                       subfield, writable{""}, nullptr, str);
+                       subfield, no_field, nullptr, str);
     }
     return;
   }

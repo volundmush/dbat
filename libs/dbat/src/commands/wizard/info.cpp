@@ -82,7 +82,7 @@ ACMD(do_finddoor)
   struct char_data *tmp_char;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -132,7 +132,7 @@ ACMD(do_vnum)
 {
   std::string buf, buf2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_word(rest);
   buf2                  = skip_spaces(rest);
 
@@ -803,7 +803,7 @@ ACMD(do_varstat)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
@@ -839,7 +839,7 @@ ACMD(do_stat)
   struct char_data *victim;
   struct obj_data *object;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf1                  = take_word(rest);
   buf2                  = skip_spaces(rest);
 
@@ -929,7 +929,7 @@ ACMD(do_vstat)
 {
   std::string buf, buf2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   buf2                  = take_arg(rest);
 
@@ -1000,7 +1000,7 @@ ACMD(do_last)
   std::string arg;
   struct char_data *vict = nullptr;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "For whom do you wish to search?\r\n");
@@ -1113,7 +1113,7 @@ ACMD(do_show)
       {"\n",         0            }
   };
 
-  std::string_view rest = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
+  std::string_view rest = skip_spaces(argument);
 
   if (rest.empty()) {
     send_to_char(g, ch, "Game Info options:\r\n");
@@ -1428,7 +1428,7 @@ ACMD(do_plist)
   int low = 0, high = 100, low_day = 0, high_day = 10000, low_hr = 0, high_hr = 24;
 
   std::string name_search;
-  std::string_view rest = skip_spaces(argument ? argument : ""); /* (some callers pass null) */
+  std::string_view rest = skip_spaces(argument);
 
   while (!rest.empty()) {
     std::string arg = take_word(rest);
@@ -1643,7 +1643,7 @@ ACMD(do_zcheck)
   float avg_dam;
   size_t len = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string zarg      = take_arg(rest);
 
   if (zarg.empty() || zarg == ".")
@@ -2198,7 +2198,7 @@ ACMD(do_checkloadstatus)
 {
   std::string buf1, buf2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf1                  = take_arg(rest);
   buf2                  = take_arg(rest);
 
@@ -2233,7 +2233,7 @@ ACMD(do_findkey)
   obj_vnum key;
   char buf[MAX_STRING_LENGTH];
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_word(rest);          /* not take_arg(): "in" is a valid direction */
 
   if (arg.empty()) {

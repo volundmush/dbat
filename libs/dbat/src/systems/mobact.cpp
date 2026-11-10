@@ -192,22 +192,22 @@ void mobile_activity(GameWorld *g)
               act(g, "@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
             }
             if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
-              do_fly(g, ch, nullptr, 0, 0);
+              do_fly(g, ch, "", 0, 0);
               continue;
             }
             if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
-              do_fly(g, ch, nullptr, 0, 0);
+              do_fly(g, ch, "", 0, 0);
               continue;
             }
             do_punch(g, ch, tar, 0, 0);
           }
           if (!char_is_humanoid(ch)) {
             if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
-              do_fly(g, ch, nullptr, 0, 0);
+              do_fly(g, ch, "", 0, 0);
               continue;
             }
             if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
-              do_fly(g, ch, nullptr, 0, 0);
+              do_fly(g, ch, "", 0, 0);
               continue;
             }
             if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
@@ -302,10 +302,10 @@ void mobile_activity(GameWorld *g)
 
     /* Absorb protection */
     if (char_get_absorbby(g, ch) && rand_number(g, 1, 3) == 3) {
-      do_escape(g, ch, nullptr, 0, 0);
+      do_escape(g, ch, "", 0, 0);
     }
     if (char_get_position(ch) == POS_SLEEPING && rand_number(g, 1, 3) == 3) {
-      do_wake(g, ch, nullptr, 0, 0);
+      do_wake(g, ch, "", 0, 0);
     }
     /* Shopkeep 24-hour Purge */
     if (char_get_mob_spec(g, ch) == shop_keeper) {

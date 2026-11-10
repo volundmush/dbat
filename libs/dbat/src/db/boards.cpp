@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/boards.hpp"
 #include "dbat/utils.hpp"
@@ -678,7 +679,7 @@ static void start_post(GameWorld *g, struct board_info *board, struct board_msg 
   announce_new_post(g, board->vnum);
 }
 
-void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, char *arg)
+void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, std::string_view arg)
 {
   struct board_info *board;
 
@@ -698,16 +699,16 @@ void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch
     return;
   }
 
-  skip_spaces(&arg);
-  if (strlen(arg) > 45) {
+  std::string subject(skip_spaces(arg));
+  if (subject.size() > 45) {
     send_to_char(g, ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
     return;
   }
   act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  delete_doubledollar(arg);
+  delete_doubledollar(subject);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n");
-  start_post(g, board, new_message(g, ch, *arg ? arg : "No Subject"), ch);
+  start_post(g, board, new_message(g, ch, !subject.empty() ? subject.c_str() : "No Subject"), ch);
 }
 
 void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int mnum)

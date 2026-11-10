@@ -54,7 +54,7 @@ ACMD(do_assedit)
     }
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
   buf2                  = take_arg(rest);
 

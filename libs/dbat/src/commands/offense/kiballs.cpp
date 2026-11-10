@@ -36,7 +36,7 @@ ACMD(do_geno)
   struct char_data *vict = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
   /* Can they do the technique? */
@@ -136,7 +136,7 @@ ACMD(do_genki)
   struct char_data *vict = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
   /* Can they do the technique? */
@@ -247,7 +247,7 @@ ACMD(do_spiritball)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -473,7 +473,7 @@ ACMD(do_deathball)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -669,7 +669,7 @@ ACMD(do_hellspear)
   double attperc = .3, minimum = .1;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
@@ -800,7 +800,7 @@ ACMD(do_crusher)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1048,7 +1048,7 @@ ACMD(do_blessedhammer)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1267,7 +1267,7 @@ ACMD(do_kiball)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

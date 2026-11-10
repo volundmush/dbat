@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/command.hpp"
 #include "dbat/utils.hpp"
@@ -666,7 +667,7 @@ static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
   return true;
 }
 
-bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
+bool special(GameWorld *g, struct char_data *ch, int cmd, std::string_view arg)
 {
   int j;
   bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
@@ -711,10 +712,10 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, char *arg)
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
+void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view argument)
 {
   int cmd, length;
-  char *line;
+  std::string_view line;
   char arg[MAX_INPUT_LENGTH];
 
   switch (char_get_position(ch)) {
@@ -727,8 +728,8 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
   }
 
   /* just drop to next line for hitting CR */
-  skip_spaces(&argument);
-  if (!*argument)
+  argument = skip_spaces(argument);
+  if (argument.empty())
     return;
 
   /*
@@ -736,15 +737,15 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
    * requested by many people so "'hi" or ";godnet test" is possible.
    * Patch sent by Eric Green and Stefan Wasilewski.
    */
-  if (!isalpha((unsigned char)*argument)) {
+  if (!isalpha((unsigned char)argument[0])) {
     arg[0] = argument[0];
     arg[1] = '\0';
-    line   = argument + 1;
+    line   = argument.substr(1);
   } else { /* the command word, lowercased; forced and scripted lines can be longer than typed ones */
-    for (length = 0; argument[length] && !isspace((unsigned char)argument[length]) && length < (int)sizeof(arg) - 1; length++)
+    for (length = 0; length < (int)argument.size() && !isspace((unsigned char)argument[length]) && length < (int)sizeof(arg) - 1; length++)
       arg[length] = tolower((unsigned char)argument[length]);
     arg[length] = '\0';
-    for (line = argument + length; *line && !isspace((unsigned char)*line); line++); /* any part of an over-long word that didn't fit is dropped */
+    for (line = argument.substr(length); !line.empty() && !isspace((unsigned char)line[0]); line.remove_prefix(1)); /* any part of an over-long word that didn't fit is dropped */
   }
 
   if (!strcasecmp(arg, "-")) {
@@ -755,10 +756,11 @@ void command_interpreter(GameWorld *g, struct char_data *ch, char *argument)
    */
   /* otherwise, find the command */
   {
-    int cont;                                          /* continue the command checks */
-    cont = command_wtrigger(g, ch, arg, line);            /* any world triggers ? */
-    if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
-    if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
+    int cont;                                                                                 /* continue the command checks */
+    std::string trigger_line(line);                                                           /* the triggers want a C string */
+    cont = command_wtrigger(g, ch, arg, trigger_line.data());                                 /* any world triggers ? */
+    if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, trigger_line.data()); /* any mobile triggers ? */
+    if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, trigger_line.data()); /* any object triggers ? */
     if (cont || char_is_dead(ch)) return; /* yes, command trigger took over, or forced them away */
   }
   for (length = strlen(arg), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++) {

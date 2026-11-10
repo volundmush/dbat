@@ -55,7 +55,7 @@ ACMD(do_dig)
   struct descriptor_data *d = char_get_desc(ch); /* will save us some typing */
 
   /* Grab the room's name (if available). */
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   sdir                  = take_arg(rest);
   sroom                 = take_arg(rest);
   new_room_name         = skip_spaces(rest);
@@ -220,7 +220,7 @@ ACMD(do_rcopy)
   std::string arg2;
   int i;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

@@ -135,7 +135,7 @@ ACMD(do_paralyze)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_PARALYZE)) {
@@ -258,7 +258,7 @@ ACMD(do_kura)
   }
 
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -313,7 +313,7 @@ ACMD(do_candy)
   struct obj_data *obj;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
@@ -399,7 +399,7 @@ ACMD(do_future)
 {
   std::string arg;
   struct char_data *vict = nullptr;
-  std::string_view rest  = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest  = argument;
   arg                    = take_arg(rest);
 
   if (char_is_npc(ch) || !char_is_kanassan(ch)) {
@@ -483,7 +483,7 @@ ACMD(do_future)
 ACMD(do_suppress)
 {
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -587,7 +587,7 @@ ACMD(do_implant)
   std::string arg2;
   int found = false;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -733,7 +733,7 @@ ACMD(do_fury)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_halfbreed(ch) || char_is_npc(ch)) {
@@ -781,7 +781,7 @@ ACMD(do_majinize)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_majin(ch)) {
@@ -875,7 +875,7 @@ ACMD(do_spit)
   struct affected_type af = {};
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_SPIT)) {
@@ -957,7 +957,7 @@ ACMD(do_absorb)
   struct char_data *vict = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1225,7 +1225,7 @@ ACMD(do_regenerate)
   int skill   = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   skill = init_skill(g, ch, SKILL_REGENERATE);
@@ -1400,7 +1400,7 @@ ACMD(do_kaioken)
 {
   std::string arg;
   int roll = axion_dice(g, 0), x = 0;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_KAIOKEN)) {
@@ -1646,7 +1646,7 @@ ACMD(do_heal)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!check_skill(g, ch, SKILL_HEAL)) {
@@ -1844,7 +1844,7 @@ ACMD(do_barrier)
   int prob = 0, perc = 0, size = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_BARRIER) && !char_get_skill(ch, SKILL_AQUA_BARRIER)) {
@@ -1947,7 +1947,7 @@ ACMD(do_instant)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -2115,7 +2115,7 @@ ACMD(do_transform)
   }
 
   // Moved this further down. No need to parse the entry if we quit early. -Volund
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -2148,7 +2148,7 @@ ACMD(do_transform)
     }
     // We are all clear to revert.
     if ((char_get_charge(ch) > 0)) {
-      do_charge(g, ch, writable{"release"}, 0, 0);
+      do_charge(g, ch, "release", 0, 0);
     }
     race_echo_revert(g, ch, race_flag_to_tier(cur_form.flag));
     char_plr_set(ch, cur_form.flag, false);
@@ -2231,7 +2231,7 @@ ACMD(do_aid)
   if (char_get_skill(ch, SKILL_SURVIVAL)) {
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -2405,7 +2405,7 @@ ACMD(do_aura)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

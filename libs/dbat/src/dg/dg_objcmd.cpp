@@ -268,7 +268,7 @@ static OCMD(do_otimer)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -289,7 +289,7 @@ static OCMD(do_otransform)
   struct char_data *wearer = nullptr;
   int pos                  = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -344,7 +344,7 @@ static OCMD(do_opurge)
   obj_data *o;
   room_vnum rm;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -393,7 +393,7 @@ static OCMD(do_ogoto)
   room_vnum target;
   std::string arg1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
 
   if (arg1.empty()) {
@@ -419,7 +419,7 @@ static OCMD(do_oteleport)
   room_vnum target, rm;
   std::string arg1, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -570,7 +570,7 @@ static OCMD(do_odamage)
   int dam = 0;
   char_data *ch;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_arg(rest);
   amount                = take_arg(rest);
 
@@ -658,7 +658,7 @@ static OCMD(do_osetval)
   std::string arg1, arg2;
   int position, new_value;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
   if (arg1.empty() || arg2.empty() ||

@@ -43,7 +43,7 @@ ACMD(do_attack)
   if (char_is_android(ch)) {
     stcost *= 0.25;
   }
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
@@ -490,7 +490,7 @@ ACMD(do_attack)
       case 1:
         if (!char_get_fighting(g, ch) && backstab(g, ch, vict, wlvl, dmg)) {
           if (vict != nullptr && getCurPL(g, vict) > 1 && axion_dice(g, 0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-            do_attack2(g, ch, nullptr, 0, 0);
+            do_attack2(g, ch, "", 0, 0);
           }
           pcost(g, ch, 0, stcost);
           return;
@@ -784,7 +784,7 @@ ACMD(do_attack)
         improve_skill(g, ch, SKILL_DUALWIELD, 0);
       }
       if (vict != nullptr && getCurPL(g, vict) > 1 && axion_dice(g, 0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1)) {
-        do_attack2(g, ch, nullptr, 0, 0);
+        do_attack2(g, ch, "", 0, 0);
       }
     }
     handle_multihit(g, ch, vict);
@@ -819,7 +819,7 @@ static ACMD(do_attack2)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_get_equipment(ch, WEAR_WIELD2)) {

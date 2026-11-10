@@ -143,7 +143,7 @@ ACMD(do_carry)
     }
     return;
   } else { /* So not carrying already. */
-    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    std::string_view rest = argument;
     arg                   = take_arg(rest);
 
     if (arg.empty()) {
@@ -227,260 +227,260 @@ void carry_drop(GameWorld *g, struct char_data *ch, int type)
   char_set_carried_by(g, vict, nullptr);
 }
 
-static room_vnum land_location(GameWorld *g, struct char_data *ch, char *arg)
+static room_vnum land_location(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
 
   if (char_get_in_room(ch) == 50) { // Above Earth
-    if (!strcasecmp(arg, "Nexus City")) {
+    if (str_eq_nocase(arg, "Nexus City")) {
       return (300);
     }
-    if (!strcasecmp(arg, "South Ocean")) {
+    if (str_eq_nocase(arg, "South Ocean")) {
       return (800);
     }
-    if (!strcasecmp(arg, "Nexus Field")) {
+    if (str_eq_nocase(arg, "Nexus Field")) {
       return (1150);
     }
-    if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
+    if (str_eq_nocase(arg, "Cherry Blossom Mountain")) {
       return (1180);
     }
-    if (!strcasecmp(arg, "Sandy Desert")) {
+    if (str_eq_nocase(arg, "Sandy Desert")) {
       return (1287);
     }
-    if (!strcasecmp(arg, "Northern Plains")) {
+    if (str_eq_nocase(arg, "Northern Plains")) {
       return (1428);
     }
-    if (!strcasecmp(arg, "Korin's Tower")) {
+    if (str_eq_nocase(arg, "Korin's Tower")) {
       return (1456);
     }
-    if (!strcasecmp(arg, "Kami's Lookout")) {
+    if (str_eq_nocase(arg, "Kami's Lookout")) {
       return (1506);
     }
-    if (!strcasecmp(arg, "Shadow Forest")) {
+    if (str_eq_nocase(arg, "Shadow Forest")) {
       return (1636);
     }
-    if (!strcasecmp(arg, "Decrepit Area")) {
+    if (str_eq_nocase(arg, "Decrepit Area")) {
       return (1710);
     }
-    if (!strcasecmp(arg, "West City")) {
+    if (str_eq_nocase(arg, "West City")) {
       return (19510);
     }
-    if (!strcasecmp(arg, "Hercule Beach")) {
+    if (str_eq_nocase(arg, "Hercule Beach")) {
       return (2141);
     }
-    if (!strcasecmp(arg, "Satan City")) {
+    if (str_eq_nocase(arg, "Satan City")) {
       return (13020);
     }
     send_to_char(g, ch, "You don't know where that made up place is, but decided to land anyway.");
     return (300);
   } else if (char_get_in_room(ch) == 51) { // Above Frigid
-    if (!strcasecmp(arg, "Ice Crown City")) {
+    if (str_eq_nocase(arg, "Ice Crown City")) {
       return (4264);
     }
-    if (!strcasecmp(arg, "Ice Highway")) {
+    if (str_eq_nocase(arg, "Ice Highway")) {
       return (4300);
     }
-    if (!strcasecmp(arg, "Topica Snowfield")) {
+    if (str_eq_nocase(arg, "Topica Snowfield")) {
       return (4351);
     }
-    if (!strcasecmp(arg, "Glug's Volcano")) {
+    if (str_eq_nocase(arg, "Glug's Volcano")) {
       return (4400);
     }
-    if (!strcasecmp(arg, "Platonic Sea")) {
+    if (str_eq_nocase(arg, "Platonic Sea")) {
       return (4600);
     }
-    if (!strcasecmp(arg, "Slave City")) {
+    if (str_eq_nocase(arg, "Slave City")) {
       return (4800);
     }
-    if (!strcasecmp(arg, "Acturian Woods")) {
+    if (str_eq_nocase(arg, "Acturian Woods")) {
       return (5100);
     }
-    if (!strcasecmp(arg, "Desolate Demesne")) {
+    if (str_eq_nocase(arg, "Desolate Demesne")) {
       return (5150);
     }
-    if (!strcasecmp(arg, "Chateau Ishran")) {
+    if (str_eq_nocase(arg, "Chateau Ishran")) {
       return (5165);
     }
-    if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
+    if (str_eq_nocase(arg, "Wyrm Spine Mountain")) {
       return (5200);
     }
-    if (!strcasecmp(arg, "Cloud Ruler Temple")) {
+    if (str_eq_nocase(arg, "Cloud Ruler Temple")) {
       return (5500);
     }
-    if (!strcasecmp(arg, "Koltoan Mine")) {
+    if (str_eq_nocase(arg, "Koltoan Mine")) {
       return (4944);
     }
     send_to_char(g, ch, "You don't know where that made up place is, but decided to land anyway.");
     return (4264);
   } else if (char_get_in_room(ch) == 52) { // Above Konack
-    if (!strcasecmp(arg, "Tiranoc City")) {
+    if (str_eq_nocase(arg, "Tiranoc City")) {
       return (8006);
     }
-    if (!strcasecmp(arg, "Great Oroist Temple")) {
+    if (str_eq_nocase(arg, "Great Oroist Temple")) {
       return (8300);
     }
-    if (!strcasecmp(arg, "Elzthuan Forest")) {
+    if (str_eq_nocase(arg, "Elzthuan Forest")) {
       return (8400);
     }
-    if (!strcasecmp(arg, "Mazori Farm")) {
+    if (str_eq_nocase(arg, "Mazori Farm")) {
       return (8447);
     }
-    if (!strcasecmp(arg, "Dres")) {
+    if (str_eq_nocase(arg, "Dres")) {
       return (8500);
     }
-    if (!strcasecmp(arg, "Colvian Farm")) {
+    if (str_eq_nocase(arg, "Colvian Farm")) {
       return (8600);
     }
-    if (!strcasecmp(arg, "St Alucia")) {
+    if (str_eq_nocase(arg, "St Alucia")) {
       return (8700);
     }
-    if (!strcasecmp(arg, "Meridius Memorial")) {
+    if (str_eq_nocase(arg, "Meridius Memorial")) {
       return (8800);
     }
-    if (!strcasecmp(arg, "Desert of Illusion")) {
+    if (str_eq_nocase(arg, "Desert of Illusion")) {
       return (8900);
     }
-    if (!strcasecmp(arg, "Plains of Confusion")) {
+    if (str_eq_nocase(arg, "Plains of Confusion")) {
       return (8954);
     }
-    if (!strcasecmp(arg, "Turlon Fair")) {
+    if (str_eq_nocase(arg, "Turlon Fair")) {
       return (9200);
     }
-    if (!strcasecmp(arg, "Wetlands")) {
+    if (str_eq_nocase(arg, "Wetlands")) {
       return (9700);
     }
-    if (!strcasecmp(arg, "Kerberos")) {
+    if (str_eq_nocase(arg, "Kerberos")) {
       return (9855);
     }
-    if (!strcasecmp(arg, "Shaeras Mansion")) {
+    if (str_eq_nocase(arg, "Shaeras Mansion")) {
       return (9864);
     }
-    if (!strcasecmp(arg, "Slavinus Ravine")) {
+    if (str_eq_nocase(arg, "Slavinus Ravine")) {
       return (9900);
     }
-    if (!strcasecmp(arg, "Furian Citadel")) {
+    if (str_eq_nocase(arg, "Furian Citadel")) {
       return (9949);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (8006);
   } else if (char_get_in_room(ch) == 53) { // Above Vegeta
-    if (!strcasecmp(arg, "Vegetos City")) {
+    if (str_eq_nocase(arg, "Vegetos City")) {
       return (2226);
     }
-    if (!strcasecmp(arg, "Blood Dunes")) {
+    if (str_eq_nocase(arg, "Blood Dunes")) {
       return (2600);
     }
-    if (!strcasecmp(arg, "Ancestral Mountains")) {
+    if (str_eq_nocase(arg, "Ancestral Mountains")) {
       return (2616);
     }
-    if (!strcasecmp(arg, "Destopa Swamp")) {
+    if (str_eq_nocase(arg, "Destopa Swamp")) {
       return (2709);
     }
-    if (!strcasecmp(arg, "Pride forest")) {
+    if (str_eq_nocase(arg, "Pride forest")) {
       return (2800);
     }
-    if (!strcasecmp(arg, "Pride Tower")) {
+    if (str_eq_nocase(arg, "Pride Tower")) {
       return (2899);
     }
-    if (!strcasecmp(arg, "Ruby Cave")) {
+    if (str_eq_nocase(arg, "Ruby Cave")) {
       return (2615);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (2226);
   } else if (char_get_in_room(ch) == 54) { // Above Namek
-    if (!strcasecmp(arg, "Senzu Village")) {
+    if (str_eq_nocase(arg, "Senzu Village")) {
       return (11600);
     }
-    if (!strcasecmp(arg, "Guru's House")) {
+    if (str_eq_nocase(arg, "Guru's House")) {
       return (10182);
     }
-    if (!strcasecmp(arg, "Crystalline Cave")) {
+    if (str_eq_nocase(arg, "Crystalline Cave")) {
       return (10474);
     }
-    if (!strcasecmp(arg, "Elder Village")) {
+    if (str_eq_nocase(arg, "Elder Village")) {
       return (13300);
     }
-    if (!strcasecmp(arg, "Frieza's Ship")) {
+    if (str_eq_nocase(arg, "Frieza's Ship")) {
       return (10203);
     }
-    if (!strcasecmp(arg, "Kakureta Village")) {
+    if (str_eq_nocase(arg, "Kakureta Village")) {
       return (10922);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (11600);
   } else if (char_get_in_room(ch) == 55) { // Above Aether
-    if (!strcasecmp(arg, "Haven City")) {
+    if (str_eq_nocase(arg, "Haven City")) {
       return (12010);
     }
-    if (!strcasecmp(arg, "Serenity Lake")) {
+    if (str_eq_nocase(arg, "Serenity Lake")) {
       return (12103);
     }
-    if (!strcasecmp(arg, "Kaiju Forest")) {
+    if (str_eq_nocase(arg, "Kaiju Forest")) {
       return (12300);
     }
-    if (!strcasecmp(arg, "Ortusian Temple")) {
+    if (str_eq_nocase(arg, "Ortusian Temple")) {
       return (12400);
     }
-    if (!strcasecmp(arg, "Silent Glade")) {
+    if (str_eq_nocase(arg, "Silent Glade")) {
       return (12480);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (12010);
   } else if (char_get_in_room(ch) == 56) { // Above Yardrat
-    if (!strcasecmp(arg, "Yardra City")) {
+    if (str_eq_nocase(arg, "Yardra City")) {
       return (14008);
     }
-    if (!strcasecmp(arg, "Jade Forest")) {
+    if (str_eq_nocase(arg, "Jade Forest")) {
       return (14100);
     }
-    if (!strcasecmp(arg, "Jade Cliffs")) {
+    if (str_eq_nocase(arg, "Jade Cliffs")) {
       return (14200);
     }
-    if (!strcasecmp(arg, "Mount Valaria")) {
+    if (str_eq_nocase(arg, "Mount Valaria")) {
       return (14300);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (14008);
   } else if (char_get_in_room(ch) == 198) { // Above Cerria
-    if (!strcasecmp(arg, "Cerria Colony")) {
+    if (str_eq_nocase(arg, "Cerria Colony")) {
       return (17531);
     }
-    if (!strcasecmp(arg, "Crystalline Forest")) {
+    if (str_eq_nocase(arg, "Crystalline Forest")) {
       return (7950);
     }
-    if (!strcasecmp(arg, "Fistarl Volcano")) {
+    if (str_eq_nocase(arg, "Fistarl Volcano")) {
       return (17420);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (17531);
   } else if (char_get_in_room(ch) == 57) { // Above Zennith
-    if (!strcasecmp(arg, "Utatlan City")) {
+    if (str_eq_nocase(arg, "Utatlan City")) {
       return (3412);
     }
-    if (!strcasecmp(arg, "Zenith Jungle")) {
+    if (str_eq_nocase(arg, "Zenith Jungle")) {
       return (3520);
     }
-    if (!strcasecmp(arg, "Ancient Castle")) {
+    if (str_eq_nocase(arg, "Ancient Castle")) {
       return (19600);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (3412);
   } else if (char_get_in_room(ch) == 58) { // Above Kanassa
-    if (!strcasecmp(arg, "Aquis City")) {
+    if (str_eq_nocase(arg, "Aquis City")) {
       return (14904);
     }
-    if (!strcasecmp(arg, "Yunkai Pirate Base")) {
+    if (str_eq_nocase(arg, "Yunkai Pirate Base")) {
       return (15655);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
     return (14904);
   } else if (char_get_in_room(ch) == 59) { // Above Arlia
-    if (!strcasecmp(arg, "Janacre")) {
+    if (str_eq_nocase(arg, "Janacre")) {
       return (16009);
     }
-    if (!strcasecmp(arg, "Arlian Wasteland")) {
+    if (str_eq_nocase(arg, "Arlian Wasteland")) {
       return (16544);
     }
-    if (!strcasecmp(arg, "Arlia Mine")) {
+    if (str_eq_nocase(arg, "Arlia Mine")) {
       return (16600);
     }
     send_to_char(g, ch, "you don't know where that made up place is, but decided to land anyway.");
@@ -557,13 +557,13 @@ ACMD(do_land)
 
   int above_planet = true;
   room_vnum inroom = char_get_in_room(ch);
-  skip_spaces(&argument);
+  argument         = skip_spaces(argument);
 
   if (inroom != 50 && inroom != 198 && inroom != 51 && inroom != 52 && inroom != 53 && inroom != 54 && inroom != 55 && inroom != 56 && inroom != 57 && inroom != 58 && inroom != 59) {
     above_planet = false;
   }
 
-  if (!*argument) {
+  if (argument.empty()) {
     if (above_planet == true) {
       send_to_char(g, ch, "Land where?\n");
       disp_locations(g, ch);
@@ -658,7 +658,6 @@ bool has_o2(struct char_data *ch)
  */
 bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
 {
-  char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
   room_vnum was_in = char_get_in_room(ch);
@@ -669,7 +668,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
    * Check for special routines (North is 1 in command list, but 0 here) Note
    * -- only check if following; this avoids 'double spec-proc' bug
    */
-  if (need_specials_check && special(g, ch, dir + 1, throwaway))
+  if (need_specials_check && special(g, ch, dir + 1, ""))
     return false;
 
   /* blocked by a leave trigger ? */
@@ -980,7 +979,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
       act(g, "@rYour legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "@R$n@r's legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_ROOM);
       if (char_is_npc(ch) && char_is_humanoid(ch) && rand_number(g, 1, 2) == 2) {
-        do_fly(g, ch, nullptr, 0, 0);
+        do_fly(g, ch, "", 0, 0);
       }
       decCurHealth(g, ch, getEffMaxPL(g, ch) / 20, 0);
       if (getCurPL(g, ch) <= 0) {
@@ -1781,12 +1780,12 @@ ACMD(do_gen_door)
   struct obj_data *obj     = nullptr;
   struct char_data *victim = nullptr;
 
-  skip_spaces(&argument);
-  if (!*argument) {
+  argument = skip_spaces(argument);
+  if (argument.empty()) {
     send_to_char(g, ch, "%c%s what?\r\n", toupper(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
     return;
   }
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   type                  = take_arg(rest);
   dir                   = take_arg(rest);
   if (!generic_find(g, type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
@@ -2020,7 +2019,7 @@ ACMD(do_enter)
   std::string buf;
   int door, move_dir = -1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (!buf.empty()) { /* an argument was supplied, search for door keyword */
@@ -2331,7 +2330,7 @@ ACMD(do_fly)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_get_absorbing(g, ch) || char_get_absorbby(g, ch)) {
@@ -2555,7 +2554,7 @@ ACMD(do_sit)
 {
   struct obj_data *chair = nullptr;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
@@ -2579,7 +2578,7 @@ ACMD(do_sit)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, nullptr, 0, 0);
+    do_fly(g, ch, "", 0, 0);
   }
 
   if (arg.empty()) {
@@ -2669,7 +2668,7 @@ ACMD(do_rest)
 {
   struct obj_data *chair = nullptr;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_PILOTING)) {
@@ -2715,7 +2714,7 @@ ACMD(do_rest)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, nullptr, 0, 0);
+    do_fly(g, ch, "", 0, 0);
   }
 
   if (arg.empty()) {
@@ -2812,7 +2811,7 @@ ACMD(do_sleep)
 {
   struct obj_data *chair = nullptr;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -2877,7 +2876,7 @@ ACMD(do_sleep)
   }
 
   if (char_aff_flagged(ch, AFF_FLYING)) {
-    do_fly(g, ch, nullptr, 0, 0);
+    do_fly(g, ch, "", 0, 0);
   }
 
   if (arg.empty()) {
@@ -2986,7 +2985,7 @@ ACMD(do_wake)
   struct char_data *vict;
   int self = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_aff_flagged(ch, AFF_KNOCKED)) {
@@ -3067,7 +3066,7 @@ ACMD(do_follow)
   std::string buf;
   struct char_data *leader;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (char_plr_flagged(ch, PLR_HEALT)) {

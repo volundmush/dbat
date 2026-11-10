@@ -110,7 +110,7 @@ ACMD(do_masound)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  if (!argument || !*argument) {
+  if (argument.empty()) {
     mob_log(g, ch, "masound called with no argument");
     return;
   }
@@ -139,7 +139,7 @@ ACMD(do_mheal)
   if (!mob_cmd_allowed(g, ch, false))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -172,7 +172,7 @@ ACMD(do_mkill)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -242,7 +242,7 @@ ACMD(do_mjunk)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -281,7 +281,7 @@ ACMD(do_mechoaround)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_arg(rest);
   std::string p(skip_spaces(rest));
 
@@ -314,7 +314,7 @@ ACMD(do_msend)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_arg(rest);
   std::string p(skip_spaces(rest));
 
@@ -339,19 +339,16 @@ ACMD(do_msend)
 /* prints the message to the room at large */
 ACMD(do_mecho)
 {
-  char *p;
-
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  if (!*argument) {
+  if (argument.empty()) {
     mob_log(g, ch, "mecho called with no arguments");
     return;
   }
-  p = argument;
-  skip_spaces(&p);
+  std::string p(skip_spaces(argument));
 
-  sub_write(g, p, ch, true, TO_ROOM);
+  sub_write(g, p.data(), ch, true, TO_ROOM);
 }
 
 ACMD(do_mzoneecho)
@@ -361,7 +358,7 @@ ACMD(do_mzoneecho)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest   = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest   = argument;
   std::string room_number = take_word(rest);
   std::string msg(skip_spaces(rest));
 
@@ -393,7 +390,7 @@ ACMD(do_mload)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
   std::string target(skip_spaces(rest)); /* where to load it */
@@ -499,7 +496,7 @@ ACMD(do_mpurge)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -555,7 +552,7 @@ ACMD(do_mgoto)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -587,7 +584,7 @@ ACMD(do_mat)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
   if (arg.empty() || rest.empty()) {
@@ -603,8 +600,7 @@ ACMD(do_mat)
   original = char_get_in_room(ch);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  std::string line(rest);
-  command_interpreter(g, ch, line.data());
+  command_interpreter(g, ch, rest);
 
   /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
   if (char_get_in_room(ch) == location) {
@@ -626,7 +622,7 @@ ACMD(do_mteleport)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -684,7 +680,7 @@ ACMD(do_mdamage)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   name                  = take_arg(rest);
   amount                = take_arg(rest);
 
@@ -717,9 +713,8 @@ ACMD(do_mforce)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_arg(rest);
-  std::string line(rest); /* the command; every target is given this same line */
 
   if (arg.empty() || rest.empty()) {
     mob_log(g, ch, "mforce: bad syntax");
@@ -737,7 +732,7 @@ ACMD(do_mforce)
         vch = i->character;
         if (char_get_level(vch) < char_get_level(ch) && char_can_see(g, ch, vch) &&
             valid_dg_target(g, vch, 0)) {
-          command_interpreter(g, vch, line.data());
+          command_interpreter(g, vch, rest);
         }
       }
     }
@@ -760,7 +755,7 @@ ACMD(do_mforce)
     }
 
     if (valid_dg_target(g, victim, 0))
-      command_interpreter(g, victim, line.data());
+      command_interpreter(g, victim, rest);
   }
 }
 
@@ -773,7 +768,7 @@ ACMD(do_mremember)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
@@ -817,7 +812,7 @@ ACMD(do_mforget)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -872,7 +867,7 @@ ACMD(do_mtransform)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty())
@@ -941,7 +936,7 @@ ACMD(do_mdoor)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   target                = take_arg(rest);
   direction             = take_arg(rest);
   field                 = take_arg(rest);
@@ -979,7 +974,7 @@ ACMD(do_mfollow)
   if (!mob_cmd_allowed(g, ch, true))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (buf.empty()) {
@@ -1029,7 +1024,7 @@ ACMD(do_mrecho)
 
   if (!mob_cmd_allowed(g, ch, false))
     return;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   start                 = take_arg(rest);
   finish                = take_arg(rest);
 

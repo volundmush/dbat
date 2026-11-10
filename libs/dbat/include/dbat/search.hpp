@@ -20,8 +20,7 @@ int get_number(std::string &name);
 /*
  * The lookups take the name as a std::string they may change, as they always have: with no number given, the
  * "N." comes off the front, and get_char_room_vis() capitalises it as it goes. A caller printing the name
- * afterwards prints what is left. The char * forms do the same to the caller's buffer; they go once the
- * commands calling them pass std::strings.
+ * afterwards prints what is left.
  */
 struct char_data *get_char_room(GameWorld *g, std::string &name, int *number, room_vnum room);
 struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, int inroom);
@@ -33,16 +32,12 @@ struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, std::string &na
 struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
 int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
 
+/* The char * forms, which change the caller's buffer the same way, for the DG message parser and the shopkeeper,
+ * which still work on char * lines */
 int get_number(char **name);
-struct char_data *get_char_room(GameWorld *g, char *name, int *number, room_vnum room);
-struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int inroom);
-struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, char *name, int *number, int where);
 struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *name, int *number);
-struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, char *name, int *number);
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, const id_list &list);
-struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, char *name, int *num);
 struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]);
-int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *num, struct obj_data *equipment[]);
 
 struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, const id_list &list);
 struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr);
@@ -56,7 +51,6 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
 
 /* FIND_ALL for "all", FIND_ALLDOT for "all.x" (taking "all." off arg), FIND_INDIV otherwise */
 int find_all_dots(std::string &arg);
-int find_all_dots(char *arg);
 
 constexpr int FIND_INDIV  = 0;
 constexpr int FIND_ALL    = 1;

@@ -89,7 +89,7 @@ ACMD(do_train)
   int64_t total = 0, weight = 0, bonus = 0, cost = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   weight = getCurCarriedWeight(ch);
@@ -502,7 +502,7 @@ ACMD(do_potential)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!know_skill(g, ch, SKILL_POTENTIAL)) {
@@ -809,7 +809,7 @@ ACMD(do_meditate)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1382,7 +1382,7 @@ void base_update(GameWorld *g)
         incCurHealth(g, d->character, drain1 * .5, true);
 
         if (isFullKI(d->character) && isFullST(d->character)) {
-          do_absorb(g, d->character, nullptr, 0, 0);
+          do_absorb(g, d->character, "", 0, 0);
         }
       }
       continue;

@@ -37,7 +37,7 @@ ACMD(do_disable)
     return;
   }
 
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
 
   if (text.empty()) {       /* Nothing specified. Show disabled commands. */
     if (!g->disabled_first) /* Any disabled at all ? */

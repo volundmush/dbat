@@ -1261,7 +1261,8 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
           loops++;
           trig->loops++;
           if (loops == 40) {
-            process_wait(g, go, trig, type, writable{"wait 1"}, cl);
+            char wait_a_pulse[] = "wait 1";
+            process_wait(g, go, trig, type, wait_a_pulse, cl);
             g->script_depth--;
             return ret_val;
           }

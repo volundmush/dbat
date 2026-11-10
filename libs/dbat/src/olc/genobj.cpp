@@ -346,11 +346,14 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
     bool changed = false;
     for (cmd_no = 0; zone_get_cmd(g, zone, cmd_no)->command != 'S'; cmd_no++) {
       switch (zone_get_cmd(g, zone, cmd_no)->command) {
-        case 'P':
-          if (zone_get_cmd(g, zone, cmd_no)->arg3 == rnum) {
+        case 'P': /* the object put, or what it's put in */
+          if (zone_get_cmd(g, zone, cmd_no)->arg1 == rnum || zone_get_cmd(g, zone, cmd_no)->arg3 == rnum) {
             zone_get_cmd(g, zone, cmd_no)->command = '*';
-            zone_get_cmd(g, zone, cmd_no)->arg3    = NOTHING;
-            changed                             = true;
+            if (zone_get_cmd(g, zone, cmd_no)->arg1 == rnum)
+              zone_get_cmd(g, zone, cmd_no)->arg1 = NOTHING;
+            if (zone_get_cmd(g, zone, cmd_no)->arg3 == rnum)
+              zone_get_cmd(g, zone, cmd_no)->arg3 = NOTHING;
+            changed = true;
           }
           break;
         case 'O':

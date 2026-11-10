@@ -63,7 +63,7 @@ ACMD(do_restring)
   struct obj_data *obj;
   int pay = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_get_in_room(ch) >= 178 && char_get_in_room(ch) <= 184) {
@@ -114,7 +114,7 @@ ACMD(do_fish)
 
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -480,7 +480,7 @@ static void catch_fish(GameWorld *g, struct char_data *ch, int quality)
 
   obj_set_value(pole, 0, 0);
   obj_to_room(g, fish, char_get_in_room(ch));
-  do_get(g, ch, writable{"fish"}, 0, 0);
+  do_get(g, ch, "fish", 0, 0);
   send_to_char(g, ch, "@D[@cFish Weight@D: @G%" PRId64 "@D]@n\r\n", obj_get_weight(fish));
   char_plr_set(ch, PLR_FISHING, false);
   char_set_accuracy_mod(ch, 0);
@@ -499,7 +499,7 @@ ACMD(do_extract)
   struct obj_data *obj = nullptr, *obj2 = nullptr;
   int skill = char_get_skill(ch, SKILL_EXTRACT), chance = axion_dice(g, 0);
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   arg2                  = take_arg(rest);
   arg3                  = take_arg(rest);
@@ -636,7 +636,7 @@ ACMD(do_runic)
   std::string arg, arg2;
   int skill = char_get_skill(ch, SKILL_RUNIC), bonus = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1004,7 +1004,7 @@ ACMD(do_resize)
   std::string arg, arg2;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1076,7 +1076,7 @@ ACMD(do_bury)
 
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1169,7 +1169,7 @@ ACMD(do_silk)
   struct obj_data *obj = nullptr, *weaved = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
   int prob = char_get_skill(ch, SKILL_SILK), perc = rand_number(g, 1, 120);
@@ -1256,7 +1256,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, nullptr, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, nullptr, TO_ROOM);
-        do_get(g, ch, writable{"headsash"}, 0, 0);
+        do_get(g, ch, "headsash", 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (str_eq_nocase(arg2, "wrist")) {
@@ -1315,7 +1315,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, nullptr, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, nullptr, TO_ROOM);
-        do_get(g, ch, writable{"wristband"}, 0, 0);
+        do_get(g, ch, "wristband", 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (str_eq_nocase(arg2, "belt")) {
@@ -1374,7 +1374,7 @@ ACMD(do_silk)
         }
         act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, nullptr, TO_CHAR);
         act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, nullptr, TO_ROOM);
-        do_get(g, ch, writable{"belt"}, 0, 0);
+        do_get(g, ch, "belt", 0, 0);
         extract_obj(g, obj);
         char_set_wait(ch, PULSE_4SEC);
       } else {
@@ -1976,7 +1976,7 @@ ACMD(do_cook)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_is_npc(ch))
@@ -2246,7 +2246,7 @@ ACMD(do_feed)
   struct char_data *vict;
   struct obj_data *obj;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -2317,7 +2317,7 @@ ACMD(do_spoil)
   struct obj_data *obj;
   int type = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

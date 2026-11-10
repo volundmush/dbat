@@ -158,14 +158,14 @@ ACMD(do_help)
   if (!char_get_desc(ch))
     return;
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument));
 
   if (g->help_table.empty()) {
     send_to_char(g, ch, "No help available.\r\n");
     return;
   }
 
-  if (!*argument) {
+  if (text.empty()) {
     if (char_get_admlevel(ch) < ADMLVL_IMMORT)
       send_to_char(g, ch, "%s", g->help.c_str());
     else
@@ -173,21 +173,21 @@ ACMD(do_help)
     return;
   }
 
-  space_to_minus(argument);
+  space_to_minus(text.data());
 
-  if ((mid = search_help(g, argument, char_get_admlevel(ch))) == NOWHERE) {
+  if ((mid = search_help(g, text.c_str(), char_get_admlevel(ch))) == NOWHERE) {
     int i, found = 0;
     send_to_char(g, ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), argument);
+      mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "%s tried to get help on %s", char_get_name(ch), text.c_str());
     }
     for (i = 0; i < (int)g->help_table.size(); i++) {
       if (g->help_table[i].min_level > char_get_admlevel(ch))
         continue;
       /* To help narrow down results, if they don't start with the same letters, move on */
-      if (*argument != *g->help_table[i].keywords.c_str())
+      if (text[0] != *g->help_table[i].keywords.c_str())
         continue;
-      if (levenshtein_distance(argument, g->help_table[i].keywords.c_str()) <= 2) {
+      if (levenshtein_distance(text.c_str(), g->help_table[i].keywords.c_str()) <= 2) {
         if (!found) {
           send_to_char(g, ch, "\r\nDid you mean:\r\n");
           found = 1;
@@ -215,7 +215,7 @@ ACMD(do_gen_ps)
 {
   std::string arg;
   char bum[10000];
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   switch (subcmd) {
@@ -281,7 +281,7 @@ ACMD(do_color)
   /*if (IS_NPC(ch))
     return;*/
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
 
   if (arg.empty()) {
@@ -438,7 +438,7 @@ ACMD(do_commands)
   std::string arg;
   char label[MAX_INPUT_LENGTH];
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!arg.empty()) {
@@ -499,7 +499,7 @@ ACMD(do_history)
   std::string arg;
   int type;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   type = search_block(arg, history_types, false);

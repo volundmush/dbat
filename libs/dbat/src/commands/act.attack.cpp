@@ -45,7 +45,7 @@ ACMD(do_lightgrenade)
   struct char_data *targ = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -230,7 +230,7 @@ ACMD(do_breath)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -428,7 +428,7 @@ ACMD(do_ram)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -605,7 +605,7 @@ ACMD(do_strike)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_is_npc(ch)) {
@@ -794,7 +794,7 @@ ACMD(do_combine)
   struct char_data *vict;
   int fire = false, temp = -1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -912,7 +912,7 @@ ACMD(do_sunder)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1107,7 +1107,7 @@ ACMD(do_zen)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1328,10 +1328,10 @@ ACMD(do_zen)
             solo_gain(g, ch, vict);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-            do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
+            do_get(g, ch, "all.zenni corpse", 0, 0);
           }
           if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-            do_get(g, ch, writable{"all corpse"}, 0, 0);
+            do_get(g, ch, "all corpse", 0, 0);
           }
         } else if (dmg > getEffMaxPL(g, vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
           if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(g, 1, 101) && (getCurKI(g, vict)) >= getMaxKI(g, vict) / 40) {
@@ -1352,10 +1352,10 @@ ACMD(do_zen)
               solo_gain(g, ch, vict);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
-              do_get(g, ch, writable{"all.zenni corpse"}, 0, 0);
+              do_get(g, ch, "all.zenni corpse", 0, 0);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
-              do_get(g, ch, writable{"all corpse"}, 0, 0);
+              do_get(g, ch, "all corpse", 0, 0);
             }
           }
         } else {
@@ -1463,7 +1463,7 @@ ACMD(do_malice)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -1682,7 +1682,7 @@ ACMD(do_nova)
   double attperc = .20, minimum = .1;
   std::string arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg2                  = take_arg(rest);
 
   /* Can they do the technique? */
@@ -1847,7 +1847,7 @@ ACMD(do_head)
   std::string arg;
   double attperc = 0;
   int mult;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
@@ -2072,7 +2072,7 @@ ACMD(do_bash)
   std::string arg;
   double attperc = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (playing_song(g, ch)) {
@@ -2281,7 +2281,7 @@ ACMD(do_seishou)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -2467,7 +2467,7 @@ ACMD(do_throw)
   int64_t damage;
 
   char_set_throws(ch, rand_number(g, 1, 3)); /* (set by the interpreter before, for any "throw") */
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_word(rest);
   chunk                 = skip_spaces(rest);
 
@@ -3036,7 +3036,7 @@ ACMD(do_razor)
   struct obj_data *obj;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3220,7 +3220,7 @@ ACMD(do_spike)
   int64_t dmg;
   double attperc = .14, minimum = .05;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3546,7 +3546,7 @@ ACMD(do_koteiru)
   std::string arg, arg2;
   double attperc = .3, minimum = .1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3743,7 +3743,7 @@ ACMD(do_hspiral)
   std::string arg, arg2;
   double attperc = .3, minimum = .15;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -3916,7 +3916,7 @@ ACMD(do_spiral)
   struct char_data *vict;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   /* Can they do the technique? */
@@ -3982,7 +3982,7 @@ ACMD(do_breaker)
   std::string arg, arg2;
   double attperc = .14, minimum = .05;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 

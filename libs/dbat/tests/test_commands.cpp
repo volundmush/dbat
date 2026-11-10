@@ -146,7 +146,8 @@ static void audit_problem(void *, const char *problem)
 
 static void play_case(GameWorld *g, struct char_data *ch, struct char_data *victim, enum state state, const char *line)
 {
-  struct char_data *dummy = get_char_room_vis(g, ch, writable{"dummy"}, nullptr);
+  std::string name        = "dummy";
+  struct char_data *dummy = get_char_room_vis(g, ch, name, nullptr);
 
   switch (state) {
     case STANDING:

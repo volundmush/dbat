@@ -407,7 +407,7 @@ ACMD(do_hcontrol)
 {
   std::string arg1, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg1                  = take_word(rest);
   arg2                  = skip_spaces(rest);
 
@@ -429,7 +429,7 @@ ACMD(do_house)
   std::string arg;
   int i, j, id;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))

@@ -61,7 +61,7 @@ ACMD(do_oasis_hedit)
     return;
   }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -437,7 +437,7 @@ ACMD(do_hindex)
   int len, count = 0, i, num = 0;
   char buf[MAX_STRING_LENGTH];
 
-  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
+  std::string text(skip_spaces(argument));
 
   if (text.empty()) {
     send_to_char(g, ch, "Usage: hindex <string>\r\n");

@@ -607,7 +607,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
     struct char_data *mob = read_mobile(g, 300);
 
     char_to_room(g, mob, char_get_in_room(ch));
-    command_interpreter(g, mob, writable{"snet 5"});
+    command_interpreter(g, mob, "snet 5");
     extract_char(g, mob);
     finish_extractions(g);
   }

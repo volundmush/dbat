@@ -434,7 +434,7 @@ ACMD(do_song)
   std::string arg, arg2;
   int skill = char_get_skill(ch, SKILL_MYSTICMUSIC);
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
   if (arg.empty()) {

@@ -56,7 +56,7 @@ ACMD(do_oasis_aedit)
       return;
     }
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -748,7 +748,7 @@ ACMD(do_astat)
   if (char_is_npc(ch))
     return;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {

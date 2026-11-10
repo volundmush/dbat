@@ -54,7 +54,7 @@ ACMD(do_mimic)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_MIMIC)) {
@@ -173,7 +173,7 @@ ACMD(do_table)
   struct obj_data *obj = nullptr, *obj2 = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -213,7 +213,8 @@ ACMD(do_draw)
   struct obj_data *obj = nullptr, *obj3 = nullptr;
   int drawn = false;
 
-  if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
+  std::string what = "case";
+  if (!(obj = get_obj_in_list_vis(g, ch, what, nullptr, char_get_inventory(ch)))) {
     send_to_char(g, ch, "You don't have a case.\r\n");
     return;
   }
@@ -250,7 +251,8 @@ ACMD(do_shuffle)
   struct obj_data *obj = nullptr;
   int count = 0;
 
-  if (!(obj = get_obj_in_list_vis(g, ch, writable{"case"}, nullptr, char_get_inventory(ch)))) {
+  std::string what = "case";
+  if (!(obj = get_obj_in_list_vis(g, ch, what, nullptr, char_get_inventory(ch)))) {
     send_to_char(g, ch, "You don't have a case.\r\n");
     return;
   }
@@ -297,7 +299,7 @@ ACMD(do_hand)
   std::string arg;
   int count = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -360,7 +362,7 @@ ACMD(do_post)
   struct obj_data *obj;
   struct obj_data *obj2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -441,7 +443,7 @@ ACMD(do_play)
 
   struct obj_data *obj = nullptr, *obj2 = nullptr;
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -477,7 +479,7 @@ ACMD(do_nickname)
   struct obj_data *obj = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -551,7 +553,7 @@ ACMD(do_showoff)
   struct char_data *vict = nullptr;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -708,7 +710,7 @@ ACMD(do_intro)
   std::string arg, arg2;
   struct char_data *vict;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -772,7 +774,7 @@ ACMD(do_rptrans)
   int amt = 0;
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -826,21 +828,19 @@ ACMD(do_rptrans)
 
 ACMD(do_rdisplay)
 {
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
   if (char_is_npc(ch)) {
     return;
   }
 
-  if (!*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "Clearing room display.\r\n");
     char_set_rdisplay(ch, "Empty");
   } else {
-    char derp[MAX_STRING_LENGTH];
+    std::string derp(argument);
 
-    strcpy(derp, argument);
-
-    send_to_char(g, ch, "You set your display to; %s\r\n", derp);
+    send_to_char(g, ch, "You set your display to; %s\r\n", derp.c_str());
     char_set_rdisplay(ch, derp);
   }
 }

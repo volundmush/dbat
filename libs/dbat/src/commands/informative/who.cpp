@@ -54,7 +54,7 @@ ACMD(do_finger)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -80,8 +80,8 @@ ACMD(do_who)
   int who_room = 0, showgroup = 0, showleader = 0;
   const char *line_color = "@n";
 
-  skip_spaces(&argument);
-  strcpy(buf, argument); /* strcpy: OK (sizeof: argument == buf) */
+  argument = skip_spaces(argument);
+  snprintf(buf, sizeof(buf), "%s", std::string(argument).c_str());
   name_search[0] = '\0';
 
   struct {
@@ -303,7 +303,7 @@ ACMD(do_users)
   int showclass = 0, outlaws = 0, playing = 0, deadweight = 0, showrace = 0;
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   while (!rest.empty()) {
     arg  = take_word(rest);
     rest = skip_spaces(rest);
@@ -568,7 +568,7 @@ ACMD(do_where)
 {
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (char_adm_flagged(ch, ADM_FULLWHERE) || char_get_admlevel(ch) > 4)
@@ -742,15 +742,15 @@ ACMD(do_whois)
   };
 
   struct char_data *victim = nullptr;
-  skip_spaces(&argument);
+  argument                 = skip_spaces(argument);
 
-  if (!*argument) {
+  if (argument.empty()) {
     send_to_char(g, ch, "Who?\r\n");
   } else {
     victim = new char_data();
     clear_char(victim);
     char_make_player_specials(victim);
-    if (load_char(g, argument, victim) >= 0) {
+    if (load_char(g, std::string(argument).c_str(), victim) >= 0) {
       clan = false;
       send_to_char(g, ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
       if (char_get_admlevel(victim) >= ADMLVL_IMMORT) {

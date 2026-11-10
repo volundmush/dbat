@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <ctime>
 #include <cinttypes> /* PRId64 / SCNd64 for int64_t in printf and scanf */
+#include <string_view>
 
 typedef int IDXTYPE;
 constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
@@ -89,7 +90,7 @@ typedef struct transforms_available transforms_available;
 typedef struct pclean_criteria_data pclean_criteria_data;
 typedef struct GameWorld GameWorld;
 
-#define ACMD(name)    void(name)(GameWorld * g, struct char_data * ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, char *argument)
+#define ACMD(name)    void(name)(GameWorld * g, struct char_data * ch, std::string_view argument, int cmd, int subcmd)
+#define SPECIAL(name) int(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, std::string_view argument)
 typedef SPECIAL((*spec_proc_func));
 

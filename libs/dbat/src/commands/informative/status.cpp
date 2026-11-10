@@ -56,7 +56,7 @@ ACMD(do_evolve)
   }
 
   std::string arg;
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   int64_t plcost = char_get_level(ch), stcost = char_get_level(ch), kicost = char_get_level(ch);
@@ -189,7 +189,7 @@ ACMD(do_perf)
   std::string arg, arg2;
   int i, skill = 1, found = false, type = 0;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -285,7 +285,7 @@ ACMD(do_score)
 
   std::string arg;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -564,7 +564,7 @@ ACMD(do_status)
       "@rForgotten@n",
       "\n"};
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -1381,7 +1381,7 @@ ACMD(do_consider)
   struct char_data *victim;
   int diff;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
@@ -1425,7 +1425,7 @@ ACMD(do_diagnose)
   std::string buf;
   struct char_data *vict;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf                   = take_arg(rest);
 
   if (!buf.empty()) {

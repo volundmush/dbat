@@ -306,7 +306,7 @@ ACMD(do_oasis_cedit)
   struct descriptor_data *d;
   std::string buf1;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   buf1                  = take_arg(rest);
 
   if (char_get_admlevel(ch) < ADMLVL_GRGOD) {

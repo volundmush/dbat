@@ -139,7 +139,7 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
     } else if (k->character && char_get_idnum(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
 
-      do_return(g, k->character, nullptr, 0, 0);
+      do_return(g, k->character, "", 0, 0);
     } else if (k->character && char_get_idnum(k->character) == id) {
       /* Character taking over their own body. */
 

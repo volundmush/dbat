@@ -298,7 +298,7 @@ ACMD(do_skillset)
   char help_text[MAX_STRING_LENGTH];
   int skill, value, i = 0, qend;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   std::string name      = take_arg(rest);
 
   if (name.empty()) { /* no arguments. print an informative text */

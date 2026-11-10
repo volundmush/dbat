@@ -75,7 +75,7 @@ ACMD(do_lag)
 
   std::string arg, arg2;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   arg2                  = take_arg(rest);
 
@@ -135,7 +135,7 @@ ACMD(do_shutdown)
     send_to_char(g, ch, "If you want to shut something down, say so!\r\n");
     return;
   }
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
 
   if (arg.empty()) {
@@ -213,7 +213,7 @@ ACMD(do_copyover)
   std::string arg;
   int secs;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (arg.empty()) {
     execute_copyover(g);
@@ -402,7 +402,7 @@ ACMD(do_dc)
   struct descriptor_data *d;
   int num_to_dc;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (!(num_to_dc = parse_int(arg))) {
     send_to_char(g, ch, "Usage: DC <user number> (type USERS for a list)\r\n");
@@ -460,7 +460,7 @@ ACMD(do_wizlock)
   int value;
   const char *when;
 
-  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string_view rest = argument;
   arg                   = take_arg(rest);
   if (!arg.empty()) {
     value = parse_int(arg);

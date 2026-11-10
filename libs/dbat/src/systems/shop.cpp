@@ -1275,31 +1275,32 @@ SPECIAL(shop_keeper)
       snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
       act(g, argm, false, ch, nullptr, keeper, TO_CHAR);
       act(g, argm, false, ch, nullptr, keeper, TO_ROOM);
-      do_action(g, keeper, writable_copy(char_get_name(ch)).data(), g->cmd_slap, 0);
+      do_action(g, keeper, writable_copy(char_get_name(ch)), g->cmd_slap, 0);
 
       return (true);
     }
     return (false);
   }
 
+  std::string line(argument); /* the shopping commands take the line apart in place */
   if (CMD_IS(g, "buy")) {
-    shopping_buy(g, argument, ch, keeper, shop);
+    shopping_buy(g, line.data(), ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "sell")) {
-    shopping_sell(g, argument, ch, keeper, shop);
+    shopping_sell(g, line.data(), ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "value")) {
-    shopping_value(g, argument, ch, keeper, shop);
+    shopping_value(g, line.data(), ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "list")) {
-    shopping_list(g, argument, ch, keeper, shop);
+    shopping_list(g, line.data(), ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "appraise")) {
-    shopping_app(g, argument, ch, keeper, shop);
+    shopping_app(g, line.data(), ch, keeper, shop);
     return (true);
   }
   return (false);
