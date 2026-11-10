@@ -221,9 +221,9 @@ static bool pick_n_throw(GameWorld *g, struct char_data *ch, std::string_view bu
   for (obj_data *cont : room_contents(g, char_get_in_room(ch))) {
     if (obj_get_weight(cont) <= getMaxCarryWeight(g, ch) + char_get_carry_weight(ch)) {
       buf2 = str_format("{}", obj_get_name(cont));
-      do_get(g, ch, buf2.c_str(), 0, 0);
+      do_get(g, ch, buf2, 0, 0);
       buf3 = str_format("{} {}", buf2, buf);
-      do_throw(g, ch, buf3.c_str(), 0, 0);
+      do_throw(g, ch, buf3, 0, 0);
       return (true);
     }
   }
@@ -296,11 +296,11 @@ static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
     } else if (special < 100) { /* Normal physical attack */
       if (char_get_class(ch) == CLASS_SHADOWDANCER && rand_number(g, 1, 3) == 3) {
         buf2 = str_format("ass {}", buf);
-        do_throw(g, ch, buf2.c_str(), 0, 0);
+        do_throw(g, ch, buf2, 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_REPAIR) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 16) {
         do_srepair(g, ch, "", 0, 0);
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_ABSORB) && rand_number(g, 1, 20) >= 19) {
-        do_absorb(g, ch, buf2.c_str(), 0, 0);
+        do_absorb(g, ch, buf2, 0, 0);
       } else if ((char_is_bio(ch) || char_is_majin(ch)) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) >= 17) {
         do_regenerate(g, ch, "25", 0, 0);
       } else if (char_is_namek(ch) && getCurPL(g, ch) <= (getEffMaxPL(g, ch)) * 0.5 && rand_number(g, 1, 20) == 20) {

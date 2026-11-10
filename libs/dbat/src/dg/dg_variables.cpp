@@ -75,10 +75,8 @@ void add_char_uid_var(trig_data *trig, const char *name, const struct char_data 
 /* sets trigger variable name to object o's UID, so the script can use %name% to refer to it */
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context)
 {
-  char buf[MAX_INPUT_LENGTH];
-
-  snprintf(buf, sizeof(buf), "%c%d", UID_CHAR, obj_get_id(o));
-  add_var(&trig->var_list, name, buf, context);
+  std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(o));
+  add_var(&trig->var_list, name, buf.c_str(), context);
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
@@ -920,9 +918,8 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
         if (!subfield || !*subfield)
           str = str_format("{}", obj_get_short_description(o));
         else {
-          char blah[500];
-          snprintf(blah, sizeof(blah), "%s @wnicknamed @D(@C%s@D)@n", obj_get_short_description(o), subfield);
-          obj_set_short_description(o, blah);
+          std::string blah = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(o), subfield);
+          obj_set_short_description(o, blah.c_str());
         }
       } else if (!strcasecmp(field, "setaffects")) {
         if (subfield && *subfield) {

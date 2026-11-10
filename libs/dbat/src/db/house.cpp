@@ -229,7 +229,7 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
   char *timestr, *temp;
   std::string built_on;
   std::string last_pay;
-  char own_name[MAX_NAME_LENGTH + 1];
+  std::string own_name;
 
   if (!g->num_of_houses) {
     send_to_char(g, ch, "No houses have been defined.\r\n");
@@ -258,7 +258,7 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
       last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
-    strcpy(own_name, temp); /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
+    own_name = temp; /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
     send_to_char(g, ch, "{:>7d} {:<10}    {:>2d}    {:<12} {}\r\n",
                  g->house_control[i].vnum, built_on,
                  g->house_control[i].num_of_guests, CAP(own_name), last_pay);

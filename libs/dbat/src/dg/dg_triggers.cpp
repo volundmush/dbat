@@ -549,7 +549,7 @@ void load_mtrigger(GameWorld *g, char_data *ch)
 int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (ch == nullptr)
     return 1;
@@ -561,8 +561,8 @@ int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
     if (trigger_ready(t, MTRIG_CAST) &&
         (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
-      sprintf(buf, "%d", spellnum);
-      add_var(&t->var_list, "spell", buf, 0);
+      buf = str_format("{:d}", spellnum);
+      add_var(&t->var_list, "spell", buf.c_str(), 0);
       add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       return script_driver(g, &ch, t, MOB_TRIGGER, TRIG_NEW);
     }
@@ -916,7 +916,7 @@ bool load_otrigger(GameWorld *g, obj_data *obj)
 int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
 {
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
   int ret_val;
 
   if (obj == nullptr)
@@ -929,8 +929,8 @@ int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
     if (trigger_ready(t, OTRIG_CAST) &&
         (rand_number(g, 1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
-      sprintf(buf, "%d", spellnum);
-      add_var(&t->var_list, "spell", buf, 0);
+      buf = str_format("{:d}", spellnum);
+      add_var(&t->var_list, "spell", buf.c_str(), 0);
       add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       ret_val = script_driver(g, &obj, t, OBJ_TRIGGER, TRIG_NEW);
       /* the spell has nothing left to work on, or nobody left to cast it */
@@ -1184,7 +1184,7 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
 {
   room_data *room;
   trig_data *t;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
     return 1;
@@ -1199,8 +1199,8 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
         add_char_uid_var(t, "victim", vict, 0);
       if (obj)
         add_obj_uid_var(t, "object", obj, 0);
-      sprintf(buf, "%d", spellnum);
-      add_var(&t->var_list, "spell", buf, 0);
+      buf = str_format("{:d}", spellnum);
+      add_var(&t->var_list, "spell", buf.c_str(), 0);
       add_var(&t->var_list, "spellname", skill_name(g, spellnum), 0);
       return script_driver(g, &room, t, WLD_TRIGGER, TRIG_NEW);
     }

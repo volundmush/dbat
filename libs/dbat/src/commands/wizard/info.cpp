@@ -273,18 +273,18 @@ static void list_zone_commands_room(GameWorld *g, struct char_data *ch, room_vnu
 
 static void do_stat_room(GameWorld *g, struct char_data *ch)
 {
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf2;
   struct room_data *rm = room_of(g, char_get_in_room(ch));
   int i, found, column;
 
   send_to_char(g, ch, "Room name: @c{}@n\r\n", room_get_name(rm));
 
-  sprinttype(room_get_sector_type(rm), sector_types, buf2, sizeof(buf2));
+  buf2 = sprinttype(room_get_sector_type(rm), sector_types);
   send_to_char(g, ch, "Zone: [{:>3d}], VNum: [@g{:>5d}@n], RNum: [{:>5d}], IDNum: [{:>5d}], Type: {}\r\n",
                room_get_zone(rm)->number, room_get_number(rm), char_get_in_room(ch),
                (long)room_get_number(rm) + ROOM_ID_BASE, buf2);
 
-  sprintbitarray(room_get_room_flags(rm), room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
+  buf2 = sprintbitarray(room_get_room_flags(rm), room_bits, RF_ARRAY_MAX);
   send_to_char(g, ch, "Room Damage: {:d}, Room Effect: {:d}\r\n", room_get_dmg(rm), room_get_geffect(rm));
   send_to_char(g, ch, "SpecProc: {}, Flags: {}\r\n", room_get_func(rm) == nullptr ? "None" : "Exists", buf2);
 
@@ -343,7 +343,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     else
       buf1 = str_format("@c{:>5d}@n", room_get_dir_option(rm, i)->to_room);
 
-    sprintbit(room_get_dir_option(rm, i)->exit_info, exit_bits, buf2, sizeof(buf2));
+    buf2 = sprintbit(room_get_dir_option(rm, i)->exit_info, exit_bits);
 
     send_to_char(g, ch, "Exit @c{:<5}@n:  To: [{}], Key: [{:>5d}], Keywrd: {}, Type: {}\r\n  DC Lock: [{:>2d}], DC Hide: [{:>2d}], DC Skill: [{:>4}], DC Move: [{:>2d}]\r\n{}",
                  dirs[i], buf1,
@@ -365,7 +365,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   int i, found;
   obj_vnum vnum;
   struct char_data *sitter;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   vnum = obj_get_vnum(g, j);
   if (obj_get_lload(j) > 0) {
@@ -382,7 +382,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
                obj_get_short_description(j) ? obj_get_short_description(j) : "<None>", obj_get_name(j),
                size_names[obj_get_size(j)]);
 
-  sprinttype(obj_get_type_flag(j), item_types, buf, sizeof(buf));
+  buf = sprinttype(obj_get_type_flag(j), item_types);
   send_to_char(g, ch, "VNum: [@g{:>5d}@n], RNum: [{:>5d}], Idnum: [{:>5d}], Type: {}, SpecProc: {}\r\n",
                vnum, obj_get_item_number(j), obj_get_id(j), buf, obj_get_spec(g, j) ? "Exists" : "None");
 
@@ -411,13 +411,13 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     send_to_char(g, ch, "\r\n");
   }
 
-  sprintbitarray(obj_get_wear_flags(j), wear_bits, TW_ARRAY_MAX, buf, sizeof(buf));
+  buf = sprintbitarray(obj_get_wear_flags(j), wear_bits, TW_ARRAY_MAX);
   send_to_char(g, ch, "Can be worn on: {}\r\n", buf);
 
-  sprintbitarray(obj_get_bitvector(j), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
+  buf = sprintbitarray(obj_get_bitvector(j), affected_bits, AF_ARRAY_MAX);
   send_to_char(g, ch, "Set char bits : {}\r\n", buf);
 
-  sprintbitarray(obj_get_extra_flags(j), extra_bits, EF_ARRAY_MAX, buf, sizeof(buf));
+  buf = sprintbitarray(obj_get_extra_flags(j), extra_bits, EF_ARRAY_MAX);
   send_to_char(g, ch, "Extra flags   : {}\r\n", buf);
 
   send_to_char(g, ch, "Weight: {:d}, Value: {:d}, Cost/day: {:d}, Timer: {:d}, Min Level: {:d}\r\n",
@@ -476,14 +476,14 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
       send_to_char(g, ch, "Spell: {:d}, - Hitpoints: {:d}\r\n", obj_get_value(j, VAL_TRAP_SPELL), obj_get_value(j, VAL_TRAP_HITPOINTS));
       break;
     case ITEM_CONTAINER:
-      sprintbit(obj_get_value(j, VAL_CONTAINER_FLAGS), container_bits, buf, sizeof(buf));
+      buf = sprintbit(obj_get_value(j, VAL_CONTAINER_FLAGS), container_bits);
       send_to_char(g, ch, "Weight capacity: {:d}, Lock Type: {}, Key Num: {:d}, Corpse: {}\r\n",
                    obj_get_value(j, VAL_CONTAINER_CAPACITY), buf, obj_get_value(j, VAL_CONTAINER_KEY),
                    YESNO(obj_get_value(j, VAL_CONTAINER_CORPSE)));
       break;
     case ITEM_DRINKCON:
     case ITEM_FOUNTAIN:
-      sprinttype(obj_get_value(j, VAL_DRINKCON_LIQUID), drinks, buf, sizeof(buf));
+      buf = sprinttype(obj_get_value(j, VAL_DRINKCON_LIQUID), drinks);
       send_to_char(g, ch, "Capacity: {:d}, Contains: {:d}, Poisoned: {}, Liquid: {}\r\n",
                    obj_get_value(j, VAL_DRINKCON_CAPACITY), obj_get_value(j, VAL_DRINKCON_HOWFULL), YESNO(obj_get_value(j, VAL_DRINKCON_POISON)), buf);
       break;
@@ -537,7 +537,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   send_to_char(g, ch, "Affections:");
   for (i = 0; i < MAX_OBJ_AFFECT; i++)
     if (obj_get_affected(j)[i].modifier) {
-      sprinttype(obj_get_affected(j)[i].location, apply_types, buf, sizeof(buf));
+      buf = sprinttype(obj_get_affected(j)[i].location, apply_types);
       send_to_char(g, ch, "{} {:+d} to {}", found++ ? "," : "", obj_get_affected(j)[i].modifier, buf);
       switch (obj_get_affected(j)[i].location) {
         case APPLY_FEAT:
@@ -559,7 +559,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
 
 static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_data *k)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   std::string buf2;
   int i, i2, column, found = false;
   struct obj_data *chair;
@@ -572,7 +572,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
     *(tmstr + strlen(tmstr) - 1) = '\0';
     send_to_char(g, ch, "LOADED AT: [{}]\r\n", tmstr);
   }
-  sprinttype(char_get_sex(k), genders, buf, sizeof(buf));
+  buf = sprinttype(char_get_sex(k), genders);
   send_to_char(g, ch, "{} {} '{}'  IDNum: [{:>5d}], In room [{:>5d}], Loadroom : [{:>5d}]\r\n",
                buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB")),
                char_get_name(k), char_is_npc(k) ? char_get_id(k) : char_get_idnum(k), char_get_in_room(k), char_is_npc(k) ? char_get_hometown(k) : char_get_load_room(g, k));
@@ -580,9 +580,9 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   send_to_char(g, ch, "DROOM: [{:>5d}]\r\n", char_get_droom(k));
   if (char_is_mob(g, k)) {
     if (char_get_master_id(k) > -1)
-      snprintf(buf, sizeof(buf), ", Master: %s", get_name_by_id(g, char_get_master_id(k)));
+      buf = str_format(", Master: {}", get_name_by_id(g, char_get_master_id(k)));
     else
-      buf[0] = 0;
+      buf.clear();
     send_to_char(g, ch, "Keyword: {}, VNum: [{:>5d}], RNum: [{:>5d}]{}\r\n", char_get_alias(k),
                  char_get_mob_vnum(g, k), char_get_nr(k), buf);
   } else
@@ -591,9 +591,9 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   send_to_char(g, ch, "L-Des: {}@n", char_get_ldesc(k) ? char_get_ldesc(k) : "<None>\r\n");
   if (CONFIG_ALLOW_MULTICLASS) {
-    strlcpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
+    buf = class_desc_str(k, 1, 0);
   } else {
-    snprintf(buf, sizeof(buf), "%s", char_sensei_name(k));
+    buf = str_format("{}", char_sensei_name(k));
   }
   buf2 = str_format("{}", char_true_race_name(k));
   send_to_char(g, ch, "Class: {}, Race: {}, Lev: [@y{:>2d}({:d}HD+{:d}cl+{:d})@n], XP: [@y{:d}@n]\r\n",
@@ -657,26 +657,26 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   send_to_char(g, ch, "Armor: [{:d} ]\r\n", char_get_armor(k));
 
-  sprinttype(char_get_position(k), position_types, buf, sizeof(buf));
+  buf = sprinttype(char_get_position(k), position_types);
   send_to_char(g, ch, "Pos: {}, Fighting: {}", buf, char_get_fighting(g, k) ? char_get_name(char_get_fighting(g, k)) : "Nobody");
 
   if (char_get_desc(k)) {
-    sprinttype(desc_get_connected(char_get_desc(k)), connected_types, buf, sizeof(buf));
+    buf = sprinttype(desc_get_connected(char_get_desc(k)), connected_types);
     send_to_char(g, ch, ", Connected: {}", buf);
   }
 
   if (char_is_npc(k)) {
-    sprinttype(char_get_mob_specials_default_pos(k), position_types, buf, sizeof(buf));
+    buf = sprinttype(char_get_mob_specials_default_pos(k), position_types);
     send_to_char(g, ch, ", Default position: {}\r\n", buf);
-    sprintbitarray(char_get_act(k), action_bits, PM_ARRAY_MAX, buf, sizeof(buf));
+    buf = sprintbitarray(char_get_act(k), action_bits, PM_ARRAY_MAX);
     send_to_char(g, ch, "NPC flags: @c{}@n\r\n", buf);
   } else {
     send_to_char(g, ch, ", Idle Timer (in tics) [{:d}]\r\n", char_get_timer(k));
 
-    sprintbitarray(char_get_act(k), player_bits, PM_ARRAY_MAX, buf, sizeof(buf));
+    buf = sprintbitarray(char_get_act(k), player_bits, PM_ARRAY_MAX);
     send_to_char(g, ch, "PLR: @c{}@n\r\n", buf);
 
-    sprintbitarray(char_get_pref(g, k), preference_bits, PR_ARRAY_MAX, buf, sizeof(buf));
+    buf = sprintbitarray(char_get_pref(g, k), preference_bits, PR_ARRAY_MAX);
     send_to_char(g, ch, "PRF: @g{}@n\r\n", buf);
   }
 
@@ -731,7 +731,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   }
 
   /* Showing the bitvector */
-  sprintbitarray(char_get_affected_by(k), affected_bits, AF_ARRAY_MAX, buf, sizeof(buf));
+  buf = sprintbitarray(char_get_affected_by(k), affected_bits, AF_ARRAY_MAX);
   send_to_char(g, ch, "AFF: @y{}@n\r\n", buf);
 
   /* Routine to show what spells a char is affected by */
@@ -746,7 +746,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
         if (aff->modifier)
           send_to_char(g, ch, ", ");
 
-        strcpy(buf, affected_bits[aff->bitvector]);
+        buf = affected_bits[aff->bitvector];
         send_to_char(g, ch, "sets {}", buf);
       }
       send_to_char(g, ch, "\r\n");
@@ -2233,7 +2233,7 @@ ACMD(do_findkey)
       send_to_char(g, ch, "There's no key for that exit.\r\n");
     } else {
       buf = str_format("obj {:d}", key);
-      do_checkloadstatus(g, ch, buf.c_str(), 0, 0);
+      do_checkloadstatus(g, ch, buf, 0, 0);
     }
   } else {
     send_to_char(g, ch, "What direction is that?!?\r\n");

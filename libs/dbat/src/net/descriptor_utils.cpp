@@ -16,7 +16,8 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   if (char_is_npc(ch))
     return;
 
-  char fname[40], line[READ_SIZE], prev[READ_SIZE] = "";
+  char fname[40], line[READ_SIZE];
+  std::string prev;
   FILE *fl, *file;
 
   if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user.c_str())) {
@@ -32,9 +33,9 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   /* copy the existing list (if there is one yet), dropping repeated lines, then add the new item */
   if ((file = fopen(fname, "r"))) {
     while (get_line(file, line)) {
-      if (strcasecmp(prev, line))
+      if (strcasecmp(prev.c_str(), line))
         fprintf(fl, "%s\n", line);
-      strlcpy(prev, line, sizeof(prev));
+      prev = line;
     }
     fclose(file);
   }
@@ -47,9 +48,10 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
 void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *name)
 {
 
-  char fname[40], line[256], filler[256] = "";
+  char fname[40], line[256];
+  std::string filler;
   FILE *fl;
-  char buf[MAX_STRING_LENGTH] = "";
+  std::string buf;
 
   if (type == 1) {
 
@@ -65,14 +67,14 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
 
     while (!feof(fl)) {
       get_line(fl, line);
-      if (strcasecmp(filler, line))
-        sprintf(buf + strlen(buf), "%s\n", line);
-      *filler = '\0';
+      if (strcasecmp(filler.c_str(), line))
+        buf += str_format("{}\n", line);
+      filler.clear();
       *line   = '\0';
-      sprintf(filler, "%s", line);
+      filler  = str_format("{}", line);
     }
 
-    send_to_char(g, d->character, "{}", buf);
+    send_to_char(g, d->character, buf);
 
     fclose(fl);
     return;
@@ -90,13 +92,13 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
 
   while (!feof(fl)) {
     get_line(fl, line);
-    if (strcasecmp(filler, line))
-      sprintf(buf + strlen(buf), "%s\n", line);
-    *filler = '\0';
-    sprintf(filler, "%s", line);
+    if (strcasecmp(filler.c_str(), line))
+      buf += str_format("{}\n", line);
+    filler.clear();
+    filler = str_format("{}", line);
   }
 
-  write_to_output(g, d, "{}", buf);
+  write_to_output(g, d, buf);
 
   fclose(fl);
 }

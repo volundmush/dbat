@@ -145,9 +145,7 @@ static void assedit_setup(GameWorld *g, struct descriptor_data *d, obj_vnum numb
 static void assedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
   int i                             = 0;
-  char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
-
-  sprinttype(OLC_ASSEDIT(d)->uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
+  std::string szAssmType            = sprinttype(OLC_ASSEDIT(d)->uchAssemblyType, AssemblyTypes);
 
 #if defined(CLEAR_SCREEN)
   send_to_char(g, d->character, "{:c}[H{:c}[J", as_char(27), as_char(27));

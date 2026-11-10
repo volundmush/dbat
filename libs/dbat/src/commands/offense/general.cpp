@@ -172,9 +172,8 @@ ACMD(do_charge)
     } else {
       reveal_hiding(g, ch, 0);
       send_to_char(g, ch, "You begin to charge some energy, as a {} aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
-      char bloom[MAX_INPUT_LENGTH];
-      snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
+      std::string bloom = str_format("@wA {} aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
+      act(g, bloom.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
       char_set_chargeto(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1));
       char_set_charge(ch, char_get_charge(ch) + (1));
       char_plr_set(ch, PLR_CHARGE, true);

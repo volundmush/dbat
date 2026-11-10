@@ -1147,7 +1147,7 @@ ACMD(do_move)
 
   if (char_get_fighting(g, ch) && !char_is_npc(ch)) {
     std::string blah = str_format("{}", dirs[subcmd - 1]);
-    do_flee(g, ch, blah.c_str(), 0, 0);
+    do_flee(g, ch, blah, 0, 0);
     return;
   }
 

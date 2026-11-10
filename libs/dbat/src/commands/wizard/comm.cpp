@@ -272,7 +272,7 @@ ACMD(do_echo)
   }
 
   std::string buf;
-  char name[128];
+  std::string name;
   int found              = false;
   struct char_data *tch  = nullptr;
 
@@ -280,15 +280,15 @@ ACMD(do_echo)
     if (vict == ch)
       continue;
     if (found == false) {
-      snprintf(name, sizeof(name), "*%s", char_get_name(vict));
-      if (strstr(text.c_str(), CAP(name))) {
+      name = str_format("*{}", char_get_name(vict));
+      if (text.contains(CAP(name))) {
         found = true;
         tch   = vict;
       }
       if (found == false && !char_is_npc(vict)) {
         if (readIntro(ch, vict) == 1) {
-          snprintf(name, sizeof(name), "*%s", get_i_name(ch, vict));
-          if (strstr(text.c_str(), CAP(name))) {
+          name = str_format("*{}", get_i_name(ch, vict));
+          if (text.contains(CAP(name))) {
             found = true;
             tch   = vict;
           }
@@ -306,7 +306,7 @@ ACMD(do_echo)
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
     if (found == true) {
-      search_replace(buf, name, "$N");
+      search_replace(buf, name.c_str(), "$N");
     } else if (buf.find('*') != std::string::npos) {
       search_replace(buf, "*", "");
     }
@@ -316,7 +316,7 @@ ACMD(do_echo)
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
     if (found == true) {
-      search_replace(buf, name, "$N");
+      search_replace(buf, name.c_str(), "$N");
     }
   } else {
     buf = text;

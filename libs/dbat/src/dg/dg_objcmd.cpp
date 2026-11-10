@@ -517,9 +517,8 @@ static OCMD(do_dgoload)
     }
 
     if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
-      char buf[MAX_INPUT_LENGTH];
-      sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf, 0);
+      std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
+      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf.c_str(), 0);
     }
 
     /* special handling to make objects able to load on a person/in a container/worn etc. */

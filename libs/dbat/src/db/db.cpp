@@ -1522,7 +1522,7 @@ static void renum_zone_table(GameWorld *g)
 {
   int cmd_no;
   room_vnum a, b, c, olda, oldb, oldc;
-  char buf[128];
+  std::string buf;
 
   for (struct zone_data *zone : g->zones.all())
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -1567,10 +1567,10 @@ static void renum_zone_table(GameWorld *g)
       }
       if (a == NOWHERE || b == NOWHERE || c == NOWHERE) {
         if (!g->mini_mud) {
-          snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
-                   a == NOWHERE ? olda : b == NOWHERE ? oldb
-                                                      : oldc);
-          log_zone_error(g, zone, cmd_no, buf);
+          buf = str_format("Invalid vnum {:d}, cmd disabled",
+                           a == NOWHERE ? olda : b == NOWHERE ? oldb
+                                                              : oldc);
+          log_zone_error(g, zone, cmd_no, buf.c_str());
         }
         ZCMD2.command = '*';
       }

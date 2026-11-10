@@ -316,10 +316,10 @@ static void oedit_save_to_disk(GameWorld *g, struct zone_data *zone_num)
  */
 static void oedit_disp_container_flags_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
   clear_screen(g, d);
 
-  sprintbit(obj_get_value(OLC_OBJ(d), 1), container_bits, bits, sizeof(bits));
+  bits = sprintbit(obj_get_value(OLC_OBJ(d), 1), container_bits);
   write_to_output(g, d,
                   "@g1@n) CLOSEABLE\r\n@g2@n) PICKPROOF\r\n@g3@n) CLOSED\r\n@g4@n) LOCKED\r\nContainer flags: @c{}@n\r\nEnter flag, 0 to quit : ",
                   bits);
@@ -348,14 +348,14 @@ static void oedit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void oedit_disp_prompt_apply_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char apply_buf[MAX_STRING_LENGTH];
+  std::string apply_buf;
   int counter;
 
   clear_screen(g, d);
 
   for (counter = 0; counter < MAX_OBJ_AFFECT; counter++) {
     if (obj_get_affected(OLC_OBJ(d))[counter].modifier) {
-      sprinttype(obj_get_affected(OLC_OBJ(d))[counter].location, apply_types, apply_buf, sizeof(apply_buf));
+      apply_buf = sprinttype(obj_get_affected(OLC_OBJ(d))[counter].location, apply_types);
       write_to_output(g, d, " @g{:d}@n) {:+d} to @b{}@n", counter + 1,
                       obj_get_affected(OLC_OBJ(d))[counter].modifier, apply_buf);
       switch (obj_get_affected(OLC_OBJ(d))[counter].location) {
@@ -802,12 +802,12 @@ static void oedit_disp_type_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void oedit_disp_extra_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
 
   clear_screen(g, d);
 
   olc_list_columns(g, d, extra_bits, NUM_ITEM_FLAGS, 1, " ", 3);
-  sprintbitarray(obj_get_extra_flags(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits, sizeof(bits));
+  bits = sprintbitarray(obj_get_extra_flags(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX);
   write_to_output(g, d, "\r\nObject flags: @c{}@n\r\nEnter object extra flag (0 to quit) : ",
                   bits);
 }
@@ -817,7 +817,7 @@ static void oedit_disp_extra_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void oedit_disp_perm_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bitbuf[MAX_STRING_LENGTH];
+  std::string bitbuf;
   int counter, columns = 0;
 
   clear_screen(g, d);
@@ -829,7 +829,7 @@ static void oedit_disp_perm_menu(GameWorld *g, struct descriptor_data *d)
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}", counter,
                     affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
+  bitbuf = sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX);
   write_to_output(g, d, "\r\nObject permanent flags: @c{}@n\r\nEnter object perm flag (0 to quit) : ",
                   bitbuf);
 }
@@ -850,12 +850,12 @@ static void oedit_disp_size_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void oedit_disp_wear_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
 
   clear_screen(g, d);
 
   olc_list_columns(g, d, wear_bits, NUM_ITEM_WEARS, 1, " ", 3);
-  sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
+  bits = sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX);
   write_to_output(g, d, "\r\nWear flags: @c{}@n\r\nEnter wear flag, 0 to quit : ",
                   bits);
 }
@@ -865,7 +865,8 @@ static void oedit_disp_wear_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char tbitbuf[MAX_INPUT_LENGTH], ebitbuf[MAX_INPUT_LENGTH];
+  std::string tbitbuf;
+  std::string ebitbuf;
   struct obj_data *obj;
 
   obj = OLC_OBJ(d);
@@ -874,8 +875,8 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   /*
    * Build buffers for first part of menu.
    */
-  sprinttype(obj_get_type_flag(obj), item_types, tbitbuf, sizeof(tbitbuf));
-  sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
+  tbitbuf = sprinttype(obj_get_type_flag(obj), item_types);
+  ebitbuf = sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX);
 
   /*
    * Build first half of menu.
@@ -897,8 +898,8 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
   /*
    * Build second half of menu.
    */
-  sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf, sizeof(tbitbuf));
-  sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
+  tbitbuf = sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX);
+  ebitbuf = sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX);
 
   write_to_output(g, d,
                   "@g7@n) Wear flags  : @c{}@n\r\n@g8@n) Weight      : @c{:<4d}@n, 	@g9@n) Cost        : @c{:<4d}@n\r\n@gA@n) Cost/Day    : @c{:<4d}@n, 	@gB@n) Timer       : @c{:<4d}@n\r\n@gC@n) Values      : @c{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}@n\r\n@gD@n) Applies menu@n\r\n@gE@n) Extra descriptions menu {}\r\n@gM@n) Min Level   : @c{:d}@n\r\n@gN@n) Material    : @c{}@n\r\n@gP@n) Perm Affects: @c{}@n\r\n@gS@n) Script      : @c{}@n\r\n@gT@n) Spellbook menu\r\n@gW@n) Copy object        ,	@gX@n) Delete object\r\n@gY@n) Size        : @c{}@n\r\n@gZ@n) Wiznet      :\r\n@gQ@n) Quit\r\nEnter choice : ",

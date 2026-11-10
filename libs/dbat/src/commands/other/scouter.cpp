@@ -568,9 +568,8 @@ ACMD(do_snet)
         hist.clear();
         hist = str_format("@CYou @D[@WSNET FREQ@D: @Y{:d} @mBroadcast@D] @G{}@n\r\n", obj_get_scoutfreq(obj), arg2.empty() ? "" : CAP(arg2).c_str());
         add_history(g, ch, hist.c_str(), HIST_SNET);
-        char over[MAX_STRING_LENGTH];
-        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
-        act(g, over, true, ch, nullptr, nullptr, TO_ROOM);
+        std::string over = str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", arg2.empty() ? "" : CAP(arg2).c_str());
+        act(g, over.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
         if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL)) {
           send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
         }

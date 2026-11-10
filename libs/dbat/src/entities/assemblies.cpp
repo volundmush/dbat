@@ -91,7 +91,7 @@ void assemblyBootAssemblies(GameWorld *g)
 void assemblySaveAssemblies(GameWorld *g)
 {
   struct atomic_file af;
-  char szType[MAX_STRING_LENGTH] = {'\0'};
+  std::string szType;
   long i                         = 0;
   long j                         = 0;
   ASSEMBLY *pAssembly            = nullptr;
@@ -105,8 +105,8 @@ void assemblySaveAssemblies(GameWorld *g)
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     pAssembly = (g->g_pAssemblyTable + i);
-    sprinttype(pAssembly->uchAssemblyType, AssemblyTypes, szType, sizeof(szType));
-    fprintf(pFile, "Vnum                #%d %s\n", pAssembly->lVnum, szType);
+    szType    = sprinttype(pAssembly->uchAssemblyType, AssemblyTypes);
+    fprintf(pFile, "Vnum                #%d %s\n", pAssembly->lVnum, szType.c_str());
 
     for (j = 0; j < pAssembly->lNumComponents; j++) {
       fprintf(pFile, "Component           #%d %d %d\n",
@@ -124,8 +124,8 @@ void assemblySaveAssemblies(GameWorld *g)
 
 void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
 {
-  char szBuffer[MAX_STRING_LENGTH]  = {'\0'};
-  char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
+  std::string szBuffer;
+  std::string szAssmType;
   long i                            = 0; // Outer iterator.
   long j                            = 0; // Inner iterator.
   obj_vnum lRnum                    = 0; // An object vnum, checked against obj_proto.
@@ -147,10 +147,10 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
       send_to_char(g, pCharacter, "[-----] ***RESERVED***\r\n");
       mud_log("SYSERR: assemblyListToChar(): Invalid vnum #{:d} in assembly table.", g->g_pAssemblyTable[i].lVnum);
     } else {
-      sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
-      sprintf(szBuffer, "[%5d] %s (%s)\r\n", g->g_pAssemblyTable[i].lVnum,
-              obj_get_short_description(obj_proto_of(g, lRnum)), szAssmType);
-      send_to_char(g, pCharacter, "{}", szBuffer);
+      szAssmType = sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes);
+      szBuffer   = str_format("[{:>5d}] {} ({})\r\n", g->g_pAssemblyTable[i].lVnum,
+                              obj_get_short_description(obj_proto_of(g, lRnum)), szAssmType);
+      send_to_char(g, pCharacter, szBuffer);
 
       for (j = 0; j < g->g_pAssemblyTable[i].lNumComponents; j++) {
         if (!obj_proto_of(g, lRnum = g->g_pAssemblyTable[i].pComponents[j].lVnum)) {
@@ -158,11 +158,11 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
           mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #{:d} in assembly for vnum #{:d}.",
                   g->g_pAssemblyTable[i].pComponents[j].lVnum, g->g_pAssemblyTable[i].lVnum);
         } else {
-          sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g->g_pAssemblyTable[i].pComponents[j].lVnum,
-                  obj_get_short_description(obj_proto_of(g, lRnum)),
-                  (g->g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
-                  (g->g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
-          send_to_char(g, pCharacter, "{}", szBuffer);
+          szBuffer = str_format(" {:>5d}: {:<20.20} Extract={:<3.3} InRoom={:<3.3}\r\n", +g->g_pAssemblyTable[i].pComponents[j].lVnum,
+                                obj_get_short_description(obj_proto_of(g, lRnum)),
+                                (g->g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
+                                (g->g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
+          send_to_char(g, pCharacter, szBuffer);
         }
       }
     }

@@ -206,7 +206,7 @@ static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data 
       (char_get_alignment(ch) < 0 && shop_trade_flagged(shop, TRADE_NOEVIL)) ||
       (char_get_alignment(ch) == 0 && shop_trade_flagged(shop, TRADE_NONEUTRAL))) {
     buf = str_format("{} {}", char_get_name(ch), MSG_NO_SELL_ALIGN);
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return (false);
   }
   if (char_is_npc(ch))
@@ -241,7 +241,7 @@ static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data 
       (char_is_thaumaturgist(ch) && shop_trade_flagged(shop, TRADE_NOTHAUMATURGIST))) {
 
     buf = str_format("{} {}", char_get_name(ch), MSG_NO_SELL_CLASS);
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return (false);
   }
   if ((char_is_human(ch) && shop_trade_flagged(shop, TRADE_NOHUMAN)) ||
@@ -249,7 +249,7 @@ static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data 
       (char_is_saiyan(ch) && shop_trade_flagged(shop, TRADE_NOSAIYAN)) ||
       (char_is_konatsu(ch) && shop_trade_flagged(shop, TRADE_NOKONATSU))) {
     buf = str_format("{} {}", char_get_name(ch), MSG_NO_SELL_RACE);
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return (false);
   }
 
@@ -258,16 +258,16 @@ static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data 
 
 static bool is_ok_obj(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct obj_data *obj, struct shop_data *shop)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (obj_extra_flagged(obj, ITEM_BROKEN) && shop_trade_flagged(shop, TRADE_NOBROKEN)) {
-    snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_BUY_BROKEN);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}", char_get_name(ch), MSG_NO_BUY_BROKEN);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
   if (obj_extra_flagged(obj, ITEM_FORGED)) {
-    snprintf(buf, sizeof(buf), "%s that piece of junk is an obvious forgery!", char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} that piece of junk is an obvious forgery!", char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
@@ -288,7 +288,7 @@ static bool is_open(GameWorld *g, struct char_data *keeper, struct shop_data *sh
   if (buf.empty())
     return (true);
   if (msg)
-    do_say(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_say(g, keeper, buf, g->cmd_tell, 0);
   return (false);
 }
 
@@ -694,7 +694,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
 {
   struct obj_data *obj;
   int i, found = false;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   if (!is_ok(g, keeper, ch, shop))
     return;
@@ -703,8 +703,8 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
     sort_keeper_objs(g, keeper, shop);
 
   if (!*arg) {
-    snprintf(buf, sizeof(buf), "%s What do you want to appraise?", char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} What do you want to appraise?", char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
   if (!(obj = get_purchase_obj(g, ch, arg, keeper, shop, true))) {
@@ -756,8 +756,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
     send_to_char(g, ch, "GToken Slots  @W: @m2/2@n\n");
   }
-  char bits[MAX_STRING_LENGTH];
-  sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
+  std::string bits = sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX);
   search_replace(bits, "TAKE", "");
   send_to_char(g, ch, "@GWear Loc.   @W:@w{}\n", bits);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
@@ -776,7 +775,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   send_to_char(g, ch, "@GItem Bonuses@W:@w");
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj_get_affected(obj)[i].modifier) {
-      sprinttype(obj_get_affected(obj)[i].location, apply_types, buf, sizeof(buf));
+      buf = sprinttype(obj_get_affected(obj)[i].location, apply_types);
       send_to_char(g, ch, "{} {:+d} to {}", found++ ? "," : "", obj_get_affected(obj)[i].modifier, buf);
       switch (obj_get_affected(obj)[i].location) {
         case APPLY_FEAT:
@@ -792,8 +791,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
     send_to_char(g, ch, " None@n");
   else
     send_to_char(g, ch, "@n");
-  char buf2[MAX_STRING_LENGTH];
-  sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
+  std::string buf2 = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
   send_to_char(g, ch, "\n@GSpecial     @W:@w {}", buf2);
   send_to_char(g, ch, "\n@c---------------------------------------------------------------@n\n");
 }
@@ -814,14 +812,12 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   if ((buynum = transaction_amt(arg)) < 0) {
     std::string buf = str_format("{} A negative amount?  Try selling me something.",
                                  char_get_name(ch));
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
   if (!*arg || !buynum) {
-    char buf[MAX_INPUT_LENGTH];
-
-    snprintf(buf, sizeof(buf), "%s What do you want to buy?", char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    std::string buf = str_format("{} What do you want to buy?", char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
   if (!(obj = get_purchase_obj(g, ch, arg, keeper, shop, true)))
@@ -897,7 +893,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
       buf = str_format("{} You can only carry {:d}.", char_get_name(ch), bought);
     else
       buf = str_format("{} Something screwy only gave you {:d}.", char_get_name(ch), bought);
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
   }
   if (!char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(keeper, char_get_gold(keeper) + (goldamt));
@@ -1025,15 +1021,13 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
     return;
 
   if ((sellnum = transaction_amt(arg)) < 0) {
-    char buf[MAX_INPUT_LENGTH];
-
-    snprintf(buf, sizeof(buf), "%s A negative amount?  Try buying something.", char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    std::string buf = str_format("{} A negative amount?  Try buying something.", char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
   if (!*arg || !sellnum) {
     std::string buf = str_format("{} What do you want to sell??", char_get_name(ch));
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
   one_argument(arg, name);
@@ -1041,9 +1035,8 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
     return;
 
   if (obj_get_type_flag(obj) == ITEM_PLANT && obj_get_value(obj, VAL_WATERLEVEL) <= -10) {
-    char buf[MAX_INPUT_LENGTH];
-    snprintf(buf, sizeof(buf), "%s That thing is dead!", char_get_name(ch));
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    std::string buf = str_format("{} That thing is dead!", char_get_name(ch));
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
 
@@ -1079,7 +1072,7 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
     else
       buf = str_format("{} Something really screwy made me buy {:d}.", char_get_name(ch), sold);
 
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
   }
   tempstr = times_message(nullptr, name, sold);
   snprintf(tempbuf, sizeof(tempbuf), "$n sells something to %s.\r\n", char_get_name(keeper));
@@ -1116,7 +1109,7 @@ static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct
 
   if (!*arg) {
     buf = str_format("{} What do you want me to evaluate??", char_get_name(ch));
-    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
   one_argument(arg, name);
@@ -1127,7 +1120,7 @@ static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct
     return;
 
   buf = str_format("{} I'll give you {:d} zenni for that!", char_get_name(ch), sell_price(g, obj, shop, keeper, ch));
-  do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
+  do_tell(g, keeper, buf, g->cmd_tell, 0);
 }
 
 static char *list_object(GameWorld *g, struct obj_data *obj, int cnt, int aindex, struct shop_data *shop, struct char_data *keeper, struct char_data *ch)
@@ -1732,8 +1725,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
   /* Need a local buffer. */
   {
-    char buf1[128];
-    sprintbit(shop_get_bitvector(shop), shop_bits, buf1, sizeof(buf1));
+    std::string buf1 = sprintbit(shop_get_bitvector(shop), shop_bits);
     send_to_char(g, ch, "Bits:       {}\r\n", buf1);
   }
 }

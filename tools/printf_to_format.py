@@ -10,10 +10,12 @@ functions into calls of their std::format replacements.
                                            format string, which is argument N (from 0); prints each call it
                                            couldn't convert, to do by hand
   printf_to_format.py --buffers FILE...    makes each local char buffer in FILE a std::string where every use is
-                                           one it knows: written by snprintf, sprintf, strcpy or strcat (as
-                                           statements), cleared, read with *, [0] or strlen(), or passed to a
-                                           function (as .c_str() unless it takes a std::string_view); prints
-                                           the buffers it left alone
+                                           one it knows: written by snprintf, sprintf, strcpy, strcat or
+                                           sprintbit() and the like (as statements), cleared, read with *, [0]
+                                           or strlen(), changed by a function with a std::string & overload
+                                           (CAP(), search_replace()...), or passed to a function (as .c_str()
+                                           unless it takes a std::string_view); then tidies format calls (a
+                                           value s.c_str() becomes s); prints the buffers it left alone
 
 Conversion (printf -> std::format):
   %s %d %i %c %f %e %g %x %X %o %u %%, with flags - + space # 0, a width and a precision, and the length
@@ -323,7 +325,7 @@ def noncode(src):
     return mask
 
 
-DECL_LINE = re.compile(r'^([ \t]+)char[ \t]+([^;(){}"]*);[ \t]*$', re.M)
+DECL_LINE = re.compile(r'^([ \t]+)char[ \t]+([^;()]*);[ \t]*$', re.M)
 DECLARATOR = re.compile(r'\s*([A-Za-z_]\w*)\s*\[([^\]]+)\]\s*(?:=\s*(?:""|\{\s*(?:0|\'\\0\'|"")?\s*\}))?\s*')
 WRITERS = {'snprintf': 2, 'sprintf': 1, 'strcpy': None, 'strlcpy': None, 'strcat': None, 'strlcat': None}
 # functions that take a std::string_view, to which a std::string is passed as it is
@@ -332,9 +334,14 @@ SV_SINKS = {'send_to_char', 'write_to_output', 'send_to_room', 'send_to_all', 's
             'str_format'}
 # functions that write into a char * argument
 MUTATORS = {'one_argument', 'two_arguments', 'three_arguments', 'half_chop', 'any_one_arg', 'one_word',
-            'skip_spaces', 'CAP', 'trim', 'prune_crlf', 'delete_doubledollar', 'search_replace', 'get_number',
+            'skip_spaces', 'trim', 'get_number',
             'fgets', 'get_line', 'strncpy', 'memcpy', 'memmove', 'memset', 'strtok', 'strsep', 'sscanf', 'strftime',
-            'fread', 'bzero', 'strncat', 'vsnprintf', 'sprintbit', 'sprinttype', 'sprintbitarray'}
+            'fread', 'bzero', 'strncat', 'vsnprintf'}
+# functions that change a char * in place and have an overload that changes a std::string & instead
+STRING_REF = {'CAP', 'prune_crlf', 'delete_doubledollar', 'search_replace', 'strip_cr'}
+# functions that fill a char buffer (the argument at the first index, its size at the second) and have a
+# version that returns the text as a std::string instead
+PRODUCERS = {'sprintbit': (2, 3), 'sprinttype': (2, 3), 'sprintbitarray': (3, 4)}
 KEYWORDS = {'if', 'while', 'for', 'switch', 'return', 'sizeof', 'do'}
 
 
@@ -464,6 +471,19 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
             edits.append((call_start, close + 1, text))
             writes += 1
             continue
+        # sprintbit(v, names, name, sizeof(name)) and the like
+        if func in PRODUCERS and re.search(r',\s*$', before):
+            spans, close = split_args(src, paren)
+            di, si = PRODUCERS[func]
+            call_start = paren - len(re.search(r'([A-Za-z_]\w*)\s*$', src[:paren]).group(0))
+            if len(spans) != si + 1 or re.sub(r'\s+', '', src[spans[di][0]:spans[di][1]]) != name or \
+                    not size_ok(src[spans[si][0]:spans[si][1]], name, size) or \
+                    not statement_start(src, mask, call_start) or not re.match(r'\s*;', src[close + 1:]):
+                raise Unsupported(f'line {line}: passed to {func}')
+            args = ','.join(src[a:b] for a, b in spans[:di])
+            edits.append((call_start, close + 1, f'{name} = {func}({args.strip()})'))
+            writes += 1
+            continue
         # *name = '\0'; name[0] = '\0';
         mstar = re.search(r'\*\s*$', before)
         if mstar and statement_start(src, mask, p - len(mstar.group(0))) and re.match(r"\s*=\s*('\\0'|0)\s*;", after):
@@ -506,7 +526,10 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
                 raise Unsupported(f'line {line}: {name} as a value')
             if func in MUTATORS:
                 raise Unsupported(f'line {line}: passed to {func}')
-            if func not in SV_SINKS:
+            if func in STRING_REF:
+                if not re.search(r'\(\s*$', before):
+                    edits.append((p, e, f'{name}.c_str()'))  # not the text it changes
+            elif func not in SV_SINKS:
                 edits.append((p, e, f'{name}.c_str()'))
             else:
                 only = re.search(r'"\{\}"\s*,\s*$', before)
@@ -519,7 +542,7 @@ def buffer_edits(src, mask, name, size, scope_a, scope_b):
             continue
         raise Unsupported(f'line {line}: {name} used as {src[p - 20:e + 20].strip()!r}')
     if not writes:
-        raise Unsupported('never written with snprintf, sprintf, strcpy or strcat')
+        raise Unsupported('never written with snprintf, sprintf, strcpy, strcat or sprintbit')
     return edits
 
 
@@ -597,7 +620,7 @@ def convert_buffers(path):
             if not all(decls):
                 continue
             for k, d in enumerate(decls):
-                key = (d.group(1), dm.group(0), src.count(dm.group(0), 0, dm.start()))
+                key = (d.group(1), dm.group(0), src.count(dm.group(0), dm.end()))  # identical ones after it stay put
                 if key not in tried:
                     found = (dm, decls, k, key)
                     break

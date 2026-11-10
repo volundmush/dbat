@@ -253,21 +253,20 @@ ASPELL(spell_charm)
 ASPELL(spell_identify)
 {
   int i, found;
-  size_t len;
 
   if (obj) {
-    char bitbuf[MAX_STRING_LENGTH];
+    std::string bitbuf;
     std::string buf2;
 
-    sprinttype(obj_get_type_flag(obj), item_types, bitbuf, sizeof(bitbuf));
+    bitbuf = sprinttype(obj_get_type_flag(obj), item_types);
     send_to_char(g, ch, "You feel informed:\r\nObject '{}', Item type: {}\r\n", obj_get_short_description(obj), bitbuf);
 
     if (obj_get_bitvector(obj)) {
-      sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
+      bitbuf = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
       send_to_char(g, ch, "Item will give you following abilities:  {}\r\n", bitbuf);
     }
 
-    sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
+    bitbuf = sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX);
     send_to_char(g, ch, "Item is: {}\r\n", bitbuf);
 
     send_to_char(g, ch, "Weight: {:d}, Value: {:d}, Rent: {:d}, Min Level: {:d}\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
@@ -275,25 +274,10 @@ ASPELL(spell_identify)
     switch (obj_get_type_flag(obj)) {
       case ITEM_SCROLL:
       case ITEM_POTION:
-        len = i = 0;
-
-        if (obj_get_value(obj, VAL_SCROLL_SPELL1) >= 1) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL1)));
-          if (i >= 0)
-            len += i;
-        }
-
-        if (obj_get_value(obj, VAL_SCROLL_SPELL2) >= 1 && len < sizeof(bitbuf)) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL2)));
-          if (i >= 0)
-            len += i;
-        }
-
-        if (obj_get_value(obj, VAL_SCROLL_SPELL3) >= 1 && len < sizeof(bitbuf)) {
-          i = snprintf(bitbuf + len, sizeof(bitbuf) - len, " %s", skill_name(g, obj_get_value(obj, VAL_SCROLL_SPELL3)));
-          if (i >= 0)
-            len += i;
-        }
+        bitbuf.clear(); /* the spells, each after a space */
+        for (int val : {VAL_SCROLL_SPELL1, VAL_SCROLL_SPELL2, VAL_SCROLL_SPELL3})
+          if (obj_get_value(obj, val) >= 1)
+            bitbuf += str_format(" {}", skill_name(g, obj_get_value(obj, val)));
 
         send_to_char(g, ch, "This {} casts: {}\r\n", item_types[(int)obj_get_type_flag(obj)], bitbuf);
         break;
@@ -319,7 +303,7 @@ ASPELL(spell_identify)
           send_to_char(g, ch, "Can affect you as :\r\n");
           found = true;
         }
-        sprinttype(obj_get_affected(obj)[i].location, apply_types, bitbuf, sizeof(bitbuf));
+        bitbuf = sprinttype(obj_get_affected(obj)[i].location, apply_types);
         switch (obj_get_affected(obj)[i].location) {
           case APPLY_FEAT:
             buf2 = str_format(" ({})", g->feat_list[obj_get_affected(obj)[i].specific].name);

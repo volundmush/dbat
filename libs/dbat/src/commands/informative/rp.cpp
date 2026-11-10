@@ -408,10 +408,9 @@ ACMD(do_post)
     send_to_char(g, ch, "Boards come with their own means of posting messages.\r\n");
     return;
   }
-  char buf[MAX_STRING_LENGTH];
-  snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj_get_short_description(obj), obj_get_short_description(obj2));
+  std::string buf = str_format("@C$n@W posts {}@W on {}@W.@n", obj_get_short_description(obj), obj_get_short_description(obj2));
   send_to_char(g, ch, "@WYou post {}@W on {}@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(obj2));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   obj_from_char(g, obj);
   obj_to_room(g, obj, char_get_in_room(ch));
   obj_set_posttype(obj, 2);

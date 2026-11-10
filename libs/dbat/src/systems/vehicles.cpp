@@ -465,16 +465,16 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
 static void drive_outof_vehicle(GameWorld *g, struct char_data *ch, struct obj_data *vehicle)
 {
   struct obj_data *hatch, *vehicle_in_out;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   if (!(hatch = get_obj_in_list_type(g, ITEM_HATCH, room_get_contents(g, obj_get_in_room(vehicle))))) {
     send_to_char(g, ch, "@wNowhere to pilot out of.\r\n");
   } else if (!(vehicle_in_out = find_vehicle_by_vnum(g, obj_get_value(hatch, 0)))) {
     send_to_char(g, ch, "@wYou can't pilot out anywhere!\r\n");
   } else {
-    sprintf(buf, "%s @wexits %s.\r\n", obj_get_short_description(vehicle),
-            obj_get_short_description(vehicle_in_out));
-    send_to_room(g, obj_get_in_room(vehicle), "{}", buf);
+    buf = str_format("{} @wexits {}.\r\n", obj_get_short_description(vehicle),
+                     obj_get_short_description(vehicle_in_out));
+    send_to_room(g, obj_get_in_room(vehicle), buf);
 
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, obj_get_in_room(vehicle_in_out));
@@ -489,9 +489,9 @@ static void drive_outof_vehicle(GameWorld *g, struct char_data *ch, struct obj_d
         send_to_room(g, room_get_dir_option(g, char_get_in_room(ch), door)->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
       }
     }
-    sprintf(buf, "%s @wflies out of %s.\r\n", obj_get_short_description(vehicle),
-            obj_get_short_description(vehicle_in_out));
-    send_to_room(g, obj_get_in_room(vehicle), "{}", buf);
+    buf = str_format("{} @wflies out of {}.\r\n", obj_get_short_description(vehicle),
+                     obj_get_short_description(vehicle_in_out));
+    send_to_room(g, obj_get_in_room(vehicle), buf);
   }
 }
 

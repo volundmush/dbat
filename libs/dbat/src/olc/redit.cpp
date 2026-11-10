@@ -335,7 +335,7 @@ static void redit_disp_extradesc_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char door_buf[40];
+  std::string door_buf;
   /*
    * if exit doesn't exist, alloc/create it 
    */
@@ -345,7 +345,7 @@ static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
     room_set_dir_option(OLC_ROOM(d), OLC_VAL(d), new_exit);
   }
 
-  sprintbit(OLC_EXIT(d)->exit_info, exit_bits, door_buf, sizeof(door_buf));
+  door_buf = sprintbit(OLC_EXIT(d)->exit_info, exit_bits);
 
   clear_screen(g, d);
   write_to_output(g, d,
@@ -369,11 +369,11 @@ static void redit_disp_exit_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void redit_disp_exit_flag_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_INPUT_LENGTH];
+  std::string bits;
 
   clear_screen(g, d);
   olc_list_columns(g, d, exit_bits, NUM_EXIT_FLAGS, 1, "", 2);
-  sprintbit(OLC_EXIT(d)->exit_info, exit_bits, bits, sizeof(bits));
+  bits = sprintbit(OLC_EXIT(d)->exit_info, exit_bits);
   write_to_output(g, d, "\r\nExit flags: @c{}@n\r\nEnter exit flags, 0 to quit : ",
                   bits);
   OLC_MODE(d) = REDIT_EXIT_DOORFLAGS;
@@ -384,11 +384,11 @@ static void redit_disp_exit_flag_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void redit_disp_flag_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
 
   clear_screen(g, d);
   olc_list_columns(g, d, room_bits, NUM_ROOM_FLAGS, 1, "", 2);
-  sprintbitarray(room_get_room_flags(OLC_ROOM(d)), room_bits, RF_ARRAY_MAX, bits, sizeof(bits));
+  bits = sprintbitarray(room_get_room_flags(OLC_ROOM(d)), room_bits, RF_ARRAY_MAX);
   write_to_output(g, d, "\r\nRoom flags: @c{}@n\r\nEnter room flags, 0 to quit : ",
                   bits);
   OLC_MODE(d) = REDIT_FLAGS;
@@ -410,15 +410,15 @@ static void redit_disp_sector_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf1;
+  std::string buf2;
   struct room_data *room;
 
   clear_screen(g, d);
   room = OLC_ROOM(d);
 
-  sprintbitarray(room_get_room_flags(room), room_bits, RF_ARRAY_MAX, buf1, sizeof(buf1));
-  sprinttype(room_get_sector_type(room), sector_types, buf2, sizeof(buf2));
+  buf1 = sprintbitarray(room_get_room_flags(room), room_bits, RF_ARRAY_MAX);
+  buf2 = sprinttype(room_get_sector_type(room), sector_types);
   if (char_get_admlevel(d->character) > 0) {
     write_to_output(g, d,
                     "-- Room number : [@c{:d}@n]  	Room zone: [@c{:d}@n]\r\n@g1@n) Name        : @y{}\r\n@g2@n) Description :\r\n@y{}@g3@n) Room flags  : @c{}\r\n@g4@n) Sector type : @c{}\r\n@g5@n) Exit north  : [@c{:>6d}@n],  @gB@n) Exit northwest : [@c{:>6d}@n]\r\n@g6@n) Exit east   : [@c{:>6d}@n],  @gC@n) Exit northeast : [@c{:>6d}@n]\r\n@g7@n) Exit south  : [@c{:>6d}@n],  @gD@n) Exit southeast : [@c{:>6d}@n]\r\n@g8@n) Exit west   : [@c{:>6d}@n],  @gE@n) Exit southwest : [@c{:>6d}@n]\r\n@g9@n) Exit up     : [@c{:>6d}@n],  @gF@n) Exit in        : [@c{:>6d}@n]\r\n@gA@n) Exit down   : [@c{:>6d}@n],  @gG@n) Exit out       : [@c{:>6d}@n]\r\n@gH@n) Extra descriptions menu\r\n@gW@n) Copy Room\r\n@gX@n) Delete Room\r\n@gS@n) Script      : @c{}\r\n@gZ@n) Wiznet      :\r\n@gQ@n) Quit\r\nEnter choice : ",

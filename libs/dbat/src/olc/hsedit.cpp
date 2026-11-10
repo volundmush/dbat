@@ -184,7 +184,7 @@ static void hedit_delete_house(GameWorld *g, struct descriptor_data *d, room_vnu
 static void hsedit_disp_flags_menu(GameWorld *g, struct descriptor_data *d)
 {
   int counter, columns = 0;
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
 
   clear_screen(g, d);
   for (counter = 0; counter < HOUSE_NUM_FLAGS; counter++) {
@@ -192,7 +192,7 @@ static void hsedit_disp_flags_menu(GameWorld *g, struct descriptor_data *d)
     if (!(++columns % 2))
       send_to_char(g, d->character, "\r\n");
   }
-  sprintbit(OLC_HOUSE(d)->bitvector, house_flags, buf1, sizeof(buf1));
+  buf1 = sprintbit(OLC_HOUSE(d)->bitvector, house_flags);
   send_to_char(g, d->character,
                "\r\nHouse flags: @g{}@n\r\nEnter house flags, 0 to quit : ",
                buf1);
@@ -215,7 +215,7 @@ static void hsedit_owner_menu(GameWorld *g, struct descriptor_data *d)
 
 static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
   struct house_control_rec *house;
   room_vnum house_rnum, newroom[12];
   int i;
@@ -226,8 +226,7 @@ static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
   house_rnum = house->vnum;
 
   if ((house_rnum < 0) || (!room_of(g, house_rnum))) {
-    sprintf(buf, "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n"
-                 "(Press Enter)\r\n");
+    buf         = "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n(Press Enter)\r\n";
     OLC_MODE(d) = HSEDIT_NOVNUM;
   } else {
     /* Grab exit rooms */
@@ -238,37 +237,23 @@ static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
         newroom[i] = NOWHERE;
     }
 
-    sprintf(buf,
-            "@g1@D)@g North  : @D(@c%s@D)\r\n"
-            "@g2@D)@g East   : @D(@c%s@D)\r\n"
-            "@g3@D)@g South  : @D(@c%s@D)\r\n"
-            "@g4@D)@g West   : @D(@c%s@D)\r\n"
-            "@g5@D)@g Up     : @D(@c%s@D)\r\n"
-            "@g6@D)@g Down   : @D(@c%s@D)\r\n"
-            "@g7@D)@g NorthW : @D(@c%s@D)\r\n"
-            "@g8@D)@g NorthE : @D(@c%s@D)\r\n"
-            "@g9@D)@g SouthE : @D(@c%s@D)\r\n"
-            "@g10@D)@g SouthW : @D(@c%s@D)\r\n"
-            "@g11@D)@g Inside : @D(@c%s@D)\r\n"
-            "@g12@D)@g Outside: @D(@c%s@D)\r\n"
-            "@gQ@D)@g Back to main menu\r\n"
-            "@gEnter atrium direction : @n",
+    buf         = str_format("@g1@D)@g North  : @D(@c{}@D)\r\n@g2@D)@g East   : @D(@c{}@D)\r\n@g3@D)@g South  : @D(@c{}@D)\r\n@g4@D)@g West   : @D(@c{}@D)\r\n@g5@D)@g Up     : @D(@c{}@D)\r\n@g6@D)@g Down   : @D(@c{}@D)\r\n@g7@D)@g NorthW : @D(@c{}@D)\r\n@g8@D)@g NorthE : @D(@c{}@D)\r\n@g9@D)@g SouthE : @D(@c{}@D)\r\n@g10@D)@g SouthW : @D(@c{}@D)\r\n@g11@D)@g Inside : @D(@c{}@D)\r\n@g12@D)@g Outside: @D(@c{}@D)\r\n@gQ@D)@g Back to main menu\r\n@gEnter atrium direction : @n",
 
-            newroom[0] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[0])),
-            newroom[1] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[1])),
-            newroom[2] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[2])),
-            newroom[3] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[3])),
-            newroom[4] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[4])),
-            newroom[5] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[5])),
-            newroom[6] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[6])),
-            newroom[7] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[7])),
-            newroom[8] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[8])),
-            newroom[9] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[9])),
-            newroom[10] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[10])),
-            newroom[11] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[11])));
+                     newroom[0] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[0])),
+                     newroom[1] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[1])),
+                     newroom[2] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[2])),
+                     newroom[3] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[3])),
+                     newroom[4] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[4])),
+                     newroom[5] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[5])),
+                     newroom[6] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[6])),
+                     newroom[7] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[7])),
+                     newroom[8] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[8])),
+                     newroom[9] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[9])),
+                     newroom[10] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[10])),
+                     newroom[11] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[11])));
     OLC_MODE(d) = HSEDIT_DIR_MENU;
   }
-  send_to_char(g, d->character, "{}", buf);
+  send_to_char(g, d->character, buf);
 }
 
 static void hsedit_disp_type_menu(GameWorld *g, struct descriptor_data *d)
@@ -349,7 +334,8 @@ static char *hsedit_list_guests(GameWorld *g, struct house_control_rec *thishous
 /* the main menu */
 static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH];
+  std::string buf1;
   std::string built_on;
   std::string last_pay;
   char buf2[MAX_STRING_LENGTH];
@@ -374,7 +360,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
     last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
   *buf2 = '\0';
-  sprintbit(house->bitvector, house_flags, buf1, sizeof(buf1));
+  buf1  = sprintbit(house->bitvector, house_flags);
   //  sprintf(buf2, "%d %d %d %d", house->value[0], house->value[1], house->value[2], house->value[3]);
   sprintf(no_name, "(NOBODY)");
   snprintf(buf, sizeof(buf),
@@ -396,7 +382,7 @@ static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
            OLC_NUM(d), OLC_ZNUM(d)->number,
            house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name : get_name_by_id(g, house->owner),
            house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
-           house_types[(house->mode)], built_on.c_str(), last_pay.c_str(), hsedit_list_guests(g, house, buf2), buf1);
+           house_types[(house->mode)], built_on.c_str(), last_pay.c_str(), hsedit_list_guests(g, house, buf2), buf1.c_str());
   send_to_char(g, d->character, "{}", buf);
 
   OLC_MODE(d) = HSEDIT_MAIN_MENU;

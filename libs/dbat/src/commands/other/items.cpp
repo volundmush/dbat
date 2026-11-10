@@ -1454,7 +1454,7 @@ ACMD(do_appraise)
   int i, found;
   struct obj_data *obj;
   std::string arg;
-  char buf[MAX_STRING_LENGTH];
+  std::string buf;
 
   std::string_view rest = argument;
   arg                   = take_arg(rest);
@@ -1540,7 +1540,7 @@ ACMD(do_appraise)
       if (obj_get_affected(obj)[i].location == APPLY_REGEN || obj_get_affected(obj)[i].location == APPLY_TRAIN || obj_get_affected(obj)[i].location == APPLY_LIFEMAX) {
         percent = true;
       }
-      sprinttype(obj_get_affected(obj)[i].location, apply_types, buf, sizeof(buf));
+      buf = sprinttype(obj_get_affected(obj)[i].location, apply_types);
       send_to_char(g, ch, "{} {:+d}{} to {}", found++ ? "," : "", obj_get_affected(obj)[i].modifier, percent == true ? "%" : "", buf);
       percent = false;
       switch (obj_get_affected(obj)[i].location) {
@@ -1555,8 +1555,7 @@ ACMD(do_appraise)
   }
   if (!found)
     send_to_char(g, ch, " None");
-  char buf2[MAX_STRING_LENGTH];
-  sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
+  std::string buf2 = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
   send_to_char(g, ch, "\nSpecial: {}\r\n", buf2);
 
   char_set_wait(ch, PULSE_2SEC);

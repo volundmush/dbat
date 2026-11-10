@@ -291,12 +291,12 @@ static void zedit_setup(GameWorld *g, struct descriptor_data *d, room_vnum room_
 /*------------------------------------------------------------------*/
 static void zedit_disp_flag_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
 
   clear_screen(g, d);
   olc_list_columns(g, d, zone_bits, NUM_ZONE_FLAGS, 1, " ", 2);
 
-  sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
+  bits = sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX);
   write_to_output(g, d, "\r\nZone flags: @c{}@n\r\nEnter Zone flags, 0 to quit : ",
                   bits);
   OLC_MODE(d) = ZEDIT_ZONE_FLAGS;
@@ -455,10 +455,10 @@ static bool start_change_command(struct descriptor_data *d, int pos)
 static void zedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
   int subcmd = 0, counter = 0;
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
 
   clear_screen(g, d);
-  sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, buf1, sizeof(buf1));
+  buf1 = sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX);
 
   /*
    * Menu header  

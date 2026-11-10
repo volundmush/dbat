@@ -496,15 +496,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction NORTHEAST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               dlist3 += str_format("                    The {}{} {} {} {}{}.\r\n",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                                        : "opening",
-                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -543,15 +542,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction SOUTHEAST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               dlist5 += str_format("                    The {}{} {} {} {}{}.\r\n",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                                        : "opening",
-                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -590,15 +588,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction SOUTHWEST at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               dlist7 += str_format("                    The {}{} {} {} {}{}.\r\n",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                                        : "opening",
-                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -637,15 +634,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction UP at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               dlist9 += str_format("                    The {}{} {} {} {}{}.\r\n",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                    (exit_keyword(room_get_dir_option(g, target_room, door)) &&
                                     strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
                                        ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                                        : "opening",
-                                   strstr(argh, "s ") != nullptr ? "are" : "is",
+                                   strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                    IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -684,15 +680,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
                 mud_log("ERROR: {} found error direction INSIDE at room {:d}", char_get_name(ch), char_get_in_room(ch));
                 return;
               }
-              char argh[100];
-              snprintf(argh, sizeof(argh), "%s ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
+              std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined") ? fname(exit_keyword(room_get_dir_option(g, target_room, door))) : "opening");
               dlist11 += str_format("                    The {}{} {} {} {}{}.\r\n",
                                     IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                     (exit_keyword(room_get_dir_option(g, target_room, door)) &&
                                      strcasecmp(fname(exit_keyword(room_get_dir_option(g, target_room, door))), "undefined"))
                                         ? fname(exit_keyword(room_get_dir_option(g, target_room, door)))
                                         : "opening",
-                                    strstr(argh, "s ") != nullptr ? "are" : "is",
+                                    strstr(argh.c_str(), "s ") != nullptr ? "are" : "is",
                                     IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                                     IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                     IS_SET(room_get_dir_option(g, target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -979,12 +974,12 @@ void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int
     return;
   }
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
-    char buf[MAX_STRING_LENGTH];
-    char buf2[MAX_STRING_LENGTH];
+    std::string buf;
+    std::string buf2;
     std::string buf3;
 
-    sprintbitarray(room_get_room_flags(g, target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
-    sprinttype(room_get_sector_type(rm), sector_types, buf2, sizeof(buf2));
+    buf  = sprintbitarray(room_get_room_flags(g, target_room), room_bits, RF_ARRAY_MAX);
+    buf2 = sprinttype(room_get_sector_type(rm), sector_types);
     if (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NODEC)) {
       send_to_char(g, ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
@@ -1334,16 +1329,15 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &a
       send_to_char(g, ch, "It is empty.\r\n");
     else {
       if (obj_get_value(obj, VAL_DRINKCON_CAPACITY) < 0) {
-        char buf2[MAX_STRING_LENGTH];
-        sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+        std::string buf2 = sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid);
         send_to_char(g, ch, "It's full of a {} liquid.\r\n", buf2);
       } else if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) > obj_get_value(obj, VAL_DRINKCON_CAPACITY)) {
         send_to_char(g, ch, "Its contents seem somewhat murky.\r\n"); /* BUG */
       } else {
-        char buf2[MAX_STRING_LENGTH];
+        std::string buf2;
         amt        = obj_get_value(obj, VAL_DRINKCON_CAPACITY);
         int leftin = obj_get_value(obj, VAL_DRINKCON_HOWFULL);
-        sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+        buf2       = sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid);
         if (leftin == amt) {
           send_to_char(g, ch, "It's full of a {} liquid.\r\n", buf2);
         } else if (leftin >= amt * .8) {

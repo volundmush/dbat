@@ -3052,10 +3052,9 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
             buf3 = str_format("-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", str);
             perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
           } else if (obj != nullptr && char_get_listenroom(d->character) == obj_get_in_room(obj) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
-            char buf3[1000];
-            *buf3 = '\0';
-            sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
-            perform_act(g, buf3, ch, obj, vict_obj, d->character);
+            std::string buf3;
+            buf3 = str_format("-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", str);
+            perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
           }
         }
       }

@@ -334,7 +334,7 @@ static void sedit_namelist_menu(GameWorld *g, struct descriptor_data *d)
 
 static void sedit_shop_flags_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
   int i, count = 0;
 
   clear_screen(g, d);
@@ -342,7 +342,7 @@ static void sedit_shop_flags_menu(GameWorld *g, struct descriptor_data *d)
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, shop_bits[i],
                     !(++count % 2) ? "\r\n" : "");
   }
-  sprintbit(shop_get_bitvector(OLC_SHOP(d)), shop_bits, bits, sizeof(bits));
+  bits = sprintbit(shop_get_bitvector(OLC_SHOP(d)), shop_bits);
   write_to_output(g, d, "\r\nCurrent Shop Flags : @c{}@n\r\nEnter choice : ", bits);
   OLC_MODE(d) = SEDIT_SHOP_FLAGS;
 }
@@ -351,7 +351,7 @@ static void sedit_shop_flags_menu(GameWorld *g, struct descriptor_data *d)
 
 static void sedit_no_trade_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
   int i, count = 0;
 
   clear_screen(g, d);
@@ -359,7 +359,7 @@ static void sedit_no_trade_menu(GameWorld *g, struct descriptor_data *d)
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, trade_letters[i],
                     !(++count % 2) ? "\r\n" : "");
   }
-  sprintbitarray(shop_get_with_who(OLC_SHOP(d)), trade_letters, 4, bits, sizeof(bits));
+  bits = sprintbitarray(shop_get_with_who(OLC_SHOP(d)), trade_letters, 4);
   write_to_output(g, d, "\r\nCurrently won't trade with: @c{}@n\r\nEnter choice : ",
                   bits);
   OLC_MODE(d) = SEDIT_NOTRADE;
@@ -387,15 +387,15 @@ static void sedit_types_menu(GameWorld *g, struct descriptor_data *d)
  */
 static void sedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf1;
+  std::string buf2;
   struct shop_data *shop;
 
   shop = OLC_SHOP(d);
 
   clear_screen(g, d);
-  sprintbitarray(shop_get_with_who(shop), trade_letters, 4, buf1, sizeof(buf1));
-  sprintbit(shop_get_bitvector(shop), shop_bits, buf2, sizeof(buf2));
+  buf1 = sprintbitarray(shop_get_with_who(shop), trade_letters, 4);
+  buf2 = sprintbit(shop_get_bitvector(shop), shop_bits);
   write_to_output(g, d,
                   "-- Shop Number : [@c{:d}@n]\r\n@g0@n) Keeper      : [@c{:d}@n] @y{}\r\n@g1@n) Open 1      : @c{:>4d}@n          @g2@n) Close 1     : @c{:>4d}\r\n@g3@n) Open 2      : @c{:>4d}@n          @g4@n) Close 2     : @c{:>4d}\r\n@g5@n) Sell rate   : @c{:>1.2f}@n          @g6@n) Buy rate    : @c{:>1.2f}\r\n@g7@n) Keeper no item : @y{}\r\n@g8@n) Player no item : @y{}\r\n@g9@n) Keeper no cash : @y{}\r\n@gA@n) Player no cash : @y{}\r\n@gB@n) Keeper no buy  : @y{}\r\n@gC@n) Buy success    : @y{}\r\n@gD@n) Sell success   : @y{}\r\n@gE@n) No Trade With  : @c{}\r\n@gF@n) Shop flags     : @c{}\r\n@gR@n) Rooms Menu\r\n@gP@n) Products Menu\r\n@gT@n) Accept Types Menu\r\n@gW@n) Copy Shop\r\n@gQ@n) Quit\r\nEnter Choice : ",
 

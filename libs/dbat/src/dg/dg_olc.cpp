@@ -206,17 +206,17 @@ static void trigedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct trig_data *trig = OLC_TRIG(d);
   const char *attach_type;
-  char trgtypes[256];
+  std::string trgtypes;
 
   if (trig->attach_type == OBJ_TRIGGER) {
     attach_type = "Objects";
-    sprintbit(trig->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
+    trgtypes    = sprintbit(trig->trigger_type, otrig_types);
   } else if (trig->attach_type == WLD_TRIGGER) {
     attach_type = "Rooms";
-    sprintbit(trig->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
+    trgtypes    = sprintbit(trig->trigger_type, wtrig_types);
   } else {
     attach_type = "Mobiles";
-    sprintbit(trig->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
+    trgtypes    = sprintbit(trig->trigger_type, trig_types);
   }
 
   clear_screen(g, d);
@@ -239,7 +239,7 @@ static void trigedit_disp_types(GameWorld *g, struct descriptor_data *d)
 {
   int i, columns = 0;
   const char *const *types;
-  char bitbuf[MAX_STRING_LENGTH];
+  std::string bitbuf;
 
   switch (OLC_TRIG(d)->attach_type) {
     case WLD_TRIGGER:
@@ -260,7 +260,7 @@ static void trigedit_disp_types(GameWorld *g, struct descriptor_data *d)
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}  {}", i + 1, types[i],
                     !(++columns % 2) ? "\r\n" : "");
   }
-  sprintbit(OLC_TRIG(d)->trigger_type, types, bitbuf, sizeof(bitbuf));
+  bitbuf = sprintbit(OLC_TRIG(d)->trigger_type, types);
   write_to_output(g, d, "\r\nCurrent types : @c{}@n\r\nEnter type (0 to quit) : ", bitbuf);
 }
 

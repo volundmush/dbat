@@ -575,7 +575,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
   struct board_info *board;
   struct obj_data *obj;
   bool oldest_first = char_prf_flagged(g, ch, PRF_VIEWORDER);
-  char name[127];
+  std::string name;
   int count = 0;
 
   if (char_is_npc(ch)) {
@@ -601,7 +601,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
   send_to_char(g, ch, "                  @WThere {} {:d} {} on the board.@n\r\n", (board->num_messages == 1) ? "is" : "are", board->num_messages, (board->num_messages == 1) ? "message" : "messages");
 
   for (struct board_msg *msg = nth_message(board, 1, oldest_first); msg; msg = oldest_first ? msg->prev : msg->next) {
-    snprintf(name, sizeof(name), "%s", msg->name.c_str());
+    name = msg->name;
     send_to_char(g, ch, "@D[{}] (@C{:>2d}@D) : @W{:>6.10} @D(@G{:<10}@D) ::@w {:<45}\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject);
   }
   send_to_char(g, ch, "@rO@b============================================================================@rO@n\n");
@@ -615,7 +615,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
 {
   struct board_info *board;
   struct board_msg *msg;
-  char name[127];
+  std::string name;
   bool added;
 
   if (char_is_npc(ch)) {
@@ -648,7 +648,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
 
   added = mark_read(g, board, msg, ch);
 
-  snprintf(name, sizeof(name), "%s", msg->name.c_str());
+  name = msg->name;
   send_to_char(g, ch, "@r_____________________________________________________________________________@n\r\n\r\n@gMessage @W[@Y{:>2d}@W] @D: @c{:>6.10} @D(@C{}@D)\r\n@GTopic        @D: @w{}\r\n@r-------------------------------------------------------------------------@n\r\n\r\n{}\n@r_____________________________________________________________________________@n\r\n",
                arg,
                board_time_str(&msg->timestamp),

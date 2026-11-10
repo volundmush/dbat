@@ -203,26 +203,26 @@ ACMD(do_mkill)
   if (char_is_humanoid(ch)) {
     switch (rand_number(g, 1, 7)) {
       case 1:
-        do_punch(g, ch, buf.c_str(), 0, 0);
+        do_punch(g, ch, buf, 0, 0);
         break;
       case 2:
-        do_kick(g, ch, buf.c_str(), 0, 0);
+        do_kick(g, ch, buf, 0, 0);
         break;
       case 3:
-        do_elbow(g, ch, buf.c_str(), 0, 0);
+        do_elbow(g, ch, buf, 0, 0);
         break;
       case 4:
-        do_knee(g, ch, buf.c_str(), 0, 0);
+        do_knee(g, ch, buf, 0, 0);
         break;
       case 5:
-        do_kick(g, ch, buf.c_str(), 0, 0);
+        do_kick(g, ch, buf, 0, 0);
         break;
       default:
-        do_punch(g, ch, buf.c_str(), 0, 0);
+        do_punch(g, ch, buf, 0, 0);
         break;
     } //end switch
   } else {
-    do_bite(g, ch, buf.c_str(), 0, 0);
+    do_bite(g, ch, buf, 0, 0);
   } //end humanoid if
   return;
 }
@@ -429,9 +429,8 @@ ACMD(do_mload)
       return;
     }
     if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
-      char buf[MAX_INPUT_LENGTH];
-      sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf, 0);
+      std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
+      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf.c_str(), 0);
     }
     randomize_eq(g, object);
     /* special handling to make objects able to load on a person/in a container/worn etc. */

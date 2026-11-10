@@ -23,7 +23,8 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc);
 static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 {
   struct cmdlist_element *cmd_list;
-  char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
+  char sb[MAX_STRING_LENGTH];
+  std::string buf;
   int len = 0;
 
   if (!trig) {
@@ -36,17 +37,17 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 
   if (trig->attach_type == OBJ_TRIGGER) {
     len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Objects\r\n");
-    sprintbit(trig->trigger_type, otrig_types, buf, sizeof(buf));
+    buf = sprintbit(trig->trigger_type, otrig_types);
   } else if (trig->attach_type == WLD_TRIGGER) {
     len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Rooms\r\n");
-    sprintbit(trig->trigger_type, wtrig_types, buf, sizeof(buf));
+    buf = sprintbit(trig->trigger_type, wtrig_types);
   } else {
     len += snprintf(sb + len, sizeof(sb) - len, "Trigger Intended Assignment: Mobiles\r\n");
-    sprintbit(trig->trigger_type, trig_types, buf, sizeof(buf));
+    buf = sprintbit(trig->trigger_type, trig_types);
   }
 
   len += snprintf(sb + len, sizeof(sb) - len, "Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
-                  buf, trig->narg,
+                  buf.c_str(), trig->narg,
                   !trig->arglist.empty() ? trig->arglist.c_str() : "None");
 
   len += snprintf(sb + len, sizeof(sb) - len, "Commands:\r\n");
@@ -87,7 +88,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
   trig_data *t;
   char name[MAX_INPUT_LENGTH];
   std::string namebuf;
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
 
   send_to_char(g, ch, "Global Variables: {}\r\n", sc->global_vars ? "" : "None");
   send_to_char(g, ch, "Global context: {:d}\r\n", sc->context);
@@ -107,13 +108,13 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 
     if (t->attach_type == OBJ_TRIGGER) {
       send_to_char(g, ch, "  Trigger Intended Assignment: Objects\r\n");
-      sprintbit(t->trigger_type, otrig_types, buf1, sizeof(buf1));
+      buf1 = sprintbit(t->trigger_type, otrig_types);
     } else if (t->attach_type == WLD_TRIGGER) {
       send_to_char(g, ch, "  Trigger Intended Assignment: Rooms\r\n");
-      sprintbit(t->trigger_type, wtrig_types, buf1, sizeof(buf1));
+      buf1 = sprintbit(t->trigger_type, wtrig_types);
     } else {
       send_to_char(g, ch, "  Trigger Intended Assignment: Mobiles\r\n");
-      sprintbit(t->trigger_type, trig_types, buf1, sizeof(buf1));
+      buf1 = sprintbit(t->trigger_type, trig_types);
     }
 
     send_to_char(g, ch, "  Trigger Type: {}, Numeric Arg: {:d}, Arg list: {}\r\n",

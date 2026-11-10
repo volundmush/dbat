@@ -341,14 +341,14 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
   int size_rooms, size_objects, size_mobiles;
   int size_guilds, size_triggers, size_shops;
   room_vnum top, bottom;
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
 
   if ((rnum = find_zone(g, vnum)) == nullptr) {
     send_to_char(g, ch, "Zone #{:d} does not exist in the database.\r\n", vnum);
     return;
   }
 
-  sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
+  bits = sprintbitarray(rnum->zone_flags, zone_bits, ZF_ARRAY_MAX);
 
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
@@ -398,7 +398,7 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
 {
   IDXTYPE bottom, top;
   int counter = 0;
-  char trgtypes[256];
+  std::string trgtypes;
 
   /** Expect a minimum / maximum number if no zone was given.               **/
   if (rnum != nullptr) {
@@ -423,13 +423,13 @@ static void list_triggers(GameWorld *g, struct char_data *ch, struct zone_data *
                    counter, i->vnum, i->proto->name);
 
       if (i->proto->attach_type == OBJ_TRIGGER) {
-        sprintbit(i->proto->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
+        trgtypes = sprintbit(i->proto->trigger_type, otrig_types);
         send_to_char(g, ch, "obj @y{}@n\r\n", trgtypes);
       } else if (i->proto->attach_type == WLD_TRIGGER) {
-        sprintbit(i->proto->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
+        trgtypes = sprintbit(i->proto->trigger_type, wtrig_types);
         send_to_char(g, ch, "wld @y{}@n\r\n", trgtypes);
       } else {
-        sprintbit(i->proto->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
+        trgtypes = sprintbit(i->proto->trigger_type, trig_types);
         send_to_char(g, ch, "mob @y{}@n\r\n", trgtypes);
       }
     }

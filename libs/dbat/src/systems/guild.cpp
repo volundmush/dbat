@@ -411,14 +411,14 @@ static bool is_guild_open(GameWorld *g, struct char_data *keeper, struct guild_d
   if (buf.empty())
     return (true);
   if (msg)
-    do_say(g, keeper, buf.c_str(), g->cmd_tell, 0);
+    do_say(g, keeper, buf, g->cmd_tell, 0);
 
   return (false);
 }
 
 static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct guild_data *guild_nr)
 {
-  char buf[200];
+  std::string buf;
 
   if (!(char_can_see(g, keeper, ch))) {
     do_say(g, keeper, MSG_TRAINER_NO_SEE_CH, g->cmd_say, 0);
@@ -426,18 +426,18 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
   }
 
   if (char_get_level(ch) < guild_get_minlvl(guild_nr)) {
-    snprintf(buf, sizeof(buf), "%s %s",
-             char_get_name(ch), MSG_TRAINER_MINLVL);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}",
+                     char_get_name(ch), MSG_TRAINER_MINLVL);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
   if ((char_is_good(ch) && guild_trade_flagged(guild_nr, TRADE_NOGOOD)) ||
       (char_is_evil(ch) && guild_trade_flagged(guild_nr, TRADE_NOEVIL)) ||
       (char_is_neutral(ch) && guild_trade_flagged(guild_nr, TRADE_NONEUTRAL))) {
-    snprintf(buf, sizeof(buf), "%s %s",
-             char_get_name(ch), MSG_TRAINER_DISLIKE_ALIGN);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}",
+                     char_get_name(ch), MSG_TRAINER_DISLIKE_ALIGN);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
@@ -471,9 +471,9 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
       (char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, TRADE_NOSHADOWDANCER)) ||
       (char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, TRADE_NOTHAUMATURGIST))) {
 
-    snprintf(buf, sizeof(buf), "%s %s",
-             char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}",
+                     char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
@@ -503,9 +503,9 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
       (!char_is_mystic_theurge(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYMYSTIC_THEURGE)) ||
       (!char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYSHADOWDANCER)) ||
       (!char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYTHAUMATURGIST))) {
-    snprintf(buf, sizeof(buf), "%s %s",
-             char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}",
+                     char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
@@ -530,9 +530,9 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
       (char_is_halfbreed(ch) && guild_trade_flagged(guild_nr, TRADE_NOHALFBREED)) ||
       (char_is_yardratian(ch) && guild_trade_flagged(guild_nr, TRADE_NOMINOTAUR)) ||
       (char_is_arlian(ch) && guild_trade_flagged(guild_nr, TRADE_NOKOBOLD))) {
-    snprintf(buf, sizeof(buf), "%s %s",
-             char_get_name(ch), MSG_TRAINER_DISLIKE_RACE);
-    do_tell(g, keeper, buf, g->cmd_tell, 0);
+    buf = str_format("{} {}",
+                     char_get_name(ch), MSG_TRAINER_DISLIKE_RACE);
+    do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
   return (true);

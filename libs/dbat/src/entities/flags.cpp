@@ -1,8 +1,8 @@
-#include <cstdio>
 #include <cstring>
+#include <string>
+#include <utility>
 
 #include "dbat/flags.hpp"
-#include "dbat/consts/maximums.hpp"
 
 static bool flag_test(const bitvector_t bitvector[], int flag)
 {
@@ -12,45 +12,33 @@ static bool flag_test(const bitvector_t bitvector[], int flag)
   return (bitvector[array_pos] & (1u << bit_pos)) != 0;
 }
 
-size_t sprintbit(bitvector_t bitvector, const char *const names[], char *result, size_t reslen)
+/* the words in a finished list, the space after the last taken off; an empty list is "None " (with its space) */
+static std::string flag_list(std::string out)
 {
-  if (reslen == 0) {
-    return 0;
-  }
-
-  size_t len = 0;
-  int nr     = 0;
-
-  while (bitvector && len < reslen) {
-    if (bitvector & 1) {
-      const char *name = (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
-      int nlen         = snprintf(result + len, reslen - len, "%s ", name);
-      if (nlen < 0 || (size_t)nlen >= reslen - len) {
-        result[len] = '\0';
-        return len;
-      }
-      len += (size_t)nlen;
-    }
-
-    if (*names[nr] != '\n') {
-      nr++;
-    }
-
-    bitvector >>= 1;
-  }
-
-  if (len == 0) {
-    strlcpy(result, "None ", reslen);
-    len = 4;
-  } else {
-    result[len - 1] = '\0'; // Remove trailing space
-    len--;
-  }
-
-  return len;
+  if (out.empty())
+    return "None ";
+  out.pop_back();
+  return out;
 }
 
-size_t sprinttype(int type, const char *const names[], char *result, size_t reslen)
+std::string sprintbit(bitvector_t bitvector, const char *const names[])
+{
+  std::string out;
+  int nr = 0;
+
+  while (bitvector) {
+    if (bitvector & 1) {
+      out += (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
+      out += ' ';
+    }
+    if (*names[nr] != '\n')
+      nr++; /* past the end of names, each bit is UNDEFINED */
+    bitvector >>= 1;
+  }
+  return flag_list(std::move(out));
+}
+
+std::string sprinttype(int type, const char *const names[])
 {
   int nr = 0;
 
@@ -58,76 +46,19 @@ size_t sprinttype(int type, const char *const names[], char *result, size_t resl
     type--;
     nr++;
   }
-
-  const char *name = (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
-  return strlcpy(result, name, reslen);
-}
-
-size_t sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar, char *result, size_t reslen)
-{
-  if (reslen == 0) {
-    return 0;
-  }
-
-  size_t len    = 0;
-  int found_end = false;
-
-  for (int teller = 0; teller < maxar && !found_end; teller++) {
-    for (int nr = 0; nr < 32 && !found_end; nr++) {
-      int flag         = (teller * 32) + nr;
-      const char *name = names[flag];
-
-      if (*name == '\n') {
-        found_end = true;
-        break;
-      }
-
-      if (flag_test(bitvector, flag)) {
-        if (*name != '\0') {
-          if (len < reslen) {
-            int nlen = snprintf(result + len, reslen - len, "%s ", name);
-            if (nlen > 0) {
-              len += (size_t)nlen;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (len == 0) {
-    strlcpy(result, "None ", reslen);
-    len = 4;
-  } else if (len > 0) {
-    result[len - 1] = '\0';
-    len--;
-  }
-
-  return len;
-}
-
-std::string sprintbit(bitvector_t vector, const char *const names[])
-{
-  char buf[MAX_STRING_LENGTH];
-
-  sprintbit(vector, names, buf, sizeof(buf));
-  return buf;
-}
-
-std::string sprinttype(int type, const char *const names[])
-{
-  char buf[MAX_STRING_LENGTH];
-
-  sprinttype(type, names, buf, sizeof(buf));
-  return buf;
+  return (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
 }
 
 std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar)
 {
-  char buf[MAX_STRING_LENGTH];
+  std::string out;
 
-  sprintbitarray(bitvector, names, maxar, buf, sizeof(buf));
-  return buf;
+  for (int flag = 0; flag < maxar * 32 && *names[flag] != '\n'; flag++)
+    if (flag_test(bitvector, flag) && *names[flag] != '\0') {
+      out += names[flag];
+      out += ' ';
+    }
+  return flag_list(std::move(out));
 }
 
 int get_flag_by_name(const char *const flag_list[], char *flag_name)

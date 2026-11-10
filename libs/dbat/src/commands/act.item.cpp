@@ -63,17 +63,20 @@ static int64_t max_carry_weight(GameWorld *g, struct char_data *ch);
 
 static const char *const auctioneer[AUC_BID + 1] = {
 
-    "@D[@CAUCTION@c: @C$n@W puts $p@W up for sale at @Y%d@W zenni.@D]@n",
-    "@D[@CAUCTION@c: @W$p@W at @Y%d@W zenni going once!@D]@n",
-    "@D[@CAUCTION@c: @W$p@W at @Y%d@W zenni going twice!@D]@n",
-    "@D[@CAUCTION@c: @WLast call: $p@W going for @Y%d@W zenni.@D]@n",
+    "@D[@CAUCTION@c: @C$n@W puts $p@W up for sale at @Y{:d}@W zenni.@D]@n",
+    "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going once!@D]@n",
+    "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going twice!@D]@n",
+    "@D[@CAUCTION@c: @WLast call: $p@W going for @Y{:d}@W zenni.@D]@n",
     "@D[@CAUCTION@c: @WUnfortunately $p@W is unsold, returning it to $n. @D]@n",
-    "@D[@CAUCTION@c: @WSOLD! $p@W to @C$n@W for @Y%d@W zenni!@D]@n",
+    "@D[@CAUCTION@c: @WSOLD! $p@W to @C$n@W for @Y{:d}@W zenni!@D]@n",
     "@D[@CAUCTION@c: @WSorry, @C$n@W has cancelled the auction.@D]@n",
     "@D[@CAUCTION@c: @WSorry, @C$n@W has left us, the auction can't go on.@D]@n",
     "@D[@CAUCTION@c: @WSorry, $p@W has been confiscated, shame on you $n.@D]@n",
-    "@D[@CAUCTION@c: @C$n@W is selling $p@W for @Y%d@W zenni.@D]@n",
-    "@D[@CAUCTION@c: @C$n@W bids @Y%d@W zenni on $p@W.@D]@n"};
+    "@D[@CAUCTION@c: @C$n@W is selling $p@W for @Y{:d}@W zenni.@D]@n",
+    "@D[@CAUCTION@c: @C$n@W bids @Y{:d}@W zenni on $p@W.@D]@n"};
+
+/* auctioneer[i], with the bid where it has {:d} */
+static std::string auction_message(int i, int bid) { return std::vformat(auctioneer[i], std::make_format_args(bid)); }
 
 /* local functions */
 static void majin_gain(GameWorld *g, struct char_data *ch, int type);
@@ -93,14 +96,11 @@ static void perform_get_from_container(GameWorld *g, struct char_data *ch, struc
 static int hands(struct char_data *ch);
 static void start_auction(GameWorld *g, struct char_data *ch, struct obj_data *obj, int bid);
 static void auc_stat(GameWorld *g, struct char_data *ch, struct obj_data *obj);
-static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer);
+static void auc_send_to_all(GameWorld *g, const std::string &messg, bool buyer);
 static bool has_housekey(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *plant);
 static bool can_harvest(GameWorld *g, struct obj_data *plant);
 static const char *find_exdesc_keywords(std::string_view word, const ex_desc_list &list);
-
-/* local variables */
-static char buf[MAX_STRING_LENGTH];
 
 // definitions
 
@@ -935,6 +935,7 @@ ACMD(do_twohand)
 
 static void start_auction(GameWorld *g, struct char_data *ch, struct obj_data *obj, int bid)
 {
+  std::string buf;
   /* Take object from character and set variables */
 
   obj_from_char(g, obj);
@@ -944,12 +945,12 @@ static void start_auction(GameWorld *g, struct char_data *ch, struct obj_data *o
   g->curbid      = bid;
 
   /* Tell th character where his item went */
-  snprintf(buf, sizeof(buf), "%s magicly flies away from your hands to be auctioned!\r\n", obj_get_short_description(auction_obj(g)));
+  buf = str_format("{} magicly flies away from your hands to be auctioned!\r\n", obj_get_short_description(auction_obj(g)));
   CAP(buf);
-  send_to_char(g, auction_seller(g), "{}", buf);
+  send_to_char(g, auction_seller(g), buf);
 
   /* Anounce the item is being sold */
-  snprintf(buf, sizeof(buf), auctioneer[AUC_NULL_STATE], g->curbid);
+  buf = auction_message(AUC_NULL_STATE, g->curbid);
   auc_send_to_all(g, buf, false);
 
   g->aucstat = AUC_OFFERING;
@@ -957,6 +958,7 @@ static void start_auction(GameWorld *g, struct char_data *ch, struct obj_data *o
 
 void check_auction(GameWorld *g)
 {
+  std::string buf;
   switch (g->aucstat) {
     case AUC_NULL_STATE:
       return;
@@ -969,7 +971,7 @@ void check_auction(GameWorld *g)
         g->aucstat    = AUC_NULL_STATE;
         return;
       }
-      snprintf(buf, sizeof(buf), auctioneer[AUC_OFFERING], g->curbid);
+      buf = auction_message(AUC_OFFERING, g->curbid);
       CAP(buf);
       auc_send_to_all(g, buf, false);
       g->aucstat = AUC_GOING_ONCE;
@@ -985,7 +987,7 @@ void check_auction(GameWorld *g)
         return;
       }
 
-      snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_ONCE], g->curbid);
+      buf = auction_message(AUC_GOING_ONCE, g->curbid);
       CAP(buf);
       auc_send_to_all(g, buf, false);
       g->aucstat = AUC_GOING_TWICE;
@@ -1001,7 +1003,7 @@ void check_auction(GameWorld *g)
         return;
       }
 
-      snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_TWICE], g->curbid);
+      buf = auction_message(AUC_GOING_TWICE, g->curbid);
       CAP(buf);
       auc_send_to_all(g, buf, false);
       g->aucstat = AUC_LAST_CALL;
@@ -1018,14 +1020,14 @@ void check_auction(GameWorld *g)
       }
       if (auction_buyer(g) == nullptr) {
 
-        snprintf(buf, sizeof(buf), auctioneer[AUC_LAST_CALL], g->curbid);
+        buf = auction_message(AUC_LAST_CALL, g->curbid);
 
         CAP(buf);
         auc_send_to_all(g, buf, false);
 
-        snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
+        buf = str_format("{} flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
         CAP(buf);
-        send_to_char(g, auction_seller(g), "{}", buf);
+        send_to_char(g, auction_seller(g), buf);
         obj_to_char(g, auction_obj(g), auction_seller(g));
 
         /* Reset auctioning values */
@@ -1037,17 +1039,17 @@ void check_auction(GameWorld *g)
         return;
       }
 
-      snprintf(buf, sizeof(buf), auctioneer[AUC_SOLD], g->curbid);
+      buf = auction_message(AUC_SOLD, g->curbid);
       auc_send_to_all(g, buf, true);
 
       /* Give the object to the buyer */
       obj_to_char(g, auction_obj(g), auction_buyer(g));
-      snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands, what a steal!\r\n", obj_get_short_description(auction_obj(g)));
+      buf = str_format("{} flies out the sky and into your hands, what a steal!\r\n", obj_get_short_description(auction_obj(g)));
       CAP(buf);
-      send_to_char(g, auction_buyer(g), "{}", buf);
+      send_to_char(g, auction_buyer(g), buf);
 
-      snprintf(buf, sizeof(buf), "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_get_short_description(auction_obj(g)), g->curbid);
-      send_to_char(g, auction_seller(g), "{}", buf);
+      buf = str_format("Congrats! You have sold {} for @Y{:d}@W zenni!\r\n", obj_get_short_description(auction_obj(g)), g->curbid);
+      send_to_char(g, auction_seller(g), buf);
 
       /* Give selling char the money for his stuff */
       if (char_get_gold(auction_seller(g)) + g->curbid > char_gold_carry(auction_seller(g))) {
@@ -1072,6 +1074,7 @@ void check_auction(GameWorld *g)
 
 ACMD(do_auction)
 {
+  std::string buf;
   std::string arg1;
   std::string arg2;
   struct obj_data *obj;
@@ -1113,20 +1116,20 @@ ACMD(do_auction)
     auc_stat(g, ch, auction_obj(g));
     return;
   } else if (!(obj = get_obj_in_list_vis(g, ch, arg1, nullptr, char_get_inventory(ch)))) {
-    snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1.c_str());
-    send_to_char(g, ch, "{}", buf);
+    buf = str_format("You don't seem to have {} {}.\r\n", AN(arg1), arg1);
+    send_to_char(g, ch, buf);
     return;
   } else if (arg2.empty()) {
-    snprintf(buf, sizeof(buf), "What should be the minimum bid?\r\n");
-    send_to_char(g, ch, "{}", buf);
+    buf = "What should be the minimum bid?\r\n";
+    send_to_char(g, ch, buf);
     return;
   } else if (!arg2.empty() && (bid = parse_int(arg2)) <= 0) {
     send_to_char(g, ch, "Come on? One zenni at least?\r\n");
     return;
   } else if (g->aucstat != AUC_NULL_STATE) {
-    snprintf(buf, sizeof(buf), "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", char_get_name(auction_seller(g)),
-             obj_get_short_description(auction_obj(g)), bid);
-    send_to_char(g, ch, "{}", buf);
+    buf = str_format("Sorry, but {} is already auctioning {} at @Y{:d}@W zenni!\r\n", char_get_name(auction_seller(g)),
+                     obj_get_short_description(auction_obj(g)), bid);
+    send_to_char(g, ch, buf);
     return;
   } else if (obj_extra_flagged(obj, ITEM_NOSELL)) {
     send_to_char(g, ch, "Sorry but you can't sell that!\r\n");
@@ -1143,6 +1146,7 @@ ACMD(do_auction)
 
 ACMD(do_bid)
 {
+  std::string buf;
   struct obj_data *obj2 = nullptr;
   std::string arg, arg2;
   int found = false, list = 0, masterList = 0;
@@ -1264,8 +1268,7 @@ ACMD(do_bid)
       send_to_char(g, ch, "@GCondition   @W: @D{:d}{}@n\n", obj_get_value(obj2, VAL_ALL_HEALTH), "%");
     }
     send_to_char(g, ch, "@GItem Weight @W: @w{}@n\n", add_commas(obj_get_weight(obj2)));
-    char bits[MAX_STRING_LENGTH];
-    sprintbitarray(obj_get_wear_flags(obj2), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
+    std::string bits = sprintbitarray(obj_get_wear_flags(obj2), wear_bits, TW_ARRAY_MAX);
     search_replace(bits, "TAKE", "");
     send_to_char(g, ch, "@GWear Loc.   @W:@w{}\n", bits);
     if (obj_get_type_flag(obj2) == ITEM_WEAPON) {
@@ -1286,7 +1289,7 @@ ACMD(do_bid)
     send_to_char(g, ch, "@GItem Bonuses@W:@w");
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
       if (obj_get_affected(obj2)[i].modifier) {
-        sprinttype(obj_get_affected(obj2)[i].location, apply_types, buf, sizeof(buf));
+        buf = sprinttype(obj_get_affected(obj2)[i].location, apply_types);
         send_to_char(g, ch, "{} {:+d} to {}", found_bonus++ ? "," : "", obj_get_affected(obj2)[i].modifier, buf);
         switch (obj_get_affected(obj2)[i].location) {
           case APPLY_FEAT:
@@ -1302,8 +1305,7 @@ ACMD(do_bid)
       send_to_char(g, ch, " None@n");
     else
       send_to_char(g, ch, "@n");
-    char buf2[MAX_STRING_LENGTH];
-    sprintbitarray(obj_get_bitvector(obj2), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
+    std::string buf2 = sprintbitarray(obj_get_bitvector(obj2), affected_bits, AF_ARRAY_MAX);
     send_to_char(g, ch, "\n@GSpecial     @W:@w {}\n", buf2);
     send_to_char(g, ch, "@c------------------------------------------------------------------------\n");
     return;
@@ -1382,6 +1384,7 @@ ACMD(do_bid)
 
 void stop_auction(GameWorld *g, int type, struct char_data *ch)
 {
+  std::string buf;
   if (auction_obj(g) == nullptr) {
     auc_send_to_all(g, "@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
     g->curbid     = 0;
@@ -1394,19 +1397,19 @@ void stop_auction(GameWorld *g, int type, struct char_data *ch)
 
     case AUC_NORMAL_CANCEL: {
 
-      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_NORMAL_CANCEL]);
+      buf = auction_message(AUC_NORMAL_CANCEL, g->curbid);
       auc_send_to_all(g, buf, false);
       break;
     }
     case AUC_QUIT_CANCEL: {
 
-      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_QUIT_CANCEL]);
+      buf = auction_message(AUC_QUIT_CANCEL, g->curbid);
       auc_send_to_all(g, buf, false);
       break;
     }
     case AUC_WIZ_CANCEL: {
 
-      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_WIZ_CANCEL]);
+      buf = auction_message(AUC_WIZ_CANCEL, g->curbid);
       auc_send_to_all(g, buf, false);
       break;
     }
@@ -1417,14 +1420,14 @@ void stop_auction(GameWorld *g, int type, struct char_data *ch)
   }
 
   if (type != AUC_WIZ_CANCEL) {
-    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
+    buf = str_format("{} flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
     CAP(buf);
-    send_to_char(g, auction_seller(g), "{}", buf);
+    send_to_char(g, auction_seller(g), buf);
     obj_to_char(g, auction_obj(g), auction_seller(g));
   } else {
-    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
+    buf = str_format("{} flies out the sky and into your hands.\r\n", obj_get_short_description(auction_obj(g)));
     CAP(buf);
-    send_to_char(g, ch, "{}", buf);
+    send_to_char(g, ch, buf);
     obj_to_char(g, auction_obj(g), ch);
   }
 
@@ -1441,6 +1444,7 @@ void stop_auction(GameWorld *g, int type, struct char_data *ch)
 
 static void auc_stat(GameWorld *g, struct char_data *ch, struct obj_data *obj)
 {
+  std::string buf;
 
   if (g->aucstat == AUC_NULL_STATE) {
     send_to_char(g, ch, "Nothing is being auctioned!\r\n");
@@ -1455,19 +1459,15 @@ static void auc_stat(GameWorld *g, struct char_data *ch, struct obj_data *obj)
     return;
   }
   /* auctioneer tells the character the auction details */
-  snprintf(buf, sizeof(buf), auctioneer[AUC_STAT], g->curbid);
-  act(g, buf, true, auction_seller(g), obj, ch, TO_VICT | TO_SLEEP);
+  buf = auction_message(AUC_STAT, g->curbid);
+  act(g, buf.c_str(), true, auction_seller(g), obj, ch, TO_VICT | TO_SLEEP);
   char_set_gold(ch, char_get_gold(ch) - (500));
 
   /*call_magic(ch, NULL, obj_selling, SPELL_IDENTIFY, 30, CAST_SPELL);*/
 }
 
-static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer)
+static void auc_send_to_all(GameWorld *g, const std::string &messg, bool buyer)
 {
-
-  if (messg == nullptr)
-    return;
-
   for (descriptor_data *i : each_desc(g)) {
     if (desc_get_connected(i) != CON_PLAYING)
       continue;
@@ -1476,9 +1476,9 @@ static void auc_send_to_all(GameWorld *g, const char *messg, bool buyer)
     if (room_flagged(g, char_get_in_room(i->character), ROOM_PAST))
       continue;
     if (buyer)
-      act(g, messg, true, auction_buyer(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
+      act(g, messg.c_str(), true, auction_buyer(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
     else
-      act(g, messg, true, auction_seller(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
+      act(g, messg.c_str(), true, auction_seller(g), auction_obj(g), i->character, TO_VICT | TO_SLEEP);
   }
 }
 
@@ -1919,7 +1919,7 @@ static void get_check_money(GameWorld *g, struct char_data *ch, struct obj_data 
     send_to_char(g, ch, "There were {:d} zenni.\r\n", value);
     if (char_is_affected(ch, AFF_GROUP) && char_prf_flagged(g, ch, PRF_AUTOSPLIT)) {
       std::string split = str_format("{:d}", value);
-      do_split(g, ch, split.c_str(), 0, 0);
+      do_split(g, ch, split, 0, 0);
     }
   }
 }

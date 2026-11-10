@@ -662,7 +662,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 {
   int door, i;
   char map[9][10] = {{'-'}, {'-'}};
-  char buf2[MAX_INPUT_LENGTH];
+  std::string buf2;
 
   if (num == 1) {
     /* Map Key */
@@ -725,28 +725,28 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 
   /* print out the map */
   int key = 0;
-  *buf2   = '\0';
+  buf2.clear();
   for (i = 2; i < 9; i++) {
     if (i > 6) {
       continue;
     }
     if (num == 1) {
-      snprintf(buf2, sizeof(buf2), "@w                %s\r\n", map[i]);
+      buf2 = str_format("@w                {}\r\n", map[i]);
     } else {
       if (i == 2) {
-        snprintf(buf2, sizeof(buf2), "@w       @w|%s@w|           %s", (char_get_exit(g, ch, 0) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+        buf2 = str_format("@w       @w|{}@w|           {}", (char_get_exit(g, ch, 0) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
       }
       if (i == 3) {
-        snprintf(buf2, sizeof(buf2), "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(g, ch, 6) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (char_get_exit(g, ch, 4) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (char_get_exit(g, ch, 7) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 6) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (char_get_exit(g, ch, 4) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (char_get_exit(g, ch, 7) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
       }
       if (i == 4) {
-        snprintf(buf2, sizeof(buf2), "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(g, ch, 3) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (char_get_exit(g, ch, 10) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((char_get_exit(g, ch, 11) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (char_get_exit(g, ch, 1) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 3) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (char_get_exit(g, ch, 10) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((char_get_exit(g, ch, 11) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (char_get_exit(g, ch, 1) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
       }
       if (i == 5) {
-        snprintf(buf2, sizeof(buf2), "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(g, ch, 9) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (char_get_exit(g, ch, 5) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (char_get_exit(g, ch, 8) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
+        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 9) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (char_get_exit(g, ch, 5) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (char_get_exit(g, ch, 8) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
       }
       if (i == 6) {
-        snprintf(buf2, sizeof(buf2), "@w       @w|%s@w|           %s", (char_get_exit(g, ch, 2) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+        buf2 = str_format("@w       @w|{}@w|           {}", (char_get_exit(g, ch, 2) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
       }
     }
     search_replace(buf2, "x", "@RX");
@@ -792,7 +792,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
       }
       key += 1;
     } else {
-      send_to_char(g, ch, "{}", buf2);
+      send_to_char(g, ch, buf2);
     }
   }
   if (num == 1) {

@@ -228,17 +228,16 @@ ACMD(do_say)
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (tch != ch && char_get_desc(tch)) {
-        char sayto[100];
-        snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
-        if (strstr(text.c_str(), sayto)) {
-          search_replace(text, sayto, "");
+        std::string sayto = str_format("to {} ", char_get_name(tch));
+        if (strstr(text.c_str(), sayto.c_str())) {
+          search_replace(text, sayto.c_str(), "");
           sch = tch;
         } else if (!char_is_npc(tch) && !char_is_npc(ch)) {
           if (readIntro(ch, tch) == 1) {
-            snprintf(sayto, sizeof(sayto), "to %s ", get_i_name(ch, tch));
+            sayto = str_format("to {} ", get_i_name(ch, tch));
           }
-          if (strstr(text.c_str(), sayto)) {
-            search_replace(text, sayto, "");
+          if (strstr(text.c_str(), sayto.c_str())) {
+            search_replace(text, sayto.c_str(), "");
             sch = tch;
           }
         }

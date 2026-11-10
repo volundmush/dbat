@@ -366,11 +366,11 @@ static void medit_disp_sex(GameWorld *g, struct descriptor_data *d)
  */
 static void medit_disp_mob_flags(GameWorld *g, struct descriptor_data *d)
 {
-  char flags[MAX_STRING_LENGTH];
+  std::string flags;
 
   clear_screen(g, d);
   olc_list_columns(g, d, action_bits, NUM_MOB_FLAGS, 1, "  ", 2);
-  sprintbitarray(char_get_act(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  flags = sprintbitarray(char_get_act(OLC_MOB(d)), action_bits, AF_ARRAY_MAX);
   write_to_output(g, d, "\r\nCurrent flags : @c{}@n\r\nEnter mob flags (0 to quit) : ",
                   flags);
 }
@@ -391,11 +391,11 @@ static void medit_disp_personality(GameWorld *g, struct descriptor_data *d)
  */
 static void medit_disp_aff_flags(GameWorld *g, struct descriptor_data *d)
 {
-  char flags[MAX_STRING_LENGTH];
+  std::string flags;
 
   clear_screen(g, d);
   olc_list_columns(g, d, affected_bits + 1, NUM_AFF_FLAGS, 1, "  ", 2);
-  sprintbitarray(char_get_affected_by(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  flags = sprintbitarray(char_get_affected_by(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX);
   write_to_output(g, d, "\r\nCurrent flags   : @c{}@n\r\nEnter aff flags (0 to quit) : ",
                   flags);
 }
@@ -426,13 +426,13 @@ static void medit_disp_class(GameWorld *g, struct descriptor_data *d)
 static void medit_disp_race(GameWorld *g, struct descriptor_data *d)
 {
   int columns = 0;
-  char buf[MAX_INPUT_LENGTH];
+  std::string buf;
 
   clear_screen(g, d);
   for (int r = 0; r < NUM_RACES; r++) {
-    sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race_name(r),
-            !(++columns % 2) ? "\r\n" : "");
-    write_to_output(g, d, "{}", buf);
+    buf = str_format("@g{:>2d}@n) {:<20.20}  {}", r, race_name(r),
+                     !(++columns % 2) ? "\r\n" : "");
+    write_to_output(g, d, buf);
   }
   write_to_output(g, d, "Enter race number : ");
 }
@@ -464,7 +464,8 @@ static void medit_disp_size(GameWorld *g, struct descriptor_data *d)
 static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct char_data *mob;
-  char flags[MAX_STRING_LENGTH], flag2[MAX_STRING_LENGTH];
+  std::string flags;
+  std::string flag2;
 
   mob = OLC_MOB(d);
   clear_screen(g, d);
@@ -477,8 +478,8 @@ static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
                   char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob), getCurPL(g, mob), (getCurKI(g, mob)),
                   (getCurST(g, mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob));
-  sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
-  sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
+  flags = sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX);
+  flag2 = sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX);
   write_to_output(g, d,
                   "@gI@n) Position   : @y{:<10}@n,	 @gJ@n) Default   : @y{:<10}\r\n@gK@n) Personality: @Y{}@n\r\n@gL@n) NPC Flags  : @c{}\r\n@gM@n) AFF Flags  : @c{}\r\n@gN@n) Class      : @y{:<10}@n,	 @gO@n) Race      : @y{:<10}\r\n@gS@n) Script     : @c{}\r\n@gW@n) Copy mob              ,	 @gX@n) Delete mob\r\n@gY@n) Size       : @y{}\r\n@gZ@n) Wiznet     :\r\n@gQ@n) Quit\r\nEnter choice : ",
 

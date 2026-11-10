@@ -1360,9 +1360,9 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
-    char aura[MAX_INPUT_LENGTH];
-    snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, nullptr, ch, TO_VICT);
+    std::string aura;
+    aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
+    act(g, aura.c_str(), true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);

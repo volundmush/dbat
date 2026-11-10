@@ -401,7 +401,7 @@ static void gedit_select_wp_menu(GameWorld *g, struct descriptor_data *d)
 
 static void gedit_no_train_menu(GameWorld *g, struct descriptor_data *d)
 {
-  char bits[MAX_STRING_LENGTH];
+  std::string bits;
   int i, count = 0;
   struct guild_data *guilddata;
 
@@ -413,7 +413,7 @@ static void gedit_no_train_menu(GameWorld *g, struct descriptor_data *d)
                     !(++count % 2) ? "\r\n" : "");
   }
 
-  sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4, bits, sizeof(bits));
+  bits = sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4);
   write_to_output(g, d, "\r\nCurrent train flags: @c{}@n\r\nEnter choice, 0 to quit : ",
                   bits);
   OLC_MODE(d) = GEDIT_NO_TRAIN;
@@ -425,13 +425,13 @@ static void gedit_no_train_menu(GameWorld *g, struct descriptor_data *d)
 static void gedit_disp_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct guild_data *guilddata;
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
 
   guilddata = OLC_GUILD(d);
 
   clear_screen(g, d);
 
-  sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4, buf1, sizeof(buf1));
+  buf1 = sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4);
 
   write_to_output(g, d,
                   "-- Guild Number: [@c{:d}@n]\r\n@g 0@n) Guild Master : [@c{:d}@n] @y{}\r\n@g 1@n) Doesn't know skill:\r\n @y{}\r\n@g 2@n) Player no gold:\r\n @y{}\r\n@g 3@n) Open   :  [@c{:d}@n]\r\n@g 4@n) Close  :  [@c{:d}@n]\r\n@g 5@n) Charge :  [@c{:>3.1f}@n]\r\n@g 6@n) Minlvl :  [@c{:d}@n]\r\n@g 7@n) Who to Train:  @c{}\r\n@g 8@n) Feats Menu\r\n@g 9@n) Skills Menu\r\n@g B@n) Languages Menu\r\n@g Q@n) Quit\r\nEnter Choice : ",

@@ -228,97 +228,97 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
       switch (char_get_combo(ch)) {
         case 0:
           buf = str_format("{}", char_get_name(vict));
-          do_punch(g, ch, buf.c_str(), 0, 0);
+          do_punch(g, ch, buf, 0, 0);
           break;
         case 1:
           buf = str_format("{}", char_get_name(vict));
-          do_kick(g, ch, buf.c_str(), 0, 0);
+          do_kick(g, ch, buf, 0, 0);
           break;
         case 2:
           buf = str_format("{}", char_get_name(vict));
-          do_elbow(g, ch, buf.c_str(), 0, 0);
+          do_elbow(g, ch, buf, 0, 0);
           break;
         case 3:
           buf = str_format("{}", char_get_name(vict));
-          do_knee(g, ch, buf.c_str(), 0, 0);
+          do_knee(g, ch, buf, 0, 0);
           break;
         case 4:
           buf = str_format("{}", char_get_name(vict));
-          do_roundhouse(g, ch, buf.c_str(), 0, 0);
+          do_roundhouse(g, ch, buf, 0, 0);
           break;
         case 5:
           buf = str_format("{}", char_get_name(vict));
-          do_uppercut(g, ch, buf.c_str(), 0, 0);
+          do_uppercut(g, ch, buf, 0, 0);
           break;
         case 6:
           buf = str_format("{}", char_get_name(vict));
-          do_slam(g, ch, buf.c_str(), 0, 0);
+          do_slam(g, ch, buf, 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 8:
           buf = str_format("{}", char_get_name(vict));
-          do_heeldrop(g, ch, buf.c_str(), 0, 0);
+          do_heeldrop(g, ch, buf, 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 51:
           buf = str_format("{}", char_get_name(vict));
-          do_bash(g, ch, buf.c_str(), 0, 0);
+          do_bash(g, ch, buf, 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 52:
           buf = str_format("{}", char_get_name(vict));
-          do_head(g, ch, buf.c_str(), 0, 0);
+          do_head(g, ch, buf, 0, 0);
           break;
         case 56:
           buf = str_format("{}", char_get_name(vict));
-          do_tailwhip(g, ch, buf.c_str(), 0, 0);
+          do_tailwhip(g, ch, buf, 0, 0);
           char_set_throws(ch, char_get_throws(ch) + 1);
           break;
       }
     } else {
       if (char_get_lastattack(ch) == -1) {
         buf = str_format("{}", char_get_name(vict));
-        do_attack(g, ch, buf.c_str(), 0, 0);
+        do_attack(g, ch, buf, 0, 0);
       } else {
         /* Repeat the last physical attack command that was issued
            instead of always falling back to punch/kick. */
         buf = str_format("{}", char_get_name(vict));
         switch (char_get_lastattack(ch)) {
           case 0:
-            do_punch(g, ch, buf.c_str(), 0, 0);
+            do_punch(g, ch, buf, 0, 0);
             break;
           case 1:
-            do_kick(g, ch, buf.c_str(), 0, 0);
+            do_kick(g, ch, buf, 0, 0);
             break;
           case 2:
-            do_elbow(g, ch, buf.c_str(), 0, 0);
+            do_elbow(g, ch, buf, 0, 0);
             break;
           case 3:
-            do_knee(g, ch, buf.c_str(), 0, 0);
+            do_knee(g, ch, buf, 0, 0);
             break;
           case 4:
-            do_roundhouse(g, ch, buf.c_str(), 0, 0);
+            do_roundhouse(g, ch, buf, 0, 0);
             break;
           case 5:
-            do_uppercut(g, ch, buf.c_str(), 0, 0);
+            do_uppercut(g, ch, buf, 0, 0);
             break;
           case 6:
-            do_slam(g, ch, buf.c_str(), 0, 0);
+            do_slam(g, ch, buf, 0, 0);
             break;
           case 8:
-            do_heeldrop(g, ch, buf.c_str(), 0, 0);
+            do_heeldrop(g, ch, buf, 0, 0);
             break;
           case 51:
-            do_bash(g, ch, buf.c_str(), 0, 0);
+            do_bash(g, ch, buf, 0, 0);
             break;
           case 52:
-            do_head(g, ch, buf.c_str(), 0, 0);
+            do_head(g, ch, buf, 0, 0);
             break;
           case 56:
-            do_tailwhip(g, ch, buf.c_str(), 0, 0);
+            do_tailwhip(g, ch, buf, 0, 0);
             break;
           default: /* unknown / weapon attack: fall back to punch */
-            do_punch(g, ch, buf.c_str(), 0, 0);
+            do_punch(g, ch, buf, 0, 0);
             break;
         }
       }
@@ -933,11 +933,11 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
     std::string corp;
     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
       corp = "all.zenni corpse";
-      do_get(g, ch, corp.c_str(), 0, 0);
+      do_get(g, ch, corp, 0, 0);
     }
     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
       corp = "all corpse";
-      do_get(g, ch, corp.c_str(), 0, 0);
+      do_get(g, ch, corp, 0, 0);
     }
     return;
   } else { /* We've only succeeded in removing a limb. */
@@ -4520,11 +4520,11 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (!char_plr_flagged(ch, PLR_SELFD2)) {
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
           corp = "all.zenni corpse";
-          do_get(g, ch, corp.c_str(), 0, 0);
+          do_get(g, ch, corp, 0, 0);
         }
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
           corp = "all corpse";
-          do_get(g, ch, corp.c_str(), 0, 0);
+          do_get(g, ch, corp, 0, 0);
         }
       }
     }
