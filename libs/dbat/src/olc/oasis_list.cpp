@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/interpreter.hpp"
@@ -41,23 +42,25 @@ ACMD(do_oasis_list)
   struct zone_data *rzone = nullptr;
   room_vnum vmin          = NOWHERE;
   room_vnum vmax          = NOWHERE;
-  char smin[MAX_INPUT_LENGTH];
-  char smax[MAX_INPUT_LENGTH];
+  std::string smin;
+  std::string smax;
 
-  two_arguments(argument, smin, smax);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  smin                  = take_arg(rest);
+  smax                  = take_arg(rest);
 
   if (subcmd == SCMD_OASIS_ZLIST) { /* special case */
-    if (*smin && is_number(smin))
-      print_zone(g, ch, atoi(smin));
+    if (!smin.empty() && is_number(smin))
+      print_zone(g, ch, parse_int(smin));
     else
       list_zones(g, ch);
     return;
   }
 
-  if (!*smin || *smin == '.') {
+  if (smin.empty() || smin[0] == '.') {
     rzone = room_get_zone(g, char_get_in_room(ch));
-  } else if (!*smax) {
-    rzone = find_zone(g, atoi(smin));
+  } else if (smax.empty()) {
+    rzone = find_zone(g, parse_int(smin));
 
     if (rzone == nullptr) {
       send_to_char(g, ch, "Sorry, there's no zone with that number\r\n");
@@ -65,8 +68,8 @@ ACMD(do_oasis_list)
     }
   } else {
     /** Listing by min vnum / max vnum.  Retrieve the numeric values.          **/
-    vmin = atoi(smin);
-    vmax = atoi(smax);
+    vmin = parse_int(smin);
+    vmax = parse_int(smax);
 
     if (vmin + 500 < vmax) {
       send_to_char(g, ch, "Really? Over 500?! You need to view that many at once? Come on...\r\n");
@@ -99,16 +102,16 @@ ACMD(do_oasis_links)
   room_vnum to_room;
   room_vnum first, last;
   int j;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
-  skip_spaces(&argument);
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!strcmp(arg, ".") || !*arg) {
+  if (arg == "." || arg.empty()) {
     zrnum = room_get_zone(g, char_get_in_room(ch));
     zvnum = zrnum->number;
   } else {
-    zvnum = atoi(arg);
+    zvnum = parse_int(arg);
     zrnum = find_zone(g, zvnum);
   }
 

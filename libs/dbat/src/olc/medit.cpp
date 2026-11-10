@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/medit.hpp"
 #include "dbat/interpreter.hpp"
@@ -54,20 +55,22 @@ ACMD(do_oasis_medit)
   int save       = 0;
   mob_vnum real_num;
   struct descriptor_data *d;
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf1;
+  std::string buf2;
 
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  two_arguments(argument, buf1, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_arg(rest);
+  buf2                  = take_arg(rest);
 
-  if (!*buf1) {
+  if (buf1.empty()) {
     send_to_char(g, ch, "Specify a mobile VNUM to edit.\r\n");
     return;
   }
-  if (!isdigit(*buf1)) {
-    if (strcasecmp("save", buf1) != 0) {
+  if (!isdigit(buf1[0])) {
+    if (!str_eq_nocase("save", buf1)) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
@@ -75,7 +78,7 @@ ACMD(do_oasis_medit)
     save = true;
 
     if (is_number(buf2))
-      number = atoi(buf2);
+      number = parse_int(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
       struct zone_data *zlok;
 
@@ -95,7 +98,7 @@ ACMD(do_oasis_medit)
   /** If a numeric argument was given (like a room number), get it.          **/
   /****************************************************************************/
   if (number == NOBODY)
-    number = atoi(buf1);
+    number = parse_int(buf1);
 
   /****************************************************************************/
   /** Check that whatever it is isn't already being edited.                  **/

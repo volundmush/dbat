@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -50,8 +51,8 @@ static void redit_setup_new(struct descriptor_data *d);
 
 ACMD(do_oasis_redit)
 {
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf1;
+  std::string buf2;
   IDXTYPE number = NOWHERE;
   int save       = 0;
   room_vnum real_num;
@@ -59,7 +60,9 @@ ACMD(do_oasis_redit)
 
   /* Parse any arguments. */
   if (char_get_admlevel(ch) > 0) {
-    two_arguments(argument, buf1, buf2);
+    std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+    buf1                  = take_arg(rest);
+    buf2                  = take_arg(rest);
   }
 
   if (char_get_admlevel(ch) < 1 && !room_flagged(g, char_get_in_room(ch), ROOM_CANREMODEL)) {
@@ -90,10 +93,10 @@ ACMD(do_oasis_redit)
     remodeling = true;
   }
 
-  if (!*buf1 || char_get_admlevel(ch) < 1)
+  if (buf1.empty() || char_get_admlevel(ch) < 1)
     number = char_get_in_room(ch);
-  else if (!isdigit(*buf1)) {
-    if (strcasecmp("save", buf1) != 0) {
+  else if (!isdigit(buf1[0])) {
+    if (!str_eq_nocase("save", buf1)) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
@@ -101,7 +104,7 @@ ACMD(do_oasis_redit)
     save = true;
 
     if (is_number(buf2))
-      number = atoi(buf2);
+      number = parse_int(buf2);
     else if (char_get_olc_zone(g, ch) >= 0) {
       struct zone_data *zlok;
 
@@ -121,7 +124,7 @@ ACMD(do_oasis_redit)
    * If a numeric argument was given (like a room number), get it.
    */
   if (number == NOWHERE)
-    number = atoi(buf1);
+    number = parse_int(buf1);
 
   /* Check to make sure the room isn't already being edited. */
   for (descriptor_data *dd : each_desc(g)) {

@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
@@ -294,13 +295,13 @@ static size_t text_used(size_t len, int wrote, size_t size)
 ACMD(do_skillset)
 {
   struct char_data *vict;
-  char name[MAX_INPUT_LENGTH];
-  char buf[MAX_INPUT_LENGTH], help_text[MAX_STRING_LENGTH];
+  char help_text[MAX_STRING_LENGTH];
   int skill, value, i = 0, qend;
 
-  argument = one_argument(argument, name);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  std::string name      = take_arg(rest);
 
-  if (!*name) { /* no arguments. print an informative text */
+  if (name.empty()) { /* no arguments. print an informative text */
     send_to_char(g, ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
                      "Skill being one of the following:\r\n");
     for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++) {
@@ -323,10 +324,10 @@ ACMD(do_skillset)
     send_to_char(g, ch, "NPCs don't have skills.\r\n");
     return;
   }
-  skip_spaces(&argument);
+  rest = skip_spaces(rest);
 
   /* If there is no chars in argument */
-  if (!*argument) {
+  if (rest.empty()) {
     size_t len = 0;
 
     len = text_used(len, snprintf(help_text, sizeof(help_text), "\r\nSkills:\r\n"), sizeof(help_text));
@@ -343,33 +344,31 @@ ACMD(do_skillset)
     return;
   }
 
-  if (*argument != '\'') {
+  if (rest[0] != '\'') {
     send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
-  /* Locate the last quote and lowercase the magic words (if any) */
-
-  for (qend = 1; argument[qend] && argument[qend] != '\''; qend++)
-    argument[qend] = tolower(argument[qend]);
-
-  if (argument[qend] != '\'') {
+  /* Locate the closing quote; the magic words between are lowercased */
+  size_t close = rest.find('\'', 1);
+  if (close == std::string_view::npos) {
     send_to_char(g, ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
-  strcpy(help_text, (argument + 1)); /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
-  help_text[qend - 1] = '\0';
-  if ((skill = find_skill_num(g, help_text, SKTYPE_SKILL)) <= 0) {
+  std::string skillname(rest.substr(1, close - 1));
+  for (char &c : skillname)
+    c = tolower(c);
+  if ((skill = find_skill_num(g, skillname.data(), SKTYPE_SKILL)) <= 0) {
     send_to_char(g, ch, "Unrecognized skill.\r\n");
     return;
   }
-  argument += qend + 1; /* skip to next parameter */
-  argument = one_argument(argument, buf);
+  rest.remove_prefix(close + 1); /* skip to next parameter */
+  std::string buf = take_arg(rest);
 
-  if (!*buf) {
+  if (buf.empty()) {
     send_to_char(g, ch, "Learned value expected.\r\n");
     return;
   }
-  value = atoi(buf);
+  value = parse_int(buf);
   if (value < 0) {
     send_to_char(g, ch, "Minimum value for learned is 0.\r\n");
     return;

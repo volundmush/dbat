@@ -8,6 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/config.hpp"
@@ -56,20 +57,22 @@ ACMD(do_oasis_gedit)
   int save       = 0;
   struct guild_data *existing;
   struct descriptor_data *d;
-  char buf1[MAX_INPUT_LENGTH];
-  char buf2[MAX_INPUT_LENGTH];
+  std::string buf1;
+  std::string buf2;
 
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  two_arguments(argument, buf1, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_arg(rest);
+  buf2                  = take_arg(rest);
 
-  if (!*buf1) {
+  if (buf1.empty()) {
     send_to_char(g, ch, "Specify a guild VNUM to edit.\r\n");
     return;
   }
-  if (!isdigit(*buf1)) {
-    if (strcasecmp("save", buf1) != 0) {
+  if (!isdigit(buf1[0])) {
+    if (!str_eq_nocase("save", buf1)) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
@@ -77,7 +80,7 @@ ACMD(do_oasis_gedit)
     save = true;
 
     if (is_number(buf2))
-      number = atoi(buf2);
+      number = parse_int(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
       struct zone_data *zlok;
 
@@ -97,7 +100,7 @@ ACMD(do_oasis_gedit)
   /** If a numeric argument was given, get it.                               **/
   /****************************************************************************/
   if (number == NOWHERE)
-    number = atoi(buf1);
+    number = parse_int(buf1);
 
   /****************************************************************************/
   /** Check that the guild isn't already being edited.                        **/

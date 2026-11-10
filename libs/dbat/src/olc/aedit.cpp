@@ -7,6 +7,7 @@
  */
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/aedit.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -35,7 +36,7 @@ static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *d);
 
 ACMD(do_oasis_aedit)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct descriptor_data *d;
   int i;
 
@@ -55,16 +56,17 @@ ACMD(do_oasis_aedit)
       return;
     }
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Please specify a social to edit.\r\n");
     return;
   }
 
   d = char_get_desc(ch);
 
-  if (!strcasecmp("save", arg)) {
+  if (str_eq_nocase("save", arg)) {
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: %s saves socials.", char_get_name(ch));
     send_to_char(g, ch, "Writing social file..\r\n");
     aedit_save_to_disk(g, d);
@@ -741,14 +743,15 @@ void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 ACMD(do_astat)
 {
   int i, real = false;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
 
   if (char_is_npc(ch))
     return;
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Astat which social?\r\n");
     return;
   }

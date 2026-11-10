@@ -11,6 +11,7 @@
 **************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/help.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/hedit.hpp"
@@ -43,7 +44,7 @@ static void hedit_disp_menu(GameWorld *g, struct descriptor_data *);
 
 ACMD(do_oasis_hedit)
 {
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg;
   struct descriptor_data *d;
 
   /* No building as a mob or while being forced. */
@@ -60,16 +61,17 @@ ACMD(do_oasis_hedit)
     return;
   }
 
-  one_argument(argument, arg);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Please specify a help entry to edit.\r\n");
     return;
   }
 
   d = char_get_desc(ch);
 
-  if (!strcasecmp("save", arg)) {
+  if (str_eq_nocase("save", arg)) {
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: %s saves help files.",
            char_get_name(ch));
     hedit_save_to_disk(g, d);
@@ -435,9 +437,9 @@ ACMD(do_hindex)
   int len, count = 0, i, num = 0;
   char buf[MAX_STRING_LENGTH];
 
-  skip_spaces(&argument);
+  std::string text(skip_spaces(argument ? argument : "")); /* (some callers pass null) */
 
-  if (!*argument) {
+  if (text.empty()) {
     send_to_char(g, ch, "Usage: hindex <string>\r\n");
     for (i = 0; i < (int)g->help_table.size(); i++) {
       num++;
@@ -448,10 +450,10 @@ ACMD(do_hindex)
     return;
   }
 
-  len = sprintf(buf, "Help index entries based on '%s':\r\n", argument);
+  len = sprintf(buf, "Help index entries based on '%s':\r\n", text.c_str());
   for (i = 0; i < (int)g->help_table.size(); i++) {
     num++;
-    if (is_abbrev(argument, g->help_table[i].keywords.c_str()) && (char_get_admlevel(ch) >= g->help_table[i].min_level))
+    if (is_abbrev(text, g->help_table[i].keywords.c_str()) && (char_get_admlevel(ch) >= g->help_table[i].min_level))
       len +=
           snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", g->help_table[i].keywords.c_str(),
                    (++count % 3 ? "" : "\r\n"));

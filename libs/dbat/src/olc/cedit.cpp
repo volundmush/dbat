@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/consts/create.hpp"
 #include "dbat/config.hpp"
@@ -303,9 +304,10 @@ static void reassign_rooms(GameWorld *g);
 ACMD(do_oasis_cedit)
 {
   struct descriptor_data *d;
-  char buf1[MAX_STRING_LENGTH];
+  std::string buf1;
 
-  one_argument(argument, buf1);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_arg(rest);
 
   if (char_get_admlevel(ch) < ADMLVL_GRGOD) {
     send_to_char(g, ch, "You can't modify the game configuration.\r\n");
@@ -314,7 +316,7 @@ ACMD(do_oasis_cedit)
 
   d = char_get_desc(ch);
 
-  if (!*buf1) {
+  if (buf1.empty()) {
     d->olc      = new oasis_olc_data();
     OLC_ZONE(d) = nullptr;
     cedit_setup(g, d);
@@ -326,7 +328,7 @@ ACMD(do_oasis_cedit)
            "OLC: %s starts editing the game configuration.", char_get_name(ch));
     return;
   }
-  if (strcasecmp("save", buf1) != 0) {
+  if (!str_eq_nocase("save", buf1)) {
     send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
     return;
   }

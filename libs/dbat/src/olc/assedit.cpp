@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/assedit.hpp"
 #include "dbat/assemblies.hpp"
@@ -40,11 +41,8 @@ static void nodigit(GameWorld *g, struct descriptor_data *d);
 ACMD(do_assedit)
 {
   struct descriptor_data *d = char_get_desc(ch);
-  char buf[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
-
-  *buf  = '\0'; /* If I run into problems then take this sucker out */
-  *buf2 = '\0';
+  std::string buf;
+  std::string buf2;
 
   if (char_is_npc(ch))
     return;
@@ -56,33 +54,35 @@ ACMD(do_assedit)
     }
   }
 
-  two_arguments(argument, buf, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf                   = take_arg(rest);
+  buf2                  = take_arg(rest);
 
   d = char_get_desc(ch);
 
-  if (!*buf) {
+  if (buf.empty()) {
     nodigit(g, d);
     return;
   }
 
-  if (!isdigit(*buf)) {
-    if (strncasecmp("new", buf, 3) == 0) {
-      if (!isdigit(*buf2)) {
+  if (!isdigit(buf[0])) {
+    if (strncasecmp("new", buf.c_str(), 3) == 0) {
+      if (!isdigit(buf2[0])) {
         nodigit(g, d);
-      } else if (!obj_proto_of(g, atoi(buf2))) {
+      } else if (!obj_proto_of(g, parse_int(buf2))) {
         send_to_char(g, d->character, "You need to create the assembly object before you can create the new assembly.\r\n");
         return;
       } else {
-        assemblyCreate(g, atoi(buf2), 0);
+        assemblyCreate(g, parse_int(buf2), 0);
         send_to_char(g, d->character, "Assembly Created.\r\n");
         assemblySaveAssemblies(g);
         return;
       }
-    } else if (strncasecmp("delete", buf, 6) == 0) {
-      if (!isdigit(*buf2))
+    } else if (strncasecmp("delete", buf.c_str(), 6) == 0) {
+      if (!isdigit(buf2[0]))
         nodigit(g, d);
       else {
-        assemblyDestroy(g, atoi(buf2));
+        assemblyDestroy(g, parse_int(buf2));
         send_to_char(g, d->character, "Assembly Deleted.\r\n");
         assemblySaveAssemblies(g);
         return;
@@ -91,10 +91,10 @@ ACMD(do_assedit)
       nodigit(g, d);
       return;
     }
-  } else if (isdigit(*buf)) {
+  } else if (isdigit(buf[0])) {
     d = char_get_desc(ch);
     d->olc = new oasis_olc_data();
-    assedit_setup(g, d, atoi(buf));
+    assedit_setup(g, d, parse_int(buf));
   }
   return;
 }

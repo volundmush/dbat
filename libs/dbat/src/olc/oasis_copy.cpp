@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/oasis_copy.hpp"
 #include "dbat/broadcast.hpp"
 #include "dbat/dg_olc.hpp"
@@ -46,7 +47,7 @@ static room_vnum redit_find_new_vnum(GameWorld *g, struct zone_data *zone);
 
 ACMD(do_dig)
 {
-  char sdir[MAX_INPUT_LENGTH], sroom[MAX_INPUT_LENGTH], *new_room_name;
+  std::string sdir, sroom, new_room_name;
   room_vnum rvnum = NOWHERE;
   room_vnum rrnum = NOWHERE;
   struct zone_data *zone;
@@ -54,17 +55,19 @@ ACMD(do_dig)
   struct descriptor_data *d = char_get_desc(ch); /* will save us some typing */
 
   /* Grab the room's name (if available). */
-  new_room_name = two_arguments(argument, sdir, sroom);
-  skip_spaces(&new_room_name);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  sdir                  = take_arg(rest);
+  sroom                 = take_arg(rest);
+  new_room_name         = skip_spaces(rest);
 
   /* Can't dig if we don't know where to go. */
-  if (!*sdir || !*sroom) {
+  if (sdir.empty() || sroom.empty()) {
     send_to_char(g, ch, "Format: tunnel <direction> <room> - to create an exit\r\n"
                      "        tunnel <direction> -1     - to delete an exit\r\n");
     return;
   }
 
-  rawvnum = atoi(sroom);
+  rawvnum = parse_int(sroom);
   if (rawvnum == -1)
     rvnum = NOWHERE;
   else
@@ -75,7 +78,7 @@ ACMD(do_dig)
   zone = room_get_zone(g, char_get_in_room(ch));
 
   if (dir < 0) {
-    send_to_char(g, ch, "Cannot create an exit to the '%s'.\r\n", sdir);
+    send_to_char(g, ch, "Cannot create an exit to the '%s'.\r\n", sdir.c_str());
     return;
   }
   /* Make sure that the builder has access to the zone he's in. */
@@ -143,7 +146,7 @@ ACMD(do_dig)
     OLC_ROOM(d) = new room_data();
 
     /* Copy the room's name. */
-    if (*new_room_name)
+    if (!new_room_name.empty())
       room_set_name(OLC_ROOM(d), new_room_name);
     else
       room_set_name(OLC_ROOM(d), "An unfinished room");
@@ -213,23 +216,25 @@ ACMD(do_rcopy)
   room_vnum tvnum;
   struct zone_data *zone;
 
-  char arg[MAX_INPUT_LENGTH];
-  char arg2[MAX_INPUT_LENGTH];
+  std::string arg;
+  std::string arg2;
   int i;
 
-  two_arguments(argument, arg, arg2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  arg                   = take_arg(rest);
+  arg2                  = take_arg(rest);
 
-  if (!*arg) {
+  if (arg.empty()) {
     send_to_char(g, ch, "Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n");
     return;
   }
 
-  if (!*arg2) {
-    tvnum = atoi(arg);
+  if (arg2.empty()) {
+    tvnum = parse_int(arg);
     rvnum = char_get_in_room(ch);
   } else {
-    rvnum = atoi(arg2);
-    tvnum = atoi(arg);
+    rvnum = parse_int(arg2);
+    tvnum = parse_int(arg);
   }
 
   if (rvnum == 0 || tvnum == 0) {

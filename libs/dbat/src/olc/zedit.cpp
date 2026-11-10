@@ -5,6 +5,7 @@
  ************************************************************************/
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
 #include "dbat/comm.hpp"
@@ -50,26 +51,26 @@ ACMD(do_oasis_zedit)
   int save       = 0;
   room_vnum real_num;
   struct descriptor_data *d;
-  char *buf3;
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
+  std::string buf1, buf2;
 
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  buf3 = two_arguments(argument, buf1, buf2);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  buf1                  = take_arg(rest);
+  buf2                  = take_arg(rest);
 
   /****************************************************************************/
   /** If no argument was given, use the zone the builder is standing in.     **/
   /****************************************************************************/
-  if (!*buf1)
+  if (buf1.empty())
     number = char_get_in_room(ch);
-  else if (!isdigit(*buf1)) {
-    if (strcasecmp("save", buf1) == 0) {
+  else if (!isdigit(buf1[0])) {
+    if (str_eq_nocase("save", buf1)) {
       save = true;
 
       if (is_number(buf2))
-        number = atoi(buf2);
+        number = parse_int(buf2);
       else if (char_get_olc_zone(g, ch) > 0) {
         struct zone_data *zlok;
 
@@ -84,21 +85,19 @@ ACMD(do_oasis_zedit)
         return;
       }
     } else if (char_get_admlevel(ch) >= ADMLVL_IMPL) {
-      if (strcasecmp("new", buf1) || !buf3 || !*buf3)
+      if (!str_eq_nocase("new", buf1) || skip_spaces(rest).empty())
         send_to_char(g, ch, "Format: zedit new <zone number> <bottom-room> "
                          "<upper-room>\r\n");
       else {
-        char sbot[MAX_INPUT_LENGTH], stop[MAX_INPUT_LENGTH];
         room_vnum bottom, top;
+        std::string sbot = take_arg(rest);
+        std::string stop = take_arg(rest);
 
-        skip_spaces(&buf3);
-        two_arguments(buf3, sbot, stop);
-
-        number = atoi(buf2);
+        number = parse_int(buf2);
         if (number < 0)
           number = NOWHERE;
-        bottom = atoi(sbot);
-        top    = atoi(stop);
+        bottom = parse_int(sbot);
+        top    = parse_int(stop);
 
         /**********************************************************************/
         /** Setup the new zone (displays the menu to the builder).           **/
@@ -121,7 +120,7 @@ ACMD(do_oasis_zedit)
   /** If a numeric argument was given, retrieve it.                           **/
   /****************************************************************************/
   if (number == NOWHERE)
-    number = atoi(buf1);
+    number = parse_int(buf1);
 
   /****************************************************************************/
   /** Check that nobody is currently editing this zone.                      **/

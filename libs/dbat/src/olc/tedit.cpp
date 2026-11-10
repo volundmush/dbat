@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
@@ -143,7 +144,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 ACMD(do_tedit)
 {
   int l, i = 0;
-  char field[MAX_INPUT_LENGTH];
+  std::string field;
 
   struct {
     const char *cmd{};
@@ -169,9 +170,10 @@ ACMD(do_tedit)
   if (char_get_desc(ch) == nullptr)
     return;
 
-  one_argument(argument, field);
+  std::string_view rest = argument ? argument : ""; /* (some callers pass null) */
+  field                 = take_arg(rest);
 
-  if (!*field) {
+  if (field.empty()) {
     send_to_char(g, ch, "Files available to be edited:\r\n");
     for (l = 0; *fields[l].cmd != '\n'; l++) {
       if (char_get_admlevel(ch) >= fields[l].level) {
@@ -187,7 +189,7 @@ ACMD(do_tedit)
     return;
   }
   for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (!strncmp(field, fields[l].cmd, strlen(field)))
+    if (!strncmp(field.c_str(), fields[l].cmd, field.size()))
       break;
 
   if (*fields[l].cmd == '\n') {
