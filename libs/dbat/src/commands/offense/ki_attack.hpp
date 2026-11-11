@@ -1,0 +1,87 @@
+#pragma once
+/*
+ * Ki attacks (galik gun, kamehameha and the rest) as data: what every one of them does is perform_ki_attack(), and
+ * what each does differently is its ki_attack. A hook covers what only a few do.
+ */
+#include <cstdint>
+#include <string_view>
+
+#include "dbat/consts/types.hpp"
+
+/* The three messages of an act() at a victim: to the attacker, to the victim and to everyone else. */
+struct act_msgs {
+  const char *to_char{};
+  const char *to_vict{};
+  const char *to_room{};
+};
+
+/* How an attack ended, for the hooks that do something after one ends a certain way. */
+enum class ki_outcome { zanzoken,
+                        absorbed,
+                        blocked,
+                        dodged,
+                        missed,
+                        hit,
+                        object };
+
+/* What an attack does if an android absorbs it. */
+enum class ki_absorb {
+  none,      /* androids can't absorb it */
+  costs_one, /* the attacker pays pcost(1) */
+  costs_all, /* the attacker pays as for any other ending */
+};
+
+struct ki_attack;
+
+/* An attack being made, as the hooks see it. */
+struct ki_shot {
+  GameWorld *g{};
+  struct char_data *ch{};
+  struct char_data *vict{};
+  struct obj_data *obj{};
+  const ki_attack *attack{};
+  double attperc{};
+  double minimum{};
+  int skill{}; /* init_skill()'s roll */
+  int64_t dmg{};
+};
+
+struct ki_attack {
+  int skill{};           /* SKILL_ */
+  const char *name{};    /* as the zanzoken messages name it */
+  int damtype{};         /* damtype()'s number for it */
+  double attperc{};      /* the share of the charge it uses */
+  double minimum{};      /* the least share it can be made with */
+  int cooldown{};        /* handle_cooldown() */
+  bool perfection{};     /* perfection 1 adds 5% to attperc, 2 adds 5 to accuracy, 3 takes 5% off the minimum and the cost */
+  ki_absorb absorb{};    /* what an android absorbing it does */
+  bool hide{};           /* act()'s hide_invisible, for its messages but those of a hit */
+  bool hits_hide{true};  /* the same, for those of a hit */
+  bool block_improves{}; /* blocking it improves the victim's block skill */
+  int dodge_dmg_cap{95}; /* dodging it damages the room by dodge_dmg while the room's damage is at most this */
+  int dodge_dmg{5};
+  int limb_hurt{190};         /* hurt()'s limb argument for a hit on an arm or a leg */
+  bool powerhit_crit{};       /* a critical hit does 3x damage, 5x with BONUS_POWERHIT, rather than calc_critical() */
+  bool multihit{};            /* handle_multihit() after a hit */
+  bool needs_free_hand{};     /* not with both hands holding weapons */
+  bool dodge_explosion{true}; /* dodging it makes "A bright explosion" in the room */
+  int shots{1};               /* more than one: the attacker pays on the last, or when one leaves the victim down; each after
+                                 the first is a fifth less likely to land, and only the first checks the victim is up */
+
+  act_msgs parry; /* if it can be parried: parry_ki() sends it on */
+  act_msgs block;
+  act_msgs dodge;
+  act_msgs miss;       /* when the victim could have avoided it */
+  act_msgs miss_spent; /* when the victim had no stamina left to avoid it */
+  act_msgs hits[5];    /* by roll_hitloc(): body, head (critical), body, arm, leg */
+  const char *obj_to_char{};
+  const char *obj_to_room{};
+
+  /* each may be null */
+  void (*bonus_damage)(ki_shot &shot){};                 /* after the damage of a hit is rolled */
+  int (*aim)(ki_shot &shot, int hitspot){};              /* where a hit lands, given roll_hitloc()\'s choice */
+  void (*after_hit)(ki_shot &shot){};                    /* after a hit lands, before the attacker pays */
+  void (*after_paying)(ki_shot &shot, ki_outcome how){}; /* right after the attacker pays, however it ended */
+};
+
+void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack);

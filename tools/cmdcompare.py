@@ -15,6 +15,7 @@ options:
   --steps N      steps per bot seed (default 2000)
   --cases N      differing cases to show (default 10)
   -j N           processes (default: one per core)
+  --only C,...   only these commands, in both transcripts, and no bots: for quick checks while working
   --keep         keep the work directory (transcripts, traces, the worktree)
 """
 import argparse, difflib, os, re, shutil, subprocess, sys, tempfile
@@ -36,18 +37,20 @@ def build(tree, jobs):
     return os.path.join(tree, 'build/bin')
 
 
-def run_transcripts(binary, out_dir, shards, temp):
+def run_transcripts(binary, out_dir, shards, temp, only=None):
+    """only: the commands to run, each in its own process; otherwise all of them in shards"""
     os.makedirs(out_dir, exist_ok=True)
     env = dict(os.environ, TMPDIR=temp)
+    runs = [['--shard', f'{k}/{shards}'] for k in range(shards)] if not only else [[c] for c in only]
 
-    def shard(k):
+    def run(k):
         path = os.path.join(out_dir, f'{k}.txt')
-        subprocess.run([binary, '--transcript', path, '--shard', f'{k}/{shards}'], cwd=os.path.dirname(binary),
+        subprocess.run([binary, '--transcript', path, *runs[k]], cwd=os.path.dirname(binary),
                        env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return path
 
-    with ThreadPoolExecutor(shards) as ex:
-        return list(ex.map(shard, range(shards)))
+    with ThreadPoolExecutor(min(len(runs), os.cpu_count())) as ex:
+        return list(ex.map(run, range(len(runs))))
 
 
 def cases(path):
@@ -117,6 +120,7 @@ def main():
     p.add_argument('--steps', type=int, default=2000)
     p.add_argument('--cases', type=int, default=10)
     p.add_argument('-j', type=int, default=os.cpu_count())
+    p.add_argument('--only')
     p.add_argument('--keep', action='store_true')
     a = p.parse_args()
 
@@ -136,10 +140,12 @@ def main():
             if not (os.path.exists(os.path.join(base_bin, test)) and os.path.exists(os.path.join(new_bin, test))):
                 continue
             shards = a.j
-            paths = [run_transcripts(os.path.join(b, test), os.path.join(work, f'{test}-{side}'), shards, work)
+            only = a.only.split(',') if a.only else None
+            paths = [run_transcripts(os.path.join(b, test), os.path.join(work, f'{test}-{side}'), shards, work, only)
                      for b, side in ((base_bin, 'base'), (new_bin, 'new'))]
             differing += compare_transcripts(test, *paths, a.cases)
-        differing += compare_bots(os.path.join(base_bin, 'dbat_test_bot'), os.path.join(new_bin, 'dbat_test_bot'),
+        if not a.only:
+            differing += compare_bots(os.path.join(base_bin, 'dbat_test_bot'), os.path.join(new_bin, 'dbat_test_bot'),
                                   a.seeds, a.steps, a.j, work, a.cases)
         print('cmdcompare: SAME' if not differing else 'cmdcompare: DIFFERENT')
         return 1 if differing else 0
