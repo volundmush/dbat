@@ -8,11 +8,13 @@
 
 #include "dbat/consts/types.hpp"
 
-/* The three messages of an act() at a victim: to the attacker, to the victim and to everyone else. */
+/* The three messages of an act() at a victim: to the attacker, to the victim and to everyone else, and act()'s
+ * hide_invisible for them. */
 struct act_msgs {
   const char *to_char{};
   const char *to_vict{};
   const char *to_room{};
+  bool hide{};
 };
 
 /* How an attack ended, for the hooks that do something after one ends a certain way. */
@@ -52,11 +54,13 @@ struct ki_shot {
   int64_t dmg{};
   int64_t pl_before{}; /* the victim's power level before a hit landed */
   bool mastered{};     /* for a hook that rolls for a master's bonus before zanzoken */
+  int landings{1};     /* how many times a hit lands, for a hook that grants more */
 };
 
 struct ki_attack {
   int skill{};              /* SKILL_ */
   const char *name{};       /* as the zanzoken messages name it */
+  const char *parry_name{}; /* as parry_ki() names it, if not name */
   int damtype{};            /* damtype()'s number for it */
   double attperc{};         /* the share of the charge it uses */
   double minimum{};         /* the least share it can be made with */
@@ -66,13 +70,17 @@ struct ki_attack {
   bool needs_arms{true};    /* limb_ok() first */
   bool perfection{};        /* perfection 1 adds 5% to attperc, 2 adds 5 to accuracy, 3 takes 5% off the minimum and the cost */
   ki_absorb absorb{};       /* what an android absorbing it does */
-  bool hide{};              /* act()'s hide_invisible, for its messages but those of a hit */
-  bool hits_hide{true};     /* the same, for those of a hit */
   bool block_improves{};    /* blocking it improves the victim's block skill */
   int dodge_dmg_cap{95};    /* dodging it damages the room by dodge_dmg while the room's damage is at most this */
   int dodge_dmg{5};
   int limb_hurt{190};        /* hurt()'s limb argument for a hit on an arm or a leg */
   bool powerhit_crit{};      /* a critical hit does 3x damage, 5x with BONUS_POWERHIT, rather than calc_critical() */
+  int head_mult{};           /* a critical hit does this many times the damage, if not as powerhit_crit says */
+  int arm_crit{1};           /* calc_critical()'s argument for a hit on an arm */
+  bool blockable{true};      /* the victim can block it */
+  int dodge_damtype{};       /* dodge_ki()'s number for it, if not damtype */
+  bool guided{};             /* the attacker steers it after a dodge: dodge_ki() follows a zanzoken or a miss, and a parry
+                            or a miss of someone with no stamina left hurts them for nothing */
   bool soft_crit{true};      /* BONUS_SOFT can make a hit on the body critical */
   int leg_flag{1};           /* hurt()'s first argument for a hit on a leg */
   bool dodge_scatters{true}; /* dodging it sends it into the room (dodge_ki(), room damage) and improves dodge */
@@ -94,6 +102,7 @@ struct ki_attack {
   const ki_spot *spots{}; /* what each of those is; null for roll_hitloc()'s body, head, body, arm, leg */
   const char *obj_to_char{};
   const char *obj_to_room{};
+  bool obj_hide{}; /* act()'s hide_invisible for those two */
 
   /* each may be null */
   int (*cooldown_for)(ki_shot &shot){};                  /* handle_cooldown()'s argument, if not cooldown */
@@ -101,6 +110,7 @@ struct ki_attack {
   void (*bonus_damage)(ki_shot &shot){};                 /* after the damage of a hit is rolled */
   int (*locate)(ki_shot &shot){};                        /* where a hit lands, instead of roll_hitloc() */
   int (*aim)(ki_shot &shot, int hitspot){};              /* where a hit lands, given roll_hitloc()\'s choice */
+  void (*before_landing)(ki_shot &shot){};               /* before a hit lands, after the attack got through */
   void (*after_hit)(ki_shot &shot){};                    /* after a hit lands, before the attacker pays */
   void (*after_paying)(ki_shot &shot, ki_outcome how){}; /* right after the attacker pays, however it ended */
   bool (*on_object)(ki_shot &shot){};                    /* aimed at an object: true if it dealt with it */

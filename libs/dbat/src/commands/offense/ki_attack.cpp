@@ -20,11 +20,16 @@
 
 namespace {
 
-void act_at(const ki_shot &s, const act_msgs &m, bool hide)
+void act_at(const ki_shot &s, const act_msgs &m)
 {
-  act(s.g, m.to_char, hide, s.ch, nullptr, s.vict, TO_CHAR);
-  act(s.g, m.to_vict, hide, s.ch, nullptr, s.vict, TO_VICT);
-  act(s.g, m.to_room, hide, s.ch, nullptr, s.vict, TO_NOTVICT);
+  act(s.g, m.to_char, m.hide, s.ch, nullptr, s.vict, TO_CHAR);
+  act(s.g, m.to_vict, m.hide, s.ch, nullptr, s.vict, TO_VICT);
+  act(s.g, m.to_room, m.hide, s.ch, nullptr, s.vict, TO_NOTVICT);
+}
+
+int dodge_damtype(const ki_attack &atk)
+{
+  return atk.dodge_damtype ? atk.dodge_damtype : atk.damtype;
 }
 
 int perfection(const ki_shot &s)
@@ -60,7 +65,7 @@ void land(ki_shot &s)
     where = atk.aim(s, where);
   if (where < 1 || where > 6 || !atk.hits[where - 1].to_char)
     return;
-  act_at(s, atk.hits[where - 1], atk.hits_hide);
+  act_at(s, atk.hits[where - 1]);
   switch ((atk.spots ? atk.spots : standard)[where - 1]) {
     case ki_spot::body:
       if (atk.soft_crit && char_get_bonuses(s.ch, BONUS_SOFT))
@@ -69,7 +74,9 @@ void land(ki_shot &s)
       dam_eq_loc(g, s.vict, 4); /* 1 arms, 2 legs, 3 head, 4 body */
       break;
     case ki_spot::head:
-      if (!atk.powerhit_crit)
+      if (atk.head_mult)
+        s.dmg *= atk.head_mult;
+      else if (!atk.powerhit_crit)
         s.dmg *= calc_critical(g, s.ch, 0);
       else
         s.dmg *= char_get_bonuses(s.ch, BONUS_POWERHIT) ? 5 : 3;
@@ -77,7 +84,7 @@ void land(ki_shot &s)
       dam_eq_loc(g, s.vict, 3);
       break;
     case ki_spot::arm:
-      s.dmg *= calc_critical(g, s.ch, 1);
+      s.dmg *= calc_critical(g, s.ch, atk.arm_crit);
       hurt(g, 0, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 1);
       break;
@@ -99,12 +106,19 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
     if (pays)
       pay(s, how);
   };
+  auto steer = [&]() { /* a guided attack the victim got away from */
+                       dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
+  };
 
   if (prob < perc - 20) {
     if (getCurST(g, s.vict) <= 0) {
-      act_at(s, atk.miss_spent, atk.hide);
+      act_at(s, atk.miss_spent);
+      if (atk.guided)
+        steer();
       pay_if(ki_outcome::missed);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
+      if (atk.guided) /* quirk: twice */
+        hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       return ki_outcome::missed;
     }
     if (atk.absorb != ki_absorb::none && tech_handle_android_absorb(g, s.ch, s.vict)) {
@@ -116,17 +130,21 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
     }
     if (atk.parry.to_char && pry > rand_number(g, 1, 140) &&
         (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
-      act_at(s, atk.parry, atk.hide);
+      act_at(s, atk.parry);
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
-      parry_ki(g, s.attperc, s.ch, s.vict, atk.name, prob, perc, s.skill, atk.damtype);
+      parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill, atk.damtype);
       pay_if(ki_outcome::blocked);
-      room_vnum here = char_get_in_room(s.ch);
-      if (room_get_dmg(g, here) <= 95)
-        room_set_dmg(g, here, room_get_dmg(g, here) + 5);
+      if (atk.guided) {
+        hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
+      } else {
+        room_vnum here = char_get_in_room(s.ch);
+        if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
+          room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
+      }
       return ki_outcome::blocked;
     }
-    if (blk > axion_dice(g, 10)) {
-      act_at(s, atk.block, atk.hide);
+    if (atk.blockable && blk > axion_dice(g, 10)) {
+      act_at(s, atk.block);
       if (atk.block_improves)
         improve_skill(g, s.vict, SKILL_BLOCK, 0);
       pay_if(ki_outcome::blocked);
@@ -136,11 +154,11 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
       return ki_outcome::blocked;
     }
     if (dge > axion_dice(g, 10)) {
-      act_at(s, atk.dodge, atk.hide);
+      act_at(s, atk.dodge);
       if (atk.dodge_scatters) {
         if (atk.dodge_explosion)
           send_to_room(g, char_get_in_room(s.vict), atk.dodge_explosion);
-        dodge_ki(g, s.ch, s.vict, 0, atk.damtype, s.skill, atk.skill); /* 0: it doesn't home in */
+        dodge_ki(g, s.ch, s.vict, 0, dodge_damtype(atk), s.skill, atk.skill); /* 0: it doesn't home in */
         room_vnum here = char_get_in_room(s.ch);
         if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
           room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
@@ -150,13 +168,21 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       return ki_outcome::dodged;
     }
-    act_at(s, atk.miss, atk.hide);
+    act_at(s, atk.miss);
+    if (atk.guided)
+      steer();
     pay_if(ki_outcome::missed);
     hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
     return ki_outcome::missed;
   }
 
-  land(s);
+  if (atk.before_landing)
+    atk.before_landing(s);
+  for (int landed = 0; landed < s.landings; landed++) {
+    land(s);
+    if (getCurPL(g, s.vict) <= 0)
+      break;
+  }
   if (atk.after_hit)
     atk.after_hit(s);
   pay_if(ki_outcome::hit);
@@ -191,6 +217,10 @@ void at_victim(ki_shot &s)
 
   if (!tech_handle_zanzoken(g, s.ch, s.vict, atk.name)) {
     pay(s, ki_outcome::zanzoken);
+    if (atk.guided) {
+      dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
+      hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
+    }
     pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
     return;
   }
@@ -220,8 +250,8 @@ void at_object(ki_shot &s)
   if (s.attack->on_object && s.attack->on_object(s))
     return;
   s.dmg = damtype(g, s.ch, s.attack->obj_damtype ? s.attack->obj_damtype : s.attack->damtype, s.skill, s.attperc) / 10;
-  act(g, s.attack->obj_to_char, s.attack->hide, s.ch, s.obj, nullptr, TO_CHAR);
-  act(g, s.attack->obj_to_room, s.attack->hide, s.ch, s.obj, nullptr, TO_ROOM);
+  act(g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_CHAR);
+  act(g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_ROOM);
   hurt(g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
   pcost(g, s.ch, s.attperc, 0);
   if (s.attack->after_paying)
