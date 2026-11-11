@@ -159,3 +159,27 @@ void tech_handle_crashdown(GameWorld *g, char_data *ch, char_data *vict)
     handle_knockdown(g, vict);
   }
 }
+
+bool tech_handle_arms(GameWorld *g, char_data *ch)
+{
+  if (!char_has_arms(g, ch)) {
+    send_to_char(g, ch, "You have no available arms!\r\n");
+    return false;
+  }
+  if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50 && char_get_limb_condition(ch, (2) - 1) < 0) {
+    send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
+    char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
+    if (char_get_limb_condition(ch, (1) - 1) < 0) {
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    }
+  } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
+    send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
+    char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
+    if (char_get_limb_condition(ch, (2) - 1) < 0) {
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    }
+  }
+  return true;
+}

@@ -5,6 +5,7 @@
 
 #include "dbat/args.hpp"
 #include "dbat/consts/affflags.hpp"
+#include "dbat/consts/attacks.hpp"
 #include "dbat/consts/bonus.hpp"
 #include "dbat/consts/mobflags.hpp"
 #include "dbat/consts/itemdata.hpp"
@@ -20,11 +21,18 @@
 
 namespace {
 
-void act_at(const ki_shot &s, const act_msgs &m)
+/* A sword technique needs a sword: false, saying so, if ch isn't wielding one */
+bool holds_sword(GameWorld *g, struct char_data *ch)
 {
-  act(s.g, m.to_char, m.hide, s.ch, nullptr, s.vict, TO_CHAR);
-  act(s.g, m.to_vict, m.hide, s.ch, nullptr, s.vict, TO_VICT);
-  act(s.g, m.to_room, m.hide, s.ch, nullptr, s.vict, TO_NOTVICT);
+  if (!char_get_equipment(ch, WEAR_WIELD1)) {
+    send_to_char(g, ch, "You need to wield a sword to use this.\r\n");
+    return false;
+  }
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+    send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
+    return false;
+  }
+  return true;
 }
 
 int dodge_damtype(const ki_attack &atk)
@@ -65,7 +73,9 @@ void land(ki_shot &s)
     where = atk.aim(s, where);
   if (where < 1 || where > 6 || !atk.hits[where - 1].to_char)
     return;
-  act_at(s, atk.hits[where - 1]);
+  ki_act(s, atk.hits[where - 1]);
+  if (atk.strike && atk.strike(s, where))
+    return;
   switch ((atk.spots ? atk.spots : standard)[where - 1]) {
     case ki_spot::body:
       if (atk.soft_crit && char_get_bonuses(s.ch, BONUS_SOFT))
@@ -112,8 +122,8 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
 
   if (prob < perc - 20) {
     if (getCurST(g, s.vict) <= 0) {
-      act_at(s, atk.miss_spent);
-      if (atk.guided)
+      ki_act(s, atk.miss_spent);
+      if (atk.steers)
         steer();
       pay_if(ki_outcome::missed);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
@@ -130,7 +140,7 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
     }
     if (atk.parry.to_char && pry > rand_number(g, 1, 140) &&
         (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
-      act_at(s, atk.parry);
+      ki_act(s, atk.parry);
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
       parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill, atk.damtype);
       pay_if(ki_outcome::blocked);
@@ -144,7 +154,7 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
       return ki_outcome::blocked;
     }
     if (atk.blockable && blk > axion_dice(g, 10)) {
-      act_at(s, atk.block);
+      ki_act(s, atk.block);
       if (atk.block_improves)
         improve_skill(g, s.vict, SKILL_BLOCK, 0);
       pay_if(ki_outcome::blocked);
@@ -154,11 +164,11 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
       return ki_outcome::blocked;
     }
     if (dge > axion_dice(g, 10)) {
-      act_at(s, atk.dodge);
+      ki_act(s, atk.dodge);
       if (atk.dodge_scatters) {
         if (atk.dodge_explosion)
           send_to_room(g, char_get_in_room(s.vict), atk.dodge_explosion);
-        dodge_ki(g, s.ch, s.vict, 0, dodge_damtype(atk), s.skill, atk.skill); /* 0: it doesn't home in */
+        dodge_ki(g, s.ch, s.vict, atk.dodge_kind, dodge_damtype(atk), s.skill, atk.skill);
         room_vnum here = char_get_in_room(s.ch);
         if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
           room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
@@ -168,8 +178,8 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       return ki_outcome::dodged;
     }
-    act_at(s, atk.miss);
-    if (atk.guided)
+    ki_act(s, atk.miss);
+    if (atk.steers)
       steer();
     pay_if(ki_outcome::missed);
     hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
@@ -260,6 +270,13 @@ void at_object(ki_shot &s)
 
 } // namespace
 
+void ki_act(const ki_shot &s, const act_msgs &m)
+{
+  act(s.g, m.to_char, m.hide, s.ch, nullptr, s.vict, TO_CHAR);
+  act(s.g, m.to_vict, m.hide, s.ch, nullptr, s.vict, TO_VICT);
+  act(s.g, m.to_room, m.hide, s.ch, nullptr, s.vict, TO_NOTVICT);
+}
+
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack)
 {
   ki_shot s{.g = g, .ch = ch, .attack = &attack, .attperc = attack.attperc, .minimum = attack.minimum};
@@ -269,7 +286,9 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
 
   if (attack.not_while_singing && playing_song(g, ch))
     return;
-  if (!can_grav(g, ch) || !check_skill(g, ch, attack.skill) || (attack.needs_arms && !limb_ok(g, ch, 0)))
+  if (!can_grav(g, ch) || !check_skill(g, ch, attack.skill))
+    return;
+  if (attack.sword ? !tech_handle_arms(g, ch) : (attack.needs_arms && !limb_ok(g, ch, 0)))
     return;
   if (attack.needs_free_hand && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
     send_to_char(g, ch, "Your hands are full!\r\n");
@@ -279,6 +298,8 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
+  if (attack.sword && attack.sword_checked_early && !holds_sword(g, ch))
+    return;
   if (perfection(s) == 1)
     s.attperc += 0.05;
   else if (perfection(s) == 3) {
@@ -291,6 +312,8 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
   if (getMaxKI(g, ch) * s.attperc > char_get_charge(ch))
     s.attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
   if (!check_points(g, ch, getMaxKI(g, ch) * s.minimum, 0))
+    return;
+  if (attack.sword && !attack.sword_checked_early && !holds_sword(g, ch))
     return;
   s.skill = init_skill(g, ch, attack.skill);
   if (!tech_handle_targeting(g, ch, arg, &s.vict, &s.obj))

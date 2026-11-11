@@ -167,6 +167,7 @@ const ki_attack SPIRITBALL = {
     .cooldown       = 8,
     .kill_mode      = 3,
     .limb_hurt      = 170,
+    .steers         = true,
     .guided         = true,
     .dodge_scatters = false,
     .parry          = {"@C$N@W deflects your Spirit Ball, sending it flying away!@n", "@WYou deflect @C$n's@W Spirit Ball sending it flying away!@n", "@C$N@W deflects @c$n's@W Spirit Ball sending it flying away!@n", true},

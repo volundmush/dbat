@@ -58,20 +58,22 @@ struct ki_shot {
 };
 
 struct ki_attack {
-  int skill{};              /* SKILL_ */
-  const char *name{};       /* as the zanzoken messages name it */
-  const char *parry_name{}; /* as parry_ki() names it, if not name */
-  int damtype{};            /* damtype()'s number for it */
-  double attperc{};         /* the share of the charge it uses */
-  double minimum{};         /* the least share it can be made with */
-  int cooldown{};           /* handle_cooldown() */
-  int kill_mode{1};         /* can_kill()'s mode for a victim */
-  bool not_while_singing{}; /* refused while playing a song */
-  bool needs_arms{true};    /* limb_ok() first */
-  bool perfection{};        /* perfection 1 adds 5% to attperc, 2 adds 5 to accuracy, 3 takes 5% off the minimum and the cost */
-  ki_absorb absorb{};       /* what an android absorbing it does */
-  bool block_improves{};    /* blocking it improves the victim's block skill */
-  int dodge_dmg_cap{95};    /* dodging it damages the room by dodge_dmg while the room's damage is at most this */
+  int skill{};                /* SKILL_ */
+  const char *name{};         /* as the zanzoken messages name it */
+  const char *parry_name{};   /* as parry_ki() names it, if not name */
+  int damtype{};              /* damtype()'s number for it */
+  double attperc{};           /* the share of the charge it uses */
+  double minimum{};           /* the least share it can be made with */
+  int cooldown{};             /* handle_cooldown() */
+  int kill_mode{1};           /* can_kill()'s mode for a victim */
+  bool not_while_singing{};   /* refused while playing a song */
+  bool needs_arms{true};      /* limb_ok() first */
+  bool sword{};               /* the user's arms as tech_handle_arms() checks them, rather than limb_ok(), and a sword in hand */
+  bool sword_checked_early{}; /* the sword is checked before the charge is, rather than after */
+  bool perfection{};          /* perfection 1 adds 5% to attperc, 2 adds 5 to accuracy, 3 takes 5% off the minimum and the cost */
+  ki_absorb absorb{};         /* what an android absorbing it does */
+  bool block_improves{};      /* blocking it improves the victim's block skill */
+  int dodge_dmg_cap{95};      /* dodging it damages the room by dodge_dmg while the room's damage is at most this */
   int dodge_dmg{5};
   int limb_hurt{190};        /* hurt()'s limb argument for a hit on an arm or a leg */
   bool powerhit_crit{};      /* a critical hit does 3x damage, 5x with BONUS_POWERHIT, rather than calc_critical() */
@@ -79,8 +81,10 @@ struct ki_attack {
   int arm_crit{1};           /* calc_critical()'s argument for a hit on an arm */
   bool blockable{true};      /* the victim can block it */
   int dodge_damtype{};       /* dodge_ki()'s number for it, if not damtype */
-  bool guided{};             /* the attacker steers it after a dodge: dodge_ki() follows a zanzoken or a miss, and a parry
-                            or a miss of someone with no stamina left hurts them for nothing */
+  int dodge_kind{};          /* dodge_ki()'s first argument when it is dodged: 0 straight, 1 homing, 2 guided */
+  bool steers{};             /* a miss is guided on into the room too (dodge_ki() with 2) */
+  bool guided{};             /* it also follows a zanzoken that way, a parry of it hurts the victim for nothing (rather than
+                            damaging the room), and a miss of someone with no stamina left hurts them for nothing twice */
   bool soft_crit{true};      /* BONUS_SOFT can make a hit on the body critical */
   int leg_flag{1};           /* hurt()'s first argument for a hit on a leg */
   bool dodge_scatters{true}; /* dodging it sends it into the room (dodge_ki(), room damage) and improves dodge */
@@ -111,9 +115,13 @@ struct ki_attack {
   int (*locate)(ki_shot &shot){};                        /* where a hit lands, instead of roll_hitloc() */
   int (*aim)(ki_shot &shot, int hitspot){};              /* where a hit lands, given roll_hitloc()\'s choice */
   void (*before_landing)(ki_shot &shot){};               /* before a hit lands, after the attack got through */
+  bool (*strike)(ki_shot &shot, int where){};            /* after a hit's messages: true if it dealt the hit itself */
   void (*after_hit)(ki_shot &shot){};                    /* after a hit lands, before the attacker pays */
   void (*after_paying)(ki_shot &shot, ki_outcome how){}; /* right after the attacker pays, however it ended */
   bool (*on_object)(ki_shot &shot){};                    /* aimed at an object: true if it dealt with it */
 };
 
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack);
+
+/* For hooks: the three messages of m about shot's victim */
+void ki_act(const ki_shot &shot, const act_msgs &m);

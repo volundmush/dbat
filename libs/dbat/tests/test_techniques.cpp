@@ -169,6 +169,10 @@ static const struct situation {
          equip_char(g, att, read_object(g, 301), WEAR_WIELD1);
        equip_char(g, att, read_object(g, 301), WEAR_WIELD2);
      }                                                       },
+    {"regenerating",  "majin",   false, [](GameWorld *,  char_data *,    char_data *victim, int) {
+       char_set_race(victim, RACE_MAJIN);
+       char_set_skills_base(victim, SKILL_REGENERATE, 100);
+     }                                                 },
     {"fighting",      "dummy",   true,  [](GameWorld *,  char_data *,    char_data *,       int) {}                                               },
 };
 constexpr int SITUATION_SEEDS = 3;
