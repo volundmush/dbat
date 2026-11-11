@@ -48,7 +48,9 @@ int perfection(const ki_shot &s)
 /* The attacker pays for the attack: perfection 3 takes 5% off, if that leaves at least the minimum. */
 void pay(ki_shot &s, ki_outcome how)
 {
-  if (perfection(s) == 3 && s.attperc > s.minimum)
+  if (s.attack->cost)
+    pcost(s.g, s.ch, s.attack->cost(s), 0);
+  else if (perfection(s) == 3 && s.attperc > s.minimum)
     pcost(s.g, s.ch, s.attperc - 0.05, 0);
   else
     pcost(s.g, s.ch, s.attperc, 0);
@@ -116,15 +118,17 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
     if (pays)
       pay(s, how);
   };
-  auto steer = [&]() { /* a guided attack the victim got away from */
-                       dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
+  auto steer = [&]() { /* a homing or guided attack the victim got away from */
+                       dodge_ki(g, s.ch, s.vict, atk.steers, dodge_damtype(atk), s.skill, atk.skill);
   };
 
-  if (prob < perc - 20) {
+  if (atk.through ? !atk.through(s, prob, perc) : prob < perc - 20) {
     if (getCurST(g, s.vict) <= 0) {
       ki_act(s, atk.miss_spent);
       if (atk.steers)
         steer();
+      if (atk.homing) /* quirk: before paying, and again after */
+        hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       pay_if(ki_outcome::missed);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       if (atk.guided) /* quirk: twice */
@@ -142,11 +146,13 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
         (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
       ki_act(s, atk.parry);
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
-      parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill, atk.damtype);
+      if (atk.parry_returns)
+        parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill,
+                 atk.damtype);
       pay_if(ki_outcome::blocked);
       if (atk.guided) {
         hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
-      } else {
+      } else if (atk.parry_scatters) {
         room_vnum here = char_get_in_room(s.ch);
         if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
           room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
@@ -226,6 +232,13 @@ void at_victim(ki_shot &s)
     atk.steady(s, prob);
 
   if (!tech_handle_zanzoken(g, s.ch, s.vict, atk.name)) {
+    if (atk.homing) {
+      pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
+      dodge_ki(g, s.ch, s.vict, 1, dodge_damtype(atk), s.skill, atk.skill);
+      hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
+      pay(s, ki_outcome::zanzoken);
+      return;
+    }
     pay(s, ki_outcome::zanzoken);
     if (atk.guided) {
       dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
@@ -300,6 +313,8 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
   }
   if (attack.sword && attack.sword_checked_early && !holds_sword(g, ch))
     return;
+  if (attack.targets_first && !tech_handle_targeting(g, ch, arg, &s.vict, &s.obj))
+    return;
   if (perfection(s) == 1)
     s.attperc += 0.05;
   else if (perfection(s) == 3) {
@@ -316,7 +331,7 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
   if (attack.sword && !attack.sword_checked_early && !holds_sword(g, ch))
     return;
   s.skill = init_skill(g, ch, attack.skill);
-  if (!tech_handle_targeting(g, ch, arg, &s.vict, &s.obj))
+  if (!attack.targets_first && !tech_handle_targeting(g, ch, arg, &s.vict, &s.obj))
     return;
   handle_cooldown(g, ch, attack.cooldown_for ? attack.cooldown_for(s) : attack.cooldown);
   if (s.vict)

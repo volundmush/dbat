@@ -99,7 +99,7 @@ void shogekiha_mastery(ki_shot &s, int &)
     master_chance = 10;
   else if (s.skill >= 50)
     master_chance = 5;
-  s.mastered = master_chance >= master_roll;
+  s.mastery = master_chance >= master_roll;
 }
 
 /* Kabito's students get some of the ki back */
@@ -118,7 +118,7 @@ void shogekiha_refund(ki_shot &s)
 
 void shogekiha_dissipate(ki_shot &s)
 {
-  if (s.mastered) {
+  if (s.mastery) {
     act(s.g, "@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", true, s.ch, nullptr, s.vict, TO_CHAR);
     act(s.g, "@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", true, s.ch, nullptr, s.vict, TO_VICT);
     act(s.g, "@C$n@C's skillful shogekiha disipated some of @c$N's@C charged ki!", true, s.ch, nullptr, s.vict, TO_NOTVICT);
@@ -164,7 +164,7 @@ void kiblast_mastery(ki_shot &s, int &)
     chance = 20;
   else if (s.skill >= 50)
     chance = 15;
-  s.mastered = mastery <= chance;
+  s.mastery = mastery <= chance;
 }
 
 /* Androids hit harder with it */
@@ -186,7 +186,7 @@ void kiblast_knockout(ki_shot &s)
   GameWorld *g           = s.g;
   struct char_data *vict = s.vict;
 
-  if (s.mastered && s.pl_before > getCurPL(g, vict) && (s.pl_before - getCurPL(g, vict) > (getEffMaxPL(g, vict)) * 0.025)) {
+  if (s.mastery && s.pl_before > getCurPL(g, vict) && (s.pl_before - getCurPL(g, vict) > (getEffMaxPL(g, vict)) * 0.025)) {
     if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act(g, "@C$N@W is knocked out!@n", true, s.ch, nullptr, vict, TO_CHAR);
       act(g, "@WYou are knocked out!@n", true, s.ch, nullptr, vict, TO_VICT);

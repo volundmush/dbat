@@ -53,8 +53,9 @@ struct ki_shot {
   int skill{}; /* init_skill()'s roll */
   int64_t dmg{};
   int64_t pl_before{}; /* the victim's power level before a hit landed */
-  bool mastered{};     /* for a hook that rolls for a master's bonus before zanzoken */
+  int mastery{};       /* for a hook that rolls for a master's bonus before zanzoken: 0 for none */
   int landings{1};     /* how many times a hit lands, for a hook that grants more */
+  int tally{};         /* for a through hook: how much of it got through */
 };
 
 struct ki_attack {
@@ -82,9 +83,15 @@ struct ki_attack {
   bool blockable{true};      /* the victim can block it */
   int dodge_damtype{};       /* dodge_ki()'s number for it, if not damtype */
   int dodge_kind{};          /* dodge_ki()'s first argument when it is dodged: 0 straight, 1 homing, 2 guided */
-  bool steers{};             /* a miss is guided on into the room too (dodge_ki() with 2) */
+  int steers{};              /* a miss is followed on into the room too: dodge_ki() with this, 1 homing or 2 guided */
   bool guided{};             /* it also follows a zanzoken that way, a parry of it hurts the victim for nothing (rather than
                             damaging the room), and a miss of someone with no stamina left hurts them for nothing twice */
+  bool homing{};             /* it follows a zanzoken as dodge_ki() with 1 after the victim pays (the attacker paying last),
+                            and a miss of someone with no stamina left hurts them for nothing before the attacker pays
+                            and again after (quirk) */
+  bool parry_returns{true};  /* a parry sends it on (parry_ki()) */
+  bool parry_scatters{true}; /* a parry that isn't guided damages the room as a dodge does */
+  bool targets_first{};      /* the target is found before the charge is checked, rather than after */
   bool soft_crit{true};      /* BONUS_SOFT can make a hit on the body critical */
   int leg_flag{1};           /* hurt()'s first argument for a hit on a leg */
   bool dodge_scatters{true}; /* dodging it sends it into the room (dodge_ki(), room damage) and improves dodge */
@@ -110,7 +117,9 @@ struct ki_attack {
 
   /* each may be null */
   int (*cooldown_for)(ki_shot &shot){};                  /* handle_cooldown()'s argument, if not cooldown */
+  double (*cost)(const ki_shot &shot){};                 /* the share of the charge the attacker pays, if not attperc */
   void (*steady)(ki_shot &shot, int &prob){};            /* the last word on its accuracy, just before zanzoken */
+  bool (*through)(ki_shot &shot, int prob, int perc){};  /* whether it got past the victim, if not prob >= perc - 20 */
   void (*bonus_damage)(ki_shot &shot){};                 /* after the damage of a hit is rolled */
   int (*locate)(ki_shot &shot){};                        /* where a hit lands, instead of roll_hitloc() */
   int (*aim)(ki_shot &shot, int hitspot){};              /* where a hit lands, given roll_hitloc()\'s choice */

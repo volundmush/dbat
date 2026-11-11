@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "dbat/consts/affflags.hpp"
+#include "dbat/consts/bonus.hpp"
 #include "dbat/consts/itemdata.hpp"
 #include "dbat/consts/roomflags.hpp"
 #include "dbat/object_utils.hpp"
@@ -174,6 +175,10 @@ static const struct situation {
        char_set_skills_base(victim, SKILL_REGENERATE, 100);
      }                                                 },
     {"fighting",      "dummy",   true,  [](GameWorld *,  char_data *,    char_data *,       int) {}                                               },
+    {"soft",          "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_set_bonuses(att, BONUS_SOFT, 1); }        },
+    {"middling",      "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int skill) { if (skill) char_set_skills_base(att, skill, 60); }                                       },
+    {"piccolo's student", "namek", false, [](GameWorld *, char_data *att, char_data *,      int) { char_set_class(att, CLASS_PICCOLO); char_set_skills_base(att, SKILL_STYLE, 75); }                },
+    {"nail's student", "namek",  false, [](GameWorld *,  char_data *att, char_data *,       int) { char_set_class(att, CLASS_NAIL); }             },
 };
 constexpr int SITUATION_SEEDS = 3;
 
