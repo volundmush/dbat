@@ -163,6 +163,12 @@ static const struct situation {
     {"broken",        "chest",   false, [](GameWorld *,  char_data *,    char_data *,       int) { obj_extra_set(cast.chest, ITEM_BROKEN, true); }},
     {"peaceful",      "namek",   false, [](GameWorld *g, char_data *,    char_data *,       int) { room_set_flag(g, ARENA, ROOM_PEACEFUL, true); }},
     {"asleep",        "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_aff_set(victim, AFF_ZANZOKEN, true); char_set_position(victim, POS_SLEEPING); }                                              },
+    {"spent",         "namek",   false, [](GameWorld *g, char_data *,    char_data *victim, int) { decCurST(g, victim, getCurST(g, victim), 0); } },
+    {"hands full",    "namek",   false, [](GameWorld *g, char_data *att, char_data *,       int) {
+       if (!char_get_equipment(att, WEAR_WIELD1))
+         equip_char(g, att, read_object(g, 301), WEAR_WIELD1);
+       equip_char(g, att, read_object(g, 301), WEAR_WIELD2);
+     }                                                       },
     {"fighting",      "dummy",   true,  [](GameWorld *,  char_data *,    char_data *,       int) {}                                               },
 };
 constexpr int SITUATION_SEEDS = 3;

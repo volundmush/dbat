@@ -46,41 +46,44 @@ void pay(ki_shot &s, ki_outcome how)
 /* The victim couldn't avoid it: where it hit, and what that did. */
 void land(ki_shot &s)
 {
-  GameWorld *g = s.g;
+  static constexpr ki_spot standard[6] = {ki_spot::body, ki_spot::head, ki_spot::body,
+                                          ki_spot::arm, ki_spot::leg, ki_spot::body};
+  GameWorld *g                         = s.g;
+  const ki_attack &atk                 = *s.attack;
 
-  s.dmg = damtype(g, s.ch, s.attack->damtype, s.skill, s.attperc);
-  if (s.attack->bonus_damage)
-    s.attack->bonus_damage(s);
-  int hitspot = roll_hitloc(g, s.ch, s.vict, s.skill);
-  if (s.attack->aim)
-    hitspot = s.attack->aim(s, hitspot);
-  if (hitspot < 1 || hitspot > 5)
+  s.dmg = damtype(g, s.ch, atk.damtype, s.skill, s.attperc);
+  if (atk.bonus_damage)
+    atk.bonus_damage(s);
+  s.pl_before = getCurPL(g, s.vict);
+  int where   = atk.locate ? atk.locate(s) : roll_hitloc(g, s.ch, s.vict, s.skill);
+  if (atk.aim)
+    where = atk.aim(s, where);
+  if (where < 1 || where > 6 || !atk.hits[where - 1].to_char)
     return;
-  act_at(s, s.attack->hits[hitspot - 1], s.attack->hits_hide);
-  switch (hitspot) {
-    case 1:
-    case 3:
-      if (char_get_bonuses(s.ch, BONUS_SOFT))
+  act_at(s, atk.hits[where - 1], atk.hits_hide);
+  switch ((atk.spots ? atk.spots : standard)[where - 1]) {
+    case ki_spot::body:
+      if (atk.soft_crit && char_get_bonuses(s.ch, BONUS_SOFT))
         s.dmg *= calc_critical(g, s.ch, 2);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 4); /* 1 arms, 2 legs, 3 head, 4 body */
       break;
-    case 2:
-      if (!s.attack->powerhit_crit)
+    case ki_spot::head:
+      if (!atk.powerhit_crit)
         s.dmg *= calc_critical(g, s.ch, 0);
       else
         s.dmg *= char_get_bonuses(s.ch, BONUS_POWERHIT) ? 5 : 3;
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 3);
       break;
-    case 4:
+    case ki_spot::arm:
       s.dmg *= calc_critical(g, s.ch, 1);
-      hurt(g, 0, s.attack->limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
+      hurt(g, 0, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 1);
       break;
-    case 5:
+    case ki_spot::leg:
       s.dmg *= calc_critical(g, s.ch, 1);
-      hurt(g, 1, s.attack->limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
+      hurt(g, atk.leg_flag, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 2);
       break;
   }
@@ -134,13 +137,15 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
     }
     if (dge > axion_dice(g, 10)) {
       act_at(s, atk.dodge, atk.hide);
-      if (atk.dodge_explosion)
-        send_to_room(g, char_get_in_room(s.vict), "@wA bright explosion erupts from the impact!\r\n");
-      dodge_ki(g, s.ch, s.vict, 0, atk.damtype, s.skill, atk.skill); /* 0: it doesn't home in */
-      room_vnum here = char_get_in_room(s.ch);
-      if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
-        room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
-      improve_skill(g, s.vict, SKILL_DODGE, 0);
+      if (atk.dodge_scatters) {
+        if (atk.dodge_explosion)
+          send_to_room(g, char_get_in_room(s.vict), atk.dodge_explosion);
+        dodge_ki(g, s.ch, s.vict, 0, atk.damtype, s.skill, atk.skill); /* 0: it doesn't home in */
+        room_vnum here = char_get_in_room(s.ch);
+        if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
+          room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
+        improve_skill(g, s.vict, SKILL_DODGE, 0);
+      }
       pay_if(ki_outcome::dodged);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       return ki_outcome::dodged;
@@ -166,7 +171,7 @@ void at_victim(ki_shot &s)
   const ki_attack &atk = *s.attack;
   int pry = 2, dge = 2, blk = 2;
 
-  if (!can_kill(g, s.ch, s.vict, nullptr, 1))
+  if (!can_kill(g, s.ch, s.vict, nullptr, atk.kill_mode))
     return;
   if (handle_defender(g, s.vict, s.ch))
     s.vict = char_get_defender(g, s.vict);
@@ -181,6 +186,8 @@ void at_victim(ki_shot &s)
   handle_defense(g, s.vict, &pry, &blk, &dge);
   prob -= avo;
   tech_handle_posmodifier(s.vict, &pry, &blk, &dge, &prob);
+  if (atk.steady)
+    atk.steady(s, prob);
 
   if (!tech_handle_zanzoken(g, s.ch, s.vict, atk.name)) {
     pay(s, ki_outcome::zanzoken);
@@ -210,7 +217,9 @@ void at_object(ki_shot &s)
   /* can_kill() refuses a broken object, so it is never broken here */
   if (!can_kill(g, s.ch, nullptr, s.obj, 1))
     return;
-  s.dmg = damtype(g, s.ch, s.attack->damtype, s.skill, s.attperc) / 10;
+  if (s.attack->on_object && s.attack->on_object(s))
+    return;
+  s.dmg = damtype(g, s.ch, s.attack->obj_damtype ? s.attack->obj_damtype : s.attack->damtype, s.skill, s.attperc) / 10;
   act(g, s.attack->obj_to_char, s.attack->hide, s.ch, s.obj, nullptr, TO_CHAR);
   act(g, s.attack->obj_to_room, s.attack->hide, s.ch, s.obj, nullptr, TO_ROOM);
   hurt(g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
@@ -228,7 +237,9 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
   std::string arg       = take_arg(rest);
   std::string arg2      = take_arg(rest);
 
-  if (!can_grav(g, ch) || !check_skill(g, ch, attack.skill) || !limb_ok(g, ch, 0))
+  if (attack.not_while_singing && playing_song(g, ch))
+    return;
+  if (!can_grav(g, ch) || !check_skill(g, ch, attack.skill) || (attack.needs_arms && !limb_ok(g, ch, 0)))
     return;
   if (attack.needs_free_hand && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
     send_to_char(g, ch, "Your hands are full!\r\n");
@@ -254,7 +265,7 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
   s.skill = init_skill(g, ch, attack.skill);
   if (!tech_handle_targeting(g, ch, arg, &s.vict, &s.obj))
     return;
-  handle_cooldown(g, ch, attack.cooldown);
+  handle_cooldown(g, ch, attack.cooldown_for ? attack.cooldown_for(s) : attack.cooldown);
   if (s.vict)
     at_victim(s);
   else if (s.obj)
