@@ -110,7 +110,7 @@ void land(ki_shot &s)
 
 /* One shot at the victim, after zanzoken: avoided, or where it landed. pays: whether the attacker pays for the attack
  * now, as they do on the last shot. Returns how it ended. */
-ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool pays)
+ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool pays)
 {
   GameWorld *g         = s.g;
   const ki_attack &atk = *s.attack;
@@ -129,11 +129,11 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
         steer();
       if (atk.homing) /* quirk: before paying, and again after */
         hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
-      pay_if(ki_outcome::missed);
+      pay_if(ki_outcome::spent);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       if (atk.guided) /* quirk: twice */
         hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
-      return ki_outcome::missed;
+      return ki_outcome::spent;
     }
     if (atk.absorb != ki_absorb::none && tech_handle_android_absorb(g, s.ch, s.vict)) {
       if (atk.absorb == ki_absorb::costs_one)
@@ -207,6 +207,14 @@ ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool
   return ki_outcome::hit;
 }
 
+ki_outcome shoot(ki_shot &s, int prob, int perc, int pry, int blk, int dge, bool pays)
+{
+  ki_outcome how = shoot_once(s, prob, perc, pry, blk, dge, pays);
+  if (s.attack->finish && how != ki_outcome::absorbed)
+    s.attack->finish(s, how);
+  return how;
+}
+
 void at_victim(ki_shot &s)
 {
   GameWorld *g         = s.g;
@@ -237,14 +245,16 @@ void at_victim(ki_shot &s)
       dodge_ki(g, s.ch, s.vict, 1, dodge_damtype(atk), s.skill, atk.skill);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
       pay(s, ki_outcome::zanzoken);
-      return;
+    } else {
+      pay(s, ki_outcome::zanzoken);
+      if (atk.guided) {
+        dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
+        hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
+      }
+      pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
     }
-    pay(s, ki_outcome::zanzoken);
-    if (atk.guided) {
-      dodge_ki(g, s.ch, s.vict, 2, dodge_damtype(atk), s.skill, atk.skill);
-      hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
-    }
-    pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
+    if (atk.finish)
+      atk.finish(s, ki_outcome::zanzoken);
     return;
   }
 
