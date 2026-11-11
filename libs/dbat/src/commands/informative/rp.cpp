@@ -589,7 +589,7 @@ void introCreate(struct char_data *ch)
     return;
   }
 
-  fprintf(fl, "Gibbles Gibbles\n");
+  file_print(fl, "Gibbles Gibbles\n");
 
   atomic_commit(&af);
   return;
@@ -674,7 +674,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
   while (x < count) {
     if (x == 0 || strcasecmp(names[x - 1], names[x])) {
       if (strcasecmp(names[x], char_get_name(vict))) {
-        fprintf(fl, "%s %s\n", names[x], alias[x]);
+        file_print(fl, "{} {}\n", names[x], alias[x]);
       }
     }
     x++;
@@ -691,7 +691,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
     x++;
   }
 
-  fprintf(fl, "%s %s\n", char_get_name(vict), CAP(name).c_str());
+  file_print(fl, "{} {}\n", char_get_name(vict), CAP(name));
 
   atomic_commit(&af);
   return;

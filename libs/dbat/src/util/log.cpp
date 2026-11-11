@@ -28,7 +28,7 @@ void mud_log(std::string_view text)
 
   time_s[strlen(time_s) - 1] = '\0';
 
-  fprintf(logfile, "%-15.15s :: ", time_s + 4);
+  file_print(logfile, "{:<15.15} :: ", time_s + 4);
   fwrite(text.data(), 1, text.size(), logfile);
   fputc('\n', logfile);
   fflush(logfile);

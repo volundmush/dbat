@@ -146,7 +146,7 @@ void script_save_to_disk(FILE *fp, void *item, int type)
   }
 
   while (t) {
-    fprintf(fp, "T %d\n", t->vnum);
+    file_print(fp, "T {:d}\n", t->vnum);
     t = t->next;
   }
 }
@@ -506,31 +506,31 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
     if ((rnum = find_trigger(g, i)) != nullptr) {
       trig = rnum->proto;
 
-      if (fprintf(trig_file, "#%d\n", i) < 0) {
+      if (file_print(trig_file, "#{:d}\n", i) < 0) {
         mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't write trig file!");
         atomic_abort(&af);
         return false;
       }
       sprintascii(bitBuf, trig->trigger_type);
-      fprintf(trig_file, "%s%c\n"
-                         "%d %s %d\n"
-                         "%s%c\n",
-              !trig->name.empty() ? trig->name.c_str() : "unknown trigger", STRING_TERMINATOR,
-              trig->attach_type,
-              *bitBuf ? bitBuf : "0", trig->narg,
-              trig->arglist.c_str(), STRING_TERMINATOR);
+      file_print(trig_file, "{}{:c}\n"
+                            "{:d} {} {:d}\n"
+                            "{}{:c}\n",
+                 !trig->name.empty() ? trig->name.c_str() : "unknown trigger", as_char(STRING_TERMINATOR),
+                 trig->attach_type,
+                 *bitBuf ? bitBuf : "0", trig->narg,
+                 trig->arglist, as_char(STRING_TERMINATOR));
 
       /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
       if (!trig->cmdlist)
         fputs("* Empty script", trig_file);
       for (cmd = trig->cmdlist; cmd; cmd = cmd->next)
-        fprintf(trig_file, "%s\n", cmd->cmd.c_str());
+        file_print(trig_file, "{}\n", cmd->cmd);
 
-      fprintf(trig_file, "%c\n", STRING_TERMINATOR);
+      file_print(trig_file, "{:c}\n", as_char(STRING_TERMINATOR));
     }
   }
 
-  fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
+  file_print(trig_file, "${:c}\n", as_char(STRING_TERMINATOR));
   if (!atomic_commit(&af))
     return false;
   create_world_index(g, zone, "trg");

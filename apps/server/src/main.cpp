@@ -128,22 +128,22 @@ int main(int argc, char **argv)
         break;
       case 'h':
         /* From: Anil Mahajan <amahajan@proxicom.com> */
-        printf("Usage: %s [-c] [-m] [-x] [-q] [-r] [-s] [-d pathname] [port #]\n"
-               "  -c             Enable syntax check mode.\n"
-               "  -d <directory> Specify library directory (defaults to 'lib').\n"
-               "  -f<file>       Use <file> for configuration.\n"
-               "  -h             Print this command line argument help.\n"
-               "  -m             Start in mini-MUD mode.\n"
-               "  -o <file>      Write log to <file> instead of stderr.\n"
-               "  -q             Quick boot (doesn't scan rent for object limits)\n"
-               "  -r             Restrict MUD -- no new players allowed.\n"
-               "  -s             Suppress special procedure assignments.\n"
-               " Note:         These arguments are 'CaSe SeNsItIvE!!!'\n"
-               "  -x             Load using secondary (ascii) files.\n",
-               argv[0]);
+        file_print(stdout, "Usage: {} [-c] [-m] [-x] [-q] [-r] [-s] [-d pathname] [port #]\n"
+                           "  -c             Enable syntax check mode.\n"
+                           "  -d <directory> Specify library directory (defaults to 'lib').\n"
+                           "  -f<file>       Use <file> for configuration.\n"
+                           "  -h             Print this command line argument help.\n"
+                           "  -m             Start in mini-MUD mode.\n"
+                           "  -o <file>      Write log to <file> instead of stderr.\n"
+                           "  -q             Quick boot (doesn't scan rent for object limits)\n"
+                           "  -r             Restrict MUD -- no new players allowed.\n"
+                           "  -s             Suppress special procedure assignments.\n"
+                           " Note:         These arguments are 'CaSe SeNsItIvE!!!'\n"
+                           "  -x             Load using secondary (ascii) files.\n",
+                   argv[0]);
         exit(0);
       default:
-        printf("SYSERR: Unknown option -%c in argument string.\n", *(argv[pos] + 1));
+        file_print(stdout, "SYSERR: Unknown option -{:c} in argument string.\n", as_char(*(argv[pos] + 1)));
         break;
     }
     pos++;
@@ -151,10 +151,10 @@ int main(int argc, char **argv)
 
   if (pos < argc) {
     if (!isdigit(*argv[pos])) {
-      printf("Usage: %s [-c] [-m] [-q] [-r] [-s] [-d pathname] [port #]\n", argv[0]);
+      file_print(stdout, "Usage: {} [-c] [-m] [-q] [-r] [-s] [-d pathname] [port #]\n", argv[0]);
       exit(1);
     } else if ((g->port = atoi(argv[pos])) <= 1024) {
-      printf("SYSERR: Illegal port number %d.\n", g->port);
+      file_print(stdout, "SYSERR: Illegal port number {:d}.\n", g->port);
       exit(1);
     }
   }

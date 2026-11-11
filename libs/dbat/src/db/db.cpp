@@ -730,10 +730,10 @@ void auc_save(GameWorld *g)
 
     for (obj_data *obj : room_contents(g, 80)) {
       if (obj) {
-        fprintf(fl, "%" PRId64 " %s %d %d %d %d %ld\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
+        file_print(fl, "{:d} {} {:d} {:d} {:d} {:d} {:d}\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
       }
     }
-    fprintf(fl, "~END~\n");
+    file_print(fl, "~END~\n");
     fclose(fl);
   }
 }
@@ -862,32 +862,32 @@ void save_mud_time(GameWorld *g, struct time_info_data *when)
   if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
     mud_log("SYSERR: Can't write to '{}' time file.", TIME_FILE);
   else {
-    fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(g, when));
-    fprintf(bgtime, "%lld\n", (long long)g->NEWSUPDATE);
-    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWMORT);
-    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWDUO);
-    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWCOD);
-    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWBUI);
-    fprintf(bgtime, "%lld\n", (long long)g->BOARDNEWIMM);
-    fprintf(bgtime, "%lld\n", (long long)g->INTERESTTIME);
-    fprintf(bgtime, "%lld\n", (long long)g->LASTINTEREST);
-    fprintf(bgtime, "%d\n", g->HIGHPCOUNT);
-    fprintf(bgtime, "%lld\n", (long long)g->PCOUNTDATE);
-    fprintf(bgtime, "%d\n", g->WISHTIME);
-    fprintf(bgtime, "%d\n", g->PCOUNT);
-    fprintf(bgtime, "%lld\n", (long long)g->LASTPAYOUT);
-    fprintf(bgtime, "%d\n", g->LASTPAYTYPE);
-    fprintf(bgtime, "%d\n", g->LASTNEWS);
-    fprintf(bgtime, "%d\n", g->dballtime);
-    fprintf(bgtime, "%d\n", g->SELFISHMETER);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON1);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON2);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON3);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON4);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON5);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON6);
-    fprintf(bgtime, "%d\n", g->SHADOW_DRAGON7);
-    fprintf(bgtime, "%d\n", g->ERAPLAYERS);
+    file_print(bgtime, "{:d}\n", (long long)mud_time_to_secs(g, when));
+    file_print(bgtime, "{:d}\n", (long long)g->NEWSUPDATE);
+    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWMORT);
+    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWDUO);
+    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWCOD);
+    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWBUI);
+    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWIMM);
+    file_print(bgtime, "{:d}\n", (long long)g->INTERESTTIME);
+    file_print(bgtime, "{:d}\n", (long long)g->LASTINTEREST);
+    file_print(bgtime, "{:d}\n", g->HIGHPCOUNT);
+    file_print(bgtime, "{:d}\n", (long long)g->PCOUNTDATE);
+    file_print(bgtime, "{:d}\n", g->WISHTIME);
+    file_print(bgtime, "{:d}\n", g->PCOUNT);
+    file_print(bgtime, "{:d}\n", (long long)g->LASTPAYOUT);
+    file_print(bgtime, "{:d}\n", g->LASTPAYTYPE);
+    file_print(bgtime, "{:d}\n", g->LASTNEWS);
+    file_print(bgtime, "{:d}\n", g->dballtime);
+    file_print(bgtime, "{:d}\n", g->SELFISHMETER);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON1);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON2);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON3);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON4);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON5);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON6);
+    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON7);
+    file_print(bgtime, "{:d}\n", g->ERAPLAYERS);
     atomic_commit(&af);
   }
 }
@@ -4324,23 +4324,16 @@ static int check_object_level(GameWorld *g, struct obj_data *obj, int val)
   return (error);
 }
 
-static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context,
-                             const char *file, int line, const char *format, ...)
-    __attribute__((format(printf, 7, 8)));
-
-static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context,
-                             const char *file, int line, const char *format, ...)
+/* file_print()s to fp, logging a failed write; false if it failed */
+template <class... Args>
+static bool obj_save_print(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context, const char *file,
+                           int line, std::format_string<Args...> format, Args &&...args)
 {
-  va_list args;
-  int result;
-
-  va_start(args, format);
-  result = vfprintf(fp, format, args);
-  va_end(args);
+  int result = file_print(fp, format, std::forward<Args>(args)...);
 
   if (result < 0 || ferror(fp)) {
     int saved_errno = errno;
-    mud_log("SYSERR: {}:{:d}: fprintf failed saving object #{:d} ({}): {}",
+    mud_log("SYSERR: {}:{:d}: write failed saving object #{:d} ({}): {}",
             file, line, obj_get_vnum(g, obj), context,
             saved_errno ? strerror(saved_errno) : "stream error");
     return false;
@@ -4349,8 +4342,8 @@ static bool obj_save_fprintf(GameWorld *g, FILE *fp, struct obj_data *obj, const
   return true;
 }
 
-#define OBJ_SAVE_FPRINTF(g, fp, obj, context, ...) \
-  obj_save_fprintf(g, (fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
+#define OBJ_SAVE_PRINT(g, fp, obj, context, ...) \
+  obj_save_print(g, (fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
 
 bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate)
 {
@@ -4370,53 +4363,48 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
   sprintascii(ebuf2, obj_get_extra_flags(obj)[2]);
   sprintascii(ebuf3, obj_get_extra_flags(obj)[3]);
 
-  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "base object data",
-                        "#%d\n"
-                        "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d\n",
-                        obj_get_vnum(g, obj), locate, obj_get_value(obj, 0), obj_get_value(obj, 1),
-                        obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 4),
-                        obj_get_value(obj, 5), obj_get_value(obj, 6), obj_get_value(obj, 7),
-                        ebuf0, ebuf1, ebuf2, ebuf3,
-                        obj_get_value(obj, 8), obj_get_value(obj, 9),
-                        obj_get_value(obj, 10), obj_get_value(obj, 11), obj_get_value(obj, 12),
-                        obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
+  if (!OBJ_SAVE_PRINT(g, fp, obj, "base object data",
+                      "#{:d}\n"
+                      "{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {} {} {} {} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
+                      obj_get_vnum(g, obj), locate, obj_get_value(obj, 0), obj_get_value(obj, 1),
+                      obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 4),
+                      obj_get_value(obj, 5), obj_get_value(obj, 6), obj_get_value(obj, 7),
+                      ebuf0, ebuf1, ebuf2, ebuf3,
+                      obj_get_value(obj, 8), obj_get_value(obj, 9),
+                      obj_get_value(obj, 10), obj_get_value(obj, 11), obj_get_value(obj, 12),
+                      obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
     return false;
 
   /* An early "return 1" for non-unique, non-spellbook objects used to sit here, but its
    * condition (!type == ITEM_SPELLBOOK) was always false, so every object saves its XAP data. */
 
-  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "XAP object data",
-                        "XAP\n"
-                        "%s~\n"
-                        "%s~\n"
-                        "%s~\n"
-                        "%s~\n"
-                        "%d %d %d %d %d %" PRId64 " %d %d\n",
-                        obj_get_name(obj) ? obj_get_name(obj) : "undefined",
-                        obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
-                        obj_get_description(obj) ? obj_get_description(obj) : "undefined",
-                        buf1.c_str(), obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
-                        (int)obj_get_wear_flags(obj)[1], (int)obj_get_wear_flags(obj)[2], (int)obj_get_wear_flags(obj)[3],
-                        obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
+  if (!OBJ_SAVE_PRINT(g, fp, obj, "XAP object data",
+                      "XAP\n{}~\n{}~\n{}~\n{}~\n{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
+                      obj_get_name(obj) ? obj_get_name(obj) : "undefined",
+                      obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
+                      obj_get_description(obj) ? obj_get_description(obj) : "undefined",
+                      buf1.c_str(), obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
+                      (int)obj_get_wear_flags(obj)[1], (int)obj_get_wear_flags(obj)[2], (int)obj_get_wear_flags(obj)[3],
+                      obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
     return false;
 
   if (obj_get_generation(obj))
-    if (!OBJ_SAVE_FPRINTF(g, fp, obj, "generation", "G\n%lld\n", (long long)obj_get_generation(obj)))
+    if (!OBJ_SAVE_PRINT(g, fp, obj, "generation", "G\n{:d}\n", (long long)obj_get_generation(obj)))
       return false;
   if (obj_get_unique_id(obj))
-    if (!OBJ_SAVE_FPRINTF(g, fp, obj, "unique id", "U\n%" PRId64 "\n", obj_get_unique_id(obj)))
+    if (!OBJ_SAVE_PRINT(g, fp, obj, "unique id", "U\n{:d}\n", obj_get_unique_id(obj)))
       return false;
 
-  if (!OBJ_SAVE_FPRINTF(g, fp, obj, "size", "Z\n%d\n", obj_get_size(obj)))
+  if (!OBJ_SAVE_PRINT(g, fp, obj, "size", "Z\n{:d}\n", obj_get_size(obj)))
     return false;
 
   /* Do we have affects? */
   for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
     if (obj_get_affected(obj)[counter2].modifier)
-      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "affect", "A\n"
-                                               "%d %d %d\n",
-                            obj_get_affected(obj)[counter2].location, obj_get_affected(obj)[counter2].modifier,
-                            obj_get_affected(obj)[counter2].specific))
+      if (!OBJ_SAVE_PRINT(g, fp, obj, "affect", "A\n"
+                                                "{:d} {:d} {:d}\n",
+                          obj_get_affected(obj)[counter2].location, obj_get_affected(obj)[counter2].modifier,
+                          obj_get_affected(obj)[counter2].specific))
         return false;
 
   /* Do we have extra descriptions? */
@@ -4429,11 +4417,11 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
       }
       buf1 = ex_desc->description;
       strip_cr(buf1);
-      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "extra description", "E\n"
-                                                             "%s~\n"
-                                                             "%s~\n",
-                            ex_desc->keyword.c_str(),
-                            buf1.c_str()))
+      if (!OBJ_SAVE_PRINT(g, fp, obj, "extra description", "E\n"
+                                                           "{}~\n"
+                                                           "{}~\n",
+                          ex_desc->keyword.c_str(),
+                          buf1.c_str()))
         return false;
     }
   }
@@ -4444,9 +4432,9 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
       if (obj_get_sbinfo(obj)[i].spellname == 0) {
         break;
       }
-      if (!OBJ_SAVE_FPRINTF(g, fp, obj, "spellbook", "S\n"
-                                                  "%d %d\n",
-                            obj_get_sbinfo(obj)[i].spellname, obj_get_sbinfo(obj)[i].pages))
+      if (!OBJ_SAVE_PRINT(g, fp, obj, "spellbook", "S\n"
+                                                   "{:d} {:d}\n",
+                          obj_get_sbinfo(obj)[i].spellname, obj_get_sbinfo(obj)[i].pages))
         return false;
       continue;
     }
@@ -4454,7 +4442,7 @@ bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locat
   return true;
 }
 
-#undef OBJ_SAVE_FPRINTF
+#undef OBJ_SAVE_PRINT
 
 /* External variables from config.c */
 

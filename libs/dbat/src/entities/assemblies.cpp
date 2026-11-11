@@ -106,17 +106,17 @@ void assemblySaveAssemblies(GameWorld *g)
   for (i = 0; i < g->g_lNumAssemblies; i++) {
     pAssembly = (g->g_pAssemblyTable + i);
     szType    = sprinttype(pAssembly->uchAssemblyType, AssemblyTypes);
-    fprintf(pFile, "Vnum                #%d %s\n", pAssembly->lVnum, szType.c_str());
+    file_print(pFile, "Vnum                #{:d} {}\n", pAssembly->lVnum, szType);
 
     for (j = 0; j < pAssembly->lNumComponents; j++) {
-      fprintf(pFile, "Component           #%d %d %d\n",
-              pAssembly->pComponents[j].lVnum,
-              (pAssembly->pComponents[j].bExtract ? 1 : 0),
-              (pAssembly->pComponents[j].bInRoom ? 1 : 0));
+      file_print(pFile, "Component           #{:d} {:d} {:d}\n",
+                 pAssembly->pComponents[j].lVnum,
+                 (pAssembly->pComponents[j].bExtract ? 1 : 0),
+                 (pAssembly->pComponents[j].bInRoom ? 1 : 0));
     }
 
     if (i < g->g_lNumAssemblies - 1)
-      fprintf(pFile, "\n");
+      file_print(pFile, "\n");
   }
 
   atomic_commit(&af);

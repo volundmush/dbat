@@ -163,10 +163,10 @@ static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
     strip_cr(buf1);
 
     /* Forget making a buffer, lets just write the thing now. */
-    fprintf(fp, "%s#%d\n", buf1.c_str(), g->help_table[i].min_level);
+    file_print(fp, "{}#{:d}\n", buf1, g->help_table[i].min_level);
   }
   /* Write final line and close. */
-  fprintf(fp, "$~\n");
+  file_print(fp, "$~\n");
   if (!atomic_commit(&af))
     return; /* still listed as unsaved */
 

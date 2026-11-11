@@ -1378,7 +1378,7 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   /* in the future */
   while (vars) {
     if (vars->name[0] != '-') /* don't save if it begins with - */
-      fprintf(file, "%s %ld %s\n", vars->name.c_str(), vars->context, vars->value.c_str());
+      file_print(file, "{} {:d} {}\n", vars->name, vars->context, vars->value);
     vars = vars->next;
   }
 

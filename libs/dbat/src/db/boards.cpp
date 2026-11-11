@@ -544,15 +544,15 @@ bool save_board(GameWorld *g, struct board_info *board)
   for (msg = board->messages; msg; msg = msg->next)
     if (message_saveable(g, msg))
       saved++;
-  fprintf(fl, "Board File\n%d %d %d %d %d\n", board->read_lvl, board->write_lvl, board->remove_lvl, saved, CURRENT_BOARD_VER);
+  file_print(fl, "Board File\n{:d} {:d} {:d} {:d} {:d}\n", board->read_lvl, board->write_lvl, board->remove_lvl, saved, CURRENT_BOARD_VER);
 
   for (msg = board->messages; msg; msg = msg->next)
     if (message_saveable(g, msg))
-      fprintf(fl, "#%d\n%s\n%ld\n%s\n%s~\n", i++, msg->name.c_str(), (long)msg->timestamp, msg->subject.c_str(), msg->data.c_str());
+      file_print(fl, "#{:d}\n{}\n{:d}\n{}\n{}~\n", i++, msg->name, (long)msg->timestamp, msg->subject, msg->data);
 
   for (int slot = 0; slot < BOARD_MEMORY_SLOTS; slot++)
     for (struct board_memory *mem = board->memory[slot]; mem; mem = mem->next)
-      fprintf(fl, "S%d %s %d\n", slot, mem->name.c_str(), mem->timestamp);
+      file_print(fl, "S{:d} {} {:d}\n", slot, mem->name, mem->timestamp);
 
   return atomic_commit(&af);
 }

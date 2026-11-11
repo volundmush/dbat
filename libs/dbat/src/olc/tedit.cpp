@@ -43,10 +43,10 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         tmstr                        = asctime(localtime(&mytime));
         *(tmstr + strlen(tmstr) - 1) = '\0';
 
-        fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", g->TOP_OF_NEWS, d->newsbuf.c_str(), char_get_name(d->character), tmstr);
+        file_print(fl, "#{:d} {}\n@cUpdated By@D: @C{:<13} @cDate@D: @Y{}@n\n", g->TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
         d->newsbuf.clear();
         strip_cr(d->draft);
-        fprintf(fl, "%s\n", d->draft.c_str());
+        file_print(fl, "{}\n", d->draft);
         fclose(fl);
 
         g->NEWSUPDATE = game_now(g);
@@ -99,7 +99,7 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
           strip_cr(*text);
-          fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), text->c_str());
+          file_print(fl, "\n-----------------------------------------------\n@Y{} @cUpdated By@D: @C{}@n\r\n-----------------------------------------------\n{}\n", tmstr, char_get_name(d->character), text->c_str());
         } else if (!text->empty()) {
           strip_cr(*text);
           fputs(text->c_str(), fl);

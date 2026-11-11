@@ -81,8 +81,8 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
   if (!(fp = atomic_open(&af, filename, true)))
     return false;
 
-  if (fprintf(fp, "%d %lld %d %d %d %d\r\n", rentcode, (long long)game_now(g), cost,
-              char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
+  if (file_print(fp, "{:d} {:d} {:d} {:d} {:d} {:d}\r\n", rentcode, (long long)game_now(g), cost,
+                 char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
     Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
     atomic_abort(&af);
     return false;
@@ -791,7 +791,7 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
 
         if (!get_line(fl, line) ||
             (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
-          fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
+          file_print(stderr, "Format error in first numeric line (expecting _x_ args)");
           return false;
         }
         obj_set_type_flag(temp, t[0]);

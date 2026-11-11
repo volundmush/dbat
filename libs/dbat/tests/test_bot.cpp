@@ -267,7 +267,7 @@ static void take_all_output(GameWorld *g)
 
 static void print_audit_problem(void *, const char *problem)
 {
-  printf("AUDIT: %s\n", problem);
+  file_print(stdout, "AUDIT: {}\n", problem);
 }
 
 /*
@@ -329,9 +329,9 @@ static void check_log(void)
     if (first_boot)
       continue;
     if (is_new)
-      printf("LOGGED: %s\n", message);
+      file_print(stdout, "LOGGED: {}\n", message);
     if (fatal && !strcmp(fatal, message)) {
-      printf("AUDIT: logged: %s\n", message);
+      file_print(stdout, "AUDIT: logged: {}\n", message);
       th_exit(AUDIT_FAILED);
     }
   }
@@ -623,7 +623,7 @@ static void journal_and_do(GameWorld *g)
   static char with_dice[MAX_LINE + 34];
 
   snprintf(with_dice, MAX_LINE, "@%lu %s", bot_dice(1000000000), line);
-  fprintf(journal, "%s\n", with_dice);
+  file_print(journal, "{}\n", with_dice);
   fflush(journal);
   do_action(g, with_dice);
 }
@@ -732,7 +732,7 @@ static void report_kind(const char *key)
     is_new = strcmp(reported[i], kind) != 0;
   if (is_new && num_reported < 256) {
     snprintf(reported[num_reported++], sizeof(reported[0]), "%s", kind);
-    printf("LOGGED: SAVE CHANGED: %s\n", kind);
+    file_print(stdout, "LOGGED: SAVE CHANGED: {}\n", kind);
   }
 }
 
@@ -755,7 +755,7 @@ static void report_changed_lines(struct changed_line *lines, int count)
     if (!lines[i].moved) {
       char key[32] = "";
 
-      printf("  %s\n", lines[i].text);
+      file_print(stdout, "  {}\n", lines[i].text);
       sscanf(lines[i].text + 2, "%31[A-Za-z_]", key);
       report_kind(*key ? key : "(numbers)");
     }
@@ -793,7 +793,7 @@ static void report_changes(const char *what)
         if (end)
           *end = '\0';
       }
-      printf("  %.200s\n", text);
+      file_print(stdout, "  {:.200}\n", text);
       if (*text != 'd') {
         char key[8];
 
@@ -880,7 +880,7 @@ static GameWorld *restart_and_compare(GameWorld *g)
                     "done; rm -f \"$TMPDIR/.x$$\"", "r"))) {
     while (fgets(text, sizeof(text), lost)) {
       snprintf(changed_file, sizeof(changed_file), "plrobjs");
-      printf("  object lost: %s", text);
+      file_print(stdout, "  object lost: {}", text);
       report_kind("object lost on loading");
     }
     pclose(lost);
@@ -894,14 +894,14 @@ static GameWorld *restart_and_compare(GameWorld *g)
   check_log();
   if (world_audit(g, print_audit_problem, nullptr))
     th_exit(AUDIT_FAILED);
-  printf("restart: %d players saved again, %d back in the game\n", players, returned);
+  file_print(stdout, "restart: {:d} players saved again, {:d} back in the game\n", players, returned);
   return g;
 }
 
 static void finish(GameWorld *g)
 {
   alarm(0);
-  printf("fingerprint %lx\n", fingerprint);
+  file_print(stdout, "fingerprint {:x}\n", as_unsigned(fingerprint));
   th_shutdown(g);
 }
 
@@ -917,7 +917,7 @@ static void play_seed(unsigned long seed, int steps, FILE *journal_file)
   for (int step = 0; step < steps; step++)
     bot_step(g, &next_name);
   if (journal)
-    fprintf(journal, "restart\n");
+    file_print(journal, "restart\n");
   g = restart_and_compare(g);
   finish(g);
 }
@@ -1068,8 +1068,8 @@ static int print_failures(void)
   int new_failures = 0;
 
   for (int i = 0; i < num_signatures; i++) {
-    printf("%4d %s %s\n      first seen with: %s\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
-           signatures[i].text, signatures[i].example);
+    file_print(stdout, "{:>4d} {} {}\n      first seen with: {}\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
+               signatures[i].text, signatures[i].example);
     if (!signatures[i].known && (HAS_SANITIZER || strncmp(signatures[i].text, "killed by signal", 16)))
       new_failures++;
   }
@@ -1098,11 +1098,11 @@ static int run_seeds(const char *base, unsigned long first, int seeds, int steps
   /* a run that failed proves nothing here, so this uses the first that finished */
   snprintf(repeat_dir, sizeof(repeat_dir), "%s/replay", base);
   if (repeat_fingerprint && run_child(repeat_dir, 0, 0, repeat_journal) != repeat_fingerprint) {
-    printf("FAIL: replaying %s didn't repeat the run exactly\n", repeat_journal);
+    file_print(stdout, "FAIL: replaying {} didn't repeat the run exactly\n", repeat_journal);
     failures++;
   }
   failures += print_failures();
-  printf("%d seeds of %d steps, %d finished, %d distinct failures, %d of them new\n", seeds, steps, finished, num_signatures, failures);
+  file_print(stdout, "{:d} seeds of {:d} steps, {:d} finished, {:d} distinct failures, {:d} of them new\n", seeds, steps, finished, num_signatures, failures);
   return failures;
 }
 
@@ -1127,7 +1127,7 @@ static int run_corpus(const char *base, const char *corpus)
   }
   closedir(dir);
   failures = print_failures();
-  printf("%d journals, %d distinct failures, %d of them new\n", files, num_signatures, failures);
+  file_print(stdout, "{:d} journals, {:d} distinct failures, {:d} of them new\n", files, num_signatures, failures);
   return failures;
 }
 
@@ -1180,6 +1180,6 @@ int main(int argc, char **argv)
 
   snprintf(cleanup, sizeof(cleanup), "rm -rf '%s'", base);
   if (system(cleanup) != 0)
-    printf("couldn't remove %s\n", base);
+    file_print(stdout, "couldn't remove {}\n", base);
   return failures != 0;
 }

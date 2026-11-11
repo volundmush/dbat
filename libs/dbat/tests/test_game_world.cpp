@@ -29,12 +29,12 @@
 
 static int failures = 0;
 
-#define CHECK(cond)                                              \
-  do {                                                           \
-    if (!(cond)) {                                               \
-      printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond);     \
-      failures++;                                                \
-    }                                                            \
+#define CHECK(cond)                                                        \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      file_print(stdout, "FAIL {}:{:d}: {}\n", __FILE__, __LINE__, #cond); \
+      failures++;                                                          \
+    }                                                                      \
   } while (0)
 
 /* Rooms, one mob and object prototype, one zone and one shop, all numbered from first_vnum. */
@@ -570,7 +570,7 @@ int main(void)
   free_world(a);
 
   if (failures) {
-    printf("%d check(s) failed\n", failures);
+    file_print(stdout, "{:d} check(s) failed\n", failures);
     return 1;
   }
   puts("game_world: all checks passed");

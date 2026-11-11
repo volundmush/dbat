@@ -38,17 +38,17 @@ static void add_trigger_to_file(void)
   end = ftell(fl);
   /* over the $~ at the end of the file */
   fseek(fl, end - 3, SEEK_SET);
-  fprintf(fl, "#399\nFuzzed~\n%d c %d\nfuzz~\n", attach_type, attach_type == 1 ? 2 : 100);
+  file_print(fl, "#399\nFuzzed~\n{:d} c {:d}\nfuzz~\n", attach_type, attach_type == 1 ? 2 : 100);
   for (size_t i = 0; i < script_size; i++)
     if (script[i] && script[i] != '~')
       putc(script[i], fl);
-  fprintf(fl, "\n~\n$~\n");
+  file_print(fl, "\n~\n$~\n");
   fclose(fl);
 }
 
 static void audit_problem(void *, const char *problem)
 {
-  fprintf(stderr, "AUDIT: %s\n", problem);
+  file_print(stderr, "AUDIT: {}\n", problem);
   abort();
 }
 

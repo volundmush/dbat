@@ -106,8 +106,8 @@ static void _write_one_node(FILE *fp, struct ban_list_element *node)
 {
   if (node) {
     _write_one_node(fp, node->next);
-    fprintf(fp, "%s %s %ld %s\n", ban_types[node->type],
-            node->site, (long)node->date, node->name);
+    file_print(fp, "{} {} {:d} {}\n", ban_types[node->type],
+               node->site, (long)node->date, node->name);
   }
 }
 

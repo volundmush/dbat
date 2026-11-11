@@ -174,8 +174,8 @@ static void save_disabled(GameWorld *g)
   }
 
   for (p = g->disabled_first; p; p = p->next)
-    fprintf(fp, "%s %d %d %s\n", p->command->command, p->subcmd, p->level, p->disabled_by);
-  fprintf(fp, "%s\n", END_MARKER);
+    file_print(fp, "{} {:d} {:d} {}\n", p->command->command, p->subcmd, p->level, p->disabled_by);
+  file_print(fp, "{}\n", END_MARKER);
   atomic_commit(&af);
 }
 

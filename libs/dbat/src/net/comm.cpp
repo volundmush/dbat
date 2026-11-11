@@ -2896,12 +2896,12 @@ static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode
     logfile = fopen(filename, mode);
 
   if (logfile) {
-    printf("Using log file '%s'%s.\n",
-           filename, stderr_fp ? " with redirection" : "");
+    file_print(stdout, "Using log file '{}'{}.\n",
+               filename, stderr_fp ? " with redirection" : "");
     return (true);
   }
 
-  printf("SYSERR: Error opening file '%s': %s\n", filename, strerror(errno));
+  file_print(stdout, "SYSERR: Error opening file '{}': {}\n", filename, strerror(errno));
   return (false);
 }
 

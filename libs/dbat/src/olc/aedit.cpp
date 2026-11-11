@@ -206,33 +206,33 @@ static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
   }
 
   for (i = 0; i <= g->top_of_socialt; i++) {
-    fprintf(fp, "~%s %s %d %d %d %d\n",
-            g->soc_mess_list[i].command,
-            g->soc_mess_list[i].sort_as,
-            g->soc_mess_list[i].hide,
-            g->soc_mess_list[i].min_char_position,
-            g->soc_mess_list[i].min_victim_position,
-            g->soc_mess_list[i].min_level_char);
-    fprintf(fp, "%s\n%s\n%s\n%s\n",
-            ((g->soc_mess_list[i].char_no_arg) ? g->soc_mess_list[i].char_no_arg : "#"),
-            ((g->soc_mess_list[i].others_no_arg) ? g->soc_mess_list[i].others_no_arg : "#"),
-            ((g->soc_mess_list[i].char_found) ? g->soc_mess_list[i].char_found : "#"),
-            ((g->soc_mess_list[i].others_found) ? g->soc_mess_list[i].others_found : "#"));
-    fprintf(fp, "%s\n%s\n%s\n%s\n",
-            ((g->soc_mess_list[i].vict_found) ? g->soc_mess_list[i].vict_found : "#"),
-            ((g->soc_mess_list[i].not_found) ? g->soc_mess_list[i].not_found : "#"),
-            ((g->soc_mess_list[i].char_auto) ? g->soc_mess_list[i].char_auto : "#"),
-            ((g->soc_mess_list[i].others_auto) ? g->soc_mess_list[i].others_auto : "#"));
-    fprintf(fp, "%s\n%s\n%s\n",
-            ((g->soc_mess_list[i].char_body_found) ? g->soc_mess_list[i].char_body_found : "#"),
-            ((g->soc_mess_list[i].others_body_found) ? g->soc_mess_list[i].others_body_found : "#"),
-            ((g->soc_mess_list[i].vict_body_found) ? g->soc_mess_list[i].vict_body_found : "#"));
-    fprintf(fp, "%s\n%s\n\n",
-            ((g->soc_mess_list[i].char_obj_found) ? g->soc_mess_list[i].char_obj_found : "#"),
-            ((g->soc_mess_list[i].others_obj_found) ? g->soc_mess_list[i].others_obj_found : "#"));
+    file_print(fp, "~{} {} {:d} {:d} {:d} {:d}\n",
+               g->soc_mess_list[i].command,
+               g->soc_mess_list[i].sort_as,
+               g->soc_mess_list[i].hide,
+               g->soc_mess_list[i].min_char_position,
+               g->soc_mess_list[i].min_victim_position,
+               g->soc_mess_list[i].min_level_char);
+    file_print(fp, "{}\n{}\n{}\n{}\n",
+               ((g->soc_mess_list[i].char_no_arg) ? g->soc_mess_list[i].char_no_arg : "#"),
+               ((g->soc_mess_list[i].others_no_arg) ? g->soc_mess_list[i].others_no_arg : "#"),
+               ((g->soc_mess_list[i].char_found) ? g->soc_mess_list[i].char_found : "#"),
+               ((g->soc_mess_list[i].others_found) ? g->soc_mess_list[i].others_found : "#"));
+    file_print(fp, "{}\n{}\n{}\n{}\n",
+               ((g->soc_mess_list[i].vict_found) ? g->soc_mess_list[i].vict_found : "#"),
+               ((g->soc_mess_list[i].not_found) ? g->soc_mess_list[i].not_found : "#"),
+               ((g->soc_mess_list[i].char_auto) ? g->soc_mess_list[i].char_auto : "#"),
+               ((g->soc_mess_list[i].others_auto) ? g->soc_mess_list[i].others_auto : "#"));
+    file_print(fp, "{}\n{}\n{}\n",
+               ((g->soc_mess_list[i].char_body_found) ? g->soc_mess_list[i].char_body_found : "#"),
+               ((g->soc_mess_list[i].others_body_found) ? g->soc_mess_list[i].others_body_found : "#"),
+               ((g->soc_mess_list[i].vict_body_found) ? g->soc_mess_list[i].vict_body_found : "#"));
+    file_print(fp, "{}\n{}\n\n",
+               ((g->soc_mess_list[i].char_obj_found) ? g->soc_mess_list[i].char_obj_found : "#"),
+               ((g->soc_mess_list[i].others_obj_found) ? g->soc_mess_list[i].others_obj_found : "#"));
   }
 
-  fprintf(fp, "$\n");
+  file_print(fp, "$\n");
   if (atomic_commit(&af)) /* otherwise still listed as unsaved */
     remove_from_save_list(g, AEDIT_PERMISSION, SL_ACT);
 }

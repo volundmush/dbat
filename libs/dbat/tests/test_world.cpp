@@ -40,17 +40,17 @@ static struct char_data stray_char;
 static struct obj_data stray_obj;
 static struct descriptor_data stray_desc;
 
-#define CHECK(cond)                                              \
-  do {                                                           \
-    if (!(cond)) {                                               \
-      printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond);     \
-      failures++;                                                \
-    }                                                            \
+#define CHECK(cond)                                                        \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      file_print(stdout, "FAIL {}:{:d}: {}\n", __FILE__, __LINE__, #cond); \
+      failures++;                                                          \
+    }                                                                      \
   } while (0)
 
 static void print_problem(void *, const char *problem)
 {
-  printf("  audit: %s\n", problem);
+  file_print(stdout, "  audit: {}\n", problem);
 }
 
 static void quiet(void *, const char *) {}
@@ -962,8 +962,8 @@ int main(void)
 
   th_shutdown(g);
   if (failures)
-    printf("%d check(s) failed\n", failures);
+    file_print(stdout, "{:d} check(s) failed\n", failures);
   else
-    printf("all checks passed\n");
+    file_print(stdout, "all checks passed\n");
   return failures != 0;
 }

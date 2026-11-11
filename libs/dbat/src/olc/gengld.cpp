@@ -101,43 +101,43 @@ bool save_guilds(GameWorld *g, struct zone_data *zone_num)
   /*. Search database for guilds in this zone . */
   for (guild_vnum i : g->guilds.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((guild = find_guild(g, i)) != nullptr) {
-      fprintf(guild_file, "#%d~\n", i);
+      file_print(guild_file, "#{:d}~\n", i);
 
       for (j = 0; j < SKILL_TABLE_SIZE; j++)
         if (guild_get_skill(guild, j))
-          fprintf(guild_file, "%d 1\n", j);
+          file_print(guild_file, "{:d} 1\n", j);
 
       for (j = 0; j < NUM_FEATS_DEFINED; j++)
         if (guild_get_feat(guild, j))
-          fprintf(guild_file, "%d 2\n", j);
+          file_print(guild_file, "{:d} 2\n", j);
 
-      fprintf(guild_file, "-1\n");
+      file_print(guild_file, "-1\n");
 
       /*. Save charge . */
-      fprintf(guild_file, "%1.2f\n", guild_get_charge(guild));
+      file_print(guild_file, "{:>1.2f}\n", guild_get_charge(guild));
 
       /*. Save messages . */
-      fprintf(guild_file,
-              "%s~\n%s~\n",
-              /*. Added some small'n'silly defaults as sanity checks . */
-              (guild_get_no_such_skill(guild) ? guild_get_no_such_skill(guild) : "%s ERROR"),
-              (guild_get_not_enough_gold(guild) ? guild_get_not_enough_gold(guild) : "%s ERROR"));
+      file_print(guild_file,
+                 "{}~\n{}~\n",
+                 /*. Added some small'n'silly defaults as sanity checks . */
+                 (guild_get_no_such_skill(guild) ? guild_get_no_such_skill(guild) : "%s ERROR"),
+                 (guild_get_not_enough_gold(guild) ? guild_get_not_enough_gold(guild) : "%s ERROR"));
 
       /* Write what the GM teaches */
-      fprintf(guild_file, "%d\n", guild_get_minlvl(guild));
+      file_print(guild_file, "{:d}\n", guild_get_minlvl(guild));
 
       /*. Save the rest . */
-      fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-              guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
-              (int)guild_get_with_who(guild)[0], /* as signed, as always */
-              guild_get_open(guild),
-              guild_get_close(guild));
+      file_print(guild_file, "{:d}\n{:d}\n{:d}\n{:d}\n",
+                 guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
+                 (int)guild_get_with_who(guild)[0], /* as signed, as always */
+                 guild_get_open(guild),
+                 guild_get_close(guild));
       for (j = 1; j < SW_ARRAY_MAX; j++)
-        fprintf(guild_file, "%s%d", j == 1 ? "" : " ", (int)guild_get_with_who(guild)[j]);
-      fprintf(guild_file, "\n");
+        file_print(guild_file, "{}{:d}", j == 1 ? "" : " ", (int)guild_get_with_who(guild)[j]);
+      file_print(guild_file, "\n");
     }
   }
-  fprintf(guild_file, "$~\n");
+  file_print(guild_file, "$~\n");
   atomic_commit(&af);
 
   if (in_save_list(g, zone_num->number, SL_GLD)) {

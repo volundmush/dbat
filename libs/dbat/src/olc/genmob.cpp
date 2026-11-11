@@ -259,10 +259,10 @@ bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     strip_cr(wmmarg);
     wmmcom = mob_prog->comlist;
     strip_cr(wmmcom);
-    fprintf(fd, "%s %s~\n"
-                "%s%c\n",
-            medit_get_mprog_type(mob_prog), wmmarg.c_str(),
-            wmmcom.c_str(), STRING_TERMINATOR);
+    file_print(fd, "{} {}~\n"
+                   "{}{:c}\n",
+               medit_get_mprog_type(mob_prog), wmmarg,
+               wmmcom, as_char(STRING_TERMINATOR));
     if (mob_prog->next == nullptr)
       fputs("|\n", fd);
   }
@@ -275,29 +275,29 @@ static bool write_mobile_espec(GameWorld *g, mob_vnum mvnum, struct char_data *m
   struct affected_type *aff;
 
   if (get_size(mob) != race_get_size(char_get_race(mob)))
-    fprintf(fd, "Size: %d\n", get_size(mob));
+    file_print(fd, "Size: {:d}\n", get_size(mob));
   if (char_get_mob_specials_attack_type(mob) != 0)
-    fprintf(fd, "BareHandAttack: %d\n", char_get_mob_specials_attack_type(mob));
+    file_print(fd, "BareHandAttack: {:d}\n", char_get_mob_specials_attack_type(mob));
   if (char_get_aff_abils_str(mob) != 0)
-    fprintf(fd, "Str: %d\n", char_get_aff_abils_str(mob));
+    file_print(fd, "Str: {:d}\n", char_get_aff_abils_str(mob));
   if (char_get_aff_abils_dex(mob) != 0)
-    fprintf(fd, "Dex: %d\n", char_get_aff_abils_dex(mob));
+    file_print(fd, "Dex: {:d}\n", char_get_aff_abils_dex(mob));
   if (char_get_aff_abils_intel(mob) != 0)
-    fprintf(fd, "Int: %d\n", char_get_aff_abils_intel(mob));
+    file_print(fd, "Int: {:d}\n", char_get_aff_abils_intel(mob));
   if (char_get_aff_abils_wis(mob) != 0)
-    fprintf(fd, "Wis: %d\n", char_get_aff_abils_wis(mob));
+    file_print(fd, "Wis: {:d}\n", char_get_aff_abils_wis(mob));
   if (char_get_aff_abils_con(mob) != 0)
-    fprintf(fd, "Con: %d\n", char_get_aff_abils_con(mob));
+    file_print(fd, "Con: {:d}\n", char_get_aff_abils_con(mob));
   if (char_get_aff_abils_cha(mob) != 0)
-    fprintf(fd, "Cha: %d\n", char_get_aff_abils_cha(mob));
+    file_print(fd, "Cha: {:d}\n", char_get_aff_abils_cha(mob));
   if (mob_proto_of(g, mvnum) != mob) { /* Not saving a prototype */
-    fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
-            getCurPL(g, mob), getEffMaxPL(g, mob), (getCurKI(g, mob)), getMaxKI(g, mob),
-            (getCurST(g, mob)), getMaxST(g, mob));
+    file_print(fd, "Hit: {:d}\nMaxHit: {:d}\nMana: {:d}\nMaxMana: {:d}\nMoves: {:d}\nMaxMoves: {:d}\n",
+               getCurPL(g, mob), getEffMaxPL(g, mob), (getCurKI(g, mob)), getMaxKI(g, mob),
+               (getCurST(g, mob)), getMaxST(g, mob));
     for (auto aff_it = char_affects(mob).begin(); aff_it != char_affects(mob).end() && (aff = &*aff_it); ++aff_it)
       if (aff->type)
-        fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
+        file_print(fd, "Affect: {:d} {:d} {:d} {:d} {:d} {:d}\n", aff->type, aff->duration,
+                   aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
   fputs("E\n", fd);
   return true;
@@ -318,16 +318,16 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
   ddesc = char_get_ddesc(mob);
   strip_cr(ddesc);
 
-  fprintf(fd, "#%d\n"
-              "%s%c\n"
-              "%s%c\n"
-              "%s%c\n"
-              "%s%c\n",
-          mvnum,
-          char_get_alias(mob), STRING_TERMINATOR,
-          char_get_sdesc(mob), STRING_TERMINATOR,
-          ldesc.c_str(), STRING_TERMINATOR,
-          ddesc.c_str(), STRING_TERMINATOR);
+  file_print(fd, "#{:d}\n"
+                 "{}{:c}\n"
+                 "{}{:c}\n"
+                 "{}{:c}\n"
+                 "{}{:c}\n",
+             mvnum,
+             char_get_alias(mob), as_char(STRING_TERMINATOR),
+             char_get_sdesc(mob), as_char(STRING_TERMINATOR),
+             ldesc, as_char(STRING_TERMINATOR),
+             ddesc, as_char(STRING_TERMINATOR));
 
   sprintascii(fbuf1, char_get_act(mob)[0]);
   sprintascii(fbuf2, char_get_act(mob)[1]);
@@ -338,19 +338,18 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
   sprintascii(abuf3, char_get_affected_by(mob)[2]);
   sprintascii(abuf4, char_get_affected_by(mob)[3]);
 
-  fprintf(fd, "%s %s %s %s %s %s %s %s %d E\n"
-              "%d %d %d %" PRId64 "d%" PRId64 "+%" PRId64 " %dd%d+%d\n",
-          fbuf1, fbuf2, fbuf3, fbuf4,
-          abuf1, abuf2, abuf3, abuf4,
-          char_get_alignment(mob),
-          char_get_race_level(mob), char_get_accuracy_mod(mob), 10 - (char_get_armor(mob) / 10),
-          getCurPL(g, mob), (getCurKI(g, mob)), (getCurST(g, mob)), char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob),
-          0 /* damage mod: unused, still written to keep the file format */
+  file_print(fd, "{} {} {} {} {} {} {} {} {:d} E\n{:d} {:d} {:d} {:d}d{:d}+{:d} {:d}d{:d}+{:d}\n",
+             fbuf1, fbuf2, fbuf3, fbuf4,
+             abuf1, abuf2, abuf3, abuf4,
+             char_get_alignment(mob),
+             char_get_race_level(mob), char_get_accuracy_mod(mob), 10 - (char_get_armor(mob) / 10),
+             getCurPL(g, mob), (getCurKI(g, mob)), (getCurST(g, mob)), char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob),
+             0 /* damage mod: unused, still written to keep the file format */
   );
-  fprintf(fd, "%d 0 %d %d\n"
-              "%d %d %d\n",
-          char_get_gold(mob), char_get_race(mob), char_get_class(mob),
-          char_get_position(mob), char_get_mob_specials_default_pos(mob), char_get_sex(mob));
+  file_print(fd, "{:d} 0 {:d} {:d}\n"
+                 "{:d} {:d} {:d}\n",
+             char_get_gold(mob), char_get_race(mob), char_get_class(mob),
+             char_get_position(mob), char_get_mob_specials_default_pos(mob), char_get_sex(mob));
 
   if (!write_mobile_espec(g, mvnum, mob, fd))
     mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #{:d}.", mvnum);

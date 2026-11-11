@@ -56,12 +56,12 @@ void write_aliases(GameWorld *g, struct char_data *ch)
     int aliaslen = (int)a.alias.size();
     int repllen  = (int)a.replacement.size() - 1;
 
-    fprintf(file, "%d\n%s\n" /* Alias */
-                  "%d\n%s\n" /* Replacement */
-                  "%d\n",    /* Type */
-            aliaslen, a.alias.c_str(),
-            repllen, a.replacement.c_str() + 1,
-            a.type);
+    file_print(file, "{:d}\n{}\n" /* Alias */
+                     "{:d}\n{}\n" /* Replacement */
+                     "{:d}\n",    /* Type */
+               aliaslen, a.alias,
+               repllen, a.replacement.c_str() + 1,
+               a.type);
   }
 
   atomic_commit(&af);

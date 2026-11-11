@@ -161,18 +161,18 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
       } else
         buf.clear();
 
-      fprintf(fp,
-              "#%d\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n",
+      file_print(fp,
+                 "#{:d}\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n",
 
-              obj_get_vnum(g, obj),
-              (obj_get_name(obj) && *obj_get_name(obj)) ? obj_get_name(obj) : "undefined",
-              (obj_get_short_description(obj) && *obj_get_short_description(obj)) ? obj_get_short_description(obj) : "undefined",
-              (obj_get_description(obj) && *obj_get_description(obj)) ? obj_get_description(obj) : "undefined",
-              buf.c_str());
+                 obj_get_vnum(g, obj),
+                 (obj_get_name(obj) && *obj_get_name(obj)) ? obj_get_name(obj) : "undefined",
+                 (obj_get_short_description(obj) && *obj_get_short_description(obj)) ? obj_get_short_description(obj) : "undefined",
+                 (obj_get_description(obj) && *obj_get_description(obj)) ? obj_get_description(obj) : "undefined",
+                 buf);
 
       sprintascii(ebuf1, obj_get_extra_flags(obj)[0]);
       sprintascii(ebuf2, obj_get_extra_flags(obj)[1]);
@@ -187,29 +187,27 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
       sprintascii(pbuf3, obj_get_bitvector(obj)[2]);
       sprintascii(pbuf4, obj_get_bitvector(obj)[3]);
 
-      fprintf(fp,
-              "%d %s %s %s %s %s %s %s %s %s %s %s %s\n"
-              "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
-              "%" PRId64 " %d %d %d\n",
+      file_print(fp,
+                 "{:d} {} {} {} {} {} {} {} {} {} {} {} {}\n{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n{:d} {:d} {:d} {:d}\n",
 
-              obj_get_type_flag(obj),
-              ebuf1, ebuf2, ebuf3, ebuf4,
-              wbuf1, wbuf2, wbuf3, wbuf4,
-              pbuf1, pbuf2, pbuf3, pbuf4,
-              obj_get_value(obj, 0), obj_get_value(obj, 1), obj_get_value(obj, 2),
-              obj_get_value(obj, 3), obj_get_value(obj, 4), obj_get_value(obj, 5),
-              obj_get_value(obj, 6), obj_get_value(obj, 7), obj_get_value(obj, 8),
-              obj_get_value(obj, 9), obj_get_value(obj, 10), obj_get_value(obj, 11),
-              obj_get_value(obj, 12), obj_get_value(obj, 13), obj_get_value(obj, 14),
-              obj_get_value(obj, 15),
-              obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
+                 obj_get_type_flag(obj),
+                 ebuf1, ebuf2, ebuf3, ebuf4,
+                 wbuf1, wbuf2, wbuf3, wbuf4,
+                 pbuf1, pbuf2, pbuf3, pbuf4,
+                 obj_get_value(obj, 0), obj_get_value(obj, 1), obj_get_value(obj, 2),
+                 obj_get_value(obj, 3), obj_get_value(obj, 4), obj_get_value(obj, 5),
+                 obj_get_value(obj, 6), obj_get_value(obj, 7), obj_get_value(obj, 8),
+                 obj_get_value(obj, 9), obj_get_value(obj, 10), obj_get_value(obj, 11),
+                 obj_get_value(obj, 12), obj_get_value(obj, 13), obj_get_value(obj, 14),
+                 obj_get_value(obj, 15),
+                 obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
 
       /*
        * Do we have script(s) attached ?
        */
       script_save_to_disk(fp, obj, OBJ_TRIGGER);
 
-      fprintf(fp, "Z\n%d\n", obj_get_size(obj));
+      file_print(fp, "Z\n{:d}\n", obj_get_size(obj));
       /*
        * Do we have extra descriptions?
        */
@@ -223,29 +221,29 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
         }
         buf = ex_desc.description;
         strip_cr(buf);
-        fprintf(fp, "E\n"
-                    "%s~\n"
-                    "%s~\n",
-                ex_desc.keyword.c_str(), buf.c_str());
+        file_print(fp, "E\n"
+                       "{}~\n"
+                       "{}~\n",
+                   ex_desc.keyword, buf);
       }
       /*
        * Do we have affects?
        */
       for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
         if (obj_get_affected(obj)[counter2].modifier)
-          fprintf(fp, "A\n"
-                      "%d %d %d\n",
-                  obj_get_affected(obj)[counter2].location,
-                  obj_get_affected(obj)[counter2].modifier, obj_get_affected(obj)[counter2].specific);
+          file_print(fp, "A\n"
+                         "{:d} {:d} {:d}\n",
+                     obj_get_affected(obj)[counter2].location,
+                     obj_get_affected(obj)[counter2].modifier, obj_get_affected(obj)[counter2].specific);
       /* Do we have spells? */
       if (obj_get_sbinfo(obj)) { /*. Yep, save them too . */
         for (counter2 = 0; counter2 < SKILL_TABLE_SIZE; counter2++) {
           if (obj_get_sbinfo(obj)[counter2].spellname == 0) {
             break;
           }
-          fprintf(fp, "S\n"
-                      "%d %d\n",
-                  obj_get_sbinfo(obj)[counter2].spellname, obj_get_sbinfo(obj)[counter2].pages);
+          file_print(fp, "S\n"
+                         "{:d} {:d}\n",
+                     obj_get_sbinfo(obj)[counter2].spellname, obj_get_sbinfo(obj)[counter2].pages);
           continue;
         }
       }
@@ -255,7 +253,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
   /*
    * Write the final line, close the file.
    */
-  fprintf(fp, "$~\n");
+  file_print(fp, "$~\n");
   if (!atomic_commit(&af))
     return false;
   buf = cmfname;

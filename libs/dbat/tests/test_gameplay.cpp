@@ -42,12 +42,12 @@
 
 static int failures = 0;
 
-#define CHECK(cond)                                              \
-  do {                                                           \
-    if (!(cond)) {                                               \
-      printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond);     \
-      failures++;                                                \
-    }                                                            \
+#define CHECK(cond)                                                        \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      file_print(stdout, "FAIL {}:{:d}: {}\n", __FILE__, __LINE__, #cond); \
+      failures++;                                                          \
+    }                                                                      \
   } while (0)
 
 static bool saw(struct char_data *ch, const char *text)
@@ -91,7 +91,7 @@ static void check_commands_wait_for_the_song_to_stop(void)
     th_take_output(g, ch);
     commands[i].command(g, ch, argument, 0, 0);
     if (!saw(ch, "currently playing a song")) {
-      printf("FAIL: %s works during a song: %s\n", commands[i].name, th_output(ch));
+      file_print(stdout, "FAIL: {} works during a song: {}\n", commands[i].name, th_output(ch));
       failures++;
     }
   }
@@ -162,7 +162,7 @@ static void heal_until_it_works(GameWorld *g, struct char_data *ch, const char *
     do_heal(g, ch, argument, 0, 0);
   }
   if (!saw(ch, "orange glow"))
-    printf("%s\n", th_output(ch));
+    file_print(stdout, "{}\n", th_output(ch));
   CHECK(saw(ch, "orange glow"));
 }
 
@@ -550,13 +550,13 @@ int main(int argc, char **argv)
     }
     waitpid(child, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status)) {
-      printf("%s failed (%s %d)\n", checks[i].name, WIFEXITED(status) ? "status" : "signal", WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status));
+      file_print(stdout, "{} failed ({} {:d})\n", checks[i].name, WIFEXITED(status) ? "status" : "signal", WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status));
       failed++;
     }
   }
   if (failed)
-    printf("%d check(s) failed\n", failed);
+    file_print(stdout, "{:d} check(s) failed\n", failed);
   else
-    printf("all checks passed\n");
+    file_print(stdout, "all checks passed\n");
   return failed != 0;
 }

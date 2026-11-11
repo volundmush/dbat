@@ -1,5 +1,6 @@
 #pragma once
 /* std::format for the game's text, as the printf-style functions it replaces formatted it */
+#include <cstdio>
 #include <format>
 #include <string>
 #include <string_view>
@@ -25,6 +26,19 @@ template <class... Args> std::string str_format(std::format_string<Args...> fmt,
 {
   return [&](auto &&...v) { return std::vformat(fmt.get(), std::make_format_args(v...)); }(
       dbat_format::arg(std::forward<Args>(args))...);
+}
+
+/* writes text to fl as it is: its length, or -1 if the write failed, as fprintf() returned */
+inline int file_print(FILE *fl, std::string_view text)
+{
+  return std::fwrite(text.data(), 1, text.size(), fl) == text.size() ? static_cast<int>(text.size()) : -1;
+}
+/* writes text formatted as std::format does to fl (a failed write is reported, not thrown as std::print does) */
+template <class... Args>
+  requires(sizeof...(Args) > 0)
+int file_print(FILE *fl, std::format_string<Args...> fmt, Args &&...args)
+{
+  return file_print(fl, str_format(fmt, std::forward<Args>(args)...));
 }
 
 /* v read as unsigned, as printf's %u, %x and %o read it */

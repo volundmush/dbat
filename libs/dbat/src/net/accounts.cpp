@@ -170,27 +170,27 @@ void userCreate(struct descriptor_data *d)
   }
 
   /* User's Account Name */
-  fprintf(fl, "%s\n", CAP(d->user.data()));
+  file_print(fl, "{}\n", CAP(d->user.data()));
   /* User's Email */
-  fprintf(fl, "%s\n", d->email.c_str());
+  file_print(fl, "{}\n", d->email);
   /* User's Password */
-  fprintf(fl, "%s\n", d->pass.c_str());
+  file_print(fl, "{}\n", d->pass);
   /* User's Allowed Player Total */
-  fprintf(fl, "3\n");
+  file_print(fl, "3\n");
   d->total = 3;
   /* User's Total RPP */
-  fprintf(fl, "0\n");
+  file_print(fl, "0\n");
   d->rpp = 0;
   /* Player Slots */
-  fprintf(fl, "Empty\n");
-  fprintf(fl, "Empty\n");
-  fprintf(fl, "Empty\n");
-  fprintf(fl, "Empty\n");
-  fprintf(fl, "Empty\n");
-  fprintf(fl, "0\n");
-  fprintf(fl, "1\n");
+  file_print(fl, "Empty\n");
+  file_print(fl, "Empty\n");
+  file_print(fl, "Empty\n");
+  file_print(fl, "Empty\n");
+  file_print(fl, "Empty\n");
+  file_print(fl, "0\n");
+  file_print(fl, "1\n");
   /* User's Total RPP */
-  fprintf(fl, "0\n");
+  file_print(fl, "0\n");
   d->rbank = 0;
 
   atomic_commit(&af);
@@ -281,44 +281,44 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
     }
 
     /* User's Account Name */
-    fprintf(fl, "%s\n", CAP(d->user.data()));
+    file_print(fl, "{}\n", CAP(d->user.data()));
 
     /* User's Email */
-    fprintf(fl, "%s\n", d->email.c_str());
+    file_print(fl, "{}\n", d->email);
 
     /* User's Pass */
-    fprintf(fl, "%s\n", d->pass.c_str());
+    file_print(fl, "{}\n", d->pass);
 
     /* User's Allowed Player Total */
     if (setTot <= 3 || setTot > 5) {
-      fprintf(fl, "%d\n", d->total);
+      file_print(fl, "{:d}\n", d->total);
     } else if (setTot > 3) {
-      fprintf(fl, "%d\n", setTot);
+      file_print(fl, "{:d}\n", setTot);
       d->total = setTot;
     }
     /* User's RPP Total */
     if (setRpp == 0) {
-      fprintf(fl, "%d\n", d->rpp);
+      file_print(fl, "{:d}\n", d->rpp);
     } else {
       d->rpp += setRpp;
-      fprintf(fl, "%d\n", d->rpp);
+      file_print(fl, "{:d}\n", d->rpp);
     }
 
     /* Write Player Slots */
     for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-      fprintf(fl, "%s\n", !account_slot(d, n)->empty() ? account_slot(d, n)->c_str() : "Empty");
+      file_print(fl, "{}\n", !account_slot(d, n)->empty() ? account_slot(d, n)->c_str() : "Empty");
 
-    fprintf(fl, "%d\n", d->level);
+    file_print(fl, "{:d}\n", d->level);
 
     /* Write whether we have a custom file or not */
-    fprintf(fl, "%d\n", d->customfile);
+    file_print(fl, "{:d}\n", d->customfile);
 
     /* User's RPP Bank Total */
     if (setRBank == 0) {
-      fprintf(fl, "%d\n", d->rbank);
+      file_print(fl, "{:d}\n", d->rbank);
     } else {
       d->rbank += setRBank;
-      fprintf(fl, "%d\n", d->rbank);
+      file_print(fl, "{:d}\n", d->rbank);
     }
 
     atomic_commit(&af);
@@ -394,48 +394,48 @@ void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, 
       return;
     }
     /* User's Account Name */
-    fprintf(fl, "%s\n", uname);
+    file_print(fl, "{}\n", uname);
     /* User's Email */
-    fprintf(fl, "%s\n", email);
+    file_print(fl, "{}\n", email);
 
     /* User's Pass */
-    fprintf(fl, "%s\n", pass);
+    file_print(fl, "{}\n", pass);
 
     /* User's Allowed Player Total */
     if (setTot <= 3 || setTot > 5) {
-      fprintf(fl, "%d\n", total);
+      file_print(fl, "{:d}\n", total);
     } else if (setTot > 3) {
-      fprintf(fl, "%d\n", setTot);
+      file_print(fl, "{:d}\n", setTot);
     }
     /* User's RPP Total */
     if (setRpp == 0) {
-      fprintf(fl, "%d\n", rpp);
+      file_print(fl, "{:d}\n", rpp);
     } else if (rpp + setRpp < 0) {
       send_to_imm(g, "RPP would be below 0, reward canceled.");
-      fprintf(fl, "%d\n", rpp);
+      file_print(fl, "{:d}\n", rpp);
     } else {
       rpp += setRpp;
-      fprintf(fl, "%d\n", rpp);
+      file_print(fl, "{:d}\n", rpp);
     }
 
     /* Write Player Slots */
-    fprintf(fl, "%s\n", tmp1);
-    fprintf(fl, "%s\n", tmp2);
-    fprintf(fl, "%s\n", tmp3);
-    fprintf(fl, "%s\n", tmp4);
-    fprintf(fl, "%s\n", tmp5);
-    fprintf(fl, "%d\n", level);
-    fprintf(fl, "%d\n", custom);
+    file_print(fl, "{}\n", tmp1);
+    file_print(fl, "{}\n", tmp2);
+    file_print(fl, "{}\n", tmp3);
+    file_print(fl, "{}\n", tmp4);
+    file_print(fl, "{}\n", tmp5);
+    file_print(fl, "{:d}\n", level);
+    file_print(fl, "{:d}\n", custom);
 
     /* User's RPP Total */
     if (setRBank == 0) {
-      fprintf(fl, "%d\n", rbank);
+      file_print(fl, "{:d}\n", rbank);
     } else if (rbank + setRBank < 0) {
       send_to_imm(g, "RPP Bank would be below 0, reward canceled.");
-      fprintf(fl, "%d\n", rbank);
+      file_print(fl, "{:d}\n", rbank);
     } else {
       rbank += setRBank;
-      fprintf(fl, "%d\n", rbank);
+      file_print(fl, "{:d}\n", rbank);
     }
 
     atomic_commit(&af);

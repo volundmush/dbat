@@ -39,7 +39,7 @@ static void run(const char *format, const char *a, const char *b)
 
   snprintf(cmd, sizeof(cmd), format, a, b);
   if (system(cmd) != 0) {
-    fprintf(stderr, "harness: '%s' failed\n", cmd);
+    file_print(stderr, "harness: '{}' failed\n", cmd);
     exit(2);
   }
 }
@@ -55,7 +55,7 @@ static void write_surface_map(void)
   }
   for (int row = 0; row <= MAP_ROWS; row++) {
     for (int col = 0; col <= MAP_COLS; col++)
-      fprintf(fl, "%d ", MAP_ROOM);
+      file_print(fl, "{:d} ", MAP_ROOM);
     fputc('\n', fl);
   }
   fclose(fl);
@@ -163,7 +163,7 @@ void th_shutdown(GameWorld *g)
 {
   free_game(g);
   if (getenv("TH_KEEP")) { /* for looking at what a run left behind */
-    printf("kept %s\n", temp_dir);
+    file_print(stdout, "kept {}\n", temp_dir);
     return;
   }
   if (chdir("/") == 0)

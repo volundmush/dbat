@@ -34,7 +34,7 @@ static void damage_file(void)
 
 static void audit_problem(void *, const char *problem)
 {
-  fprintf(stderr, "AUDIT: %s\n", problem);
+  file_print(stderr, "AUDIT: {}\n", problem);
   abort();
 }
 

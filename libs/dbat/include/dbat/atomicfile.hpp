@@ -9,7 +9,7 @@
  *   struct atomic_file af;
  *   FILE *fl = atomic_open(&af, path, false);
  *   if (!fl) return false;
- *   ... fprintf(fl, ...) ...
+ *   ... file_print(fl, ...) ...
  *   return atomic_commit(&af);       (or atomic_abort(&af) to throw the new contents away)
  */
 #include <climits>

@@ -482,7 +482,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
     }
     x = 0;
     while (x < 25) {
-      fprintf(fl, "%s %" PRId64 "\n", g->topname[x], g->toppoint[x]);
+      file_print(fl, "{} {:d}\n", g->topname[x], g->toppoint[x]);
       x++;
     }
 

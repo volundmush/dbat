@@ -91,9 +91,9 @@ void log_imm_action(GameWorld *g, std::string_view text)
 
   time_s[strlen(time_s) - 1] = '\0';
 
-  fprintf(fl, "%-15.15s :: ", time_s + 4);
+  file_print(fl, "{:<15.15} :: ", time_s + 4);
   fwrite(text.data(), 1, text.size(), fl);
-  fprintf(fl, "\n");
+  file_print(fl, "\n");
 
   fclose(fl);
 }
@@ -129,7 +129,7 @@ void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj)
     return;
   }
 
-  fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n", char_get_user(d->character), char_get_name(d->character), obj_get_short_description(obj));
+  file_print(fl, "@D[@cUser@W: @R{:<20} @cName@W: @C{:<20} @cCustom@W: @Y{}@D]\n", char_get_user(d->character), char_get_name(d->character), obj_get_short_description(obj));
   fclose(fl);
 }
 
@@ -621,12 +621,12 @@ ACMD(do_rpp)
       return;
     }
     if (selection == 1) {
-      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "House");
+      file_print(fl, "@D[@cName@W: @C{:<20} @cRequest@W: @Y{:<20}@D]\n", char_get_name(ch), "House");
       send_to_imm(g, "RPP Request: {} paid for house", char_get_name(ch));
       g->BOARDNEWCOD = game_now(g);
       save_mud_time(g, &g->time_info);
     } else if (selection == 2) {
-      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "Custom Skill");
+      file_print(fl, "@D[@cName@W: @C{:<20} @cRequest@W: @Y{:<20}@D]\n", char_get_name(ch), "Custom Skill");
       send_to_imm(g, "RPP Request: {} paid for Custom Skill, uhoh spaggettios", char_get_name(ch));
       g->BOARDNEWCOD = game_now(g);
       save_mud_time(g, &g->time_info);

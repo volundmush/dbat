@@ -206,15 +206,15 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
       sprintascii(rbuf2, room_get_room_flags(room)[1]);
       sprintascii(rbuf3, room_get_room_flags(room)[2]);
       sprintascii(rbuf4, room_get_room_flags(room)[3]);
-      fprintf(sf, "#%d\n"
-                  "%s%c\n"
-                  "%s%c\n"
-                  "%d %s %s %s %s %d\n",
-              room_get_number(room),
-              room_get_name(room) ? room_get_name(room) : "Untitled", STRING_TERMINATOR,
-              buf.c_str(), STRING_TERMINATOR,
-              room_get_zone(room)->number,
-              rbuf1, rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
+      file_print(sf, "#{:d}\n"
+                     "{}{:c}\n"
+                     "{}{:c}\n"
+                     "{:d} {} {} {} {} {:d}\n",
+                 room_get_number(room),
+                 room_get_name(room) ? room_get_name(room) : "Untitled", as_char(STRING_TERMINATOR),
+                 buf, as_char(STRING_TERMINATOR),
+                 room_get_zone(room)->number,
+                 rbuf1, rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
 
       /*
        * Now you write out the exits for the room.
@@ -252,29 +252,29 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
           /*
 	   * Now write the exit to the file.
 	   */
-          fprintf(sf, "D%d\n"
-                      "%s~\n"
-                      "%s~\n"
-                      "%d %d %d %d %d %d %d %d %d %d %d\n",
-                  j, buf.c_str(), buf1.c_str(), dflag,
-                  room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
-                  room_get_dir_option(room, j)->to_room != NOWHERE ? room_get_dir_option(room, j)->to_room : -1,
-                  room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
-                  room_get_dir_option(room, j)->dcskill, room_get_dir_option(room, j)->dcmove,
-                  room_get_dir_option(room, j)->failsavetype, room_get_dir_option(room, j)->dcfailsave,
-                  room_get_dir_option(room, j)->failroom, room_get_dir_option(room, j)->totalfailroom);
+          file_print(sf, "D{:d}\n"
+                         "{}~\n"
+                         "{}~\n"
+                         "{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
+                     j, buf, buf1, dflag,
+                     room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
+                     room_get_dir_option(room, j)->to_room != NOWHERE ? room_get_dir_option(room, j)->to_room : -1,
+                     room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
+                     room_get_dir_option(room, j)->dcskill, room_get_dir_option(room, j)->dcmove,
+                     room_get_dir_option(room, j)->failsavetype, room_get_dir_option(room, j)->dcfailsave,
+                     room_get_dir_option(room, j)->failroom, room_get_dir_option(room, j)->totalfailroom);
         }
       }
 
       for (const extra_descr_data &xdesc : room_get_ex_description(room)) {
         buf = xdesc.description;
         strip_cr(buf);
-        fprintf(sf, "E\n"
-                    "%s~\n"
-                    "%s~\n",
-                xdesc.keyword.c_str(), buf.c_str());
+        file_print(sf, "E\n"
+                       "{}~\n"
+                       "{}~\n",
+                   xdesc.keyword, buf);
       }
-      fprintf(sf, "S\n");
+      file_print(sf, "S\n");
       script_save_to_disk(sf, room, WLD_TRIGGER);
     }
   }
@@ -282,7 +282,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
   /*
    * Write the final line and close it.
    */
-  fprintf(sf, "$~\n");
+  file_print(sf, "$~\n");
   if (!atomic_commit(&af))
     return false;
   buf = filename;

@@ -183,7 +183,7 @@ static void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
   while (x < count) {
     if (x == 0 || strcasecmp(names[x - 1], names[x])) {
       if (strcasecmp(names[x], capped.c_str())) {
-        fprintf(fl, "%s\n", CAP(names[x]));
+        file_print(fl, "{}\n", CAP(names[x]));
       } else {
         found = true;
       }
@@ -191,7 +191,7 @@ static void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
     x++;
   }
   if (found == false) {
-    fprintf(fl, "%s\n", capped.c_str());
+    file_print(fl, "{}\n", capped);
     send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped, char_get_name(ch));
     mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
     log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));

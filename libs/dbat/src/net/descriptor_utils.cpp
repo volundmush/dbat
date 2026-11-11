@@ -34,13 +34,13 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   if ((file = fopen(fname, "r"))) {
     while (get_line(file, line)) {
       if (strcasecmp(prev.c_str(), line))
-        fprintf(fl, "%s\n", line);
+        file_print(fl, "{}\n", line);
       prev = line;
     }
     fclose(file);
   }
 
-  fprintf(fl, "%s\n\n", obj_get_short_description(obj));
+  file_print(fl, "{}\n\n", obj_get_short_description(obj));
 
   atomic_commit(&af);
 }
@@ -126,7 +126,7 @@ void customCreate(struct descriptor_data *d)
     return;
   }
 
-  fprintf(fl, "@D--@RUser @GC@gustom@Gs@D--@n\n");
+  file_print(fl, "@D--@RUser @GC@gustom@Gs@D--@n\n");
   d->customfile = 1;
 
   atomic_commit(&af);

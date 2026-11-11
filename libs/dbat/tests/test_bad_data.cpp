@@ -67,17 +67,17 @@ const char *__asan_default_options(void)
   return "exitcode=99";
 }
 
-#define CHECK(cond)                                              \
-  do {                                                           \
-    if (!(cond)) {                                               \
-      printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond);     \
-      failures++;                                                \
-    }                                                            \
+#define CHECK(cond)                                                        \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      file_print(stdout, "FAIL {}:{:d}: {}\n", __FILE__, __LINE__, #cond); \
+      failures++;                                                          \
+    }                                                                      \
   } while (0)
 
 static void print_problem(void *, const char *problem)
 {
-  printf("AUDIT: %s\n", problem);
+  file_print(stdout, "AUDIT: {}\n", problem);
 }
 
 #define CHECK_AUDIT(g) CHECK(world_audit((g), print_problem, nullptr) == 0)
@@ -121,7 +121,7 @@ static void add_script_to_trigger_file(void)
   if (!fl)
     abort();
   fseek(fl, -3, SEEK_END);
-  fprintf(fl, "#399\nScript~\n2 c 100\nrunit~\n%s\n~\n$~\n", script_text);
+  file_print(fl, "#399\nScript~\n2 c 100\nrunit~\n{}\n~\n$~\n", script_text);
   fclose(fl);
 }
 
@@ -247,7 +247,7 @@ static void check_expression_values(void)
     std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
 
     if (result != cases[i].value) {
-      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result.c_str(), cases[i].value);
+      file_print(stdout, "FAIL: {} gave '{}', not '{}'\n", cases[i].expression, result, cases[i].value);
       failures++;
     }
   }
@@ -276,7 +276,7 @@ static void check_arithmetic_at_the_limits(void)
     std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
 
     if (result != cases[i].value) {
-      printf("FAIL: %s gave '%s', not '%s'\n", cases[i].expression, result.c_str(), cases[i].value);
+      file_print(stdout, "FAIL: {} gave '{}', not '{}'\n", cases[i].expression, result, cases[i].value);
       failures++;
     }
   }
@@ -1897,13 +1897,13 @@ int main(int argc, char **argv)
     }
     waitpid(child, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status)) {
-      printf("%s failed (%s %d)\n", checks[i].name, WIFEXITED(status) ? "status" : "signal", WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status));
+      file_print(stdout, "{} failed ({} {:d})\n", checks[i].name, WIFEXITED(status) ? "status" : "signal", WIFEXITED(status) ? WEXITSTATUS(status) : WTERMSIG(status));
       failed++;
     }
   }
   if (failed)
-    printf("%d check(s) failed\n", failed);
+    file_print(stdout, "{:d} check(s) failed\n", failed);
   else
-    printf("all checks passed\n");
+    file_print(stdout, "all checks passed\n");
   return failed != 0;
 }

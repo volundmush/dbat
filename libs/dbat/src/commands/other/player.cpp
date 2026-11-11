@@ -735,8 +735,8 @@ ACMD(do_gen_write)
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text.c_str());
-  fprintf(fl, "@D-------------------------------@n\n");
+  file_print(fl, "@D[@WUser: @c{:<10}@D] [@WChar: @C{:<10}@D] [@WRoom: @G{:<4d}@D] [@WDate: @Y{:>6.6}@D]@b \n-----------@w\n{}\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
+  file_print(fl, "@D-------------------------------@n\n");
   fclose(fl);
   send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }

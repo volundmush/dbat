@@ -102,7 +102,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
     return false;
   }
-  if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
+  if (file_print(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
     mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
     atomic_abort(&af);
     return false;
@@ -112,29 +112,29 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
    */
   for (shop_vnum i : g->shops.vnums_in(genolc_zone_bottom(g, zone_num), zone_num->top)) {
     if ((shop = find_shop(g, i)) != nullptr) {
-      fprintf(shop_file, "#%d~\n", i);
+      file_print(shop_file, "#{:d}~\n", i);
 
       /*
        * Save the products.
        */
       for (obj_vnum product : shop_products(shop))
-        fprintf(shop_file, "%d\n", product);
-      fprintf(shop_file, "-1\n");
+        file_print(shop_file, "{:d}\n", product);
+      file_print(shop_file, "-1\n");
 
       /*
        * Save the rates.
        */
-      fprintf(shop_file, "%1.2f\n"
-                         "%1.2f\n",
-              shop_get_profit_buy(shop),
-              shop_get_profit_sell(shop));
+      file_print(shop_file, "{:>1.2f}\n"
+                            "{:>1.2f}\n",
+                 shop_get_profit_buy(shop),
+                 shop_get_profit_sell(shop));
 
       /*
        * Save the buy types and namelists.
        */
       for (const shop_buy_data &buy : shop_buy_types(shop))
-        fprintf(shop_file, "%d%s\n", buy.type, buy.keywords.c_str());
-      fprintf(shop_file, "-1\n");
+        file_print(shop_file, "{:d}{}\n", buy.type, buy.keywords);
+      file_print(shop_file, "-1\n");
 
       /* Not allowed to use Ascii in shopfile anymore (bpl21)
       sprintascii(buf1, shop_get_bitvector(shop));
@@ -145,46 +145,46 @@ bool save_shops(GameWorld *g, struct zone_data *zone_num)
        * Save messages'n'stuff.
        * Added some small'n'silly defaults as sanity checks.
        */
-      fprintf(shop_file,
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%s~\n"
-              "%d\n"
-              "%d\n"
-              "%d\n",
-              shop_get_no_such_item1(shop) ? shop_get_no_such_item1(shop) : "%s Ke?!",
-              shop_get_no_such_item2(shop) ? shop_get_no_such_item2(shop) : "%s Ke?!",
-              shop_get_do_not_buy(shop) ? shop_get_do_not_buy(shop) : "%s Ke?!",
-              shop_get_missing_cash1(shop) ? shop_get_missing_cash1(shop) : "%s Ke?!",
-              shop_get_missing_cash2(shop) ? shop_get_missing_cash2(shop) : "%s Ke?!",
-              shop_get_message_buy(shop) ? shop_get_message_buy(shop) : "%s Ke?! %d?",
-              shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
-              shop_get_temper(shop),
-              (int)shop_get_bitvector(shop), /* as signed, as always */
-              shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
+      file_print(shop_file,
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{}~\n"
+                 "{:d}\n"
+                 "{:d}\n"
+                 "{:d}\n",
+                 shop_get_no_such_item1(shop) ? shop_get_no_such_item1(shop) : "%s Ke?!",
+                 shop_get_no_such_item2(shop) ? shop_get_no_such_item2(shop) : "%s Ke?!",
+                 shop_get_do_not_buy(shop) ? shop_get_do_not_buy(shop) : "%s Ke?!",
+                 shop_get_missing_cash1(shop) ? shop_get_missing_cash1(shop) : "%s Ke?!",
+                 shop_get_missing_cash2(shop) ? shop_get_missing_cash2(shop) : "%s Ke?!",
+                 shop_get_message_buy(shop) ? shop_get_message_buy(shop) : "%s Ke?! %d?",
+                 shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
+                 shop_get_temper(shop),
+                 (int)shop_get_bitvector(shop), /* as signed, as always */
+                 shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
       for (j = 0; j < SW_ARRAY_MAX; j++)
-        fprintf(shop_file, "%s%d", j ? " " : "", (int)shop_get_with_who(shop)[j]);
-      fprintf(shop_file, "\n");
+        file_print(shop_file, "{}{:d}", j ? " " : "", (int)shop_get_with_who(shop)[j]);
+      file_print(shop_file, "\n");
 
       /*
        * Save the rooms.
        */
       for (room_vnum room : shop_rooms(shop))
-        fprintf(shop_file, "%d\n", room);
-      fprintf(shop_file, "-1\n");
+        file_print(shop_file, "{:d}\n", room);
+      file_print(shop_file, "-1\n");
 
       /*
        * Save open/closing times 
        */
-      fprintf(shop_file, "%d\n%d\n%d\n%d\n", shop_get_open1(shop), shop_get_close1(shop),
-              shop_get_open2(shop), shop_get_close2(shop));
+      file_print(shop_file, "{:d}\n{:d}\n{:d}\n{:d}\n", shop_get_open1(shop), shop_get_close1(shop),
+                 shop_get_open2(shop), shop_get_close2(shop));
     }
   }
-  fprintf(shop_file, "$~\n");
+  file_print(shop_file, "$~\n");
   if (!atomic_commit(&af))
     return false;
   oldname = fname;

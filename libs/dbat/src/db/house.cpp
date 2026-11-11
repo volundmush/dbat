@@ -639,7 +639,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
 
         if (!get_line(fl, line) ||
             (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
-          fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
+          file_print(stderr, "Format error in first numeric line (expecting _x_ args)");
           return false;
         }
         obj_set_type_flag(temp, t[0]);

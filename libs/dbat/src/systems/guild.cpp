@@ -1165,7 +1165,7 @@ static void read_guild_line(GameWorld *g, guild_vnum vnum, FILE *gm_f, const cha
   char buf[MAX_STRING_LENGTH];
 
   if (!get_line(gm_f, buf) || !sscanf(buf, string, data)) {
-    fprintf(stderr, "Error in guild #%d, Could not get %s\n", vnum, type);
+    file_print(stderr, "Error in guild #{:d}, Could not get {}\n", vnum, type);
     exit(1);
   }
 }

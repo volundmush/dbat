@@ -9,6 +9,8 @@ functions into calls of their std::format replacements.
                                            rewrites calls of FUNC_printf(...) in FILE to FUNC(...), converting the
                                            format string, which is argument N (from 0); prints each call it
                                            couldn't convert, to do by hand
+  printf_to_format.py OLD=NEW:N[,...] FILE...
+                                           the same for calls of OLD(...), which become NEW(...) (fprintf=file_print:1)
   printf_to_format.py --buffers FILE...    makes each local char buffer in FILE a std::string where every use is
                                            one it knows: written by snprintf, sprintf, strcpy, strcat or
                                            sprintbit() and the like (as statements), cleared, read with *, [0]
@@ -175,7 +177,21 @@ def split_args(src, i):
 
 
 PRI = re.compile(r'\bPRI([diouxX])(8|16|32|64|MAX|PTR|LEAST\d+|FAST\d+)\b')
-LITERAL_PIECE = re.compile(r'\s*("(?:[^"\\]|\\.)*"|PRI[diouxX]\w*)\s*', re.S)
+GAP = r'(?:\s|/\*.*?\*/|//[^\n]*\n)*'
+LITERAL_PIECE = re.compile(GAP + r'("(?:[^"\\]|\\.)*"|PRI[diouxX]\w*)' + GAP, re.S)
+
+
+def literal_pieces(text):
+    """The source of a format argument made of adjacent string literals only -> [(start, end) of each literal's
+    contents in text], or None."""
+    pos, pieces = 0, []
+    while pos < len(text):
+        m = LITERAL_PIECE.match(text, pos)
+        if not m or not m.group(1).startswith('"'):
+            return None
+        pieces.append((m.start(1) + 1, m.end(1) - 1))
+        pos = m.end()
+    return pieces
 
 
 def literal_value(text):
@@ -239,6 +255,19 @@ def convert_call(src, spans, fi):
         raise Unsupported('format not a literal')
     values = spans[fi + 1:]
     new_fmt, notes = convert_format(fmt, with_args=bool(values))
+    pieces = literal_pieces(fmt_src)
+    split_src = None
+    if pieces and len(pieces) > 1:  # keep the literals as they were split, if no conversion spans two of them
+        try:
+            converted = [convert_format(fmt_src[a:b], with_args=bool(values)) for a, b in pieces]
+            if ''.join(c[0] for c in converted) == new_fmt and sum((c[1] for c in converted), []) == notes:
+                out, k = [], 0
+                for (a, b), c in zip(pieces, converted):
+                    out.append(fmt_src[k:a] + c[0])
+                    k = b
+                split_src = ''.join(out) + fmt_src[k:]
+        except Unsupported:
+            pass
     consumed = sum(1 + any(x.startswith('width') or x == 'prec' for x in n) for n in notes)
     if consumed != len(values):
         raise Unsupported(f'{consumed} conversions for {len(values)} arguments')
@@ -265,34 +294,36 @@ def convert_call(src, spans, fi):
         elif 'prec' in n:
             value = f'{lead}printf_precision({value.strip()}, {runtime})'
         new_args.append(value)
+    if split_src is not None:
+        return split_src, new_args
     lead = fmt_src[:len(fmt_src) - len(fmt_src.lstrip())]
     new_fmt_src = lead + '"' + new_fmt + '"'
     return new_fmt_src, new_args
 
 
-def rewrite_file(path, funcs, fmt_index):
-    """fmt_index: {func: index of its format argument}. Returns list of (line, reason) left alone."""
+def rewrite_file(path, renames):
+    """renames: {old name: (new name, index of its format argument)}. Returns list of (line, reason) left alone."""
     src = open(path).read()
     comments = comment_spans(src)
     out, i, left = [], 0, []
-    call = re.compile(r'\b(' + '|'.join(re.escape(f) for f in funcs) + r')_printf\s*\(')
+    call = re.compile(r'\b(' + '|'.join(re.escape(f) for f in renames) + r')\s*\(')
     while True:
         m = call.search(src, i)
         if not m:
             out.append(src[i:])
             break
-        func = m.group(1)
-        if any(a <= m.start() < b for a, b in comments):  # code in a comment: only its old name back
-            out.append(src[i:m.start()] + func + '(')
+        old = m.group(1)
+        new_name, fi = renames[old]
+        if any(a <= m.start() < b for a, b in comments):  # code in a comment: only its new name
+            out.append(src[i:m.start()] + new_name + src[m.end(1):m.end()])
             i = m.end()
             continue
         paren = m.end() - 1
         spans, close = split_args(src, paren)
-        fi = fmt_index[func]
         line = src.count('\n', 0, m.start()) + 1
         try:
             new_fmt_src, new_args = convert_call(src, spans, fi)
-            head = src[m.start():spans[fi][0]].replace(func + '_printf', func, 1)
+            head = new_name + src[m.end(1):spans[fi][0]]
             pieces = [head, new_fmt_src]
             for a in new_args:
                 pieces.append(',' + a)
@@ -626,7 +657,7 @@ def apply_edits(src, edits):
     return src
 
 
-FORMAT_CALLS = SV_SINKS
+FORMAT_CALLS = SV_SINKS | {'file_print'}
 
 
 def tidy_format_values(src):
@@ -889,14 +920,14 @@ def main():
             for line, name, why in convert_buffers(path):
                 print(f'{path}:{line}: {name} left as it was: {why}')
         return
-    funcs = sys.argv[1].split(',')
-    fmt_index = {}
-    for spec in funcs:
+    renames = {}
+    for spec in sys.argv[1].split(','):
         name, _, idx = spec.partition(':')
-        fmt_index[name] = int(idx)
+        old, _, new = name.partition('=')
+        renames[old if new else old + '_printf'] = (new or old, int(idx))
     status = 0
     for path in sys.argv[2:]:
-        for line, why in rewrite_file(path, list(fmt_index), fmt_index):
+        for line, why in rewrite_file(path, renames):
             print(f'{path}:{line}: left as it was: {why}')
             status = 1
     sys.exit(status)

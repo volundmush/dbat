@@ -73,7 +73,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write zone file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
+  file_print(fp, "#{:d}\nNew Zone~\n{:d} 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
@@ -89,7 +89,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write world file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
+  file_print(fp, "#{:d}\nThe Beginning~\nNot much here.\n~\n{:d} 0 0\nS\n$\n", bottom, vzone_num);
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
@@ -105,7 +105,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write mobile file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "$\n");
+  file_print(fp, "$\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
@@ -121,7 +121,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write object file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "$\n");
+  file_print(fp, "$\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
@@ -137,7 +137,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write shop file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "$~\n");
+  file_print(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
@@ -153,7 +153,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write trigger file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "$~\n");
+  file_print(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
@@ -169,7 +169,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     *error = "Could not write guild file.\r\n";
     return nullptr;
   }
-  fprintf(fp, "$~\n");
+  file_print(fp, "$~\n");
   if (!atomic_commit(&af)) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
@@ -280,7 +280,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
       /*
        * The following used to add a blank line, thanks to Brian Taylor for the fix... (Mythran)
        */
-      fprintf(newfile, "%s", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
+      file_print(newfile, "{}", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
       break;
     }
     if (!found) {
@@ -289,10 +289,10 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
         found = true;
       } else if (num > znum) {
         found = true;
-        fprintf(newfile, "%s\n", buf1);
+        file_print(newfile, "{}\n", buf1);
       }
     }
-    fprintf(newfile, "%s\n", buf);
+    file_print(newfile, "{}\n", buf);
   }
 
   fclose(oldfile);
@@ -372,25 +372,25 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
   sprintascii(zbuf3, zone_num->zone_flags[2]);
   sprintascii(zbuf4, zone_num->zone_flags[3]);
 
-  fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
-  fprintf(zfile, "#%d\n"
-                 "%s~\n"
-                 "%s~\n"
-                 "%d %d %d %d %s %s %s %s %d %d\n",
-          zone_num->number,
-          !zone_num->builders.empty()
-              ? zone_num->builders.c_str()
-              : "None.",
-          !zone_num->name.empty()
-              ? zone_num->name.c_str()
-              : "undefined",
-          genolc_zone_bottom(g, zone_num),
-          zone_num->top,
-          zone_num->lifespan,
-          zone_num->reset_mode,
-          zbuf1, zbuf2, zbuf3, zbuf4,
-          zone_num->min_level,
-          zone_num->max_level);
+  file_print(zfile, "@Version: {:d}\n", CUR_ZONE_VERSION);
+  file_print(zfile, "#{:d}\n"
+                    "{}~\n"
+                    "{}~\n"
+                    "{:d} {:d} {:d} {:d} {} {} {} {} {:d} {:d}\n",
+             zone_num->number,
+             !zone_num->builders.empty()
+                 ? zone_num->builders.c_str()
+                 : "None.",
+             !zone_num->name.empty()
+                 ? zone_num->name.c_str()
+                 : "undefined",
+             genolc_zone_bottom(g, zone_num),
+             zone_num->top,
+             zone_num->lifespan,
+             zone_num->reset_mode,
+             zbuf1, zbuf2, zbuf3, zbuf4,
+             zone_num->min_level,
+             zone_num->max_level);
 
   /*
 	 * Handy Quick Reference Chart for Zone Values.
@@ -488,12 +488,12 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         continue;
     }
     if (zone_get_cmd(g, zone_num, subcmd)->command != 'V')
-      fprintf(zfile, "%c %d %d %d %d %d %d \t(%s)\n",
-              zone_get_cmd(g, zone_num, subcmd)->command, zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5, comment);
+      file_print(zfile, "{:c} {:d} {:d} {:d} {:d} {:d} {:d} \t({})\n",
+                 as_char(zone_get_cmd(g, zone_num, subcmd)->command), zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5, comment);
     else
-      fprintf(zfile, "%c %d %d %d %d %d %d %s %s\n",
-              zone_get_cmd(g, zone_num, subcmd)->command, zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5,
-              zone_get_cmd(g, zone_num, subcmd)->sarg1, zone_get_cmd(g, zone_num, subcmd)->sarg2);
+      file_print(zfile, "{:c} {:d} {:d} {:d} {:d} {:d} {:d} {} {}\n",
+                 as_char(zone_get_cmd(g, zone_num, subcmd)->command), zone_get_cmd(g, zone_num, subcmd)->if_flag, arg1, arg2, arg3, arg4, arg5,
+                 zone_get_cmd(g, zone_num, subcmd)->sarg1, zone_get_cmd(g, zone_num, subcmd)->sarg2);
   }
   fputs("S\n$\n", zfile);
   if (!atomic_commit(&af))

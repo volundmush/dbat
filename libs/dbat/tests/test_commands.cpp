@@ -141,7 +141,7 @@ static void describe_report(const char *report_path, char *out, size_t size)
 
 static void audit_problem(void *, const char *problem)
 {
-  printf("AUDIT: %s\n", problem);
+  file_print(stdout, "AUDIT: {}\n", problem);
 }
 
 static void play_case(GameWorld *g, struct char_data *ch, struct char_data *victim, enum state state, const char *line)
@@ -275,12 +275,12 @@ int main(int argc, char **argv)
 
   qsort(signatures, num_signatures, sizeof(*signatures), by_count);
   for (int i = 0; i < num_signatures; i++) {
-    printf("%5d %s %s\n       e.g. %s\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
-           signatures[i].text, signatures[i].example);
+    file_print(stdout, "{:>5d} {} {}\n       e.g. {}\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
+               signatures[i].text, signatures[i].example);
     if (!signatures[i].known)
       new_failures++;
   }
-  printf("%d cases, %d distinct failures, %d of them new\n", cases, num_signatures, new_failures);
+  file_print(stdout, "{:d} cases, {:d} distinct failures, {:d} of them new\n", cases, num_signatures, new_failures);
   fflush(stdout);
   th_shutdown(g);
   return new_failures != 0;

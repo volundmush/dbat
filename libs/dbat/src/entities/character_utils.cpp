@@ -2111,7 +2111,7 @@ void senseCreate(struct char_data *ch)
     return;
   }
 
-  fprintf(fl, "0\n");
+  file_print(fl, "0\n");
 
   atomic_commit(&af);
   return;
@@ -2201,11 +2201,11 @@ void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vi
     if (x == 0 || idnums[x - 1] != idnums[x]) {
       if (!char_is_npc(vict)) {
         if (idnums[x] != char_get_id(vict)) {
-          fprintf(fl, "%d\n", idnums[x]);
+          file_print(fl, "{:d}\n", idnums[x]);
         }
       } else {
         if (idnums[x] != char_get_mob_vnum(g, vict)) {
-          fprintf(fl, "%d\n", idnums[x]);
+          file_print(fl, "{:d}\n", idnums[x]);
         }
       }
     }
@@ -2213,9 +2213,9 @@ void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vi
   }
 
   if (!char_is_npc(vict)) {
-    fprintf(fl, "%d\n", char_get_id(vict));
+    file_print(fl, "{:d}\n", char_get_id(vict));
   } else {
-    fprintf(fl, "%d\n", char_get_mob_vnum(g, vict));
+    file_print(fl, "{:d}\n", char_get_mob_vnum(g, vict));
   }
 
   atomic_commit(&af);
