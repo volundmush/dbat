@@ -1355,9 +1355,15 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
       exit(1);
     }
     switch (*line) {
-      case 'D':
-        setup_dir(g, fl, g->parse_room_index, atoi(line + 1));
+      case 'D': {
+        int dir = atoi(line + 1);
+        if (dir < 0 || dir >= NUM_OF_DIRS) {
+          mud_log("SYSERR: Format error in room #{:d}: there is no direction D{:d}", virtual_nr, dir);
+          exit(1);
+        }
+        setup_dir(g, fl, g->parse_room_index, dir);
         break;
+      }
       case 'E': {
         extra_descr_data descr;
         descr.keyword     = take_string(fread_string(fl, buf2.c_str()));
@@ -2492,6 +2498,10 @@ static void load_zones(GameWorld *g, FILE *fl, const char *zonename)
     ptr = buf;
     skip_spaces(&ptr);
 
+    if (*ptr != '*' && cmd_no >= num_of_cmds) { /* counted by a stricter rule than this reads them by */
+      mud_log("SYSERR: Zone command count mismatch for {}. Estimated: {:d}, Actual: more", zname, num_of_cmds);
+      exit(1);
+    }
     if ((ZCMD2.command = *ptr) == '*')
       continue;
 

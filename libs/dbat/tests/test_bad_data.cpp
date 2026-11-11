@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -1798,6 +1799,92 @@ static void check_long_name_in_auction_file(void)
   th_shutdown(g);
 }
 
+/* the first from in path becomes to */
+static void replace_in_file(const char *path, const char *from, const char *to)
+{
+  FILE *fl = fopen(path, "r");
+  std::string text;
+  char chunk[4096];
+  size_t n;
+
+  if (!fl)
+    abort();
+  while ((n = fread(chunk, 1, sizeof(chunk), fl)) > 0)
+    text.append(chunk, n);
+  fclose(fl);
+  size_t at = text.find(from);
+  if (at == std::string::npos)
+    abort();
+  text.replace(at, strlen(from), to);
+  write_file(path, text.c_str());
+}
+
+/* boots with prepare() run first; true if the game refused to start (exit 1), saying why in a SYSERR that has
+ * reason in it: UBSan stops a run with an exit of 1 too */
+static void (*refused_prepare)(void);
+
+static void prepare_and_log_to_stderr(void)
+{
+  refused_prepare();
+  if (symlink("/dev/stderr", "test.log")) /* where the harness logs */
+    abort();
+}
+
+static bool boot_is_refused(void (*prepare)(void), const char *reason)
+{
+  int status = 0, out[2];
+  pid_t child;
+  std::string said;
+  char chunk[4096];
+  ssize_t n;
+
+  fflush(stdout);
+  fflush(stderr);
+  if (pipe(out))
+    abort();
+  if (!(child = fork())) {
+    close(out[0]);
+    dup2(out[1], STDOUT_FILENO);
+    dup2(out[1], STDERR_FILENO);
+    refused_prepare = prepare;
+    th_before_boot(prepare_and_log_to_stderr);
+    th_boot();
+    th_exit(0);
+  }
+  close(out[1]);
+  while ((n = read(out[0], chunk, sizeof(chunk))) > 0)
+    said.append(chunk, (size_t)n);
+  close(out[0]);
+  waitpid(child, &status, 0);
+  if (said.find("runtime error") != std::string::npos || said.find("ERROR: AddressSanitizer") != std::string::npos ||
+      said.find("Assertion") != std::string::npos)
+    file_print(stdout, "{}", said);
+  return WIFEXITED(status) && WEXITSTATUS(status) == 1 && said.find(reason) != std::string::npos;
+}
+
+static void exit_in_a_direction_that_does_not_exist(void)
+{
+  replace_in_file("world/wld/3.wld", "D0\n", "D300\n");
+}
+
+/* There are only NUM_OF_DIRS exits: the direction was written past the end of them. */
+static void check_exit_in_a_direction_that_does_not_exist(void)
+{
+  CHECK(boot_is_refused(exit_in_a_direction_that_does_not_exist, "SYSERR: Format error in room #300: there is no direction D300"));
+}
+
+static void zone_command_with_a_space_before_it(void)
+{
+  replace_in_file("world/zon/3.zon", "\nM 0 300 5 301 2 0\n", "\n M 0 300 5 301 2 0\n");
+}
+
+/* The commands were counted, to make room for them, by a looser rule than they are read by: one with a space before
+ * it was read but not counted, and written past the end. */
+static void check_zone_command_with_a_space_before_it(void)
+{
+  CHECK(boot_is_refused(zone_command_with_a_space_before_it, "SYSERR: Zone command count mismatch"));
+}
+
 static const struct {
   const char *name;
   void (*check)(void);
@@ -1877,6 +1964,8 @@ static const struct {
     {"shadow_dragon_missing_from_the_world",        check_shadow_dragon_missing_from_the_world       },
     {"homing_ball_that_someone_is_carrying",        check_homing_ball_that_someone_is_carrying       },
     {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },
+    {"exit_in_a_direction_that_does_not_exist",     check_exit_in_a_direction_that_does_not_exist    },
+    {"zone_command_with_a_space_before_it",         check_zone_command_with_a_space_before_it        },
 };
 
 int main(int argc, char **argv)
