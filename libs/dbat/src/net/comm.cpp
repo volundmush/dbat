@@ -2717,6 +2717,13 @@ bool sendok(struct char_data *ch, int to_sleeping)
   return (char_get_desc(ch) || script_has_type(char_get_script(ch), MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
 }
 
+void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict)
+{
+  act(g, m.to_char, m.hide, ch, obj, vict, TO_CHAR);
+  act(g, m.to_vict, m.hide, ch, obj, vict, TO_VICT);
+  act(g, m.to_room, m.hide, ch, obj, vict, TO_NOTVICT);
+}
+
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type)
 {

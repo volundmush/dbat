@@ -6,16 +6,8 @@
 #include <cstdint>
 #include <string_view>
 
+#include "dbat/comm.hpp"
 #include "dbat/consts/types.hpp"
-
-/* The three messages of an act() at a victim: to the attacker, to the victim and to everyone else, and act()'s
- * hide_invisible for them. */
-struct act_msgs {
-  const char *to_char{};
-  const char *to_vict{};
-  const char *to_room{};
-  bool hide{};
-};
 
 /* How an attack ended, for the hooks that do something after one ends a certain way. */
 enum class ki_outcome { zanzoken,
@@ -128,8 +120,8 @@ struct ki_attack {
   bool (*strike)(ki_shot &shot, int where){};            /* after a hit's messages: true if it dealt the hit itself */
   void (*after_hit)(ki_shot &shot){};                    /* after a hit lands, before the attacker pays */
   void (*after_paying)(ki_shot &shot, ki_outcome how){}; /* right after the attacker pays, however it ended */
-  bool (*on_object)(ki_shot &shot){};
-  void (*finish)(ki_shot &shot, ki_outcome how){}; /* last, however it ended at the victim but absorbed */ /* aimed at an object: true if it dealt with it */
+  bool (*on_object)(ki_shot &shot){};              /* aimed at an object: true if it dealt with it */
+  void (*finish)(ki_shot &shot, ki_outcome how){}; /* last, however it ended at the victim but absorbed */
 };
 
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack);

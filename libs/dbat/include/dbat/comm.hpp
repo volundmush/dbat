@@ -88,6 +88,16 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
   send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
 }
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+/* The three messages of an act() at a victim: to the actor, to the victim and to everyone else, and act()'s
+ * hide_invisible for them. A null one isn't sent. */
+struct act_msgs {
+  const char *to_char{};
+  const char *to_vict{};
+  const char *to_room{};
+  bool hide{};
+};
+/* act() of each of m in turn: to ch, to vict, then to the rest of the room */
+void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
 
@@ -140,4 +150,3 @@ void game_heartbeat(GameWorld *g, int heart_pulse);
 void free_bufpool(GameWorld *g);
 void setup_log(const char *filename, int fd, bool keep_old_log);
 bool sendok(struct char_data *ch, int to_sleeping);
-

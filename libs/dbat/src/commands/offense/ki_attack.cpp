@@ -295,9 +295,7 @@ void at_object(ki_shot &s)
 
 void ki_act(const ki_shot &s, const act_msgs &m)
 {
-  act(s.g, m.to_char, m.hide, s.ch, nullptr, s.vict, TO_CHAR);
-  act(s.g, m.to_vict, m.hide, s.ch, nullptr, s.vict, TO_VICT);
-  act(s.g, m.to_room, m.hide, s.ch, nullptr, s.vict, TO_NOTVICT);
+  act_triple(s.g, m, s.ch, nullptr, s.vict);
 }
 
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack)
