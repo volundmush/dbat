@@ -10,9 +10,11 @@
 
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <string>
 #include <unistd.h>
 
 #include "dbat/comm.hpp"
+#include "dbat/random.hpp"
 #include "dbat/db.hpp"
 #include "dbat/fight.hpp"
 #include "dbat/handler.hpp"
@@ -75,6 +77,14 @@ struct signature {
   int count{};
   bool known{};
 };
+
+/* --transcript: what each case did, to compare two builds (tools/cmdcompare.sh) */
+constexpr time_t TRANSCRIPT_TIME = 1800000000;
+static FILE *transcript          = nullptr;
+static bool full_saves           = false; /* --full: saved files as they are, rather than a hash of each */
+static unsigned long case_seed   = 0;
+static struct char_data *transcript_chars[8];
+static size_t num_transcript_chars = 0;
 
 static struct signature signatures[MAX_SIGNATURES];
 static int num_signatures = 0;
@@ -174,6 +184,17 @@ static void play_case(GameWorld *g, struct char_data *ch, struct char_data *vict
   }
 }
 
+/* The same seed for a case whatever else runs, so that a shard of the commands sees what the whole run does */
+static unsigned long seed_for(const char *command, size_t player, int state, size_t argument)
+{
+  unsigned long h = 14695981039346656037UL;
+
+  for (const char *c = command; *c; c++)
+    h = (h ^ (unsigned char)*c) * 1099511628211UL;
+  h = (h ^ (player * 31 + (size_t)state * 7 + argument)) * 1099511628211UL;
+  return h % 2147483646UL + 1; /* the generator needs 1 .. 2^31-2 */
+}
+
 static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victim, enum state state,
                      const char *command, const char *argument)
 {
@@ -198,11 +219,21 @@ static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victi
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
     alarm(CASE_SECONDS);
+    if (transcript)
+      circle_srandom(g, case_seed);
     play_case(g, ch, victim, state, line);
+    if (transcript)
+      th_write_case_record(g, transcript_chars, num_transcript_chars, full_saves);
+    fflush(stdout);
     th_exit(0);
   }
 
   waitpid(pid, &status, 0);
+  if (transcript) {
+    file_print(transcript, "######## {} | {}\n{}", example, WIFEXITED(status) ? WEXITSTATUS(status) : -WTERMSIG(status),
+               th_file_text(report));
+    fflush(transcript);
+  }
   if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
     return;
 
@@ -240,12 +271,38 @@ static int by_count(const void *a, const void *b)
   return ((const struct signature *)b)->count - ((const struct signature *)a)->count;
 }
 
+/*
+ * test_commands [command]
+ * test_commands --transcript FILE [--full] [--shard K/N] [command]
+ *   writes what each case did to FILE, every case with its own seed and the clock stopped, to compare two builds;
+ *   --full writes the players' saved files out whole, where otherwise each is a hash;
+ *   --shard runs every Nth command from the Kth, to share the work between processes
+ */
 int main(int argc, char **argv)
 {
-  GameWorld *g = th_boot();
+  int shard = 0, shards = 1, arg = 1;
+
+  while (arg < argc && !strncmp(argv[arg], "--", 2)) {
+    if (!strcmp(argv[arg], "--transcript")) {
+      if (arg + 1 >= argc || !(transcript = fopen(argv[arg + 1], "w"))) {
+        perror(argv[arg + 1]);
+        return 2;
+      }
+    } else if (!strcmp(argv[arg], "--full")) {
+      full_saves = true;
+      arg--;
+    } else if (!strcmp(argv[arg], "--shard")) {
+      if (arg + 1 >= argc || sscanf(argv[arg + 1], "%d/%d", &shard, &shards) != 2 || shards < 1 || shard < 0 || shard >= shards)
+        return 2;
+    } else
+      return 2;
+    arg += 2;
+  }
+
+  GameWorld *g             = transcript ? th_boot_at(TRANSCRIPT_TIME) : th_boot();
   struct char_data *victim = th_player(g, "Victim", ADMLVL_NONE);
   struct char_data *players[sizeof(levels) / sizeof(*levels)];
-  const char *only = argc > 1 ? argv[1] : nullptr;
+  const char *only         = argc > arg ? argv[arg] : nullptr;
   const size_t num_players = sizeof(players) / sizeof(*players);
   int new_failures = 0;
 
@@ -262,16 +319,28 @@ int main(int argc, char **argv)
     obj_to_char(g, read_object(g, 300), players[i]);
   }
 
+  if (transcript) {
+    transcript_chars[num_transcript_chars++] = victim;
+    for (size_t i = 0; i < num_players; i++)
+      transcript_chars[num_transcript_chars++] = players[i];
+    for (size_t i = 0; i < num_transcript_chars; i++)
+      th_take_output(g, transcript_chars[i]); /* what logging in sent them */
+  }
+
   for (int c = 1; g->complete_cmd_info[c].command[0] != '\n'; c++) {
     const char *command = g->complete_cmd_info[c].command;
 
-    if (is_skipped(command) || !strcmp(command, "RESERVED") || (only && strcmp(only, command)))
+    if (is_skipped(command) || !strcmp(command, "RESERVED") || (only && strcmp(only, command)) || c % shards != shard)
       continue;
     for (size_t p = 0; p < num_players; p++)
       for (int s = 0; s < NUM_STATES; s++)
-        for (size_t a = 0; a < sizeof(arguments) / sizeof(*arguments); a++)
+        for (size_t a = 0; a < sizeof(arguments) / sizeof(*arguments); a++) {
+          case_seed = seed_for(command, p, s, a);
           run_case(g, players[p], victim, (enum state)s, command, arguments[a]);
+        }
   }
+  if (transcript)
+    fclose(transcript);
 
   qsort(signatures, num_signatures, sizeof(*signatures), by_count);
   for (int i = 0; i < num_signatures; i++) {

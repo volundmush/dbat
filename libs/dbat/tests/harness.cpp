@@ -16,6 +16,10 @@
 #include "dbat/dg_event.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/fileop.hpp"
+#include "dbat/iterate.hpp"
+#include "dbat/objsave.hpp"
+#include "dbat/object_utils.hpp"
+#include "dbat/room_utils.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/players.hpp"
 #include "dbat/utils.hpp"
@@ -371,5 +375,61 @@ void th_pulses(GameWorld *g, int n)
     game_process_commands(g);
     game_finish_descriptors(g);
     game_heartbeat(g, ++g->pulse);
+  }
+}
+
+std::string th_file_text(const char *path)
+{
+  std::string text;
+  char chunk[4096];
+  size_t n;
+
+  if (FILE *fl = fopen(path, "r")) {
+    while ((n = fread(chunk, 1, sizeof(chunk), fl)) > 0)
+      text.append(chunk, n);
+    fclose(fl);
+  }
+  return text;
+}
+
+/* text, or unless full only a hash of it */
+static std::string saved_text(const std::string &text, bool full)
+{
+  if (full)
+    return text;
+  unsigned long h = 14695981039346656037UL;
+  for (char c : text)
+    h = (h ^ (unsigned char)c) * 1099511628211UL;
+  return str_format("{:d} bytes, hash {:x}\n", text.size(), h);
+}
+
+void th_write_case_record(GameWorld *g, struct char_data *const *chars, size_t num_chars, bool full)
+{
+  char path[256];
+
+  file_print(stdout, "rng {:d}\n", g->rng_seed);
+  for (size_t i = 0; i < num_chars; i++) {
+    struct char_data *ch = chars[i];
+
+    file_print(stdout, "== {} sees:\n{}\n", char_get_name(ch), th_output(ch));
+    Crash_crashsave(g, ch);
+    save_char(g, ch);
+    if (get_filename(path, sizeof(path), PLR_FILE, char_get_name(ch)))
+      file_print(stdout, "== {} saved: {}", char_get_name(ch), saved_text(th_file_text(path), full));
+    if (get_filename(path, sizeof(path), NEW_OBJ_FILES, char_get_name(ch)))
+      file_print(stdout, "== {} carries: {}", char_get_name(ch), saved_text(th_file_text(path), full));
+  }
+  for (room_vnum v = 300; v < 400; v++) {
+    if (!room_of(g, v))
+      continue;
+    std::string line;
+    for (char_data *who : room_people(g, v))
+      line += str_format(" {}({:d}/{:d}/{:d} pos {:d}{}{})", char_get_name(who), getCurPL(g, who), getCurKI(g, who),
+                         getCurST(g, who), char_get_position(who), char_get_fighting(g, who) ? " fighting " : "",
+                         char_get_fighting(g, who) ? char_get_name(char_get_fighting(g, who)) : "");
+    for (obj_data *obj : room_contents(g, v))
+      line += str_format(" #{:d}", obj_get_vnum(g, obj));
+    if (!line.empty())
+      file_print(stdout, "== room {:d}:{}\n", v, line);
   }
 }

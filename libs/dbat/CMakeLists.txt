@@ -80,6 +80,12 @@ target_link_libraries(dbat_test_commands PRIVATE dbat_test_harness)
 add_test(NAME commands COMMAND dbat_test_commands)
 set_tests_properties(commands PROPERTIES LABELS slow TIMEOUT 3600)
 
+add_executable(dbat_test_techniques tests/test_techniques.cpp)
+target_compile_options(dbat_test_techniques PRIVATE ${DBAT_CXX_FLAGS})
+target_link_libraries(dbat_test_techniques PRIVATE dbat_test_harness)
+add_test(NAME techniques COMMAND dbat_test_techniques)
+set_tests_properties(techniques PROPERTIES LABELS slow TIMEOUT 3600)
+
 add_executable(dbat_test_bot tests/test_bot.cpp)
 target_compile_options(dbat_test_bot PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)

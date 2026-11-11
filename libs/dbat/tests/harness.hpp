@@ -2,6 +2,7 @@
 
 /* Runs a whole game inside a test: no sockets, no real data/ files. */
 #include <ctime>
+#include <string>
 
 #include "dbat/consts/types.hpp"
 
@@ -63,3 +64,11 @@ void th_take_output_at(GameWorld *g, struct descriptor_data *d);
 /* Runs n pulses of the game. */
 void th_pulses(GameWorld *g, int n);
 
+/* The whole of a file, or nothing if it can't be read. */
+std::string th_file_text(const char *path);
+
+/*
+ * For a transcript of cases, to compare two builds: writes to stdout the generator's state, what each of chars was
+ * sent, the files each saves (as a hash of each unless full), and who and what is in the fixture's rooms.
+ */
+void th_write_case_record(GameWorld *g, struct char_data *const *chars, size_t num_chars, bool full);
