@@ -59,6 +59,8 @@ struct ki_attack {
   double attperc{};           /* the share of the charge it uses */
   double minimum{};           /* the least share it can be made with */
   int cooldown{};             /* handle_cooldown() */
+  int stamina_share{};        /* the user needs a 1/this share of their max power level in stamina too, if not 0 */
+  bool ki_accuracy{true};     /* roll_accuracy()'s last argument */
   int kill_mode{1};           /* can_kill()'s mode for a victim */
   bool not_while_singing{};   /* refused while playing a song */
   bool needs_arms{true};      /* limb_ok() first */
@@ -113,6 +115,7 @@ struct ki_attack {
   double (*cost)(const ki_shot &shot){};                 /* the share of the charge the attacker pays, if not attperc */
   void (*steady)(ki_shot &shot, int &prob){};            /* the last word on its accuracy, just before zanzoken */
   bool (*through)(ki_shot &shot, int prob, int perc){};  /* whether it got past the victim, if not prob >= perc - 20 */
+  void (*on_parry)(ki_shot &shot){};                     /* what a parry does after its messages, if not send it on */
   void (*bonus_damage)(ki_shot &shot){};                 /* after the damage of a hit is rolled */
   int (*locate)(ki_shot &shot){};                        /* where a hit lands, instead of roll_hitloc() */
   int (*aim)(ki_shot &shot, int hitspot){};              /* where a hit lands, given roll_hitloc()\'s choice */
@@ -120,8 +123,8 @@ struct ki_attack {
   bool (*strike)(ki_shot &shot, int where){};            /* after a hit's messages: true if it dealt the hit itself */
   void (*after_hit)(ki_shot &shot){};                    /* after a hit lands, before the attacker pays */
   void (*after_paying)(ki_shot &shot, ki_outcome how){}; /* right after the attacker pays, however it ended */
-  bool (*on_object)(ki_shot &shot){};              /* aimed at an object: true if it dealt with it */
-  void (*finish)(ki_shot &shot, ki_outcome how){}; /* last, however it ended at the victim but absorbed */
+  bool (*on_object)(ki_shot &shot){};                    /* aimed at an object: true if it dealt with it */
+  void (*finish)(ki_shot &shot, ki_outcome how){};       /* last, however it ended at the victim but absorbed */
 };
 
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack);

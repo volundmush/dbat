@@ -6,6 +6,7 @@
 #include "dbat/args.hpp"
 #include "dbat/consts/bonus.hpp"
 #include "dbat/consts/mobflags.hpp"
+#include "dbat/consts/playerflags.hpp"
 #include "dbat/consts/skills.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/random.hpp"
@@ -62,29 +63,33 @@ void land(strike_shot &s)
   act_triple(g, atk.hits[where - 1], s.ch, nullptr, s.vict);
   if (atk.on_spot)
     atk.on_spot(s, where);
+  int leg = 0, limb = 0, eq = 0; /* hurt()'s first two arguments; dam_eq_loc(): 1 arms, 2 legs, 3 head, 4 body */
   switch ((atk.spots ? atk.spots : standard)[where - 1]) {
     case strike_spot::body:
       if (char_get_bonuses(s.ch, BONUS_SOFT))
         s.dmg *= calc_critical(g, s.ch, 2);
-      hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 0);
-      dam_eq_loc(g, s.vict, 4); /* 1 arms, 2 legs, 3 head, 4 body */
+      eq = 4;
       break;
     case strike_spot::head:
       s.dmg *= calc_critical(g, s.ch, 0);
-      hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 0);
-      dam_eq_loc(g, s.vict, 3);
+      eq = 3;
       break;
     case strike_spot::arm:
       s.dmg *= calc_critical(g, s.ch, 1);
-      hurt(g, 0, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 0);
-      dam_eq_loc(g, s.vict, 1);
+      limb = atk.limb_hurt;
+      eq   = 1;
       break;
     case strike_spot::leg:
       s.dmg *= calc_critical(g, s.ch, 1);
-      hurt(g, atk.leg_flag, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 0);
-      dam_eq_loc(g, s.vict, 2);
+      leg  = atk.leg_flag;
+      limb = atk.limb_hurt;
+      eq   = 2;
       break;
   }
+  if (atk.before_damage)
+    atk.before_damage(s, where);
+  hurt(g, leg, limb, s.ch, s.vict, nullptr, s.dmg, 0);
+  dam_eq_loc(g, s.vict, eq);
 }
 
 void at_victim(strike_shot &s)
@@ -105,13 +110,18 @@ void at_victim(strike_shot &s)
     perc -= perc * 0.2;
   index -= handle_speed(g, s.ch, s.vict);
   int avo = index / 4;
-  handle_defense(g, s.vict, &pry, &blk, &dge);
+  if (atk.defend)
+    atk.defend(s, pry, blk, dge);
+  else
+    handle_defense(g, s.vict, &pry, &blk, &dge);
   prob -= avo;
   tech_handle_posmodifier(s.vict, &pry, &blk, &dge, &prob);
 
   if (!tech_handle_zanzoken(g, s.ch, s.vict, atk.name)) {
-    char_set_combo(s.ch, -1);
-    char_set_combhits(s.ch, 0);
+    if (!atk.keeps_combo) {
+      char_set_combo(s.ch, -1);
+      char_set_combhits(s.ch, 0);
+    }
     pay(s, s.stcost / 2);
     pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
     return;
@@ -135,7 +145,7 @@ void at_victim(strike_shot &s)
       pay(s, s.stcost / 2);
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 500);
       s.dmg = damtype(g, s.vict, -2, s.skill, 0);
-      s.dmg *= calc_critical(g, s.ch, 1);
+      s.dmg *= calc_critical(g, s.ch, atk.parry_crit);
       hurt(g, 0, 0, s.vict, s.ch, nullptr, s.dmg, -1); /* the counterblow */
       return;
     }
@@ -144,7 +154,7 @@ void at_victim(strike_shot &s)
       improve_skill(g, s.vict, SKILL_BLOCK, 0);
       pay(s, s.stcost / 2);
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 500);
-      s.dmg = damtype(g, s.ch, atk.damtype, s.skill, 0) / 4;
+      s.dmg = damtype(g, s.ch, atk.block_damtype.value_or(atk.damtype), s.skill, 0) / 4;
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 0);
       return;
     }
@@ -189,18 +199,32 @@ void perform_strike(GameWorld *g, struct char_data *ch, std::string_view argumen
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  if (!can_grav(g, ch) || !check_skill(g, ch, attack.skill))
+  if (attack.not_while_singing && playing_song(g, ch))
     return;
-  if (attack.legs) {
-    if (!legs_ok(g, ch))
-      return;
-  } else {
-    if (!limb_ok(g, ch, 0))
-      return;
-    if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
-      send_to_char(g, ch, "Your hands are full!\r\n");
-      return;
-    }
+  if (attack.skill_before_grav ? !check_skill(g, ch, attack.skill) || !can_grav(g, ch)
+                               : !can_grav(g, ch) || !check_skill(g, ch, attack.skill))
+    return;
+  switch (attack.needs) {
+    case strike_needs::hands:
+      if (!limb_ok(g, ch, 0))
+        return;
+      if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
+        send_to_char(g, ch, "Your hands are full!\r\n");
+        return;
+      }
+      break;
+    case strike_needs::legs:
+      if (!legs_ok(g, ch))
+        return;
+      break;
+    case strike_needs::tail:
+      if (!char_plr_flagged(ch, PLR_TAIL) && !char_is_npc(ch)) {
+        send_to_char(g, ch, "You have no tail!\r\n");
+        return;
+      }
+      break;
+    case strike_needs::nothing:
+      break;
   }
   if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");

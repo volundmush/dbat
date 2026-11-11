@@ -145,6 +145,10 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
     if (atk.parry.to_char && pry > rand_number(g, 1, 140) &&
         (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
       ki_act(s, atk.parry);
+      if (atk.on_parry) {
+        atk.on_parry(s);
+        return ki_outcome::blocked;
+      }
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
       if (atk.parry_returns)
         parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill,
@@ -227,7 +231,7 @@ void at_victim(ki_shot &s)
     s.vict = char_get_defender(g, s.vict);
   improve_skill(g, s.ch, atk.skill, 0);
   int index = check_def(g, s.vict); /* the victim's parry, block and dodge */
-  int prob  = roll_accuracy(g, s.ch, s.skill, true);
+  int prob  = roll_accuracy(g, s.ch, s.skill, atk.ki_accuracy);
   if (perfection(s) == 2)
     prob += 5;
   int perc = chance_to_hit(g, s.ch);
@@ -334,7 +338,7 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
     return;
   if (getMaxKI(g, ch) * s.attperc > char_get_charge(ch))
     s.attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
-  if (!check_points(g, ch, getMaxKI(g, ch) * s.minimum, 0))
+  if (!check_points(g, ch, getMaxKI(g, ch) * s.minimum, attack.stamina_share ? getEffMaxPL(g, ch) / attack.stamina_share : 0))
     return;
   if (attack.sword && !attack.sword_checked_early && !holds_sword(g, ch))
     return;
