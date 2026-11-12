@@ -411,247 +411,362 @@ ACMD(do_potential)
   }
 }
 
-ACMD(do_situp)
+namespace {
+
+/* Situps, pushups and meditation: in gravity, each costs (stamina, or ki to meditate) and gains (stamina, power level
+ * or ki) more the stronger it is. */
+
+/* What the stronger gravities add to the cost */
+struct heavy_gravity {
+  int gravity;
+  int extra;
+};
+constexpr heavy_gravity HEAVY_GRAVITY[] = {{300, 1000000}, {400, 2000000}, {500, 7500000}, {1000, 15000000}, {5000, 25000000}, {10000, 50000000}};
+
+/* What exercising costs in this gravity, with this weight lifted (by the mind). Situps and pushups count it in an
+ * int, meditation in an int64_t. */
+template <class T> T exercise_cost(struct char_data *ch, int gravity, int64_t weight = 0)
 {
+  T cost = 1;
 
-  int cost = 1, bonus = 0;
+  if (!char_is_bardock(ch) || gravity != 10)
+    cost += gravity * ((gravity * 2) + char_get_level(ch));
+  else
+    cost += gravity * char_get_level(ch);
+  cost += weight * ((gravity + 1) / 5);
+  auto heavy = std::ranges::find(HEAVY_GRAVITY, gravity, &heavy_gravity::gravity);
+  if (heavy != std::end(HEAVY_GRAVITY))
+    cost += heavy->extra;
+  if (cost < weight)
+    cost = weight;
 
-  if (char_is_npc(ch)) {
-    send_to_char(g, ch, "You are a mob fool!\r\n");
-    return;
-  }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
-    send_to_char(g, ch, "The fire makes it too hot!\r\n");
-    return;
-  }
-  if (char_get_drag(g, ch)) {
-    send_to_char(g, ch, "You are dragging someone!\r\n");
-    return;
-  }
-  if (char_plr_flagged(ch, PLR_FISHING)) {
-    send_to_char(g, ch, "Stop fishing first.\r\n");
-    return;
-  }
-  if (char_get_carrying(g, ch)) {
-    send_to_char(g, ch, "You are carrying someone!\r\n");
-    return;
-  }
-
-  if ((room_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * ((room_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
-  } else if (char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
-  }
-
-  if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-    cost += 1000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-    cost += 2000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-    cost += 7500000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-    cost += 15000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-    cost += 25000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-    cost += 50000000;
-  }
-
-  if (cost == 1 || cost == 0) {
+  if (cost == 1 || cost == 0)
     cost = 25;
-  }
-  if (char_get_bonuses(ch, BONUS_HARDWORKER) > 0) {
+  if (char_get_bonuses(ch, BONUS_HARDWORKER) > 0)
     cost -= cost * .25;
-  } else if (char_get_bonuses(ch, BONUS_SLACKER) > 0) {
+  else if (char_get_bonuses(ch, BONUS_SLACKER) > 0)
     cost += cost * .25;
-  }
 
-  if (char_get_relax_count(ch) >= 464) {
+  if (char_get_relax_count(ch) >= 464)
     cost *= 50;
-  } else if (char_get_relax_count(ch) >= 232) {
+  else if (char_get_relax_count(ch) >= 232)
     cost *= 15;
-  } else if (char_get_relax_count(ch) >= 116) {
+  else if (char_get_relax_count(ch) >= 116)
     cost *= 4;
-  }
+  return cost;
+}
 
-  if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
-    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
-    return;
-  }
+/* The gravities one gains in, with what the body (situps and pushups) and the mind gain there, and how the body
+ * feels it. Any other gains nothing. */
+struct gravity_tier {
+  int gravity;
+  int body_lo, body_hi;
+  int mind_lo, mind_hi;
+  const char *to_char, *to_room; /* after "You do a situp" and "$n does a situp" */
+};
+constexpr gravity_tier GRAVITIES[] = {
+    {0, 1, 1, 1, 1, ".", "."},
+    {10, 3, 7, 2, 4, ", feeling the strain of gravity.", ", while sweating."},
+    {20, 8, 14, 5, 10, ", and feel gravity's pull.", ", while sweating."},
+    {30, 14, 20, 10, 15, ", and feel the burn.", ", while sweating."},
+    {40, 20, 35, 15, 20, ", and feel the burn.", ", while sweating."},
+    {50, 40, 60, 40, 60, ", and feel the burn.", ", while sweating."},
+    {100, 180, 250, 180, 250, ", and really strain against the gravity.", ", while sweating."},
+    {200, 400, 600, 400, 600, ", and really strain against the gravity.", ", while sweating."},
+    {300, 800, 1200, 800, 1200, ", and really strain against the gravity.", ", while sweating."},
+    {400, 2000, 3000, 2000, 3000, ", and really strain against the gravity.", ", while sweating."},
+    {500, 4000, 6000, 4000, 6000, ", and really strain against the gravity.", ", while sweating."},
+    {1000, 9000, 10000, 9000, 10000, ", and it was a really hard one to finish.", ", while sweating profusely."},
+    {5000, 15000, 20000, 15000, 20000, ", and it was a really hard one to finish.", ", while sweating profusely."},
+    {10000, 25000, 30000, 25000, 30000, ", and it was a really hard one to finish.", ", while sweating profusely."},
+};
 
-  if (!limb_ok(g, ch, 1)) {
-    return;
-  }
+const gravity_tier *gravity_tier_of(int gravity)
+{
+  auto tier = std::ranges::find(GRAVITIES, gravity, &gravity_tier::gravity);
+  return tier == std::end(GRAVITIES) ? nullptr : tier;
+}
 
-  if ((getCurST(g, ch)) < cost) {
-    send_to_char(g, ch, "You are too tired!\r\n");
-    return;
-  }
-  if (char_plr_flagged(ch, PLR_SPAR)) {
-    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
-    return;
-  }
-  if (char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "You are fighting you moron!\r\n");
-    return;
-  }
-  if (char_aff_flagged(ch, AFF_FLYING)) {
-    send_to_char(g, ch, "You can't do situps in midair!\r\n");
-    return;
-  }
-  if (room_get_gravity(g, char_get_in_room(ch)) == 0) {
-    bonus = 1;
-    act(g, "@gYou do a situp.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 10) {
-    bonus = rand_number(g, 3, 7);
-    act(g, "@gYou do a situp, feeling the strain of gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 20) {
-    bonus = rand_number(g, 8, 14);
-    act(g, "@gYou do a situp, and feel gravity's pull.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 30) {
-    bonus = rand_number(g, 14, 20);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 40) {
-    bonus = rand_number(g, 20, 35);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 50) {
-    bonus = rand_number(g, 40, 60);
-    act(g, "@gYou do a situp, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 100) {
-    bonus = rand_number(g, 180, 250);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 200) {
-    bonus = rand_number(g, 400, 600);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-    bonus = rand_number(g, 800, 1200);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-    bonus = rand_number(g, 2000, 3000);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-    bonus = rand_number(g, 4000, 6000);
-    act(g, "@gYou do a situp, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-    bonus = rand_number(g, 9000, 10000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-    bonus = rand_number(g, 15000, 20000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-    bonus = rand_number(g, 25000, 30000);
-    act(g, "@gYou do a situp, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  }
-  if (cost >= getMaxST(g, ch) / 2) {
-    send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
-    bonus *= 10;
-  } else if (cost >= getMaxST(g, ch) / 4) {
-    send_to_char(g, ch, "This gravity is an awesome challenge for you!\r\n");
-    bonus *= 8;
-  } else if (cost >= getMaxST(g, ch) / 10) {
-    send_to_char(g, ch, "This gravity is a good challenge for you!\r\n");
-    bonus *= 6;
-  } else if (cost < getMaxST(g, ch) / 1000) {
-    send_to_char(g, ch, "This gravity is so easy to you, you could do it in your sleep...\r\n");
-    bonus /= 8;
-  } else if (cost < getMaxST(g, ch) / 100) {
-    send_to_char(g, ch, "This gravity is the opposite of a challenge for you...\r\n");
-    bonus /= 5;
-  } else if (cost < getMaxST(g, ch) / 50) {
-    send_to_char(g, ch, "This gravity is definitely not a challenge for you...\r\n");
-    bonus /= 4;
-  } else if (cost < getMaxST(g, ch) / 30) {
-    send_to_char(g, ch, "This gravity is barely a challenge for you...\r\n");
-    bonus /= 3;
-  } else if (cost < getMaxST(g, ch) / 20) {
-    send_to_char(g, ch, "This gravity is hardly a challenge for you...\r\n");
-    bonus /= 2;
-  } else {
-    send_to_char(g, ch, "This gravity is just perfect for you...\r\n");
+int roll(GameWorld *g, int lo, int hi)
+{
+  return lo == hi ? lo : rand_number(g, lo, hi);
+}
+
+/* A situp or a pushup (what), shown off: what it gains before the rest is reckoned */
+int body_workout(GameWorld *g, struct char_data *ch, int gravity, std::string_view what)
+{
+  const gravity_tier *tier = gravity_tier_of(gravity);
+  if (!tier)
+    return 0;
+
+  int bonus = roll(g, tier->body_lo, tier->body_hi);
+  act(g, str_format("@gYou do a {}{}@n", what, tier->to_char).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, str_format("@g$n does a {}{}@n", what, tier->to_room).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  return bonus;
+}
+
+/* How the cost measures up against the exerciser's most: the first row it fits, or else just right */
+constexpr struct {
+  int64_t share; /* of the most */
+  bool at_least; /* or less than */
+  int mult;      /* or, if negative, divide */
+  const char *how;
+  bool ellipsis;
+} CHALLENGES[] = {
+    {2, true, 10, "a great challenge for you!", false},
+    {4, true, 8, "an awesome challenge for you!", false},
+    {10, true, 6, "a good challenge for you!", false},
+    {1000, false, -8, "so easy to you, you could do it in your sleep", true},
+    {100, false, -5, "the opposite of a challenge for you", true},
+    {50, false, -4, "definitely not a challenge for you", true},
+    {30, false, -3, "barely a challenge for you", true},
+    {20, false, -2, "hardly a challenge for you", true},
+};
+
+/* what is "This gravity is" or the like; ellipsis ends the easy ones and the just right */
+template <class T>
+void challenge(GameWorld *g, struct char_data *ch, T &bonus, T cost, int64_t most, std::string_view what, std::string_view ellipsis)
+{
+  auto row = std::ranges::find_if(CHALLENGES, [&](const auto &c) { return c.at_least ? cost >= most / c.share : cost < most / c.share; });
+  if (row == std::end(CHALLENGES)) {
+    send_to_char(g, ch, "This gravity is just perfect for you{}\r\n", ellipsis); /* quirk: meditating, too */
     bonus *= 4;
+    return;
   }
-  if (is_soft_cap(ch, 2, 1.0)) {
-    bonus = 0;
-  }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  send_to_char(g, ch, "{} {}{}\r\n", what, row->how, row->ellipsis ? ellipsis : "");
+  if (row->mult > 0)
+    bonus *= row->mult;
+  else
+    bonus /= -row->mult;
+}
+
+bool in_rooms(struct char_data *ch, room_vnum lo, room_vnum hi)
+{
+  return char_get_in_room(ch) >= lo && char_get_in_room(ch) <= hi;
+}
+
+/* What the place adds: the time chamber, a workout room (better at 19100 to 19199) or 19800 to 19899's magic. The
+ * least one gains is 1, 15 in the time chamber, and in a workout room 12 or 6 when the bonus is no more than
+ * workout_least. */
+template <class T> void place_bonus(GameWorld *g, struct char_data *ch, T &bonus, int workout_least)
+{
+  room_vnum room = char_get_in_room(ch);
+
+  if (room_flagged(g, room, ROOM_HBTC)) {
     send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-  } else if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-    if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-      bonus *= 10;
-    } else {
-      bonus *= 5;
-    }
-  } else if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
+  } else if (room_flagged(g, room, ROOM_WORKOUT)) {
+    bonus *= in_rooms(ch, 19100, 19199) ? 10 : 5;
+  } else if (in_rooms(ch, 19800, 19899)) {
     send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
   }
-  if (bonus <= 0 && !room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-    bonus = 1;
+  if (bonus <= 0)
+    bonus = room_flagged(g, room, ROOM_HBTC) ? 15 : 1;
+  if (bonus <= workout_least && room_flagged(g, room, ROOM_WORKOUT))
+    bonus = in_rooms(ch, 19100, 19199) ? 12 : 6;
+}
+
+/* How long one exercise takes, by the gravity: the first row it's within, or none past them */
+constexpr struct {
+  int gravity, wait;
+} EXERCISE_WAITS[] = {{50, PULSE_2SEC}, {200, PULSE_3SEC}, {500, PULSE_4SEC}, {1000, PULSE_5SEC}, {5000, PULSE_6SEC}, {10000, PULSE_7SEC}};
+
+void exercise_wait(struct char_data *ch, int gravity)
+{
+  auto row = std::ranges::find_if(EXERCISE_WAITS, [gravity](const auto &w) { return gravity <= w.gravity; });
+  if (row != std::end(EXERCISE_WAITS))
+    char_set_wait(ch, row->wait);
+}
+
+/* The races that exercise for nothing */
+bool gains_nothing(struct char_data *ch)
+{
+  return char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch);
+}
+
+/* The checks between paying and exercising, for situps and pushups; false if one fails */
+bool fit_to_exercise(GameWorld *g, struct char_data *ch, int cost, int limb, std::string_view what)
+{
+  if (gains_nothing(ch)) {
+    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
+    return false;
   }
-  if (bonus <= 0 && room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-    bonus = 15;
+  if (!limb_ok(g, ch, limb))
+    return false;
+  if (getCurST(g, ch) < cost) {
+    send_to_char(g, ch, "You are too tired!\r\n");
+    return false;
   }
-  if (bonus <= 0 && room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-    if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-      bonus = 12;
-    } else {
-      bonus = 6;
-    }
+  if (char_plr_flagged(ch, PLR_SPAR)) {
+    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
+    return false;
   }
-  /* Rillao: transloc, add new transes here */
+  if (char_get_fighting(g, ch)) {
+    send_to_char(g, ch, "You are fighting you moron!\r\n");
+    return false;
+  }
+  if (char_aff_flagged(ch, AFF_FLYING)) {
+    send_to_char(g, ch, "You can't do {}s in midair!\r\n", what);
+    return false;
+  }
+  return true;
+}
+
+} // namespace
+
+ACMD(do_situp)
+{
+  if (char_is_npc(ch)) {
+    send_to_char(g, ch, "You are a mob fool!\r\n");
+    return;
+  }
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+    send_to_char(g, ch, "The fire makes it too hot!\r\n");
+    return;
+  }
+  if (char_get_drag(g, ch)) {
+    send_to_char(g, ch, "You are dragging someone!\r\n");
+    return;
+  }
+  if (char_plr_flagged(ch, PLR_FISHING)) {
+    send_to_char(g, ch, "Stop fishing first.\r\n");
+    return;
+  }
+  if (char_get_carrying(g, ch)) {
+    send_to_char(g, ch, "You are carrying someone!\r\n");
+    return;
+  }
+
+  int gravity = room_get_gravity(g, char_get_in_room(ch));
+  int cost    = exercise_cost<int>(ch, gravity);
+  if (!fit_to_exercise(g, ch, cost, 1, "situp"))
+    return;
+
+  int bonus = body_workout(g, ch, gravity, "situp");
+  challenge(g, ch, bonus, cost, getMaxST(g, ch), "This gravity is", "...");
+  if (is_soft_cap(ch, 2, 1.0))
+    bonus = 0;
+  place_bonus(g, ch, bonus, 0); /* quirk: 0, so a workout room never lifts the least */
   bonus += char_get_level(ch) / 20;
-  if (char_is_namek(ch)) {
+  if (char_is_namek(ch))
     bonus -= bonus / 4;
-  }
-  if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
+  if (char_get_bonuses(ch, BONUS_HARDWORKER))
     bonus += bonus * 0.5;
-  }
-  if (char_get_bonuses(ch, BONUS_LONER)) {
+  if (char_get_bonuses(ch, BONUS_LONER))
     bonus += bonus * 0.1;
-  }
   send_to_char(g, ch, "You feel slightly more vigorous @D[@G+{}@D]@n.\r\n", add_commas(bonus));
   gainBaseST(ch, bonus, true);
-  if (room_get_gravity(g, char_get_in_room(ch)) <= 50) {
-    char_set_wait(ch, PULSE_2SEC);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) <= 200) {
-    char_set_wait(ch, PULSE_3SEC);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) <= 500) {
-    char_set_wait(ch, PULSE_4SEC);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) <= 1000) {
-    char_set_wait(ch, PULSE_5SEC);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) <= 5000) {
-    char_set_wait(ch, PULSE_6SEC);
-  } else if (room_get_gravity(g, char_get_in_room(ch)) <= 10000) {
-    char_set_wait(ch, PULSE_7SEC);
-  }
+  exercise_wait(ch, gravity);
   decCurST(g, ch, cost, 0);
 }
 
+ACMD(do_pushup)
+{
+  if (char_is_npc(ch)) {
+    send_to_char(g, ch, "You are a mob fool!\r\n");
+    return;
+  }
+  if (char_plr_flagged(ch, PLR_FISHING)) {
+    send_to_char(g, ch, "Stop fishing first.\r\n");
+    return;
+  }
+  if (char_get_drag(g, ch)) {
+    send_to_char(g, ch, "You are dragging someone!\r\n");
+    return;
+  }
+  if (char_get_carrying(g, ch)) {
+    send_to_char(g, ch, "You are carrying someone!\r\n");
+    return;
+  }
+
+  int gravity = room_get_gravity(g, char_get_in_room(ch));
+  int cost    = exercise_cost<int>(ch, gravity);
+  if (!fit_to_exercise(g, ch, cost, 0, "pushup"))
+    return;
+
+  int bonus = body_workout(g, ch, gravity, "pushup");
+  challenge(g, ch, bonus, cost, getMaxPLTrans(g, ch), "This gravity is", "....");
+  if (is_soft_cap(ch, 0, 1.0))
+    bonus = 0;
+  place_bonus(g, ch, bonus, 1);
+  bonus += char_get_level(ch) / 20;
+  if (char_is_namek(ch))
+    bonus -= bonus / 4;
+  if (char_get_bonuses(ch, BONUS_HARDWORKER))
+    bonus += bonus * 0.5;
+  if (char_get_bonuses(ch, BONUS_LONER))
+    bonus += bonus * 0.1;
+  send_to_char(g, ch, "You feel slightly stronger @D[@G+{}@D]@n.\r\n", add_commas(bonus));
+  if (char_is_human(ch))
+    bonus = bonus * 0.8; /* quirk: after they're told */
+  gainBasePL(ch, bonus, true);
+  exercise_wait(ch, gravity);
+  decCurST(g, ch, cost, 0);
+}
+
+namespace {
+
+/* meditate expand: another skill slot, for practices */
+void expand_mind(GameWorld *g, struct char_data *ch)
+{
+  int slot_cost = char_is_saiyan(ch) ? 7000 : 3500;
+
+  if (char_get_practice_points(g, ch) < slot_cost) {
+    send_to_char(g, ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
+    send_to_char(g, ch, "{} needed.\r\n", add_commas(slot_cost));
+  } else if ((char_get_skill_slots(ch) >= 60 && char_get_bonuses(ch, BONUS_GMEMORY) == 0) ||
+             (char_get_skill_slots(ch) >= 65 && char_get_bonuses(ch, BONUS_GMEMORY) == 1)) {
+    send_to_char(g, ch, "You can not have any more slots through this process.\r\n");
+  } else {
+    send_to_char(g, ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
+    char_set_skill_slots(ch, char_get_skill_slots(ch) + 1);
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - slot_cost);
+  }
+}
+
+/* meditate break: pushing out the one mind linked with them */
+void break_mind_link(GameWorld *g, struct char_data *ch)
+{
+  struct char_data *linked = char_get_mindlink(g, ch);
+
+  if (!linked) {
+    send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
+    return;
+  }
+  if (char_get_linker(ch) == 1) {
+    send_to_char(g, ch, "This is not how you break YOUR mind link.\r\n");
+    return;
+  }
+  if (getCurKI(g, ch) < getMaxKI(g, linked) * 0.05) {
+    send_to_char(g, ch, "You do not have enough ki to manage a break.\r\n");
+    return;
+  }
+  if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(linked) + (char_get_skill(linked, SKILL_TELEPATHY) * 0.1)) {
+    act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, linked, TO_CHAR);
+    act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, linked, TO_ROOM);
+    send_to_char(g, linked, "@rYour mind linked target manages to push you out!@n\r\n");
+    if (char_get_aff_abils_intel(linked) < axion_dice(g, -10) && !char_aff_flagged(linked, AFF_SHOCKED)) {
+      send_to_char(g, linked, "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
+      char_aff_set(linked, AFF_SHOCKED, false); /* quirk: they aren't, though */
+    }
+    char_set_linker(linked, 0);
+    char_set_mindlink(linked, nullptr);
+    char_set_mindlink(ch, nullptr);
+    return;
+  }
+  act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, linked, TO_CHAR);
+  act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, linked, TO_ROOM);
+  send_to_char(g, linked, "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
+  decCurKI(g, ch, getMaxKI(g, linked) * .05, 0);
+}
+
+} // namespace
+
 ACMD(do_meditate)
 {
-
-  int64_t bonus = 0, cost = 1, weight = 0;
-  struct obj_data *obj;
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You are a mob fool!\r\n");
@@ -665,520 +780,89 @@ ACMD(do_meditate)
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
-
-  if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
+  if (gains_nothing(ch)) {
     send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
     return;
   }
-
   if (char_get_carrying(g, ch)) {
     send_to_char(g, ch, "You are carrying someone!\r\n");
     return;
   }
-
   if (char_get_drag(g, ch)) {
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
-
   if (char_plr_flagged(ch, PLR_SPAR)) {
     send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
-
   if (char_get_fighting(g, ch)) {
     send_to_char(g, ch, "You are fighting you moron!\r\n");
     return;
   }
-
   if (char_get_position(ch) != POS_SITTING) {
     send_to_char(g, ch, "You need to be sitting to meditate.\r\n");
     return;
   }
 
+  constexpr const char *syntax = "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n";
   if (arg.empty()) {
-    send_to_char(g, ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
+    send_to_char(g, ch, syntax);
     return;
   }
-
   if (str_eq_nocase(arg, "expand")) {
-    int slot_cost = 3500;
-    if (char_is_saiyan(ch)) {
-      slot_cost = 7000;
-    }
-    if (char_get_practice_points(g, ch) < slot_cost) {
-      send_to_char(g, ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
-      send_to_char(g, ch, "{} needed.\r\n", add_commas(slot_cost));
-    } else if (char_get_skill_slots(ch) >= 60 && char_get_bonuses(ch, BONUS_GMEMORY) == 0) {
-      send_to_char(g, ch, "You can not have any more slots through this process.\r\n");
-    } else if (char_get_skill_slots(ch) >= 65 && char_get_bonuses(ch, BONUS_GMEMORY) == 1) {
-      send_to_char(g, ch, "You can not have any more slots through this process.\r\n");
-    } else {
-      send_to_char(g, ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
-      char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-      char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (slot_cost));
-      return;
-    }
+    expand_mind(g, ch);
     return;
   }
   if (str_eq_nocase(arg, "break")) {
-    if (char_get_mindlink(g, ch) == nullptr) {
-      send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
-      return;
-    }
-    if (char_get_linker(ch) == 1) {
-      send_to_char(g, ch, "This is not how you break YOUR mind link.\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < getMaxKI(g, char_get_mindlink(g, ch)) * 0.05) {
-      send_to_char(g, ch, "You do not have enough ki to manage a break.\r\n");
-      return;
-    }
-    if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(char_get_mindlink(g, ch)) + (char_get_skill(char_get_mindlink(g, ch), SKILL_TELEPATHY) * 0.1)) {
-      act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
-      act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, char_get_mindlink(g, ch), TO_ROOM);
-      send_to_char(g, char_get_mindlink(g, ch), "@rYour mind linked target manages to push you out!@n\r\n");
-      if (char_get_aff_abils_intel(char_get_mindlink(g, ch)) < axion_dice(g, -10) && !char_aff_flagged(char_get_mindlink(g, ch), AFF_SHOCKED)) {
-        send_to_char(g, char_get_mindlink(g, ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
-        char_aff_set(char_get_mindlink(g, ch), AFF_SHOCKED, false);
-      }
-
-      char_set_linker(char_get_mindlink(g, ch), 0);
-      char_set_mindlink(char_get_mindlink(g, ch), nullptr);
-      char_set_mindlink(ch, nullptr);
-      return;
-    }
-    act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
-    act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, char_get_mindlink(g, ch), TO_ROOM);
-    send_to_char(g, char_get_mindlink(g, ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
-
-    decCurKI(g, ch, getMaxKI(g, char_get_mindlink(g, ch)) * .05, 0);
-    return;
-  }
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-    send_to_char(g, ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
+    break_mind_link(g, ch);
     return;
   }
 
+  struct obj_data *obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)));
+  if (!obj) {
+    send_to_char(g, ch, syntax);
+    return;
+  }
   if (obj_get_vnum(g, obj) == 79) {
     send_to_char(g, ch, "It's frozen to the surface.\r\n");
     return;
   }
 
-  weight = obj_get_weight(obj);
-
-  if (obj_get_sitting(g, obj)) {
+  int64_t weight = obj_get_weight(obj);
+  if (obj_get_sitting(g, obj))
     weight += char_get_weight(obj_get_sitting(g, obj));
-  }
 
-  if ((room_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * ((room_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
-  } else if (char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
-  }
-  cost += weight * ((room_get_gravity(g, char_get_in_room(ch)) + 1) / 5);
-
-  if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-    cost += 1000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-    cost += 2000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-    cost += 7500000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-    cost += 15000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-    cost += 25000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-    cost += 50000000;
-  }
-
-  if (cost < weight) {
-    cost = weight;
-  }
-
-  if (cost == 1 || cost == 0) {
-    cost = 25;
-  }
-  if (char_get_bonuses(ch, BONUS_HARDWORKER) > 0) {
-    cost -= cost * .25;
-  } else if (char_get_bonuses(ch, BONUS_SLACKER) > 0) {
-    cost += cost * .25;
-  }
-
-  if (char_get_relax_count(ch) >= 464) {
-    cost *= 50;
-  } else if (char_get_relax_count(ch) >= 232) {
-    cost *= 15;
-  } else if (char_get_relax_count(ch) >= 116) {
-    cost *= 4;
-  }
-
-  if ((getCurKI(g, ch)) < cost) {
+  int gravity  = room_get_gravity(g, char_get_in_room(ch));
+  int64_t cost = exercise_cost<int64_t>(ch, gravity, weight);
+  if (getCurKI(g, ch) < cost) {
     send_to_char(g, ch, "You don't have enough ki!\r\n");
     return;
   }
 
-  else {
-    /* Meditate Message */
-    act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, TO_ROOM);
+  act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, TO_CHAR);
+  act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, TO_ROOM);
 
-    if (room_get_gravity(g, char_get_in_room(ch)) == 0) {
-      bonus = 1;
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 10) {
-      bonus = rand_number(g, 2, 4);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 20) {
-      bonus = rand_number(g, 5, 10);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 30) {
-      bonus = rand_number(g, 10, 15);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 40) {
-      bonus = rand_number(g, 15, 20);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 50) {
-      bonus = rand_number(g, 40, 60);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 100) {
-      bonus = rand_number(g, 180, 250);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 200) {
-      bonus = rand_number(g, 400, 600);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-      bonus = rand_number(g, 800, 1200);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-      bonus = rand_number(g, 2000, 3000);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-      bonus = rand_number(g, 4000, 6000);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-      bonus = rand_number(g, 9000, 10000);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-      bonus = rand_number(g, 15000, 20000);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-      bonus = rand_number(g, 25000, 30000);
-    }
-
-    bonus += ((weight + 1) / 500) + 1;
-
-    if (cost >= getMaxKI(g, ch) / 2) {
-      send_to_char(g, ch, "The object weight and gravity are a great challenge for you!\r\n");
-      bonus *= 10;
-    } else if (cost >= getMaxKI(g, ch) / 4) {
-      send_to_char(g, ch, "The object weight and gravity are an awesome challenge for you!\r\n");
-      bonus *= 8;
-    } else if (cost >= getMaxKI(g, ch) / 10) {
-      send_to_char(g, ch, "The object weight and gravity are a good challenge for you!\r\n");
-      bonus *= 6;
-    } else if (cost < getMaxKI(g, ch) / 1000) {
-      send_to_char(g, ch, "The object weight and gravity are so easy to you, you could do it in your sleep....\r\n");
-      bonus /= 8;
-    } else if (cost < getMaxKI(g, ch) / 100) {
-      send_to_char(g, ch, "The object weight and gravity are the opposite of a challenge for you....\r\n");
-      bonus /= 5;
-    } else if (cost < getMaxKI(g, ch) / 50) {
-      send_to_char(g, ch, "The object weight and gravity are definitely not a challenge for you....\r\n");
-      bonus /= 4;
-    } else if (cost < getMaxKI(g, ch) / 30) {
-      send_to_char(g, ch, "The object weight and gravity are barely a challenge for you....\r\n");
-      bonus /= 3;
-    } else if (cost < getMaxKI(g, ch) / 20) {
-      send_to_char(g, ch, "The object weight and gravity are hardly a challenge for you....\r\n");
-      bonus /= 2;
-    } else {
-      send_to_char(g, ch, "This gravity is just perfect for you....\r\n");
-      bonus *= 4;
-    }
-    if (is_soft_cap(ch, 1, 1.0)) {
-      bonus = 0;
-    }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-      bonus *= 10;
-    } else if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-        bonus *= 10;
-      } else {
-        bonus *= 5;
-      }
-    } else if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-      send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
-      bonus *= 20;
-    }
-    if (bonus <= 0 && !room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      bonus = 1;
-    }
-    if (bonus <= 0 && room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      bonus = 15;
-    }
-    if (bonus <= 1 && room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-        bonus = 12;
-      } else {
-        bonus = 6;
-      }
-    }
-    if (bonus != 1 && char_is_demon(ch) && rand_number(g, 1, 100) >= 80) {
-      send_to_char(g, ch, "Your spirit magnifies the strength of your body! @D[@G+{}@D]@n\r\n", add_commas(bonus / 2));
-      gainBasePL(ch, bonus / 2, false);
-    }
-
-    bonus += char_get_level(ch) / 20;
-    if (char_is_namek(ch)) {
-      bonus += bonus / 2;
-    }
-    if (char_get_bonuses(ch, BONUS_LONER)) {
-      bonus += bonus * 0.1;
-    }
-    /* Rillao: transloc, add new transes here */
-    send_to_char(g, ch, "You feel your spirit grow stronger @D[@G+{}@D]@n.\r\n", add_commas(bonus));
-    gainBaseKI(ch, bonus, true);
-    if (room_get_gravity(g, char_get_in_room(ch)) <= 50) {
-      char_set_wait(ch, PULSE_2SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 200) {
-      char_set_wait(ch, PULSE_3SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 500) {
-      char_set_wait(ch, PULSE_4SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 1000) {
-      char_set_wait(ch, PULSE_5SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 5000) {
-      char_set_wait(ch, PULSE_6SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 10000) {
-      char_set_wait(ch, PULSE_7SEC);
-    }
-
-    decCurKI(g, ch, cost, 0);
+  const gravity_tier *tier = gravity_tier_of(gravity);
+  int64_t bonus            = tier ? roll(g, tier->mind_lo, tier->mind_hi) : 0;
+  bonus += ((weight + 1) / 500) + 1;
+  challenge(g, ch, bonus, cost, getMaxKI(g, ch), "The object weight and gravity are", "....");
+  if (is_soft_cap(ch, 1, 1.0))
+    bonus = 0;
+  place_bonus(g, ch, bonus, 1);
+  if (bonus != 1 && char_is_demon(ch) && rand_number(g, 1, 100) >= 80) {
+    send_to_char(g, ch, "Your spirit magnifies the strength of your body! @D[@G+{}@D]@n\r\n", add_commas(bonus / 2));
+    gainBasePL(ch, bonus / 2, false);
   }
-}
-
-ACMD(do_pushup)
-{
-
-  int cost = 1, bonus = 0;
-
-  if (char_is_npc(ch)) {
-    send_to_char(g, ch, "You are a mob fool!\r\n");
-    return;
-  }
-
-  if (char_plr_flagged(ch, PLR_FISHING)) {
-    send_to_char(g, ch, "Stop fishing first.\r\n");
-    return;
-  }
-  if (char_get_drag(g, ch)) {
-    send_to_char(g, ch, "You are dragging someone!\r\n");
-    return;
-  }
-  if (char_get_carrying(g, ch)) {
-    send_to_char(g, ch, "You are carrying someone!\r\n");
-    return;
-  }
-
-  if ((room_get_gravity(g, char_get_in_room(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * ((room_get_gravity(g, char_get_in_room(ch)) * 2) + char_get_level(ch));
-  } else if (char_is_bardock(ch)) {
-    cost += room_get_gravity(g, char_get_in_room(ch)) * char_get_level(ch);
-  }
-
-  if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-    cost += 1000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-    cost += 2000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-    cost += 7500000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-    cost += 15000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-    cost += 25000000;
-  } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-    cost += 50000000;
-  }
-
-  if (cost == 1 || cost == 0) {
-    cost = 25;
-  }
-
-  if (char_get_bonuses(ch, BONUS_HARDWORKER) > 0) {
-    cost -= cost * .25;
-  } else if (char_get_bonuses(ch, BONUS_SLACKER) > 0) {
-    cost += cost * .25;
-  }
-
-  if (char_get_relax_count(ch) >= 464) {
-    cost *= 50;
-  } else if (char_get_relax_count(ch) >= 232) {
-    cost *= 15;
-  } else if (char_get_relax_count(ch) >= 116) {
-    cost *= 4;
-  }
-
-  if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
-    send_to_char(g, ch, "You will gain nothing from exercising!\r\n");
-    return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
-  if ((getCurST(g, ch)) < cost) {
-    send_to_char(g, ch, "You are too tired!\r\n");
-    return;
-  }
-  if (char_plr_flagged(ch, PLR_SPAR)) {
-    send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
-    return;
-  }
-  if (char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "You are fighting you moron!\r\n");
-    return;
-  }
-  if (char_aff_flagged(ch, AFF_FLYING)) {
-    send_to_char(g, ch, "You can't do pushups in midair!\r\n");
-    return;
-  }
-
-  else {
-    if (room_get_gravity(g, char_get_in_room(ch)) == 0) {
-      bonus = 1;
-      act(g, "@gYou do a pushup.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 10) {
-      bonus = rand_number(g, 3, 7);
-      act(g, "@gYou do a pushup, feeling the strain of gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 20) {
-      bonus = rand_number(g, 8, 14);
-      act(g, "@gYou do a pushup, and feel gravity's pull.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 30) {
-      bonus = rand_number(g, 14, 20);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 40) {
-      bonus = rand_number(g, 20, 35);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 50) {
-      bonus = rand_number(g, 40, 60);
-      act(g, "@gYou do a pushup, and feel the burn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 100) {
-      bonus = rand_number(g, 180, 250);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 200) {
-      bonus = rand_number(g, 400, 600);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 300) {
-      bonus = rand_number(g, 800, 1200);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 400) {
-      bonus = rand_number(g, 2000, 3000);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 500) {
-      bonus = rand_number(g, 4000, 6000);
-      act(g, "@gYou do a pushup, and really strain against the gravity.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 1000) {
-      bonus = rand_number(g, 9000, 10000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 5000) {
-      bonus = rand_number(g, 15000, 20000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) == 10000) {
-      bonus = rand_number(g, 25000, 30000);
-      act(g, "@gYou do a pushup, and it was a really hard one to finish.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    }
-    if (cost >= getMaxPLTrans(g, ch) / 2) {
-      send_to_char(g, ch, "This gravity is a great challenge for you!\r\n");
-      bonus *= 10;
-    } else if (cost >= getMaxPLTrans(g, ch) / 4) {
-      send_to_char(g, ch, "This gravity is an awesome challenge for you!\r\n");
-      bonus *= 8;
-    } else if (cost >= getMaxPLTrans(g, ch) / 10) {
-      send_to_char(g, ch, "This gravity is a good challenge for you!\r\n");
-      bonus *= 6;
-    } else if (cost < getMaxPLTrans(g, ch) / 1000) {
-      send_to_char(g, ch, "This gravity is so easy to you, you could do it in your sleep....\r\n");
-      bonus /= 8;
-    } else if (cost < getMaxPLTrans(g, ch) / 100) {
-      send_to_char(g, ch, "This gravity is the opposite of a challenge for you....\r\n");
-      bonus /= 5;
-    } else if (cost < getMaxPLTrans(g, ch) / 50) {
-      send_to_char(g, ch, "This gravity is definitely not a challenge for you....\r\n");
-      bonus /= 4;
-    } else if (cost < getMaxPLTrans(g, ch) / 30) {
-      send_to_char(g, ch, "This gravity is barely a challenge for you....\r\n");
-      bonus /= 3;
-    } else if (cost < getMaxPLTrans(g, ch) / 20) {
-      send_to_char(g, ch, "This gravity is hardly a challenge for you....\r\n");
-      bonus /= 2;
-    } else {
-      send_to_char(g, ch, "This gravity is just perfect for you....\r\n");
-      bonus *= 4;
-    }
-    if (is_soft_cap(ch, 0, 1.0)) {
-      bonus = 0;
-    }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-      bonus *= 10;
-    } else if (room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-        bonus *= 10;
-      } else {
-        bonus *= 5;
-      }
-    } else if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-      send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
-      bonus *= 20;
-    }
-    if (bonus <= 0 && !room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      bonus = 1;
-    }
-    if (bonus <= 0 && room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
-      bonus = 15;
-    }
-    if (bonus <= 1 && room_flagged(g, char_get_in_room(ch), ROOM_WORKOUT)) {
-      if (char_get_in_room(ch) >= 19100 && char_get_in_room(ch) <= 19199) {
-        bonus = 12;
-      } else {
-        bonus = 6;
-      }
-    }
-    bonus += char_get_level(ch) / 20;
-    if (char_is_namek(ch)) {
-      bonus -= bonus / 4;
-    }
-    if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
-      bonus += bonus * 0.5;
-    }
-    if (char_get_bonuses(ch, BONUS_LONER)) {
-      bonus += bonus * 0.1;
-    }
-    /* Rillao: transloc, add new transes here */
-    send_to_char(g, ch, "You feel slightly stronger @D[@G+{}@D]@n.\r\n", add_commas(bonus));
-
-    if (char_is_human(ch)) {
-      bonus = bonus * 0.8;
-    }
-    gainBasePL(ch, bonus, true);
-    if (room_get_gravity(g, char_get_in_room(ch)) <= 50) {
-      char_set_wait(ch, PULSE_2SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 200) {
-      char_set_wait(ch, PULSE_3SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 500) {
-      char_set_wait(ch, PULSE_4SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 1000) {
-      char_set_wait(ch, PULSE_5SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 5000) {
-      char_set_wait(ch, PULSE_6SEC);
-    } else if (room_get_gravity(g, char_get_in_room(ch)) <= 10000) {
-      char_set_wait(ch, PULSE_7SEC);
-    }
-    decCurST(g, ch, cost, 0);
-  }
+  bonus += char_get_level(ch) / 20;
+  if (char_is_namek(ch))
+    bonus += bonus / 2;
+  if (char_get_bonuses(ch, BONUS_LONER))
+    bonus += bonus * 0.1;
+  send_to_char(g, ch, "You feel your spirit grow stronger @D[@G+{}@D]@n.\r\n", add_commas(bonus));
+  gainBaseKI(ch, bonus, true);
+  exercise_wait(ch, gravity);
+  decCurKI(g, ch, cost, 0);
 }
 
 /* This handles many player specific routines. It may be a bit too bloated though. */
