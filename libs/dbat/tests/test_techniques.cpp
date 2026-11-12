@@ -330,6 +330,30 @@ static void creates(GameWorld *g, struct char_data *att, int skill, int concentr
   char_set_practice_points(g, att, practices);
 }
 
+/* att trains at level 70 with every stat at 30, carrying 1 in gravity that makes the training about this share of
+   their power level */
+static void trains(GameWorld *g, struct char_data *att, double share = 0.3)
+{
+  struct obj_data *obj = read_object(g, 70);
+  obj_set_weight(obj, 1);
+  obj_to_char(g, obj, att);
+  char_set_class_level(att, 70);
+  for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel,
+                   char_set_real_abils_wis, char_set_real_abils_dex})
+    set(att, 30);
+  room_set_gravity(g, char_get_in_room(att), (int)(getEffMaxPL(g, att) * share));
+}
+
+/* ... with their sensei (an assassin's is in the town square), who is paid */
+static void with_sensei(GameWorld *g, struct char_data *att, bool paid = true)
+{
+  char_set_class(att, CLASS_ASSASSIN);
+  char_from_room(g, att);
+  char_to_room(g, att, 300);
+  char_set_gold(att, paid ? 8 : 7);
+  char_set_practice_points(g, att, 1);
+}
+
 /* a scene's setup, with what it doesn't use put aside */
 #define SETUP(body) [](GameWorld *g, char_data *att, char_data *victim) { (void)g; (void)att; (void)victim; body }
 
@@ -870,6 +894,115 @@ static const struct scene {
     {"senzu, hurt", "create senzu", false, SETUP(creates(g, att, 100, 0, 60); decCurHealth(g, att, 1, 0);), false, 1},
     {"senzu, tired", "create senzu", false, SETUP(creates(g, att, 100, 0, 60); decCurST(g, att, 1, 0);), false, 1},
     {"senzu, short of ki", "create senzu", false, SETUP(creates(g, att, 100, 0, 60); decCurKI(g, att, 1, 0);), false, 1},
+    {"the status", "train", false, SETUP(trains(g, att);), false, 1},
+    {"the status, with progress", "train", false, SETUP(trains(g, att); char_set_trainstr(g, att, 12345); char_set_traincon(g, att, 7);), false, 1},
+    {"the status, capped", "train", false, SETUP(trains(g, att); char_set_real_abils_str(att, 80); char_set_real_abils_wis(att, 80);), false, 1},
+    {"the status, as a human", "train", false, SETUP(trains(g, att); char_set_race(att, RACE_HUMAN);), false, 1},
+    {"the status, as a kanassan", "train", false, SETUP(trains(g, att); char_set_race(att, RACE_KANASSAN);), false, 1},
+    {"the status, as a halfbreed", "train", false, SETUP(trains(g, att); char_set_race(att, RACE_HALFBREED);), false, 1},
+    {"the status, as a truffle", "train", false, SETUP(trains(g, att); char_set_race(att, RACE_TRUFFLE);), false, 1},
+    {"weighted down", "train str", false, SETUP(trains(g, att); obj_data *rock = read_object(g, 70); obj_set_weight(rock, 2000000000); obj_to_char(g, rock, att);), false, 1},
+    {"something unknown", "train luck", false, SETUP(trains(g, att);), false, 1},
+    {"something unknown, with a sensei", "train luck", false, SETUP(with_sensei(g, att); trains(g, att);), false, 1},
+    {"with a sensei, unpaid", "train str", false, SETUP(with_sensei(g, att, false); trains(g, att);), false, 1},
+    {"with a sensei, without practices", "train str", false, SETUP(with_sensei(g, att); char_set_practice_points(g, att, 0); trains(g, att);), false, 1},
+    {"with a sensei, at level 5", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 5);), false, 1},
+    {"with a sensei, at level 10", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 10);), false, 1},
+    {"with a sensei, at level 20", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 20);), false, 1},
+    {"with a sensei, at level 40", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 40);), false, 1},
+    {"with a sensei, at level 80", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 80);), false, 1},
+    {"with a sensei, at level 100", "train str", false, SETUP(with_sensei(g, att); trains(g, att, 0.001); char_set_class_level(att, 100);), false, 1},
+    {"str", "train str", false, SETUP(trains(g, att);), false, 4},
+    {"str, improving", "train str", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"str, maxed", "train str", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"spd", "train spd", false, SETUP(trains(g, att);), false, 4},
+    {"spd, improving", "train spd", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"spd, maxed", "train spd", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"con", "train con", false, SETUP(trains(g, att);), false, 4},
+    {"con, improving", "train con", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"con, maxed", "train con", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"int", "train int", false, SETUP(trains(g, att);), false, 4},
+    {"int, improving", "train int", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"int, maxed", "train int", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"wis", "train wis", false, SETUP(trains(g, att);), false, 4},
+    {"wis, improving", "train wis", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"wis, maxed", "train wis", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"agl", "train agl", false, SETUP(trains(g, att);), false, 4},
+    {"agl, improving", "train agl", false, SETUP(trains(g, att); char_set_trainstr(g, att, 99999); char_set_trainspd(g, att, 99999); char_set_traincon(g, att, 99999); char_set_trainint(g, att, 99999); char_set_trainwis(g, att, 99999); char_set_trainagl(g, att, 99999);), false, 1},
+    {"agl, maxed", "train agl", false, SETUP(trains(g, att); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 80);), false, 1},
+    {"STR", "train STR", false, SETUP(trains(g, att);), false, 1},
+    {"str, improving as a human", "train str", false, SETUP(trains(g, att); char_set_race(att, RACE_HUMAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"con, improving as a human", "train con", false, SETUP(trains(g, att); char_set_race(att, RACE_HUMAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"int, improving as a human", "train int", false, SETUP(trains(g, att); char_set_race(att, RACE_HUMAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"agl, improving as a human", "train agl", false, SETUP(trains(g, att); char_set_race(att, RACE_HUMAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"str, improving as a kanassan", "train str", false, SETUP(trains(g, att); char_set_race(att, RACE_KANASSAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"con, improving as a kanassan", "train con", false, SETUP(trains(g, att); char_set_race(att, RACE_KANASSAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"int, improving as a kanassan", "train int", false, SETUP(trains(g, att); char_set_race(att, RACE_KANASSAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"agl, improving as a kanassan", "train agl", false, SETUP(trains(g, att); char_set_race(att, RACE_KANASSAN); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"str, improving as a halfbreed", "train str", false, SETUP(trains(g, att); char_set_race(att, RACE_HALFBREED); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"con, improving as a halfbreed", "train con", false, SETUP(trains(g, att); char_set_race(att, RACE_HALFBREED); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"int, improving as a halfbreed", "train int", false, SETUP(trains(g, att); char_set_race(att, RACE_HALFBREED); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"agl, improving as a halfbreed", "train agl", false, SETUP(trains(g, att); char_set_race(att, RACE_HALFBREED); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"str, improving as a truffle", "train str", false, SETUP(trains(g, att); char_set_race(att, RACE_TRUFFLE); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"con, improving as a truffle", "train con", false, SETUP(trains(g, att); char_set_race(att, RACE_TRUFFLE); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"int, improving as a truffle", "train int", false, SETUP(trains(g, att); char_set_race(att, RACE_TRUFFLE); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"agl, improving as a truffle", "train agl", false, SETUP(trains(g, att); char_set_race(att, RACE_TRUFFLE); char_set_trainstr(g, att, 18000); char_set_traincon(g, att, 18000); char_set_trainint(g, att, 18000); char_set_trainagl(g, att, 18000);), false, 1},
+    {"str, flawed at 70", "train str", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_WIMP, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"spd, flawed at 70", "train spd", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_SLOW, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"con, flawed at 70", "train con", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_FRAIL, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"int, flawed at 70", "train int", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_DULL, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"wis, flawed at 70", "train wis", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_FOOLISH, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"agl, flawed at 70", "train agl", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_CLUMSY, 1); for (auto set : {char_set_real_abils_str, char_set_real_abils_cha, char_set_real_abils_con, char_set_real_abils_intel, char_set_real_abils_wis, char_set_real_abils_dex}) set(att, 70);), false, 1},
+    {"str, flawed at 69", "train str", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_WIMP, 1); char_set_real_abils_str(att, 69);), false, 1},
+    {"str at level 20, at 20", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 20); char_set_real_abils_str(att, 20);), false, 1},
+    {"str at level 21, at 20", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 21); char_set_real_abils_str(att, 20);), false, 1},
+    {"str at level 40, at 40", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 40); char_set_real_abils_str(att, 40);), false, 1},
+    {"str at level 41, at 40", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 41); char_set_real_abils_str(att, 40);), false, 1},
+    {"str at level 60, at 60", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 60); char_set_real_abils_str(att, 60);), false, 1},
+    {"str at level 61, at 60", "train str", false, SETUP(trains(g, att); char_set_class_level(att, 61); char_set_real_abils_str(att, 60);), false, 1},
+    {"str, tired", "train str", false, SETUP(trains(g, att); decCurST(g, att, getMaxST(g, att), 0);), false, 1},
+    {"int, without the ki", "train int", false, SETUP(trains(g, att); drained(g, att);), false, 1},
+    {"str, with a share of 0", "train str", false, SETUP(trains(g, att, 0);), false, 1},
+    {"str, with a share of 0.05", "train str", false, SETUP(trains(g, att, 0.05);), false, 1},
+    {"int, with a share of 0.05", "train int", false, SETUP(trains(g, att, 0.05);), false, 1},
+    {"str, with a share of 0.08", "train str", false, SETUP(trains(g, att, 0.08);), false, 1},
+    {"int, with a share of 0.08", "train int", false, SETUP(trains(g, att, 0.08);), false, 1},
+    {"str, with a share of 0.15", "train str", false, SETUP(trains(g, att, 0.15);), false, 1},
+    {"int, with a share of 0.15", "train int", false, SETUP(trains(g, att, 0.15);), false, 1},
+    {"int, with a share of 0", "train int", false, SETUP(trains(g, att, 0);), false, 1},
+    {"str, with a share of 0.1", "train str", false, SETUP(trains(g, att, 0.1);), false, 1},
+    {"int, with a share of 0.1", "train int", false, SETUP(trains(g, att, 0.1);), false, 1},
+    {"str, with a share of 0.2", "train str", false, SETUP(trains(g, att, 0.2);), false, 1},
+    {"int, with a share of 0.2", "train int", false, SETUP(trains(g, att, 0.2);), false, 1},
+    {"str, with a share of 0.4", "train str", false, SETUP(trains(g, att, 0.4);), false, 1},
+    {"int, with a share of 0.4", "train int", false, SETUP(trains(g, att, 0.4);), false, 1},
+    {"str, with a share of 0.7", "train str", false, SETUP(trains(g, att, 0.7);), false, 1},
+    {"int, with a share of 0.7", "train int", false, SETUP(trains(g, att, 0.7);), false, 1},
+    {"str, with a share of 1.5", "train str", false, SETUP(trains(g, att, 1.5);), false, 1},
+    {"int, with a share of 1.5", "train int", false, SETUP(trains(g, att, 1.5);), false, 1},
+    {"str, with a share of 3", "train str", false, SETUP(trains(g, att, 3);), false, 1},
+    {"int, with a share of 3", "train int", false, SETUP(trains(g, att, 3);), false, 1},
+    {"str, relaxed 115 times", "train str", false, SETUP(trains(g, att); char_set_relax_count(att, 115);), false, 1},
+    {"str, relaxed 116 times", "train str", false, SETUP(trains(g, att); char_set_relax_count(att, 116);), false, 1},
+    {"str, relaxed 232 times", "train str", false, SETUP(trains(g, att); char_set_relax_count(att, 232);), false, 1},
+    {"str, relaxed 464 times", "train str", false, SETUP(trains(g, att); char_set_relax_count(att, 464);), false, 1},
+    {"str, brawny", "train str", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_BRAWNY, 1);), false, 1},
+    {"spd, quick", "train spd", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_QUICK, 1);), false, 1},
+    {"con, sturdy", "train con", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_STURDY, 1);), false, 1},
+    {"int, scholarly", "train int", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_SCHOLARLY, 1);), false, 1},
+    {"wis, sage", "train wis", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_SAGE, 1);), false, 1},
+    {"agl, agile", "train agl", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_AGILE, 1);), false, 1},
+    {"str, hardworker", "train str", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_HARDWORKER, 1);), false, 1},
+    {"str, loner", "train str", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_LONER, 1);), false, 1},
+    {"int, hardworker", "train int", false, SETUP(trains(g, att); char_set_bonuses(att, BONUS_HARDWORKER, 1);), false, 1},
+    {"str, in the time chamber", "train str", false, SETUP(trains(g, att); room_set_flag(g, char_get_in_room(att), ROOM_HBTC, true);), false, 1},
+    {"str, with a sensei", "train str", false, SETUP(with_sensei(g, att); trains(g, att);), false, 4},
+    {"int, with a sensei", "train int", false, SETUP(with_sensei(g, att); trains(g, att);), false, 1},
+    {"str, improving with a sensei", "train str", false, SETUP(with_sensei(g, att); trains(g, att); char_set_trainstr(g, att, 99999);), false, 1},
+    {"str, hidden", "train str", false, SETUP(trains(g, att); char_aff_set(att, AFF_HIDE, true);), false, 1},
+    {"str, improving as Nail's namek", "train str", false, SETUP(trains(g, att); char_set_class(att, CLASS_PICCOLO); char_set_race(att, RACE_NAMEK); char_set_exp(att, 0); char_set_trainstr(g, att, 99999);), false, 1},
+    {"str, improving as Nail's namek, past the level", "train str", false, SETUP(trains(g, att); char_set_class(att, CLASS_PICCOLO); char_set_race(att, RACE_NAMEK); char_set_exp(att, 4000000000000LL); char_set_trainstr(g, att, 99999);), false, 1},
+    {"str, improving as Piccolo's saiyan", "train str", false, SETUP(trains(g, att); char_set_class(att, CLASS_PICCOLO); char_set_race(att, RACE_SAIYAN); char_set_exp(att, 0); char_set_trainstr(g, att, 99999);), false, 1},
 };
 #undef SETUP
 constexpr int SCENE_SEEDS = 4;

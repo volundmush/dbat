@@ -1,5 +1,8 @@
 /* training.c: training, exercises and growth
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
+#include <array>
+
 #include <sys/stat.h>
 
 #include "dbat/args.hpp"
@@ -73,419 +76,256 @@ void bring_to_cap(struct char_data *ch)
   }
 }
 
+namespace {
+
+/* What one does to train a stat, to themselves and to the room */
+struct drill {
+  const char *to_char, *to_room;
+};
+
+/* The stats one can train, in the order the status shows them */
+struct trained_stat {
+  std::string_view word; /* what's typed */
+  std::string_view name;
+  std::string_view label; /* in the status */
+  int8_t *(*slot)(struct char_data *);
+  int player_special_data::*progress;
+  int bonus_trait, nega_trait;
+  bool uses_ki; /* rather than stamina */
+  std::array<drill, 3> drills;
+};
+
+constexpr trained_stat STATS[] = {
+    {"str", "strength", "Strength Progress    ", char_real_abils_str_slot, &player_special_data::trainstr, BONUS_BRAWNY, BONUS_WIMP, false,
+     {{{"@WYou throw a flurry of punches into the air at an invisible opponent.@n", "@W$n throws a flurry of punches into the air.@n"},
+       {"@WYou leap into the air and throw a wild kick at an invisible opponent@n", "@W$n leaps into the air and throws a wild kick at nothing.@n"},
+       {"@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", "@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n"}}}},
+    {"spd", "speed", "Speed Progress       ", char_real_abils_cha_slot, &player_special_data::trainspd, BONUS_QUICK, BONUS_SLOW, false,
+     {{{"@WYou dash quickly around the surrounding area as fast as you can!@n", "@W$n dashes quickly around the surrounding area as fast as $e can!@n"},
+       {"@WYou dodge to the side as fast as you can!@n", "@W$n dodges to the side as fast as $e can!@n"},
+       {"@WYou dash backwards as fast as you can!@n", "@W$n dashes backwards as fast as $e can!@n"}}}},
+    {"con", "constitution", "Constitution Progress", char_real_abils_con_slot, &player_special_data::traincon, BONUS_STURDY, BONUS_FRAIL, false,
+     {{{"@WYou leap into the air and then slam into the ground with your feet outstretched!@n", "@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n"},
+       {"@WYou leap into the air and then slam into the ground with your fists!@n", "@W$n leaps into the air and then slams into the ground with $s fists!?@n"},
+       {"@WYou leap into the air and then slam into the ground with your body!@n", "@W$n leaps into the air and then slams into the ground with $s body!?@n"}}}},
+    {"int", "intelligence", "Intelligence Progress", char_real_abils_intel_slot, &player_special_data::trainint, BONUS_SCHOLARLY, BONUS_DULL, true,
+     {{{"@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", "@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n"},
+       {"@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", "@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n"},
+       {"@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", "@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n"}}}},
+    {"wis", "wisdom", "Wisdom Progress      ", char_real_abils_wis_slot, &player_special_data::trainwis, BONUS_SAGE, BONUS_FOOLISH, true,
+     {{{"@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", "@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n"},
+       {"@WYou look around and contemplate battle tactics for an imaginary scenario.@n", "@W$n looks around and appears to be imagining things that aren't there.@n"},
+       {"@WYou invent a battle plan for a battle that doesn't exist!@n", "@W$n seems to have thought of something.@n"}}}},
+    {"agl", "agility", "Agility Progress     ", char_real_abils_dex_slot, &player_special_data::trainagl, BONUS_AGILE, BONUS_CLUMSY, false,
+     {{{"@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n"},
+       {"@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n"},
+       {"@WYou flip to the side off one hand and then land on your feet.@n", "@W$n flips to the side off one hand and then lands on $s feet.@n"}}}},
+};
+constexpr size_t N_STATS = std::size(STATS);
+
+/* Some races need more (or less) training for some stats: shares of the usual, in STATS' order */
+constexpr struct {
+  bool (*is)(const struct char_data *);
+  std::array<double, N_STATS> share;
+} RACE_SHARES[] = {
+    {char_is_human, {1, 1, 1, 0.75, 0.75, 1}},
+    {char_is_kanassan, {1, 1, 1, 0.4, 0.4, 0.4}},
+    {char_is_halfbreed, {0.75, 1, 1, 0.75, 1, 1}},
+    {char_is_truffle, {1.5, 1, 1.5, 1, 1, 1}},
+};
+
+/* The training a stat takes to go up by one */
+int training_needed(struct char_data *ch, size_t stat)
+{
+  int needed = 5000 + 500 * *STATS[stat].slot(ch);
+  auto race  = std::ranges::find_if(RACE_SHARES, [ch](const auto &r) { return r.is(ch); });
+  if (race != std::end(RACE_SHARES))
+    needed = needed * race->share[stat];
+  return needed;
+}
+
+void training_status(GameWorld *g, struct char_data *ch, int64_t weight)
+{
+  send_to_char(g, ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
+  for (size_t i = 0; i < N_STATS; i++) {
+    const trained_stat &s = STATS[i];
+    send_to_char(g, ch, "  @m{}@D: @R{:>6}/{:>6}@n\r\n", s.label, add_commas(char_get_player_specials(ch)->*s.progress),
+                 *s.slot(ch) >= 80 ? "@rCAPPED" : add_commas(training_needed(ch, i)));
+  }
+  send_to_char(g, ch, "@D  -----------------------------------------  @n\r\n");
+  send_to_char(g, ch, "  @CCurrent Weight Held  @D: @c{}@n\r\n", add_commas(weight));
+  send_to_char(g, ch, "@D---------------------------------------------@n\r\n");
+  send_to_char(g, ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
+}
+
+/* How much more a sensei makes of training, by the student's level: the first row they reach */
+constexpr struct {
+  int level;
+  int64_t mult;
+} SENSEI_MULTS[] = {{100, 15000}, {80, 1500}, {40, 600}, {20, 300}, {10, 150}};
+
+/* How hard the training is (its weight against the trainee's power level), from the easiest that counts */
+constexpr struct {
+  int gain;
+  const char *feel;
+  int wait;
+} GAINS[] = {
+    {5, "slight improvement.", PULSE_3SEC},
+    {10, "some improvement.", PULSE_3SEC},
+    {25, "good improvement.", PULSE_3SEC},
+    {50, "great improvement!", PULSE_5SEC},
+    {100, "awesome improvement!", PULSE_5SEC},
+};
+
+/* 0 for too easy to count, or 1 + the row of GAINS */
+int training_difficulty(GameWorld *g, struct char_data *ch, int64_t total)
+{
+  int64_t pl                 = getEffMaxPL(g, ch);
+  const int64_t thresholds[] = {pl / 8, pl / 4, pl / 2, pl, pl * 2};
+  int bonus                  = 0;
+  for (int64_t t : thresholds)
+    if (total > t)
+      bonus++;
+  return bonus;
+}
+
+/* The stat cap for a level */
+int stat_cap(struct char_data *ch)
+{
+  int level = char_get_level(ch);
+  return level >= 61 ? 80 : level > 40 ? 60 : level > 20 ? 40 : 20;
+}
+
+} // namespace
+
 ACMD(do_train)
 {
-
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
     return;
-  }
 
   if (char_get_carry_weight(ch) > getMaxCarryWeight(g, ch)) {
     send_to_char(g, ch, "You are weighted down too much!\r\n");
     return;
   }
 
-  int plus      = 0;
-  int64_t total = 0, weight = 0, bonus = 0, cost = 0;
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  weight = getCurCarriedWeight(ch);
-
-  int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
-
-  strcap += 500 * char_get_real_abils_str(ch);
-  intcap += 500 * char_get_real_abils_intel(ch);
-  wiscap += 500 * char_get_real_abils_wis(ch);
-  spdcap += 500 * char_get_real_abils_cha(ch);
-  concap += 500 * char_get_real_abils_con(ch);
-  aglcap += 500 * char_get_real_abils_dex(ch);
-
-  if (char_is_human(ch)) {
-    intcap = intcap * 0.75;
-    wiscap = wiscap * 0.75;
-  } else if (char_is_kanassan(ch)) {
-    intcap = intcap * 0.4;
-    wiscap = wiscap * 0.4;
-    aglcap = aglcap * 0.4;
-  } else if (char_is_halfbreed(ch)) {
-    intcap = intcap * 0.75;
-    strcap = strcap * 0.75;
-  } else if (char_is_truffle(ch)) {
-    strcap = strcap * 1.5;
-    concap = concap * 1.5;
-  }
+  std::string arg       = take_arg(rest);
+  int64_t weight        = getCurCarriedWeight(ch);
 
   if (arg.empty()) {
-    send_to_char(g, ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
-    send_to_char(g, ch, "  @mStrength Progress    @D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_trainstr(g, ch)), char_get_real_abils_str(ch) >= 80 ? "@rCAPPED" : add_commas(strcap));
-    send_to_char(g, ch, "  @mSpeed Progress       @D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_trainspd(g, ch)), char_get_real_abils_cha(ch) >= 80 ? "@rCAPPED" : add_commas(spdcap));
-    send_to_char(g, ch, "  @mConstitution Progress@D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_traincon(g, ch)), char_get_real_abils_con(ch) >= 80 ? "@rCAPPED" : add_commas(concap));
-    send_to_char(g, ch, "  @mIntelligence Progress@D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_trainint(g, ch)), char_get_real_abils_intel(ch) >= 80 ? "@rCAPPED" : add_commas(intcap));
-    send_to_char(g, ch, "  @mWisdom Progress      @D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_trainwis(g, ch)), char_get_real_abils_wis(ch) >= 80 ? "@rCAPPED" : add_commas(wiscap));
-    send_to_char(g, ch, "  @mAgility Progress     @D: @R{:>6}/{:>6}@n\r\n", add_commas(char_get_trainagl(g, ch)), char_get_real_abils_dex(ch) >= 80 ? "@rCAPPED" : add_commas(aglcap));
-    send_to_char(g, ch, "@D  -----------------------------------------  @n\r\n");
-    send_to_char(g, ch, "  @CCurrent Weight Held  @D: @c{}@n\r\n", add_commas(weight));
-    send_to_char(g, ch, "@D---------------------------------------------@n\r\n");
-    send_to_char(g, ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
+    training_status(g, ch, weight);
     return;
   }
 
-  /*
- if (weight < (GET_LEVEL(ch) * 100) && GET_LEVEL(ch) <= 19) {
-  send_to_char(ch, "With so little weight on you like that it would be a joke to try and train.\r\n");
-  return;
- } else if (weight < (GET_LEVEL(ch) * 110) && GET_LEVEL(ch) <= 45) {
-  send_to_char(ch, "With so little weight on you like that it would be a joke to try and train.\r\n");
-  return;
- } else if (weight < (GET_LEVEL(ch) * 125) && GET_LEVEL(ch) > 45) {
-  send_to_char(ch, "With so little weight on you like that it would be a joke to try and train.\r\n");
-  return;
- }
-*/
-
   /* Figure up the weight bonus */
-  total = weight * (room_get_gravity(g, char_get_in_room(ch)) + 1);
-  total += (room_get_gravity(g, char_get_in_room(ch)) + 1) ^ 2;
-  if (char_get_in_room(ch) >= 6100 && char_get_in_room(ch) <= 6135) {
+  int gravity   = room_get_gravity(g, char_get_in_room(ch));
+  int64_t total = weight * (gravity + 1);
+  total += (gravity + 1) ^ 2; /* quirk: ^ is exclusive or, not a power */
+  if (char_get_in_room(ch) >= 6100 && char_get_in_room(ch) <= 6135)
     total += total * 0.15;
-  }
 
-  int sensei = -1;
-
-  if (char_get_in_room(ch) == sensei_location_id(char_get_class(ch))) {
+  bool sensei = char_get_in_room(ch) == sensei_location_id(char_get_class(ch));
+  if (sensei) {
     if (!(char_get_gold(ch) >= 8 && char_get_practice_points(g, ch) >= 1)) {
       send_to_char(g, ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
       return;
     }
     total += total * 0.85;
-    if (char_get_level(ch) >= 100)
-      total *= 15000;
-    else if (char_get_level(ch) >= 80)
-      total *= 1500;
-    else if (char_get_level(ch) >= 40)
-      total *= 600;
-    else if (char_get_level(ch) >= 20)
-      total *= 300;
-    else if (char_get_level(ch) >= 10)
-      total *= 150;
-    sensei = char_get_class(ch);
+    auto row = std::ranges::find_if(SENSEI_MULTS, [ch](const auto &m) { return char_get_level(ch) >= m.level; });
+    if (row != std::end(SENSEI_MULTS))
+      total *= row->mult;
     send_to_char(g, ch, "@G{} begins to instruct you in training technique.@n\r\n", char_sensei_name(ch));
   }
 
-  if (total > getEffMaxPL(g, ch) * 2) {
-    bonus = 5;
-  } else if (total > getEffMaxPL(g, ch)) {
-    bonus = 4;
-  } else if (total > (getEffMaxPL(g, ch) / 2)) {
-    bonus = 3;
-  } else if (total > (getEffMaxPL(g, ch) / 4)) {
-    bonus = 2;
-  } else if (total > (getEffMaxPL(g, ch) / 8)) {
-    bonus = 1;
-  }
-
-  if (sensei < 0)
-    cost = ((total / 20) + (getMaxST(g, ch) / 50));
-  else
-    cost = ((total / 25) + (getMaxST(g, ch) / 60));
-
-  if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
+  int bonus    = training_difficulty(g, ch, total);
+  int64_t cost = sensei ? total / 25 + getMaxST(g, ch) / 60 : total / 20 + getMaxST(g, ch) / 50;
+  if (char_get_bonuses(ch, BONUS_HARDWORKER))
     cost -= cost * 0.25;
-  }
-
-  if (char_get_relax_count(ch) >= 464) {
+  if (char_get_relax_count(ch) >= 464)
     cost *= 10;
-  } else if (char_get_relax_count(ch) >= 232) {
+  else if (char_get_relax_count(ch) >= 232)
     cost *= 5;
-  } else if (char_get_relax_count(ch) >= 116) {
+  else if (char_get_relax_count(ch) >= 116)
     cost *= 2;
-  }
 
-  int stat_id           = 0;
-  int8_t *stat_val      = nullptr;
-  const char *stat_name = nullptr;
-  int bonus_trait       = -1;
-  int nega_trait        = -1;
-  int *stat_train       = nullptr;
-  int needed            = 0;
-
-  if (str_eq_nocase("str", arg)) {
-    stat_id     = 1;
-    stat_val    = char_real_abils_str_slot(ch);
-    stat_name   = "strength";
-    bonus_trait = BONUS_BRAWNY;
-    nega_trait  = BONUS_WIMP;
-    stat_train  = &(char_get_player_specials(ch)->trainstr);
-    needed      = strcap;
-  } else if (str_eq_nocase("spd", arg)) {
-    stat_id     = 2;
-    stat_val    = char_real_abils_cha_slot(ch);
-    stat_name   = "speed";
-    bonus_trait = BONUS_QUICK;
-    nega_trait  = BONUS_SLOW;
-    stat_train  = &(char_get_player_specials(ch)->trainspd);
-    needed      = spdcap;
-  } else if (str_eq_nocase("con", arg)) {
-    stat_id     = 3;
-    stat_val    = char_real_abils_con_slot(ch);
-    stat_name   = "constitution";
-    bonus_trait = BONUS_STURDY;
-    nega_trait  = BONUS_FRAIL;
-    stat_train  = &(char_get_player_specials(ch)->traincon);
-    needed      = concap;
-  } else if (str_eq_nocase("agl", arg)) {
-    stat_id     = 4;
-    stat_val    = char_real_abils_dex_slot(ch);
-    stat_name   = "agility";
-    bonus_trait = BONUS_AGILE;
-    nega_trait  = BONUS_CLUMSY;
-    stat_train  = &(char_get_player_specials(ch)->trainagl);
-    needed      = aglcap;
-  } else if (str_eq_nocase("int", arg)) {
-    stat_id     = 5;
-    stat_val    = char_real_abils_intel_slot(ch);
-    stat_name   = "intelligence";
-    bonus_trait = BONUS_SCHOLARLY;
-    nega_trait  = BONUS_DULL;
-    stat_train  = &(char_get_player_specials(ch)->trainint);
-    needed      = intcap;
-  } else if (str_eq_nocase("wis", arg)) {
-    stat_id     = 6;
-    stat_val    = char_real_abils_wis_slot(ch);
-    stat_name   = "wisdom";
-    bonus_trait = BONUS_SAGE;
-    nega_trait  = BONUS_FOOLISH;
-    stat_train  = &(char_get_player_specials(ch)->trainwis);
-    needed      = wiscap;
-  } else {
+  auto found = std::ranges::find_if(STATS, [&](const trained_stat &s) { return str_eq_nocase(s.word, arg); });
+  if (found == std::end(STATS)) {
     send_to_char(g, ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
     return;
   }
+  const trained_stat &stat = *found;
+  int8_t *stat_val         = stat.slot(ch);
 
   if (*stat_val == 80) {
-    send_to_char(g, ch, "Your base {} is maxed!\r\n", stat_name);
+    send_to_char(g, ch, "Your base {} is maxed!\r\n", stat.name);
     return;
   }
-
-  if (*stat_val >= 70 && char_get_bonuses(ch, nega_trait) > 0) {
-    send_to_char(g, ch, "You're not able to withstand increasing your {} beyond 70.\r\n", stat_name);
+  if (*stat_val >= 70 && char_get_bonuses(ch, stat.nega_trait) > 0) {
+    send_to_char(g, ch, "You're not able to withstand increasing your {} beyond 70.\r\n", stat.name);
     return;
   }
-
-  int stat_cap = 20;
-  if (char_get_level(ch) >= 61)
-    stat_cap = 80;
-  else if (char_get_level(ch) > 40)
-    stat_cap = 60;
-  else if (char_get_level(ch) > 20)
-    stat_cap = 40;
-
-  if (*stat_val >= stat_cap) {
+  if (*stat_val >= stat_cap(ch)) {
     send_to_char(g, ch, "You have reached the stat cap for your level.\r\n");
     return;
   }
 
-  switch (stat_id) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-      if ((getCurST(g, ch)) < cost) {
-        send_to_char(g, ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
-        return;
-      }
-      plus = (((total / 20) + (getMaxST(g, ch) / 50)) * 100) / getMaxST(g, ch);
-      decCurST(g, ch, cost, 0);
-      break;
-    case 5:
-    case 6:
-      if ((getCurKI(g, ch)) < cost) {
-        send_to_char(g, ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
-        return;
-      }
-      plus = (((total / 20) + (getMaxKI(g, ch) / 50)) * 100) / getMaxKI(g, ch);
-      decCurKI(g, ch, cost, 0);
-      break;
-  }
-
-  /* what training message is displayed? */
-  reveal_hiding(g, ch, 0);
-
-  int msg_case = rand_number(g, 1, 3);
-
-  switch (stat_id) {
-    case 1:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n throws a flurry of punches into the air.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou leap into the air and throw a wild kick at an invisible opponent@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n leaps into the air and throws a wild kick at nothing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-    case 2:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n dashes quickly around the surrounding area as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou dodge to the side as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n dodges to the side as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou dash backwards as fast as you can!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n dashes backwards as fast as $e can!@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-    case 3:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou leap into the air and then slam into the ground with your fists!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s fists!?@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou leap into the air and then slam into the ground with your body!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n leaps into the air and then slams into the ground with $s body!?@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-    case 4:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou flip to the side off one hand and then land on your feet.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n flips to the side off one hand and then lands on $s feet.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-    case 5:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-    case 6:
-      switch (msg_case) {
-        case 1:
-          act(g, "@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 2:
-          act(g, "@WYou look around and contemplate battle tactics for an imaginary scenario.@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n looks around and appears to be imagining things that aren't there.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-        case 3:
-          act(g, "@WYou invent a battle plan for a battle that doesn't exist!@n", true, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@W$n seems to have thought of something.@n", true, ch, nullptr, nullptr, TO_ROOM);
-          break;
-      }
-      break;
-  }
-
-  plus += 75;
-  /*
-    if (GET_LEVEL(ch) > 80) {
-        plus += 50;
-    } else if (GET_LEVEL(ch) > 60) {
-        plus += 25;
+  int plus;
+  if (stat.uses_ki) {
+    if (getCurKI(g, ch) < cost) {
+      send_to_char(g, ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
+      return;
     }
-     */
+    plus = ((total / 20 + getMaxKI(g, ch) / 50) * 100) / getMaxKI(g, ch);
+    decCurKI(g, ch, cost, 0);
+  } else {
+    if (getCurST(g, ch) < cost) {
+      send_to_char(g, ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
+      return;
+    }
+    plus = ((total / 20 + getMaxST(g, ch) / 50) * 100) / getMaxST(g, ch);
+    decCurST(g, ch, cost, 0);
+  }
 
-  plus *= 2;
+  reveal_hiding(g, ch, 0);
+  const drill &d = stat.drills[rand_number(g, 1, 3) - 1];
+  act(g, d.to_char, true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, d.to_room, true, ch, nullptr, nullptr, TO_ROOM);
 
-  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
+  plus = (plus + 75) * 2;
+  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899)
     plus *= 4;
-  }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))
     plus *= 3;
-  }
-  if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
+  if (char_get_bonuses(ch, BONUS_HARDWORKER))
     plus += plus * 0.25;
-  }
-  if (char_get_bonuses(ch, bonus_trait)) {
+  if (char_get_bonuses(ch, stat.bonus_trait))
     plus += plus * 0.75;
-  }
-  if (char_get_bonuses(ch, BONUS_LONER)) {
+  if (char_get_bonuses(ch, BONUS_LONER))
     plus += plus * 0.05;
-  }
-  if (sensei > -1) {
+  if (sensei)
     plus += plus * 0.2;
+
+  int &progress = char_get_player_specials(ch)->*stat.progress;
+  if (bonus == 0) {
+    progress += 1;
+    send_to_char(g, ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
+    char_set_wait(ch, PULSE_3SEC);
+  } else {
+    const auto &gain = GAINS[bonus - 1];
+    progress += gain.gain + plus;
+    send_to_char(g, ch, "You feel {} @D[@G+{:d}@D]@n\r\n", gain.feel, plus + gain.gain);
+    char_set_wait(ch, gain.wait);
   }
 
-  switch (bonus) {
-    case 1:
-      *stat_train += 5 + plus;
-      send_to_char(g, ch, "You feel slight improvement. @D[@G+{:d}@D]@n\r\n", (plus + 5));
-      char_set_wait(ch, PULSE_3SEC);
-      break;
-    case 2:
-      *stat_train += 10 + plus;
-      send_to_char(g, ch, "You feel some improvement. @D[@G+{:d}@D]@n\r\n", (plus + 10));
-      char_set_wait(ch, PULSE_3SEC);
-      break;
-    case 3:
-      *stat_train += 25 + plus;
-      send_to_char(g, ch, "You feel good improvement. @D[@G+{:d}@D]@n\r\n", (plus + 25));
-      char_set_wait(ch, PULSE_3SEC);
-      break;
-    case 4:
-      *stat_train += 50 + plus;
-      send_to_char(g, ch, "You feel great improvement! @D[@G+{:d}@D]@n\r\n", (plus + 50));
-      char_set_wait(ch, PULSE_5SEC);
-      break;
-    case 5:
-      *stat_train += 100 + plus;
-      send_to_char(g, ch, "You feel awesome improvement! @D[@G+{:d}@D]@n\r\n", (plus + 100));
-      char_set_wait(ch, PULSE_5SEC);
-      break;
-    default:
-      *stat_train += 1;
-      send_to_char(g, ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
-      char_set_wait(ch, PULSE_3SEC);
-      break;
+  if (sensei) {
+    char_set_gold(ch, char_get_gold(ch) - 8);
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - 1);
   }
 
-  if (sensei > -1) {
-    char_set_gold(ch, char_get_gold(ch) - (8));
-    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (1));
-  }
-
-  if (*stat_train >= needed) {
-    *stat_train -= needed;
-    send_to_char(g, ch, "You feel your {} improve!@n\r\n", stat_name);
+  int needed = training_needed(ch, &stat - STATS);
+  if (progress >= needed) {
+    progress -= needed;
+    send_to_char(g, ch, "You feel your {} improve!@n\r\n", stat.name);
     *stat_val += 1;
     if (char_is_piccolo(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0) {
       char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.25));
