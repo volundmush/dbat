@@ -38,6 +38,7 @@
 #include "dbat/handler.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.attack.hpp"
+#include "dbat/act.offensive.hpp"
 #include "dbat/random.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/world_audit.hpp"
@@ -264,6 +265,56 @@ static void group(GameWorld *g, struct char_data *leader, struct char_data *foll
   char_aff_set(follower, AFF_GROUP, true);
 }
 
+/* att wields a sword made into this damage type in pos, in place of whatever was there */
+static struct obj_data *wield(GameWorld *g, struct char_data *att, int damtype, int pos = WEAR_WIELD1, int flag = -1)
+{
+  if (char_get_equipment(att, pos))
+    extract_obj(g, unequip_char(g, att, pos));
+  struct obj_data *obj = read_object(g, 301);
+  obj_set_value(obj, VAL_WEAPON_DAMTYPE, damtype);
+  if (flag >= 0)
+    obj_extra_set(obj, flag, true);
+  equip_char(g, att, obj, pos);
+  for (int skill : {SKILL_SWORD, SKILL_DAGGER, SKILL_CLUB, SKILL_SPEAR, SKILL_GUN, SKILL_BRAWL}) /* to hit with it */
+    char_set_skills_base(att, skill, 100);
+  return obj;
+}
+
+/* ... in the off hand alone */
+static void off_hand(GameWorld *g, struct char_data *att, int damtype)
+{
+  if (char_get_equipment(att, WEAR_WIELD1))
+    extract_obj(g, unequip_char(g, att, WEAR_WIELD1));
+  wield(g, att, damtype, WEAR_WIELD2);
+}
+
+/* ... and a sword in the main hand, and a mastery of the two */
+static void dual(GameWorld *g, struct char_data *att, int damtype, int mastery = 100)
+{
+  wield(g, att, TYPE_SLASH - TYPE_HIT);
+  wield(g, att, damtype, WEAR_WIELD2);
+  char_set_skills_base(att, SKILL_DUALWIELD, mastery);
+}
+
+static void two_handed(struct char_data *att, int mastery)
+{
+  char_plr_set(att, PLR_THANDW, true);
+  char_set_skills_base(att, SKILL_TWOHAND, mastery);
+}
+
+static void defends(struct char_data *victim)
+{
+  char_set_skills_base(victim, SKILL_BLOCK, 100);
+  char_set_skills_base(victim, SKILL_DODGE, 100);
+  char_set_skills_base(victim, SKILL_PARRY, 100);
+}
+
+static void fireshielded(struct char_data *victim)
+{
+  char_aff_set(victim, AFF_FIRESHIELD, true);
+  char_set_skills_base(victim, SKILL_FIRESHIELD, 80);
+}
+
 static void throw_ready(struct char_data *att)
 {
   char_set_skills_base(att, SKILL_THROW, 100);
@@ -278,7 +329,90 @@ static const struct scene {
   const char *line; /* what the attacker types; "namek" is the victim */
   bool fighting;    /* fighting the dummy when it starts */
   void (*setup)(GameWorld *g, struct char_data *att, struct char_data *victim);
+  bool by_mob;      /* a critter makes it in the attacker's place, by do_attack() (mobs only fight so) */
+  int seeds;        /* if not SCENE_SEEDS */
 } scenes[] = {
+    /* attack: each kind of weapon (by damage type), in each hand */
+    {"a sword",              "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); }},
+    {"a dagger",             "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_PIERCE - TYPE_HIT); }},
+    {"a club",               "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_CRUSH - TYPE_HIT); }},
+    {"a spear",              "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT); }},
+    {"a gun",                "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT); }},
+    {"a whip",               "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_WHIP - TYPE_HIT); }},
+    {"an off-hand sword",    "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); }, false, 12},
+    {"an off-hand dagger",   "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_PIERCE - TYPE_HIT); }, false, 12},
+    {"an off-hand club",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_CRUSH - TYPE_HIT); }, false, 12},
+    {"an off-hand spear",    "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_STAB - TYPE_HIT); }, false, 12},
+    {"an off-hand gun",      "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_BLAST - TYPE_HIT); }, false, 12},
+    {"an off-hand whip",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_WHIP - TYPE_HIT); }, false, 12},
+    {"two swords",           "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); }, false, 12},
+    {"and a dagger",         "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_PIERCE - TYPE_HIT); }, false, 12},
+    {"and a club",           "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_CRUSH - TYPE_HIT); }, false, 12},
+    {"and a spear",          "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_STAB - TYPE_HIT); }, false, 12},
+    {"and a gun",            "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_BLAST - TYPE_HIT); char_set_gold(att, 100); }, false, 12},
+    {"and a gun, broke",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_BLAST - TYPE_HIT); char_set_gold(att, 0); }, false, 12},
+    {"and a whip",           "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_WHIP - TYPE_HIT); }, false, 12},
+    {"two swords, fair",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT, 50); }, false, 12},
+    {"two swords, good",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT, 75); }, false, 12},
+    {"two swords, unlearned","attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT, 0); }, false, 12},
+    {"two swords, defended", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); defends(victim); }, false, 12},
+    {"two swords, shielded", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); }, false, 12},
+    {"two swords, fireproof","attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); char_set_bonuses(att, BONUS_FIREPROOF, 1); }, false, 12},
+    {"two swords, right arm broken", "attack namek",         false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_limb_condition(att, 0, 2); char_set_limb_condition(att, 1, -1); }, false, 12},
+    {"two swords, left arm broken",  "attack namek",         false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_limb_condition(att, 1, 4); char_set_limb_condition(att, 0, -1); }, false, 12},
+    {"two daggers, unseen",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_PIERCE - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 4); wield(g, att, TYPE_PIERCE - TYPE_HIT, WEAR_WIELD2); char_set_skills_base(att, SKILL_DUALWIELD, 100); char_set_skills_base(att, SKILL_DAGGER, 100); char_set_skills_base(att, SKILL_MOVE_SILENTLY, 100); char_set_skills_base(att, SKILL_SPOT, 100); }, false, 24},
+    {"a sharp dagger",       "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_PIERCE - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1); char_set_skills_base(att, SKILL_DAGGER, 100); }},
+    {"a level 2 gun",        "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 1); char_set_gold(att, 100); }},
+    {"a level 3 gun",        "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 2); char_set_gold(att, 100); }},
+    {"a level 4 gun",        "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 3); char_set_gold(att, 100); }},
+    {"a level 5 gun",        "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 4); char_set_gold(att, 100); }},
+    {"a level 5 gun, broke", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 4); char_set_gold(att, 5); }},
+    {"a gun, two-handed",    "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_BLAST - TYPE_HIT); two_handed(att, 100); char_set_skills_base(att, SKILL_GUN, 100); }},
+    {"a gun, defended",      "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { wield(g, att, TYPE_BLAST - TYPE_HIT); defends(victim); }},
+    {"a sword, two-handed",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 0); }},
+    {"a sword, two-handed fairly", "attack namek",           false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); }},
+    {"a sword, two-handed well",   "attack namek",           false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 75); }},
+    {"a sword, two-handed masterfully", "attack namek",      false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 100); char_set_skills_base(att, SKILL_SWORD, 100); }, false, 24},
+    {"a level 1 spear, two-handed", "attack namek",          false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1); two_handed(att, 50); }},
+    {"a level 2 spear, two-handed", "attack namek",          false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 1); two_handed(att, 50); }},
+    {"a level 3 spear, two-handed", "attack namek",          false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 2); two_handed(att, 50); }},
+    {"a level 4 spear, two-handed", "attack namek",          false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 3); two_handed(att, 50); }},
+    {"a level 5 spear, two-handed", "attack namek",          false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 4); two_handed(att, 50); }},
+    {"a spear, skilfully",   "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT); char_set_skills_base(att, SKILL_SPEAR, 60); }},
+    {"a spear, masterfully", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_STAB - TYPE_HIT); char_set_skills_base(att, SKILL_SPEAR, 100); }},
+    {"a whip, brawling",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_WHIP - TYPE_HIT); char_set_skills_base(att, SKILL_BRAWL, 60); }, false, 48},
+    {"a whip, brawling masterfully", "attack namek",         false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_WHIP - TYPE_HIT); char_set_skills_base(att, SKILL_BRAWL, 100); }},
+    {"and a whip, brawling masterfully", "attack namek",     false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_WHIP - TYPE_HIT); char_set_skills_base(att, SKILL_BRAWL, 100); }, false, 12},
+    {"a sword, as a konatsu","attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); char_set_race(att, RACE_KONATSU); }},
+    {"two swords, soft",     "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_bonuses(att, BONUS_SOFT, 1); }, false, 12},
+    {"a sword, shielded",    "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { wield(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); }},
+    {"a sword, fireproof",   "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { wield(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); char_set_bonuses(att, BONUS_FIREPROOF, 1); }},
+    {"an off-hand sword, shielded",   "attack namek",        false, [](GameWorld *g, char_data *att, char_data *victim) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); }, false, 12},
+    {"an off-hand sword, fireproof",  "attack namek",        false, [](GameWorld *g, char_data *att, char_data *victim) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); fireshielded(victim); char_set_race(att, RACE_DEMON); }, false, 12},
+    {"an off-hand sword, tired",     "attack namek",         false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); decCurST(g, att, getCurST(g, att), 0); }},
+    {"an off-hand sword, as an android", "attack namek",     false, [](GameWorld *g, char_data *att, char_data *) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); char_set_race(att, RACE_ANDROID); }},
+    {"an off-hand sword, at a newbie",   "attack namek",     false, [](GameWorld *g, char_data *att, char_data *victim) { off_hand(g, att, TYPE_SLASH - TYPE_HIT); char_set_class_level(victim, 5); }},
+    {"an off-hand gun, at a newbie",     "attack namek",     false, [](GameWorld *g, char_data *att, char_data *victim) { off_hand(g, att, TYPE_BLAST - TYPE_HIT); char_set_class_level(victim, 5); }},
+    {"two swords, both zanzoken", "attack namek",            false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_aff_set(victim, AFF_ZANZOKEN, true); char_aff_set(att, AFF_ZANZOKEN, true); }, false, 12},
+    {"a level 4 sword",      "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT, WEAR_WIELD1, ITEM_WEAPLVL1 + 3); }},
+    {"and a level 3 sword",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); obj_extra_set(char_get_equipment(att, WEAR_WIELD2), ITEM_WEAPLVL1 + 2, true); }, false, 12},
+    {"two swords, broken arms", "attack namek",              false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_limb_condition(att, 0, -1); char_set_limb_condition(att, 1, -1); }, false, 12},
+    {"and a level 1 sword",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); obj_extra_set(char_get_equipment(att, WEAR_WIELD2), ITEM_WEAPLVL1, true); }, false, 12},
+    {"and a level 2 sword",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); obj_extra_set(char_get_equipment(att, WEAR_WIELD2), ITEM_WEAPLVL1 + 1, true); }, false, 12},
+    {"and a level 4 sword",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); obj_extra_set(char_get_equipment(att, WEAR_WIELD2), ITEM_WEAPLVL1 + 3, true); }, false, 12},
+    {"and a level 5 sword",  "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); obj_extra_set(char_get_equipment(att, WEAR_WIELD2), ITEM_WEAPLVL1 + 4, true); }, false, 12},
+    {"and a whip, brawling", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_WHIP - TYPE_HIT); char_set_skills_base(att, SKILL_BRAWL, 60); }, false, 24},
+    {"and a spear, skilfully", "attack namek",               false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_STAB - TYPE_HIT); char_set_skills_base(att, SKILL_SPEAR, 60); }, false, 12},
+    {"two swords, as a konatsu", "attack namek",             false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_race(att, RACE_KONATSU); }, false, 12},
+    {"two swords, dodged",   "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_skills_base(victim, SKILL_DODGE, 100); }, false, 24},
+    {"two swords, at the spent", "attack namek",             false, [](GameWorld *g, char_data *att, char_data *victim) { dual(g, att, TYPE_SLASH - TYPE_HIT); decCurST(g, victim, getCurST(g, victim), 0); }, false, 12},
+    {"two swords, clumsily", "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_skills_base(att, SKILL_SWORD, 40); }, false, 24},
+    {"a sword, at nobody",   "attack",                       false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); }},
+    {"a sword, tired",       "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); decCurST(g, att, getCurST(g, att), 0); }},
+    {"a gun, at a newbie",   "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *victim) { wield(g, att, TYPE_BLAST - TYPE_HIT); char_set_class_level(victim, 5); }},
+    {"as an android",        "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_race(att, RACE_ANDROID); }, false, 12},
+    {"as a fighter",         "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_preference(att, PREFERENCE_H2H); }, false, 12},
+    {"a mob, two swords",    "victim", false, [](GameWorld *g, char_data *att, char_data *) { dual(g, att, TYPE_SLASH - TYPE_HIT); char_set_class_level(att, 45); },  true, 24},
     /* throw */
     {"nothing",              "throw",                        false, [](GameWorld *, char_data *, char_data *) {}},
     {"sparring",             "throw sword namek",            false, [](GameWorld *g, char_data *att, char_data *) { missile(g, att); char_plr_set(att, PLR_SPAR, true); }},
@@ -506,6 +640,12 @@ static void play_scene(GameWorld *g, struct char_data *att, struct char_data *vi
   struct char_data *dummy   = get_char_room_vis(g, att, name, nullptr);
   struct char_data *chars[] = {att, victim, cast.helper};
 
+  if (sc.by_mob) { /* with no descriptor, it sees nothing and saves nothing: the rooms' record has it */
+    att = read_mobile(g, 310);
+    char_to_room(g, att, ARENA);
+    chars[0] = victim; /* and the player it stands in for stays out of it */
+    chars[1] = cast.helper;
+  }
   circle_srandom(g, seed);
   char_set_skills_base(victim, SKILL_BLOCK, 0);
   char_set_skills_base(victim, SKILL_DODGE, 0);
@@ -518,12 +658,15 @@ static void play_scene(GameWorld *g, struct char_data *att, struct char_data *vi
     set_fighting(g, att, dummy);
     set_fighting(g, dummy, att);
   }
-  th_type(g, att, sc.line);
+  if (sc.by_mob)
+    do_attack(g, att, sc.line, 0, 0);
+  else
+    th_type(g, att, sc.line);
   th_pulses(g, 1);
   if (world_audit(g, audit_problem, nullptr))
     th_exit(3);
   if (transcript)
-    th_write_case_record(g, chars, 3, full_saves);
+    th_write_case_record(g, chars, sc.by_mob ? 2 : 3, full_saves);
   fflush(stdout);
 }
 
@@ -608,11 +751,11 @@ int main(int argc, char **argv)
   }
   constexpr int n_attacks = sizeof(attacks) / sizeof(*attacks);
   for (int i = 0; i < (int)(sizeof(scenes) / sizeof(*scenes)); i++) {
-    std::string_view command = std::string_view(scenes[i].line).substr(0, std::string_view(scenes[i].line).find(' '));
+    std::string_view command = scenes[i].by_mob ? "attack" : std::string_view(scenes[i].line).substr(0, std::string_view(scenes[i].line).find(' '));
     if ((n_attacks + i) % shards != shard || (only && command != only))
       continue;
     for (size_t who = 0; who < n_attackers; who++)
-      for (int seed = 0; seed < SCENE_SEEDS; seed++) {
+      for (int seed = 0; seed < (scenes[i].seeds ? scenes[i].seeds : SCENE_SEEDS); seed++) {
         cast.helper = att[(who + 1) % n_attackers];
         run_scene(g, att[who], victim, scenes[i], seed);
       }
