@@ -2724,6 +2724,13 @@ void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct ob
   act(g, m.to_room, m.hide, ch, obj, vict, TO_NOTVICT);
 }
 
+void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict)
+{
+  act(g, m.to_char, m.hide, ch, obj, vict, TO_CHAR);
+  act(g, m.to_room, m.hide, ch, obj, vict, TO_NOTVICT);
+  act(g, m.to_vict, m.hide, ch, obj, vict, TO_VICT);
+}
+
 char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type)
 {

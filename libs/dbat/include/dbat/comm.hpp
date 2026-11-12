@@ -98,6 +98,8 @@ struct act_msgs {
 };
 /* act() of each of m in turn: to ch, to vict, then to the rest of the room */
 void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
+/* ... or to ch, to the rest of the room, then to vict */
+void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
 

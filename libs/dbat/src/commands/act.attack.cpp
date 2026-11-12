@@ -13,6 +13,9 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
+#include <algorithm>
+#include <span>
+
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.attack.hpp"
@@ -893,33 +896,24 @@ ACMD(do_lightgrenade)
 
 ACMD(do_energize)
 {
-
   if (char_is_npc(ch))
     return;
-
   if (char_get_preference(ch) != PREFERENCE_THROWING) {
     send_to_char(g, ch, "You aren't dedicated to throwing!\r\n");
     return;
   }
-
   if (!char_get_skill(ch, SKILL_ENERGIZE)) {
-    if (char_get_skill(ch, SKILL_FOCUS) >= 30) {
-      int result = rand_number(g, 10, 14);
-      char_set_skills_base(ch, SKILL_ENERGIZE, result);
-      send_to_char(g, ch, "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
+    if (char_get_skill(ch, SKILL_FOCUS) < 30) {
+      send_to_char(g, ch, "You need a Focus skill level of 30 to figure out the basics of this technique.\r\n");
       return;
     }
-    send_to_char(g, ch, "You need a Focus skill level of 30 to figure out the basics of this technique.\r\n");
+    char_set_skills_base(ch, SKILL_ENERGIZE, rand_number(g, 10, 14));
+    send_to_char(g, ch, "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
     return;
   }
-  if (char_prf_flagged(g, ch, PRF_ENERGIZE)) {
-    send_to_char(g, ch, "You stop focusing ki into your fingertips.\r\n");
-    char_prf_set(g, ch, PRF_ENERGIZE, false);
-    return;
-  }
-  send_to_char(g, ch, "You start focusing your latent ki into your fingertips.\r\n");
-  char_prf_set(g, ch, PRF_ENERGIZE, true);
-  return;
+  bool on = !char_prf_flagged(g, ch, PRF_ENERGIZE);
+  send_to_char(g, ch, "{}\r\n", on ? "You start focusing your latent ki into your fingertips." : "You stop focusing ki into your fingertips.");
+  char_prf_set(g, ch, PRF_ENERGIZE, on);
 }
 
 ACMD(do_breath)
@@ -939,121 +933,126 @@ ACMD(do_strike)
 
 /* End NPC skills */
 
+namespace {
+
+void combine_syntax(GameWorld *g, struct char_data *ch, const char *cancel)
+{
+  send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
+  send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
+  send_to_char(g, ch, "{} Syntax: combine stop\r\n", cancel);
+}
+
+/* say(to) to ch's leader, then to each of the leader's other followers */
+template <class Say> void tell_group(GameWorld *g, struct char_data *ch, Say say)
+{
+  struct char_data *leader = char_get_master(g, ch);
+
+  say(leader);
+  for (char_data *fol : char_followers(g, leader))
+    if (fol != ch)
+      say(fol);
+}
+
+} // namespace
+
+/* A follower readies an attack, and the leader, aiming, makes it with the attacks readied */
 ACMD(do_combine)
 {
-
-  std::string arg, arg2;
-  struct char_data *vict;
-  int fire = false, temp = -1;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string_view rest    = argument;
+  std::string arg          = take_arg(rest);
+  std::string arg2         = take_arg(rest);
+  struct char_data *leader = char_get_master(g, ch);
 
   if (!has_group(g, ch)) {
     send_to_char(g, ch, "You need to be in a group!\r\n");
     return;
   }
-  if (arg.empty() || (!char_get_master(g, ch) && arg2.empty())) {
-    send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
-    send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
-    send_to_char(g, ch, "Cancel Syntax: combine stop\r\n");
-  } else {
-    if (str_eq_nocase(arg, "stop") && char_get_master(g, ch)) {
-      if (char_get_combine(ch) == -1) {
-        send_to_char(g, ch, "You are not trying to combine any attacks...\r\n");
-        return;
-      }
-      send_to_char(g, ch, "You stop your preparations to combine your attack with a group attack.\r\n");
-      send_to_char(g, char_get_master(g, ch), "@Y{}@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(char_get_master(g, ch), ch));
-      for (char_data *fol : char_followers(g, char_get_master(g, ch))) {
-        if (ch != fol)
-          send_to_char(g, fol, "@Y{}@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(fol, ch));
-      }
-      char_set_combine(ch, -1);
-      return;
-    }
-    if (str_eq_nocase(arg, "stop") && !char_get_master(g, ch)) {
+  if (arg.empty() || (!leader && arg2.empty())) {
+    combine_syntax(g, ch, "Cancel");
+    return;
+  }
+  if (str_eq_nocase(arg, "stop")) {
+    if (!leader) {
       send_to_char(g, ch, "You do not need to stop as you haven't prepared anything.\r\n");
       return;
     }
-    int i = 0;
-    for (i = 0; i < 14; i++) {
-      if (arg.find(attack_names[i]) != std::string::npos) {
-        if (i == 5) {
-          if (!char_get_equipment(ch, WEAR_WIELD1)) {
-            send_to_char(g, ch, "You need to wield a sword to use this technique.\r\n");
-            return;
-          }
-          if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-            send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
-            return;
-          }
-          temp = i;
-          i    = 15;
-        }
-        temp = i;
-        i    = 15;
-      }
-    }
-    if (temp == -1) {
-      send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
-      send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
-      send_to_char(g, ch, "Follower Cancel Syntax: combine stop\r\n");
+    if (char_get_combine(ch) == -1) {
+      send_to_char(g, ch, "You are not trying to combine any attacks...\r\n");
       return;
     }
-    if (!char_get_skill(ch, attack_skills[temp])) {
-      send_to_char(g, ch, "You do not know that skill.\r\n");
+    send_to_char(g, ch, "You stop your preparations to combine your attack with a group attack.\r\n");
+    tell_group(g, ch, [&](struct char_data *to) {
+      send_to_char(g, to, "@Y{}@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(to, ch));
+    });
+    char_set_combine(ch, -1);
+    return;
+  }
+
+  /* quirk: the attack is the first word with its name in it, so those of two words (twin slash and the
+     renzokou energy dan, and with them the sword and Nail's student checks) are never found */
+  std::span<const char *const> names(attack_names, 14);
+  auto named = std::ranges::find_if(names, [&](const char *name) { return arg.find(name) != std::string::npos; });
+  if (named == names.end()) {
+    combine_syntax(g, ch, "Follower Cancel");
+    return;
+  }
+  int attack = named - names.begin();
+  if (attack == 5) { /* twin slash */
+    if (!char_get_equipment(ch, WEAR_WIELD1)) {
+      send_to_char(g, ch, "You need to wield a sword to use this technique.\r\n");
       return;
     }
-    if (attack_skills[temp] == 440 && !char_is_nail(ch)) {
-      send_to_char(g, ch, "Only students of Nail know how to combine that attack effectively.\r\n");
+    if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+      send_to_char(g, ch, "You are not wielding a sword, you need one to use this technique.\r\n");
       return;
-    }
-    if (char_get_charge(ch) < getMaxKI(g, ch) * 0.05) {
-      send_to_char(g, ch, "You need to have the minimum of 5{} ki charged to combine.\r\n", "%");
-    }
-    if (!char_get_master(g, ch)) {
-      if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-        send_to_char(g, ch, "Who will your combined attack be targeting?\r\n");
-        return;
-      }
-      if (vict == ch) {
-        send_to_char(g, ch, "No targeting yourself...\r\n");
-        return;
-      }
-      char_set_combine(ch, temp);
-      for (char_data *foll : char_followers(g, ch)) {
-        if (!char_aff_flagged(foll, AFF_GROUP)) {
-          continue;
-        }
-        if (char_get_combine(foll) != -1 && char_get_charge(foll) >= getMaxKI(g, foll) * 0.05) {
-          fire = true;
-        }
-      } /* End follow for statement */
-      if (fire == true) {
-        combine_attacks(g, ch, vict);
-        return;
-      }
-      send_to_char(g, ch, "You do not have any followers who have readied an attack to combine or they do not have enough ki anymore to combine said attack.\r\n");
-      return;
-    }
-    if (char_get_master(g, ch)) {
-      if (char_get_charge(ch) >= getMaxKI(g, ch) * 0.05) {
-        act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
-        send_to_char(g, char_get_master(g, ch), "@BCOMBINE@c: @Y{}@C has prepared to combine a @c'@G{}@c'@C with the next group attack!@n\r\n", get_i_name(char_get_master(g, ch), ch), attack_names[temp]);
-        for (char_data *f_ch : char_followers(g, char_get_master(g, ch))) {
-          if (ch != f_ch)
-            send_to_char(g, f_ch, "@BCOMBINE@c: @Y{}@C has prepared to combine a @c'@G{}@c'@C with the next group attack!@n\r\n", get_i_name(f_ch, ch), attack_names[temp]);
-        }
-        char_set_combine(ch, temp);
-      } else {
-        send_to_char(g, ch, "You do not have the minimum 5{} ki charged.\r\n", "%");
-        return;
-      }
     }
   }
-} /* End */
+  if (!char_get_skill(ch, attack_skills[attack])) {
+    send_to_char(g, ch, "You do not know that skill.\r\n");
+    return;
+  }
+  if (attack_skills[attack] == 440 && !char_is_nail(ch)) {
+    send_to_char(g, ch, "Only students of Nail know how to combine that attack effectively.\r\n");
+    return;
+  }
+  bool charged = char_get_charge(ch) >= getMaxKI(g, ch) * 0.05;
+  if (!charged) /* quirk: and goes on */
+    send_to_char(g, ch, "You need to have the minimum of 5{} ki charged to combine.\r\n", "%");
+
+  if (!leader) {
+    struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM);
+    if (!vict) {
+      send_to_char(g, ch, "Who will your combined attack be targeting?\r\n");
+      return;
+    }
+    if (vict == ch) {
+      send_to_char(g, ch, "No targeting yourself...\r\n");
+      return;
+    }
+    char_set_combine(ch, attack);
+    bool readied = false;
+    for (char_data *fol : char_followers(g, ch))
+      if (char_aff_flagged(fol, AFF_GROUP) && char_get_combine(fol) != -1 && char_get_charge(fol) >= getMaxKI(g, fol) * 0.05) {
+        readied = true;
+        break;
+      }
+    if (readied)
+      combine_attacks(g, ch, vict);
+    else
+      send_to_char(g, ch, "You do not have any followers who have readied an attack to combine or they do not have enough ki anymore to combine said attack.\r\n");
+    return;
+  }
+
+  if (!charged) {
+    send_to_char(g, ch, "You do not have the minimum 5{} ki charged.\r\n", "%");
+    return;
+  }
+  act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
+  tell_group(g, ch, [&](struct char_data *to) {
+    send_to_char(g, to, "@BCOMBINE@c: @Y{}@C has prepared to combine a @c'@G{}@c'@C with the next group attack!@n\r\n", get_i_name(to, ch), attack_names[attack]);
+  });
+  char_set_combine(ch, attack);
+}
 
 ACMD(do_sunder)
 {
@@ -1085,483 +1084,436 @@ ACMD(do_seishou)
   perform_ki_attack(g, ch, argument, SEISHOU);
 }
 
-ACMD(do_throw)
+namespace {
+
+/* A thrown object's weapon level adds a share of its damage, and later a flat amount */
+constexpr int THROW_LEVEL_FLAGS[]     = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
+constexpr double THROW_LEVEL_SHARE[]  = {0.1, 0.2, 0.3, 0.4, 0.5};
+constexpr int THROW_LEVEL_BONUS[]     = {1000, 5000, 10000, 16000, 25000};
+
+/* What a thrown object is, by the messages it gets: anything but a weapon, a weapon by its damage type (in this
+   order, from 1), or another weapon */
+constexpr int THROWN_THING = 0, THROWN_BLASTING = 5, THROWN_OTHER = 6;
+constexpr int THROWN_DAMTYPES[] = {TYPE_PIERCE, TYPE_SLASH, TYPE_CRUSH, TYPE_STAB, TYPE_BLAST};
+
+int thrown_kind(struct obj_data *obj)
 {
-  struct char_data *vict = nullptr, *tch = nullptr;
-  struct obj_data *obj = nullptr;
-  std::string arg, arg2, arg3;
-  std::string chunk;
-  int odam = 0, miss = true, perc = 0, prob = 0, perc2 = 0, grab = false;
-  int64_t damage;
+  if (obj_get_type_flag(obj) != ITEM_WEAPON)
+    return THROWN_THING;
+  auto found = std::ranges::find(THROWN_DAMTYPES, obj_get_value(obj, VAL_WEAPON_DAMTYPE) + TYPE_HIT);
+  return found == std::end(THROWN_DAMTYPES) ? THROWN_OTHER : 1 + (found - std::begin(THROWN_DAMTYPES));
+}
 
-  char_set_throws(ch, rand_number(g, 1, 3)); /* (set by the interpreter before, for any "throw") */
-  std::string_view rest = argument;
-  arg                   = take_word(rest);
-  chunk                 = skip_spaces(rest);
+/* How much a throw wears it, by what it is made of */
+struct throw_wear_by {
+  int material, low, high;
+};
+constexpr throw_wear_by THROW_WEAR[] = {
+    {MATERIAL_STEEL,   5,  30},
+    {MATERIAL_IRON,    18, 50},
+    {MATERIAL_MITHRIL, 5,  15},
+    {MATERIAL_KACHIN,  5,  15},
+    {MATERIAL_STONE,   20, 50},
+    {MATERIAL_DIAMOND, 5,  20},
+};
 
-  if (playing_song(g, ch)) {
+int throw_wear(GameWorld *g, struct obj_data *obj)
+{
+  int material = obj_get_value(obj, VAL_ALL_MATERIAL);
+
+  if (material == MATERIAL_ENERGY)
+    return rand_number(g, 1, 2) == 2 ? 0 : rand_number(g, 1, 3);
+  auto wear = std::ranges::find(THROW_WEAR, material, &throw_wear_by::material);
+  return wear == std::end(THROW_WEAR) ? rand_number(g, 90, 100) : rand_number(g, wear->low, wear->high);
+}
+
+/* An object thrown: to_char, to_vict and to_room, which act_triple_vict_last() sends to the victim last */
+constexpr act_msgs THROWN[] = {
+    {"You throw $p at $N@n full speed, and watch it smash into $M!",
+     "$n@n throws $p at you full speed. You reel as it smashes into your body!",
+     "$n@n throws $p at $N@n full speed, and watches it smash into $M!", true},
+    {"You pull out and throw $p at $N@n full speed, and watch it sink into $M!",
+     "$n@n pulls out and throws $p at you full speed. You reel as it sink into your body!",
+     "$n@n pulls out and throws $p at $N@n full speed, and watches it sink into $M!", true},
+    {"You pull out and throw $p at $N@n full speed, and watch it sink into $M!",
+     "$n@n pulls out and throws $p at you full speed. You reel as it sink into your body!",
+     "$n@n pulls out and throws $p at $N@n full speed, and watches it sink into $M!", true},
+    {"You swing $p overhead and throw it at $N@n full speed, and watch it slam into $M!",
+     "$n@n swings $p overhead and throws it at you full speed. You reel as it slam into your body!",
+     "$n@n swings $p overhead and throws it at $N@n full speed, and watches it slam into $M!", true},
+    {"You bring $p over your shoulder and throw it at $N@n full speed, and watch it sink into $M!",
+     "$n@n brings $p over $s shoulder and throws $p at you full speed. You reel as it sink into your body!",
+     "$n@n brings $p over $s shoulder and throws it at $N@n full speed, and watches it sink into $M!", true},
+    {"You pull out and throw $p at $N@n full speed, and watch it hit $M!",
+     "$n@n pulls out and throws $p at you full speed. You reel as it hits your body!",
+     "$n@n pulls out and throws $p at $N@n full speed, and watches it hit $M!", true},
+    {}, /* quirk: another weapon says nothing */
+};
+constexpr act_msgs THROWN_ENERGIZED = {
+    "You charge $p with the energy in your fingertips! As it begins to @Yglow a bright hot @Rred@n you throw $p at $N@n full speed, and watch it smash into $M!",
+    "$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!",
+    "$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at $N@n full speed, and watches it smash into $M!", true};
+constexpr act_msgs THROWN_MELTS   = {"You throw $p at $N@n, but it melts before touching $M!",
+                                     "$n@n throws $p at you, but it melts before touching you!",
+                                     "$n@n throws $p at $N@n, but it melts before touching $M!", true};
+constexpr act_msgs THROWN_DODGED  = {"You throw $p at $N@n, but $E manages to dodge it easily!",
+                                     "$n@n throws $p at you, but you easily dodge it.",
+                                     "$n@n throws $p at $N@n, but $E manages to dodge it easily!", true};
+constexpr act_msgs THROWN_MISSES  = {"You throw $p at $N@n, but unfortunatly miss!",
+                                     "$n@n throws $p at you, but thankfully misses you.",
+                                     "$n@n throws $p at $N@n, but unfortunatly misses!", true};
+constexpr act_msgs THROWN_BREAKS  = {"You smile as $p breaks on $N's@n face!", "$n@n smiles as $p breaks on your face!",
+                                     "$n@n smiles as $p breaks on $N's@n face!", true};
+/* and a critical hit, by what it hits (these to_char, to_vict, then to_room) */
+constexpr act_msgs THROWN_METAL   = {"@RSome pieces of metal are sent flying!@n", "@RSome pieces of metal are sent flying!@n",
+                                     "@RSome pieces of metal are sent flying!@n", true};
+constexpr act_msgs THROWN_GOO     = {"@RA wide hole is left in $S gooey flesh!@n", "@RA wide hole is left is your gooey flesh!@n",
+                                     "@RA wide hole is left in $N@R's gooey flesh@n", true};
+constexpr act_msgs THROWN_BLOOD   = {"@RBlood flies out from the impact!@n", "@RBlood flies out from the impact!@n",
+                                     "@RBlood flies out from the impact!@n", true};
+constexpr act_msgs THROWN_BURNS   = {"@R$N@R is burned by it!@n", "@RYou are burned by it!@n", "@R$N@R is burned by it!@n", true};
+
+/* After a throw that didn't vanish: it tires, and if it was thrown well enough (better unarmed), it is thrown
+   again, at most the times rolled, by do_throw() as typed */
+void throw_follow_up(GameWorld *g, struct char_data *ch, std::string_view argument, struct char_data *vict,
+                     int64_t weight, int perc, int unarmed, int needed, bool multithrow)
+{
+  decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + weight), 0);
+  if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2))
+    perc += unarmed;
+  int throws = char_get_throws(ch);
+  if (perc + char_get_aff_abils_cha(ch) >= needed && multithrow && getCurPL(g, vict) > 1 && throws >= 1) {
+    do_throw(g, ch, argument, 0, 0);
+    char_set_throws(ch, throws > 1 ? char_get_throws(ch) - 1 : -1);
+  } else
+    char_set_throws(ch, 0);
+  char_set_wait(ch, PULSE_3SEC);
+}
+
+void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument, struct obj_data *obj,
+                  struct char_data *vict, const std::string &how)
+{
+  int64_t weight = obj_get_weight(obj);
+  room_vnum here = char_get_in_room(ch);
+
+  if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 200) + weight)) {
+    send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
+    return;
+  }
+  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    send_to_char(g, ch, "That is broken and useless to throw!\r\n");
+    return;
+  }
+  if (weight + room_get_gravity(g, here) > getMaxCarryWeight(g, ch)) {
+    send_to_char(g, ch, "The gravity has made that too heavy for you to throw!\r\n");
+    return;
+  }
+  int penalty = 0, chance = axion_dice(g, 0) + axion_dice(g, 0);
+  bool multithrow = true;
+  handle_cooldown(g, ch, 5);
+  improve_skill(g, ch, SKILL_THROW, 0);
+
+  int64_t damage = ((weight / 3) * (char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) * 0.01);
+  damage += (damage * 0.01) * (room_get_gravity(g, here) / 4);
+  if (char_get_preference(ch) == PREFERENCE_THROWING)
+    chance -= chance * 0.25;
+  int level = 1; /* quirk: one of no level counts as level 1 below, though it gets no share for it here */
+  for (int i = 0; i < 5; i++)
+    if (obj_extra_flagged(obj, THROW_LEVEL_FLAGS[i])) {
+      damage += damage * THROW_LEVEL_SHARE[i];
+      level = i + 1;
+      break;
+    }
+  int kind = thrown_kind(obj);
+  if (kind == THROWN_BLASTING) {
+    damage = ((weight * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) * 0.01);
+    damage += room_get_gravity(g, here) * (room_get_gravity(g, here) / 2);
+  }
+  int odam = throw_wear(g, obj);
+  if (!obj_extra_flagged(obj, ITEM_THROW)) {
+    penalty    = 15;
+    multithrow = false;
+    damage     = damage * 0.45;
+  } else {
+    odam = rand_number(g, 0, 1);
+    damage += (char_get_aff_abils_str(ch)) * ((getCurPL(g, ch) * 0.00012) + rand_number(g, 1, 20));
+    damage += level * (damage * 0.1);
+  }
+  damage += THROW_LEVEL_BONUS[level - 1];
+  if (kind != THROWN_THING && kind != THROWN_BLASTING && odam > 1)
+    odam = 1;
+
+  int perc  = init_skill(g, ch, SKILL_THROW);
+  int perc2 = init_skill(g, vict, SKILL_DODGE);
+  int prob  = axion_dice(g, penalty);
+  if (!how.empty()) {
+    if (!str_eq_nocase(how, "1") && !str_eq_nocase(how, "single")) {
+      send_to_char(g, ch, "Syntax: throw (obj | character) (target) <-- This will multithrow if able\nSyntax: throw (obj) (target) (1 | single) <-- This will not multi throw)\r\n");
+      return;
+    }
+    multithrow = false;
+  }
+
+  if (!tech_handle_zanzoken(g, ch, vict, "$p")) {
+    char_set_combo(ch, -1);
+    char_set_combhits(ch, 0);
+    int stcost = ((getEffMaxPL(g, ch) / 200) + weight);
+    char_aff_set(vict, AFF_ZANZOKEN, false);
+    pcost(g, ch, 0, stcost / 2);
+    pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
+    obj_from_char(g, obj);
+    obj_to_room(g, obj, char_get_in_room(vict));
     return;
   }
 
+  if (perc - (perc2 / 10) < prob) {
+    if (obj_extra_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
+      act_triple_vict_last(g, THROWN_MELTS, ch, obj, vict);
+      decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + weight), 0);
+      extract_obj(g, obj);
+      return;
+    }
+    act_triple_vict_last(g, perc2 > 0 ? THROWN_DODGED : THROWN_MISSES, ch, obj, vict);
+    decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + weight), 0);
+    if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE))
+      obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam / 2));
+    char_set_lastattack(ch, -50);
+    hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
+    obj_from_char(g, obj);
+    obj_to_room(g, obj, char_get_in_room(vict));
+    throw_follow_up(g, ch, argument, vict, weight, perc, 20, chance + penalty, multithrow);
+    return;
+  }
+
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ENERGIZE) && (getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.02) {
+    damage += (damage * (0.0016 * char_get_skill(ch, SKILL_ENERGIZE)));
+    act_triple_vict_last(g, THROWN_ENERGIZED, ch, obj, vict);
+    if (getMaxKI(g, ch) * 0.02 > 0)
+      decCurKI(g, ch, getMaxKI(g, ch) * .02, 0);
+    else
+      decCurKI(g, ch, 1, 0);
+    improve_skill(g, ch, SKILL_ENERGIZE, 0);
+  } else
+    act_triple_vict_last(g, THROWN[kind], ch, obj, vict);
+  if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE))
+    obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam));
+  char_set_lastattack(ch, -50);
+  /* quirk: the wear counts twice here */
+  if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
+    act_triple_vict_last(g, THROWN_BREAKS, ch, obj, vict);
+    obj_extra_toggle(obj, ITEM_BROKEN);
+  } else if (char_get_aff_abils_dex(ch) >= axion_dice(g, 0)) {
+    act_triple(g, char_is_android(vict) || char_is_mechanical(vict) ? THROWN_METAL : char_is_majin(vict) ? THROWN_GOO : THROWN_BLOOD,
+               ch, nullptr, vict);
+    if (obj_extra_flagged(obj, ITEM_ICE) && !char_is_android(vict) && !char_is_icer(vict)) {
+      decCurST(g, vict, (getMaxST(g, vict) * .005) + weight, 0);
+      act(g, "@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_NOTVICT);
+    }
+    damage *= calc_critical(g, ch, 0);
+  }
+  if (obj_extra_flagged(obj, ITEM_HOT) && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
+    act_triple(g, THROWN_BURNS, ch, nullptr, vict);
+    char_aff_set(vict, AFF_BURNED, true);
+    damage += damage * 0.4;
+  }
+  if (char_get_preference(ch) == PREFERENCE_KI)
+    damage -= damage * 0.20;
+  if (obj_get_vnum(g, obj) == 5899 || obj_get_vnum(g, obj) == 5898)
+    damage *= 0.35;
+  hurt(g, 0, 0, ch, vict, nullptr, damage, 0);
+  obj_from_char(g, obj);
+  obj_to_room(g, obj, char_get_in_room(vict));
+  throw_follow_up(g, ch, argument, vict, weight, perc, 12, chance + penalty, multithrow);
+}
+
+/* Someone thrown at someone else: to_char, to_vict and to_room, as the thrower grabs (or the one thrown), then as
+   the one thrown flies (or the target) */
+constexpr act_msgs THROW_SLIPS   = {"@WYou try to grab @C$N@W and throw them, but they manage to dodge your attempt!@n",
+                                    "@C$n@W tries to @RGRAB@W you and @RTHROW@W you, but you manage to dodge the attempt!@n",
+                                    "@C$n@W tries to @RGRAB@W @c$N@W and @RTHROW@W $M, but $E manages to dodge the attempt!@n", true};
+constexpr act_msgs THROW_GRABS   = {"@WYou grab @C$N@W and spinning around quickly you throw $M!@n",
+                                    "@C$n@W grabs YOU and spinning around quickly $e throws you!@n",
+                                    "@C$n@W grabs @c$N@W and spinning around quickly $e throws $M!@n", true};
+constexpr act_msgs FLUNG_DODGED  = {"@WThrown through the air, YOU fly at @c$N@W, but $E manages to dodge and you manage recover your bearings a moment later!@n",
+                                    "@WThrown through the air, @C$n@W flies at YOU, but you manage to dodge and @C$n@W recovers $s bearings a moment later!@n",
+                                    "@WThrown through the air, @C$n@W flies at @c$N@W, but $E manages to dodge and @C$n@W recovers $s bearingsa moment later!@n", true};
+constexpr act_msgs FLUNG_MISSES  = {"@WThrown through the air, YOU fly at @c$N@W, but the throw is a miss! You manage recover your bearings a moment later!@n",
+                                    "@WThrown through the air, @C$n@W flies at YOU, but the throw is a miss! @C$n@W recovers $s bearings a moment later!@n",
+                                    "@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n", true};
+constexpr act_msgs FLUNG_HITS    = {"@WThrown through the air, YOU fly at @c$N@W and smash into $M!@n",
+                                    "@WThrown through the air, @C$n@W flies at YOU and smashes into YOU!@n",
+                                    "@WThrown through the air, @C$n@W flies at @c$N@W and smashes into $M!@n", true};
+
+/* Names who is hurt next, to a and b, and to them */
+void throw_banner(GameWorld *g, struct char_data *a, struct char_data *b, struct char_data *who)
+{
+  act(g, "@W--@R$N@W--@n", true, a, nullptr, who, TO_CHAR);
+  act(g, "@W--@R$N@W--@n", true, b, nullptr, who, TO_CHAR);
+  act(g, "@W--@RYOU@W--@n", true, who, nullptr, nullptr, TO_CHAR);
+}
+
+void throw_character(GameWorld *g, struct char_data *ch, struct char_data *tch, struct char_data *vict)
+{
+  if (tch == vict) {
+    send_to_char(g, ch, "You can't throw someone at theirself.\r\n");
+    return;
+  }
+  if (!can_kill(g, ch, tch, nullptr, 0)) {
+    send_to_char(g, ch, "The one you are throwing can't be harmed.\r\n");
+    return;
+  }
+  bool grab = char_get_speedi(g, tch) < char_get_speedi(g, ch) && rand_number(g, 1, 106) < char_get_skill(ch, SKILL_THROW);
+  if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch))) {
+    send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
+    return;
+  }
+  if (char_get_pc_weight(g, tch) + room_get_gravity(g, char_get_in_room(ch)) > getMaxCarryWeight(g, ch)) {
+    send_to_char(g, ch, "The gravity has made them too heavy for you to throw!\r\n");
+    return;
+  }
+  if (!grab) {
+    act_triple(g, THROW_SLIPS, ch, nullptr, tch);
+    hurt(g, 0, 0, ch, tch, nullptr, 0, 0);
+    handle_cooldown(g, ch, 5);
+    decCurST(g, ch, (getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch), 0);
+    return;
+  }
+  handle_cooldown(g, ch, 5);
+  improve_skill(g, ch, SKILL_THROW, 0);
+  int64_t damage = ((char_get_pc_weight(g, tch) * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) / 100);
+  damage += room_get_gravity(g, char_get_in_room(ch)) * (room_get_gravity(g, char_get_in_room(ch)) / 2);
+  int perc  = init_skill(g, ch, SKILL_THROW);
+  int perc2 = init_skill(g, vict, SKILL_DODGE);
+  int prob  = rand_number(g, 1, 106);
+  bool hits = perc - (perc2 / 10) >= prob;
+
+  act_triple(g, THROW_GRABS, ch, nullptr, tch);
+  act_triple(g, hits ? FLUNG_HITS : perc2 > 0 ? FLUNG_DODGED : FLUNG_MISSES, tch, nullptr, vict);
+  if (!hits)
+    decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch)), 0);
+  throw_banner(g, ch, tch, vict);
+  hurt(g, 0, 0, ch, vict, nullptr, hits ? damage : 0, 0);
+  throw_banner(g, ch, vict, tch);
+  hurt(g, 0, 0, ch, tch, nullptr, hits ? damage : 0, 0);
+  if (!hits)
+    return;
+  decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch)), 0);
+  char_set_wait(ch, PULSE_3SEC);
+}
+
+} // namespace
+
+/* Throws something carried, or someone in the room, at someone */
+ACMD(do_throw)
+{
+  char_set_throws(ch, rand_number(g, 1, 3)); /* (set by the interpreter before, for any "throw") */
+  std::string_view rest = argument;
+  std::string arg       = take_word(rest);
+  std::string arg2      = take_arg(rest);
+  std::string arg3      = take_arg(rest);
+
+  if (playing_song(g, ch))
+    return;
   if (arg.empty()) {
     send_to_char(g, ch, "Throw what?\r\n");
     return;
   }
-
   if (is_sparring(ch)) {
     send_to_char(g, ch, "You can not spar with throw.\r\n");
     return;
   }
-
-  if (!chunk.empty()) {
-    std::string_view chunk_rest = chunk;
-    arg2                        = take_arg(chunk_rest);
-    arg3                        = take_arg(chunk_rest);
+  struct obj_data *obj  = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
+  struct char_data *tch = obj ? nullptr : get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  if (!obj && !tch) {
+    send_to_char(g, ch, "You do not have that object or character to throw!\r\n");
+    return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    if (!(tch = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(g, ch, "You do not have that object or character to throw!\r\n");
-      return;
-    }
-  }
-
-  if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(g, ch);
-    } else {
+  struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM);
+  if (!vict) {
+    struct char_data *foe = char_get_fighting(g, ch);
+    if (!foe || char_get_in_room(foe) != char_get_in_room(ch)) {
       send_to_char(g, ch, "Who do you want to target?\r\n");
       return;
     }
+    vict = foe;
   }
-
-  if (getCurPL(g, vict) <= 1) {
+  if (getCurPL(g, vict) <= 1 || !can_kill(g, ch, vict, nullptr, 1))
     return;
-  }
+  if (handle_defender(g, vict, ch))
+    vict = char_get_defender(g, vict);
 
-  if (!can_kill(g, ch, vict, nullptr, 1)) {
-    return;
-  }
-
-  if (handle_defender(g, vict, ch)) {
-    struct char_data *def = char_get_defender(g, vict);
-    vict                  = def;
-  }
-
-  /* We are throwing an object. */
-  if (obj) {
-    if (char_get_throws(ch) == -1) {
-      char_set_throws(ch, 0);
-      return;
-    }
-
-    if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 200) + obj_get_weight(obj))) {
-      send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
-      return;
-    }
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "That is broken and useless to throw!\r\n");
-      return;
-    }
-    if (obj_get_weight(obj) + room_get_gravity(g, char_get_in_room(ch)) > getMaxCarryWeight(g, ch)) {
-      send_to_char(g, ch, "The gravity has made that too heavy for you to throw!\r\n");
-      return;
-    }
-    int penalty = 0, chance = axion_dice(g, 0) + axion_dice(g, 0), wtype = 0, wlvl = 1, multithrow = true;
-    handle_cooldown(g, ch, 5);
-    improve_skill(g, ch, SKILL_THROW, 0);
-    damage = ((obj_get_weight(obj) / 3) * (char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) * 0.01);
-    damage += (damage * 0.01) * (room_get_gravity(g, char_get_in_room(ch)) / 4);
-
-    if (char_get_preference(ch) == PREFERENCE_THROWING) {
-      chance -= chance * 0.25;
-    }
-
-    if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
-      damage += damage * 0.1;
-      wlvl = 1;
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
-      damage += damage * 0.2;
-      wlvl = 2;
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
-      damage += damage * 0.3;
-      wlvl = 3;
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
-      damage += damage * 0.4;
-      wlvl = 4;
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
-      damage += damage * 0.5;
-      wlvl = 5;
-    }
-    if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-      if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
-        wtype = 1;
-      } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
-        wtype = 2;
-      } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
-        wtype = 3;
-      } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
-        wtype = 4;
-      } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
-        wtype  = 5;
-        damage = ((obj_get_weight(obj) * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) * 0.01);
-        damage += room_get_gravity(g, char_get_in_room(ch)) * (room_get_gravity(g, char_get_in_room(ch)) / 2);
-      } else {
-        wtype = 6;
-      }
-    }
-    if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL) {
-      odam = rand_number(g, 5, 30);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_IRON) {
-      odam = rand_number(g, 18, 50);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL) {
-      odam = rand_number(g, 5, 15);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_KACHIN) {
-      odam = rand_number(g, 5, 15);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
-      odam = rand_number(g, 20, 50);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_DIAMOND) {
-      odam = rand_number(g, 5, 20);
-    } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_ENERGY) {
-      if (rand_number(g, 1, 2) == 2) {
-        odam = 0;
-      } else {
-        odam = rand_number(g, 1, 3);
-      }
-    } else {
-      odam = rand_number(g, 90, 100);
-    }
-    if (!obj_extra_flagged(obj, ITEM_THROW)) {
-      penalty    = 15;
-      multithrow = false;
-      damage     = damage * 0.45;
-    } else {
-      odam = rand_number(g, 0, 1);
-      damage += (char_get_aff_abils_str(ch)) * ((getCurPL(g, ch) * 0.00012) + rand_number(g, 1, 20));
-      damage += wlvl * (damage * 0.1);
-    }
-
-    if (wlvl == 5) {
-      damage += 25000;
-    } else if (wlvl == 4) {
-      damage += 16000;
-    } else if (wlvl == 3) {
-      damage += 10000;
-    } else if (wlvl == 2) {
-      damage += 5000;
-    } else if (wlvl == 1) {
-      damage += 1000;
-    }
-
-    int hot = false;
-    if (obj_extra_flagged(obj, ITEM_HOT)) {
-      hot = true;
-    }
-
-    if (wtype > 0 && wtype != 5 && odam > 1) {
-      odam = 1;
-    }
-    perc  = init_skill(g, ch, SKILL_THROW);
-    perc2 = init_skill(g, vict, SKILL_DODGE);
-    prob  = axion_dice(g, penalty);
-    if (!arg3.empty()) {
-      if (str_eq_nocase(arg3, "1") || str_eq_nocase(arg3, "single")) {
-        multithrow = false;
-      } else {
-        send_to_char(g, ch, "Syntax: throw (obj | character) (target) <-- This will multithrow if able\nSyntax: throw (obj) (target) (1 | single) <-- This will not multi throw)\r\n");
-        return;
-      }
-    }
-
-    if (!tech_handle_zanzoken(g, ch, vict, "$p")) {
-      char_set_combo(ch, -1);
-      char_set_combhits(ch, 0);
-      int stcost = ((getEffMaxPL(g, ch) / 200) + obj_get_weight(obj));
-      char_aff_set(vict, AFF_ZANZOKEN, false);
-      pcost(g, ch, 0, stcost / 2);
-      pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-      obj_from_char(g, obj);
-      obj_to_room(g, obj, char_get_in_room(vict));
-      return;
-    }
-
-    if (perc - (perc2 / 10) < prob) {
-      if (obj_extra_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
-        act(g, "You throw $p at $N@n, but it melts before touching $M!", true, ch, obj, vict, TO_CHAR);
-        act(g, "$n@n throws $p at $N@n, but it melts before touching $M!", true, ch, obj, vict, TO_NOTVICT);
-        act(g, "$n@n throws $p at you, but it melts before touching you!", true, ch, obj, vict, TO_VICT);
-        decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + obj_get_weight(obj)), 0);
-        extract_obj(g, obj);
-        return;
-      }
-      if (perc2 > 0) {
-        act(g, "You throw $p at $N@n, but $E manages to dodge it easily!", true, ch, obj, vict, TO_CHAR);
-        act(g, "$n@n throws $p at $N@n, but $E manages to dodge it easily!", true, ch, obj, vict, TO_NOTVICT);
-        act(g, "$n@n throws $p at you, but you easily dodge it.", true, ch, obj, vict, TO_VICT);
-      } else if (perc2 <= 0) {
-        act(g, "You throw $p at $N@n, but unfortunatly miss!", true, ch, obj, vict, TO_CHAR);
-        act(g, "$n@n throws $p at $N@n, but unfortunatly misses!", true, ch, obj, vict, TO_NOTVICT);
-        act(g, "$n@n throws $p at you, but thankfully misses you.", true, ch, obj, vict, TO_VICT);
-      }
-      decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + obj_get_weight(obj)), 0);
-      if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
-        obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam / 2));
-      }
-      char_set_lastattack(ch, -50);
-      hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-      obj_from_char(g, obj);
-      obj_to_room(g, obj, char_get_in_room(vict));
-      decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + obj_get_weight(obj)), 0);
-      if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2))
-        perc += 20;
-      if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(g, vict) > 1 && char_get_throws(ch) > 1) {
-        do_throw(g, ch, argument, 0, 0);
-        char_set_throws(ch, char_get_throws(ch) - 1);
-      } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(g, vict) > 1 && char_get_throws(ch) == 1) {
-        do_throw(g, ch, argument, 0, 0);
-        char_set_throws(ch, -1);
-      } else {
-        char_set_throws(ch, 0);
-      }
-      char_set_wait(ch, PULSE_3SEC);
-      return;
-    }
-    if (perc - (perc2 / 10) > prob) {
-      miss = false;
-    }
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ENERGIZE) && (getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.02) {
-      damage += (damage * (0.0016 * char_get_skill(ch, SKILL_ENERGIZE)));
-      act(g, "You charge $p with the energy in your fingertips! As it begins to @Yglow a bright hot @Rred@n you throw $p at $N@n full speed, and watch it smash into $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at $N@n full speed, and watches it smash into $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!", true, ch, obj, vict, TO_VICT);
-      if (getMaxKI(g, ch) * 0.02 > 0) {
-        decCurKI(g, ch, getMaxKI(g, ch) * .02, 0);
-      } else {
-        decCurKI(g, ch, 1, 0);
-      }
-      improve_skill(g, ch, SKILL_ENERGIZE, 0);
-    } else if (wtype == 0) {
-      act(g, "You throw $p at $N@n full speed, and watch it smash into $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n throws $p at $N@n full speed, and watches it smash into $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n throws $p at you full speed. You reel as it smashes into your body!", true, ch, obj, vict, TO_VICT);
-    } else if (wtype == 1 || wtype == 2) {
-      act(g, "You pull out and throw $p at $N@n full speed, and watch it sink into $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n pulls out and throws $p at $N@n full speed, and watches it sink into $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n pulls out and throws $p at you full speed. You reel as it sink into your body!", true, ch, obj, vict, TO_VICT);
-    } else if (wtype == 3) {
-      act(g, "You swing $p overhead and throw it at $N@n full speed, and watch it slam into $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n swings $p overhead and throws it at $N@n full speed, and watches it slam into $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n swings $p overhead and throws it at you full speed. You reel as it slam into your body!", true, ch, obj, vict, TO_VICT);
-    } else if (wtype == 4) {
-      act(g, "You bring $p over your shoulder and throw it at $N@n full speed, and watch it sink into $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n brings $p over $s shoulder and throws it at $N@n full speed, and watches it sink into $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n brings $p over $s shoulder and throws $p at you full speed. You reel as it sink into your body!", true, ch, obj, vict, TO_VICT);
-    } else if (wtype == 5) {
-      act(g, "You pull out and throw $p at $N@n full speed, and watch it hit $M!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n pulls out and throws $p at $N@n full speed, and watches it hit $M!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n pulls out and throws $p at you full speed. You reel as it hits your body!", true, ch, obj, vict, TO_VICT);
-    }
-    if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
-      obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam));
-    }
-    char_set_lastattack(ch, -50);
-    if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
-      act(g, "You smile as $p breaks on $N's@n face!", true, ch, obj, vict, TO_CHAR);
-      act(g, "$n@n smiles as $p breaks on $N's@n face!", true, ch, obj, vict, TO_NOTVICT);
-      act(g, "$n@n smiles as $p breaks on your face!", true, ch, obj, vict, TO_VICT);
-      obj_extra_toggle(obj, ITEM_BROKEN);
-    } else if (char_get_aff_abils_dex(ch) >= axion_dice(g, 0)) {
-      if (char_is_android(vict) || char_is_mechanical(vict)) {
-        act(g, "@RSome pieces of metal are sent flying!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@RSome pieces of metal are sent flying!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@RSome pieces of metal are sent flying!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      } else if (char_is_majin(vict)) {
-        act(g, "@RA wide hole is left in $S gooey flesh!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@RA wide hole is left is your gooey flesh!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@RA wide hole is left in $N@R's gooey flesh@n", true, ch, nullptr, vict, TO_NOTVICT);
-      } else {
-        act(g, "@RBlood flies out from the impact!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@RBlood flies out from the impact!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@RBlood flies out from the impact!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      }
-      if (obj_extra_flagged(obj, ITEM_ICE)) {
-        if (!char_is_android(vict) && !char_is_icer(vict)) {
-          decCurST(g, vict, (getMaxST(g, vict) * .005) + obj_get_weight(obj), 0);
-          act(g, "@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        }
-      }
-      damage *= calc_critical(g, ch, 0);
-    }
-    if (hot == true) {
-      if (!char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-        act(g, "@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@RYou are burned by it!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_BURNED, true);
-        damage += damage * 0.4;
-      }
-    }
-    if (char_get_preference(ch) == PREFERENCE_KI) {
-      damage -= damage * 0.20;
-    }
-    if (obj_get_vnum(g, obj) == 5899 || obj_get_vnum(g, obj) == 5898) {
-      damage *= 0.35;
-    }
-    hurt(g, 0, 0, ch, vict, nullptr, damage, 0);
-    obj_from_char(g, obj);
-    obj_to_room(g, obj, char_get_in_room(vict));
-
-    decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + obj_get_weight(obj)), 0);
-    if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2))
-      perc += 12;
-    if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(g, vict) > 1 && char_get_throws(ch) > 1) {
-      do_throw(g, ch, argument, 0, 0);
-      char_set_throws(ch, char_get_throws(ch) - 1);
-    } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(g, vict) > 1 && char_get_throws(ch) == 1) {
-      do_throw(g, ch, argument, 0, 0);
-      char_set_throws(ch, -1);
-    } else {
-      char_set_throws(ch, 0);
-    }
-    char_set_wait(ch, PULSE_3SEC);
-    return;
-  } /* End object section. */
-
-  /* We are throwing a character at someone else. */
-  if (tch) {
-    if (tch == vict) {
-      send_to_char(g, ch, "You can't throw someone at theirself.\r\n");
-      return;
-    }
-
-    if (!can_kill(g, ch, tch, nullptr, 0)) {
-      send_to_char(g, ch, "The one you are throwing can't be harmed.\r\n");
-      return;
-    }
-
-    if (char_get_speedi(g, tch) < char_get_speedi(g, ch) && rand_number(g, 1, 106) < char_get_skill(ch, SKILL_THROW)) {
-      grab = true;
-    }
-
-    if ((getCurST(g, ch)) < ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch))) {
-      send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
-      return;
-    }
-    if (char_get_pc_weight(g, tch) + room_get_gravity(g, char_get_in_room(ch)) > getMaxCarryWeight(g, ch)) {
-      send_to_char(g, ch, "The gravity has made them too heavy for you to throw!\r\n");
-      return;
-    }
-    if (grab == false) {
-      act(g, "@WYou try to grab @C$N@W and throw them, but they manage to dodge your attempt!@n", true, ch, nullptr, tch, TO_CHAR);
-      act(g, "@C$n@W tries to @RGRAB@W you and @RTHROW@W you, but you manage to dodge the attempt!@n", true, ch, nullptr, tch, TO_VICT);
-      act(g, "@C$n@W tries to @RGRAB@W @c$N@W and @RTHROW@W $M, but $E manages to dodge the attempt!@n", true, ch, nullptr, tch, TO_NOTVICT);
-      hurt(g, 0, 0, ch, tch, nullptr, 0, 0);
-      handle_cooldown(g, ch, 5);
-      decCurST(g, ch, (getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch), 0);
-      return;
-    }
-    handle_cooldown(g, ch, 5);
-    improve_skill(g, ch, SKILL_THROW, 0);
-    damage = ((char_get_pc_weight(g, tch) * char_get_aff_abils_str(ch)) * (char_get_aff_abils_cha(ch) / 3)) + (getEffMaxPL(g, ch) / 100);
-    damage += room_get_gravity(g, char_get_in_room(ch)) * (room_get_gravity(g, char_get_in_room(ch)) / 2);
-    perc  = init_skill(g, ch, SKILL_THROW);
-    perc2 = init_skill(g, vict, SKILL_DODGE);
-    prob  = rand_number(g, 1, 106);
-    if (perc - (perc2 / 10) < prob) {
-      if (perc2 > 0) {
-        act(g, "@WYou grab @C$N@W and spinning around quickly you throw $M!@n", true, ch, nullptr, tch, TO_CHAR);
-        act(g, "@C$n@W grabs YOU and spinning around quickly $e throws you!@n", true, ch, nullptr, tch, TO_VICT);
-        act(g, "@C$n@W grabs @c$N@W and spinning around quickly $e throws $M!@n", true, ch, nullptr, tch, TO_NOTVICT);
-        act(g, "@WThrown through the air, YOU fly at @c$N@W, but $E manages to dodge and you manage recover your bearings a moment later!@n", true, tch, nullptr, vict, TO_CHAR);
-        act(g, "@WThrown through the air, @C$n@W flies at YOU, but you manage to dodge and @C$n@W recovers $s bearings a moment later!@n", true, tch, nullptr, vict, TO_VICT);
-        act(g, "@WThrown through the air, @C$n@W flies at @c$N@W, but $E manages to dodge and @C$n@W recovers $s bearingsa moment later!@n", true, tch, nullptr, vict, TO_NOTVICT);
-      } else if (perc2 <= 0) {
-        act(g, "@WYou grab @C$N@W and spinning around quickly you throw $M!@n", true, ch, nullptr, tch, TO_CHAR);
-        act(g, "@C$n@W grabs YOU and spinning around quickly $e throws you!@n", true, ch, nullptr, tch, TO_VICT);
-        act(g, "@C$n@W grabs @c$N@W and spinning around quickly $e throws $M!@n", true, ch, nullptr, tch, TO_NOTVICT);
-        act(g, "@WThrown through the air, YOU fly at @c$N@W, but the throw is a miss! You manage recover your bearings a moment later!@n", true, tch, nullptr, vict, TO_CHAR);
-        act(g, "@WThrown through the air, @C$n@W flies at YOU, but the throw is a miss! @C$n@W recovers $s bearings a moment later!@n", true, tch, nullptr, vict, TO_VICT);
-        act(g, "@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n", true, tch, nullptr, vict, TO_NOTVICT);
-      }
-      decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + char_get_pc_weight(g, tch)), 0);
-      act(g, "@W--@R$N@W--@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@W--@R$N@W--@n", true, tch, nullptr, vict, TO_CHAR);
-      act(g, "@W--@RYOU@W--@n", true, vict, nullptr, nullptr, TO_CHAR);
-      hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-      act(g, "@W--@R$N@W--@n", true, ch, nullptr, tch, TO_CHAR);
-      act(g, "@W--@R$N@W--@n", true, vict, nullptr, tch, TO_CHAR);
-      act(g, "@W--@RYOU@W--@n", true, tch, nullptr, nullptr, TO_CHAR);
-      hurt(g, 0, 0, ch, tch, nullptr, 0, 0);
-      return;
-    }
-    if (perc - (perc2 / 10) >= prob) {
-      miss = false;
-    }
-    if (miss == false) {
-      act(g, "@WYou grab @C$N@W and spinning around quickly you throw $M!@n", true, ch, nullptr, tch, TO_CHAR);
-      act(g, "@C$n@W grabs YOU and spinning around quickly $e throws you!@n", true, ch, nullptr, tch, TO_VICT);
-      act(g, "@C$n@W grabs @c$N@W and spinning around quickly $e throws $M!@n", true, ch, nullptr, tch, TO_NOTVICT);
-      act(g, "@WThrown through the air, YOU fly at @c$N@W and smash into $M!@n", true, tch, nullptr, vict, TO_CHAR);
-      act(g, "@WThrown through the air, @C$n@W flies at YOU and smashes into YOU!@n", true, tch, nullptr, vict, TO_VICT);
-      act(g, "@WThrown through the air, @C$n@W flies at @c$N@W and smashes into $M!@n", true, tch, nullptr, vict, TO_NOTVICT);
-      act(g, "@W--@R$N@W--@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@W--@R$N@W--@n", true, tch, nullptr, vict, TO_CHAR);
-      act(g, "@W--@RYOU@W--@n", true, vict, nullptr, nullptr, TO_CHAR);
-      hurt(g, 0, 0, ch, vict, nullptr, damage, 0);
-      act(g, "@W--@R$N@W--@n", true, ch, nullptr, tch, TO_CHAR);
-      if (vict) {
-        act(g, "@W--@R$N@W--@n", true, vict, nullptr, tch, TO_CHAR);
-      }
-      act(g, "@W--@RYOU@W--@n", true, tch, nullptr, nullptr, TO_CHAR);
-      hurt(g, 0, 0, ch, tch, nullptr, damage, 0);
-    }
-    decCurST(g, ch, ((getEffMaxPL(g, ch) / 200) + char_get_pc_weight(g, tch)), 0);
-    char_set_wait(ch, PULSE_3SEC);
-  } /* End throwing character. */
-
-  /* Whoops!? */
-  if (!obj && !tch) {
-    send_to_imm(g, "ERROR: Throw resolved without character or object.");
-    return;
-  }
+  if (obj)
+    throw_object(g, ch, argument, obj, vict, arg3);
+  else
+    throw_character(g, ch, tch, vict);
 }
 
+namespace {
+
+void selfd_calms(GameWorld *g, struct char_data *ch)
+{
+  act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_ROOM);
+}
+
+/* The blast: the charge, 60% of the base PL and the base ST (half again for a wide one), all spent */
+int64_t selfd_blast(GameWorld *g, struct char_data *ch, bool wide)
+{
+  int64_t dmg = char_get_charge(ch);
+
+  char_set_charge(ch, 0);
+  dmg += (getBasePL(ch)) * 0.6;
+  dmg += (getBaseST(ch));
+  if (wide)
+    dmg *= 1.5;
+  decCurHealthPercent(g, ch, 1, 1);
+  char_set_suppressed(ch, 0);
+  char_set_suppression(ch, 0);
+  return dmg;
+}
+
+/* Each self destruct teaches it: quirk: it becomes the skill and a roll, unless twice the skill and the roll is
+   more than 100, when it becomes 100 */
+void selfd_learns(GameWorld *g, struct char_data *ch)
+{
+  int num = rand_number(g, 10, 20) + char_get_skill(ch, SKILL_SELFD);
+  char_set_skills_base(ch, SKILL_SELFD, char_get_skill(ch, SKILL_SELFD) + num <= 100 ? num : 100);
+}
+
+constexpr act_msgs SELFD_ON_ONE = {"@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n",
+                                   "@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body in a sphere of deadly energy!@n",
+                                   "@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true};
+constexpr act_msgs SELFD_CAUGHT = {"@r$N@R is caught in the explosion!@n", "@RYou are caught in the explosion!@n",
+                                   "@r$N@R is caught in the explosion!@n", true};
+
+} // namespace
+
+/* The first time, starts to glow; the next, calms down, unless primed (PLR_SELFD2), when it explodes on whoever is
+   grappled, or else on everyone around */
 ACMD(do_selfd)
 {
-
-  struct char_data *tch = nullptr;
-  int64_t dmg = 0;
-
   if (char_is_npc(ch))
     return;
-
   if (char_in_arena(g, ch)) {
     send_to_char(g, ch, "You can not use self destruct in the arena.\r\n");
     return;
   }
-
   if (char_aff_flagged(ch, AFF_SPIRIT)) {
     send_to_char(g, ch, "You are already dead!\r\n");
     return;
   }
-
   if (char_get_level(ch) < 9) {
     send_to_char(g, ch, "You can't self destruct while protected by the newbie shield!\r\n");
     return;
   }
-
-  /*Andros Start*/
   if (char_get_con_sdcooldown(ch) > 0) {
     send_to_char(g, ch, "Your body is still recovering from the last self destruct!\r\n");
     return;
-  } /*Andros End*/
-
-  if (!char_get_skill(ch, SKILL_SELFD)) {
-    int num = rand_number(g, 10, 20);
-    char_set_skills_base(ch, SKILL_SELFD, num);
   }
+  if (!char_get_skill(ch, SKILL_SELFD))
+    char_set_skills_base(ch, SKILL_SELFD, rand_number(g, 10, 20));
 
   if (!char_plr_flagged(ch, PLR_SELFD)) {
     act(g, "@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1570,89 +1522,50 @@ ACMD(do_selfd)
     return;
   }
   if (!char_plr_flagged(ch, PLR_SELFD2)) {
-    act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    selfd_calms(g, ch);
     char_plr_set(ch, PLR_SELFD, false);
     return;
   }
   if (char_get_grappling(g, ch) != nullptr && !can_kill(g, ch, char_get_grappling(g, ch), nullptr, 3)) {
-    act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    selfd_calms(g, ch);
     send_to_char(g, ch, "You can't kill them, the immortals won't allow it!\r\n");
     char_plr_set(ch, PLR_SELFD, false);
     return;
   }
-  if (char_get_grappling(g, ch) != nullptr) {
-    tch = char_get_grappling(g, ch);
-    dmg += char_get_charge(ch);
-    char_set_charge(ch, 0);
-    dmg += (getBasePL(ch)) * 0.6;
-    dmg += (getBaseST(ch));
-    decCurHealthPercent(g, ch, 1, 1);
-    char_set_suppressed(ch, 0);
-    char_set_suppression(ch, 0);
-    act(g, "@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true, ch, nullptr, tch, TO_CHAR);
-    act(g, "@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body in a sphere of deadly energy!@n", true, ch, nullptr, tch, TO_VICT);
-    act(g, "@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true, ch, nullptr, tch, TO_NOTVICT);
+
+  if (struct char_data *tch = char_get_grappling(g, ch)) {
+    int64_t dmg = selfd_blast(g, ch, false);
+    act_triple(g, SELFD_ON_ONE, ch, nullptr, tch);
     hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
     char_plr_set(ch, PLR_SELFD, false);
     char_plr_set(ch, PLR_SELFD2, false);
-    if (char_plr_flagged(ch, PLR_IMMORTAL)) {
+    if (char_plr_flagged(ch, PLR_IMMORTAL))
       char_set_con_sdcooldown(ch, 600);
-    }
     if ((char_is_majin(ch) || char_is_bio(ch)) && getCurLFPercent(ch) > 0.5) {
       decCurLFPercent(g, ch, 2, -1);
       char_plr_set(ch, PLR_GOOP, true);
       char_set_gooptime(ch, 70);
-    } else {
+    } else
       die(g, ch, nullptr);
-    }
-    int num = rand_number(g, 10, 20) + char_get_skill(ch, SKILL_SELFD);
-    if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
-      char_set_skills_base(ch, SKILL_SELFD, num);
-    } else {
-      char_set_skills_base(ch, SKILL_SELFD, 100);
-    }
+    selfd_learns(g, ch);
     return;
   }
-  dmg += char_get_charge(ch);
-  char_set_charge(ch, 0);
-  dmg += (getBasePL(ch)) * 0.6;
-  dmg += (getBaseST(ch));
-  dmg *= 1.5;
-  decCurHealthPercent(g, ch, 1, 1);
-  char_set_suppressed(ch, 0);
-  char_set_suppression(ch, 0);
+
+  int64_t dmg = selfd_blast(g, ch, true);
   act(g, "@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", true, ch, nullptr, nullptr, TO_ROOM);
   for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch) {
+    if (vict == ch || !can_kill(g, ch, vict, nullptr, 3) || char_mob_flagged(vict, MOB_NOKILL))
       continue;
-    }
-    if (!can_kill(g, ch, vict, nullptr, 3)) {
-      continue;
-    }
-    if (char_mob_flagged(vict, MOB_NOKILL)) {
-      continue;
-    }
-    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@RYou are caught in the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@r$N@R is caught in the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
+    act_triple(g, SELFD_CAUGHT, ch, nullptr, vict);
     hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
   }
-  if (char_plr_flagged(ch, PLR_IMMORTAL)) {
+  if (char_plr_flagged(ch, PLR_IMMORTAL))
     char_set_con_sdcooldown(ch, 600);
-  }
-  die(g, ch, nullptr);
+  die(g, ch, nullptr); /* quirk: before the flags are cleared, unlike above */
   char_plr_set(ch, PLR_SELFD, false);
   char_plr_set(ch, PLR_SELFD2, false);
-  int num = rand_number(g, 10, 20) + char_get_skill(ch, SKILL_SELFD);
-  if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
-    char_set_skills_base(ch, SKILL_SELFD, num);
-  } else {
-    char_set_skills_base(ch, SKILL_SELFD, 100);
-  }
-  return;
+  selfd_learns(g, ch);
 }
 
 ACMD(do_razor)
@@ -1677,58 +1590,28 @@ ACMD(do_hspiral)
 
 ACMD(do_spiral)
 {
-  int skill;
-  struct char_data *vict;
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  /* Can they do the technique? */
-
-  if (!can_grav(g, ch)) {
+  if (!can_grav(g, ch) || !check_skill(g, ch, SKILL_SPIRAL) || !limb_ok(g, ch, 0))
     return;
-  }
-
-  if (!check_skill(g, ch, SKILL_SPIRAL)) {
-    return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
   if (arg.empty() && !char_get_fighting(g, ch)) {
     send_to_char(g, ch, "Direct it at who?\r\n");
     return;
   }
+  if (!check_points(g, ch, getMaxKI(g, ch) * .5, 0))
+    return;
+  int skill = init_skill(g, ch, SKILL_SPIRAL);
 
-  if (!check_points(g, ch, getMaxKI(g, ch) * .5, 0)) {
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  if (!vict && !(vict = char_get_fighting(g, ch))) {
+    send_to_char(g, ch, "Nothing around here by that name.");
     return;
   }
-
-  /* Passed sanity checks for doing the technique */
-
-  skill = init_skill(g, ch, SKILL_SPIRAL); /* Set skill value */
-
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch)) {
-      vict = char_get_fighting(g, ch);
-    } else {
-      send_to_char(g, ch, "Nothing around here by that name.");
-      return;
-    }
-  }
-
-  /* There is a player/mob targeted */
-  if (!can_kill(g, ch, vict, nullptr, 3)) {
+  if (!can_kill(g, ch, vict, nullptr, 3))
     return;
-  }
-
-  if (handle_defender(g, vict, ch)) {
-    struct char_data *def = char_get_defender(g, vict);
-    vict                  = def;
-  }
+  if (handle_defender(g, vict, ch))
+    vict = char_get_defender(g, vict);
 
   char_plr_set(ch, PLR_SPIRAL, true);
   improve_skill(g, ch, SKILL_SPIRAL, 0);
