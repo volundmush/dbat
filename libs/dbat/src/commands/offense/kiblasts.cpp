@@ -105,15 +105,8 @@ void shogekiha_mastery(ki_shot &s, int &)
 /* Kabito's students get some of the ki back */
 void shogekiha_refund(ki_shot &s)
 {
-  if (char_is_kabito(s.ch)) {
-    if (char_get_skill(s.ch, SKILL_SHOGEKIHA) >= 100) {
-      incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * .15, true);
-    } else if (char_get_skill(s.ch, SKILL_SHOGEKIHA) >= 60) {
-      incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * .1, true);
-    } else if (char_get_skill(s.ch, SKILL_SHOGEKIHA) >= 40) {
-      incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * .05, true);
-    }
-  }
+  if (char_is_kabito(s.ch))
+    ki_refund(s, .15);
 }
 
 void shogekiha_dissipate(ki_shot &s)

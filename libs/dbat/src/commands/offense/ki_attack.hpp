@@ -48,7 +48,9 @@ struct ki_shot {
   int64_t pl_before{}; /* the victim's power level before a hit landed */
   int mastery{};       /* for a hook that rolls for a master's bonus before zanzoken: 0 for none */
   int landings{1};     /* how many times a hit lands, for a hook that grants more */
-  int tally{};         /* for a through hook: how much of it got through */
+  int tally{};         /* for a through hook: how much of it got through; or for any hook's own count */
+  int where{};         /* where a hit landed, once it has */
+  int64_t extra{};     /* for hooks: whatever one needs to tell a later one */
 };
 
 struct ki_attack {
@@ -76,6 +78,9 @@ struct ki_attack {
   int head_mult{};           /* a critical hit does this many times the damage, if not as powerhit_crit says */
   int arm_crit{1};           /* calc_critical()'s argument for a hit on an arm */
   bool blockable{true};      /* the victim can block it */
+  int avoid_die{};           /* blocking and dodging it are rolled against rand_number(1, this), if not axion_dice(10) */
+  int block_damtype{};       /* damtype()'s number for it when blocked, if not damtype */
+  bool block_tires{true};    /* blocking it costs the victim stamina */
   int dodge_damtype{};       /* dodge_ki()'s number for it, if not damtype */
   int dodge_kind{};          /* dodge_ki()'s first argument when it is dodged: 0 straight, 1 homing, 2 guided */
   int steers{};              /* a miss is followed on into the room too: dodge_ki() with this, 1 homing or 2 guided */
@@ -90,6 +95,10 @@ struct ki_attack {
   bool soft_crit{true};      /* BONUS_SOFT can make a hit on the body critical */
   int leg_flag{1};           /* hurt()'s first argument for a hit on a leg */
   bool dodge_scatters{true}; /* dodging it sends it into the room (dodge_ki(), room damage) and improves dodge */
+  bool dodge_improves{true}; /* if it scatters, dodging it improves the victim's dodge */
+  bool damages_eq{true};     /* a hit damages the equipment where it lands */
+  bool limb_eq_first{};      /* quirk: a hit on an arm or a leg damages the equipment there before it hurts */
+  const char *no_objects{};  /* if not null, it can't be aimed at an object, and this says so */
   int obj_damtype{};         /* damtype()'s number for it at an object, if not damtype */
   bool multihit{};           /* handle_multihit() after a hit */
   bool needs_free_hand{};    /* not with both hands holding weapons */
@@ -112,7 +121,9 @@ struct ki_attack {
 
   /* each may be null */
   int (*cooldown_for)(ki_shot &shot){};                  /* handle_cooldown()'s argument, if not cooldown */
-  double (*cost)(const ki_shot &shot){};                 /* the share of the charge the attacker pays, if not attperc */
+  double (*cost)(const ki_shot &shot, ki_outcome how){}; /* the share of the charge the attacker pays, if not attperc */
+  bool (*victim_ok)(ki_shot &shot){};                    /* false, saying so, if it can't be used on the victim */
+  int (*to_hit)(ki_shot &shot){};                        /* the attacker's chance to hit, if not chance_to_hit() */
   void (*steady)(ki_shot &shot, int &prob){};            /* the last word on its accuracy, just before zanzoken */
   bool (*through)(ki_shot &shot, int prob, int perc){};  /* whether it got past the victim, if not prob >= perc - 20 */
   void (*on_parry)(ki_shot &shot){};                     /* what a parry does after its messages, if not send it on */
@@ -131,3 +142,6 @@ void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argu
 
 /* For hooks: the three messages of m about shot's victim */
 void ki_act(const ki_shot &shot, const act_msgs &m);
+
+/* For hooks: the attacker gets back this share of what the attack cost, at full skill (60 gets 0.1, 40 0.05) */
+void ki_refund(const ki_shot &shot, double share);

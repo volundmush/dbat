@@ -2,6 +2,7 @@
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
 #include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
+#include "dbat/act.attack.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/consts/deathtype.hpp"
@@ -98,7 +99,8 @@ struct sever_msgs {
   bool told_to_vict{}; /* quirk: the third message goes to the victim again rather than to the room */
 };
 
-void sever(ki_shot &s, const sever_msgs &m, int left_limb, int right_limb)
+/* odds: the least of a rand_number(1, 100) that severs one */
+void sever(ki_shot &s, const sever_msgs &m, int left_limb, int right_limb, int odds = 70)
 {
   GameWorld *g           = s.g;
   struct char_data *vict = s.vict;
@@ -108,7 +110,7 @@ void sever(ki_shot &s, const sever_msgs &m, int left_limb, int right_limb)
     act(g, a.to_room, true, s.ch, nullptr, vict, m.told_to_vict ? TO_VICT : TO_NOTVICT);
   };
 
-  if (rand_number(g, 1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
+  if (rand_number(g, 1, 100) >= odds && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
     if (char_get_limb_condition(vict, left_limb - 1) > 0 && !is_sparring(s.ch) && rand_number(g, 1, 2) == 2) {
       say(m.left);
       char_set_limb_condition(vict, left_limb - 1, 0);
@@ -171,7 +173,8 @@ const sever_msgs TWIN_SLASH_LEGS = {
     true
 };
 
-bool twin_slash_strike(ki_shot &s, int where)
+/* A twin slash's hit, or a zen blade strike's, which severs less often (sever_odds) */
+bool twin_slash_hit(ki_shot &s, int where, int sever_odds)
 {
   GameWorld *g = s.g;
 
@@ -191,18 +194,28 @@ bool twin_slash_strike(ki_shot &s, int where)
       return true;
     case 4:
       s.dmg *= calc_critical(g, s.ch, 1);
-      sever(s, TWIN_SLASH_ARMS, 2, 1);
+      sever(s, TWIN_SLASH_ARMS, 2, 1, sever_odds);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 1);
       return true;
     case 5:
       s.dmg *= calc_critical(g, s.ch, 1);
-      sever(s, TWIN_SLASH_LEGS, 4, 3);
+      sever(s, TWIN_SLASH_LEGS, 4, 3, sever_odds);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
       dam_eq_loc(g, s.vict, 2);
       return true;
   }
   return false;
+}
+
+bool twin_slash_strike(ki_shot &s, int where)
+{
+  return twin_slash_hit(s, where, 70);
+}
+
+bool zen_strike(ki_shot &s, int where)
+{
+  return twin_slash_hit(s, where, 80);
 }
 
 /* Phoenix slash: a hot ruby feeds it, fireproofing resists it and the flammable suffer it, and it leaves ash */
@@ -435,6 +448,31 @@ const ki_attack KIENZAN = {
     .strike          = kienzan_strike,
 };
 
+/* The zen blade strike cuts as a twin slash does */
+const ki_attack ZEN = {
+    .skill               = SKILL_ZEN,
+    .name                = "Zen Blade Strike",
+    .damtype             = 54,
+    .attperc             = .2,
+    .minimum             = .1,
+    .cooldown            = 6,
+    .not_while_singing   = true,
+    .sword               = true,
+    .sword_checked_early = true,
+    .perfection          = true,
+    .avoid_die           = 130,
+    .dodge_damtype       = 19,
+    .obj_damtype         = 19,
+    .block               = {"@C$N@W moves quickly and blocks your Zen Blade Strike!@n", "@WYou move quickly and block @C$n's@W Zen Blade Strike!@n", "@C$N@W moves quickly and blocks @c$n's@W Zen Blade Strike!@n"},
+    .dodge               = {"@C$N@W manages to dodge your Zen Blade Strike, letting it slam into the surroundings!@n", "@WYou dodge @C$n's@W Zen Blade Strike, letting it slam into the surroundings!@n", "@C$N@W manages to dodge @c$n's@W Zen Blade Strike, letting it slam into the surroundings!@n"},
+    .miss                = {"@WYou can't believe it but your Zen Blade Strike misses, flying through the air harmlessly!@n", "@C$n@W fires a Zen Blade Strike at you, but misses!@n ", "@c$n@W fires a Zen Blade Strike at @C$N@W, but somehow misses!@n "},
+    .miss_spent          = {"@WYou can't believe it but your Zen Blade Strike misses, flying through the air harmlessly!@n", "@C$n@W fires a Zen Blade Strike at you, but misses!@n", "@c$n@W fires a Zen Blade Strike at @C$N@W, but somehow misses!@n"},
+    .hits                = {{"@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S body!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR body!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C body!@n", true}, {"@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S head!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR head!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C head!@n", true}, {"@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S body!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR body!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C body!@n", true}, {"@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S arm!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR arm!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C arm!@n", true}, {"@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S leg!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR leg!@n", "@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C leg!@n", true}},
+    .obj_to_char         = "@WYou fire a Zen Blade Strike at $p@W!@n",
+    .obj_to_room         = "@C$n@W fires a Zen Blade Strike at $p@W!@n",
+    .strike              = zen_strike,
+};
+
 } // namespace
 
 ACMD(do_tslash) { perform_ki_attack(g, ch, argument, TWIN_SLASH); }
@@ -444,3 +482,5 @@ ACMD(do_pslash) { perform_ki_attack(g, ch, argument, PHOENIX_SLASH); }
 ACMD(do_ddslash) { perform_ki_attack(g, ch, argument, DARKNESS_DRAGON_SLASH); }
 
 ACMD(do_kienzan) { perform_ki_attack(g, ch, argument, KIENZAN); }
+
+ACMD(do_zen) { perform_ki_attack(g, ch, argument, ZEN); }

@@ -30,10 +30,6 @@
 
 namespace {
 
-/* Where an elbow, a kick or a knee lands: its fourth place is a leg and its fifth an arm */
-constexpr strike_spot LEG_THEN_ARM[5] = {strike_spot::body, strike_spot::head, strike_spot::body, strike_spot::leg,
-                                         strike_spot::arm};
-
 /* Frieza's students with style uppercut sooner */
 int uppercut_cooldown(strike_shot &s)
 {
@@ -98,7 +94,7 @@ const strike_attack ROUNDHOUSE = {
     .damtype       = 4,
     .stamina_share = 180,
     .improve_mode  = 1,
-    .needs          = strike_needs::legs,
+    .needs         = strike_needs::legs,
     .limb_hurt     = 195,
     .leg_flag      = 1,
     .fireshield    = "leg",
@@ -142,7 +138,7 @@ const strike_attack KICK = {
     .damtype           = 1,
     .cooldown          = 5,
     .stamina_share     = 400,
-    .needs              = strike_needs::legs,
+    .needs             = strike_needs::legs,
     .fireshield        = "leg",
     .spent_hurts_first = true,
     .parry             = {"@C$N@W parries your kick with a kick of $S own!@n", "@WYou parry @C$n's@W kick with one of your own!@n", "@C$N@W parries @c$n's@W kick with a kick of $S own!@n", true},
@@ -163,7 +159,7 @@ const strike_attack KNEE = {
     .damtype           = 3,
     .cooldown          = 6,
     .stamina_share     = 250,
-    .needs              = strike_needs::legs,
+    .needs             = strike_needs::legs,
     .fireshield        = "knee",
     .spent_hurts_first = true,
     .spent_free        = true,

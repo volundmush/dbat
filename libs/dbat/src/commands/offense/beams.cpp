@@ -79,13 +79,7 @@ void kamehameha_refund(ki_shot &s, ki_outcome how)
 {
   if (how == ki_outcome::absorbed)
     return;
-  if (char_get_skill(s.ch, SKILL_KAMEHAMEHA) >= 100) {
-    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * 0.25, true);
-  } else if (char_get_skill(s.ch, SKILL_KAMEHAMEHA) >= 60) {
-    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * 0.1, true);
-  } else if (char_get_skill(s.ch, SKILL_KAMEHAMEHA) >= 40) {
-    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * 0.05, true);
-  }
+  ki_refund(s, 0.25);
   if (char_get_skills_perf(s.ch, SKILL_KAMEHAMEHA) == 3) {
     char_set_wait(s.ch, PULSE_3SEC);
   }

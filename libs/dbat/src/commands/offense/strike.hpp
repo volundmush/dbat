@@ -23,6 +23,10 @@ enum class strike_needs { hands, /* arms (limb_ok()), and a hand free of weapons
                           tail,
                           nothing };
 
+/* Where an elbow, a kick, a knee, a headbutt or a bash lands: its fourth place is a leg and its fifth an arm */
+inline constexpr strike_spot LEG_THEN_ARM[5] = {strike_spot::body, strike_spot::head, strike_spot::body,
+                                                strike_spot::leg, strike_spot::arm};
+
 struct strike_attack;
 
 /* A strike being made, as the hooks see it. */
@@ -38,18 +42,19 @@ struct strike_shot {
 };
 
 struct strike_attack {
-  int skill{};         /* SKILL_ */
-  const char *name{};  /* as the zanzoken messages name it */
-  int damtype{};       /* damtype()'s number for it */
-  int cooldown{};      /* handle_cooldown() */
-  int stamina_share{}; /* the user needs a 1/this share of their max power level in stamina */
-  int improve_mode{};  /* improve_skill()'s last argument for the user */
-  strike_needs needs{}; /* what of the user it needs whole */
+  int skill{};                        /* SKILL_ */
+  const char *name{};                 /* as the zanzoken messages name it */
+  int damtype{};                      /* damtype()'s number for it */
+  int cooldown{};                     /* handle_cooldown() */
+  int stamina_share{};                /* the user needs a 1/this share of their max power level in stamina */
+  int improve_mode{};                 /* improve_skill()'s last argument for the user */
+  strike_needs needs{};               /* what of the user it needs whole */
   bool not_while_singing{};           /* refused while playing a song */
   bool skill_before_grav{};           /* quirk: the skill is checked before gravity, rather than after */
   bool keeps_combo{};                 /* quirk: a zanzoken doesn't end the user's combo */
   int parry_crit{1};                  /* calc_critical()'s argument for a counterblow */
   std::optional<int> block_damtype{}; /* damtype()'s number for it when blocked, if not damtype */
+  int avoid_die{};                    /* blocking and dodging it are rolled against rand_number(1, this), if not axion_dice(10) */
   int limb_hurt{};                    /* hurt()'s limb argument for a hit on an arm or a leg */
   int leg_flag{};                     /* hurt()'s first argument for a hit on a leg */
   const char *fireshield{};           /* what of the user a fire shield burns when it hits */
@@ -70,8 +75,11 @@ struct strike_attack {
   /* each may be null */
   int (*cooldown_for)(strike_shot &shot){};                          /* handle_cooldown()'s argument, if not cooldown */
   void (*defend)(strike_shot &shot, int &pry, int &blk, int &dge){}; /* the victim's chances, if not handle_defense()'s */
+  void (*bonus_damage)(strike_shot &shot){};                         /* after a hit's damage is rolled, before where it lands is */
   void (*on_spot)(strike_shot &shot, int where){};                   /* after a hit's messages, before its damage is rolled */
+  long double (*head_crit)(strike_shot &shot){};                     /* what a hit on the head multiplies its damage by, if not calc_critical()'s */
   void (*before_damage)(strike_shot &shot, int where){};             /* after a hit's damage is rolled, before it is dealt */
+  void (*after_hit)(strike_shot &shot){};                            /* after a hit and the fire shield, before the user pays */
 };
 
 void perform_strike(GameWorld *g, struct char_data *ch, std::string_view argument, const strike_attack &attack);

@@ -86,7 +86,7 @@ void renzokou_mastery(ki_shot &s, int &)
     send_to_char(s.g, s.ch, "@GYour mastery of the technique has made your use of energy as efficient as possible!@n\r\n");
 }
 
-double renzokou_cost(const ki_shot &s)
+double renzokou_cost(const ki_shot &s, ki_outcome)
 {
   return s.mastery == 1 ? s.attperc * 0.25 : s.mastery == 2 ? s.attperc * 0.5
                                                             : s.attperc;

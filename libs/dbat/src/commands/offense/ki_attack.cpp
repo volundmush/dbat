@@ -49,7 +49,7 @@ int perfection(const ki_shot &s)
 void pay(ki_shot &s, ki_outcome how)
 {
   if (s.attack->cost)
-    pcost(s.g, s.ch, s.attack->cost(s), 0);
+    pcost(s.g, s.ch, s.attack->cost(s, how), 0);
   else if (perfection(s) == 3 && s.attperc > s.minimum)
     pcost(s.g, s.ch, s.attperc - 0.05, 0);
   else
@@ -65,6 +65,10 @@ void land(ki_shot &s)
                                           ki_spot::arm, ki_spot::leg, ki_spot::body};
   GameWorld *g                         = s.g;
   const ki_attack &atk                 = *s.attack;
+  auto damage_eq                       = [&](int loc) {
+    if (atk.damages_eq)
+      dam_eq_loc(g, s.vict, loc);
+  };
 
   s.dmg = damtype(g, s.ch, atk.damtype, s.skill, s.attperc);
   if (atk.bonus_damage)
@@ -73,6 +77,7 @@ void land(ki_shot &s)
   int where   = atk.locate ? atk.locate(s) : roll_hitloc(g, s.ch, s.vict, s.skill);
   if (atk.aim)
     where = atk.aim(s, where);
+  s.where = where;
   if (where < 1 || where > 6 || !atk.hits[where - 1].to_char)
     return;
   ki_act(s, atk.hits[where - 1]);
@@ -83,7 +88,7 @@ void land(ki_shot &s)
       if (atk.soft_crit && char_get_bonuses(s.ch, BONUS_SOFT))
         s.dmg *= calc_critical(g, s.ch, 2);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
-      dam_eq_loc(g, s.vict, 4); /* 1 arms, 2 legs, 3 head, 4 body */
+      damage_eq(4); /* 1 arms, 2 legs, 3 head, 4 body */
       break;
     case ki_spot::head:
       if (atk.head_mult)
@@ -93,17 +98,23 @@ void land(ki_shot &s)
       else
         s.dmg *= char_get_bonuses(s.ch, BONUS_POWERHIT) ? 5 : 3;
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
-      dam_eq_loc(g, s.vict, 3);
+      damage_eq(3);
       break;
     case ki_spot::arm:
       s.dmg *= calc_critical(g, s.ch, atk.arm_crit);
+      if (atk.limb_eq_first)
+        damage_eq(1);
       hurt(g, 0, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
-      dam_eq_loc(g, s.vict, 1);
+      if (!atk.limb_eq_first)
+        damage_eq(1);
       break;
     case ki_spot::leg:
       s.dmg *= calc_critical(g, s.ch, 1);
+      if (atk.limb_eq_first)
+        damage_eq(2);
       hurt(g, atk.leg_flag, atk.limb_hurt, s.ch, s.vict, nullptr, s.dmg, 1);
-      dam_eq_loc(g, s.vict, 2);
+      if (!atk.limb_eq_first)
+        damage_eq(2);
       break;
   }
 }
@@ -117,6 +128,9 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
   auto pay_if          = [&](ki_outcome how) {
     if (pays)
       pay(s, how);
+  };
+  auto avoids = [&](int chance) { /* the victim blocks or dodges it */
+                                  return chance > (atk.avoid_die ? rand_number(g, 1, atk.avoid_die) : axion_dice(g, 10));
   };
   auto steer = [&]() { /* a homing or guided attack the victim got away from */
                        dodge_ki(g, s.ch, s.vict, atk.steers, dodge_damtype(atk), s.skill, atk.skill);
@@ -163,17 +177,18 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
       }
       return ki_outcome::blocked;
     }
-    if (atk.blockable && blk > axion_dice(g, 10)) {
+    if (atk.blockable && avoids(blk)) {
       ki_act(s, atk.block);
       if (atk.block_improves)
         improve_skill(g, s.vict, SKILL_BLOCK, 0);
       pay_if(ki_outcome::blocked);
-      pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 500);
-      s.dmg = damtype(g, s.ch, atk.damtype, s.skill, s.attperc) / 4;
+      if (atk.block_tires)
+        pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 500);
+      s.dmg = damtype(g, s.ch, atk.block_damtype ? atk.block_damtype : atk.damtype, s.skill, s.attperc) / 4;
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 1);
       return ki_outcome::blocked;
     }
-    if (dge > axion_dice(g, 10)) {
+    if (avoids(dge)) {
       ki_act(s, atk.dodge);
       if (atk.dodge_scatters) {
         if (atk.dodge_explosion)
@@ -182,7 +197,8 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
         room_vnum here = char_get_in_room(s.ch);
         if (room_get_dmg(g, here) <= atk.dodge_dmg_cap)
           room_set_dmg(g, here, room_get_dmg(g, here) + atk.dodge_dmg);
-        improve_skill(g, s.vict, SKILL_DODGE, 0);
+        if (atk.dodge_improves)
+          improve_skill(g, s.vict, SKILL_DODGE, 0);
       }
       pay_if(ki_outcome::dodged);
       hurt(g, 0, 0, s.ch, s.vict, nullptr, 0, 1);
@@ -227,6 +243,8 @@ void at_victim(ki_shot &s)
 
   if (!can_kill(g, s.ch, s.vict, nullptr, atk.kill_mode))
     return;
+  if (atk.victim_ok && !atk.victim_ok(s))
+    return;
   if (handle_defender(g, s.vict, s.ch))
     s.vict = char_get_defender(g, s.vict);
   improve_skill(g, s.ch, atk.skill, 0);
@@ -234,7 +252,7 @@ void at_victim(ki_shot &s)
   int prob  = roll_accuracy(g, s.ch, s.skill, atk.ki_accuracy);
   if (perfection(s) == 2)
     prob += 5;
-  int perc = chance_to_hit(g, s.ch);
+  int perc = atk.to_hit ? atk.to_hit(s) : chance_to_hit(g, s.ch);
   index -= handle_speed(g, s.ch, s.vict);
   int avo = index / 4;
   handle_defense(g, s.vict, &pry, &blk, &dge);
@@ -281,6 +299,10 @@ void at_object(ki_shot &s)
 {
   GameWorld *g = s.g;
 
+  if (s.attack->no_objects) {
+    send_to_char(g, s.ch, s.attack->no_objects);
+    return;
+  }
   /* can_kill() refuses a broken object, so it is never broken here */
   if (!can_kill(g, s.ch, nullptr, s.obj, 1))
     return;
@@ -300,6 +322,17 @@ void at_object(ki_shot &s)
 void ki_act(const ki_shot &s, const act_msgs &m)
 {
   act_triple(s.g, m, s.ch, nullptr, s.vict);
+}
+
+void ki_refund(const ki_shot &s, double share)
+{
+  int skill = char_get_skill(s.ch, s.attack->skill);
+  if (skill >= 100)
+    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * share, true);
+  else if (skill >= 60)
+    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * .1, true);
+  else if (skill >= 40)
+    incCurKI(s.g, s.ch, (getMaxKI(s.g, s.ch) * s.attperc) * .05, true);
 }
 
 void perform_ki_attack(GameWorld *g, struct char_data *ch, std::string_view argument, const ki_attack &attack)

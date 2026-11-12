@@ -56,7 +56,9 @@ void land(strike_shot &s)
   GameWorld *g                             = s.g;
   const strike_attack &atk                 = *s.attack;
 
-  s.dmg     = damtype(g, s.ch, atk.damtype, s.skill, 0);
+  s.dmg = damtype(g, s.ch, atk.damtype, s.skill, 0);
+  if (atk.bonus_damage)
+    atk.bonus_damage(s);
   int where = roll_hitloc(g, s.ch, s.vict, s.skill);
   if (where < 1 || where > 5)
     return;
@@ -71,7 +73,7 @@ void land(strike_shot &s)
       eq = 4;
       break;
     case strike_spot::head:
-      s.dmg *= calc_critical(g, s.ch, 0);
+      s.dmg *= atk.head_crit ? atk.head_crit(s) : calc_critical(g, s.ch, 0);
       eq = 3;
       break;
     case strike_spot::arm:
@@ -97,6 +99,9 @@ void at_victim(strike_shot &s)
   GameWorld *g             = s.g;
   const strike_attack &atk = *s.attack;
   int pry = 2, dge = 2, blk = 2;
+  auto avoids = [&](int chance) { /* the victim blocks or dodges it */
+                                  return chance > (atk.avoid_die ? rand_number(g, 1, atk.avoid_die) : axion_dice(g, 10));
+  };
 
   if (!can_kill(g, s.ch, s.vict, nullptr, 0))
     return;
@@ -149,7 +154,7 @@ void at_victim(strike_shot &s)
       hurt(g, 0, 0, s.vict, s.ch, nullptr, s.dmg, -1); /* the counterblow */
       return;
     }
-    if (blk > axion_dice(g, 10)) {
+    if (avoids(blk)) {
       act_triple(g, atk.block, s.ch, nullptr, s.vict);
       improve_skill(g, s.vict, SKILL_BLOCK, 0);
       pay(s, s.stcost / 2);
@@ -158,7 +163,7 @@ void at_victim(strike_shot &s)
       hurt(g, 0, 0, s.ch, s.vict, nullptr, s.dmg, 0);
       return;
     }
-    if (dge > axion_dice(g, 10)) {
+    if (avoids(dge)) {
       act_triple(g, atk.dodge, s.ch, nullptr, s.vict);
       improve_skill(g, s.vict, SKILL_DODGE, 0);
       pay(s, s.stcost / 2);
@@ -173,6 +178,8 @@ void at_victim(strike_shot &s)
 
   land(s);
   tech_handle_fireshield(g, s.ch, s.vict, atk.fireshield);
+  if (atk.after_hit)
+    atk.after_hit(s);
   pay(s, s.stcost);
   handle_multihit(g, s.ch, s.vict);
 }
