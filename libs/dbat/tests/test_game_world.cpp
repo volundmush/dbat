@@ -498,6 +498,20 @@ static void check_objects_off_the_ground(void)
   extract_obj(g, obj);
   free_world(g);
 
+  /* carried ice that melts away leaves its carrier's load as it was, weighed once */
+  g   = make_world(500, 1);
+  obj = carried_object(g, holder);
+  obj_from_char(g, obj);
+  obj_extra_set(obj, ITEM_ICE, true);
+  obj_set_weight(obj, 20);
+  int64_t load = char_get_carry_weight(holder);
+  obj_to_char(g, obj, holder);
+  for (int i = 0; i < 20 && !g->objects.empty(); i++)
+    point_update(g);
+  CHECK(g->objects.empty());
+  CHECK(char_get_carry_weight(holder) == load);
+  free_world(g);
+
   /* a gravity generator in a container changes nothing */
   g   = make_world(11, 1);
   bag = read_object(g, 11);

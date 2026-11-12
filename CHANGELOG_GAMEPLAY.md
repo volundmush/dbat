@@ -1,5 +1,7 @@
 # 2.9.4 (latest)
 - ???
+- Focusing a curse on yourself curses you, rather than crashing the game. [Volund]
+- Carried ice that melts away no longer leaves its carrier counting less weight than they carry. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

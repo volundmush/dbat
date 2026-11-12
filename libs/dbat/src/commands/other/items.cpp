@@ -1,6 +1,9 @@
 /* items.c: item crafting, repair and use
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
+#include <array>
 #include <cstdlib>
+#include <span>
 
 #include <sys/stat.h>
 
@@ -55,730 +58,330 @@
 
 #include "other_internal.hpp"
 
-static void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch, int type);
+namespace {
 
-/* This handles increasing the stats of a created object based on the skill *
- * and/or stats of the user.                                                */
-static void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch, int type)
+/* Worn equipment made by someone level 30 or more gets their level, rounded down to ten (at most 100), and
+ * stats to match. */
+void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
-
-  if (!obj || !ch)
+  int level = char_get_level(ch);
+  if (level < 30)
     return;
 
-  int boost = 0;
+  int boost = std::min(level, 100) / 10 * 10;
+  obj_set_level(obj, boost);
+  obj_get_affected(obj)[0].location = 17;
+  obj_get_affected(obj)[0].modifier += boost * level;
+  obj_get_affected(obj)[1].location = obj_get_vnum(g, obj) == 91 ? 1 : 3; /* pants */
+  obj_get_affected(obj)[1].modifier = boost / 20;
+}
 
-  if (char_get_level(ch) >= 100) {
-    boost = 100;
-  } else if (char_get_level(ch) >= 90) {
-    boost = 90;
-  } else if (char_get_level(ch) >= 80) {
-    boost = 80;
-  } else if (char_get_level(ch) >= 70) {
-    boost = 70;
-  } else if (char_get_level(ch) >= 60) {
-    boost = 60;
-  } else if (char_get_level(ch) >= 50) {
-    boost = 50;
-  } else if (char_get_level(ch) >= 40) {
-    boost = 40;
-  } else if (char_get_level(ch) >= 30) {
-    boost = 30;
+/* What concentration takes off the ki a creation costs: the first row the skill reaches. */
+constexpr struct {
+  int skill;
+  double discount;
+} DISCOUNTS[] = {{100, 0.5}, {90, 0.6}, {80, 0.65}, {70, 0.7}, {60, 0.75}, {50, 0.8}, {40, 0.85}, {30, 0.9}, {20, 0.95}};
+
+double concentration_discount(struct char_data *ch)
+{
+  int skill = char_get_skill(ch, SKILL_CONCENTRATION);
+  auto row  = std::ranges::find_if(DISCOUNTS, [skill](const auto &d) { return skill >= d.skill; });
+  return row == std::end(DISCOUNTS) ? 1.0 : row->discount;
+}
+
+struct form_request {
+  std::string_view what; /* the creation's name */
+  std::string &arg2;
+  const std::string &arg3; /* the rest of the line */
+  int skill;
+  double discount;
+};
+
+bool has_ki_for(GameWorld *g, struct char_data *ch, const form_request &req, int64_t cost)
+{
+  if (getCurKI(g, ch) >= cost)
+    return true;
+  send_to_char(g, ch, "You do not have enough ki to create {}\r\n", req.what);
+  return false;
+}
+
+struct obj_data *conjure(GameWorld *g, obj_vnum vnum)
+{
+  struct obj_data *obj = read_object(g, vnum);
+  add_unique_id(g, obj);
+  return obj;
+}
+
+/* The end of every creation: obj (the last made) is shown off and paid for. */
+void created(GameWorld *g, struct char_data *ch, struct obj_data *obj, int64_t cost, bool cooldown = true)
+{
+  reveal_hiding(g, ch, 0);
+  if (cooldown)
+    char_set_con_cooldown(ch, 10);
+  act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
+  act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
+  decCurKI(g, ch, cost, 0);
+}
+
+/* A better grade of a creation, by name, for those with the skill: 0 is the lowest, i the i-th row's. */
+struct grade {
+  std::string_view word;
+  int skill;
+};
+constexpr grade GRADES[]        = {{"mid", 50}, {"high", 75}, {"highest", 100}};
+constexpr grade WEAPON_GRADES[] = {{"mid", 30}, {"high", 50}, {"higher", 75}, {"highest", 100}};
+
+size_t pick_grade(GameWorld *g, struct char_data *ch, std::string_view word, int skill, std::span<const grade> grades,
+                  std::string_view syntax)
+{
+  if (word.empty()) {
+    send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) ({})\r\n", syntax);
+    send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
+    return 0;
+  }
+  auto row = std::ranges::find_if(grades, [&](const grade &gr) { return str_eq_nocase(word, gr.word) && skill >= gr.skill; });
+  return row == grades.end() ? 0 : row - grades.begin() + 1;
+}
+
+/* Most creations differ only in these. */
+struct creation {
+  int64_t (*cost)(int64_t max_ki, int skill);
+  std::array<obj_vnum, 4> vnums; /* by grade, if graded */
+  bool graded;
+  bool boosted;  /* worn equipment, made better by a high level */
+  bool on_floor; /* or in hand */
+  bool no_rent;
+  bool sized;
+  bool cooldown{true};
+};
+
+template <const creation &C> void make(GameWorld *g, struct char_data *ch, form_request &req)
+{
+  int64_t cost = C.cost(getMaxKI(g, ch), req.skill);
+  cost *= req.discount;
+
+  if (!has_ki_for(g, ch, req, cost))
+    return;
+
+  size_t grade = C.graded ? pick_grade(g, ch, req.arg2, req.skill, GRADES, "mid | high | highest") : 0;
+
+  struct obj_data *obj = conjure(g, C.vnums[grade]);
+  if (C.boosted)
+    boost_obj(g, obj, ch);
+  if (C.on_floor)
+    obj_to_room(g, obj, char_get_in_room(ch));
+  else
+    obj_to_char(g, obj, ch);
+  if (C.no_rent) {
+    obj_extra_set(obj, ITEM_NORENT, true);
+    obj_extra_set(obj, ITEM_NOSELL, true);
+  }
+  if (C.sized)
+    obj_set_size(obj, get_size(ch));
+  created(g, ch, obj, cost, C.cooldown);
+}
+
+constexpr int64_t cheap(int64_t max_ki, int skill) { return max_ki / (skill * 2); }
+constexpr int64_t fifth(int64_t max_ki, int) { return max_ki / 5; }
+constexpr int64_t nearly_all(int64_t max_ki, int) { return max_ki - 1; }
+
+constexpr creation FOOD     = {.cost = [](int64_t max_ki, int skill) { return max_ki / std::max(skill / 2, 1); }, .vnums = {70, 1510, 1511, 1512}, .graded = true};
+constexpr creation WATER    = {.cost = cheap, .vnums = {71, 1513, 1514, 1515}, .graded = true};
+constexpr creation LIGHT    = {.cost = cheap, .vnums = {72}, .sized = true};
+constexpr creation BAG      = {.cost = cheap, .vnums = {319}};
+constexpr creation MATTRESS = {.cost = [](int64_t max_ki, int skill) { return max_ki / skill; }, .vnums = {16}, .cooldown = false};
+constexpr creation PANTS    = {.cost = fifth, .vnums = {91}, .boosted = true, .sized = true};
+constexpr creation GI       = {.cost = fifth, .vnums = {92}, .boosted = true, .sized = true};
+constexpr creation WRIST    = {.cost = fifth, .vnums = {1528}, .boosted = true, .sized = true};
+constexpr creation BOOTS    = {.cost = fifth, .vnums = {1532}, .boosted = true, .sized = true};
+constexpr creation SHURIKEN = {.cost = [](int64_t max_ki, int) { return max_ki / 4; }, .vnums = {19053}, .no_rent = true, .sized = true};
+constexpr creation KACHIN   = {.cost = nearly_all, .vnums = {87}, .on_floor = true, .sized = true};
+
+constexpr struct {
+  std::string_view name;
+  std::array<obj_vnum, 5> vnums; /* by grade */
+} WEAPONS[] = {
+    {"sword", {90, 1516, 1517, 1518, 1519}},
+    {"dagger", {1536, 1537, 1538, 1539, 1540}},
+    {"club", {1541, 1542, 1543, 1544, 1545}},
+    {"spear", {1546, 1547, 1548, 1549, 1550}},
+    {"gun", {1551, 1552, 1553, 1554, 1555}},
+};
+
+void weapon(GameWorld *g, struct char_data *ch, form_request &req)
+{
+  int64_t cost = getMaxKI(g, ch) / 5;
+  cost *= req.discount;
+
+  if (!has_ki_for(g, ch, req, cost))
+    return;
+  if (req.arg2.empty()) {
+    send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
+    return;
   }
 
-  switch (type) {       /* Main switch of boost_obj */
-    case 0:             /* This object is a piece of worn equipment, not a weapon. */
-      if (boost != 0) { /* Change it if it qualifies */
-        obj_set_level(obj, boost);
-        obj_get_affected(obj)[0].location = 17;
-        obj_get_affected(obj)[0].modifier += (boost * char_get_level(ch));
-        if (obj_get_vnum(g, obj) == 91) {
-          obj_get_affected(obj)[1].location = 1;
-          obj_get_affected(obj)[1].modifier = (boost / 20);
-        } else {
-          obj_get_affected(obj)[1].location = 3;
-          obj_get_affected(obj)[1].modifier = (boost / 20);
-        }
-      }
-      break;
-    case 1: /* This object is a weapon. */
-      switch (boost) {
-        case 30:
-          obj_extra_set(obj, ITEM_WEAPLVL2, true);
-          break;
-        case 40:
-        case 50:
-          obj_extra_set(obj, ITEM_WEAPLVL3, true);
-          break;
-        case 60:
-        case 70:
-        case 80:
-        case 90:
-          obj_extra_set(obj, ITEM_WEAPLVL4, true);
-          break;
-        case 100:
-          obj_extra_set(obj, ITEM_WEAPLVL5, true);
-          break;
-        default:
-          obj_extra_set(obj, ITEM_WEAPLVL1, true);
-          break;
-      }
-      if (boost != 0) {
-        obj_set_level(obj, boost);
-        obj_get_affected(obj)[0].location = 1;
-        obj_get_affected(obj)[0].modifier = (boost / 20);
-      }
-      break;
-  } /* End of main switch */
+  size_t grade = pick_grade(g, ch, req.arg3, req.skill, WEAPON_GRADES, "mid | high | higher | highest");
+  auto kind    = std::ranges::find_if(WEAPONS, [&](const auto &w) { return str_eq_nocase(req.arg2, w.name); });
+  if (kind == std::end(WEAPONS)) {
+    send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
+    return;
+  }
+
+  struct obj_data *obj = conjure(g, kind->vnums[grade]);
+  obj_to_char(g, obj, ch);
+  obj_set_size(obj, get_size(ch));
+  created(g, ch, obj, cost);
 }
+
+/* A full set of clothes, put on a follower */
+void clothesbeam(GameWorld *g, struct char_data *ch, form_request &req)
+{
+  int64_t cost = getMaxKI(g, ch) / 2;
+  cost *= req.discount;
+
+  if (!has_ki_for(g, ch, req, cost))
+    return;
+  if (req.arg2.empty()) {
+    send_to_char(g, ch, "Who do you want to hit with clothesbeam?\r\nSyntax: create clothesbeam (target)\r\n");
+    return;
+  }
+
+  struct char_data *vict = get_char_vis(g, ch, req.arg2, nullptr, FIND_CHAR_ROOM);
+  if (!vict) {
+    send_to_char(g, ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
+    return;
+  }
+  if (char_get_master(g, vict) != ch) {
+    send_to_char(g, ch, "They must be following you first.\r\n");
+    return;
+  }
+
+  struct obj_data *obj = nullptr;
+  for (obj_vnum vnum : {92, 91, 1528, 1528, 1532}) { /* gi, pants, two wristbands, boots */
+    obj = conjure(g, vnum);
+    boost_obj(g, obj, ch);
+    obj_to_char(g, obj, vict);
+    obj_set_size(obj, get_size(vict));
+  }
+  do_wear(g, vict, "all", 0, 0);
+  created(g, ch, obj, cost);
+}
+
+void elixir(GameWorld *g, struct char_data *ch, form_request &req)
+{
+  int64_t cost = getMaxKI(g, ch) - 1;
+  cost *= req.discount;
+
+  if (!has_ki_for(g, ch, req, cost))
+    return;
+  if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
+    send_to_char(g, ch, "You need to be at full powerlevel to create {}\r\n", req.what);
+    return;
+  }
+  if (char_get_practice_points(g, ch) < 10) {
+    send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 10.\r\n", req.what);
+    return;
+  }
+
+  struct obj_data *obj = conjure(g, 86);
+  obj_to_room(g, obj, char_get_in_room(ch));
+  obj_set_size(obj, get_size(ch));
+  created(g, ch, obj, cost);
+  decCurHealthPercent(g, ch, 1, 1);
+  char_set_practice_points(g, ch, char_get_practice_points(g, ch) - 10);
+}
+
+/* Costs everything, and no less with concentration */
+void senzu(GameWorld *g, struct char_data *ch, form_request &req)
+{
+  int64_t cost  = getMaxKI(g, ch);
+  int64_t cost2 = getEffMaxPL(g, ch) - 1;
+
+  if (getCurKI(g, ch) < cost) {
+    send_to_char(g, ch, "You do not have enough ki to create {}, you need full ki.\r\n", req.what);
+    return;
+  }
+  if (getCurPL(g, ch) <= cost2) {
+    send_to_char(g, ch, "You do not have enough powerlevel to create {}, you need to be at full.\r\n", req.what);
+    return;
+  }
+  if (getCurST(g, ch) < getMaxST(g, ch)) {
+    send_to_char(g, ch, "You do not have enough stamina to create {}, you need to be at full.\r\n", req.what);
+    return;
+  }
+  if (char_get_practice_points(g, ch) < 50) {
+    send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 50.\r\n", req.what);
+    return;
+  }
+
+  struct obj_data *obj = conjure(g, 1);
+  obj_to_char(g, obj, ch);
+  created(g, ch, obj, cost);
+  decCurHealth(g, ch, cost2, 0);
+  decCurSTPercent(g, ch, 1, 1);
+  char_set_practice_points(g, ch, char_get_practice_points(g, ch) - 50);
+}
+
+/* In the menu's order. Names match exactly. */
+constexpr struct form_kind {
+  std::string_view name;
+  int skill; /* the creation skill it takes */
+  std::string_view menu;
+  void (*make)(GameWorld *, struct char_data *, form_request &);
+} FORMS[] = {
+    {"food", 0, "create food\r\n", make<FOOD>},
+    {"water", 0, "create water\r\n", make<WATER>},
+    {"light", 20, "create light\r\n", make<LIGHT>},
+    {"bag", 30, "create bag\r\n", make<BAG>},
+    {"mattress", 40, "create mattress\r\n", make<MATTRESS>},
+    {"weapon", 50, "create weapon (sword | club | dagger | spear | gun )\r\n", weapon},
+    {"pants", 50, "create pants\r\n", make<PANTS>},
+    {"gi", 50, "create gi\r\n", make<GI>},
+    {"wristband", 50, "create wristband\r\n", make<WRIST>},
+    {"boots", 50, "create boots\r\n", make<BOOTS>},
+    {"clothesbeam", 60, "create clothesbeam (target)\r\n", clothesbeam},
+    {"shuriken", 70, "create shuriken\r\n", make<SHURIKEN>},
+    {"senzu", 80, "create senzu\r\n", senzu},
+    {"kachin", 90, "create kachin\r\n", make<KACHIN>},
+    {"elixir", 100, "create elixir\r\n", elixir},
+};
+
+} // namespace
 
 ACMD(do_form)
 {
-  int skill = 0, senzu = false, bag = false, light = false, sword = false, mattress = false, gi = false, pants = false, kachin = false, boost = false, shuriken = false;
-  int clothes = false, wrist = false, boots = false, level = 0;
-  double discount = 1.0;
-  int64_t cost    = 0;
-  struct obj_data *obj;
-  std::string arg, arg2, arg3;
-
   std::string_view rest = argument;
-  arg                   = take_word(rest);
-  arg2                  = take_word(rest);
-  arg3                  = skip_spaces(rest); /* the rest of the line, as half_chop left it */
+  std::string arg       = take_word(rest);
+  std::string arg2      = take_word(rest);
+  std::string arg3      = std::string(skip_spaces(rest)); /* the rest of the line, as half_chop left it */
 
-  if (!know_skill(g, ch, SKILL_CREATE)) {
+  if (!know_skill(g, ch, SKILL_CREATE))
     return;
-  }
 
-  /* -- code disabled as of 10/24/2021
-  if (GET_COOLDOWN(ch) > 0) {
-   send_to_char(ch, "You must wait a short period before concentrating again.\r\n");
-   return;
-  }
-   */
-
-  skill = char_get_skill(ch, SKILL_CREATE);
-
-  if (skill >= 100) {
-    boost = true;
-  }
-  if (skill >= 90) {
-    kachin = true;
-  }
-  if (skill >= 80) {
-    senzu = true;
-  }
-  if (skill >= 70) {
-    shuriken = true;
-  }
-  if (skill >= 60) {
-    clothes = true;
-  }
-  if (skill >= 50) {
-    sword = true;
-    gi    = true;
-    pants = true;
-    wrist = true;
-    boots = true;
-  }
-  if (skill >= 40) {
-    mattress = true;
-  }
-  if (skill >= 30) {
-    bag = true;
-  }
-  if (skill >= 20) {
-    light = true;
-  }
-
-  if (char_get_skill(ch, SKILL_CONCENTRATION)) {
-    if (char_get_skill(ch, SKILL_CONCENTRATION) >= 100) {
-      discount = 0.5;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 90) {
-      discount = 0.6;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 80) {
-      discount = 0.65;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 70) {
-      discount = 0.7;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 60) {
-      discount = 0.75;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 50) {
-      discount = 0.8;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 40) {
-      discount = 0.85;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 30) {
-      discount = 0.9;
-    } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 20) {
-      discount = 0.95;
-    }
-  }
+  int skill = char_get_skill(ch, SKILL_CREATE);
 
   if (arg.empty()) {
-    send_to_char(g, ch, "What do you want to create?\r\n@GCreation @WMenu@n\r\n@D---------------@n\r\n@wcreate food\r\ncreate water\r\n{}{}{}{}{}{}{}{}{}{}{}{}{}\r\n",
-                 light ? "create light\r\n" : "", bag ? "create bag\r\n" : "", mattress ? "create mattress\r\n" : "",
-                 sword ? "create weapon (sword | club | dagger | spear | gun )\r\n" : "", pants ? "create pants\r\n" : "", gi ? "create gi\r\n" : "",
-                 wrist ? "create wristband\r\n" : "", boots ? "create boots\r\n" : "", clothes ? "create clothesbeam (target)\r\n" : "", shuriken ? "create shuriken\r\n" : "", senzu ? "create senzu\r\n" : "",
-                 kachin ? "create kachin\r\n" : "", boost ? "create elixir\r\n" : "");
+    std::string menu;
+    for (const form_kind &f : FORMS)
+      if (skill >= f.skill)
+        menu += f.menu;
+    send_to_char(g, ch, "What do you want to create?\r\n@GCreation @WMenu@n\r\n@D---------------@n\r\n@w{}\r\n", menu);
     return;
   }
   reveal_hiding(g, ch, 0);
-  if (!(arg != "food")) {
-    cost = getMaxKI(g, ch) / MAX(skill / 2, 1);
-    cost *= discount;
 
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    if (arg2.empty()) {
-      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
-      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (!arg2.empty()) {
-      if (str_eq_nocase(arg2, "highest") && skill >= 100) {
-        level = 4;
-      } else if (str_eq_nocase(arg2, "high") && skill >= 75) {
-        level = 3;
-      } else if (str_eq_nocase(arg2, "mid") && skill >= 50) {
-        level = 2;
-      } else {
-        level = 1;
-      }
-    }
-    if (level == 4) {
-      obj = read_object(g, 1512);
-      add_unique_id(g, obj);
-    } else if (level == 3) {
-      obj = read_object(g, 1511);
-      add_unique_id(g, obj);
-    } else if (level == 2) {
-      obj = read_object(g, 1510);
-      add_unique_id(g, obj);
-    } else {
-      obj = read_object(g, 70);
-      add_unique_id(g, obj);
-    }
-    obj_to_char(g, obj, ch);
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
+  auto kind = std::ranges::find(FORMS, std::string_view(arg), &form_kind::name);
+  if (kind == std::end(FORMS)) {
+    send_to_char(g, ch, "Create what?\r\n");
     return;
   }
-  if (!(arg != "water")) {
-    cost = getMaxKI(g, ch) / (skill * 2);
-    cost *= discount;
-
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    if (arg2.empty()) {
-      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
-      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (!arg2.empty()) {
-      if (str_eq_nocase(arg2, "highest") && skill >= 100) {
-        level = 4;
-      } else if (str_eq_nocase(arg2, "high") && skill >= 75) {
-        level = 3;
-      } else if (str_eq_nocase(arg2, "mid") && skill >= 50) {
-        level = 2;
-      } else {
-        level = 1;
-      }
-    }
-    if (level == 4) {
-      obj = read_object(g, 1515);
-      add_unique_id(g, obj);
-    } else if (level == 3) {
-      obj = read_object(g, 1514);
-      add_unique_id(g, obj);
-    } else if (level == 2) {
-      obj = read_object(g, 1513);
-      add_unique_id(g, obj);
-    } else {
-      obj = read_object(g, 71);
-      add_unique_id(g, obj);
-    }
-    obj_to_char(g, obj, ch);
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
+  if (skill < kind->skill) {
+    send_to_char(g, ch, "What do you want to create?\r\n");
     return;
   }
-  if (!(arg != "bag")) {
-    cost = getMaxKI(g, ch) / (skill * 2);
-    cost *= discount;
 
-    if (bag == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 319);
-    add_unique_id(g, obj);
-    obj_to_char(g, obj, ch);
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "mattress")) {
-    cost = getMaxKI(g, ch) / skill;
-    cost *= discount;
-
-    if (mattress == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 16);
-    add_unique_id(g, obj);
-    obj_to_char(g, obj, ch); // cooldown removed on 10/24/2021
-    reveal_hiding(g, ch, 0); //GET_COOLDOWN(ch) = 10;
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "weapon")) {
-    cost = getMaxKI(g, ch) / 5;
-    cost *= discount;
-
-    if (sword == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    if (arg2.empty()) {
-      send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
-      return;
-    }
-    if (arg3.empty()) {
-      send_to_char(g, ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | higher | highest)\r\n");
-      send_to_char(g, ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
-    } else if (!arg3.empty()) {
-      if (str_eq_nocase(arg3, "highest") && skill >= 100) {
-        level = 5;
-      } else if (str_eq_nocase(arg3, "higher") && skill >= 75) {
-        level = 4;
-      } else if (str_eq_nocase(arg3, "high") && skill >= 50) {
-        level = 3;
-      } else if (str_eq_nocase(arg3, "mid") && skill >= 30) {
-        level = 2;
-      } else {
-        level = 1;
-      }
-    }
-    if (str_eq_nocase(arg2, "sword")) {
-      if (level == 5) {
-        obj = read_object(g, 1519);
-        add_unique_id(g, obj);
-      } else if (level == 4) {
-        obj = read_object(g, 1518);
-        add_unique_id(g, obj);
-      } else if (level == 3) {
-        obj = read_object(g, 1517);
-        add_unique_id(g, obj);
-      } else if (level == 2) {
-        obj = read_object(g, 1516);
-        add_unique_id(g, obj);
-      } else {
-        obj = read_object(g, 90);
-        add_unique_id(g, obj);
-      }
-    } else if (str_eq_nocase(arg2, "dagger")) {
-      if (level == 5) {
-        obj = read_object(g, 1540);
-        add_unique_id(g, obj);
-      } else if (level == 4) {
-        obj = read_object(g, 1539);
-        add_unique_id(g, obj);
-      } else if (level == 3) {
-        obj = read_object(g, 1538);
-        add_unique_id(g, obj);
-      } else if (level == 2) {
-        obj = read_object(g, 1537);
-        add_unique_id(g, obj);
-      } else {
-        obj = read_object(g, 1536);
-        add_unique_id(g, obj);
-      }
-    } else if (str_eq_nocase(arg2, "club")) {
-      if (level == 5) {
-        obj = read_object(g, 1545);
-        add_unique_id(g, obj);
-      } else if (level == 4) {
-        obj = read_object(g, 1544);
-        add_unique_id(g, obj);
-      } else if (level == 3) {
-        obj = read_object(g, 1543);
-        add_unique_id(g, obj);
-      } else if (level == 2) {
-        obj = read_object(g, 1542);
-        add_unique_id(g, obj);
-      } else {
-        obj = read_object(g, 1541);
-        add_unique_id(g, obj);
-      }
-    } else if (str_eq_nocase(arg2, "spear")) {
-      if (level == 5) {
-        obj = read_object(g, 1550);
-        add_unique_id(g, obj);
-      } else if (level == 4) {
-        obj = read_object(g, 1549);
-        add_unique_id(g, obj);
-      } else if (level == 3) {
-        obj = read_object(g, 1548);
-        add_unique_id(g, obj);
-      } else if (level == 2) {
-        obj = read_object(g, 1547);
-        add_unique_id(g, obj);
-      } else {
-        obj = read_object(g, 1546);
-        add_unique_id(g, obj);
-      }
-    } else if (str_eq_nocase(arg2, "gun")) {
-      if (level == 5) {
-        obj = read_object(g, 1555);
-        add_unique_id(g, obj);
-      } else if (level == 4) {
-        obj = read_object(g, 1554);
-        add_unique_id(g, obj);
-      } else if (level == 3) {
-        obj = read_object(g, 1553);
-        add_unique_id(g, obj);
-      } else if (level == 2) {
-        obj = read_object(g, 1552);
-        add_unique_id(g, obj);
-      } else {
-        obj = read_object(g, 1551);
-        add_unique_id(g, obj);
-      }
-    } else {
-      send_to_char(g, ch, "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
-      return;
-    }
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "clothesbeam")) {
-    cost = getMaxKI(g, ch) / 2;
-    cost *= discount;
-
-    if (clothes == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    if (arg2.empty()) {
-      send_to_char(g, ch, "Who do you want to hit with clothesbeam?\r\nSyntax: create clothesbeam (target)\r\n");
-      return;
-    }
-
-    struct char_data *vict = nullptr;
-
-    if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(g, ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
-      return;
-    }
-
-    if (char_get_master(g, vict) != ch) {
-      send_to_char(g, ch, "They must be following you first.\r\n");
-      return;
-    }
-    obj = read_object(g, 92); /* gi */
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, vict);
-    obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 91); /* pants */
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, vict);
-    obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1528); /* wrist */
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, vict);
-    obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1528); /* wrist */
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, vict);
-    obj_set_size(obj, get_size(vict));
-    obj = read_object(g, 1532); /* boots */
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, vict);
-    obj_set_size(obj, get_size(vict));
-    do_wear(g, vict, "all", 0, 0);
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "gi")) {
-    cost = getMaxKI(g, ch) / 5;
-    cost *= discount;
-    if (gi == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 92);
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "shuriken")) {
-    cost = getMaxKI(g, ch) / 4;
-    cost *= discount;
-
-    if (shuriken == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 19053);
-    add_unique_id(g, obj);
-    obj_to_char(g, obj, ch);
-    obj_extra_set(obj, ITEM_NORENT, true);
-    obj_extra_set(obj, ITEM_NOSELL, true);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "pants")) {
-    cost = getMaxKI(g, ch) / 5;
-    cost *= discount;
-
-    if (pants == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 91);
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "wristband")) {
-    cost = getMaxKI(g, ch) / 5;
-    cost *= discount;
-
-    if (wrist == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 1528);
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "boots")) {
-    cost = getMaxKI(g, ch) / 5;
-    cost *= discount;
-
-    if (boots == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 1532);
-    add_unique_id(g, obj);
-    boost_obj(g, obj, ch, 0);
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "light")) {
-    cost = getMaxKI(g, ch) / (skill * 2);
-    cost *= discount;
-
-    if (light == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 72);
-    add_unique_id(g, obj);
-    obj_to_char(g, obj, ch);
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "kachin")) {
-    cost = getMaxKI(g, ch) - 1;
-    cost *= discount;
-
-    if (kachin == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 87);
-    add_unique_id(g, obj);
-    obj_to_room(g, obj, char_get_in_room(ch));
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    return;
-  }
-  if (!(arg != "elixir")) {
-    cost = getMaxKI(g, ch) - 1;
-    cost *= discount;
-
-    if (boost == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}\r\n", arg);
-      return;
-    }
-    if (getCurPL(g, ch) < getEffMaxPL(g, ch)) {
-      send_to_char(g, ch, "You need to be at full powerlevel to create {}\r\n", arg);
-      return;
-    }
-    if (char_get_practice_points(g, ch) < 10) {
-      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 10.\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 86);
-    add_unique_id(g, obj);
-    obj_to_room(g, obj, char_get_in_room(ch));
-    obj_set_size(obj, get_size(ch));
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    decCurHealthPercent(g, ch, 1, 1);
-    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (10));
-    return;
-  }
-  if (!(arg != "senzu")) {
-    cost          = getMaxKI(g, ch);
-    int64_t cost2 = getEffMaxPL(g, ch) - 1;
-
-    if (senzu == false) {
-      send_to_char(g, ch, "What do you want to create?\r\n");
-      return;
-    }
-    if ((getCurKI(g, ch)) < cost) {
-      send_to_char(g, ch, "You do not have enough ki to create {}, you need full ki.\r\n", arg);
-      return;
-    }
-    if (getCurPL(g, ch) <= cost2) {
-      send_to_char(g, ch, "You do not have enough powerlevel to create {}, you need to be at full.\r\n", arg);
-      return;
-    }
-    if ((getCurST(g, ch)) < getMaxST(g, ch)) {
-      send_to_char(g, ch, "You do not have enough stamina to create {}, you need to be at full.\r\n", arg);
-      return;
-    }
-    if (char_get_practice_points(g, ch) < 50) {
-      send_to_char(g, ch, "You do not have enough PS to create {}, you need at least 50.\r\n", arg);
-      return;
-    }
-    obj = read_object(g, 1);
-    add_unique_id(g, obj);
-    obj_to_char(g, obj, ch);
-    reveal_hiding(g, ch, 0);
-    char_set_con_cooldown(ch, 10);
-    act(g, "You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
-    decCurKI(g, ch, cost, 0);
-    decCurHealth(g, ch, cost2, 0);
-    decCurSTPercent(g, ch, 1, 1);
-    char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (50));
-    return;
-  }
-  send_to_char(g, ch, "Create what?\r\n");
-  return;
+  form_request req{kind->name, arg2, arg3, skill, concentration_discount(ch)};
+  kind->make(g, ch, req);
 }
 
 ACMD(do_recharge)

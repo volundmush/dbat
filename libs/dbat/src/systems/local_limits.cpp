@@ -1690,8 +1690,6 @@ static void point_update_objects(GameWorld *g)
             char_set_carry_weight(obj_get_carried_by(j), char_get_carry_weight(obj_get_carried_by(j)) - (melt));
           } else {
             send_to_char(g, obj_get_carried_by(j), "{} @wmelts completely away.\r\n", obj_get_short_description(j));
-            int remainder = melt - obj_get_weight(j);
-            char_set_carry_weight(obj_get_carried_by(j), char_get_carry_weight(obj_get_carried_by(j)) - ((melt - remainder)));
             extract_obj(g, j);
             continue;
           }

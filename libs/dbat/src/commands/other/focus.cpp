@@ -106,7 +106,6 @@ struct focus_buff {
   bool self_flat_duration{};     /* quirk: on themselves, it lasts intelligence / 20, unrolled */
   bool pays_first{};             /* the ki is spent before the duration is rolled, not after the affect */
   bool self_sets_flag{};         /* quirk: on themselves, the flag is set before the affect is */
-  bool self_on_nobody{};         /* quirk: on themselves, the affect goes to no one */
   std::array<int, 6> mods{};     /* str, con, int, agl, wis, spd */
   act_msgs self_done;            /* to_char and to_room */
   act_msgs vict_done;
@@ -173,18 +172,17 @@ void focus_buff_on(GameWorld *g, struct char_data *ch, std::string &name, const 
   }
 
   struct char_data *target = self ? ch : vict;
-  struct char_data *gets   = self && b.self_on_nobody ? nullptr : target;
   const auto &[str, con, intel, agl, wis, spd] = b.mods;
   if (b.pays_first) {
     if (self && b.self_sets_flag)
       char_aff_set(ch, b.aff, true);
     decCurKI(g, ch, focus_cost(g, ch), 0);
     int duration = roll_aff_duration(g, char_get_aff_abils_intel(ch), b.duration_add);
-    assign_affect(g, gets, b.aff, b.skill, duration, str, con, intel, agl, wis, spd);
+    assign_affect(g, target, b.aff, b.skill, duration, str, con, intel, agl, wis, spd);
   } else {
     int duration = self && b.self_flat_duration ? char_get_aff_abils_intel(ch) / 20
                                                 : roll_aff_duration(g, char_get_aff_abils_intel(ch), b.duration_add);
-    assign_affect(g, gets, b.aff, b.skill, duration, str, con, intel, agl, wis, spd);
+    assign_affect(g, target, b.aff, b.skill, duration, str, con, intel, agl, wis, spd);
     decCurKI(g, ch, focus_cost(g, ch), 0);
   }
   reveal_hiding(g, ch, 0);
@@ -383,7 +381,6 @@ constexpr focus_buff CURSE = {
     .vict_fail         = {"You focus ki while chanting demonic words. Your cursing fails!", "$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", "$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", true},
     .vict_fail_unnamed = true,
     .duration_add      = 3,
-    .self_on_nobody    = true,
     .self_done         = {"You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", nullptr, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true},
     .vict_done         = {"You focus ki while chanting demonic words. cursing $N with slower regeneration!", "$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", "$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", true},
     .after             = cursed,
@@ -608,7 +605,7 @@ constexpr focus_kind FOCUSES[] = {
     {"genius",         buff<GENIUS>   },
     {"flex",           buff<FLEX>     },
     {"bless",          buff<BLESS>    },
-    {"curse",          buff<CURSE>    }, /* quirk: on themselves, a success gives the curse to no one, and crashes */
+    {"curse",          buff<CURSE>    },
     {"yoikominminken", yoikominminken },
     {"yoik",           yoikominminken },
     {"vigor",          vigor          },
