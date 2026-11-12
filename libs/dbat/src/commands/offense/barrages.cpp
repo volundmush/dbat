@@ -28,6 +28,7 @@
 #include "dbat/techniques.hpp"
 #include "dbat/game_world.hpp"
 #include "ki_attack.hpp"
+#include "area.hpp"
 
 namespace {
 
@@ -278,267 +279,78 @@ ACMD(do_pbarrage) { perform_ki_attack(g, ch, argument, PSYCHIC_BARRAGE); }
 
 ACMD(do_scatter) { perform_ki_attack(g, ch, argument, SCATTER_SHOT); }
 
+namespace {
+
+/* Kakusanha is worth making only at those still standing, and not at any grouped player */
+bool kakusanha_worth(GameWorld *g, struct char_data *ch, struct char_data *vict)
+{
+  if (getCurPL(g, vict) <= 0)
+    return false;
+  if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict) &&
+      (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, vict) == char_get_master(g, ch)))
+    return false;
+  return area_fair_game(g, ch, vict);
+}
+
+/* It then catches anyone still standing but those grouped with the user who lead them or whom they lead */
+bool kakusanha_caught(GameWorld *g, struct char_data *ch, struct char_data *vict)
+{
+  return area_fair_game_ungrouped(g, ch, vict) && getCurPL(g, vict) > 0;
+}
+
+/* Its five beams share the damage, more for fewer of them */
+void kakusanha_damage(area_shot &s)
+{
+  if (s.count >= 3)
+    s.dmg = (s.dmg / 100) * 40;
+  else if (s.count > 1)
+    s.dmg = (s.dmg / 100) * 60;
+}
+
+/* The beams that catch no one slam into the ground */
+void kakusanha_impacts(area_shot &s)
+{
+  room_vnum here = char_get_in_room(s.ch);
+  int missed     = 5 - s.count;
+
+  if (s.count >= 5 || room_flagged(s.g, here, ROOM_SPACE))
+    return;
+  send_to_room(s.g, here, "The rest of the beams slam into the ground!@n\r\n");
+  send_to_room(s.g, here, "@wBright explosions erupt from the impacts!\r\n");
+  tech_impact_scenery(s.g, s.ch, nullptr, here, 5, true); /* quirk: water too */
+  if (room_get_dmg(s.g, here) <= 100 - missed * 5)
+    room_set_dmg(s.g, here, room_get_dmg(s.g, here) + missed * 5);
+}
+
+const area_attack KAKUSANHA = {
+    .skill                = SKILL_KAKUSANHA,
+    .damtype              = 34,
+    .attperc              = .3,
+    .minimum              = .10,
+    .in_peace             = true,
+    .worth                = kakusanha_worth,
+    .caught               = kakusanha_caught,
+    .cooldown_first       = 5,
+    .cooldown_last        = 5, /* quirk: twice */
+    .cooldown_first_early = true,
+    .dodge_low            = -10,
+    .dodge_improves_first = true,
+    .vanish_hurts         = true,
+    .max_hits             = 5,
+    .fail                 = {"@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. The beam flies off harmlessly through the air as you lose control over it!@n", nullptr, "@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. The beam flies off harmlessly through the air as $e loses control over it!@n"},
+    .launch               = {"@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. Above your targets the beam breaks apart into five seperate pieces that follow their victims!@n", nullptr, "@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. Above you the beam breaks apart into five seperate pieces that follow their victims!@n"},
+    .vanish               = {"@C$N@c disappears, avoiding the beam chasing $M!@n", "@cYou disappear, avoiding the beam chasing you!@n", "@C$N@c disappears, avoiding the beam chasing $M!@n"},
+    .escape               = {"@c$N@W manages to escape the attack!@n", "@WYou manage to escape the attack!@n", "@c$N@W manages to escape the attack!@n", true},
+    .hit                  = {"@R$N@r is slammed by one of the beams!@n", "@RYou are slammed by one of the beams!@n", "@R$N@r is slammed by one of the beams!@n", true},
+    .damage               = kakusanha_damage,
+    .after                = kakusanha_impacts,
+};
+
+} // namespace
+
 ACMD(do_kakusanha)
 {
-  int perc, dge = 2, count = 0, skill;
-  int64_t dmg;
-  double attperc = .3, minimum = .10;
-  std::string arg2;
-
-  std::string_view rest = argument;
-  arg2                  = take_arg(rest);
-
-  /* Can they do the technique? */
-
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (!check_skill(g, ch, SKILL_KAKUSANHA)) {
-    return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
-  if (!tech_handle_charge(g, ch, arg2, minimum, &attperc)) return;
-
-  if (getMaxKI(g, ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
-  }
-
-  if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0)) {
-    return;
-  }
-
-  /* Passed sanity checks for doing the technique */
-
-  skill = init_skill(g, ch, SKILL_KAKUSANHA); /* Set skill value */
-
-  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch) {
-      continue;
-    }
-    if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-      continue;
-    }
-    if (getCurPL(g, vict) <= 0) {
-      continue;
-    }
-    if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict)) {
-      if (char_get_master(g, vict) == ch) {
-        continue;
-      }
-      if (char_get_master(g, ch) == vict) {
-        continue;
-      }
-      if (char_get_master(g, vict) == char_get_master(g, ch)) {
-        continue;
-      }
-    }
-    if (char_mob_flagged(vict, MOB_NOKILL)) {
-      continue;
-    }
-    if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-      continue;
-    }
-    count += 1;
-  }
-  if (count <= 0) {
-    send_to_char(g, ch, "There is no one worth targeting around.\r\n");
-    return;
-  } /* No one worth targeting */
-  else {
-    handle_cooldown(g, ch, 5);
-    int hits = 0;
-    perc     = chance_to_hit(g, ch);
-
-    if (skill < perc) {
-      act(g, "@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. The beam flies off harmlessly through the air as you lose control over it!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. The beam flies off harmlessly through the air as $e loses control over it!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      pcost(g, ch, attperc, 0);
-
-      improve_skill(g, ch, SKILL_KAKUSANHA, 0);
-      return;
-    }
-
-    act(g, "@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. Above your targets the beam breaks apart into five seperate pieces that follow their victims!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. Above you the beam breaks apart into five seperate pieces that follow their victims!@n", true, ch, nullptr, nullptr, TO_ROOM);
-
-    dmg = damtype(g, ch, 34, skill, attperc);
-    if (count >= 3) {
-      dmg = (dmg / 100) * 40;
-    } else if (count > 1) {
-      dmg = (dmg / 100) * 60;
-    }
-
-    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-      if (vict == ch) {
-        continue;
-      }
-      if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-        continue;
-      }
-      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
-        continue;
-      }
-      if (char_mob_flagged(vict, MOB_NOKILL)) {
-        continue;
-      }
-      if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-        continue;
-      }
-      if (getCurPL(g, vict) <= 0) {
-        continue;
-      }
-      if (hits >= 5) {
-        continue;
-      }
-      dge = handle_dodge(g, vict);
-      if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-          (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-        hits++;
-        act(g, "@C$N@c disappears, avoiding the beam chasing $M!@n", false, ch, nullptr, vict, TO_CHAR);
-        act(g, "@cYou disappear, avoiding the beam chasing you!@n", false, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$N@c disappears, avoiding the beam chasing $M!@n", false, ch, nullptr, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_ZANZOKEN, false);
-        pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        continue;
-      }
-      if (dge + rand_number(g, -10, 5) > skill) {
-        hits++;
-        act(g, "@c$N@W manages to escape the attack!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@WYou manage to escape the attack!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$N@W manages to escape the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        improve_skill(g, vict, SKILL_DODGE, 0);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        continue;
-      }
-      hits++;
-      act(g, "@R$N@r is slammed by one of the beams!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@RYou are slammed by one of the beams!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@R$N@r is slammed by one of the beams!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
-      continue;
-    } /* Hitting targets! */
-
-    if (count < 5 && !room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
-      send_to_room(g, char_get_in_room(ch), "The rest of the beams slam into the ground!@n\r\n");
-      send_to_room(g, char_get_in_room(ch), "@wBright explosions erupt from the impacts!\r\n");
-
-      if (room_sect(g, char_get_in_room(ch)) != SECT_INSIDE) {
-        impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
-        switch (rand_number(g, 1, 8)) {
-          case 1:
-            act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 2:
-            if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(ch)) == 0) {
-              room_set_geffect(g, char_get_in_room(ch), 5);
-              act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, nullptr, TO_CHAR);
-              act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, nullptr, TO_ROOM);
-            }
-            break;
-          case 3:
-            act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 4:
-            act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 5:
-            act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 6:
-            act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          default:
-            /* we want no message for the default */
-            break;
-        }
-      }
-      if (room_sect(g, char_get_in_room(ch)) == SECT_UNDERWATER) {
-        switch (rand_number(g, 1, 3)) {
-          case 1:
-            act(g, "The water churns violently!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The water churns violently!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 2:
-            act(g, "Large bubbles rise from the movement!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "Large bubbles rise from the movement!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 3:
-            act(g, "The water collapses in on the hole created!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The water collapses in on the hole create!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-        }
-      }
-      if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
-        switch (rand_number(g, 1, 3)) {
-          case 1:
-            act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 2:
-            act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 3:
-            act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-        }
-      }
-      if (room_sect(g, char_get_in_room(ch)) == SECT_INSIDE) {
-        impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
-        switch (rand_number(g, 1, 8)) {
-          case 1:
-            act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 2:
-            act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 3:
-            act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 4:
-            act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 5:
-            act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          case 6:
-            act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr, TO_ROOM);
-            break;
-          default:
-            /* we want no message for the default */
-            break;
-        }
-      }
-
-      if (room_get_dmg(g, char_get_in_room(ch)) <= (100 - ((5 - count) * 5))) {
-        room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + ((5 - count) * 5));
-      }
-    }
-
-    pcost(g, ch, attperc, 0);
-
-    improve_skill(g, ch, SKILL_KAKUSANHA, 0);
-    handle_cooldown(g, ch, 5);
-    return;
-  } /* We have targets! Attempt to kills them! */
+  perform_area_attack(g, ch, argument, KAKUSANHA);
 }
 
 ACMD(do_renzo) { perform_ki_attack(g, ch, argument, RENZOKOU); }

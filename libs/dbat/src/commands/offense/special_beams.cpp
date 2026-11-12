@@ -47,20 +47,7 @@ int honoo_flames(ki_shot &s, int hitspot)
 /* ... and can burn them */
 void honoo_burn(ki_shot &s)
 {
-  GameWorld *g           = s.g;
-  struct char_data *vict = s.vict;
-
-  if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-    send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
-    send_to_char(g, s.ch, "@RThey are burned by the attack!@n\r\n");
-    char_aff_set(vict, AFF_BURNED, true);
-  } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-    send_to_char(g, s.ch, "@RThey appear to be fireproof!@n\r\n");
-  } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-    send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-    send_to_char(g, s.ch, "@RThey are easily burned!@n\r\n");
-    char_aff_set(vict, AFF_BURNED, true);
-  }
+  tech_handle_burn(s.g, s.ch, s.vict, 3);
 }
 
 /* A honoo dries up some of the water flooding the room */

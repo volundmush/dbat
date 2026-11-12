@@ -591,19 +591,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
       return;
     }
   }
-  if (burn == true) {
-    if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
-      char_aff_set(vict, AFF_BURNED, true);
-    } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-      send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
-    } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-      send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
-      char_aff_set(vict, AFF_BURNED, true);
-    }
-  }
+  if (burn == true)
+    tech_handle_burn(g, ch, vict, 3);
   if (shocked == true) {
     if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
@@ -2457,105 +2446,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     buf2 = str_format("@WThe deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
     act(g, buf.c_str(), true, vict, nullptr, nullptr, TO_CHAR);
     act(g, buf2.c_str(), true, vict, nullptr, nullptr, TO_ROOM);
-    if (room_sect(g, char_get_in_room(vict)) != SECT_INSIDE && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM && room_sect(g, char_get_in_room(vict)) != SECT_UNDERWATER && room_sect(g, char_get_in_room(vict)) != SECT_WATER_SWIM && room_sect(g, char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
-      impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
-      switch (rand_number(g, 1, 8)) {
-        case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 2:
-          if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, char_get_in_room(vict)) == 0) {
-            room_set_geffect(g, char_get_in_room(vict), 1);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_CHAR);
-            act(g, "Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, nullptr, vict, TO_ROOM);
-          }
-          break;
-        case 3:
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 6:
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        default:
-          /* we want no message for the default */
-          break;
-      }
-    }
-    if (room_sect(g, char_get_in_room(vict)) == SECT_UNDERWATER) {
-      switch (rand_number(g, 1, 3)) {
-        case 1:
-          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The water churns violently!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 2:
-          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 3:
-          act(g, "The water collapses in on the hole created!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The water collapses in on the hole create!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-      }
-    }
-    if (room_sect(g, char_get_in_room(vict)) == SECT_WATER_SWIM || room_sect(g, char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
-      switch (rand_number(g, 1, 3)) {
-        case 1:
-          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 2:
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 3:
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-      }
-    }
-    if (room_sect(g, char_get_in_room(vict)) == SECT_INSIDE) {
-      impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
-      switch (rand_number(g, 1, 8)) {
-        case 1:
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 2:
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 3:
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 4:
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 5:
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        case 6:
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_CHAR);
-          act(g, "The walls of the surrounding room crack in the same instant!", true, ch, nullptr, vict, TO_ROOM);
-          break;
-        default:
-          /* we want no message for the default */
-          break;
-      }
-    }
+    tech_impact_scenery(g, ch, vict, char_get_in_room(vict), 1);
     if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
       room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
     }

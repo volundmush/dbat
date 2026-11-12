@@ -28,6 +28,7 @@
 #include "dbat/techniques.hpp"
 #include "dbat/game_world.hpp"
 #include "ki_attack.hpp"
+#include "area.hpp"
 
 namespace {
 
@@ -341,133 +342,30 @@ ACMD(do_spiritball) { perform_ki_attack(g, ch, argument, SPIRITBALL); }
 
 ACMD(do_deathball) { perform_ki_attack(g, ch, argument, DEATHBALL); }
 
+namespace {
+
+const area_attack HELL_SPEAR = {
+    .skill         = SKILL_HELLSPEAR,
+    .damtype       = 33,
+    .attperc       = .3,
+    .minimum       = .1,
+    .worth         = area_fair_game,
+    .caught        = area_fair_game,
+    .cooldown_last = 5,
+    .dodge_low     = -10,
+    .knockdown     = area_knockdown::one_in_four,
+    .fail          = {"@WYou fly up higher in the air while holding your hand up above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. The spear disolves as you screw up the technique!@n", nullptr, "@C$n@W flies up higher in the air while holding $s hand up above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. The spear disolves as $e screws up the technique!@n"},
+    .launch        = {"@WYou fly up higher in the air while holding your hand above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. Grinning evily you aim the spear at the ground below and throw it. As the red spear of energy slams into the ground your laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n", nullptr, "@C$n@W flies up higher in the air while holding $s hand above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. Grinning evily $e aims the spear at the ground below and throws it. As the red spear of energy slams into the ground $s laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n"},
+    .vanish        = EXPLOSION_VANISH,
+    .escape        = EXPLOSION_ESCAPE,
+    .hit           = EXPLOSION_HIT,
+};
+
+} // namespace
+
 ACMD(do_hellspear)
 {
-  int perc, dge = 2, count = 0, skill;
-  int64_t dmg;
-  double attperc = .3, minimum = .1;
-  std::string arg2;
-
-  std::string_view rest = argument;
-  arg2                  = take_arg(rest);
-
-  /* Can they do the technique? */
-
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (!check_skill(g, ch, SKILL_HELLSPEAR)) {
-    return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
-  if (!tech_handle_charge(g, ch, arg2, minimum, &attperc)) return;
-
-  if (getMaxKI(g, ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
-  }
-
-  if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0)) {
-    return;
-  }
-
-  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
-    send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
-    return;
-  }
-
-  /* Passed sanity checks for doing the technique */
-
-  skill = init_skill(g, ch, SKILL_HELLSPEAR); /* Set skill value */
-
-  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch) {
-      continue;
-    }
-    if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-      continue;
-    }
-    if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-      continue;
-    }
-    if (char_mob_flagged(vict, MOB_NOKILL)) {
-      continue;
-    }
-    count += 1;
-  }
-  if (count <= 0) {
-    send_to_char(g, ch, "There is no one worth targeting around.\r\n");
-    return;
-  } /* No one worth targeting */
-  else {
-    perc = chance_to_hit(g, ch);
-
-    if (skill < perc) {
-      act(g, "@WYou fly up higher in the air while holding your hand up above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. The spear disolves as you screw up the technique!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W flies up higher in the air while holding $s hand up above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. The spear disolves as $e screws up the technique!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      pcost(g, ch, attperc, 0);
-
-      improve_skill(g, ch, SKILL_HELLSPEAR, 0);
-      return;
-    }
-
-    act(g, "@WYou fly up higher in the air while holding your hand above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. Grinning evily you aim the spear at the ground below and throw it. As the red spear of energy slams into the ground your laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@W flies up higher in the air while holding $s hand above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. Grinning evily $e aims the spear at the ground below and throws it. As the red spear of energy slams into the ground $s laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n", true, ch, nullptr, nullptr, TO_ROOM);
-
-    dmg = damtype(g, ch, 33, skill, attperc);
-
-    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-      if (vict == ch) {
-        continue;
-      }
-      if (char_mob_flagged(vict, MOB_NOKILL)) {
-        continue;
-      }
-      if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-        continue;
-      }
-      if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-        continue;
-      }
-      dge = handle_dodge(g, vict);
-
-      if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-          (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-        act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_CHAR);
-        act(g, "@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_ZANZOKEN, false);
-        pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-        continue;
-      }
-      if (dge + rand_number(g, -10, 5) > skill) {
-        act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        improve_skill(g, vict, SKILL_DODGE, 0);
-        continue;
-      }
-      act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4) {
-        handle_knockdown(g, vict);
-      }
-      hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
-      continue;
-    } /* Hitting targets! */
-
-    pcost(g, ch, attperc, 0);
-
-    improve_skill(g, ch, SKILL_HELLSPEAR, 0);
-    handle_cooldown(g, ch, 5);
-    return;
-  } /* We have targets! Attempt to kills them! */
+  perform_area_attack(g, ch, argument, HELL_SPEAR);
 }
 
 ACMD(do_crusher) { perform_ki_attack(g, ch, argument, CRUSHER); }

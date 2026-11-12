@@ -12,6 +12,9 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/consts/sectortypes.hpp"
+#include "dbat/fight.hpp"
+#include "dbat/random.hpp"
 
 bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const char *name)
 {
@@ -95,6 +98,77 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, std::string &arg, char_d
     return true;
   }
   return true;
+}
+
+void tech_handle_burn(GameWorld *g, char_data *ch, char_data *vict, int face)
+{
+  if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == face && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
+    send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
+    send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
+    char_aff_set(vict, AFF_BURNED, true);
+  } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
+    send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
+  } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
+    send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+    send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
+    char_aff_set(vict, AFF_BURNED, true);
+  }
+}
+
+void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum where, int lava, bool water_too)
+{
+  struct scenery {
+    const char *to_char{};
+    const char *to_room{}; /* if not to_char */
+  };
+  /* a null is nothing; outdoors' second is lava, if the ground is quiet */
+  static constexpr scenery outdoors[8]   = {{"Debris is thrown into the air and showers down thunderously!"},
+                                            {"Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!"},
+                                            {"A cloud of dust envelopes the entire area!"},
+                                            {"The surrounding area roars and shudders from the impact!"},
+                                            {"The ground shatters apart from the stress of the impact!"},
+                                            {"The explosion continues to burn spreading out and devouring some more of the ground before dying out."}};
+  static constexpr scenery underwater[3] = {
+      {"The water churns violently!"},
+      {"Large bubbles rise from the movement!"},
+      {"The water collapses in on the hole created!", "The water collapses in on the hole create!"}
+  };
+  static constexpr scenery water[3]  = {{"A huge column of water erupts from the impact!"},
+                                        {"The impact briefly causes a swirling vortex of water!"},
+                                        {"A huge depression forms in the water and erupts into a wave from the impact!"}};
+  static constexpr scenery inside[8] = {{"Debris is thrown into the air and showers down thunderously!"},
+                                        {"The structure of the surrounding room cracks and quakes from the blast!"},
+                                        {"Parts of the ceiling collapse, crushing into the floor!"},
+                                        {"The surrounding area roars and shudders from the impact!"},
+                                        {"The ground shatters apart from the stress of the impact!"},
+                                        {"The walls of the surrounding room crack in the same instant!"}};
+  auto show = [&](const scenery &sc) {
+    if (!sc.to_char)
+      return;
+    act(g, sc.to_char, true, ch, nullptr, vict, TO_CHAR);
+    act(g, sc.to_room ? sc.to_room : sc.to_char, true, ch, nullptr, vict, TO_ROOM);
+  };
+  int sect = room_sect(g, where);
+
+  if (sect != SECT_INSIDE &&
+      (water_too || (sect != SECT_UNDERWATER && sect != SECT_WATER_SWIM && sect != SECT_WATER_NOSWIM))) {
+    impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
+    int roll = rand_number(g, 1, 8);
+    if (roll != 2)
+      show(outdoors[roll - 1]);
+    else if (rand_number(g, 1, 4) == 4 && room_get_geffect(g, where) == 0) {
+      room_set_geffect(g, where, lava);
+      show(outdoors[1]);
+    }
+  }
+  if (sect == SECT_UNDERWATER)
+    show(underwater[rand_number(g, 1, 3) - 1]);
+  if (sect == SECT_WATER_SWIM || sect == SECT_WATER_NOSWIM)
+    show(water[rand_number(g, 1, 3) - 1]);
+  if (sect == SECT_INSIDE) {
+    impact_sound(g, ch, "@wA loud roar is heard nearby!@n\r\n");
+    show(inside[rand_number(g, 1, 8) - 1]);
+  }
 }
 
 void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const char *part)

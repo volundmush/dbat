@@ -30,6 +30,8 @@
 #include "dbat/db.hpp"
 #include "dbat/fight.hpp"
 #include "dbat/handler.hpp"
+#include "dbat/iterate.hpp"
+#include "dbat/act.attack.hpp"
 #include "dbat/random.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/world_audit.hpp"
@@ -43,11 +45,13 @@ constexpr room_vnum ARENA        = 301; /* the training yard, with its dummies *
 
 static const struct {
   const char *command;
-  int skill; /* 0 for none */
+  int skill;  /* 0 for none */
+  void (*beast)(GameWorld *, struct char_data *, std::string_view, int, int); /* only mobs make it, when they fight, by this: a critter makes it in the attacker's place */
+  bool area;  /* it catches everyone, and takes no target: just the charge */
 } attacks[] = {
     {"barrage",       SKILL_PBARRAGE     },
     {"scatter",       SKILL_SCATTER      },
-    {"kakusanha",     SKILL_KAKUSANHA    },
+    {"kakusanha",     SKILL_KAKUSANHA, nullptr, true},
     {"renzokou",      SKILL_RENZO        },
     {"tsuihidan",     SKILL_TSUIHIDAN    },
     {"galikgun",      SKILL_GALIKGUN     },
@@ -62,7 +66,7 @@ static const struct {
     {"genkidama",     SKILL_GENKIDAMA    },
     {"spiritball",    SKILL_SPIRITBALL   },
     {"deathball",     SKILL_DEATHBALL    },
-    {"hellspear",     SKILL_HELLSPEAR    },
+    {"hellspear",     SKILL_HELLSPEAR, nullptr, true},
     {"crusher",       SKILL_CRUSHER      },
     {"blessedhammer", SKILL_BLESSEDHAMMER},
     {"kiball",        SKILL_KIBALL       },
@@ -70,7 +74,7 @@ static const struct {
     {"bigbang",       SKILL_BIGBANG      },
     {"balefire",      SKILL_BALEFIRE     },
     {"hellflash",     SKILL_HELLFLASH    },
-    {"bakuhatsuha",   SKILL_BAKUHATSUHA  },
+    {"bakuhatsuha",   SKILL_BAKUHATSUHA, nullptr, true},
     {"shogekiha",     SKILL_SHOGEKIHA    },
     {"kiblast",       SKILL_KIBLAST      },
     {"uppercut",      SKILL_UPPERCUT     },
@@ -96,7 +100,7 @@ static const struct {
     {"sunder",        SKILL_SUNDER       },
     {"zen",           SKILL_ZEN          },
     {"malice",        SKILL_MALICE       },
-    {"nova",          SKILL_STARNOVA     },
+    {"nova",          SKILL_STARNOVA, nullptr, true},
     {"headbutt",      SKILL_HEADBUTT     },
     {"bash",          SKILL_BASH         },
     {"seishou",       SKILL_SEISHOU      },
@@ -108,6 +112,9 @@ static const struct {
     {"starbreaker",   SKILL_BREAKER      },
     {"bite",          0                  },
     {"attack",        0                  },
+    {"breath",        0,                  do_breath},
+    {"ram",           0,                  do_ram},
+    {"strike",        0,                  do_strike},
 };
 
 /* who attacks: race and sensei decide what some attacks can do */
@@ -139,6 +146,16 @@ static struct {
   struct char_data *android; /* kept out of the arena until wanted */
   struct obj_data *chest;
 } cast;
+
+/* Everyone leaves the arena but a, b and c */
+static void clear_arena(GameWorld *g, struct char_data *a, struct char_data *b, struct char_data *c = nullptr)
+{
+  for (char_data *who : room_people(g, ARENA))
+    if (who != a && who != b && who != c) {
+      char_from_room(g, who);
+      char_to_room(g, who, 300);
+    }
+}
 
 /*
  * Situations the grid never sets up, each tried with every attack, attacker and perfection: the checks before an
@@ -204,6 +221,18 @@ static const struct situation {
     {"aqua barrier",      "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_aff_set(att, AFF_SANCTUARY, true); char_set_skills_base(att, SKILL_AQUA_BARRIER, 100); }                                                 },
     {"veteran",           "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_set_class_level(att, 100); }                 },
     {"novice",            "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_set_class_level(att, 1); }                   },
+    {"grouped",           "namek",   false, [](GameWorld *g, char_data *att, char_data *victim, int) { add_follower(g, victim, att); char_aff_set(victim, AFF_GROUP, true); }                                                 },
+    {"fellow follower",   "namek",   false, [](GameWorld *g, char_data *att, char_data *victim, int) { add_follower(g, att, cast.helper); add_follower(g, victim, cast.helper); char_aff_set(victim, AFF_GROUP, true); }                                                 },
+    {"grouped alone",     "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_aff_set(victim, AFF_GROUP, true); }           },
+    {"just us",           "namek",   false, [](GameWorld *g, char_data *att, char_data *victim, int) { clear_arena(g, att, victim, cast.helper); }          },
+    {"one on one",        "namek",   false, [](GameWorld *g, char_data *att, char_data *victim, int) { clear_arena(g, att, victim); }                       },
+    {"one on one outdoors", "namek", false, [](GameWorld *g, char_data *att, char_data *victim, int) { clear_arena(g, att, victim); room_set_sector_type(g, ARENA, SECT_FIELD); }      },
+    {"one on one underwater", "namek", false, [](GameWorld *g, char_data *att, char_data *victim, int) { clear_arena(g, att, victim); room_set_sector_type(g, ARENA, SECT_UNDERWATER); } },
+    {"one on one in the water", "namek", false, [](GameWorld *g, char_data *att, char_data *victim, int) { clear_arena(g, att, victim); room_set_sector_type(g, ARENA, SECT_WATER_SWIM); } },
+    {"alone",             "",        false, [](GameWorld *g, char_data *att, char_data *,       int) { clear_arena(g, att, att); }                          },
+    {"newbie victim",     "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_set_class_level(victim, 5); }                 },
+    {"dead victim",       "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_aff_set(victim, AFF_SPIRIT, true); }          },
+    {"hiding",            "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_aff_set(att, AFF_HIDE, true); }              },
 };
 constexpr int SITUATION_SEEDS = 3;
 
@@ -230,9 +259,16 @@ static void audit_problem(void *, const char *problem)
 static void play(GameWorld *g, struct char_data *att, struct char_data *victim, int a, int level, int perf, int defence,
                  const char *target, const char *charge, const struct situation *sit, unsigned long seed)
 {
-  struct char_data *chars[] = {att, victim};
-  std::string name          = "dummy";
-  struct char_data *dummy   = get_char_room_vis(g, att, name, nullptr);
+  std::string name        = "dummy";
+  struct char_data *dummy = get_char_room_vis(g, att, name, nullptr);
+
+  struct char_data *beast = nullptr;
+  if (attacks[a].beast) { /* with no descriptor, it sees nothing and saves nothing: the rooms' record has it */
+    beast = att = read_mobile(g, 310);
+    char_to_room(g, att, ARENA);
+  }
+  struct char_data *chars[] = {beast ? victim : att, victim};
+  size_t n_chars            = beast ? 1 : 2;
 
   circle_srandom(g, seed);
   if (attacks[a].skill) {
@@ -255,12 +291,20 @@ static void play(GameWorld *g, struct char_data *att, struct char_data *victim, 
     set_fighting(g, att, dummy);
     set_fighting(g, dummy, att);
   }
-  th_type(g, att, str_format("{} {} {}", attacks[a].command, target, charge).c_str());
+  if (attacks[a].area)
+    target = "";
+  if (beast && !strcmp(target, "namek")) /* a mob knows players by name */
+    target = "victim";
+  std::string line = str_format("{} {} {}", attacks[a].command, target, charge);
+  if (beast)
+    attacks[a].beast(g, att, str_format("{} {}", target, charge), 0, 0);
+  else
+    th_type(g, att, line.c_str());
   th_pulses(g, 1);
   if (world_audit(g, audit_problem, nullptr))
     th_exit(3);
   if (transcript)
-    th_write_case_record(g, chars, sizeof(chars) / sizeof(*chars), full_saves);
+    th_write_case_record(g, chars, n_chars, full_saves);
   fflush(stdout);
 }
 

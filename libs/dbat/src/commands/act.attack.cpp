@@ -38,6 +38,7 @@
 #include "dbat/game_world.hpp"
 #include "offense/ki_attack.hpp"
 #include "offense/strike.hpp"
+#include "offense/area.hpp"
 
 namespace {
 
@@ -547,122 +548,324 @@ const ki_attack STAR_BREAKER = {
     .after_hit      = star_breaker_blessing,
 };
 
+
+/* Star nova is better known by day, and stronger by evening */
+void nova_by_day(area_shot &s)
+{
+  if (s.g->time_info.hours <= 15 || s.g->time_info.hours > 22)
+    s.skill += 5;
+}
+
+void nova_by_evening(area_shot &s)
+{
+  if (s.g->time_info.hours <= 15)
+    s.dmg *= 1.25;
+  else if (s.g->time_info.hours <= 22)
+    s.dmg *= 1.4;
+}
+
+const area_attack STAR_NOVA = {
+    .skill          = SKILL_STARNOVA,
+    .damtype        = 53,
+    .attperc        = .20,
+    .minimum        = .1,
+    .perfections    = true,
+    .worth          = area_fair_game_ungrouped,
+    .caught         = area_fair_game_ungrouped,
+    .cooldown_first = 6,
+    .dodge_low      = -15,
+    .vanish_hurts   = true,
+    .knockdown      = area_knockdown::always,
+    .fail           = {"@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body before you lose your concentration and fail to create a @yS@Yt@Wa@wr @cN@Co@Wv@wa@W!@n", nullptr, "@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body before $e seems to lose $s concentration and fail to create a @yS@Yt@Wa@wr @cN@Co@Wv@wa@W!@n"},
+    .launch         = {"@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as your glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n", nullptr, "@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as @C$n's@W glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n"},
+    .vanish         = EXPLOSION_VANISH,
+    .escape         = EXPLOSION_ESCAPE,
+    .hit            = EXPLOSION_HIT,
+    .before_roll    = nova_by_day,
+    .damage         = nova_by_evening,
+};
+
+/*
+ * What only mobs do (breath, ram and fang strike) as data, made by perform_beast(). Unlike a strike, they check no
+ * skill, say nothing when they can't be made, improve no skill of the user's, and neither end a combo nor lead to a
+ * multihit. The user sees none of their messages.
+ */
+struct beast_attack {
+  const char *name{};                                                       /* as the zanzoken messages name it */
+  int64_t stamina_share{};                                                  /* it costs a 1/this share of the user's max power level in stamina */
+  int64_t needs_share{};                                                    /* and needs a 1/this share to be made */
+  int cooldown{};                                                           /* handle_cooldown() */
+  int kill_mode{};                                                          /* can_kill()'s last argument, at a victim */
+  int accuracy{};                                                           /* added to the roll to hit */
+  int64_t (*blocked)(int64_t dmg){};                                        /* a block's damage, from damtype() 6's */
+  int64_t (*landed)(int64_t dmg){};                                         /* a hit's, from damtype() 8's, before where it lands */
+  int limb_hurt{};                                                          /* hurt()'s limb argument for a hit on an arm or a leg */
+  int leg_flag{};                                                           /* hurt()'s first argument for a hit on a leg */
+  bool parries{};                                                           /* the victim can parry it with a counterblow */
+  act_msgs parry, block, dodge, miss, hits[5];                              /* hits by where roll_hitloc() says it landed */
+  const char *obj_to_room{};
+  void (*on_block)(GameWorld *g, char_data *ch, char_data *vict){};        /* before a block hurts */
+  void (*after_hit)(GameWorld *g, char_data *ch, char_data *vict, int64_t dmg){}; /* after the user pays for a hit */
+};
+
+void beast_at_victim(GameWorld *g, char_data *ch, char_data *vict, const beast_attack &atk, int skill, int64_t stcost)
+{
+  /* dam_eq_loc() for where it lands: 1 arms, 2 legs, 3 head, 4 body; quirk: a hit on the body's first place damages
+     the head's equipment, and one on the face the body's */
+  static constexpr int equipment[5] = {3, 4, 4, 1, 2};
+  int pry = 2, dge = 2, blk = 2;
+
+  if (!can_kill(g, ch, vict, nullptr, atk.kill_mode))
+    return;
+  if (handle_defender(g, vict, ch))
+    vict = char_get_defender(g, vict);
+  int index = check_def(g, vict);
+  int prob  = roll_accuracy(g, ch, skill, true);
+  int perc  = chance_to_hit(g, ch);
+  index -= handle_speed(g, ch, vict);
+  int avo = index / 4;
+  handle_defense(g, vict, &pry, &blk, &dge);
+  prob -= avo;
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
+  prob += atk.accuracy;
+
+  if (!tech_handle_zanzoken(g, ch, vict, atk.name)) {
+    pcost(g, ch, 0, stcost / 2);
+    pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
+    return;
+  }
+
+  if (prob < perc - 20) {
+    if (getCurST(g, vict) > 0) { /* with no stamina left, they can only be missed */
+      if (atk.parries && pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
+        act_triple(g, atk.parry, ch, nullptr, vict);
+        improve_skill(g, vict, SKILL_PARRY, 0);
+        pcost(g, ch, 0, stcost / 2);
+        pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
+        int64_t dmg = damtype(g, vict, -2, skill, 0);
+        dmg *= calc_critical(g, ch, 1);
+        hurt(g, 0, 0, vict, ch, nullptr, dmg, -1); /* the counterblow */
+        return;
+      }
+      if (blk > axion_dice(g, 10)) {
+        act_triple(g, atk.block, ch, nullptr, vict);
+        improve_skill(g, vict, SKILL_BLOCK, 0);
+        pcost(g, ch, 0, stcost / 2);
+        pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
+        int64_t dmg = atk.blocked(damtype(g, ch, 6, skill, 0));
+        if (atk.on_block)
+          atk.on_block(g, ch, vict);
+        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
+        return;
+      }
+      if (dge > axion_dice(g, 10)) {
+        act_triple(g, atk.dodge, ch, nullptr, vict);
+        improve_skill(g, vict, SKILL_DODGE, 0);
+        pcost(g, ch, 0, stcost / 2);
+        hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
+        return;
+      }
+    }
+    act_triple(g, atk.miss, ch, nullptr, vict);
+    pcost(g, ch, 0, stcost / 2);
+    hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
+    return;
+  }
+
+  int64_t dmg = atk.landed(damtype(g, ch, 8, skill, 0));
+  int where   = roll_hitloc(g, ch, vict, skill);
+  if (where >= 1 && where <= 5) {
+    act_triple(g, atk.hits[where - 1], ch, nullptr, vict);
+    if (where == 2)
+      dmg *= calc_critical(g, ch, 0);
+    else if (where >= 4)
+      dmg *= calc_critical(g, ch, 1);
+    else if (char_get_bonuses(ch, BONUS_SOFT))
+      dmg *= calc_critical(g, ch, 2);
+    hurt(g, where == 5 ? atk.leg_flag : 0, where >= 4 ? atk.limb_hurt : 0, ch, vict, nullptr, dmg, 0);
+    dam_eq_loc(g, vict, equipment[where - 1]);
+  }
+  pcost(g, ch, 0, stcost);
+  if (atk.after_hit)
+    atk.after_hit(g, ch, vict, dmg);
+}
+
+void perform_beast(GameWorld *g, char_data *ch, std::string_view argument, const beast_attack &atk)
+{
+  int64_t stcost        = getEffMaxPL(g, ch) / atk.stamina_share;
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+
+  if (!char_is_npc(ch) || !can_grav(g, ch))
+    return;
+  if (arg.empty() && !char_get_fighting(g, ch))
+    return;
+  if (!check_points(g, ch, 0, getEffMaxPL(g, ch) / atk.needs_share))
+    return;
+  int skill = init_skill(g, ch, SKILL_KNEE); /* each is rolled as a knee */
+
+  /* who they name, else who they're fighting if they're here, else an object here */
+  struct char_data *vict = nullptr;
+  struct obj_data *obj   = nullptr;
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch))
+      vict = char_get_fighting(g, ch);
+    else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
+      return;
+  }
+  handle_cooldown(g, ch, atk.cooldown);
+  if (vict) {
+    beast_at_victim(g, ch, vict, atk, skill, stcost);
+    return;
+  }
+  if (!can_kill(g, ch, nullptr, obj, 0)) /* which refuses a broken object */
+    return;
+  int64_t dmg = getCurPL(g, ch) / 10000 + char_get_aff_abils_str(ch);
+  act(g, atk.obj_to_room, true, ch, obj, nullptr, TO_ROOM);
+  hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
+  pcost(g, ch, 0, stcost);
+}
+
+/* A breath can burn its victim */
+void breath_burn(GameWorld *g, char_data *ch, char_data *vict)
+{
+  tech_handle_burn(g, ch, vict, 3);
+}
+
+void breath_burn_after(GameWorld *g, char_data *ch, char_data *vict, int64_t)
+{
+  tech_handle_burn(g, ch, vict, 3);
+}
+
+/* A fang strike tires its victim by a quarter of its damage */
+void fang_strike_tires(GameWorld *g, char_data *, char_data *vict, int64_t dmg)
+{
+  decCurST(g, vict, dmg * .25, 0);
+}
+
+const beast_attack BREATH = {
+    .name          = "breath",
+    .stamina_share = 5000,
+    .needs_share   = 200,
+    .cooldown      = 10,
+    .kill_mode     = 1,
+    .accuracy      = 15,
+    .blocked       = [](int64_t dmg) -> int64_t { return dmg * 0.8; },
+    .landed        = [](int64_t dmg) -> int64_t { return dmg + dmg * 2; },
+    .block         = {nullptr, "@WYou move quickly and block @C$n's@W fiery breath!@n", "@C$N@W moves quickly and blocks @c$n's@W fiery breath!@n", true},
+    .dodge         = {nullptr, "@WYou dodge the fiery jets of flames coming from @C$n's@W mouth!@n", "@C$N@W manages to dodge the fiery jets of flames coming from @c$n's@W mouth!@n", true},
+    .miss          = {nullptr, "@C$n@W moves to breath flames on you, but misses!@n", "@c$n@W moves to breath flames on @C$N@W, but somehow misses!@n", true},
+    .hits          = {{nullptr, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR body!@n", "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W body!@n", true}, {nullptr, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR face!@n", "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W face!@n", true}, {nullptr, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR body!@n", "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W body!@n", true}, {nullptr, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR arm!@n", "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W arm!@n", true}, {nullptr, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR leg!@n", "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W leg!@n", true}},
+    .obj_to_room   = "@C$n@W breathes flames on $p@W!@n",
+    .on_block      = breath_burn,
+    .after_hit     = breath_burn_after,
+};
+
+const beast_attack RAM = {
+    .name          = "ram",
+    .stamina_share = 200,
+    .needs_share   = 200,
+    .cooldown      = 4,
+    .accuracy      = -5,
+    .blocked       = [](int64_t dmg) -> int64_t { return dmg - dmg * 0.2; },
+    .landed        = [](int64_t dmg) -> int64_t { return dmg + dmg * 1.1; },
+    .limb_hurt     = 190,
+    .leg_flag      = 1,
+    .block         = {nullptr, "@WYou move quickly and block @C$n's@W body as $e tries to ram YOU!@n", "@C$N@W moves quickly and blocks @c$n's@W body as $e tries to ram $M!@n", true},
+    .dodge         = {nullptr, "@WYou dodge @C$n's@W attempted ram!@n", "@C$N@W manages to dodge @c$n's@W attempted ram!@n", true},
+    .miss          = {nullptr, "@C$n@W moves to ram you, but misses!@n", "@c$n@W moves to ram @C$N@W, but somehow misses!@n", true},
+    .hits          = {{nullptr, "@C$n@W aims $s body at YOU and rams into YOUR body!@n", "@c$n@W aims $s body at @C$N@W and rams into $S body!@n", true}, {nullptr, "@C$n@W aims $s body at YOU and rams into YOUR face!@n", "@c$n@W aims $s body at @C$N@W and rams into $S face!@n", true}, {nullptr, "@C$n@W aims $s body at YOU and rams into YOUR body!@n", "@c$n@W aims $s body at @C$N@W and rams into $S body!@n", true}, {nullptr, "@C$n@W aims $s body at YOU and rams into YOUR arm!@n", "@c$n@W aims $s body at @C$N@W and rams into $S arm!@n", true}, {nullptr, "@C$n@W aims $s body at YOU and rams into YOUR leg!@n", "@c$n@W aims $s body at @C$N@W and rams into $S leg!@n", true}},
+    .obj_to_room   = "@C$n@W rams $p@W extremely hard!@n",
+};
+
+const beast_attack FANG_STRIKE = {
+    .name          = "fang strike",
+    .stamina_share = 400,
+    .needs_share   = 400,
+    .cooldown      = 4,
+    .accuracy      = 5,
+    .blocked       = [](int64_t dmg) -> int64_t { return dmg / 4; },
+    .landed        = [](int64_t dmg) -> int64_t { return dmg + dmg * 0.5; },
+    .parries       = true,
+    .parry         = {nullptr, "@WYou parry @C$n's@W fang strike with a punch of your own!@n", "@C$N@W parries @c$n's@W fang strike with a punch of $S own!@n", true},
+    .block         = {nullptr, "@WYou move quickly and block @C$n's@W fang strike!@n", "@C$N@W moves quickly and blocks @c$n's@W fang strike!@n", true},
+    .dodge         = {nullptr, "@WYou dodge @C$n's@W fang strike!@n", "@C$N@W manages to dodge @c$n's@W fang strike!@n", true},
+    .miss          = {nullptr, "@C$n@W moves to fang strike you, but misses!@n", "@c$n@W moves to fang strike @C$N@W, but somehow misses!@n", true},
+    .hits          = {{nullptr, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR body!@n", "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S body!@n", true}, {nullptr, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR face!@n", "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S face!@n", true}, {nullptr, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR body!@n", "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S body!@n", true}, {nullptr, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR arm!@n", "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S arm!@n", true}, {nullptr, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR leg!@n", "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S leg!@n", true}},
+    .obj_to_room   = "@C$n@W fang strikes $p@W extremely hard!@n",
+    .after_hit     = fang_strike_tires,
+};
+
 } // namespace
 
+/* Light grenade is aimed at one, and its explosion catches the rest for half */
 ACMD(do_lightgrenade)
 {
-  int perc, dge = 2, skill;
-  int64_t dmg;
-  double attperc = .35, minimum = .15;
-  struct char_data *targ = nullptr;
-  std::string arg, arg2;
+  static constexpr act_msgs fail     = {"@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Your concentration waivers however and the energy slips away from your control harmlessly!@n", "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Suddenly $s concentration seems to waiver and the energy slips away from $s control harmlessly!@n", "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Suddenly $s concentration seems to waiver and the energy slips away from $s control harmlessly!@n", true};
+  static constexpr act_msgs launch   = {"@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. You shout @r'@YLIGHT GRENADE@r'@W as the orb launches from your hands at @C$N@W!@n", "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at YOU!@n", "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at @c$N@W!@n", true};
+  static constexpr act_msgs dodged   = {"@c$N@W manages to dodge the light grenade!@n", "@WYou manages to dodge the light grenade!@n", "@c$N@W manages to dodge the light grenade!@n", true};
+  static constexpr act_msgs hit      = {"@R$N@r is hit by the light grenade which explodes all around $m!@n", "@RYou are hit by the light grenade which explodes all around you!@n", "@R$N@r is hit by the light grenade which explodes all around $m!@n", true};
+  static constexpr act_msgs caught   = {"@R$N@r is caught by the light grenade's explosion!@n", "@RYou are caught by the light grenade's explosion!@n", "@R$N@r is caught by the light grenade's explosion!@n", true};
+  double attperc                     = .35, minimum = .15;
+  std::string_view rest              = argument;
+  std::string arg                    = take_arg(rest);
+  std::string arg2                   = take_arg(rest);
+  struct char_data *targ             = nullptr;
 
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
-
-  /* Can they do the technique? */
-
-  if (!can_grav(g, ch)) {
+  if (!can_grav(g, ch) || !check_skill(g, ch, SKILL_LIGHTGRENADE) || !limb_ok(g, ch, 0))
     return;
-  }
-
-  if (!check_skill(g, ch, SKILL_LIGHTGRENADE)) {
+  if (!tech_handle_charge(g, ch, arg2, minimum, &attperc))
     return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
-  if (!tech_handle_charge(g, ch, arg2, minimum, &attperc)) return;
-
-  if (getMaxKI(g, ch) * attperc > char_get_charge(ch)) {
+  if (getMaxKI(g, ch) * attperc > char_get_charge(ch))
     attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
-  }
-
-  if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0)) {
+  if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0))
     return;
-  }
-
   if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
-
-  targ = nullptr;
   if (arg.empty() || !(targ = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
-      targ = char_get_fighting(g, ch);
-    } else {
+    if (!char_get_fighting(g, ch) || char_get_in_room(char_get_fighting(g, ch)) != char_get_in_room(ch)) {
       send_to_char(g, ch, "Nobody around here by that name.\r\n");
       return;
     }
+    targ = char_get_fighting(g, ch);
   }
 
-  /* Passed sanity checks for doing the technique */
-
-  skill = init_skill(g, ch, SKILL_LIGHTGRENADE); /* Set skill value */
-
-  perc = chance_to_hit(g, ch);
-
-  if (skill < perc) {
-    act(g, "@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Your concentration waivers however and the energy slips away from your control harmlessly!@n", true, ch, nullptr, targ, TO_CHAR);
-    act(g, "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Suddenly $s concentration seems to waiver and the energy slips away from $s control harmlessly!@n", true, ch, nullptr, targ, TO_VICT);
-    act(g, "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. Suddenly $s concentration seems to waiver and the energy slips away from $s control harmlessly!@n", true, ch, nullptr, targ, TO_NOTVICT);
+  int skill = init_skill(g, ch, SKILL_LIGHTGRENADE);
+  if (skill < chance_to_hit(g, ch)) {
+    act_triple(g, fail, ch, nullptr, targ);
     pcost(g, ch, attperc, 0);
-
     improve_skill(g, ch, SKILL_LIGHTGRENADE, 0);
     return;
   }
-
-  act(g, "@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. You shout @r'@YLIGHT GRENADE@r'@W as the orb launches from your hands at @C$N@W!@n", true, ch, nullptr, targ, TO_CHAR);
-  act(g, "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at YOU!@n", true, ch, nullptr, targ, TO_VICT);
-  act(g, "@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at @c$N@W!@n", true, ch, nullptr, targ, TO_NOTVICT);
-
-  dmg = damtype(g, ch, 57, skill, attperc);
+  act_triple(g, launch, ch, nullptr, targ);
+  int64_t dmg = damtype(g, ch, 57, skill, attperc);
 
   for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch) {
+    if (vict == ch || char_mob_flagged(vict, MOB_NOKILL))
+      continue;
+    if (char_aff_flagged(vict, AFF_GROUP) &&
+        (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict))) {
+      if (vict == targ)
+        send_to_char(g, ch, "Leave the group if you want to murder them.\r\n");
       continue;
     }
-    if (char_mob_flagged(vict, MOB_NOKILL)) {
+    if (!area_fair_game(g, ch, vict))
       continue;
-    }
-    if (char_aff_flagged(vict, AFF_GROUP)) {
-      if (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) {
-        if (vict == targ) {
-          send_to_char(g, ch, "Leave the group if you want to murder them.\r\n");
-        }
-        continue;
-      }
-    }
-    if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-      continue;
-    }
-    if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-      continue;
-    }
-    dge = handle_dodge(g, vict);
-    if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-        (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-      act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_CHAR);
-      act(g, "@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_VICT);
-      act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_NOTVICT);
-      char_aff_set(vict, AFF_ZANZOKEN, false);
-      pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-      if (vict == targ) {
+    int dge = handle_dodge(g, vict);
+    if (area_vanishes(g, ch, vict, EXPLOSION_VANISH)) {
+      if (vict == targ) { /* which ends it */
         pcost(g, ch, attperc, 0);
         handle_cooldown(g, ch, 9);
         return;
       }
       continue;
     }
+    /* quirk: whether they escape is rolled first for the target, then for anyone else, so twice for the rest */
     if (dge > axion_dice(g, skill * 0.5) && vict == targ) {
-      send_to_char(g, ch, "DGE: {:d}\n", dge);
-      act(g, "@c$N@W manages to dodge the light grenade!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@WYou manages to dodge the light grenade!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@c$N@W manages to dodge the light grenade!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      send_to_char(g, ch, "DGE: {:d}\n", dge); /* quirk: left from debugging */
+      act_triple(g, dodged, ch, nullptr, vict);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       improve_skill(g, vict, SKILL_DODGE, 0);
       pcost(g, ch, attperc, 0);
@@ -670,34 +873,20 @@ ACMD(do_lightgrenade)
       return;
     }
     if (dge > axion_dice(g, skill * 0.5) && vict != targ) {
-      act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      act_triple(g, EXPLOSION_ESCAPE, ch, nullptr, vict);
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       improve_skill(g, vict, SKILL_DODGE, 0);
       continue;
     }
-    if (vict == targ) {
-      act(g, "@R$N@r is hit by the light grenade which explodes all around $m!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@RYou are hit by the light grenade which explodes all around you!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@R$N@r is hit by the light grenade which explodes all around $m!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4) {
-        handle_knockdown(g, vict);
-      }
-      hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
-      continue;
-    }
-    act(g, "@R$N@r is caught by the light grenade's explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@RYou are caught by the light grenade's explosion!@n", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@R$N@r is caught by the light grenade's explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
-    if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4) {
+    act_triple(g, vict == targ ? hit : caught, ch, nullptr, vict);
+    if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4)
       handle_knockdown(g, vict);
-    }
-    hurt(g, 0, 0, ch, vict, nullptr, dmg * 0.5, 1);
-    continue;
-  } /* Hitting targets! */
+    if (vict == targ)
+      hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
+    else
+      hurt(g, 0, 0, ch, vict, nullptr, dmg * 0.5, 1);
+  }
   pcost(g, ch, attperc, 0);
-
   improve_skill(g, ch, SKILL_LIGHTGRENADE, 0);
   handle_cooldown(g, ch, 9);
 }
@@ -735,566 +924,17 @@ ACMD(do_energize)
 
 ACMD(do_breath)
 {
-  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
-  int64_t dmg, stcost = getEffMaxPL(g, ch) / 5000;
-  struct char_data *vict;
-  struct obj_data *obj;
-  std::string arg;
-  double attperc = 0;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (!char_is_npc(ch)) {
-    return;
-  }
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (arg.empty() && !char_get_fighting(g, ch)) {
-    return;
-  }
-
-  if (!check_points(g, ch, 0, getEffMaxPL(g, ch) / 200)) {
-    return;
-  }
-
-  skill = init_skill(g, ch, SKILL_KNEE);
-
-  vict = nullptr;
-  obj  = nullptr;
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(g, ch);
-    } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      return;
-    }
-  }
-  handle_cooldown(g, ch, 10);
-  if (vict) {
-    if (!can_kill(g, ch, vict, nullptr, 1)) {
-      return;
-    }
-    if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(g, vict);
-      vict                  = def;
-    }
-    index = check_def(g, vict);
-    prob  = roll_accuracy(g, ch, skill, true);
-    perc  = chance_to_hit(g, ch);
-
-    index -= handle_speed(g, ch, vict);
-
-    avo = index / 4;
-
-    handle_defense(g, vict, &pry, &blk, &dge);
-
-    prob -= avo;
-    tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
-    prob += 15;
-
-    if (!tech_handle_zanzoken(g, ch, vict, "breath")) {
-      pcost(g, ch, 0, stcost / 2);
-      pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-
-      return;
-    }
-
-    if (prob < perc - 20) {
-      if ((getCurST(g, vict)) > 0) {
-        if (blk > axion_dice(g, 10)) {
-          act(g, "@WYou move quickly and block @C$n's@W fiery breath!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W fiery breath!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_BLOCK, 0);
-          pcost(g, ch, 0, stcost / 2);
-          pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
-          dmg = damtype(g, ch, 6, skill, attperc);
-          dmg = dmg * 0.8;
-          if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-            send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
-            send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
-            char_aff_set(vict, AFF_BURNED, true);
-          } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-            send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
-          } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-            send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-            send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
-            char_aff_set(vict, AFF_BURNED, true);
-          }
-          hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-
-          return;
-        }
-        if (dge > axion_dice(g, 10)) {
-          act(g, "@WYou dodge the fiery jets of flames coming from @C$n's@W mouth!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge the fiery jets of flames coming from @c$n's@W mouth!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_DODGE, 0);
-          pcost(g, ch, 0, stcost / 2);
-          hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-          return;
-        }
-        act(g, "@C$n@W moves to breath flames on you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W moves to breath flames on @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        pcost(g, ch, 0, stcost / 2);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-        return;
-      }
-      act(g, "@C$n@W moves to breath flames on you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@c$n@W moves to breath flames on @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      pcost(g, ch, 0, stcost / 2);
-      hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-      return;
-    }
-    dmg = damtype(g, ch, 8, skill, attperc);
-    dmg += dmg * 2;
-    int hitspot = 1;
-    hitspot     = roll_hitloc(g, ch, vict, skill);
-    switch (hitspot) {
-      case 1:
-        act(g, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 3);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 2: /* Critical */
-        act(g, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR face!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W face!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 0);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 3:
-        act(g, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 4: /* Weak */
-        act(g, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 1);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 5: /* Weak 2 */
-        act(g, "@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 2);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-    }
-    pcost(g, ch, 0, stcost);
-    if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
-      send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
-      char_aff_set(vict, AFF_BURNED, true);
-    } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
-      send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
-    } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
-      send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
-      char_aff_set(vict, AFF_BURNED, true);
-    }
-    return;
-  }
-  if (obj) {
-    if (!can_kill(g, ch, nullptr, obj, 0)) {
-      return;
-    }
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
-      return;
-    }
-    dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@C$n@W breathes flames on $p@W!@n", true, ch, obj, nullptr, TO_ROOM);
-    hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
-    pcost(g, ch, 0, stcost);
-
-  } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
-    return;
-  }
+  perform_beast(g, ch, argument, BREATH);
 }
 
 ACMD(do_ram)
 {
-  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
-  int64_t dmg, stcost = getEffMaxPL(g, ch) / 200;
-  struct char_data *vict;
-  struct obj_data *obj;
-  std::string arg;
-  double attperc = 0;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (!char_is_npc(ch)) {
-    return;
-  }
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (arg.empty() && !char_get_fighting(g, ch)) {
-    return;
-  }
-
-  if (!check_points(g, ch, 0, getEffMaxPL(g, ch) / 200)) {
-    return;
-  }
-
-  skill = init_skill(g, ch, SKILL_KNEE);
-
-  vict = nullptr;
-  obj  = nullptr;
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(g, ch);
-    } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      return;
-    }
-  }
-  handle_cooldown(g, ch, 4);
-  if (vict) {
-    if (!can_kill(g, ch, vict, nullptr, 0)) {
-      return;
-    }
-    if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(g, vict);
-      vict                  = def;
-    }
-    index = check_def(g, vict);
-    prob  = roll_accuracy(g, ch, skill, true);
-    perc  = chance_to_hit(g, ch);
-
-    index -= handle_speed(g, ch, vict);
-
-    avo = index / 4;
-
-    handle_defense(g, vict, &pry, &blk, &dge);
-
-    prob -= avo;
-    tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
-
-    prob -= 5;
-
-    if (!tech_handle_zanzoken(g, ch, vict, "ram")) {
-      pcost(g, ch, 0, stcost / 2);
-      pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-
-      return;
-    }
-
-    if (prob < perc - 20) {
-      if ((getCurST(g, vict)) > 0) {
-        if (blk > axion_dice(g, 10)) {
-          act(g, "@WYou move quickly and block @C$n's@W body as $e tries to ram YOU!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W body as $e tries to ram $M!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_BLOCK, 0);
-          pcost(g, ch, 0, stcost / 2);
-          pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
-          dmg = damtype(g, ch, 6, skill, attperc);
-          dmg -= dmg * 0.2;
-          hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-
-          return;
-        }
-        if (dge > axion_dice(g, 10)) {
-          act(g, "@WYou dodge @C$n's@W attempted ram!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W attempted ram!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_DODGE, 0);
-          pcost(g, ch, 0, stcost / 2);
-          hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-          return;
-        }
-        act(g, "@C$n@W moves to ram you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W moves to ram @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        pcost(g, ch, 0, stcost / 2);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-        return;
-      }
-      act(g, "@C$n@W moves to ram you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@c$n@W moves to ram @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      pcost(g, ch, 0, stcost / 2);
-      hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-      return;
-    }
-    dmg = damtype(g, ch, 8, skill, attperc);
-    dmg += dmg * 1.1;
-    int hitspot = 1;
-    hitspot     = roll_hitloc(g, ch, vict, skill);
-    switch (hitspot) {
-      case 1:
-        act(g, "@C$n@W aims $s body at YOU and rams into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W aims $s body at @C$N@W and rams into $S body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 3);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 2: /* Critical */
-        act(g, "@C$n@W aims $s body at YOU and rams into YOUR face!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W aims $s body at @C$N@W and rams into $S face!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 0);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 3:
-        act(g, "@C$n@W aims $s body at YOU and rams into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W aims $s body at @C$N@W and rams into $S body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 4: /* Weak */
-        act(g, "@C$n@W aims $s body at YOU and rams into YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W aims $s body at @C$N@W and rams into $S arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 0, 190, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 1);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 5: /* Weak 2 */
-        act(g, "@C$n@W aims $s body at YOU and rams into YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W aims $s body at @C$N@W and rams into $S leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 1, 190, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 2);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-    }
-    pcost(g, ch, 0, stcost);
-    return;
-  }
-  if (obj) {
-    if (!can_kill(g, ch, nullptr, obj, 0)) {
-      return;
-    }
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
-      return;
-    }
-    dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@C$n@W rams $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM);
-    hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
-    pcost(g, ch, 0, stcost);
-
-  } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
-    return;
-  }
+  perform_beast(g, ch, argument, RAM);
 }
 
 ACMD(do_strike)
 {
-  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
-  int64_t dmg, stcost = getEffMaxPL(g, ch) / 400;
-  struct char_data *vict;
-  struct obj_data *obj;
-  std::string arg;
-  double attperc = 0;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (!char_is_npc(ch)) {
-    return;
-  }
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (arg.empty() && !char_get_fighting(g, ch)) {
-    return;
-  }
-
-  if (!check_points(g, ch, 0, getEffMaxPL(g, ch) / 400)) {
-    return;
-  }
-
-  skill = init_skill(g, ch, SKILL_KNEE);
-
-  vict = nullptr;
-  obj  = nullptr;
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
-      vict = char_get_fighting(g, ch);
-    } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      return;
-    }
-  }
-  handle_cooldown(g, ch, 4);
-  if (vict) {
-    if (!can_kill(g, ch, vict, nullptr, 0)) {
-      return;
-    }
-    if (handle_defender(g, vict, ch)) {
-      struct char_data *def = char_get_defender(g, vict);
-      vict                  = def;
-    }
-    index = check_def(g, vict);
-    prob  = roll_accuracy(g, ch, skill, true);
-    perc  = chance_to_hit(g, ch);
-
-    index -= handle_speed(g, ch, vict);
-
-    avo = index / 4;
-
-    handle_defense(g, vict, &pry, &blk, &dge);
-
-    prob -= avo;
-    tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
-
-    prob += 5;
-
-    if (!tech_handle_zanzoken(g, ch, vict, "fang strike")) {
-      pcost(g, ch, 0, stcost / 2);
-      pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-      return;
-    }
-
-    if (prob < perc - 20) {
-      if ((getCurST(g, vict)) > 0) {
-        if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act(g, "@WYou parry @C$n's@W fang strike with a punch of your own!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W parries @c$n's@W fang strike with a punch of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_PARRY, 0);
-          pcost(g, ch, 0, stcost / 2);
-          pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
-          dmg = damtype(g, vict, -2, skill, attperc);
-          dmg *= calc_critical(g, ch, 1);
-          hurt(g, 0, 0, vict, ch, nullptr, dmg, -1);
-
-          return;
-        }
-        if (blk > axion_dice(g, 10)) {
-          act(g, "@WYou move quickly and block @C$n's@W fang strike!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W moves quickly and blocks @c$n's@W fang strike!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_BLOCK, 0);
-          pcost(g, ch, 0, stcost / 2);
-          pcost(g, vict, 0, getEffMaxPL(g, vict) / 500);
-          dmg = damtype(g, ch, 6, skill, attperc);
-          dmg /= 4;
-          hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-
-          return;
-        }
-        if (dge > axion_dice(g, 10)) {
-          act(g, "@WYou dodge @C$n's@W fang strike!@n", true, ch, nullptr, vict, TO_VICT);
-          act(g, "@C$N@W manages to dodge @c$n's@W fang strike!@n", true, ch, nullptr, vict, TO_NOTVICT);
-          improve_skill(g, vict, SKILL_DODGE, 0);
-          pcost(g, ch, 0, stcost / 2);
-          hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-          return;
-        }
-        act(g, "@C$n@W moves to fang strike you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W moves to fang strike @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        pcost(g, ch, 0, stcost / 2);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-
-        return;
-      }
-      act(g, "@C$n@W moves to fang strike you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@c$n@W moves to fang strike @C$N@W, but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      pcost(g, ch, 0, stcost / 2);
-      hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
-      return;
-    }
-    dmg = damtype(g, ch, 8, skill, attperc);
-    dmg += dmg * 0.5;
-    int hitspot = 1;
-    hitspot     = roll_hitloc(g, ch, vict, skill);
-    switch (hitspot) {
-      case 1:
-        act(g, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 3);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 2: /* Critical */
-        act(g, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR face!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S face!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 0);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 3:
-        act(g, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S body!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (char_get_bonuses(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(g, ch, 2);
-        }
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 4);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 4: /* Weak */
-        act(g, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 1);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-      case 5: /* Weak 2 */
-        act(g, "@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        dmg *= calc_critical(g, ch, 1);
-        hurt(g, 0, 0, ch, vict, nullptr, dmg, 0);
-        dam_eq_loc(g, vict, 2);
-        /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-        break;
-    }
-    pcost(g, ch, 0, stcost);
-    decCurST(g, vict, dmg * .25, 0);
-    return;
-  }
-  if (obj) {
-    if (!can_kill(g, ch, nullptr, obj, 0)) {
-      return;
-    }
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-      send_to_char(g, ch, "It is broken already!\r\n");
-      return;
-    }
-    dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@C$n@W fang strikes $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM);
-    hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
-    pcost(g, ch, 0, stcost);
-
-  } else {
-    send_to_char(g, ch, "Error! Please report.\r\n");
-    return;
-  }
+  perform_beast(g, ch, argument, FANG_STRIKE);
 }
 
 /* End NPC skills */
@@ -1427,165 +1067,7 @@ ACMD(do_malice)
 
 ACMD(do_nova)
 {
-  int perc, dge = 2, count = 0, skill;
-  int64_t dmg;
-  double attperc = .20, minimum = .1;
-  std::string arg2;
-
-  std::string_view rest = argument;
-  arg2                  = take_arg(rest);
-
-  /* Can they do the technique? */
-
-  if (!can_grav(g, ch)) {
-    return;
-  }
-
-  if (!check_skill(g, ch, SKILL_STARNOVA)) {
-    return;
-  }
-
-  if (!limb_ok(g, ch, 0)) {
-    return;
-  }
-
-  if (char_get_skills_perf(ch, SKILL_STARNOVA) == 1) {
-    attperc += 0.05;
-  } else if (char_get_skills_perf(ch, SKILL_STARNOVA) == 3) {
-    minimum -= 0.05;
-    if (minimum <= 0.0) {
-      minimum = 0.01;
-    }
-  }
-
-  if (!tech_handle_charge(g, ch, arg2, minimum, &attperc)) return;
-
-  if (getMaxKI(g, ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
-  }
-
-  if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0)) {
-    return;
-  }
-
-  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
-    send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
-    return;
-  }
-
-  /* Passed sanity checks for doing the technique */
-
-  skill = init_skill(g, ch, SKILL_STARNOVA); /* Set skill value */
-  if (char_get_skills_perf(ch, SKILL_STARNOVA) == 2) {
-    skill += 5;
-  }
-
-  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch) {
-      continue;
-    }
-    if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-      continue;
-    }
-    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
-      continue;
-    }
-    if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-      continue;
-    }
-    if (char_mob_flagged(vict, MOB_NOKILL)) {
-      continue;
-    }
-    count += 1;
-  }
-  if (count <= 0) {
-    send_to_char(g, ch, "There is no one worth targeting around.\r\n");
-    return;
-  } /* No one worth targeting */
-  else {
-    perc = chance_to_hit(g, ch);
-    if (g->time_info.hours <= 15 || g->time_info.hours > 22) {
-      skill += 5;
-    }
-    handle_cooldown(g, ch, 6);
-    if (skill < perc) {
-      act(g, "@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body before you lose your concentration and fail to create a @yS@Yt@Wa@wr @cN@Co@Wv@wa@W!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body before $e seems to lose $s concentration and fail to create a @yS@Yt@Wa@wr @cN@Co@Wv@wa@W!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      if (char_get_skills_perf(ch, SKILL_STARNOVA) == 3 && attperc > minimum) {
-        pcost(g, ch, attperc - 0.05, 0);
-      } else {
-        pcost(g, ch, attperc, 0);
-      }
-
-      improve_skill(g, ch, SKILL_STARNOVA, 0);
-      return;
-    }
-
-    act(g, "@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as your glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as @C$n's@W glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n", true, ch, nullptr, nullptr, TO_ROOM);
-
-    dmg = damtype(g, ch, 53, skill, attperc);
-
-    if (g->time_info.hours <= 15) {
-      dmg *= 1.25;
-    } else if (g->time_info.hours <= 22) {
-      dmg *= 1.4;
-    }
-
-    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-      if (vict == ch) {
-        continue;
-      }
-      if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
-        continue;
-      }
-      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict)) {
-        continue;
-      }
-      if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
-        continue;
-      }
-      if (char_mob_flagged(vict, MOB_NOKILL)) {
-        continue;
-      }
-      dge = handle_dodge(g, vict);
-      if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-          (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-        act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_CHAR);
-        act(g, "@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_VICT);
-        act(g, "@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_ZANZOKEN, false);
-        pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        continue;
-      }
-      if (dge + rand_number(g, -15, 5) > skill) {
-        act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@WYou manage to escape the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@c$N@W manages to escape the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
-        improve_skill(g, vict, SKILL_DODGE, 0);
-        continue;
-      }
-      act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@RYou are caught by the explosion!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING) {
-        handle_knockdown(g, vict);
-      }
-      hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
-      continue;
-    } /* Hitting targets! */
-
-    if (char_get_skills_perf(ch, SKILL_STARNOVA) == 3 && attperc > minimum) {
-      pcost(g, ch, attperc - 0.05, 0);
-    } else {
-      pcost(g, ch, attperc, 0);
-    }
-
-    improve_skill(g, ch, SKILL_STARNOVA, 0);
-    return;
-  } /* We have targets! Attempt to kills them! */
+  perform_area_attack(g, ch, argument, STAR_NOVA);
 }
 
 ACMD(do_head)
