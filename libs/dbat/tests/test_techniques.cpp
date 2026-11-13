@@ -426,6 +426,56 @@ static void exit_to(GameWorld *g, int dir, room_vnum to, const char *description
   room_set_dir_option(g, ARENA, dir, exit);
 }
 
+/* ... carrying something standing in for gardening gear (or a plant) of this vnum */
+/* Gives obj the vnum of something the fixture world doesn't have, with an index and a bare prototype made for it. */
+static void renumber(GameWorld *g, struct obj_data *obj, obj_vnum vnum)
+{
+  struct index_data *index = g->obj_index.find(vnum);
+  if (!index) {
+    index       = g->obj_index.emplace(vnum);
+    index->vnum = vnum;
+    obj_set_item_number(g->obj_proto.emplace(vnum), vnum);
+  }
+  obj_index_of(g, obj_get_item_number(obj))->number--;
+  index->number++;
+  obj_set_item_number(obj, vnum);
+}
+
+static struct obj_data *carries_as(GameWorld *g, struct char_data *att, obj_vnum vnum, const char *name = "item70 tool")
+{
+  struct obj_data *obj = read_object(g, 70);
+  renumber(g, obj, vnum);
+  obj_set_name(obj, name);
+  obj_set_weight(obj, 1);
+  obj_to_char(g, obj, att);
+  return obj;
+}
+
+/* ... a gardener of this skill, in a garden of the arena, by a seedling of this vnum planted there */
+static struct obj_data *gardening(GameWorld *g, struct char_data *att, int skill, obj_vnum seedling = 250)
+{
+  char_set_skills_base(att, SKILL_GARDENING, skill);
+  room_set_flag(g, ARENA, ROOM_GARDEN1, true);
+  if (seedling < 0)
+    return nullptr;
+  struct obj_data *plant = read_object(g, 70);
+  renumber(g, plant, seedling);
+  obj_set_name(plant, "seedling");
+  obj_set_type_flag(plant, ITEM_PLANT);
+  obj_to_room(g, plant, ARENA);
+  return plant;
+}
+
+/* ... with `count` more plants growing there */
+static void planters(GameWorld *g, int count)
+{
+  for (int i = 0; i < count; i++) {
+    struct obj_data *plant = read_object(g, 70);
+    obj_set_type_flag(plant, ITEM_PLANT);
+    obj_to_room(g, plant, ARENA);
+  }
+}
+
 #define SETUP(body) [](GameWorld *g, char_data *att, char_data *victim) { (void)g; (void)att; (void)victim; body }
 
 static void fireshielded(struct char_data *victim)
@@ -1813,6 +1863,70 @@ static const struct scene {
     {"implementor, with a godroom", "game godrooms", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); room_set_flag(g, 5, ROOM_GODROOM, true); room_set_flag(g, 6, ROOM_GODROOM, true);), false, 1},
     {"implementor, multiclassing", "game player Sayla", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); g->config_info.advance.allow_multiclass = 1;), false, 1},
     {"implementor, with modifiers", "game affect Hugo", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); affected_type af{}; af.type = 1; af.duration = 3; af.modifier = 2; af.location = APPLY_STR; affect_to_char(g, att, &af); af.bitvector = AFF_FLYING; affect_to_char(g, att, &af); af.modifier = 0; affect_to_char(g, att, &af);), false, 1},
+    {"unskilled", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 0); char_set_skill_slots(att, 200);), false, 2},
+    {"unskilled, no slots", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 0); char_set_skill_slots(att, 0);), false, 1},
+    {"skilled", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); ), false, 1},
+    {"skilled", "garden seedling", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); ), false, 1},
+    {"skilled", "garden COLLECT", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); ), false, 1},
+    {"skilled, with a shovel", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); carries_as(g, att, 254);), false, 1},
+    {"skilled, with a broken shovel, in a forest", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FOREST); obj_extra_set(carries_as(g, att, 254), ITEM_BROKEN, true);), false, 1},
+    {"skilled, with a forged shovel, in a forest", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FOREST); obj_extra_set(carries_as(g, att, 254), ITEM_FORGED, true);), false, 1},
+    {"skilled, with a shovel, SECT_FOREST", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FOREST); carries_as(g, att, 254);), false, 2},
+    {"skilled, with a shovel, SECT_FIELD", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FIELD); carries_as(g, att, 254);), false, 2},
+    {"skilled, with a shovel, SECT_MOUNTAIN", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_MOUNTAIN); carries_as(g, att, 254);), false, 2},
+    {"skilled, with a shovel, SECT_HILLS", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_HILLS); carries_as(g, att, 254);), false, 2},
+    {"skilled, with a shovel, on fertile ground", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FOREST); carries_as(g, att, 254); room_set_flag(g, ARENA, ROOM_FERTILE1, true);), false, 1},
+    {"skilled, with a shovel, on good ground", "garden collect", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); room_set_sector_type(g, ARENA, SECT_FOREST); carries_as(g, att, 254); room_set_flag(g, ARENA, ROOM_FERTILE2, true);), false, 2},
+    {"skilled, out of a garden", "garden seedling water", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); ), false, 1},
+    {"in a garden, no plant", "garden seedling water", false, SETUP(gardening(g, att, 50, -1);), false, 1},
+    {"in a garden, no plant", "garden seedling plant", false, SETUP(gardening(g, att, 50, -1);), false, 1},
+    {"in the other garden", "garden seedling prune", false, SETUP(gardening(g, att, 50); room_set_flag(g, ARENA, ROOM_GARDEN1, false); room_set_flag(g, ARENA, ROOM_GARDEN2, true);), false, 1},
+    {"in a garden, exhausted", "garden seedling water", false, SETUP(gardening(g, att, 50); decCurST(g, att, getCurST(g, att), 0);), false, 1},
+    {"in a garden", "garden seedling prune", false, SETUP(gardening(g, att, 50);), false, 1},
+    {"in a garden, no water", "garden seedling water", false, SETUP(gardening(g, att, 100);), false, 1},
+    {"in a garden, forged water", "garden seedling water", false, SETUP(gardening(g, att, 100); obj_extra_set(carries_as(g, att, 251), ITEM_FORGED, true);), false, 1},
+    {"expert, plant full", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 100), VAL_WATERLEVEL, 500); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant full", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 500); carries_as(g, att, 251); ), false, 1},
+    {"expert, plant dead", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 100), VAL_WATERLEVEL, -10); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant dead", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, -10); carries_as(g, att, 251); ), false, 1},
+    {"expert, plant dry", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 100), VAL_WATERLEVEL, 0); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant dry", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 0); carries_as(g, att, 251); ), false, 1},
+    {"expert, plant at 275", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 100), VAL_WATERLEVEL, 275); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant at 275", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 275); carries_as(g, att, 251); ), false, 1},
+    {"expert, plant at 300", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 100), VAL_WATERLEVEL, 300); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant at 300", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 300); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant at 460", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 460); carries_as(g, att, 251); ), false, 1},
+    {"clumsy, plant at 480", "garden seedling water", false, SETUP(obj_set_value(gardening(g, att, 1), VAL_WATERLEVEL, 480); carries_as(g, att, 251); ), false, 1},
+    {"expert, no clippers", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } ), false, 1},
+    {"expert, broken clippers", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } obj_extra_set(carries_as(g, att, 253), ITEM_BROKEN, true);), false, 1},
+    {"expert, unharvestable", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 70); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } carries_as(g, att, 253); ), false, 1},
+    {"expert, dead plant", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); obj_set_value(p, VAL_WATERLEVEL, -10);} carries_as(g, att, 253); ), false, 1},
+    {"expert, young plant", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); obj_set_value(p, VAL_MATURITY, 2);} carries_as(g, att, 253); ), false, 1},
+    {"clumsy", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 1, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } carries_as(g, att, 253); ), false, 1},
+    {"expert, dull clippers", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } obj_set_value(carries_as(g, att, 253), VAL_ALL_HEALTH, 1);), false, 1},
+    {"expert", "garden seedling harvest", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } obj_set_value(carries_as(g, att, 253), VAL_ALL_HEALTH, 5);), false, 2},
+    {"expert, no shovel", "garden seedling dig", false, SETUP(gardening(g, att, 100);), false, 1},
+    {"expert", "garden seedling dig", false, SETUP(gardening(g, att, 100); carries_as(g, att, 254);), false, 1},
+    {"expert, no shovel", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); ), false, 1},
+    {"expert, no soil", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254);), false, 1},
+    {"expert, forged soil", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_extra_set(soil, ITEM_FORGED, true); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 0", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 0); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 1", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 1); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 2", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 2); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 3", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 3); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 4", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 4); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 5", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 5); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 6", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 6); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 7", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 7); obj_to_char(g, soil, att); }), false, 1},
+    {"expert, soil of 8", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); { obj_data *soil = read_object(g, 255); obj_set_value(soil, 0, 8); obj_to_char(g, soil, att); }), false, 1},
+    {"clumsy", "garden seedling plant", false, SETUP(gardening(g, att, 1, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); obj_to_char(g, read_object(g, 255), att);), false, 1},
+    {"expert, planters full", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); carries_as(g, att, 254); obj_to_char(g, read_object(g, 255), att); room_set_flag(g, ARENA, ROOM_HOUSE, true); planters(g, 8);), false, 1},
+    {"expert, big garden, 8 planted", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); room_set_flag(g, ARENA, ROOM_GARDEN1, false); room_set_flag(g, ARENA, ROOM_GARDEN2, true); carries_as(g, att, 254); obj_to_char(g, read_object(g, 255), att); room_set_flag(g, ARENA, ROOM_HOUSE, true); planters(g, 8);), false, 1},
+    {"expert, big garden full", "garden seedling plant", false, SETUP(gardening(g, att, 100, -1); obj_set_type_flag(carries_as(g, att, 250, "seedling"), ITEM_PLANT); room_set_flag(g, ARENA, ROOM_GARDEN1, false); room_set_flag(g, ARENA, ROOM_GARDEN2, true); carries_as(g, att, 254); obj_to_char(g, read_object(g, 255), att); room_set_flag(g, ARENA, ROOM_HOUSE, true); planters(g, 20);), false, 1},
+    {"expert, unpickable", "garden seedling pick", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); } ), false, 1},
+    {"expert, young", "garden seedling pick", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); obj_extra_set(p, ITEM_MATURE, true); obj_set_value(p, VAL_MATURITY, 2);} ), false, 1},
+    {"clumsy", "garden seedling pick", false, SETUP({ obj_data *p = gardening(g, att, 1, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); obj_extra_set(p, ITEM_MATURE, true);} ), false, 1},
+    {"expert", "garden seedling pick", false, SETUP({ obj_data *p = gardening(g, att, 100, 250); obj_set_value(p, VAL_MATURITY, 6); obj_set_value(p, VAL_MAXMATURE, 6); obj_extra_set(p, ITEM_MATURE, true);} ), false, 1},
     {"implementor", "set", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
     {"implementor", "set Sayla", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
     {"implementor", "set Sayla maxpl 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},

@@ -7,7 +7,9 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <cstdlib>
+#include <iterator>
 
 #include "dbat/args.hpp"
 #include "dbat/auction.hpp"
@@ -264,328 +266,318 @@ static void harvest_plant(GameWorld *g, struct char_data *ch, struct obj_data *p
   }
 }
 
-ACMD(do_garden)
-{
+namespace {
+  constexpr obj_vnum GROW_WATER = 251, CLIPPERS = 253, SHOVEL = 254, SOIL = 255;
 
-  std::string arg, arg2;
-  struct obj_data *obj;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
-
-  if (!char_get_skill(ch, SKILL_GARDENING) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
-    int numb = rand_number(g, 8, 16);
-    char_set_skills_base(ch, SKILL_GARDENING, numb);
-    send_to_char(g, ch, "@GYou learn the very basics of gardening.\r\n");
-  } else if (!char_get_skill(ch, SKILL_GARDENING) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-    send_to_char(g, ch, "You need additional skill slots to pick up the skill linked with this.\r\n");
-    return;
+  /* The last carried of `vnum` that isn't forged, nor broken if it has to work. */
+  struct obj_data *carried(GameWorld *g, struct char_data *ch, obj_vnum vnum, bool working)
+  {
+    struct obj_data *found = nullptr;
+    for (obj_data *obj : char_inventory(g, ch))
+      if (obj_get_vnum(g, obj) == vnum && !(working && obj_extra_flagged(obj, ITEM_BROKEN)) && !obj_extra_flagged(obj, ITEM_FORGED))
+        found = obj;
+    return found;
   }
 
-  if (!arg.empty()) {
-    if (str_eq_nocase(arg, "collect")) {
-      int found = false;
+  /* False when ch has no gardening and no room to learn it. */
+  bool knows_gardening(GameWorld *g, struct char_data *ch)
+  {
+    if (char_get_skill(ch, SKILL_GARDENING))
+      return true;
+    if (slot_count(ch) + 1 > char_get_skill_slots(ch)) {
+      send_to_char(g, ch, "You need additional skill slots to pick up the skill linked with this.\r\n");
+      return false;
+    }
+    char_set_skills_base(ch, SKILL_GARDENING, rand_number(g, 8, 16));
+    send_to_char(g, ch, "@GYou learn the very basics of gardening.\r\n");
+    return true;
+  }
 
-      for (obj_data *obj2 : char_inventory(g, ch)) {
-        if (obj_get_vnum(g, obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-          found = true;
-        }
-      }
-      if (found == false) {
-        send_to_char(g, ch, "You need a shovel in order to collect soil.\r\n");
-        return;
-      }
-      if (room_sect(g, char_get_in_room(ch)) != SECT_FOREST && room_sect(g, char_get_in_room(ch)) != SECT_FIELD && room_sect(g, char_get_in_room(ch)) != SECT_MOUNTAIN && room_sect(g, char_get_in_room(ch)) != SECT_HILLS) {
-        send_to_char(g, ch, "You can not collect soil from this area.\r\n");
-        return;
-      }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_FERTILE1)) {
-        struct obj_data *soil = read_object(g, 255);
-        obj_to_char(g, soil, ch);
-        act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        obj_set_value(soil, 0, 8);
-        char_set_wait(ch, PULSE_4SEC);
-        return;
-      }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_FERTILE2)) {
-        struct obj_data *soil = read_object(g, 255);
-        obj_to_char(g, soil, ch);
-        act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        obj_set_value(soil, 0, rand_number(g, 5, 7));
-        char_set_wait(ch, PULSE_4SEC);
-        return;
-      }
-      struct obj_data *soil = read_object(g, 255);
-      obj_to_char(g, soil, ch);
-      act(g, "@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      obj_set_value(soil, 0, rand_number(g, 0, 4));
-      char_set_wait(ch, PULSE_4SEC);
+  void garden_syntax(GameWorld *g, struct char_data *ch)
+  {
+    send_to_char(g, ch, "Syntax: garden (plant) ( water | harvest | dig | plant | pick )\r\n");
+    send_to_char(g, ch, "Syntax: garden collect [Will collect soil from a room with soil.\r\n");
+  }
+
+  struct soil_grade {
+    int flag; /* the room's, or -1 for any */
+    const char *kind;
+    int lo, hi; /* its quality */
+  };
+
+  constexpr soil_grade SOIL_GRADES[] = {
+      {ROOM_FERTILE1, "fertile soil", 8, 8},
+      {ROOM_FERTILE2, "good soil",    5, 7},
+      {-1,            "soil",         0, 4},
+  };
+
+  void collect_soil(GameWorld *g, struct char_data *ch)
+  {
+    if (!carried(g, ch, SHOVEL, true)) {
+      send_to_char(g, ch, "You need a shovel in order to collect soil.\r\n");
       return;
+    }
+    int sect = room_sect(g, char_get_in_room(ch));
+    if (sect != SECT_FOREST && sect != SECT_FIELD && sect != SECT_MOUNTAIN && sect != SECT_HILLS) {
+      send_to_char(g, ch, "You can not collect soil from this area.\r\n");
+      return;
+    }
+    const soil_grade &grade = *std::ranges::find_if(SOIL_GRADES, [&](const soil_grade &s) { return s.flag < 0 || room_flagged(g, char_get_in_room(ch), s.flag); });
+    struct obj_data *soil   = read_object(g, SOIL);
+    obj_to_char(g, soil, ch);
+    act(g, str_format("@yYou sink your shovel into the soft ground and manage to dig up a pile of {}!@n", grade.kind).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, str_format("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of {}!@n", grade.kind).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    obj_set_value(soil, 0, grade.lo == grade.hi ? grade.lo : rand_number(g, grade.lo, grade.hi));
+    char_set_wait(ch, PULSE_4SEC);
+  }
+
+  /* Every bit of gardening done ends so. */
+  void worked(GameWorld *g, struct char_data *ch)
+  {
+    char_set_wait(ch, PULSE_3SEC);
+    improve_skill(g, ch, SKILL_GARDENING, 0);
+  }
+
+  /* One way of tending a plant: what to do with it, the stamina it costs and the gardener's skill. */
+  struct tending {
+    GameWorld *g;
+    struct char_data *ch;
+    struct obj_data *plant;
+    int64_t cost;
+    int skill;
+
+    void tire() { decCurST(g, ch, cost, 0); }
+  };
+
+  /* quirk: a careless watering only says the plant is full above 500, a careful one at 500 too */
+  void add_water(tending &t, int amount, int full_at)
+  {
+    obj_set_value(t.plant, VAL_WATERLEVEL, obj_get_value(t.plant, VAL_WATERLEVEL) + amount);
+    if (obj_get_value(t.plant, VAL_WATERLEVEL) >= full_at) {
+      obj_set_value(t.plant, VAL_WATERLEVEL, 500);
+      send_to_char(t.g, t.ch, "@YThe plant is now at full water level.@n\r\n");
     }
   }
 
-  if (arg.empty() || arg2.empty()) {
-    send_to_char(g, ch, "Syntax: garden (plant) ( water | harvest | dig | plant | pick )\r\n");
-    send_to_char(g, ch, "Syntax: garden collect [Will collect soil from a room with soil.\r\n");
-    return;
+  void water(tending &t)
+  {
+    struct obj_data *water = carried(t.g, t.ch, GROW_WATER, false);
+    if (!water) {
+      send_to_char(t.g, t.ch, "You do not have any grow water!\r\n");
+      return;
+    }
+    if (obj_get_value(t.plant, VAL_WATERLEVEL) >= 500) {
+      send_to_char(t.g, t.ch, "You stop as you realize that the plant already has enough water.\r\n");
+      return;
+    }
+    if (obj_get_value(t.plant, VAL_WATERLEVEL) <= -10) {
+      send_to_char(t.g, t.ch, "The plant is dead!\r\n");
+      return;
+    }
+    if (t.skill < axion_dice(t.g, 0)) {
+      act(t.g, "@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+      act(t.g, "@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+      t.tire();
+      add_water(t, 40, 501);
+    } else {
+      act(t.g, "@GYou calmly and expertly pour the grow water on @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+      act(t.g, "@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+      t.tire();
+      add_water(t, 225, 500);
+    }
+    extract_obj(t.g, water);
+    worked(t.g, t.ch);
   }
 
+  void harvest(tending &t)
+  {
+    struct obj_data *clippers = carried(t.g, t.ch, CLIPPERS, true);
+    if (!clippers) {
+      send_to_char(t.g, t.ch, "You do not have any working gardening clippers!\r\n");
+      return;
+    }
+    if (!can_harvest(t.g, t.plant)) {
+      send_to_char(t.g, t.ch, "You can not harvest that plant. Instead, Syntax: garden (plant) (pick)\r\n");
+      return;
+    }
+    if (obj_get_value(t.plant, VAL_WATERLEVEL) <= -10) {
+      send_to_char(t.g, t.ch, "That plant is dead!\r\n");
+      return;
+    }
+    if (obj_get_value(t.plant, VAL_MATURITY) < obj_get_value(t.plant, VAL_MAXMATURE)) {
+      send_to_char(t.g, t.ch, "You stop as you realize that the plant isn't mature enough to harvest.\r\n");
+      return;
+    }
+    if (t.skill < axion_dice(t.g, -5)) {
+      act(t.g, "@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+      act(t.g, "@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+      t.tire();
+      extract_obj(t.g, t.plant);
+      worked(t.g, t.ch);
+      return;
+    }
+    act(t.g, "@GYou calmly and expertly harvest @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+    act(t.g, "@g$n@G calmly and expertly harvests @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+    t.tire();
+    obj_set_value(clippers, VAL_ALL_HEALTH, obj_get_value(clippers, VAL_ALL_HEALTH) - 1);
+    if (obj_get_value(clippers, VAL_ALL_HEALTH) <= 0) {
+      /* quirk: the clippers dull before the harvest, which is lost */
+      send_to_char(t.g, t.ch, "The clippers are now too dull to use.\r\n");
+      return;
+    }
+    harvest_plant(t.g, t.ch, t.plant);
+    worked(t.g, t.ch);
+  }
+
+  bool has_shovel(tending &t)
+  {
+    if (carried(t.g, t.ch, SHOVEL, true))
+      return true;
+    send_to_char(t.g, t.ch, "You do not have any working gardening shovels!\r\n");
+    return false;
+  }
+
+  void dig(tending &t)
+  {
+    if (!has_shovel(t))
+      return;
+    act(t.g, "@GYou calmly dig up @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+    act(t.g, "@g$n@G calmly digs up @g$p@G.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+    t.tire();
+    obj_from_room(t.g, t.plant);
+    obj_to_char(t.g, t.plant, t.ch);
+    obj_set_value(t.plant, VAL_SOILQ, 0);
+    worked(t.g, t.ch);
+  }
+
+  /* How much sooner a plant matures, by the soil's quality from 1; any other is as 8. */
+  constexpr int SOIL_HASTE[] = {10, 15, 20, 25, 50, 60, 70};
+
+  bool planters_full(GameWorld *g, struct char_data *ch)
+  {
+    return (check_saveroom_count(g, ch, nullptr) > 7 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1)) ||
+           (check_saveroom_count(g, ch, nullptr) > 19 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2));
+  }
+
+  void plant(tending &t)
+  {
+    if (!has_shovel(t))
+      return;
+    struct obj_data *soil = carried(t.g, t.ch, SOIL, false);
+    if (!soil) {
+      send_to_char(t.g, t.ch, "You don't have any real soil.\r\n");
+      return;
+    }
+    if (planters_full(t.g, t.ch)) {
+      send_to_char(t.g, t.ch, "This room already has all its planters full. Try digging up some plants.\r\n");
+      return;
+    }
+    if (t.skill < axion_dice(t.g, -5)) {
+      act(t.g, "@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+      act(t.g, "@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+      t.tire();
+      worked(t.g, t.ch);
+      return;
+    }
+    act(t.g, "@GYou dig a proper sized hole and plant @g$p@G in it.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+    act(t.g, "@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+    obj_from_char(t.g, t.plant);
+    obj_to_room(t.g, t.plant, char_get_in_room(t.ch));
+    t.tire();
+    obj_set_value(t.plant, VAL_MAXMATURE, 6);
+    obj_set_value(t.plant, VAL_SOILQ, obj_get_value(soil, 0));
+    int quality = obj_get_value(t.plant, VAL_SOILQ);
+    /* quirk: soil of quality 0 does as well as the best */
+    obj_set_value(t.plant, VAL_MATGOAL, 200 - (quality >= 1 && quality <= 7 ? SOIL_HASTE[quality - 1] : 80));
+    extract_obj(t.g, soil);
+    worked(t.g, t.ch);
+  }
+
+  void pick(tending &t)
+  {
+    if (!obj_extra_flagged(t.plant, ITEM_MATURE)) {
+      send_to_char(t.g, t.ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
+      return;
+    }
+    if (obj_get_value(t.plant, VAL_MATURITY) < obj_get_value(t.plant, VAL_MAXMATURE)) {
+      send_to_char(t.g, t.ch, "That plant is not mature enough yet.\r\n");
+      return;
+    }
+    if (t.skill < axion_dice(t.g, -5)) {
+      /* quirk: shredding it costs nothing, and leaves it be */
+      act(t.g, "@GYou end up shredding @g$p@G with your clumsy unskilled hands.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+      act(t.g, "@g$n@G grabs a hold of @g$p@G and shreds it in an attempt to pick it.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+      return;
+    }
+    act(t.g, "@GYou grab a hold of @g$p@G and carefully pick it out of the soil.@n", true, t.ch, t.plant, nullptr, TO_CHAR);
+    act(t.g, "@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", true, t.ch, t.plant, nullptr, TO_ROOM);
+    obj_from_room(t.g, t.plant);
+    obj_to_char(t.g, t.plant, t.ch);
+    t.tire();
+    worked(t.g, t.ch);
+  }
+
+  struct garden_action {
+    const char *word;
+    void (*tend)(tending &t);
+  };
+
+  constexpr garden_action GARDEN_ACTIONS[] = {
+      {"water",   water  },
+      {"harvest", harvest},
+      {"dig",     dig    },
+      {"plant",   plant  },
+      {"pick",    pick   },
+  };
+} // namespace
+
+ACMD(do_garden)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
+
+  if (!knows_gardening(g, ch))
+    return;
+
+  if (str_eq_nocase(arg, "collect")) {
+    collect_soil(g, ch);
+    return;
+  }
+  if (arg.empty() || arg2.empty()) {
+    garden_syntax(g, ch);
+    return;
+  }
   if (!room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) && !room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You are not even in a garden!\r\n");
     return;
   }
 
+  /* A plant to plant is carried; any other is in the room. */
+  struct obj_data *obj;
   if (str_eq_nocase(arg2, "plant")) {
     if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "What are you trying to plant?\r\n");
       send_to_char(g, ch, "Syntax: garden (plant in inventory) plant\r\n");
       return;
     }
-  } else {
-    if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-      send_to_char(g, ch, "That plant doesn't seem to be here.\r\n");
-      return;
-    }
-  }
-
-  if (!obj) {
-    send_to_char(g, ch, "What plant are you gardening?\r\n");
+  } else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
+    send_to_char(g, ch, "That plant doesn't seem to be here.\r\n");
     return;
   }
 
-  int64_t cost = (getMaxST(g, ch) * 0.005) + rand_number(g, 50, 150);
-  int skill    = char_get_skill(ch, SKILL_GARDENING);
-
-  if ((getCurST(g, ch)) < cost) {
-    send_to_char(g, ch, "@WYou need at least @G{}@W stamina to garden.\r\n", add_commas(cost));
+  tending t{g, ch, obj, static_cast<int64_t>((getMaxST(g, ch) * 0.005) + rand_number(g, 50, 150)), char_get_skill(ch, SKILL_GARDENING)};
+  if (getCurST(g, ch) < t.cost) {
+    send_to_char(g, ch, "@WYou need at least @G{}@W stamina to garden.\r\n", add_commas(t.cost));
     return;
   }
-  if (str_eq_nocase(arg2, "water")) {
-    struct obj_data *water = nullptr;
-    int found = false;
 
-    for (obj_data *obj2 : char_inventory(g, ch)) {
-      if (obj_get_vnum(g, obj2) == 251 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = true;
-        water = obj2;
-      }
-    }
-    if (found == false) {
-      send_to_char(g, ch, "You do not have any grow water!\r\n");
-      return;
-    }
-    if (obj_get_value(obj, VAL_WATERLEVEL) >= 500) {
-      send_to_char(g, ch, "You stop as you realize that the plant already has enough water.\r\n");
-      return;
-    }
-    if (obj_get_value(obj, VAL_WATERLEVEL) <= -10) {
-      send_to_char(g, ch, "The plant is dead!\r\n");
-      return;
-    }
-    if (skill < axion_dice(g, 0)) {
-      act(g, "@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-
-      decCurST(g, ch, cost, 0);
-      obj_set_value(obj, VAL_WATERLEVEL, obj_get_value(obj, VAL_WATERLEVEL) + (40));
-      if (obj_get_value(obj, VAL_WATERLEVEL) > 500) {
-        obj_set_value(obj, VAL_WATERLEVEL, 500);
-        send_to_char(g, ch, "@YThe plant is now at full water level.@n\r\n");
-      }
-      extract_obj(g, water);
-      char_set_wait(ch, PULSE_3SEC);
-      improve_skill(g, ch, SKILL_GARDENING, 0);
-      return;
-    }
-    act(g, "@GYou calmly and expertly pour the grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-    decCurST(g, ch, cost, 0);
-    obj_set_value(obj, VAL_WATERLEVEL, obj_get_value(obj, VAL_WATERLEVEL) + (225));
-    if (obj_get_value(obj, VAL_WATERLEVEL) >= 500) {
-      obj_set_value(obj, VAL_WATERLEVEL, 500);
-      send_to_char(g, ch, "@YThe plant is now at full water level.@n\r\n");
-    }
-    extract_obj(g, water);
-    char_set_wait(ch, PULSE_3SEC);
-    improve_skill(g, ch, SKILL_GARDENING, 0);
+  auto action = std::ranges::find_if(GARDEN_ACTIONS, [&](const garden_action &a) { return str_eq_nocase(arg2, a.word); });
+  if (action == std::end(GARDEN_ACTIONS)) {
+    garden_syntax(g, ch);
     return;
   }
-  if (str_eq_nocase(arg2, "harvest")) {
-    struct obj_data *clippers = nullptr;
-    int found = false;
-
-    for (obj_data *obj2 : char_inventory(g, ch)) {
-      if (obj_get_vnum(g, obj2) == 253 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found    = true;
-        clippers = obj2;
-      }
-    }
-    if (found == false) {
-      send_to_char(g, ch, "You do not have any working gardening clippers!\r\n");
-      return;
-    }
-    if (can_harvest(g, obj) == false) {
-      send_to_char(g, ch, "You can not harvest that plant. Instead, Syntax: garden (plant) (pick)\r\n");
-      return;
-    }
-    if (obj_get_value(obj, VAL_WATERLEVEL) <= -10) {
-      send_to_char(g, ch, "That plant is dead!\r\n");
-      return;
-    }
-    if (obj_get_value(obj, VAL_MATURITY) < obj_get_value(obj, VAL_MAXMATURE)) {
-      send_to_char(g, ch, "You stop as you realize that the plant isn't mature enough to harvest.\r\n");
-      return;
-    }
-    if (skill < axion_dice(g, -5)) {
-      act(g, "@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", true, ch, obj, nullptr, TO_ROOM);
-      decCurST(g, ch, cost, 0);
-      extract_obj(g, obj);
-      char_set_wait(ch, PULSE_3SEC);
-      improve_skill(g, ch, SKILL_GARDENING, 0);
-      return;
-    }
-    act(g, "@GYou calmly and expertly harvest @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@g$n@G calmly and expertly harvests @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-    decCurST(g, ch, cost, 0);
-    obj_set_value(clippers, VAL_ALL_HEALTH, obj_get_value(clippers, VAL_ALL_HEALTH) - (1));
-    if (obj_get_value(clippers, VAL_ALL_HEALTH) <= 0) {
-      send_to_char(g, ch, "The clippers are now too dull to use.\r\n");
-      return;
-    }
-    harvest_plant(g, ch, obj);
-    char_set_wait(ch, PULSE_3SEC);
-    improve_skill(g, ch, SKILL_GARDENING, 0);
-    return;
-  }
-  if (str_eq_nocase(arg2, "dig")) {
-    int found = false;
-
-    for (obj_data *obj2 : char_inventory(g, ch)) {
-      if (obj_get_vnum(g, obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = true;
-      }
-    }
-    if (found == false) {
-      send_to_char(g, ch, "You do not have any working gardening shovels!\r\n");
-      return;
-    }
-    act(g, "@GYou calmly dig up @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@g$n@G calmly digs up @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
-    decCurST(g, ch, cost, 0);
-    obj_from_room(g, obj);
-    obj_to_char(g, obj, ch);
-    obj_set_value(obj, VAL_SOILQ, 0);
-    char_set_wait(ch, PULSE_3SEC);
-    improve_skill(g, ch, SKILL_GARDENING, 0);
-    return;
-  }
-  if (str_eq_nocase(arg2, "plant")) {
-    int found = false;
-
-    for (obj_data *obj2 : char_inventory(g, ch)) {
-      if (obj_get_vnum(g, obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = true;
-      }
-    }
-    if (found == false) {
-      send_to_char(g, ch, "You do not have any working gardening shovels!\r\n");
-      return;
-    }
-    found                 = false;
-    struct obj_data *soil = nullptr;
-
-    for (obj_data *obj2 : char_inventory(g, ch)) {
-      if (obj_get_vnum(g, obj2) == 255 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = true;
-        soil  = obj2;
-      }
-    }
-    if (found == false) {
-      send_to_char(g, ch, "You don't have any real soil.\r\n");
-    } else if (check_saveroom_count(g, ch, nullptr) > 7 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1)) {
-      send_to_char(g, ch, "This room already has all its planters full. Try digging up some plants.\r\n");
-      return;
-    } else if (check_saveroom_count(g, ch, nullptr) > 19 && room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
-      send_to_char(g, ch, "This room already has all its planters full. Try digging up some plants.\r\n");
-      return;
-    } else if (skill < axion_dice(g, -5)) {
-      act(g, "@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", true, ch, obj, nullptr, TO_ROOM);
-      decCurST(g, ch, cost, 0);
-      char_set_wait(ch, PULSE_3SEC);
-      improve_skill(g, ch, SKILL_GARDENING, 0);
-      return;
-    } else {
-      act(g, "@GYou dig a proper sized hole and plant @g$p@G in it.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, ch, obj, nullptr, TO_ROOM);
-      obj_from_char(g, obj);
-      obj_to_room(g, obj, char_get_in_room(ch));
-      decCurST(g, ch, cost, 0);
-      obj_set_value(obj, VAL_MAXMATURE, 6);
-      obj_set_value(obj, VAL_MATGOAL, 200);
-      obj_set_value(obj, VAL_SOILQ, obj_get_value(soil, 0));
-      switch (obj_get_value(obj, VAL_SOILQ)) {
-        case 1:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (10));
-          break;
-        case 2:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (15));
-          break;
-        case 3:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (20));
-          break;
-        case 4:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (25));
-          break;
-        case 5:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (50));
-          break;
-        case 6:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (60));
-          break;
-        case 7:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (70));
-          break;
-        default:
-          obj_set_value(obj, VAL_MATGOAL, obj_get_value(obj, VAL_MATGOAL) - (80));
-          break;
-      }
-      extract_obj(g, soil);
-      char_set_wait(ch, PULSE_3SEC);
-      improve_skill(g, ch, SKILL_GARDENING, 0);
-    }
-  } else if (str_eq_nocase(arg2, "pick")) {
-    if (!obj_extra_flagged(obj, ITEM_MATURE)) {
-      send_to_char(g, ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
-      return;
-    }
-    if (obj_get_value(obj, VAL_MATURITY) < obj_get_value(obj, VAL_MAXMATURE)) {
-      send_to_char(g, ch, "That plant is not mature enough yet.\r\n");
-      return;
-    }
-    if (skill < axion_dice(g, -5)) {
-      act(g, "@GYou end up shredding @g$p@G with your clumsy unskilled hands.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@g$n@G grabs a hold of @g$p@G and shreds it in an attempt to pick it.@n", true, ch, obj, nullptr, TO_ROOM);
-      return;
-    }
-    act(g, "@GYou grab a hold of @g$p@G and carefully pick it out of the soil.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", true, ch, obj, nullptr, TO_ROOM);
-    obj_from_room(g, obj);
-    obj_to_char(g, obj, ch);
-    decCurST(g, ch, cost, 0);
-    char_set_wait(ch, PULSE_3SEC);
-    improve_skill(g, ch, SKILL_GARDENING, 0);
-    return;
-  } else {
-    send_to_char(g, ch, "Syntax: garden (plant) ( water | harvest | dig | plant | pick )\r\n");
-    send_to_char(g, ch, "Syntax: garden collect [Will collect soil from a room with soil.\r\n");
-    return;
-  }
+  action->tend(t);
 }
 
 static bool has_housekey(GameWorld *g, struct char_data *ch, struct obj_data *obj)
