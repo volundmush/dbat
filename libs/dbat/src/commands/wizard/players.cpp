@@ -7,8 +7,10 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <climits>
 #include <cstdlib>
+#include <iterator>
 
 #include <unistd.h>
 
@@ -61,7 +63,6 @@
 
 /* local functions */
 static void print_lockout(GameWorld *g, struct char_data *ch);
-static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode, const std::string &val_arg);
 static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level);
 static void lockWrite(GameWorld *g, struct char_data *ch, const char *name);
 
@@ -680,674 +681,387 @@ ACMD(do_wizutil)
 
 /***************** The do_set function ***********************************/
 
-constexpr int PC   = 1;
-constexpr int NPC  = 2;
-constexpr int BOTH = 3;
+namespace {
+  constexpr int PC   = 1;
+  constexpr int NPC  = 2;
+  constexpr int BOTH = 3;
 
-constexpr int MISC   = 0;
-constexpr int BINARY = 1;
-constexpr int NUMBER = 2;
+  constexpr int MISC   = 0;
+  constexpr int BINARY = 1;
+  constexpr int NUMBER = 2;
 
-#define SET_OR_REMOVE(flagset, flags)            \
-  {                                              \
-    if (on) SET_BIT_AR(flagset, flags);          \
-    else if (off) REMOVE_BIT_AR(flagset, flags); \
+  /* One set being done: who to whom, and the value as each kind of field reads it. */
+  struct setting {
+    GameWorld *g;
+    struct char_data *ch;
+    struct char_data *vict;
+    const std::string &val; /* as typed */
+    const char *field;
+    int64_t value; /* a NUMBER field's */
+    bool on;       /* a BINARY field's */
+
+    int64_t clamp(int64_t lo, int64_t hi) { return value = std::max(lo, std::min(hi, value)); }
+
+    bool says(const char *text, bool done)
+    {
+      send_to_char(g, ch, "{}", text);
+      return done;
+    }
+
+    /* Tells the immortals and the log, then works out the victim's stats again if asked to. */
+    bool logged(const char *what, bool totals = false)
+    {
+      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set {} for {}.", char_get_name(ch), what, char_get_name(vict));
+      log_imm_action(g, "SET: {} has set {} for {}.", char_get_name(ch), what, char_get_name(vict));
+      if (totals)
+        affect_total(g, vict);
+      return true;
+    }
+
+    bool not_godly_enough()
+    {
+      if (char_get_admlevel(ch) >= ADMLVL_IMPL || ch == vict)
+        return false;
+      send_to_char(g, ch, "You aren't godly enough for that!\r\n");
+      return true;
+    }
+  };
+
+  void set_bit(bitvector_t *flags, int flag, bool on)
+  {
+    if (on)
+      SET_BIT_AR(flags, flag);
+    else
+      REMOVE_BIT_AR(flags, flag);
   }
 
-#define RANGE(low, high) (value = MAX((low), MIN((high), (value))))
+  template <int Flag>
+  bool pref(setting &s)
+  {
+    set_bit(char_get_pref(s.g, s.vict), Flag, s.on);
+    return true;
+  }
 
-/* The set options available */
-static const struct set_struct {
-  const char *cmd;
-  const char level;
-  const char pcnpc;
-  const char type;
-} set_fields[] = {
-    {"brief",      ADMLVL_GOD,     PC,   BINARY}, /* 0 */
-    {"invstart",   ADMLVL_GOD,     PC,   BINARY}, /* 1 */
-    {"title",      ADMLVL_GOD,     PC,   MISC  },
-    {"nosummon",   ADMLVL_GRGOD,   PC,   BINARY},
-    {"maxpl",      ADMLVL_BUILDER, BOTH, NUMBER},
-    {"maxki",      ADMLVL_BUILDER, BOTH, NUMBER}, /* 5 */
-    {"maxst",      ADMLVL_BUILDER, BOTH, NUMBER},
-    {"pl",         ADMLVL_BUILDER, BOTH, NUMBER},
-    {"ki",         ADMLVL_BUILDER, BOTH, NUMBER},
-    {"sta",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"align",      ADMLVL_BUILDER, BOTH, NUMBER}, /* 10 */
-    {"str",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"stradd",     ADMLVL_IMPL,    BOTH, NUMBER},
-    {"int",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"wis",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"dex",        ADMLVL_BUILDER, BOTH, NUMBER}, /* 15 */
-    {"con",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"cha",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"ac",         ADMLVL_IMPL,    BOTH, NUMBER},
-    {"zenni",      ADMLVL_BUILDER, BOTH, NUMBER},
-    {"bank",       ADMLVL_BUILDER, PC,   NUMBER}, /* 20 */
-    {"exp",        ADMLVL_BUILDER, BOTH, NUMBER},
-    {"accuracy",   ADMLVL_VICE,    BOTH, NUMBER},
-    {"damage",     ADMLVL_VICE,    BOTH, NUMBER},
-    {"invis",      ADMLVL_IMPL,    PC,   NUMBER},
-    {"nohassle",   ADMLVL_VICE,    PC,   BINARY}, /* 25 */
-    {"frozen",     ADMLVL_FREEZE,  PC,   BINARY},
-    {"practices",  ADMLVL_BUILDER, PC,   NUMBER},
-    {"lessons",    ADMLVL_IMPL,    PC,   NUMBER},
-    {"drunk",      ADMLVL_GOD,     BOTH, MISC  },
-    {"hunger",     ADMLVL_BUILDER, BOTH, MISC  }, /* 30 */
-    {"thirst",     ADMLVL_BUILDER, BOTH, MISC  },
-    {"killer",     ADMLVL_GOD,     PC,   BINARY},
-    {"thief",      ADMLVL_GOD,     PC,   BINARY},
-    {"level",      ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"room",       ADMLVL_IMPL,    BOTH, NUMBER}, /* 35 */
-    {"roomflag",   ADMLVL_VICE,    PC,   BINARY},
-    {"siteok",     ADMLVL_VICE,    PC,   BINARY},
-    {"deleted",    ADMLVL_IMPL,    PC,   BINARY},
-    {"class",      ADMLVL_VICE,    BOTH, MISC  },
-    {"nowizlist",  ADMLVL_GOD,     PC,   BINARY}, /* 40 */
-    {"quest",      ADMLVL_GOD,     PC,   BINARY},
-    {"loadroom",   ADMLVL_VICE,    PC,   MISC  },
-    {"color",      ADMLVL_GOD,     PC,   BINARY},
-    {"idnum",      ADMLVL_IMPL,    PC,   NUMBER},
-    {"passwd",     ADMLVL_IMPL,    PC,   MISC  }, /* 45 */
-    {"nodelete",   ADMLVL_GOD,     PC,   BINARY},
-    {"sex",        ADMLVL_VICE,    BOTH, MISC  },
-    {"age",        ADMLVL_VICE,    BOTH, NUMBER},
-    {"height",     ADMLVL_GOD,     BOTH, NUMBER},
-    {"weight",     ADMLVL_GOD,     BOTH, NUMBER}, /* 50 */
-    {"olc",        ADMLVL_GRGOD,   PC,   MISC  },
-    {"race",       ADMLVL_VICE,    PC,   MISC  },
-    {"trains",     ADMLVL_VICE,    PC,   NUMBER},
-    {"feats",      ADMLVL_VICE,    PC,   NUMBER},
-    {"ethic",      ADMLVL_GOD,     BOTH, NUMBER}, /* 55 */
-    {"unused1",    ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"unused2",    ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"adminlevel", ADMLVL_GRGOD,   PC,   NUMBER},
-    {"hairl",      ADMLVL_VICE,    PC,   NUMBER},
-    {"hairs",      ADMLVL_VICE,    PC,   NUMBER},
-    {"hairc",      ADMLVL_VICE,    PC,   NUMBER},
-    {"skin",       ADMLVL_VICE,    PC,   NUMBER},
-    {"eye",        ADMLVL_VICE,    PC,   NUMBER},
-    {"basepl",     ADMLVL_BUILDER, BOTH, NUMBER},
-    {"baseki",     ADMLVL_BUILDER, BOTH, NUMBER},
-    {"basest",     ADMLVL_BUILDER, BOTH, NUMBER},
-    {"droom",      ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"absorbs",    ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"ugp",        ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"aura",       ADMLVL_IMMORT,  BOTH, NUMBER},
-    {"trp",        ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"boost",      ADMLVL_GRGOD,   BOTH, NUMBER},
-    {"multi",      ADMLVL_IMPL,    PC,   BINARY},
-    {"deaths",     ADMLVL_BUILDER, BOTH, NUMBER},
-    {"user",       ADMLVL_IMPL,    PC,   MISC  },
-    {"phase",      ADMLVL_IMMORT,  PC,   NUMBER},
-    {"racial",     ADMLVL_IMMORT,  PC,   NUMBER},
-    {"slots",      ADMLVL_IMMORT,  PC,   NUMBER},
-    {"feature",    ADMLVL_IMMORT,  PC,   BINARY},
-    {"tclass",     ADMLVL_VICE,    PC,   NUMBER},
-    {"clones",     ADMLVL_IMPL,    PC,   NUMBER},
-    {"armor",      ADMLVL_IMPL,    PC,   NUMBER},
-    {"\n",         0,              BOTH, MISC  }
-};
+  template <int Flag>
+  bool act_flag(setting &s)
+  {
+    set_bit(char_get_act(s.vict), Flag, s.on);
+    return true;
+  }
 
-static bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, int mode,
-                        const std::string &val_arg)
-{
-  int i, on = 0, off = 0;
-  int64_t value = 0;
-  room_vnum rnum;
-  room_vnum rvnum;
-  int chosen_race;
-  int chosen_sensei;
+  bool does_nothing(setting &s) { return s.says("This does nothing at the moment.\r\n", true); }
 
-  /* Check to make sure all the levels are correct */
-  if (char_get_admlevel(ch) != ADMLVL_IMPL) {
-    if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict) && vict != ch) {
+  /* Drunk, hunger and thirst: off, or 0 to 48. */
+  template <int Condition>
+  bool condition(setting &s)
+  {
+    if (str_eq_nocase(s.val, "off")) {
+      char_set_conditions(s.g, s.vict, Condition, -1);
+      send_to_char(s.g, s.ch, "{}'s {} now off.\r\n", char_get_name(s.vict), s.field);
+      return true;
+    }
+    if (!is_number(s.val))
+      return s.says("Must be 'off' or a value from 0 to 48.\r\n", false);
+    s.value = parse_int(s.val);
+    char_set_conditions(s.g, s.vict, Condition, s.clamp(0, 48));
+    send_to_char(s.g, s.ch, "{}'s {} set to {:d}.\r\n", char_get_name(s.vict), s.field, s.value);
+    return true;
+  }
+
+  /* Looks from 0 to below Count. */
+  template <void (*Set)(struct char_data *, int8_t), int Count>
+  bool look(setting &s)
+  {
+    if (s.value < 0 || s.value >= Count)
+      return s.says("You can't set it to that.\r\n", false);
+    Set(s.vict, s.value);
+    return true;
+  }
+
+  bool affects_again(setting &s)
+  {
+    affect_total(s.g, s.vict);
+    return true;
+  }
+
+  bool cant_set(setting &s) { return s.says("Can't set that!\r\n", false); }
+
+  bool practices(setting &s)
+  {
+    if (!char_get_class_level(s.vict))
+      return does_nothing(s); /* race practices (skill_points) no longer exist */
+    char_set_practice_points(s.g, s.vict, s.clamp(0, 10000));
+    return s.logged("PS");
+  }
+
+  struct set_field {
+    const char *name;
+    int level;
+    int pcnpc;
+    int type;
+    bool (*apply)(setting &s); /* true if something changed, to be saved */
+  };
+
+  /* Matched exactly, then by prefix, in this order. */
+  constexpr set_field SET_FIELDS[] = {
+      {"brief", ADMLVL_GOD, PC, BINARY, pref<PRF_BRIEF>},
+      {"invstart", ADMLVL_GOD, PC, BINARY, act_flag<PLR_INVSTART>},
+      {"title", ADMLVL_GOD, PC, MISC, [](setting &s) {
+         set_title(s.g, s.vict, s.val.c_str());
+         send_to_char(s.g, s.ch, "{}'s title is now: {}\r\n", char_get_name(s.vict), char_get_title(s.vict));
+         return true;
+       }},
+      {"nosummon", ADMLVL_GRGOD, PC, BINARY, [](setting &s) {
+         pref<PRF_SUMMONABLE>(s);
+         send_to_char(s.g, s.ch, "Nosummon {} for {}.\r\n", ONOFF(!s.on), char_get_name(s.vict));
+         return true;
+       }},
+      {"maxpl", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_max_hit(s.vict, s.value); return s.logged("maxpl"); }},
+      {"maxki", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_max_mana(s.vict, s.value); return s.logged("maxki"); }},
+      {"maxst", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_max_move(s.vict, s.value); return s.logged("maxsta"); }},
+      {"pl", ADMLVL_BUILDER, BOTH, NUMBER, does_nothing},  /* the legacy hit field it set no longer exists */
+      {"ki", ADMLVL_BUILDER, BOTH, NUMBER, does_nothing},  /* the legacy mana field it set no longer exists */
+      {"sta", ADMLVL_BUILDER, BOTH, NUMBER, does_nothing}, /* the legacy move field it set no longer exists */
+      {"align", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_alignment(s.vict, s.clamp(-1000, 1000)); return s.logged("align", true); }},
+      {"str", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_str(s.vict, s.clamp(0, 100)); return s.logged("str", true); }},
+      {"stradd", ADMLVL_IMPL, BOTH, NUMBER, [](setting &s) { return s.says("Setting str_add does nothing now.\r\n", true); }},
+      {"int", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_intel(s.vict, s.clamp(0, 100)); return s.logged("intel", true); }},
+      {"wis", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_wis(s.vict, s.clamp(0, 100)); return s.logged("wis", true); }},
+      {"dex", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_dex(s.vict, s.clamp(0, 100)); return s.logged("dex", true); }},
+      {"con", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_con(s.vict, s.clamp(0, 100)); return s.logged("con", true); }},
+      {"cha", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_real_abils_cha(s.vict, s.clamp(0, 100)); return s.logged("speed", true); }},
+      {"ac", ADMLVL_IMPL, BOTH, NUMBER, [](setting &s) { char_set_armor(s.vict, s.clamp(-100, 500)); return s.logged("armor index", true); }},
+      {"zenni", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_gold(s.vict, s.clamp(0, 100000000)); return s.logged("zenni"); }},
+      {"bank", ADMLVL_BUILDER, PC, NUMBER, [](setting &s) { char_set_bank_gold(s.vict, s.clamp(0, 100000000)); return s.logged("bank"); }},
+      {"exp", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_exp(s.vict, s.clamp(0, 50000000)); return s.logged("exp"); }},
+      {"accuracy", ADMLVL_VICE, BOTH, NUMBER, does_nothing},
+      {"damage", ADMLVL_VICE, BOTH, NUMBER, does_nothing}, /* damage mod no longer exists */
+      {"invis", ADMLVL_IMPL, PC, NUMBER, [](setting &s) {
+         if (s.not_godly_enough())
+           return false;
+         char_set_invis_level(s.g, s.vict, s.clamp(0, char_get_admlevel(s.vict)));
+         return true;
+       }},
+      {"nohassle", ADMLVL_VICE, PC, BINARY, [](setting &s) { return !s.not_godly_enough() && pref<PRF_NOHASSLE>(s); }},
+      {"frozen", ADMLVL_FREEZE, PC, BINARY, [](setting &s) {
+         if (s.ch == s.vict && s.on)
+           return s.says("Better not -- could be a long winter!\r\n", false);
+         return act_flag<PLR_FROZEN>(s);
+       }},
+      {"practices", ADMLVL_BUILDER, PC, NUMBER, practices},
+      {"lessons", ADMLVL_IMPL, PC, NUMBER, practices},
+      {"drunk", ADMLVL_GOD, BOTH, MISC, condition<0>},
+      {"hunger", ADMLVL_BUILDER, BOTH, MISC, condition<1>},
+      {"thirst", ADMLVL_BUILDER, BOTH, MISC, condition<2>},
+      {"killer", ADMLVL_GOD, PC, BINARY, act_flag<PLR_KILLER>},
+      {"thief", ADMLVL_GOD, PC, BINARY, act_flag<PLR_THIEF>},
+      {"level", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) {
+         if (!char_is_npc(s.vict) && s.value > 100)
+           return s.says("You can't do that.\r\n", false);
+         char_set_class_level(s.vict, std::max<int64_t>(0, s.value));
+         return true;
+       }},
+      {"room", ADMLVL_IMPL, BOTH, NUMBER, [](setting &s) {
+         room_vnum rnum = s.value;
+         if (!room_of(s.g, rnum))
+           return s.says("No room exists with that number.\r\n", false);
+         if (char_get_in_room(s.vict) != NOWHERE) /* Another Eric Green special. */
+           char_from_room(s.g, s.vict);
+         char_to_room(s.g, s.vict, rnum);
+         return true;
+       }},
+      {"roomflag", ADMLVL_VICE, PC, BINARY, pref<PRF_ROOMFLAGS>},
+      {"siteok", ADMLVL_VICE, PC, BINARY, act_flag<PLR_SITEOK>},
+      {"deleted", ADMLVL_IMPL, PC, BINARY, act_flag<PLR_DELETED>},
+      {"class", ADMLVL_VICE, BOTH, MISC, [](setting &s) {
+         int sensei = sensei_find(s.val.c_str());
+         if (sensei == CLASS_UNDEFINED)
+           return s.says("That is not a class.\r\n", false);
+         char_set_class(s.vict, sensei);
+         return true;
+       }},
+      {"nowizlist", ADMLVL_GOD, PC, BINARY, act_flag<PLR_NOWIZLIST>},
+      {"quest", ADMLVL_GOD, PC, BINARY, pref<PRF_QUEST>},
+      {"loadroom", ADMLVL_VICE, PC, MISC, [](setting &s) {
+         if (str_eq_nocase(s.val, "off")) {
+           char_plr_set(s.vict, PLR_LOADROOM, false);
+           char_set_load_room(s.g, s.vict, NOWHERE);
+           return true;
+         }
+         if (!is_number(s.val))
+           return s.says("Must be 'off' or a room's virtual number.\r\n", false);
+         room_vnum room = parse_int(s.val);
+         if (!room_of(s.g, room))
+           return s.says("That room does not exist!\r\n", false);
+         char_plr_set(s.vict, PLR_LOADROOM, true);
+         char_set_load_room(s.g, s.vict, room);
+         send_to_char(s.g, s.ch, "{} will enter at room #{:d}.\r\n", char_get_name(s.vict), char_get_load_room(s.g, s.vict));
+         return true;
+       }},
+      {"color", ADMLVL_GOD, PC, BINARY, pref<PRF_COLOR>},
+      {"idnum", ADMLVL_IMPL, PC, NUMBER, [](setting &s) {
+         if (char_get_idnum(s.ch) == 0 || char_is_npc(s.vict))
+           return false;
+         char_set_idnum(s.vict, s.value);
+         return true;
+       }},
+      {"passwd", ADMLVL_IMPL, PC, MISC, [](setting &s) {
+         if (char_get_idnum(s.ch) > 1)
+           return s.says("Please don't use this command, yet.\r\n", false);
+         if (char_get_admlevel(s.ch) < 10)
+           return s.says("NO.\r\n", false);
+         return true;
+       }},
+      {"nodelete", ADMLVL_GOD, PC, BINARY, act_flag<PLR_NODELETE>},
+      {"sex", ADMLVL_VICE, BOTH, MISC, [](setting &s) {
+         int sex = search_block(s.val, genders, false);
+         if (sex < 0)
+           return s.says("Must be 'male', 'female', or 'neutral'.\r\n", false);
+         char_set_sex(s.vict, sex);
+         return true;
+       }},
+      {"age", ADMLVL_VICE, BOTH, NUMBER, [](setting &s) {
+         if (s.value < 2 || s.value > 20000) /* Arbitrary limits. */
+           return s.says("Ages 2 to 20000 accepted.\r\n", false);
+         /* May not display the exact age specified, due to the integer division used elsewhere. -gg 5/27/98 */
+         char_set_time_birth(s.vict, game_now(s.g) - (s.value * SECS_PER_MUD_YEAR));
+         return true;
+       }},
+      {"height", ADMLVL_GOD, BOTH, NUMBER, [](setting &s) { char_set_height(s.vict, s.value); return affects_again(s); }},
+      {"weight", ADMLVL_GOD, BOTH, NUMBER, [](setting &s) { char_set_weight(s.vict, s.value); return affects_again(s); }},
+      {"olc", ADMLVL_GRGOD, PC, MISC, [](setting &s) {
+         if (is_abbrev(s.val, "socials") || is_abbrev(s.val, "actions"))
+           char_set_olc_zone(s.g, s.vict, AEDIT_PERMISSION);
+         else if (is_abbrev(s.val, "hedit"))
+           char_set_olc_zone(s.g, s.vict, HEDIT_PERMISSION);
+         else if (is_abbrev(s.val, "off"))
+           char_set_olc_zone(s.g, s.vict, NOWHERE);
+         else if (!is_number(s.val))
+           return s.says("Value must be either 'socials', 'actions', 'hedit', 'off' or a zone number.\r\n", false);
+         else
+           char_set_olc_zone(s.g, s.vict, parse_int(s.val));
+         return true;
+       }},
+      {"race", ADMLVL_VICE, PC, MISC, [](setting &s) {
+         /* quirk: by the setter's sex, not the victim's */
+         int race = race_find(s.val.c_str(), char_get_sex(s.ch), !char_is_npc(s.vict));
+         if (race == RACE_UNDEFINED)
+           return s.says("That is not a valid race for them.\r\n", false);
+         char_set_race(s.vict, race);
+         racial_body_parts(s.vict);
+         return true;
+       }},
+      {"trains", ADMLVL_VICE, PC, NUMBER, [](setting &s) { char_set_ability_trains(s.g, s.vict, s.clamp(0, 500)); return true; }},
+      {"feats", ADMLVL_VICE, PC, NUMBER, [](setting &s) { char_set_feat_points(s.g, s.vict, s.clamp(0, 500)); return true; }},
+      {"ethic", ADMLVL_GOD, BOTH, NUMBER, affects_again},
+      {"unused1", ADMLVL_GRGOD, BOTH, NUMBER, affects_again},
+      {"unused2", ADMLVL_GRGOD, BOTH, NUMBER, affects_again},
+      {"adminlevel", ADMLVL_GRGOD, PC, NUMBER, [](setting &s) {
+         if (char_get_admlevel(s.vict) >= char_get_admlevel(s.ch) && s.vict != s.ch)
+           return s.says("Permission denied.\r\n", false);
+         if (s.value < ADMLVL_NONE || s.value > char_get_admlevel(s.ch))
+           return s.says("You can't set it to that.\r\n", false);
+         if (char_get_admlevel(s.vict) != s.value)
+           admin_set(s.g, s.vict, s.value);
+         return true;
+       }},
+      {"hairl", ADMLVL_VICE, PC, NUMBER, look<char_set_hairl, 6>},
+      {"hairs", ADMLVL_VICE, PC, NUMBER, look<char_set_hairs, 13>},
+      {"hairc", ADMLVL_VICE, PC, NUMBER, look<char_set_hairc, 15>},
+      {"skin", ADMLVL_VICE, PC, NUMBER, look<char_set_skin, 12>},
+      {"eye", ADMLVL_VICE, PC, NUMBER, look<char_set_eye, 13>},
+      {"basepl", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_basepl(s.vict, s.value); return s.logged("basepl"); }},
+      {"baseki", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_baseki(s.vict, s.value); return s.logged("baseki"); }},
+      {"basest", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_basest(s.vict, s.value); return s.logged("basest"); }},
+      {"droom", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { char_set_droom(s.vict, s.clamp(0, 20000)); return true; }},
+      {"absorbs", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { char_set_absorbs(s.vict, s.clamp(0, 3)); return s.logged("absorbs"); }},
+      {"ugp", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { char_set_upgrade(s.vict, char_get_upgrade(s.vict) + s.clamp(1, 1000)); return s.logged("upgrade points"); }},
+      {"aura", ADMLVL_IMMORT, BOTH, NUMBER, [](setting &s) { char_set_aura(s.vict, s.clamp(0, 8)); return s.logged("aura"); }},
+      {"trp", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { return s.says("Use the reward command.\r\n", true); }},
+      {"boost", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { char_set_boosts(s.vict, s.clamp(-1000, 1000)); return true; }},
+      {"multi", ADMLVL_IMPL, PC, BINARY, act_flag<PLR_MULTP>},
+      {"deaths", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_dcount(s.vict, s.clamp(-1000, 1000)); return s.logged("death count"); }},
+      {"user", ADMLVL_IMPL, PC, MISC, [](setting &s) { return s.says("No.", true); }},
+      {"phase", ADMLVL_IMMORT, PC, NUMBER, [](setting &s) {
+         if (char_get_desc(s.vict) == nullptr)
+           return s.says("They aren't even in the game!\r\n", true);
+         star_phase(s.g, s.vict, s.clamp(0, 2));
+         return true;
+       }},
+      {"racial", ADMLVL_IMMORT, PC, NUMBER, [](setting &s) { char_set_racial_pref(s.g, s.vict, s.clamp(1, 3)); return true; }},
+      {"slots", ADMLVL_IMMORT, PC, NUMBER, [](setting &s) { char_set_skill_slots(s.vict, s.clamp(1, 1000)); return s.logged("skill slots"); }},
+      {"feature", ADMLVL_IMMORT, PC, BINARY, [](setting &s) { char_set_feature(s.vict, ""); return true; }},
+      {"tclass", ADMLVL_VICE, PC, NUMBER, [](setting &s) { char_set_transclass(s.vict, s.clamp(1, 3)); return s.logged("transformation class"); }},
+      {"clones", ADMLVL_IMPL, PC, NUMBER, [](setting &s) { char_set_clones(s.vict, s.clamp(1, 3)); return s.says("Done.\r\n", true); }},
+      {"armor", ADMLVL_IMPL, PC, NUMBER, [](setting &s) { char_set_armor(s.vict, s.clamp(0, 1000000)); return s.says("Done.\r\n", true); }},
+  };
+
+  /* What a field no one has heard of is taken as. */
+  constexpr set_field UNKNOWN_FIELD = {"", 0, BOTH, MISC, cant_set};
+
+  const set_field &find_set_field(const std::string &field)
+  {
+    auto it = std::ranges::find_if(SET_FIELDS, [&](const set_field &f) { return field == f.name; });
+    if (it == std::end(SET_FIELDS))
+      it = std::ranges::find_if(SET_FIELDS, [&](const set_field &f) { return std::string_view(f.name).starts_with(field); });
+    return it == std::end(SET_FIELDS) ? UNKNOWN_FIELD : *it;
+  }
+
+  bool perform_set(GameWorld *g, struct char_data *ch, struct char_data *vict, const set_field &f, const std::string &val_arg)
+  {
+    /* Check to make sure all the levels are correct */
+    if (char_get_admlevel(ch) != ADMLVL_IMPL && !char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict) && vict != ch) {
       send_to_char(g, ch, "Maybe that's not such a great idea...\r\n");
       return false;
     }
-  }
-  if (char_get_admlevel(ch) < set_fields[mode].level) {
-    send_to_char(g, ch, "You are not godly enough for that!\r\n");
-    return false;
-  }
-
-  /* Make sure the PC/NPC is correct */
-  if (char_is_npc(vict) && !(set_fields[mode].pcnpc & NPC)) {
-    send_to_char(g, ch, "You can't do that to a beast!\r\n");
-    return false;
-  }
-  if (!char_is_npc(vict) && !(set_fields[mode].pcnpc & PC)) {
-    send_to_char(g, ch, "That can only be done to a beast!\r\n");
-    return false;
-  }
-
-  /* Find the value of the argument */
-  if (set_fields[mode].type == BINARY) {
-    if (val_arg == "on" || val_arg == "yes")
-      on = 1;
-    else if (val_arg == "off" || val_arg == "no")
-      off = 1;
-    if (!(on || off)) {
-      send_to_char(g, ch, "Value must be 'on' or 'off'.\r\n");
+    if (char_get_admlevel(ch) < f.level) {
+      send_to_char(g, ch, "You are not godly enough for that!\r\n");
       return false;
     }
-    send_to_char(g, ch, "{} {} for {}.\r\n", set_fields[mode].cmd, ONOFF(on), char_get_name(vict));
-  } else if (set_fields[mode].type == NUMBER) {
-    char *ptr;
 
-    value = strtoll(val_arg.c_str(), &ptr, 10);
-    /*    value = parse_int(val_arg); */
-    send_to_char(g, ch, "{}'s {} set to {:d}.\r\n", char_get_name(vict), set_fields[mode].cmd, value);
-  } else
-    send_to_char(g, ch, CONFIG_OK);
-
-  switch (mode) {
-    case 0:
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_BRIEF);
-      break;
-    case 1:
-      SET_OR_REMOVE(char_get_act(vict), PLR_INVSTART);
-      break;
-    case 2:
-      set_title(g, vict, val_arg.c_str());
-      send_to_char(g, ch, "{}'s title is now: {}\r\n", char_get_name(vict), char_get_title(vict));
-      break;
-    case 3:
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_SUMMONABLE);
-      send_to_char(g, ch, "Nosummon {} for {}.\r\n", ONOFF(!on), char_get_name(vict));
-      break;
-    case 4:
-      char_set_max_hit(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set maxpl for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set maxpl for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 5:
-      char_set_max_mana(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set maxki for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set maxki for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 6:
-      char_set_max_move(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set maxsta for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set maxsta for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 7: /* pl: the legacy hit field it set no longer exists */
-    case 8: /* ki: the legacy mana field it set no longer exists */
-    case 9: /* st: the legacy move field it set no longer exists */
-      send_to_char(g, ch, "This does nothing at the moment.\r\n");
-      break;
-    case 10:
-      char_set_alignment(vict, RANGE(-1000, 1000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set align for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set align for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 11:
-      RANGE(0, 100);
-      char_set_real_abils_str(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set str for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set str for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 12:
-      send_to_char(g, ch, "Setting str_add does nothing now.\r\n");
-      /* vict->real_abils.str_add = RANGE(0, 100);
-    if (value > 0)
-      vict->real_abils.str = 18;
-    affect_total(vict);
-       break; */
-      break;
-    case 13:
-      RANGE(0, 100);
-      char_set_real_abils_intel(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set intel for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set intel for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 14:
-      RANGE(0, 100);
-      char_set_real_abils_wis(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set wis for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set wis for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 15:
-      RANGE(0, 100);
-      char_set_real_abils_dex(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set dex for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set dex for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 16:
-      RANGE(0, 100);
-      char_set_real_abils_con(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set con for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set con for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 17:
-      RANGE(0, 100);
-      char_set_real_abils_cha(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set speed for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set speed for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 18:
-      char_set_armor(vict, RANGE(-100, 500));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set armor index for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set armor index for {}.", char_get_name(ch), char_get_name(vict));
-      affect_total(g, vict);
-      break;
-    case 19:
-      char_set_gold(vict, RANGE(0, 100000000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set zenni for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set zenni for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 20:
-      char_set_bank_gold(vict, RANGE(0, 100000000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set bank for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set bank for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 21:
-      char_set_exp(vict, RANGE(0, 50000000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set exp for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set exp for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 22:
-      send_to_char(g, ch, "This does nothing at the moment.\r\n");
-      break;
-    case 23: /* damage mod no longer exists */
-      send_to_char(g, ch, "This does nothing at the moment.\r\n");
-      break;
-    case 24:
-      if (char_get_admlevel(ch) < ADMLVL_IMPL && ch != vict) {
-        send_to_char(g, ch, "You aren't godly enough for that!\r\n");
-        return false;
-      }
-      char_set_invis_level(g, vict, RANGE(0, char_get_admlevel(vict)));
-      break;
-    case 25:
-      if (char_get_admlevel(ch) < ADMLVL_IMPL && ch != vict) {
-        send_to_char(g, ch, "You aren't godly enough for that!\r\n");
-        return false;
-      }
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_NOHASSLE);
-      break;
-    case 26:
-      if (ch == vict && on) {
-        send_to_char(g, ch, "Better not -- could be a long winter!\r\n");
-        return false;
-      }
-      SET_OR_REMOVE(char_get_act(vict), PLR_FROZEN);
-      break;
-    case 27:
-    case 28:
-      if (char_get_class_level(vict)) {
-        char_set_practice_points(g, vict, RANGE(0, 10000));
-        mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set PS for {}.", char_get_name(ch), char_get_name(vict));
-        log_imm_action(g, "SET: {} has set PS for {}.", char_get_name(ch), char_get_name(vict));
-      } else {
-        /* race practices (skill_points) no longer exist */
-        send_to_char(g, ch, "This does nothing at the moment.\r\n");
-      }
-      break;
-    case 29:
-    case 30:
-    case 31:
-      if (str_eq_nocase(val_arg, "off")) {
-        char_set_conditions(g, vict, (mode - 29), -1); /* warning: magic number here */
-        send_to_char(g, ch, "{}'s {} now off.\r\n", char_get_name(vict), set_fields[mode].cmd);
-      } else if (is_number(val_arg)) {
-        value = parse_int(val_arg);
-        RANGE(0, 48);
-        char_set_conditions(g, vict, (mode - 29), value); /* and here too */
-        send_to_char(g, ch, "{}'s {} set to {:d}.\r\n", char_get_name(vict), set_fields[mode].cmd, value);
-      } else {
-        send_to_char(g, ch, "Must be 'off' or a value from 0 to 48.\r\n");
-        return false;
-      }
-      break;
-    case 32:
-      SET_OR_REMOVE(char_get_act(vict), PLR_KILLER);
-      break;
-    case 33:
-      SET_OR_REMOVE(char_get_act(vict), PLR_THIEF);
-      break;
-    case 34:
-      if (!char_is_npc(vict) && value > 100) {
-        send_to_char(g, ch, "You can't do that.\r\n");
-        return false;
-      }
-      value       = MAX(0, value);
-      char_set_class_level(vict, value);
-      break;
-    case 35:
-      if (!room_of(g, rnum = value)) {
-        send_to_char(g, ch, "No room exists with that number.\r\n");
-        return false;
-      }
-      if (char_get_in_room(vict) != NOWHERE) /* Another Eric Green special. */
-        char_from_room(g, vict);
-      char_to_room(g, vict, rnum);
-      break;
-    case 36:
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_ROOMFLAGS);
-      break;
-    case 37:
-      SET_OR_REMOVE(char_get_act(vict), PLR_SITEOK);
-      break;
-    case 38:
-      SET_OR_REMOVE(char_get_act(vict), PLR_DELETED);
-      break;
-    case 39:
-      if ((chosen_sensei = sensei_find(val_arg.c_str())) == CLASS_UNDEFINED) {
-        send_to_char(g, ch, "That is not a class.\r\n");
-        return false;
-      }
-      value         = char_get_class_ranks(vict, char_get_class(vict));
-      char_set_class(vict, chosen_sensei);
-      break;
-    case 40:
-      SET_OR_REMOVE(char_get_act(vict), PLR_NOWIZLIST);
-      break;
-    case 41:
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_QUEST);
-      break;
-    case 42:
-      if (str_eq_nocase(val_arg, "off")) {
-        char_plr_set(vict, PLR_LOADROOM, false);
-        char_set_load_room(g, vict, NOWHERE);
-      } else if (is_number(val_arg)) {
-        rvnum = parse_int(val_arg);
-        if (room_of(g, rvnum)) {
-          char_plr_set(vict, PLR_LOADROOM, true);
-          char_set_load_room(g, vict, rvnum);
-          send_to_char(g, ch, "{} will enter at room #{:d}.\r\n", char_get_name(vict), char_get_load_room(g, vict));
-        } else {
-          send_to_char(g, ch, "That room does not exist!\r\n");
-          return false;
-        }
-      } else {
-        send_to_char(g, ch, "Must be 'off' or a room's virtual number.\r\n");
-        return false;
-      }
-      break;
-    case 43:
-      SET_OR_REMOVE(char_get_pref(g, vict), PRF_COLOR);
-      break;
-    case 44:
-      if (char_get_idnum(ch) == 0 || char_is_npc(vict))
-        return false;
-      char_set_idnum(vict, value);
-      break;
-    case 45:
-      if (char_get_idnum(ch) > 1) {
-        send_to_char(g, ch, "Please don't use this command, yet.\r\n");
-        return false;
-      }
-      if (char_get_admlevel(ch) < 10) {
-        send_to_char(g, ch, "NO.\r\n");
-        return false;
-      }
-      break;
-    case 46:
-      SET_OR_REMOVE(char_get_act(vict), PLR_NODELETE);
-      break;
-    case 47:
-      if ((i = search_block(val_arg, genders, false)) < 0) {
-        send_to_char(g, ch, "Must be 'male', 'female', or 'neutral'.\r\n");
-        return false;
-      }
-      char_set_sex(vict, i);
-      break;
-    case 48:                            /* set age */
-      if (value < 2 || value > 20000) { /* Arbitrary limits. */
-        send_to_char(g, ch, "Ages 2 to 20000 accepted.\r\n");
-        return false;
-      }
-      /*
-     * NOTE: May not display the exact age specified due to the integer
-     * division used elsewhere in the code.  Seems to only happen for
-     * some values below the starting age (17) anyway. -gg 5/27/98
-     */
-      char_set_time_birth(vict, game_now(g) - (value * SECS_PER_MUD_YEAR));
-      break;
-
-    case 49: /* Blame/Thank Rick Glover. :) */
-      char_set_height(vict, value);
-      affect_total(g, vict);
-      break;
-
-    case 50:
-      char_set_weight(vict, value);
-      affect_total(g, vict);
-      break;
-
-    case 51:
-      if (is_abbrev(val_arg, "socials") || is_abbrev(val_arg, "actions"))
-        char_set_olc_zone(g, vict, AEDIT_PERMISSION);
-      else if (is_abbrev(val_arg, "hedit"))
-        char_set_olc_zone(g, vict, HEDIT_PERMISSION);
-      else if (is_abbrev(val_arg, "off"))
-        char_set_olc_zone(g, vict, NOWHERE);
-      else if (!is_number(val_arg)) {
-        send_to_char(g, ch, "Value must be either 'socials', 'actions', 'hedit', 'off' or a zone number.\r\n");
-        return false;
-      } else
-        char_set_olc_zone(g, vict, parse_int(val_arg));
-      break;
-
-    case 52:
-      if (char_is_npc(vict)) {
-        chosen_race = race_find(val_arg.c_str(), char_get_sex(ch), false);
-      } else {
-        chosen_race = race_find(val_arg.c_str(), char_get_sex(ch), true);
-      }
-      if (chosen_race == RACE_UNDEFINED) {
-        send_to_char(g, ch, "That is not a valid race for them.\r\n");
-        return false;
-      }
-      char_set_race(vict, chosen_race);
-      racial_body_parts(vict);
-      break;
-
-    case 53:
-      char_set_ability_trains(g, vict, RANGE(0, 500));
-      break;
-
-    case 54:
-      char_set_feat_points(g, vict, RANGE(0, 500));
-      break;
-
-    case 55:
-      affect_total(g, vict);
-      break;
-
-    case 56:
-      affect_total(g, vict);
-      break;
-
-    case 57:
-      affect_total(g, vict);
-      break;
-
-    case 58:
-      if (char_get_admlevel(vict) >= char_get_admlevel(ch) && vict != ch) {
-        send_to_char(g, ch, "Permission denied.\r\n");
-        return false;
-      }
-      if (value < ADMLVL_NONE || value > char_get_admlevel(ch)) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      if (char_get_admlevel(vict) == value)
-        return true;
-      admin_set(g, vict, value);
-      break;
-
-    case 59:
-      if (value < 0 || value >= 6) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      char_set_hairl(vict, value);
-      return true;
-      break;
-
-    case 60:
-      if (value < 0 || value >= 13) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      char_set_hairs(vict, value);
-      return true;
-      break;
-
-    case 61:
-      if (value < 0 || value >= 15) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      char_set_hairc(vict, value);
-      return true;
-      break;
-
-    case 62:
-      if (value < 0 || value >= 12) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      char_set_skin(vict, value);
-      return true;
-      break;
-
-    case 63:
-      if (value < 0 || value >= 13) {
-        send_to_char(g, ch, "You can't set it to that.\r\n");
-        return false;
-      }
-      char_set_eye(vict, value);
-      return true;
-      break;
-
-    case 64:
-      char_set_basepl(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set basepl for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set basepl for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 65:
-      char_set_baseki(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set baseki for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set baseki for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 66:
-      char_set_basest(vict, value);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set basest for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set basest for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 67:
-      char_set_droom(vict, RANGE(0, 20000));
-      break;
-
-    case 68:
-      char_set_absorbs(vict, RANGE(0, 3));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set absorbs for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set absorbs for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 69:
-      char_set_upgrade(vict, char_get_upgrade(vict) + (RANGE(1, 1000)));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set upgrade points for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set upgrade points for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 70:
-      char_set_aura(vict, RANGE(0, 8));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set aura for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set aura for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 71:
-      send_to_char(g, ch, "Use the reward command.\r\n");
-      break;
-    case 72:
-      char_set_boosts(vict, RANGE(-1000, 1000));
-      break;
-    case 73:
-      SET_OR_REMOVE(char_get_act(vict), PLR_MULTP);
-      break;
-    case 74:
-      char_set_dcount(vict, RANGE(-1000, 1000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set death count for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set death count for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-    case 75:
-      send_to_char(g, ch, "No.");
-      break;
-    case 76:
-      if (char_get_desc(vict) != nullptr) {
-        star_phase(g, vict, RANGE(0, 2));
-      } else {
-        send_to_char(g, ch, "They aren't even in the game!\r\n");
-      }
-      break;
-    case 77:
-      char_set_racial_pref(g, vict, RANGE(1, 3));
-      break;
-
-    case 78:
-      char_set_skill_slots(vict, RANGE(1, 1000));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set skill slots for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set skill slots for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 79:
-      char_set_feature(vict, "");
-      break;
-
-    case 80:
-      char_set_transclass(vict, RANGE(1, 3));
-      mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set transformation class for {}.", char_get_name(ch), char_get_name(vict));
-      log_imm_action(g, "SET: {} has set transformation class for {}.", char_get_name(ch), char_get_name(vict));
-      break;
-
-    case 81:
-      char_set_clones(vict, RANGE(1, 3));
-      send_to_char(g, ch, "Done.\r\n");
-      break;
-
-    case 82:
-      char_set_armor(vict, RANGE(0, 1000000));
-      send_to_char(g, ch, "Done.\r\n");
-      break;
-
-    default:
-      send_to_char(g, ch, "Can't set that!\r\n");
+    /* Make sure the PC/NPC is correct */
+    if (char_is_npc(vict) && !(f.pcnpc & NPC)) {
+      send_to_char(g, ch, "You can't do that to a beast!\r\n");
       return false;
-  }
+    }
+    if (!char_is_npc(vict) && !(f.pcnpc & PC)) {
+      send_to_char(g, ch, "That can only be done to a beast!\r\n");
+      return false;
+    }
 
-  return true;
-}
+    setting s{g, ch, vict, val_arg, f.name, 0, false};
+    if (f.type == BINARY) {
+      bool off = val_arg == "off" || val_arg == "no";
+      s.on     = val_arg == "on" || val_arg == "yes";
+      if (!s.on && !off) {
+        send_to_char(g, ch, "Value must be 'on' or 'off'.\r\n");
+        return false;
+      }
+      send_to_char(g, ch, "{} {} for {}.\r\n", f.name, ONOFF(s.on), char_get_name(vict));
+    } else if (f.type == NUMBER) {
+      s.value = strtoll(val_arg.c_str(), nullptr, 10);
+      send_to_char(g, ch, "{}'s {} set to {:d}.\r\n", char_get_name(vict), f.name, s.value);
+    } else {
+      send_to_char(g, ch, CONFIG_OK);
+    }
+
+    return f.apply(s);
+  }
+} // namespace
 
 ACMD(do_set)
 {
-  struct char_data *vict = nullptr, *cbuf = nullptr;
-  std::string name, field, buf;
-  int mode, player_i = 0, retval;
-  char is_file = 0, is_player = 0;
-
   std::string_view rest = argument;
-  name                  = take_word(rest);
+  std::string name      = take_word(rest);
   rest                  = skip_spaces(rest);
+  bool is_file = false, is_player = false;
 
   if (name == "file") {
-    is_file = 1;
+    is_file = true;
     name    = take_word(rest);
     rest    = skip_spaces(rest);
   } else if (str_eq_nocase(name, "player")) {
-    is_player = 1;
+    is_player = true;
     name      = take_word(rest);
     rest      = skip_spaces(rest);
   } else if (str_eq_nocase(name, "mob")) {
@@ -1355,8 +1069,8 @@ ACMD(do_set)
     rest = skip_spaces(rest);
   }
 
-  field = take_word(rest);
-  buf   = skip_spaces(rest); /* the value: the rest of the line */
+  std::string field = take_word(rest);
+  std::string value(skip_spaces(rest)); /* the rest of the line */
 
   if (name.empty() || field.empty()) {
     send_to_char(g, ch, "Usage: set <victim> <field> <value>\r\n");
@@ -1364,63 +1078,49 @@ ACMD(do_set)
   }
 
   /* find the target */
-  if (!is_file) {
-    if (is_player) {
-      if (!(vict = get_player_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(g, ch, "There is no such player.\r\n");
-        return;
-      }
-    } else { /* is_mob */
-      if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(g, ch, "There is no such creature.\r\n");
-        return;
-      }
-    }
-  } else if (is_file) {
-    /* try to load the player off disk */
-    cbuf = new char_data();
-    clear_char(cbuf);
-    char_make_player_specials(cbuf);
-    if ((player_i = load_char(g, name.c_str(), cbuf)) > -1) {
-      if (char_get_admlevel(cbuf) >= char_get_admlevel(ch)) {
-        free_char(g, cbuf);
-        send_to_char(g, ch, "Sorry, you can't do that.\r\n");
-        return;
-      }
-      vict = cbuf;
-    } else {
-      free_char(g, cbuf);
+  struct char_data *vict = nullptr;
+  int player_i           = 0;
+  if (is_player) {
+    if (!(vict = get_player_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
       send_to_char(g, ch, "There is no such player.\r\n");
+      return;
+    }
+  } else if (!is_file) {
+    if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+      send_to_char(g, ch, "There is no such creature.\r\n");
+      return;
+    }
+  } else {
+    /* try to load the player off disk */
+    vict = new char_data();
+    clear_char(vict);
+    char_make_player_specials(vict);
+    if ((player_i = load_char(g, name.c_str(), vict)) < 0) {
+      free_char(g, vict);
+      send_to_char(g, ch, "There is no such player.\r\n");
+      return;
+    }
+    if (char_get_admlevel(vict) >= char_get_admlevel(ch)) {
+      free_char(g, vict);
+      send_to_char(g, ch, "Sorry, you can't do that.\r\n");
       return;
     }
   }
 
-  /* find the command in the list */
-  for (mode = 0; *(set_fields[mode].cmd) != '\n'; mode++)
-    if (field == set_fields[mode].cmd)
-      break;
-  if (*(set_fields[mode].cmd) == '\n')
-    for (mode = 0; *(set_fields[mode].cmd) != '\n'; mode++)
-      if (std::string_view(set_fields[mode].cmd).starts_with(field))
-        break;
-
-  /* perform the set */
-  retval = perform_set(g, ch, vict, mode, buf);
-
   /* save the character if a change was made */
-  if (retval) {
-    if (!is_file && !char_is_npc(vict))
-      save_char(g, vict);
+  if (perform_set(g, ch, vict, find_set_field(field), value)) {
     if (is_file) {
-      char_set_pfilepos(cbuf, player_i);
-      save_char(g, cbuf);
+      char_set_pfilepos(vict, player_i);
+      save_char(g, vict);
       send_to_char(g, ch, "Saved in file.\r\n");
+    } else if (!char_is_npc(vict)) {
+      save_char(g, vict);
     }
   }
 
   /* free the memory if we allocated it earlier */
   if (is_file)
-    free_char(g, cbuf);
+    free_char(g, vict);
 }
 
 ACMD(do_chown)

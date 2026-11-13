@@ -7,8 +7,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <climits>
 #include <cstdlib>
+#include <iterator>
+#include <ranges>
 #include <vector>
 
 #include <unistd.h>
@@ -1052,48 +1055,242 @@ static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listal
                     zone->builders, zone->bot, zone->top);
 }
 
-ACMD(do_show)
-{
-  room_vnum i;
-  int j, k, l, con; /* i, j, k to specifics? */
-  struct zone_data *zrn;
-  obj_vnum low, high;
-  int8_t self            = false;
-  struct char_data *vict = nullptr;
-  struct affected_type *aff;
-  std::string buf;
+namespace {
+  void show_zones(GameWorld *g, struct char_data *ch, std::string &value)
+  {
+    std::string buf;
+    if (value == ".")
+      buf = zone_summary(g, room_get_zone(g, char_get_in_room(ch)), 1);
+    else if (!value.empty() && is_number(value)) {
+      struct zone_data *zone = find_zone(g, parse_int(value));
+      if (!zone) {
+        send_to_char(g, ch, "That is not a valid zone.\r\n");
+        return;
+      }
+      buf = zone_summary(g, zone, 1);
+    } else {
+      for (struct zone_data *zone : g->zones.all())
+        buf += zone_summary(g, zone, 0);
+    }
+    send_to_char(g, ch, buf);
+  }
 
-  struct show_struct {
-    const char *cmd{};
-    const char level{};
-  } fields[] = {
-      {"nothing",    0            }, /* 0 */
-      {"zones",      ADMLVL_IMMORT}, /* 1 */
-      {"player",     ADMLVL_GOD   },
-      {"rent",       ADMLVL_GRGOD },
-      {"stats",      ADMLVL_IMMORT},
-      {"errors",     ADMLVL_IMPL  }, /* 5 */
-      {"death",      ADMLVL_GOD   },
-      {"godrooms",   ADMLVL_IMMORT},
-      {"shops",      ADMLVL_IMMORT},
-      {"houses",     ADMLVL_GOD   },
-      {"snoop",      ADMLVL_GRGOD }, /* 10 */
-      {"assemblies", ADMLVL_IMMORT},
-      {"guilds",     ADMLVL_GOD   },
-      {"levels",     ADMLVL_GRGOD },
-      {"uniques",    ADMLVL_GRGOD },
-      {"affect",     ADMLVL_GRGOD }, /* 15 */
-      {"affectv",    ADMLVL_GRGOD },
-      {"\n",         0            }
+  void show_player(GameWorld *g, struct char_data *ch, std::string &value)
+  {
+    if (value.empty()) {
+      send_to_char(g, ch, "A name would help.\r\n");
+      return;
+    }
+    struct char_data *vict = new char_data();
+    clear_char(vict);
+    char_make_player_specials(vict);
+    if (load_char(g, value.c_str(), vict) < 0) {
+      send_to_char(g, ch, "There is no such player.\r\n");
+      free_char(g, vict);
+      return;
+    }
+    send_to_char(g, ch, "Player: {:<12} ({}) [{:>2d} {} {}]\r\n", char_get_name(vict),
+                 genders[(int)char_get_sex(vict)], char_get_level(vict), char_class_abbr(vict), char_race_abbr(vict));
+    send_to_char(g, ch, "Au: {:<8d}  Bal: {:<8d}  Exp: {:d}  Align: {:<5d}\r\n",
+                 char_get_gold(vict), char_get_bank_gold(vict), char_get_exp(vict), char_get_alignment(vict));
+    if (CONFIG_ALLOW_MULTICLASS)
+      send_to_char(g, ch, "Class ranks: {}\r\n", class_desc_str(vict, 1, 0));
+
+    /* ctime() uses static buffer: do not combine. */
+    time_t created = char_get_time_created(vict), logon = char_get_time_logon(vict);
+    send_to_char(g, ch, "Started: {:<20.16}  ", ctime(&created));
+    send_to_char(g, ch, "Last: {:<20.16}  Played: {:>3d}h {:>2d}m\r\n", ctime(&logon),
+                 (int)(char_get_time_played(vict) / 3600), (int)(char_get_time_played(vict) / 60 % 60));
+    free_char(g, vict);
+  }
+
+  void show_rent(GameWorld *g, struct char_data *ch, std::string &value)
+  {
+    if (value.empty()) {
+      send_to_char(g, ch, "A name would help.\r\n");
+      return;
+    }
+    Crash_listrent(g, ch, value.data());
+  }
+
+  void show_stats(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    int players = 0, connected = 0, mobiles = 0;
+    for (char_data *tch : each_char(g)) {
+      if (char_is_npc(tch))
+        mobiles++;
+      else if (char_can_see(g, ch, tch)) {
+        players++;
+        if (char_get_desc(tch))
+          connected++;
+      }
+    }
+    int objects = count_members(each_obj(g));
+    send_to_char(g, ch,
+                 "             @D---   @CCore Stats   @D---\r\n  @Y{:>5d}@W players in game  @y{:>5d}@W connected\r\n  @Y{:>5d}@W registered\r\n  @Y{:>5d}@W mobiles          @y{:>5d}@W prototypes\r\n  @Y{:>5d}@W objects          @y{:>5d}@W prototypes\r\n  @Y{:>5d}@W rooms            @y{:>5d}@W zones\r\n  @Y{:>5d}@W triggers\r\n  @Y{:>5d}@W large bufs\r\n  @Y{:>5d}@W buf switches     @y{:>5d}@W overflows\r\n             @D--- @CMiscellaneous  @D---\r\n  @Y{:>5}@W Mob ki attacks this boot\r\n  @Y{:>5}@W Asssassins Generated@n\r\n  @Y{:>5d}@W Wish Selfishness Meter@n\r\n",
+                 players, connected,
+                 g->top_of_p_table + 1,
+                 mobiles, (int)g->mob_proto.size(),
+                 objects, (int)g->obj_proto.size(),
+                 (int)g->rooms.size(), (int)g->zones.size(),
+                 (int)g->trig_index.size(),
+                 g->buf_largecount,
+                 g->buf_switches, g->buf_overflows,
+                 add_commas(g->mob_specials_used),
+                 add_commas(g->number_of_assassins),
+                 g->SELFISHMETER);
+  }
+
+  void show_errors(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    std::string buf = "Errant Rooms\r\n------------\r\n";
+    int k           = 0;
+    for (room_vnum r : g->rooms.vnums())
+      for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
+        auto *exit = room_get_dir_option(g, r, dir);
+        if (!exit)
+          continue;
+        if (exit->to_room == 0)
+          buf += str_format("{:>2d}: (void   ) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[dir]);
+        if (exit->to_room == NOWHERE && !exit_description(exit))
+          buf += str_format("{:>2d}: (Nowhere) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[dir]);
+      }
+    send_to_char(g, ch, buf);
+  }
+
+  template <const char *Title, int Flag>
+  void show_flagged_rooms(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    std::string buf = Title;
+    int count       = 0;
+    for (room_vnum r : g->rooms.vnums())
+      if (room_flagged(g, r, Flag))
+        buf += str_format("{:>2d}: [{:>5d}] {}\r\n", ++count, r, room_get_name(g, r));
+    send_to_char(g, ch, buf);
+  }
+
+  constexpr char DEATH_TRAPS[] = "Death Traps\r\n-----------\r\n";
+  constexpr char GODROOMS[]    = "Godrooms\r\n--------------------------\r\n";
+
+  void show_shops_of(GameWorld *g, struct char_data *ch, std::string &value) { show_shops(g, ch, value.data()); }
+
+  void show_houses(GameWorld *g, struct char_data *ch, std::string &) { hcontrol_list_houses(g, ch); }
+
+  void show_snoop(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    int count = 0;
+    send_to_char(g, ch, "People currently snooping:\r\n--------------------------\r\n");
+    for (descriptor_data *d : each_desc(g)) {
+      if (d->snooping == nullptr || d->character == nullptr)
+        continue;
+      if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(ch) < char_get_admlevel(d->character))
+        continue;
+      if (!char_can_see(g, ch, d->character) || char_get_in_room(d->character) == NOWHERE)
+        continue;
+      count++;
+      send_to_char(g, ch, "{:<10} - snooped by {}.\r\n", char_get_name(d->snooping->character), char_get_name(d->character));
+    }
+    if (count == 0)
+      send_to_char(g, ch, "No one is currently snooping.\r\n");
+  }
+
+  void show_assemblies(GameWorld *g, struct char_data *ch, std::string &) { assemblyListToChar(g, ch); }
+
+  void show_guilds(GameWorld *g, struct char_data *ch, std::string &value) { show_guild(g, ch, value.data()); }
+
+  void show_levels(GameWorld *g, struct char_data *ch, std::string &) { send_to_char(g, ch, "This is not used currently.\r\n"); }
+
+  void show_uniques(GameWorld *g, struct char_data *ch, std::string &value)
+  {
+    obj_vnum low = -1, high = 9999999;
+    if (!value.empty() && sscanf(value.c_str(), "%d-%d", &low, &high) != 2) {
+      if (sscanf(value.c_str(), "%d", &low) != 1) {
+        send_to_char(g, ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
+        return;
+      }
+      high = low;
+    }
+    send_to_char(g, ch, sprintuniques(g, low, high));
+  }
+
+  /* Everyone affected, newest first, or the one asked about; durations in `unit`. */
+  template <const char *Unit>
+  void show_affects(GameWorld *g, struct char_data *ch, std::string &value)
+  {
+    std::vector<struct char_data *> victs;
+    if (value.empty()) {
+      g->affect_list.visit([&](long, struct char_data *affected) { victs.push_back(affected); });
+    } else {
+      struct char_data *vict = get_char_world_vis(g, ch, value, nullptr);
+      if (!vict) {
+        send_to_char(g, ch, "Cannot find that character.\r\n");
+        return;
+      }
+      victs.push_back(vict);
+    }
+    if (victs.empty()) {
+      send_to_char(g, ch, "None.\r\n");
+      return;
+    }
+    std::string text;
+    for (struct char_data *who : victs) {
+      text += str_format("Name: {}\r\n", char_get_name(who));
+      for (const struct affected_type &aff : char_affects(who)) {
+        text += str_format("SPL: ({:>3d}{}) @c{:<21}@n ", aff.duration + 1, Unit, skill_name(g, aff.type));
+        if (aff.modifier)
+          text += str_format("{:+d} to {}", aff.modifier, apply_types[(int)aff.location]);
+        if (aff.bitvector) {
+          if (aff.modifier)
+            text += ", ";
+          text += str_format("sets {}", affected_bits[aff.bitvector]);
+        }
+        text += "\r\n";
+      }
+    }
+    send_to_char(g, ch, text);
+  }
+
+  constexpr char HOURS[]  = "hr";
+  constexpr char ROUNDS[] = "rd";
+
+  struct show_field {
+    const char *name;
+    int level;
+    void (*show)(GameWorld *g, struct char_data *ch, std::string &value);
   };
 
+  /* Matched by prefix, in this order. "nothing" is there to be matched, and understood as nothing. */
+  constexpr show_field SHOW_FIELDS[] = {
+      {"nothing",    0,             nullptr                                    },
+      {"zones",      ADMLVL_IMMORT, show_zones                                 },
+      {"player",     ADMLVL_GOD,    show_player                                },
+      {"rent",       ADMLVL_GRGOD,  show_rent                                  },
+      {"stats",      ADMLVL_IMMORT, show_stats                                 },
+      {"errors",     ADMLVL_IMPL,   show_errors                                },
+      {"death",      ADMLVL_GOD,    show_flagged_rooms<DEATH_TRAPS, ROOM_DEATH>},
+      {"godrooms",   ADMLVL_IMMORT, show_flagged_rooms<GODROOMS, ROOM_GODROOM> },
+      {"shops",      ADMLVL_IMMORT, show_shops_of                              },
+      {"houses",     ADMLVL_GOD,    show_houses                                },
+      {"snoop",      ADMLVL_GRGOD,  show_snoop                                 },
+      {"assemblies", ADMLVL_IMMORT, show_assemblies                            },
+      {"guilds",     ADMLVL_GOD,    show_guilds                                },
+      {"levels",     ADMLVL_GRGOD,  show_levels                                },
+      {"uniques",    ADMLVL_GRGOD,  show_uniques                               },
+      {"affect",     ADMLVL_GRGOD,  show_affects<HOURS>                        },
+      {"affectv",    ADMLVL_GRGOD,  show_affects<ROUNDS>                       },
+  };
+} // namespace
+
+ACMD(do_show)
+{
   std::string_view rest = skip_spaces(argument);
 
   if (rest.empty()) {
     send_to_char(g, ch, "Game Info options:\r\n");
-    for (j = 0, i = 1; fields[i].level; i++)
-      if (fields[i].level <= char_get_admlevel(ch))
-        send_to_char(g, ch, "{:<15}{}", fields[i].cmd, (!(++j % 5) ? "\r\n" : ""));
+    int shown = 0;
+    for (const show_field &f : SHOW_FIELDS | std::views::drop(1))
+      if (f.level <= char_get_admlevel(ch))
+        send_to_char(g, ch, "{:<15}{}", f.name, (!(++shown % 5) ? "\r\n" : ""));
     send_to_char(g, ch, "\r\n");
     return;
   }
@@ -1101,255 +1298,16 @@ ACMD(do_show)
   std::string field = take_arg(rest);
   std::string value = take_arg(rest);
 
-  for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (std::string_view(fields[l].cmd).starts_with(field))
-      break;
-
-  if (char_get_admlevel(ch) < fields[l].level) {
+  auto it = std::ranges::find_if(SHOW_FIELDS, [&](const show_field &f) { return std::string_view(f.name).starts_with(field); });
+  if (it != std::end(SHOW_FIELDS) && char_get_admlevel(ch) < it->level) {
     send_to_char(g, ch, "You are not godly enough for that!\r\n");
     return;
   }
-  if (value == ".")
-    self = true;
-  buf.clear();
-
-  switch (l) {
-    /* show zone */
-    case 1:
-      /* tightened up by JE 4/6/93 */
-      if (self)
-        buf = zone_summary(g, room_get_zone(g, char_get_in_room(ch)), 1);
-      else if (!value.empty() && is_number(value)) {
-        if ((zrn = find_zone(g, parse_int(value))))
-          buf = zone_summary(g, zrn, 1);
-        else {
-          send_to_char(g, ch, "That is not a valid zone.\r\n");
-          return;
-        }
-      } else {
-        buf.clear();
-        for (struct zone_data *zone : g->zones.all())
-          buf += str_format("{}", zone_summary(g, zone, 0));
-      }
-      send_to_char(g, ch, buf);
-      break;
-
-    /* show player */
-    case 2:
-      if (value.empty()) {
-        send_to_char(g, ch, "A name would help.\r\n");
-        return;
-      }
-
-      vict = new char_data();
-      clear_char(vict);
-      char_make_player_specials(vict);
-      if (load_char(g, value.c_str(), vict) < 0) {
-        send_to_char(g, ch, "There is no such player.\r\n");
-        free_char(g, vict);
-        return;
-      }
-      send_to_char(g, ch, "Player: {:<12} ({}) [{:>2d} {} {}]\r\n", char_get_name(vict),
-                   genders[(int)char_get_sex(vict)], char_get_level(vict), char_class_abbr(vict), char_race_abbr(vict));
-      send_to_char(g, ch, "Au: {:<8d}  Bal: {:<8d}  Exp: {:d}  Align: {:<5d}\r\n",
-                   char_get_gold(vict), char_get_bank_gold(vict), char_get_exp(vict),
-                   char_get_alignment(vict));
-      if (CONFIG_ALLOW_MULTICLASS)
-        send_to_char(g, ch, "Class ranks: {}\r\n", class_desc_str(vict, 1, 0));
-
-      /* ctime() uses static buffer: do not combine. */
-      {
-        time_t created = char_get_time_created(vict), logon = char_get_time_logon(vict);
-        send_to_char(g, ch, "Started: {:<20.16}  ", ctime(&created));
-        send_to_char(g, ch, "Last: {:<20.16}  Played: {:>3d}h {:>2d}m\r\n",
-                     ctime(&logon),
-                     (int)(char_get_time_played(vict) / 3600),
-                     (int)(char_get_time_played(vict) / 60 % 60));
-      }
-      free_char(g, vict);
-      break;
-
-    /* show rent */
-    case 3:
-      if (value.empty()) {
-        send_to_char(g, ch, "A name would help.\r\n");
-        return;
-      }
-      Crash_listrent(g, ch, value.data());
-      break;
-
-    /* show stats */
-    case 4:
-      i   = 0;
-      j   = 0;
-      k   = 0;
-      con = 0;
-      for (char_data *tch : each_char(g)) {
-        if (char_is_npc(tch))
-          j++;
-        else if (char_can_see(g, ch, tch)) {
-          i++;
-          if (char_get_desc(tch))
-            con++;
-        }
-      }
-      k += count_members(each_obj(g));
-      send_to_char(g, ch,
-                   "             @D---   @CCore Stats   @D---\r\n  @Y{:>5d}@W players in game  @y{:>5d}@W connected\r\n  @Y{:>5d}@W registered\r\n  @Y{:>5d}@W mobiles          @y{:>5d}@W prototypes\r\n  @Y{:>5d}@W objects          @y{:>5d}@W prototypes\r\n  @Y{:>5d}@W rooms            @y{:>5d}@W zones\r\n  @Y{:>5d}@W triggers\r\n  @Y{:>5d}@W large bufs\r\n  @Y{:>5d}@W buf switches     @y{:>5d}@W overflows\r\n             @D--- @CMiscellaneous  @D---\r\n  @Y{:>5}@W Mob ki attacks this boot\r\n  @Y{:>5}@W Asssassins Generated@n\r\n  @Y{:>5d}@W Wish Selfishness Meter@n\r\n",
-                   i, con,
-                   g->top_of_p_table + 1,
-                   j, (int)g->mob_proto.size(),
-                   k, (int)g->obj_proto.size(),
-                   (int)g->rooms.size(), (int)g->zones.size(),
-                   (int)g->trig_index.size(),
-                   g->buf_largecount,
-                   g->buf_switches, g->buf_overflows,
-                   add_commas(g->mob_specials_used),
-                   add_commas(g->number_of_assassins),
-                   g->SELFISHMETER);
-      break;
-
-    /* show errors */
-    case 5:
-      buf = "Errant Rooms\r\n------------\r\n";
-      k   = 0;
-      for (room_vnum r : g->rooms.vnums())
-        for (j = 0; j < NUM_OF_DIRS; j++) {
-          if (!room_get_dir_option(g, r, j))
-            continue;
-          if (room_get_dir_option(g, r, j)->to_room == 0) {
-            buf += str_format("{:>2d}: (void   ) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[j]);
-          }
-          if (room_get_dir_option(g, r, j)->to_room == NOWHERE && !exit_description(room_get_dir_option(g, r, j))) {
-            buf += str_format("{:>2d}: (Nowhere) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[j]);
-          }
-        }
-      send_to_char(g, ch, buf);
-      break;
-
-    /* show death */
-    case 6:
-      buf = "Death Traps\r\n-----------\r\n";
-      j   = 0;
-      for (room_vnum r : g->rooms.vnums())
-        if (room_flagged(g, r, ROOM_DEATH)) {
-          buf += str_format("{:>2d}: [{:>5d}] {}\r\n", ++j, r, room_get_name(g, r));
-        }
-      send_to_char(g, ch, buf);
-      break;
-
-    /* show godrooms */
-    case 7:
-      buf = "Godrooms\r\n--------------------------\r\n";
-      j   = 0;
-      for (room_vnum r : g->rooms.vnums())
-        if (room_flagged(g, r, ROOM_GODROOM)) {
-          buf += str_format("{:>2d}: [{:>5d}] {}\r\n", ++j, r, room_get_name(g, r));
-        }
-      send_to_char(g, ch, buf);
-      break;
-
-    /* show shops */
-    case 8:
-      show_shops(g, ch, value.data());
-      break;
-
-    /* show houses */
-    case 9:
-      hcontrol_list_houses(g, ch);
-      break;
-
-    /* show snoop */
-    case 10:
-      i = 0;
-      send_to_char(g, ch, "People currently snooping:\r\n--------------------------\r\n");
-      for (descriptor_data *d : each_desc(g)) {
-        if (d->snooping == nullptr || d->character == nullptr)
-          continue;
-        if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(ch) < char_get_admlevel(d->character))
-          continue;
-        if (!char_can_see(g, ch, d->character) || char_get_in_room(d->character) == NOWHERE)
-          continue;
-        i++;
-        send_to_char(g, ch, "{:<10} - snooped by {}.\r\n", char_get_name(d->snooping->character), char_get_name(d->character));
-      }
-      if (i == 0)
-        send_to_char(g, ch, "No one is currently snooping.\r\n");
-      break;
-    /* show assembly */
-    case 11:
-      assemblyListToChar(g, ch);
-      break;
-    /* show guilds */
-    case 12:
-      show_guild(g, ch, value.data());
-      break;
-
-    /* show level tables */
-    case 13:
-      send_to_char(g, ch, "This is not used currently.\r\n");
-      break;
-
-    case 14:
-      if (!value.empty()) {
-        if (sscanf(value.c_str(), "%d-%d", &low, &high) != 2) {
-          if (sscanf(value.c_str(), "%d", &low) != 1) {
-            send_to_char(g, ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
-            return;
-          }
-          high = low;
-        }
-      } else {
-        low  = -1;
-        high = 9999999;
-      }
-      send_to_char(g, ch, sprintuniques(g, low, high));
-      break;
-
-    case 15:
-    case 16: {
-      std::vector<struct char_data *> victs; /* everyone affected, newest first, or the one asked about */
-      if (value.empty()) {
-        low = 1;
-        g->affect_list.visit([&](long, struct char_data *affected) { victs.push_back(affected); });
-      } else {
-        low = 0;
-        if (!(vict = get_char_world_vis(g, ch, value, nullptr))) {
-          send_to_char(g, ch, "Cannot find that character.\r\n");
-          return;
-        }
-        victs.push_back(vict);
-      }
-      if (victs.empty()) {
-        send_to_char(g, ch, "None.\r\n");
-        return;
-      }
-      std::string text;
-      for (struct char_data *who : victs) {
-        text += str_format("Name: {}\r\n", char_get_name(who));
-        for (auto aff_it = char_affects(who).begin(); aff_it != char_affects(who).end() && (aff = &*aff_it); ++aff_it) {
-          text += str_format("SPL: ({:>3d}{}) @c{:<21}@n ", aff->duration + 1, (l == 15) ? "hr" : "rd", skill_name(g, aff->type));
-
-          if (aff->modifier)
-            text += str_format("{:+d} to {}", aff->modifier, apply_types[(int)aff->location]);
-
-          if (aff->bitvector) {
-            if (aff->modifier)
-              text += ", ";
-
-            text += str_format("sets {}", affected_bits[aff->bitvector]);
-          }
-          text += "\r\n";
-        }
-      }
-      send_to_char(g, ch, text);
-    } break;
-
-    /* show what? */
-    default:
-      send_to_char(g, ch, "Sorry, I don't understand that.\r\n");
-      break;
+  if (it == std::end(SHOW_FIELDS) || !it->show) {
+    send_to_char(g, ch, "Sorry, I don't understand that.\r\n");
+    return;
   }
+  it->show(g, ch, value);
 }
 
 #define PLIST_FORMAT \
