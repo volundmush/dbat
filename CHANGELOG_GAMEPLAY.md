@@ -2,6 +2,8 @@
 - ???
 - Focusing a curse on yourself curses you, rather than crashing the game. [Volund]
 - Carried ice that melts away no longer leaves its carrier counting less weight than they carry. [Volund]
+- The top lists load all 25 places and no further: loading them no longer replaced the top powerlevel with a garbage number and disturbed the auction, and "toplist" no longer wrote past its own list. A short top list file leaves its missing places empty. [Volund]
+- An immortal listing exits beside a door with no keyword is told of the error, rather than crashing the game. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

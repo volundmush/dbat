@@ -1,6 +1,9 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <memory>
+#include <ranges>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -23,6 +26,14 @@
  * been destroyed, or is no longer where it was, by the time its turn comes. Members added during the loop are not
  * visited. So a loop may extract, move or create entities freely, including the ones it hasn't reached yet. How the
  * snapshot is taken is private to this file, so that the way entities are stored can change without touching a loop.
+ *
+ * Each range is a std::ranges::input_range, so the standard algorithms and views work on it:
+ *
+ *   auto awake = std::ranges::count_if(room_people(g, room), [](char_data *ch) { return AWAKE(ch); });
+ *   for (char_data *ch : room_people(g, room) | std::views::filter(is_player)) { ... }
+ *
+ * An algorithm that hands back an iterator (find_if and the like) can't be given a range made on the spot, since the
+ * snapshot is gone when it returns; find_first() is for that.
  */
 
 namespace dbat_iter {
@@ -54,6 +65,16 @@ template <typename T, typename Key, typename Resolve, typename Where> class snap
 
 public:
   snapshot(Resolve resolve, Where where) : resolve_(std::move(resolve)), where_(std::move(where)) {}
+  snapshot(snapshot &&) = default;
+  /* Lambdas that capture can't be assigned, but a view of a snapshot made on the spot needs it moved into place. */
+  snapshot &operator=(snapshot &&other) noexcept
+  {
+    if (this != &other) {
+      std::destroy_at(this);
+      std::construct_at(this, std::move(other));
+    }
+    return *this;
+  }
   void add(long id, Key key) { entries_.push_back({id, key}); }
 
   class iterator {
@@ -72,6 +93,10 @@ public:
     }
 
   public:
+    using value_type      = T *;
+    using difference_type = std::ptrdiff_t;
+
+    iterator() = default;
     iterator(const snapshot *s, std::size_t i) : s_(s), i_(i) { settle(); }
     T *operator*() const { return current_; }
     iterator &operator++()
@@ -80,6 +105,7 @@ public:
       settle();
       return *this;
     }
+    void operator++(int) { ++*this; }
     bool operator==(const iterator &other) const { return i_ == other.i_; }
   };
 
@@ -102,6 +128,9 @@ inline auto obj_snapshot(GameWorld *g)
 {
   return make_snapshot<obj_data, obj_place>([g](long id) { return obj_by_id(g, id); }, place_of);
 }
+
+static_assert(std::ranges::viewable_range<decltype(char_snapshot(nullptr))>);
+static_assert(std::ranges::viewable_range<decltype(obj_snapshot(nullptr))>);
 
 /* The characters in list, which must be one room's people. */
 inline auto chars_in_room_list(GameWorld *g, const id_list &list)

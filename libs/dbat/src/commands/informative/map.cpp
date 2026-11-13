@@ -1,5 +1,10 @@
 /* map.c: maps, scanning and searching
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
+#include <iterator>
+#include <optional>
+#include <utility>
+
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -77,6 +82,8 @@ static double terrain_bonus(GameWorld *g, struct char_data *ch)
   return (bonus);
 }
 
+constexpr act_msgs FOUND_HIDING = {"@YYou find @y$N@Y hiding nearby!@n", "@y$n@Y has found your hiding spot!@n", "@y$n@Y has found @y$N's@Y hiding spot!@n", true};
+
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
 void search_room(GameWorld *g, struct char_data *ch)
 {
@@ -116,9 +123,7 @@ void search_room(GameWorld *g, struct char_data *ch)
       }
       terrain += terrain_bonus(g, vict);
       if (perc * bonus >= prob * terrain) { /* Found them. */
-        act(g, "@YYou find @y$N@Y hiding nearby!@n", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "@y$n@Y has found your hiding spot!@n", true, ch, nullptr, vict, TO_VICT);
-        act(g, "@y$n@Y has found @y$N's@Y hiding spot!@n", true, ch, nullptr, vict, TO_NOTVICT);
+        act_triple(g, FOUND_HIDING, ch, nullptr, vict);
         reveal_hiding(g, vict, 4);
         found++;
       }
@@ -135,521 +140,71 @@ void search_room(GameWorld *g, struct char_data *ch)
   }
   decCurSTPercent(g, ch, .001, 0);
 
-  if (found == 0) {
+  if (found == 0)
     send_to_char(g, ch, "You find nothing hidden.\r\n");
-    return;
-  }
 }
 
-static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum,
-                          struct char_data *ch)
-{
-  int door;
+namespace {
+  /* Where each of the eight flat directions is on the map, from the room drawn; up, down, in and out aren't drawn. */
+  struct map_step {
+    int dx, dy;
+  };
 
-  for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (room_get_dir_option(g, rnum, door) && room_get_dir_option(g, rnum, door)->to_room != NOWHERE && (room_exit_flagged(room_get_dir_option(g, rnum, door), EX_CLOSED) && !room_exit_flagged(room_get_dir_option(g, rnum, door), EX_SECRET))) {
-      switch (door) {
-        case NORTH:
-          map[y - 1][x] = '8';
-          break;
-        case EAST:
-          map[y][x + 1] = '8';
-          break;
-        case SOUTH:
-          map[y + 1][x] = '8';
-          break;
-        case WEST:
-          map[y][x - 1] = '8';
-          break;
-        case NORTHEAST:
-          map[y - 1][x + 1] = '8';
-          break;
-        case NORTHWEST:
-          map[y - 1][x - 1] = '8';
-          break;
-        case SOUTHEAST:
-          map[y + 1][x + 1] = '8';
-          break;
-        case SOUTHWEST:
-          map[y + 1][x - 1] = '8';
-          break;
-      }
-    } else if (room_get_dir_option(g, rnum, door) && room_get_dir_option(g, rnum, door)->to_room != NOWHERE && !room_exit_flagged(room_get_dir_option(g, rnum, door), EX_CLOSED)) {
-      switch (door) {
-        case NORTH:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y - 1][x] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '2';
-            } else {
-              map[y - 1][x] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '2';
-            } else {
-              map[y - 1][x] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '7';
-            } else {
-              map[y - 1][x] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '1';
-            } else {
-              map[y - 1][x] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '6';
-            } else {
-              map[y - 1][x] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '5';
-            } else {
-              map[y - 1][x] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x] = '3';
-            } else {
-              map[y - 1][x] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y - 1][x] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y - 1][x] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y - 1][x] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y - 1][x] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y - 1][x] = '*';
-          } else {
-            map[y - 1][x] = '-';
-          }
-          break;
-        case EAST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y][x + 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '2';
-            } else {
-              map[y][x + 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '2';
-            } else {
-              map[y][x + 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '7';
-            } else {
-              map[y][x + 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '1';
-            } else {
-              map[y][x + 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '6';
-            } else {
-              map[y][x + 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '5';
-            } else {
-              map[y][x + 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x + 1] = '3';
-            } else {
-              map[y][x + 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y][x + 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y][x + 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y][x + 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y][x + 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y][x + 1] = '*';
-          } else {
-            map[y][x + 1] = '-';
-          }
-          break;
-        case SOUTH:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y + 1][x] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '2';
-            } else {
-              map[y + 1][x] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '2';
-            } else {
-              map[y + 1][x] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '7';
-            } else {
-              map[y + 1][x] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '1';
-            } else {
-              map[y + 1][x] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '6';
-            } else {
-              map[y + 1][x] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '5';
-            } else {
-              map[y + 1][x] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '3';
-            } else {
-              map[y + 1][x] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y + 1][x] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y + 1][x] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y + 1][x] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y + 1][x] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y + 1][x] = '*';
-          } else {
-            map[y + 1][x] = '-';
-          }
-          break;
-        case WEST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y][x - 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x] = '2';
-            } else {
-              map[y][x - 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '2';
-            } else {
-              map[y][x - 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '7';
-            } else {
-              map[y][x - 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '1';
-            } else {
-              map[y][x - 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '6';
-            } else {
-              map[y][x - 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '5';
-            } else {
-              map[y][x - 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y][x - 1] = '3';
-            } else {
-              map[y][x - 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y][x - 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y][x - 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y][x - 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y][x - 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y][x - 1] = '*';
-          } else {
-            map[y][x - 1] = '-';
-          }
-          break;
-        case NORTHEAST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y - 1][x + 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '2';
-            } else {
-              map[y - 1][x + 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '2';
-            } else {
-              map[y - 1][x + 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '7';
-            } else {
-              map[y - 1][x + 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '1';
-            } else {
-              map[y - 1][x + 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '6';
-            } else {
-              map[y - 1][x + 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '5';
-            } else {
-              map[y - 1][x + 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x + 1] = '3';
-            } else {
-              map[y - 1][x + 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y - 1][x + 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y - 1][x + 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y - 1][x + 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y - 1][x + 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y - 1][x + 1] = '*';
-          } else {
-            map[y - 1][x + 1] = '-';
-          }
-          break;
-        case NORTHWEST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y - 1][x - 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '2';
-            } else {
-              map[y - 1][x - 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '2';
-            } else {
-              map[y - 1][x - 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '7';
-            } else {
-              map[y - 1][x - 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '1';
-            } else {
-              map[y - 1][x - 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '6';
-            } else {
-              map[y - 1][x - 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '5';
-            } else {
-              map[y - 1][x - 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y - 1][x - 1] = '3';
-            } else {
-              map[y - 1][x - 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y - 1][x - 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y - 1][x - 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y - 1][x - 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y - 1][x - 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y - 1][x - 1] = '*';
-          } else {
-            map[y - 1][x - 1] = '-';
-          }
-          break;
-        case SOUTHEAST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y + 1][x + 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '2';
-            } else {
-              map[y + 1][x + 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '2';
-            } else {
-              map[y + 1][x + 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '7';
-            } else {
-              map[y + 1][x + 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '1';
-            } else {
-              map[y + 1][x + 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '6';
-            } else {
-              map[y + 1][x + 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '5';
-            } else {
-              map[y + 1][x + 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x + 1] = '3';
-            } else {
-              map[y + 1][x + 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y + 1][x + 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y + 1][x + 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y + 1][x + 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y + 1][x + 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y + 1][x + 1] = '*';
-          } else {
-            map[y + 1][x + 1] = '-';
-          }
-          break;
-        case SOUTHWEST:
-          if (room_sunken(g, room_get_dir_option(g, rnum, door)->to_room)) {
-            map[y + 1][x - 1] = '=';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_INSIDE) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '2';
-            } else {
-              map[y + 1][x - 1] = 'i';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FIELD) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '2';
-            } else {
-              map[y + 1][x - 1] = 'p';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_DESERT) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '7';
-            } else {
-              map[y + 1][x - 1] = '!';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_CITY) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '1';
-            } else {
-              map[y + 1][x - 1] = '(';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FOREST) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '6';
-            } else {
-              map[y + 1][x - 1] = 'f';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_MOUNTAIN) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '5';
-            } else {
-              map[y + 1][x - 1] = '^';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_HILLS) {
-            if (room_get_geffect(g, room_get_dir_option(g, rnum, door)->to_room) >= 1) {
-              map[y + 1][x - 1] = '3';
-            } else {
-              map[y + 1][x - 1] = 'h';
-            }
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_FLYING) {
-            map[y + 1][x - 1] = 's';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_NOSWIM) {
-            map[y + 1][x - 1] = '`';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_WATER_SWIM) {
-            map[y + 1][x - 1] = '+';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_SHOP) {
-            map[y + 1][x - 1] = '&';
-          } else if (room_sect(g, room_get_dir_option(g, rnum, door)->to_room) == SECT_IMPORTANT) {
-            map[y + 1][x - 1] = '*';
-          } else {
-            map[y + 1][x - 1] = '-';
-          }
-          break;
-      }
+  constexpr std::optional<map_step> MAP_STEPS[NUM_OF_DIRS] = {
+      map_step{0, -1}, map_step{1, 0}, map_step{0, 1}, map_step{-1, 0}, std::nullopt, std::nullopt,
+      map_step{-1, -1}, map_step{1, -1}, map_step{1, 1}, map_step{-1, 1}, std::nullopt, std::nullopt,
+  };
+
+  struct sector_glyph {
+    int sect;
+    char glyph;
+    char with_lava; /* or the glyph again, for a sector lava doesn't change */
+  };
+
+  /* A room's glyph by its sector; lava (any ground effect) marks some as their lava glyph. Failing all, '-'. */
+  constexpr sector_glyph SECTOR_GLYPHS[] = {
+      {SECT_INSIDE,       'i', '2'}, /* quirk: lava inside is drawn as lava on a plain */
+      {SECT_FIELD,        'p', '2'},
+      {SECT_DESERT,       '!', '7'},
+      {SECT_CITY,         '(', '1'},
+      {SECT_FOREST,       'f', '6'},
+      {SECT_MOUNTAIN,     '^', '5'},
+      {SECT_HILLS,        'h', '3'},
+      {SECT_FLYING,       's', 's'},
+      {SECT_WATER_NOSWIM, '`', '`'},
+      {SECT_WATER_SWIM,   '+', '+'},
+      {SECT_SHOP,         '&', '&'},
+      {SECT_IMPORTANT,    '*', '*'},
+  };
+
+  char room_glyph(GameWorld *g, room_vnum room)
+  {
+    if (room_sunken(g, room))
+      return '=';
+    auto it = std::ranges::find(SECTOR_GLYPHS, room_sect(g, room), &sector_glyph::sect);
+    if (it == std::end(SECTOR_GLYPHS))
+      return '-';
+    return room_get_geffect(g, room) >= 1 ? it->with_lava : it->glyph;
+  }
+} // namespace
+
+/* Draws the rooms around rnum, which is at x, y: a closed door ('8'), or the room it opens on. */
+static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum, struct char_data *)
+{
+  for (int door = 0; door < NUM_OF_DIRS; door++) {
+    struct room_direction_data *exit = room_get_dir_option(g, rnum, door);
+    if (!exit || exit->to_room == NOWHERE || !MAP_STEPS[door])
+      continue;
+    char *cell = &map[y + MAP_STEPS[door]->dy][x + MAP_STEPS[door]->dx];
+    if (room_exit_flagged(exit, EX_CLOSED)) {
+      if (!room_exit_flagged(exit, EX_SECRET))
+        *cell = '8';
+      continue;
     }
+    char glyph = room_glyph(g, exit->to_room);
+    if (door == WEST && glyph == '2' && room_sect(g, exit->to_room) == SECT_INSIDE)
+      cell = &map[y + 1][x]; /* quirk: lava inside, to the west, is drawn to the south */
+    *cell = glyph;
   }
 }
 
@@ -658,11 +213,67 @@ ACMD(do_map)
   gen_map(g, ch, 1);
 }
 
+namespace {
+  /* The map's glyphs as they are shown, in the order they are replaced. */
+  constexpr std::pair<const char *, const char *> GLYPH_COLOURS[] = {
+      {"x", "@RX"}, {"&", "@m$"}, {"*", "@m#"}, {"+", "@c~"}, {"s", "@CS"}, {"i", "@wI"}, {"(", "@WC"}, {"^", "@DM"},
+      {"h", "@yH"}, {"`", "@BW"}, {"=", "@bU"}, {"p", "@GP"}, {"f", "@gF"}, {"!", "@YD"}, {"-", "@w:"},
+      /* lava */
+      {"1", "@4@YC@n"}, {"2", "@4@YP@n"}, {"3", "@4@YH@n"}, {"7", "@4@YD@n"}, {"5", "@4@YM@n"}, {"6", "@4@YF@n"},
+      /* closed doors */
+      {"8", "@1 @n"},
+  };
+
+  /* The key beside each line of the small map */
+  constexpr const char *MAP_KEY[] = {
+      "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
+      "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
+      "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
+      "    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n",
+      "    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n",
+  };
+
+  bool exit_visible(GameWorld *g, struct char_data *ch, int dir)
+  {
+    struct room_direction_data *exit = char_get_exit(g, ch, dir);
+    return exit && !room_exit_flagged(exit, EX_SECRET);
+  }
+
+  /* An exit's mark beside the small map: shut, open, or blank where there's none to see. */
+  const char *exit_mark(GameWorld *g, struct char_data *ch, int dir, const char *shut, const char *open, int shut_flag = EX_CLOSED)
+  {
+    if (!exit_visible(g, ch, dir))
+      return "   ";
+    return room_exit_flagged(char_get_exit(g, ch, dir), shut_flag) ? shut : open;
+  }
+
+  /* The exits beside line i of the small map */
+  std::string exits_beside(GameWorld *g, struct char_data *ch, int i, const char *line)
+  {
+    switch (i) {
+      case 2:
+        return str_format("@w       @w|{}@w|           {}", exit_mark(g, ch, NORTH, " @rN ", " @CN "), line);
+      case 3: /* quirk: northeast is never shown shut */
+        return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, NORTHWEST, " @rNW", " @CNW"), exit_mark(g, ch, UP, " @yU ", " @YU "),
+                          exit_mark(g, ch, NORTHEAST, "@rNE ", "@CNE ", EX_SECRET), line);
+      case 4: {
+        const char *inside = exit_visible(g, ch, INDIR)    ? exit_mark(g, ch, INDIR, " @rI ", " @mI ")
+                             : exit_visible(g, ch, OUTDIR) ? exit_mark(g, ch, OUTDIR, "@rOUT", "@mOUT")
+                                                           : "@r{ }";
+        return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, WEST, "  @rW", "  @CW"), inside, exit_mark(g, ch, EAST, "@rE  ", "@CE  "), line);
+      }
+      case 5: /* quirk: southeast is never shown shut */
+        return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, SOUTHWEST, " @rSW", " @CSW"), exit_mark(g, ch, DOWN, " @yD ", " @YD "),
+                          exit_mark(g, ch, SOUTHEAST, "@rSE ", "@CSE ", EX_SECRET), line);
+      default:
+        return str_format("@w       @w|{}@w|           {}", exit_mark(g, ch, SOUTH, " @rS ", " @CS "), line);
+    }
+  }
+} // namespace
+
 void gen_map(GameWorld *g, struct char_data *ch, int num)
 {
-  int door, i;
   char map[9][10] = {{'-'}, {'-'}};
-  std::string buf2;
 
   if (num == 1) {
     /* Map Key */
@@ -683,129 +294,54 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
   }
 
   /* blank the map */
-  for (i = 0; i < 9; i++) {
-    strcpy(map[i], "         ");
-  }
+  for (auto &row : map)
+    strcpy(row, "         ");
 
-  /* print out exits */
+  /* the room ch is in, and the rooms its open exits lead to */
   map_draw_room(g, map, 4, 4, char_get_in_room(ch), ch);
-  for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (char_get_exit(g, ch, door) && char_get_exit(g, ch, door)->to_room != NOWHERE && !room_exit_flagged(char_get_exit(g, ch, door), EX_CLOSED)) {
-      switch (door) {
-        case NORTH:
-          map_draw_room(g, map, 4, 3, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case EAST:
-          map_draw_room(g, map, 5, 4, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case SOUTH:
-          map_draw_room(g, map, 4, 5, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case WEST:
-          map_draw_room(g, map, 3, 4, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case NORTHEAST:
-          map_draw_room(g, map, 5, 3, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case NORTHWEST:
-          map_draw_room(g, map, 3, 3, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case SOUTHEAST:
-          map_draw_room(g, map, 5, 5, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-        case SOUTHWEST:
-          map_draw_room(g, map, 3, 5, char_get_exit(g, ch, door)->to_room, ch);
-          break;
-      }
-    }
+  for (int door = 0; door < NUM_OF_DIRS; door++) {
+    struct room_direction_data *exit = char_get_exit(g, ch, door);
+    if (exit && exit->to_room != NOWHERE && !room_exit_flagged(exit, EX_CLOSED) && MAP_STEPS[door])
+      map_draw_room(g, map, 4 + MAP_STEPS[door]->dx, 4 + MAP_STEPS[door]->dy, exit->to_room, ch);
   }
 
   /* make it obvious what room they are in */
   map[4][4] = 'x';
 
-  /* print out the map */
-  int key = 0;
-  buf2.clear();
-  for (i = 2; i < 9; i++) {
-    if (i > 6) {
-      continue;
-    }
-    if (num == 1) {
-      buf2 = str_format("@w                {}\r\n", map[i]);
-    } else {
-      if (i == 2) {
-        buf2 = str_format("@w       @w|{}@w|           {}", (char_get_exit(g, ch, 0) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
-      }
-      if (i == 3) {
-        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 6) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (char_get_exit(g, ch, 4) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (char_get_exit(g, ch, 7) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
-      }
-      if (i == 4) {
-        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 3) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (char_get_exit(g, ch, 10) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((char_get_exit(g, ch, 11) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (char_get_exit(g, ch, 1) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
-      }
-      if (i == 5) {
-        buf2 = str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", (char_get_exit(g, ch, 9) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (char_get_exit(g, ch, 5) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (char_get_exit(g, ch, 8) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
-      }
-      if (i == 6) {
-        buf2 = str_format("@w       @w|{}@w|           {}", (char_get_exit(g, ch, 2) && !room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_SECRET)) ? (room_exit_flagged(room_get_dir_option(g, char_get_in_room(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
-      }
-    }
-    search_replace(buf2, "x", "@RX");
-    search_replace(buf2, "&", "@m$");
-    search_replace(buf2, "*", "@m#");
-    search_replace(buf2, "+", "@c~");
-    search_replace(buf2, "s", "@CS");
-    search_replace(buf2, "i", "@wI");
-    search_replace(buf2, "(", "@WC");
-    search_replace(buf2, "^", "@DM");
-    search_replace(buf2, "h", "@yH");
-    search_replace(buf2, "`", "@BW");
-    search_replace(buf2, "=", "@bU");
-    search_replace(buf2, "p", "@GP");
-    search_replace(buf2, "f", "@gF");
-    search_replace(buf2, "!", "@YD");
-    search_replace(buf2, "-", "@w:");
-    /* ------- Do Lava Rooms ------- */
-    search_replace(buf2, "1", "@4@YC@n");
-    search_replace(buf2, "2", "@4@YP@n");
-    search_replace(buf2, "3", "@4@YH@n");
-    search_replace(buf2, "7", "@4@YD@n");
-    search_replace(buf2, "5", "@4@YM@n");
-    search_replace(buf2, "6", "@4@YF@n");
-    /* ------- Do Closed Rooms------- */
-    search_replace(buf2, "8", "@1 @n");
-
-    if (num != 1) {
-      if (key == 0) {
-        send_to_char(g, ch, "{}    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n", buf2);
-      }
-      if (key == 1) {
-        send_to_char(g, ch, "{}    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n", buf2);
-      }
-      if (key == 2) {
-        send_to_char(g, ch, "{}    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n", buf2);
-      }
-      if (key == 3) {
-        send_to_char(g, ch, "{}    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n", buf2);
-      }
-      if (key == 4) {
-        send_to_char(g, ch, "{}    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n", buf2);
-      }
-      key += 1;
-    } else {
-      send_to_char(g, ch, buf2);
-    }
+  /* print out the map: the middle five lines */
+  for (int i = 2; i <= 6; i++) {
+    std::string line = num == 1 ? str_format("@w                {}\r\n", map[i]) : exits_beside(g, ch, i, map[i]);
+    for (auto [glyph, shown] : GLYPH_COLOURS)
+      search_replace(line, glyph, shown);
+    if (num == 1)
+      send_to_char(g, ch, line);
+    else
+      send_to_char(g, ch, "{}{}", line, MAP_KEY[i - 2]);
   }
-  if (num == 1) {
+  if (num == 1)
     send_to_char(g, ch, "@D                ---------@w\r\n");
-  }
 }
+
+namespace {
+  /* What ch sees of a room scanned: its name, what's in it, and its lava. */
+  void scan_room(GameWorld *g, struct char_data *ch, room_vnum room, const char *far, const char *direction)
+  {
+    send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
+    send_to_char(g, ch, "          {}{}{}: {} {}\n\r", CCCYN(g, ch, C_NRM), far, direction,
+                 room_get_name(g, room) ? room_get_name(g, room) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
+    send_to_char(g, ch, "@W          -----------------          @n\r\n");
+    list_obj_to_char(g, room_get_contents(g, room), ch, SHOW_OBJ_LONG, false);
+    list_char_to_char(g, room_get_people(g, room), ch);
+    if (room_get_geffect(g, room) >= 1 && room_get_geffect(g, room) <= 5)
+      send_to_char(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
+    if (room_get_geffect(g, room) >= 6)
+      send_to_char(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
+  }
+} // namespace
 
 ACMD(do_scan)
 {
-  int i;
-  room_vnum newroom;
-  const char *dirnames[] = {
-      "North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
+  static constexpr const char *dirnames[] = {"North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
 
   if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(g, ch, "You can't see anything but stars!\n\r");
@@ -823,92 +359,53 @@ ACMD(do_scan)
     send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
-  for (i = 0; i < 10; i++) {
-    if (char_get_exit(g, ch, i)) {
-      if (room_is_dark(g, char_get_in_room(ch)) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
-          (!char_aff_flagged(ch, AFF_INFRAVISION))) {
-        send_to_char(g, ch, "{}: DARK\n\r", dirnames[i]);
-        continue;
-      }
-      if (char_can_go(g, ch, i)) {
-        newroom = room_get_dir_option(g, char_get_in_room(ch), i)->to_room;
-        send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
-        send_to_char(g, ch, "          {}{}: {} {}\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
-        send_to_char(g, ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(g, room_get_contents(g, newroom), ch, SHOW_OBJ_LONG, false);
-        list_char_to_char(g, room_get_people(g, newroom), ch);
-        if (room_get_geffect(g, newroom) >= 1 && room_get_geffect(g, newroom) <= 5) {
-          send_to_char(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
-        }
-        if (room_get_geffect(g, newroom) >= 6) {
-          send_to_char(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
-        }
-        /* Check 2nd room away */
-        if (char_get_exit2(g, ch, i) && char_get_exit2(g, ch, i)->to_room) {
-          newroom = char_get_exit2(g, ch, i)->to_room;
-
-          if ((newroom != NOWHERE) && (!IS_SET(char_get_exit2(g, ch, i)->exit_info, EX_CLOSED))) {
-            if (!room_is_dark(g, char_get_exit2(g, ch, i)->to_room)) {
-              send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
-              send_to_char(g, ch, "          {}Far {}: {} {}\n\r", CCCYN(g, ch, C_NRM), dirnames[i], room_get_name(g, newroom) ? room_get_name(g, newroom) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
-              send_to_char(g, ch, "@W          -----------------          @n\r\n");
-
-              list_obj_to_char(g, room_get_contents(g, newroom), ch, SHOW_OBJ_LONG, false);
-              list_char_to_char(g, room_get_people(g, newroom), ch);
-              if (room_get_geffect(g, newroom) >= 1 && room_get_geffect(g, newroom) <= 5) {
-                send_to_char(g, ch, "@rLava@w is pooling in someplaces here...@n\r\n");
-              }
-              if (room_get_geffect(g, newroom) >= 6) {
-                send_to_char(g, ch, "@RLava@r covers pretty much the entire area!@n\r\n");
-              }
-            } else {
-              send_to_char(g, ch, "{}<-> {}Far {}: Too dark to tell! {}<->{}\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);
-            }
-          }
-        }
-      }
+  for (int i = 0; i < 10; i++) {
+    if (!char_get_exit(g, ch, i))
+      continue;
+    if (room_is_dark(g, char_get_in_room(ch)) && char_get_admlevel(ch) < ADMLVL_IMMORT && !char_aff_flagged(ch, AFF_INFRAVISION)) {
+      send_to_char(g, ch, "{}: DARK\n\r", dirnames[i]);
+      continue;
     }
+    if (!char_can_go(g, ch, i))
+      continue;
+    scan_room(g, ch, room_get_dir_option(g, char_get_in_room(ch), i)->to_room, "", dirnames[i]);
+
+    /* and the room past it */
+    struct room_direction_data *far = char_get_exit2(g, ch, i);
+    if (!far || !far->to_room || far->to_room == NOWHERE || IS_SET(far->exit_info, EX_CLOSED))
+      continue;
+    if (room_is_dark(g, far->to_room))
+      send_to_char(g, ch, "{}<-> {}Far {}: Too dark to tell! {}<->{}\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);
+    else
+      scan_room(g, ch, far->to_room, "Far ", dirnames[i]);
   }
   send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
 }
 
-#define DOOR_DCHIDE(g, ch, door) (char_get_exit(g, ch, door)->dchide)
-
 void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
 {
-  int check = false, skill_lvl, dchide = 20;
-
   send_to_char(g, ch, "You search for secret doors.\r\n");
   act(g, "$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
-  skill_lvl = char_get_skill(ch, SKILL_SEARCH);
+  int skill_lvl = char_get_skill(ch, SKILL_SEARCH);
   if (char_is_truffle(ch) || char_is_human(ch))
     skill_lvl = skill_lvl + 2;
   if (char_is_halfbreed(ch))
     skill_lvl = skill_lvl + 1;
 
-  if (char_get_exit(g, ch, dir))
-    dchide = DOOR_DCHIDE(g, ch, dir);
+  struct room_direction_data *exit = char_get_exit(g, ch, dir);
+  bool check                       = skill_lvl > (exit ? exit->dchide : 20);
 
-  if (skill_lvl > dchide)
-    check = true;
-
-  if (char_get_exit(g, ch, dir)) {
-    if (exit_description(char_get_exit(g, ch, dir)) &&
-        !room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
-      send_to_char(g, ch, "{}", exit_description(char_get_exit(g, ch, dir)));
-    else if (!room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET))
-      send_to_char(g, ch, "There is a normal exit there.\r\n");
-    else if (room_exit_flagged(char_get_exit(g, ch, dir), EX_ISDOOR) &&
-             room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) &&
-             exit_keyword(char_get_exit(g, ch, dir)) && (check == true))
-      send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n",
-                   fname(exit_keyword(char_get_exit(g, ch, dir))),
-                   (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) ? "" : "open ");
-    else
-      send_to_char(g, ch, "There is no exit there.\r\n");
-  } else
+  if (!exit)
+    send_to_char(g, ch, "There is no exit there.\r\n");
+  else if (exit_description(exit) && !room_exit_flagged(exit, EX_SECRET))
+    send_to_char(g, ch, "{}", exit_description(exit));
+  else if (!room_exit_flagged(exit, EX_SECRET))
+    send_to_char(g, ch, "There is a normal exit there.\r\n");
+  else if (room_exit_flagged(exit, EX_ISDOOR) && exit_keyword(exit) && check)
+    send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n", fname(exit_keyword(exit)), room_exit_flagged(exit, EX_CLOSED) ? "" : "open ");
+  else
     send_to_char(g, ch, "There is no exit there.\r\n");
 }

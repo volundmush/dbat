@@ -1,8 +1,11 @@
 /* rp.c: intros, RP bank and display, mimic, nickname, card games
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
+#include <ranges>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -48,46 +51,27 @@
 
 ACMD(do_mimic)
 {
-
   if (char_is_npc(ch))
     return;
 
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
   if (!char_get_skill(ch, SKILL_MIMIC)) {
     send_to_char(g, ch, "You do not know how to mimic the appearance of other races.\r\n");
     return;
   }
 
-  int count = 0;
-
-  // generate a list of mimic'able races.
-  bool can_mimic[NUM_RACES];
-  for (int r = 0; r < NUM_RACES; r++) {
-    can_mimic[r] = race_can_be_mimiced(r) && race_valid_sex(r, char_get_sex(ch));
-  }
+  auto can_mimic = [&](int r) { return race_can_be_mimiced(r) && race_valid_sex(r, char_get_sex(ch)); };
+  auto races     = std::views::iota(0, NUM_RACES);
 
   if (arg.empty()) {
     send_to_char(g, ch, "@CMimic Menu\n@c--------------------@W\r\n");
-    for (int r = 0; r < NUM_RACES; r++) {
-      if (!can_mimic[r])
-        continue;
-      if (count == 2) {
-        send_to_char(g, ch, "{}\n", race_name(r));
-        count = 0;
-      } else {
-        send_to_char(g, ch, "{}\n", race_name(r));
-        count++;
-      }
-    }
+    for (int r : races | std::views::filter(can_mimic))
+      send_to_char(g, ch, "{}\n", race_name(r));
     send_to_char(g, ch, "Stop@n\r\n");
-    if (char_get_mimic(ch)) {
+    if (char_get_mimic(ch))
       send_to_char(g, ch, "You currently Mimic a {}", pc_race_types[char_get_mimic(ch)]);
-    }
-
     return;
   }
 
@@ -99,29 +83,25 @@ ACMD(do_mimic)
     act(g, "@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr, nullptr, TO_ROOM);
     char_set_mimic(ch, 0);
+    /* quirk: goes on, to be told that "stop" is no race */
   }
 
-  int race = RACE_UNDEFINED;
-  for (int r = 0; r < NUM_RACES; r++) {
-    if (can_mimic[r] && str_eq_nocase(arg, race_name(r))) {
-      race = r;
-      break;
-    }
-  }
-  if (race == RACE_UNDEFINED) {
+  auto it = std::ranges::find_if(races, [&](int r) { return can_mimic(r) && str_eq_nocase(arg, race_name(r)); });
+  if (it == races.end()) {
     send_to_char(g, ch, "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
     return;
   }
+  int race = *it;
 
   int prob = char_get_skill(ch, SKILL_MIMIC), perc = axion_dice(g, 0);
-  double mult  = 1 / prob;
+  double mult  = 1 / prob; /* quirk: whole numbers, so it's free unless the skill is 1 */
   int64_t cost = getMaxKI(g, ch) * mult;
 
   if (race == char_get_mimic(ch)) {
     send_to_char(g, ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
     return;
   }
-  if ((getCurKI(g, ch)) < cost) {
+  if (getCurKI(g, ch) < cost) {
     send_to_char(g, ch, "You do not have enough ki to perform the technique.\r\n");
     return;
   }
@@ -131,22 +111,17 @@ ACMD(do_mimic)
     act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
-  std::string buf;
   char_set_mimic(ch, race);
   decCurKI(g, ch, cost, 0);
-  buf = str_format("@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be {} @M{}!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+  std::string buf = str_format("@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be {} @M{}!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(g, ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be {} {}.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-  return;
 }
 
 ACMD(do_kyodaika)
 {
-
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
     return;
-  }
-
   if (!char_is_namek(ch)) {
     send_to_char(g, ch, "You are not a namek!\r\n");
     return;
@@ -157,134 +132,109 @@ ACMD(do_kyodaika)
     act(g, "@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(g, ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
     assign_affect(g, ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
-    save_char(g, ch);
-    return;
+  } else {
+    act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    send_to_char(g, ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
+    remove_affect(g, ch, AFF_KYODAIKA);
   }
-  act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
-  send_to_char(g, ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
-  remove_affect(g, ch, AFF_KYODAIKA);
   save_char(g, ch);
-  return;
 }
 
 ACMD(do_table)
 {
-  struct obj_data *obj = nullptr, *obj2 = nullptr;
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: table (red | blue | green | yellow) (card name)");
     return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-    send_to_char(g, ch, "You don't see that table here.\r\n");
+  auto table = find_in_room(g, ch, arg, "You don't see that table here.\r\n");
+  if (reject(g, ch, table))
     return;
-  }
-
-  if (!(obj2 = get_obj_in_list_vis(g, ch, arg2, nullptr, obj_get_contains(obj)))) {
-    send_to_char(g, ch, "That card doesn't seem to be on that table.\r\n");
+  auto card = find_inside(g, ch, arg2, *table, "That card doesn't seem to be on that table.\r\n");
+  if (reject(g, ch, card))
     return;
-  }
 
-  std::string buf = str_format("$n looks at {} on {}.\r\n", obj_get_short_description(obj2), obj_get_short_description(obj));
+  std::string buf = str_format("$n looks at {} on {}.\r\n", obj_get_short_description(*card), obj_get_short_description(*table));
   act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-  send_to_char(g, ch, "{}", obj_get_action_description(obj2));
+  send_to_char(g, ch, "{}", obj_get_action_description(*card));
 }
+
+namespace {
+  /* Whether ch sits at one of the official duel tables. */
+  bool at_duel_table(GameWorld *g, struct char_data *ch)
+  {
+    if (!char_get_sits(g, ch)) {
+      send_to_char(g, ch, "You are not sitting at a duel table.\r\n");
+      return false;
+    }
+    if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
+      send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
+      return false;
+    }
+    return true;
+  }
+
+  parsed<struct obj_data *> card_case(GameWorld *g, struct char_data *ch)
+  {
+    std::string what = "case";
+    return find_carried(g, ch, what, "You don't have a case.\r\n");
+  }
+
+  bool is_card(struct obj_data *obj) { return obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT); }
+} // namespace
 
 ACMD(do_draw)
 {
-  if (!char_get_sits(g, ch)) {
-    send_to_char(g, ch, "You are not sitting at a duel table.\r\n");
+  if (!at_duel_table(g, ch))
     return;
-  }
-
-  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
-    send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
+  auto box = card_case(g, ch);
+  if (reject(g, ch, box))
     return;
-  }
 
-  struct obj_data *obj = nullptr, *obj3 = nullptr;
-  int drawn = false;
-
-  std::string what = "case";
-  if (!(obj = get_obj_in_list_vis(g, ch, what, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't have a case.\r\n");
-    return;
-  }
-  for (obj_data *obj2 : obj_contents(g, obj)) {
-    if (drawn == false) {
-      obj_from_obj(g, obj2);
-      obj_to_char(g, obj2, ch);
-      obj3  = obj2;
-      drawn = true;
-    }
-  }
-  if (drawn == false) {
+  struct obj_data *card = find_first(obj_contents(g, *box), [](obj_data *) { return true; });
+  if (!card) {
     send_to_char(g, ch, "You don't have any cards in the case!\r\n");
     return;
   }
-  act(g, "$n draws a card from $s $p.\r\n", true, ch, obj, nullptr, TO_ROOM);
-  send_to_char(g, ch, "You draw a card.\r\n{}\r\n", obj_get_action_description(obj3));
-  return;
+  obj_from_obj(g, card);
+  obj_to_char(g, card, ch);
+  act(g, "$n draws a card from $s $p.\r\n", true, ch, *box, nullptr, TO_ROOM);
+  send_to_char(g, ch, "You draw a card.\r\n{}\r\n", obj_get_action_description(card));
 }
 
 ACMD(do_shuffle)
 {
-
-  if (!char_get_sits(g, ch)) {
-    send_to_char(g, ch, "You are not sitting at a duel table.\r\n");
+  if (!at_duel_table(g, ch))
     return;
-  }
-
-  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
-    send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
+  auto box = card_case(g, ch);
+  if (reject(g, ch, box))
     return;
-  }
 
-  struct obj_data *obj = nullptr;
-  int count = 0;
-
-  std::string what = "case";
-  if (!(obj = get_obj_in_list_vis(g, ch, what, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't have a case.\r\n");
-    return;
-  }
-
-  for (obj_data *obj2 : obj_contents(g, obj)) {
-    if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
-      continue;
-    }
-    count += 1;
-  }
+  int count = static_cast<int>(std::ranges::count_if(obj_contents(g, *box), is_card));
   if (count <= 0) {
     send_to_char(g, ch, "You don't have any cards in the case!\r\n");
     return;
   }
   int total = count;
-  for (obj_data *obj2 : obj_contents(g, obj)) {
-    obj_from_obj(g, obj2);
-    obj_to_room(g, obj2, 48);
+  /* quirk: everything in the case goes to room 48, but only the cards come back */
+  for (obj_data *obj : obj_contents(g, *box)) {
+    obj_from_obj(g, obj);
+    obj_to_room(g, obj, 48);
   }
+  /* Back in the case: each card a quarter of the time, round and round, until only one is left, which goes last. */
   while (count > 0) {
-    for (obj_data *obj2 : room_contents(g, 48)) {
-      if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
+    for (obj_data *card : room_contents(g, 48) | std::views::filter(is_card)) {
+      if (count > 1 && rand_number(g, 1, 4) != 3)
         continue;
-      }
-      if (obj2 && count > 1 && rand_number(g, 1, 4) == 3) {
-        count -= 1;
-        obj_from_room(g, obj2);
-        obj_to_obj(g, obj2, obj);
-      } else if (obj2 && count == 1) {
-        count -= 1;
-        obj_from_room(g, obj2);
-        obj_to_obj(g, obj2, obj);
-      }
+      if (count < 1)
+        continue;
+      count -= 1;
+      obj_from_room(g, card);
+      obj_to_obj(g, card, *box);
     }
   }
   send_to_char(g, ch, "You shuffle the cards carefully.\r\n");
@@ -294,28 +244,15 @@ ACMD(do_shuffle)
 
 ACMD(do_hand)
 {
-
-  std::string arg;
-  int count = 0;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (arg.empty()) {
-    send_to_char(g, ch, "Syntax: hand (look | show)\r\n");
-    return;
-  }
+  std::string arg       = take_arg(rest);
+  int count             = 0;
 
   if (str_eq_nocase("look", arg)) {
     send_to_char(g, ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
-    for (obj_data *obj : char_inventory(g, ch)) {
-      if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
-        continue;
-      }
-      if (obj) {
-        count += 1;
-        send_to_char(g, ch, "{}\r\n", obj_get_short_description(obj));
-      }
+    for (obj_data *card : char_inventory(g, ch) | std::views::filter(is_card)) {
+      count += 1;
+      send_to_char(g, ch, "{}\r\n", obj_get_short_description(card));
     }
     act(g, "$n looks at $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     if (count == 0) {
@@ -325,60 +262,44 @@ ACMD(do_hand)
       act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
-      std::string buf = str_format("There are {:d} cards in the hand.", count);
-      act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, str_format("There are {:d} cards in the hand.", count).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (str_eq_nocase("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
     act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-    for (obj_data *obj : char_inventory(g, ch)) {
-      if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
-        continue;
-      }
-      if (obj) {
-        count += 1;
-        act(g, "$p", true, ch, obj, nullptr, TO_ROOM);
-      }
+    for (obj_data *card : char_inventory(g, ch) | std::views::filter(is_card)) {
+      count += 1;
+      act(g, "$p", true, ch, card, nullptr, TO_ROOM);
     }
-    if (count == 0) {
+    if (count == 0)
       act(g, "No cards.", true, ch, nullptr, nullptr, TO_ROOM);
-    }
     if (count > 7) {
       act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else {
     send_to_char(g, ch, "Syntax: hand (look | show)\r\n");
-    return;
   }
 }
 
 ACMD(do_post)
 {
-
-  std::string arg, arg2;
-  struct obj_data *obj;
-  struct obj_data *obj2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "Syntax: post (obj name)\n        post (obj name) (target obj name)\r\n");
     return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't seem to have that.\r\n");
+  auto note = find_carried(g, ch, arg, "You don't seem to have that.\r\n");
+  if (reject(g, ch, note))
     return;
-  }
-
+  struct obj_data *obj = *note;
   if (obj_get_type_flag(obj) != ITEM_NOTE) {
     send_to_char(g, ch, "You can only post notepaper.\r\n");
     return;
   }
-
   if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(g, ch, "You can not post on things in a garden.\r\n");
     return;
@@ -396,10 +317,10 @@ ACMD(do_post)
     obj_set_posttype(obj, 1);
     return;
   }
-  if (!(obj2 = get_obj_in_list_vis(g, ch, arg2, nullptr, room_get_contents(g, char_get_in_room(ch))))) {
-    send_to_char(g, ch, "You can't seem to find the thing you want to post it on.\r\n");
+  auto target = find_in_room(g, ch, arg2, "You can't seem to find the thing you want to post it on.\r\n");
+  if (reject(g, ch, target))
     return;
-  }
+  struct obj_data *obj2 = *target;
   if (obj_get_posted_to(g, obj2)) {
     send_to_char(g, ch, "It already has something posted on it. Get that first if you want to post.\r\n");
     return;
@@ -416,115 +337,91 @@ ACMD(do_post)
   obj_set_posttype(obj, 2);
   obj_set_posted_to(obj, obj2);
   obj_set_posted_to(obj2, obj);
-  return;
 }
 
 ACMD(do_play)
 {
-
-  if (char_get_position(ch) != POS_SITTING) {
+  if (char_get_position(ch) != POS_SITTING || !char_get_sits(g, ch) || obj_get_vnum(g, char_get_sits(g, ch)) < 604 ||
+      obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
     send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
     return;
   }
 
-  if (!char_get_sits(g, ch)) {
-    send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
-    return;
-  }
-
-  if (obj_get_vnum(g, char_get_sits(g, ch)) < 604 || obj_get_vnum(g, char_get_sits(g, ch)) > 607) {
-    send_to_char(g, ch, "You need to be sitting at an official table to play.\r\n");
-    return;
-  }
-
-  struct obj_data *obj = nullptr, *obj2 = nullptr;
-  std::string arg;
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Syntax: play (card name)");
     return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't have that card to play.\r\n");
+  auto card = find_carried(g, ch, arg, "You don't have that card to play.\r\n");
+  if (reject(g, ch, card))
     return;
-  }
 
-  for (obj_data *obj3 : room_contents(g, char_get_in_room(ch))) {
-    if (obj_get_vnum(g, obj3) == obj_get_vnum(g, char_get_sits(g, ch)) - 4) {
-      obj2 = obj3;
-    }
-  }
-
-  if (obj2 == nullptr) {
+  /* the seat's own table, 4 vnums below it: the last one in the room */
+  obj_vnum table_vnum    = obj_get_vnum(g, char_get_sits(g, ch)) - 4;
+  struct obj_data *table = nullptr;
+  for (obj_data *obj : room_contents(g, char_get_in_room(ch)) | std::views::filter([&](obj_data *o) { return obj_get_vnum(g, o) == table_vnum; }))
+    table = obj;
+  if (!table) {
     send_to_char(g, ch, "Your table is missing. Inform an immortal of this problem.\r\n");
     return;
   }
 
-  act(g, "You play $p on your table.", true, ch, obj, nullptr, TO_CHAR);
-  act(g, "$n plays $p on $s table.", true, ch, obj, nullptr, TO_ROOM);
-  obj_from_char(g, obj);
-  obj_to_obj(g, obj, obj2);
+  act(g, "You play $p on your table.", true, ch, *card, nullptr, TO_CHAR);
+  act(g, "$n plays $p on $s table.", true, ch, *card, nullptr, TO_ROOM);
+  obj_from_char(g, *card);
+  obj_to_obj(g, *card, table);
 }
+
+namespace {
+  void nickname_ship(GameWorld *g, struct char_data *ch, std::string nick)
+  {
+    struct obj_data *ship = find_first(room_contents(g, char_get_in_room(ch)), [&](obj_data *o) { return obj_get_vnum(g, o) >= 45000 && obj_get_vnum(g, o) <= 45999; });
+    if (!ship) {
+      send_to_char(g, ch, "There's no ship here to nickname.\r\n");
+      return;
+    }
+    if (nick.find('@') != std::string::npos) {
+      send_to_char(g, ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
+      return;
+    }
+    obj_set_action_description(ship, CAP(nick).c_str());
+    /* its interior, 1000 vnums on: gone, and the ship put back to show its new name */
+    for (obj_data *k : each_obj(g) | std::views::filter([&](obj_data *o) { return obj_get_vnum(g, o) == obj_get_vnum(g, ship) + 1000; })) {
+      extract_obj(g, k);
+      room_vnum was_in = obj_get_in_room(ship);
+      obj_from_room(g, ship);
+      obj_to_room(g, ship, was_in);
+    }
+  }
+} // namespace
 
 /* Nickname an object */
 ACMD(do_nickname)
 {
-  struct obj_data *obj = nullptr;
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: nickname (object) (nickname)\n");
     send_to_char(g, ch, "Syntax: nickname ship (nickname)\n");
     return;
   }
-
-  if (!str_eq_nocase(arg, "ship")) {
-    if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-      send_to_char(g, ch, "You don't have that item to nickname.\r\n");
-      return;
-    }
-  }
+  bool ship = str_eq_nocase(arg, "ship");
+  parsed<struct obj_data *> item;
+  if (!ship && reject(g, ch, item = find_carried(g, ch, arg, "You don't have that item to nickname.\r\n")))
+    return;
   if (arg2.size() > 20) {
     send_to_char(g, ch, "You can't nickname items with any name longer than 20 characters.\r\n");
     return;
   }
-
-  if (str_eq_nocase(arg, "ship")) {
-    struct obj_data *ship2 = nullptr;
-    int found = false;
-    for (obj_data *ship : room_contents(g, char_get_in_room(ch))) {
-      if (obj_get_vnum(g, ship) >= 45000 && obj_get_vnum(g, ship) <= 45999 && found == false) {
-        found = true;
-        ship2 = ship;
-      }
-    }
-    if (found == true) {
-      if (arg2.find('@') != std::string::npos) {
-        send_to_char(g, ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
-        return;
-      }
-      std::string nick = CAP(arg2);
-      obj_set_action_description(ship2, nick.c_str());
-      for (obj_data *k : each_obj(g)) {
-        if (obj_get_vnum(g, k) == obj_get_vnum(g, ship2) + 1000) {
-          extract_obj(g, k);
-          room_vnum was_in = obj_get_in_room(ship2);
-          obj_from_room(g, ship2);
-          obj_to_room(g, ship2, was_in);
-        }
-      }
-    } else
-      send_to_char(g, ch, "There's no ship here to nickname.\r\n");
+  if (ship) {
+    nickname_ship(g, ch, arg2);
     return;
   }
 
+  struct obj_data *obj = *item;
   if (strstr(obj_get_short_description(obj), "nicknamed")) {
     send_to_char(g, ch, "{}@w has already been nicknamed.@n\r\n", obj_get_short_description(obj));
     return;
@@ -534,44 +431,32 @@ ACMD(do_nickname)
     return;
   }
   send_to_char(g, ch, "@wYou nickname {}@w as '@C{}@w'.@n\r\n", obj_get_short_description(obj), arg2);
-  std::string nick;
-  std::string nick2;
-  nick  = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(obj), CAP(arg2));
-  nick2 = str_format("{} {}", obj_get_name(obj), arg2);
+  std::string nick  = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(obj), CAP(arg2));
+  std::string nick2 = str_format("{} {}", obj_get_name(obj), arg2);
   obj_set_short_description(obj, nick.c_str());
   obj_set_name(obj, nick2.c_str());
-  return;
 }
+
+constexpr act_msgs SHOWOFF = {"@WYou hold up $p@W for @C$N@W to see:@n", "@C$n@W holds up $p@W for you to see:@n", "@C$n@W holds up $p@W for @c$N@W to see.@n", true};
 
 ACMD(do_showoff)
 {
-  struct obj_data *obj   = nullptr;
-  struct char_data *vict = nullptr;
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "You want to show what item to what character?\r\n");
     return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't seem to have that.\r\n");
+  auto obj = find_carried(g, ch, arg, "You don't seem to have that.\r\n");
+  if (reject(g, ch, obj))
     return;
-  }
-  if (!(vict = get_player_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "There is no such person around.\r\n");
+  auto vict = find_player(g, ch, arg2, FIND_CHAR_ROOM, "There is no such person around.\r\n");
+  if (reject(g, ch, vict))
     return;
-  } else { /* Ok show that target the object! */
-    act(g, "@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
-    act(g, "@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
-    act(g, "@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
-    show_obj_to_char(g, obj, vict, SHOW_OBJ_ACTION);
-    return;
-  }
+  act_triple(g, SHOWOFF, ch, *obj, *vict);
+  show_obj_to_char(g, *obj, *vict, SHOW_OBJ_ACTION);
 }
 
 /* Used for checking if you know the character in question. */
@@ -697,29 +582,25 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
   return;
 }
 
+constexpr act_msgs DUBBED = {"You decide to call $M, $N.", "$n seems to decide something about you.", "$n seems to decide something about $N.", true};
+
 ACMD(do_intro)
 {
-
   if (char_is_npc(ch))
     return;
 
-  std::string arg, arg2;
-  struct char_data *vict;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "Syntax: dub (target) (name)\r\nWho do you want to dub and what do you want to name them?\r\n");
     return;
   }
-
   if (arg2.empty()) {
     send_to_char(g, ch, "Syntax: dub (target) (name)\r\nWhat name do you wish to know them by?\r\n");
     return;
   }
-
   if (arg2.size() > 20) {
     send_to_char(g, ch, "Limit the name to 20 characters.\r\n");
     return;
@@ -728,27 +609,23 @@ ACMD(do_intro)
     send_to_char(g, ch, "Limit the name to at least 3 characters.\r\n");
     return;
   }
-
   if (arg2.find_first_of("$@%") != std::string::npos) {
     send_to_char(g, ch, "Illegal character. No symbols.\r\n");
     return;
   }
 
-  if (!(vict = get_player_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "There is no such person.\r\n");
+  auto found = find_player(g, ch, arg, FIND_CHAR_ROOM, "There is no such person.\r\n");
+  if (reject(g, ch, found))
     return;
-  }
-
+  struct char_data *vict = *found;
   if (vict == ch) {
     send_to_char(g, ch, "That seems rather odd.\r\n");
     return;
   }
-
   if (char_is_npc(vict)) {
     send_to_char(g, ch, "That seems rather unwise.\r\n");
     return;
   }
-
   if (readIntro(vict, ch) == 2) {
     send_to_char(g, ch, "There seems to have been an error, report this to Iovan.\r\n");
     return;
@@ -758,63 +635,50 @@ ACMD(do_intro)
     return;
   }
   introWrite(ch, vict, arg2);
-  act(g, "You decide to call $M, $N.", true, ch, nullptr, vict, TO_CHAR);
-  act(g, "$n seems to decide something about you.", true, ch, nullptr, vict, TO_VICT);
-  act(g, "$n seems to decide something about $N.", true, ch, nullptr, vict, TO_NOTVICT);
-  return;
+  act_triple(g, DUBBED, ch, nullptr, vict);
 }
 
 ACMD(do_rptrans)
 {
-  struct char_data *vict = nullptr;
-  int amt = 0;
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: exchange (target) (amount)\r\n");
     return;
   }
-
-  amt = parse_int(arg2);
-
+  int amt = parse_int(arg2);
   if (amt <= 0) {
     send_to_char(g, ch, "Are you being funny?\r\n");
     return;
   }
-
   if (amt > char_get_rp(ch)) {
     send_to_char(g, ch, "@WYou only have @C{:d}@W RPP!@n\r\n", char_get_rp(ch));
     return;
   }
-
   if (!readUserIndex(arg)) {
     send_to_char(g, ch, "That is not a recognised user file.\r\n");
     return;
   }
 
+  /* the user's character in the game, the last if there are more */
+  struct char_data *vict = nullptr;
   for (descriptor_data *k : each_desc(g)) {
-    if (desc_get_connected(k) != CON_PLAYING)
-      continue;
-    if (char_is_npc(k->character))
-      continue;
-    if (str_eq_nocase(k->user, arg))
+    if (desc_get_connected(k) == CON_PLAYING && !char_is_npc(k->character) && str_eq_nocase(k->user, arg))
       vict = k->character;
   }
   if (vict == nullptr) {
     userWrite(g, nullptr, 0, amt, 0, arg.c_str());
   } else {
-    char_set_rp(vict, char_get_rp(vict) + (amt));
+    char_set_rp(vict, char_get_rp(vict) + amt);
     char_get_desc(vict)->rpp += amt;
     userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
-    char_set_trp(vict, char_get_trp(vict) + (amt));
+    char_set_trp(vict, char_get_trp(vict) + amt);
     save_char(g, vict);
     send_to_char(g, vict, "@W{} gives @C{:d}@W of their RPP to you. How nice!\r\n", char_get_name(ch), amt);
   }
-  char_set_rp(ch, char_get_rp(ch) - (amt));
+  char_set_rp(ch, char_get_rp(ch) - amt);
   char_get_desc(ch)->rpp -= amt;
   userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
   send_to_char(g, ch, "@WYou exchange @C{:d}@W RPP to user @c{}@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
@@ -824,19 +688,15 @@ ACMD(do_rptrans)
 
 ACMD(do_rdisplay)
 {
-  argument = skip_spaces(argument);
-
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
     return;
-  }
 
-  if (argument.empty()) {
+  std::string text(skip_spaces(argument));
+  if (text.empty()) {
     send_to_char(g, ch, "Clearing room display.\r\n");
     char_set_rdisplay(ch, "Empty");
   } else {
-    std::string derp(argument);
-
-    send_to_char(g, ch, "You set your display to; {}\r\n", derp);
-    char_set_rdisplay(ch, derp);
+    send_to_char(g, ch, "You set your display to; {}\r\n", text);
+    char_set_rdisplay(ch, text);
   }
 }

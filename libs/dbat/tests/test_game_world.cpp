@@ -1,10 +1,15 @@
 /* Two GameWorlds built by hand must not affect each other. Needs no data/ files. */
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 #include <vector>
+
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "dbat/utils.hpp"
 #include "dbat/db.hpp"
+#include "dbat/fileop.hpp"
 #include "dbat/extract.hpp"
 #include "dbat/descriptor.hpp"
 #include "dbat/dg_event.hpp"
@@ -558,6 +563,36 @@ static void check_get_number(void)
   CHECK(!strcmp(name, "bread"));
 }
 
+/* A toplist file of 25 places loads into the 25 places, and nothing past them. */
+static void check_toplist_load(void)
+{
+  const char *tmp = getenv("TMPDIR");
+  std::string dir = std::string(tmp && *tmp ? tmp : "/tmp") + "/dbat-toplist.XXXXXX";
+  char cwd[4096];
+  CHECK(mkdtemp(dir.data()) != nullptr && getcwd(cwd, sizeof(cwd)) != nullptr);
+  CHECK(chdir(dir.c_str()) == 0 && mkdir("intro", 0755) == 0 && mkdir("intro/P-T", 0755) == 0);
+  FILE *fl = fopen("intro/P-T/toplist.itr", "w");
+  CHECK(fl != nullptr);
+  for (int x = 0; x < 25; x++)
+    fprintf(fl, "Name%d %d\n", x, (x + 1) * 100);
+  fclose(fl);
+
+  GameWorld *g = make_world(800, 1);
+  topLoad(g);
+  CHECK(g->toppoint[0] == 100);
+  CHECK(g->toppoint[24] == 2500);
+  CHECK(g->topname[24] && !strcmp(g->topname[24], "Name24"));
+  CHECK(g->ch_selling_uid == 0 && g->ch_buying_uid == 0);
+  for (char *&name : g->topname) {
+    free(name);
+    name = nullptr;
+  }
+  free_world(g);
+
+  CHECK(remove("intro/P-T/toplist.itr") == 0 && rmdir("intro/P-T") == 0 && rmdir("intro") == 0);
+  CHECK(chdir(cwd) == 0 && rmdir(dir.c_str()) == 0);
+}
+
 int main(void)
 {
   GameWorld *a = make_world(100, 3);
@@ -579,6 +614,7 @@ int main(void)
   check_other_state(a, b);
   check_objects_off_the_ground();
   check_get_number();
+  check_toplist_load();
 
   free_world(b);
   free_world(a);

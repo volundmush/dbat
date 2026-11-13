@@ -234,8 +234,10 @@ static void fingerprint_bytes(const char *bytes, size_t length)
   static FILE *trace; /* BOT_TRACE names a file for the output itself, to see where two runs part */
   if (!trace && getenv("BOT_TRACE"))
     trace = fopen(getenv("BOT_TRACE"), "w");
-  if (trace)
+  if (trace) {
     fwrite(bytes, 1, length, trace);
+    fflush(trace); /* the run can end without closing it */
+  }
 
   for (size_t i = 0; i < length; i++)
     fingerprint = (fingerprint ^ (unsigned char)bytes[i]) * 1099511628211UL;
@@ -839,6 +841,14 @@ static GameWorld *restart_and_compare(GameWorld *g)
   char text[256];
 
   alarm(STEP_SECONDS * 20);
+  /*
+   * The restart frees every descriptor, and a new one can be given a freed address, which would make
+   * forget_closed_connections() take it for one still open. So no connection outlives the game it was in.
+   */
+  for (int i = 0; i < num_connections; i++)
+    if (connections[i].peer >= 0)
+      close(connections[i].peer);
+  num_connections = 0;
   save_everything(g);
   th_stop(g); /* which saves whoever has lost their connection */
   if (system("rm -rf ../first && cp -r . ../first") != 0)

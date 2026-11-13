@@ -1,8 +1,10 @@
 /* help.c: help, commands, toggles, colour, history, time and weather
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
 #include "dbat/utils.hpp"
@@ -45,60 +47,42 @@
 #include "informative_internal.hpp"
 
 static int sort_commands_helper(const void *a, const void *b, void *world);
-static void space_to_minus(char *str);
 
-/* local globals */
+namespace {
+  /* 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th ... 21st */
+  const char *ordinal_suffix(int n)
+  {
+    if ((n % 100) / 10 == 1)
+      return "th";
+    switch (n % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  }
+} // namespace
 
 ACMD(do_time)
 {
-  const char *suf;
-  int weekday, day;
-
-  /* day in [1..30] */
-  day = g->time_info.day + 1;
-
-  /* 30 days in a month, 6 days a week */
-  weekday = day % 6;
+  int day     = g->time_info.day + 1; /* day in [1..30] */
+  int weekday = day % 6;              /* 30 days in a month, 6 days a week */
 
   send_to_char(g, ch, "It is {:d} o'clock {}, on {}.\r\n",
                (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12),
                g->time_info.hours >= 12 ? "PM" : "AM", weekdays[weekday]);
 
-  /*
-   * Peter Ajamian <peter@PAJAMIAN.DHS.ORG> supplied the following as a fix
-   * for a bug introduced in the ordinal display that caused 11, 12, and 13
-   * to be incorrectly displayed as 11st, 12nd, and 13rd.  Nate Winters
-   * <wintersn@HOTMAIL.COM> had already submitted a fix, but it hard-coded a
-   * limit on ordinal display which I want to avoid.	-dak
-   */
-
-  suf = "th";
-
-  if (((day % 100) / 10) != 1) {
-    switch (day % 10) {
-      case 1:
-        suf = "st";
-        break;
-      case 2:
-        suf = "nd";
-        break;
-      case 3:
-        suf = "rd";
-        break;
-    }
-  }
-
   send_to_char(g, ch, "The {:d}{} Day of the {}, Year {:d}.\r\n",
-               day, suf, month_name[g->time_info.month], g->time_info.year);
+               day, ordinal_suffix(day), month_name[g->time_info.month], g->time_info.year);
 }
 
 ACMD(do_weather)
 {
-  const char *sky_look[] = {
-      "cloudless",
-      "cloudy",
-      "rainy",
-      "lit by flashes of lightning"};
+  static constexpr const char *sky_look[] = {"cloudless", "cloudy", "rainy", "lit by flashes of lightning"};
 
   if (char_is_outside(g, ch)) {
     send_to_char(g, ch, "The sky is {} and {}.\r\n", sky_look[g->weather_info.sky],
@@ -111,13 +95,6 @@ ACMD(do_weather)
                    sky_look[g->weather_info.sky]);
   } else
     send_to_char(g, ch, "You have no feeling about the weather at all.\r\n");
-}
-
-/* puts -'s instead of spaces */
-static void space_to_minus(char *str)
-{
-  while ((str = strchr(str, ' ')) != nullptr)
-    *str = '-';
 }
 
 int search_help(GameWorld *g, const char *argument, int level)
@@ -152,9 +129,6 @@ int search_help(GameWorld *g, const char *argument, int level)
 
 ACMD(do_help)
 {
-  std::string buf;
-  int mid = 0;
-
   if (!char_get_desc(ch))
     return;
 
@@ -173,27 +147,24 @@ ACMD(do_help)
     return;
   }
 
-  space_to_minus(text.data());
+  std::ranges::replace(text, ' ', '-');
 
-  if ((mid = search_help(g, text.c_str(), char_get_admlevel(ch))) == NOWHERE) {
-    int i, found = 0;
+  int mid = search_help(g, text.c_str(), char_get_admlevel(ch));
+  if (mid == NOWHERE) {
     send_to_char(g, ch, "There is no help on that word.\r\n");
-    if (char_get_admlevel(ch) < 3) {
+    if (char_get_admlevel(ch) < 3)
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_is_npc(ch) ? 0 : char_get_invis_level(g, ch)), true, "{} tried to get help on {}", char_get_name(ch), text);
-    }
-    for (i = 0; i < (int)g->help_table.size(); i++) {
-      if (g->help_table[i].min_level > char_get_admlevel(ch))
+    /* the entries ch may read that start with the same letter and are within two edits of it */
+    bool found = false;
+    for (const auto &entry : g->help_table) {
+      if (entry.min_level > char_get_admlevel(ch) || text[0] != *entry.keywords.c_str())
         continue;
-      /* To help narrow down results, if they don't start with the same letters, move on */
-      if (text[0] != *g->help_table[i].keywords.c_str())
+      if (levenshtein_distance(text.c_str(), entry.keywords.c_str()) > 2)
         continue;
-      if (levenshtein_distance(text.c_str(), g->help_table[i].keywords.c_str()) <= 2) {
-        if (!found) {
-          send_to_char(g, ch, "\r\nDid you mean:\r\n");
-          found = 1;
-        }
-        send_to_char(g, ch, "  {}\r\n", g->help_table[i].keywords);
-      }
+      if (!found)
+        send_to_char(g, ch, "\r\nDid you mean:\r\n");
+      found = true;
+      send_to_char(g, ch, "  {}\r\n", entry.keywords);
     }
     return;
   }
@@ -201,23 +172,17 @@ ACMD(do_help)
     send_to_char(g, ch, "There is no help on that word.\r\n");
     return;
   }
-  buf = "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n";
+  std::string buf = "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n";
   buf += g->help_table[mid].entry;
   buf += "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n";
-  if (char_get_admlevel(ch) > 0) {
+  if (char_get_admlevel(ch) > 0)
     buf += str_format("@WHelp File Level@w: @D(@R{:d}@D)@n\n", g->help_table[mid].min_level);
-  }
   send_to_char(g, ch, buf);
 }
 
 /* Shows one of the fixed text files (credits, news, motd, ...) */
 ACMD(do_gen_ps)
 {
-  std::string arg;
-  std::string bum;
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
   switch (subcmd) {
     case SCMD_CREDITS:
       send_to_char(g, ch, g->credits);
@@ -239,8 +204,7 @@ ACMD(do_gen_ps)
       send_to_char(g, ch, g->handbook);
       break;
     case SCMD_POLICIES:
-      bum = str_format("--------------------\r\n{}\r\n--------------------\r\n", g->policies);
-      send_to_char(g, ch, bum);
+      send_to_char(g, ch, str_format("--------------------\r\n{}\r\n--------------------\r\n", g->policies));
       break;
     case SCMD_MOTD:
       send_to_char(g, ch, g->motd);
@@ -270,50 +234,28 @@ ACMD(do_gen_ps)
   }
 }
 
-static const char *const ctypes[] = {
-    "off", "on", "\n"};
+static const char *const ctypes[] = {"off", "on", "\n"}; /* by C_OFF and C_ON */
 
 ACMD(do_color)
 {
-  std::string arg;
-  int tp;
-
-  /*if (IS_NPC(ch))
-    return;*/
-
   std::string_view rest = argument;
-  arg                   = take_word(rest);
+  std::string arg       = take_word(rest);
 
-  if (arg.empty()) {
+  int tp = arg.empty() ? -1 : search_block(arg, ctypes, false);
+  if (tp == -1) {
     send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
-  if ((tp = search_block(arg, ctypes, false)) == -1) {
-    send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
-    return;
-  }
-  switch (tp) {
-    case C_OFF:
-      char_prf_set(g, ch, PRF_COLOR, false);
-      break;
-    case C_ON:
-      char_prf_set(g, ch, PRF_COLOR, true);
-      break;
-  }
+  char_prf_set(g, ch, PRF_COLOR, tp == C_ON);
   send_to_char(g, ch, "Your color is now @o{}@n.\r\n", ctypes[tp]);
 }
 
 ACMD(do_toggle)
 {
-  std::string buf2;
-
   if (char_is_npc(ch))
     return;
 
-  if (char_get_wimp_level(g, ch) == 0)
-    buf2 = "OFF"; /* strcpy: OK */
-  else
-    buf2 = str_format("{:<3}", printf_digits(char_get_wimp_level(g, ch), 3)); /* sprintf: OK */
+  std::string wimp = char_get_wimp_level(g, ch) == 0 ? "OFF" : str_format("{:<3}", printf_digits(char_get_wimp_level(g, ch), 3));
 
   if (char_get_admlevel(ch)) {
     send_to_char(g, ch,
@@ -345,7 +287,7 @@ ACMD(do_toggle)
 
                ONOFF(char_prf_flagged(g, ch, PRF_DISPKI)),
                YESNO(char_prf_flagged(g, ch, PRF_DEAF)),
-               buf2,
+               wimp,
 
                ONOFF(!char_prf_flagged(g, ch, PRF_NOGOSS)),
                ONOFF(!char_prf_flagged(g, ch, PRF_NOAUCT)),
@@ -365,9 +307,8 @@ ACMD(do_toggle)
 
                ONOFF(char_prf_flagged(g, ch, PRF_DISPTNL)));
 
-  if (CONFIG_ENABLE_COMPRESSION) {
+  if (CONFIG_ENABLE_COMPRESSION)
     send_to_char(g, ch, "    Compression: {:<3}\r\n", ONOFF(!char_prf_flagged(g, ch, PRF_NOCOMPRESS)));
-  }
 }
 
 static int sort_commands_helper(const void *a, const void *b, void *world)
@@ -397,61 +338,48 @@ void sort_commands(GameWorld *g)
 
 ACMD(do_commands)
 {
-  int no, i, cmd_num;
-  int wizhelp = 0, socials = 0;
-  struct char_data *vict;
-  std::string arg;
-  std::string label;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string_view rest  = argument;
+  std::string arg        = take_arg(rest);
+  struct char_data *vict = ch;
 
   if (!arg.empty()) {
-    if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
-      send_to_char(g, ch, "Who is that?\r\n");
+    auto who = find_char(g, ch, arg, FIND_CHAR_WORLD, "Who is that?\r\n").and_then([](struct char_data *v) -> parsed<struct char_data *> {
+      if (char_is_npc(v))
+        return std::unexpected("Who is that?\r\n");
+      return v;
+    });
+    if (reject(g, ch, who))
       return;
-    }
+    vict = *who;
     if (char_get_level(ch) < char_get_level(vict)) {
       send_to_char(g, ch, "You can't see the commands of people above your level.\r\n");
       return;
     }
-  } else
-    vict = ch;
+  }
 
-  if (subcmd == SCMD_SOCIALS)
-    socials = 1;
-  else if (subcmd == SCMD_WIZHELP)
-    wizhelp = 1;
+  bool socials = subcmd == SCMD_SOCIALS;
+  bool wizhelp = subcmd == SCMD_WIZHELP;
 
   send_to_char(g, ch, "The following {}{} are available to {}:\r\n",
                wizhelp ? "privileged " : "",
                socials ? "socials" : "commands",
                vict == ch ? "you" : char_get_name(vict));
 
-  /* cmd_num starts at 1, not 0, to remove 'RESERVED' */
-  for (no = 1, cmd_num = 1; g->complete_cmd_info[g->cmd_sort_info[cmd_num]].command[0] != '\n'; cmd_num++) {
-    i = g->cmd_sort_info[cmd_num];
+  /* in sorted order, from 1 to pass over 'RESERVED' */
+  int no = 1;
+  for (int cmd_num = 1; g->complete_cmd_info[g->cmd_sort_info[cmd_num]].command[0] != '\n'; cmd_num++) {
+    const auto &info = g->complete_cmd_info[g->cmd_sort_info[cmd_num]];
 
-    if (g->complete_cmd_info[i].minimum_level < 0 ||
-        char_get_level(vict) < g->complete_cmd_info[i].minimum_level)
+    if (info.minimum_level < 0 || char_get_level(vict) < info.minimum_level)
+      continue;
+    if (info.minimum_admlevel < 0 || char_get_admlevel(vict) < info.minimum_admlevel)
+      continue;
+    if ((info.minimum_admlevel >= ADMLVL_IMMORT) != wizhelp)
+      continue;
+    if (!wizhelp && socials != (info.command_pointer == do_action || info.command_pointer == do_insult))
       continue;
 
-    if (g->complete_cmd_info[i].minimum_admlevel < 0 ||
-        char_get_admlevel(vict) < g->complete_cmd_info[i].minimum_admlevel)
-      continue;
-
-    if ((g->complete_cmd_info[i].minimum_admlevel >= ADMLVL_IMMORT) != wizhelp)
-      continue;
-
-    if (!wizhelp && socials != (g->complete_cmd_info[i].command_pointer == do_action ||
-                                g->complete_cmd_info[i].command_pointer == do_insult))
-      continue;
-
-    if (check_disabled(g, &g->complete_cmd_info[i]))
-      label = str_format("({})", g->complete_cmd_info[i].command);
-    else
-      label = str_format("{}", g->complete_cmd_info[i].command);
-
+    std::string label = check_disabled(g, &info) ? str_format("({})", info.command) : std::string(info.command);
     send_to_char(g, ch, "{:<11}{}", label, no++ % 7 == 0 ? "\r\n" : "");
   }
 
@@ -461,42 +389,31 @@ ACMD(do_commands)
 
 ACMD(do_history)
 {
-  std::string arg;
-  int type;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  type = search_block(arg, history_types, false);
+  int type = search_block(arg, history_types, false);
   if (arg.empty() || type < 0) {
-    int i;
-
     send_to_char(g, ch, "Usage: history <");
-    for (i = 0; *history_types[i] != '\n'; i++) {
-      if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
+    for (int i = 0; *history_types[i] != '\n'; i++) {
+      bool shown = i != 3 || char_get_admlevel(ch) >= 1; /* the fourth is for immortals */
+      if (shown)
         send_to_char(g, ch, " {} ", history_types[i]);
-      }
-      if (*history_types[i + 1] == '\n') {
+      if (*history_types[i + 1] == '\n')
         send_to_char(g, ch, ">\r\n");
-      } else {
-        if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
-          send_to_char(g, ch, "|");
-        }
-      }
+      else if (shown)
+        send_to_char(g, ch, "|");
     }
     return;
   }
 
   std::deque<std::string> *history = char_comm_hist(g, ch, type);
-  if (history && !history->empty() && !history->front().empty()) {
-    for (const std::string &line : *history)
-      send_to_char(g, ch, line);
-/* Make this a 1 if you want history to cear after viewing */
-#if 0 
-      free_history(ch, type);
-#endif
-  } else
+  if (!history || history->empty() || history->front().empty()) {
     send_to_char(g, ch, "You have no history in that channel.\r\n");
+    return;
+  }
+  for (const std::string &line : *history)
+    send_to_char(g, ch, line);
 }
 
 void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)

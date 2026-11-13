@@ -2,9 +2,12 @@
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
 #include <cstdlib>
+#include <iterator>
+#include <ranges>
 #include <span>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -48,161 +51,105 @@
 #include "informative_internal.hpp"
 
 // definitions
+namespace {
+  /* What an arlian's evolution points can be spent on, and its cost: the level, then shares of the molt threshold and
+     of the base. */
+  struct evolution {
+    const char *word, *abbr; /* abbr may be null */
+    const char *name;
+    double of_threshold, of_base;
+    int64_t (*base)(char_data *ch);
+    int64_t (*gain)(char_data *ch, int64_t amt, bool trans_mult);
+    const char *felt, *label;
+  };
+
+  constexpr evolution EVOLUTIONS[] = {
+      {"powerlevel", "pl", "powerlevel", 0.65, 0.15, getBasePL, gainBasePL, "your body has strengthened.", "@RPL"},
+      {"ki", nullptr, "ki", 0.50, 0.22, getBaseKI, gainBaseKI, "your spirit has strengthened.", "@CKi"},
+      {"stamina", "st", "stamina", 0.50, 0.15, getBaseST, gainBaseST, "your body has more stamina.", "@GST"},
+  };
+
+  int64_t evolution_cost(struct char_data *ch, const evolution &e)
+  {
+    int64_t cost = char_get_level(ch);
+    cost += (molt_threshold(ch) * e.of_threshold) + (e.base(ch) * e.of_base);
+    return cost;
+  }
+} // namespace
+
 ACMD(do_evolve)
 {
-
   if (!char_is_arlian(ch) || char_is_npc(ch)) {
     send_to_char(g, ch, "You are not an arlian!\r\n");
     return;
   }
 
-  std::string arg;
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  int64_t plcost = char_get_level(ch), stcost = char_get_level(ch), kicost = char_get_level(ch);
-
-  plcost += molt_threshold(ch) * 0.65 + (getBasePL(ch) * 0.15);
-  kicost += (molt_threshold(ch) * 0.50) + (getBaseKI(ch) * 0.22);
-  stcost += (molt_threshold(ch) * 0.50) + (getBaseST(ch) * 0.15);
+  std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "@D-=@YConvert Evolution Points To What?@D=-@n\r\n");
     send_to_char(g, ch, "@D-------------------------------------@n\r\n");
-    send_to_char(g, ch, "@CPowerlevel  @D: @Y{} @Wpts\r\n", add_commas(plcost));
-    send_to_char(g, ch, "@CKi          @D: @Y{} @Wpts\r\n", add_commas(kicost));
-    send_to_char(g, ch, "@CStamina     @D: @Y{} @Wpts\r\n", add_commas(stcost));
+    send_to_char(g, ch, "@CPowerlevel  @D: @Y{} @Wpts\r\n", add_commas(evolution_cost(ch, EVOLUTIONS[0])));
+    send_to_char(g, ch, "@CKi          @D: @Y{} @Wpts\r\n", add_commas(evolution_cost(ch, EVOLUTIONS[1])));
+    send_to_char(g, ch, "@CStamina     @D: @Y{} @Wpts\r\n", add_commas(evolution_cost(ch, EVOLUTIONS[2])));
     send_to_char(g, ch, "@D[@Y{} @Wpts currently@D]@n\r\n", add_commas(char_get_moltexp(ch)));
     return;
   }
-  if (str_eq_nocase(arg, "powerlevel") || str_eq_nocase(arg, "pl")) {
-    if (plcost > molt_threshold(ch)) {
-      send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
-      return;
-    }
-    if (char_get_moltexp(ch) < plcost) {
-      send_to_char(g, ch, "You do not have enough evolution experience.\r\n");
-      return;
-    }
-    int64_t plgain = (getBasePL(ch)) * 0.01;
 
-    if (plgain <= 0) {
-      plgain = rand_number(g, 1, 5);
-    } else {
-      plgain = rand_number(g, plgain, plgain * .5);
-    }
-    gainBasePL(ch, plgain, false);
-    char_set_moltexp(ch, char_get_moltexp(ch) - (plcost));
-    send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+{}@D]@n\r\n", add_commas(plgain));
-  } else if (str_eq_nocase(arg, "ki")) {
-    if (kicost > molt_threshold(ch)) {
-      send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
-      return;
-    }
-    if (char_get_moltexp(ch) < kicost) {
-      send_to_char(g, ch, "You do not have enough evolution experience.\r\n");
-      return;
-    }
-    int64_t kigain = (getBaseKI(ch)) * 0.01;
-
-    if (kigain <= 0) {
-      kigain = rand_number(g, 1, 5);
-    } else {
-      kigain = rand_number(g, kigain, kigain * .5);
-    }
-    gainBaseKI(ch, kigain, false);
-    char_set_moltexp(ch, char_get_moltexp(ch) - (kicost));
-    send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+{}@D]@n\r\n", add_commas(kigain));
-  } else if (str_eq_nocase(arg, "stamina") || str_eq_nocase(arg, "st")) {
-    if (stcost > molt_threshold(ch)) {
-      send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
-      return;
-    }
-    if (char_get_moltexp(ch) < stcost) {
-      send_to_char(g, ch, "You do not have enough evolution experience.\r\n");
-      return;
-    }
-    int64_t stgain = (getBaseST(ch)) * 0.01;
-
-    if (stgain <= 0) {
-      stgain = rand_number(g, 1, 5);
-    } else {
-      stgain = rand_number(g, stgain, stgain * .5);
-    }
-    gainBaseST(ch, stgain, false);
-    char_set_moltexp(ch, char_get_moltexp(ch) - (stcost));
-    send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+{}@D]@n\r\n", add_commas(stgain));
+  auto it = std::ranges::find_if(EVOLUTIONS, [&](const evolution &e) { return str_eq_nocase(arg, e.word) || (e.abbr && str_eq_nocase(arg, e.abbr)); });
+  if (it == std::end(EVOLUTIONS))
+    return; /* quirk: says nothing */
+  int64_t cost = evolution_cost(ch, *it);
+  if (cost > molt_threshold(ch)) {
+    send_to_char(g, ch, "You need a few more evolution levels before you can start upgrading {}.\r\n", it->name);
+    return;
   }
+  if (char_get_moltexp(ch) < cost) {
+    send_to_char(g, ch, "You do not have enough evolution experience.\r\n");
+    return;
+  }
+  int64_t gain = it->base(ch) * 0.01;
+  gain         = gain <= 0 ? rand_number(g, 1, 5) : rand_number(g, gain, gain * .5);
+  it->gain(ch, gain, false);
+  char_set_moltexp(ch, char_get_moltexp(ch) - cost);
+  send_to_char(g, ch, "Your body evolves to make better use of the way it is now, and you feel that {} @D[{}@D: @Y+{}@D]@n\r\n", it->felt, it->label, add_commas(gain));
 }
 
 bool perf_skill(int skill)
 {
-
-  if (!skill) {
-    return false;
-  }
-
-  switch (skill) {
-    case 464:
-      return true;
-      break;
-    case 441:
-      return true;
-      break;
-    case 444:
-      return true;
-      break;
-    case 475:
-      return true;
-      break;
-    case 474:
-      return true;
-      break;
-    case 476:
-      return true;
-      break;
-    case 488:
-      return true;
-      break;
-    case 472:
-      return true;
-      break;
-    case 485:
-      return true;
-      break;
-    case 442:
-      return true;
-      break;
-    case 510:
-      return true;
-      break;
-    case 533:
-      return true;
-      break;
-    default:
-      return false;
-      break;
-  }
+  static constexpr int PERFECTABLE[] = {464, 441, 444, 475, 474, 476, 488, 472, 485, 442, 510, 533};
+  return std::ranges::contains(PERFECTABLE, skill);
 }
+
+namespace {
+  void perfection_types(GameWorld *g, struct char_data *ch)
+  {
+    send_to_char(g, ch, "@WType @G1@D: @wOver Charged@n\r\n");
+    send_to_char(g, ch, "@WType @G2@D: @wAccurate@n\r\n");
+    send_to_char(g, ch, "@WType @G3@D: @wEfficient@n\r\n");
+  }
+
+  /* what perfecting a skill each way does, from type 1 */
+  constexpr const char *PERFECTIONS[] = {
+      "so that you can over charge it!",
+      "so that you have supreme accuracy with it!",
+      "so that you require a lower minimum charge for it!",
+  };
+} // namespace
 
 ACMD(do_perf)
 {
-  std::string arg, arg2;
-  int i, skill = 1, found = false, type = 0;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (char_is_npc(ch) || char_get_admlevel(ch) > 0) {
     send_to_char(g, ch, "I don't think so.\r\n");
     return;
   }
-
   if (arg.empty() || arg2.empty()) {
-    send_to_char(g, ch, "@WType @G1@D: @wOver Charged@n\r\n");
-    send_to_char(g, ch, "@WType @G2@D: @wAccurate@n\r\n");
-    send_to_char(g, ch, "@WType @G3@D: @wEfficient@n\r\n");
+    perfection_types(g, ch);
     send_to_char(g, ch, "Syntax: perfect (skillname) (type 1/2/or 3)\r\n");
     return;
   }
@@ -210,22 +157,14 @@ ACMD(do_perf)
     send_to_char(g, ch, "The skill name should be longer than 3 characters...\r\n");
     return;
   }
-  for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-    if (g->spell_info[i].skilltype != SKTYPE_SKILL)
-      continue;
-
-    if (found == true)
-      continue;
-
-    if (strstr(g->spell_info[i].name, arg.c_str())) {
-      skill = i;
-      found = true;
-    }
-  }
-  if (found == false) {
+  /* the first skill whose name has arg in it */
+  auto skills = std::views::iota(0, SKILL_TABLE_SIZE);
+  auto found  = std::ranges::find_if(skills, [&](int i) { return g->spell_info[i].skilltype == SKTYPE_SKILL && strstr(g->spell_info[i].name, arg.c_str()); });
+  if (found == skills.end()) {
     send_to_char(g, ch, "The skill {} doesn't exist.\r\n", arg);
     return;
   }
+  int skill = *found;
   if (!char_get_skill(ch, skill)) {
     send_to_char(g, ch, "You don't know {}.\r\n", arg);
     return;
@@ -242,28 +181,14 @@ ACMD(do_perf)
     send_to_char(g, ch, "You can't perfect that type of skill.\r\n");
     return;
   }
-  if (parse_int(arg2) < 1 || parse_int(arg2) > 3) {
-    send_to_char(g, ch, "@WType @G1@D: @wOver Charged@n\r\n");
-    send_to_char(g, ch, "@WType @G2@D: @wAccurate@n\r\n");
-    send_to_char(g, ch, "@WType @G3@D: @wEfficient@n\r\n");
+  int type = parse_int(arg2);
+  if (type < 1 || type > 3) {
+    perfection_types(g, ch);
     send_to_char(g, ch, "@RType must be a number between 1 and 3.@n\r\n");
     return;
   }
-  type = parse_int(arg2);
-  switch (type) {
-    case 1:
-      send_to_char(g, ch, "You perfect the skill {} so that you can over charge it!\r\n", g->spell_info[skill].name);
-      char_set_skills_perf(ch, skill, 1);
-      break;
-    case 2:
-      send_to_char(g, ch, "You perfect the skill {} so that you have supreme accuracy with it!\r\n", g->spell_info[skill].name);
-      char_set_skills_perf(ch, skill, 2);
-      break;
-    case 3:
-      send_to_char(g, ch, "You perfect the skill {} so that you require a lower minimum charge for it!\r\n", g->spell_info[skill].name);
-      char_set_skills_perf(ch, skill, 3);
-      break;
-  }
+  send_to_char(g, ch, "You perfect the skill {} {}\r\n", g->spell_info[skill].name, PERFECTIONS[type - 1]);
+  char_set_skills_perf(ch, skill, type);
 }
 
 ACMD(do_gold)
@@ -276,99 +201,85 @@ ACMD(do_gold)
     send_to_char(g, ch, "You have {:d} zenni.\r\n", char_get_gold(ch));
 }
 
+namespace {
+  struct by_flag {
+    int flag;
+    const char *name;
+  };
+
+  /* An android's model and version, the first flag it has; failing them all, the last. */
+  constexpr by_flag ANDROID_MODELS[]   = {{PLR_ABSORB, "@CAbsorption"}, {PLR_REPAIR, "@GSelf Repairing"}, {PLR_SENSEM, "@RSensor Equiped"}, {-1, "@WNone"}};
+  constexpr by_flag ANDROID_VERSIONS[] = {{PLR_TRANS1, "Beta 1.0"}, {PLR_TRANS2, "ANS 2.0"}, {PLR_TRANS3, "ANS 3.0"}, {PLR_TRANS4, "ANS 4.0"},
+                                          {PLR_TRANS5, "ANS 5.0"},  {PLR_TRANS6, "ANS 6.0"}, {-1, "Alpha 0.5"}};
+
+  const char *first_flagged(struct char_data *ch, std::span<const by_flag> rows)
+  {
+    return std::ranges::find_if(rows, [&](const by_flag &r) { return r.flag < 0 || char_plr_flagged(ch, r.flag); })->name;
+  }
+
+  /* Whether arg is part of view's name, in lower case or with a capital. */
+  bool asks_for(std::string_view view, const std::string &arg)
+  {
+    std::string capital(view);
+    capital[0] = (char)toupper(capital[0]);
+    return view.contains(arg) || std::string_view(capital).contains(arg);
+  }
+} // namespace
+
 ACMD(do_score)
 {
-
   if (char_is_npc(ch))
     return;
 
-  int view = 0, full = 5, personal = 1, health = 2, stats = 3, other = 4;
-
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (arg.empty()) {
-    view = full;
-  } else if (std::string_view("personal").contains(arg) || std::string_view("Personal").contains(arg)) {
-    view = personal;
-  } else if (std::string_view("health").contains(arg) || std::string_view("Health").contains(arg)) {
-    view = health;
-  } else if (std::string_view("statistics").contains(arg) || std::string_view("Statistics").contains(arg)) {
-    view = stats;
-  } else if (std::string_view("other").contains(arg) || std::string_view("Other").contains(arg)) {
-    view = other;
-  } else {
+  bool all      = arg.empty();
+  bool personal = !all && asks_for("personal", arg);
+  bool health   = !all && !personal && asks_for("health", arg);
+  bool stats    = !all && !personal && !health && asks_for("statistics", arg);
+  bool other    = !all && !personal && !health && !stats && asks_for("other", arg);
+  if (!all && !personal && !health && !stats && !other) {
     send_to_char(g, ch, "Syntax: score, or... score (personal, health, statistics, other)\r\n");
     return;
   }
 
-  if (view == full || view == personal) {
+  if (all || personal) {
     send_to_char(g, ch, "  @cO@D-----------------------------[  @cPersonal  @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "  @D|  @CName@D: @W{:>15}@D,   @CTitle@D: @W{:<38}@D|@n\n", char_get_name(ch), char_get_title(ch));
-    if (char_is_android(ch)) {
-      std::string model = "@WNone", version;
-      int absorb = 0;
-      if (char_plr_flagged(ch, PLR_ABSORB)) {
-        model = "@CAbsorption";
-      } else if (char_plr_flagged(ch, PLR_REPAIR)) {
-        model = "@GSelf Repairing";
-      } else if (char_plr_flagged(ch, PLR_SENSEM)) {
-        model = "@RSensor Equiped";
-      }
-      if (char_plr_flagged(ch, PLR_TRANS1)) {
-        version = "Beta 1.0";
-      } else if (char_plr_flagged(ch, PLR_TRANS2)) {
-        version = "ANS 2.0";
-      } else if (char_plr_flagged(ch, PLR_TRANS3)) {
-        version = "ANS 3.0";
-      } else if (char_plr_flagged(ch, PLR_TRANS4)) {
-        version = "ANS 4.0";
-      } else if (char_plr_flagged(ch, PLR_TRANS5)) {
-        version = "ANS 5.0";
-      } else if (char_plr_flagged(ch, PLR_TRANS6)) {
-        version = "ANS 6.0";
-      } else {
-        version = "Alpha 0.5";
-      }
-      send_to_char(g, ch, "  @D| @CModel@D: {:>15}@D,    @CUGP@D: @G{:>15}@D,  @CVersion@D: @r{:<12}@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
-    }
+    if (char_is_android(ch))
+      send_to_char(g, ch, "  @D| @CModel@D: {:>15}@D,    @CUGP@D: @G{:>15}@D,  @CVersion@D: @r{:<12}@D|@n\n", first_flagged(ch, ANDROID_MODELS),
+                   add_commas(char_get_upgrade(ch)), first_flagged(ch, ANDROID_VERSIONS));
     send_to_char(g, ch, "  @D|  @CRace@D: @W{:>10}@D,  @CSensei@D: @W{:>15}@D,     @CArt@D: @W{:<17}@D|@n\n", char_true_race_name(ch), char_sensei_name(ch), char_sensei_style(ch));
-    std::string hei;
-    std::string wei;
-    hei = str_format("{:d}cm", get_measure(ch, char_get_pc_height(g, ch), 0));
-    wei = str_format("{:d}kg", get_measure(ch, 0, char_get_pc_weight(g, ch)));
+    std::string hei = str_format("{:d}cm", get_measure(ch, char_get_pc_height(g, ch), 0));
+    std::string wei = str_format("{:d}kg", get_measure(ch, 0, char_get_pc_weight(g, ch)));
     send_to_char(g, ch, "  @D|   @CAge@D: @W{:>10}@D,  @CHeight@D: @W{:>15}@D,  @CWeight@D: @W{:<17}@D|@n\n", add_commas(char_get_age_years(g, ch)), hei, wei);
     send_to_char(g, ch, "  @D|@CGender@D: @W{:>10}@D,  @C  Size@D: @W{:>15}@D,  @C Align@D: @W{:<17}@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
   }
-  if (view == full || view == health) {
+  if (all || health) {
     send_to_char(g, ch, "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
-    send_to_char(g, ch, "    @wCurrent   @D-[@R{:<16}@D]-[@R{:<16}@D]-[@R{:<16}@D]@n\n", add_commas(getCurPL(g, ch)), add_commas((getCurKI(g, ch))), add_commas((getCurST(g, ch))));
+    send_to_char(g, ch, "    @wCurrent   @D-[@R{:<16}@D]-[@R{:<16}@D]-[@R{:<16}@D]@n\n", add_commas(getCurPL(g, ch)), add_commas(getCurKI(g, ch)), add_commas(getCurST(g, ch)));
     send_to_char(g, ch, "    @wMaximum   @D-[@r{:<16}@D]-[@r{:<16}@D]-[@r{:<16}@D]@n\n", add_commas(getEffMaxPL(g, ch)), add_commas(getMaxKI(g, ch)), add_commas(getMaxST(g, ch)));
-    send_to_char(g, ch, "    @wBase      @D-[@m{:<16}@D]-[@m{:<16}@D]-[@m{:<16}@D]@n\n", add_commas((getEffBasePL(g, ch))), add_commas((getEffBaseKI(g, ch))), add_commas((getEffBaseST(g, ch))));
-    if (!char_is_android(ch) && (getCurLF(g, ch)) > 0) {
-      send_to_char(g, ch, "    @wLife Force@D-[@C{:>16}@D{}@c{:>16}@D]- @wLife Percent@D-[@Y{:>3d}{}@D]@n\n", add_commas((getCurLF(g, ch))), "/", add_commas((getMaxLF(g, ch))), char_get_lifeperc(ch), "%");
-    } else if (!char_is_android(ch)) {
-      send_to_char(g, ch, "    @wLife Force@D-[@C{:>16}@D{}@c{:>16}@D]- @wLife Percent@D-[@Y{:>3d}{}@D]@n\n", add_commas(0), "/", add_commas((getMaxLF(g, ch))), char_get_lifeperc(ch), "%");
-    }
+    send_to_char(g, ch, "    @wBase      @D-[@m{:<16}@D]-[@m{:<16}@D]-[@m{:<16}@D]@n\n", add_commas(getEffBasePL(g, ch)), add_commas(getEffBaseKI(g, ch)), add_commas(getEffBaseST(g, ch)));
+    if (!char_is_android(ch))
+      send_to_char(g, ch, "    @wLife Force@D-[@C{:>16}@D{}@c{:>16}@D]- @wLife Percent@D-[@Y{:>3d}{}@D]@n\n", add_commas(getCurLF(g, ch) > 0 ? getCurLF(g, ch) : 0), "/",
+                   add_commas(getMaxLF(g, ch)), char_get_lifeperc(ch), "%");
   }
-  if (view == full || view == stats) {
+  if (all || stats) {
     send_to_char(g, ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "      @D<@wCharacter Level@D: @w{:<3d}@D> <@wRPP@D: @w{:<3d}@D> <@wRPP Bank@D: @w{:<3d}@D>@n\n", char_get_level(ch), char_get_rp(ch), char_get_rbank(ch));
     send_to_char(g, ch, "      @D<@wSpeed Index@D: @w{:<15}@D> <@wArmor Index@D: @w{:<15}@D>@n\n", add_commas(char_get_speedi(g, ch)), add_commas(char_get_armor(ch)));
     send_to_char(g, ch, "    @D[    @RStrength@D|@G{:>2d} ({:>3d})@D] [     @YAgility@D|@G{:>2d} ({:>3d})@D] [      @BSpeed@D|@G{:>2d} ({:>3d})@D]@n\n", char_get_real_abils_str(ch), char_get_aff_abils_str(ch), char_get_real_abils_dex(ch), char_get_aff_abils_dex(ch), char_get_real_abils_cha(ch), char_get_aff_abils_cha(ch));
     send_to_char(g, ch, "    @D[@gConstitution@D|@G{:>2d} ({:>3d})@D] [@CIntelligence@D|@G{:>2d} ({:>3d})@D] [     @MWisdom@D|@G{:>2d} ({:>3d})@D]@n\n", char_get_real_abils_con(ch), char_get_aff_abils_con(ch), char_get_real_abils_intel(ch), char_get_aff_abils_intel(ch), char_get_real_abils_wis(ch), char_get_aff_abils_wis(ch));
   }
-  if (view == full || view == other) {
+  if (all || other) {
     send_to_char(g, ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
     send_to_char(g, ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
-    send_to_char(g, ch, "      @D[   @CCarried@D| @W{:<15}@D] [   @CCarried@D| @W{:<15}@D]@n\n", add_commas(char_get_gold(ch)), add_commas((getCurCarriedWeight(ch))));
+    send_to_char(g, ch, "      @D[   @CCarried@D| @W{:<15}@D] [   @CCarried@D| @W{:<15}@D]@n\n", add_commas(char_get_gold(ch)), add_commas(getCurCarriedWeight(ch)));
     send_to_char(g, ch, "      @D[      @CBank@D| @W{:<15}@D] [ @CMax Carry@D| @W{:<15}@D]@n\n", add_commas(char_get_bank_gold(ch)), add_commas(getMaxCarryWeight(g, ch)));
     send_to_char(g, ch, "      @D[ @CMax Carry@D| @W{:<15}@D]@n\n", add_commas(char_gold_carry(ch)));
-    int numb = char_get_bank_interest(ch);
-    send_to_char(g, ch, "      @D[  @CInterest@D| @W{:<15}@D]\n", add_commas(numb));
+    send_to_char(g, ch, "      @D[  @CInterest@D| @W{:<15}@D]\n", add_commas(char_get_bank_interest(ch)));
     if (char_is_arlian(ch)) {
       send_to_char(g, ch, "                             @D<@GEvolution @D>@n\n");
       send_to_char(g, ch, "      @D[ @CEvo Level@D| @W{:<15d}@D] [   @CEvo Exp@D| @W{:<15}@D]\n", char_get_moltlevel(ch), add_commas(char_get_moltexp(ch)));
@@ -376,181 +287,85 @@ ACMD(do_score)
     }
     if (char_get_level(ch) < 100) {
       send_to_char(g, ch, "                             @D<@gAdvancement@D>@n\n");
-    }
-    if (char_get_level(ch) < 100) {
       send_to_char(g, ch, "      @D[@CExperience@D| @W{:<15}@D] [@CNext Level@D| @W{:<15}@D]@n\n", add_commas(char_get_exp(ch)), add_commas(level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch)));
       send_to_char(g, ch, "      @D[  @CRpp Cost@D| @W{:<15d}@D]@n\n", rpp_to_level(ch));
     }
-
     send_to_char(g, ch, "\n     @D<@wPlayed@D: @yYears @D(@W{:>2d}@D) @yWeeks @D(@W{:>2d}@D) @yDays @D(@W{:>2d}@D) @yHours @D(@W{:>2d}@D) @yMinutes @D(@W{:>2d}@D)>@n\n", (int)char_get_time_played(ch) / 31536000, (int)((char_get_time_played(ch) % 31536000) / 604800), (int)((char_get_time_played(ch) % 604800) / 86400), (int)((char_get_time_played(ch) % 86400) / 3600), (int)((char_get_time_played(ch) % 3600) / 60));
   }
   send_to_char(g, ch, "  @cO@D------------------------------------------------------------------------@cO@n\n");
 }
 
+namespace {
+  /* A transformation a race may be in: the flag, and another it needs as well. */
+  struct transformation {
+    int flag;
+    int also;
+    const char *name;
+  };
+
+  /* Rillao: transloc, add new transes here */
+  constexpr transformation HUMAN_FORMS[]     = {{PLR_TRANS1, -1, "@CSuper Human First"}, {PLR_TRANS2, -1, "@CSuper Human Second"}, {PLR_TRANS3, -1, "@CSuper Human Third"}, {PLR_TRANS4, -1, "@CSuper Human Fourth"}};
+  constexpr transformation SAIYAN_FORMS[]    = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, -1, "@CSuper Saiyan First"},
+                                                {PLR_TRANS2, -1, "@CSuper Saiyan Second"}, {PLR_TRANS3, -1, "@CSuper Saiyan Third"},
+                                                {PLR_TRANS4, -1, "@CSuper Saiyan Fourth"}, {PLR_OOZARU, -1, "@COozaru"}};
+  constexpr transformation LEGENDARY_FORMS[] = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, -1, "@CSuper Saiyan First"},
+                                                {PLR_TRANS2, -1, "@YLegendary @CSuper Saiyan"}, {PLR_OOZARU, -1, "@COozaru"}};
+  constexpr transformation NAMEK_FORMS[]     = {{PLR_TRANS1, -1, "@CSuper Namek First"}, {PLR_TRANS2, -1, "@CSuper Namek Second"}, {PLR_TRANS3, -1, "@CSuper Namek Third"}, {PLR_TRANS4, -1, "@CSuper Namek Fourth"}};
+  constexpr transformation ICER_FORMS[]      = {{PLR_TRANS1, -1, "@CTransform First"}, {PLR_TRANS2, -1, "@CTransform Second"}, {PLR_TRANS3, -1, "@CTransform Third"}, {PLR_TRANS4, -1, "@CTransform Fourth"}};
+  constexpr transformation KONATSU_FORMS[]   = {{PLR_TRANS1, -1, "@CShadow First"}, {PLR_TRANS2, -1, "@CShadow Second"}, {PLR_TRANS3, -1, "@CShadow Third"}, {PLR_TRANS4, -1, "@CShadow Fourth"}};
+  constexpr transformation MUTANT_FORMS[]    = {{PLR_TRANS1, -1, "@CMutate First"}, {PLR_TRANS2, -1, "@CMutate Second"}, {PLR_TRANS3, -1, "@CMutate Third"}};
+  constexpr transformation BIO_FORMS[]       = {{PLR_TRANS1, -1, "@CMature"}, {PLR_TRANS2, -1, "@CSemi-perfect"}, {PLR_TRANS3, -1, "@CPerfect"}, {PLR_TRANS4, -1, "@CSuper Perfect"}};
+  constexpr transformation ANDROID_FORMS[]   = {{PLR_TRANS1, -1, "@CSeries 1.0"}, {PLR_TRANS2, -1, "@CSeries 2.0"}, {PLR_TRANS3, -1, "@CSeries 3.0"},
+                                                {PLR_TRANS4, -1, "@CSeries 4.0"}, {PLR_TRANS5, -1, "@CSeries 5.0"}, {PLR_TRANS6, -1, "@CSeries 6.0"}};
+  constexpr transformation MAJIN_FORMS[]     = {{PLR_TRANS1, -1, "@CAffinity"}, {PLR_TRANS2, -1, "@CSuper"}, {PLR_TRANS3, -1, "@CTrue"}};
+  constexpr transformation TRUFFLE_FORMS[]   = {{PLR_TRANS1, -1, "@CAscend First"}, {PLR_TRANS2, -1, "@CAscend Second"}, {PLR_TRANS3, -1, "@CAscend Third"}};
+  constexpr transformation KAI_FORMS[]       = {{PLR_TRANS1, -1, "@CMystic First"}, {PLR_TRANS2, -1, "@CMystic Second"}, {PLR_TRANS3, -1, "@CMystic Third"}};
+
+  struct race_forms {
+    bool (*is)(const struct char_data *ch);
+    std::span<const transformation> forms;
+  };
+
+  bool full_saiyan(const struct char_data *ch) { return (char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_plr_flagged(ch, PLR_LSSJ); }
+  bool legendary(const struct char_data *ch) { return char_is_saiyan(ch) && char_plr_flagged(ch, PLR_LSSJ); }
+
+  /* In this order; a hoshijin's forms are its star phases, and are told apart below. */
+  const race_forms RACE_FORMS[] = {
+      {char_is_human,     HUMAN_FORMS    },
+      {full_saiyan,       SAIYAN_FORMS   },
+      {legendary,         LEGENDARY_FORMS},
+      {char_is_namek,     NAMEK_FORMS    },
+      {char_is_icer,      ICER_FORMS     },
+      {char_is_konatsu,   KONATSU_FORMS  },
+      {char_is_mutant,    MUTANT_FORMS   },
+      {char_is_bio,       BIO_FORMS      },
+      {char_is_android,   ANDROID_FORMS  },
+      {char_is_majin,     MAJIN_FORMS    },
+      {char_is_truffle,   TRUFFLE_FORMS  },
+      {char_is_kai,       KAI_FORMS      },
+  };
+
+  /* The form's name, with its colour; "@wNone" for none. Races are told apart in this order, a hoshijin's star
+     phases first. */
+  const char *current_form(struct char_data *ch, struct char_data *vict)
+  {
+    if (char_is_hoshijin(vict)) {
+      if (char_get_mimic(vict) != 0 && vict != ch)
+        return "@wNone";
+      return char_get_starphase(vict) == 1 ? "@CBirth Phase" : char_get_starphase(vict) == 2 ? "@CLife Phase" : "@wNone";
+    }
+    auto race = std::ranges::find_if(RACE_FORMS, [&](const race_forms &r) { return r.is(vict); });
+    if (race == std::end(RACE_FORMS))
+      return "@wNone";
+    auto form = std::ranges::find_if(race->forms, [&](const transformation &t) { return char_plr_flagged(vict, t.flag) && (t.also < 0 || char_plr_flagged(vict, t.also)); });
+    return form == race->forms.end() ? "@wNone" : form->name;
+  }
+} // namespace
+
 void trans_check(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  /* Rillao: transloc, add new transes here */
-  if (char_is_human(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Human First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Human Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Human Third@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Human Fourth@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_hoshijin(vict)) {
-    if (char_get_mimic(vict) == 0 || vict == ch) {
-      if (char_get_starphase(vict) == 1) {
-        send_to_char(g, ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
-      } else if (char_get_starphase(vict) == 2) {
-        send_to_char(g, ch, "         @cCurrent Transformation@D: @CLife Phase@n\r\n");
-      } else {
-        send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-      }
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if ((char_is_saiyan(vict) || char_is_halfbreed(vict)) && !char_plr_flagged(vict, PLR_LSSJ)) {
-    if (char_plr_flagged(vict, PLR_TRANS1) && !char_plr_flagged(vict, PLR_FPSSJ)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS1) && char_plr_flagged(vict, PLR_FPSSJ)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Saiyan Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Saiyan Third@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Saiyan Fourth@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_OOZARU)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_saiyan(vict) && char_plr_flagged(vict, PLR_LSSJ)) {
-    if (char_plr_flagged(vict, PLR_TRANS1) && !char_plr_flagged(vict, PLR_FPSSJ)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS1) && char_plr_flagged(vict, PLR_FPSSJ)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @YLegendary @CSuper Saiyan@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_OOZARU)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_namek(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Namek First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Namek Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Namek Third@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Namek Fourth@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_icer(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CTransform First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CTransform Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CTransform Third@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CTransform Fourth@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_konatsu(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CShadow First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CShadow Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CShadow Third@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CShadow Fourth@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_mutant(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMutate First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMutate Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMutate Third@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_bio(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMature@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSemi-perfect@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CPerfect@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper Perfect@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_android(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 1.0@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 2.0@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 3.0@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 4.0@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS5)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 5.0@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS6)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSeries 6.0@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_majin(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CAffinity@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CSuper@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CTrue@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_truffle(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CAscend First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CAscend Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CAscend Third@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else if (char_is_kai(vict)) {
-    if (char_plr_flagged(vict, PLR_TRANS1)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMystic First@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMystic Second@n\r\n");
-    } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @CMystic Third@n\r\n");
-    } else {
-      send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-    }
-  } else {
-    send_to_char(g, ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-  }
-
-} // End trans check
+  send_to_char(g, ch, "         @cCurrent Transformation@D: {}@n\r\n", current_form(ch, vict));
+}
 
 namespace {
 
@@ -1087,14 +902,12 @@ ACMD(do_status)
 ACMD(do_inventory)
 {
   send_to_char(g, ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
-  if (!char_is_npc(ch)) {
-    if (char_plr_flagged(ch, PLR_STOLEN)) {
-      char_plr_set(ch, PLR_STOLEN, false);
-      send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
-      send_to_char(g, ch, "@R    You notice that you have been robbed sometime recently!\n");
-      send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
-      return;
-    }
+  if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_STOLEN)) {
+    char_plr_set(ch, PLR_STOLEN, false);
+    send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
+    send_to_char(g, ch, "@R    You notice that you have been robbed sometime recently!\n");
+    send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
+    return;
   }
   list_obj_to_char(g, char_get_inventory(ch), ch, SHOW_OBJ_SHORT, true);
   send_to_char(g, ch, "\n");
@@ -1102,140 +915,107 @@ ACMD(do_inventory)
 
 ACMD(do_equipment)
 {
-  int i;
-
   send_to_char(g, ch, "        @YEquipment Being Worn\r\n@D-------------------------------------@w\r\n");
-  for (i = 1; i < NUM_WEARS; i++) {
-    if (char_get_equipment(ch, i)) {
-      if (char_can_see_obj(g, ch, char_get_equipment(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
-        send_to_char(g, ch, "{}", wear_where[i]);
-        show_obj_to_char(g, char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
+  for (int i = 1; i < NUM_WEARS; i++) {
+    struct obj_data *obj = char_get_equipment(ch, i);
+    bool wielded         = i == WEAR_WIELD1 || i == WEAR_WIELD2;
 
-        if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *sheath = char_get_equipment(ch, i);
-          for (obj_data *thing : obj_contents(g, sheath)) {
-            if (thing) {
-              send_to_char(g, ch, "@D  ---- @YSheathed@D ----@c> @n");
-              show_obj_to_char(g, thing, ch, SHOW_OBJ_SHORT);
-            }
-          }
-        }
-      } else if (char_can_see_obj(g, ch, char_get_equipment(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
-        send_to_char(g, ch, "{}", wear_where[i]);
-        show_obj_to_char(g, char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
-        if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *sheath = char_get_equipment(ch, i);
-          for (obj_data *item : obj_contents(g, sheath)) {
-            if (item) {
-              send_to_char(g, ch, "@D  ---- @YSheathed@D ----> @n");
-              show_obj_to_char(g, item, ch, SHOW_OBJ_SHORT);
-            }
-          }
-        }
-      } else if (char_can_see_obj(g, ch, char_get_equipment(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
-        send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");
-        show_obj_to_char(g, char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
-      } else {
-        send_to_char(g, ch, "{}", wear_where[i]);
-        send_to_char(g, ch, "Something.\r\n");
-      }
-    } else {
-      if (char_body_flagged(ch, i) && (i != WEAR_WIELD2)) {
+    if (!obj) {
+      if (char_body_flagged(ch, i) && (i != WEAR_WIELD2 || !char_plr_flagged(ch, PLR_THANDW)))
         send_to_char(g, ch, "{}@wNothing.@n\r\n", wear_where[i]);
-      } else if (char_body_flagged(ch, i) && (i == WEAR_WIELD2 && !char_plr_flagged(ch, PLR_THANDW))) {
-        send_to_char(g, ch, "{}@wNothing.@n\r\n", wear_where[i]);
-      }
+      continue;
+    }
+    if (!char_can_see_obj(g, ch, obj)) {
+      send_to_char(g, ch, "{}", wear_where[i]);
+      send_to_char(g, ch, "Something.\r\n");
+      continue;
+    }
+    if (wielded && char_plr_flagged(ch, PLR_THANDW)) {
+      send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");
+      show_obj_to_char(g, obj, ch, SHOW_OBJ_SHORT);
+      continue;
+    }
+    send_to_char(g, ch, "{}", wear_where[i]);
+    show_obj_to_char(g, obj, ch, SHOW_OBJ_SHORT);
+    if (!obj_extra_flagged(obj, ITEM_SHEATH))
+      continue;
+    for (obj_data *thing : obj_contents(g, obj)) {
+      /* quirk: the arrow is coloured on a sheath worn, not on one wielded */
+      send_to_char(g, ch, wielded ? "@D  ---- @YSheathed@D ----> @n" : "@D  ---- @YSheathed@D ----@c> @n");
+      show_obj_to_char(g, thing, ch, SHOW_OBJ_SHORT);
     }
   }
 }
 
 ACMD(do_levels)
 {
-  std::string buf;
-  size_t i;
-
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You ain't nothin' but a hound-dog.\r\n");
     return;
   }
 
-  for (i = 1; i < 101; i++) {
-    if (i == 100)
-      buf += str_format("[100] {:>8}          : \r\n", add_commas(level_exp(ch, 100)));
-    else
-      buf += str_format("[{:>2d}] {:>8}-{:<8} : \r\n", i,
-                        add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
-  }
-
+  std::string buf;
+  for (int i = 1; i < 100; i++)
+    buf += str_format("[{:>2d}] {:>8}-{:<8} : \r\n", i, add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
+  buf += str_format("[100] {:>8}          : \r\n", add_commas(level_exp(ch, 100)));
   send_to_char(g, ch, buf);
 }
 
+namespace {
+  struct odds {
+    int at_most; /* the victim's level less ch's */
+    const char *says;
+  };
+
+  constexpr odds CONSIDERED[] = {
+      {-10, "Now where did that chicken go?\r\n"},
+      {-5,  "You could do it with a needle!\r\n"},
+      {-2,  "Easy.\r\n"},
+      {-1,  "Fairly easy.\r\n"},
+      {0,   "The perfect match!\r\n"},
+      {1,   "You could probably manage it.\r\n"},
+      {2,   "You might take a beating.\r\n"},
+      {3,   "You MIGHT win, maybe.\r\n"},
+      {5,   "Do you feel lucky? You better.\r\n"},
+      {10,  "Better bring some tough backup!\r\n"},
+      {25,  "Maybe if they are allergic to you, otherwise your last words will be 'Oh shit.'\r\n"},
+  };
+
+  const char *pronoun(struct char_data *ch) { return char_get_sex(ch) == SEX_MALE ? "He " : (char_get_sex(ch) == SEX_FEMALE ? "She " : "It "); }
+} // namespace
+
 ACMD(do_consider)
 {
-  std::string buf;
-  struct char_data *victim;
-  int diff;
-
   std::string_view rest = argument;
-  buf                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (!(victim = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "Consider killing who?\r\n");
+  auto victim = find_char(g, ch, arg, FIND_CHAR_ROOM, "Consider killing who?\r\n");
+  if (reject(g, ch, victim))
     return;
-  }
-  if (victim == ch) {
+  if (*victim == ch) {
     send_to_char(g, ch, "Easy!  Very easy indeed!\r\n");
     return;
   }
-  diff = (char_get_level(victim) - char_get_level(ch));
-
-  if (diff <= -10)
-    send_to_char(g, ch, "Now where did that chicken go?\r\n");
-  else if (diff <= -5)
-    send_to_char(g, ch, "You could do it with a needle!\r\n");
-  else if (diff <= -2)
-    send_to_char(g, ch, "Easy.\r\n");
-  else if (diff <= -1)
-    send_to_char(g, ch, "Fairly easy.\r\n");
-  else if (diff == 0)
-    send_to_char(g, ch, "The perfect match!\r\n");
-  else if (diff <= 1)
-    send_to_char(g, ch, "You could probably manage it.\r\n");
-  else if (diff <= 2)
-    send_to_char(g, ch, "You might take a beating.\r\n");
-  else if (diff <= 3)
-    send_to_char(g, ch, "You MIGHT win, maybe.\r\n");
-  else if (diff <= 5)
-    send_to_char(g, ch, "Do you feel lucky? You better.\r\n");
-  else if (diff <= 10)
-    send_to_char(g, ch, "Better bring some tough backup!\r\n");
-  else if (diff <= 25)
-    send_to_char(g, ch, "Maybe if they are allergic to you, otherwise your last words will be 'Oh shit.'\r\n");
-  else
-    send_to_char(g, ch, "No chance.\r\n");
+  int diff = char_get_level(*victim) - char_get_level(ch);
+  auto it  = std::ranges::find_if(CONSIDERED, [&](const odds &o) { return diff <= o.at_most; });
+  send_to_char(g, ch, "{}", it == std::end(CONSIDERED) ? "No chance.\r\n" : it->says);
 }
 
 ACMD(do_diagnose)
 {
-  std::string buf;
-  struct char_data *vict;
-
   std::string_view rest = argument;
-  buf                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (!buf.empty()) {
-    if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(g, ch, CONFIG_NOPERSON);
-    else {
-      send_to_char(g, ch, "{}", char_get_sex(vict) == SEX_MALE ? "He " : (char_get_sex(vict) == SEX_FEMALE ? "She " : "It "));
-      diag_char_to_char(g, vict, ch);
-    }
-  } else {
-    if (char_get_fighting(g, ch)) {
-      send_to_char(g, ch, "{}", char_get_sex(char_get_fighting(g, ch)) == SEX_MALE ? "He " : (char_get_sex(char_get_fighting(g, ch)) == SEX_FEMALE ? "She " : "It "));
-      diag_char_to_char(g, char_get_fighting(g, ch), ch);
-    } else {
-      send_to_char(g, ch, "Diagnose who?\r\n");
-    }
+  struct char_data *vict = char_get_fighting(g, ch);
+  if (!arg.empty()) {
+    auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, CONFIG_NOPERSON);
+    if (reject(g, ch, found))
+      return;
+    vict = *found;
+  } else if (!vict) {
+    send_to_char(g, ch, "Diagnose who?\r\n");
+    return;
   }
+  send_to_char(g, ch, "{}", pronoun(vict));
+  diag_char_to_char(g, vict, ch);
 }

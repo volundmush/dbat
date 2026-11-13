@@ -183,13 +183,14 @@ void topLoad(GameWorld *g)
 
   g->TOPLOADED = true;
 
-  while (!feof(file)) {
-    get_line(file, line);
+  /* 25 places, a line each; any the file is short of are empty */
+  for (; x < 25 && get_line(file, line); x++) {
+    *filler = '\0';
     sscanf(line, "%49s %" SCNd64 "\n", filler, &g->toppoint[x]);
     g->topname[x] = strdup(filler);
-    *filler    = '\0';
-    x++;
   }
+  for (; x < 25; x++)
+    g->topname[x] = strdup("");
   fclose(file);
 }
 
