@@ -1,6 +1,7 @@
 /* player.c: general player commands (quit, save, group, title, toggles...)
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <cstdlib>
+#include <iterator>
 
 #include <sys/stat.h>
 
@@ -741,300 +742,173 @@ ACMD(do_gen_write)
   send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }
 
-constexpr int TOG_OFF = 0;
-constexpr int TOG_ON  = 1;
+namespace {
+  /* A toggle flips one flag and reports the new state.  `before` may refuse
+   * (it sends why and returns true); `after` adds to what was said. */
+  struct gen_toggle {
+    int subcmd;
+    bool (*flip)(GameWorld *g, struct char_data *ch);
+    const char *off;
+    const char *on;
+    bool (*before)(GameWorld *g, struct char_data *ch) = nullptr;
+    void (*after)(GameWorld *g, struct char_data *ch)  = nullptr;
+  };
+
+  template <int Flag>
+  bool prf(GameWorld *g, struct char_data *ch) { return char_prf_toggle(g, ch, Flag); }
+
+  template <int Flag>
+  bool aff(GameWorld *, struct char_data *ch) { return char_aff_toggle(ch, Flag); }
+
+  bool slow_nameserver(GameWorld *g, struct char_data *) { return (CONFIG_NS_IS_SLOW = !CONFIG_NS_IS_SLOW); }
+  bool track_doors(GameWorld *g, struct char_data *) { return (CONFIG_TRACK_T_DOORS = !CONFIG_TRACK_T_DOORS); }
+
+  void afk_announce(GameWorld *g, struct char_data *ch)
+  {
+    if (char_prf_flagged(g, ch, PRF_AFK)) {
+      act(g, "$n has gone AFK.", true, ch, nullptr, nullptr, TO_ROOM);
+      return;
+    }
+    act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
+    if (has_mail(g, char_get_idnum(ch)))
+      send_to_char(g, ch, "You have mail waiting.\r\n");
+  }
+
+  bool immortals_only(GameWorld *g, struct char_data *ch)
+  {
+    if (char_get_admlevel(ch) >= ADMLVL_IMMORT)
+      return false;
+    send_to_char(g, ch, "Immortals only, sorry.\r\n");
+    return true;
+  }
+
+  void buildwalk_log(GameWorld *g, struct char_data *ch)
+  {
+    mudlog(g, LOG_CMP, char_get_level(ch), true, "OLC: {} turned buildwalk {}. Allowed zone {:d}",
+           char_get_name(ch), char_prf_flagged(g, ch, PRF_BUILDWALK) ? "on" : "off", char_get_olc_zone(g, ch));
+  }
+
+  bool cannot_hide(GameWorld *g, struct char_data *ch)
+  {
+    bool ki_user = char_get_preference(ch) == PREFERENCE_KI;
+    if ((char_get_charge(ch) > 0 && !ki_user) || (char_get_charge(ch) > getMaxKI(g, ch) * 0.1 && ki_user) ||
+        char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
+      send_to_char(g, ch, "You stand out too much to hide right now!\r\n");
+      return true;
+    }
+    if (char_plr_flagged(ch, PLR_HEALT)) {
+      send_to_char(g, ch, "You are inside a healing tank!\r\n");
+      return true;
+    }
+    if (char_get_skill(ch, SKILL_HIDE))
+      return false;
+    if (slot_count(ch) + 1 > char_get_skill_slots(ch)) {
+      send_to_char(g, ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
+      return true;
+    }
+    send_to_char(g, ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
+    char_set_skills_base(ch, SKILL_HIDE, rand_number(g, 1, 5));
+    return false;
+  }
+
+  bool compression_disabled(GameWorld *g, struct char_data *ch)
+  {
+    if (CONFIG_ENABLE_COMPRESSION)
+      return false;
+    send_to_char(g, ch, "Sorry, compression is globally disabled.\r\n");
+    return true;
+  }
+
+  /* Testing mode reports itself, so it never reaches the table's messages. */
+  bool test_mode(GameWorld *g, struct char_data *ch)
+  {
+    if (char_get_admlevel(ch) < 1) {
+      send_to_char(g, ch, "You are not an immortal.\r\n");
+      return true;
+    }
+    char_prf_toggle(g, ch, PRF_TEST);
+    send_to_char(g, ch, "Okay. Testing is now: {}\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
+    if (char_prf_flagged(g, ch, PRF_TEST))
+      send_to_char(g, ch, "Make sure to remove nohassle as well.\r\n");
+    return true;
+  }
+
+  constexpr gen_toggle GEN_TOGGLES[] = {
+      {SCMD_NOSUMMON, prf<PRF_SUMMONABLE>, "You are now safe from summoning by other players.\r\n", "You may now be summoned by other players.\r\n"},
+      {SCMD_NOHASSLE, prf<PRF_NOHASSLE>, "Nohassle disabled.\r\n", "Nohassle enabled.\r\n"},
+      {SCMD_BRIEF, prf<PRF_BRIEF>, "Brief mode off.\r\n", "Brief mode on.\r\n"},
+      {SCMD_COMPACT, prf<PRF_COMPACT>, "Compact mode off.\r\n", "Compact mode on.\r\n"},
+      {SCMD_NOTELL, prf<PRF_NOTELL>, "You can now hear tells.\r\n", "You are now deaf to tells.\r\n"},
+      {SCMD_NOAUCTION, prf<PRF_NOAUCT>, "You can now hear newbie.\r\n", "You are now deaf to newbie.\r\n"},
+      {SCMD_DEAF, prf<PRF_DEAF>, "You can now hear shouts.\r\n", "You are now deaf to shouts.\r\n"},
+      {SCMD_NOGOSSIP, prf<PRF_NOGOSS>, "You can now hear ooc.\r\n", "You are now deaf to ooc.\r\n"},
+      {SCMD_NOGRATZ, prf<PRF_NOGRATZ>, "You can now hear the congratulation messages.\r\n", "You are now deaf to the congratulation messages.\r\n"},
+      {SCMD_NOWIZ, prf<PRF_NOWIZ>, "You can now hear the Wiz-channel.\r\n", "You are now deaf to the Wiz-channel.\r\n"},
+      {SCMD_QUEST, prf<PRF_QUEST>, "You are no longer part of the Quest.\r\n", "Okay, you are part of the Quest!\r\n"},
+      {SCMD_ROOMFLAGS, prf<PRF_ROOMFLAGS>, "You will no longer see the room flags.\r\n", "You will now see the room flags.\r\n"},
+      {SCMD_NOREPEAT, prf<PRF_NOREPEAT>, "You will now have your communication repeated.\r\n", "You will no longer have your communication repeated.\r\n"},
+      {SCMD_HOLYLIGHT, prf<PRF_HOLYLIGHT>, "HolyLight mode off.\r\n", "HolyLight mode on.\r\n"},
+      {SCMD_SLOWNS, slow_nameserver, "Nameserver_is_slow changed to NO; IP addresses will now be resolved.\r\n",
+       "Nameserver_is_slow changed to YES; sitenames will no longer be resolved.\r\n"},
+      {SCMD_AUTOEXIT, prf<PRF_AUTOEXIT>, "Autoexits disabled.\r\n", "Autoexits enabled.\r\n"},
+      {SCMD_TRACK, track_doors, "Will no longer track through doors.\r\n", "Will now track through doors.\r\n"},
+      {SCMD_BUILDWALK, prf<PRF_BUILDWALK>, "Buildwalk Off.\r\n", "Buildwalk On.\r\n", immortals_only, buildwalk_log},
+      {SCMD_AFK, prf<PRF_AFK>, "AFK flag is now off.\r\n", "AFK flag is now on.\r\n", nullptr, afk_announce},
+      {SCMD_AUTOASSIST, prf<PRF_AUTOASSIST>, "You will no longer Auto-Assist.\r\n", "You will now Auto-Assist.\r\n"},
+      {SCMD_AUTOLOOT, prf<PRF_AUTOLOOT>, "Autoloot disabled.\r\n", "Autoloot enabled.\r\n"},
+      {SCMD_AUTOGOLD, prf<PRF_AUTOGOLD>, "Autogold disabled.\r\n", "Autogold enabled.\r\n"},
+      {SCMD_CLS, prf<PRF_CLS>, "Will no longer clear screen in OLC.\r\n", "Will now clear screen in OLC.\r\n"},
+      {SCMD_AUTOSPLIT, prf<PRF_AUTOSPLIT>, "Autosplit disabled.\r\n", "Autosplit enabled.\r\n"},
+      {SCMD_AUTOSAC, prf<PRF_AUTOSAC>, "Autosac disabled.\r\n", "Autosac enabled.\r\n"},
+      {SCMD_SNEAK, aff<AFF_SNEAK>, "You will no longer attempt to be sneaky.\r\n", "You will try to move as silently as you can.\r\n"},
+      {SCMD_HIDE, aff<AFF_HIDE>, "You will no longer attempt to stay hidden.\r\n", "You will try to stay hidden.\r\n", cannot_hide},
+      {SCMD_AUTOMEM, prf<PRF_AUTOMEM>, "You will no longer automatically memorize spells in your list.\r\n",
+       "You will automatically memorize spells in your list.\r\n"},
+      {SCMD_VIEWORDER, prf<PRF_VIEWORDER>, "Viewing newest board messages at top of list.\r\n", "Viewing newest board messages at bottom of list.\r\n"},
+      {SCMD_NOCOMPRESS, prf<PRF_NOCOMPRESS>, "Compression will be used if your client supports it.\r\n",
+       "Compression will not be used even if your client supports it.\r\n", compression_disabled},
+      {SCMD_TEST, nullptr, "", "", test_mode},
+      {SCMD_WHOHIDE, prf<PRF_HIDE>, "You are no longer hidden from view on the who list and public channels.\r\n",
+       "You are now hidden from view on the who list and public channels.\r\n"},
+      {SCMD_NMWARN, prf<PRF_NMWARN>, "You will now be told that you have mail on prompt.\r\n", "You will no longer be told that you have mail on prompt.\r\n"},
+      {SCMD_HINTS, prf<PRF_HINTS>, "You will no longer receive automatic hints.\r\n", "You will now receive automatic hints.\r\n"},
+      {SCMD_NODEC, prf<PRF_NODEC>, "Screen Reader Friendly Mode Deactivated.\r\n", "Screen Reader Friendly Mode Activated..\r\n"},
+      {SCMD_NOEQSEE, prf<PRF_NOEQSEE>, "You will now see equipment when looking at someone.\r\n", "You will no longer see equipment when looking at someone.\r\n"},
+      {SCMD_NOMUSIC, prf<PRF_NOMUSIC>, "You will now listen to the music channel.\r\n", "You will no longer listen to the music channel.\r\n"},
+      {SCMD_NOPARRY, prf<PRF_NOPARRY>, "You will now parry attacks.\r\n", "You will no longer parry attacks.\r\n"},
+      {SCMD_LKEEP, prf<PRF_LKEEP>, "You will no longer keep cybernetic limbs with death.\r\n", "You will now keep cybernetic limbs with death.\r\n"},
+      {SCMD_CARVE, prf<PRF_CARVE>, "You will no longer worry about acquiring steaks from animals.\r\n", "You will now acquire steaks from animal if you can.\r\n"},
+      {SCMD_NOGIVE, prf<PRF_NOGIVE>, "You will now accept things being given to you.\r\n", "You will no longer accept things being given to you.\r\n"},
+      {SCMD_INSTRUCT, prf<PRF_INSTRUCT>, "You will no longer instruct those you spar with.\r\n", "You will now instruct those you spar with.\r\n"},
+      {SCMD_GHEALTH, prf<PRF_GHEALTH>, "You will no longer view group health.\r\n", "You will now view group health.\r\n"},
+      {SCMD_IHEALTH, prf<PRF_IHEALTH>, "You will no longer view item health.\r\n", "You will now view item health.\r\n"},
+  };
+
+  static_assert([] {
+    for (int i = 0; i < std::ssize(GEN_TOGGLES); ++i)
+      if (GEN_TOGGLES[i].subcmd != i)
+        return false;
+    return true;
+  }(), "GEN_TOGGLES is indexed by subcmd");
+} // namespace
 
 ACMD(do_gen_tog)
 {
-  long result;
-
-  const char *tog_messages[][2] = {
-      {"You are now safe from summoning by other players.\r\n",
-       "You may now be summoned by other players.\r\n"                               },
-      {"Nohassle disabled.\r\n",
-       "Nohassle enabled.\r\n"                                                       },
-      {"Brief mode off.\r\n",
-       "Brief mode on.\r\n"                                                          },
-      {"Compact mode off.\r\n",
-       "Compact mode on.\r\n"                                                        },
-      {"You can now hear tells.\r\n",
-       "You are now deaf to tells.\r\n"                                              },
-      {"You can now hear newbie.\r\n",
-       "You are now deaf to newbie.\r\n"                                             },
-      {"You can now hear shouts.\r\n",
-       "You are now deaf to shouts.\r\n"                                             },
-      {"You can now hear ooc.\r\n",
-       "You are now deaf to ooc.\r\n"                                                },
-      {"You can now hear the congratulation messages.\r\n",
-       "You are now deaf to the congratulation messages.\r\n"                        },
-      {"You can now hear the Wiz-channel.\r\n",
-       "You are now deaf to the Wiz-channel.\r\n"                                    },
-      {"You are no longer part of the Quest.\r\n",
-       "Okay, you are part of the Quest!\r\n"                                        },
-      {"You will no longer see the room flags.\r\n",
-       "You will now see the room flags.\r\n"                                        },
-      {"You will now have your communication repeated.\r\n",
-       "You will no longer have your communication repeated.\r\n"                    },
-      {"HolyLight mode off.\r\n",
-       "HolyLight mode on.\r\n"                                                      },
-      {"Nameserver_is_slow changed to NO; IP addresses will now be resolved.\r\n",
-       "Nameserver_is_slow changed to YES; sitenames will no longer be resolved.\r\n"},
-      {"Autoexits disabled.\r\n",
-       "Autoexits enabled.\r\n"                                                      },
-      {"Will no longer track through doors.\r\n",
-       "Will now track through doors.\r\n"                                           },
-      {"Buildwalk Off.\r\n",
-       "Buildwalk On.\r\n"                                                           },
-      {"AFK flag is now off.\r\n",
-       "AFK flag is now on.\r\n"                                                     },
-      {"You will no longer Auto-Assist.\r\n",
-       "You will now Auto-Assist.\r\n"                                               },
-      {"Autoloot disabled.\r\n",
-       "Autoloot enabled.\r\n"                                                       },
-      {"Autogold disabled.\r\n",
-       "Autogold enabled.\r\n"                                                       },
-      {"Will no longer clear screen in OLC.\r\n",
-       "Will now clear screen in OLC.\r\n"                                           },
-      {"Autosplit disabled.\r\n",
-       "Autosplit enabled.\r\n"                                                      },
-      {"Autosac disabled.\r\n",
-       "Autosac enabled.\r\n"                                                        },
-      {"You will no longer attempt to be sneaky.\r\n",
-       "You will try to move as silently as you can.\r\n"                            },
-      {"You will no longer attempt to stay hidden.\r\n",
-       "You will try to stay hidden.\r\n"                                            },
-      {"You will no longer automatically memorize spells in your list.\r\n",
-       "You will automatically memorize spells in your list.\r\n"                    },
-      {"Viewing newest board messages at top of list.\r\n",
-       "Viewing newest board messages at bottom of list.\r\n"                        },
-      {"Compression will be used if your client supports it.\r\n",
-       "Compression will not be used even if your client supports it.\r\n"           },
-      {"",
-       ""                                                                            },
-      {"You are no longer hidden from view on the who list and public channels.\r\n",
-       "You are now hidden from view on the who list and public channels.\r\n"       },
-      {"You will now be told that you have mail on prompt.\r\n",
-       "You will no longer be told that you have mail on prompt.\r\n"                },
-      {"You will no longer receive automatic hints.\r\n",
-       "You will now receive automatic hints.\r\n"                                   },
-      {"Screen Reader Friendly Mode Deactivated.\r\n",
-       "Screen Reader Friendly Mode Activated..\r\n"                                 },
-      {"You will now see equipment when looking at someone.\r\n",
-       "You will no longer see equipment when looking at someone.\r\n"               },
-      {"You will now listen to the music channel.\r\n",
-       "You will no longer listen to the music channel.\r\n"                         },
-      {"You will now parry attacks.\r\n",
-       "You will no longer parry attacks.\r\n"                                       },
-      {"You will no longer keep cybernetic limbs with death.\r\n",
-       "You will now keep cybernetic limbs with death.\r\n"                          },
-      {"You will no longer worry about acquiring steaks from animals.\r\n",
-       "You will now acquire steaks from animal if you can.\r\n"                     },
-      {"You will now accept things being given to you.\r\n",
-       "You will no longer accept things being given to you.\r\n"                    },
-      {"You will no longer instruct those you spar with.\r\n",
-       "You will now instruct those you spar with.\r\n"                              },
-      {"You will no longer view group health.\r\n",
-       "You will now view group health.\r\n"                                         },
-      {"You will no longer view item health.\r\n",
-       "You will now view item health.\r\n"                                          }
-  };
-
   if (char_is_npc(ch))
     return;
 
-  switch (subcmd) {
-    case SCMD_NOSUMMON:
-      result = char_prf_toggle(g, ch, PRF_SUMMONABLE);
-      break;
-    case SCMD_NOHASSLE:
-      result = char_prf_toggle(g, ch, PRF_NOHASSLE);
-      break;
-    case SCMD_BRIEF:
-      result = char_prf_toggle(g, ch, PRF_BRIEF);
-      break;
-    case SCMD_COMPACT:
-      result = char_prf_toggle(g, ch, PRF_COMPACT);
-      break;
-    case SCMD_NOTELL:
-      result = char_prf_toggle(g, ch, PRF_NOTELL);
-      break;
-    case SCMD_NOAUCTION:
-      result = char_prf_toggle(g, ch, PRF_NOAUCT);
-      break;
-    case SCMD_DEAF:
-      result = char_prf_toggle(g, ch, PRF_DEAF);
-      break;
-    case SCMD_NOGOSSIP:
-      result = char_prf_toggle(g, ch, PRF_NOGOSS);
-      break;
-    case SCMD_NOGRATZ:
-      result = char_prf_toggle(g, ch, PRF_NOGRATZ);
-      break;
-    case SCMD_NOWIZ:
-      result = char_prf_toggle(g, ch, PRF_NOWIZ);
-      break;
-    case SCMD_QUEST:
-      result = char_prf_toggle(g, ch, PRF_QUEST);
-      break;
-    case SCMD_ROOMFLAGS:
-      result = char_prf_toggle(g, ch, PRF_ROOMFLAGS);
-      break;
-    case SCMD_NOREPEAT:
-      result = char_prf_toggle(g, ch, PRF_NOREPEAT);
-      break;
-    case SCMD_HOLYLIGHT:
-      result = char_prf_toggle(g, ch, PRF_HOLYLIGHT);
-      break;
-    case SCMD_SLOWNS:
-      result = (CONFIG_NS_IS_SLOW = !CONFIG_NS_IS_SLOW);
-      break;
-    case SCMD_AUTOEXIT:
-      result = char_prf_toggle(g, ch, PRF_AUTOEXIT);
-      break;
-    case SCMD_TRACK:
-      result = (CONFIG_TRACK_T_DOORS = !CONFIG_TRACK_T_DOORS);
-      break;
-    case SCMD_AFK:
-      result = char_prf_toggle(g, ch, PRF_AFK);
-      if (char_prf_flagged(g, ch, PRF_AFK))
-        act(g, "$n has gone AFK.", true, ch, nullptr, nullptr, TO_ROOM);
-      else {
-        act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
-        if (has_mail(g, char_get_idnum(ch)))
-          send_to_char(g, ch, "You have mail waiting.\r\n");
-      }
-      break;
-    case SCMD_AUTOLOOT:
-      result = char_prf_toggle(g, ch, PRF_AUTOLOOT);
-      break;
-    case SCMD_AUTOGOLD:
-      result = char_prf_toggle(g, ch, PRF_AUTOGOLD);
-      break;
-    case SCMD_CLS:
-      result = char_prf_toggle(g, ch, PRF_CLS);
-      break;
-    case SCMD_BUILDWALK:
-      if (char_get_admlevel(ch) < ADMLVL_IMMORT) {
-        send_to_char(g, ch, "Immortals only, sorry.\r\n");
-        return;
-      }
-      result = char_prf_toggle(g, ch, PRF_BUILDWALK);
-      if (char_prf_flagged(g, ch, PRF_BUILDWALK))
-        mudlog(g, LOG_CMP, char_get_level(ch), true,
-               "OLC: {} turned buildwalk on. Allowed zone {:d}", char_get_name(ch), char_get_olc_zone(g, ch));
-      else
-        mudlog(g, LOG_CMP, char_get_level(ch), true,
-               "OLC: {} turned buildwalk off. Allowed zone {:d}", char_get_name(ch), char_get_olc_zone(g, ch));
-      break;
-    case SCMD_AUTOSPLIT:
-      result = char_prf_toggle(g, ch, PRF_AUTOSPLIT);
-      break;
-    case SCMD_AUTOSAC:
-      result = char_prf_toggle(g, ch, PRF_AUTOSAC);
-      break;
-    case SCMD_SNEAK:
-      result = char_aff_toggle(ch, AFF_SNEAK);
-      break;
-    case SCMD_HIDE:
-      if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(g, ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
-        send_to_char(g, ch, "You stand out too much to hide right now!\r\n");
-        return;
-      }
-      if (char_plr_flagged(ch, PLR_HEALT)) {
-        send_to_char(g, ch, "You are inside a healing tank!\r\n");
-        return;
-      }
-      if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
-        send_to_char(g, ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
-        char_set_skills_base(ch, SKILL_HIDE, rand_number(g, 1, 5));
-      } else if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
-        send_to_char(g, ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
-        return;
-      }
-      result = char_aff_toggle(ch, AFF_HIDE);
-      break;
-    case SCMD_AUTOMEM:
-      result = char_prf_toggle(g, ch, PRF_AUTOMEM);
-      break;
-    case SCMD_VIEWORDER:
-      result = char_prf_toggle(g, ch, PRF_VIEWORDER);
-      break;
-    case SCMD_TEST:
-      if (char_get_admlevel(ch) >= 1) {
-        char_prf_toggle(g, ch, PRF_TEST);
-        send_to_char(g, ch, "Okay. Testing is now: {}\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
-        if (char_prf_flagged(g, ch, PRF_TEST)) {
-          send_to_char(g, ch, "Make sure to remove nohassle as well.\r\n");
-        }
-        return;
-      }
-      send_to_char(g, ch, "You are not an immortal.\r\n");
-      return;
-      break;
-    case SCMD_NOCOMPRESS:
-      if (CONFIG_ENABLE_COMPRESSION) {
-        result = char_prf_toggle(g, ch, PRF_NOCOMPRESS);
-        break;
-      }
-      send_to_char(g, ch, "Sorry, compression is globally disabled.\r\n");
-      return;
-    case SCMD_AUTOASSIST:
-      result = char_prf_toggle(g, ch, PRF_AUTOASSIST);
-      break;
-    case SCMD_WHOHIDE:
-      result = char_prf_toggle(g, ch, PRF_HIDE);
-      break;
-    case SCMD_NMWARN:
-      result = char_prf_toggle(g, ch, PRF_NMWARN);
-      break;
-    case SCMD_HINTS:
-      result = char_prf_toggle(g, ch, PRF_HINTS);
-      break;
-    case SCMD_NODEC:
-      result = char_prf_toggle(g, ch, PRF_NODEC);
-      break;
-    case SCMD_NOEQSEE:
-      result = char_prf_toggle(g, ch, PRF_NOEQSEE);
-      break;
-    case SCMD_NOMUSIC:
-      result = char_prf_toggle(g, ch, PRF_NOMUSIC);
-      break;
-    case SCMD_NOPARRY:
-      result = char_prf_toggle(g, ch, PRF_NOPARRY);
-      break;
-    case SCMD_LKEEP:
-      result = char_prf_toggle(g, ch, PRF_LKEEP);
-      break;
-    case SCMD_CARVE:
-      result = char_prf_toggle(g, ch, PRF_CARVE);
-      break;
-    case SCMD_NOGIVE:
-      result = char_prf_toggle(g, ch, PRF_NOGIVE);
-      break;
-    case SCMD_INSTRUCT:
-      result = char_prf_toggle(g, ch, PRF_INSTRUCT);
-      break;
-    case SCMD_GHEALTH:
-      result = char_prf_toggle(g, ch, PRF_GHEALTH);
-      break;
-    case SCMD_IHEALTH:
-      result = char_prf_toggle(g, ch, PRF_IHEALTH);
-      break;
-    default:
-      mud_log("SYSERR: Unknown subcmd {:d} in do_gen_toggle.", subcmd);
-      /*  SYSERR_DESC:
-     *  This is the same as the unhandled case in do_gen_ps(), but in the
-     *  function which handles 'compact', 'brief', and so forth.
-     */
-      return;
+  if (subcmd < 0 || subcmd >= std::ssize(GEN_TOGGLES)) {
+    mud_log("SYSERR: Unknown subcmd {:d} in do_gen_toggle.", subcmd);
+    return;
   }
+  const gen_toggle &toggle = GEN_TOGGLES[subcmd];
 
-  if (result)
-    send_to_char(g, ch, "{}", tog_messages[subcmd][TOG_ON]);
-  else
-    send_to_char(g, ch, "{}", tog_messages[subcmd][TOG_OFF]);
-
-  return;
+  if (toggle.before && toggle.before(g, ch))
+    return;
+  bool on = toggle.flip(g, ch);
+  if (toggle.after)
+    toggle.after(g, ch);
+  send_to_char(g, ch, "{}", on ? toggle.on : toggle.off);
 }
 
 ACMD(do_file)
