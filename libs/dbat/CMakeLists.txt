@@ -80,7 +80,8 @@ target_link_libraries(dbat_test_commands PRIVATE dbat_test_harness)
 add_test(NAME commands COMMAND dbat_test_commands)
 set_tests_properties(commands PROPERTIES LABELS slow TIMEOUT 3600)
 
-add_executable(dbat_test_techniques tests/test_techniques.cpp)
+add_executable(dbat_test_techniques tests/test_techniques.cpp tests/scenes_offense.cpp tests/scenes_dispatchers.cpp
+               tests/scenes_informative.cpp tests/scenes_items_wizard.cpp tests/scenes_other.cpp)
 target_compile_options(dbat_test_techniques PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_techniques PRIVATE dbat_test_harness)
 # in shards, so that ctest -j runs them side by side (under ASan the whole run takes over an hour)
