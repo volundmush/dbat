@@ -387,6 +387,24 @@ static void lasting(GameWorld *g, struct char_data *att, const char *skill)
 }
 
 /* a scene's setup, with what it doesn't use put aside */
+/* ... with Shenron summoned where they stand, played by the victim */
+static void before_shenron(GameWorld *g, struct char_data *att, struct char_data *dragon, int wishes = 0)
+{
+  g->SHENRON      = true;
+  g->DRAGONR      = char_get_in_room(att);
+  g->EDRAGON_uid  = char_get_id(dragon);
+  g->WISH[0]      = wishes > 0;
+  g->WISH[1]      = wishes > 1;
+}
+
+/* ... and every player there dead, but `alive` */
+static void the_dead(GameWorld *g, struct char_data *att, const char *alive = "")
+{
+  for (char_data *c : room_people(g, char_get_in_room(att)))
+    if (!char_is_npc(c))
+      char_aff_set(c, AFF_SPIRIT, strcmp(char_get_name(c), alive) != 0);
+}
+
 #define SETUP(body) [](GameWorld *g, char_data *att, char_data *victim) { (void)g; (void)att; (void)victim; body }
 
 static void fireshielded(struct char_data *victim)
@@ -1643,6 +1661,80 @@ static const struct scene {
     {"at 60 slots", "rpp 15", false, SETUP(char_set_rp(att, 10000); char_set_skill_slots(att, 60);), false, 1},
     {"at 60 slots, good memory", "rpp 15", false, SETUP(char_set_rp(att, 10000); char_set_skill_slots(att, 60); char_set_bonuses(att, BONUS_GMEMORY, 1);), false, 1},
     {"at 65 slots, good memory", "rpp 15", false, SETUP(char_set_rp(att, 10000); char_set_skill_slots(att, 65); char_set_bonuses(att, BONUS_GMEMORY, 1);), false, 1},
+    {"plainly", "say hello there", false, SETUP(), false, 1},
+    {"plainly", "say hello there!", false, SETUP(), false, 1},
+    {"plainly", "say hello there?", false, SETUP(), false, 1},
+    {"nothing", "say", false, SETUP(), false, 1},
+    {"mute", "say hello", false, SETUP(char_set_bonuses(att, BONUS_MUTE, 1);), false, 1},
+    {"mute, at MUD school", "say hello", false, SETUP(char_set_bonuses(att, BONUS_MUTE, 1); char_from_room(g, att); char_to_room(g, att, 50);), false, 1},
+    {"with norepeat", "say hello", false, SETUP(char_prf_set(g, att, PRF_NOREPEAT, true);), false, 1},
+    {"to someone", "say to Sayla hello", false, SETUP(), false, 1},
+    {"to someone", "say to Hugo hello", false, SETUP(), false, 1},
+    {"to someone", "say to Victim hello", false, SETUP(), false, 1},
+    {"to someone", "say to namek hello", false, SETUP(), false, 1},
+    {"to someone", "say to dummy hello", false, SETUP(), false, 1},
+    {"to someone", "say hello to Icor and to Blade ", false, SETUP(), false, 1},
+    {"to Shenron, wishless", "say knowledge for me", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron, naming no one", "say I wish for knowledge", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron elsewhere", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); g->DRAGONR = 0;), false, 1},
+    {"to Shenron gone", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); char_from_room(g, victim); char_to_room(g, victim, 302);), false, 1},
+    {"to Shenron, with no dragon", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); g->EDRAGON_uid = -1;), false, 1},
+    {"to Shenron unsummoned", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); g->SHENRON = false;), false, 1},
+    {"to Shenron, with norepeat", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); char_prf_set(g, att, PRF_NOREPEAT, true);), false, 1},
+    {"to Shenron", "say I wish myself knowledge", false, SETUP(before_shenron(g, att, victim); ), false, 3},
+    {"to Shenron", "say I wish myself speed", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself tough", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself strength", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself intelligence", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself wisdom", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself agility", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself constitution", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself skill", false, SETUP(before_shenron(g, att, victim); ), false, 3},
+    {"to Shenron", "say I wish myself power", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself money", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself immunity", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself vitality", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself senzu", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself roleplay", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself to be a mortal", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself to be immortal", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself cake", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself power and money", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron", "say I wish myself vitality and a cake", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron, second wish", "say I wish myself money", false, SETUP(before_shenron(g, att, victim, 1);), false, 1},
+    {"to Shenron, second wish", "say I wish myself to be immortal", false, SETUP(before_shenron(g, att, victim, 1);), false, 1},
+    {"to Shenron, wishes spent", "say I wish myself to be immortal", false, SETUP(before_shenron(g, att, victim, 2);), false, 1},
+    {"to Shenron, at 95", "say I wish myself speed", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_cha(att, 95);), false, 1},
+    {"to Shenron, at 95", "say I wish myself strength", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_str(att, 95);), false, 1},
+    {"to Shenron, at 95", "say I wish myself intelligence", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_intel(att, 95);), false, 1},
+    {"to Shenron, at 95", "say I wish myself wisdom", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_wis(att, 95);), false, 1},
+    {"to Shenron, at 95", "say I wish myself agility", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_dex(att, 95);), false, 1},
+    {"to Shenron, at 95", "say I wish myself constitution", false, SETUP(before_shenron(g, att, victim); char_set_real_abils_con(att, 95);), false, 1},
+    {"to Shenron, an immortal", "say I wish myself to be a mortal", false, SETUP(before_shenron(g, att, victim); char_plr_set(att, PLR_IMMORTAL, true);), false, 1},
+    {"to Shenron, naming Sayla", "say I wish Sayla had money", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron, naming all", "say I wish Hugo, Sayla, Icor and Blade had money", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron, alive", "say I wish myself revive", false, SETUP(before_shenron(g, att, victim); ), false, 1},
+    {"to Shenron, dead", "say I wish myself revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att);), false, 1},
+    {"to Shenron, dead in room 0", "say I wish myself revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); char_set_droom(att, 0);), false, 1},
+    {"to Shenron, dead nowhere", "say I wish myself revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); char_set_droom(att, 19100);), false, 1},
+    {"to Shenron, all dead", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att);), false, 1},
+    {"to Shenron, Hugo alive", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Hugo");), false, 1},
+    {"to Shenron, Sayla alive", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Sayla");), false, 1},
+    {"to Shenron, all dead", "say I wish Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att);), false, 1},
+    {"to Shenron, Icor alive", "say I wish Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Icor");), false, 1},
+    {"to Shenron, Blade alive", "say I wish Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Blade");), false, 1},
+    {"to Shenron, all dead", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att);), false, 1},
+    {"to Shenron, Hugo alive", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Hugo");), false, 1},
+    {"to Shenron, Sayla alive", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Sayla");), false, 1},
+    {"to Shenron, Icor alive", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Icor");), false, 1},
+    {"to Shenron, all dead", "say I wish Sayla, Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att);), false, 1},
+    {"to Shenron, Sayla alive", "say I wish Sayla, Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Sayla");), false, 1},
+    {"to Shenron, Icor alive", "say I wish Sayla, Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Icor");), false, 1},
+    {"to Shenron, Blade alive", "say I wish Sayla, Icor and Blade would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att, "Blade");), false, 1},
+    {"to Shenron, all dead in room 0", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 0);), false, 1},
+    {"to Shenron, all dead nowhere", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 19100);), false, 1},
+    {"to Shenron, two dead nowhere", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 19100);), false, 1},
+    {"to Shenron, Sayla at a menu", "say I wish Hugo and Sayla had money", false, SETUP(before_shenron(g, att, victim); for (char_data *c : room_people(g, char_get_in_room(att))) if (c != att && !strcmp(char_get_name(c), "Sayla") && char_get_desc(c)) desc_set_connected(char_get_desc(c), CON_POBJ);), false, 1},
 };
 #undef SETUP
 constexpr int SCENE_SEEDS = 4;

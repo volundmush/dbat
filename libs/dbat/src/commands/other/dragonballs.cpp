@@ -1,5 +1,9 @@
 /* dragonballs.c: dragon balls, wishes and summoning
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
+#include <array>
+#include <string_view>
+
 #include <sys/stat.h>
 
 #include "dbat/iterate.hpp"
@@ -490,4 +494,284 @@ bool dball_count(GameWorld *g, struct char_data *ch)
     return true;
   }
   return false;
+}
+
+/* Wishes: what Shenron does with what is said to him. */
+namespace {
+  /* Who a wish names: at most three players, in the order they connected. */
+  struct wisher {
+    GameWorld *g;
+    struct char_data *ch;
+    std::array<struct char_data *, 3> named{};
+
+    int count() const { return static_cast<int>(std::ranges::count_if(named, [](auto *c) { return c != nullptr; })); }
+  };
+
+  const char *second_wish(GameWorld *g) { return g->WISH[0] ? "" : " Now make your second wish."; }
+
+  void shenron_says_no(GameWorld *g)
+  {
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
+  }
+
+  /* A boon: one named player gains something, and the wish is granted. */
+  struct boon {
+    const char *word;
+    const char *granted; /* "{name} ..." */
+    const char *logged;  /* "... has made {logged} on {name}." */
+    void (*bestow)(GameWorld *g, struct char_data *wch);
+    bool saves;
+  };
+
+  template <int8_t (*Get)(const struct char_data *), void (*Set)(struct char_data *, int8_t)>
+  void raise_by_10(GameWorld *, struct char_data *wch)
+  {
+    Set(wch, Get(wch) + 10);
+    if (Get(wch) > 100)
+      Set(wch, 100);
+  }
+
+  void more_practice(GameWorld *g, struct char_data *wch) { char_set_practice_points(g, wch, char_get_practice_points(g, wch) + rand_number(g, 2000, 5000)); }
+
+  void more_armor(GameWorld *, struct char_data *wch) { char_set_armor(wch, char_get_armor(wch) + 5000); }
+
+  void more_skill_slots(GameWorld *g, struct char_data *wch)
+  {
+    int roll = rand_number(g, 1, 3);
+    send_to_char(g, wch, "@GYou suddenly feel like you could learn {:d} more skills!@n\r\n", roll);
+    char_set_skill_slots(wch, char_get_skill_slots(wch) + roll);
+  }
+
+  void more_money(GameWorld *, struct char_data *wch) { char_set_bank_gold(wch, char_get_bank_gold(wch) + 1000000); }
+
+  void immunity(GameWorld *, struct char_data *wch) { char_aff_set(wch, AFF_IMMUNITY, true); }
+
+  constexpr boon KNOWLEDGE    = {"knowledge", "now has more knowledge", "a knowledge wish", more_practice, false};
+  constexpr boon SPEED        = {"speed", "is now faster", "a speed wish", raise_by_10<char_get_real_abils_cha, char_set_real_abils_cha>, true};
+  constexpr boon TOUGH        = {"tough", "is now tougher", "a tough wish", more_armor, false};
+  constexpr boon STRENGTH     = {"strength", "has more strength", "a strength wish", raise_by_10<char_get_real_abils_str, char_set_real_abils_str>, true};
+  constexpr boon INTELLIGENCE = {"intelligence", "is now smarter", "a intelligence wish", raise_by_10<char_get_real_abils_intel, char_set_real_abils_intel>, true};
+  constexpr boon WISDOM       = {"wisdom", "is now wiser", "a wisdom wish", raise_by_10<char_get_real_abils_wis, char_set_real_abils_wis>, false /* quirk */};
+  constexpr boon AGILITY      = {"agility", "is now more agile", "a agility wish", raise_by_10<char_get_real_abils_dex, char_set_real_abils_dex>, true};
+  constexpr boon CONSTITUTION = {"constitution", "has more guts", "a constitutionwish" /* quirk */, raise_by_10<char_get_real_abils_con, char_set_real_abils_con>, true};
+  constexpr boon SKILL        = {"skill", "has more skill", "a skill wish", more_skill_slots, true};
+  constexpr boon MONEY        = {"money", "now has become richer", "a money wish", more_money, false};
+  constexpr boon IMMUNITY     = {"immunity", "now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis", "a immunity wish", immunity, false};
+
+  template <const boon &B>
+  bool grant_boon(wisher &w)
+  {
+    GameWorld *g = w.g;
+    struct char_data *wch = w.named[0];
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} {}!{}@w'@n\r\n", char_get_name(wch), B.granted, second_wish(g));
+    B.bestow(g, wch);
+    if (B.saves)
+      save_char(g, wch);
+    g->SELFISHMETER += 1;
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made {} on {}.", char_get_name(w.ch), B.logged, char_get_name(wch));
+    char_set_wait(w.ch, PULSE_4SEC);
+    return true;
+  }
+
+  /* Power and vitality were wishes once. */
+  bool refuse(wisher &w)
+  {
+    shenron_says_no(w.g);
+    char_set_wait(w.ch, PULSE_4SEC);
+    return false;
+  }
+
+  void not_dead(GameWorld *g, struct char_data *wch)
+  {
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@C{} is not dead, and can not be revived.@w'@n\r\n", char_get_name(wch));
+  }
+
+  /* quirk: reviving one sends a death room of 0 to room 300, reviving more sends them to room 0 */
+  void return_to_life(GameWorld *g, struct char_data *wch, bool zero_is_300)
+  {
+    if (!room_of(g, char_get_droom(wch)))
+      char_set_droom(wch, 300);
+    if (!room_of(g, char_get_droom(wch)))
+      return;
+    char_from_room(g, wch);
+    char_to_room(g, wch, zero_is_300 && char_get_droom(wch) <= 0 ? 300 : char_get_droom(wch));
+    look_at_room(g, char_get_in_room(wch), wch, 0);
+    send_to_char(g, wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
+    char_aff_set(wch, AFF_SPIRIT, false);
+    char_aff_set(wch, AFF_ETHEREAL, false);
+  }
+
+  bool revive(wisher &w)
+  {
+    GameWorld *g = w.g;
+    auto &named  = w.named;
+    int count    = w.count();
+    auto dead    = [](struct char_data *c) { return char_aff_flagged(c, AFF_SPIRIT); };
+
+    if (count == 1) {
+      if (!dead(named[0])) {
+        not_dead(g, named[0]);
+        return false;
+      }
+      send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} has returned to life!{}@w'@n\r\n", char_get_name(named[0]), second_wish(g));
+      return_to_life(g, named[0], true);
+      g->SELFISHMETER -= 2;
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a revive wish on {}.", char_get_name(w.ch), char_get_name(named[0]));
+      return true; /* quirk: no wait for this one */
+    }
+
+    /* The first ones are told of each, the last only if it is the one alive. */
+    for (int i = 0; i < count - 1; i++)
+      if (!dead(named[i]))
+        not_dead(g, named[i]);
+    if (!dead(named[count - 1])) {
+      not_dead(g, named[count - 1]);
+      return false;
+    }
+    if (!std::all_of(named.begin(), named.begin() + count, dead))
+      return false;
+
+    if (count == 2)
+      send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} and {} have returned to life!{}@w'@n\r\n",
+                   char_get_name(named[0]), char_get_name(named[1]), second_wish(g));
+    else
+      send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {}, {}, and {} have returned to life!!{}@w'@n\r\n",
+                   char_get_name(named[0]), char_get_name(named[1]), char_get_name(named[2]), second_wish(g));
+    for (int i = 0; i < count; i++)
+      return_to_life(g, named[i], false);
+    g->SELFISHMETER -= 3;
+    /* quirk: the log leaves out the first one revived */
+    if (count == 2)
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a revive wish on {}.", char_get_name(w.ch), char_get_name(named[1]));
+    else
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a revive wish on {} and {}.", char_get_name(w.ch), char_get_name(named[1]), char_get_name(named[2]));
+    char_set_wait(w.ch, PULSE_4SEC);
+    return true;
+  }
+
+  /* Takes both wishes. */
+  bool immortality(wisher &w)
+  {
+    GameWorld *g = w.g;
+    if (g->WISH[0] != 0)
+      return false;
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} is now immortal!@w'@n\r\n", char_get_name(w.named[0]));
+    char_plr_set(w.named[0], PLR_IMMORTAL, true);
+    g->WISH[0] = 1;
+    g->WISH[1] = 1;
+    g->SELFISHMETER += 4;
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a immortal wish on {}.", char_get_name(w.ch), char_get_name(w.named[0]));
+    char_set_wait(w.ch, PULSE_4SEC);
+    return true;
+  }
+
+  bool immortality_spent(wisher &w)
+  {
+    if (w.g->WISH[0] == 1)
+      send_to_room(w.g, w.g->DRAGONR, "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
+    return false;
+  }
+
+  bool mortality(wisher &w)
+  {
+    GameWorld *g = w.g;
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} is now mortal!{}@w'@n\r\n", char_get_name(w.named[0]), second_wish(g));
+    char_plr_set(w.named[0], PLR_IMMORTAL, false);
+    g->SELFISHMETER += 4;
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a mortal wish on {}.", char_get_name(w.ch), char_get_name(w.named[0]));
+    char_set_wait(w.ch, PULSE_4SEC);
+    return true;
+  }
+
+  /* quirk: the one wishing gets the senzus, and has no wait */
+  bool senzus(wisher &w)
+  {
+    GameWorld *g = w.g;
+    for (int i = 0; i < 10; i++)
+      obj_to_char(g, read_object(g, 1), w.ch);
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} now possesses 10 senzus!{}@w'@n\r\n", char_get_name(w.named[0]), second_wish(g));
+    g->SELFISHMETER += 1;
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a senzu wish.", char_get_name(w.ch));
+    return true;
+  }
+
+  bool roleplay(wisher &w)
+  {
+    GameWorld *g = w.g;
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {}!{}@w'@n\r\n", char_get_name(w.named[0]), second_wish(g));
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a roleplay wish.", char_get_name(w.ch));
+    char_set_wait(w.ch, PULSE_4SEC);
+    return true;
+  }
+
+  struct wish {
+    const char *word;
+    bool (*grant)(wisher &w); /* true if granted */
+  };
+
+  /* Tried in order until one is granted. */
+  constexpr wish WISHES[] = {
+      {"knowledge",    grant_boon<KNOWLEDGE>   },
+      {"speed",        grant_boon<SPEED>       },
+      {"tough",        grant_boon<TOUGH>       },
+      {"strength",     grant_boon<STRENGTH>    },
+      {"intelligence", grant_boon<INTELLIGENCE>},
+      {"wisdom",       grant_boon<WISDOM>      },
+      {"agility",      grant_boon<AGILITY>     },
+      {"constitution", grant_boon<CONSTITUTION>},
+      {"skill",        grant_boon<SKILL>       },
+      {"power",        refuse                  },
+      {"money",        grant_boon<MONEY>       },
+      {"immunity",     grant_boon<IMMUNITY>    },
+      {"vitality",     refuse                  },
+      {"revive",       revive                  },
+      {"immortal",     immortality             },
+      {"immortal",     immortality_spent       },
+      {" mortal",      mortality               },
+      {"senzu",        senzus                  },
+      {"roleplay",     roleplay                },
+  };
+} // namespace
+
+bool shenron_hears(GameWorld *g, struct char_data *ch, std::string_view text)
+{
+  if (!g->SHENRON || char_get_in_room(ch) != g->DRAGONR)
+    return true;
+  struct char_data *dragon = char_by_id(g, g->EDRAGON_uid);
+  if (!dragon || char_get_in_room(dragon) != g->DRAGONR || !text.contains("wish"))
+    return true;
+
+  wisher w{g, ch};
+  for (descriptor_data *d : each_desc(g)) {
+    if (desc_get_connected(d) != CON_PLAYING || !text.contains(char_get_name(d->character)))
+      continue;
+    if (auto slot = std::ranges::find(w.named, nullptr); slot != w.named.end())
+      *slot = d->character;
+  }
+  if (!w.named[0] && text.contains("myself"))
+    w.named[0] = ch;
+  if (!w.named[0])
+    return false; /* quirk: nothing else hears it, not even the speech triggers */
+
+  bool granted = false;
+  for (const wish &x : WISHES) {
+    if (text.contains(x.word) && x.grant(w)) {
+      granted = true;
+      break;
+    }
+  }
+
+  if (!granted) {
+    send_to_room(g, g->DRAGONR, "@wShenron says, '@CDo not waste my time with wishes I can not grant...@w'@n\r\n");
+    return true;
+  }
+  if (g->WISH[0] == 1)
+    g->WISH[1] = 1;
+  else
+    g->WISH[0] = 1;
+  /* quirk: saves the first one named once for each one named */
+  for (int i = 0; i < w.count(); i++)
+    save_char(g, w.named[0]);
+  save_mud_time(g, &g->time_info);
+  return true;
 }

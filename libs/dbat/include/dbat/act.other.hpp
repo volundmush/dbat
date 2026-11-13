@@ -22,6 +22,8 @@ void hint_system(GameWorld *g, struct char_data *ch, int num);
 bool dball_count(GameWorld *g, struct char_data *ch);
 void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj);
 void wishSYS(GameWorld *g);
+/* Lets Shenron hear what ch says. False when a wish named no one, and the speech goes no further. */
+bool shenron_hears(GameWorld *g, struct char_data *ch, std::string_view text);
 void bring_to_cap(struct char_data *ch);
 void base_update(GameWorld *g);
 void load_shadow_dragons(GameWorld *g);
