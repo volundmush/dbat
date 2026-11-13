@@ -1,6 +1,8 @@
 /* status.c: score, status, inventory, equipment, consider
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
+#include <span>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
@@ -45,7 +47,6 @@
 
 #include "informative_internal.hpp"
 
-static void bonus_status(GameWorld *g, struct char_data *ch);
 // definitions
 ACMD(do_evolve)
 {
@@ -551,739 +552,536 @@ void trans_check(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
 } // End trans check
 
-ACMD(do_status)
-{
-  std::string arg;
-  struct affected_type *aff;
+namespace {
 
-  const char *forget_level[7] = {
-      "@GRemembered Well@n",
-      "@GRemembered Well Enough@n",
-      "@RGetting Foggy@n",
-      "@RHalf Forgotten@n",
-      "@rAlmost Forgotten@n",
-      "@rForgotten@n",
-      "\n"};
+/* What status says of the body, a section at a time, each line by the first row it fits */
 
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (arg.empty()) {
-    send_to_char(g, ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
-    send_to_char(g, ch, "            @D---------------@CAppearance@D---------------\n");
-    bringdesc(g, ch, ch);
-    send_to_char(g, ch, "            @D---------------@RAppendages@D---------------\n");
-
-    if (char_plr_flagged(ch, PLR_HEAD)) {
-      send_to_char(g, ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
-    }
-    if (!char_plr_flagged(ch, PLR_HEAD)) {
-      send_to_char(g, ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
-    }
-    if (char_get_limb_condition(ch, (1) - 1) >= 50 && !char_plr_flagged(ch, PLR_CRARM)) {
-      send_to_char(g, ch, "            @D[@cRight Arm   @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(ch, (1) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (1) - 1) > 0 && !char_plr_flagged(ch, PLR_CRARM)) {
-      send_to_char(g, ch, "            @D[@cRight Arm   @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(ch, (1) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (1) - 1) > 0 && char_plr_flagged(ch, PLR_CRARM)) {
-      send_to_char(g, ch, "            @D[@cRight Arm   @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(ch, (1) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (1) - 1) <= 0) {
-      send_to_char(g, ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
-    }
-    if (char_get_limb_condition(ch, (2) - 1) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
-      send_to_char(g, ch, "            @D[@cLeft Arm    @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(ch, (2) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (2) - 1) > 0 && !char_plr_flagged(ch, PLR_CLARM)) {
-      send_to_char(g, ch, "            @D[@cLeft Arm    @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(ch, (2) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_plr_flagged(ch, PLR_CLARM)) {
-      send_to_char(g, ch, "            @D[@cLeft Arm    @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(ch, (2) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (2) - 1) <= 0) {
-      send_to_char(g, ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
-    }
-    if (char_get_limb_condition(ch, (3) - 1) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
-      send_to_char(g, ch, "            @D[@cRight Leg   @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(ch, (3) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (3) - 1) > 0 && !char_plr_flagged(ch, PLR_CRLEG)) {
-      send_to_char(g, ch, "            @D[@cRight Leg   @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(ch, (3) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (3) - 1) > 0 && char_plr_flagged(ch, PLR_CRLEG)) {
-      send_to_char(g, ch, "            @D[@cRight Leg   @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(ch, (3) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (3) - 1) <= 0) {
-      send_to_char(g, ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
-    }
-    if (char_get_limb_condition(ch, (4) - 1) >= 50 && !char_plr_flagged(ch, PLR_CLLEG)) {
-      send_to_char(g, ch, "            @D[@cLeft Leg    @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(ch, (4) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (4) - 1) > 0 && !char_plr_flagged(ch, PLR_CLLEG)) {
-      send_to_char(g, ch, "            @D[@cLeft Leg    @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(ch, (4) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (4) - 1) > 0 && char_plr_flagged(ch, PLR_CLLEG)) {
-      send_to_char(g, ch, "            @D[@cLeft Leg    @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(ch, (4) - 1), "%", "%");
-    } else if (char_get_limb_condition(ch, (4) - 1) <= 0) {
-      send_to_char(g, ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
-    }
-
-    if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, PLR_STAIL)) {
-      send_to_char(g, ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-    }
-    if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_plr_flagged(ch, PLR_STAIL)) {
-      send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-    }
-    if ((char_is_icer(ch) || char_is_bio(ch)) && char_plr_flagged(ch, PLR_TAIL)) {
-      send_to_char(g, ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-    }
-    if ((char_is_icer(ch) || char_is_bio(ch)) && !char_plr_flagged(ch, PLR_TAIL)) {
-      send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-    }
-    send_to_char(g, ch, "\r\n");
-
-    send_to_char(g, ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
-    if (char_get_conditions(g, ch, HUNGER) >= 48) {
-      send_to_char(g, ch, "         You are full.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 40) {
-      send_to_char(g, ch, "         You are nearly full.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 30) {
-      send_to_char(g, ch, "         You are not hungry.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 21) {
-      send_to_char(g, ch, "         You wouldn't mind a snack.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 15) {
-      send_to_char(g, ch, "         You are slightly hungry.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 10) {
-      send_to_char(g, ch, "         You are partially hungry.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 5) {
-      send_to_char(g, ch, "         You are really hungry.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 2) {
-      send_to_char(g, ch, "         You are extremely hungry.\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) >= 0) {
-      send_to_char(g, ch, "         You are starving!\r\n");
-    } else if (char_get_conditions(g, ch, HUNGER) < 0) {
-      send_to_char(g, ch, "         You need not eat.\r\n");
-    }
-    if (char_get_conditions(g, ch, THIRST) >= 48) {
-      send_to_char(g, ch, "         You are not thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 40) {
-      send_to_char(g, ch, "         You are nearly quenched.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 30) {
-      send_to_char(g, ch, "         You are not thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 21) {
-      send_to_char(g, ch, "         You wouldn't mind a drink.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 15) {
-      send_to_char(g, ch, "         You are slightly thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 10) {
-      send_to_char(g, ch, "         You are partially thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 5) {
-      send_to_char(g, ch, "         You are really thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 2) {
-      send_to_char(g, ch, "         You are extremely thirsty.\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) >= 0) {
-      send_to_char(g, ch, "         You are dehydrated!\r\n");
-    } else if (char_get_conditions(g, ch, THIRST) < 0) {
-      send_to_char(g, ch, "         You need not drink.\r\n");
-    }
-    send_to_char(g, ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
-    trans_check(g, ch, ch);
-    send_to_char(g, ch, "         You have died {:d} times.\r\n", char_get_dcount(ch));
-    if (char_plr_flagged(ch, PLR_NOSHOUT)) {
-      send_to_char(g, ch, "         You have been @rmuted@n on public channels.\r\n");
-    }
-    if (char_get_in_room(ch) == 9) {
-      send_to_char(g, ch, "         You are in punishment hell, so sad....\r\n");
-    }
-    if (!char_prf_flagged(g, ch, PRF_HINTS)) {
-      send_to_char(g, ch, "         You have hints turned off.\r\n");
-    }
-    if (g->NEWSUPDATE > char_get_lastpl(ch)) {
-      send_to_char(g, ch, "         Check the 'news', it has been updated recently.\r\n");
-    }
-    if (has_mail(g, char_get_idnum(ch))) {
-      send_to_char(g, ch, "         Check your mail at the nearest postmaster.\r\n");
-    }
-    if (char_prf_flagged(g, ch, PRF_HIDE)) {
-      send_to_char(g, ch, "         You are hidden from who and ooc.\r\n");
-    }
-    if (char_get_voice(ch) != nullptr) {
-      send_to_char(g, ch, "         Your voice desc: '{}'\r\n", char_get_voice(ch));
-    }
-    if (char_get_distfea(ch) == DISTFEA_EYE) {
-      send_to_char(g, ch, "         Your eyes are your most distinctive feature.\r\n");
-    }
-    if (char_get_preference(ch) == 0) {
-      send_to_char(g, ch, "         You preferred a balanced form of fighting.\r\n");
-    } else if (char_get_preference(ch) == PREFERENCE_KI) {
-      send_to_char(g, ch, "         You preferred a ki dominate form of fighting.\r\n");
-    } else if (char_get_preference(ch) == PREFERENCE_WEAPON) {
-      send_to_char(g, ch, "         You preferred a weapon dominate form of fighting.\r\n");
-    } else if (char_get_preference(ch) == PREFERENCE_H2H) {
-      send_to_char(g, ch, "         You preferred a body dominate form of fighting.\r\n");
-    } else if (char_get_preference(ch) == PREFERENCE_THROWING) {
-      send_to_char(g, ch, "         You preferred a throwing dominate form of fighting.\r\n");
-    }
-    if (char_get_distfea(ch) == DISTFEA_HAIR && !char_is_demon(ch) && !char_is_majin(ch) && !char_is_icer(ch) && !char_is_namek(ch)) {
-      send_to_char(g, ch, "         Your hair is your most distinctive feature.\r\n");
-    } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_demon(ch)) {
-      send_to_char(g, ch, "         Your horns are your most distinctive feature.\r\n");
-    } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_majin(ch)) {
-      send_to_char(g, ch, "         Your forelock is your most distinctive feature.\r\n");
-    } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_icer(ch)) {
-      send_to_char(g, ch, "         Your horns are your most distinctive feature.\r\n");
-    } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_namek(ch)) {
-      send_to_char(g, ch, "         Your antennae are your most distinctive feature.\r\n");
-    }
-
-    if (char_get_distfea(ch) == DISTFEA_SKIN) {
-      send_to_char(g, ch, "         Your skin is your most distinctive feature.\r\n");
-    }
-    if (char_get_distfea(ch) == DISTFEA_HEIGHT) {
-      send_to_char(g, ch, "         Your height is your most distinctive feature.\r\n");
-    }
-    if (char_get_distfea(ch) == DISTFEA_WEIGHT) {
-      send_to_char(g, ch, "         Your weight is your most distinctive feature.\r\n");
-    }
-    if (char_get_equipment(ch, WEAR_EYE)) {
-      struct obj_data *obj = char_get_equipment(ch, WEAR_EYE);
-      if (obj_get_scoutfreq(obj) == 0) {
-        obj_set_scoutfreq(obj, 1);
-      }
-      send_to_char(g, ch, "         Your scouter is on frequency @G{:d}@n\r\n", obj_get_scoutfreq(obj));
-      obj = nullptr;
-    }
-    if (char_get_charge(ch) > 0) {
-      send_to_char(g, ch, "         You have @C{}@n ki charged.\r\n", add_commas(char_get_charge(ch)));
-    }
-    if (char_get_kaioken(ch) > 0) {
-      send_to_char(g, ch, "         You are focusing Kaioken x {:d}.\r\n", char_get_kaioken(ch));
-    }
-    if (char_aff_flagged(ch, AFF_SANCTUARY)) {
-      send_to_char(g, ch, "         You are surrounded by a barrier @D(@Y{}@D)@n\r\n", add_commas(char_get_barrier(ch)));
-    }
-    if (char_aff_flagged(ch, AFF_FIRESHIELD)) {
-      send_to_char(g, ch, "         You are surrounded by flames!@n\r\n");
-    }
-    if (char_get_suppression(ch) > 0) {
-      send_to_char(g, ch, "         You are suppressing current PL to {:d}.\r\n", char_get_suppression(ch));
-    }
-    if (char_is_majin(ch)) {
-      send_to_char(g, ch, "         You have ingested {:d} people.\r\n", char_get_absorbs(ch));
-    }
-    if (char_is_bio(ch)) {
-      send_to_char(g, ch, "         You have {:d} absorbs left.\r\n", char_get_absorbs(ch));
-    }
-    send_to_char(g, ch, "         You have {} colored aura.\r\n", aura_types[char_get_aura(ch)]);
-
-    if (char_get_level(ch) < 100) {
-      if ((char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch))) {
-        send_to_char(g, ch, "         @R{}@n to SC a stat this level.\r\n", add_commas(calc_soft_cap(ch)));
-      } else {
-        send_to_char(g, ch, "         @R{}@n in PL/KI/ST combined to SC this level.\r\n", add_commas(calc_soft_cap(ch)));
-      }
-    } else {
-      send_to_char(g, ch, "         Your strengths are potentially limitless.\r\n");
-    }
-
-    if (char_get_forgeting(ch) != 0) {
-      send_to_char(g, ch, "         @MForgetting @D[@m{} - {}@D]@n\r\n", g->spell_info[char_get_forgeting(ch)].name, forget_level[char_get_forgetcount(ch)]);
-    } else {
-      send_to_char(g, ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
-    }
-
-    if (char_get_skill(ch, SKILL_DAGGER) > 0) {
-      if (char_get_backstabcool(ch) > 0) {
-        send_to_char(g, ch, "         @yYou can't preform a backstab yet.@n\r\n");
-      } else {
-        send_to_char(g, ch, "         @YYou can backstab.@n\r\n");
-      }
-    }
-
-    if (char_get_feature(ch)) {
-      send_to_char(g, ch, "         Extra Feature: @C{}@n\r\n", char_get_feature(ch));
-    }
-
-    if (char_get_rdisplay(ch)) {
-      if (strcmp(char_get_rdisplay(ch), "Empty")) {
-        send_to_char(g, ch, "         Room Display: @C...{}@n\r\n", char_get_rdisplay(ch));
-      }
-    }
-
-    send_to_char(g, ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
-
-    if (char_get_bonuses(ch, BONUS_INSOMNIAC)) {
-      send_to_char(g, ch, "You can not sleep.\r\n");
-    } else {
-      if (char_get_sleeptime(ch) > 6 && char_get_position(ch) != POS_SLEEPING) {
-        send_to_char(g, ch, "You are well rested.\r\n");
-      } else if (char_get_sleeptime(ch) > 6 && char_get_position(ch) == POS_SLEEPING) {
-        send_to_char(g, ch, "You are getting the rest you need.\r\n");
-      } else if (char_get_sleeptime(ch) > 4) {
-        send_to_char(g, ch, "You are rested.\r\n");
-      } else if (char_get_sleeptime(ch) > 2) {
-        send_to_char(g, ch, "You are not sleepy.\r\n");
-      } else if (char_get_sleeptime(ch) >= 1) {
-        send_to_char(g, ch, "You are getting a little sleepy.\r\n");
-      } else if (char_get_sleeptime(ch) == 0) {
-        send_to_char(g, ch, "You could sleep at any time.\r\n");
-      }
-    }
-
-    if (char_get_relax_count(ch) > 464) {
-      send_to_char(g, ch, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
-    } else if (char_get_relax_count(ch) > 232) {
-      send_to_char(g, ch, "You are too at ease to train hard like you should. Get out of the house more often.\r\n");
-    } else if (char_get_relax_count(ch) > 116) {
-      send_to_char(g, ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
-    }
-
-    if (char_get_mimic(ch) > 0) {
-      send_to_char(g, ch, "You are mimicing the general appearance of {} {}\r\n", AN(juggleRaceName(ch, false)), juggleRaceName(ch, false));
-    }
-    if (char_is_mutant(ch)) {
-      send_to_char(g, ch, "Your Mutations:\r\n");
-      if (char_get_genome(ch, 0) == 1) {
-        send_to_char(g, ch, "  Extreme Speed.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 2) {
-        send_to_char(g, ch, "  Increased Cell Regeneration.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 3) {
-        send_to_char(g, ch, "  Extreme Reflexes.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 4) {
-        send_to_char(g, ch, "  Infravision.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 5) {
-        send_to_char(g, ch, "  Natural Camo.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 6) {
-        send_to_char(g, ch, "  Limb Regen.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 7) {
-        send_to_char(g, ch, "  Poisonous (you can use the bite attack).\r\n");
-      }
-      if (char_get_genome(ch, 0) == 8) {
-        send_to_char(g, ch, "  Rubbery Body.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 9) {
-        send_to_char(g, ch, "  Innate Telepathy.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 10) {
-        send_to_char(g, ch, "  Natural Energy.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 1) {
-        send_to_char(g, ch, "  Extreme Speed.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 2) {
-        send_to_char(g, ch, "  Increased Cell Regeneration.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 3) {
-        send_to_char(g, ch, "  Extreme Reflexes.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 4) {
-        send_to_char(g, ch, "  Infravision.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 5) {
-        send_to_char(g, ch, "  Natural Camo.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 6) {
-        send_to_char(g, ch, "  Limb Regen.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 7) {
-        send_to_char(g, ch, "  Poisonous (you can use the bite attack).\r\n");
-      }
-      if (char_get_genome(ch, 1) == 8) {
-        send_to_char(g, ch, "  Rubbery Body.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 9) {
-        send_to_char(g, ch, "  Innate Telepathy.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 10) {
-        send_to_char(g, ch, "  Natural Energy.\r\n");
-      }
-    }
-    if (char_is_bio(ch)) {
-      send_to_char(g, ch, "Your genes carry:\r\n");
-      if (char_get_genome(ch, 0) == 1) {
-        send_to_char(g, ch, "  Human DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 2) {
-        send_to_char(g, ch, "  Saiyan DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 3) {
-        send_to_char(g, ch, "  Namek DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 4) {
-        send_to_char(g, ch, "  Icer DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 5) {
-        send_to_char(g, ch, "  Truffle DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 6) {
-        send_to_char(g, ch, "  Arlian DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 7) {
-        send_to_char(g, ch, "  Kai DNA.\r\n");
-      }
-      if (char_get_genome(ch, 0) == 8) {
-        send_to_char(g, ch, "  Konatsu DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 1) {
-        send_to_char(g, ch, "  Human DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 2) {
-        send_to_char(g, ch, "  Saiyan DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 3) {
-        send_to_char(g, ch, "  Namek DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 4) {
-        send_to_char(g, ch, "  Icer DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 5) {
-        send_to_char(g, ch, "  Truffle DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 6) {
-        send_to_char(g, ch, "  Arlian DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 7) {
-        send_to_char(g, ch, "  Kai DNA.\r\n");
-      }
-      if (char_get_genome(ch, 1) == 8) {
-        send_to_char(g, ch, "  Konatsu DNA.\r\n");
-      }
-    }
-    if (char_get_genome(ch, 0) == 11) {
-      send_to_char(g, ch, "You have used kyodaika.\r\n");
-    }
-    if (char_prf_flagged(g, ch, PRF_NOPARRY)) {
-      send_to_char(g, ch, "You have decided not to parry attacks.\r\n");
-    }
-    switch (char_get_position(ch)) {
-      case POS_DEAD:
-        send_to_char(g, ch, "You are DEAD!\r\n");
-        break;
-      case POS_MORTALLYW:
-        send_to_char(g, ch, "You are mortally wounded! You should seek help!\r\n");
-        break;
-      case POS_INCAP:
-        send_to_char(g, ch, "You are incapacitated, slowly fading away...\r\n");
-        break;
-      case POS_STUNNED:
-        send_to_char(g, ch, "You are stunned! You can't move!\r\n");
-        break;
-      case POS_SLEEPING:
-        send_to_char(g, ch, "You are sleeping.\r\n");
-        break;
-      case POS_RESTING:
-        send_to_char(g, ch, "You are resting.\r\n");
-        break;
-      case POS_SITTING:
-        send_to_char(g, ch, "You are sitting.\r\n");
-        break;
-      case POS_FIGHTING:
-        send_to_char(g, ch, "You are fighting {}.\r\n", char_get_fighting(g, ch) ? char_pers(g, char_get_fighting(g, ch), ch) : "thin air");
-        break;
-      case POS_STANDING:
-        send_to_char(g, ch, "You are standing.\r\n");
-        break;
-      default:
-        send_to_char(g, ch, "You are floating.\r\n");
-        break;
-    }
-
-    if (has_group(g, ch)) {
-      send_to_char(g, ch, "@GGroup Victories@D: @w{}@n\r\n", add_commas(char_get_combatexpertise(ch)));
-    }
-
-    if (char_plr_flagged(ch, PLR_EYEC)) {
-      send_to_char(g, ch, "Your eyes are closed.\r\n");
-    }
-    if (char_aff_flagged(ch, AFF_SNEAK)) {
-      send_to_char(g, ch, "You are prepared to sneak where ever you go.\r\n");
-    }
-    if (char_plr_flagged(ch, PLR_DISGUISED)) {
-      send_to_char(g, ch, "You have disguised your facial features.\r\n");
-    }
-    if (char_aff_flagged(ch, AFF_FLYING)) {
-      send_to_char(g, ch, "You are flying.\r\n");
-    }
-    if (char_plr_flagged(ch, PLR_PILOTING)) {
-      send_to_char(g, ch, "You are busy piloting a ship.\r\n");
-    }
-    if (char_get_powerattack(ch) > 0) {
-      send_to_char(g, ch, "You are playing @y'@Y{}@y'@n.\r\n", song_types[char_get_powerattack(ch)]);
-    }
-
-    if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-      send_to_char(g, ch, "You are prepared to zanzoken.\r\n");
-    }
-    if (char_aff_flagged(ch, AFF_HASS)) {
-      send_to_char(g, ch, "Your arms are moving fast.\r\n");
-    }
-    if (char_aff_flagged(ch, AFF_INFUSE)) {
-      send_to_char(g, ch, "Your ki will be infused in your next physical attack.\r\n");
-    }
-    if (char_plr_flagged(ch, PLR_TAILHIDE)) {
-      send_to_char(g, ch, "Your tail is hidden!\r\n");
-    }
-    if (char_plr_flagged(ch, PLR_NOGROW)) {
-      send_to_char(g, ch, "Your tail is no longer regrowing!\r\n");
-    }
-    if (is_affected(ch, AFF_SPECIAL_POSE)) {
-      send_to_char(g, ch, "You are feeling confident from your pose earlier.\r\n");
-    }
-    if (is_affected(ch, AFF_HYDROZAP)) {
-      send_to_char(g, ch, "You are effected by Kanso Suru.\r\n");
-    }
-    if (char_get_conditions(g, ch, DRUNK) > 15)
-      send_to_char(g, ch, "You are extremely drunk.\r\n");
-    else if (char_get_conditions(g, ch, DRUNK) > 10)
-      send_to_char(g, ch, "You are pretty drunk.\r\n");
-    else if (char_get_conditions(g, ch, DRUNK) > 4)
-      send_to_char(g, ch, "You are drunk.\r\n");
-    else if (char_get_conditions(g, ch, DRUNK) > 0)
-      send_to_char(g, ch, "You have an alcoholic buzz.\r\n");
-
-    if (!char_affects(ch).empty()) {
-      int lasttype = 0;
-      for (auto aff_it = char_affects(ch).begin(); aff_it != char_affects(ch).end() && (aff = &*aff_it); ++aff_it) {
-        if (!strcasecmp(skill_name(g, aff->type), "runic") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Kenaz rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "punch") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Algiz rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "knee") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Oagaz rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "slam") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Wunjo rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "heeldrop") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Purisaz rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "special beam cannon") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Laguz rune is still in effect! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "might") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your muscles are pumped! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "flex") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You are more agile right now! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "bless") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have been blessed! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "curse") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have been cursed! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "healing glow") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have a healing glow enveloping your body! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "genius") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You are smarter right now! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "enlighten") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You are wiser right now! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "yoikominminken") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have been lulled to sleep! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "solar flare") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have been blinded! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "spirit control") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have full control of your spirit! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "!UNUSED!") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You feel poison burning through your blood! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "tough skin") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have toughened skin right now! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "poison") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "You have been poisoned! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "warp pool") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Weakened State! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "dark metamorphosis") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your Dark Metamorphosis is still in effect. ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-        if (!strcasecmp(skill_name(g, aff->type), "hayasa") && aff->type != lasttype) {
-          lasttype = aff->type;
-          send_to_char(g, ch, "Your body has been infused to move faster! ({:>2d} Mud Hours)\r\n", aff->duration + 1);
-        }
-      }
-    }
-
-    if (char_aff_flagged(ch, AFF_KNOCKED))
-      send_to_char(g, ch, "You have been knocked unconcious!\r\n");
-
-    if (char_aff_flagged(ch, AFF_INVISIBLE))
-      send_to_char(g, ch, "You are invisible.\r\n");
-
-    if (char_aff_flagged(ch, AFF_DETECT_INVIS))
-      send_to_char(g, ch, "You are sensitive to the presence of invisible things.\r\n");
-
-    if (char_aff_flagged(ch, AFF_MBREAK))
-      send_to_char(g, ch, "Your mind has been broken!\r\n");
-
-    if (char_aff_flagged(ch, AFF_WITHER))
-      send_to_char(g, ch, "You've been withered! You feel so weak...\r\n");
-
-    if (char_aff_flagged(ch, AFF_SHOCKED))
-      send_to_char(g, ch, "Your mind has been shocked!\r\n");
-
-    if (char_aff_flagged(ch, AFF_CHARM))
-      send_to_char(g, ch, "You have been charmed!\r\n");
-
-    if (affected_by_spell(ch, SPELL_MAGE_ARMOR))
-      send_to_char(g, ch, "You feel protected.\r\n");
-
-    if (char_aff_flagged(ch, AFF_INFRAVISION))
-      send_to_char(g, ch, "You can see in darkness with infravision.\r\n");
-
-    if (char_prf_flagged(g, ch, PRF_SUMMONABLE))
-      send_to_char(g, ch, "You are summonable by other players.\r\n");
-
-    if (char_aff_flagged(ch, AFF_DETECT_ALIGN))
-      send_to_char(g, ch, "You see into the hearts of others.\r\n");
-
-    if (char_aff_flagged(ch, AFF_DETECT_MAGIC))
-      send_to_char(g, ch, "You are sensitive to the magical nature of things.\r\n");
-
-    if (char_aff_flagged(ch, AFF_SPIRIT))
-      send_to_char(g, ch, "You have died and are part of the SPIRIT world!\r\n");
-
-    if (char_prf_flagged(g, ch, PRF_NOGIVE))
-      send_to_char(g, ch, "You are not accepting items being handed to you right now.\r\n");
-
-    if (char_aff_flagged(ch, AFF_ETHEREAL))
-      send_to_char(g, ch, "You are ethereal and cannot interact with normal space!\r\n");
-
-    if (char_get_regen(ch) > 0) {
-      send_to_char(g, ch, "Something is augmenting your regen rate by {}{:d}{}!\r\n", char_get_regen(ch) > 0 ? "+" : "-", char_get_regen(ch), "%");
-    }
-
-    if (char_get_asb(ch) > 0) {
-      send_to_char(g, ch, "Something is augmenting your auto-skill training rate by {}{:d}{}!\r\n", char_get_asb(ch) > 0 ? "+" : "-", char_get_asb(ch), "%");
-    }
-
-    if (char_get_raw_lifebonus(ch) > 0) {
-      send_to_char(g, ch, "Something is augmenting your Life Force Max by {}{:d}{}!\r\n", char_get_raw_lifebonus(ch) > 0 ? "+" : "-", char_get_raw_lifebonus(ch), "%");
-    }
-
-    if (char_plr_flagged(ch, PLR_FISHING))
-      send_to_char(g, ch, "Current Fishing Pole Bonus @D[@C{:d}@D]@n\r\n", char_get_accuracy(ch));
-
-    if (char_plr_flagged(ch, PLR_AURALIGHT))
-      send_to_char(g, ch, "Aura Light is active.\r\n");
-    send_to_char(g, ch, "@D<@b--------------------------------------------------------------@D>@n\r\n");
-    send_to_char(g, ch, "To view your bonus/negative traits enter: status traits\r\n");
-  } else if (str_eq_nocase(arg, "traits")) {
-    bonus_status(g, ch);
-  } else {
-    send_to_char(g, ch, "The only argument status takes is 'traits'. If you just want your status do not use an argument.\r\n");
-  }
-}
-static const char *const list_bonuses[] = {
-    "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost          ",                                                                                                                                                              /* Bonus 0 */
-    "Prodigy     - +25% Experience Gained Until Level 80               ",                                                                                                                                                              /* Bonus 1 */
-    "Quick Study - Character auto-trains skills faster                 ",                                                                                                                                                              /* Bonus 2 */
-    "Die Hard    - Life Force's PL regen doubled, but cost is the same ",                                                                                                                                                              /* Bonus 3 */
-    "Brawler     - Physical attacks do 20% more damage                 ",                                                                                                                                                              /* Bonus 4 */
-    "Destroyer   - Damaged Rooms act as regen rooms for you            ",                                                                                                                                                              /* Bonus 5 */
-    "Hard Worker - Physical activity bonuses + drains less stamina     ",                                                                                                                                                              /* Bonus 6 */
-    "Healer      - Heal/First-aid/Vigor/Repair restore +10%            ",                                                                                                                                                              /* Bonus 7 */
-    "Loyal       - +20% Experience When Grouped As Follower            ",                                                                                                                                                              /* Bonus 8 */
-    "Brawny      - Strength gains +2 every 10 levels, Train STR + 75%  ",                                                                                                                                                              /* Bonus 9 */
-    "Scholarly   - Intelligence gains +2 every 10 levels, Train INT + 75%",                                                                                                                                                            /* Bonus 10 */
-    "Sage        - Wisdom gains +2 every 10 levels, Train WIS + 75%    ",                                                                                                                                                              /* Bonus 11 */
-    "Agile       - Agility gains +2 every 10 levels, Train AGL + 75%   ",                                                                                                                                                              /* Bonus 12 */
-    "Quick       - Speed gains +2 every 10 levels, Train SPD + 75%     ",                                                                                                                                                              /* Bonus 13 */
-    "Sturdy      - Constitution +2 every 10 levels, Train CON + 75%    ",                                                                                                                                                              /* Bonus 14 */
-    "Thick Skin  - -20% Physical and -10% ki dmg received              ",                                                                                                                                                              /* Bonus 15 */
-    "Recipe Int. - Food cooked by you lasts longer/heals better        ",                                                                                                                                                              /* Bonus 16 */
-    "Fireproof   - -50% Fire Dmg taken, -10% ki, immunity to burn      ",                                                                                                                                                              /* Bonus 17 */
-    "Powerhitter - 15% critical hits will be x4 instead of x2          ",                                                                                                                                                              /* Bonus 18 */
-    "Healthy     - 40% chance to recover from ill effects when sleeping",                                                                                                                                                              /* Bonus  19 */
-    "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis ",                                                                                                                                                              /* Bonus  20 */
-    "Evasive     - +15% to dodge rolls                                 ",                                                                                                                                                              /* Bonus  21 */
-    "The Wall    - +20% chance to block                                ",                                                                                                                                                              /* Bonus  22 */
-    "Accurate    - +20% chance to hit physical, +10% to hit with ki     ",                                                                                                                                                             /* Bonus  23 */
-    "Energy Leech- -2% ki damage received for every 5 character levels,\n                  @cas long as you can take that ki to your charge pool.@D        ",                                                                          /* Bonus  24*/
-    "Good Memory - +2 Skill Slots initially, +1 every 20 levels after  ",                                                                                                                                                              /* Bonus 25 */
-    "Soft Touch  - Half damage for all hit locations                   ",                                                                                                                                                              /* Neg 26 */
-    "Late Sleeper- Can only wake automatically. 33% every hour if maxed",                                                                                                                                                              /* Neg 27 */
-    "Impulse Shop- +25% shop costs                                     ",                                                                                                                                                              /* Neg 28 */
-    "Sickly      - Suffer from harmful effects longer                  ",                                                                                                                                                              /* Neg 29 */
-    "Punching Bag- -15% to dodge rolls                                 ",                                                                                                                                                              /* Neg 30 */
-    "Pushover    - -20% block chance                                   ",                                                                                                                                                              /* Neg 31 */
-    "Poor D. Perc- -20% chance to hit with physical, -10% with ki       ",                                                                                                                                                             /* Neg 32 */
-    "Thin Skin   - +20% physical and +10% ki damage received           ",                                                                                                                                                              /* Neg 33 */
-    "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned         ",                                                                                                                                                              /* Neg 34 */
-    "Energy Int. - +2% ki damage received for every 5 character levels,\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ", /* Neg 35 */
-    "Coward      - Can't Attack Enemy With 150% Your Powerlevel        ",                                                                                                                                                              /* Neg 36 */
-    "Arrogant    - Cannot Suppress                                     ",                                                                                                                                                              /* Neg 37 */
-    "Unfocused   - Charge concentration randomly breaks                ",                                                                                                                                                              /* Neg 38 */
-    "Slacker     - Physical activity drains more stamina               ",                                                                                                                                                              /* Neg 39 */
-    "Slow Learner- Character auto-trains skills slower                 ",                                                                                                                                                              /* Neg 40 */
-    "Masochistic - Defense Skills Cap At 75                            ",                                                                                                                                                              /* Neg 41 */
-    "Mute        - Can't use IC speech related commands                ",                                                                                                                                                              /* Neg 42 */
-    "Wimp        - Strength is capped at 45                            ",                                                                                                                                                              /* Neg 43 */
-    "Dull        - Intelligence is capped at 45                        ",                                                                                                                                                              /* Neg 44 */
-    "Foolish     - Wisdom is capped at 45                              ",                                                                                                                                                              /* Neg 45 */
-    "Clumsy      - Agility is capped at 45                             ",                                                                                                                                                              /* Neg 46 */
-    "Slow        - Speed is capped at 45                               ",                                                                                                                                                              /* Neg 47 */
-    "Frail       - Constitution capped at 45                           ",                                                                                                                                                              /* Neg 48 */
-    "Sadistic    - Half Experience Gained For Quick Kills              ",                                                                                                                                                              /* Neg 49 */
-    "Loner       - Can't Group with anyone, +5% train and +10% Phys    ",                                                                                                                                                              /* Neg 50 */
-    "Bad Memory  - -5 Skill Slots                                      "                                                                                                                                                               /* Neg 51 */
+struct limb_row {
+  const char *label;
+  int index;
+  int healthy_flag; /* a sound limb isn't cybernetic by this */
+  int cyber_flag;
+};
+constexpr limb_row LIMBS[] = {
+    {"Right Arm   ", 0, PLR_CRARM, PLR_CRARM},
+    {"Left Arm    ", 1, PLR_CLARM, PLR_CLARM},
+    {"Right Leg   ", 2, PLR_CLARM, PLR_CRLEG}, /* quirk: a sound right leg is the left arm's */
+    {"Left Leg    ", 3, PLR_CLLEG, PLR_CLLEG},
 };
 
-/* Display What Bonuses/Negatives Player Has */
-static void bonus_status(GameWorld *g, struct char_data *ch)
+void appendages_status(GameWorld *g, struct char_data *ch)
 {
-  int i, max = 52, count = 0;
+  if (char_plr_flagged(ch, PLR_HEAD))
+    send_to_char(g, ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
+  else
+    send_to_char(g, ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
 
+  for (const limb_row &l : LIMBS) {
+    int condition = char_get_limb_condition(ch, l.index);
+    if (condition >= 50 && !char_plr_flagged(ch, l.healthy_flag))
+      send_to_char(g, ch, "            @D[@c{}@D: @G{:>2d}%@D/@g100%        @D]@n\r\n", l.label, condition);
+    else if (condition > 0 && !char_plr_flagged(ch, l.cyber_flag))
+      send_to_char(g, ch, "            @D[@c{}@D: @rBroken @y{:>2d}%@D/@g100% @D]@n\r\n", l.label, condition);
+    else if (condition > 0)
+      send_to_char(g, ch, "            @D[@c{}@D: @cCybernetic @G{:>2d}%@D/@G100%@D]@n\r\n", l.label, condition);
+    else
+      send_to_char(g, ch, "            @D[@c{}@D: @rMissing.         @D]@n\r\n", l.label);
+  }
+
+  int tail = char_is_saiyan(ch) || char_is_halfbreed(ch) ? PLR_STAIL : char_is_icer(ch) || char_is_bio(ch) ? PLR_TAIL : -1;
+  if (tail >= 0) {
+    if (char_plr_flagged(ch, tail))
+      send_to_char(g, ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+    else
+      send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
+  }
+  send_to_char(g, ch, "\r\n");
+}
+
+/* A ladder: the first row whose least the value reaches says it, or else the last word */
+struct rung {
+  int least;
+  const char *says;
+};
+
+void climb(GameWorld *g, struct char_data *ch, int value, std::span<const rung> rungs, const char *otherwise)
+{
+  auto r = std::ranges::find_if(rungs, [value](const rung &x) { return value >= x.least; });
+  const char *says = r == rungs.end() ? otherwise : r->says;
+  if (says)
+    send_to_char(g, ch, "{}", says);
+}
+
+constexpr rung HUNGER_RUNGS[] = {
+    {48, "         You are full.\r\n"},
+    {40, "         You are nearly full.\r\n"},
+    {30, "         You are not hungry.\r\n"},
+    {21, "         You wouldn't mind a snack.\r\n"},
+    {15, "         You are slightly hungry.\r\n"},
+    {10, "         You are partially hungry.\r\n"},
+    {5, "         You are really hungry.\r\n"},
+    {2, "         You are extremely hungry.\r\n"},
+    {0, "         You are starving!\r\n"},
+};
+constexpr rung THIRST_RUNGS[] = {
+    {48, "         You are not thirsty.\r\n"},
+    {40, "         You are nearly quenched.\r\n"},
+    {30, "         You are not thirsty.\r\n"},
+    {21, "         You wouldn't mind a drink.\r\n"},
+    {15, "         You are slightly thirsty.\r\n"},
+    {10, "         You are partially thirsty.\r\n"},
+    {5, "         You are really thirsty.\r\n"},
+    {2, "         You are extremely thirsty.\r\n"},
+    {0, "         You are dehydrated!\r\n"},
+};
+constexpr rung RELAX_RUNGS[] = {
+    {465, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n"},
+    {233, "You are too at ease to train hard like you should. Get out of the house more often.\r\n"},
+    {117, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n"},
+};
+constexpr rung DRUNK_RUNGS[] = {
+    {16, "You are extremely drunk.\r\n"},
+    {11, "You are pretty drunk.\r\n"},
+    {5, "You are drunk.\r\n"},
+    {1, "You have an alcoholic buzz.\r\n"},
+};
+
+/* A line said when a flag is set */
+enum class flag_kind { plr, aff, prf, affected, spell };
+struct flag_line {
+  flag_kind kind;
+  int flag;
+  const char *says;
+};
+
+bool has_flag(GameWorld *g, struct char_data *ch, const flag_line &f)
+{
+  switch (f.kind) {
+    case flag_kind::plr:
+      return char_plr_flagged(ch, f.flag);
+    case flag_kind::aff:
+      return char_aff_flagged(ch, f.flag);
+    case flag_kind::prf:
+      return char_prf_flagged(g, ch, f.flag);
+    case flag_kind::affected:
+      return is_affected(ch, f.flag);
+    case flag_kind::spell:
+      return affected_by_spell(ch, f.flag);
+  }
+  return false;
+}
+
+void say_flags(GameWorld *g, struct char_data *ch, std::span<const flag_line> lines)
+{
+  for (const flag_line &f : lines)
+    if (has_flag(g, ch, f))
+      send_to_char(g, ch, "{}", f.says);
+}
+
+struct preference_line {
+  int preference;
+  const char *says;
+};
+constexpr preference_line PREFERENCES[] = {
+    {0, "         You preferred a balanced form of fighting.\r\n"},
+    {PREFERENCE_KI, "         You preferred a ki dominate form of fighting.\r\n"},
+    {PREFERENCE_WEAPON, "         You preferred a weapon dominate form of fighting.\r\n"},
+    {PREFERENCE_H2H, "         You preferred a body dominate form of fighting.\r\n"},
+    {PREFERENCE_THROWING, "         You preferred a throwing dominate form of fighting.\r\n"},
+};
+
+/* What one's "hair" is, by race */
+const char *hair_word(struct char_data *ch)
+{
+  if (char_is_demon(ch) || char_is_icer(ch))
+    return "horns are";
+  if (char_is_majin(ch))
+    return "forelock is";
+  if (char_is_namek(ch))
+    return "antennae are";
+  return "hair is";
+}
+
+const char *const FORGET_LEVELS[] = {
+    "@GRemembered Well@n", "@GRemembered Well Enough@n", "@RGetting Foggy@n", "@RHalf Forgotten@n", "@rAlmost Forgotten@n", "@rForgotten@n", "\n",
+};
+
+void info_status(GameWorld *g, struct char_data *ch)
+{
+  send_to_char(g, ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
+  trans_check(g, ch, ch);
+  send_to_char(g, ch, "         You have died {:d} times.\r\n", char_get_dcount(ch));
+  if (char_plr_flagged(ch, PLR_NOSHOUT))
+    send_to_char(g, ch, "         You have been @rmuted@n on public channels.\r\n");
+  if (char_get_in_room(ch) == 9)
+    send_to_char(g, ch, "         You are in punishment hell, so sad....\r\n");
+  if (!char_prf_flagged(g, ch, PRF_HINTS))
+    send_to_char(g, ch, "         You have hints turned off.\r\n");
+  if (g->NEWSUPDATE > char_get_lastpl(ch))
+    send_to_char(g, ch, "         Check the 'news', it has been updated recently.\r\n");
+  if (has_mail(g, char_get_idnum(ch)))
+    send_to_char(g, ch, "         Check your mail at the nearest postmaster.\r\n");
+  if (char_prf_flagged(g, ch, PRF_HIDE))
+    send_to_char(g, ch, "         You are hidden from who and ooc.\r\n");
+  if (char_get_voice(ch) != nullptr)
+    send_to_char(g, ch, "         Your voice desc: '{}'\r\n", char_get_voice(ch));
+
+  int feature = char_get_distfea(ch);
+  if (feature == DISTFEA_EYE)
+    send_to_char(g, ch, "         Your eyes are your most distinctive feature.\r\n");
+  auto preference = std::ranges::find(PREFERENCES, char_get_preference(ch), &preference_line::preference);
+  if (preference != std::end(PREFERENCES))
+    send_to_char(g, ch, "{}", preference->says);
+  if (feature == DISTFEA_HAIR)
+    send_to_char(g, ch, "         Your {} your most distinctive feature.\r\n", hair_word(ch));
+  if (feature == DISTFEA_SKIN)
+    send_to_char(g, ch, "         Your skin is your most distinctive feature.\r\n");
+  if (feature == DISTFEA_HEIGHT)
+    send_to_char(g, ch, "         Your height is your most distinctive feature.\r\n");
+  if (feature == DISTFEA_WEIGHT)
+    send_to_char(g, ch, "         Your weight is your most distinctive feature.\r\n");
+
+  if (struct obj_data *scouter = char_get_equipment(ch, WEAR_EYE)) {
+    if (obj_get_scoutfreq(scouter) == 0)
+      obj_set_scoutfreq(scouter, 1);
+    send_to_char(g, ch, "         Your scouter is on frequency @G{:d}@n\r\n", obj_get_scoutfreq(scouter));
+  }
+  if (char_get_charge(ch) > 0)
+    send_to_char(g, ch, "         You have @C{}@n ki charged.\r\n", add_commas(char_get_charge(ch)));
+  if (char_get_kaioken(ch) > 0)
+    send_to_char(g, ch, "         You are focusing Kaioken x {:d}.\r\n", char_get_kaioken(ch));
+  if (char_aff_flagged(ch, AFF_SANCTUARY))
+    send_to_char(g, ch, "         You are surrounded by a barrier @D(@Y{}@D)@n\r\n", add_commas(char_get_barrier(ch)));
+  if (char_aff_flagged(ch, AFF_FIRESHIELD))
+    send_to_char(g, ch, "         You are surrounded by flames!@n\r\n");
+  if (char_get_suppression(ch) > 0)
+    send_to_char(g, ch, "         You are suppressing current PL to {:d}.\r\n", char_get_suppression(ch));
+  if (char_is_majin(ch))
+    send_to_char(g, ch, "         You have ingested {:d} people.\r\n", char_get_absorbs(ch));
+  if (char_is_bio(ch))
+    send_to_char(g, ch, "         You have {:d} absorbs left.\r\n", char_get_absorbs(ch));
+  send_to_char(g, ch, "         You have {} colored aura.\r\n", aura_types[char_get_aura(ch)]);
+
+  if (char_get_level(ch) >= 100)
+    send_to_char(g, ch, "         Your strengths are potentially limitless.\r\n");
+  else if ((char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch)))
+    send_to_char(g, ch, "         @R{}@n to SC a stat this level.\r\n", add_commas(calc_soft_cap(ch)));
+  else
+    send_to_char(g, ch, "         @R{}@n in PL/KI/ST combined to SC this level.\r\n", add_commas(calc_soft_cap(ch)));
+
+  if (char_get_forgeting(ch) != 0)
+    send_to_char(g, ch, "         @MForgetting @D[@m{} - {}@D]@n\r\n", g->spell_info[char_get_forgeting(ch)].name, FORGET_LEVELS[char_get_forgetcount(ch)]);
+  else
+    send_to_char(g, ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
+
+  if (char_get_skill(ch, SKILL_DAGGER) > 0) {
+    if (char_get_backstabcool(ch) > 0)
+      send_to_char(g, ch, "         @yYou can't preform a backstab yet.@n\r\n");
+    else
+      send_to_char(g, ch, "         @YYou can backstab.@n\r\n");
+  }
+  if (char_get_feature(ch))
+    send_to_char(g, ch, "         Extra Feature: @C{}@n\r\n", char_get_feature(ch));
+  if (char_get_rdisplay(ch) && strcmp(char_get_rdisplay(ch), "Empty"))
+    send_to_char(g, ch, "         Room Display: @C...{}@n\r\n", char_get_rdisplay(ch));
+}
+
+/* A mutant's mutations and a bio-android's genes, by genome (1 up) */
+constexpr const char *MUTATIONS[] = {
+    "Extreme Speed",  "Increased Cell Regeneration", "Extreme Reflexes", "Infravision",       "Natural Camo",
+    "Limb Regen",     "Poisonous (you can use the bite attack)", "Rubbery Body", "Innate Telepathy", "Natural Energy",
+};
+constexpr const char *GENES[] = {"Human", "Saiyan", "Namek", "Icer", "Truffle", "Arlian", "Kai", "Konatsu"};
+
+void genome_status(GameWorld *g, struct char_data *ch, const char *heading, std::span<const char *const> names, const char *suffix)
+{
+  send_to_char(g, ch, "{}", heading);
+  for (int i : {0, 1}) {
+    int genome = char_get_genome(ch, i);
+    if (genome >= 1 && genome <= (int)names.size())
+      send_to_char(g, ch, "  {}{}.\r\n", names[genome - 1], suffix);
+  }
+}
+
+constexpr flag_line STEALTH_LINES[] = {
+    {flag_kind::plr, PLR_EYEC, "Your eyes are closed.\r\n"},
+    {flag_kind::aff, AFF_SNEAK, "You are prepared to sneak where ever you go.\r\n"},
+    {flag_kind::plr, PLR_DISGUISED, "You have disguised your facial features.\r\n"},
+    {flag_kind::aff, AFF_FLYING, "You are flying.\r\n"},
+    {flag_kind::plr, PLR_PILOTING, "You are busy piloting a ship.\r\n"},
+};
+constexpr flag_line READY_LINES[] = {
+    {flag_kind::aff, AFF_ZANZOKEN, "You are prepared to zanzoken.\r\n"},
+    {flag_kind::aff, AFF_HASS, "Your arms are moving fast.\r\n"},
+    {flag_kind::aff, AFF_INFUSE, "Your ki will be infused in your next physical attack.\r\n"},
+    {flag_kind::plr, PLR_TAILHIDE, "Your tail is hidden!\r\n"},
+    {flag_kind::plr, PLR_NOGROW, "Your tail is no longer regrowing!\r\n"},
+    {flag_kind::affected, AFF_SPECIAL_POSE, "You are feeling confident from your pose earlier.\r\n"},
+    {flag_kind::affected, AFF_HYDROZAP, "You are effected by Kanso Suru.\r\n"},
+};
+constexpr flag_line AFFLICTION_LINES[] = {
+    {flag_kind::aff, AFF_KNOCKED, "You have been knocked unconcious!\r\n"},
+    {flag_kind::aff, AFF_INVISIBLE, "You are invisible.\r\n"},
+    {flag_kind::aff, AFF_DETECT_INVIS, "You are sensitive to the presence of invisible things.\r\n"},
+    {flag_kind::aff, AFF_MBREAK, "Your mind has been broken!\r\n"},
+    {flag_kind::aff, AFF_WITHER, "You've been withered! You feel so weak...\r\n"},
+    {flag_kind::aff, AFF_SHOCKED, "Your mind has been shocked!\r\n"},
+    {flag_kind::aff, AFF_CHARM, "You have been charmed!\r\n"},
+    {flag_kind::spell, SPELL_MAGE_ARMOR, "You feel protected.\r\n"},
+    {flag_kind::aff, AFF_INFRAVISION, "You can see in darkness with infravision.\r\n"},
+    {flag_kind::prf, PRF_SUMMONABLE, "You are summonable by other players.\r\n"},
+    {flag_kind::aff, AFF_DETECT_ALIGN, "You see into the hearts of others.\r\n"},
+    {flag_kind::aff, AFF_DETECT_MAGIC, "You are sensitive to the magical nature of things.\r\n"},
+    {flag_kind::aff, AFF_SPIRIT, "You have died and are part of the SPIRIT world!\r\n"},
+    {flag_kind::prf, PRF_NOGIVE, "You are not accepting items being handed to you right now.\r\n"},
+    {flag_kind::aff, AFF_ETHEREAL, "You are ethereal and cannot interact with normal space!\r\n"},
+};
+
+/* What lasting effects are told, by their skill's name */
+constexpr struct {
+  const char *skill;
+  const char *says; /* before " (n Mud Hours)" */
+} AFFECT_LINES[] = {
+    {"runic", "Your Kenaz rune is still in effect!"},
+    {"punch", "Your Algiz rune is still in effect!"},
+    {"knee", "Your Oagaz rune is still in effect!"},
+    {"slam", "Your Wunjo rune is still in effect!"},
+    {"heeldrop", "Your Purisaz rune is still in effect!"},
+    {"special beam cannon", "Your Laguz rune is still in effect!"},
+    {"might", "Your muscles are pumped!"},
+    {"flex", "You are more agile right now!"},
+    {"bless", "You have been blessed!"},
+    {"curse", "You have been cursed!"},
+    {"healing glow", "You have a healing glow enveloping your body!"},
+    {"genius", "You are smarter right now!"},
+    {"enlighten", "You are wiser right now!"},
+    {"yoikominminken", "You have been lulled to sleep!"},
+    {"solar flare", "You have been blinded!"},
+    {"spirit control", "You have full control of your spirit!"},
+    {"!UNUSED!", "You feel poison burning through your blood!"},
+    {"tough skin", "You have toughened skin right now!"},
+    {"poison", "You have been poisoned!"},
+    {"warp pool", "Weakened State!"},
+    {"dark metamorphosis", "Your Dark Metamorphosis is still in effect."},
+    {"hayasa", "Your body has been infused to move faster!"},
+};
+
+/* Each effect is told once for a run of affects of its skill */
+void affects_status(GameWorld *g, struct char_data *ch)
+{
+  int lasttype = 0;
+  for (const affected_type &aff : char_affects(ch)) {
+    const char *name = skill_name(g, aff.type);
+    auto line        = std::ranges::find_if(AFFECT_LINES, [name](const auto &l) { return !strcasecmp(name, l.skill); });
+    if (line != std::end(AFFECT_LINES) && aff.type != lasttype) {
+      lasttype = aff.type;
+      send_to_char(g, ch, "{} ({:>2d} Mud Hours)\r\n", line->says, aff.duration + 1);
+    }
+  }
+}
+
+void sleep_status(GameWorld *g, struct char_data *ch)
+{
+  int sleep = char_get_sleeptime(ch);
+
+  if (char_get_bonuses(ch, BONUS_INSOMNIAC))
+    send_to_char(g, ch, "You can not sleep.\r\n");
+  else if (sleep > 6 && char_get_position(ch) != POS_SLEEPING)
+    send_to_char(g, ch, "You are well rested.\r\n");
+  else if (sleep > 6)
+    send_to_char(g, ch, "You are getting the rest you need.\r\n");
+  else if (sleep > 4)
+    send_to_char(g, ch, "You are rested.\r\n");
+  else if (sleep > 2)
+    send_to_char(g, ch, "You are not sleepy.\r\n");
+  else if (sleep >= 1)
+    send_to_char(g, ch, "You are getting a little sleepy.\r\n");
+  else if (sleep == 0)
+    send_to_char(g, ch, "You could sleep at any time.\r\n");
+}
+
+void position_status(GameWorld *g, struct char_data *ch)
+{
+  switch (char_get_position(ch)) {
+    case POS_DEAD:
+      send_to_char(g, ch, "You are DEAD!\r\n");
+      break;
+    case POS_MORTALLYW:
+      send_to_char(g, ch, "You are mortally wounded! You should seek help!\r\n");
+      break;
+    case POS_INCAP:
+      send_to_char(g, ch, "You are incapacitated, slowly fading away...\r\n");
+      break;
+    case POS_STUNNED:
+      send_to_char(g, ch, "You are stunned! You can't move!\r\n");
+      break;
+    case POS_SLEEPING:
+      send_to_char(g, ch, "You are sleeping.\r\n");
+      break;
+    case POS_RESTING:
+      send_to_char(g, ch, "You are resting.\r\n");
+      break;
+    case POS_SITTING:
+      send_to_char(g, ch, "You are sitting.\r\n");
+      break;
+    case POS_FIGHTING:
+      send_to_char(g, ch, "You are fighting {}.\r\n", char_get_fighting(g, ch) ? char_pers(g, char_get_fighting(g, ch), ch) : "thin air");
+      break;
+    case POS_STANDING:
+      send_to_char(g, ch, "You are standing.\r\n");
+      break;
+    default:
+      send_to_char(g, ch, "You are floating.\r\n");
+      break;
+  }
+}
+
+void condition_status(GameWorld *g, struct char_data *ch)
+{
+  send_to_char(g, ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
+  sleep_status(g, ch);
+  climb(g, ch, char_get_relax_count(ch), RELAX_RUNGS, nullptr);
+
+  if (char_get_mimic(ch) > 0)
+    send_to_char(g, ch, "You are mimicing the general appearance of {} {}\r\n", AN(juggleRaceName(ch, false)), juggleRaceName(ch, false));
+  if (char_is_mutant(ch))
+    genome_status(g, ch, "Your Mutations:\r\n", MUTATIONS, "");
+  if (char_is_bio(ch))
+    genome_status(g, ch, "Your genes carry:\r\n", GENES, " DNA");
+  if (char_get_genome(ch, 0) == 11)
+    send_to_char(g, ch, "You have used kyodaika.\r\n");
+  if (char_prf_flagged(g, ch, PRF_NOPARRY))
+    send_to_char(g, ch, "You have decided not to parry attacks.\r\n");
+  position_status(g, ch);
+  if (has_group(g, ch))
+    send_to_char(g, ch, "@GGroup Victories@D: @w{}@n\r\n", add_commas(char_get_combatexpertise(ch)));
+
+  say_flags(g, ch, STEALTH_LINES);
+  if (char_get_powerattack(ch) > 0)
+    send_to_char(g, ch, "You are playing @y'@Y{}@y'@n.\r\n", song_types[char_get_powerattack(ch)]);
+  say_flags(g, ch, READY_LINES);
+  climb(g, ch, char_get_conditions(g, ch, DRUNK), DRUNK_RUNGS, nullptr);
+  affects_status(g, ch);
+  say_flags(g, ch, AFFLICTION_LINES);
+
+  if (char_get_regen(ch) > 0)
+    send_to_char(g, ch, "Something is augmenting your regen rate by +{:d}%!\r\n", char_get_regen(ch));
+  if (char_get_asb(ch) > 0)
+    send_to_char(g, ch, "Something is augmenting your auto-skill training rate by +{:d}%!\r\n", char_get_asb(ch));
+  if (char_get_raw_lifebonus(ch) > 0)
+    send_to_char(g, ch, "Something is augmenting your Life Force Max by +{:d}%!\r\n", char_get_raw_lifebonus(ch));
+  if (char_plr_flagged(ch, PLR_FISHING))
+    send_to_char(g, ch, "Current Fishing Pole Bonus @D[@C{:d}@D]@n\r\n", char_get_accuracy(ch));
+  if (char_plr_flagged(ch, PLR_AURALIGHT))
+    send_to_char(g, ch, "Aura Light is active.\r\n");
+}
+
+/* The traits, bonuses then negatives, by number */
+constexpr const char *TRAITS[] = {
+    "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost          ",
+    "Prodigy     - +25% Experience Gained Until Level 80               ",
+    "Quick Study - Character auto-trains skills faster                 ",
+    "Die Hard    - Life Force's PL regen doubled, but cost is the same ",
+    "Brawler     - Physical attacks do 20% more damage                 ",
+    "Destroyer   - Damaged Rooms act as regen rooms for you            ",
+    "Hard Worker - Physical activity bonuses + drains less stamina     ",
+    "Healer      - Heal/First-aid/Vigor/Repair restore +10%            ",
+    "Loyal       - +20% Experience When Grouped As Follower            ",
+    "Brawny      - Strength gains +2 every 10 levels, Train STR + 75%  ",
+    "Scholarly   - Intelligence gains +2 every 10 levels, Train INT + 75%",
+    "Sage        - Wisdom gains +2 every 10 levels, Train WIS + 75%    ",
+    "Agile       - Agility gains +2 every 10 levels, Train AGL + 75%   ",
+    "Quick       - Speed gains +2 every 10 levels, Train SPD + 75%     ",
+    "Sturdy      - Constitution +2 every 10 levels, Train CON + 75%    ",
+    "Thick Skin  - -20% Physical and -10% ki dmg received              ",
+    "Recipe Int. - Food cooked by you lasts longer/heals better        ",
+    "Fireproof   - -50% Fire Dmg taken, -10% ki, immunity to burn      ",
+    "Powerhitter - 15% critical hits will be x4 instead of x2          ",
+    "Healthy     - 40% chance to recover from ill effects when sleeping",
+    "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis ",
+    "Evasive     - +15% to dodge rolls                                 ",
+    "The Wall    - +20% chance to block                                ",
+    "Accurate    - +20% chance to hit physical, +10% to hit with ki     ",
+    "Energy Leech- -2% ki damage received for every 5 character levels,\n                  @cas long as you can take that ki to your charge pool.@D        ",
+    "Good Memory - +2 Skill Slots initially, +1 every 20 levels after  ",
+    /* the negatives */
+    "Soft Touch  - Half damage for all hit locations                   ",
+    "Late Sleeper- Can only wake automatically. 33% every hour if maxed",
+    "Impulse Shop- +25% shop costs                                     ",
+    "Sickly      - Suffer from harmful effects longer                  ",
+    "Punching Bag- -15% to dodge rolls                                 ",
+    "Pushover    - -20% block chance                                   ",
+    "Poor D. Perc- -20% chance to hit with physical, -10% with ki       ",
+    "Thin Skin   - +20% physical and +10% ki damage received           ",
+    "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned         ",
+    "Energy Int. - +2% ki damage received for every 5 character levels,\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ",
+    "Coward      - Can't Attack Enemy With 150% Your Powerlevel        ",
+    "Arrogant    - Cannot Suppress                                     ",
+    "Unfocused   - Charge concentration randomly breaks                ",
+    "Slacker     - Physical activity drains more stamina               ",
+    "Slow Learner- Character auto-trains skills slower                 ",
+    "Masochistic - Defense Skills Cap At 75                            ",
+    "Mute        - Can't use IC speech related commands                ",
+    "Wimp        - Strength is capped at 45                            ",
+    "Dull        - Intelligence is capped at 45                        ",
+    "Foolish     - Wisdom is capped at 45                              ",
+    "Clumsy      - Agility is capped at 45                             ",
+    "Slow        - Speed is capped at 45                               ",
+    "Frail       - Constitution capped at 45                           ",
+    "Sadistic    - Half Experience Gained For Quick Kills              ",
+    "Loner       - Can't Group with anyone, +5% train and +10% Phys    ",
+    "Bad Memory  - -5 Skill Slots                                      ",
+};
+constexpr int FIRST_NEGATIVE = 26;
+
+void bonus_status(GameWorld *g, struct char_data *ch)
+{
   if (char_is_npc(ch))
     return;
 
+  int count = 0;
   send_to_char(g, ch, "@CYour Traits@n\n@D-----------------------------@w\n");
-  for (i = 0; i < max; i++) {
-    if (i < 26) {
-      if (char_get_bonuses(ch, i)) {
-        send_to_char(g, ch, "@c{}@n\n", list_bonuses[i]);
-        count++;
-      }
-    } else {
-      if (i == 26) {
-        send_to_char(g, ch, "\r\n");
-      }
-      if (char_get_bonuses(ch, i)) {
-        send_to_char(g, ch, "@r{}@n\n", list_bonuses[i]);
-        count++;
-      }
+  for (int i = 0; i < (int)std::size(TRAITS); i++) {
+    if (i == FIRST_NEGATIVE)
+      send_to_char(g, ch, "\r\n");
+    if (char_get_bonuses(ch, i)) {
+      send_to_char(g, ch, "@{}{}@n\n", i < FIRST_NEGATIVE ? 'c' : 'r', TRAITS[i]);
+      count++;
     }
   }
-  if (count <= 0) {
+  if (count == 0)
     send_to_char(g, ch, "@wNone.\r\n");
-  }
   send_to_char(g, ch, "@D-----------------------------@n\r\n");
-  return;
+}
+
+} // namespace
+
+ACMD(do_status)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+
+  if (!arg.empty()) {
+    if (str_eq_nocase(arg, "traits"))
+      bonus_status(g, ch);
+    else
+      send_to_char(g, ch, "The only argument status takes is 'traits'. If you just want your status do not use an argument.\r\n");
+    return;
+  }
+
+  send_to_char(g, ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
+  send_to_char(g, ch, "            @D---------------@CAppearance@D---------------\n");
+  bringdesc(g, ch, ch);
+  send_to_char(g, ch, "            @D---------------@RAppendages@D---------------\n");
+  appendages_status(g, ch);
+
+  send_to_char(g, ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
+  climb(g, ch, char_get_conditions(g, ch, HUNGER), HUNGER_RUNGS, "         You need not eat.\r\n");
+  climb(g, ch, char_get_conditions(g, ch, THIRST), THIRST_RUNGS, "         You need not drink.\r\n");
+  info_status(g, ch);
+  condition_status(g, ch);
+  send_to_char(g, ch, "@D<@b--------------------------------------------------------------@D>@n\r\n");
+  send_to_char(g, ch, "To view your bonus/negative traits enter: status traits\r\n");
 }
 
 ACMD(do_inventory)
