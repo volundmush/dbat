@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -386,30 +387,24 @@ ACMD(do_form)
 
 ACMD(do_recharge)
 {
-
   if (char_is_npc(ch) || !char_is_android(ch)) {
     send_to_char(g, ch, "Only androids can use recharge\r\n");
     return;
   }
-
   if (char_get_con_cooldown(ch) > 0) {
     send_to_char(g, ch, "You must wait a short period before your nanites can convert your ki.\r\n");
     return;
   }
-
   if (!char_plr_flagged(ch, PLR_REPAIR)) {
     send_to_char(g, ch, "You are not a repair model android.\r\n");
     return;
   }
-  int64_t cost = 0;
-
-  cost = getMaxST(g, ch) / 20;
-
-  if ((getCurKI(g, ch)) < cost) {
+  int64_t cost = getMaxST(g, ch) / 20;
+  if (getCurKI(g, ch) < cost) {
     send_to_char(g, ch, "You do not have enough ki to recharge your stamina.\r\n");
     return;
   }
-  if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
+  if (getCurST(g, ch) >= getMaxST(g, ch)) {
     send_to_char(g, ch, "Your energy reserves are already full.\r\n");
     return;
   }
@@ -418,9 +413,9 @@ ACMD(do_recharge)
   act(g, "You focus your ki into your energy reserves, recharging them some.", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "$n stops and glows green briefly.", true, ch, nullptr, nullptr, TO_ROOM);
   decCurKI(g, ch, cost, 0);
-  if ((getCurST(g, ch)) + (cost * 2) < getMaxST(g, ch)) {
+  if (getCurST(g, ch) + cost * 2 < getMaxST(g, ch))
     incCurST(g, ch, cost * 2, true);
-  } else {
+  else {
     restoreST(ch, false);
     send_to_char(g, ch, "You are fully recharged now.\r\n");
   }
@@ -429,27 +424,20 @@ ACMD(do_recharge)
 
 ACMD(do_srepair)
 {
-  int i;
-
   if (!char_is_android(ch)) {
     send_to_char(g, ch, "Only androids can use repair, maybe you want 'fix' instead?\r\n");
     return;
   }
-
   if (char_get_con_cooldown(ch) > 0) {
     send_to_char(g, ch, "You must wait a short period before your nanites can repair you.\r\n");
     return;
   }
-
   if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_REPAIR)) {
     send_to_char(g, ch, "You are not a repair model android.\r\n");
     return;
   }
-  int64_t cost = 0, heal = 0;
-
-  cost = getEffMaxPL(g, ch) / 40;
-
-  if ((getCurST(g, ch)) < cost) {
+  int64_t cost = getEffMaxPL(g, ch) / 40;
+  if (getCurST(g, ch) < cost) {
     send_to_char(g, ch, "You do not have enough stamina to repair yourself.\r\n");
     return;
   }
@@ -462,420 +450,262 @@ ACMD(do_srepair)
   act(g, "You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "$n stops a moment as small glowing particles move across $s body.", true, ch, nullptr, nullptr, TO_ROOM);
 
-  int repaired = false;
-  if (!char_is_npc(ch)) {
-    for (i = 0; i < NUM_WEARS; i++) {
-      if (char_get_equipment(ch, i)) {
-        if (obj_get_value(char_get_equipment(ch, i), VAL_ALL_HEALTH) < 100) {
-          obj_set_value(char_get_equipment(ch, i), VAL_ALL_HEALTH, obj_get_value(char_get_equipment(ch, i), VAL_ALL_HEALTH) + (20));
-          if (obj_get_value(char_get_equipment(ch, i), VAL_ALL_HEALTH) > 100) {
-            obj_set_value(char_get_equipment(ch, i), VAL_ALL_HEALTH, 100);
-          }
-          if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_BROKEN)) {
-            obj_extra_set(char_get_equipment(ch, i), ITEM_BROKEN, false);
-          }
-          repaired = true;
-        }
-      }
-    }
+  /* and a fifth of the wear off everything worn */
+  bool repaired = false;
+  for (int i = 0; i < NUM_WEARS && !char_is_npc(ch); i++) {
+    struct obj_data *obj = char_get_equipment(ch, i);
+    if (!obj || obj_get_value(obj, VAL_ALL_HEALTH) >= 100)
+      continue;
+    obj_set_value(obj, VAL_ALL_HEALTH, std::min(obj_get_value(obj, VAL_ALL_HEALTH) + 20, 100));
+    obj_extra_set(obj, ITEM_BROKEN, false);
+    repaired = true;
   }
-
-  if (repaired == true) {
+  if (repaired)
     send_to_char(g, ch, "@GYour nano-robots also repair all of your equipment a little bit.@n\r\n");
-  }
+
   decCurST(g, ch, cost, 0);
-  heal = cost * 2;
-  if (char_get_bonuses(ch, BONUS_HEALER) > 0) {
+  int64_t heal = cost * 2;
+  if (char_get_bonuses(ch, BONUS_HEALER) > 0)
     heal += heal * .25;
-  }
-
-  if (incCurHealth(g, ch, heal, true) == getEffMaxPL(g, ch)) {
+  if (incCurHealth(g, ch, heal, true) == getEffMaxPL(g, ch))
     send_to_char(g, ch, "You are fully repaired now.\r\n");
-  }
-
-  if (!char_is_npc(ch) && rand_number(g, 1, 3) == 2 && (getCurKI(g, ch)) < getMaxKI(g, ch)) {
+  if (!char_is_npc(ch) && rand_number(g, 1, 3) == 2 && getCurKI(g, ch) < getMaxKI(g, ch)) {
     send_to_char(g, ch, "@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
     incCurKI(g, ch, cost, true);
   }
   char_set_wait(ch, PULSE_2SEC);
 }
 
-ACMD(do_upgrade)
-{
-  int count = 0, bonus = 0, cost = 0;
-  std::string arg;
-  std::string arg2;
+namespace {
+  /* What upgrade and augment can raise */
+  struct upgradable {
+    const char *name;
+    int cost;                 /* in upgrade points, per upgrade */
+    std::array<int, 7> bonus; /* per upgrade, times the level, by UPGRADE_TIERS */
+    int64_t (*gain)(char_data *, int64_t, bool);
+  };
+  /* The levels each bonus starts at */
+  constexpr std::array<int, 7> UPGRADE_TIERS = {90, 80, 70, 60, 50, 25, 0};
+  constexpr upgradable UPGRADABLE[] = {
+      {"powerlevel", 75, {5000, 2500, 2000, 1300, 500, 250, 150}, gainBasePL},
+      {"ki", 40, {3650, 2450, 1800, 1250, 400, 200, 120}, gainBaseKI},
+      {"stamina", 50, {3650, 2450, 1800, 1250, 500, 200, 120}, gainBaseST},
+  };
 
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
-
-  if (char_is_npc(ch) || !char_is_android(ch)) {
-    send_to_char(g, ch, "You are not an android!\r\n");
-    return;
+  const upgradable *upgradable_named(std::string_view name)
+  {
+    auto u = std::ranges::find_if(UPGRADABLE, [&](const upgradable &each) { return str_eq_nocase(each.name, name); });
+    return u == std::end(UPGRADABLE) ? nullptr : &*u;
   }
 
-  if (arg.empty()) {
-    if (!char_plr_flagged(ch, PLR_ABSORB)) {
-      send_to_char(g, ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n@cUpgrade @CKi        @D: @Y40 @WPoints\r\n@cUpgrade @GStamina   @D: @Y50 @WPoints\r\n@D            -----------\r\n");
-    }
-    send_to_char(g, ch, "@cAugment @RPowerlevel\r\n@cAugment @CKi\r\n@cAugment @GStamina\r\n@WCurrent Upgrade Points @D[@y{}@D]@n\r\n",
-                 add_commas(char_get_upgrade(ch)));
-    return;
-  }
-
-  if (str_eq_nocase("augment", arg)) {
-    struct obj_data *obj = nullptr;
-    int64_t gain         = 0;
+  /* upgrade augment (what): an augmentation kit, for androids of level 80 or more */
+  void augment(GameWorld *g, struct char_data *ch, std::string &what)
+  {
     if (char_get_level(ch) < 80) {
       send_to_char(g, ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
     std::string augmentation = "Augmentation";
-    if (!(obj = get_obj_in_list_vis(g, ch, augmentation, nullptr, char_get_inventory(ch)))) {
+    struct obj_data *kit     = get_obj_in_list_vis(g, ch, augmentation, nullptr, char_get_inventory(ch));
+    if (!kit) {
       send_to_char(g, ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }
-    switch (char_get_level(ch)) { /* R: Original was GET_LEVEL(ch) */
-      case 80:
-        gain = getEffMaxPL(g, ch) * 0.005;
-        break;
-      case 81:
-      case 82:
-      case 83:
-      case 84:
-      case 85:
-      case 86:
-      case 87:
-      case 88:
-      case 89:
-      case 90:
-        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 2000; */
-        break;
-      case 91:
-      case 92:
-      case 93:
-      case 94:
-      case 95:
-      case 96:
-      case 97:
-      case 98:
-      case 99:
-        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 4000; */
-        break;
-      case 100:
-        gain = getEffMaxPL(g, ch) * 0.005; /* R: Original was GET_LEVEL(ch) * 100000 */
-        if (gain > 10000000) {
-          gain = 10000000;
-        }
-        break;
-    }
-    if (str_eq_nocase("powerlevel", arg2)) {
-      obj_from_char(g, obj);
-      extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      gainBasePL(ch, gain, true);
-      send_to_char(g, ch, "@gGain @D[@G+{}@D]\r\n", add_commas(gain));
+    int64_t gain = 0;
+    if (char_get_level(ch) <= 100)
+      gain = getEffMaxPL(g, ch) * 0.005;
+    if (char_get_level(ch) == 100)
+      gain = std::min<int64_t>(gain, 10000000);
+    const upgradable *u = upgradable_named(what);
+    if (!u) {
+      send_to_char(g, ch, "What do you want to augment? Powerlevel, ki, or stamina?\r\n");
       return;
     }
-    if (str_eq_nocase("ki", arg2)) {
-      obj_from_char(g, obj);
-      extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      gainBaseKI(ch, gain, true);
-      send_to_char(g, ch, "@gGain @D[@G+{}@D]\r\n", add_commas(gain));
-      return;
-    }
-    if (str_eq_nocase("stamina", arg2)) {
-      obj_from_char(g, obj);
-      extract_obj(g, obj);
-      act(g, "@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-      gainBaseST(ch, gain, true);
-      send_to_char(g, ch, "@gGain @D[@G+{}@D]\r\n", add_commas(gain));
-      return;
-    }
-    send_to_char(g, ch, "What do you want to augment? Powerlevel, ki, or stamina?\r\n");
+    obj_from_char(g, kit);
+    extract_obj(g, kit);
+    act(g, str_format("@WYou install the circuits and upgrade your maximum {}.@n", u->name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    u->gain(ch, gain, true);
+    send_to_char(g, ch, "@gGain @D[@G+{}@D]\r\n", add_commas(gain));
+  }
+} // namespace
+
+ACMD(do_upgrade)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
+
+  if (char_is_npc(ch) || !char_is_android(ch)) {
+    send_to_char(g, ch, "You are not an android!\r\n");
     return;
   }
-
+  if (arg.empty()) {
+    if (!char_plr_flagged(ch, PLR_ABSORB))
+      send_to_char(g, ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n@cUpgrade @CKi        @D: @Y40 @WPoints\r\n@cUpgrade @GStamina   @D: @Y50 @WPoints\r\n@D            -----------\r\n");
+    send_to_char(g, ch, "@cAugment @RPowerlevel\r\n@cAugment @CKi\r\n@cAugment @GStamina\r\n@WCurrent Upgrade Points @D[@y{}@D]@n\r\n", add_commas(char_get_upgrade(ch)));
+    return;
+  }
+  if (str_eq_nocase("augment", arg)) {
+    augment(g, ch, arg2);
+    return;
+  }
   if (char_plr_flagged(ch, PLR_ABSORB)) {
     send_to_char(g, ch, "You are an absorb model and can only upgrade with augmentation kits.\r\n");
     return;
   }
-
   if (is_soft_cap(ch, 0, 1.0)) {
     send_to_char(g, ch, "@mYou are unable to spend anymore UGP right now (Softcap)@n\r\n");
     return;
   }
-
-  if (arg2.empty() && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
-    send_to_char(g, ch, "How many times do you want to increase {}?", arg);
-    return;
-  }
-
-  if (parse_int(arg2) <= 0 && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
-    send_to_char(g, ch, "It needs to be between 1-1000\r\n");
-    return;
-  }
-
-  if (parse_int(arg2) > 1000 && (str_eq_nocase("powerlevel", arg) || str_eq_nocase("ki", arg) || str_eq_nocase("stamina", arg))) {
-    send_to_char(g, ch, "It needs to be between 1-1000\r\n");
-    return;
-  }
-
-  if (str_eq_nocase("powerlevel", arg)) {
-    count = parse_int(arg2);
-    while (count > 0) {
-      if (char_get_level(ch) >= 90) {
-        bonus += char_get_level(ch) * 5000;
-      } else if (char_get_level(ch) >= 80) {
-        bonus += char_get_level(ch) * 2500;
-      } else if (char_get_level(ch) >= 70) {
-        bonus += char_get_level(ch) * 2000;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1300;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1200;
-      } else if (char_get_level(ch) >= 50) {
-        bonus += char_get_level(ch) * 500;
-      } else if (char_get_level(ch) >= 25) {
-        bonus += char_get_level(ch) * 250;
-      } else {
-        bonus += char_get_level(ch) * 150;
-      }
-      cost += 75;
-      count--;
-    }
-    if (cost > char_get_upgrade(ch)) {
-      send_to_char(g, ch, "You need {} upgrade points, and only have {}.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
-      return;
-    }
-    if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
-      return;
-    }
-    char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
-    gainBasePL(ch, bonus, true);
-  } else if (str_eq_nocase("ki", arg)) {
-    count = parse_int(arg2);
-    while (count > 0) {
-      if (char_get_level(ch) >= 90) {
-        bonus += char_get_level(ch) * 3650;
-      } else if (char_get_level(ch) >= 80) {
-        bonus += char_get_level(ch) * 2450;
-      } else if (char_get_level(ch) >= 70) {
-        bonus += char_get_level(ch) * 1800;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1250;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1150;
-      } else if (char_get_level(ch) >= 50) {
-        bonus += char_get_level(ch) * 400;
-      } else if (char_get_level(ch) >= 25) {
-        bonus += char_get_level(ch) * 200;
-      } else {
-        bonus += char_get_level(ch) * 120;
-      }
-      cost += 40;
-      count--;
-    }
-    if (cost > char_get_upgrade(ch)) {
-      send_to_char(g, ch, "You need {} upgrade points, and only have {}.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
-      return;
-    }
-    if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
-      return;
-    }
-    char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
-    gainBaseKI(ch, bonus, true);
-  } else if (str_eq_nocase("stamina", arg)) {
-    count = parse_int(arg2);
-    while (count > 0) {
-      if (char_get_level(ch) >= 90) {
-        bonus += char_get_level(ch) * 3650;
-      } else if (char_get_level(ch) >= 80) {
-        bonus += char_get_level(ch) * 2450;
-      } else if (char_get_level(ch) >= 70) {
-        bonus += char_get_level(ch) * 1800;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1250;
-      } else if (char_get_level(ch) >= 60) {
-        bonus += char_get_level(ch) * 1150;
-      } else if (char_get_level(ch) >= 50) {
-        bonus += char_get_level(ch) * 500;
-      } else if (char_get_level(ch) >= 25) {
-        bonus += char_get_level(ch) * 200;
-      } else {
-        bonus += char_get_level(ch) * 120;
-      }
-      cost += 50;
-      count--;
-    }
-    if (cost > char_get_upgrade(ch)) {
-      send_to_char(g, ch, "You need {} upgrade points, and only have {}.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
-      return;
-    }
-    if (is_soft_cap(ch, bonus, 1.0)) {
-      send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
-      return;
-    }
-    char_set_upgrade(ch, char_get_upgrade(ch) - (cost));
-    send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
-    gainBaseST(ch, bonus, true);
-  } else {
+  const upgradable *u = upgradable_named(arg);
+  if (!u) {
     send_to_char(g, ch, "That is not a valid upgrade option.\r\n");
     return;
   }
+  if (arg2.empty()) {
+    send_to_char(g, ch, "How many times do you want to increase {}?", arg);
+    return;
+  }
+  int count = parse_int(arg2);
+  if (count <= 0 || count > 1000) {
+    send_to_char(g, ch, "It needs to be between 1-1000\r\n");
+    return;
+  }
+  size_t tier = std::ranges::find_if(UPGRADE_TIERS, [&](int from) { return char_get_level(ch) >= from; }) - UPGRADE_TIERS.begin();
+  int bonus   = count * char_get_level(ch) * u->bonus[tier];
+  int cost    = count * u->cost;
+  if (cost > char_get_upgrade(ch)) {
+    send_to_char(g, ch, "You need {} upgrade points, and only have {}.\r\n", add_commas(cost), add_commas(char_get_upgrade(ch)));
+    return;
+  }
+  if (is_soft_cap(ch, bonus, 1.0)) {
+    send_to_char(g, ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
+    return;
+  }
+  char_set_upgrade(ch, char_get_upgrade(ch) - cost);
+  send_to_char(g, ch, "You upgrade your system and gain {} {}!", add_commas(bonus), arg);
+  u->gain(ch, bonus, true);
 }
 
-ACMD(do_ingest)
-{
+namespace {
+  /* Why a majin of ch's level and appetite can't ingest vict, if they can't */
+  const char *cannot_ingest(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    int level = char_get_level(ch), absorbs = char_get_absorbs(ch);
+    if (absorbs > 3)
+      return "You already have already ingested 4 people.\r\n";
+    if (level < 25)
+      return "You can't ingest yet.\r\n";
+    if ((level < 100 && level >= 75 && absorbs == 3) || (level < 75 && level >= 50 && absorbs == 2) || (level < 50 && level >= 25 && absorbs == 1))
+      return "You already have ingested as much as you can. You'll have to get more experienced.\r\n";
+    if (getEffMaxPL(g, vict) >= getBasePL(ch) * 3)
+      return "You are too weak to ingest them into your body!\r\n";
+    if (char_aff_flagged(vict, AFF_SANCTUARY))
+      return "You can't ingest them, they have a barrier!\r\n";
+    return nullptr;
+  }
 
-  if (char_is_majin(ch)) {
-    struct char_data *vict;
-    std::string arg;
-
-    std::string_view rest = argument;
-    arg                   = take_arg(rest);
-
-    if (arg.empty()) {
-      send_to_char(g, ch, "Who do you want to ingest?\r\n");
-      return;
-    }
-
-    if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-      send_to_char(g, ch, "Ingest who?\r\n");
-      return;
-    }
-    if (!can_kill(g, ch, vict, nullptr, 0)) {
-      return;
-    }
-    if (char_get_absorbby(g, vict)) {
-      send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
-      return;
-    }
-    if (char_get_absorbs(ch) > 3) {
-      send_to_char(g, ch, "You already have already ingested 4 people.\r\n");
-      return;
-    }
-    if (char_get_level(ch) < 25) {
-      send_to_char(g, ch, "You can't ingest yet.\r\n");
-      return;
-    }
-    if (char_get_level(ch) < 100 && char_get_level(ch) >= 75 && char_get_absorbs(ch) == 3) {
-      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
-      return;
-    }
-    if (char_get_level(ch) < 75 && char_get_level(ch) >= 50 && char_get_absorbs(ch) == 2) {
-      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
-      return;
-    }
-    if (char_get_level(ch) < 50 && char_get_level(ch) >= 25 && char_get_absorbs(ch) == 1) {
-      send_to_char(g, ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
-      return;
-    }
-
-    if (getEffMaxPL(g, vict) >= (getBasePL(ch)) * 3) {
-      send_to_char(g, ch, "You are too weak to ingest them into your body!\r\n");
-      return;
-    }
-    if (char_aff_flagged(vict, AFF_SANCTUARY)) {
-      send_to_char(g, ch, "You can't ingest them, they have a barrier!\r\n");
-      return;
-    }
-    reveal_hiding(g, ch, 0);
-    if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-      act(g, "@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, nullptr, vict, TO_CHAR);
-      act(g, "@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, nullptr, vict, TO_VICT);
-      act(g, "@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, nullptr, vict, TO_NOTVICT);
-      char_aff_set(vict, AFF_ZANZOKEN, false);
-      char_set_wait(ch, PULSE_3SEC);
-      return;
-    }
-    if (char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, ch) + rand_number(g, 1, 5)) {
-      act(g, "@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-      char_set_wait(ch, PULSE_3SEC);
-      return;
-    }
-    act(g, "@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-    char_set_absorbs(ch, char_get_absorbs(ch) + (1));
-    int64_t pl   = (getBasePL(vict)) / 6;
-    int64_t stam = (getBaseST(vict)) / 6;
-    int64_t ki   = (getBaseKI(vict)) / 6;
-    gainBasePL(ch, pl, true);
-    gainBaseST(ch, stam, true);
-    gainBaseKI(ch, ki, true);
-    if (!char_is_npc(vict) && !char_is_npc(ch)) {
-      send_to_imm(g, "[PK] {} killed {} at room [{:d}]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
-      char_plr_set(vict, PLR_ABSORBED, true);
-    }
-    send_to_char(g, ch, "@D[@mINGEST@D] @rPL@W: @D(@y{}@D) @cKi@W: @D(@y{}@D) @gSt@W: @D(@y{}@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
+  /* What ingesting vict changes about ch's looks: one thing, each in turn a one in three chance */
+  void takes_after(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
     if (rand_number(g, 1, 3) == 3) {
       send_to_char(g, ch, "You get {}'s eye color.\r\n", char_get_name(vict));
       char_set_eye(ch, char_get_eye(vict));
     } else if (rand_number(g, 1, 3) == 3) {
       send_to_char(g, ch, "{} changes your height.\r\n", char_get_name(vict));
-      if (char_get_pc_height(g, ch) > char_get_pc_height(g, vict)) {
-        char_set_height(ch, char_get_height(ch) - (((char_get_pc_height(g, ch) - char_get_pc_height(g, vict)) / 2)));
-      } else if (char_get_pc_height(g, ch) < char_get_pc_height(g, vict)) {
-        char_set_height(ch, char_get_height(ch) + (((char_get_pc_height(g, vict) - char_get_pc_height(g, ch)) / 2)));
-      } else {
-        char_set_height(ch, char_get_pc_height(g, vict));
-      }
+      int mine = char_get_pc_height(g, ch), theirs = char_get_pc_height(g, vict);
+      if (mine > theirs)
+        char_set_height(ch, char_get_height(ch) - (mine - theirs) / 2);
+      else if (mine < theirs)
+        char_set_height(ch, char_get_height(ch) + (theirs - mine) / 2);
+      else
+        char_set_height(ch, theirs);
     } else if (rand_number(g, 1, 3) == 3) {
       send_to_char(g, ch, "{} changes your weight.\r\n", char_get_name(vict));
-      if (char_get_pc_weight(g, ch) > char_get_pc_weight(g, vict)) {
-        char_set_weight(ch, char_get_weight(ch) - (((char_get_pc_weight(g, ch) - char_get_pc_weight(g, vict)) / 2)));
-      } else if (char_get_pc_weight(g, ch) < char_get_pc_weight(g, vict)) {
-        char_set_weight(ch, char_get_weight(ch) + (((char_get_pc_weight(g, vict) - char_get_pc_weight(g, ch)) / 2)));
-      } else {
-        char_set_weight(ch, char_get_pc_weight(g, vict));
-      }
+      int mine = char_get_pc_weight(g, ch), theirs = char_get_pc_weight(g, vict);
+      if (mine > theirs)
+        char_set_weight(ch, char_get_weight(ch) - (mine - theirs) / 2);
+      else if (mine < theirs)
+        char_set_weight(ch, char_get_weight(ch) + (theirs - mine) / 2);
+      else
+        char_set_weight(ch, theirs);
     } else {
       send_to_char(g, ch, "Your forelock length changes because of {}.\r\n", char_get_name(vict));
       char_set_hairl(ch, char_get_hairl(vict));
     }
-    handle_ingest_learn(g, ch, vict);
-    die(g, vict, nullptr);
-    return;
-  } // End of ingest
+  }
+} // namespace
 
-  else {
+ACMD(do_ingest)
+{
+  if (!char_is_majin(ch)) {
     send_to_char(g, ch, "You are not a majin, you can not ingest.\r\n");
     return;
-  } // Error
+  }
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+  if (arg.empty()) {
+    send_to_char(g, ch, "Who do you want to ingest?\r\n");
+    return;
+  }
+  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "Ingest who?\r\n");
+  if (reject(g, ch, found))
+    return;
+  struct char_data *vict = *found;
+  if (!can_kill(g, ch, vict, nullptr, 0))
+    return;
+  if (char_get_absorbby(g, vict)) {
+    send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
+    return;
+  }
+  if (const char *why = cannot_ingest(g, ch, vict)) {
+    send_to_char(g, ch, why);
+    return;
+  }
+  reveal_hiding(g, ch, 0);
+  if (char_aff_flagged(vict, AFF_ZANZOKEN) && getCurST(g, vict) >= 1 && char_get_position(vict) != POS_SLEEPING) {
+    act_triple(g, {"@C$N@c disappears, avoiding your attempted ingestion!@n", "@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", "@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n"}, ch, nullptr, vict);
+    char_aff_set(vict, AFF_ZANZOKEN, false);
+    char_set_wait(ch, PULSE_3SEC);
+    return;
+  }
+  /* quirk: ch's speed is matched against ch's own */
+  if (char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, ch) + rand_number(g, 1, 5)) {
+    act_triple(g, {"@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", "@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", "@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true}, ch, nullptr, vict);
+    char_set_wait(ch, PULSE_3SEC);
+    return;
+  }
+  act_triple(g, {"@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", "@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", "@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true}, ch, nullptr, vict);
+  char_set_absorbs(ch, char_get_absorbs(ch) + 1);
+  int64_t pl = getBasePL(vict) / 6, stam = getBaseST(vict) / 6, ki = getBaseKI(vict) / 6;
+  gainBasePL(ch, pl, true);
+  gainBaseST(ch, stam, true);
+  gainBaseKI(ch, ki, true);
+  if (!char_is_npc(vict) && !char_is_npc(ch)) {
+    send_to_imm(g, "[PK] {} killed {} at room [{:d}]\r\n", char_get_name(ch), char_get_name(vict), char_get_in_room(vict));
+    char_plr_set(vict, PLR_ABSORBED, true);
+  }
+  send_to_char(g, ch, "@D[@mINGEST@D] @rPL@W: @D(@y{}@D) @cKi@W: @D(@y{}@D) @gSt@W: @D(@y{}@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
+  takes_after(g, ch, vict);
+  handle_ingest_learn(g, ch, vict);
+  die(g, vict, nullptr);
 }
 
 ACMD(do_plant)
 {
-  struct char_data *vict;
-  struct obj_data *obj;
-  std::string vict_name, obj_name;
-  int roll = 0, detect = 0, fail = 0;
-
   if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
-
   std::string_view rest = argument;
-  obj_name              = take_arg(rest);
-  vict_name             = take_arg(rest);
+  std::string obj_name  = take_arg(rest);
+  std::string vict_name = take_arg(rest);
 
-  if (!(vict = get_char_vis(g, ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "Plant what on who?\r\n");
+  auto found = find_char(g, ch, vict_name, FIND_CHAR_ROOM, "Plant what on who?\r\n");
+  if (reject(g, ch, found))
     return;
-  }
+  struct char_data *vict = *found;
   if (vict == ch) {
     send_to_char(g, ch, "Come on now, that's rather stupid!\r\n");
     return;
@@ -885,319 +715,252 @@ ACMD(do_plant)
     return;
   }
 
-  roll = roll_skill(g, ch, SKILL_SLEIGHT_OF_HAND) + rand_number(g, 1, 3);
-  fail = rand_number(g, 1, 105);
-
-  if (char_get_position(vict) < POS_SLEEPING)
-    detect = 0;
-  else
-    detect = (roll_skill(g, vict, SKILL_SPOT) + rand_number(g, 1, 3));
-
+  int roll   = roll_skill(g, ch, SKILL_SLEIGHT_OF_HAND) + rand_number(g, 1, 3);
+  int fail   = rand_number(g, 1, 105);
+  int detect = char_get_position(vict) < POS_SLEEPING ? 0 : roll_skill(g, vict, SKILL_SPOT) + rand_number(g, 1, 3);
   /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
   if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(g, vict) == shop_keeper) && char_get_admlevel(ch) < 5)
-    roll = -10; /* Failure */
+    roll = -10;
 
-  if (!(obj = get_obj_in_list_vis(g, ch, obj_name, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You don't have that to plant on them.\r\n");
+  auto obj = find_carried(g, ch, obj_name, "You don't have that to plant on them.\r\n");
+  if (reject(g, ch, obj))
     return;
-  }
+  constexpr const char *TRIES_ON_YOU = "@C$n@w tries to plant $p@w on you!@n", *TRIES_ON_THEM = "@C$n@w tries to plant $p@w on @c$N@w!@n";
   if (roll <= detect && roll <= fail) {
     reveal_hiding(g, ch, 0);
-    act(g, "@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
-    act(g, "@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
-    act(g, "@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", true, ch, obj, vict, TO_CHAR);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
-  }
-  if (roll <= fail) {
-    act(g, "@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", true, ch, obj, vict, TO_CHAR);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
-  }
-  if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(g, vict)) {
+    act(g, TRIES_ON_YOU, true, ch, *obj, vict, TO_VICT);
+    act(g, TRIES_ON_THEM, true, ch, *obj, vict, TO_NOTVICT);
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", true, ch, *obj, vict, TO_CHAR);
+  } else if (roll <= fail)
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", true, ch, *obj, vict, TO_CHAR);
+  else if (obj_get_weight(*obj) + getCurCarriedWeight(vict) > getMaxCarryWeight(g, vict)) {
     reveal_hiding(g, ch, 0);
-    act(g, "@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
-    act(g, "@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
-    act(g, "@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", true, ch, obj, vict, TO_CHAR);
-    char_set_wait(ch, PULSE_2SEC);
-  } else if (roll <= detect) {
-    act(g, "@cYou feel like the weight of your inventory has changed.@n", true, ch, obj, vict, TO_VICT);
-    act(g, "@c$N@w looks around after feeling $S pockets.@n", true, ch, obj, vict, TO_NOTVICT);
-    act(g, "@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch, obj, vict, TO_CHAR);
-    obj_from_char(g, obj);
-    obj_to_char(g, obj, vict);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
+    act(g, TRIES_ON_YOU, true, ch, *obj, vict, TO_VICT);
+    act(g, TRIES_ON_THEM, true, ch, *obj, vict, TO_NOTVICT);
+    act(g, "@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", true, ch, *obj, vict, TO_CHAR);
   } else {
-    act(g, "@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
-    obj_from_char(g, obj);
-    obj_to_char(g, obj, vict);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
+    if (roll <= detect) {
+      act(g, "@cYou feel like the weight of your inventory has changed.@n", true, ch, *obj, vict, TO_VICT);
+      act(g, "@c$N@w looks around after feeling $S pockets.@n", true, ch, *obj, vict, TO_NOTVICT);
+      act(g, "@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch, *obj, vict, TO_CHAR);
+    } else
+      act(g, "@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, *obj, vict, TO_CHAR);
+    obj_from_char(g, *obj);
+    obj_to_char(g, *obj, vict);
   }
+  char_set_wait(ch, PULSE_2SEC);
 }
+
+namespace {
+  /* Why obj can't be forged, if it can't */
+  const char *unforgeable(GameWorld *g, struct obj_data *obj)
+  {
+    obj_vnum vnum = obj_get_vnum(g, obj);
+    if (vnum >= 60000 || vnum == 0)
+      return "You can not make a forgery of that! It's far too squishy....";
+    if ((vnum >= 18800 && vnum <= 18999) || (vnum >= 19080 && vnum <= 19199) || (vnum >= 4 && vnum <= 6))
+      return "You can not make a forgery of that!\r\n";
+    if (obj_extra_flagged(obj, ITEM_PROTECTED))
+      return "You don't know where to begin with this work of ART.\r\n";
+    return nullptr;
+  }
+
+  /* The first of ch's kits of this number that's neither broken nor fake */
+  struct obj_data *usable_kit(GameWorld *g, struct char_data *ch, obj_vnum vnum)
+  {
+    return find_first(char_inventory(g, ch), [&](obj_data *obj) {
+      return obj_get_vnum(g, obj) == vnum && !obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED);
+    });
+  }
+} // namespace
 
 ACMD(do_forgery)
 {
-
-  struct obj_data *obj2, *obj3 = nullptr;
-  struct obj_data *obj4 = nullptr;
-  int found = false;
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch) || !know_skill(g, ch, SKILL_FORGERY))
     return;
-  }
-
-  if (!know_skill(g, ch, SKILL_FORGERY)) {
-    return;
-  }
-
   if (arg.empty()) {
     send_to_char(g, ch, "Okay, make a forgery of what?\r\n");
     return;
   }
-
-  if (!(obj2 = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You want to make a fake copy of what?\r\n");
+  auto found = find_carried(g, ch, arg, "You want to make a fake copy of what?\r\n");
+  if (reject(g, ch, found))
     return;
-  }
-
-  for (obj_data *obj : char_inventory(g, ch)) {
-    if (found == false && obj_get_vnum(g, obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
-      found = true;
-      obj4  = obj;
-    }
-  }
-
-  if (found == false || obj4 == nullptr) {
+  struct obj_data *original = *found;
+  struct obj_data *kit      = usable_kit(g, ch, 19);
+  if (!kit) {
     send_to_char(g, ch, "You need a forgery kit.\r\n");
     return;
   }
-
-  if (obj_get_vnum(g, obj2) == 19) {
+  if (obj_get_vnum(g, original) == 19) {
     send_to_char(g, ch, "You can't duplicate a forgery kit.\r\n");
     return;
   }
-
-  if (obj_extra_flagged(obj2, ITEM_FORGED)) {
-    send_to_char(g, ch, "{} is forgery, there is no reason to make a fake of a fake!\r\n", obj_get_short_description(obj2));
+  if (obj_extra_flagged(original, ITEM_FORGED) || obj_extra_flagged(original, ITEM_BROKEN)) {
+    send_to_char(g, ch, "{} is {}\r\n", obj_get_short_description(original), obj_extra_flagged(original, ITEM_FORGED) ? "forgery, there is no reason to make a fake of a fake!" : "broken, there is no reason to make a fake of this mess!");
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
-
-  if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
-    send_to_char(g, ch, "{} is broken, there is no reason to make a fake of this mess!\r\n", obj_get_short_description(obj2));
-    char_set_wait(ch, PULSE_2SEC);
-    return;
-  }
-
-  if (obj_get_vnum(g, obj2) >= 60000 || obj_get_vnum(g, obj2) == 0) {
-    send_to_char(g, ch, "You can not make a forgery of that! It's far too squishy....");
-    return;
-  }
-  if (obj_get_vnum(g, obj2) >= 18800 && obj_get_vnum(g, obj2) <= 18999) {
-    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
-    return;
-  }
-  if (obj_get_vnum(g, obj2) >= 19080 && obj_get_vnum(g, obj2) <= 19199) {
-    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
-    return;
-  }
-  if (obj_get_vnum(g, obj2) >= 4 && obj_get_vnum(g, obj2) <= 6) {
-    send_to_char(g, ch, "You can not make a forgery of that!\r\n");
-    return;
-  }
-
-  if (obj_extra_flagged(obj2, ITEM_PROTECTED)) {
-    send_to_char(g, ch, "You don't know where to begin with this work of ART.\r\n");
+  if (const char *why = unforgeable(g, original)) {
+    send_to_char(g, ch, why);
     return;
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, nullptr, TO_ROOM);
+  act(g, "@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, original, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_FORGERY, 1);
   if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(g, 0)) {
     if (rand_number(g, 1, 10) >= 9) { /* Uh oh */
-      send_to_char(g, ch, "In the middle of creating a forgery of {} you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj_get_short_description(obj2));
-      extract_obj(g, obj4);
-      extract_obj(g, obj2);
+      send_to_char(g, ch, "In the middle of creating a forgery of {} you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj_get_short_description(original));
+      extract_obj(g, kit);
+      extract_obj(g, original);
       return;
     }
-    send_to_char(g, ch, "You start to make a forgery of {} but screw up and waste your forgery kit..\r\n", obj_get_short_description(obj2));
-    act(g, "@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, nullptr, TO_ROOM);
-    obj_from_char(g, obj4);
-    extract_obj(g, obj4);
+    send_to_char(g, ch, "You start to make a forgery of {} but screw up and waste your forgery kit..\r\n", obj_get_short_description(original));
+    act(g, "@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, original, nullptr, TO_ROOM);
+    obj_from_char(g, kit);
+    extract_obj(g, kit);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
-  obj_vnum loadn = obj_get_vnum(g, obj2);
-
-  obj3 = read_object(g, loadn);
-  add_unique_id(g, obj3);
-  obj_to_char(g, obj3, ch);
-
-  /* Set Object Variables */
-  obj_extra_set(obj3, ITEM_FORGED, true);
-  obj_set_weight(obj3, rand_number(g, obj_get_weight(obj3) / 2, obj_get_weight(obj3)));
-
-  obj_from_char(g, obj4);
-  extract_obj(g, obj4);
-  send_to_char(g, ch, "You make an excellent forgery of {}@n!\r\n", obj_get_short_description(obj2));
-  act(g, "@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, nullptr, TO_ROOM);
+  struct obj_data *fake = read_object(g, obj_get_vnum(g, original));
+  add_unique_id(g, fake);
+  obj_extra_set(fake, ITEM_FORGED, true);
+  /* lighter than the real thing; weighed before it's carried, so the carrier counts what it really weighs */
+  obj_set_weight(fake, rand_number(g, obj_get_weight(fake) / 2, obj_get_weight(fake)));
+  obj_to_char(g, fake, ch);
+  obj_from_char(g, kit);
+  extract_obj(g, kit);
+  send_to_char(g, ch, "You make an excellent forgery of {}@n!\r\n", obj_get_short_description(original));
+  act(g, "@c$n@w makes a perfect forgery of $p.@n", true, ch, original, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
 }
 
+namespace {
+  constexpr struct {
+    int flag;
+    const char *line;
+  } WEAPON_LEVELS[] = {
+      {ITEM_WEAPLVL1, "Weapon Level: 1\nDamage Bonus: 5%\r\n"},  {ITEM_WEAPLVL2, "Weapon Level: 2\nDamage Bonus: 10%\r\n"},
+      {ITEM_WEAPLVL3, "Weapon Level: 3\nDamage Bonus: 20%\r\n"}, {ITEM_WEAPLVL4, "Weapon Level: 4\nDamage Bonus: 30%\r\n"},
+      {ITEM_WEAPLVL5, "Weapon Level: 5\nDamage Bonus: 50%\r\n"},
+  };
+
+  /* How full obj's token slots are, if it has any; quirk: two filled slots show nothing */
+  const char *token_slots(struct obj_data *obj)
+  {
+    bool filled = obj_extra_flagged(obj, ITEM_SLOTS_FILLED);
+    if (obj_extra_flagged(obj, ITEM_SLOT1))
+      return filled ? "Token Slots  : @m1/1@n\n" : "Token Slots  : @m0/1@n\n";
+    if (obj_extra_flagged(obj, ITEM_SLOT2) && !filled)
+      return obj_extra_flagged(obj, ITEM_SLOT_ONE) ? "Token Slots  : @m1/2@n\n" : "Token Slots  : @m0/2@n\n";
+    return nullptr;
+  }
+
+  /* The bonuses obj gives, as appraise lists them after "Bonuses:" */
+  void appraise_bonuses(GameWorld *g, struct char_data *ch, struct obj_data *obj)
+  {
+    bool found = false;
+    for (int i = 0; i < MAX_OBJ_AFFECT; i++) {
+      const auto &aff = obj_get_affected(obj)[i];
+      if (!aff.modifier)
+        continue;
+      bool percent = aff.location == APPLY_REGEN || aff.location == APPLY_TRAIN || aff.location == APPLY_LIFEMAX;
+      send_to_char(g, ch, "{} {:+d}{} to {}", found ? "," : "", aff.modifier, percent ? "%" : "", sprinttype(aff.location, apply_types));
+      found = true;
+      if (aff.location == APPLY_FEAT)
+        send_to_char(g, ch, " ({})", g->feat_list[aff.specific].name);
+      else if (aff.location == APPLY_SKILL)
+        send_to_char(g, ch, " ({})", g->spell_info[aff.specific].name);
+    }
+    if (!found)
+      send_to_char(g, ch, " None");
+    send_to_char(g, ch, "\nSpecial: {}\r\n", sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX));
+  }
+} // namespace
+
 ACMD(do_appraise)
 {
-  int i, found;
-  struct obj_data *obj;
-  std::string arg;
-  std::string buf;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch) || !know_skill(g, ch, SKILL_APPRAISE))
     return;
-  }
-
-  if (!know_skill(g, ch, SKILL_APPRAISE)) {
-    return;
-  }
-
   if (arg.empty()) {
     send_to_char(g, ch, "Okay, appraise what?\r\n");
     return;
   }
-
-  if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-    send_to_char(g, ch, "You want to appraise what?\r\n");
+  auto found = find_carried(g, ch, arg, "You want to appraise what?\r\n");
+  if (reject(g, ch, found))
     return;
-  }
+  struct obj_data *obj = *found;
 
   reveal_hiding(g, ch, 0);
   act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_APPRAISE, 1);
+  /* what's said of it instead, either side of its name, and how ch looks */
+  const char *before = "", *after = nullptr, *look = nullptr;
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(g, -10)) {
-    send_to_char(g, ch, "You fail to perceive the worth of {}..\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks stumped about $p.@n", true, ch, obj, nullptr, TO_ROOM);
+    before = "You fail to perceive the worth of ";
+    after  = "..";
+    look   = "@c$n@w looks stumped about $p.@n";
+  } else if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    after = " is broken!";
+    look  = "@c$n@w looks at $p and frowns.@n";
+  } else if (obj_extra_flagged(obj, ITEM_FORGED)) {
+    after = " is fake and worthless!";
+    look  = "@c$n@w looks at $p with an angry face.@n";
+  }
+  if (after) {
+    send_to_char(g, ch, "{}{}{}\r\n", before, obj_get_short_description(obj), after);
+    act(g, look, true, ch, obj, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
-  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-    send_to_char(g, ch, "{} is broken!\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks at $p and frowns.@n", true, ch, obj, nullptr, TO_ROOM);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
-  }
-
-  if (obj_extra_flagged(obj, ITEM_FORGED)) {
-    send_to_char(g, ch, "{} is fake and worthless!\r\n", obj_get_short_description(obj));
-    act(g, "@c$n@w looks at $p with an angry face.@n", true, ch, obj, nullptr, TO_ROOM);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
-  }
-  found         = false;
-  int displevel = obj_get_level(obj);
-
-  if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
-    displevel = 20;
-
+  bool weapon   = obj_get_type_flag(obj) == ITEM_WEAPON;
+  int displevel = weapon && obj_extra_flagged(obj, ITEM_CUSTOM) ? 20 : obj_get_level(obj);
   send_to_char(g, ch, "{} is worth: {}\r\nMin Lvl: {:d}\r\n", obj_get_short_description(obj), add_commas(obj_get_cost(obj)), displevel);
-  if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-    if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
-      send_to_char(g, ch, "Weapon Level: 1\nDamage Bonus: 5{}\r\n", "%");
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
-      send_to_char(g, ch, "Weapon Level: 2\nDamage Bonus: 10{}\r\n", "%");
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
-      send_to_char(g, ch, "Weapon Level: 3\nDamage Bonus: 20{}\r\n", "%");
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
-      send_to_char(g, ch, "Weapon Level: 4\nDamage Bonus: 30{}\r\n", "%");
-    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
-      send_to_char(g, ch, "Weapon Level: 5\nDamage Bonus: 50{}\r\n", "%");
-    }
+  if (weapon) {
+    auto level = std::ranges::find_if(WEAPON_LEVELS, [&](const auto &l) { return obj_extra_flagged(obj, l.flag); });
+    if (level != std::end(WEAPON_LEVELS))
+      send_to_char(g, ch, level->line);
   }
   send_to_char(g, ch, "Size: {}\r\n", size_names[obj_get_size(obj)]);
-  if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "Token Slots  : @m0/1@n\n");
-  } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "Token Slots  : @m1/1@n\n");
-  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "Token Slots  : @m0/2@n\n");
-  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "Token Slots  : @m1/2@n\n");
-  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-    send_to_char(g, ch, "Token Slots  : @m2/2@n\n");
-  }
+  if (const char *slots = token_slots(obj))
+    send_to_char(g, ch, slots);
   send_to_char(g, ch, "Bonuses:");
   act(g, "@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, nullptr, TO_ROOM);
-  int percent = false;
-  for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-    if (obj_get_affected(obj)[i].modifier) {
-      if (obj_get_affected(obj)[i].location == APPLY_REGEN || obj_get_affected(obj)[i].location == APPLY_TRAIN || obj_get_affected(obj)[i].location == APPLY_LIFEMAX) {
-        percent = true;
-      }
-      buf = sprinttype(obj_get_affected(obj)[i].location, apply_types);
-      send_to_char(g, ch, "{} {:+d}{} to {}", found++ ? "," : "", obj_get_affected(obj)[i].modifier, percent == true ? "%" : "", buf);
-      percent = false;
-      switch (obj_get_affected(obj)[i].location) {
-        case APPLY_FEAT:
-          send_to_char(g, ch, " ({})", g->feat_list[obj_get_affected(obj)[i].specific].name);
-          break;
-        case APPLY_SKILL:
-          send_to_char(g, ch, " ({})", g->spell_info[obj_get_affected(obj)[i].specific].name);
-          break;
-      }
-    }
-  }
-  if (!found)
-    send_to_char(g, ch, " None");
-  std::string buf2 = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
-  send_to_char(g, ch, "\nSpecial: {}\r\n", buf2);
-
+  appraise_bonuses(g, ch, obj);
   char_set_wait(ch, PULSE_2SEC);
 }
 
 ACMD(do_disguise)
 {
-  int skill = 0, roll = 0;
-
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You forgot your disguise off in mobland.\r\n");
     return;
   }
-
   if (char_plr_flagged(ch, PLR_DISGUISED)) {
     send_to_char(g, ch, "You stop disguising yourself.\r\n");
     char_plr_set(ch, PLR_DISGUISED, false);
     act(g, "@C$n @wpulls off $s disguise and reveals $mself!", true, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
-
-  if (!know_skill(g, ch, SKILL_DISGUISE)) {
+  if (!know_skill(g, ch, SKILL_DISGUISE))
     return;
-  }
-
   if (!char_get_equipment(ch, WEAR_HEAD)) {
     send_to_char(g, ch, "You can't disguise your identity without anything on your head.\r\n");
     return;
   }
-
-  if ((getCurST(g, ch)) < (getCurST(g, ch)) / 50) {
+  if (getCurST(g, ch) < getCurST(g, ch) / 50) { /* quirk: never so, as it's measured against itself */
     send_to_char(g, ch, "You are too tired to try that right now.\r\n");
     return;
   }
-
-  skill = char_get_skill(ch, SKILL_DISGUISE);
-  roll  = axion_dice(g, -10);
-
-  if (skill > roll) {
+  if (char_get_skill(ch, SKILL_DISGUISE) > axion_dice(g, -10)) {
     send_to_char(g, ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
     act(g, "@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, nullptr, nullptr, TO_ROOM);
     char_plr_set(ch, PLR_DISGUISED, true);
@@ -1206,393 +969,269 @@ ACMD(do_disguise)
   send_to_char(g, ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
   act(g, "@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, nullptr, nullptr, TO_ROOM);
   decCurST(g, ch, getMaxST(g, ch) / 50, 0);
-  return;
 }
+
+namespace {
+  /* use (medical supplies): each of these does its own thing; anything else isn't to be used */
+  void use_supply(GameWorld *g, struct char_data *ch, struct obj_data *item)
+  {
+    switch (obj_get_vnum(g, item)) {
+      case 381: /* stamina injector */
+        if (getCurST(g, ch) >= getMaxST(g, ch)) {
+          send_to_char(g, ch, "Your stamina is full.\r\n");
+          return;
+        }
+        act(g, "@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, item, nullptr, TO_CHAR);
+        act(g, "@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, item, nullptr, TO_ROOM);
+        if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
+          send_to_char(g, ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
+          incCurST(g, ch, getMaxST(g, ch) * .25, true);
+        } else
+          incCurST(g, ch, getMaxST(g, ch) * .1, true);
+        extract_obj(g, item);
+        return;
+      case 382: /* burn salve */
+        if (!char_aff_flagged(ch, AFF_BURNED)) {
+          send_to_char(g, ch, "You are not burned.\r\n");
+          return;
+        }
+        act(g, "@WYou gently apply the salve to your burns.@n", true, ch, item, nullptr, TO_CHAR);
+        act(g, "@C$n@W gently applies a burn salve to $s burns.@n", true, ch, item, nullptr, TO_ROOM);
+        char_aff_set(ch, AFF_BURNED, false);
+        extract_obj(g, item);
+        return;
+      case 383: /* antitoxin */
+        if (!char_aff_flagged(ch, AFF_POISON)) {
+          send_to_char(g, ch, "You are not poisoned.\r\n");
+          return;
+        }
+        act(g, "@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, item, nullptr, TO_CHAR);
+        act(g, "@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, item, nullptr, TO_ROOM);
+        null_affect(g, ch, AFF_POISON);
+        extract_obj(g, item);
+        return;
+      case 385: { /* restorative vial */
+        act(g, "@WYou drink the contents of the vial before disposing of it.@n", true, ch, item, nullptr, TO_CHAR);
+        act(g, "@C$n@W dinks a $p and then disposes of it.@n", true, ch, item, nullptr, TO_ROOM);
+        if (char_aff_flagged(ch, AFF_BLIND)) {
+          act(g, "@WYour eyesight has returned!@n", true, ch, item, nullptr, TO_CHAR);
+          act(g, "@C$n@W eyesight seems to have returned.@n", true, ch, item, nullptr, TO_ROOM);
+          null_affect(g, ch, AFF_BLIND);
+        }
+        bool refreshed = true;
+        if (getCurPL(g, ch) <= getEffMaxPL(g, ch) * 0.99)
+          incCurHealth(g, ch, large_rand(g, getEffMaxPL(g, ch) * 0.08, getEffMaxPL(g, ch) * 0.16), true);
+        else if (getCurKI(g, ch) <= getEffMaxPL(g, ch) * 0.99) /* quirk: ki measured against powerlevel */
+          incCurKI(g, ch, large_rand(g, getMaxKI(g, ch) * 0.08, getMaxKI(g, ch) * 0.16), true);
+        else if (getCurST(g, ch) <= getMaxST(g, ch) * 0.99)
+          incCurST(g, ch, large_rand(g, getMaxST(g, ch) * 0.08, getMaxST(g, ch) * 0.16), true);
+        else
+          refreshed = false;
+        if (refreshed)
+          send_to_char(g, ch, "@CYou feel refreshed!\r\n");
+        extract_obj(g, item);
+        return;
+      }
+      default:
+        send_to_char(g, ch, "That is not something you can apparently use.\r\n");
+        return;
+    }
+  }
+} // namespace
 
 ACMD(do_use)
 {
-  std::string buf, arg;
-  struct obj_data *mag_item = nullptr;
-
   std::string_view rest = argument;
-  arg                   = take_word(rest);
-  buf                   = skip_spaces(rest);
+  std::string arg       = take_word(rest);
+  std::string buf(skip_spaces(rest));
+
   if (arg.empty()) {
     send_to_char(g, ch, "What do you want to {}?\r\n", CMD_NAME);
     return;
   }
-
+  if (subcmd != SCMD_RECITE && subcmd != SCMD_QUAFF && subcmd != SCMD_USE) {
+    mud_log("SYSERR: Unknown subcmd {:d} passed to do_use.", subcmd);
+    return;
+  }
+  struct obj_data *mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
   if (!mag_item) {
-    switch (subcmd) {
-      case SCMD_RECITE:
-      case SCMD_QUAFF:
-        if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
-          return;
-        }
-        break;
-      case SCMD_USE:
-        if (!(mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
-          send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
-          return;
-        }
-        break;
-      default:
-        mud_log("SYSERR: Unknown subcmd {:d} passed to do_use.", subcmd);
-        /*  SYSERR_DESC:
-       *  This is the same as the unhandled case in do_gen_ps(), but in the
-       *  function which handles 'quaff', 'recite', and 'use'.
-       */
-        return;
+    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
+    return;
+  }
+
+  const char *refusal = nullptr;
+  if (subcmd == SCMD_QUAFF) {
+    if (obj_get_type_flag(mag_item) != ITEM_POTION)
+      refusal = "You can only swallow beans.\r\n";
+    else if (char_is_android(ch))
+      refusal = "You can't swallow beans, you are an android.\r\n";
+    else if (obj_extra_flagged(mag_item, ITEM_FORGED))
+      refusal = "You can't swallow that, it is fake!\r\n";
+    else if (obj_extra_flagged(mag_item, ITEM_BROKEN))
+      refusal = "You can't swallow that, it is broken!\r\n";
+  } else if (subcmd == SCMD_RECITE) {
+    if (obj_get_type_flag(mag_item) != ITEM_SCROLL)
+      refusal = "You can only recite scrolls.\r\n";
+  } else {
+    if (char_is_android(ch))
+      refusal = "You are not biological enough to use these, Tincan.\r\n";
+    else {
+      use_supply(g, ch, mag_item);
+      return;
     }
   }
-  int refreshed;
-  switch (subcmd) {
-    case SCMD_QUAFF:
-      if (obj_get_type_flag(mag_item) != ITEM_POTION) {
-        send_to_char(g, ch, "You can only swallow beans.\r\n");
-        return;
-      }
-      if (char_is_android(ch)) {
-        send_to_char(g, ch, "You can't swallow beans, you are an android.\r\n");
-        return;
-      }
-      if (obj_extra_flagged(mag_item, ITEM_FORGED)) {
-        send_to_char(g, ch, "You can't swallow that, it is fake!\r\n");
-        return;
-      }
-      if (obj_extra_flagged(mag_item, ITEM_BROKEN)) {
-        send_to_char(g, ch, "You can't swallow that, it is broken!\r\n");
-        return;
-      }
-      break;
-    case SCMD_RECITE:
-      if (obj_get_type_flag(mag_item) != ITEM_SCROLL) {
-        send_to_char(g, ch, "You can only recite scrolls.\r\n");
-        return;
-      }
-      break;
-    case SCMD_USE:
-      if (char_is_android(ch)) {
-        send_to_char(g, ch, "You are not biological enough to use these, Tincan.\r\n");
-        return;
-      }
-      switch (obj_get_vnum(g, mag_item)) {
-        case 381:
-          if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
-            send_to_char(g, ch, "Your stamina is full.\r\n");
-            return;
-          }
-          act(g, "@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, nullptr, TO_CHAR);
-          act(g, "@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, nullptr, TO_ROOM);
-          if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
-            send_to_char(g, ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
-            incCurST(g, ch, getMaxST(g, ch) * .25, true);
-          } else {
-            incCurST(g, ch, getMaxST(g, ch) * .1, true);
-          }
-          extract_obj(g, mag_item);
-          return;
-        case 382:
-          if (char_aff_flagged(ch, AFF_BURNED)) {
-            act(g, "@WYou gently apply the salve to your burns.@n", true, ch, mag_item, nullptr, TO_CHAR);
-            act(g, "@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, nullptr, TO_ROOM);
-            char_aff_set(ch, AFF_BURNED, false);
-            extract_obj(g, mag_item);
-          } else {
-            send_to_char(g, ch, "You are not burned.\r\n");
-          }
-          return;
-        case 383:
-          if (char_aff_flagged(ch, AFF_POISON)) {
-            act(g, "@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, nullptr, TO_CHAR);
-            act(g, "@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, nullptr, TO_ROOM);
-            null_affect(g, ch, AFF_POISON);
-            extract_obj(g, mag_item);
-          } else {
-            send_to_char(g, ch, "You are not poisoned.\r\n");
-          }
-          return;
-        case 385:
-          act(g, "@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, nullptr, TO_CHAR);
-          act(g, "@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, nullptr, TO_ROOM);
-          if (char_aff_flagged(ch, AFF_BLIND)) {
-            act(g, "@WYour eyesight has returned!@n", true, ch, mag_item, nullptr, TO_CHAR);
-            act(g, "@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, nullptr, TO_ROOM);
-            null_affect(g, ch, AFF_BLIND);
-          }
-          refreshed = false;
-
-          if (getCurPL(g, ch) <= getEffMaxPL(g, ch) * 0.99) {
-            incCurHealth(g, ch, large_rand(g, getEffMaxPL(g, ch) * 0.08, getEffMaxPL(g, ch) * 0.16), true);
-            refreshed = true;
-          } else if ((getCurKI(g, ch)) <= getEffMaxPL(g, ch) * 0.99) {
-            incCurKI(g, ch, large_rand(g, getMaxKI(g, ch) * 0.08, getMaxKI(g, ch) * 0.16), true);
-            refreshed = true;
-          } else if ((getCurST(g, ch)) <= getMaxST(g, ch) * 0.99) {
-            incCurST(g, ch, large_rand(g, getMaxST(g, ch) * 0.08, getMaxST(g, ch) * 0.16), true);
-            refreshed = true;
-          }
-          if (refreshed == true) {
-            send_to_char(g, ch, "@CYou feel refreshed!\r\n");
-          }
-          extract_obj(g, mag_item);
-          return;
-        default:
-          send_to_char(g, ch, "That is not something you can apparently use.\r\n");
-          return;
-      }
-      break;
+  if (refusal) {
+    send_to_char(g, ch, refusal);
+    return;
   }
-
   mag_objectmagic(g, ch, mag_item, buf);
 }
 
+/* wimpy, the only value it sets now */
 ACMD(do_value)
 {
-  std::string arg;
-  int value_lev;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (arg.empty()) {
-    switch (subcmd) {
-      case SCMD_WIMPY:
-        if (char_get_wimp_level(g, ch)) {
-          send_to_char(g, ch, "Your current wimp level is {:d} powerlevel.\r\n", char_get_wimp_level(g, ch));
-          return;
-        }
-        send_to_char(g, ch, "At the moment, you're not a wimp.  (sure, sure...)\r\n");
-        return;
-        break;
-    }
+  if (subcmd != SCMD_WIMPY) {
+    mud_log("Unknown subcmd to do_value {:d} called by {}", subcmd, char_get_name(ch));
+    return;
   }
-
-  if (isdigit(arg[0])) {
-    switch (subcmd) {
-      case SCMD_WIMPY:
-        /* 'wimp_level' is a player_special. -gg 2/25/98 */
-        if (char_is_npc(ch))
-          return;
-        if ((value_lev = parse_int(arg)) != 0) {
-          if (value_lev < 0)
-            send_to_char(g, ch, "Heh, heh, heh.. we are jolly funny today, eh?\r\n");
-          else if (value_lev > getEffMaxPL(g, ch))
-            send_to_char(g, ch, "That doesn't make much sense, now does it?\r\n");
-          else if (value_lev > (getEffMaxPL(g, ch) * 0.5))
-            send_to_char(g, ch, "You can't set your wimp level above half your powerlevel.\r\n");
-          else {
-            send_to_char(g, ch, "Okay, you'll wimp out if you drop below {:d} powerlevel.\r\n", value_lev);
-            char_set_wimp_level(g, ch, value_lev);
-          }
-        } else {
-          send_to_char(g, ch, "Okay, you'll now tough out fights to the bitter end.\r\n");
-          char_set_wimp_level(g, ch, 0);
-        }
-        break;
-      default:
-        mud_log("Unknown subcmd to do_value {:d} called by {}", subcmd, char_get_name(ch));
-        break;
-    }
-  } else
+  if (arg.empty()) {
+    if (char_get_wimp_level(g, ch))
+      send_to_char(g, ch, "Your current wimp level is {:d} powerlevel.\r\n", char_get_wimp_level(g, ch));
+    else
+      send_to_char(g, ch, "At the moment, you're not a wimp.  (sure, sure...)\r\n");
+    return;
+  }
+  if (!isdigit(arg[0])) {
     send_to_char(g, ch, "Specify a value.  (0 to disable)\r\n");
+    return;
+  }
+  /* 'wimp_level' is a player_special. -gg 2/25/98 */
+  if (char_is_npc(ch))
+    return;
+  int value_lev = parse_int(arg);
+  if (value_lev == 0) {
+    send_to_char(g, ch, "Okay, you'll now tough out fights to the bitter end.\r\n");
+    char_set_wimp_level(g, ch, 0);
+  } else if (value_lev < 0)
+    send_to_char(g, ch, "Heh, heh, heh.. we are jolly funny today, eh?\r\n");
+  else if (value_lev > getEffMaxPL(g, ch))
+    send_to_char(g, ch, "That doesn't make much sense, now does it?\r\n");
+  else if (value_lev > getEffMaxPL(g, ch) * 0.5)
+    send_to_char(g, ch, "You can't set your wimp level above half your powerlevel.\r\n");
+  else {
+    send_to_char(g, ch, "Okay, you'll wimp out if you drop below {:d} powerlevel.\r\n", value_lev);
+    char_set_wimp_level(g, ch, value_lev);
+  }
 }
+
+namespace {
+  /* What compare goes by, for the kinds of things it can compare */
+  int comparable_worth(struct obj_data *obj)
+  {
+    if (obj_get_type_flag(obj) == ITEM_ARMOR)
+      return obj_get_value(obj, VAL_ARMOR_APPLYAC);
+    return (1 + obj_get_value(obj, VAL_WEAPON_DAMSIZE)) * obj_get_value(obj, VAL_WEAPON_DAMDICE);
+  }
+} // namespace
 
 ACMD(do_compare)
 {
-  std::string arg1;
-  std::string arg2;
-  struct obj_data *obj1, *obj2;
-  struct char_data *tchar;
-  int value1 = 0, value2 = 0, o1, o2;
-  const char *msg = nullptr;
-
   std::string_view rest = argument;
-  arg1                  = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg1      = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg1.empty() || arg2.empty()) {
     send_to_char(g, ch, "Compare what to what?\n\r");
     return;
   }
-
-  o1 = generic_find(g, arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
-  o2 = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
-
+  struct char_data *tchar;
+  struct obj_data *obj1, *obj2;
+  int o1 = generic_find(g, arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
+  int o2 = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
   if (!o1 || !o2) {
     send_to_char(g, ch, "You do not have that item.\r\n");
     return;
   }
-  if (obj1 == obj2) {
+  const char *msg;
+  if (obj1 == obj2)
     msg = "You compare $p to itself.  It looks about the same.";
-  } else if (obj_get_type_flag(obj1) != obj_get_type_flag(obj2)) {
+  else if (obj_get_type_flag(obj1) != obj_get_type_flag(obj2) || (obj_get_type_flag(obj1) != ITEM_ARMOR && obj_get_type_flag(obj1) != ITEM_WEAPON))
     msg = "You can't compare $p and $P.";
-  } else {
-    switch (obj_get_type_flag(obj1)) {
-      default:
-        msg = "You can't compare $p and $P.";
-        break;
-      case ITEM_ARMOR:
-        value1 = obj_get_value(obj1, VAL_ARMOR_APPLYAC);
-        value2 = obj_get_value(obj2, VAL_ARMOR_APPLYAC);
-        break;
-      case ITEM_WEAPON:
-        value1 = (1 + obj_get_value(obj1, VAL_WEAPON_DAMSIZE)) * obj_get_value(obj1, VAL_WEAPON_DAMDICE);
-        value2 = (1 + obj_get_value(obj2, VAL_WEAPON_DAMSIZE)) * obj_get_value(obj2, VAL_WEAPON_DAMDICE);
-        break;
-    }
-  }
-
-  if (msg == nullptr) {
-    if (value1 == value2)
-      msg = "$p and $P look about the same.";
-    else if (value1 > value2)
-      msg = "$p looks better than $P.";
-    else
-      msg = "$p looks worse than $P.";
-  }
-
+  else if (int value1 = comparable_worth(obj1), value2 = comparable_worth(obj2); value1 == value2)
+    msg = "$p and $P look about the same.";
+  else
+    msg = value1 > value2 ? "$p looks better than $P." : "$p looks worse than $P.";
   act(g, msg, false, ch, obj1, obj2, TO_CHAR);
-  return;
 }
 
 ACMD(do_break)
 {
-  std::string arg;
-  struct obj_data *obj;
-  struct char_data *dummy = nullptr;
-  int cmbrk;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "Usually you break SOMETHING.\r\n");
     return;
   }
-
-  if (!(cmbrk = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
+  struct char_data *dummy = nullptr;
+  struct obj_data *obj;
+  if (!generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &dummy, &obj)) {
     send_to_char(g, ch, "Can't seem to find what you want to break!\r\n");
     return;
   }
-
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(g, ch, "Seems like it's already broken!\r\n");
     return;
   }
-
-  /* Ok, break it! */
   send_to_char(g, ch, "You ruin {}.\r\n", obj_get_short_description(obj));
   act(g, "$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
   obj_extra_toggle(obj, ITEM_BROKEN);
-
-  return;
 }
 
-ACMD(do_fix)
-{
-  std::string arg;
-  struct obj_data *obj, *obj4 = nullptr;
-  struct char_data *dummy = nullptr;
-  int cmbrk, found = false, self = false, custom = false;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (!know_skill(g, ch, SKILL_REPAIR)) {
-    return;
-  }
-
-  if (arg.empty()) {
-    send_to_char(g, ch, "Usually you fix SOMETHING.\r\n");
-    return;
-  }
-
-  if (str_eq_nocase("self", arg)) {
-    if (!char_is_android(ch)) {
-      send_to_char(g, ch, "Only androids can fix their bodies with repair kits.\r\n");
-      return;
-    }
-    self = true;
-  }
-
-  if (self == false) {
-    if (!(cmbrk = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &dummy, &obj))) {
-      send_to_char(g, ch, "Can't seem to find what you want to fix!\r\n");
-      return;
-    }
-
-    if ((cmbrk) && obj_get_value(obj, VAL_ALL_HEALTH) >= 100) {
-      send_to_char(g, ch, "But it isn't even damaged!\r\n");
-      return;
-    }
-
-    if (obj_extra_flagged(obj, ITEM_FORGED)) {
-      send_to_char(g, ch, "That is fake, why bother fixing it?\r\n");
-      return;
-    }
-
+namespace {
+  /* Why obj can't be fixed, if it can't */
+  const char *unfixable(struct obj_data *obj)
+  {
+    if (obj_get_value(obj, VAL_ALL_HEALTH) >= 100)
+      return "But it isn't even damaged!\r\n";
+    if (obj_extra_flagged(obj, ITEM_FORGED))
+      return "That is fake, why bother fixing it?\r\n";
     switch (obj_get_value(obj, VAL_ALL_MATERIAL)) {
       case MATERIAL_ORGANIC:
       case MATERIAL_FOOD:
       case MATERIAL_PAPER:
       case MATERIAL_LIQUID:
-        send_to_char(g, ch, "You can't repair that.\r\n");
-        return;
-        break;
+        return "You can't repair that.\r\n";
     }
-
-    if (obj_get_vnum(g, obj) == 20099 || obj_get_vnum(g, obj) == 20098) {
-      custom = true;
-    }
+    return nullptr;
   }
 
-  for (obj_data *rep : char_inventory(g, ch)) {
-    if (custom == false) {
-      if (found == false && obj_get_vnum(g, rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
-        found = true;
-        obj4  = rep;
-      }
-    } else {
-      if (found == false && obj_get_vnum(g, rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
-        found = true;
-        obj4  = rep;
-      }
-    }
-  }
-
-  if (found == false && custom == false) {
-    send_to_char(g, ch, "You do not even have a repair kit.\r\n");
-    return;
-  }
-  if (found == false && custom == true) {
-    send_to_char(g, ch, "You do not even have a Nano-tech Repair Orb.\r\n");
-    return;
-  }
-
-  if (self == false) {
+  /* fix (obj), with a repair kit */
+  void fix_thing(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct obj_data *kit)
+  {
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
       act(g, "You try to repair $p but screw up..", true, ch, obj, nullptr, TO_CHAR);
       act(g, "$n tries to repair $p but screws up..", true, ch, obj, nullptr, TO_ROOM);
-      extract_obj(g, obj4);
+      extract_obj(g, kit);
       improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_2SEC);
       return;
     }
-
     if (obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
       send_to_char(g, ch, "You repair {} a bit.\r\n", obj_get_short_description(obj));
       act(g, "$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
-      obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
-      obj_extra_set(obj, ITEM_BROKEN, false);
+      obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR));
     } else {
       send_to_char(g, ch, "You repair {} completely.\r\n", obj_get_short_description(obj));
       act(g, "$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, 100);
-      obj_extra_set(obj, ITEM_BROKEN, false);
     }
+    obj_extra_set(obj, ITEM_BROKEN, false);
+    /* Something not carried teaches a little, once, until a lucky fix makes it teach again */
     if (obj_get_carried_by(obj) == nullptr && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
       int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
       send_to_char(g, ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+{}@D]@n\r\n", add_commas(gain));
@@ -1603,11 +1242,13 @@ ACMD(do_fix)
       send_to_char(g, ch, "@mYou think you might be on to something...@n\r\n");
     }
     improve_skill(g, ch, SKILL_REPAIR, 1);
-    extract_obj(g, obj4);
+    extract_obj(g, kit);
     char_set_wait(ch, PULSE_2SEC);
-    return;
-  } else { /* For androids repairing themselves */
+  }
 
+  /* fix self, an android's body, with a repair kit */
+  void fix_self(GameWorld *g, struct char_data *ch, struct obj_data *kit)
+  {
     if (getCurPL(g, ch) >= getEffMaxPL(g, ch)) {
       send_to_char(g, ch, "Your body is already in peak condition.\r\n");
       return;
@@ -1615,23 +1256,60 @@ ACMD(do_fix)
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(g, 0)) {
       act(g, "You try to repair your body but screw up..", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n tries to repair $s body but screws up..", true, ch, nullptr, nullptr, TO_ROOM);
-      extract_obj(g, obj4);
+      extract_obj(g, kit);
       improve_skill(g, ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_5SEC);
       return;
     }
     act(g, "You use the repair kit to fix part of your body...", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "$n works on their body with a repair kit.", true, ch, nullptr, nullptr, TO_ROOM);
-    int64_t mult = char_get_skill(ch, SKILL_REPAIR);
-    int64_t add  = (getEffMaxPL(g, ch) * 0.005 + 10) * mult;
-
-    extract_obj(g, obj4);
-    if (incCurHealth(g, ch, add, true) == getEffMaxPL(g, ch)) {
+    int64_t add = (getEffMaxPL(g, ch) * 0.005 + 10) * char_get_skill(ch, SKILL_REPAIR);
+    extract_obj(g, kit);
+    if (incCurHealth(g, ch, add, true) == getEffMaxPL(g, ch))
       send_to_char(g, ch, "Your body has been totally repaired.\r\n");
-      char_set_wait(ch, PULSE_5SEC);
-    } else {
+    else
       send_to_char(g, ch, "Your body still needs some work done to it.\r\n");
-      char_set_wait(ch, PULSE_5SEC);
+    char_set_wait(ch, PULSE_5SEC);
+  }
+} // namespace
+
+ACMD(do_fix)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_arg(rest);
+
+  if (!know_skill(g, ch, SKILL_REPAIR))
+    return;
+  if (arg.empty()) {
+    send_to_char(g, ch, "Usually you fix SOMETHING.\r\n");
+    return;
+  }
+  bool self = str_eq_nocase("self", arg);
+  if (self && !char_is_android(ch)) {
+    send_to_char(g, ch, "Only androids can fix their bodies with repair kits.\r\n");
+    return;
+  }
+  struct obj_data *obj = nullptr;
+  if (!self) {
+    struct char_data *dummy = nullptr;
+    if (!generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &dummy, &obj)) {
+      send_to_char(g, ch, "Can't seem to find what you want to fix!\r\n");
+      return;
+    }
+    if (const char *why = unfixable(obj)) {
+      send_to_char(g, ch, why);
+      return;
     }
   }
+  /* custom gear takes an orb */
+  bool custom           = obj && (obj_get_vnum(g, obj) == 20099 || obj_get_vnum(g, obj) == 20098);
+  struct obj_data *kit  = usable_kit(g, ch, custom ? 13593 : 48);
+  if (!kit) {
+    send_to_char(g, ch, custom ? "You do not even have a Nano-tech Repair Orb.\r\n" : "You do not even have a repair kit.\r\n");
+    return;
+  }
+  if (self)
+    fix_self(g, ch, kit);
+  else
+    fix_thing(g, ch, obj, kit);
 }

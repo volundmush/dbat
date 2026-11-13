@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -337,78 +338,50 @@ ACMD(do_train)
 
 ACMD(do_potential)
 {
-  int boost = 0;
-
-  struct char_data *vict;
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (!know_skill(g, ch, SKILL_POTENTIAL)) {
+  if (!know_skill(g, ch, SKILL_POTENTIAL))
     return;
-  }
-
   if (arg.empty()) {
-    send_to_char(g, ch, "Who's potential do you want to release?\r\n");
-    send_to_char(g, ch, "Potential Releases: {:d}\r\n", char_get_boosts(ch));
+    send_to_char(g, ch, "Who's potential do you want to release?\r\nPotential Releases: {:d}\r\n", char_get_boosts(ch));
     return;
   }
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "That target isn't here.\r\n");
+  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "That target isn't here.\r\n");
+  if (reject(g, ch, found))
+    return;
+  struct char_data *vict = *found;
+  const char *refusal    = nullptr;
+  if (char_is_npc(vict))
+    refusal = "Why would you waste your time releasing their potential?\r\n";
+  else if (vict == ch)
+    refusal = "You can't release your own potential.\r\n";
+  else if (char_get_boosts(ch) == 0)
+    refusal = "You have no potential releases to perform.\r\n";
+  else if (char_plr_flagged(vict, PLR_PR))
+    refusal = "Their potential has already been released\r\n";
+  else if (char_is_android(vict))
+    refusal = "They are a machine and have no potential to release.\r\n";
+  else if (char_get_majinize(vict) > 0)
+    refusal = "They are already majinized and have no potential to release.\r\n";
+  else if (char_is_majin(vict))
+    refusal = "They have no potential to release...\r\n";
+  if (refusal) {
+    send_to_char(g, ch, refusal);
     return;
   }
-
-  if (char_is_npc(vict)) {
-    send_to_char(g, ch, "Why would you waste your time releasing their potential?\r\n");
-    return;
+  int boost = char_get_skill(ch, SKILL_POTENTIAL) / 2;
+  char_plr_set(vict, PLR_PR, true);
+  gainBasePL(vict, (getBasePL(vict) / 100) * boost, false);
+  if (char_is_halfbreed(vict)) {
+    gainBaseKI(vict, (getBaseKI(vict) / 100) * boost, false);
+    gainBaseST(vict, (getBaseST(vict) / 100) * boost, false);
   }
-  if (vict == ch) {
-    send_to_char(g, ch, "You can't release your own potential.\r\n");
-    return;
-  }
-  if (char_get_boosts(ch) == 0) {
-    send_to_char(g, ch, "You have no potential releases to perform.\r\n");
-    return;
-  }
-  if (char_plr_flagged(vict, PLR_PR)) {
-    send_to_char(g, ch, "Their potential has already been released\r\n");
-    return;
-  }
-  if (char_is_android(vict)) {
-    send_to_char(g, ch, "They are a machine and have no potential to release.\r\n");
-    return;
-  }
-  if (char_get_majinize(vict) > 0) {
-    send_to_char(g, ch, "They are already majinized and have no potential to release.\r\n");
-    return;
-  }
-  if (char_is_majin(vict)) {
-    send_to_char(g, ch, "They have no potential to release...\r\n");
-    return;
-  }
-  /* Rillao: transloc, add new transes here */
-  else {
-    boost = char_get_skill(ch, SKILL_POTENTIAL) / 2;
-
-    char_plr_set(vict, PLR_PR, true);
-
-    gainBasePL(vict, (getBasePL(vict) / 100) * boost, false);
-    if (char_is_halfbreed(vict)) {
-      gainBaseKI(vict, (getBaseKI(vict) / 100) * boost, false);
-      gainBaseST(vict, (getBaseST(vict) / 100) * boost, false);
-    }
-    reveal_hiding(g, ch, 0);
-    act(g, "You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", true, ch, nullptr, vict, TO_VICT);
-    act(g, "$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true, ch, nullptr, vict, TO_NOTVICT);
+  reveal_hiding(g, ch, 0);
+  act_triple(g, {"You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", "$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", "$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", true}, ch, nullptr, vict);
+  for (int i = 0; i < 4; i++) /* quirk: four times over */
     improve_skill(g, ch, SKILL_POTENTIAL, 0);
-    improve_skill(g, ch, SKILL_POTENTIAL, 0);
-    improve_skill(g, ch, SKILL_POTENTIAL, 0);
-    improve_skill(g, ch, SKILL_POTENTIAL, 0);
-    char_set_boosts(ch, char_get_boosts(ch) - (1));
-    return;
-  }
+  char_set_boosts(ch, char_get_boosts(ch) - 1);
 }
 
 namespace {

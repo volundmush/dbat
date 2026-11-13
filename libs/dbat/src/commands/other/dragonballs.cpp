@@ -2,6 +2,7 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <string_view>
 
 #include <sys/stat.h>
@@ -300,20 +301,23 @@ void wishSYS(GameWorld *g)
   }
 }
 
+namespace {
+  /* The dragon balls are 20 to 26, one star to seven */
+  constexpr obj_vnum FIRST_DRAGON_BALL = 20, LAST_DRAGON_BALL = 26;
+
+  bool is_dragon_ball(GameWorld *g, struct obj_data *obj)
+  {
+    obj_vnum vnum = obj_get_vnum(g, obj);
+    return vnum >= FIRST_DRAGON_BALL && vnum <= LAST_DRAGON_BALL;
+  }
+} // namespace
+
 ACMD(do_summon)
 {
-
-  int summoned = false, count = 0;
-  int dball[7]  = {20, 21, 22, 23, 24, 25, 26};
-  int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
-  struct char_data *mob = nullptr;
-  mob_vnum r_num;
-
   if (!room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
     send_to_char(g, ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
     return;
-  } // are they on earth?
-
+  }
   if (room_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT) || room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(g, ch, "You can not summon shenron in this protected area!\r\n");
     return;
@@ -322,178 +326,48 @@ ACMD(do_summon)
     send_to_char(g, ch, "Go outside to summon Shenron!\r\n");
     return;
   }
-
-  for (obj_data *obj : char_inventory(g, ch)) {
-    if (obj_extra_flagged(obj, ITEM_FORGED)) {
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[0]) {
-      dball[0] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[1]) {
-      dball[1] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[2]) {
-      dball[2] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[3]) {
-      dball[3] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[4]) {
-      dball[4] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[5]) {
-      dball[5] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[6]) {
-      dball[6] = -1;
-      count++;
-      continue;
-    } else {
-      continue;
-    } // end if
-  } // end repeat for
-
-  if (count == 7) {
-    summoned = true;
-  }
-
-  if (summoned == true) {
-    reveal_hiding(g, ch, 0);
-    act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
-    g->SHENRON = true;
-    g->DRAGONC = 300;
-    g->DRAGONR = char_get_in_room(ch);
-    if (!room_of(g, g->DRAGONR)) {
-      g->DRAGONR = char_get_in_room(ch);
-    }
-    send_to_imm(g, "Shenron summoned to room: {:d}\r\n", g->DRAGONR);
-
-    if (struct zone_data *zone = find_zone_by_thing(g, g->DRAGONR))
-      g->DRAGONZ = zone->number;
-
-    for (obj_data *obj : char_inventory(g, ch)) {
-
-      if (obj_get_vnum(g, obj) == dball2[0]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[0] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[1]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[1] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[2]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[2] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[3]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[3] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[4]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[4] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[5]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[5] = -1;
-        continue;
-      }
-      if (obj_get_vnum(g, obj) == dball2[6]) {
-        obj_from_char(g, obj);
-        extract_obj(g, obj);
-        dball2[6] = -1;
-        continue;
-      }
-      continue;
-    }
-    if (!mob_proto_of(g, r_num = 21)) {
-      send_to_imm(g, "Shenron doesn't exist!");
-      return;
-    }
-    mob = read_mobile(g, r_num);
-    char_to_room(g, mob, 0);
-    g->EDRAGON_uid = char_get_id(mob);
+  /* all seven, and none of them fakes */
+  std::array<bool, 7> held{};
+  for (obj_data *obj : char_inventory(g, ch))
+    if (!obj_extra_flagged(obj, ITEM_FORGED) && is_dragon_ball(g, obj))
+      held[obj_get_vnum(g, obj) - FIRST_DRAGON_BALL] = true;
+  if (!std::ranges::all_of(held, std::identity())) {
+    send_to_char(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
     return;
   }
-  send_to_char(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
-  return;
+
+  reveal_hiding(g, ch, 0);
+  act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+  g->SHENRON = true;
+  g->DRAGONC = 300;
+  g->DRAGONR = char_get_in_room(ch);
+  send_to_imm(g, "Shenron summoned to room: {:d}\r\n", g->DRAGONR);
+  if (struct zone_data *zone = find_zone_by_thing(g, g->DRAGONR))
+    g->DRAGONZ = zone->number;
+
+  /* the first of each ball carried is used up; quirk: a fake can be used up in place of the real one */
+  std::array<bool, 7> used{};
+  for (obj_data *obj : char_inventory(g, ch)) {
+    if (!is_dragon_ball(g, obj) || used[obj_get_vnum(g, obj) - FIRST_DRAGON_BALL])
+      continue;
+    used[obj_get_vnum(g, obj) - FIRST_DRAGON_BALL] = true;
+    obj_from_char(g, obj);
+    extract_obj(g, obj);
+  }
+  if (!mob_proto_of(g, 21)) {
+    send_to_imm(g, "Shenron doesn't exist!");
+    return;
+  }
+  struct char_data *mob = read_mobile(g, 21);
+  char_to_room(g, mob, 0);
+  g->EDRAGON_uid = char_get_id(mob);
 }
 
+/* Whether ch carries any dragon ball, fake or not */
 bool dball_count(GameWorld *g, struct char_data *ch)
 {
-
-  int dball[7]         = {20, 21, 22, 23, 24, 25, 26};
-  int count            = 0;
-
-  for (obj_data *obj : char_inventory(g, ch)) {
-    if (obj_get_vnum(g, obj) == dball[0]) {
-      dball[0] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[1]) {
-      dball[1] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[2]) {
-      dball[2] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[3]) {
-      dball[3] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[4]) {
-      dball[4] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[5]) {
-      dball[5] = -1;
-      count++;
-      continue;
-    }
-    if (obj_get_vnum(g, obj) == dball[6]) {
-      dball[6] = -1;
-      count++;
-      continue;
-    } else {
-      continue;
-    } // end if
-  } // end repeat for
-
-  if (count >= 1) {
-    return true;
-  }
-  return false;
+  return std::ranges::any_of(char_inventory(g, ch), [&](obj_data *obj) { return is_dragon_ball(g, obj); });
 }
 
 /* Wishes: what Shenron does with what is said to him. */

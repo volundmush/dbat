@@ -471,152 +471,122 @@ ACMD(do_rpp)
 
 ACMD(do_commune)
 {
-
-  if (char_is_npc(ch))
+  if (char_is_npc(ch) || !know_skill(g, ch, SKILL_COMMUNE))
     return;
-
-  if (!know_skill(g, ch, SKILL_COMMUNE)) {
-    return;
-  }
-
-  if ((getCurST(g, ch)) >= getMaxST(g, ch)) {
+  if (getCurST(g, ch) >= getMaxST(g, ch)) {
     send_to_char(g, ch, "Your stamina is already at full.\r\n");
     return;
   }
-
   int prob = char_get_skill(ch, SKILL_COMMUNE), perc = axion_dice(g, 0);
   int64_t cost = getMaxST(g, ch) * .05;
-
-  if ((getCurKI(g, ch)) < cost) {
+  if (getCurKI(g, ch) < cost) {
     send_to_char(g, ch, "You do not have enough ki to commune with the Eldritch Star.\r\n");
     return;
   }
+  decCurKI(g, ch, cost, 0);
   if (prob < perc) {
-    decCurKI(g, ch, cost, 0);
     reveal_hiding(g, ch, 0);
     act(g, "@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
+  } else {
+    decCurST(g, ch, cost, 0); /* quirk: it takes stamina, while saying it replenishes it */
+    reveal_hiding(g, ch, 0);
+    act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, nullptr, nullptr, TO_ROOM);
   }
-  decCurKI(g, ch, cost, 0);
-  decCurST(g, ch, cost, 0);
-  reveal_hiding(g, ch, 0);
-  act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
-  return;
 }
+
+namespace {
+  /* The poses struck, as the user and the room see them */
+  constexpr struct {
+    const char *to_char, *to_room;
+  } POSES[] = {
+      {"@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", "@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n"},
+      {"@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", "@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n"},
+      {"@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", "@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n"},
+      {"@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", "@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n"},
+  };
+} // namespace
 
 ACMD(do_pose)
 {
-
-  if (!know_skill(g, ch, SKILL_POSE)) {
+  if (!know_skill(g, ch, SKILL_POSE))
+    return;
+  const char *refusal = nullptr;
+  if (getCurST(g, ch) < getMaxST(g, ch) / 40)
+    refusal = "You do not have enough stamina to pull off such an exciting pose!\r\n";
+  else if (is_affected(ch, AFF_SPECIAL_POSE))
+    refusal = "You are already feeling good and confident from a previous pose.\r\n";
+  else if (char_get_fighting(g, ch))
+    refusal = "You are too busy to pose right now!\r\n";
+  if (refusal) {
+    send_to_char(g, ch, refusal);
+    return;
+  }
+  int prob = char_get_skill(ch, SKILL_POSE), perc = rand_number(g, 1, 70);
+  if (char_get_real_abils_str(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_WIMP) > 0)
+    refusal = "You can't handle having your strength increased beyond 70.\r\n";
+  else if (char_get_real_abils_dex(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_CLUMSY) > 0)
+    refusal = "You can't handle having your agility increased beyond 70.\r\n";
+  if (refusal) {
+    send_to_char(g, ch, refusal);
     return;
   }
 
-  if ((getCurST(g, ch)) < getMaxST(g, ch) / 40) {
-    send_to_char(g, ch, "You do not have enough stamina to pull off such an exciting pose!\r\n");
-    return;
-  }
-
-  if (is_affected(ch, AFF_SPECIAL_POSE)) {
-    send_to_char(g, ch, "You are already feeling good and confident from a previous pose.\r\n");
-    return;
-  }
-
-  if (char_get_fighting(g, ch)) {
-    send_to_char(g, ch, "You are too busy to pose right now!\r\n");
-    return;
-  }
-
-  int prob = char_get_skill(ch, SKILL_POSE);
-  int perc = rand_number(g, 1, 70);
-
-  if (char_get_real_abils_str(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_WIMP) > 0) {
-    send_to_char(g, ch, "You can't handle having your strength increased beyond 70.\r\n");
-    return;
-  }
-  if (char_get_real_abils_dex(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_CLUMSY) > 0) {
-    send_to_char(g, ch, "You can't handle having your agility increased beyond 70.\r\n");
-    return;
-  }
-
+  reveal_hiding(g, ch, 0);
   if (prob < perc) {
-    reveal_hiding(g, ch, 0);
     act(g, "@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, nullptr, nullptr, TO_ROOM);
-    decCurST(g, ch, getMaxST(g, ch) / 40, 0);
-    improve_skill(g, ch, SKILL_POSE, 0);
-    return;
+  } else {
+    const auto &pose = POSES[rand_number(g, 1, 4) - 1];
+    act(g, pose.to_char, true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, pose.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+    send_to_char(g, ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");
+    assign_affect(g, ch, AFF_SPECIAL_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
+    save_char(g, ch);
+    int64_t before = getMaxLF(g, ch);
+    incCurLF(g, ch, getMaxLF(g, ch) - before, true); /* quirk: always nothing, measured after as well as before */
   }
-  reveal_hiding(g, ch, 0);
-  switch (rand_number(g, 1, 4)) {
-    case 1:
-      act(g, "@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", true, ch, nullptr, nullptr, TO_ROOM);
-      break;
-    case 2:
-      act(g, "@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      break;
-    case 3:
-      act(g, "@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      break;
-    case 4:
-      act(g, "@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      break;
-  }
-  send_to_char(g, ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");
-  assign_affect(g, ch, AFF_SPECIAL_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
-  save_char(g, ch);
-  int64_t before = (getMaxLF(g, ch));
-  incCurLF(g, ch, (getMaxLF(g, ch)) - before, true);
   decCurST(g, ch, getMaxST(g, ch) / 40, 0);
   improve_skill(g, ch, SKILL_POSE, 0);
-  return;
 }
 
-/* End of do_fury for halfbreeds to release their raaage, rawrg! */
+namespace {
+  constexpr const char *HINTS[] = {
+      "Remember to save often.",
+      "Remember to eat or drink if you want to stay alive.",
+      "It is a good idea to save up PS for learning skills instead of just practicing them.",
+      "A good way to save up money is with the bank.",
+      "If you want to stay alive in this rough world you will need to be mindful of your surroundings.",
+      "Knowing when to rest and recover can be the difference between life and death.",
+      "Not every battle can be won. Great warriors know how to pick their fights.",
+      "It is a good idea to experiment with skills fully before deciding their worth.",
+      "Having a well balanced repertoire of skills can help you out of any situation.",
+      "You can become hidden from your enemies on who and ooc with the whohide command.",
+      "You can value an item at a shopkeeper with the value command.",
+      "There are ways to earn money through jobs, try looking for a job. Bum.",
+      "You never know what may be hidden nearby. You should always check out anything you can.",
+      "You should check for a help file on any subject you can, you never know how the info may 'help' you.",
+      "Until you are capable of taking care of yourself for long periods of time you should stick near your sensei.",
+      "You shouldn't travel to other planets until you have a stable supply of money.",
+      "There is a vast galaxy out there that you may not be able to reach by public ship.",
+      "Score is used to view the various statistics about your character.",
+      "Status is used to view what is influencing your character and its characteristics.",
+      "You will need a scouter in order to use the Scouter Network (SNET).",
+      "The DBAT forum is a great resource for finding out information and for conversing\r\nwith fellow players. http://advent-truth.com/forum",
+      "Found a bug or have a suggestion? Log into our forums and post in the relevant section.",
+  };
+} // namespace
 
+/* Hint num, or (for 0) one at random */
 void hint_system(GameWorld *g, struct char_data *ch, int num)
 {
-  const char *hints[22] = {"Remember to save often.",                                                                                                                 /* 0 */
-                           "Remember to eat or drink if you want to stay alive.",                                                                                     /* 1 */
-                           "It is a good idea to save up PS for learning skills instead of just practicing them.",                                                    /* 2 */
-                           "A good way to save up money is with the bank.",                                                                                           /* 3 */
-                           "If you want to stay alive in this rough world you will need to be mindful of your surroundings.",                                         /* 4 */
-                           "Knowing when to rest and recover can be the difference between life and death.",                                                          /* 5 */
-                           "Not every battle can be won. Great warriors know how to pick their fights.",                                                              /* 6 */
-                           "It is a good idea to experiment with skills fully before deciding their worth.",                                                          /* 7 */
-                           "Having a well balanced repertoire of skills can help you out of any situation.",                                                          /* 8 */
-                           "You can become hidden from your enemies on who and ooc with the whohide command.",                                                        /* 9 */
-                           "You can value an item at a shopkeeper with the value command.",                                                                           /* 10 */
-                           "There are ways to earn money through jobs, try looking for a job. Bum.",                                                                  /* 11 */
-                           "You never know what may be hidden nearby. You should always check out anything you can.",                                                 /* 12 */
-                           "You should check for a help file on any subject you can, you never know how the info may 'help' you.",                                    /* 13 */
-                           "Until you are capable of taking care of yourself for long periods of time you should stick near your sensei.",                            /* 14 */
-                           "You shouldn't travel to other planets until you have a stable supply of money.",                                                          /* 15 */
-                           "There is a vast galaxy out there that you may not be able to reach by public ship.",                                                      /* 16 */
-                           "Score is used to view the various statistics about your character.",                                                                      /* 17 */
-                           "Status is used to view what is influencing your character and its characteristics.",                                                      /* 18 */
-                           "You will need a scouter in order to use the Scouter Network (SNET).",                                                                     /* 19 */
-                           "The DBAT forum is a great resource for finding out information and for conversing\r\nwith fellow players. http://advent-truth.com/forum", /* 20 */
-                           "Found a bug or have a suggestion? Log into our forums and post in the relevant section."};
-  if (num == 0) {
+  if (num == 0)
     num = rand_number(g, 0, 21);
-  }
-
-  if (!char_is_android(ch) && !char_is_namek(ch)) {
-    send_to_char(g, ch, "@D[@GHint@D] @G{}@n\r\n", hints[num]);
-  } else {
-    if (num == 1) {
-      num = 0;
-    }
-    send_to_char(g, ch, "@D[@GHint@D] @G{}@n\r\n", hints[num]);
-  }
+  if (num == 1 && (char_is_android(ch) || char_is_namek(ch))) /* who never eat or drink */
+    num = 0;
+  send_to_char(g, ch, "@D[@GHint@D] @G{}@n\r\n", HINTS[num]);
   send_to_char(g, ch, "@D(@gYou can turn off hints with the command 'hints'@D)@n\r\n");
 }
 
@@ -624,30 +594,23 @@ ACMD(do_think)
 {
   argument = skip_spaces(argument);
 
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
+    return;
+  const char *refusal = nullptr;
+  if (char_in_arena(g, ch))
+    refusal = "Lol, no.\r\n";
+  else if (char_get_skill(ch, SKILL_TELEPATHY))
+    refusal = "You can just use telepathy.\r\n";
+  else if (!char_get_mindlink(g, ch))
+    refusal = "No one has linked with your mind.\r\n";
+  else if (argument.empty())
+    refusal = "Syntax: think (message)\r\n";
+  if (refusal) {
+    send_to_char(g, ch, refusal);
     return;
   }
-  if (char_in_arena(g, ch)) {
-    send_to_char(g, ch, "Lol, no.\r\n");
-    return;
-  }
-  if (char_get_skill(ch, SKILL_TELEPATHY)) {
-    send_to_char(g, ch, "You can just use telepathy.\r\n");
-    return;
-  }
-  if (!char_get_mindlink(g, ch)) {
-    send_to_char(g, ch, "No one has linked with your mind.\r\n");
-    return;
-  }
-  if (argument.empty()) {
-    send_to_char(g, ch, "Syntax: think (message)\r\n");
-    return;
-  }
-  struct char_data *tch;
-  tch = char_get_mindlink(g, ch);
+  struct char_data *tch = char_get_mindlink(g, ch);
   send_to_char(g, ch, "@c{}@w reads your thoughts, '@C{}@w'@n\r\n", char_get_name(tch), argument);
   send_to_char(g, tch, "@c{}@w thinks, '@C{}@w'@n\r\n", char_get_name(ch), argument);
   send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);
-  return;
 }
-

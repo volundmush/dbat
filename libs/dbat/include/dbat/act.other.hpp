@@ -27,7 +27,6 @@ bool shenron_hears(GameWorld *g, struct char_data *ch, std::string_view text);
 void bring_to_cap(struct char_data *ch);
 void base_update(GameWorld *g);
 void load_shadow_dragons(GameWorld *g);
-void update_innate(struct char_data *ch);
 
 // commands
 ACMD(do_skills);

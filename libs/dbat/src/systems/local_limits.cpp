@@ -1525,7 +1525,6 @@ static void point_update_characters(GameWorld *g)
     }
     if (!char_is_npc(i)) {
       update_char_objects(g, i);
-      update_innate(i);
       if (char_get_admlevel(i) < CONFIG_IDLE_MAX_LEVEL)
         check_idling(g, i);
       else

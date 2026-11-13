@@ -1,11 +1,13 @@
 /* player.c: general player commands (quit, save, group, title, toggles...)
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
 #include <iterator>
 
 #include <sys/stat.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/auction.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"
@@ -57,48 +59,54 @@
 
 #include "other_internal.hpp"
 
-static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
-static void print_group(GameWorld *g, struct char_data *ch);
 
 ACMD(do_spar)
 {
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
     return;
-  }
   if (char_plr_flagged(ch, PLR_SPAR)) {
     act(g, "@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
-  }
-  if (!char_plr_flagged(ch, PLR_SPAR)) {
+  } else {
     act(g, "@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
   }
   char_plr_toggle(ch, PLR_SPAR);
 }
 
+namespace {
+  /* Why ch can't quit here, if they can't */
+  const char *cannot_quit(GameWorld *g, struct char_data *ch)
+  {
+    room_vnum room = char_get_in_room(ch);
+    if (room_flagged(g, room, ROOM_PAST))
+      return "This is the past, you can't quit here!\r\n";
+    if (room >= 2002 && room <= 2011)
+      return "You can't quit in the arena!\r\n";
+    if (room >= 101 && room <= 139)
+      return "You can't quit in the mud school!\r\n";
+    if (room >= 19800 && room <= 19899)
+      return "You can't quit in a pocket dimension!\r\n";
+    if (room == 2069)
+      return "You can't quit here!\r\n";
+    return nullptr;
+  }
+
+  /* Where ch loads back in next time, if not where they were: anywhere but the void, the past or a pocket dimension */
+  void remember_load_room(GameWorld *g, struct char_data *ch)
+  {
+    room_vnum room = char_get_in_room(ch);
+    if (room != NOWHERE && room != 0 && room != 1 && (room < 19800 || room > 19899))
+      char_set_load_room(g, ch, room);
+  }
+} // namespace
+
 ACMD(do_quit)
 {
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
-
-  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-    send_to_char(g, ch, "This is the past, you can't quit here!\r\n");
-    return;
-  }
-  if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
-    send_to_char(g, ch, "You can't quit in the arena!\r\n");
-    return;
-  }
-  if (char_get_in_room(ch) >= 101 && char_get_in_room(ch) <= 139) {
-    send_to_char(g, ch, "You can't quit in the mud school!\r\n");
-    return;
-  }
-  if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899) {
-    send_to_char(g, ch, "You can't quit in a pocket dimension!\r\n");
-    return;
-  }
-  if (char_get_in_room(ch) == 2069) {
-    send_to_char(g, ch, "You can't quit here!\r\n");
+  if (const char *why = cannot_quit(g, ch)) {
+    send_to_char(g, ch, why);
     return;
   }
   if (char_get_mindlink(g, ch) && char_get_linker(ch) == 0) {
@@ -133,27 +141,9 @@ ACMD(do_quit)
       die_follower(g, ch);
     if (ch == auction_seller(g))
       stop_auction(g, AUC_QUIT_CANCEL, nullptr);
-
-    /*  We used to check here for duping attempts, but we may as well
-     *  do it right in extract_char(), since there is no check if a
-     *  player rents out and it can leave them in an equally screwy
-     *  situation.
-     */
-
-    /* If someone is quitting in their house, let them load back here. */
-    if (!room_flagged(g, char_get_in_room(ch), ROOM_PAST) && (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899)) {
-      if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
-        char_set_load_room(g, ch, char_get_in_room(ch));
-      }
-    }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
-      if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
-        char_set_load_room(g, ch, 1561);
-      }
-    }
-
+    /* If someone is quitting in their house, let them load back here. (The past was refused above.) */
+    remember_load_room(g, ch);
     Crash_rentsave(g, ch, 0);
-
     extract_char(g, ch); /* Char is saved before extracting. */
   }
   /* Remove any snoopers */
@@ -168,37 +158,25 @@ ACMD(do_save)
 {
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
-
   /* Only tell the char we're saving if they actually typed "save" */
   if (cmd) {
+    send_to_char(g, ch, "Saving.\r\n");
     /*
      * This prevents item duplication by two PC's using coordinated saves
      * (or one PC with a house) and system crashes. Note that houses are
      * still automatically saved without this enabled. This code assumes
-     * that guest immortals aren't trustworthy. If you've disabled guest
-     * immortal advances from mortality, you may want < instead of <=.
+     * that guest immortals aren't trustworthy.
      */
     if (CONFIG_AUTO_SAVE && char_get_admlevel(ch) < 1) {
-      send_to_char(g, ch, "Saving.\r\n");
       write_aliases(g, ch);
       save_char(g, ch);
       Crash_crashsave(g, ch);
-      if (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899) {
-        if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
-          char_set_load_room(g, ch, char_get_in_room(ch));
-        }
-      }
+      remember_load_room(g, ch);
       return;
     }
-    send_to_char(g, ch, "Saving.\r\n");
   }
-
   write_aliases(g, ch);
-  if (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899) {
-    if (char_get_in_room(ch) != NOWHERE && char_get_in_room(ch) != 0 && char_get_in_room(ch) != 1) {
-      char_set_load_room(g, ch, char_get_in_room(ch));
-    }
-  }
+  remember_load_room(g, ch);
   save_char(g, ch);
   Crash_crashsave(g, ch);
 }
@@ -212,48 +190,29 @@ ACMD(do_not_here)
 
 ACMD(do_practice)
 {
-  std::string arg;
-
-  /* if (IS_NPC(ch))
-    return; */
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (!arg.empty())
+  if (!take_arg(rest).empty())
     send_to_char(g, ch, "You can only practice skills with your trainer.\r\n");
   else
     send_to_char(g, ch, "Use the skills command unless you are at your trainer.\r\n");
-  /*list_skills(ch);*/
 }
 
 ACMD(do_skills)
 {
-  std::string arg;
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  if (char_is_npc(ch)) {
-    return;
-  }
-  list_skills(g, ch, arg);
+  std::string arg       = take_arg(rest);
+  if (!char_is_npc(ch))
+    list_skills(g, ch, arg);
 }
 
 ACMD(do_visible)
 {
-  int appeared = 0;
-
-  if (char_get_admlevel(ch)) {
+  if (char_get_admlevel(ch))
     perform_immort_vis(g, ch);
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_INVISIBLE)) {
+  else if (char_aff_flagged(ch, AFF_INVISIBLE)) {
     appear(g, ch);
-    appeared = 1;
     send_to_char(g, ch, "You break the spell of invisibility.\r\n");
-  }
-
-  if (!appeared)
+  } else
     send_to_char(g, ch, "You are already visible.\r\n");
 }
 
@@ -276,463 +235,286 @@ ACMD(do_title)
   }
 }
 
-static bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
-{
-  if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(g, ch, vict))
-    return false;
-
-  if (char_get_bonuses(vict, BONUS_LONER) > 0) {
-    act(g, "$n is the loner type and refuses to be in your group.", true, vict, nullptr, ch, TO_VICT);
-    return false;
+namespace {
+  /* vict joins ch's group, if they will */
+  bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(g, ch, vict))
+      return false;
+    if (char_get_bonuses(vict, BONUS_LONER) > 0) {
+      act(g, "$n is the loner type and refuses to be in your group.", true, vict, nullptr, ch, TO_VICT);
+      return false;
+    }
+    char_aff_set(vict, AFF_GROUP, true);
+    act_triple(g, {ch != vict ? "$N is now a member of your group." : nullptr, "You are now a member of $n's group.", "$N is now a member of $n's group."}, ch, nullptr, vict);
+    return true;
   }
 
-  /*
-  if (GET_LEVEL(vict) + 12 < highlvl) {
-   act("$n isn't experienced enough to be in your group with its current members.", TRUE, vict, 0, ch, TO_VICT);
-   return false;
+  void kicked_out(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    act_triple(g, {ch != vict ? "$N is no longer a member of your group." : nullptr, "You have been kicked out of $n's group!", "$N has been kicked out of $n's group!"}, ch, nullptr, vict);
   }
 
-  if (GET_LEVEL(vict) > lowlvl + 12) {
-   act("$n is too experienced to be in your group with its current members.", TRUE, vict, 0, ch, TO_VICT);
-   return false;
+  /* A member's line in the group list: L for the leader, F for a follower; red powerlevel when they're low */
+  std::string group_line(GameWorld *g, struct char_data *k, char role, bool low)
+  {
+    return str_format("@g{}@D: @w$N @W- @D[@RPL@Y: @{}{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]{}", role, low ? 'r' : 'c', add_commas(getCurPL(g, k)), add_commas(getCurKI(g, k)),
+                      add_commas(getCurST(g, k)), char_get_level(k), char_class_abbr(k), char_race_abbr(k), role == 'L' ? "@n" : "");
   }
 
-  if (highlvl >= 100) {
-   if ((getEffMaxPL(vict))) > highpl * 1.5) {
-    act("$n is too powerful right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
-    return false;
-   }
-
-   if ((getEffMaxPL(vict))) < lowpl * 0.5) {
-    act("$n is too weak right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
-    return false;
-   }
-  }
-  */
-
-  char_aff_set(vict, AFF_GROUP, true);
-  if (ch != vict)
-    act(g, "$N is now a member of your group.", false, ch, nullptr, vict, TO_CHAR);
-  act(g, "You are now a member of $n's group.", false, ch, nullptr, vict, TO_VICT);
-  act(g, "$N is now a member of $n's group.", false, ch, nullptr, vict, TO_NOTVICT);
-  return true;
-}
-
-static void print_group(GameWorld *g, struct char_data *ch)
-{
-  struct char_data *k;
-
-  if (!char_aff_flagged(ch, AFF_GROUP))
-    send_to_char(g, ch, "But you are not the member of a group!\r\n");
-  else {
-    std::string buf;
-
+  void print_group(GameWorld *g, struct char_data *ch)
+  {
+    if (!char_aff_flagged(ch, AFF_GROUP)) {
+      send_to_char(g, ch, "But you are not the member of a group!\r\n");
+      return;
+    }
     send_to_char(g, ch, "Your group consists of:\r\n");
-
-    k = (char_get_master(g, ch) ? char_get_master(g, ch) : ch);
-
+    struct char_data *k = char_get_master(g, ch) ? char_get_master(g, ch) : ch;
+    /* quirk: the leader is measured two ways, so between them gets no line, and when both hold, the red one */
+    std::string buf;
     if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(g, ch, "@D----------------@n\r\n");
-      if (getCurPL(g, k) > getEffMaxPL(g, k) / 10) {
-        buf = str_format("@gL@D: @w$N @W- @D[@RPL@Y: @c{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]@n",
-                         add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
-                         char_class_abbr(k), char_race_abbr(k));
-      }
-      if (getCurPL(g, k) <= (getEffMaxPL(g, k) - (getCurCarriedWeight(k))) / 10) {
-        buf = str_format("@gL@D: @w$N @W- @D[@RPL@Y: @r{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]@n",
-                         add_commas(getCurPL(g, k)), add_commas((getCurKI(g, k))), add_commas((getCurST(g, k))), char_get_level(k),
-                         char_class_abbr(k), char_race_abbr(k));
-      }
+      if (getCurPL(g, k) > getEffMaxPL(g, k) / 10)
+        buf = group_line(g, k, 'L', false);
+      if (getCurPL(g, k) <= (getEffMaxPL(g, k) - getCurCarriedWeight(k)) / 10)
+        buf = group_line(g, k, 'L', true);
       act(g, buf.c_str(), false, ch, nullptr, k, TO_CHAR);
     }
-
     for (char_data *fol : char_followers(g, k)) {
       if (!char_aff_flagged(fol, AFF_GROUP))
         continue;
       send_to_char(g, ch, "@D----------------@n\r\n");
-      if (getCurPL(g, fol) > (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
-        buf = str_format("@gF@D: @w$N @W- @D[@RPL@Y: @c{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]",
-                         add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
-                         char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
-      }
-      if (getCurPL(g, fol) <= (getEffMaxPL(g, fol) - (getCurCarriedWeight(fol))) / 10) {
-        buf = str_format("@gF@D: @w$N @W- @D[@RPL@Y: @r{} @CKi@Y: @c{} @GST@Y: @c{}@D] [@w{:>2d} {} {}@D]",
-                         add_commas(getCurPL(g, fol)), add_commas((getCurKI(g, fol))), add_commas((getCurST(g, fol))),
-                         char_get_level(fol), char_class_abbr(fol), char_race_abbr(fol));
-      }
+      bool low = getCurPL(g, fol) <= (getEffMaxPL(g, fol) - getCurCarriedWeight(fol)) / 10;
+      buf      = group_line(g, fol, 'F', low);
       act(g, buf.c_str(), false, ch, nullptr, fol, TO_CHAR);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }
-}
+} // namespace
 
 ACMD(do_group)
 {
-  std::string buf;
-  struct char_data *vict;
-  int found, highlvl = 0, lowlvl = 0;
-  int64_t highpl = 0, lowpl = 0;
-
   std::string_view rest = argument;
-  buf                   = take_arg(rest);
+  std::string buf       = take_arg(rest);
 
   if (char_get_bonuses(ch, BONUS_LONER) > 0) {
     send_to_char(g, ch, "You can not group as you prefer to be alone.\r\n");
     return;
   }
-
   if (buf.empty()) {
     print_group(g, ch);
     return;
   }
-
   if (char_get_master(g, ch)) {
-    act(g, "You cannot enroll group members without being head of a group.",
-        false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "You cannot enroll group members without being head of a group.", false, ch, nullptr, nullptr, TO_CHAR);
     return;
   }
-
-  highlvl = char_get_level(ch);
-  lowlvl  = char_get_level(ch);
-  highpl  = getEffMaxPL(g, ch);
-  lowpl   = getEffMaxPL(g, ch);
-
-  found = 0;
-  for (char_data *fol : char_followers(g, ch)) {
-    if (char_aff_flagged(fol, AFF_GROUP)) {
-      if (char_get_level(fol) > highlvl) {
-        highlvl = char_get_level(fol);
-      }
-      if (char_get_level(fol) < lowlvl) {
-        lowlvl = char_get_level(fol);
-      }
-    }
-  }
-
-  int foundwas = 0;
-
   if (str_eq_nocase(buf, "all")) {
-    perform_group(g, ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
-    found = 0;
-    for (char_data *foll : char_followers(g, ch)) {
-      foundwas = found;
-      found += perform_group(g, ch, foll, highlvl, lowlvl, highpl, lowpl);
-      if (found > foundwas) {
-        if (char_get_level(foll) > highlvl)
-          highlvl = char_get_level(foll);
-        else if (char_get_level(foll) < lowlvl)
-          lowlvl = char_get_level(foll);
-      }
-    }
+    perform_group(g, ch, ch);
+    int found = 0;
+    for (char_data *foll : char_followers(g, ch))
+      found += perform_group(g, ch, foll);
     if (!found)
       send_to_char(g, ch, "Everyone following you is already in your group.\r\n");
     return;
   }
-
-  if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM)))
+  struct char_data *vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM);
+  if (!vict)
     send_to_char(g, ch, CONFIG_NOPERSON);
-  else if ((char_get_master(g, vict) != ch) && (vict != ch))
+  else if (char_get_master(g, vict) != ch && vict != ch)
     act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
-  else {
-    if (!char_aff_flagged(vict, AFF_GROUP)) {
-      if (!char_aff_flagged(ch, AFF_GROUP)) {
-        send_to_char(g, ch, "You form a group, with you as leader.\r\n");
-        char_aff_set(ch, AFF_GROUP, true);
-      }
-      perform_group(g, ch, vict, highlvl, lowlvl, highpl, lowpl);
-    } else {
-      if (ch != vict)
-        act(g, "$N is no longer a member of your group.", false, ch, nullptr, vict, TO_CHAR);
-      act(g, "You have been kicked out of $n's group!", false, ch, nullptr, vict, TO_VICT);
-      act(g, "$N has been kicked out of $n's group!", false, ch, nullptr, vict, TO_NOTVICT);
-      char_aff_set(vict, AFF_GROUP, false);
+  else if (char_aff_flagged(vict, AFF_GROUP)) {
+    kicked_out(g, ch, vict);
+    char_aff_set(vict, AFF_GROUP, false);
+  } else {
+    if (!char_aff_flagged(ch, AFF_GROUP)) {
+      send_to_char(g, ch, "You form a group, with you as leader.\r\n");
+      char_aff_set(ch, AFF_GROUP, true);
     }
+    perform_group(g, ch, vict);
   }
 }
 
 ACMD(do_ungroup)
 {
-  std::string buf;
-  struct char_data *tch;
-
   std::string_view rest = argument;
-  buf                   = take_arg(rest);
+  std::string buf       = take_arg(rest);
 
   if (buf.empty()) {
-    if (char_get_master(g, ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
+    if (char_get_master(g, ch) || !char_aff_flagged(ch, AFF_GROUP)) {
       send_to_char(g, ch, "But you lead no group!\r\n");
       return;
     }
-
     for (char_data *fol : char_followers(g, ch)) {
-      if (char_aff_flagged(fol, AFF_GROUP)) {
-        char_aff_set(fol, AFF_GROUP, false);
-        act(g, "$N has disbanded the group.", true, fol, nullptr, ch, TO_CHAR);
-        char_set_combatexpertise(fol, 0);
-        if (!char_aff_flagged(fol, AFF_CHARM))
-          stop_follower(g, fol);
-      }
+      if (!char_aff_flagged(fol, AFF_GROUP))
+        continue;
+      char_aff_set(fol, AFF_GROUP, false);
+      act(g, "$N has disbanded the group.", true, fol, nullptr, ch, TO_CHAR);
+      char_set_combatexpertise(fol, 0);
+      if (!char_aff_flagged(fol, AFF_CHARM))
+        stop_follower(g, fol);
     }
-
     char_aff_set(ch, AFF_GROUP, false);
     char_set_combatexpertise(ch, 0);
     send_to_char(g, ch, "You disband the group.\r\n");
     return;
   }
-  if (!(tch = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
-    send_to_char(g, ch, "There is no such person!\r\n");
+  auto found = find_char(g, ch, buf, FIND_CHAR_ROOM, "There is no such person!\r\n");
+  if (reject(g, ch, found))
     return;
-  }
+  struct char_data *tch = *found;
   if (char_get_master(g, tch) != ch) {
     send_to_char(g, ch, "That person is not following you!\r\n");
     return;
   }
-
   if (!char_aff_flagged(tch, AFF_GROUP)) {
     send_to_char(g, ch, "That person isn't in your group.\r\n");
     return;
   }
-
   char_aff_set(tch, AFF_GROUP, false);
   char_set_combatexpertise(tch, 0);
-
-  act(g, "$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
-  act(g, "You have been kicked out of $n's group!", false, ch, nullptr, tch, TO_VICT);
-  act(g, "$N has been kicked out of $n's group!", false, ch, nullptr, tch, TO_NOTVICT);
-
+  kicked_out(g, ch, tch);
   if (!char_aff_flagged(tch, AFF_CHARM))
     stop_follower(g, tch);
 }
 
 ACMD(do_split)
 {
-  std::string buf;
-  std::string msg;
-  int amount, num, share, rest;
-  struct char_data *k;
-
   if (char_is_npc(ch))
     return;
-
   std::string_view args = argument;
-  buf                   = take_arg(args);
-
-  if (is_number(buf)) {
-    amount = parse_int(buf);
-    if (amount <= 0) {
-      send_to_char(g, ch, "Sorry, you can't do that.\r\n");
-      return;
-    }
-    if (amount > char_get_gold(ch)) {
-      send_to_char(g, ch, "You don't seem to have that much gold to split.\r\n");
-      return;
-    }
-    char_set_gold(ch, char_get_gold(ch) - (amount));
-    k = (char_get_master(g, ch) ? char_get_master(g, ch) : ch);
-
-    if (char_aff_flagged(k, AFF_GROUP) && (char_get_in_room(k) == char_get_in_room(ch)))
-      num = 1;
-    else
-      num = 0;
-
-    for (char_data *fol : char_followers(g, k))
-      if (char_aff_flagged(fol, AFF_GROUP) &&
-          (!char_is_npc(fol)) && fol != ch &&
-          (char_get_in_room(fol) == char_get_in_room(ch)))
-        num++;
-
-    if (num > 0 && char_aff_flagged(ch, AFF_GROUP)) {
-      share = amount / num;
-      rest  = amount % num;
-    } else {
-      send_to_char(g, ch, "With whom do you wish to share your gold?\r\n");
-      return;
-    }
-
-    char_set_gold(ch, char_get_gold(ch) + (share));
-
-    /* Abusing signed/unsigned to make sizeof work. */
-    msg = str_format("{} splits {:d} zenni; you receive {:d}.\r\n", char_get_name(ch), amount, share);
-    if (rest)
-      msg += str_format("{:d} zenni {} not splitable, so {} keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", char_get_name(ch));
-    if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) &&
-        !char_is_npc(k) && k != ch) {
-      char_set_gold(k, char_get_gold(k) + (share));
-      send_to_char(g, k, "{}", msg);
-    }
-
-    for (char_data *foll : char_followers(g, k)) {
-      if (char_aff_flagged(foll, AFF_GROUP) &&
-          (!char_is_npc(foll)) &&
-          (char_get_in_room(foll) == char_get_in_room(ch)) &&
-          foll != ch) {
-
-        char_set_gold(foll, char_get_gold(foll) + (share));
-        send_to_char(g, foll, "{}", msg);
-      }
-    }
-    send_to_char(g, ch, "You split {:d} zenni among {:d} members -- {:d} zenni each.\r\n",
-                 amount, num, share);
-
-    if (rest) {
-      send_to_char(g, ch, "{:d} zenni {} not splitable, so you keep the money.\r\n",
-                   rest, (rest == 1) ? "was" : "were");
-      char_set_gold(ch, char_get_gold(ch) + (rest));
-    }
-  } else {
+  std::string buf       = take_arg(args);
+  if (!is_number(buf)) {
     send_to_char(g, ch, "How much zenni do you wish to split with your group?\r\n");
     return;
   }
+  int amount = parse_int(buf);
+  if (amount <= 0) {
+    send_to_char(g, ch, "Sorry, you can't do that.\r\n");
+    return;
+  }
+  if (amount > char_get_gold(ch)) {
+    send_to_char(g, ch, "You don't seem to have that much gold to split.\r\n");
+    return;
+  }
+  char_set_gold(ch, char_get_gold(ch) - amount); /* quirk: before knowing there's anyone to share it with, so it's lost if not */
+
+  /* Everyone in the group here shares: the leader, and the players following them (but ch, counted with the leader) */
+  struct char_data *k = char_get_master(g, ch) ? char_get_master(g, ch) : ch;
+  auto shares_here    = [&](struct char_data *fol) { return char_aff_flagged(fol, AFF_GROUP) && !char_is_npc(fol) && fol != ch && char_get_in_room(fol) == char_get_in_room(ch); };
+  int num             = (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) ? 1 : 0) + std::ranges::count_if(char_followers(g, k), shares_here);
+  if (num <= 0 || !char_aff_flagged(ch, AFF_GROUP)) {
+    send_to_char(g, ch, "With whom do you wish to share your gold?\r\n");
+    return;
+  }
+  int share = amount / num, rest = amount % num;
+  char_set_gold(ch, char_get_gold(ch) + share);
+
+  std::string msg = str_format("{} splits {:d} zenni; you receive {:d}.\r\n", char_get_name(ch), amount, share);
+  if (rest)
+    msg += str_format("{:d} zenni {} not splitable, so {} keeps the money.\r\n", rest, rest == 1 ? "was" : "were", char_get_name(ch));
+  if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) && !char_is_npc(k) && k != ch) {
+    char_set_gold(k, char_get_gold(k) + share);
+    send_to_char(g, k, "{}", msg);
+  }
+  for (char_data *foll : char_followers(g, k)) {
+    if (!shares_here(foll))
+      continue;
+    char_set_gold(foll, char_get_gold(foll) + share);
+    send_to_char(g, foll, "{}", msg);
+  }
+  send_to_char(g, ch, "You split {:d} zenni among {:d} members -- {:d} zenni each.\r\n", amount, num, share);
+  if (rest) {
+    send_to_char(g, ch, "{:d} zenni {} not splitable, so you keep the money.\r\n", rest, rest == 1 ? "was" : "were");
+    char_set_gold(ch, char_get_gold(ch) + rest);
+  }
 }
+
+namespace {
+  /* What each letter of prompt shows, in the order all/on and none/off set them */
+  struct prompt_part {
+    char letter;
+    int flag;
+  };
+  constexpr prompt_part PROMPT_PARTS[] = {{'p', PRF_DISPHP}, {'s', PRF_DISPMOVE}, {'k', PRF_DISPKI}, {'t', PRF_DISPTNL}, {'f', PRF_FURY}, {'h', PRF_DISTIME}, {'g', PRF_DISGOLD}, {'l', PRF_DISPRAC}, {'m', PRF_DISHUTH}, {'c', PRF_DISPERC}};
+} // namespace
 
 ACMD(do_display)
 {
-  size_t i;
-
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "Mosters don't need displays.  Go away.\r\n");
     return;
   }
   argument = skip_spaces(argument);
-
   if (argument.empty()) {
     send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
     return;
   }
-
-  if (str_eq_nocase(argument, "on") || str_eq_nocase(argument, "all")) {
-    char_prf_set(g, ch, PRF_DISPHP, true);
-    char_prf_set(g, ch, PRF_DISPMOVE, true);
-    char_prf_set(g, ch, PRF_DISPKI, true);
-    char_prf_set(g, ch, PRF_DISPTNL, true);
-    char_prf_set(g, ch, PRF_FURY, true);
-    char_prf_set(g, ch, PRF_DISTIME, true);
-    char_prf_set(g, ch, PRF_DISGOLD, true);
-    char_prf_set(g, ch, PRF_DISPRAC, true);
-    char_prf_set(g, ch, PRF_DISHUTH, true);
-    char_prf_set(g, ch, PRF_DISPERC, true);
-  } else if (str_eq_nocase(argument, "off") || str_eq_nocase(argument, "none")) {
-    char_prf_set(g, ch, PRF_DISPHP, false);
-    char_prf_set(g, ch, PRF_DISPKI, false);
-    char_prf_set(g, ch, PRF_DISPMOVE, false);
-    char_prf_set(g, ch, PRF_DISPTNL, false);
-    char_prf_set(g, ch, PRF_FURY, false);
-    char_prf_set(g, ch, PRF_DISTIME, false);
-    char_prf_set(g, ch, PRF_DISGOLD, false);
-    char_prf_set(g, ch, PRF_DISPRAC, false);
-    char_prf_set(g, ch, PRF_DISHUTH, false);
-    char_prf_set(g, ch, PRF_DISPERC, false);
-  } else {
-    /*char_prf_set(ch, PRF_DISPHP, false);
-    char_prf_set(ch, PRF_DISPMOVE, false);
-    char_prf_set(ch, PRF_DISPTNL, false);
-    char_prf_set(ch, PRF_DISPKI, false);*/
-
-    for (i = 0; i < argument.size(); i++) {
-      switch (tolower(argument[i])) {
-        case 'p':
-          char_prf_toggle(g, ch, PRF_DISPHP);
-          break;
-        case 's':
-          char_prf_toggle(g, ch, PRF_DISPMOVE);
-          break;
-        case 'k':
-          char_prf_toggle(g, ch, PRF_DISPKI);
-          break;
-        case 't':
-          char_prf_toggle(g, ch, PRF_DISPTNL);
-          break;
-        case 'h':
-          char_prf_toggle(g, ch, PRF_DISTIME);
-          break;
-        case 'g':
-          char_prf_toggle(g, ch, PRF_DISGOLD);
-          break;
-        case 'l':
-          char_prf_toggle(g, ch, PRF_DISPRAC);
-          break;
-        case 'c':
-          char_prf_toggle(g, ch, PRF_DISPERC);
-          break;
-        case 'm':
-          char_prf_toggle(g, ch, PRF_DISHUTH);
-          break;
-        case 'f':
-          if (!char_is_halfbreed(ch)) {
-            send_to_char(g, ch, "Only halfbreeds use fury.\r\n");
-          }
-          char_prf_toggle(g, ch, PRF_FURY);
-          break;
-        default:
-          send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
-          return;
+  bool all = str_eq_nocase(argument, "on") || str_eq_nocase(argument, "all");
+  if (all || str_eq_nocase(argument, "off") || str_eq_nocase(argument, "none")) {
+    for (const auto &part : PROMPT_PARTS)
+      char_prf_set(g, ch, part.flag, all);
+  } else
+    for (char c : argument) {
+      auto part = std::ranges::find(PROMPT_PARTS, (char)tolower(c), &prompt_part::letter);
+      if (part == std::end(PROMPT_PARTS)) {
+        send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
+        return;
       }
+      if (part->flag == PRF_FURY && !char_is_halfbreed(ch))
+        send_to_char(g, ch, "Only halfbreeds use fury.\r\n");
+      char_prf_toggle(g, ch, part->flag);
     }
-  }
-
   send_to_char(g, ch, CONFIG_OK);
 }
 
+namespace {
+  /* Where bug, typo and idea (report) are filed */
+  const char *filed_in(int subcmd)
+  {
+    switch (subcmd) {
+      case SCMD_BUG:
+        return BUG_FILE;
+      case SCMD_TYPO:
+        return TYPO_FILE;
+      case SCMD_IDEA:
+        return IDEA_FILE;
+    }
+    return nullptr;
+  }
+} // namespace
+
 ACMD(do_gen_write)
 {
-  FILE *fl;
-  char *tmp;
-  const char *filename;
-  struct stat fbuf;
-  time_t ct;
-
-  switch (subcmd) {
-    case SCMD_BUG:
-      filename = BUG_FILE;
-      break;
-    case SCMD_TYPO:
-      filename = TYPO_FILE;
-      break;
-    case SCMD_IDEA:
-      filename = IDEA_FILE;
-      break;
-    default:
-      return;
-  }
-
-  ct  = game_now(g);
-  tmp = asctime(localtime(&ct));
-
+  const char *filename = filed_in(subcmd);
+  if (!filename)
+    return;
+  time_t ct = game_now(g);
+  char *tmp = asctime(localtime(&ct));
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "Monsters can't have ideas - Go away.\r\n");
     return;
   }
-
   std::string text(skip_spaces(argument));
   delete_doubledollar(text);
-
   if (text.empty()) {
     send_to_char(g, ch, "That must be a mistake...\r\n");
     return;
   }
   send_to_imm(g, "[A new {} has been filed by: {}]\r\n", CMD_NAME, char_get_name(ch));
 
+  struct stat fbuf;
   if (stat(filename, &fbuf) < 0) {
     perror("SYSERR: Can't stat() file");
-    /*  SYSERR_DESC:
-     *  This is from do_gen_write() and indicates that it cannot call the
-     *  stat() system call on the file required.  The error string at the
-     *  end of the line should explain what the problem is.
-     */
     return;
   }
   if (fbuf.st_size >= CONFIG_MAX_FILESIZE) {
     send_to_char(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
     return;
   }
-  if (!(fl = fopen(filename, "a"))) {
+  FILE *fl = fopen(filename, "a");
+  if (!fl) {
     perror("SYSERR: do_gen_write");
-    /*  SYSERR_DESC:
-     *  This is from do_gen_write(), and will be output if the file in
-     *  question cannot be opened for appending to.  The error string
-     *  at the end of the line should explain what the problem is.
-     */
-
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
@@ -741,6 +523,7 @@ ACMD(do_gen_write)
   fclose(fl);
   send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }
+
 
 namespace {
   /* A toggle flips one flag and reports the new state.  `before` may refuse
@@ -911,130 +694,81 @@ ACMD(do_gen_tog)
   send_to_char(g, ch, "{}", on ? toggle.on : toggle.off);
 }
 
+namespace {
+  /* What file can show, to immortals of at least the level */
+  constexpr struct {
+    const char *cmd;
+    int level;
+    const char *file;
+  } FILES[] = {
+      {"none", 6, "Does Nothing"},
+      {"bug", ADMLVL_IMMORT, "../data/misc/bugs"},
+      {"typo", ADMLVL_IMMORT, "../data/misc/typos"},
+      {"report", ADMLVL_IMMORT, "../data/misc/ideas"},
+      {"xnames", 4, "../data/misc/xnames"},
+      {"levels", 4, "../log/levels"},
+      {"rip", 4, "../log/rip"},
+      {"players", 4, "../log/newplayers"},
+      {"rentgone", 4, "../log/rentgone"},
+      {"errors", 4, "../log/errors"},
+      {"godcmds", 4, "../log/godcmds"},
+      {"syslog", ADMLVL_IMMORT, "../syslog"},
+      {"crash", ADMLVL_IMMORT, "../syslog.CRASH"},
+      {"immlog", ADMLVL_IMMORT, "../data/misc/request"},
+      {"customs", ADMLVL_IMMORT, "../data/misc/customs"},
+      {"todo", 5, "../todo"},
+  };
+} // namespace
+
 ACMD(do_file)
 {
-  FILE *req_file;
-  int cur_line  = 0,
-      num_lines = 0,
-      req_lines = 0,
-      i;
-  int l;
-  char line[READ_SIZE];
-  std::string field, value;
-  std::string buf;
-
-  struct file_struct {
-    const char *cmd{};
-    char level{};
-    const char *file{};
-  } fields[] = {
-      {"none",     6,             "Does Nothing"        },
-      {"bug",      ADMLVL_IMMORT, "../data/misc/bugs"   },
-      {"typo",     ADMLVL_IMMORT, "../data/misc/typos"  },
-      {"report",   ADMLVL_IMMORT, "../data/misc/ideas"  },
-      {"xnames",   4,             "../data/misc/xnames" },
-      {"levels",   4,             "../log/levels"       },
-      {"rip",      4,             "../log/rip"          },
-      {"players",  4,             "../log/newplayers"   },
-      {"rentgone", 4,             "../log/rentgone"     },
-      {"errors",   4,             "../log/errors"       },
-      {"godcmds",  4,             "../log/godcmds"      },
-      {"syslog",   ADMLVL_IMMORT, "../syslog"           },
-      {"crash",    ADMLVL_IMMORT, "../syslog.CRASH"     },
-      {"immlog",   ADMLVL_IMMORT, "../data/misc/request"},
-      {"customs",  ADMLVL_IMMORT, "../data/misc/customs"},
-      {"todo",     5,             "../todo"             },
-      {"\n",       0,             "\n"                  }
-  };
-
   argument = skip_spaces(argument);
-
   if (argument.empty()) {
-    buf = "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n";
-    for (i = 1; fields[i].level; i++)
-      if (fields[i].level <= char_get_level(ch))
-        buf += str_format("{:<15}{}\r\n", fields[i].cmd, fields[i].file);
+    std::string buf = "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n";
+    for (const auto &f : FILES | std::views::drop(1)) /* quirk: listed by level, not admin level */
+      if (f.level <= char_get_level(ch))
+        buf += str_format("{:<15}{}\r\n", f.cmd, f.file);
     send_to_char(g, ch, buf);
     return;
   }
-
   std::string_view rest = argument;
-  field                 = take_arg(rest);
-  value                 = take_arg(rest);
+  std::string field     = take_arg(rest);
+  std::string value     = take_arg(rest);
 
-  for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (std::string_view(fields[l].cmd).starts_with(field))
-      break;
-
-  if (*(fields[l].cmd) == '\n') {
+  auto f = std::ranges::find_if(FILES, [&](const auto &each) { return std::string_view(each.cmd).starts_with(field); });
+  if (f == std::end(FILES)) {
     send_to_char(g, ch, "That is not a valid option!\r\n");
     return;
   }
-
-  if (char_get_admlevel(ch) < fields[l].level) {
+  if (char_get_admlevel(ch) < f->level) {
     send_to_char(g, ch, "You are not godly enough to view that file!\r\n");
     return;
   }
+  int req_lines = value.empty() ? 15 : parse_int(value); /* default is the last 15 lines */
 
-  if (str_eq_nocase(field, "request")) {
-    char_set_lboard(ch, 2, game_now(g));
-  }
-
-  if (value.empty())
-    req_lines = 15; /* default is the last 15 lines */
-  else
-    req_lines = parse_int(value);
-
-  if (!(req_file = fopen(fields[l].file, "r"))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true,
-           "SYSERR: Error opening file {} using 'file' command.",
-           fields[l].file);
+  FILE *req_file = fopen(f->file, "r");
+  if (!req_file) {
+    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: Error opening file {} using 'file' command.", f->file);
     return;
   }
-
+  char line[READ_SIZE];
+  int num_lines = 0;
   get_line(req_file, line);
   while (!feof(req_file)) {
     num_lines++;
     get_line(req_file, line);
   }
   rewind(req_file);
+  req_lines = std::min({req_lines, num_lines, 5000});
 
-  req_lines = MIN(MIN(req_lines, num_lines), 5000);
-
-  buf.clear();
-
+  std::string buf;
+  int cur_line = 0;
   get_line(req_file, line);
   while (!feof(req_file)) {
-    cur_line++;
-    if (cur_line > (num_lines - req_lines))
+    if (++cur_line > num_lines - req_lines)
       buf += str_format("{}\r\n", line);
-
     get_line(req_file, line);
   }
   fclose(req_file);
-
   send_to_char(g, ch, buf);
-}
-
-/* Returns true if the spell/skillnum is innate to the character
-   (as opposed to just practiced).
- */
-/* returns FALSE if the spell is found in the innate linked list. 
-  This just means the ability is ready IF they can even get the
-  ability. (see is_innate). 
-*/
-/* Adds a node to the linked list with a timer which indicates
-   that the innate skill/spell is NOT ready to be used.
-
-   is_innate_ready(...) should be called first to determine if
-   there is already a timer set for the spellnum.
-*/
-
-/* called when a player enters the game to set permanent affects.
-   Usually these will stay set, but certain circumstances will
-   cause them to wear off (ie. removing eq with a perm affect).
-*/
-/* Called to update the innate timers */
-void update_innate(struct char_data *ch)
-{
 }

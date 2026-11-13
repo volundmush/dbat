@@ -4,6 +4,8 @@
 - Carried ice that melts away no longer leaves its carrier counting less weight than they carry. [Volund]
 - The top lists load all 25 places and no further: loading them no longer replaced the top powerlevel with a garbage number and disturbed the auction, and "toplist" no longer wrote past its own list. A short top list file leaves its missing places empty. [Volund]
 - An immortal listing exits beside a door with no keyword is told of the error, rather than crashing the game. [Volund]
+- Struggling to escape a grapple or an absorption, and knocking out or killing whoever held you, no longer crashes the game. [Volund]
+- A forgery is weighed before it's handed over, so its forger no longer counts a different weight than they carry. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]
