@@ -1,6 +1,8 @@
 /* rp.c: roleplay points, immortal action logs, hints, poses
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <algorithm>
 #include <cstdlib>
+#include <iterator>
 
 #include <sys/stat.h>
 
@@ -133,531 +135,338 @@ void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj)
   fclose(fl);
 }
 
-/* Let's Reward Those Roleplayers! - Iovan*/
-ACMD(do_rpp)
-{
+namespace {
+  const char *const SHORT_OF_RPP = "You do not have enough RPP for that selection.\r\n";
+  /* quirk: the stat and aura choices say this too */
+  const char *const NOT_ACCEPTABLE = "That is not an acceptable option for changing alignment.\r\n";
 
-  std::string arg, arg2;
-  int tnlcost = 1, revcost = 1, selection = 0, pay = 0;
-  int max_choice = 15; /* Controls the maximum number of menu choices */
-  struct obj_data *obj;
-
-  std::string_view rest = argument;
-  arg                   = take_word(rest);
-  arg2                  = skip_spaces(rest);
-
-  if (char_is_npc(ch)) {
-    return;
+  /* Sends `why` and returns true when ch can't pay. */
+  bool short_of(GameWorld *g, struct char_data *ch, int pay, const char *why = SHORT_OF_RPP)
+  {
+    if (char_get_rp(ch) >= pay)
+      return false;
+    send_to_char(g, ch, "{}", why);
+    return true;
   }
 
-  revcost = revcost * (char_get_level(ch) / 15);
-  tnlcost = 1 + (tnlcost * (char_get_level(ch) / 40));
-
-  if (revcost < 1) {
-    revcost = 1;
-  }
-  if (tnlcost < 1) {
-    tnlcost = 1;
-  }
-
-  if (char_plr_flagged(ch, PLR_PDEATH)) {
-    revcost *= 6;
+  void pay_rpp(GameWorld *g, struct char_data *ch, int pay)
+  {
+    char_set_rp(ch, char_get_rp(ch) - pay);
+    char_get_desc(ch)->rpp = char_get_rp(ch);
+    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+    save_char(g, ch);
+    send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", pay);
+    send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), pay);
   }
 
-  if (arg.empty()) { /* Display menu */
+  int experience_price(struct char_data *ch) { return std::max(1, 1 + char_get_level(ch) / 40); }
+
+  void show_rewards(GameWorld *g, struct char_data *ch)
+  {
     send_to_char(g, ch, "@C                             Rewards Menu\n");
     send_to_char(g, ch, "@b  ------------------------------------------------------------------\n");
     send_to_char(g, ch, "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
     send_to_char(g, ch, "  @C3@D)@c Custom Equipment    @D[@G 20 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
     send_to_char(g, ch, "  @C5@D)@c 7,500 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  2 RPP @D]\n");
     send_to_char(g, ch, "  @C7@D)@c +750 PS             @D[@G  4 RPP @D]  @C8@D)@R Disabled               @D[@G -- RPP @D]\n");
-    send_to_char(g, ch, "  @C9@D)@c 50{} TNL Exp         @D[@G{:>3d} RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n", "%", tnlcost);
+    send_to_char(g, ch, "  @C9@D)@c 50{} TNL Exp         @D[@G{:>3d} RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n", "%", experience_price(ch));
     send_to_char(g, ch, " @C11@D)@c Reach Softcap       @D[@G  5 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
     send_to_char(g, ch, " @C13@D)@c Extra Feature       @D[@G  1 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
     send_to_char(g, ch, " @C15@D)@c Extra Skillslot     @D[@G  3 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
     send_to_char(g, ch, "@b  ------------------------------------------------------------------@n\n");
     send_to_char(g, ch, "@D                           [@YYour RPP@D:@G {:>3d}@D]@n\n", char_get_rp(ch));
-    // send_to_char(ch, "@D                           [@YRPP Bank@D:@G %3d@D]@n\n", GET_RBANK(ch));
     send_to_char(g, ch, "\nSyntax: rpp (num)\n");
+  }
+
+  /* A reward does what it can and returns what it costs: 0 when it charged nothing. */
+  using reward = int (*)(GameWorld *g, struct char_data *ch, std::string &arg);
+
+  int disabled(GameWorld *, struct char_data *, std::string &) { return 0; }
+
+  /* quirk: the menu calls this one disabled */
+  int house_capsule(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 6500, "Nice try but you don't have enough RPP for that.\r\n"))
+      return 0;
+    send_to_char(g, ch, "You now have an Excel House Capsule!\r\n");
+    obj_to_char(g, read_object(g, 6), ch);
+    return 6500;
+  }
+
+  int custom_equipment(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 20, "You need at least 20 RPP to initiate a custom equipment build.\r\n"))
+      return 0;
+    struct descriptor_data *d = char_get_desc(ch);
+    desc_set_connected(d, CON_POBJ);
+    d->obj_name   = "Generic Armor Vest";
+    d->obj_short  = "@cGeneric @DArmor @WVest@n";
+    d->obj_long   = "@wA @cgeneric @Darmor @Wvest@w is lying here@n";
+    d->obj_type   = 1;
+    d->obj_weapon = 0;
+    disp_custom_menu(g, d);
+    d->obj_editflag = EDIT_CUSTOM;
+    d->obj_editval  = EDIT_CUSTOM_MAIN;
+    return 0;
+  }
+
+  struct alignment_choice {
+    const char *word;
+    const char *says;
+    int value;
+  };
+
+  constexpr alignment_choice ALIGNMENTS[] = {
+      {"evil",       "Evil",       -750},
+      {"sorta-evil", "Sorta Evil", -50 },
+      {"neutral",    "Neutral",    0   },
+      {"sorta-good", "Sorta Good", 51  },
+      {"good",       "Good",       300 },
+  };
+
+  int alignment(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    if (short_of(g, ch, 20))
+      return 0;
+    if (arg.empty()) {
+      send_to_char(g, ch, "What do you want to change your alignment to? (evil, sorta-evil, neutral, sorta-good, good)");
+      return 0;
+    }
+    auto it = std::ranges::find_if(ALIGNMENTS, [&](const alignment_choice &a) { return str_eq_nocase(arg, a.word); });
+    if (it == std::end(ALIGNMENTS)) {
+      send_to_char(g, ch, "{}", NOT_ACCEPTABLE);
+      return 0;
+    }
+    send_to_char(g, ch, "You change your alignment to {}.\r\n", it->says);
+    char_set_alignment(ch, it->value);
+    return 20;
+  }
+
+  int zenni(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 1))
+      return 0;
+    char_set_bank_gold(ch, char_get_bank_gold(ch) + 7500);
+    send_to_char(g, ch, "Your bank zenni has been increased by 7,500\r\n");
+    return 1;
+  }
+
+  struct raised_stat {
+    const char *word;
+    const char *name;
+    int negative; /* the trait that caps it at 70 */
+    int8_t (*real)(const struct char_data *ch);
+    void (*set_real)(struct char_data *ch, int8_t v);
+    int8_t (*current)(const struct char_data *ch);
+  };
+
+  constexpr raised_stat RAISED_STATS[] = {
+      {"str", "strength",     BONUS_WIMP,    char_get_real_abils_str,   char_set_real_abils_str,   char_get_aff_abils_str  },
+      {"con", "constitution", BONUS_FRAIL,   char_get_real_abils_con,   char_set_real_abils_con,   char_get_aff_abils_con  },
+      {"int", "intelligence", BONUS_DULL,    char_get_real_abils_intel, char_set_real_abils_intel, char_get_aff_abils_intel},
+      {"wis", "wisdom",       BONUS_FOOLISH, char_get_real_abils_wis,   char_set_real_abils_wis,   char_get_aff_abils_wis  },
+      {"spd", "speed",        BONUS_SLOW,    char_get_real_abils_cha,   char_set_real_abils_cha,   char_get_aff_abils_cha  },
+      {"agl", "speed" /* quirk */, BONUS_CLUMSY, char_get_real_abils_dex, char_set_real_abils_dex, char_get_aff_abils_dex  },
+  };
+
+  int raise_stat(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    if (short_of(g, ch, 2))
+      return 0;
+    if (arg.empty()) {
+      send_to_char(g, ch, "What stat? (str, con, int, wis, spd, agl)");
+      return 0;
+    }
+    auto it = std::ranges::find_if(RAISED_STATS, [&](const raised_stat &s) { return str_eq_nocase(arg, s.word); });
+    if (it == std::end(RAISED_STATS)) {
+      send_to_char(g, ch, "{}", NOT_ACCEPTABLE);
+      return 0;
+    }
+    if (char_get_bonuses(ch, it->negative) > 0 && it->real(ch) >= 70) {
+      send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
+      return 0;
+    }
+    if (it->current(ch) >= 100) {
+      send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
+      return 0;
+    }
+    send_to_char(g, ch, "You increase your {} by 2.\r\n", it->name);
+    it->set_real(ch, it->real(ch) + 2);
+    return 2;
+  }
+
+  int practice(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 4))
+      return 0;
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) + 750);
+    send_to_char(g, ch, "Your practices have been increased by 750\r\n");
+    return 4;
+  }
+
+  int experience(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    int pay = experience_price(ch);
+    if (short_of(g, ch, pay))
+      return 0;
+    if (char_get_level(ch) >= 100) {
+      send_to_char(g, ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
+      return 0;
+    }
+    if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) < 0) {
+      send_to_char(g, ch, "You can not buy experience anymore UNTIL you level.\r\n");
+      return 0;
+    }
+    char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * .52));
+    send_to_char(g, ch, "You gained 50{} of the entire experience needed for your next level.\r\n", "%");
+    return pay;
+  }
+
+  /* An aura's number is its place here. */
+  constexpr const char *AURAS[] = {"white", "blue", "red", "green", "pink", "purple", "yellow", "black", "orange"};
+
+  int aura(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    if (short_of(g, ch, 2))
+      return 0;
+    if (arg.empty()) {
+      send_to_char(g, ch, "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
+      return 0;
+    }
+    auto it = std::ranges::find_if(AURAS, [&](const char *name) { return str_eq_nocase(arg, name); });
+    if (it == std::end(AURAS)) {
+      send_to_char(g, ch, "{}", NOT_ACCEPTABLE);
+      return 0;
+    }
+    char_set_aura(ch, static_cast<int>(it - std::begin(AURAS)));
+    send_to_char(g, ch, "You change your aura to {}.\r\n", *it);
+    return 2;
+  }
+
+  int softcap(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 5))
+      return 0;
+    if (char_get_level(ch) >= 100) {
+      send_to_char(g, ch, "You can't use this at level 100.\r\n");
+      return 0;
+    }
+    if (char_is_arlian(ch)) {
+      send_to_char(g, ch, "This is not available to bugs.\r\n");
+      return 0;
+    }
+    if (is_soft_cap(ch, 0, 1.0) && is_soft_cap(ch, 1, 1.0) && is_soft_cap(ch, 2, 1.0)) {
+      send_to_char(g, ch, "You are already above your softcap for this level.\r\n");
+      return 0;
+    }
+    bring_to_cap(ch);
+    return 5;
+  }
+
+  int store(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    if (arg.empty()) {
+      disp_rpp_store(g, ch);
+      return 0;
+    }
+    int choice = parse_int(arg);
+    if (choice <= 0) {
+      send_to_char(g, ch, "That is not a choice in the RPP store!\r\n");
+      return 0;
+    }
+    handle_rpp_store(g, ch, choice);
+    return 0;
+  }
+
+  int feature(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    rpp_feature(g, ch, arg);
+    return 0;
+  }
+
+  int restring(GameWorld *g, struct char_data *ch, std::string &arg)
+  {
+    if (short_of(g, ch, 1, "You need at least 1 RPP to initiate an equipment restring.\r\n"))
+      return 0;
+    struct obj_data *obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
+    if (!obj) {
+      send_to_char(g, ch, "You don't have a that equipment to restring in your inventory.\r\n");
+      send_to_char(g, ch, "Syntax: rpp 14 (obj name)\r\n");
+      return 0;
+    }
+    if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+      send_to_char(g, ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
+      return 0;
+    }
+    struct descriptor_data *d = char_get_desc(ch);
+    desc_set_connected(d, CON_POBJ);
+    d->obj_name      = str_format("{}", obj_get_name(obj));
+    d->obj_was       = str_format("{}", obj_get_short_description(obj));
+    d->obj_short     = d->obj_was;
+    d->obj_long      = str_format("{}", obj_get_description(obj));
+    d->obj_point_uid = obj_get_id(obj);
+    d->obj_type      = 1;
+    d->obj_weapon    = 0;
+    disp_restring_menu(g, d);
+    d->obj_editflag = EDIT_RESTRING;
+    d->obj_editval  = EDIT_RESTRING_MAIN;
+    return 0;
+  }
+
+  int skillslot(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    if (short_of(g, ch, 3, "You do not have enough RPP in your bank for that selection.\r\n"))
+      return 0;
+    if (char_get_skill_slots(ch) >= (char_get_bonuses(ch, BONUS_GMEMORY) ? 65 : 60)) {
+      send_to_char(g, ch, "You are already at your skillslot cap.\r\n");
+      return 0;
+    }
+    char_set_skill_slots(ch, char_get_skill_slots(ch) + 1);
+    return 3;
+  }
+
+  /* By menu number, from 1. */
+  constexpr reward REWARDS[] = {
+      house_capsule,
+      disabled, /* custom skills */
+      custom_equipment,
+      alignment,
+      zenni,
+      raise_stat,
+      practice,
+      disabled, /* revival */
+      experience,
+      aura,
+      softcap,
+      store,
+      feature,
+      restring,
+      skillslot,
+  };
+} // namespace
+
+/* Let's Reward Those Roleplayers! - Iovan*/
+ACMD(do_rpp)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_word(rest);
+  std::string arg2(skip_spaces(rest));
+
+  if (char_is_npc(ch))
+    return;
+
+  if (arg.empty()) {
+    show_rewards(g, ch);
     return;
   }
 
-  /* What choice did they make? */
-
-  selection = parse_int(arg);
-
-  if (selection <= 0 || selection > max_choice) {
+  int selection = parse_int(arg);
+  if (selection <= 0 || selection > std::ssize(REWARDS)) {
     send_to_char(g, ch, "You must choose a number from the menu. Enter the command again with no arguments for the menu.\r\n");
     return;
   }
-
-  /* Instant Reward Section*/
-  if (selection > 2) {
-
-    if (selection == 3) { /* Custom Equipment Construction */
-      if (char_get_rp(ch) < 20) {
-        send_to_char(g, ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
-        return;
-      }
-      desc_set_connected(char_get_desc(ch), CON_POBJ);
-      char_get_desc(ch)->obj_name   = "Generic Armor Vest";
-      char_get_desc(ch)->obj_short  = "@cGeneric @DArmor @WVest@n";
-      char_get_desc(ch)->obj_long   = "@wA @cgeneric @Darmor @Wvest@w is lying here@n";
-      char_get_desc(ch)->obj_type   = 1;
-      char_get_desc(ch)->obj_weapon = 0;
-      disp_custom_menu(g, char_get_desc(ch));
-      char_get_desc(ch)->obj_editflag = EDIT_CUSTOM;
-      char_get_desc(ch)->obj_editval  = EDIT_CUSTOM_MAIN;
-      return;
-    }
-    if (selection == 4) { /* Simple Align Change*/
-      pay = 20;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      } else {
-        if (arg2.empty()) {
-          send_to_char(g, ch, "What do you want to change your alignment to? (evil, sorta-evil, neutral, sorta-good, good)");
-          return;
-        }
-        if (str_eq_nocase(arg2, "evil")) {
-          send_to_char(g, ch, "You change your alignment to Evil.\r\n");
-          char_set_alignment(ch, -750);
-        } else if (str_eq_nocase(arg2, "sorta-evil")) {
-          send_to_char(g, ch, "You change your alignment to Sorta Evil.\r\n");
-          char_set_alignment(ch, -50);
-        } else if (str_eq_nocase(arg2, "neutral")) {
-          send_to_char(g, ch, "You change your alignment to Neutral.\r\n");
-          char_set_alignment(ch, 0);
-        } else if (str_eq_nocase(arg2, "sorta-good")) {
-          send_to_char(g, ch, "You change your alignment to Sorta Good.\r\n");
-          char_set_alignment(ch, 51);
-        } else if (str_eq_nocase(arg2, "good")) {
-          send_to_char(g, ch, "You change your alignment to Good.\r\n");
-          char_set_alignment(ch, 300);
-        } else {
-          send_to_char(g, ch, "That is not an acceptable option for changing alignment.\r\n");
-          return;
-        }
-
-      } /* Can pay for it */
-    } /* End Simple Align Change */
-
-    if (selection == 5) { /*Simple Zenni Reward*/
-      pay = 1;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      } else {
-        char_set_bank_gold(ch, char_get_bank_gold(ch) + (7500));
-        send_to_char(g, ch, "Your bank zenni has been increased by 7,500\r\n");
-      } /* Can pay for it */
-    } /* End Simple Zenni Reward */
-
-    if (selection == 6) { /* Simple Stat Change*/
-      pay = 2;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      } else {
-        if (arg2.empty()) {
-          send_to_char(g, ch, "What stat? (str, con, int, wis, spd, agl)");
-          return;
-        }
-        if (str_eq_nocase(arg2, "str")) {
-          if (char_get_bonuses(ch, BONUS_WIMP) > 0 && char_get_real_abils_str(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_str(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your strength by 2.\r\n");
-          char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
-        } else if (str_eq_nocase(arg2, "con")) {
-          if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && char_get_real_abils_con(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_con(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your constitution by 2.\r\n");
-          char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
-        } else if (str_eq_nocase(arg2, "int")) {
-          if (char_get_bonuses(ch, BONUS_DULL) > 0 && char_get_real_abils_intel(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_intel(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your intelligence by 2.\r\n");
-          char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
-        } else if (str_eq_nocase(arg2, "wis")) {
-          if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && char_get_real_abils_wis(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_wis(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your wisdom by 2.\r\n");
-          char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
-        } else if (str_eq_nocase(arg2, "spd")) {
-          if (char_get_bonuses(ch, BONUS_SLOW) > 0 && char_get_real_abils_cha(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_cha(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your speed by 2.\r\n");
-          char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
-        } else if (str_eq_nocase(arg2, "agl")) {
-          if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && char_get_real_abils_dex(ch) >= 70) {
-            send_to_char(g, ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
-            return;
-          }
-          if (char_get_aff_abils_dex(ch) >= 100) {
-            send_to_char(g, ch, "100 is the maximum for any stat.\r\n");
-            return;
-          }
-          send_to_char(g, ch, "You increase your speed by 2.\r\n");
-          char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 2);
-        } else {
-          send_to_char(g, ch, "That is not an acceptable option for changing alignment.\r\n");
-          return;
-        }
-
-      } /* Can pay for it */
-    } /* End Simple Align Change */
-
-    if (selection == 7) { /*Simple PS Reward*/
-      pay = 4;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      } else {
-        char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (750));
-        send_to_char(g, ch, "Your practices have been increased by 750\r\n");
-      } /* Can pay for it */
-    } /* End Simple Zenni Reward */
-
-    //  if (selection == 8) { /* Simple Revival Reward */
-    //   pay = revcost;
-    //   if (GET_RP(ch) < pay) {
-    //  send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
-    //  return;
-    //   } else if (!AFF_FLAGGED(ch, AFF_SPIRIT)) {
-    //    send_to_char(ch, "You aren't even dead!");
-    //    return;
-    // } else {
-    //       resurrect(ch, 2);
-    //    send_to_char(ch, "You have been revived.\r\n");
-    //   } /* Can pay for it */
-    //  } /* End Simple Revival Reward */
-
-    if (selection == 9) { /*Simple Exp Reward*/
-      pay = tnlcost;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      }
-      if (char_get_level(ch) >= 100) {
-        send_to_char(g, ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
-        return;
-      }
-      if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) < 0) {
-        send_to_char(g, ch, "You can not buy experience anymore UNTIL you level.\r\n");
-        return;
-      } else {
-        char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * .52));
-        send_to_char(g, ch, "You gained 50{} of the entire experience needed for your next level.\r\n", "%");
-      } /* Can pay for it */
-    } /* End Simple Exp Reward */
-
-    if (selection == 10) { /* Simple Aura Change*/
-      pay = 2;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      } else {
-        if (arg2.empty()) {
-          send_to_char(g, ch, "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
-          return;
-        }
-        if (str_eq_nocase(arg2, "white")) {
-          char_set_aura(ch, 0);
-          send_to_char(g, ch, "You change your aura to white.\r\n");
-        } else if (str_eq_nocase(arg2, "blue")) {
-          char_set_aura(ch, 1);
-          send_to_char(g, ch, "You change your aura to blue.\r\n");
-        } else if (str_eq_nocase(arg2, "red")) {
-          char_set_aura(ch, 2);
-          send_to_char(g, ch, "You change your aura to red.\r\n");
-        } else if (str_eq_nocase(arg2, "green")) {
-          char_set_aura(ch, 3);
-          send_to_char(g, ch, "You change your aura to green.\r\n");
-        } else if (str_eq_nocase(arg2, "pink")) {
-          char_set_aura(ch, 4);
-          send_to_char(g, ch, "You change your aura to pink.\r\n");
-        } else if (str_eq_nocase(arg2, "purple")) {
-          char_set_aura(ch, 5);
-          send_to_char(g, ch, "You change your aura to purple.\r\n");
-        } else if (str_eq_nocase(arg2, "yellow")) {
-          char_set_aura(ch, 6);
-          send_to_char(g, ch, "You change your aura to yellow.\r\n");
-        } else if (str_eq_nocase(arg2, "black")) {
-          char_set_aura(ch, 7);
-          send_to_char(g, ch, "You change your aura to black.\r\n");
-        } else if (str_eq_nocase(arg2, "orange")) {
-          char_set_aura(ch, 8);
-          send_to_char(g, ch, "You change your aura to orange.\r\n");
-        } else {
-          send_to_char(g, ch, "That is not an acceptable option for changing alignment.\r\n");
-          return;
-        }
-
-      } /* Can pay for it */
-    } /* End Simple Aura Change */
-
-    if (selection == 11) { /* Simple Soft-cap Reward*/
-      pay = 5;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP for that selection.\r\n");
-        return;
-      }
-      if (char_get_level(ch) >= 100) {
-        send_to_char(g, ch, "You can't use this at level 100.\r\n");
-        return;
-      }
-      if (char_is_arlian(ch)) {
-        send_to_char(g, ch, "This is not available to bugs.\r\n");
-        return;
-      } else {
-        if (is_soft_cap(ch, 0, 1.0) && is_soft_cap(ch, 1, 1.0) && is_soft_cap(ch, 2, 1.0)) {
-          send_to_char(g, ch, "You are already above your softcap for this level.\r\n");
-          return;
-        }
-        bring_to_cap(ch);
-      } /* Can pay for it */
-    } /* End Simple Soft-cap Reward */
-
-    if (selection == 12) {
-      if (arg2.empty()) {
-        disp_rpp_store(g, ch);
-        return;
-      }
-      if (parse_int(arg2) <= 0) {
-        send_to_char(g, ch, "That is not a choice in the RPP store!\r\n");
-        return;
-      }
-      int choice = parse_int(arg2);
-      handle_rpp_store(g, ch, choice);
-      return;
-    }
-
-    if (selection == 13) { /* Extra Feature Reward*/
-      rpp_feature(g, ch, arg2);
-      return;
-    } /* End Extra Feature Reward */
-
-    if (selection == 14) { /* Restring equipment reward */
-      pay = 1;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
-        return;
-      }
-      if (!(obj = get_obj_in_list_vis(g, ch, arg2, nullptr, char_get_inventory(ch)))) {
-        send_to_char(g, ch, "You don't have a that equipment to restring in your inventory.\r\n");
-        send_to_char(g, ch, "Syntax: rpp 14 (obj name)\r\n");
-        return;
-      }
-      if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
-        send_to_char(g, ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
-        return;
-      }
-      desc_set_connected(char_get_desc(ch), CON_POBJ);
-      char_get_desc(ch)->obj_name      = str_format("{}", obj_get_name(obj));
-      char_get_desc(ch)->obj_was       = str_format("{}", obj_get_short_description(obj));
-      char_get_desc(ch)->obj_short     = char_get_desc(ch)->obj_was;
-      char_get_desc(ch)->obj_long      = str_format("{}", obj_get_description(obj));
-      char_get_desc(ch)->obj_point_uid = obj_get_id(obj);
-      char_get_desc(ch)->obj_type   = 1;
-      char_get_desc(ch)->obj_weapon = 0;
-      disp_restring_menu(g, char_get_desc(ch));
-      char_get_desc(ch)->obj_editflag = EDIT_RESTRING;
-      char_get_desc(ch)->obj_editval  = EDIT_RESTRING_MAIN;
-      return;
-    } /* End equipment restring reward */
-
-    if (selection == 15) { /* Skillslot Reward */
-      pay = 3;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP in your bank for that selection.\r\n");
-        return;
-      }
-      if (char_get_bonuses(ch, BONUS_GMEMORY) && char_get_skill_slots(ch) >= 65) {
-        send_to_char(g, ch, "You are already at your skillslot cap.\r\n");
-        return;
-      }
-      if (!char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_skill_slots(ch) >= 60)) {
-        send_to_char(g, ch, "You are already at your skillslot cap.\r\n");
-        return;
-      } else {
-        char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-      } /* Can pay for it */
-    } /*End Skillslot Reward */
-
-    if (selection == 16) { /* DB Spawn Reward */
-      pay = 5000;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "You do not have enough RPP in your bank for that selection.\r\n");
-        return;
-      } else {
-        int found          = false;
-        for (obj_data *k : each_obj(g)) {
-          if (obj_extra_flagged(k, ITEM_FORGED)) {
-            continue;
-          }
-          if (obj_get_vnum(g, k) == 20) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 21) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 22) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 23) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 24) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 25) {
-            found = true;
-          } else if (obj_get_vnum(g, k) == 26) {
-            found = true;
-          }
-        }
-        if (found == false) {
-          send_to_char(g, ch, "You have reduced the Dragon Ball wait by a whole real life day!\r\n");
-          send_to_all(g, "{} has just reduced the Dragon Ball wait by a whole real life day!\r\n", char_get_name(ch));
-          g->dballtime -= 86400;
-          if (g->dballtime <= 0) {
-            g->dballtime = 1;
-          }
-        } else if (g->SELFISHMETER >= 10) {
-          send_to_char(g, ch, "Sorry, it seems there there are several powers interfering with the Dragon Balls.\r\n");
-          return;
-        } else {
-          send_to_char(g, ch, "Sorry, but there is already a set of Dragon Balls in existence.\r\n");
-          return;
-        }
-      } /* Can pay for it */
-    }
-
-  } /* End Instant Reward Section */
-
-  /* Resuest Only Section */
-  if (selection <= 2) {
-    FILE *fl;
-    const char *filename;
-    struct stat fbuf;
-
-    filename = REQUEST_FILE;
-
-    if (selection == 1) {
-      pay = 6500;
-      if (char_get_rp(ch) < pay) {
-        send_to_char(g, ch, "Nice try but you don't have enough RPP for that.\r\n");
-        return;
-      }
-      send_to_char(g, ch, "You now have an Excel House Capsule!\r\n");
-      struct obj_data *hobj = read_object(g, 6);
-      obj_to_char(g, hobj, ch);
-      char_set_rp(ch, char_get_rp(ch) - (pay));
-      char_get_desc(ch)->rpp = char_get_rp(ch);
-      userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-      save_char(g, ch);
-      send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-      send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), pay);
-      return;
-    }
-    if (selection == 2) {
-      return;
-      pay = 200;
-    }
-
-    if (char_get_rp(ch) < pay) {
-      send_to_char(g, ch, "Nice try but you don't have enough RPP for that.\r\n");
-      return;
-    }
-
-    if (stat(filename, &fbuf) < 0) {
-      perror("SYSERR: Can't stat() file");
-      /*  SYSERR_DESC:
-       *  This is from do_gen_write() and indicates that it cannot call the
-       *  stat() system call on the file required.  The error string at the
-       *  end of the line should explain what the problem is.
-       */
-      return;
-    }
-    if (fbuf.st_size >= CONFIG_MAX_FILESIZE) {
-      send_to_char(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
-      return;
-    }
-    if (!(fl = fopen(filename, "a"))) {
-      perror("SYSERR: do_reward_request");
-      /*  SYSERR_DESC:
-        *  This is from do_gen_write(), and will be output if the file in
-        *  question cannot be opened for appending to.  The error string
-        *  at the end of the line should explain what the problem is.
-        */
-
-      send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
-      return;
-    }
-    if (selection == 1) {
-      file_print(fl, "@D[@cName@W: @C{:<20} @cRequest@W: @Y{:<20}@D]\n", char_get_name(ch), "House");
-      send_to_imm(g, "RPP Request: {} paid for house", char_get_name(ch));
-      g->BOARDNEWCOD = game_now(g);
-      save_mud_time(g, &g->time_info);
-    } else if (selection == 2) {
-      file_print(fl, "@D[@cName@W: @C{:<20} @cRequest@W: @Y{:<20}@D]\n", char_get_name(ch), "Custom Skill");
-      send_to_imm(g, "RPP Request: {} paid for Custom Skill, uhoh spaggettios", char_get_name(ch));
-      g->BOARDNEWCOD = game_now(g);
-      save_mud_time(g, &g->time_info);
-    }
-    char_set_rp(ch, char_get_rp(ch) - (pay));
-    char_get_desc(ch)->rpp = char_get_rp(ch);
-    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-    save_char(g, ch);
-    send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n", pay);
-
-    fclose(fl);
-  } /* End Request Only Section */
-
-  /* Pay for purchases here */
-  if (selection >= 4 && selection < 12 && pay > 0) {
-    char_set_rp(ch, char_get_rp(ch) - (pay));
-    char_get_desc(ch)->rpp = char_get_rp(ch);
-    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-    save_char(g, ch);
-    send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-    send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), pay);
-  }
-
-  if (selection > 12 && pay > 0) {
-    char_set_rp(ch, char_get_rp(ch) - (pay));
-    char_get_desc(ch)->rpp = char_get_rp(ch);
-    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
-    save_char(g, ch);
-    send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-    send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), pay);
-  }
+  if (int pay = REWARDS[selection - 1](g, ch, arg2); pay > 0)
+    pay_rpp(g, ch, pay);
 }
 
 ACMD(do_commune)
