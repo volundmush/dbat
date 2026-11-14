@@ -611,3 +611,4 @@ extern const std::span<const scene> SCENES_MISC;
 extern const std::span<const scene> SCENES_WIZARD;
 extern const std::span<const scene> SCENES_ITEMS;
 extern const std::span<const scene> SCENES_COMM;
+extern const std::span<const scene> SCENES_MOVEMENT;

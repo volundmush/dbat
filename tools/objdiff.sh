@@ -15,9 +15,9 @@ git -C "$root" archive "$ref" libs apps | tar -x -C "$work/ref-src"
 flags=(-O2 -fno-inline -fno-ipa-sra -fno-ipa-cp -fno-ipa-ra -fno-ipa-icf -fno-ipa-pure-const
        -fno-ipa-reference -fno-ipa-modref -fno-ipa-vrp -fno-ipa-bit-cp -fno-ipa-stack-alignment
        -ffunction-sections -fdata-sections -Wno-builtin-macro-redefined -D__LINE__=0)
-"$here/build-tree.sh" "$work/ref-src" "$work/ref" "${flags[@]}" & p1=$!
-"$here/build-tree.sh" "$root" "$work/new" "${flags[@]}" & p2=$!
-wait $p1; wait $p2
+# One build at a time (each runs JOBS compilers, see build-tree.sh), to keep within memory
+"$here/build-tree.sh" "$work/ref-src" "$work/ref" "${flags[@]}"
+"$here/build-tree.sh" "$root" "$work/new" "${flags[@]}"
 set +e
 python3 "$here/objdiff.py" "$work/ref/obj" "$work/new/obj"; status=$?
 rm -rf "$work"

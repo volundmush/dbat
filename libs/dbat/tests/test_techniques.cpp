@@ -235,7 +235,7 @@ constexpr int SITUATION_SEEDS = 3;
 /* All the scenes, in order */
 static const std::vector<scene> scenes = [] {
   std::vector<scene> all;
-  for (std::span<const scene> part : {SCENES_OFFENSE, SCENES_DISPATCHERS, SCENES_INFORMATIVE, SCENES_ITEMS_WIZARD, SCENES_OTHER, SCENES_MISC, SCENES_WIZARD, SCENES_ITEMS, SCENES_COMM})
+  for (std::span<const scene> part : {SCENES_OFFENSE, SCENES_DISPATCHERS, SCENES_INFORMATIVE, SCENES_ITEMS_WIZARD, SCENES_OTHER, SCENES_MISC, SCENES_WIZARD, SCENES_ITEMS, SCENES_COMM, SCENES_MOVEMENT})
     all.insert(all.end(), part.begin(), part.end());
   return all;
 }();

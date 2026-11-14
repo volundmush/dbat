@@ -17,9 +17,9 @@ git -C "$root" archive "$ref" libs apps tools | tar -x -C "$work/ref-src"
 # VERIFY_SHARED_ROUNDTRIP=1: build the ref with this tree's roundtrip.cpp, so that both save the same files. Only
 # while the save functions it calls are the same on both sides.
 [ "${VERIFY_SHARED_ROUNDTRIP:-0}" = 1 ] && cp "$here/roundtrip.cpp" "$work/ref-src/tools/roundtrip.cpp"
-"$here/build-tree.sh" "$work/ref-src" "$work/ref" -O2 & p1=$!
-"$here/build-tree.sh" "$root" "$work/new" -O2 & p2=$!
-wait $p1; wait $p2
+# One build at a time (each runs JOBS compilers, see build-tree.sh), to keep within memory
+"$here/build-tree.sh" "$work/ref-src" "$work/ref" -O2
+"$here/build-tree.sh" "$root" "$work/new" -O2
 
 port_ref=4198 port_new=4197
 cat > "$work/rt.gdb.in" <<'GDB'

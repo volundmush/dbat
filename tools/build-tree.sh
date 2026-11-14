@@ -14,11 +14,14 @@ cflags=(-std=$std -g -w -DPATH_MAX=4096 -fmacro-prefix-map="$tree/=" -fmacro-pre
 # The helper calls server functions, so it must match the tree being built.
 roundtrip="$tree/tools/roundtrip.$ext"
 [ -f "$roundtrip" ] || roundtrip="$here/roundtrip.cpp"
-pids=()
+# At most JOBS compilers at once (default 4): one per file at once ran the machine out of memory
+jobs=${JOBS:-4} running=0 fail=0
 while IFS= read -r f; do
   obj="$out/obj/$(echo "${f#"$tree"/}" | tr / _).o"
-  $cc "${cflags[@]}" -c "$f" -o "$obj" & pids+=($!)
+  $cc "${cflags[@]}" -c "$f" -o "$obj" &
+  running=$((running + 1))
+  if [ $running -ge "$jobs" ]; then wait -n || fail=1; running=$((running - 1)); fi
 done < <(find "$tree/libs/dbat/src" -name "*.$ext"; echo "$tree/apps/server/src/main.$ext"; echo "$roundtrip")
-fail=0; for p in "${pids[@]}"; do wait "$p" || fail=1; done
+while [ $running -gt 0 ]; do wait -n || fail=1; running=$((running - 1)); done
 [ $fail -eq 0 ] || { echo "build-tree: compile failed in $tree" >&2; exit 1; }
 $cc -o "$out/dbat" "$out"/obj/*.o -lm -lcrypt ${LDFLAGS_EXTRA:-}
