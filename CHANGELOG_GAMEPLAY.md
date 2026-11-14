@@ -6,6 +6,7 @@
 - An immortal listing exits beside a door with no keyword is told of the error, rather than crashing the game. [Volund]
 - Struggling to escape a grapple or an absorption, and knocking out or killing whoever held you, no longer crashes the game. [Volund]
 - A forgery is weighed before it's handed over, so its forger no longer counts a different weight than they carry. [Volund]
+- A mob made to restring something at the restring shop is ignored, rather than crashing the game. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]
