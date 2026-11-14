@@ -32,48 +32,6 @@ namespace {
     char_set_limb_condition(victim, 3, 95);
   }
 
-  /* ... with prototypes for these vnums, which the fixture lacks */
-  void stock(GameWorld *g, std::initializer_list<obj_vnum> vnums)
-  {
-    for (obj_vnum vnum : vnums) {
-      if (g->obj_index.find(vnum))
-        continue;
-      struct obj_data *spare = read_object(g, 70);
-      renumber(g, spare, vnum);
-      extract_obj(g, spare);
-    }
-  }
-
-  /* ... with a mob prototype of this vnum, copied from the critter's */
-  void mob_stock(GameWorld *g, mob_vnum vnum)
-  {
-    if (mob_proto_of(g, vnum))
-      return;
-    struct index_data *index = g->mob_index.emplace(vnum);
-    index->vnum              = vnum;
-    struct char_data *proto  = g->mob_proto.emplace(vnum);
-    *proto                   = *mob_proto_of(g, 310);
-    char_set_nr(proto, vnum);
-  }
-
-  /* ... with a bare room of this vnum, in the arena's zone */
-  void room_stock(GameWorld *g, room_vnum vnum)
-  {
-    if (g->rooms.find(vnum))
-      return;
-    struct room_data *room = g->rooms.emplace(vnum);
-    room_set_number(room, vnum);
-    room_set_zone(room, room_get_zone(g, ARENA));
-    room_set_name(room, "A built room");
-  }
-
-  void moved(GameWorld *g, struct char_data *ch, room_vnum to)
-  {
-    room_stock(g, to);
-    char_from_room(g, ch);
-    char_to_room(g, ch, to);
-  }
-
   /* ... a token of this stat, flagged as asked */
   struct obj_data *token(GameWorld *g, struct char_data *att, int stat = APPLY_STR, int flag = ITEM_TOKEN)
   {
@@ -99,22 +57,6 @@ namespace {
       i++;
     }
     return obj;
-  }
-
-  /* ... carrying as much weight as can be carried */
-  void laden(GameWorld *g, struct char_data *att)
-  {
-    struct obj_data *rock = read_object(g, 70);
-    obj_set_name(rock, "boulder");
-    obj_set_weight(rock, getMaxCarryWeight(g, att) - char_get_carry_weight(att));
-    obj_to_char(g, rock, att);
-  }
-
-  /* ... carrying as many things as can be carried */
-  void crowded(GameWorld *g, struct char_data *att)
-  {
-    while (char_get_carry_items(att) < char_can_carry_n(att))
-      holding(g, att, "pebble");
   }
 
   /* ... sitting on the chest */
