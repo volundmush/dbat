@@ -79,98 +79,74 @@ static void game_info(GameWorld *g, std::format_string<Args...> fmt, Args &&...a
 // definitions
 ACMD(do_lag)
 {
-
-  std::string arg, arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
-
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: lag (target) (number of seconds)\r\n");
     return;
   }
 
-  int found = false, num = parse_int(arg2);
-
+  int num = parse_int(arg2);
   if (num <= 0 || num > 5) {
     send_to_char(g, ch, "Keep it between 1 to 5 seconds please.\r\n");
     return;
   }
 
+  bool found = false;
   for (descriptor_data *d : each_desc(g)) {
-    if (!d->character || !char_get_name(d->character)) { /* still at the login menus */
+    if (!d->character || !char_get_name(d->character) || !str_eq_nocase(char_get_name(d->character), arg)) /* or still at the login menus */
+      continue;
+    if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
+      send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
       continue;
     }
-    if (str_eq_nocase(char_get_name(d->character), arg)) {
-      if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
-        send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
-        continue;
-      }
-      switch (num) {
-        case 1:
-          char_set_wait(d->character, PULSE_1SEC);
-          break;
-        case 2:
-          char_set_wait(d->character, PULSE_2SEC);
-          break;
-        case 3:
-          char_set_wait(d->character, PULSE_3SEC);
-          break;
-        case 4:
-          char_set_wait(d->character, PULSE_4SEC);
-          break;
-        case 5:
-          char_set_wait(d->character, PULSE_5SEC);
-          break;
-      }
-      found = true;
-    }
+    char_set_wait(d->character, num * PULSE_1SEC);
+    found = true;
   }
-
-  if (found == false) {
+  if (!found)
     send_to_char(g, ch, "That player isn't around.\r\n");
-    return;
-  }
 }
+
+namespace {
+  /* What "shutdown <option>" announces and does */
+  struct shutdown_mode {
+    const char *option; /* "" for none */
+    const char *logged; /* "(GC) <this> by <who>." */
+    const char *announced;
+    const char *touched; /* the file left for autorun, or null */
+    int reboot;
+  };
+  const shutdown_mode SHUTDOWN_MODES[] = {
+    {"", "Shutdown", "Shutting down.\r\n", nullptr, 0},
+    {"reboot", "Reboot", "Rebooting.. come back in a minute or two.\r\n", FASTBOOT_FILE, 1},
+    {"die", "Shutdown", "Shutting down for maintenance.\r\n", KILLSCRIPT_FILE, 0},
+    {"now", "Shutdown NOW", "Rebooting.. come back in a minute or two.\r\n", nullptr, 2 /* do not autosave olc */},
+    {"pause", "Shutdown", "Shutting down for maintenance.\r\n", PAUSE_FILE, 0},
+  };
+} // namespace
 
 ACMD(do_shutdown)
 {
-  std::string arg;
-
   if (subcmd != SCMD_SHUTDOWN) {
     send_to_char(g, ch, "If you want to shut something down, say so!\r\n");
     return;
   }
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (arg.empty()) {
-    mud_log("(GC) Shutdown by {}.", char_get_name(ch));
-    send_to_all(g, "Shutting down.\r\n");
-    g->circle_shutdown = 1;
-  } else if (str_eq_nocase(arg, "reboot")) {
-    mud_log("(GC) Reboot by {}.", char_get_name(ch));
-    send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
-    touch(FASTBOOT_FILE);
-    g->circle_shutdown = g->circle_reboot = 1;
-  } else if (str_eq_nocase(arg, "die")) {
-    mud_log("(GC) Shutdown by {}.", char_get_name(ch));
-    send_to_all(g, "Shutting down for maintenance.\r\n");
-    touch(KILLSCRIPT_FILE);
-    g->circle_shutdown = 1;
-  } else if (str_eq_nocase(arg, "now")) {
-    mud_log("(GC) Shutdown NOW by {}.", char_get_name(ch));
-    send_to_all(g, "Rebooting.. come back in a minute or two.\r\n");
-    g->circle_shutdown = 1;
-    g->circle_reboot   = 2; /* do not autosave olc */
-  } else if (str_eq_nocase(arg, "pause")) {
-    mud_log("(GC) Shutdown by {}.", char_get_name(ch));
-    send_to_all(g, "Shutting down for maintenance.\r\n");
-    touch(PAUSE_FILE);
-    g->circle_shutdown = 1;
-  } else
+  auto mode = std::ranges::find_if(SHUTDOWN_MODES, [&](const shutdown_mode &m) { return arg.empty() ? !*m.option : str_eq_nocase(arg, m.option); });
+  if (mode == std::end(SHUTDOWN_MODES)) {
     send_to_char(g, ch, "Unknown shutdown option.\r\n");
+    return;
+  }
+  mud_log("(GC) {} by {}.", mode->logged, char_get_name(ch));
+  send_to_all(g, mode->announced);
+  if (mode->touched)
+    touch(mode->touched);
+  g->circle_shutdown = 1;
+  if (mode->reboot)
+    g->circle_reboot = mode->reboot;
 }
 
 /* Path of the binary to re-exec on copyover: whatever file is now at the path this process was started
@@ -373,23 +349,20 @@ static void execute_copyover(GameWorld *g)
 
 void copyover_check(GameWorld *g)
 {
-  if (!g->copyover_timer) return;
+  if (!g->copyover_timer)
+    return;
   g->copyover_timer--;
-  if (!g->copyover_timer) {
+  int left = g->copyover_timer;
+  if (!left) {
     execute_copyover(g);
     return; /* only if it was aborted */
   }
-  if (g->copyover_timer > 59) {
-    if (g->copyover_timer % 60 == 0) {
-      game_info(g, "A copyover will be performed in {:d} minute{}.", (g->copyover_timer / 60), (g->copyover_timer / 60) > 1 ? "s" : "");
-    }
-  } else {
-    if (g->copyover_timer % 10 == 0 && g->copyover_timer > 29) {
-      game_info(g, "A copyover will be performed in {:d} seconds.", (g->copyover_timer));
-    }
-    if (g->copyover_timer % 5 == 0 && g->copyover_timer <= 29) {
-      game_info(g, "A copyover will be performed in {:d} seconds.", (g->copyover_timer));
-    }
+  /* Each minute, then every ten seconds of the last minute, then every five of the last thirty */
+  if (left > 59) {
+    if (left % 60 == 0)
+      game_info(g, "A copyover will be performed in {:d} minute{}.", left / 60, left / 60 > 1 ? "s" : "");
+  } else if (left % (left > 29 ? 10 : 5) == 0) {
+    game_info(g, "A copyover will be performed in {:d} seconds.", left);
   }
 }
 
@@ -453,59 +426,47 @@ ACMD(do_dc)
 
 ACMD(do_wizlock)
 {
-  std::string arg;
-  int value;
-  const char *when;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  if (!arg.empty()) {
-    value = parse_int(arg);
-    if (value < 0 || value > 101) {
-      send_to_char(g, ch, "Invalid wizlock value.\r\n");
-      return;
-    }
-    g->circle_restrict = value;
-    when            = "now";
-  } else
-    when = "currently";
+  std::string arg       = take_arg(rest);
 
-  if (!arg.empty()) {
-    switch (g->circle_restrict) {
-      case 0:
-        send_to_char(g, ch, "The game is {} completely open.\r\n", when);
-        send_to_all(g, "@RWIZLOCK@D: @WThe game has been completely opened by @C{}@W.@n", char_get_name(ch));
-        mud_log("WIZLOCK: The game has been completely opened by {}.", char_get_name(ch));
-        break;
-      case 1:
-        send_to_char(g, ch, "The game is {} closed to new players.\r\n", when);
-        send_to_all(g, "@RWIZLOCK@D: @WThe game is {} closed to new players by @C{}@W.@n", when, char_get_name(ch));
-        mud_log("WIZLOCK: The game is {} closed to new players by {}.", when, char_get_name(ch));
-        break;
-      case 101:
-        send_to_char(g, ch, "The game is {} closed to non-imms.\r\n", when);
-        send_to_all(g, "@RWIZLOCK@D: @WThe game is {} closed to non-imms by @C{}@W.@n", when, char_get_name(ch));
-        mud_log("WIZLOCK: The game is {} closed to non-imms by {}.", when, char_get_name(ch));
-        break;
-      default:
-        send_to_char(g, ch, "Only level {:d}+ may enter the game {}.\r\n", g->circle_restrict, when);
-        send_to_all(g, "@RWIZLOCK@D: @WLevel {:d}+ only can enter the game {}, thanks to @C{}@W.@n", g->circle_restrict, when, char_get_name(ch));
-        mud_log("WIZLOCK: Level {:d}+ only can enter the game {}, thanks to {}.", g->circle_restrict, when, char_get_name(ch));
-        break;
-    }
-  }
   if (arg.empty()) {
-    switch (g->circle_restrict) {
-      case 0:
-        send_to_char(g, ch, "The game is {} completely open.\r\n", when);
-        break;
-      case 1:
-        send_to_char(g, ch, "The game is {} closed to new players.\r\n", when);
-        break;
-      default:
-        send_to_char(g, ch, "Only level {:d} and above may enter the game {}.\r\n", g->circle_restrict, when);
-        break;
-    }
+    if (g->circle_restrict == 0)
+      send_to_char(g, ch, "The game is currently completely open.\r\n");
+    else if (g->circle_restrict == 1)
+      send_to_char(g, ch, "The game is currently closed to new players.\r\n");
+    else
+      send_to_char(g, ch, "Only level {:d} and above may enter the game currently.\r\n", g->circle_restrict);
+    return;
+  }
+
+  int value = parse_int(arg);
+  if (value < 0 || value > 101) {
+    send_to_char(g, ch, "Invalid wizlock value.\r\n");
+    return;
+  }
+  g->circle_restrict = value;
+  const char *name   = char_get_name(ch);
+  switch (value) {
+    case 0:
+      send_to_char(g, ch, "The game is now completely open.\r\n");
+      send_to_all(g, "@RWIZLOCK@D: @WThe game has been completely opened by @C{}@W.@n", name);
+      mud_log("WIZLOCK: The game has been completely opened by {}.", name);
+      break;
+    case 1:
+      send_to_char(g, ch, "The game is now closed to new players.\r\n");
+      send_to_all(g, "@RWIZLOCK@D: @WThe game is now closed to new players by @C{}@W.@n", name);
+      mud_log("WIZLOCK: The game is now closed to new players by {}.", name);
+      break;
+    case 101:
+      send_to_char(g, ch, "The game is now closed to non-imms.\r\n");
+      send_to_all(g, "@RWIZLOCK@D: @WThe game is now closed to non-imms by @C{}@W.@n", name);
+      mud_log("WIZLOCK: The game is now closed to non-imms by {}.", name);
+      break;
+    default:
+      send_to_char(g, ch, "Only level {:d}+ may enter the game now.\r\n", value);
+      send_to_all(g, "@RWIZLOCK@D: @WLevel {:d}+ only can enter the game now, thanks to @C{}@W.@n", value, name);
+      mud_log("WIZLOCK: Level {:d}+ only can enter the game now, thanks to {}.", value, name);
+      break;
   }
 }
 

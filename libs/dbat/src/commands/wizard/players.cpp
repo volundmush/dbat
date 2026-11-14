@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -61,265 +62,209 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
-/* local functions */
-static void print_lockout(GameWorld *g, struct char_data *ch);
-static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level);
-static void lockWrite(GameWorld *g, struct char_data *ch, const char *name);
+namespace {
+  void print_lockout(GameWorld *g, struct char_data *ch)
+  {
+    if (char_is_npc(ch))
+      return;
 
-static void print_lockout(GameWorld *g, struct char_data *ch)
-{
-  if (char_is_npc(ch))
-    return;
-
-  FILE *file;
-  char fname[40], filler[50], line[256];
-  std::string buf;
-  int count = 0, first = true;
-
-  /* Read Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
-    send_to_char(g, ch, "The lockout file does not exist.");
-    return;
-  }
-  if (!(file = fopen(fname, "r"))) {
-    send_to_char(g, ch, "The lockout file does not exist.");
-    return;
-  }
-  buf = "@b------------------[ @RLOCKOUT @b]------------------@n\n";
-  while (!feof(file)) {
-    get_line(file, line);
-    sscanf(line, "%49s\n", filler);
-    if (first != true && strstr(buf.c_str(), filler) == nullptr) {
-      if (count == 0) {
-        buf += str_format("{:<23}@D|@n", filler);
-        count = 1;
-      } else {
-        buf += str_format("{:<23}\n", filler);
-        count = 0;
-      }
-    } else if (first == true) {
-      buf += str_format("{:<23}@D|@n", filler);
-      first = false;
-      count = 1;
+    char fname[40], filler[50] = "", line[256] = "";
+    FILE *file;
+    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout") || !(file = fopen(fname, "r"))) {
+      send_to_char(g, ch, "The lockout file does not exist.");
+      return;
     }
-    *filler = '\0';
+    /* Two names to a line, each once */
+    std::string buf = "@b------------------[ @RLOCKOUT @b]------------------@n\n";
+    bool first = true, odd = false;
+    while (!feof(file)) {
+      get_line(file, line);
+      sscanf(line, "%49s\n", filler);
+      if (first || !strstr(buf.c_str(), filler)) {
+        if (odd && !first)
+          buf += str_format("{:<23}\n", filler);
+        else
+          buf += str_format("{:<23}@D|@n", filler);
+        odd   = first || !odd;
+        first = false;
+      }
+      *filler = '\0';
+    }
+    if (odd)
+      buf += "\n";
+    buf += "@b------------------[ @RLOCKOUT @b]------------------@n\n";
+    send_to_char(g, ch, buf);
+    fclose(file);
   }
-  if (count == 1) {
-    buf += "\n";
+
+  /* Locks name out, or lets them back in if they were */
+  void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
+  {
+    char fname[40], filler[50] = "", line[256] = "";
+    std::string capped = name;
+    CAP(capped);
+
+    FILE *file;
+    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout") || !(file = fopen(fname, "r"))) {
+      send_to_char(g, ch, "The lockout file does not exist.");
+      return;
+    }
+    /* At least 498 entries are read, the last name standing in for those past the end, as it always has */
+    std::vector<std::string> names;
+    while (!feof(file) || names.size() < 498) {
+      get_line(file, line);
+      sscanf(line, "%49s\n", filler);
+      names.emplace_back(filler);
+      *filler = '\0';
+    }
+    fclose(file);
+
+    struct atomic_file af;
+    FILE *fl;
+    if (!(fl = atomic_open(&af, fname, false))) {
+      mud_log("ERROR: could not save Lockout File, {}.", fname);
+      return;
+    }
+    bool found = false;
+    for (size_t x = 0; x < names.size(); x++) {
+      if (x > 0 && !strcasecmp(names[x - 1].c_str(), names[x].c_str()))
+        continue;
+      if (strcasecmp(names[x].c_str(), capped.c_str()))
+        file_print(fl, "{}\n", CAP(names[x]));
+      else
+        found = true;
+    }
+    if (!found) {
+      file_print(fl, "{}\n", capped);
+      send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped, char_get_name(ch));
+    } else {
+      send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, has had lockout removed by @c{}@W.@n\r\n", capped, char_get_name(ch));
+    }
+    mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
+    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
+    atomic_commit(&af);
   }
-  buf += "@b------------------[ @RLOCKOUT @b]------------------@n\n";
 
-  send_to_char(g, ch, buf);
+  void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)
+  {
+    for (char_data *tch : room_people(g, char_get_in_room(ch))) {
+      if (tch == ch)
+        continue;
+      if (char_get_admlevel(tch) >= char_get_invis_level(g, ch) && char_get_admlevel(tch) < level)
+        act(g, "You blink and suddenly realize that $n is gone.", false, ch, nullptr, tch, TO_VICT);
+      if (char_get_admlevel(tch) < char_get_invis_level(g, ch) && char_get_admlevel(tch) >= level)
+        act(g, "You suddenly realize that $n is standing beside you.", false, ch, nullptr, tch, TO_VICT);
+    }
+    char_set_invis_level(g, ch, level);
+    send_to_char(g, ch, "Your invisibility level is {:d}.\r\n", level);
+  }
 
-  fclose(file);
-}
+  /* The senior immortals, whom no one can lock out */
+  constexpr const char *SENIOR_IMMORTALS[] = {"Iovan", "Fahl", "Xyron", "Samael"};
+} // namespace
 
 ACMD(do_approve)
 {
-
-  std::string arg;
-  struct char_data *vict = nullptr;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "What player do you want to approve as having an acceptable bio?\r\n");
     return;
   }
-
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, "That player is not in the game.\r\n");
+  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "That player is not in the game.\r\n");
+  if (reject(g, ch, found))
     return;
-  }
-
-  if (char_plr_flagged(vict, PLR_BIOGR)) {
+  if (char_plr_flagged(*found, PLR_BIOGR)) {
     send_to_char(g, ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
     return;
   }
-  char_plr_set(vict, PLR_BIOGR, true);
+  char_plr_set(*found, PLR_BIOGR, true);
   send_to_char(g, ch, "They have now been approved.\r\n");
-  return;
-}
-
-static void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
-{
-  struct atomic_file af;
-  FILE *file;
-  char fname[40], filler[50], line[256];
-  char *names[500] = {nullptr};
-  FILE *fl;
-  int count = 0, x = 0, found = false;
-  std::string capped = writable_copy(name);
-  CAP(capped.data());
-
-  /* Read Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
-    send_to_char(g, ch, "The lockout file does not exist.");
-    return;
-  }
-  if (!(file = fopen(fname, "r"))) {
-    send_to_char(g, ch, "The lockout file does not exist.");
-    return;
-  }
-  while (!feof(file) || count < 498) {
-    get_line(file, line);
-    sscanf(line, "%49s\n", filler);
-    names[count] = strdup(filler);
-    count++;
-    *filler = '\0';
-  }
-  fclose(file);
-
-  /* Write Introduction File */
-
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout"))
-    return;
-
-  if (!(fl = atomic_open(&af, fname, false))) {
-    mud_log("ERROR: could not save Lockout File, {}.", fname);
-    return;
-  }
-
-  while (x < count) {
-    if (x == 0 || strcasecmp(names[x - 1], names[x])) {
-      if (strcasecmp(names[x], capped.c_str())) {
-        file_print(fl, "{}\n", CAP(names[x]));
-      } else {
-        found = true;
-      }
-    }
-    x++;
-  }
-  if (found == false) {
-    file_print(fl, "{}\n", capped);
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped, char_get_name(ch));
-    mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
-  } else {
-    send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, has had lockout removed by @c{}@W.@n\r\n", capped, char_get_name(ch));
-    mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
-    log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
-  }
-
-  atomic_commit(&af);
-  return;
 }
 
 ACMD(do_reward)
 {
-  struct char_data *vict = nullptr;
-  int amt = 0;
-
-  std::string arg;
-  std::string arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
   if (arg.empty() || arg2.empty()) {
     send_to_char(g, ch, "Syntax: reward (target) (amount)\r\nThis is either a positive number or a negative.\r\n");
     return;
   }
-
   if (!readUserIndex(arg)) {
     send_to_char(g, ch, "That is not a recognised user file.\r\n");
     return;
   }
-
-  amt = parse_int(arg2);
-
+  int amt = parse_int(arg2);
   if (amt == 0) {
     send_to_char(g, ch, "That is pointless don't you think? Try an amount higher than 0.\r\n");
     return;
   }
 
-  for (descriptor_data *k : each_desc(g)) {
-    if (desc_get_connected(k) != CON_PLAYING)
-      continue;
-    if (char_is_npc(k->character))
-      continue;
-    if (str_eq_nocase(k->user, arg))
+  struct char_data *vict = nullptr; /* the last of the user's characters playing */
+  for (descriptor_data *k : each_desc(g))
+    if (desc_get_connected(k) == CON_PLAYING && !char_is_npc(k->character) && str_eq_nocase(k->user, arg))
       vict = k->character;
-  }
 
-  if (amt > 0) {
-    if (vict != nullptr) {
-      send_to_char(g, ch, "@WYou award @C{} @D(@G{:d}@D)@W RP points.@n\r\n", char_get_name(vict), amt);
-      send_to_char(g, vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G{:d}@D)@W RP points by @C{}@W.@n\r\n", amt, char_get_name(ch));
-      send_to_imm(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
-      char_set_rp(vict, char_get_rp(vict) + amt);
-      char_set_rp(vict, char_get_rp(vict));
-      if (amt <= 29) {
-        char_set_trp(vict, char_get_trp(vict) + (amt));
-      }
-      char_get_desc(vict)->rpp += amt;
-      userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
-    } else {
+  if (!vict) { /* offline: the user file takes it */
+    if (amt > 0) {
       send_to_char(g, ch, "@WYou award user @C{} @D(@G{:d}@D)@W RP points.@n\r\n", arg, amt);
       send_to_imm(g, "ROLEPLAY: User {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
-      userWrite(g, nullptr, 0, amt, 0, arg.c_str());
-    }
-  } else {
-    if (vict != nullptr) {
-      send_to_char(g, ch, "@WYou deduct @D(@G{:d}@D)@W RP points from @C{}@W.@n\r\n", amt, char_get_name(vict));
-      send_to_char(g, vict, "@D[@YROLEPLAY@D] @C{}@W deducts @D(@G{:d}@D)@W RP points from you.@n\r\n", char_get_name(ch), amt);
-      send_to_imm(g, "ROLEPLAY: {} has had {:d} RP points deducted by {}.", char_get_name(vict), amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has had {:d} RP points deducted by {}.", char_get_name(vict), amt, char_get_name(ch));
-      char_set_rp(vict, char_get_rp(vict) + amt);
-      char_set_rp(vict, char_get_rp(vict));
-      char_get_desc(vict)->rpp += amt;
-      userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
     } else {
       send_to_char(g, ch, "@WYou deduct @D(@G{:d}@D)@W RP points from user @C{}@W.@n\r\n", amt, arg);
       send_to_imm(g, "ROLEPLAY: User {} has had {:d} RP points deducted by {}.", arg, amt, char_get_name(ch));
-      log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
-      userWrite(g, nullptr, 0, amt, 0, arg.c_str());
     }
+    log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch)); /* quirk: says awarded for a deduction too */
+    userWrite(g, nullptr, 0, amt, 0, arg.c_str());
+    return;
   }
+
+  if (amt > 0) {
+    send_to_char(g, ch, "@WYou award @C{} @D(@G{:d}@D)@W RP points.@n\r\n", char_get_name(vict), amt);
+    send_to_char(g, vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G{:d}@D)@W RP points by @C{}@W.@n\r\n", amt, char_get_name(ch));
+    send_to_imm(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
+    log_imm_action(g, "ROLEPLAY: {} has been awarded {:d} RP points by {}.", arg, amt, char_get_name(ch));
+  } else {
+    send_to_char(g, ch, "@WYou deduct @D(@G{:d}@D)@W RP points from @C{}@W.@n\r\n", amt, char_get_name(vict));
+    send_to_char(g, vict, "@D[@YROLEPLAY@D] @C{}@W deducts @D(@G{:d}@D)@W RP points from you.@n\r\n", char_get_name(ch), amt);
+    send_to_imm(g, "ROLEPLAY: {} has had {:d} RP points deducted by {}.", char_get_name(vict), amt, char_get_name(ch));
+    log_imm_action(g, "ROLEPLAY: {} has had {:d} RP points deducted by {}.", char_get_name(vict), amt, char_get_name(ch));
+  }
+  char_set_rp(vict, char_get_rp(vict) + amt);
+  if (amt > 0 && amt <= 29)
+    char_set_trp(vict, char_get_trp(vict) + amt);
+  char_get_desc(vict)->rpp += amt;
+  userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
 }
 
 ACMD(do_permission)
 {
-  std::string arg;
-  std::string arg2;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  arg2                  = take_arg(rest);
+  std::string arg       = take_arg(rest);
+  std::string arg2      = take_arg(rest);
 
-  if (arg.empty()) {
-    send_to_char(g, ch, "You want to @Grestrict@n or @Gunrestrict@n?\r\n");
-    return;
-  }
-
-  if (arg2.empty() && str_eq_nocase("unrestrict", arg)) {
-    send_to_char(g, ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
-    return;
-  }
-  if (str_eq_nocase("unrestrict", arg)) {
-    if (str_eq_nocase("saiyan", arg2)) {
-      send_to_char(g, ch, "You have unrestricted saiyans for the very next character creation.\r\n");
-      send_to_imm(g, "PERMISSION: {} unrestricted saiyans.", char_get_name(ch));
-      g->SAIYAN_ALLOWED = true;
-    } else if (str_eq_nocase("majin", arg2)) {
-      send_to_char(g, ch, "You have unrestricted majins for the very next character creation.\r\n");
-      send_to_imm(g, "PERMISSION: {} unrestricted majins.", char_get_name(ch));
-      g->MAJIN_ALLOWED = true;
-    } else {
-      send_to_char(g, ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
-      return;
-    }
-  } else if (str_eq_nocase("restrict", arg)) {
+  if (str_eq_nocase("restrict", arg)) {
     send_to_char(g, ch, "You have restricted character creation to standard race slection.\r\n");
     send_to_imm(g, "PERMISSION: {} restricted races again.", char_get_name(ch));
-    g->MAJIN_ALLOWED = false;
-  } else {
+    g->MAJIN_ALLOWED = false; /* quirk: saiyans stay allowed */
+    return;
+  }
+  if (!str_eq_nocase("unrestrict", arg)) {
     send_to_char(g, ch, "You want to @Grestrict@n or @Gunrestrict@n?\r\n");
     return;
+  }
+  if (str_eq_nocase("saiyan", arg2)) {
+    send_to_char(g, ch, "You have unrestricted saiyans for the very next character creation.\r\n");
+    send_to_imm(g, "PERMISSION: {} unrestricted saiyans.", char_get_name(ch));
+    g->SAIYAN_ALLOWED = true;
+  } else if (str_eq_nocase("majin", arg2)) {
+    send_to_char(g, ch, "You have unrestricted majins for the very next character creation.\r\n");
+    send_to_imm(g, "PERMISSION: {} unrestricted majins.", char_get_name(ch));
+    g->MAJIN_ALLOWED = true;
+  } else {
+    send_to_char(g, ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
   }
 }
 
@@ -344,28 +289,24 @@ ACMD(do_interest)
 
 ACMD(do_hell)
 {
-  struct char_data *vict;
-  std::string arg;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
   if (arg.empty()) {
     send_to_char(g, ch, "Syntax: lockout (character)\n        lockout list\r\n");
     return;
   }
-
-  if (str_eq_nocase(arg, "Iovan") || str_eq_nocase(arg, "iovan") || str_eq_nocase(arg, "Fahl") || str_eq_nocase(arg, "fahl") || str_eq_nocase(arg, "Xyron") || str_eq_nocase(arg, "xyron") || str_eq_nocase(arg, "Samael") || str_eq_nocase(arg, "samael")) {
+  if (std::ranges::any_of(SENIOR_IMMORTALS, [&](const char *name) { return str_eq_nocase(arg, name); })) {
     send_to_char(g, ch, "What are you smoking? You can't lockout senior imms.\r\n");
     return;
   }
-
   if (str_eq_nocase(arg, "list")) {
     print_lockout(g, ch);
     return;
   }
 
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD);
+  if (!vict) {
     lockWrite(g, ch, arg.c_str());
     return;
   }
@@ -375,11 +316,9 @@ ACMD(do_hell)
   lockWrite(g, ch, char_get_name(vict));
   if (d && desc_get_connected(d) != CON_PLAYING) {
     desc_set_connected(d, CON_CLOSE);
-    char_get_desc(vict)->character = nullptr;
+    d->character = nullptr;
     char_set_desc(vict, nullptr);
   }
-  return;
-  return;
 }
 
 ACMD(do_advance)
@@ -462,21 +401,13 @@ ACMD(do_advance)
 
 ACMD(do_handout)
 {
-
   if (char_get_admlevel(ch) < 3) {
     send_to_char(g, ch, "You can't do that.\r\n");
     return;
   }
-
-  for (descriptor_data *j : each_desc(g)) {
-    if (!desc_is_playing(j) || ch == j->character || char_get_admlevel(j->character) > 0)
-      continue;
-    if (char_is_npc(j->character))
-      continue;
-    else {
-      char_set_practice_points(g, j->character, char_get_practice_points(g, j->character) + (10));
-    }
-  }
+  for (descriptor_data *j : each_desc(g))
+    if (desc_is_playing(j) && ch != j->character && char_get_admlevel(j->character) <= 0 && !char_is_npc(j->character))
+      char_set_practice_points(g, j->character, char_get_practice_points(g, j->character) + 10);
 
   send_to_all(g, "@g{}@G hands out 10 practice sessions to everyone!@n\r\n", char_get_name(ch));
   mud_log("{} gave a handout of 10 PS to everyone.", char_get_name(ch));
@@ -485,32 +416,34 @@ ACMD(do_handout)
 
 ACMD(do_restore)
 {
-  std::string buf;
-  struct char_data *vict;
-
   std::string_view rest = argument;
-  buf                   = take_arg(rest);
-  if (buf.empty())
+  std::string buf       = take_arg(rest);
+
+  if (buf.empty()) {
     send_to_char(g, ch, "Whom do you wish to restore?\r\n");
-  else if (is_abbrev(buf, "all")) {
+    return;
+  }
+  if (is_abbrev(buf, "all")) {
     send_to_imm(g, "[Log: {} restored all.]", char_get_name(ch));
     log_imm_action(g, "RESTORE: {} has restored all players.", char_get_name(ch));
-    for (descriptor_data *j : each_desc(g)) {
-      if (!desc_is_playing(j) || !(vict = j->character))
-        continue;
-      restore_by(g, vict, ch);
-    }
+    for (descriptor_data *j : each_desc(g))
+      if (desc_is_playing(j) && j->character)
+        restore_by(g, j->character, ch);
     send_to_char(g, ch, "Okay.\r\n");
-  } else if (!(vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, CONFIG_NOPERSON);
-  else if (!char_is_npc(vict) && ch != vict && char_get_admlevel(vict) >= char_get_admlevel(ch))
-    send_to_char(g, ch, "They don't need your help.\r\n");
-  else {
-    restore_by(g, vict, ch);
-    send_to_char(g, ch, CONFIG_OK);
-    send_to_imm(g, "[Log: {} restored {}.]", char_get_name(ch), char_get_name(vict));
-    log_imm_action(g, "RESTORE: {} has restored {}.", char_get_name(ch), char_get_name(vict));
+    return;
   }
+  auto found = find_char(g, ch, buf, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  if (reject(g, ch, found))
+    return;
+  struct char_data *vict = *found;
+  if (!char_is_npc(vict) && ch != vict && char_get_admlevel(vict) >= char_get_admlevel(ch)) {
+    send_to_char(g, ch, "They don't need your help.\r\n");
+    return;
+  }
+  restore_by(g, vict, ch);
+  send_to_char(g, ch, CONFIG_OK);
+  send_to_imm(g, "[Log: {} restored {}.]", char_get_name(ch), char_get_name(vict));
+  log_imm_action(g, "RESTORE: {} has restored {}.", char_get_name(ch), char_get_name(vict));
 }
 
 void perform_immort_vis(GameWorld *g, struct char_data *ch)
@@ -518,165 +451,171 @@ void perform_immort_vis(GameWorld *g, struct char_data *ch)
   char_set_invis_level(g, ch, 0);
 }
 
-static void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)
-{
-
-  for (char_data *tch : room_people(g, char_get_in_room(ch))) {
-    if (tch == ch)
-      continue;
-    if (char_get_admlevel(tch) >= char_get_invis_level(g, ch) && char_get_admlevel(tch) < level)
-      act(g, "You blink and suddenly realize that $n is gone.", false, ch, nullptr,
-          tch, TO_VICT);
-    if (char_get_admlevel(tch) < char_get_invis_level(g, ch) && char_get_admlevel(tch) >= level)
-      act(g, "You suddenly realize that $n is standing beside you.", false, ch, nullptr,
-          tch, TO_VICT);
-  }
-
-  char_set_invis_level(g, ch, level);
-  send_to_char(g, ch, "Your invisibility level is {:d}.\r\n", level);
-}
-
 ACMD(do_invis)
 {
-  std::string arg;
-  int level;
-
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "You can't do that!\r\n");
     return;
   }
 
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     if (char_get_invis_level(g, ch) > 0)
       perform_immort_vis(g, ch);
     else
       perform_immort_invis(g, ch, char_get_admlevel(ch));
-  } else {
-    level = parse_int(arg);
-    if (level > char_get_admlevel(ch))
-      send_to_char(g, ch, "You can't go invisible above your own level.\r\n");
-    else if (level < 1)
-      perform_immort_vis(g, ch);
-    else
-      perform_immort_invis(g, ch, level);
+    return;
   }
+  int level = parse_int(arg);
+  if (level > char_get_admlevel(ch))
+    send_to_char(g, ch, "You can't go invisible above your own level.\r\n");
+  else if (level < 1)
+    perform_immort_vis(g, ch);
+  else
+    perform_immort_invis(g, ch, level);
 }
 
-/*
- *  General fn for wizcommands of the sort: cmd <player>
- */
+namespace {
+  int wiz_log_level(GameWorld *g, struct char_data *ch)
+  {
+    return MAX(ADMLVL_GOD, char_get_invis_level(g, ch));
+  }
+
+  /* What each of the wizutil commands does to vict; false if nothing was done, and nothing is to be saved */
+  bool reroll(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    send_to_char(g, ch, "Rerolling is not possible at this time, bug Iovan about it...\r\n");
+    mud_log("(GC) {} has rerolled {}.", char_get_name(ch), char_get_name(vict));
+    send_to_char(g, ch, "New stats: Str {:d}, Int {:d}, Wis {:d}, Dex {:d}, Con {:d}, Cha {:d}\r\n", char_get_aff_abils_str(vict), char_get_aff_abils_intel(vict),
+                 char_get_aff_abils_wis(vict), char_get_aff_abils_dex(vict), char_get_aff_abils_con(vict), char_get_aff_abils_cha(vict));
+    return true;
+  }
+
+  bool pardon(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    if (!char_plr_flagged(vict, PLR_THIEF) && !char_plr_flagged(vict, PLR_KILLER)) {
+      send_to_char(g, ch, "Your victim is not flagged.\r\n");
+      return false;
+    }
+    char_plr_set(vict, PLR_THIEF, false);
+    char_plr_set(vict, PLR_KILLER, false);
+    send_to_char(g, ch, "Pardoned.\r\n");
+    send_to_char(g, vict, "You have been pardoned by the Gods!\r\n");
+    mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} pardoned by {}", char_get_name(vict), char_get_name(ch));
+    return true;
+  }
+
+  bool notitle(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    long result = char_plr_toggle(vict, PLR_NOTITLE);
+    mudlog(g, LOG_NRM, wiz_log_level(g, ch), true, "(GC) Notitle {} for {} by {}.", ONOFF(result), char_get_name(vict), char_get_name(ch));
+    send_to_char(g, ch, "(GC) Notitle {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
+    return true;
+  }
+
+  bool squelch(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    long result = char_plr_toggle(vict, PLR_NOSHOUT);
+    mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) Squelch {} for {} by {}.", ONOFF(result), char_get_name(vict), char_get_name(ch));
+    send_to_char(g, ch, "(GC) Mute turned {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
+    send_to_all(g, "@D[@RMUTE@D] @C{}@W has had mute turned @r{}@W by @C{}@W.\r\n", char_get_name(vict), ONOFF(result), char_get_name(ch));
+    return true;
+  }
+
+  bool freeze(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    const char *refusal = nullptr;
+    if (ch == vict)
+      refusal = "Oh, yeah, THAT'S real smart...\r\n";
+    else if (char_get_admlevel(ch) <= char_get_admlevel(vict))
+      refusal = "Pfft...\r\n";
+    else if (char_plr_flagged(vict, PLR_FROZEN))
+      refusal = "Your victim is already pretty cold.\r\n";
+    if (refusal) {
+      send_to_char(g, ch, refusal);
+      return false;
+    }
+    char_plr_set(vict, PLR_FROZEN, true);
+    char_set_freeze_level(g, vict, char_get_admlevel(ch));
+    send_to_char(g, vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
+    send_to_char(g, ch, "Frozen.\r\n");
+    act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
+    mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} frozen by {}.", char_get_name(vict), char_get_name(ch));
+    return true;
+  }
+
+  bool thaw(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    if (!char_plr_flagged(vict, PLR_FROZEN)) {
+      send_to_char(g, ch, "Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
+      return false;
+    }
+    if (char_get_freeze_level(g, vict) > char_get_admlevel(ch)) {
+      send_to_char(g, ch, "Sorry, a level {:d} God froze {}... you can't unfreeze {}.\r\n", char_get_freeze_level(g, vict), char_get_name(vict), char_hmhr(vict));
+      return false;
+    }
+    mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} un-frozen by {}.", char_get_name(vict), char_get_name(ch));
+    char_plr_set(vict, PLR_FROZEN, false);
+    send_to_char(g, vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
+    send_to_char(g, ch, "Thawed.\r\n");
+    act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
+    return true;
+  }
+
+  bool unaffect(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  {
+    if (char_affects(vict).empty() && !char_get_affected_by(vict)) {
+      send_to_char(g, ch, "Your victim does not have any affections!\r\n");
+      return false;
+    }
+    while (!char_affects(vict).empty())
+      affect_remove(g, vict, &char_affects(vict).front());
+    for (int i = 0; i < AF_ARRAY_MAX; i++)
+      char_get_affected_by(vict)[i] = 0;
+    send_to_char(g, vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
+    send_to_char(g, ch, "All spells removed.\r\n");
+    return true;
+  }
+
+  struct wizutil {
+    int subcmd;
+    bool (*apply)(GameWorld *, struct char_data *, struct char_data *);
+  };
+  constexpr wizutil WIZUTILS[] = {
+    {SCMD_REROLL, reroll}, {SCMD_PARDON, pardon}, {SCMD_NOTITLE, notitle}, {SCMD_SQUELCH, squelch},
+    {SCMD_FREEZE, freeze}, {SCMD_THAW, thaw},     {SCMD_UNAFFECT, unaffect},
+  };
+} // namespace
+
+/* General fn for wizcommands of the sort: cmd <player> */
 ACMD(do_wizutil)
 {
-  std::string arg;
-  struct char_data *vict;
-  int taeller;
-  long result;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (arg.empty())
+  if (arg.empty()) {
     send_to_char(g, ch, "Yes, but for whom?!?\r\n");
-  else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "There is no such player.\r\n");
-  else if (char_is_npc(vict))
-    send_to_char(g, ch, "You can't do that to a mob!\r\n");
-  else if (char_get_admlevel(vict) > char_get_admlevel(ch))
-    send_to_char(g, ch, "Hmmm...you'd better not.\r\n");
-  else {
-    switch (subcmd) {
-      case SCMD_REROLL:
-        send_to_char(g, ch, "Rerolling is not possible at this time, bug Iovan about it...\r\n");
-        mud_log("(GC) {} has rerolled {}.", char_get_name(ch), char_get_name(vict));
-        send_to_char(g, ch, "New stats: Str {:d}, Int {:d}, Wis {:d}, Dex {:d}, Con {:d}, Cha {:d}\r\n",
-                     char_get_aff_abils_str(vict), char_get_aff_abils_intel(vict), char_get_aff_abils_wis(vict),
-                     char_get_aff_abils_dex(vict), char_get_aff_abils_con(vict), char_get_aff_abils_cha(vict));
-        break;
-      case SCMD_PARDON:
-        if (!char_plr_flagged(vict, PLR_THIEF) && !char_plr_flagged(vict, PLR_KILLER)) {
-          send_to_char(g, ch, "Your victim is not flagged.\r\n");
-          return;
-        }
-        char_plr_set(vict, PLR_THIEF, false);
-        char_plr_set(vict, PLR_KILLER, false);
-        send_to_char(g, ch, "Pardoned.\r\n");
-        send_to_char(g, vict, "You have been pardoned by the Gods!\r\n");
-        mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} pardoned by {}", char_get_name(vict), char_get_name(ch));
-        break;
-      case SCMD_NOTITLE:
-        result = char_plr_toggle(vict, PLR_NOTITLE);
-        mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) Notitle {} for {} by {}.",
-               ONOFF(result), char_get_name(vict), char_get_name(ch));
-        send_to_char(g, ch, "(GC) Notitle {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
-        break;
-      case SCMD_SQUELCH:
-        result = char_plr_toggle(vict, PLR_NOSHOUT);
-        mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) Squelch {} for {} by {}.",
-               ONOFF(result), char_get_name(vict), char_get_name(ch));
-        send_to_char(g, ch, "(GC) Mute turned {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
-        send_to_all(g, "@D[@RMUTE@D] @C{}@W has had mute turned @r{}@W by @C{}@W.\r\n", char_get_name(vict), ONOFF(result), char_get_name(ch));
-        break;
-      case SCMD_FREEZE:
-        if (ch == vict) {
-          send_to_char(g, ch, "Oh, yeah, THAT'S real smart...\r\n");
-          return;
-        }
-        if (char_get_admlevel(ch) <= char_get_admlevel(vict)) {
-          send_to_char(g, ch, "Pfft...\r\n");
-          return;
-        }
-        if (char_plr_flagged(vict, PLR_FROZEN)) {
-          send_to_char(g, ch, "Your victim is already pretty cold.\r\n");
-          return;
-        }
-        char_plr_set(vict, PLR_FROZEN, true);
-        char_set_freeze_level(g, vict, char_get_admlevel(ch));
-        send_to_char(g, vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
-        send_to_char(g, ch, "Frozen.\r\n");
-        act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
-        mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} frozen by {}.", char_get_name(vict), char_get_name(ch));
-        break;
-      case SCMD_THAW:
-        if (!char_plr_flagged(vict, PLR_FROZEN)) {
-          send_to_char(g, ch, "Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
-          return;
-        }
-        if (char_get_freeze_level(g, vict) > char_get_admlevel(ch)) {
-          send_to_char(g, ch, "Sorry, a level {:d} God froze {}... you can't unfreeze {}.\r\n",
-                       char_get_freeze_level(g, vict), char_get_name(vict), char_hmhr(vict));
-          return;
-        }
-        mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} un-frozen by {}.", char_get_name(vict), char_get_name(ch));
-        char_plr_set(vict, PLR_FROZEN, false);
-        send_to_char(g, vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
-        send_to_char(g, ch, "Thawed.\r\n");
-        act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
-        break;
-      case SCMD_UNAFFECT:
-        if (!char_affects(vict).empty() || char_get_affected_by(vict)) {
-          while (!char_affects(vict).empty())
-            affect_remove(g, vict, &char_affects(vict).front());
-          for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            char_get_affected_by(vict)[taeller] = 0;
-          send_to_char(g, vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
-          send_to_char(g, ch, "All spells removed.\r\n");
-        } else {
-          send_to_char(g, ch, "Your victim does not have any affections!\r\n");
-          return;
-        }
-        break;
-      default:
-        mud_log("SYSERR: Unknown subcmd {:d} passed to do_wizutil ({})", subcmd, __FILE__);
-        /*  SYSERR_DESC:
-       *  This is the same as the unhandled case in do_gen_ps(), but this
-       *  function handles 'reroll', 'pardon', 'freeze', etc.
-       */
-        break;
-    }
-    save_char(g, vict);
+    return;
   }
+  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "There is no such player.\r\n");
+  if (reject(g, ch, found))
+    return;
+  struct char_data *vict = *found;
+  if (char_is_npc(vict)) {
+    send_to_char(g, ch, "You can't do that to a mob!\r\n");
+    return;
+  }
+  if (char_get_admlevel(vict) > char_get_admlevel(ch)) {
+    send_to_char(g, ch, "Hmmm...you'd better not.\r\n");
+    return;
+  }
+  auto util = std::ranges::find(WIZUTILS, subcmd, &wizutil::subcmd);
+  if (util == std::end(WIZUTILS))
+    mud_log("SYSERR: Unknown subcmd {:d} passed to do_wizutil ({})", subcmd, __FILE__);
+  else if (!util->apply(g, ch, vict))
+    return;
+  save_char(g, vict);
 }
 
 /***************** The do_set function ***********************************/
@@ -1125,49 +1064,51 @@ ACMD(do_set)
 
 ACMD(do_chown)
 {
-  struct char_data *victim;
-  struct obj_data *obj;
-  std::string buf2;
-  std::string buf3;
-  int i, k = 0;
-
   std::string_view rest = argument;
-  buf2                  = take_arg(rest);
-  buf3                  = take_arg(rest);
+  std::string buf2      = take_arg(rest);
+  std::string buf3      = take_arg(rest);
 
-  if (buf2.empty())
+  if (buf2.empty()) {
     send_to_char(g, ch, "Syntax: chown <object> <character>.\r\n");
-  else if (!(victim = get_char_vis(g, ch, buf3, nullptr, FIND_CHAR_WORLD)))
-    send_to_char(g, ch, "No one by that name here.\r\n");
-  else if (victim == ch)
-    send_to_char(g, ch, "Are you sure you're feeling ok?\r\n");
-  else if (char_get_level(victim) >= char_get_level(ch))
-    send_to_char(g, ch, "That's really not such a good idea.\r\n");
-  else if (buf3.empty())
-    send_to_char(g, ch, "Syntax: chown <object> <character>.\r\n");
-  else {
-    for (i = 0; i < NUM_WEARS; i++) {
-      if (char_get_equipment(victim, i) && char_can_see_obj(g, ch, char_get_equipment(victim, i)) &&
-          isname(buf2, obj_get_name(char_get_equipment(victim, i)))) {
-        obj_to_char(g, unequip_char(g, victim, i), victim);
-        k = 1;
-      }
-    }
-
-    if (!(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
-      if (!k && !(obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim)))) {
-        send_to_char(g, ch, "{} does not appear to have the {}.\r\n", char_get_name(victim), buf2);
-        return;
-      }
-    }
-
-    act(g, "@n$n makes a magical gesture and $p@n flies from $N to $m.", false, ch, obj, victim, TO_NOTVICT);
-    act(g, "@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, TO_VICT);
-    act(g, "@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, TO_CHAR);
-
-    obj_from_char(g, obj);
-    obj_to_char(g, obj, ch);
-    save_char(g, ch);
-    save_char(g, victim);
+    return;
   }
+  auto found = find_char(g, ch, buf3, FIND_CHAR_WORLD, "No one by that name here.\r\n");
+  if (reject(g, ch, found))
+    return;
+  struct char_data *victim = *found;
+  const char *refusal      = nullptr;
+  if (victim == ch)
+    refusal = "Are you sure you're feeling ok?\r\n";
+  else if (char_get_level(victim) >= char_get_level(ch))
+    refusal = "That's really not such a good idea.\r\n";
+  else if (buf3.empty())
+    refusal = "Syntax: chown <object> <character>.\r\n";
+  if (refusal) {
+    send_to_char(g, ch, refusal);
+    return;
+  }
+
+  /* What they wear by that name comes off first */
+  bool taken_off = false;
+  for (int i = 0; i < NUM_WEARS; i++) {
+    struct obj_data *worn = char_get_equipment(victim, i);
+    if (worn && char_can_see_obj(g, ch, worn) && isname(buf2, obj_get_name(worn))) {
+      obj_to_char(g, unequip_char(g, victim, i), victim);
+      taken_off = true;
+    }
+  }
+  /* then it's looked for, as the victim sees, among what they carry */
+  struct obj_data *obj = get_obj_in_list_vis(g, victim, buf2, nullptr, char_get_inventory(victim));
+  if (!obj && !taken_off) {
+    send_to_char(g, ch, "{} does not appear to have the {}.\r\n", char_get_name(victim), buf2);
+    return;
+  } /* quirk: if something came off but can't be found, the gestures are made with nothing */
+
+  act(g, "@n$n makes a magical gesture and $p@n flies from $N to $m.", false, ch, obj, victim, TO_NOTVICT);
+  act(g, "@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, TO_VICT);
+  act(g, "@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, TO_CHAR);
+  obj_from_char(g, obj);
+  obj_to_char(g, obj, ch);
+  save_char(g, ch);
+  save_char(g, victim);
 }

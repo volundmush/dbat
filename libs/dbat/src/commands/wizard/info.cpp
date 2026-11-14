@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -73,6 +74,22 @@ static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum);
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum);
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum);
 
+namespace {
+  /* when, as asctime() writes it but without its newline */
+  std::string clock_text(time_t when)
+  {
+    std::string text = asctime(localtime(&when));
+    text.pop_back();
+    return text;
+  }
+
+  /* A string the getters give as null when empty, as "" */
+  const char *text_of(const char *s)
+  {
+    return s ? s : "";
+  }
+} // namespace
+
 /* do_finddoor, finds the door(s) that a key goes to */
 ACMD(do_finddoor)
 {
@@ -125,37 +142,36 @@ ACMD(do_finddoor)
   }
 }
 
+namespace {
+  /* What vnum lists, by the word for it: every kind the word abbreviates is listed */
+  struct vnum_kind {
+    const char *name;
+    int (*list)(GameWorld *, std::string_view, struct char_data *);
+    const char *none;
+  };
+  const vnum_kind VNUM_KINDS[] = {
+    {"mob", vnum_mobile, "No mobiles by that name.\r\n"},
+    {"obj", vnum_object, "No objects by that name.\r\n"},
+    {"mat", vnum_material, "No materials by that name.\r\n"},
+    {"wtype", vnum_weapontype, "No weapon types by that name.\r\n"},
+    {"atype", vnum_armortype, "No armor types by that name.\r\n"},
+  };
+} // namespace
+
 ACMD(do_vnum)
 {
-  std::string buf, buf2;
-
   std::string_view rest = argument;
-  buf                   = take_word(rest);
-  buf2                  = skip_spaces(rest);
+  std::string kind      = take_word(rest);
+  std::string name(skip_spaces(rest));
 
-  if (buf.empty() || buf2.empty() || (!is_abbrev(buf, "mob") && !is_abbrev(buf, "obj") && !is_abbrev(buf, "mat") && !is_abbrev(buf, "wtype") && !is_abbrev(buf, "atype"))) {
+  auto named = [&](const vnum_kind &k) { return is_abbrev(kind, k.name); };
+  if (kind.empty() || name.empty() || std::ranges::none_of(VNUM_KINDS, named)) {
     send_to_char(g, ch, "Usage: vnum { atype | material | mob | obj | wtype } <name>\r\n");
     return;
   }
-  if (is_abbrev(buf, "mob"))
-    if (!vnum_mobile(g, buf2, ch))
-      send_to_char(g, ch, "No mobiles by that name.\r\n");
-
-  if (is_abbrev(buf, "obj"))
-    if (!vnum_object(g, buf2, ch))
-      send_to_char(g, ch, "No objects by that name.\r\n");
-
-  if (is_abbrev(buf, "mat"))
-    if (!vnum_material(g, buf2, ch))
-      send_to_char(g, ch, "No materials by that name.\r\n");
-
-  if (is_abbrev(buf, "wtype"))
-    if (!vnum_weapontype(g, buf2, ch))
-      send_to_char(g, ch, "No weapon types by that name.\r\n");
-
-  if (is_abbrev(buf, "atype"))
-    if (!vnum_armortype(g, buf2, ch))
-      send_to_char(g, ch, "No armor types by that name.\r\n");
+  for (const vnum_kind &k : VNUM_KINDS | std::views::filter(named))
+    if (!k.list(g, name, ch))
+      send_to_char(g, ch, k.none);
 }
 
 #define ZOCMD zrnum->cmd[subcmd]
@@ -365,13 +381,8 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   std::string buf;
 
   vnum = obj_get_vnum(g, j);
-  if (obj_get_lload(j) > 0) {
-    char *tmstr;
-    time_t last_load             = obj_get_lload(j);
-    tmstr                        = asctime(localtime(&last_load));
-    *(tmstr + strlen(tmstr) - 1) = '\0';
-    send_to_char(g, ch, "LOADED DROPPED: [{}]\r\n", tmstr);
-  }
+  if (obj_get_lload(j) > 0)
+    send_to_char(g, ch, "LOADED DROPPED: [{}]\r\n", clock_text(obj_get_lload(j)));
   if (obj_get_vnum(g, j) == 65) {
     send_to_char(g, ch, "Healing Tank Charge Level: [{:d}]\r\n", obj_get_healcharge(j));
   }
@@ -562,13 +573,8 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   struct obj_data *chair;
   struct affected_type *aff;
 
-  if (char_is_npc(k)) {
-    char *tmstr;
-    time_t last_played           = char_get_lastpl(k);
-    tmstr                        = asctime(localtime(&last_played));
-    *(tmstr + strlen(tmstr) - 1) = '\0';
-    send_to_char(g, ch, "LOADED AT: [{}]\r\n", tmstr);
-  }
+  if (char_is_npc(k))
+    send_to_char(g, ch, "LOADED AT: [{}]\r\n", clock_text(char_get_lastpl(k)));
   buf = sprinttype(char_get_sex(k), genders);
   send_to_char(g, ch, "{} {} '{}'  IDNum: [{:>5d}], In room [{:>5d}], Loadroom : [{:>5d}]\r\n",
                buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB")),
@@ -827,96 +833,127 @@ ACMD(do_varstat)
   }
 }
 
-ACMD(do_stat)
-{
-  std::string buf1, buf2;
-  struct char_data *victim;
-  struct obj_data *object;
-
-  std::string_view rest = argument;
-  buf1                  = take_word(rest);
-  buf2                  = skip_spaces(rest);
-
-  if (buf1.empty()) {
-    send_to_char(g, ch, "Stats on who or what or where?\r\n");
-    return;
-  }
-  if (is_abbrev(buf1, "room")) {
-    do_stat_room(g, ch);
-  } else if (is_abbrev(buf1, "mob")) {
-    if (buf2.empty())
+namespace {
+  /* stat <kind> <name>, kind by kind */
+  void stat_mob(GameWorld *g, struct char_data *ch, std::string &name)
+  {
+    if (name.empty()) {
       send_to_char(g, ch, "Stats on which mobile?\r\n");
-    else {
-      if ((victim = get_char_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
-        do_stat_character(g, ch, victim);
-      else
-        send_to_char(g, ch, "No such mobile around.\r\n");
-    }
-  } else if (is_abbrev(buf1, "player")) {
-    if (buf2.empty()) {
-      send_to_char(g, ch, "Stats on which player?\r\n");
-    } else {
-      if ((victim = get_player_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
-        do_stat_character(g, ch, victim);
-      else
-        send_to_char(g, ch, "No such player around.\r\n");
-    }
-  } else if (is_abbrev(buf1, "file")) {
-    if (buf2.empty())
-      send_to_char(g, ch, "Stats on which player?\r\n");
-    else if ((victim = get_player_vis(g, ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
-      do_stat_character(g, ch, victim);
-    else {
-      victim = new char_data();
-      clear_char(victim);
-      char_make_player_specials(victim);
-      if (load_char(g, buf2.c_str(), victim) >= 0) {
-        char_to_room(g, victim, 0);
-        if (char_get_admlevel(victim) > char_get_admlevel(ch))
-          send_to_char(g, ch, "Sorry, you can't do that.\r\n");
-        else
-          do_stat_character(g, ch, victim);
-        extract_char_final(g, victim);
-      } else {
-        send_to_char(g, ch, "There is no such player.\r\n");
-        free_char(g, victim);
-      }
-    }
-  } else if (is_abbrev(buf1, "object")) {
-    if (buf2.empty())
-      send_to_char(g, ch, "Stats on which object?\r\n");
-    else {
-      if ((object = get_obj_vis(g, ch, buf2, nullptr)) != nullptr)
-        do_stat_object(g, ch, object);
-      else
-        send_to_char(g, ch, "No such object around.\r\n");
-    }
-  } else if (is_abbrev(buf1, "zone")) {
-    if (buf2.empty()) {
-      send_to_char(g, ch, "Stats on which zone?\r\n");
       return;
     }
-    print_zone(g, ch, parse_int(buf2));
-    return;
-  } else {
-    std::string name = buf1;
-    int number       = get_number(name);
+    auto found = find_char(g, ch, name, FIND_CHAR_WORLD, "No such mobile around.\r\n");
+    if (!reject(g, ch, found))
+      do_stat_character(g, ch, *found);
+  }
 
-    if ((object = get_obj_in_equip_vis(g, ch, name, &number, char_get_equipment_array(ch))) != nullptr)
-      do_stat_object(g, ch, object);
-    else if ((object = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))) != nullptr)
-      do_stat_object(g, ch, object);
-    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
+  void stat_player(GameWorld *g, struct char_data *ch, std::string &name)
+  {
+    if (name.empty()) {
+      send_to_char(g, ch, "Stats on which player?\r\n");
+      return;
+    }
+    auto found = find_player(g, ch, name, FIND_CHAR_WORLD, "No such player around.\r\n");
+    if (!reject(g, ch, found))
+      do_stat_character(g, ch, *found);
+  }
+
+  void stat_file(GameWorld *g, struct char_data *ch, std::string &name)
+  {
+    if (name.empty()) {
+      send_to_char(g, ch, "Stats on which player?\r\n");
+      return;
+    }
+    if (struct char_data *victim = get_player_vis(g, ch, name, nullptr, FIND_CHAR_WORLD)) {
       do_stat_character(g, ch, victim);
-    else if ((object = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
-      do_stat_object(g, ch, object);
-    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
+      return;
+    }
+    struct char_data *victim = new char_data();
+    clear_char(victim);
+    char_make_player_specials(victim);
+    if (load_char(g, name.c_str(), victim) < 0) {
+      send_to_char(g, ch, "There is no such player.\r\n");
+      free_char(g, victim);
+      return;
+    }
+    char_to_room(g, victim, 0);
+    if (char_get_admlevel(victim) > char_get_admlevel(ch))
+      send_to_char(g, ch, "Sorry, you can't do that.\r\n");
+    else
       do_stat_character(g, ch, victim);
-    else if ((object = get_obj_vis(g, ch, name, &number)) != nullptr)
+    extract_char_final(g, victim);
+  }
+
+  void stat_object(GameWorld *g, struct char_data *ch, std::string &name)
+  {
+    if (name.empty()) {
+      send_to_char(g, ch, "Stats on which object?\r\n");
+      return;
+    }
+    if (struct obj_data *object = get_obj_vis(g, ch, name, nullptr))
+      do_stat_object(g, ch, object);
+    else
+      send_to_char(g, ch, "No such object around.\r\n");
+  }
+
+  void stat_zone(GameWorld *g, struct char_data *ch, std::string &name)
+  {
+    if (name.empty())
+      send_to_char(g, ch, "Stats on which zone?\r\n");
+    else
+      print_zone(g, ch, parse_int(name));
+  }
+
+  void stat_room(GameWorld *g, struct char_data *ch, std::string &)
+  {
+    do_stat_room(g, ch);
+  }
+
+  /* Anything by that name: worn, carried, here, then anywhere */
+  void stat_anything(GameWorld *g, struct char_data *ch, std::string name)
+  {
+    int number = get_number(name);
+    struct obj_data *object;
+    struct char_data *victim;
+
+    if ((object = get_obj_in_equip_vis(g, ch, name, &number, char_get_equipment_array(ch))) ||
+        (object = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))))
+      do_stat_object(g, ch, object);
+    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_ROOM)))
+      do_stat_character(g, ch, victim);
+    else if ((object = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))))
+      do_stat_object(g, ch, object);
+    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_WORLD)))
+      do_stat_character(g, ch, victim);
+    else if ((object = get_obj_vis(g, ch, name, &number)))
       do_stat_object(g, ch, object);
     else
       send_to_char(g, ch, "Nothing around by that name.\r\n");
   }
+
+  struct stat_kind {
+    const char *name;
+    void (*stat)(GameWorld *, struct char_data *, std::string &);
+  };
+  constexpr stat_kind STAT_KINDS[] = {
+    {"room", stat_room}, {"mob", stat_mob}, {"player", stat_player}, {"file", stat_file}, {"object", stat_object}, {"zone", stat_zone},
+  };
+} // namespace
+
+ACMD(do_stat)
+{
+  std::string_view rest = argument;
+  std::string kind      = take_word(rest);
+  std::string name(skip_spaces(rest));
+
+  if (kind.empty()) {
+    send_to_char(g, ch, "Stats on who or what or where?\r\n");
+    return;
+  }
+  auto it = std::ranges::find_if(STAT_KINDS, [&](const stat_kind &k) { return is_abbrev(kind, k.name); });
+  if (it != std::end(STAT_KINDS))
+    it->stat(g, ch, name);
+  else
+    stat_anything(g, ch, kind);
 }
 
 ACMD(do_vstat)
@@ -965,61 +1002,37 @@ ACMD(do_vstat)
 
 ACMD(do_date)
 {
-  char *tmstr;
-  time_t mytime;
-  int d, h, m;
-
-  if (subcmd == SCMD_DATE)
-    mytime = game_now(g);
-  else
-    mytime = g->boot_time;
-
-  tmstr                        = asctime(localtime(&mytime));
-  *(tmstr + strlen(tmstr) - 1) = '\0';
-
-  if (subcmd == SCMD_DATE)
-    send_to_char(g, ch, "Current machine time: {}\r\n", tmstr);
-  else {
-    mytime = game_now(g) - g->boot_time;
-    d      = mytime / 86400;
-    h      = (mytime / 3600) % 24;
-    m      = (mytime / 60) % 60;
-
-    send_to_char(g, ch, "Up since {}: {:d} day{}, {:d}:{:02d}\r\n", tmstr, d, d == 1 ? "" : "s", h, m);
+  if (subcmd == SCMD_DATE) {
+    send_to_char(g, ch, "Current machine time: {}\r\n", clock_text(game_now(g)));
+    return;
   }
+  time_t up = game_now(g) - g->boot_time;
+  int d = up / 86400, h = (up / 3600) % 24, m = (up / 60) % 60;
+  send_to_char(g, ch, "Up since {}: {:d} day{}, {:d}:{:02d}\r\n", clock_text(g->boot_time), d, d == 1 ? "" : "s", h, m);
 }
 
 ACMD(do_last)
 {
-  std::string arg;
-  struct char_data *vict = nullptr;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "For whom do you wish to search?\r\n");
     return;
   }
-  vict = new char_data();
+
+  struct char_data *vict = new char_data();
   clear_char(vict);
   char_make_player_specials(vict);
   if (load_char(g, arg.c_str(), vict) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
-    free_char(g, vict);
-    return;
-  }
-  if ((char_get_admlevel(vict) > char_get_admlevel(ch)) && (char_get_admlevel(ch) < ADMLVL_IMPL)) {
+  } else if (char_get_admlevel(vict) > char_get_admlevel(ch) && char_get_admlevel(ch) < ADMLVL_IMPL) {
     send_to_char(g, ch, "You are not sufficiently godly for that!\r\n");
-    return;
+  } else {
+    time_t logon = char_get_time_logon(vict);
+    send_to_char(g, ch, "[{:>5d}] [{:>2d} {} {}] {:<12} : {:<18} : {:<20}\r\n", char_get_idnum(vict), char_get_level(vict), char_race_abbr(vict), char_class_abbr(vict),
+                 char_get_name(vict), !char_get_player_specials(vict)->host.empty() ? char_get_player_specials(vict)->host.c_str() : "(NOHOST)", ctime(&logon));
   }
-
-  time_t logon = char_get_time_logon(vict);
-  send_to_char(g, ch, "[{:>5d}] [{:>2d} {} {}] {:<12} : {:<18} : {:<20}\r\n",
-               char_get_idnum(vict), char_get_level(vict),
-               char_race_abbr(vict), char_class_abbr(vict),
-               char_get_name(vict), !char_get_player_specials(vict)->host.empty() ? char_get_player_specials(vict)->host.c_str() : "(NOHOST)",
-               ctime(&logon));
-  free_char(g, vict);
+  free_char(g, vict); /* refused or not */
 }
 
 /* single zone printing fn used by "show zone" so it's not repeated in the
@@ -1554,13 +1567,13 @@ ACMD(do_zcheck)
   for (mob_vnum mvnum : g->mob_proto.vnums()) {
     if (find_zone_by_thing(g, mob_index_of(g, mvnum)->vnum) == zrnum) { /*is mob in this zone?*/
       mob = mob_proto_of(g, mvnum);
-      if (!strcmp(char_get_alias(mob), "mob unfinished") && (found = 1))
+      if (!strcmp(text_of(char_get_alias(mob)), "mob unfinished") && (found = 1))
         buf += "- Alias hasn't been set.\r\n";
 
-      if (!strcmp(char_get_sdesc(mob), "the unfinished mob") && (found = 1))
+      if (!strcmp(text_of(char_get_sdesc(mob)), "the unfinished mob") && (found = 1))
         buf += "- Short description hasn't been set.\r\n";
 
-      if (!strncmp(char_get_ldesc(mob), "An unfinished mob stands here.", 30) && (found = 1))
+      if (!strncmp(text_of(char_get_ldesc(mob)), "An unfinished mob stands here.", 30) && (found = 1))
         buf += "- Long description hasn't been set.\r\n";
 
       if (char_get_ddesc(mob) && *char_get_ddesc(mob)) {
@@ -1619,10 +1632,8 @@ ACMD(do_zcheck)
                      CCYEL(g, ch, C_NRM), char_get_name(mob),
                      CCNRM(g, ch, C_NRM), buf);
       }
-      /* reset buffers and found flag */
       buf.clear();
       found = 0;
-      buf.clear();
     } /*mob is in zone*/
   } /*check mobs*/
 
@@ -1770,15 +1781,15 @@ ACMD(do_zcheck)
                           room_flagged(g, i, ROOM_OLC) ? "OLC" : "",
                           room_flagged(g, i, ROOM_BFS_MARK) ? "*" : "");
 
-      if ((MIN_ROOM_DESC_LENGTH) && strlen(room_get_description(g, i)) < MIN_ROOM_DESC_LENGTH && (found = 1))
+      if ((MIN_ROOM_DESC_LENGTH) && strlen(text_of(room_get_description(g, i))) < MIN_ROOM_DESC_LENGTH && (found = 1))
         buf += str_format("- Room description is too short. ({:>4} of min. {:d} characters).\r\n",
-                          printf_digits(as_unsigned(strlen(room_get_description(g, i))), 4), MIN_ROOM_DESC_LENGTH);
+                          printf_digits(as_unsigned(strlen(text_of(room_get_description(g, i)))), 4), MIN_ROOM_DESC_LENGTH);
 
-      if (strncmp(room_get_description(g, i), "   ", 3) && (found = 1))
+      if (strncmp(text_of(room_get_description(g, i)), "   ", 3) && (found = 1))
         buf += "- Room description not formatted with indent (/fi in the editor).\r\n";
 
       /* strcspan = size of text in first arg before any character in second arg */
-      if ((strcspn(room_get_description(g, i), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+      if ((strcspn(text_of(room_get_description(g, i)), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
         buf += str_format("- Room description not wrapped at {:d} chars (/fi in the editor).\r\n",
                           MAX_COLOUMN_WIDTH);
 
@@ -2049,30 +2060,19 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
 
 ACMD(do_checkloadstatus)
 {
-  std::string buf1, buf2;
-
   std::string_view rest = argument;
-  buf1                  = take_arg(rest);
-  buf2                  = take_arg(rest);
+  std::string kind      = take_arg(rest);
+  std::string number    = take_arg(rest);
 
-  if (buf1.empty() || buf2.empty() || !isdigit(buf2[0])) {
+  if (kind.empty() || number.empty() || !isdigit(number[0])) {
     send_to_char(g, ch, "Checkload <M | O | T> <vnum>\r\n");
     return;
   }
-
-  if (tolower(buf1[0]) == 'm') {
-    mob_checkload(g, ch, parse_int(buf2));
-    return;
-  }
-
-  if (tolower(buf1[0]) == 'o') {
-    obj_checkload(g, ch, parse_int(buf2));
-    return;
-  }
-
-  if (tolower(buf1[0]) == 't') {
-    trg_checkload(g, ch, parse_int(buf2));
-    return;
+  switch (tolower(kind[0])) {
+    case 'm': mob_checkload(g, ch, parse_int(number)); break;
+    case 'o': obj_checkload(g, ch, parse_int(number)); break;
+    case 't': trg_checkload(g, ch, parse_int(number)); break;
+    default: break;
   }
 }
 /**************************************************************************************/

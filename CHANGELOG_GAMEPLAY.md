@@ -7,6 +7,8 @@
 - Struggling to escape a grapple or an absorption, and knocking out or killing whoever held you, no longer crashes the game. [Volund]
 - A forgery is weighed before it's handed over, so its forger no longer counts a different weight than they carry. [Volund]
 - A mob made to restring something at the restring shop is ignored, rather than crashing the game. [Volund]
+- Locking someone out while the lockout list holds 500 or more names no longer crashes the game. [Volund]
+- Checking a zone with `zcheck` no longer crashes the game when one of its rooms has no description, or one of its mobs has no keywords, short or long description. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

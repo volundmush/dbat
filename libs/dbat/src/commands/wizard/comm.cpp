@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "dbat/args.hpp"
+#include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -59,142 +60,185 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
+namespace {
+  constexpr const char *NEWS_SYNTAX = "Syntax: news (number | list)\r\n";
+
+  /* The entry numbered lookup in the news file, as shown: its heading, then its text with repeated lines left out.
+   * Returns whether it was found. */
+  bool read_news_entry(FILE *fl, int lookup, std::string &buf)
+  {
+    char line[256], title[256] = "";
+    std::string lastline;
+    int nr;
+    bool found = false, done = false, first = true;
+
+    while (!feof(fl) && !done) {
+      get_line(fl, line);
+      if (*line != '#' || sscanf(line, "#%d", &nr) != 1 || nr != lookup)
+        continue;
+      sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
+      buf   = str_format("@w--------------------------------------------------------------\n@cNum@W: @D(@G{:>3d}@D)                @cTitle@W: @g{:<50}@n\n", nr, title);
+      found = true;
+      while (!feof(fl) && !done) {
+        get_line(fl, line);
+        if (*line == '#') {
+          done = true;
+        } else if (first) {
+          first = false;
+          buf += str_format("{}\n@w--------------------------------------------------------------\n", line);
+          lastline = line;
+        } else if (strcasecmp(line, lastline.c_str())) {
+          buf += str_format("{}\n", line);
+          lastline = line;
+        }
+      }
+    }
+    return found;
+  }
+
+  /* The headings of the news file's entries; returns how many there are */
+  int list_news(FILE *fl, std::string &buf)
+  {
+    char line[256], title[256] = "";
+    int nr, entries = 0;
+
+    while (!feof(fl)) {
+      get_line(fl, line);
+      if (*line != '#')
+        continue;
+      entries++;
+      if (sscanf(line, "#%d", &nr) != 1)
+        continue;
+      sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
+      if (buf.empty())
+        buf = "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n";
+      buf += str_format("@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
+    }
+    return entries;
+  }
+
+  /* The number the next news entry takes, or 0 if the file's numbering is broken */
+  int next_news_number(FILE *fl)
+  {
+    char line[256];
+    int nr, entries = 0, lastentry = 0;
+
+    while (!feof(fl)) {
+      get_line(fl, line);
+      if (*line != '#')
+        continue;
+      entries++;
+      if (sscanf(line, "#%d", &nr) == 1)
+        lastentry = nr;
+    }
+    if (lastentry)
+      return lastentry + 1;
+    return entries == 0 ? 1 : 0;
+  }
+
+  /* The first other person in the room the text names as "*Name" (or by the name ch knows them by), and that name */
+  struct char_data *named_in(GameWorld *g, struct char_data *ch, const std::string &text, std::string &name)
+  {
+    for (char_data *vict : room_people(g, char_get_in_room(ch))) {
+      if (vict == ch)
+        continue;
+      name = str_format("*{}", char_get_name(vict));
+      if (text.contains(CAP(name)))
+        return vict;
+      if (!char_is_npc(vict) && readIntro(ch, vict) == 1) {
+        name = str_format("*{}", get_i_name(ch, vict));
+        if (text.contains(CAP(name)))
+          return vict;
+      }
+    }
+    return nullptr;
+  }
+
+  /* An emote's text, with its markup turned to act()'s */
+  void emote_markup(std::string &buf, struct char_data *named, const std::string &name)
+  {
+    search_replace(buf, "#", "$n");
+    search_replace(buf, "&1", "'@C");
+    search_replace(buf, "&2", "@w'");
+    if (named)
+      search_replace(buf, name.c_str(), "$N");
+  }
+
+  /* text to everyone playing, between before and after, and to ch unless they don't want it repeated */
+  void announce(GameWorld *g, struct char_data *ch, std::string_view argument, const char *before, const char *after)
+  {
+    std::string text(skip_spaces(argument));
+    delete_doubledollar(text);
+    if (text.empty()) {
+      send_to_char(g, ch, "That must be a mistake...\r\n");
+      return;
+    }
+    for (descriptor_data *pt : each_desc(g))
+      if (desc_is_playing(pt) && pt->character && pt->character != ch)
+        send_to_char(g, pt->character, "{}{}{}\r\n", before, text, after);
+    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
+      send_to_char(g, ch, CONFIG_OK);
+    else
+      send_to_char(g, ch, "{}{}{}\r\n", before, text, after);
+  }
+
+  const char *const logtypes[] = {"off", "brief", "normal", "complete", "\n"};
+} // namespace
+
 /* Read the news entry */
 ACMD(do_news)
 {
-
-  if (char_is_npc(ch)) {
+  if (char_is_npc(ch))
     return;
-  }
-
-  FILE *fl;
-  const char *filename;
-  char line[256];
-  std::string buf;
-  char title[256];
-  std::string lastline;
-  std::string arg;
-  int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-  filename = NEWS_FILE;
-
-  /* Check the file for the entry so we may edit it if need be*/
-
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
-    send_to_char(g, ch, "Syntax: news (number | list)\r\n");
+    send_to_char(g, ch, NEWS_SYNTAX);
     return;
   }
 
-  lookup = parse_int(arg);
-
-  if (!(fl = fopen(filename, "r"))) {
+  int lookup = parse_int(arg);
+  FILE *fl   = fopen(NEWS_FILE, "r");
+  if (!fl) {
     mud_log("SYSERR: opening news file for reading");
     return;
   }
 
+  std::string buf;
   if (lookup > 0) {
-    while (!feof(fl) && exit == false) {
-      get_line(fl, line);
-      if (*line == '#') {                    /* Count the entries */
-        if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
-          continue;
-        }
-        if (nr != lookup) {
-          entries++;
-          continue;
-        } else { /* One we want to read */
-          sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-          buf   = str_format("@w--------------------------------------------------------------\n@cNum@W: @D(@G{:>3d}@D)                @cTitle@W: @g{:<50}@n\n", nr, title);
-          found = true;
-          while (!feof(fl) && exit == false) {
-            get_line(fl, line);
-            if (*line != '#') { /* As long as it isn't a new entry*/
-              if (first == true) {
-                first = false;
-                buf += str_format("{}\n@w--------------------------------------------------------------\n", line);
-                lastline = str_format("{}", line);
-              } else if (!strcasecmp(line, lastline.c_str())) {
-                continue;
-              } else {
-                buf += str_format("{}\n", line);
-                lastline = str_format("{}", line);
-              }
-            } else {
-              exit = true;
-            }
-          } /* End write buffer with entry text */
-        } /* End One We wanted to read */
-      } /* End Check the entry */
-    } /* End of main read while */
+    bool found = read_news_entry(fl, lookup, buf);
     fclose(fl);
-  } else if (str_eq_nocase(arg, "list")) {
-    while (!feof(fl)) {
-      get_line(fl, line);
-      if (*line == '#') { /* Count the entries */
-        entries++;
-        if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
-          continue;
-        } else { /* One we want to read */
-          if (first == true) {
-            sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-            buf   = str_format("@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
-            first = false;
-          } else {
-            sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
-            buf += str_format("@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
-          }
-        }
-      } /* End Check the entry */
-    } /* End of main listwhile */
-    fclose(fl);
-
-    if (entries > 0) {
-      char_set_lastpl(ch, game_now(g));
-      char_set_wait(ch, PULSE_1SEC);
-      send_to_char(g, ch, buf);
-    } else {
-      send_to_char(g, ch, "The news file is empty right now.\r\n");
+    if (!found) {
+      send_to_char(g, ch, "That news entry does not exist.\r\n");
+      return;
     }
-    buf.clear();
-    *title    = '\0';
-    lastline.clear();
-    return;
-  } else {
-    fclose(fl);
-    send_to_char(g, ch, "Syntax: news (number | list)\r\n");
-    return;
-  }
-
-  if (found == true) {
     send_to_char(g, ch, "{}\r\n", buf);
     char_set_lastpl(ch, game_now(g));
-    buf.clear();
-    *title    = '\0';
-    lastline.clear();
     char_set_wait(ch, PULSE_1SEC);
     return;
   }
-  send_to_char(g, ch, "That news entry does not exist.\r\n");
-  return;
+  if (!str_eq_nocase(arg, "list")) {
+    fclose(fl);
+    send_to_char(g, ch, NEWS_SYNTAX);
+    return;
+  }
+  int entries = list_news(fl, buf);
+  fclose(fl);
+  if (entries <= 0) {
+    send_to_char(g, ch, "The news file is empty right now.\r\n");
+    return;
+  }
+  char_set_lastpl(ch, game_now(g));
+  char_set_wait(ch, PULSE_1SEC);
+  send_to_char(g, ch, buf);
 }
 
 /* Write the news entry */
-
 ACMD(do_newsedit)
 {
-
-  if (char_get_admlevel(ch) < 1 || char_is_npc(ch)) {
+  if (char_get_admlevel(ch) < 1 || char_is_npc(ch))
     return;
-  }
-
-  FILE *fl;
-  const char *filename;
-  char line[256];
-  int entries = 0, lookup = 0, lastentry = 0, nr;
-
-  filename = NEWS_FILE;
 
   if (argument.empty()) {
     send_to_char(g, ch, "Syntax: newsedit (title)\r\n");
@@ -209,41 +253,18 @@ ACMD(do_newsedit)
     return;
   }
 
-  /* Check the file for the entry so we may edit it if need be*/
-
-  if (!(fl = fopen(filename, "r"))) {
+  FILE *fl = fopen(NEWS_FILE, "r");
+  if (!fl) {
     mud_log("SYSERR: Couldn't open news file for reading");
     return;
   }
-
-  while (!feof(fl)) {
-    get_line(fl, line);
-    if (*line == '#') { /* Count the entries */
-      entries++;
-      if (sscanf(line, "#%d", &nr) != 1) {
-        continue;
-      }
-      lastentry = nr;
-    }
-  } /* End of main read while */
+  int lookup = next_news_number(fl);
   fclose(fl);
-
-  /* Time to write the entry */
-  char *tmstr;
-  time_t mytime                = game_now(g);
-  tmstr                        = asctime(localtime(&mytime));
-  *(tmstr + strlen(tmstr) - 1) = '\0';
-
-  if (lastentry == 0) {
-    if (entries == 0) {
-      lookup = 1;
-    } else { /* Uh oh */
-      send_to_imm(g, "ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
-      return;
-    }
-  } else {
-    lookup = lastentry + 1;
+  if (!lookup) {
+    send_to_imm(g, "ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
+    return;
   }
+
   act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
@@ -252,110 +273,70 @@ ACMD(do_newsedit)
   send_to_char(g, ch, "between paragraphs you will need to enter a single space and\n");
   send_to_char(g, ch, "not just push enter. Happy editing!@n\n");
   send_to_char(g, ch, "@D---------------------------------------------------------@n\n");
-  send_editor_help(g, char_get_desc(ch));
-  char_get_desc(ch)->newsbuf = skip_spaces(argument);
-  g->TOP_OF_NEWS       = lookup;
-  g->LASTNEWS          = lookup;
-  char_get_desc(ch)->draft.clear();
-  string_write(char_get_desc(ch), &char_get_desc(ch)->draft, 2000, 0);
-  desc_set_connected(char_get_desc(ch), CON_NEWSEDIT);
+  struct descriptor_data *d = char_get_desc(ch);
+  send_editor_help(g, d);
+  d->newsbuf     = skip_spaces(argument);
+  g->TOP_OF_NEWS = lookup;
+  g->LASTNEWS    = lookup;
+  d->draft.clear();
+  string_write(d, &d->draft, 2000, 0);
+  desc_set_connected(d, CON_NEWSEDIT);
 }
 
 ACMD(do_echo)
 {
   std::string text(skip_spaces(argument));
-  bool NoName = false;
-
   if (text.empty()) {
     send_to_char(g, ch, "Yes.. but what?\r\n");
     return;
   }
 
-  std::string buf;
   std::string name;
-  int found              = false;
-  struct char_data *tch  = nullptr;
-
-  for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch)
-      continue;
-    if (found == false) {
-      name = str_format("*{}", char_get_name(vict));
-      if (text.contains(CAP(name))) {
-        found = true;
-        tch   = vict;
-      }
-      if (found == false && !char_is_npc(vict)) {
-        if (readIntro(ch, vict) == 1) {
-          name = str_format("*{}", get_i_name(ch, vict));
-          if (text.contains(CAP(name))) {
-            found = true;
-            tch   = vict;
-          }
-        }
-      }
-    }
-  }
+  struct char_data *tch = named_in(g, ch, text, name);
+  bool no_name          = false;
+  std::string buf;
 
   if (subcmd == SCMD_SMOTE) {
-    if (text.find('#') == std::string::npos) {
-      NoName = true;
-    }
-    buf = text;
-    search_replace(buf, "#", "$n");
-    search_replace(buf, "&1", "'@C");
-    search_replace(buf, "&2", "@w'");
-    if (found == true) {
-      search_replace(buf, name.c_str(), "$N");
-    } else if (buf.find('*') != std::string::npos) {
+    no_name = text.find('#') == std::string::npos;
+    buf     = text;
+    emote_markup(buf, tch, name);
+    if (!tch && buf.find('*') != std::string::npos)
       search_replace(buf, "*", "");
-    }
   } else if (subcmd == SCMD_EMOTE) {
     buf = "$n " + text;
-    search_replace(buf, "#", "$n");
-    search_replace(buf, "&1", "'@C");
-    search_replace(buf, "&2", "@w'");
-    if (found == true) {
-      search_replace(buf, name.c_str(), "$N");
-    }
+    emote_markup(buf, tch, name);
   } else {
     buf = text;
   }
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, CONFIG_OK);
-  }
-  if (NoName == true) {
-    std::string blom = str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch));
-    act(g, blom.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
-  }
-  if (found == false) {
+  if (no_name)
+    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)).c_str(), false, ch, nullptr, nullptr, TO_ROOM);
+  if (!tch) {
     act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
     act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
-  } else {
-    act(g, buf.c_str(), false, ch, nullptr, tch, TO_CHAR);
-    act(g, buf.c_str(), false, ch, nullptr, tch, TO_NOTVICT);
-    search_replace(buf, "$N", "you");
-    act(g, buf.c_str(), false, ch, nullptr, tch, TO_VICT);
+    return;
   }
+  act(g, buf.c_str(), false, ch, nullptr, tch, TO_CHAR);
+  act(g, buf.c_str(), false, ch, nullptr, tch, TO_NOTVICT);
+  search_replace(buf, "$N", "you");
+  act(g, buf.c_str(), false, ch, nullptr, tch, TO_VICT);
 }
 
 ACMD(do_send)
 {
-  std::string arg, buf;
-  struct char_data *vict;
-
   std::string_view rest = argument;
-  arg                   = take_word(rest);
-  buf                   = skip_spaces(rest);
+  std::string arg       = take_word(rest);
+  std::string buf(skip_spaces(rest));
 
   if (arg.empty()) {
     send_to_char(g, ch, "Send what to who?\r\n");
     return;
   }
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
-    send_to_char(g, ch, CONFIG_NOPERSON);
+  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  if (reject(g, ch, found))
     return;
-  }
+  struct char_data *vict = *found;
   send_to_char(g, vict, "{}\r\n", buf);
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, "Sent.\r\n");
@@ -363,94 +344,53 @@ ACMD(do_send)
     send_to_char(g, ch, "You send '{}' to {}.\r\n", buf, char_get_name(vict));
 }
 
-static const char *const logtypes[] = {
-    "off", "brief", "normal", "complete", "\n"};
-
 ACMD(do_syslog)
 {
-  std::string arg;
-  int tp;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Your syslog is currently {}.\r\n",
                  logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
-  if ((tp = search_block(arg, logtypes, false)) == -1) {
+  int tp = search_block(arg, logtypes, false);
+  if (tp == -1) {
     send_to_char(g, ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
-  char_prf_set(g, ch, PRF_LOG1, false);
-  char_prf_set(g, ch, PRF_LOG2, false);
-  if (tp & 1) char_prf_set(g, ch, PRF_LOG1, true);
-  if (tp & 2) char_prf_set(g, ch, PRF_LOG2, true);
-
+  char_prf_set(g, ch, PRF_LOG1, (tp & 1) != 0);
+  char_prf_set(g, ch, PRF_LOG2, (tp & 2) != 0);
   send_to_char(g, ch, "Your syslog is now {}.\r\n", logtypes[tp]);
 }
 
 ACMD(do_gecho)
 {
-
-  std::string text(skip_spaces(argument));
-  delete_doubledollar(text);
-
-  if (text.empty())
-    send_to_char(g, ch, "That must be a mistake...\r\n");
-  else {
-    for (descriptor_data *pt : each_desc(g))
-      if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "{}\r\n", text);
-
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, CONFIG_OK);
-    else
-      send_to_char(g, ch, "{}\r\n", text);
-  }
+  announce(g, ch, argument, "", "");
 }
 
 ACMD(do_ginfo)
 {
-
-  std::string text(skip_spaces(argument));
-  delete_doubledollar(text);
-
-  if (text.empty())
-    send_to_char(g, ch, "That must be a mistake...\r\n");
-  else {
-    for (descriptor_data *pt : each_desc(g))
-      if (desc_is_playing(pt) && pt->character && pt->character != ch)
-        send_to_char(g, pt->character, "@D[@GINFO@D] @g{}@n\r\n", text);
-
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
-      send_to_char(g, ch, CONFIG_OK);
-    else
-      send_to_char(g, ch, "@D[@GINFO@D] @g{}@n\r\n", text);
-  }
+  announce(g, ch, argument, "@D[@GINFO@D] @g", "@n");
 }
 
 ACMD(do_poofset)
 {
-  std::string *msg;
-
   if (char_is_npc(ch))
     return;
+
+  std::string *msg;
   switch (subcmd) {
     case SCMD_POOFIN: msg = &char_get_player_specials(ch)->poofin; break;
     case SCMD_POOFOUT: msg = &char_get_player_specials(ch)->poofout; break;
     default: return;
   }
-
   *msg = skip_spaces(argument);
-
   send_to_char(g, ch, CONFIG_OK);
 }
 
 ACMD(do_wiznet)
 {
-  std::string buf1, buf2;
-  char emote = false;
+  bool emote = false;
   int level  = ADMLVL_IMMORT;
 
   std::string text(skip_spaces(argument));
@@ -483,11 +423,8 @@ ACMD(do_wiznet)
     case '@':
       send_to_char(g, ch, "God channel status:\r\n");
       for (descriptor_data *d : each_desc(g)) {
-        if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(d->character) < ADMLVL_IMMORT)
+        if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(d->character) < ADMLVL_IMMORT || !char_can_see(g, ch, d->character))
           continue;
-        if (!char_can_see(g, ch, d->character))
-          continue;
-
         send_to_char(g, ch, "  {}{}{}{}\r\n", printf_width(char_get_name(d->character), MAX_NAME_LENGTH, true),
                      char_plr_flagged(d->character, PLR_WRITING) ? " (Writing)" : "",
                      char_plr_flagged(d->character, PLR_MAILING) ? " (Writing mail)" : "",
@@ -506,31 +443,22 @@ ACMD(do_wiznet)
     return;
   }
   std::string said(skip_spaces(msg));
-
   if (said.empty()) {
     send_to_char(g, ch, "Don't bother the gods like that!\r\n");
     return;
   }
-  if (level > ADMLVL_IMMORT) {
-    buf1 = str_format("@c{}@D: <@C{:d}@D> @G{}{}@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", said);
-    buf2 = str_format("@cSomeone@D: <@C{:d}@D> @G{}{}@n\r\n", level, emote ? "<--- " : "", said);
-  } else {
-    buf1 = str_format("@c{}@D: @G{}{}@n\r\n", char_get_name(ch), emote ? "<--- " : "", said);
-    buf2 = str_format("@cSomeone@D: @G{}{}@n\r\n", emote ? "<--- " : "", said);
-  }
+
+  std::string level_tag = level > ADMLVL_IMMORT ? str_format("<@C{:d}@D> ", level) : "";
+  std::string seen      = str_format("@c{}@D: {}@G{}{}@n\r\n", char_get_name(ch), level_tag, emote ? "<--- " : "", said);
+  std::string unseen    = str_format("@cSomeone@D: {}@G{}{}@n\r\n", level_tag, emote ? "<--- " : "", said);
 
   for (descriptor_data *d : each_desc(g)) {
-    if (desc_is_playing(d) && (char_get_admlevel(d->character) >= level) &&
-        (!char_prf_flagged(g, d->character, PRF_NOWIZ)) &&
-        (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(g, d->character, PRF_NOREPEAT)))) {
-      if (char_can_see(g, d->character, ch)) {
-        send_to_char(g, d->character, buf1);
-        add_history(g, d->character, buf1.c_str(), HIST_WIZNET);
-      } else {
-        send_to_char(g, d->character, buf2);
-        add_history(g, d->character, buf2.c_str(), HIST_WIZNET);
-      }
-    }
+    if (!desc_is_playing(d) || char_get_admlevel(d->character) < level || char_prf_flagged(g, d->character, PRF_NOWIZ) ||
+        char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING) || (d == char_get_desc(ch) && char_prf_flagged(g, d->character, PRF_NOREPEAT)))
+      continue;
+    const std::string &line = char_can_see(g, d->character, ch) ? seen : unseen;
+    send_to_char(g, d->character, line);
+    add_history(g, d->character, line.c_str(), HIST_WIZNET);
   }
 
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
