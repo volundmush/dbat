@@ -706,6 +706,7 @@ bool sec_roll_check(GameWorld *g, struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
 int trans_req(struct char_data *ch, int trans);
 const char *disp_align(struct char_data *ch);
+const char *align_name(int alignment); /* the alignment's name, as disp_align() gives a character's */
 void senseCreate(struct char_data *ch);
 int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict);
 void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vict);

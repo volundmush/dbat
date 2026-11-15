@@ -545,11 +545,15 @@ static void show_model_menu(GameWorld *g, struct descriptor_data *d)
 }
 
 /* CON_ALIGN: keep the questionnaire's alignment, or pick one */
+static int answers_alignment(const struct descriptor_data *d);
+
 static void show_alignment_menu(GameWorld *g, struct descriptor_data *d)
 {
   write_to_output(g, d, "@C             Alignment Menu@n\r\n");
   write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@cCurrent Alignment@D: {}{}@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
+  int alignment = char_get_alignment(d->character) + answers_alignment(d); /* the answers aren't applied yet */
+
+  write_to_output(g, d, "@cCurrent Alignment@D: {}{}@n\r\n", alignment < -50 ? "@R" : (alignment > 50 ? "@C" : "@G"), align_name(alignment));
   write_to_output(g, d, "@YThis is the alignment your character has based on your choices.\r\n");
   write_to_output(g, d, "Choose to keep this alignment with no penalty, or choose new\r\n");
   write_to_output(g, d, "alignment and suffer a -5{} PL and -1 stat (random) penalty.\r\n@n", "%");
@@ -686,11 +690,7 @@ static void finish_creation(GameWorld *g, struct descriptor_data *d)
 
 /* ---- Race and sex ----------------------------------------------------- */
 
-/* The hair length question, or its equivalent for the race (or straight to skin if there is none). */
-static void ask_hair_length(GameWorld *g, struct descriptor_data *d)
-{
-  enter_state(g, d, has_length(d->character) ? CON_HAIRL : CON_SKIN);
-}
+static void next_step(GameWorld *g, struct descriptor_data *d);
 
 /* CON_QRACE / CON_RACE_HELP */
 static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
@@ -719,15 +719,7 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "\r\n{:d} RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
   }
   char_set_race(d->character, chosen_race);
-
-  if (char_is_halfbreed(d->character) || char_is_android(d->character)) {
-    enter_state(g, d, CON_RACIAL);
-  } else if (char_is_namek(d->character)) {
-    char_set_sex(d->character, SEX_NEUTRAL);
-    ask_hair_length(g, d);
-  } else {
-    enter_state(g, d, CON_QSEX);
-  }
+  next_step(g, d);
 }
 
 /* CON_RACIAL */
@@ -740,53 +732,24 @@ static void state_racial(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   char_get_player_specials(d->character)->racial_pref = choice + 1;
-  enter_state(g, d, CON_QSEX);
+  next_step(g, d);
 }
 
-/* CON_QSEX: query sex of new user (Nameks have none) */
+/* CON_QSEX: query sex of new user (Nameks aren't asked) */
 static void state_qsex(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   static const int sexes[] = {SEX_MALE, SEX_FEMALE, SEX_NEUTRAL};
-  struct char_data *ch     = d->character;
+  int choice               = menu_choice(arg, "mfn");
 
-  if (!char_is_namek(ch)) {
-    int choice = menu_choice(arg, "mfn");
-
-    if (choice < 0) {
-      write_to_output(g, d, "That is not a sex..\r\nWhat IS your sex? ");
-      return;
-    }
-    char_set_sex(ch, sexes[choice]);
+  if (choice < 0) {
+    write_to_output(g, d, "That is not a sex..\r\nWhat IS your sex? ");
+    return;
   }
-  ask_hair_length(g, d);
+  char_set_sex(d->character, sexes[choice]);
+  next_step(g, d);
 }
 
 /* ---- Appearance ------------------------------------------------------- */
-
-/* After the length: the colour (of hair or wings), or straight to skin. */
-static void after_length(GameWorld *g, struct descriptor_data *d)
-{
-  struct char_data *ch = d->character;
-
-  if (has_hair(ch) ? char_get_hairl(ch) != HAIRL_BALD : char_is_arlian(ch) && char_is_female(ch)) {
-    enter_state(g, d, CON_HAIRC);
-    return;
-  }
-  char_set_hairc(ch, HAIRC_NONE);
-  char_set_hairs(ch, HAIRS_NONE);
-  enter_state(g, d, CON_SKIN);
-}
-
-/* After the colour: the hair style, or for wings straight to skin. */
-static void after_color(GameWorld *g, struct descriptor_data *d)
-{
-  if (char_is_arlian(d->character)) {
-    char_set_hairs(d->character, HAIRS_NONE);
-    enter_state(g, d, CON_SKIN);
-  } else {
-    enter_state(g, d, CON_HAIRS);
-  }
-}
 
 static const int hair_lengths[] = {HAIRL_BALD, HAIRL_SHORT, HAIRL_MEDIUM, HAIRL_LONG, HAIRL_RLONG};
 static const int hair_colors[]  = {HAIRC_BLACK, HAIRC_BROWN, HAIRC_BLONDE, HAIRC_GREY, HAIRC_RED, HAIRC_ORANGE, HAIRC_GREEN,
@@ -798,25 +761,22 @@ static const int skins[]        = {SKIN_WHITE, SKIN_BLACK, SKIN_GREEN, SKIN_ORAN
 static const int eyes[]         = {EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EYE_RED, EYE_AQUA,
                                    EYE_PINK, EYE_PURPLE, EYE_CRIMSON, EYE_GOLD, EYE_AMBER, EYE_EMERALD};
 
-/* An appearance question: the keys answering it, what each sets (or, with no values, the key's position), and what
-   comes next. */
+/* An appearance question: the keys answering it, and what each sets (or, with no values, the key's position). */
 struct appearance {
   int state{};
   const char *keys{};
   std::span<const int> values{};
   void (*set)(struct char_data *ch, int value){};
-  int next{};
-  void (*then)(GameWorld *g, struct descriptor_data *d){}; /* in place of next, when it depends */
 };
 
 static const appearance appearances[] = {
-    {CON_HAIRL,   "12345",         hair_lengths, [](char_data *ch, int v) { char_set_hairl(ch, v); },   0,           after_length},
-    {CON_HAIRC,   "123456789abcd", hair_colors,  [](char_data *ch, int v) { char_set_hairc(ch, v); },   0,           after_color },
-    {CON_HAIRS,   "123456789ab",   hair_styles,  [](char_data *ch, int v) { char_set_hairs(ch, v); },   CON_SKIN               },
-    {CON_SKIN,    "123456789abc",  skins,        [](char_data *ch, int v) { char_set_skin(ch, v); },    CON_EYE                },
-    {CON_EYE,     "123456789abc",  eyes,         [](char_data *ch, int v) { char_set_eye(ch, v); },     CON_DISTFEA            },
-    {CON_DISTFEA, "12345",         {},           [](char_data *ch, int v) { char_set_distfea(ch, v); }, CON_HW                 },
-    {CON_AURA,    "123456789",     {},           [](char_data *ch, int v) { char_set_aura(ch, v); },    CON_QCLASS             },
+    {CON_HAIRL,   "12345",         hair_lengths, [](char_data *ch, int v) { char_set_hairl(ch, v); }  },
+    {CON_HAIRC,   "123456789abcd", hair_colors,  [](char_data *ch, int v) { char_set_hairc(ch, v); }  },
+    {CON_HAIRS,   "123456789ab",   hair_styles,  [](char_data *ch, int v) { char_set_hairs(ch, v); }  },
+    {CON_SKIN,    "123456789abc",  skins,        [](char_data *ch, int v) { char_set_skin(ch, v); }   },
+    {CON_EYE,     "123456789abc",  eyes,         [](char_data *ch, int v) { char_set_eye(ch, v); }    },
+    {CON_DISTFEA, "12345",         {},           [](char_data *ch, int v) { char_set_distfea(ch, v); }},
+    {CON_AURA,    "123456789",     {},           [](char_data *ch, int v) { char_set_aura(ch, v); }   },
 };
 
 /* CON_HAIRL, CON_HAIRC, CON_HAIRS, CON_SKIN, CON_EYE, CON_DISTFEA, CON_AURA */
@@ -830,10 +790,7 @@ static void state_appearance(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   a->set(d->character, a->values.empty() ? choice : a->values[choice]);
-  if (a->then)
-    a->then(g, d);
-  else
-    enter_state(g, d, a->next);
+  next_step(g, d);
 }
 
 /* CON_HW */
@@ -846,9 +803,8 @@ static void state_hw(GameWorld *g, struct descriptor_data *d, char *arg)
     reject_option(g, d);
     return;
   }
-  char_set_height(d->character, rand_number(g, sizes[choice].min_height, sizes[choice].max_height));
-  char_set_weight(d->character, rand_number(g, sizes[choice].min_weight, sizes[choice].max_weight));
-  enter_state(g, d, CON_AURA);
+  d->chargen.size = choice;
+  next_step(g, d);
 }
 
 /* ---- Sensei ----------------------------------------------------------- */
@@ -881,14 +837,11 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   char_set_class(d->character, chosen_sensei);
-
-  if (char_is_android(d->character)) {
-    enter_state(g, d, CON_ANDROID);
-  } else {
+  if (!char_is_android(d->character)) { /* an android's model, asked next, says its own */
     write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they construct your alignment\r\nand affect your stats.\r\n\r\n");
     write_to_output(g, d, "@WQuestion (@G1@W out of @g10@W)\r\n");
-    enter_state(g, d, CON_Q1);
   }
+  next_step(g, d);
 }
 
 /* CON_ANDROID */
@@ -912,7 +865,7 @@ static void state_android(GameWorld *g, struct descriptor_data *d, char *arg)
       write_to_output(g, d, "@wThat is not a correct selection, try again.@n\r\n");
       return;
   }
-  enter_state(g, d, CON_Q1);
+  next_step(g, d);
 }
 
 /* ---- Questionnaire ---------------------------------------------------- */
@@ -955,7 +908,7 @@ static void roll_starting_abilities(GameWorld *g, struct char_data *ch)
   }
 }
 
-/* Question 1 starts the base stats and abilities over, before looking at the answer (so again after a bad one). */
+/* The base stats and abilities, rolled before the answers are applied. */
 static void roll_starting_stats(GameWorld *g, struct char_data *ch)
 {
   char_set_basepl(ch, rand_number(g, 30, 50));
@@ -1042,7 +995,6 @@ struct question {
   const char *ask{};
   answer answers[5]{}; /* or none, and choices shows them */
   void (*choices)(GameWorld *g, struct descriptor_data *d){};
-  void (*before)(GameWorld *g, struct char_data *ch){}; /* each time an answer is given, before it's looked at */
 };
 
 /* Question 10's choices: the last two ages depend on the race. */
@@ -1077,8 +1029,7 @@ static const question questions[] = {
       {.text = "Jump in with some nice classic pushups!", .pl = dice(5, 55), .st = dice(8, 40), .ki = dice(6, 40)},
       {.text = "Search for something magical to increase my strength.", .pl = dice(5, 125), .st = dice(8, 50), .ki = dice(6, 40)},
       {.text = "Practice my favorite skills instead of working just on my body.", .pl = dice(5, 65), .st = dice(8, 65), .ki = dice(6, 65), .flag = PLR_SKILLP},
-      {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}},
-     nullptr, roll_starting_stats},
+      {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}}},
     {CON_Q2, false, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n",
      {{.text = "Kill my opponent in a very brutal fashion!", .alignment = -200},
       {.text = "Disable my opponent, but spare their life.", .alignment = 100},
@@ -1175,23 +1126,31 @@ static void apply_answer(GameWorld *g, struct char_data *ch, const answer &a)
     char_plr_set(ch, a.flag, true);
 }
 
+/* The alignment the answers picked give, added to the character's when they're applied. */
+static int answers_alignment(const struct descriptor_data *d)
+{
+  int sum = 0;
+
+  for (size_t i = 0; i < d->chargen.answers.size(); i++)
+    sum += questions[i].answers[d->chargen.answers[i]].alignment;
+  return sum;
+}
+
 /* CON_Q1 to CON_Q9 */
 static void state_question(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   const question &q = question_for(desc_get_connected(d));
 
-  if (q.before)
-    q.before(g, d->character);
   if (*arg < '1' || *arg >= '1' + answer_count(q)) {
     reject_option(g, d);
     return;
   }
-  apply_answer(g, d->character, q.answers[*arg - '1']);
-  enter_state(g, d, (&q + 1)->state);
+  d->chargen.answers[&q - questions] = *arg - '1';
+  next_step(g, d);
 }
 
-/* CON_QX: starting age */
-static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
+/* Question 10's age, by the choice's position */
+static int age_chosen(const struct char_data *ch, int choice)
 {
   /* the last two depend on the race: long-lived, Namek, everyone else */
   static const int ages[]         = {8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 40, 50, 60, 65};
@@ -1200,43 +1159,44 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
       {250, 400},
       {70,  75 }
   };
+
+  if (choice < (int)(countof(ages)))
+    return ages[choice];
+  return old_ages[long_lived(ch) ? 0 : char_is_namek(ch) ? 1
+                                                         : 2][choice - 16];
+}
+
+/* CON_QX: starting age */
+static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
+{
   int choice = menu_choice(arg, "123456789abcdefghi");
-  int age;
 
   if (choice < 0) {
     reject_option(g, d);
     return;
   }
-  if (choice < (int)(countof(ages)))
-    age = ages[choice];
-  else
-    age = old_ages[long_lived(d->character) ? 0 : char_is_namek(d->character) ? 1
-                                                                              : 2][choice - 16];
-  char_set_time_birth(d->character, game_now(g) - (age * SECS_PER_MUD_YEAR));
-
+  d->chargen.age = choice;
   char_set_ccpoints(d->character, char_is_hoshijin(d->character) ? 10 : 5);
-  enter_state(g, d, CON_ALIGN);
+  next_step(g, d);
 }
 
 /* CON_ALIGN: keep the questionnaire's alignment, or pick one at a cost */
+static const int alignments[] = {1000, 799, 599, 299, 0, -299, -599, -799, -1000}; /* CON_ALIGN's, from 1 */
+
 static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  static const int alignments[] = {1000, 799, 599, 299, 0, -299, -599, -799, -1000};
-  int choice                    = menu_choice(arg, "k123456789");
+  int choice = menu_choice(arg, "k123456789");
 
   if (choice < 0) {
     write_to_output(g, d, "That is not an acceptable option! Choose again...\r\n");
     return;
   }
-  if (choice == 0) {
+  d->chargen.alignment = choice;
+  if (choice == 0)
     write_to_output(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
-  } else {
-    char_set_alignment(d->character, alignments[choice - 1]);
-    loseBasePLPercent(d->character, .2, false);
-    add_ability(d->character, (ability)rand_number(g, 1, 6), -1); /* and lose a random point of one ability */
+  else
     write_to_output(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
-  }
-  enter_state(g, d, CON_SKILLS);
+  next_step(g, d);
 }
 
 /* CON_SKILLS: keep the sensei/race skills, or forget them for 200 practice sessions */
@@ -1248,17 +1208,15 @@ static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
     show_skills_prompt(g, d);
     return;
   }
-  if (forget) {
-    char_set_practice_points(g, d->character, char_get_practice_points(g, d->character) + (200));
-    char_plr_set(d->character, PLR_FORGET, true);
-  }
+  d->chargen.forget = forget;
+  next_step(g, d);
+}
 
-  if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
-    ask_bonuses(g, d, "@wChoose: ");
-    return;
-  }
+/* Entering CON_GENOME: a mutant's mutation, or a bio's two genomes. */
+static void ask_genomes(GameWorld *g, struct descriptor_data *d)
+{
   if (char_is_mutant(d->character))
-    show_mutation_menu(g, d, "\n@RSelect a mutation. A second will be chosen automatically..\n", forget);
+    show_mutation_menu(g, d, "\n@RSelect a mutation. A second will be chosen automatically..\n", d->chargen.forget);
   else
     show_genome_menu(g, d, "\n@RSelect two genomes to be your primary DNA strains.\n");
   write_to_output(g, d, "@wChoose: ");
@@ -1281,13 +1239,10 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     int num = rand_number(g, 1, 8);
     while (num == char_get_genome(ch, 0))
       num = rand_number(g, 1, 8);
-    if (num == 3) {
-      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
-    }
     write_to_output(g, d, "@CRolling second mutation... Your second mutation is @D[@Y{}@D]@n\r\n", mutation_names[num]);
     char_set_genome(ch, 1, num);
   } else if (char_get_genome(ch, 1) > 0) {
-    ask_bonuses(g, d, "\n@wChoose: ");
+    next_step(g, d);
   } else if (!*arg) {
     write_to_output(g, d, "That is not an acceptable choice!\r\n");
     write_to_output(g, d, "\n@wChoose: ");
@@ -1299,11 +1254,6 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     }
     write_to_output(g, d, "@CYou have chosen the mutation @D[@Y{}@D]@n\r\n", mutation_names[choice]);
     char_set_genome(ch, 0, choice);
-    if (choice == 3) {
-      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
-    } else if (choice == 9) {
-      char_set_skills_base(ch, SKILL_TELEPATHY, 50);
-    }
   }
 }
 
@@ -1314,7 +1264,7 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
   int select;
 
   if (char_get_genome(ch, 1) > 0) {
-    ask_bonuses(g, d, "@wChoose: ");
+    next_step(g, d);
     return;
   }
   if (!*arg) {
@@ -1338,10 +1288,6 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
   } else {
     char_set_genome(ch, 1, select);
   }
-  if (select == 7) {
-    char_set_skills_base(ch, SKILL_TELEPATHY, 30);
-    char_set_skills_base(ch, SKILL_FOCUS, 30);
-  }
   show_genome_menu(g, d, "@RSelect two genomes to be your primary DNA strains.\n");
   show_chosen_genomes(g, d);
 }
@@ -1353,6 +1299,106 @@ static void state_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     mutant_genome(g, d, arg);
   else
     bio_genome(g, d, arg);
+}
+
+/* ---- The order of creation, and the effects made at its end ---------- */
+
+static bool asked_racial(const struct char_data *ch) { return char_is_halfbreed(ch) || char_is_android(ch); }
+static bool asked_sex(const struct char_data *ch) { return !char_is_namek(ch); }
+
+/* the colour of hair, or of a female Arlian's wings */
+static bool asked_hair_color(const struct char_data *ch)
+{
+  return has_length(ch) && (has_hair(ch) ? char_get_hairl(ch) != HAIRL_BALD : char_is_arlian(ch) && char_is_female(ch));
+}
+
+static bool asked_hair_style(const struct char_data *ch) { return asked_hair_color(ch) && !char_is_arlian(ch); }
+static bool asked_genomes(const struct char_data *ch) { return char_is_bio(ch) || char_is_mutant(ch); }
+
+/* A step of creation: who is asked it (everyone, without), what not being asked sets, and what entering it shows,
+   where that isn't its state's prompt. */
+struct step {
+  int state{};
+  bool (*asked)(const struct char_data *ch){};
+  void (*skipped)(struct char_data *ch){};
+  void (*enter)(GameWorld *g, struct descriptor_data *d){};
+};
+
+static const step steps[] = {
+    {CON_QRACE},
+    {CON_RACIAL, asked_racial},
+    {CON_QSEX, asked_sex, [](char_data *ch) { char_set_sex(ch, SEX_NEUTRAL); }},
+    {CON_HAIRL, has_length},
+    {CON_HAIRC, asked_hair_color, [](char_data *ch) { char_set_hairc(ch, HAIRC_NONE); char_set_hairs(ch, HAIRS_NONE); }},
+    {CON_HAIRS, asked_hair_style, [](char_data *ch) { char_set_hairs(ch, HAIRS_NONE); }},
+    {CON_SKIN},
+    {CON_EYE},
+    {CON_DISTFEA},
+    {CON_HW},
+    {CON_AURA},
+    {CON_QCLASS},
+    {CON_ANDROID, char_is_android},
+    {CON_Q1}, {CON_Q2}, {CON_Q3}, {CON_Q4}, {CON_Q5}, {CON_Q6}, {CON_Q7}, {CON_Q8}, {CON_Q9}, {CON_QX},
+    {CON_ALIGN},
+    {CON_SKILLS},
+    {CON_GENOME, asked_genomes, nullptr, ask_genomes},
+    {CON_BONUS, nullptr, nullptr, [](GameWorld *g, descriptor_data *d) { ask_bonuses(g, d, "@wChoose: "); }},
+};
+
+/* On from the step d is at to the next it's asked. */
+static void next_step(GameWorld *g, struct descriptor_data *d)
+{
+  int at = desc_get_connected(d) == CON_RACE_HELP ? CON_QRACE : desc_get_connected(d) == CON_CLASS_HELP ? CON_QCLASS
+                                                                                                         : desc_get_connected(d);
+  const step *s = std::ranges::find(steps, at, &step::state);
+
+  while (++s != std::end(steps)) {
+    if (!s->asked || s->asked(d->character)) {
+      if (s->enter)
+        s->enter(g, d);
+      else
+        enter_state(g, d, s->state);
+      return;
+    }
+    if (s->skipped)
+      s->skipped(d->character);
+  }
+}
+
+/* What the draft's choices do, in the order they were made: the size, the base stats and abilities rolled and then
+   each answer, the age, the alignment chosen over the answers', the skills forgotten, the genomes'. */
+static void apply_draft(GameWorld *g, struct descriptor_data *d)
+{
+  struct char_data *ch    = d->character;
+  const chargen_draft &dr = d->chargen;
+  const size_range &size  = size_ranges(ch)[dr.size];
+
+  char_set_height(ch, rand_number(g, size.min_height, size.max_height));
+  char_set_weight(ch, rand_number(g, size.min_weight, size.max_weight));
+  roll_starting_stats(g, ch);
+  for (size_t i = 0; i < dr.answers.size(); i++)
+    apply_answer(g, ch, questions[i].answers[dr.answers[i]]);
+  char_set_time_birth(ch, game_now(g) - (age_chosen(ch, dr.age) * SECS_PER_MUD_YEAR));
+  if (dr.alignment > 0) { /* at a cost */
+    char_set_alignment(ch, alignments[dr.alignment - 1]);
+    loseBasePLPercent(ch, .2, false);
+    add_ability(ch, (ability)rand_number(g, 1, 6), -1); /* and lose a random point of one ability */
+  }
+  if (dr.forget) {
+    char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (200));
+    char_plr_set(ch, PLR_FORGET, true);
+  }
+  if (char_is_mutant(ch)) {
+    if (char_get_genome(ch, 0) == 3)
+      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
+    else if (char_get_genome(ch, 0) == 9)
+      char_set_skills_base(ch, SKILL_TELEPATHY, 50);
+    if (char_get_genome(ch, 1) == 3) /* quirk: a second Innate Telepathy gives none */
+      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
+  } else if (char_is_bio(ch) && (char_get_genome(ch, 0) == 7 || char_get_genome(ch, 1) == 7)) {
+    char_set_skills_base(ch, SKILL_TELEPATHY, 30);
+    char_set_skills_base(ch, SKILL_FOCUS, 30);
+  }
 }
 
 /* CON_BONUS / CON_NEGATIVE: buy bonus traits, or take negative ones for points */
@@ -1373,6 +1419,7 @@ static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
     send_to_char(g, d->character, "@wChoose: ");
     desc_set_connected(d, negatives ? CON_BONUS : CON_NEGATIVE);
   } else if (!strcasecmp(arg, "x")) {
+    apply_draft(g, d);
     if (negatives) { /* negatives can take base stats to zero or below */
       if (getBasePL(d->character) <= 0) {
         char_set_basepl(d->character, 90);

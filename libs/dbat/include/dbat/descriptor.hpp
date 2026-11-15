@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 
 #include "dbat/account.hpp"
+#include "dbat/chargen_draft.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/constates.hpp"
@@ -62,6 +63,7 @@ struct descriptor_data {
   struct account acct;                 /* the account logged in to            */
   std::string loadplay;                /* What character am I loading?        */
   int writenew{};                      /* What slot am I writing to?          */
+  struct chargen_draft chargen;         /* a character being made: what waits for the end */
   std::string newsbuf;
   /*---------------Player Level Object Editing Variables-------------------*/
   int obj_editval{};

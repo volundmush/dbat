@@ -2069,31 +2069,36 @@ int trans_req(struct char_data *ch, int trans)
   return (requirement);
 }
 
-const char *disp_align(struct char_data *ch)
+const char *align_name(int alignment)
 {
   int align;
 
-  if (char_get_alignment(ch) < -800) { // Horrifically Evil
+  if (alignment < -800) { // Horrifically Evil
     align = 8;
-  } else if (char_get_alignment(ch) < -600) { // Terrible
+  } else if (alignment < -600) { // Terrible
     align = 7;
-  } else if (char_get_alignment(ch) < -300) { // Villain
+  } else if (alignment < -300) { // Villain
     align = 6;
-  } else if (char_get_alignment(ch) < -50) { // Crook
+  } else if (alignment < -50) { // Crook
     align = 5;
-  } else if (char_get_alignment(ch) < 51) { // Neutral
+  } else if (alignment < 51) { // Neutral
     align = 4;
-  } else if (char_get_alignment(ch) < 300) { // Do-gooder
+  } else if (alignment < 300) { // Do-gooder
     align = 3;
-  } else if (char_get_alignment(ch) < 600) { // Hero
+  } else if (alignment < 600) { // Hero
     align = 2;
-  } else if (char_get_alignment(ch) < 800) { // Valiant
+  } else if (alignment < 800) { // Valiant
     align = 1;
   } else { // Saintly
     align = 0;
   }
 
   return (alignments[align]);
+}
+
+const char *disp_align(struct char_data *ch)
+{
+  return align_name(char_get_alignment(ch));
 }
 
 /* This creates a player's sense memory file for the first time. */

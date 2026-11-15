@@ -492,6 +492,7 @@ static void start_new_character(GameWorld *g, struct descriptor_data *d, char *n
   char_set_rp(d->character, d->acct.rpp);
   d->acct.slots[d->writenew - 1] = char_get_alias(d->character);
   save_account(d);
+  d->chargen = {};
   enter_state(g, d, CON_QRACE);
 }
 
@@ -518,6 +519,7 @@ static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, ch
   /* no place in the player index: the old one's emptied, and finishing creation makes a new one */
   char_prf_set(g, d->character, PRF_COLOR, true);
   char_set_rp(d->character, d->acct.rpp);
+  d->chargen = {};
   enter_state(g, d, CON_QRACE);
 }
 
