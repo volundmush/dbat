@@ -2083,7 +2083,7 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
          char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character), total);
 }
 
-static const struct nanny_state chargen_states[] = {
+static const con_state chargen_states[] = {
     {CON_QSEX,       state_qsex      },
     {CON_QRACE,      state_qrace     },
     {CON_RACE_HELP,  state_qrace     },
@@ -2118,12 +2118,4 @@ static const struct nanny_state chargen_states[] = {
     {CON_QSTATS,     state_qstats    },
 };
 
-bool chargen_parse(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  for (size_t i = 0; i < countof(chargen_states); i++)
-    if (desc_get_connected(d) == chargen_states[i].state) {
-      chargen_states[i].handler(g, d, arg);
-      return true;
-    }
-  return false;
-}
+const std::span<const con_state> CHARGEN_STATES = chargen_states;

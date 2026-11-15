@@ -1473,10 +1473,6 @@ int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high)
   return j;
 }
 
-void levelup_parse(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-}
-
 static bool guild_trade_flagged(const struct guild_data *rec, int flag)
 {
   return IS_SET_AR(rec->with_who, flag) != 0;

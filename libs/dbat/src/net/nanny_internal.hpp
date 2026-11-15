@@ -1,16 +1,13 @@
 #pragma once
 
 /* Shared by nanny.c, chargen.c and accounts.c only. */
+#include <span>
 #include <string>
+#include "dbat/con_states.hpp"
 #include "dbat/consts/types.hpp"
 
-struct nanny_state {
-  int state{};
-  void (*handler)(GameWorld *g, struct descriptor_data *d, char *arg){};
-};
-
 /* chargen.c */
-bool chargen_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+extern const std::span<const con_state> CHARGEN_STATES; /* character creation's states, for nanny() */
 void display_races(GameWorld *g, struct descriptor_data *d);
 
 /* accounts.c */

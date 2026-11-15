@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/boards.hpp"
@@ -1141,7 +1142,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
   desc_set_connected(d, CON_MENU);
 }
 
-static const struct nanny_state login_states[] = {
+static const con_state login_states[] = {
     {CON_GET_NAME,   state_get_name  },
     {CON_NAME_CNFRM, state_name_cnfrm},
     {CON_GET_USER,   state_get_user  },
@@ -1156,32 +1157,32 @@ static const struct nanny_state login_states[] = {
     {CON_DELCNF2,    state_delcnf2   },
 };
 
-void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  /* OasisOLC states */
-  struct {
-    int state{};
-    void (*func)(GameWorld *, struct descriptor_data *, char *){};
-  } olc_functions[] = {
-      {CON_OEDIT,    oedit_parse    },
-      {CON_IEDIT,    oedit_parse    },
-      {CON_ZEDIT,    zedit_parse    },
-      {CON_SEDIT,    sedit_parse    },
-      {CON_MEDIT,    medit_parse    },
-      {CON_REDIT,    redit_parse    },
-      {CON_CEDIT,    cedit_parse    },
-      {CON_AEDIT,    aedit_parse    },
-      {CON_TRIGEDIT, trigedit_parse },
-      {CON_ASSEDIT,  assedit_parse  },
-      {CON_GEDIT,    gedit_parse    },
-      {CON_LEVELUP,  levelup_parse  },
-      {CON_HEDIT,    hedit_parse    },
-      {CON_HSEDIT,   hsedit_parse   },
-      {CON_POBJ,     pobj_edit_parse},
-      {-1,           nullptr        }
-  };
+/* The editors' states, each answered by context help first */
+static const con_state olc_states[] = {
+    {CON_OEDIT,    oedit_parse,     true},
+    {CON_IEDIT,    oedit_parse,     true},
+    {CON_ZEDIT,    zedit_parse,     true},
+    {CON_SEDIT,    sedit_parse,     true},
+    {CON_MEDIT,    medit_parse,     true},
+    {CON_REDIT,    redit_parse,     true},
+    {CON_CEDIT,    cedit_parse,     true},
+    {CON_AEDIT,    aedit_parse,     true},
+    {CON_TRIGEDIT, trigedit_parse,  true},
+    {CON_ASSEDIT,  assedit_parse,   true},
+    {CON_GEDIT,    gedit_parse,     true},
+    {CON_HEDIT,    hedit_parse,     true},
+    {CON_HSEDIT,   hsedit_parse,    true},
+    {CON_POBJ,     pobj_edit_parse, true},
+};
 
-  skip_spaces(&arg);
+void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line)
+{
+  /* the handlers take a C string, which they may change and lengthen (an email's @ becomes <AT>), as they could the
+     input buffer it came from */
+  char arg[MAX_INPUT_LENGTH];
+  std::string_view text = skip_spaces(line).substr(0, sizeof(arg) - 1);
+  text.copy(arg, text.size());
+  arg[text.size()] = '\0';
 
   if (d->character == nullptr) {
     d->character = new char_data();
@@ -1190,25 +1191,15 @@ void nanny(GameWorld *g, struct descriptor_data *d, char *arg)
     char_set_desc(d->character, d);
   }
 
-  /*
-   * Quick check for the OLC states.
-   */
-  for (int i = 0; olc_functions[i].state >= 0; i++)
-    if (desc_get_connected(d) == olc_functions[i].state) {
-      /* send context-sensitive help if need be */
-      if (context_help(g, d, arg)) return;
-      (*olc_functions[i].func)(g, d, arg);
-      return;
-    }
-
-  /* Not in OLC. */
-  for (size_t i = 0; i < countof(login_states); i++)
-    if (desc_get_connected(d) == login_states[i].state) {
-      login_states[i].handler(g, d, arg);
-      return;
-    }
-  if (chargen_parse(g, d, arg))
-    return;
+  for (std::span<const con_state> part : {std::span<const con_state>(olc_states), std::span<const con_state>(login_states), CHARGEN_STATES})
+    for (const con_state &s : part)
+      if (desc_get_connected(d) == s.state) {
+        /* send context-sensitive help if need be */
+        if (s.olc && context_help(g, d, arg))
+          return;
+        s.parse(g, d, arg);
+        return;
+      }
 
   /*
    * It's possible, if enough pulses are missed, to kick someone off
