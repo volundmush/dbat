@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <cstdlib>
 
 #include <unistd.h>
@@ -80,685 +81,261 @@ static void display_classes_help(GameWorld *g, struct descriptor_data *d)
   send_to_char(g, d->character, "\n@WHelp on Class #: @n");
 }
 
-/* This is the bonus/negatives menu for Character Creation */
-static void display_bonus_menu(GameWorld *g, struct char_data *ch, int type)
+/* ---- Traits: the bonuses and negatives -------------------------------- */
+
+/* What stops a character taking a trait: another trait taken already, or being an android or a demon. */
+enum class bar_kind { none, taken, android, demon };
+
+struct trait_bar {
+  bar_kind when{};
+  int other{};          /* the trait, for taken */
+  const char *says{};   /* what to say instead of the usual */
+};
+
+static constexpr trait_bar excludes(int other, const char *says = nullptr) { return {bar_kind::taken, other, says}; }
+static constexpr trait_bar not_android(const char *says = nullptr) { return {bar_kind::android, 0, says}; }
+static constexpr trait_bar not_demon(const char *says) { return {bar_kind::demon, 0, says}; }
+
+struct trait {
+  const char *name{};  /* as the status commands show it */
+  const char *line{};  /* its line in the menu, the cost included */
+  int cost{};          /* negative for a bonus (points spent), positive for a negative (points gained) */
+  trait_bar bars[2]{}; /* checked in order */
+};
+
+/* Indexed by BONUS_*. Most exclusions go both ways, each written at both ends. */
+static const trait traits[] = {
+    /* the bonuses: they cost points */
+    {"Thrifty", "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost             @D[@G-2pts @D]",
+     -2, {excludes(BONUS_IMPULSE)}}, /* BONUS_THRIFTY */
+    {"Prodigy", "Prodigy     - +25% Experience Gained Until Level 80                  @D[@G-5pts @D]",
+     -5}, /* BONUS_PRODIGY */
+    {"Quick Study", "Quick Study - Character auto-trains skills faster                    @D[@G-3pts @D]",
+     -3, {excludes(BONUS_SLOW_LEARNER)}}, /* BONUS_QUICK_STUDY */
+    {"Die Hard", "Die Hard    - Life Force's PL regen doubled, but cost is the same    @D[@G-6pts @D]",
+     -6, {not_android()}}, /* BONUS_DIEHARD */
+    {"Brawler", "Brawler     - Physical attacks do 20% more damage                    @D[@G-4pts @D]",
+     -4}, /* BONUS_BRAWLER */
+    {"Destroyer", "Destroyer   - Damaged Rooms act as regen rooms for you               @D[@G-3pts @D]",
+     -3}, /* BONUS_DESTROYER */
+    {"Hard Worker", "Hard Worker - Physical rewards better + activity drains less stamina @D[@G-3pts @D]",
+     -3, {excludes(BONUS_SLACKER)}}, /* BONUS_HARDWORKER */
+    {"Healer", "Healer      - Heal/First-aid/Vigor/Repair restore +10%               @D[@G-3pts @D]",
+     -3}, /* BONUS_HEALER */
+    {"Loyal", "Loyal       - +20% Experience When Grouped As Follower               @D[@G-2pts @D]",
+     -2, {excludes(BONUS_LONER)}}, /* BONUS_LOYAL */
+    {"Brawny", "Brawny      - Strength gains +2 every 10 levels, Train STR + 75%     @D[@G-5pts @D]",
+     -5, {excludes(BONUS_WIMP)}}, /* BONUS_BRAWNY */
+    {"Scholarly", "Scholarly   - Intelligence gains +2 every 10 levels, Train INT + 75% @D[@G-5pts @D]",
+     -5, {excludes(BONUS_DULL)}}, /* BONUS_SCHOLARLY */
+    {"Sage", "Sage        - Wisdom gains +2 every 10 levels, Train WIS + 75%       @D[@G-5pts @D]",
+     -5, {excludes(BONUS_FOOLISH)}}, /* BONUS_SAGE */
+    {"Agile", "Agile       - Agility gains +2 every 10 levels, Train AGL + 75%      @D[@G-4pts @D]",
+     -4, {excludes(BONUS_CLUMSY)}}, /* BONUS_AGILE */
+    {"Quick", "Quick       - Speed gains +2 every 10 levels, Train SPD + 75%        @D[@G-6pts @D]",
+     -6, {excludes(BONUS_SLOW)}}, /* BONUS_QUICK */
+    {"Sturdy", "Sturdy      - Constitution +2 every 10 levels, Train CON + 75%       @D[@G-5pts @D]",
+     -5, {excludes(BONUS_FRAIL)}}, /* BONUS_STURDY */
+    {"Thick Skin", "Thick Skin  - -20% Physical and -10% ki dmg received                 @D[@G-5pts @D]",
+     -5, {excludes(BONUS_THINSKIN)}}, /* BONUS_THICKSKIN */
+    {"Recipe Int", "Recipe Int. - Food cooked by you lasts longer/heals better           @D[@G-2pts @D]",
+     -2, {not_android("You are an android and can not suppress anyway.\n\n") /* quirk: Recipe Int. has nothing to suppress */}}, /* BONUS_RECIPE */
+    {"Fireproof", "Fireproof   - -50% Fire Dmg taken, -10% ki, immunity to burn         @D[@G-4pts @D]",
+     -4, {not_demon("As a demon you are already fireproof.\r\n"), excludes(BONUS_FIREPRONE)}}, /* BONUS_FIREPROOF */
+    {"Powerhitter", "Powerhitter - 15% critical hits will be x4 instead of x2             @D[@G-4pts @D]",
+     -4, {excludes(BONUS_SOFT)}}, /* BONUS_POWERHIT */
+    {"Healthy", "Healthy     - 40% chance to recover from ill effects when sleeping   @D[@G-3pts @D]",
+     -3, {excludes(BONUS_SICKLY)}}, /* BONUS_HEALTHY */
+    {"Insomniac", "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis    @D[@G-2pts @D]",
+     -2, {excludes(BONUS_LATE), not_android()}}, /* BONUS_INSOMNIAC */
+    {"Evasive", "Evasive     - +15% to dodge rolls                                    @D[@G-3pts @D]",
+     -3, {excludes(BONUS_PUNCHINGBAG)}}, /* BONUS_EVASIVE */
+    {"The Wall", "The Wall    - +20% chance to block                                   @D[@G-3pts @D]",
+     -3, {excludes(BONUS_PUSHOVER)}}, /* BONUS_WALL */
+    {"Accurate", "Accurate    - +20% chance to hit physical, +10% to hit with ki       @D[@G-4pts @D]",
+     -4, {excludes(BONUS_POORDEPTH)}}, /* BONUS_ACCURATE */
+    {"Energy Leech", "Energy Leech- -2% ki damage received for every 5 character levels,   @D[@G-5pts @D]\n                  @cas long as you can take that ki to your charge pool.@D        ",
+     -5, {excludes(BONUS_INTOLERANT)}}, /* BONUS_LEECH */
+    {"Good Memory", "Good Memory - +2 Skill Slots initially, +1 every 20 levels after     @D[@G-6pts @D]",
+     -6, {excludes(BONUS_BMEMORY)}}, /* BONUS_GMEMORY */
+    /* the negatives: they give points */
+    {"Soft Touch", "Soft Touch  - Half damage for all hit locations                      @D[@G+5pts @D]",
+     5, {excludes(BONUS_POWERHIT)}}, /* BONUS_SOFT */
+    {"Late Sleeper", "Late Sleeper- Can only wake automatically. 33% every hour if maxed   @D[@G+5pts @D]",
+     5, {excludes(BONUS_INSOMNIAC, "@RLate Sleeper and Late Sleeper are mutually exclusive.\n\n") /* quirk: names itself twice */, not_android()}}, /* BONUS_LATE */
+    {"Impulse Shop", "Impulse Shop- +25% shop costs                                        @D[@G+3pts @D]",
+     3}, /* BONUS_IMPULSE */
+    {"Sickly", "Sickly      - Suffer from harmful effects longer                     @D[@G+5pts @D]",
+     5, {excludes(BONUS_HEALTHY)}}, /* BONUS_SICKLY */
+    {"Punching Bag", "Punching Bag- -15% to dodge rolls                                    @D[@G+3pts @D]",
+     3, {excludes(BONUS_EVASIVE)}}, /* BONUS_PUNCHINGBAG */
+    {"Pushover", "Pushover    - -20% block chance                                      @D[@G+3pts @D]",
+     3, {excludes(BONUS_WALL)}}, /* BONUS_PUSHOVER */
+    {"Poor Depth Perception", "Poor D. Perc- -20% chance to hit with physical, -10% with ki         @D[@G+4pts @D]",
+     4, {excludes(BONUS_ACCURATE)}}, /* BONUS_POORDEPTH */
+    {"Thin Skin", "Thin Skin   - +20% physical and +10% ki damage received              @D[@G+4pts @D]",
+     4, {excludes(BONUS_THICKSKIN)}}, /* BONUS_THINSKIN */
+    {"Fireprone", "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned            @D[@G+5pts @D]",
+     5, {excludes(BONUS_FIREPROOF)}}, /* BONUS_FIREPRONE */
+    {"Energy Intollerant", "Energy Int. - +2% ki damage received for every 5 character levels,   @D[@G+6pts @D]\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ",
+     6, {excludes(BONUS_LEECH)}}, /* BONUS_INTOLERANT */
+    {"Coward", "Coward      - Can't Attack Enemy With 150% Your Powerlevel           @D[@G+6pts @D]",
+     6}, /* BONUS_COWARD */
+    {"Arrogant", "Arrogant    - Cannot Suppress                                        @D[@G+1pt  @D]",
+     1}, /* BONUS_ARROGANT */
+    {"Unfocused", "Unfocused   - Charge concentration randomly breaks                   @D[@G+3pts @D]",
+     3}, /* BONUS_UNFOCUSED */
+    {"Slacker", "Slacker     - Physical activity drains more stamina                  @D[@G+3pts @D]",
+     3, {excludes(BONUS_HARDWORKER)}}, /* BONUS_SLACKER */
+    {"Slow Learner", "Slow Learner- Character auto-trains skills slower                    @D[@G+3pts @D]",
+     3, {excludes(BONUS_QUICK_STUDY)}}, /* BONUS_SLOW_LEARNER */
+    {"Masochistic", "Masochistic - Defense Skills Cap At 75                               @D[@G+5pts @D]",
+     5}, /* BONUS_MASOCHISTIC */
+    {"Mute", "Mute        - Can't use IC speech related commands                   @D[@G+4pts @D]",
+     4}, /* BONUS_MUTE */
+    {"Wimp", "Wimp        - Strength is capped at 45                               @D[@G+6pts @D]",
+     6, {excludes(BONUS_BRAWNY)}}, /* BONUS_WIMP */
+    {"Dull", "Dull        - Intelligence is capped at 45                           @D[@G+6pts @D]",
+     6, {excludes(BONUS_SCHOLARLY)}}, /* BONUS_DULL */
+    {"Foolish", "Foolish     - Wisdom is capped at 45                                 @D[@G+6pts @D]",
+     6, {excludes(BONUS_SAGE)}}, /* BONUS_FOOLISH */
+    {"Clumsy", "Clumsy      - Agility is capped at 45                                @D[@G+3pts @D]",
+     3, {excludes(BONUS_AGILE)}}, /* BONUS_CLUMSY */
+    {"Slow", "Slow        - Speed is capped at 45                                  @D[@G+6pts @D]",
+     6, {excludes(BONUS_QUICK)}}, /* BONUS_SLOW */
+    {"Frail", "Frail       - Constitution capped at 45                              @D[@G+4pts @D]",
+     4, {excludes(BONUS_STURDY)}}, /* BONUS_FRAIL */
+    {"Sadistic", "Sadistic    - Half Experience Gained For Quick Kills                 @D[@G+3pts @D]",
+     3}, /* BONUS_SADISTIC */
+    {"Loner", "Loner       - Can't Group, +5% Train gains, +10% to physical gains   @D[@G+2pts @D]",
+     2, {excludes(BONUS_LOYAL)}}, /* BONUS_LONER */
+    {"Bad Memory", "Bad Memory  - -5 Skill Slots                                         @D[@G+6pts @D]",
+     6, {excludes(BONUS_GMEMORY)}}, /* BONUS_BMEMORY */
+};
+static_assert(std::size(traits) == MAX_BONUSES);
+
+constexpr int FIRST_NEGATIVE = BONUS_SOFT;
+
+const char *trait_name(int i)
 {
-  int BonusCount = 26, NegCount = 52, x = 0, y = 0;
-  const char *bonus[] = {
-      "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost             @D[@G-2pts @D]",                                                                                                                                                              /* Bonus 0 */
-      "Prodigy     - +25% Experience Gained Until Level 80                  @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 1 */
-      "Quick Study - Character auto-trains skills faster                    @D[@G-3pts @D]",                                                                                                                                                              /* Bonus 2 */
-      "Die Hard    - Life Force's PL regen doubled, but cost is the same    @D[@G-6pts @D]",                                                                                                                                                              /* Bonus 3 */
-      "Brawler     - Physical attacks do 20% more damage                    @D[@G-4pts @D]",                                                                                                                                                              /* Bonus 4 */
-      "Destroyer   - Damaged Rooms act as regen rooms for you               @D[@G-3pts @D]",                                                                                                                                                              /* Bonus 5 */
-      "Hard Worker - Physical rewards better + activity drains less stamina @D[@G-3pts @D]",                                                                                                                                                              /* Bonus 6 */
-      "Healer      - Heal/First-aid/Vigor/Repair restore +10%               @D[@G-3pts @D]",                                                                                                                                                              /* Bonus 7 */
-      "Loyal       - +20% Experience When Grouped As Follower               @D[@G-2pts @D]",                                                                                                                                                              /* Bonus 8 */
-      "Brawny      - Strength gains +2 every 10 levels, Train STR + 75%     @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 9 */
-      "Scholarly   - Intelligence gains +2 every 10 levels, Train INT + 75% @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 10 */
-      "Sage        - Wisdom gains +2 every 10 levels, Train WIS + 75%       @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 11 */
-      "Agile       - Agility gains +2 every 10 levels, Train AGL + 75%      @D[@G-4pts @D]",                                                                                                                                                              /* Bonus 12 */
-      "Quick       - Speed gains +2 every 10 levels, Train SPD + 75%        @D[@G-6pts @D]",                                                                                                                                                              /* Bonus 13 */
-      "Sturdy      - Constitution +2 every 10 levels, Train CON + 75%       @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 14 */
-      "Thick Skin  - -20% Physical and -10% ki dmg received                 @D[@G-5pts @D]",                                                                                                                                                              /* Bonus 15 */
-      "Recipe Int. - Food cooked by you lasts longer/heals better           @D[@G-2pts @D]",                                                                                                                                                              /* Bonus 16 */
-      "Fireproof   - -50% Fire Dmg taken, -10% ki, immunity to burn         @D[@G-4pts @D]",                                                                                                                                                              /* Bonus 17 */
-      "Powerhitter - 15% critical hits will be x4 instead of x2             @D[@G-4pts @D]",                                                                                                                                                              /* Bonus 18 */
-      "Healthy     - 40% chance to recover from ill effects when sleeping   @D[@G-3pts @D]",                                                                                                                                                              /* Bonus  19 */
-      "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis    @D[@G-2pts @D]",                                                                                                                                                              /* Bonus  20 */
-      "Evasive     - +15% to dodge rolls                                    @D[@G-3pts @D]",                                                                                                                                                              /* Bonus  21 */
-      "The Wall    - +20% chance to block                                   @D[@G-3pts @D]",                                                                                                                                                              /* Bonus  22 */
-      "Accurate    - +20% chance to hit physical, +10% to hit with ki       @D[@G-4pts @D]",                                                                                                                                                              /* Bonus  23 */
-      "Energy Leech- -2% ki damage received for every 5 character levels,   @D[@G-5pts @D]\n                  @cas long as you can take that ki to your charge pool.@D        ",                                                                          /* Bonus  24*/
-      "Good Memory - +2 Skill Slots initially, +1 every 20 levels after     @D[@G-6pts @D]",                                                                                                                                                              /* Bonus 25 */
-      "Soft Touch  - Half damage for all hit locations                      @D[@G+5pts @D]",                                                                                                                                                              /* Neg 26 */
-      "Late Sleeper- Can only wake automatically. 33% every hour if maxed   @D[@G+5pts @D]",                                                                                                                                                              /* Neg 27 */
-      "Impulse Shop- +25% shop costs                                        @D[@G+3pts @D]",                                                                                                                                                              /* Neg 28 */
-      "Sickly      - Suffer from harmful effects longer                     @D[@G+5pts @D]",                                                                                                                                                              /* Neg 29 */
-      "Punching Bag- -15% to dodge rolls                                    @D[@G+3pts @D]",                                                                                                                                                              /* Neg 30 */
-      "Pushover    - -20% block chance                                      @D[@G+3pts @D]",                                                                                                                                                              /* Neg 31 */
-      "Poor D. Perc- -20% chance to hit with physical, -10% with ki         @D[@G+4pts @D]",                                                                                                                                                              /* Neg 32 */
-      "Thin Skin   - +20% physical and +10% ki damage received              @D[@G+4pts @D]",                                                                                                                                                              /* Neg 33 */
-      "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned            @D[@G+5pts @D]",                                                                                                                                                              /* Neg 34 */
-      "Energy Int. - +2% ki damage received for every 5 character levels,   @D[@G+6pts @D]\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ", /* Neg 35 */
-      "Coward      - Can't Attack Enemy With 150% Your Powerlevel           @D[@G+6pts @D]",                                                                                                                                                              /* Neg 36 */
-      "Arrogant    - Cannot Suppress                                        @D[@G+1pt  @D]",                                                                                                                                                              /* Neg 37 */
-      "Unfocused   - Charge concentration randomly breaks                   @D[@G+3pts @D]",                                                                                                                                                              /* Neg 38 */
-      "Slacker     - Physical activity drains more stamina                  @D[@G+3pts @D]",                                                                                                                                                              /* Neg 39 */
-      "Slow Learner- Character auto-trains skills slower                    @D[@G+3pts @D]",                                                                                                                                                              /* Neg 40 */
-      "Masochistic - Defense Skills Cap At 75                               @D[@G+5pts @D]",                                                                                                                                                              /* Neg 41 */
-      "Mute        - Can't use IC speech related commands                   @D[@G+4pts @D]",                                                                                                                                                              /* Neg 42 */
-      "Wimp        - Strength is capped at 45                               @D[@G+6pts @D]",                                                                                                                                                              /* Neg 43 */
-      "Dull        - Intelligence is capped at 45                           @D[@G+6pts @D]",                                                                                                                                                              /* Neg 44 */
-      "Foolish     - Wisdom is capped at 45                                 @D[@G+6pts @D]",                                                                                                                                                              /* Neg 45 */
-      "Clumsy      - Agility is capped at 45                                @D[@G+3pts @D]",                                                                                                                                                              /* Neg 46 */
-      "Slow        - Speed is capped at 45                                  @D[@G+6pts @D]",                                                                                                                                                              /* Neg 47 */
-      "Frail       - Constitution capped at 45                              @D[@G+4pts @D]",                                                                                                                                                              /* Neg 48 */
-      "Sadistic    - Half Experience Gained For Quick Kills                 @D[@G+3pts @D]",                                                                                                                                                              /* Neg 49 */
-      "Loner       - Can't Group, +5% Train gains, +10% to physical gains   @D[@G+2pts @D]",                                                                                                                                                              /* Neg 50 */
-      "Bad Memory  - -5 Skill Slots                                         @D[@G+6pts @D]"                                                                                                                                                               /* Neg 51 */
-  };
+  return traits[i].name;
+}
 
-  if (type == 0) {
+/* The bonuses menu (numbered from 1) or the negatives menu (numbered from 12), with the points left. */
+static void display_bonus_menu(GameWorld *g, struct char_data *ch, bool negatives)
+{
+  if (!negatives) {
     send_to_char(g, ch, "\r\n@YBonus Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
-    for (x = 0; x < BonusCount; x++) {
-      send_to_char(g, ch, "@C{:<2d}@D)@c {} <@g{}@D>\n", x + 1, bonus[x], char_get_bonuses(ch, x) > 0 ? "X" : " ");
-    }
+    for (int x = 0; x < FIRST_NEGATIVE; x++)
+      send_to_char(g, ch, "@C{:<2d}@D)@c {} <@g{}@D>\n", x + 1, traits[x].line, char_get_bonuses(ch, x) > 0 ? "X" : " ");
     send_to_char(g, ch, "\n");
-  }
-
-  if (type == 1) {
-    y = BonusCount;
-    send_to_char(g, ch, "@YNegative Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
-    while (y < NegCount) {
-      send_to_char(g, ch, "@R{:<2d}@D)@r {} <@g{}@D>\n", y - 14, bonus[y], char_get_bonuses(ch, y) > 0 ? "X" : " ");
-      y += 1;
-    }
-  }
-
-  if (type == 0) {
     send_to_char(g, ch, "\n@CN@D)@c Show Negatives@n\n");
   } else {
+    send_to_char(g, ch, "@YNegative Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+    for (int y = FIRST_NEGATIVE; y < MAX_BONUSES; y++)
+      send_to_char(g, ch, "@R{:<2d}@D)@r {} <@g{}@D>\n", y - 14, traits[y].line, char_get_bonuses(ch, y) > 0 ? "X" : " ");
     send_to_char(g, ch, "\n@CB@D)@c Show Bonuses@n\n");
   }
   send_to_char(g, ch, "@CX@D)@c Exit Traits Section and complete your character@n\n");
   send_to_char(g, ch, "@D---------------------------------------\n[@WCurrent Points Pool@W: @y{:d}@D] [@WPTS From Neg@W: @y{:d}@D]@w\n", char_get_ccpoints(ch), char_get_negcount(ch));
 }
 
-/* Return -1 if not an acceptable menu option *
- * Return 31 if selection is X                 *
- * Return other value if Bonus/Negative        */
-
-static int parse_bonuses(const char *arg)
+/* The trait a menu number names, or -1. A number in the negatives menu below 12 names a bonus. */
+static int trait_choice(const char *arg, bool negatives)
 {
-  int value = -1, ident = -1;
+  int n = atoi(arg);
 
-  switch (*arg) {
-    case 'b':
-    case 'B':
-      value = 53;
-      break;
-    case 'n':
-    case 'N':
-      value = 54;
-      break;
-    case 'x':
-    case 'X':
-      value = 55;
-      break;
-  }
-
-  if (value < 52) {
-    ident = atoi(arg);
-  }
-
-  switch (ident) {
-    /* Valid Selections */
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-    case 14:
-    case 15:
-    case 16:
-    case 17:
-    case 18:
-    case 19:
-    case 20:
-    case 21:
-    case 22:
-    case 23:
-    case 24:
-    case 25:
-    case 26:
-    case 27:
-    case 28:
-    case 29:
-    case 30:
-    case 31:
-    case 32:
-    case 33:
-    case 34:
-    case 35:
-    case 36:
-    case 37:
-    case 38:
-    case 39:
-    case 40:
-    case 41:
-    case 42:
-    case 43:
-    case 44:
-    case 45:
-    case 46:
-    case 47:
-    case 48:
-    case 49:
-    case 50:
-    case 51:
-      value = ident - 1;
-      break;
-
-    /* Invalid Selections */
-    default:
-      value = -1;
-      break;
-  }
-
-  return (value);
+  if (n < 1 || n > 51)
+    return -1;
+  n = negatives ? n + 14 : n - 1;
+  return n < MAX_BONUSES ? n : -1;
 }
 
-/* List names of Bonus/Negative */
-const char *const list_bonus[] = {
-    "Thrifty",               /* Bonus 0 */
-    "Prodigy",               /* Bonus 1 */
-    "Quick Study",           /* Bonus 2 */
-    "Die Hard",              /* Bonus 3 */
-    "Brawler",               /* Bonus 4 */
-    "Destroyer",             /* Bonus 5 */
-    "Hard Worker",           /* Bonus 6 */
-    "Healer",                /* Bonus 7 */
-    "Loyal",                 /* Bonus 8 */
-    "Brawny",                /* Bonus 9 */
-    "Scholarly",             /* Bonus 10 */
-    "Sage",                  /* Bonus 11 */
-    "Agile",                 /* Bonus 12 */
-    "Quick",                 /* Bonus 13 */
-    "Sturdy",                /* Bonus 14 */
-    "Thick Skin",            /* Bonus 15 */
-    "Recipe Int",            /* Bonus 16 */
-    "Fireproof",             /* Bonus 17 */
-    "Powerhitter",           /* Bonus 18 */
-    "Healthy",               /* Bonus 19 */
-    "Insomniac",             /* Bonus 20 */
-    "Evasive",               /* Bonus 21 */
-    "The Wall",              /* Bonus 22 */
-    "Accurate",              /* Bonus 23 */
-    "Energy Leech",          /* Bonus 24 */
-    "Good Memory",           /* Bonus 25*/
-    "Soft Touch",            /* Neg 26 */
-    "Late Sleeper",          /* Neg 27 */
-    "Impulse Shop",          /* Neg 28 */
-    "Sickly",                /* Neg 29 */
-    "Punching Bag",          /* Neg 30 */
-    "Pushover",              /* Neg 31 */
-    "Poor Depth Perception", /* Neg 32 */
-    "Thin Skin",             /* Neg 33 */
-    "Fireprone",             /* Neg 34 */
-    "Energy Intollerant",    /* Neg 35 */
-    "Coward",                /* Neg 36 */
-    "Arrogant",              /* Neg 37 */
-    "Unfocused",             /* Neg 38 */
-    "Slacker",               /* Neg 39 */
-    "Slow Learner",          /* Neg 40 */
-    "Masochistic",           /* Neg 41 */
-    "Mute",                  /* Neg 42 */
-    "Wimp",                  /* Neg 43 */
-    "Dull",                  /* Neg 44 */
-    "Foolish",               /* Neg 45 */
-    "Clumsy",                /* Neg 46 */
-    "Slow",                  /* Neg 47 */
-    "Frail",                 /* Neg 48 */
-    "Sadistic",              /* Neg 49 */
-    "Loner",                 /* Neg 50 */
-    "Bad Memory"             /* Neg 51 */
-};
-
-/* List cost of bonus/negative */
-static const int list_bonus_cost[] = {
-    -2, /* Bonus 0 */
-    -5, /* Bonus 1 */
-    -3, /* Bonus 2 */
-    -6, /* Bonus 3 */
-    -4, /* Bonus 4 */
-    -3, /* Bonus 5 */
-    -3, /* Bonus 6 */
-    -3, /* Bonus 7 */
-    -2, /* Bonus 8 */
-    -5, /* Bonus 9 */
-    -5, /* Bonus 10 */
-    -5, /* Bonus 11 */
-    -4, /* Bonus 12 */
-    -6, /* Bonus 13 */
-    -5, /* Bonus 14 */
-    -5, /* Bonus 15 */
-    -2, /* Bonus 16 */
-    -4, /* Bonus 17 */
-    -4, /* Bonus 18 */
-    -3, /* Bonus 19 */
-    -2, /* Bonus 20 */
-    -3, /* Bonus 21 */
-    -3, /* Bonus 22 */
-    -4, /* Bonus 23 */
-    -5, /* Bonus 24 */
-    -6, /* Bonus 25*/
-    5,  /* Negative 26 */
-    5,  /* Negative 27 */
-    3,  /* Negative 28 */
-    5,  /* Negative 29 */
-    3,  /* Negative 30 */
-    3,  /* Negative 31 */
-    4,  /* Negative 32 */
-    4,  /* Negative 33 */
-    5,  /* Negative 34 */
-    6,  /* Negative 35 */
-    6,  /* Negative 36 */
-    1,  /* Negative 37 */
-    3,  /* Negative 38 */
-    3,  /* Negative 39 */
-    3,  /* Negative 40 */
-    5,  /* Negative 41 */
-    4,  /* Negative 42 */
-    6,  /* Negative 43 */
-    6,  /* Negative 44 */
-    6,  /* Negative 45 */
-    3,  /* Negative 46 */
-    6,  /* Negative 47 */
-    4,  /* Negative 48 */
-    3,  /* Negative 49 */
-    2,  /* Negative 50 */
-    6,  /* Negative 51 */
-};
-
-static bool opp_bonus(GameWorld *g, struct char_data *ch, int value, int type)
+/* Whether something stops ch taking the trait; if so, shows the menu again and says what. */
+static bool trait_barred(GameWorld *g, struct char_data *ch, int value, bool negatives)
 {
-  int give = true;
-
-  switch (value) {
-    case 0:
-      if (char_get_bonuses(ch, BONUS_IMPULSE)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 2:
-      if (char_get_bonuses(ch, 40) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 3:
-      if (char_is_android(ch)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[3]);
-        give = false;
-      }
-      break;
-    case 6:
-      if (char_get_bonuses(ch, 39) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 8:
-      if (char_get_bonuses(ch, 50) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 9:
-      if (char_get_bonuses(ch, 43) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 10:
-      if (char_get_bonuses(ch, 44) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 11:
-      if (char_get_bonuses(ch, 45) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 12:
-      if (char_get_bonuses(ch, 46) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 13:
-      if (char_get_bonuses(ch, 47) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 14:
-      if (char_get_bonuses(ch, 48) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 15:
-      if (char_get_bonuses(ch, 33) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 16:
-      if (char_is_android(ch)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "You are an android and can not suppress anyway.\n\n");
-        give = false;
-      }
-      break;
-    case 17:
-      if (char_is_demon(ch)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "As a demon you are already fireproof.\r\n");
-        give = false;
-      } else if (char_get_bonuses(ch, 34) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 18:
-      if (char_get_bonuses(ch, 26) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 19:
-      if (char_get_bonuses(ch, 29) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 20:
-      if (char_get_bonuses(ch, 27) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-        give = false;
-      } else if (char_is_android(ch)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 21:
-      if (char_get_bonuses(ch, 30) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 22:
-      if (char_get_bonuses(ch, 31) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 23:
-      if (char_get_bonuses(ch, 32) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 24:
-      if (char_get_bonuses(ch, 35) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 25:
-      if (char_get_bonuses(ch, 51) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 26:
-      if (char_get_bonuses(ch, 18) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 27:
-      if (char_get_bonuses(ch, 20) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-        give = false;
-      } else if (char_is_android(ch)) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "You can not take {} as an android!@n\r\n", list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 29:
-      if (char_get_bonuses(ch, 19) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 30:
-      if (char_get_bonuses(ch, 21) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 31:
-      if (char_get_bonuses(ch, 22) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 32:
-      if (char_get_bonuses(ch, 23) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 33:
-      if (char_get_bonuses(ch, 15) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 34:
-      if (char_get_bonuses(ch, 17) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 35:
-      if (char_get_bonuses(ch, 24) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 39:
-      if (char_get_bonuses(ch, 6) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 40:
-      if (char_get_bonuses(ch, 2) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 43:
-      if (char_get_bonuses(ch, 9) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 44:
-      if (char_get_bonuses(ch, 10) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 45:
-      if (char_get_bonuses(ch, 11) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 46:
-      if (char_get_bonuses(ch, 12) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 47:
-      if (char_get_bonuses(ch, 13) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 48:
-      if (char_get_bonuses(ch, 14) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 50:
-      if (char_get_bonuses(ch, 8) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
-        give = false;
-      }
-      break;
-    case 51:
-      if (char_get_bonuses(ch, 25) > 0) {
-        display_bonus_menu(g, ch, type);
-        send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
-        give = false;
-      }
-      break;
+  for (const trait_bar &bar : traits[value].bars) {
+    bool applies = (bar.when == bar_kind::taken && char_get_bonuses(ch, bar.other) > 0) ||
+                   (bar.when == bar_kind::android && char_is_android(ch)) ||
+                   (bar.when == bar_kind::demon && char_is_demon(ch));
+    if (!applies)
+      continue;
+    display_bonus_menu(g, ch, negatives);
+    if (bar.says)
+      send_to_char(g, ch, "{}", bar.says);
+    else if (bar.when == bar_kind::taken)
+      send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", traits[bar.other].name, traits[value].name);
+    else
+      send_to_char(g, ch, "You can not take {} as an android!@n\r\n", traits[value].name);
+    return true;
   }
-
-  return (give);
+  return false;
 }
 
-/* Handle CC point exchange for Bonus/negative */
+/* Takes the trait, or gives it back if taken already, paying or refunding its points. */
 static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
 {
-  int type = 0;
+  bool negatives = desc_get_connected(char_get_desc(ch)) != CON_BONUS;
+  const trait &t = traits[value];
 
-  if (desc_get_connected(char_get_desc(ch)) == CON_BONUS) {
-    type = 0;
-  } else {
-    type = 1;
-  }
-
-  if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] < 0) {
-    display_bonus_menu(g, ch, type);
-    send_to_char(g, ch, "@RYou must unselect some bonus traits first.\r\n");
-    return;
-  }
-  if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] >= 0) {
-    char_set_ccpoints(ch, char_get_ccpoints(ch) - (list_bonus_cost[value]));
-    if (list_bonus_cost[value] > 0) {
-      char_set_negcount(ch, char_get_negcount(ch) - (list_bonus_cost[value]));
+  if (char_get_bonuses(ch, value) > 0) {
+    if (char_get_ccpoints(ch) - t.cost < 0) {
+      display_bonus_menu(g, ch, negatives);
+      send_to_char(g, ch, "@RYou must unselect some bonus traits first.\r\n");
+      return;
     }
+    char_set_ccpoints(ch, char_get_ccpoints(ch) - t.cost);
+    if (t.cost > 0)
+      char_set_negcount(ch, char_get_negcount(ch) - t.cost);
     char_set_bonuses(ch, value, 0);
-    display_bonus_menu(g, ch, type);
-    send_to_char(g, ch, "@GYou cancel your selection of {}.\r\n", list_bonus[value]);
+    display_bonus_menu(g, ch, negatives);
+    send_to_char(g, ch, "@GYou cancel your selection of {}.\r\n", t.name);
     return;
   }
-  if (type == 0) {
-    if (value > 25) {
-      display_bonus_menu(g, ch, type);
-      send_to_char(g, ch, "@RYou are not in the negatives menu, enter B to switch.\r\n");
-      return;
-    }
-    if (char_get_ccpoints(ch) + list_bonus_cost[value] < 0) {
-      display_bonus_menu(g, ch, type);
-      send_to_char(g, ch, "@RYou do not have enough points for {}.\r\n", list_bonus[value]);
-      return;
-    }
-    if (!opp_bonus(g, ch, value, type)) {
-      return;
-    }
-    if (list_bonus_cost[value] < 0) {
-      char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
-      char_set_bonuses(ch, value, 1);
-      display_bonus_menu(g, ch, type);
-      send_to_char(g, ch, "@GYou select the bonus {}\r\n", list_bonus[value]);
-      return;
-    }
-  } else {
 
-    if (value < 26) {
-      display_bonus_menu(g, ch, type);
-      send_to_char(g, ch, "@RYou are not in the bonuses menu, enter B to switch.\r\n");
+  if (!negatives) {
+    if (value >= FIRST_NEGATIVE) {
+      display_bonus_menu(g, ch, negatives);
+      send_to_char(g, ch, "@RYou are not in the negatives menu, enter B to switch.\r\n"); /* quirk: N switches */
       return;
     }
-
-    int x, count = 0;
-
-    for (x = 14; x < 52; x++) {
-      if (char_get_bonuses(ch, x) > 1) {
-        count += list_bonus_cost[x];
-      }
-    }
-
-    if (list_bonus_cost[value] + count > 10) {
-      display_bonus_menu(g, ch, type);
-      send_to_char(g, ch, "@RYou can not have more than +10 points from negatives.\r\n");
+    if (char_get_ccpoints(ch) + t.cost < 0) {
+      display_bonus_menu(g, ch, negatives);
+      send_to_char(g, ch, "@RYou do not have enough points for {}.\r\n", t.name);
       return;
     }
-    if (!opp_bonus(g, ch, value, type)) {
+    if (trait_barred(g, ch, value, negatives))
       return;
-    }
-    char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
-    char_set_negcount(ch, char_get_negcount(ch) + (list_bonus_cost[value]));
-    char_set_bonuses(ch, value, 2);
-    display_bonus_menu(g, ch, type);
-    send_to_char(g, ch, "@GYou select the negative {}\r\n", list_bonus[value]);
+    char_set_ccpoints(ch, char_get_ccpoints(ch) + t.cost);
+    char_set_bonuses(ch, value, 1);
+    display_bonus_menu(g, ch, negatives);
+    send_to_char(g, ch, "@GYou select the bonus {}\r\n", t.name);
     return;
   }
+
+  if (value < FIRST_NEGATIVE) {
+    display_bonus_menu(g, ch, negatives);
+    send_to_char(g, ch, "@RYou are not in the bonuses menu, enter B to switch.\r\n");
+    return;
+  }
+  int count = 0; /* the points the negatives taken give */
+  for (int x = 14; x < MAX_BONUSES; x++)
+    if (char_get_bonuses(ch, x) > 1)
+      count += traits[x].cost;
+  if (t.cost + count > 10) {
+    display_bonus_menu(g, ch, negatives);
+    send_to_char(g, ch, "@RYou can not have more than +10 points from negatives.\r\n");
+    return;
+  }
+  if (trait_barred(g, ch, value, negatives))
+    return;
+  char_set_ccpoints(ch, char_get_ccpoints(ch) + t.cost);
+  char_set_negcount(ch, char_get_negcount(ch) + t.cost);
+  char_set_bonuses(ch, value, 2);
+  display_bonus_menu(g, ch, negatives);
+  send_to_char(g, ch, "@GYou select the negative {}\r\n", t.name);
 }
 
-/* deal with newcomers and other non-playing sockets */
 /* ---- Menu helpers ---------------------------------------------------- */
 
 /* The position of the answer's first character in keys (letters in either case), or -1. */
@@ -777,10 +354,34 @@ static void reject_option(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "That is not an acceptable option.\r\n");
 }
 
+/* ---- Prompts: what each state shows on entering it ------------------- */
+
 /* Races with hair (rather than horns, a forelock, antennae or nothing). */
 static bool has_hair(const struct char_data *ch)
 {
   return char_is_human(ch) || char_is_saiyan(ch) || char_is_konatsu(ch) || char_is_mutant(ch) || char_is_android(ch) || char_is_kai(ch) || char_is_halfbreed(ch) || char_is_truffle(ch) || (char_is_hoshijin(ch) && char_is_female(ch));
+}
+
+/* Races asked a length: of hair, or of horns, a forelock or antennae. */
+static bool has_length(const struct char_data *ch)
+{
+  return has_hair(ch) || char_is_demon(ch) || char_is_icer(ch) || char_is_majin(ch) || char_is_namek(ch) || char_is_arlian(ch);
+}
+
+/* CON_RACIAL: how a halfbreed or an android is first seen */
+static void show_racial_menu(GameWorld *g, struct descriptor_data *d)
+{
+  if (char_is_halfbreed(d->character)) {
+    write_to_output(g, d, "@YWhat race do you prefer to by identified with?\r\n");
+    write_to_output(g, d, "@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
+    write_to_output(g, d, "@D---------------------------------------@n\r\n");
+    write_to_output(g, d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
+  } else {
+    write_to_output(g, d, "@YWhat do you want to be identified as at first glance?\r\n");
+    write_to_output(g, d, "@D---------------------------------------@n\r\n");
+    write_to_output(g, d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
+  }
+  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
 static void show_sex_prompt(GameWorld *g, struct descriptor_data *d)
@@ -788,9 +389,21 @@ static void show_sex_prompt(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
 }
 
-/* Hair, horn, forelock or antenna length. */
-static void show_length_menu(GameWorld *g, struct descriptor_data *d, const char *part, const char *shortest)
+/* CON_HAIRL: hair, horn, forelock or antenna length */
+static void show_length_menu(GameWorld *g, struct descriptor_data *d)
 {
+  struct char_data *ch = d->character;
+  const char *part, *shortest;
+
+  if (has_hair(ch)) {
+    part = "Hair", shortest = "Bald";
+  } else if (char_is_demon(ch) || char_is_icer(ch)) {
+    part = "Horn", shortest = "None";
+  } else if (char_is_majin(ch)) {
+    part = "Forelock", shortest = "Tiny";
+  } else {
+    part = "Antenae", shortest = "Tiny";
+  }
   write_to_output(g, d, "@Y{} Length SELECTION menu:\r\n", part);
   write_to_output(g, d, "@D---------------------------------------@n\r\n");
   write_to_output(g, d, "@B1@W)@C {}  @B2@W)@C Short  @B3@W)@C Medium\r\n", shortest);
@@ -798,10 +411,10 @@ static void show_length_menu(GameWorld *g, struct descriptor_data *d, const char
   write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
-/* Hair colour, or wing colour for female Arlians. */
-static void show_color_menu(GameWorld *g, struct descriptor_data *d, const char *part)
+/* CON_HAIRC: hair colour, or wing colour for female Arlians */
+static void show_color_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output(g, d, "@Y{} color SELECTION menu:\r\n", part);
+  write_to_output(g, d, "@Y{} color SELECTION menu:\r\n", char_is_arlian(d->character) ? "Wing" : "Hair");
   write_to_output(g, d, "@D---------------------------------------@n\r\n");
   write_to_output(g, d, "@B1@W)@C Black  @B2@W)@C Brown  @B3@W)@C Blonde\r\n");
   write_to_output(g, d, "@B4@W)@C Grey   @B5@W)@C Red    @B6@W)@C Orange@n\r\n");
@@ -831,13 +444,6 @@ static void show_skin_menu(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
   write_to_output(g, d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
   write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-}
-
-/* Starts the skin question: the step after hair, or instead of it. */
-static void ask_skin(GameWorld *g, struct descriptor_data *d)
-{
-  show_skin_menu(g, d);
-  desc_set_connected(d, CON_SKIN);
 }
 
 static void show_eye_menu(GameWorld *g, struct descriptor_data *d)
@@ -897,25 +503,21 @@ static const struct size_range truffle_sizes[] = {
 };
 
 /* The ranges ch may choose from; Icers get the three smallest normal ones. */
-static const struct size_range *size_ranges(const struct char_data *ch, int *count)
+static std::span<const size_range> size_ranges(const struct char_data *ch)
 {
-  if (char_is_truffle(ch)) {
-    *count = countof(truffle_sizes);
+  if (char_is_truffle(ch))
     return truffle_sizes;
-  }
-  *count = char_is_icer(ch) ? 3 : (int)(countof(normal_sizes));
-  return normal_sizes;
+  return std::span<const size_range>(normal_sizes).first(char_is_icer(ch) ? 3 : std::size(normal_sizes));
 }
 
 static void show_size_menu(GameWorld *g, struct descriptor_data *d)
 {
-  int count;
-  const struct size_range *sizes = size_ranges(d->character, &count);
+  std::span<const size_range> sizes = size_ranges(d->character);
 
   write_to_output(g, d, "@YWhat Height/Weight Range do you prefer:\r\n");
   write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  for (int i = 0; i < count; i++)
-    write_to_output(g, d, "@B{:d}@W)@C {:d}-{:d}cm, {:d}-{:d}kg@n\r\n", i + 1, sizes[i].min_height, sizes[i].max_height, sizes[i].min_weight, sizes[i].max_weight);
+  for (size_t i = 0; i < sizes.size(); i++)
+    write_to_output(g, d, "@B{:d}@W)@C {:d}-{:d}cm, {:d}-{:d}kg@n\r\n", (int)i + 1, sizes[i].min_height, sizes[i].max_height, sizes[i].min_weight, sizes[i].max_weight);
   write_to_output(g, d, "\n@WMake a selection:@n ");
 }
 
@@ -931,19 +533,44 @@ static void show_aura_menu(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
 }
 
-/* Question 1, after the caller's own introduction. */
-static void ask_question1(GameWorld *g, struct descriptor_data *d)
+/* CON_ANDROID */
+static void show_model_menu(GameWorld *g, struct descriptor_data *d)
 {
-  write_to_output(g, d, "@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
+  write_to_output(g, d, "\r\n@YChoose your model type.\r\n");
   write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C Ask someone with more experience what to do.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C Jump in with some nice classic pushups!@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Search for something magical to increase my strength.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
-  write_to_output(g, d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
+  write_to_output(g, d, "@B1@W)@C Absorbtion Model@n\r\n");
+  write_to_output(g, d, "@B2@W)@C Repair Model@n\r\n");
+  write_to_output(g, d, "@B3@W)@C Sense, Powersense Model@n\r\n");
   write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q1);
+}
+
+/* CON_ALIGN: keep the questionnaire's alignment, or pick one */
+static void show_alignment_menu(GameWorld *g, struct descriptor_data *d)
+{
+  write_to_output(g, d, "@C             Alignment Menu@n\r\n");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@cCurrent Alignment@D: {}{}@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
+  write_to_output(g, d, "@YThis is the alignment your character has based on your choices.\r\n");
+  write_to_output(g, d, "Choose to keep this alignment with no penalty, or choose new\r\n");
+  write_to_output(g, d, "alignment and suffer a -5{} PL and -1 stat (random) penalty.\r\n@n", "%");
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  write_to_output(g, d, "@BK@W) @wKeep This Alignment@n\r\n");
+  write_to_output(g, d, "@B1@W) @wSaintly@n\r\n");
+  write_to_output(g, d, "@B2@W) @wValiant@n\r\n");
+  write_to_output(g, d, "@B3@W) @wHero@n\r\n");
+  write_to_output(g, d, "@B4@W) @wDo-gooder@n\r\n");
+  write_to_output(g, d, "@B5@W) @wNeutral\r\n");
+  write_to_output(g, d, "@B6@W) @wCrook@n\r\n");
+  write_to_output(g, d, "@B7@W) @wVillain@n\r\n");
+  write_to_output(g, d, "@B8@W) @wTerrible@n\r\n");
+  write_to_output(g, d, "@B9@W) @wHorribly Evil@n\r\n");
+  write_to_output(g, d, "Choose: \r\n");
+}
+
+/* CON_SKILLS */
+static void show_skills_prompt(GameWorld *g, struct descriptor_data *d)
+{
+  write_to_output(g, d, "keep or forget: \r\n");
 }
 
 /* rubbery_less picks between the two wordings the original menus used. */
@@ -1014,7 +641,7 @@ static void show_chosen_genomes(GameWorld *g, struct descriptor_data *d)
 /* The traits menu that follows skills, mutations or genomes. */
 static void ask_bonuses(GameWorld *g, struct descriptor_data *d, const char *choose)
 {
-  display_bonus_menu(g, d->character, 0);
+  display_bonus_menu(g, d->character, false);
   write_to_output(g, d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
   write_to_output(g, d, "{}", choose);
   desc_set_connected(d, CON_BONUS);
@@ -1057,28 +684,12 @@ static void finish_creation(GameWorld *g, struct descriptor_data *d)
          char_sensei_name(d->character));
 }
 
-/* ---- Appearance ------------------------------------------------------- */
+/* ---- Race and sex ----------------------------------------------------- */
 
 /* The hair length question, or its equivalent for the race (or straight to skin if there is none). */
 static void ask_hair_length(GameWorld *g, struct descriptor_data *d)
 {
-  struct char_data *ch = d->character;
-
-  if (has_hair(ch)) {
-    show_length_menu(g, d, "Hair", "Bald");
-    desc_set_connected(d, CON_HAIRL);
-  } else if (char_is_demon(ch) || char_is_icer(ch)) {
-    show_length_menu(g, d, "Horn", "None");
-    desc_set_connected(d, CON_HAIRL);
-  } else if (char_is_majin(ch)) {
-    show_length_menu(g, d, "Forelock", "Tiny");
-    desc_set_connected(d, CON_HAIRL);
-  } else if (char_is_namek(ch) || char_is_arlian(ch)) {
-    show_length_menu(g, d, "Antenae", "Tiny");
-    desc_set_connected(d, CON_HAIRL);
-  } else {
-    ask_skin(g, d);
-  }
+  enter_state(g, d, has_length(d->character) ? CON_HAIRL : CON_SKIN);
 }
 
 /* CON_QRACE / CON_RACE_HELP */
@@ -1091,13 +702,7 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (strlen(arg) == 1) { /* T: toggle between the selection and help menus */
-    if (desc_get_connected(d) == CON_QRACE) {
-      display_races_help(g, d);
-      desc_set_connected(d, CON_RACE_HELP);
-    } else {
-      display_races(g, d);
-      desc_set_connected(d, CON_QRACE);
-    }
+    enter_state(g, d, desc_get_connected(d) == CON_QRACE ? CON_RACE_HELP : CON_QRACE);
     return;
   }
 
@@ -1115,25 +720,13 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
   }
   char_set_race(d->character, chosen_race);
 
-  if (char_is_halfbreed(d->character)) {
-    write_to_output(g, d, "@YWhat race do you prefer to by identified with?\r\n");
-    write_to_output(g, d, "@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
-    write_to_output(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output(g, d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
-    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-    desc_set_connected(d, CON_RACIAL);
-  } else if (char_is_android(d->character)) {
-    write_to_output(g, d, "@YWhat do you want to be identified as at first glance?\r\n");
-    write_to_output(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output(g, d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
-    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-    desc_set_connected(d, CON_RACIAL);
+  if (char_is_halfbreed(d->character) || char_is_android(d->character)) {
+    enter_state(g, d, CON_RACIAL);
   } else if (char_is_namek(d->character)) {
     char_set_sex(d->character, SEX_NEUTRAL);
     ask_hair_length(g, d);
   } else {
-    show_sex_prompt(g, d);
-    desc_set_connected(d, CON_QSEX);
+    enter_state(g, d, CON_QSEX);
   }
 }
 
@@ -1147,8 +740,7 @@ static void state_racial(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   char_get_player_specials(d->character)->racial_pref = choice + 1;
-  show_sex_prompt(g, d);
-  desc_set_connected(d, CON_QSEX);
+  enter_state(g, d, CON_QSEX);
 }
 
 /* CON_QSEX: query sex of new user (Nameks have none) */
@@ -1169,152 +761,97 @@ static void state_qsex(GameWorld *g, struct descriptor_data *d, char *arg)
   ask_hair_length(g, d);
 }
 
-/* CON_HAIRL: query hair length (or horns, forelock, antennae) */
-static void state_hairl(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const int lengths[] = {HAIRL_BALD, HAIRL_SHORT, HAIRL_MEDIUM, HAIRL_LONG, HAIRL_RLONG};
-  struct char_data *ch       = d->character;
-  int choice                 = menu_choice(arg, "12345");
+/* ---- Appearance ------------------------------------------------------- */
 
-  if (choice < 0) {
-    reject_option(g, d);
+/* After the length: the colour (of hair or wings), or straight to skin. */
+static void after_length(GameWorld *g, struct descriptor_data *d)
+{
+  struct char_data *ch = d->character;
+
+  if (has_hair(ch) ? char_get_hairl(ch) != HAIRL_BALD : char_is_arlian(ch) && char_is_female(ch)) {
+    enter_state(g, d, CON_HAIRC);
     return;
   }
-  char_set_hairl(ch, lengths[choice]);
-
-  if (has_hair(ch)) {
-    if (char_get_hairl(ch) == HAIRL_BALD) {
-      char_set_hairc(ch, HAIRC_NONE);
-      char_set_hairs(ch, HAIRS_NONE);
-      ask_skin(g, d);
-    } else {
-      show_color_menu(g, d, "Hair");
-      desc_set_connected(d, CON_HAIRC);
-    }
-  } else if ((char_is_arlian(ch) && char_is_female(ch))) {
-    show_color_menu(g, d, "Wing");
-    desc_set_connected(d, CON_HAIRC);
-  } else {
-    char_set_hairc(ch, HAIRC_NONE);
-    char_set_hairs(ch, HAIRS_NONE);
-    if (char_is_demon(ch) || char_is_icer(ch) || char_is_majin(ch) || char_is_namek(ch) || char_is_arlian(ch))
-      show_skin_menu(g, d);
-    desc_set_connected(d, CON_SKIN);
-  }
+  char_set_hairc(ch, HAIRC_NONE);
+  char_set_hairs(ch, HAIRS_NONE);
+  enter_state(g, d, CON_SKIN);
 }
 
-/* CON_HAIRC: query hair color (wing color for Arlians) */
-static void state_hairc(GameWorld *g, struct descriptor_data *d, char *arg)
+/* After the colour: the hair style, or for wings straight to skin. */
+static void after_color(GameWorld *g, struct descriptor_data *d)
 {
-  static const int colors[] = {HAIRC_BLACK, HAIRC_BROWN, HAIRC_BLONDE, HAIRC_GREY, HAIRC_RED, HAIRC_ORANGE, HAIRC_GREEN,
-                               HAIRC_BLUE, HAIRC_PINK, HAIRC_PURPLE, HAIRC_SILVER, HAIRC_CRIMSON, HAIRC_WHITE};
-  int choice                = menu_choice(arg, "123456789abcd");
-
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_hairc(d->character, colors[choice]);
   if (char_is_arlian(d->character)) {
     char_set_hairs(d->character, HAIRS_NONE);
-    ask_skin(g, d);
+    enter_state(g, d, CON_SKIN);
   } else {
-    show_hair_style_menu(g, d);
-    desc_set_connected(d, CON_HAIRS);
+    enter_state(g, d, CON_HAIRS);
   }
 }
 
-/* CON_HAIRS */
-static void state_hairs(GameWorld *g, struct descriptor_data *d, char *arg)
+static const int hair_lengths[] = {HAIRL_BALD, HAIRL_SHORT, HAIRL_MEDIUM, HAIRL_LONG, HAIRL_RLONG};
+static const int hair_colors[]  = {HAIRC_BLACK, HAIRC_BROWN, HAIRC_BLONDE, HAIRC_GREY, HAIRC_RED, HAIRC_ORANGE, HAIRC_GREEN,
+                                   HAIRC_BLUE, HAIRC_PINK, HAIRC_PURPLE, HAIRC_SILVER, HAIRC_CRIMSON, HAIRC_WHITE};
+static const int hair_styles[]  = {HAIRS_PLAIN, HAIRS_MOHAWK, HAIRS_SPIKY, HAIRS_CURLY, HAIRS_UNEVEN, HAIRS_PONYTAIL,
+                                   HAIRS_AFRO, HAIRS_FADE, HAIRS_CREW, HAIRS_FEATHERED, HAIRS_DRED};
+static const int skins[]        = {SKIN_WHITE, SKIN_BLACK, SKIN_GREEN, SKIN_ORANGE, SKIN_YELLOW, SKIN_RED,
+                                   SKIN_GREY, SKIN_BLUE, SKIN_AQUA, SKIN_PINK, SKIN_PURPLE, SKIN_TAN};
+static const int eyes[]         = {EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EYE_RED, EYE_AQUA,
+                                   EYE_PINK, EYE_PURPLE, EYE_CRIMSON, EYE_GOLD, EYE_AMBER, EYE_EMERALD};
+
+/* An appearance question: the keys answering it, what each sets (or, with no values, the key's position), and what
+   comes next. */
+struct appearance {
+  int state{};
+  const char *keys{};
+  std::span<const int> values{};
+  void (*set)(struct char_data *ch, int value){};
+  int next{};
+  void (*then)(GameWorld *g, struct descriptor_data *d){}; /* in place of next, when it depends */
+};
+
+static const appearance appearances[] = {
+    {CON_HAIRL,   "12345",         hair_lengths, [](char_data *ch, int v) { char_set_hairl(ch, v); },   0,           after_length},
+    {CON_HAIRC,   "123456789abcd", hair_colors,  [](char_data *ch, int v) { char_set_hairc(ch, v); },   0,           after_color },
+    {CON_HAIRS,   "123456789ab",   hair_styles,  [](char_data *ch, int v) { char_set_hairs(ch, v); },   CON_SKIN               },
+    {CON_SKIN,    "123456789abc",  skins,        [](char_data *ch, int v) { char_set_skin(ch, v); },    CON_EYE                },
+    {CON_EYE,     "123456789abc",  eyes,         [](char_data *ch, int v) { char_set_eye(ch, v); },     CON_DISTFEA            },
+    {CON_DISTFEA, "12345",         {},           [](char_data *ch, int v) { char_set_distfea(ch, v); }, CON_HW                 },
+    {CON_AURA,    "123456789",     {},           [](char_data *ch, int v) { char_set_aura(ch, v); },    CON_QCLASS             },
+};
+
+/* CON_HAIRL, CON_HAIRC, CON_HAIRS, CON_SKIN, CON_EYE, CON_DISTFEA, CON_AURA */
+static void state_appearance(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  static const int styles[] = {HAIRS_PLAIN, HAIRS_MOHAWK, HAIRS_SPIKY, HAIRS_CURLY, HAIRS_UNEVEN, HAIRS_PONYTAIL,
-                               HAIRS_AFRO, HAIRS_FADE, HAIRS_CREW, HAIRS_FEATHERED, HAIRS_DRED};
-  int choice                = menu_choice(arg, "123456789ab");
+  const appearance *a = std::ranges::find(appearances, desc_get_connected(d), &appearance::state);
+  int choice          = menu_choice(arg, a->keys);
 
   if (choice < 0) {
     reject_option(g, d);
     return;
   }
-  char_set_hairs(d->character, styles[choice]);
-  ask_skin(g, d);
-}
-
-/* CON_SKIN */
-static void state_skin(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const int skins[] = {SKIN_WHITE, SKIN_BLACK, SKIN_GREEN, SKIN_ORANGE, SKIN_YELLOW, SKIN_RED,
-                              SKIN_GREY, SKIN_BLUE, SKIN_AQUA, SKIN_PINK, SKIN_PURPLE, SKIN_TAN};
-  int choice               = menu_choice(arg, "123456789abc");
-
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_skin(d->character, skins[choice]);
-  show_eye_menu(g, d);
-  desc_set_connected(d, CON_EYE);
-}
-
-/* CON_EYE */
-static void state_eye(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const int eyes[] = {EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EYE_RED, EYE_AQUA,
-                             EYE_PINK, EYE_PURPLE, EYE_CRIMSON, EYE_GOLD, EYE_AMBER, EYE_EMERALD};
-  int choice              = menu_choice(arg, "123456789abc");
-
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_eye(d->character, eyes[choice]);
-  show_feature_menu(g, d);
-  desc_set_connected(d, CON_DISTFEA);
-}
-
-/* CON_DISTFEA */
-static void state_distfea(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  int choice = menu_choice(arg, "12345");
-
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_distfea(d->character, choice);
-  show_size_menu(g, d);
-  desc_set_connected(d, CON_HW);
+  a->set(d->character, a->values.empty() ? choice : a->values[choice]);
+  if (a->then)
+    a->then(g, d);
+  else
+    enter_state(g, d, a->next);
 }
 
 /* CON_HW */
 static void state_hw(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  int count;
-  const struct size_range *sizes = size_ranges(d->character, &count);
-  int choice                     = menu_choice(arg, "123456");
+  std::span<const size_range> sizes = size_ranges(d->character);
+  int choice                        = menu_choice(arg, "123456");
 
-  if (choice < 0 || choice >= count) {
+  if (choice < 0 || choice >= (int)sizes.size()) {
     reject_option(g, d);
     return;
   }
   char_set_height(d->character, rand_number(g, sizes[choice].min_height, sizes[choice].max_height));
   char_set_weight(d->character, rand_number(g, sizes[choice].min_weight, sizes[choice].max_weight));
-  show_aura_menu(g, d);
-  desc_set_connected(d, CON_AURA);
+  enter_state(g, d, CON_AURA);
 }
 
-/* CON_AURA */
-static void state_aura(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  int choice = menu_choice(arg, "123456789");
-
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_aura(d->character, choice);
-  display_classes(g, d);
-  desc_set_connected(d, CON_QCLASS);
-}
+/* ---- Sensei ----------------------------------------------------------- */
 
 /* CON_QCLASS / CON_CLASS_HELP */
 static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
@@ -1322,15 +859,10 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
   int chosen_sensei;
 
   if (strlen(arg) == 1) {
-    if (toupper(*arg) != 'T') {
+    if (toupper(*arg) != 'T') /* T: toggle between the selection and help menus */
       write_to_output(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
-    } else if (desc_get_connected(d) == CON_CLASS_HELP) { /* T: toggle between the selection and help menus */
-      desc_set_connected(d, CON_QCLASS);
-      display_classes(g, d);
-    } else {
-      display_classes_help(g, d);
-      desc_set_connected(d, CON_CLASS_HELP);
-    }
+    else
+      enter_state(g, d, desc_get_connected(d) == CON_CLASS_HELP ? CON_QCLASS : CON_CLASS_HELP);
     return;
   }
 
@@ -1351,17 +883,11 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
   char_set_class(d->character, chosen_sensei);
 
   if (char_is_android(d->character)) {
-    write_to_output(g, d, "\r\n@YChoose your model type.\r\n");
-    write_to_output(g, d, "@D---------------------------------------@n\r\n");
-    write_to_output(g, d, "@B1@W)@C Absorbtion Model@n\r\n");
-    write_to_output(g, d, "@B2@W)@C Repair Model@n\r\n");
-    write_to_output(g, d, "@B3@W)@C Sense, Powersense Model@n\r\n");
-    write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-    desc_set_connected(d, CON_ANDROID);
+    enter_state(g, d, CON_ANDROID);
   } else {
     write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they construct your alignment\r\nand affect your stats.\r\n\r\n");
     write_to_output(g, d, "@WQuestion (@G1@W out of @g10@W)\r\n");
-    ask_question1(g, d);
+    enter_state(g, d, CON_Q1);
   }
 }
 
@@ -1386,7 +912,7 @@ static void state_android(GameWorld *g, struct descriptor_data *d, char *arg)
       write_to_output(g, d, "@wThat is not a correct selection, try again.@n\r\n");
       return;
   }
-  ask_question1(g, d);
+  enter_state(g, d, CON_Q1);
 }
 
 /* ---- Questionnaire ---------------------------------------------------- */
@@ -1429,331 +955,104 @@ static void roll_starting_abilities(GameWorld *g, struct char_data *ch)
   }
 }
 
-/* CON_Q1 */
-static void state_q1(GameWorld *g, struct descriptor_data *d, char *arg)
+/* Question 1 starts the base stats and abilities over, before looking at the answer (so again after a bad one). */
+static void roll_starting_stats(GameWorld *g, struct char_data *ch)
 {
-  char_set_basepl(d->character, rand_number(g, 30, 50));
-  char_set_basest(d->character, rand_number(g, 30, 50));
-  char_set_baseki(d->character, rand_number(g, 30, 50));
-  roll_starting_abilities(g, d->character);
-
-  switch (*arg) {
-    case '1':
-      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(g, d->character, 5, 25));
-      char_set_basest(d->character, getBaseST(d->character) + roll_stats(g, d->character, 8, 50));
-      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(g, d->character, 6, 50));
-      break;
-    case '2':
-      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(g, d->character, 5, 55));
-      char_set_basest(d->character, getBaseST(d->character) + roll_stats(g, d->character, 8, 40));
-      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(g, d->character, 6, 40));
-      break;
-    case '3':
-      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(g, d->character, 5, 125));
-      char_set_basest(d->character, getBaseST(d->character) + roll_stats(g, d->character, 8, 50));
-      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(g, d->character, 6, 40));
-      break;
-    case '4':
-      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(g, d->character, 5, 65));
-      char_set_basest(d->character, getBaseST(d->character) + roll_stats(g, d->character, 8, 65));
-      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(g, d->character, 6, 65));
-      char_plr_set(d->character, PLR_SKILLP, true);
-      break;
-    case '5':
-      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(g, d->character, 5, 75));
-      char_set_basest(d->character, getBaseST(d->character) + roll_stats(g, d->character, 8, 100));
-      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(g, d->character, 6, 75));
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G2@W out of @g10@W)\r\n");
-  write_to_output(g, d, "@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C Kill my opponent in a very brutal fashion!@n\r\n");
-  write_to_output(g, d, "@B2@W)@C Disable my opponent, but spare their life.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Kill my opponent, I have no other choice.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C Try to evade my opponent till I can get away.@n\r\n");
-  write_to_output(g, d, "@B5@W)@C Take their head clean off and bathe in their blood!@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q2);
+  char_set_basepl(ch, rand_number(g, 30, 50));
+  char_set_basest(ch, rand_number(g, 30, 50));
+  char_set_baseki(ch, rand_number(g, 30, 50));
+  roll_starting_abilities(g, ch);
 }
 
-/* CON_Q2 */
-static void state_q2(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const int alignment[] = {-200, 100, 10, 0, -400};
-  int choice                   = menu_choice(arg, "12345");
+/* In the order of the ability penalty's roll. */
+enum class ability { none, str, con, wis, intel, cha, dex };
 
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
+static void add_ability(struct char_data *ch, ability which, int n)
+{
+  switch (which) {
+    case ability::none:
+      break;
+    case ability::str:
+      char_set_real_abils_str(ch, char_get_real_abils_str(ch) + n);
+      break;
+    case ability::con:
+      char_set_real_abils_con(ch, char_get_real_abils_con(ch) + n);
+      break;
+    case ability::wis:
+      char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + n);
+      break;
+    case ability::intel:
+      char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + n);
+      break;
+    case ability::cha:
+      char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + n);
+      break;
+    case ability::dex:
+      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + n);
+      break;
   }
-  char_set_alignment(d->character, char_get_alignment(d->character) + (alignment[choice]));
-  write_to_output(g, d, "\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
-  write_to_output(g, d, "@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C Hell yeah I take the opportunity to get stronger!@n\r\n");
-  write_to_output(g, d, "@B2@W)@C I refuse to gain unnatural strength.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C I refuse to gain strength at the cost of the innocent.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C I kill that many innocents before breakfast anyway...@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q3);
 }
 
-/* CON_Q3 */
-static void state_q3(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const struct {
-    int alignment{}, pl{}, st{}, ki{};
-  } answers[] = {
-      {-100, 100, 80,  10 },
-      {10,   25,  25,  25 },
-      {50,   20,  20,  20 },
-      {-200, 100, 100, 100},
-  };
-  int choice = menu_choice(arg, "1234");
+/* What an answer does to a base stat (PL, ST or KI): a fixed amount, a rand_number range added or taken away, or
+   roll_stats' roll. */
+enum class gain_kind { none, fixed, add, take, dice };
 
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
+struct gain {
+  gain_kind how{};
+  int lo{}, hi{}; /* for dice, roll_stats' type and bonus */
+};
+
+static constexpr gain plus(int n) { return {gain_kind::fixed, n, 0}; }
+static constexpr gain add(int lo, int hi) { return {gain_kind::add, lo, hi}; }
+static constexpr gain take(int lo, int hi) { return {gain_kind::take, lo, hi}; }
+static constexpr gain dice(int type, int bonus) { return {gain_kind::dice, type, bonus}; }
+
+static int64_t gained(GameWorld *g, struct char_data *ch, gain how)
+{
+  switch (how.how) {
+    case gain_kind::none:
+      break;
+    case gain_kind::fixed:
+      return how.lo;
+    case gain_kind::add:
+      return rand_number(g, how.lo, how.hi);
+    case gain_kind::take:
+      return -(int64_t)rand_number(g, how.lo, how.hi);
+    case gain_kind::dice:
+      return roll_stats(g, ch, how.lo, how.hi);
   }
-  char_set_alignment(d->character, char_get_alignment(d->character) + answers[choice].alignment);
-  char_set_basepl(d->character, getBasePL(d->character) + answers[choice].pl);
-  char_set_basest(d->character, getBaseST(d->character) + answers[choice].st);
-  char_set_baseki(d->character, getBaseKI(d->character) + answers[choice].ki);
-  write_to_output(g, d, "\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
-  write_to_output(g, d, "@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C I take the opportunity, with more money I can train better later.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C I refuse to waste my time. What I need is some nice hard training.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Hmm. With more money I can live better, certainly that is worth the time.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C I choose to earn a little money while still training instead.@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q4);
+  return 0;
 }
 
-/* CON_Q4 */
-static void state_q4(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  switch (*arg) {
-    case '1':
-      char_set_gold(d->character, char_get_gold(d->character) + 1000);
-      char_set_basepl(d->character, getBasePL(d->character) - rand_number(g, 10, 30));
-      char_set_basest(d->character, getBaseST(d->character) - rand_number(g, 10, 30));
-      char_set_baseki(d->character, getBaseKI(d->character) - rand_number(g, 10, 30));
-      break;
-    case '2':
-      char_set_gold(d->character, 0);
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 50, 165));
-      char_set_basest(d->character, getBaseST(d->character) + rand_number(g, 50, 165));
-      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(g, 50, 165));
-      break;
-    case '3':
-      char_set_gold(d->character, 2500);
-      char_set_basepl(d->character, getBasePL(d->character) - rand_number(g, 15, 25));
-      char_set_basest(d->character, getBaseST(d->character) - rand_number(g, 15, 25));
-      char_set_baseki(d->character, getBaseKI(d->character) - rand_number(g, 15, 25));
-      break;
-    case '4':
-      char_set_gold(d->character, 150);
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 25, 80));
-      char_set_basest(d->character, getBaseST(d->character) + rand_number(g, 25, 80));
-      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(g, 25, 80));
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
-  write_to_output(g, d, "@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou are introduced to a new way of training one day, what do you do?\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C I prefer my way, it has worked so far.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C I am open to new possibilites, sure.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C I will at least try it, for a little while.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C No way is superior to eating spinach everyday...@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q5);
-}
+/* An answer, and what it does, in this order. */
+struct answer {
+  const char *text{};
+  int alignment{};    /* added */
+  int gold_add{};
+  int gold_set{-1};   /* or left alone */
+  gain pl{}, st{}, ki{};
+  ability raise{};    /* by one */
+  int choice{};       /* or left alone */
+  int flag{-1};       /* a PLR_* set, or none */
+};
 
-/* CON_Q5 */
-static void state_q5(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  static const int pl_range[][2] = {
-      {0,   40},
-      {-30, 80},
-      {-25, 60},
-      {0,   50}
-  };
-  int choice = menu_choice(arg, "1234");
+struct question {
+  int state{};
+  bool gap{};          /* a blank line before "Answer the following question" */
+  const char *ask{};
+  answer answers[5]{}; /* or none, and choices shows them */
+  void (*choices)(GameWorld *g, struct descriptor_data *d){};
+  void (*before)(GameWorld *g, struct char_data *ch){}; /* each time an answer is given, before it's looked at */
+};
 
-  if (choice < 0) {
-    reject_option(g, d);
-    return;
-  }
-  char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, pl_range[choice][0], pl_range[choice][1]));
-  write_to_output(g, d, "\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
-  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C I prefer to defend rather than attack.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C I prefer to throw a strong punch at the enemy's throat.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C I prefer to send a devestating kick at the enemy's neck.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C I prefer to smash them with a two-handed slam!@n\r\n");
-  write_to_output(g, d, "@B5@W)@C I prefer to throw one of my many energy attacks!@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q6);
-}
-
-/* CON_Q6 */
-static void state_q6(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  switch (*arg) {
-    case '1':
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 0, 15));
-      char_set_basest(d->character, getBaseST(d->character) + rand_number(g, 0, 15));
-      char_set_choice(d->character, 1);
-      break;
-    case '2':
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 0, 30));
-      char_set_choice(d->character, 2);
-      break;
-    case '3':
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 0, 30));
-      char_set_choice(d->character, 3);
-      break;
-    case '4':
-      char_set_basepl(d->character, getBasePL(d->character) + rand_number(g, 0, 30));
-      char_set_choice(d->character, 4);
-      break;
-    case '5':
-      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(g, 0, 50));
-      char_set_choice(d->character, 5);
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G7@W out of @g10@W)\r\n");
-  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C One day, I am going to conquer every one of those.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C I really wish I had brought that special someone along as this is a great night for romance@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C You'd very much like to travel into space to get to one of these stars to study all that it holds.@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q7);
-}
-
-/* CON_Q7 */
-static void state_q7(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  switch (*arg) {
-    case '1':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
-      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
-      break;
-    case '2':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (+10));
-      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
-      break;
-    case '3':
-      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
-      break;
-    case '4':
-      char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) + 1);
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G8@W out of @g10@W)\r\n");
-  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C It's clear that they are quite chuffed about something, you could stop the fight now but they may just try again later. It's best to investigate and find out the source of the problem.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Pick the one you like the most and help them to win.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q8);
-}
-
-/* CON_Q8 */
-static void state_q8(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  switch (*arg) {
-    case '1':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (+10));
-      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
-      break;
-    case '2':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (+20));
-      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
-      break;
-    case '3':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
-      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
-      break;
-    case '4':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-20));
-      char_set_real_abils_dex(d->character, char_get_real_abils_dex(d->character) + 1);
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G9@W out of @g10@W)\r\n");
-  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@B1@W)@C Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.@n\r\n");
-  write_to_output(g, d, "@B2@W)@C Surrender the donut for now but come back later with your friends and gain your revenge.@n\r\n");
-  write_to_output(g, d, "@B3@W)@C Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.@n\r\n");
-  write_to_output(g, d, "@B4@W)@C It's better just to do as he says and leave it to that. After all its only a donut.@n\r\n");
-  write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_Q9);
-}
-
-/* Races that live long enough to start very old. */
+/* Question 10's choices: the last two ages depend on the race. */
 static bool long_lived(const struct char_data *ch)
 {
   return char_is_kai(ch) || char_is_demon(ch) || char_is_majin(ch);
 }
 
-/* CON_Q9 */
-static void state_q9(GameWorld *g, struct descriptor_data *d, char *arg)
+static void show_ages(GameWorld *g, struct descriptor_data *d)
 {
-  switch (*arg) {
-    case '1':
-      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
-      break;
-    case '2':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-30));
-      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
-      break;
-    case '3':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
-      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
-      break;
-    case '4':
-      char_set_alignment(d->character, char_get_alignment(d->character) + (-5));
-      char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) + 1);
-      break;
-    default:
-      reject_option(g, d);
-      return;
-  }
-  write_to_output(g, d, "\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
-  write_to_output(g, d, "\r\n@YAnswer the following question:\r\n");
-  write_to_output(g, d, "@wWhat do you wish your starting age to be?@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
   write_to_output(g, d, "@B1@W)@C  8@n    @B2@W)@C 10@n\r\n");
   write_to_output(g, d, "@B3@W)@C 12@n    @B4@W)@C 14@n\r\n");
   write_to_output(g, d, "@B5@W)@C 16@n    @B6@W)@C 18@n\r\n");
@@ -1769,8 +1068,126 @@ static void state_q9(GameWorld *g, struct descriptor_data *d, char *arg)
   } else {
     write_to_output(g, d, "@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
   }
+}
+
+/* The ten questions, in order; question 10 (the age) has its own handler. */
+static const question questions[] = {
+    {CON_Q1, false, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n",
+     {{.text = "Ask someone with more experience what to do.", .pl = dice(5, 25), .st = dice(8, 50), .ki = dice(6, 50)},
+      {.text = "Jump in with some nice classic pushups!", .pl = dice(5, 55), .st = dice(8, 40), .ki = dice(6, 40)},
+      {.text = "Search for something magical to increase my strength.", .pl = dice(5, 125), .st = dice(8, 50), .ki = dice(6, 40)},
+      {.text = "Practice my favorite skills instead of working just on my body.", .pl = dice(5, 65), .st = dice(8, 65), .ki = dice(6, 65), .flag = PLR_SKILLP},
+      {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}},
+     nullptr, roll_starting_stats},
+    {CON_Q2, false, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n",
+     {{.text = "Kill my opponent in a very brutal fashion!", .alignment = -200},
+      {.text = "Disable my opponent, but spare their life.", .alignment = 100},
+      {.text = "Kill my opponent, I have no other choice.", .alignment = 10},
+      {.text = "Try to evade my opponent till I can get away.", .alignment = 0},
+      {.text = "Take their head clean off and bathe in their blood!", .alignment = -400}}},
+    {CON_Q3, false, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n",
+     {{.text = "Hell yeah I take the opportunity to get stronger!", .alignment = -100, .pl = plus(100), .st = plus(80), .ki = plus(10)},
+      {.text = "I refuse to gain unnatural strength.", .alignment = 10, .pl = plus(25), .st = plus(25), .ki = plus(25)},
+      {.text = "I refuse to gain strength at the cost of the innocent.", .alignment = 50, .pl = plus(20), .st = plus(20), .ki = plus(20)},
+      {.text = "I kill that many innocents before breakfast anyway...", .alignment = -200, .pl = plus(100), .st = plus(100), .ki = plus(100)}}},
+    {CON_Q4, false, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n",
+     {{.text = "I take the opportunity, with more money I can train better later.", .gold_add = 1000, .pl = take(10, 30), .st = take(10, 30), .ki = take(10, 30)},
+      {.text = "I refuse to waste my time. What I need is some nice hard training.", .gold_set = 0, .pl = add(50, 165), .st = add(50, 165), .ki = add(50, 165)},
+      {.text = "Hmm. With more money I can live better, certainly that is worth the time.", .gold_set = 2500, .pl = take(15, 25), .st = take(15, 25), .ki = take(15, 25)},
+      {.text = "I choose to earn a little money while still training instead.", .gold_set = 150, .pl = add(25, 80), .st = add(25, 80), .ki = add(25, 80)}}},
+    {CON_Q5, false, "@wYou are introduced to a new way of training one day, what do you do?\r\n",
+     {{.text = "I prefer my way, it has worked so far.", .pl = add(0, 40)},
+      {.text = "I am open to new possibilites, sure.", .pl = add(-30, 80)},
+      {.text = "I will at least try it, for a little while.", .pl = add(-25, 60)},
+      {.text = "No way is superior to eating spinach everyday...", .pl = add(0, 50)}}},
+    {CON_Q6, true, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n",
+     {{.text = "I prefer to defend rather than attack.", .pl = add(0, 15), .st = add(0, 15), .choice = 1},
+      {.text = "I prefer to throw a strong punch at the enemy's throat.", .pl = add(0, 30), .choice = 2},
+      {.text = "I prefer to send a devestating kick at the enemy's neck.", .pl = add(0, 30), .choice = 3},
+      {.text = "I prefer to smash them with a two-handed slam!", .pl = add(0, 30), .choice = 4},
+      {.text = "I prefer to throw one of my many energy attacks!", .ki = add(0, 50), .choice = 5}}},
+    {CON_Q7, true, "@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n",
+     {{.text = "One day, I am going to conquer every one of those.", .alignment = -10, .raise = ability::str},
+      {.text = "I really wish I had brought that special someone along as this is a great night for romance", .alignment = 10, .raise = ability::cha},
+      {.text = "Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.", .raise = ability::wis},
+      {.text = "You'd very much like to travel into space to get to one of these stars to study all that it holds.", .raise = ability::intel}}},
+    {CON_Q8, true, "@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n",
+     {{.text = "You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.", .alignment = 10, .raise = ability::cha},
+      {.text = "It's clear that they are quite chuffed about something, you could stop the fight now but they may just try again later. It's best to investigate and find out the source of the problem.", .alignment = 20, .raise = ability::wis},
+      {.text = "Pick the one you like the most and help them to win.", .alignment = -10, .raise = ability::str},
+      {.text = "You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.", .alignment = -20, .raise = ability::dex}}},
+    {CON_Q9, true, "@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n",
+     {{.text = "Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.", .raise = ability::str},
+      {.text = "Surrender the donut for now but come back later with your friends and gain your revenge.", .alignment = -30, .raise = ability::wis},
+      {.text = "Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.", .alignment = -10, .raise = ability::cha},
+      {.text = "It's better just to do as he says and leave it to that. After all its only a donut.", .alignment = -5, .raise = ability::intel}}},
+    {CON_QX, true, "@wWhat do you wish your starting age to be?@n\r\n", {}, show_ages},
+};
+
+static const question &question_for(int state)
+{
+  return *std::ranges::find(questions, state, &question::state);
+}
+
+static int answer_count(const question &q)
+{
+  return (int)std::ranges::count_if(q.answers, [](const answer &a) { return a.text != nullptr; });
+}
+
+/* CON_Q1 to CON_QX. Question 1's heading is its caller's. */
+static void ask_question(GameWorld *g, struct descriptor_data *d)
+{
+  const question &q = question_for(desc_get_connected(d));
+  int number        = (int)(&q - questions) + 1;
+
+  if (number > 1)
+    write_to_output(g, d, "\r\n@WQuestion (@G{:d}@W out of @g10@W)\r\n", number);
+  if (q.gap)
+    write_to_output(g, d, "\r\n");
+  write_to_output(g, d, "@YAnswer the following question:\r\n");
+  write_to_output(g, d, "{}", q.ask);
+  write_to_output(g, d, "@D---------------------------------------@n\r\n");
+  if (q.choices)
+    q.choices(g, d);
+  for (int i = 0; i < answer_count(q); i++)
+    write_to_output(g, d, "@B{:d}@W)@C {}@n\r\n", i + 1, q.answers[i].text);
   write_to_output(g, d, "@w\r\nMake a selection:@n\r\n");
-  desc_set_connected(d, CON_QX);
+}
+
+static void apply_answer(GameWorld *g, struct char_data *ch, const answer &a)
+{
+  if (a.alignment)
+    char_set_alignment(ch, char_get_alignment(ch) + a.alignment);
+  if (a.gold_add)
+    char_set_gold(ch, char_get_gold(ch) + a.gold_add);
+  if (a.gold_set >= 0)
+    char_set_gold(ch, a.gold_set);
+  if (a.pl.how != gain_kind::none)
+    char_set_basepl(ch, getBasePL(ch) + gained(g, ch, a.pl));
+  if (a.st.how != gain_kind::none)
+    char_set_basest(ch, getBaseST(ch) + gained(g, ch, a.st));
+  if (a.ki.how != gain_kind::none)
+    char_set_baseki(ch, getBaseKI(ch) + gained(g, ch, a.ki));
+  add_ability(ch, a.raise, 1);
+  if (a.choice)
+    char_set_choice(ch, a.choice);
+  if (a.flag >= 0)
+    char_plr_set(ch, a.flag, true);
+}
+
+/* CON_Q1 to CON_Q9 */
+static void state_question(GameWorld *g, struct descriptor_data *d, char *arg)
+{
+  const question &q = question_for(desc_get_connected(d));
+
+  if (q.before)
+    q.before(g, d->character);
+  if (*arg < '1' || *arg >= '1' + answer_count(q)) {
+    reject_option(g, d);
+    return;
+  }
+  apply_answer(g, d->character, q.answers[*arg - '1']);
+  enter_state(g, d, (&q + 1)->state);
 }
 
 /* CON_QX: starting age */
@@ -1798,25 +1215,7 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
   char_set_time_birth(d->character, game_now(g) - (age * SECS_PER_MUD_YEAR));
 
   char_set_ccpoints(d->character, char_is_hoshijin(d->character) ? 10 : 5);
-  write_to_output(g, d, "@C             Alignment Menu@n\r\n");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@cCurrent Alignment@D: {}{}@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
-  write_to_output(g, d, "@YThis is the alignment your character has based on your choices.\r\n");
-  write_to_output(g, d, "Choose to keep this alignment with no penalty, or choose new\r\n");
-  write_to_output(g, d, "alignment and suffer a -5{} PL and -1 stat (random) penalty.\r\n@n", "%");
-  write_to_output(g, d, "@D---------------------------------------@n\r\n");
-  write_to_output(g, d, "@BK@W) @wKeep This Alignment@n\r\n");
-  write_to_output(g, d, "@B1@W) @wSaintly@n\r\n");
-  write_to_output(g, d, "@B2@W) @wValiant@n\r\n");
-  write_to_output(g, d, "@B3@W) @wHero@n\r\n");
-  write_to_output(g, d, "@B4@W) @wDo-gooder@n\r\n");
-  write_to_output(g, d, "@B5@W) @wNeutral\r\n");
-  write_to_output(g, d, "@B6@W) @wCrook@n\r\n");
-  write_to_output(g, d, "@B7@W) @wVillain@n\r\n");
-  write_to_output(g, d, "@B8@W) @wTerrible@n\r\n");
-  write_to_output(g, d, "@B9@W) @wHorribly Evil@n\r\n");
-  write_to_output(g, d, "Choose: \r\n");
-  desc_set_connected(d, CON_ALIGN);
+  enter_state(g, d, CON_ALIGN);
 }
 
 /* CON_ALIGN: keep the questionnaire's alignment, or pick one at a cost */
@@ -1834,30 +1233,10 @@ static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
   } else {
     char_set_alignment(d->character, alignments[choice - 1]);
     loseBasePLPercent(d->character, .2, false);
-    switch (rand_number(g, 1, 6)) { /* and lose a random point of one ability */
-      case 1:
-        char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) - 1);
-        break;
-      case 2:
-        char_set_real_abils_con(d->character, char_get_real_abils_con(d->character) - 1);
-        break;
-      case 3:
-        char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) - 1);
-        break;
-      case 4:
-        char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) - 1);
-        break;
-      case 5:
-        char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) - 1);
-        break;
-      case 6:
-        char_set_real_abils_dex(d->character, char_get_real_abils_dex(d->character) - 1);
-        break;
-    }
+    add_ability(d->character, (ability)rand_number(g, 1, 6), -1); /* and lose a random point of one ability */
     write_to_output(g, d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
   }
-  write_to_output(g, d, "keep or forget: \r\n");
-  desc_set_connected(d, CON_SKILLS);
+  enter_state(g, d, CON_SKILLS);
 }
 
 /* CON_SKILLS: keep the sensei/race skills, or forget them for 200 practice sessions */
@@ -1866,7 +1245,7 @@ static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
   bool forget = !strcasecmp(arg, "forget");
 
   if (!forget && strcasecmp(arg, "keep")) {
-    write_to_output(g, d, "keep or forget: \r\n");
+    show_skills_prompt(g, d);
     return;
   }
   if (forget) {
@@ -1887,6 +1266,8 @@ static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
   char_set_genome(d->character, 1, 0);
   desc_set_connected(d, CON_GENOME);
 }
+
+/* ---- Genomes, traits and stats --------------------------------------- */
 
 /* Mutants pick one mutation; the next input rolls the second, and the one after moves on. */
 static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
@@ -1978,18 +1359,17 @@ static void state_genome(GameWorld *g, struct descriptor_data *d, char *arg)
 static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
 {
   bool negatives = desc_get_connected(d) == CON_NEGATIVE;
-  int menu       = negatives ? 1 : 0;
   int value;
 
   if (!*arg) {
-    display_bonus_menu(g, d->character, menu);
+    display_bonus_menu(g, d->character, negatives);
     send_to_char(g, d->character, "@wChoose: ");
   } else if (!strcasecmp(arg, negatives ? "n" : "b")) {
-    display_bonus_menu(g, d->character, menu);
+    display_bonus_menu(g, d->character, negatives);
     send_to_char(g, d->character, "@RYou are already in that menu.\r\n");
     send_to_char(g, d->character, "@wChoose: ");
   } else if (!strcasecmp(arg, negatives ? "b" : "n")) {
-    display_bonus_menu(g, d->character, !menu);
+    display_bonus_menu(g, d->character, !negatives);
     send_to_char(g, d->character, "@wChoose: ");
     desc_set_connected(d, negatives ? CON_BONUS : CON_NEGATIVE);
   } else if (!strcasecmp(arg, "x")) {
@@ -2005,15 +1385,12 @@ static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
       }
     }
     finish_bonuses(g, d);
-  } else if ((value = parse_bonuses(arg)) == -1) {
-    display_bonus_menu(g, d->character, menu);
+  } else if ((value = trait_choice(arg, negatives)) == -1) {
+    display_bonus_menu(g, d->character, negatives);
     send_to_char(g, d->character, "@RThat is not an option.\r\n");
     send_to_char(g, d->character, "@wChoose: ");
-  } else if (value != 1337) {
-    exchange_ccpoints(g, d->character, negatives ? value + 15 : value);
-    send_to_char(g, d->character, "@wChoose: ");
   } else {
-    display_bonus_menu(g, d->character, menu);
+    exchange_ccpoints(g, d->character, value);
     send_to_char(g, d->character, "@wChoose: ");
   }
 }
@@ -2084,38 +1461,38 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 static const con_state chargen_states[] = {
-    {CON_QSEX,       state_qsex      },
-    {CON_QRACE,      state_qrace     },
-    {CON_RACE_HELP,  state_qrace     },
-    {CON_RACIAL,     state_racial    },
-    {CON_HAIRL,      state_hairl     },
-    {CON_HAIRC,      state_hairc     },
-    {CON_HAIRS,      state_hairs     },
-    {CON_SKIN,       state_skin      },
-    {CON_EYE,        state_eye       },
-    {CON_DISTFEA,    state_distfea   },
-    {CON_HW,         state_hw        },
-    {CON_AURA,       state_aura      },
-    {CON_Q1,         state_q1        },
-    {CON_Q2,         state_q2        },
-    {CON_Q3,         state_q3        },
-    {CON_Q4,         state_q4        },
-    {CON_Q5,         state_q5        },
-    {CON_Q6,         state_q6        },
-    {CON_Q7,         state_q7        },
-    {CON_Q8,         state_q8        },
-    {CON_Q9,         state_q9        },
-    {CON_QX,         state_qx        },
-    {CON_ALIGN,      state_align     },
-    {CON_SKILLS,     state_skills    },
-    {CON_GENOME,     state_genome    },
-    {CON_BONUS,      state_traits    },
-    {CON_NEGATIVE,   state_traits    },
-    {CON_QCLASS,     state_qclass    },
-    {CON_CLASS_HELP, state_qclass    },
-    {CON_ANDROID,    state_android   },
-    {CON_QROLLSTATS, state_qrollstats},
-    {CON_QSTATS,     state_qstats    },
+    {CON_QRACE,      state_qrace,      display_races        },
+    {CON_RACE_HELP,  state_qrace,      display_races_help   },
+    {CON_RACIAL,     state_racial,     show_racial_menu     },
+    {CON_QSEX,       state_qsex,       show_sex_prompt      },
+    {CON_HAIRL,      state_appearance, show_length_menu     },
+    {CON_HAIRC,      state_appearance, show_color_menu      },
+    {CON_HAIRS,      state_appearance, show_hair_style_menu },
+    {CON_SKIN,       state_appearance, show_skin_menu       },
+    {CON_EYE,        state_appearance, show_eye_menu        },
+    {CON_DISTFEA,    state_appearance, show_feature_menu    },
+    {CON_HW,         state_hw,         show_size_menu       },
+    {CON_AURA,       state_appearance, show_aura_menu       },
+    {CON_QCLASS,     state_qclass,     display_classes      },
+    {CON_CLASS_HELP, state_qclass,     display_classes_help },
+    {CON_ANDROID,    state_android,    show_model_menu      },
+    {CON_Q1,         state_question,   ask_question         },
+    {CON_Q2,         state_question,   ask_question         },
+    {CON_Q3,         state_question,   ask_question         },
+    {CON_Q4,         state_question,   ask_question         },
+    {CON_Q5,         state_question,   ask_question         },
+    {CON_Q6,         state_question,   ask_question         },
+    {CON_Q7,         state_question,   ask_question         },
+    {CON_Q8,         state_question,   ask_question         },
+    {CON_Q9,         state_question,   ask_question         },
+    {CON_QX,         state_qx,         ask_question         },
+    {CON_ALIGN,      state_align,      show_alignment_menu  },
+    {CON_SKILLS,     state_skills,     show_skills_prompt   },
+    {CON_GENOME,     state_genome                           },
+    {CON_BONUS,      state_traits                           },
+    {CON_NEGATIVE,   state_traits                           },
+    {CON_QROLLSTATS, state_qrollstats                       },
+    {CON_QSTATS,     state_qstats                           },
 };
 
 const std::span<const con_state> CHARGEN_STATES = chargen_states;

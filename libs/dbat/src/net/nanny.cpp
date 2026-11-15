@@ -1159,21 +1159,38 @@ static const con_state login_states[] = {
 
 /* The editors' states, each answered by context help first */
 static const con_state olc_states[] = {
-    {CON_OEDIT,    oedit_parse,     true},
-    {CON_IEDIT,    oedit_parse,     true},
-    {CON_ZEDIT,    zedit_parse,     true},
-    {CON_SEDIT,    sedit_parse,     true},
-    {CON_MEDIT,    medit_parse,     true},
-    {CON_REDIT,    redit_parse,     true},
-    {CON_CEDIT,    cedit_parse,     true},
-    {CON_AEDIT,    aedit_parse,     true},
-    {CON_TRIGEDIT, trigedit_parse,  true},
-    {CON_ASSEDIT,  assedit_parse,   true},
-    {CON_GEDIT,    gedit_parse,     true},
-    {CON_HEDIT,    hedit_parse,     true},
-    {CON_HSEDIT,   hsedit_parse,    true},
-    {CON_POBJ,     pobj_edit_parse, true},
+    {CON_OEDIT,    oedit_parse,     nullptr, true},
+    {CON_IEDIT,    oedit_parse,     nullptr, true},
+    {CON_ZEDIT,    zedit_parse,     nullptr, true},
+    {CON_SEDIT,    sedit_parse,     nullptr, true},
+    {CON_MEDIT,    medit_parse,     nullptr, true},
+    {CON_REDIT,    redit_parse,     nullptr, true},
+    {CON_CEDIT,    cedit_parse,     nullptr, true},
+    {CON_AEDIT,    aedit_parse,     nullptr, true},
+    {CON_TRIGEDIT, trigedit_parse,  nullptr, true},
+    {CON_ASSEDIT,  assedit_parse,   nullptr, true},
+    {CON_GEDIT,    gedit_parse,     nullptr, true},
+    {CON_HEDIT,    hedit_parse,     nullptr, true},
+    {CON_HSEDIT,   hsedit_parse,    nullptr, true},
+    {CON_POBJ,     pobj_edit_parse, nullptr, true},
 };
+
+/* The state's row: the editors', then the login menus', then character creation's. */
+static const con_state *find_state(int state)
+{
+  for (std::span<const con_state> part : {std::span<const con_state>(olc_states), std::span<const con_state>(login_states), CHARGEN_STATES})
+    for (const con_state &s : part)
+      if (s.state == state)
+        return &s;
+  return nullptr;
+}
+
+void enter_state(GameWorld *g, struct descriptor_data *d, int state)
+{
+  desc_set_connected(d, state);
+  if (const con_state *s = find_state(state); s && s->prompt)
+    s->prompt(g, d);
+}
 
 void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line)
 {
@@ -1191,15 +1208,13 @@ void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line)
     char_set_desc(d->character, d);
   }
 
-  for (std::span<const con_state> part : {std::span<const con_state>(olc_states), std::span<const con_state>(login_states), CHARGEN_STATES})
-    for (const con_state &s : part)
-      if (desc_get_connected(d) == s.state) {
-        /* send context-sensitive help if need be */
-        if (s.olc && context_help(g, d, arg))
-          return;
-        s.parse(g, d, arg);
-        return;
-      }
+  if (const con_state *s = find_state(desc_get_connected(d))) {
+    /* send context-sensitive help if need be */
+    if (s->olc && context_help(g, d, arg))
+      return;
+    s->parse(g, d, arg);
+    return;
+  }
 
   /*
    * It's possible, if enough pulses are missed, to kick someone off

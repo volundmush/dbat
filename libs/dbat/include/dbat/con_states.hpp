@@ -13,8 +13,12 @@
 struct con_state {
   int state{};
   void (*parse)(GameWorld *g, struct descriptor_data *d, char *arg){}; /* arg: the line, its leading spaces gone */
+  void (*prompt)(GameWorld *g, struct descriptor_data *d){};           /* what's shown on entering it, if always the same */
   bool olc{};                                                           /* an editor's */
 };
 
 /* Runs a line of input from a connection that isn't playing, by its state's handler. */
 void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line);
+
+/* Moves d to the state, and shows its prompt if it has one. */
+void enter_state(GameWorld *g, struct descriptor_data *d, int state);

@@ -1,5 +1,6 @@
 # 2.9.4 (latest)
 - ???
+- A number past the end of the negative traits menu (38 to 51) is refused as not an option, rather than reading and writing past the end of the character's traits. [Volund]
 - Focusing a curse on yourself curses you, rather than crashing the game. [Volund]
 - Carried ice that melts away no longer leaves its carrier counting less weight than they carry. [Volund]
 - The top lists load all 25 places and no further: loading them no longer replaced the top powerlevel with a garbage number and disturbed the auction, and "toplist" no longer wrote past its own list. A short top list file leaves its missing places empty. [Volund]

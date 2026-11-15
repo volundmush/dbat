@@ -783,12 +783,12 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
     for (x = 0; x < 30; x++) {
       if (x < 15) {
         if (char_get_bonuses(k, x) > 0) {
-          send_to_char(g, ch, "@c{}@n\n", list_bonus[x]);
+          send_to_char(g, ch, "@c{}@n\n", trait_name(x));
           track += 1;
         }
       } else {
         if (char_get_bonuses(k, x) > 0) {
-          send_to_char(g, ch, "@r{}@n\n", list_bonus[x]);
+          send_to_char(g, ch, "@r{}@n\n", trait_name(x));
           track += 1;
         }
       }
