@@ -7,6 +7,8 @@ it so that both sides run the same tests, and builds this tree, both with the de
     states, each case with its own seed and the clock stopped, recording what each player saw and saved, the
     generator's state afterwards, and what is in the fixture's rooms;
   - dbat_test_techniques, if both sides have it, the same way;
+  - dbat_test_login, if both sides have it: scripted journeys through the login and chargen menus over real
+    connections (with --only, only if 'login' is one of the commands named);
   - dbat_test_bot --seed N for each seed, comparing the fingerprints of all the output.
 and reports the first cases and seeds that differ. Exits 0 if nothing does.
 
@@ -23,13 +25,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 ROOT = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
                       cwd=os.path.dirname(os.path.abspath(__file__))).stdout.strip()
-TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques']
+TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques', 'dbat_test_login']
+# the tests a tree may not have yet, by their source
+OPTIONAL = {'dbat_test_techniques': 'test_techniques.cpp', 'dbat_test_login': 'test_login.cpp'}
 
 
 def build(tree, jobs):
     subprocess.run(['cmake', '--preset', 'debug'], cwd=tree, check=True, stdout=subprocess.DEVNULL)
-    targets = [t for t in TARGETS if t != 'dbat_test_techniques' or
-               os.path.exists(os.path.join(tree, 'libs/dbat/tests/test_techniques.cpp'))]
+    targets = [t for t in TARGETS if t not in OPTIONAL or os.path.exists(os.path.join(tree, 'libs/dbat/tests', OPTIONAL[t]))]
     r = subprocess.run(['cmake', '--build', '--preset', 'debug', f'-j{jobs}', '--target', *targets], cwd=tree,
                        capture_output=True, text=True)
     if r.returncode:
@@ -136,11 +139,15 @@ def main():
             base_bin, new_bin = ex.map(lambda t: build(t, max(1, a.j // 2)), [base_tree, ROOT])
 
         differing = 0
-        for test in ('dbat_test_commands', 'dbat_test_techniques'):
+        for test in ('dbat_test_commands', 'dbat_test_techniques', 'dbat_test_login'):
             if not (os.path.exists(os.path.join(base_bin, test)) and os.path.exists(os.path.join(new_bin, test))):
                 continue
             shards = a.j
             only = a.only.split(',') if a.only else None
+            if test == 'dbat_test_login' and only:  # its journeys aren't commands: all of them, or none
+                if 'login' not in only:
+                    continue
+                only = None
             paths = [run_transcripts(os.path.join(b, test), os.path.join(work, f'{test}-{side}'), shards, work, only)
                      for b, side in ((base_bin, 'base'), (new_bin, 'new'))]
             differing += compare_transcripts(test, *paths, a.cases)

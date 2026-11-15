@@ -90,6 +90,11 @@ foreach(shard RANGE 3)
   set_tests_properties(techniques_${shard} PROPERTIES LABELS slow TIMEOUT 3600)
 endforeach()
 
+add_executable(dbat_test_login tests/test_login.cpp)
+target_compile_options(dbat_test_login PRIVATE ${DBAT_CXX_FLAGS})
+target_link_libraries(dbat_test_login PRIVATE dbat_test_harness)
+add_test(NAME login COMMAND dbat_test_login)
+
 add_executable(dbat_test_bot tests/test_bot.cpp)
 target_compile_options(dbat_test_bot PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)
