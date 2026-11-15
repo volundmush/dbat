@@ -152,8 +152,8 @@ namespace {
   void pay_rpp(GameWorld *g, struct char_data *ch, int pay)
   {
     char_set_rp(ch, char_get_rp(ch) - pay);
-    char_get_desc(ch)->rpp = char_get_rp(ch);
-    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+    char_get_desc(ch)->acct.rpp = char_get_rp(ch);
+    save_account(char_get_desc(ch));
     save_char(g, ch);
     send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", pay);
     send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), pay);

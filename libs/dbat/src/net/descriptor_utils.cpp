@@ -20,7 +20,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   std::string prev;
   FILE *fl, *file;
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user.c_str())) {
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->acct.user.c_str())) {
     mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
@@ -80,7 +80,7 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *n
     return;
   }
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user.c_str())) {
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->acct.user.c_str())) {
     mud_log("ERROR: Custom unable to be read from user file!");
     return;
   }
@@ -110,7 +110,7 @@ void customCreate(struct descriptor_data *d)
   if (!d)
     return;
 
-  if (d->customfile == 1)
+  if (d->acct.customfile == 1)
     return;
 
   char fname[40];
@@ -118,7 +118,7 @@ void customCreate(struct descriptor_data *d)
 
   /* Create Their Custom File */
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user.c_str()))
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->acct.user.c_str()))
     return;
 
   if (!(fl = atomic_open(&af, fname, true))) {
@@ -127,7 +127,7 @@ void customCreate(struct descriptor_data *d)
   }
 
   file_print(fl, "@D--@RUser @GC@gustom@Gs@D--@n\n");
-  d->customfile = 1;
+  d->acct.customfile = 1;
 
   atomic_commit(&af);
 }

@@ -665,22 +665,22 @@ ACMD(do_rptrans)
   /* the user's character in the game, the last if there are more */
   struct char_data *vict = nullptr;
   for (descriptor_data *k : each_desc(g)) {
-    if (desc_get_connected(k) == CON_PLAYING && !char_is_npc(k->character) && str_eq_nocase(k->user, arg))
+    if (desc_get_connected(k) == CON_PLAYING && !char_is_npc(k->character) && str_eq_nocase(k->acct.user, arg))
       vict = k->character;
   }
   if (vict == nullptr) {
-    userWrite(g, nullptr, 0, amt, 0, arg.c_str());
+    reward_offline_user(g, arg, amt);
   } else {
     char_set_rp(vict, char_get_rp(vict) + amt);
-    char_get_desc(vict)->rpp += amt;
-    userWrite(g, char_get_desc(vict), 0, 0, 0, "index");
+    char_get_desc(vict)->acct.rpp += amt;
+    save_account(char_get_desc(vict));
     char_set_trp(vict, char_get_trp(vict) + amt);
     save_char(g, vict);
     send_to_char(g, vict, "@W{} gives @C{:d}@W of their RPP to you. How nice!\r\n", char_get_name(ch), amt);
   }
   char_set_rp(ch, char_get_rp(ch) - amt);
-  char_get_desc(ch)->rpp -= amt;
-  userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+  char_get_desc(ch)->acct.rpp -= amt;
+  save_account(char_get_desc(ch));
   send_to_char(g, ch, "@WYou exchange @C{:d}@W RPP to user @c{}@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
   mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: {} gave {:d} RPP to user {}", char_get_name(ch), amt, arg);
   save_char(g, ch);

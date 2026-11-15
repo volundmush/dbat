@@ -51,10 +51,10 @@ namespace {
   void account(GameWorld *g, struct char_data *ch, const char *user, bool playing = true)
   {
     struct descriptor_data *d = char_get_desc(ch);
-    d->user                   = user;
-    userWrite(g, d, 0, 0, 0, "index");
+    th_account(d).user        = user;
+    th_save_account(g, d);
     if (!playing)
-      d->user.clear();
+      th_account(d).user.clear();
   }
 
   /* ... carrying something one of a kind, with no prototype */

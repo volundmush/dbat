@@ -21,7 +21,7 @@ namespace {
   void account(struct char_data *ch, const char *user)
   {
     if (char_get_desc(ch))
-      char_get_desc(ch)->user = user;
+      th_account(char_get_desc(ch)).user = user;
   }
 
   /* ... the victim known as Namek, and the helper as Help */

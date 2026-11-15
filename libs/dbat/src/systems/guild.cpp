@@ -1007,8 +1007,8 @@ static void handle_gain(GameWorld *g, struct char_data *keeper, struct guild_dat
       send_to_char(g, ch, "You need at least {:d} RPP to gain the next level.\r\n", rpp_cost);
     } else if (rpp_cost <= char_get_rp(ch)) {
       char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
-      char_get_desc(ch)->rpp = char_get_rp(ch);
-      userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+      char_get_desc(ch)->acct.rpp = char_get_rp(ch);
+      save_account(char_get_desc(ch));
       send_to_char(g, ch, "@D(@cRPP@W: @w-{:d}@D)@n\n\n", rpp_cost);
       gain_level(g, ch, whichclass);
     } else {

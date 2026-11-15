@@ -1449,7 +1449,7 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
     d->olc = nullptr;
   }
   finish_creation(g, d);
-  char_set_rp(d->character, d->rpp);
+  char_set_rp(d->character, d->acct.rpp);
   total            = char_get_aff_abils_str(d->character) / 2 + char_get_aff_abils_con(d->character) / 2 +
           char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 +
           char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;

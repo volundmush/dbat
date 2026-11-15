@@ -1636,14 +1636,10 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
 /* What a connection holds before it has logged in to an account. */
 static void set_empty_account(struct descriptor_data *d)
 {
-  d->user  = "Empty";
-  d->pass  = "Empty";
-  d->email = "Empty";
-  d->tmp1  = "Empty";
-  d->tmp2  = "Empty";
-  d->tmp3  = "Empty";
-  d->tmp4  = "Empty";
-  d->tmp5  = "Empty";
+  d->acct.user  = "Empty";
+  d->acct.pass  = "Empty";
+  d->acct.email = "Empty";
+  d->acct.slots.fill("Empty");
 }
 
 static void set_color(GameWorld *g, struct descriptor_data *d)
@@ -2201,14 +2197,14 @@ static void free_user(struct descriptor_data *d)
   }
   d->user_freed = 1;
 
-  if (!d->user.empty() && strcasecmp(d->user.c_str(), "Empty"))
-    mud_log("Freeing User: {}", d->user);
+  if (!d->acct.user.empty() && strcasecmp(d->acct.user.c_str(), "Empty"))
+    mud_log("Freeing User: {}", d->acct.user);
 
-  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-    account_slot(d, n)->clear();
-  d->user.clear();
-  d->pass.clear();
-  d->email.clear();
+  for (auto &slot : d->acct.slots)
+    slot.clear();
+  d->acct.user.clear();
+  d->acct.pass.clear();
+  d->acct.email.clear();
 }
 
 void close_all_sockets(GameWorld *g)

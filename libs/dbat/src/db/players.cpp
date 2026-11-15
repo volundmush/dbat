@@ -777,8 +777,8 @@ void save_char(GameWorld *g, struct char_data *ch)
   if (char_get_trp(ch) < char_get_rp(ch)) {
     char_set_trp(ch, char_get_rp(ch));
   }
-  if (char_get_desc(ch) != nullptr && !char_get_desc(ch)->user.empty()) {
-    userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+  if (char_get_desc(ch) != nullptr && !char_get_desc(ch)->acct.user.empty()) {
+    save_account(char_get_desc(ch));
   }
 
   for (i = 0; i < NUM_WEARS; i++) {

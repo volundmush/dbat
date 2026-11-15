@@ -481,8 +481,8 @@ void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           d->obj_editval  = EDIT_NONE;
           char_set_rp(d->character, char_get_rp(d->character) - 20);
           char_set_rp(d->character, char_get_rp(d->character));
-          d->rpp -= 20;
-          userWrite(g, d, 0, 0, 0, "index");
+          d->acct.rpp -= 20;
+          save_account(d);
           obj_set_size(obj, get_size(d->character));
           obj_extra_set(obj, ITEM_CUSTOM, true);
           send_to_imm(g, "Custom Eq: {} has bought: {}.", char_get_name(d->character), obj_get_short_description(obj));

@@ -14,11 +14,12 @@ extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, const char *name);
 bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen);
-const char *rIntro(struct char_data *ch, std::string_view arg);
+std::string rIntro(struct char_data *ch, std::string_view arg);
 bool special(GameWorld *g, struct char_data *ch, int cmd, std::string_view arg);
 void fingerUser(GameWorld *g, struct char_data *ch, const std::string &name);
 bool readUserIndex(const std::string &name);
-void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name);
+void save_account(struct descriptor_data *d);
+void reward_offline_user(GameWorld *g, const std::string &name, int amt);
 void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view argument);
 #include "dbat/con_states.hpp" /* nanny() */
 

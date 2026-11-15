@@ -314,7 +314,7 @@ ACMD(do_users)
     const char *alias = d->original && char_get_alias(d->original) ? char_get_alias(d->original)
                         : d->character && char_get_alias(d->character) ? char_get_alias(d->character)
                                                                         : "UNDEFINED";
-    const char *user  = !d->user.empty() ? d->user.c_str() : "UNKNOWN";
+    const char *user  = !d->acct.user.empty() ? d->acct.user.c_str() : "UNKNOWN";
     std::string line  = str_format("{:>3d} {:<20} {:<20} {:<14} {:<3} {:<8} {:>1} ", d->desc_num, alias, user, state, idletime, timeptr, "N");
     if (*d->host)
       line += str_format("\n{:>3d} [{} Site: {}]\r\n", d->desc_num, user, d->host);

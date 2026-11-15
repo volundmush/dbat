@@ -367,8 +367,8 @@ void handle_rpp_store(GameWorld *g, struct char_data *ch, int choice)
       hand_over(g, ch, vnum, item.heavy);
   }
   char_set_rp(ch, char_get_rp(ch) - item.cost);
-  char_get_desc(ch)->rpp = char_get_rp(ch);
-  userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+  char_get_desc(ch)->acct.rpp = char_get_rp(ch);
+  save_account(char_get_desc(ch));
   save_char(g, ch);
   receipt(g, ch, item);
   send_to_imm(g, "RPP Purchase: {} {:d}", char_get_name(ch), item.cost);

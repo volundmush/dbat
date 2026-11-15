@@ -4596,7 +4596,7 @@ const char *char_get_title(const struct char_data *ch)
 
 const char *char_get_user(const struct char_data *ch)
 {
-  return ((ch)->desc ? (!(ch)->desc->user.empty() ? (ch)->desc->user.c_str() : "NOUSER") : "NOUSER");
+  return ((ch)->desc ? (!(ch)->desc->acct.user.empty() ? (ch)->desc->acct.user.c_str() : "NOUSER") : "NOUSER");
 }
 
 int char_get_level(const struct char_data *ch)

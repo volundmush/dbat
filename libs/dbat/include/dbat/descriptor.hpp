@@ -6,6 +6,7 @@
 
 #include <sys/socket.h>
 
+#include "dbat/account.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/constates.hpp"
@@ -58,19 +59,9 @@ struct descriptor_data {
   struct descriptor_data *snooping{};  /* Who is this char snooping	*/
   struct descriptor_data *snoop_by{};  /* And who is snooping this char	*/
   struct oasis_olc_data *olc{};        /* OLC info                            */
-  std::string user;                    /* What user am I?                     */
-  std::string email;                   /* User Account Email.                 */
-  std::string pass;                    /* User Account Password.              */
+  struct account acct;                 /* the account logged in to            */
   std::string loadplay;                /* What character am I loading?        */
   int writenew{};                      /* What slot am I writing to?          */
-  int total{};                         /* What Is My Total Character Limit?   */
-  int rpp{};                           /* What is my total RPP?               */
-  std::string tmp1;
-  std::string tmp2;
-  std::string tmp3;
-  std::string tmp4;
-  std::string tmp5;
-  int level{};
   std::string newsbuf;
   /*---------------Player Level Object Editing Variables-------------------*/
   int obj_editval{};
@@ -92,8 +83,6 @@ struct descriptor_data {
   int shipweap{};
   /*-----------------------------------------------------------------------*/
   int user_freed{};
-  int customfile{};
   std::string title;
-  int rbank{};
 };
 

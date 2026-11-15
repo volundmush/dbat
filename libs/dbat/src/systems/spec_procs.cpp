@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -947,7 +948,7 @@ SPECIAL(bank)
       clear_char(vict);
       char_make_player_specials(vict);
 
-      name = str_format("{}", rIntro(ch, arg2));
+      name = rIntro(ch, arg2);
 
       if ((player_i = load_char(g, name.c_str(), vict)) > -1) {
         is_file = true;
@@ -956,11 +957,11 @@ SPECIAL(bank)
         send_to_char(g, ch, "That person doesn't exist.\r\n");
         return (true);
       }
-      if (char_get_desc(ch)->user.empty()) {
+      if (char_get_desc(ch)->acct.user.empty()) {
         send_to_char(g, ch, "There is an error. Report to Iovan.");
         return (true);
       }
-      if (!strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp1.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp2.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp3.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp4.c_str()) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp5.c_str())) {
+      if (std::ranges::any_of(char_get_desc(ch)->acct.slots, [&](const std::string &slot) { return !strcasecmp(char_get_name(vict), slot.c_str()); })) {
         send_to_char(g, ch, "You can not transfer money to your own offline characters...");
         if (is_file == true)
           free_char(g, vict);

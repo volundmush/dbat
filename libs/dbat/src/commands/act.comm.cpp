@@ -105,8 +105,8 @@ ACMD(do_voice)
   if (!changing)
     return;
   char_set_rp(ch, char_get_rp(ch) - 1);
-  char_get_desc(ch)->rpp = char_get_rp(ch);
-  userWrite(g, char_get_desc(ch), 0, 0, 0, "index");
+  char_get_desc(ch)->acct.rpp = char_get_rp(ch);
+  save_account(char_get_desc(ch));
   send_to_char(g, ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
 }
 
@@ -352,9 +352,9 @@ namespace {
   struct char_data *player_by_account(GameWorld *g, const std::string &name)
   {
     descriptor_data *d = find_first(each_desc(g), [&](descriptor_data *k) {
-      if (desc_get_connected(k) != CON_PLAYING || char_is_npc(k->character) || k->user.empty())
+      if (desc_get_connected(k) != CON_PLAYING || char_is_npc(k->character) || k->acct.user.empty())
         return false;
-      return str_eq_nocase(k->user, name) || strstr(k->user.c_str(), name.c_str()) ||
+      return str_eq_nocase(k->acct.user, name) || strstr(k->acct.user.c_str(), name.c_str()) ||
              ((str_eq_nocase(char_get_name(k->character), name) || strstr(char_get_name(k->character), name.c_str())) && char_get_admlevel(k->character) > 0);
     });
     return d ? d->character : nullptr;

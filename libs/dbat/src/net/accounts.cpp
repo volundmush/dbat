@@ -7,7 +7,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
 #include <cstdlib>
+#include <fstream>
+#include <optional>
+#include <string>
 
 #include <unistd.h>
 
@@ -24,520 +28,273 @@
 
 #include "nanny_internal.hpp"
 
-/* The account's character slots, numbered from 1. */
-std::string *account_slot(struct descriptor_data *d, int n)
+/* An account's file, or nothing for a name that can't have one. */
+static std::optional<std::string> account_file(int mode, const char *name)
 {
-  switch (n) {
-    case 1:
-      return &d->tmp1;
-    case 2:
-      return &d->tmp2;
-    case 3:
-      return &d->tmp3;
-    case 4:
-      return &d->tmp4;
-    default:
-      return &d->tmp5;
-  }
+  char fname[40];
+
+  if (!get_filename(fname, sizeof(fname), mode, name))
+    return std::nullopt;
+  return fname;
 }
 
-void set_account_slot(struct descriptor_data *d, int n, const char *name)
+/* The next line as get_line() reads one: blank lines and '*' comments passed over, the line ending gone, and cut to
+   READ_SIZE. Leaves line as it was at the end of the file. */
+static bool next_line(std::istream &in, std::string &line)
 {
-  *account_slot(d, n) = name;
+  std::string raw;
+
+  do {
+    if (!std::getline(in, raw))
+      return false;
+  } while (raw.empty() || raw[0] == '*' || raw[0] == '\r');
+  raw.resize(std::min<size_t>(raw.find_first_of(std::string_view("\r\n\0", 3)), READ_SIZE - 1));
+  line = std::move(raw);
+  return true;
+}
+
+static void read_field(const std::string &line, std::string &text)
+{
+  char word[100] = "";
+
+  sscanf(line.c_str(), "%99s", word);
+  text = word;
+}
+
+static void read_field(const std::string &line, int &number)
+{
+  sscanf(line.c_str(), "%d", &number); /* a line that isn't a number leaves it as it was */
+}
+
+/* Reads an account file over a, a line a field. quirk: reading carries on until the end of the file has been seen, so
+   a file ending in a newline gives its last line to the next field too, and an empty one gives the first field an
+   empty line. */
+static bool read_account_file(const std::string &path, account &a)
+{
+  std::ifstream in(path);
+  std::string line;
+
+  if (!in)
+    return false;
+  each_account_field(a, [&](auto &field) {
+    if (!in.good())
+      return;
+    next_line(in, line);
+    read_field(line, field);
+  });
+  return true;
+}
+
+/* Reads name's account over a, saying so in the log if its file can't be read. */
+static bool load_account(const char *name, account &a)
+{
+  auto path = account_file(USER_FILE, name);
+
+  if (!path)
+    return false;
+  if (!read_account_file(*path, a)) {
+    mud_log("ERROR: could not load user, {}, from filename, {}.", name, *path);
+    return false;
+  }
+  return true;
+}
+
+/* Writes a to name's account file. False if it couldn't be opened. */
+static bool write_account(const char *name, const account &a)
+{
+  struct atomic_file af;
+  FILE *fl;
+  auto path = account_file(USER_FILE, name);
+
+  if (!path)
+    return false;
+  if (!(fl = atomic_open(&af, path->c_str(), true))) {
+    mud_log("ERROR: could not save user, {}, to filename, {}.", name, *path);
+    return false;
+  }
+  each_account_field(a, [&](const auto &field) { file_print(fl, "{}\n", field); });
+  atomic_commit(&af);
+  return true;
 }
 
 /* Empties every slot holding name (used when a character is deleted or missing). */
 void empty_account_slots_named(struct descriptor_data *d, const char *name)
 {
-  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-    if (!strcasecmp(name, account_slot(d, n)->c_str()))
-      set_account_slot(d, n, "Empty");
+  for (auto &slot : d->acct.slots)
+    if (!strcasecmp(name, slot.c_str()))
+      slot = "Empty";
 }
 
 bool readUserIndex(const std::string &name)
 {
-  char fname[40];
-  FILE *fl;
+  auto path = account_file(USER_FILE, name.c_str());
 
-  /* Read User Index */
-  if (!get_filename(fname, sizeof(fname), USER_FILE, name.c_str())) {
-    return false;
-  }
-  if (!(fl = fopen(fname, "r"))) {
-    return false;
-  }
-  fclose(fl);
-  return true;
+  return path && std::ifstream(*path).is_open();
 }
 
 /* True if name is on the lockout list (lib/etc lockout intro file). */
 bool lockRead(const char *name)
 {
-  char fname[40], filler[50], line[256];
+  auto path  = account_file(INTRO_FILE, "lockout");
   bool known = false;
-  FILE *fl;
+  std::string line;
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
+  if (!path)
     return false;
-  }
-  if (!(fl = fopen(fname, "r"))) {
-    return false;
-  }
-
-  while (get_line(fl, line)) {
-    if (sscanf(line, "%49s", filler) == 1 && !strcasecmp(name, filler)) {
+  std::ifstream in(*path);
+  while (next_line(in, line)) {
+    char word[50];
+    if (sscanf(line.c_str(), "%49s", word) == 1 && !strcasecmp(name, word))
       known = true;
-    }
   }
-  fclose(fl);
   return known;
 }
 
 void userLoad(struct descriptor_data *d, const char *name)
 {
-  char fname[40], filler[100] = "", line[256] = "";
-  FILE *fl;
-
-  /* Read and Write User Index */
-  if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
-    return;
-  }
-  if (!(fl = fopen(fname, "r"))) {
-    mud_log("ERROR: could not load user, {}, from filename, {}.", name, fname);
-    return;
-  }
-  int count = 0;
-  while (!feof(fl)) {
-    get_line(fl, line);
-    count += 1;
-    switch (count) {
-      case 1:
-        sscanf(line, "%99s", filler);
-        d->user = filler;
-        break;
-      case 2:
-        sscanf(line, "%99s", filler);
-        d->email = filler;
-        break;
-      case 3:
-        sscanf(line, "%99s", filler);
-        d->pass = filler;
-        break;
-      case 4:
-        sscanf(line, "%d\n", &d->total);
-        break;
-      case 5:
-        sscanf(line, "%d\n", &d->rpp);
-        break;
-      case 6:
-      case 7:
-      case 8:
-      case 9:
-      case 10:
-        sscanf(line, "%99s", filler);
-        set_account_slot(d, count - 5, filler);
-        break;
-      case 11:
-        sscanf(line, "%d\n", &d->level);
-        break;
-      case 12:
-        sscanf(line, "%d\n", &d->customfile);
-        break;
-      case 13:
-        sscanf(line, "%d\n", &d->rbank);
-        break;
-    }
-    *filler = '\0';
-  }
-  fclose(fl);
-  return;
+  load_account(name, d->acct);
 }
 
+/* Writes a new account's file: three slots, all empty, and no RPP. */
 void userCreate(struct descriptor_data *d)
 {
-  struct atomic_file af;
-  char fname[40];
-  FILE *fl;
+  account made{.user       = d->acct.user,
+               .email      = d->acct.email,
+               .pass       = d->acct.pass,
+               .total      = 3,
+               .rpp        = 0,
+               .slots      = {"Empty", "Empty", "Empty", "Empty", "Empty"},
+               .level      = 0,
+               .customfile = 1,
+               .rbank      = 0};
 
-  /* Write Their User File */
-
-  if (!get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str()))
+  CAP(made.user);
+  if (!write_account(d->acct.user.c_str(), made))
     return;
-
-  if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save user, {}, to filename, {}.", d->user, fname);
-    return;
-  }
-
-  /* User's Account Name */
-  file_print(fl, "{}\n", CAP(d->user.data()));
-  /* User's Email */
-  file_print(fl, "{}\n", d->email);
-  /* User's Password */
-  file_print(fl, "{}\n", d->pass);
-  /* User's Allowed Player Total */
-  file_print(fl, "3\n");
-  d->total = 3;
-  /* User's Total RPP */
-  file_print(fl, "0\n");
-  d->rpp = 0;
-  /* Player Slots */
-  file_print(fl, "Empty\n");
-  file_print(fl, "Empty\n");
-  file_print(fl, "Empty\n");
-  file_print(fl, "Empty\n");
-  file_print(fl, "Empty\n");
-  file_print(fl, "0\n");
-  file_print(fl, "1\n");
-  /* User's Total RPP */
-  file_print(fl, "0\n");
-  d->rbank = 0;
-
-  atomic_commit(&af);
-
-  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-    set_account_slot(d, n, "Empty");
+  /* quirk: the level and customs written aren't taken; customCreate() then makes the customs file */
+  d->acct.user  = made.user;
+  d->acct.total = made.total;
+  d->acct.rpp   = made.rpp;
+  d->acct.rbank = made.rbank;
+  d->acct.slots = made.slots;
   customCreate(d);
-
-  return;
 }
 
 /* Delete A User Account */
 void userDelete(GameWorld *g, struct descriptor_data *d)
 {
   int player_i;
+  auto path = account_file(USER_FILE, d->acct.user.c_str());
 
-  char fname[40];
-
-  if (get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str())) {
-    for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++) {
-      const char *name = account_slot(d, n)->c_str();
-      if (strcasecmp(name, "Empty") && (player_i = get_ptable_by_name(g, name)) >= 0)
-        remove_player(g, player_i);
-    }
-    unlink(fname);
+  if (!path) {
+    write_to_output(g, d, "Error. Your user file doesn't even exist!\n");
     return;
   }
-  write_to_output(g, d, "Error. Your user file doesn't even exist!\n");
-  return;
+  for (const auto &slot : d->acct.slots)
+    if (strcasecmp(slot.c_str(), "Empty") && (player_i = get_ptable_by_name(g, slot.c_str())) >= 0)
+      remove_player(g, player_i);
+  unlink(path->c_str());
 }
 
-/* For transfering money or doing things with an offline player */
-const char *rIntro(struct char_data *ch, std::string_view arg)
+/* For transfering money or doing things with an offline player: whose name ch knows by arg, or "NOTHING". */
+std::string rIntro(struct char_data *ch, std::string_view arg)
 {
-  char fname[40], filler[50] = "", scrap[100] = "", line[256] = "";
-  static char name[80];
-  int known = false;
-  FILE *fl;
+  char filler[50] = "", scrap[100] = "";
+  std::string line, name = "NOTHING";
 
-  /* Read Introduction File */
-  if (char_is_npc(ch)) {
-    return "NOTHING";
-  }
+  if (char_is_npc(ch))
+    return name;
+  auto path = account_file(INTRO_FILE, char_get_name(ch));
+  if (!path)
+    return name;
+  std::ifstream in(*path);
+  if (!in)
+    return name;
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
-    return "NOTHING";
+  /* quirk: as read_account_file(), the last line is read twice; and a line of one word keeps the last line's second */
+  while (in.good()) {
+    next_line(in, line);
+    sscanf(line.c_str(), "%49s %99s", filler, scrap);
+    if (str_eq_nocase(arg, scrap))
+      name = filler;
   }
-  if (!(fl = fopen(fname, "r"))) {
-    return "NOTHING";
-  }
-
-  while (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%49s %99s", filler, scrap);
-    if (str_eq_nocase(arg, scrap)) {
-      known = true;
-      sprintf(name, "%s", filler);
-    }
-  }
-  fclose(fl);
-
-  if (known == true)
-    return (name);
-  else
-    return "NOTHING";
+  return name;
 }
 
-/* Update A User Account */
-void userWrite(GameWorld *g, struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name)
+/* Saves the account d is logged in to, the name capitalised. */
+void save_account(struct descriptor_data *d)
 {
-  struct atomic_file af;
-  char fname[40];
-  FILE *fl;
-
-  if (!strcasecmp(name, "index")) {
-    if (!d) {
-      return;
-    }
-    if (d->user.empty()) {
-      return;
-    }
-    if (!get_filename(fname, sizeof(fname), USER_FILE, d->user.c_str()))
-      return;
-
-    if (!(fl = atomic_open(&af, fname, true))) {
-      mud_log("ERROR: could not save user, {}, to filename, {}.", d->user, fname);
-      return;
-    }
-
-    /* User's Account Name */
-    file_print(fl, "{}\n", CAP(d->user.data()));
-
-    /* User's Email */
-    file_print(fl, "{}\n", d->email);
-
-    /* User's Pass */
-    file_print(fl, "{}\n", d->pass);
-
-    /* User's Allowed Player Total */
-    if (setTot <= 3 || setTot > 5) {
-      file_print(fl, "{:d}\n", d->total);
-    } else if (setTot > 3) {
-      file_print(fl, "{:d}\n", setTot);
-      d->total = setTot;
-    }
-    /* User's RPP Total */
-    if (setRpp == 0) {
-      file_print(fl, "{:d}\n", d->rpp);
-    } else {
-      d->rpp += setRpp;
-      file_print(fl, "{:d}\n", d->rpp);
-    }
-
-    /* Write Player Slots */
-    for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-      file_print(fl, "{}\n", !account_slot(d, n)->empty() ? account_slot(d, n)->c_str() : "Empty");
-
-    file_print(fl, "{:d}\n", d->level);
-
-    /* Write whether we have a custom file or not */
-    file_print(fl, "{:d}\n", d->customfile);
-
-    /* User's RPP Bank Total */
-    if (setRBank == 0) {
-      file_print(fl, "{:d}\n", d->rbank);
-    } else {
-      d->rbank += setRBank;
-      file_print(fl, "{:d}\n", d->rbank);
-    }
-
-    atomic_commit(&af);
+  if (!d || d->acct.user.empty())
     return;
-  }
-  if (strcasecmp(name, "index")) {
-    char filename[40], uname[100] = "", email[100] = "", pass[100] = "", tmp1[100] = "", tmp2[100] = "", tmp3[100] = "", tmp4[100] = "", tmp5[100] = "", line[256] = "";
-    int total = 0, rpp = 0, level = 0, custom = 0, rbank = 0;
-    FILE *file;
 
-    /* Read and Write User Index */
-    if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
-      return;
-    }
-    if (!(file = fopen(filename, "r"))) {
-      mud_log("ERROR: could not load user, {}, from filename, {}.", name, filename);
-      return;
-    }
+  account saved = d->acct;
+  CAP(saved.user);
+  for (auto &slot : saved.slots)
+    if (slot.empty())
+      slot = "Empty";
+  if (write_account(d->acct.user.c_str(), saved))
+    d->acct.user = saved.user;
+}
 
-    int count = 0;
-    while (!feof(file)) {
-      get_line(file, line);
-      count += 1;
-      switch (count) {
-        case 1:
-          sscanf(line, "%99s", uname);
-          break;
-        case 2:
-          sscanf(line, "%99s", email);
-          break;
-        case 3:
-          sscanf(line, "%99s", pass);
-          break;
-        case 4:
-          sscanf(line, "%d\n", &total);
-          break;
-        case 5:
-          sscanf(line, "%d\n", &rpp);
-          break;
-        case 6:
-          sscanf(line, "%99s", tmp1);
-          break;
-        case 7:
-          sscanf(line, "%99s", tmp2);
-          break;
-        case 8:
-          sscanf(line, "%99s", tmp3);
-          break;
-        case 9:
-          sscanf(line, "%99s", tmp4);
-          break;
-        case 10:
-          sscanf(line, "%99s", tmp5);
-          break;
-        case 11:
-          sscanf(line, "%d\n", &level);
-          break;
-        case 12:
-          sscanf(line, "%d\n", &custom);
-          break;
-        case 13:
-          sscanf(line, "%d\n", &rbank);
-          break;
-      }
-    }
-    fclose(file);
+/* Adds amt RPP to the file of an account no one is logged in to, unless it would go below 0. */
+void reward_offline_user(GameWorld *g, const std::string &name, int amt)
+{
+  account a;
 
-    if (!get_filename(fname, sizeof(fname), USER_FILE, name))
-      return;
-
-    if (!(fl = atomic_open(&af, fname, true))) {
-      mud_log("ERROR: could not save user, {}, to filename, {}.", name, fname);
-      return;
-    }
-    /* User's Account Name */
-    file_print(fl, "{}\n", uname);
-    /* User's Email */
-    file_print(fl, "{}\n", email);
-
-    /* User's Pass */
-    file_print(fl, "{}\n", pass);
-
-    /* User's Allowed Player Total */
-    if (setTot <= 3 || setTot > 5) {
-      file_print(fl, "{:d}\n", total);
-    } else if (setTot > 3) {
-      file_print(fl, "{:d}\n", setTot);
-    }
-    /* User's RPP Total */
-    if (setRpp == 0) {
-      file_print(fl, "{:d}\n", rpp);
-    } else if (rpp + setRpp < 0) {
-      send_to_imm(g, "RPP would be below 0, reward canceled.");
-      file_print(fl, "{:d}\n", rpp);
-    } else {
-      rpp += setRpp;
-      file_print(fl, "{:d}\n", rpp);
-    }
-
-    /* Write Player Slots */
-    file_print(fl, "{}\n", tmp1);
-    file_print(fl, "{}\n", tmp2);
-    file_print(fl, "{}\n", tmp3);
-    file_print(fl, "{}\n", tmp4);
-    file_print(fl, "{}\n", tmp5);
-    file_print(fl, "{:d}\n", level);
-    file_print(fl, "{:d}\n", custom);
-
-    /* User's RPP Total */
-    if (setRBank == 0) {
-      file_print(fl, "{:d}\n", rbank);
-    } else if (rbank + setRBank < 0) {
-      send_to_imm(g, "RPP Bank would be below 0, reward canceled.");
-      file_print(fl, "{:d}\n", rbank);
-    } else {
-      rbank += setRBank;
-      file_print(fl, "{:d}\n", rbank);
-    }
-
-    atomic_commit(&af);
+  if (!load_account(name.c_str(), a))
     return;
-  }
-  send_to_imm(g, "Error with userWrite!");
-  return;
+  bool canceled = amt != 0 && a.rpp + amt < 0;
+  if (!canceled)
+    a.rpp += amt;
+  if (write_account(name.c_str(), a) && canceled)
+    send_to_imm(g, "RPP would be below 0, reward canceled.");
 }
 
 void fingerUser(GameWorld *g, struct char_data *ch, const std::string &name)
 {
-  char filename[40], uname[100] = "", email[100] = "", pass[100] = "", tmp1[100] = "", tmp2[100] = "", tmp3[100] = "", tmp4[100] = "", tmp5[100] = "", line[256] = "";
-  int total = 0, rpp = 0, rbank = 0;
-  FILE *file;
+  account a;
+  auto path = account_file(USER_FILE, name.c_str());
 
-  /* Read and Write User Index */
-  if (!get_filename(filename, sizeof(filename), USER_FILE, name.c_str())) {
+  if (!path) {
     send_to_char(g, ch, "That user doesn't exist.\r\n");
     return;
   }
-  if (!(file = fopen(filename, "r"))) {
+  if (!read_account_file(*path, a)) {
     send_to_char(g, ch, "That user is bugged! Report to Iovan.\r\n");
     return;
   }
 
-  int count = 0;
-  while (!feof(file)) {
-    get_line(file, line);
-    count += 1;
-    switch (count) {
-      case 1:
-        sscanf(line, "%99s", uname);
-        break;
-      case 2:
-        sscanf(line, "%99s", email);
-        break;
-      case 3:
-        sscanf(line, "%99s", pass);
-        break;
-      case 4:
-        sscanf(line, "%d\n", &total);
-        break;
-      case 5:
-        sscanf(line, "%d\n", &rpp);
-        break;
-      case 6:
-        sscanf(line, "%99s", tmp1);
-        break;
-      case 7:
-        sscanf(line, "%99s", tmp2);
-        break;
-      case 8:
-        sscanf(line, "%99s", tmp3);
-        break;
-      case 9:
-        sscanf(line, "%99s", tmp4);
-        break;
-      case 10:
-        sscanf(line, "%99s", tmp5);
-        break;
-      case 13:
-        sscanf(line, "%d\n", &rbank);
-        break;
-    }
-  }
-  fclose(file);
-
-  send_to_char(g, ch, "@D[@gUsername   @D: @w{:<30}@D]@n\r\n", uname);
-  send_to_char(g, ch, "@D[@gEmail      @D: @w{:<30}@D]@n\r\n", email);
+  send_to_char(g, ch, "@D[@gUsername   @D: @w{:<30}@D]@n\r\n", a.user);
+  send_to_char(g, ch, "@D[@gEmail      @D: @w{:<30}@D]@n\r\n", a.email);
   if (char_get_admlevel(ch) > 4) {
-    send_to_char(g, ch, "@D[@gPass       @D: @w{:<30}@D]@n\r\n", pass);
+    send_to_char(g, ch, "@D[@gPass       @D: @w{:<30}@D]@n\r\n", a.pass);
   } else if (char_get_admlevel(ch) > 0) {
     send_to_char(g, ch, "@D[@gPass       @D: @w{:<30}@D]@n\r\n", "??????????");
   }
-  send_to_char(g, ch, "@D[@gTotal Slots@D: @w{:<30d}@D]@n\r\n", total);
-  send_to_char(g, ch, "@D[@gRP Points  @D: @w{:<30d}@D]@n\r\n", rpp);
+  send_to_char(g, ch, "@D[@gTotal Slots@D: @w{:<30d}@D]@n\r\n", a.total);
+  send_to_char(g, ch, "@D[@gRP Points  @D: @w{:<30d}@D]@n\r\n", a.rpp);
   if (char_get_admlevel(ch) > 0) {
-    send_to_char(g, ch, "@D[@gRP Bank    @D: @w{:<30d}@D]@n (unused!)\r\n", rbank);
-    send_to_char(g, ch, "@D[@gCh. Slot 1 @D: @w{:<30}@D]@n\r\n", tmp1);
-    send_to_char(g, ch, "@D[@gCh. Slot 2 @D: @w{:<30}@D]@n\r\n", tmp2);
-    send_to_char(g, ch, "@D[@gCh. Slot 3 @D: @w{:<30}@D]@n\r\n", tmp3);
-    send_to_char(g, ch, "@D[@gCh. Slot 4 @D: @w{:<30}@D]@n\r\n", tmp4);
-    send_to_char(g, ch, "@D[@gCh. Slot 5 @D: @w{:<30}@D]@n\r\n", tmp5);
+    send_to_char(g, ch, "@D[@gRP Bank    @D: @w{:<30d}@D]@n (unused!)\r\n", a.rbank);
+    for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
+      send_to_char(g, ch, "@D[@gCh. Slot {:d} @D: @w{:<30}@D]@n\r\n", n, a.slots[n - 1]);
     send_to_char(g, ch, "\n");
     customRead(g, char_get_desc(ch), 1, name.c_str());
   }
-  return;
 }
 
 void userRead(GameWorld *g, struct descriptor_data *d)
 {
   write_to_output(g, d, "                 @RUser Menu@n\n");
   write_to_output(g, d, "@D=============================================@n\r\n");
-  write_to_output(g, d, "@D|@gUser Account  @D: @w{:<27}@D|@n\n", d->user);
-  write_to_output(g, d, "@D|@gEmail Address @D: @w{:<27}@D|@n\n", d->email);
-  write_to_output(g, d, "@D|@gMax Characters@D: @w{:<27d}@D|@n\n", d->total);
-  write_to_output(g, d, "@D|@gRP Points     @D: @w{:<27d}@D|@n\n", d->rpp);
+  write_to_output(g, d, "@D|@gUser Account  @D: @w{:<27}@D|@n\n", d->acct.user);
+  write_to_output(g, d, "@D|@gEmail Address @D: @w{:<27}@D|@n\n", d->acct.email);
+  write_to_output(g, d, "@D|@gMax Characters@D: @w{:<27d}@D|@n\n", d->acct.total);
+  write_to_output(g, d, "@D|@gRP Points     @D: @w{:<27d}@D|@n\n", d->acct.rpp);
   write_to_output(g, d, "@D=============================================@n\r\n\r\n");
   write_to_output(g, d, "      @D[@y----@YSelect A Character Slot@y----@D]@n\n");
   for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++)
-    if (n <= 3 || d->total >= n)
-      write_to_output(g, d, "                @B(@W{:d}@B) @C{}@n\n", n, account_slot(d, n)->c_str());
+    if (n <= 3 || d->acct.total >= n)
+      write_to_output(g, d, "                @B(@W{:d}@B) @C{}@n\n", n, d->acct.slots[n - 1]);
   write_to_output(g, d, "\n");
   write_to_output(g, d, "      @D[@y---- @YSelect Another Option @y----@D]@n\n");
   write_to_output(g, d, "                @B(@WB@B) @CBuy New C. Slot @D(@R15 RPP@D)@n\n");

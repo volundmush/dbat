@@ -6,6 +6,35 @@
 
 #include "dbat/consts/types.hpp"
 
+/* The test sources are built against older trees too (tools/cmdcompare.py), so they reach a connection's account
+   through these, whichever way the tree keeps it: on the descriptor itself, or as its acct. */
+template <class D>
+auto &th_account(D *d)
+{
+  if constexpr (requires { d->acct; })
+    return d->acct;
+  else
+    return *d;
+}
+
+template <class D>
+void th_empty_slots(D *d)
+{
+  if constexpr (requires { d->acct.slots; })
+    d->acct.slots.fill("Empty");
+  else
+    d->tmp1 = d->tmp2 = d->tmp3 = d->tmp4 = d->tmp5 = "Empty";
+}
+
+template <class D>
+void th_save_account(GameWorld *g, D *d)
+{
+  if constexpr (requires { save_account(d); })
+    save_account(d);
+  else
+    userWrite(g, d, 0, 0, 0, "index");
+}
+
 /* Copies the fixture world to a temp directory, enters it, and boots a game there. */
 GameWorld *th_boot(void);
 

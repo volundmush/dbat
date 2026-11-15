@@ -222,15 +222,11 @@ static struct descriptor_data *new_test_descriptor(GameWorld *g)
   d->has_prompt = 1;
   d->desc_num   = ++g->last_desc;
   strcpy(d->host, "test");
-  d->user       = "Test";
-  d->pass       = "Test";
-  d->email      = "Test";
-  d->tmp1       = "Empty";
-  d->tmp2       = "Empty";
-  d->tmp3       = "Empty";
-  d->tmp4       = "Empty";
-  d->tmp5       = "Empty";
-  d->customfile = 1;
+  th_account(d).user       = "Test";
+  th_account(d).pass       = "Test";
+  th_account(d).email      = "Test";
+  th_empty_slots(d);
+  th_account(d).customfile = 1;
   g->descriptors.add(d->desc_num, d);
   return d;
 }
