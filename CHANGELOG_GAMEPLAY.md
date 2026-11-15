@@ -1,5 +1,6 @@
 # 2.9.4 (latest)
 - ???
+- Logging in to a character whose player file is marked deleted starts a new one, as it's meant to, rather than reading the freed old character and then leaving the new one out of the player index and not properly in the game. [Volund]
 - A number past the end of the negative traits menu (38 to 51) is refused as not an option, rather than reading and writing past the end of the character's traits. [Volund]
 - Focusing a curse on yourself curses you, rather than crashing the game. [Volund]
 - Carried ice that melts away no longer leaves its carrier counting less weight than they carry. [Volund]

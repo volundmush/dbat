@@ -8,7 +8,6 @@
 
 /* chargen.c */
 extern const std::span<const con_state> CHARGEN_STATES; /* character creation's states, for nanny() */
-void display_races(GameWorld *g, struct descriptor_data *d);
 
 /* accounts.c */
 constexpr int MAX_ACCOUNT_SLOTS = 5;  /* character slots per account: d->tmp1 .. d->tmp5 */

@@ -26,6 +26,7 @@
 #include "dbat/consts/constates.hpp"
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/iterate.hpp"
+#include "dbat/players.hpp"
 #include "dbat/random.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/world_audit.hpp"
@@ -87,6 +88,24 @@ namespace {
   void rich_account(GameWorld *) { account_file(40, 3); }
   void full_account(GameWorld *) { account_file(40, 5); }
   void four_slot_account(GameWorld *) { account_file(5, 4); }
+  /* The account's first slot holds Gonechar, whose player file is marked deleted (as one deleted with the fast wipe
+     off leaves it) */
+  void deleted_in_slot(GameWorld *g)
+  {
+    struct char_data *pc = new char_data();
+    clear_char(pc);
+    char_make_player_specials(pc);
+    char_set_pc_name(pc, "Gonechar");
+    char_set_race(pc, RACE_HUMAN);
+    char_set_class(pc, CLASS_ROSHI);
+    char_set_pfilepos(pc, create_entry(g, char_get_pc_name(pc)));
+    init_char(g, pc);
+    char_plr_set(pc, PLR_DELETED, true);
+    save_char(g, pc);
+    save_player_index(g);
+    free_char(g, pc);
+    account_file(40, 3, "Gonechar");
+  }
 
   const journey JOURNEYS[] = {
       /* the menus once made, and coming back */
@@ -107,6 +126,7 @@ namespace {
       made("account, coming back after linkdeath", {}, {"@leave", "@pulse 2", "@connect", "Tester", "Pa55word1", "1", "", "1"}),
       made("account, coming back to delete", {}, {"quit", "@leave", "@connect", "Tester", "Pa55word1", "1", "", "4", "yes", "q"}),
       made("account, a taken name", {}, {"quit", "@leave", "@connect", "Tester", "Pa55word1", "2", "Testchar", "Otherchar"}),
+      {"account, a deleted character remade", {"Tester", "Pa55word1", "1", ""}, deleted_in_slot, {}, true},
       {"account, existing, a bad password three times", {"Tester", "no", "no", "no"}, rich_account},
       {"account, existing, the password", {"Tester", "Pa55word1", "x"}, rich_account},
       /* accounts */

@@ -33,7 +33,7 @@ static void display_races_sub(GameWorld *g, descriptor_data *d)
   }
 }
 
-void display_races(GameWorld *g, struct descriptor_data *d)
+static void display_races(GameWorld *g, struct descriptor_data *d)
 {
   send_to_char(g, d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
   display_races_sub(g, d);

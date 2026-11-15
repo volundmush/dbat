@@ -103,35 +103,70 @@ static bool _parse_name(const char *arg, char *name)
   return false;
 }
 
-constexpr int RECON    = 1;
-constexpr int USURP    = 2;
-constexpr int UNSWITCH = 3;
+/* ---- Notices at login ------------------------------------------------- */
 
-/* This function seems a bit over-extended. */
-static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
+/* Interest owed since the last payout, for one to three days. Reconnecting pays the bank's own rate; entering from the
+   menu pays 2% (at most 7,500 a day), and says so even when that's nothing. */
+static void pay_login_interest(GameWorld *g, struct char_data *ch, bool reconnecting) /* quirk: two rates */
+{
+  if (g->LASTINTEREST == 0 || g->LASTINTEREST <= char_get_lastint(ch))
+    return;
+  int diff = (g->LASTINTEREST - char_get_lastint(ch));
+  int days = MAX(1, MIN(3, diff / 86400));
+  char_set_lastint(ch, g->LASTINTEREST);
+
+  int per_day;
+  if (reconnecting) {
+    if (!(per_day = char_get_bank_interest(ch)))
+      return;
+  } else {
+    if (char_get_bank_gold(ch) <= 0)
+      return;
+    per_day = MIN(7500, (char_get_bank_gold(ch) / 100) * 2);
+  }
+  int total = per_day * days;
+  char_set_bank_gold(ch, char_get_bank_gold(ch) + (total));
+  send_to_char(g, ch, "Interest happened while you were away, {:d} times.\r\n@cBank Interest@D: @Y{}@n\r\n", days, add_commas(total));
+}
+
+/* Mail, the boards, the news and interest. */
+static void login_notices(GameWorld *g, struct descriptor_data *d, bool reconnecting)
+{
+  if (has_mail(g, char_get_idnum(d->character))) {
+    if (reconnecting)
+      write_to_output(g, d, "You have mail waiting.\r\n");
+    else
+      send_to_char(g, d->character, "\r\nYou have mail waiting.\r\n");
+  }
+  board_login_notices(g, d->character);
+  if (g->NEWSUPDATE > char_get_lastpl(d->character))
+    send_to_char(g, d->character, "\r\n@GThe NEWS file has been updated, type 'news {:d}' to see the latest entry or 'news list' to see available entries.@n\r\n", g->LASTNEWS);
+  pay_login_interest(g, d->character, reconnecting);
+}
+
+/* ---- Logging in to a character already in the game ------------------- */
+
+/* How d takes over a body already in the game. */
+enum class takeover { none, reconnect, usurp, unswitch };
+
+/* Disconnects every other connection controlling the character d logs in as, and returns the body d should take, if
+   any: an immortal's that was switched away from, or one in use. */
+static char_data *close_other_connections(GameWorld *g, struct descriptor_data *d, takeover *how)
 {
   struct char_data *target = nullptr;
-  int mode                 = 0;
   int id                   = char_get_idnum(d->character);
 
-  /*
-   * Now that this descriptor has successfully logged in, disconnect all
-   * other descriptors controlling a character with the same ID number.
-   */
-
   for (descriptor_data *k : each_desc(g)) {
-
     if (k == d)
       continue;
 
     if (k->original && (char_get_idnum(k->original) == id)) {
       /* Original descriptor was switched, booting it and restoring normal body control. */
-
       write_to_output(g, d, "\r\nMultiple login detected -- disconnecting.\r\n");
       desc_set_connected(k, CON_CLOSE);
       if (!target) {
         target = k->original;
-        mode   = UNSWITCH;
+        *how   = takeover::unswitch;
       }
       if (k->character)
         char_set_desc(k->character, nullptr);
@@ -139,11 +174,9 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
       k->original  = nullptr;
     } else if (k->character && char_get_idnum(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
-
       do_return(g, k->character, "", 0, 0);
     } else if (k->character && char_get_idnum(k->character) == id) {
       /* Character taking over their own body. */
-
       if (!target && desc_get_connected(k) == CON_PLAYING) {
         write_to_output(g, k, "\r\nThis body has been usurped!\r\n");
         if (k->snoop_by) {
@@ -152,333 +185,376 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
           k->snoop_by           = nullptr;
         }
         target = k->character;
-        mode   = USURP;
+        *how   = takeover::usurp;
       }
       char_set_desc(k->character, nullptr);
-      k->character       = nullptr;
-      k->original        = nullptr;
+      k->character = nullptr;
+      k->original  = nullptr;
       write_to_output(g, k, "\r\nMultiple login detected -- disconnecting.\r\n");
       desc_set_connected(k, CON_CLOSE);
     }
   }
+  return target;
+}
 
-  /*
-  * now, go through the character list, deleting all characters that
-  * are not already marked for deletion from the above step (i.e., in the
-  * CON_HANGUP state), and have not already been selected as a target for
-  * switching into.  In addition, if we haven't already found a target,
-  * choose one if one is available (while still deleting the other
-  * duplicates, though theoretically none should be able to exist).
-  */
-
+/* Of the character's bodies left with no connection, keeps the first as the target if there's none yet, and
+   extracts the rest (theoretically there are none). */
+static char_data *sweep_linkless_bodies(GameWorld *g, int id, char_data *target, takeover *how)
+{
   for (char_data *ch : each_char(g)) {
-
-    if (char_is_npc(ch))
+    if (char_is_npc(ch) || char_get_idnum(ch) != id || char_get_desc(ch) || ch == target)
       continue;
-    if (char_get_idnum(ch) != id)
-      continue;
-
-    /* ignore chars with descriptors (already handled by above step) */
-    if (char_get_desc(ch))
-      continue;
-
-    /* don't extract the target char we've found one already */
-    if (ch == target)
-      continue;
-
-    /* we don't already have a target and found a candidate for switching */
     if (!target) {
       target = ch;
-      mode   = RECON;
+      *how   = takeover::reconnect;
       continue;
     }
-
     /* we've found a duplicate - blow him away, dumping his eq in limbo. */
     if (char_get_in_room(ch) != NOWHERE)
       char_from_room(g, ch);
     char_to_room(g, ch, 1);
     extract_char(g, ch);
   }
+  return target;
+}
 
-  /* no target for switching into was found - allow login to continue */
+static void reconnected(GameWorld *g, struct descriptor_data *d)
+{
+  write_to_output(g, d, "Reconnecting.\r\n");
+  pay_player_count_rewards(g, update_player_count(g));
+  char_set_time_logon(d->character, game_now(g));
+  act(g, "$n has reconnected.", true, d->character, nullptr, nullptr, TO_ROOM);
+  mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "{} [{}] has reconnected.", char_get_name(d->character), d->host);
+  char_set_rp(d->character, d->rpp);
+  login_notices(g, d, true);
+}
+
+static void usurped(GameWorld *g, struct descriptor_data *d)
+{
+  write_to_output(g, d, "You take over your own body, already in use!\r\n");
+  act(g, "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
+      "$n's body has been taken over by a new spirit!",
+      true, d->character, nullptr, nullptr, TO_ROOM);
+  char_set_rp(d->character, d->rpp);
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true,
+         "{} has re-logged in ... disconnecting old socket.", char_get_name(d->character));
+}
+
+static void unswitched(GameWorld *g, struct descriptor_data *d)
+{
+  write_to_output(g, d, "Reconnecting to unswitched char.");
+  mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true, "{} [{}] has reconnected.", char_get_name(d->character), d->host);
+}
+
+/* Disconnects anyone else in the character d has logged in as. If its body is in the game, d takes it over and is
+   playing: true. Otherwise false, and logging in goes on. */
+static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
+{
+  takeover how     = takeover::none;
+  char_data *target = close_other_connections(g, d, &how);
+  target            = sweep_linkless_bodies(g, char_get_idnum(d->character), target, &how);
+
   if (!target)
     return false;
 
-  /* Okay, we've found a target.  Connect d to target. */
   free_char(g, d->character); /* get rid of the old char */
-  d->character        = target;
+  d->character = target;
   char_set_desc(d->character, d);
-  d->original         = nullptr;
+  d->original = nullptr;
   char_set_timer(d->character, 0);
   char_plr_set(d->character, PLR_MAILING, false);
   char_plr_set(d->character, PLR_WRITING, false);
   char_aff_set(d->character, AFF_GROUP, false);
   desc_set_connected(d, CON_PLAYING);
 
-  switch (mode) {
-    case RECON:
-      write_to_output(g, d, "Reconnecting.\r\n");
-      pay_player_count_rewards(g, update_player_count(g));
-      char_set_time_logon(d->character, game_now(g));
-      act(g, "$n has reconnected.", true, d->character, nullptr, nullptr, TO_ROOM);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "{} [{}] has reconnected.", char_get_name(d->character), d->host);
-      char_set_rp(d->character, d->rpp);
-      if (has_mail(g, char_get_idnum(d->character)))
-        write_to_output(g, d, "You have mail waiting.\r\n");
-      board_login_notices(g, d->character);
-      if (g->NEWSUPDATE > char_get_lastpl(d->character))
-        send_to_char(g, d->character, "\r\n@GThe NEWS file has been updated, type 'news {:d}' to see the latest entry or 'news list' to see available entries.@n\r\n", g->LASTNEWS);
-
-      if (g->LASTINTEREST != 0 && g->LASTINTEREST > char_get_lastint(d->character)) {
-        int diff = (g->LASTINTEREST - char_get_lastint(d->character));
-        int days = MAX(1, MIN(3, diff / 86400)); /* one to three days' interest, as at login */
-        char_set_lastint(d->character, g->LASTINTEREST);
-        int base_interest = char_get_bank_interest(d->character);
-        if (base_interest) {
-          int total_interest = base_interest * days;
-          char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (total_interest));
-          send_to_char(g, d->character, "Interest happened while you were away, {:d} times.\r\n@cBank Interest@D: @Y{}@n\r\n",
-                       days, add_commas(total_interest));
-        }
-      }
+  switch (how) {
+    case takeover::none:
       break;
-    case USURP:
-      write_to_output(g, d, "You take over your own body, already in use!\r\n");
-      act(g, "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
-          "$n's body has been taken over by a new spirit!",
-          true, d->character, nullptr, nullptr, TO_ROOM);
-      char_set_rp(d->character, d->rpp);
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true,
-             "{} has re-logged in ... disconnecting old socket.", char_get_name(d->character));
+    case takeover::reconnect:
+      reconnected(g, d);
       break;
-    case UNSWITCH:
-      write_to_output(g, d, "Reconnecting to unswitched char.");
-      mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true, "{} [{}] has reconnected.", char_get_name(d->character), d->host);
+    case takeover::usurp:
+      usurped(g, d);
+      break;
+    case takeover::unswitch:
+      unswitched(g, d);
       break;
   }
-
   return true;
 }
 
-/* load the player, put them in the right room - used by copyover_recover too */
-/* A builder can delete any of the rooms that players get sent to, while the game is running. */
-static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
+/* Where a player loading in starts: their saved room, else the immortal or mortal start (the frozen start for the
+   frozen), else the Void. */
+static room_vnum start_room(GameWorld *g, struct char_data *ch)
 {
-  room_vnum room = vnum;
-
-  return room_of(g, room) ? room : 0;
-}
-
-int enter_player_game(GameWorld *g, struct descriptor_data *d)
-{
-  int load_result;
-  IDXTYPE load_room;
-
-  reset_char(g, d->character);
-  read_aliases(g, d->character);
-
-  racial_body_parts(d->character);
-
-  if (char_plr_flagged(d->character, PLR_INVSTART))
-    char_set_invis_level(g, d->character, char_get_level(d->character));
-
-  /*
-       * We have to place the character in a room before equipping them
-       * or equip_char() will gripe about the person in NOWHERE.
-       */
-
-  load_room = char_get_load_room(g, d->character);
+  IDXTYPE load_room = char_get_load_room(g, ch);
 
   /* If char was saved with NOWHERE, or the room is gone... */
-  if (!room_of(g, load_room)) {
-    if (char_get_admlevel(d->character))
-      load_room = CONFIG_IMMORTAL_START;
-    else
-      load_room = CONFIG_MORTAL_START;
-  }
-
-  if (char_plr_flagged(d->character, PLR_FROZEN))
+  if (!room_of(g, load_room))
+    load_room = char_get_admlevel(ch) ? CONFIG_IMMORTAL_START : CONFIG_MORTAL_START;
+  if (char_plr_flagged(ch, PLR_FROZEN))
     load_room = CONFIG_FROZEN_START;
-
   if (!room_of(g, load_room)) /* a builder deleted the start room */
-    load_room = 0;          /* The Void */
+    load_room = 0;            /* The Void */
+  return load_room;
+}
+
+/* Puts the player in the game and their start room, loads what they saved (returning Crash_load's result), and
+   takes back their charmed followers. */
+static int place_player(GameWorld *g, struct descriptor_data *d)
+{
+  struct char_data *ch = d->character;
+
+  /* We have to place the character in a room before equipping them or equip_char() will gripe about the person in
+     NOWHERE. */
+  room_vnum load_room = start_room(g, ch);
 
   /* registered first, as rooms and inventories list their members by id */
-  char_set_id(d->character, char_get_idnum(d->character));
-  char_register(g, d->character);
-  char_to_room(g, d->character, load_room);
-  load_result = Crash_load(g, d->character);
-  char_get_player_specials(d->character)->host = d->host;
-  read_saved_vars(d->character);
-  /*load_char_pets(d->character);*/
+  char_set_id(ch, char_get_idnum(ch));
+  char_register(g, ch);
+  char_to_room(g, ch, load_room);
+  int load_result = Crash_load(g, ch);
+  char_get_player_specials(ch)->host = d->host;
+  read_saved_vars(ch);
   for (char_data *check : each_char(g))
-    if (!char_get_master(g, check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
-        char_aff_flagged(check, AFF_CHARM) && !circle_follow(g, check, d->character))
-      add_follower(g, check, d->character);
-  save_char(g, d->character);
+    if (!char_get_master(g, check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(ch) &&
+        char_aff_flagged(check, AFF_CHARM) && !circle_follow(g, check, ch))
+      add_follower(g, check, ch);
+  save_char(g, ch);
+  return load_result;
+}
 
+/* What doesn't last from one session to the next: healed limbs, combat and transient states. */
+static void reset_session_state(GameWorld *g, struct char_data *ch)
+{
+  static const struct {
+    int flag, limb;
+  } regrown[] = {
+      {PLR_RARM, 0},
+      {PLR_LARM, 1},
+      {PLR_LLEG, 3},
+      {PLR_RLEG, 2},
+  };
+
+  for (const auto &r : regrown)
+    if (char_plr_flagged(ch, r.flag)) {
+      char_set_limb_condition(ch, r.limb, 100);
+      char_plr_set(ch, r.flag, false);
+    }
+  char_set_combine(ch, -1);
+  char_set_sleeptime(ch, 8);
+  char_set_foodr(ch, 2);
+  char_set_altitude(ch, char_aff_flagged(ch, AFF_FLYING) ? 1 : 0);
+  for (int aff : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
+    if (char_aff_flagged(ch, aff))
+      char_aff_set(ch, aff, false);
+  if (char_plr_flagged(ch, PLR_KNOCKED))
+    char_plr_set(ch, PLR_KNOCKED, false);
+  if (char_is_android(ch) && !char_aff_flagged(ch, AFF_INFRAVISION))
+    char_aff_set(ch, AFF_INFRAVISION, true);
+  char_set_absorbing(ch, nullptr);
+  char_set_absorbby(ch, nullptr);
+  char_set_sits(ch, nullptr);
+  char_set_blocked(ch, nullptr);
+  char_set_blocks(ch, nullptr);
+  char_set_overf(ch, false);
+  char_set_spam(ch, 0);
+  char_set_rage_meter(ch, 0);
+  if (char_affects(ch).empty() && char_aff_flagged(ch, AFF_HEALGLOW))
+    char_aff_set(ch, AFF_HEALGLOW, false);
+  char_set_speedboost(ch, char_aff_flagged(ch, AFF_HAYASA) ? char_get_speedcalc(g, ch) * 0.5 : 0);
+  if (char_get_trp(ch) < char_get_rp(ch))
+    char_set_trp(ch, char_get_rp(ch));
+  if (char_is_namek(ch) && char_get_conditions(g, ch, HUNGER) >= 0)
+    char_set_conditions(g, ch, HUNGER, -1);
+  if (char_plr_flagged(ch, PLR_HEALT))
+    char_plr_set(ch, PLR_HEALT, false);
+}
+
+/* What the race brings with it: the moon's and the stars' forms, and the skills it starts with. */
+static void apply_race(GameWorld *g, struct char_data *ch)
+{
+  if (char_moon_ok(g, ch))
+    oozaru_transform(g, ch);
+  else
+    oozaru_revert(g, ch);
+  if (char_is_hoshijin(ch))
+    star_phase(g, ch, g->time_info.day <= 14 ? 1 : g->time_info.day <= 21 ? 2 : 0);
+
+  if (char_is_icer(ch) && !char_get_skill(ch, SKILL_TAILWHIP)) {
+    int numb = rand_number(g, 20, 30);
+    char_set_skills_base(ch, SKILL_TAILWHIP, numb);
+  } else if (!char_is_icer(ch) && char_get_skill(ch, SKILL_TAILWHIP)) {
+    char_set_skills_base(ch, SKILL_TAILWHIP, 0);
+  }
+  if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 9 || char_get_genome(ch, 1) == 9) && !char_get_skill(ch, SKILL_TELEPATHY))
+    char_set_skills_base(ch, SKILL_TELEPATHY, 50);
+  if (char_is_bio(ch) && (char_get_genome(ch, 0) == 7 || char_get_genome(ch, 1) == 7) && !char_get_skill(ch, SKILL_TELEPATHY) && !char_get_skill(ch, SKILL_FOCUS)) {
+    char_set_skills_base(ch, SKILL_TELEPATHY, 30);
+    char_set_skills_base(ch, SKILL_FOCUS, 30);
+  }
+}
+
+/* Loads the player into the game (used by copyover_recover too). Returns Crash_load's result. */
+int enter_player_game(GameWorld *g, struct descriptor_data *d)
+{
+  struct char_data *ch = d->character;
+
+  reset_char(g, ch);
+  read_aliases(g, ch);
+  racial_body_parts(ch);
+  if (char_plr_flagged(ch, PLR_INVSTART))
+    char_set_invis_level(g, ch, char_get_level(ch));
+
+  int load_result = place_player(g, d);
   if (d->customfile != 1) {
     customCreate(d);
     userWrite(g, d, 0, 0, 0, "index");
   }
+  reset_session_state(g, ch);
 
-  if (char_plr_flagged(d->character, PLR_RARM)) {
-    char_set_limb_condition(d->character, (1) - 1, 100);
-    char_plr_set(d->character, PLR_RARM, false);
-  }
-  if (char_plr_flagged(d->character, PLR_LARM)) {
-    char_set_limb_condition(d->character, (2) - 1, 100);
-    char_plr_set(d->character, PLR_LARM, false);
-  }
-  if (char_plr_flagged(d->character, PLR_LLEG)) {
-    char_set_limb_condition(d->character, (4) - 1, 100);
-    char_plr_set(d->character, PLR_LLEG, false);
-  }
-  if (char_plr_flagged(d->character, PLR_RLEG)) {
-    char_set_limb_condition(d->character, (3) - 1, 100);
-    char_plr_set(d->character, PLR_RLEG, false);
-  }
-  char_set_combine(d->character, -1);
-  char_set_sleeptime(d->character, 8);
-  char_set_foodr(d->character, 2);
-  if (char_aff_flagged(d->character, AFF_FLYING)) {
-    char_set_altitude(d->character, 1);
-  } else {
-    char_set_altitude(d->character, 0);
-  }
-  if (char_aff_flagged(d->character, AFF_POSITION)) {
-    char_aff_set(d->character, AFF_POSITION, false);
-  }
-  if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
-    char_aff_set(d->character, AFF_SANCTUARY, false);
-  }
-  if (char_aff_flagged(d->character, AFF_ZANZOKEN)) {
-    char_aff_set(d->character, AFF_ZANZOKEN, false);
-  }
-  if (char_plr_flagged(d->character, PLR_KNOCKED)) {
-    char_plr_set(d->character, PLR_KNOCKED, false);
-  }
-  if (char_is_android(d->character) && !char_aff_flagged(d->character, AFF_INFRAVISION)) {
-    char_aff_set(d->character, AFF_INFRAVISION, true);
-  }
-  char_set_absorbing(d->character, nullptr);
-  char_set_absorbby(d->character, nullptr);
-  char_set_sits(d->character, nullptr);
-  char_set_blocked(d->character, nullptr);
-  char_set_blocks(d->character, nullptr);
-  char_set_overf(d->character, false);
-  char_set_spam(d->character, 0);
-  char_set_rage_meter(d->character, 0);
-  if (char_affects(d->character).empty()) {
-    if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
-      char_aff_set(d->character, AFF_HEALGLOW, false);
-    }
-  }
-  if (char_aff_flagged(d->character, AFF_HAYASA)) {
-    char_set_speedboost(d->character, char_get_speedcalc(g, d->character) * 0.5);
-  } else {
-    char_set_speedboost(d->character, 0);
-  }
-  if (char_get_trp(d->character) < char_get_rp(d->character)) {
-    char_set_trp(d->character, char_get_rp(d->character));
-  }
-
-  if (char_is_namek(d->character) && char_get_conditions(g, d->character, HUNGER) >= 0) {
-    char_set_conditions(g, d->character, HUNGER, -1);
-  }
-
-  if (char_plr_flagged(d->character, PLR_HEALT)) {
-    char_plr_set(d->character, PLR_HEALT, false);
-  }
-
-  if (readIntro(d->character, d->character) == 2) {
-    introCreate(d->character);
-  }
-  if (read_sense_memory(g, d->character, d->character) == 2) {
-    senseCreate(d->character);
-  }
-  if (char_get_admlevel(d->character) > 0) {
+  if (readIntro(ch, ch) == 2)
+    introCreate(ch);
+  if (read_sense_memory(g, ch, ch) == 2)
+    senseCreate(ch);
+  if (char_get_admlevel(ch) > 0)
     d->level = 1;
-  }
+  char_set_rp(ch, d->rpp);
+  char_set_rbank(ch, d->rbank);
 
-  char_set_rp(d->character, d->rpp);
-  char_set_rbank(d->character, d->rbank);
-  if (char_moon_ok(g, d->character)) {
-    oozaru_transform(g, d->character);
-  } else {
-    oozaru_revert(g, d->character);
-  }
-  if (char_is_hoshijin(d->character)) {
-    if (g->time_info.day <= 14) {
-      star_phase(g, d->character, 1);
-    } else if (g->time_info.day <= 21) {
-      star_phase(g, d->character, 2);
-    } else {
-      star_phase(g, d->character, 0);
-    }
-  }
-
-  if (char_is_icer(d->character) && !char_get_skill(d->character, SKILL_TAILWHIP)) {
-    int numb = rand_number(g, 20, 30);
-    char_set_skills_base(d->character, SKILL_TAILWHIP, numb);
-  } else if (!char_is_icer(d->character) && char_get_skill(d->character, SKILL_TAILWHIP)) {
-    char_set_skills_base(d->character, SKILL_TAILWHIP, 0);
-  }
-
-  if (char_is_mutant(d->character) && (char_get_genome(d->character, 0) == 9 || char_get_genome(d->character, 1) == 9) && !char_get_skill(d->character, SKILL_TELEPATHY)) {
-    char_set_skills_base(d->character, SKILL_TELEPATHY, 50);
-  }
-
-  if (char_is_bio(d->character) && (char_get_genome(d->character, 0) == 7 || char_get_genome(d->character, 1) == 7) && !char_get_skill(d->character, SKILL_TELEPATHY) && !char_get_skill(d->character, SKILL_FOCUS)) {
-    char_set_skills_base(d->character, SKILL_TELEPATHY, 30);
-    char_set_skills_base(d->character, SKILL_FOCUS, 30);
-  }
-
-  char_set_combo(d->character, -1);
+  apply_race(g, ch);
+  char_set_combo(ch, -1);
   return load_result;
 }
 
+/* A builder can delete any of the rooms that players get sent to, while the game is running. */
+static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
+{
+  return room_of(g, vnum) ? vnum : 0;
+}
+
+/* RPP for everyone playing (not staff) not yet paid for this payout: 1 for a player count within 4 of the record, 2
+   for tying it, 3 for a new one. A payout lasts a day, unless a better one comes. */
 static void payout(GameWorld *g, int num)
 {
-  if (g->LASTPAYOUT == 0) {
-    g->LASTPAYOUT  = game_now(g) + 86400;
-    g->LASTPAYTYPE = num;
-  } else if (num > g->LASTPAYTYPE) {
-    g->LASTPAYOUT  = game_now(g) + 86400;
-    g->LASTPAYTYPE = num;
-  } else if (g->LASTPAYOUT <= game_now(g)) {
+  static const char *const why[] = {
+      "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n",
+      "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n",
+      "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n",
+  };
+
+  if (g->LASTPAYOUT == 0 || num > g->LASTPAYTYPE || g->LASTPAYOUT <= game_now(g)) {
     g->LASTPAYOUT  = game_now(g) + 86400;
     g->LASTPAYTYPE = num;
   }
+  int rpp = MIN(num, 2) + 1;
   for (descriptor_data *k : each_desc(g)) {
     if (desc_is_playing(k) && char_get_admlevel(k->character) <= 0 && char_get_rewtime(k->character) < g->LASTPAYOUT) {
-      if (num == 0) {
-        k->rpp += 1;
-        char_set_rp(k->character, k->rpp);
-        char_set_trp(k->character, char_get_trp(k->character) + (1));
-        userWrite(g, k, 0, 0, 0, "index");
-        send_to_char(g, k->character, "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
-      } else if (num == 1) {
-        k->rpp += 2;
-        char_set_rp(k->character, k->rpp);
-        char_set_trp(k->character, char_get_trp(k->character) + (2));
-        userWrite(g, k, 0, 0, 0, "index");
-        send_to_char(g, k->character, "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
-      } else {
-        k->rpp += 3;
-        char_set_rp(k->character, k->rpp);
-        char_set_trp(k->character, char_get_trp(k->character) + (3));
-        userWrite(g, k, 0, 0, 0, "index");
-        send_to_char(g, k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
-      }
+      k->rpp += rpp;
+      char_set_rp(k->character, k->rpp);
+      char_set_trp(k->character, char_get_trp(k->character) + (rpp));
+      userWrite(g, k, 0, 0, 0, "index");
+      send_to_char(g, k->character, "{}", why[rpp - 1]);
       char_set_rewtime(k->character, g->LASTPAYOUT);
     }
   }
 }
 
-/* CON_GET_NAME: wait for input of name */
+/* A character name: letters only, 2 to MAX_NAME_LENGTH of them, allowed, and not a fill or reserved word. The name
+   is copied into name. */
+static bool acceptable_name(GameWorld *g, const char *typed, char *name)
+{
+  char buf[MAX_INPUT_LENGTH];
+
+  return !_parse_name(typed, name) && strlen(name) >= 2 && strlen(name) <= MAX_NAME_LENGTH && Valid_Name(g, name) &&
+         !fill_word(strcpy(buf, name)) && !reserved_word(buf); /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
+}
+
+/* The account's slot names a character with no player file: empty it. */
+static void character_missing(GameWorld *g, struct descriptor_data *d)
+{
+  empty_account_slots_named(d, d->loadplay.c_str());
+  d->loadplay.clear();
+  userWrite(g, d, 0, 0, 0, "index");
+  enter_state(g, d, CON_UMENU);
+  write_to_output(g, d, "Character missing. Emptying slot.\r\n");
+}
+
+/* A new character in the empty slot chosen: on to creation. */
+static void start_new_character(GameWorld *g, struct descriptor_data *d, char *name)
+{
+  /* Check for multiple creations of a character. */
+  if (!Valid_Name(g, name)) {
+    write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
+    return;
+  }
+  char_set_alias(d->character, CAP(name));
+  char_set_rp(d->character, d->rpp);
+  set_account_slot(d, d->writenew, char_get_alias(d->character));
+  userWrite(g, d, 0, 0, 0, "index");
+  enter_state(g, d, CON_QRACE);
+}
+
+/* A deleted character's name: its old files go, so the new character doesn't get its equipment, and creation starts
+   over. */
+static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, char *name)
+{
+  if (int player_i = get_ptable_by_name(g, name); player_i >= 0)
+    remove_player(g, player_i);
+
+  /* We get a false positive from the original deleted character. */
+  free_char(g, d->character);
+  d->character = nullptr; /* Valid_Name looks at every connection's character */
+  /* Check for multiple creations... */
+  if (!Valid_Name(g, name)) {
+    write_to_output(g, d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
+    return;
+  }
+  d->character = new char_data();
+  clear_char(d->character);
+  char_make_player_specials(d->character);
+  char_set_desc(d->character, d);
+  char_set_alias(d->character, CAP(name));
+  /* no place in the player index: the old one's emptied, and finishing creation makes a new one */
+  char_prf_set(g, d->character, PRF_COLOR, true);
+  char_set_rp(d->character, d->rpp);
+  enter_state(g, d, CON_QRACE);
+}
+
+/* An existing character loaded: refused for the site or the wizlock, put into its body if that's in the game, or on
+   to the menu. */
+static void log_in_character(GameWorld *g, struct descriptor_data *d)
+{
+  /* undo it just in case they are set */
+  char_plr_set(d->character, PLR_WRITING, false);
+  char_plr_set(d->character, PLR_MAILING, false);
+  char_plr_set(d->character, PLR_CRYO, false);
+  char_aff_set(d->character, AFF_GROUP, false);
+  if (isbanned(g, d->host) == BAN_SELECT && !char_plr_flagged(d->character, PLR_SITEOK)) {
+    write_to_output(g, d, "Sorry, this char has not been cleared for login from your site!\r\n");
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Connection attempt for {} denied from {}", char_get_name(d->character), d->host);
+    desc_set_connected(d, CON_CLOSE);
+    return;
+  }
+  if (char_get_level(d->character) < g->circle_restrict && g->circle_restrict < 101) {
+    enter_state(g, d, CON_UMENU);
+    write_to_output(g, d, "The game is temporarily restricted to at least {:d} level.\r\n", g->circle_restrict);
+    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for character load denied for {} [{}] (wizlock)", char_get_name(d->character), d->host);
+    return;
+  }
+  /* check and make sure no other copies of this player are logged in */
+  if (perform_dupe_check(g, d))
+    return;
+  d->idle_tics = 0;
+  write_to_output(g, d, "\r\n{}\r\n{}", g->motd, CONFIG_MENU);
+  char_set_rp(d->character, d->rpp);
+  desc_set_connected(d, CON_MENU);
+}
+
+/* CON_GET_NAME: the name of a new character for an empty slot, or (after Return) the character in the slot chosen */
 static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
 {
+  char tmp_name[MAX_INPUT_LENGTH];
   int player_i;
 
   if (d->character) {
@@ -491,9 +567,6 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     char_set_desc(d->character, d);
     char_prf_set(g, d->character, PRF_COLOR, true);
   }
-  /*  Check for other chars already logged in */
-  /* Jamdog - 3rd May 2007 */
-  char buf[MAX_INPUT_LENGTH], tmp_name[MAX_INPUT_LENGTH];
   if (d->writenew > 0) {
     if (!*arg) {
       write_to_output(g, d, "Enter name: ");
@@ -501,109 +574,30 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     }
     d->loadplay = arg;
   }
-  if ((_parse_name(d->loadplay.c_str(), tmp_name)) || strlen(tmp_name) < 2 ||
-      strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(g, tmp_name) ||
-      fill_word(strcpy(buf, tmp_name)) || reserved_word(buf)) { /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
+  if (!acceptable_name(g, d->loadplay.c_str(), tmp_name)) {
     write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
     return;
   }
-  if (d->writenew > 0 && (player_i = load_char(g, tmp_name, d->character)) > -1) {
-    userRead(g, d);
+
+  player_i = load_char(g, tmp_name, d->character);
+  if (player_i < 0) {
+    if (d->writenew <= 0)
+      character_missing(g, d);
+    else /* player unknown -- make new character */
+      start_new_character(g, d, tmp_name);
+    return;
+  }
+  if (d->writenew > 0) {
+    enter_state(g, d, CON_UMENU);
     write_to_output(g, d, "That character is already taken.\r\n");
     d->writenew = 0;
-    desc_set_connected(d, CON_UMENU);
     return;
-  } else {
-    if ((player_i = load_char(g, tmp_name, d->character)) > -1) {
-      if (d->writenew > 0) {
-        write_to_output(g, d, "That character is already taken.\r\n");
-        userRead(g, d);
-        desc_set_connected(d, CON_UMENU);
-        return;
-      }
-      char_set_pfilepos(d->character, player_i);
-      if (char_plr_flagged(d->character, PLR_DELETED)) {
-
-        /* make sure old files are removed so the new player doesn't get
-	     the deleted player's equipment (this should probably be a
-	     stock behavior)
-	  */
-        if ((player_i = get_ptable_by_name(g, tmp_name)) >= 0)
-          remove_player(g, player_i);
-
-        /* We get a false positive from the original deleted character. */
-        free_char(g, d->character);
-        /* Check for multiple creations... */
-        if (!Valid_Name(g, tmp_name)) {
-          write_to_output(g, d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
-          return;
-        }
-        d->character = new char_data();
-        clear_char(d->character);
-        char_make_player_specials(d->character);
-        char_set_desc(d->character, d);
-        char_set_alias(d->character, CAP(tmp_name));
-        char_set_pfilepos(d->character, player_i);
-        char_prf_set(g, d->character, PRF_COLOR, true);
-        display_races(g, d);
-        char_set_rp(d->character, d->rpp);
-        desc_set_connected(d, CON_QRACE);
-      } else {
-        /* undo it just in case they are set */
-        char_plr_set(d->character, PLR_WRITING, false);
-        char_plr_set(d->character, PLR_MAILING, false);
-        char_plr_set(d->character, PLR_CRYO, false);
-        char_aff_set(d->character, AFF_GROUP, false);
-        if (isbanned(g, d->host) == BAN_SELECT &&
-            !char_plr_flagged(d->character, PLR_SITEOK)) {
-          write_to_output(g, d, "Sorry, this char has not been cleared for login from your site!\r\n");
-          mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Connection attempt for {} denied from {}", char_get_name(d->character), d->host);
-          desc_set_connected(d, CON_CLOSE);
-          return;
-        }
-        if (char_get_level(d->character) < g->circle_restrict && g->circle_restrict < 101) {
-          userRead(g, d);
-          write_to_output(g, d, "The game is temporarily restricted to at least {:d} level.\r\n", g->circle_restrict);
-          desc_set_connected(d, CON_UMENU);
-          mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for character load denied for {} [{}] (wizlock)", char_get_name(d->character), d->host);
-          return;
-        }
-        /* check and make sure no other copies of this player are logged in */
-        else if (perform_dupe_check(g, d)) {
-          return;
-        } else {
-          d->idle_tics = 0;
-          write_to_output(g, d, "\r\n{}\r\n{}", g->motd, CONFIG_MENU);
-          char_set_rp(d->character, d->rpp);
-          desc_set_connected(d, CON_MENU);
-        }
-      }
-    } else {
-      if (d->writenew <= 0) {
-        empty_account_slots_named(d, d->loadplay.c_str());
-        d->loadplay.clear();
-        userWrite(g, d, 0, 0, 0, "index");
-        userRead(g, d);
-        write_to_output(g, d, "Character missing. Emptying slot.\r\n");
-        desc_set_connected(d, CON_UMENU);
-      } else {
-        /* player unknown -- make new character */
-
-        /* Check for multiple creations of a character. */
-        if (!Valid_Name(g, tmp_name)) {
-          write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
-          return;
-        }
-        char_set_alias(d->character, CAP(tmp_name));
-
-        display_races(g, d);
-        char_set_rp(d->character, d->rpp);
-        set_account_slot(d, d->writenew, char_get_alias(d->character));
-        userWrite(g, d, 0, 0, 0, "index");
-        desc_set_connected(d, CON_QRACE);
-      }
-    }
   }
+  char_set_pfilepos(d->character, player_i);
+  if (char_plr_flagged(d->character, PLR_DELETED))
+    remake_deleted_character(g, d, tmp_name);
+  else
+    log_in_character(g, d);
 }
 
 /* CON_NAME_CNFRM: wait for conf. of new name */
@@ -744,8 +738,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
     write_to_output(g, d, "Improper email format missing '.com' or '.net' or '.org'. Email?\r\n");
     return;
@@ -758,8 +751,7 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
     }
     d->email = arg;
     userWrite(g, d, 0, 0, 0, "index");
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   } else {
     if (strstr(arg, "@")) {
       search_replace(arg, "@", "<AT>");
@@ -783,8 +775,7 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
   if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
     write_to_output(g, d, "Password is too long. Password, or M for menu?\r\n");
     return;
@@ -798,14 +789,12 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
     d->pass = arg;
     userWrite(g, d, 0, 0, 0, "index");
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   } else {
     write_to_output(g, d, "Your password and user account have been fully saved.\r\n");
     d->pass = arg;
     userCreate(d);
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   }
 }
 
@@ -842,8 +831,7 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
         }
       }
     }
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
   } else {
     send_to_imm(g, "Username, {}, password failure!", CAP(d->user.data()));
     mud_log("{} BAD PASSWORD from [{}]", CAP(d->user.data()), d->host);
@@ -908,6 +896,35 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
   }
 }
 
+/* The account menu's options other than the slots, each a letter in either case. */
+static const struct {
+  const char *key;
+  void (*choose)(GameWorld *g, struct descriptor_data *d);
+} account_options[] = {
+    {"Q", [](GameWorld *g, descriptor_data *d) {
+       write_to_output(g, d, "Thanks for visiting!\n");
+       desc_set_connected(d, CON_CLOSE);
+     }},
+    {"P", [](GameWorld *g, descriptor_data *d) {
+       write_to_output(g, d, "Enter New Password, or M for menu::\n");
+       desc_set_connected(d, CON_NEWPASSWD);
+     }},
+    {"C", [](GameWorld *g, descriptor_data *d) {
+       write_to_output(g, d, "\n");
+       customRead(g, d, 0, nullptr);
+       write_to_output(g, d, "\r\n@n--Press Enter--\n@n");
+     }},
+    {"E", [](GameWorld *g, descriptor_data *d) {
+       write_to_output(g, d, "Enter New Email, or M for menu:\n");
+       desc_set_connected(d, CON_GET_EMAIL);
+     }},
+    {"D", [](GameWorld *g, descriptor_data *d) {
+       write_to_output(g, d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
+       desc_set_connected(d, CON_DELCNF1);
+     }},
+    {"B", buy_slot},
+};
+
 /* CON_UMENU */
 static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
 {
@@ -915,28 +932,12 @@ static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
     userRead(g, d);
     return;
   }
-  if (!strcasecmp(arg, "Q")) {
-    write_to_output(g, d, "Thanks for visiting!\n");
-    desc_set_connected(d, CON_CLOSE);
-  } else if (!strcasecmp(arg, "P")) {
-    write_to_output(g, d, "Enter New Password, or M for menu::\n");
-    desc_set_connected(d, CON_NEWPASSWD);
-  } else if (!strcasecmp(arg, "C")) {
-    write_to_output(g, d, "\n");
-    customRead(g, d, 0, nullptr);
-    write_to_output(g, d, "\r\n@n--Press Enter--\n@n");
-    return;
-  } else if (!strcasecmp(arg, "E")) {
-    write_to_output(g, d, "Enter New Email, or M for menu:\n");
-    desc_set_connected(d, CON_GET_EMAIL);
-  } else if (!strcasecmp(arg, "D")) {
-    write_to_output(g, d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
-    desc_set_connected(d, CON_DELCNF1);
-  } else if (!strcasecmp(arg, "B")) {
-    buy_slot(g, d);
-  } else {
-    choose_slot(g, d, atoi(arg));
-  }
+  for (const auto &option : account_options)
+    if (!strcasecmp(arg, option.key)) {
+      option.choose(g, d);
+      return;
+    }
+  choose_slot(g, d, atoi(arg));
 }
 
 /* CON_RMOTD: read CR after printing motd */
@@ -946,12 +947,64 @@ static void state_rmotd(GameWorld *g, struct descriptor_data *d, char *arg)
   desc_set_connected(d, CON_MENU);
 }
 
+/* Where a player entering from the menu ends up: if they were put in the Void or room 1, their saved room (the
+   Void if it's gone), else room 300; otherwise they look around where they are. */
+static void settle_entered_player(GameWorld *g, struct char_data *ch)
+{
+  if (char_get_in_room(ch) <= 1 && char_get_load_room(g, ch) != NOWHERE) {
+    char_from_room(g, ch);
+    char_to_room(g, ch, room_or_void(g, char_get_load_room(g, ch)));
+  } else if (char_get_in_room(ch) <= 1) {
+    char_from_room(g, ch);
+    char_to_room(g, ch, room_or_void(g, 300));
+  } else {
+    look_at_room(g, char_get_in_room(ch), ch, 0);
+  }
+}
+
+/* Menu 1: into the game. */
+static void enter_game(GameWorld *g, struct descriptor_data *d)
+{
+  if (lockRead(char_get_name(d->character)) && d->level <= 0) {
+    write_to_output(g, d, "That character has been locked out for rule violations. Play another character.\n");
+    return;
+  }
+  int load_result = enter_player_game(g, d);
+  send_to_char(g, d->character, CONFIG_WELC_MESSG);
+  act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
+
+  int oldcount = update_player_count(g);
+  char_set_time_logon(d->character, game_now(g));
+  greet_mtrigger(g, d->character, -1);
+  greet_memory_mtrigger(g, d->character);
+  desc_set_connected(d, CON_PLAYING);
+  pay_player_count_rewards(g, oldcount);
+
+  if (char_get_level(d->character) == 0) {
+    do_start(g, d->character);
+    send_to_char(g, d->character, CONFIG_START_MESSG);
+  }
+  settle_entered_player(g, d->character);
+  login_notices(g, d, false);
+  if (!char_is_android(d->character)) {
+    send_to_sense(g, 0, "You sense someone appear suddenly", d->character);
+    std::string blip = str_format("@D[@GBlip@D]@Y {}\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
+                                  add_commas(getCurPL(g, d->character)));
+    send_to_scouter(g, blip.c_str(), d->character, 0, 0);
+  }
+  if (load_result == 2) { /* rented items lost */
+    send_to_char(g, d->character, "\r\n\007You could not afford your rent!\r\nYour possesions have been donated to the Salvation Army!\r\n");
+  }
+  d->has_prompt = 0;
+  /* We've updated to 3.1 - some bits might be set wrongly: */
+  char_prf_set(g, d->character, PRF_BUILDWALK, false);
+  if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW))
+    char_plr_set(d->character, PLR_THANDW, false);
+}
+
 /* CON_MENU: get selection from main menu */
 static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  int load_result = -1; /* Overloaded variable */
-  int oldcount;
-
   switch (*arg) {
     case '0':
       write_to_output(g, d, "Goodbye.\r\n");
@@ -959,85 +1012,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case '1':
-      if (lockRead(char_get_name(d->character)) && d->level <= 0) {
-        write_to_output(g, d, "That character has been locked out for rule violations. Play another character.\n");
-        return;
-      }
-      load_result = enter_player_game(g, d);
-      send_to_char(g, d->character, CONFIG_WELC_MESSG);
-      act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
-
-      oldcount = update_player_count(g);
-
-      char_set_time_logon(d->character, game_now(g));
-      greet_mtrigger(g, d->character, -1);
-      greet_memory_mtrigger(g, d->character);
-
-      desc_set_connected(d, CON_PLAYING);
-      pay_player_count_rewards(g, oldcount);
-
-      if (char_get_level(d->character) == 0) {
-        do_start(g, d->character);
-        send_to_char(g, d->character, CONFIG_START_MESSG);
-      }
-      if (char_get_in_room(d->character) <= 1 && char_get_load_room(g, d->character) != NOWHERE) {
-        char_from_room(g, d->character);
-        char_to_room(g, d->character, room_or_void(g, char_get_load_room(g, d->character)));
-      } else if (char_get_in_room(d->character) <= 1) {
-        char_from_room(g, d->character);
-        char_to_room(g, d->character, room_or_void(g, 300));
-      } else {
-        look_at_room(g, char_get_in_room(d->character), d->character, 0);
-      }
-      if (has_mail(g, char_get_idnum(d->character)))
-        send_to_char(g, d->character, "\r\nYou have mail waiting.\r\n");
-      board_login_notices(g, d->character);
-      if (g->NEWSUPDATE > char_get_lastpl(d->character))
-        send_to_char(g, d->character, "\r\n@GThe NEWS file has been updated, type 'news {:d}' to see the latest entry or 'news list' to see available entries.@n\r\n", g->LASTNEWS);
-      if (g->LASTINTEREST != 0 && g->LASTINTEREST > char_get_lastint(d->character)) {
-        int diff = (g->LASTINTEREST - char_get_lastint(d->character));
-        int mult = 0;
-        while (diff > 0) {
-          if ((diff - 86400) < 0 && mult == 0) {
-            mult = 1;
-          } else if ((diff - 86400) >= 0) {
-            diff -= 86400;
-            mult++;
-          } else {
-            diff = 0;
-          }
-        }
-        if (mult > 3) {
-          mult = 3;
-        }
-        char_set_lastint(d->character, g->LASTINTEREST);
-        if (char_get_bank_gold(d->character) > 0) {
-          int inc = ((char_get_bank_gold(d->character) / 100) * 2);
-          if (inc >= 7500) {
-            inc = 7500;
-          }
-          inc *= mult;
-          char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (inc));
-          send_to_char(g, d->character, "Interest happened while you were away, {:d} times.\r\n@cBank Interest@D: @Y{}@n\r\n",
-                       mult, add_commas(inc));
-        }
-      }
-      if (!char_is_android(d->character)) {
-        std::string buf3;
-        send_to_sense(g, 0, "You sense someone appear suddenly", d->character);
-        buf3 = str_format("@D[@GBlip@D]@Y {}\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
-                          add_commas(getCurPL(g, d->character)));
-        send_to_scouter(g, buf3.c_str(), d->character, 0, 0);
-      }
-      if (load_result == 2) { /* rented items lost */
-        send_to_char(g, d->character, "\r\n\007You could not afford your rent!\r\nYour possesions have been donated to the Salvation Army!\r\n");
-      }
-      d->has_prompt = 0;
-      /* We've updated to 3.1 - some bits might be set wrongly: */
-      char_prf_set(g, d->character, PRF_BUILDWALK, false);
-      if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
-        char_plr_set(d->character, PLR_THANDW, false);
-      }
+      enter_game(g, d);
       break;
 
     case '2':
@@ -1051,8 +1026,7 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
       break;
 
     case '3':
-      userRead(g, d);
-      desc_set_connected(d, CON_UMENU);
+      enter_state(g, d, CON_UMENU);
       break;
 
     case '4':
@@ -1074,12 +1048,33 @@ static void state_delcnf1(GameWorld *g, struct descriptor_data *d, char *arg)
     userDelete(g, d);
     desc_set_connected(d, CON_CLOSE);
   } else if (!strcmp(arg, "no") || !strcmp(arg, "NO")) {
-    userRead(g, d);
+    enter_state(g, d, CON_UMENU);
     write_to_output(g, d, "Nothing was deleted. Phew.\n");
-    desc_set_connected(d, CON_UMENU);
   } else {
     write_to_output(g, d, "Clearly type yes or no. Yes to delete and no to return to the menu.\nYes or no:\n");
     return;
+  }
+}
+
+/* RPP back for a deleted character: 2 for every 10 levels, once past level 19 (past 40 for the races that level free
+   that far; none for the restricted races), and the race's own refund past level 1. */
+static void refund_deleted_character(GameWorld *g, struct descriptor_data *d)
+{
+  struct char_data *ch = d->character;
+  int level            = char_get_level(ch);
+  bool cheap           = char_is_cheap_race(ch);
+
+  if (cheap ? level > 40 : level > 19 && !char_is_restricted_race(ch)) {
+    int refund = level / 10 * 2;
+    write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
+    d->rpp += refund;
+  }
+  if (cheap && level <= 40)
+    write_to_output(g, d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
+  int refund = race_rpp_refund(char_get_race(ch));
+  if (refund && level > 1) {
+    write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your {} character.@D]@n\r\n", refund, char_true_race_name(ch));
+    d->rpp += refund;
   }
 }
 
@@ -1110,32 +1105,12 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
     delete_variables(char_get_name(d->character));
     delete_inv_backup(d->character);
     write_to_output(g, d, "Character '{}' deleted!\r\n", char_get_name(d->character));
-    if (char_get_level(d->character) > 19 && !char_is_restricted_race(d->character) && !char_is_cheap_race(d->character)) {
-      int refund = char_get_level(d->character) / 10;
-      refund *= 2;
-      write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
-      d->rpp += refund;
-    }
-    if (char_get_level(d->character) > 40 && char_is_cheap_race(d->character)) {
-      int refund = char_get_level(d->character) / 10;
-      refund *= 2;
-      write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
-      d->rpp += refund;
-    }
-    if (char_get_level(d->character) <= 40 && char_is_cheap_race(d->character)) {
-      write_to_output(g, d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
-    }
-    int refund = race_rpp_refund(char_get_race(d->character));
-    if (refund && char_get_level(d->character) > 1) {
-      write_to_output(g, d, "@D[@g{:d} RPP refunded to your account for your {} character.@D]@n\r\n", refund, char_true_race_name(d->character));
-      d->rpp += refund;
-    }
+    refund_deleted_character(g, d);
     mudlog(g, LOG_NRM, ADMLVL_GOD, true, "User {} has deleted character {} (lev {:d}).", d->user, char_get_name(d->character), char_get_level(d->character));
 
     empty_account_slots_named(d, char_get_name(d->character));
     userWrite(g, d, 0, 0, 0, "index");
-    userRead(g, d);
-    desc_set_connected(d, CON_UMENU);
+    enter_state(g, d, CON_UMENU);
     return;
   }
   write_to_output(g, d, "\r\nCharacter not deleted.\r\n{}\r\n{}", g->motd, CONFIG_MENU);
@@ -1150,7 +1125,7 @@ static const con_state login_states[] = {
     {CON_GET_EMAIL,  state_get_email },
     {CON_NEWPASSWD,  state_newpasswd },
     {CON_PASSWORD,   state_password  },
-    {CON_UMENU,      state_umenu     },
+    {CON_UMENU,      state_umenu,      userRead},
     {CON_RMOTD,      state_rmotd     },
     {CON_MENU,       state_menu      },
     {CON_DELCNF1,    state_delcnf1   },
