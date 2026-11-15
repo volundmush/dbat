@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <algorithm>
 #include <cstring>
 
 #include "dbat/args.hpp"
@@ -627,45 +628,43 @@ static bool allowed_while_restrained(const char *cmd, bool liquefied)
 {
   static const char *const always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
   static const char *const liquefied_too[] = {"liquefy", "ingest"};
+  auto is_cmd                              = [&](const char *c) { return !strcasecmp(cmd, c); };
 
-  for (size_t i = 0; i < countof(always); i++)
-    if (!strcasecmp(cmd, always[i]))
-      return true;
-  if (liquefied)
-    for (size_t i = 0; i < countof(liquefied_too); i++)
-      if (!strcasecmp(cmd, liquefied_too[i]))
-        return true;
-  return false;
+  return std::ranges::any_of(always, is_cmd) || (liquefied && std::ranges::any_of(liquefied_too, is_cmd));
 }
 
 /* False (after telling them why) if ch's condition stops them running cmd. */
 static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
 {
-  if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
-    if (!allowed_while_restrained(cmd, true)) {
-      send_to_char(g, ch, "You are not capable of performing that action while liquefied!\r\n");
-      return false;
-    }
-  } else if (char_is_affected(ch, AFF_PARALYZE)) {
-    if (!allowed_while_restrained(cmd, false)) {
-      send_to_char(g, ch, "You are not capable of performing that action while petrified!\r\n");
-      return false;
-    }
-  } else if (char_is_affected(ch, AFF_FROZEN)) {
-    if (!allowed_while_restrained(cmd, false)) {
-      send_to_char(g, ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
-      return false;
-    }
-  } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60)) {
-    if (!allowed_while_restrained(cmd, false)) {
-      act(g, "@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
-      return false;
-    }
+  bool liquefied = char_aff_flagged(ch, AFF_LIQUEFIED);
+  const char *held = liquefied                                ? "liquefied"
+                     : char_is_affected(ch, AFF_PARALYZE) ? "petrified"
+                     : char_is_affected(ch, AFF_FROZEN)   ? "a frozen block of ice"
+                                                          : nullptr;
+  if (held) {
+    if (allowed_while_restrained(cmd, liquefied))
+      return true;
+    send_to_char(g, ch, "You are not capable of performing that action while {}!\r\n", held);
+    return false;
   }
-
+  /* paralysis can be overcome, by a roll against one's intelligence */
+  if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60) && !allowed_while_restrained(cmd, false)) {
+    act_triple(g, {"@yYou fail to overcome your paralysis!@n", nullptr, "@Y$n @ystruggles with $s paralysis!@n", true}, ch, nullptr, nullptr);
+    return false;
+  }
   return true;
 }
+
+/* By position, what one too low for a command is told */
+static const char *const TOO_LOW[] = {
+    "Lie still; you are DEAD!!! :-(\r\n",
+    "You are in a pretty bad shape, unable to do anything!\r\n",
+    "You are in a pretty bad shape, unable to do anything!\r\n",
+    "All you can do right now is think about the stars!\r\n",
+    "In your dreams, or what?\r\n",
+    "Nah... You feel too relaxed to do that..\r\n",
+    "Maybe you should get on your feet first?\r\n",
+};
 
 bool special(GameWorld *g, struct char_data *ch, int cmd, std::string_view arg)
 {
@@ -791,30 +790,9 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
   else if (char_is_npc(ch) && g->complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
     send_to_char(g, ch, "You can't use immortal commands while switched.\r\n");
   else if (char_get_position(ch) < g->complete_cmd_info[cmd].minimum_position && char_get_position(ch) != POS_FIGHTING) {
-    switch (char_get_position(ch)) {
-      case POS_DEAD:
-        send_to_char(g, ch, "Lie still; you are DEAD!!! :-(\r\n");
-        break;
-      case POS_INCAP:
-      case POS_MORTALLYW:
-        send_to_char(g, ch, "You are in a pretty bad shape, unable to do anything!\r\n");
-        break;
-      case POS_STUNNED:
-        send_to_char(g, ch, "All you can do right now is think about the stars!\r\n");
-        break;
-      case POS_SLEEPING:
-        send_to_char(g, ch, "In your dreams, or what?\r\n");
-        break;
-      case POS_RESTING:
-        send_to_char(g, ch, "Nah... You feel too relaxed to do that..\r\n");
-        break;
-      case POS_SITTING:
-        send_to_char(g, ch, "Maybe you should get on your feet first?\r\n");
-        break;
-      case POS_FIGHTING:
-        send_to_char(g, ch, "No way!  You're fighting for your life!\r\n");
-        break;
-    }
+    int pos = char_get_position(ch);
+    if (pos >= 0 && pos < (int)std::size(TOO_LOW))
+      send_to_char(g, ch, TOO_LOW[pos]);
   } else if (g->no_specials || !special(g, ch, cmd, line)) {
     ((*g->complete_cmd_info[cmd].command_pointer)(g, ch, line, cmd, g->complete_cmd_info[cmd].subcmd));
   }

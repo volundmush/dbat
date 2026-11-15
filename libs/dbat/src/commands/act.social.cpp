@@ -93,67 +93,52 @@ ACMD(do_action)
     return;
   }
 
-  if (char_get_position(vict) < action->min_victim_position)
+  if (char_get_position(vict) < action->min_victim_position) {
     act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-  else {
-    if (!part.empty()) {
-      act(g, action->char_body_found, 0, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_CHAR | TO_SLEEP);
-      act(g, action->others_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_NOTVICT);
-      act(g, action->vict_body_found, action->hide, ch, static_cast<struct obj_data *>(static_cast<void *>(part.data())) /* act() reads it as $t text */, vict, TO_VICT);
-    } else {
-      act(g, action->char_found, 0, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-      act(g, action->others_found, action->hide, ch, nullptr, vict, TO_NOTVICT);
-      act(g, action->vict_found, action->hide, ch, nullptr, vict, TO_VICT);
-    }
+    return;
   }
+  /* The body part, if one is named, which act() reads as $t text */
+  bool to_part         = !part.empty();
+  struct obj_data *as_t = to_part ? static_cast<struct obj_data *>(static_cast<void *>(part.data())) : nullptr;
+  act(g, to_part ? action->char_body_found : action->char_found, 0, ch, as_t, vict, TO_CHAR | TO_SLEEP);
+  act(g, to_part ? action->others_body_found : action->others_found, action->hide, ch, as_t, vict, TO_NOTVICT);
+  act(g, to_part ? action->vict_body_found : action->vict_found, action->hide, ch, as_t, vict, TO_VICT);
 }
 
+namespace {
+  /* The first of the insults, by whether the insulter is male, then the insulted */
+  constexpr const char *SEXED_INSULTS[2][2] = {
+      {"$n tells you that you'd lose a beauty contest against a troll.", "$n accuses you of having the smallest... (brain?)"},
+      {"$n says that women can't fight.",                                 "$n accuses you of fighting like a woman!"        },
+  };
+} // namespace
+
+/* No command calls this any more: insult is out of the command table */
 ACMD(do_insult)
 {
-  std::string arg;
-  struct char_data *victim;
-
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
+  std::string arg       = take_arg(rest);
 
-  if (!arg.empty()) {
-    if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM)))
-      send_to_char(g, ch, "Can't hear you!\r\n");
-    else {
-      if (victim != ch) {
-        send_to_char(g, ch, "You insult {}.\r\n", char_get_name(victim));
-
-        switch (rand_number(g, 0, 2)) {
-          case 0:
-            if (char_get_sex(ch) == SEX_MALE) {
-              if (char_get_sex(victim) == SEX_MALE)
-                act(g, "$n accuses you of fighting like a woman!", false, ch, nullptr, victim, TO_VICT);
-              else
-                act(g, "$n says that women can't fight.", false, ch, nullptr, victim, TO_VICT);
-            } else { /* Ch == Woman */
-              if (char_get_sex(victim) == SEX_MALE)
-                act(g, "$n accuses you of having the smallest... (brain?)",
-                    false, ch, nullptr, victim, TO_VICT);
-              else
-                act(g, "$n tells you that you'd lose a beauty contest against a troll.",
-                    false, ch, nullptr, victim, TO_VICT);
-            }
-            break;
-          case 1:
-            act(g, "$n calls your mother a bitch!", false, ch, nullptr, victim, TO_VICT);
-            break;
-          default:
-            act(g, "$n tells you to get lost!", false, ch, nullptr, victim, TO_VICT);
-            break;
-        } /* end switch */
-
-        act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
-      } else { /* ch == victim */
-        send_to_char(g, ch, "You feel insulted.\r\n");
-      }
-    }
-  } else
+  if (arg.empty()) {
     send_to_char(g, ch, "I'm sure you don't want to insult *everybody*...\r\n");
+    return;
+  }
+  struct char_data *victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  if (!victim) {
+    send_to_char(g, ch, "Can't hear you!\r\n");
+    return;
+  }
+  if (victim == ch) {
+    send_to_char(g, ch, "You feel insulted.\r\n");
+    return;
+  }
+  send_to_char(g, ch, "You insult {}.\r\n", char_get_name(victim));
+  int roll           = rand_number(g, 0, 2);
+  const char *insult = roll == 0   ? SEXED_INSULTS[char_get_sex(ch) == SEX_MALE][char_get_sex(victim) == SEX_MALE]
+                       : roll == 1 ? "$n calls your mother a bitch!"
+                                   : "$n tells you to get lost!";
+  act(g, insult, false, ch, nullptr, victim, TO_VICT);
+  act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
 }
 
 void boot_social_messages(GameWorld *g)
@@ -374,21 +359,12 @@ void free_social_messages(GameWorld *g)
 
 void free_action(struct social_messg *mess)
 {
-  if (mess->command) free(mess->command);
-  if (mess->sort_as) free(mess->sort_as);
-  if (mess->char_no_arg) free(mess->char_no_arg);
-  if (mess->others_no_arg) free(mess->others_no_arg);
-  if (mess->char_found) free(mess->char_found);
-  if (mess->others_found) free(mess->others_found);
-  if (mess->vict_found) free(mess->vict_found);
-  if (mess->char_body_found) free(mess->char_body_found);
-  if (mess->others_body_found) free(mess->others_body_found);
-  if (mess->vict_body_found) free(mess->vict_body_found);
-  if (mess->not_found) free(mess->not_found);
-  if (mess->char_auto) free(mess->char_auto);
-  if (mess->others_auto) free(mess->others_auto);
-  if (mess->char_obj_found) free(mess->char_obj_found);
-  if (mess->others_obj_found) free(mess->others_obj_found);
+  for (char *social_messg::*text : {&social_messg::command, &social_messg::sort_as, &social_messg::char_no_arg, &social_messg::others_no_arg,
+                                    &social_messg::char_found, &social_messg::others_found, &social_messg::vict_found,
+                                    &social_messg::char_body_found, &social_messg::others_body_found, &social_messg::vict_body_found,
+                                    &social_messg::not_found, &social_messg::char_auto, &social_messg::others_auto,
+                                    &social_messg::char_obj_found, &social_messg::others_obj_found})
+    free(mess->*text);
   *mess = {};
 }
 
@@ -448,12 +424,13 @@ ACMD(do_gmote)
   if (!action->char_found)
     arg.clear();
 
+  const char *seen;
   if (arg.empty()) {
     if (!action->others_no_arg || !*action->others_no_arg) {
       send_to_char(g, ch, "Who are you going to do that to?\r\n");
       return;
     }
-    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_no_arg);
+    seen = action->others_no_arg;
   } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(g, ch, "{}\r\n", action->not_found);
     return;
@@ -462,14 +439,12 @@ ACMD(do_gmote)
       send_to_char(g, ch, "{}\r\n", action->char_auto);
       return;
     }
-    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_auto);
+    seen = action->others_auto;
+  } else if (char_get_position(vict) < action->min_victim_position) {
+    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    return;
   } else {
-    if (char_get_position(vict) < action->min_victim_position) {
-      act(g, "$N is not in a proper position for that.",
-          false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-      return;
-    }
-    out = str_format("@D[@BOOC@D: @g{}@D]@n", action->others_found);
+    seen = action->others_found;
   }
-  act(g, out.c_str(), false, ch, nullptr, vict, TO_GMOTE);
+  act(g, str_format("@D[@BOOC@D: @g{}@D]@n", seen).c_str(), false, ch, nullptr, vict, TO_GMOTE);
 }
