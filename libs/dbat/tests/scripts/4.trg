@@ -943,4 +943,39 @@ switch %n%
     %echo% waited in a while in a case: %k%
 done
 ~
+#465
+argument corners~
+0 g 100
+~
+set rv 1
+unset %empty%
+return %empty%
+global %empty%
+context %empty%
+attach %empty%
+attach 405 abc
+attach 405 %empty%
+attach 99999 %self.id%
+attach 405 %actor.id%
+detach %empty%
+detach 405 abc
+detach 99999 %self.room.id%
+detach 99999 %self.id%
+makeuid %empty%
+makeuid u %empty%
+makeuid m mob %actor.name%
+makeuid o obj nosuch
+makeuid r room x
+makeuid x mob
+makeuid x thing y
+%echo% made %m% %r%
+remote rv -5
+rdelete rv -5
+extract aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 1 a
+dg_cast 'heal' nobody
+dg_cast 'heal' %actor%
+dg_affect %actor% str 2 0
+dg_affect %actor% str 2 -1
+%send% %actor% |%actor.name% ^%actor.name% &%actor.name% *%actor.name% and \|escaped
+~
 $~

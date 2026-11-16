@@ -30,178 +30,156 @@
 #include "dbat/search.hpp"
 #include "dbat/game_world.hpp"
 
-/* local functions */
-static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[], void *otokens[], char type[]);
+/* A piece of a message: its text, then who or what stands where the next ~|^&*_ was, if one was */
+struct sub_piece {
+  std::string text;
+  char type{};              /* the symbol, or 0 for the last piece */
+  struct char_data *ch{};   /* for ~ | ^ & * */
+  struct obj_data *obj{};   /* for _ */
+};
 
-/* same as any_one_arg except that it stops at punctuation */
-static char *any_one_name(char *argument, char *first_arg)
+/* The name after a symbol: a word, ending at a space or at punctuation other than '#' and '-', lowercased */
+static std::string take_name(std::string_view text, size_t &p)
 {
-  char *arg;
+  std::string name;
 
-  /* Find first non blank */
-  while (isspace(*argument))
-    argument++;
-
-  /* Find length of first word */
-  for (arg = first_arg;
-       *argument && !isspace(*argument) &&
-       (!ispunct(*argument) || *argument == '#' || *argument == '-');
-       arg++, argument++)
-    *arg = tolower(*argument);
-  *arg = '\0';
-
-  return argument;
+  while (p < text.size() && isspace((unsigned char)text[p]))
+    p++;
+  for (; p < text.size() && !isspace((unsigned char)text[p]) &&
+         (!ispunct((unsigned char)text[p]) || text[p] == '#' || text[p] == '-');
+       p++)
+    name += (char)tolower((unsigned char)text[p]);
+  return name;
 }
 
-static void sub_write_to_char(GameWorld *g, struct char_data *ch, char *tokens[],
-                              void *otokens[], char type[])
+/* The message as ch sees it */
+static void sub_write_to_char(GameWorld *g, struct char_data *ch, const std::vector<sub_piece> &pieces)
 {
-  char sb[MAX_STRING_LENGTH];
-  int i;
+  std::string sb;
 
-  strcpy(sb, "");
+  for (const sub_piece &piece : pieces) {
+    sb += piece.text;
+    struct char_data *who = piece.ch;
 
-  for (i = 0; tokens[i + 1]; i++) {
-    strcat(sb, tokens[i]);
-
-    switch (type[i]) {
+    switch (piece.type) {
       case '~':
-        if (!otokens[i])
-          strcat(sb, "someone");
-        else if ((struct char_data *)otokens[i] == ch)
-          strcat(sb, "you");
+        if (!who)
+          sb += "someone";
+        else if (who == ch)
+          sb += "you";
         else
-          strcat(sb, char_pers(g, ((struct char_data *)otokens[i]), ch));
+          sb += char_pers(g, who, ch);
         break;
 
       case '|':
-        if (!otokens[i])
-          strcat(sb, "someone's");
-        else if ((struct char_data *)otokens[i] == ch)
-          strcat(sb, "your");
+        if (!who)
+          sb += "someone's";
+        else if (who == ch)
+          sb += "your";
         else {
-          strcat(sb, char_pers(g, ((struct char_data *)otokens[i]), ch));
-          strcat(sb, "'s");
+          sb += char_pers(g, who, ch);
+          sb += "'s";
         }
         break;
 
       case '^':
-        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
-          strcat(sb, "its");
-        else if (otokens[i] == ch)
-          strcat(sb, "your");
+        if (!who || !char_can_see(g, ch, who))
+          sb += "its";
+        else if (who == ch)
+          sb += "your";
         else
-          strcat(sb, char_hshr((struct char_data *)otokens[i]));
+          sb += char_hshr(who);
         break;
 
       case '&':
-        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
-          strcat(sb, "it");
-        else if (otokens[i] == ch)
-          strcat(sb, "you");
+        if (!who || !char_can_see(g, ch, who))
+          sb += "it";
+        else if (who == ch)
+          sb += "you";
         else
-          strcat(sb, char_hssh((struct char_data *)otokens[i]));
+          sb += char_hssh(who);
         break;
 
       case '*':
-        if (!otokens[i] || !char_can_see(g, ch, (struct char_data *)otokens[i]))
-          strcat(sb, "it");
-        else if (otokens[i] == ch)
-          strcat(sb, "you");
+        if (!who || !char_can_see(g, ch, who))
+          sb += "it";
+        else if (who == ch)
+          sb += "you";
         else
-          strcat(sb, char_hmhr((struct char_data *)otokens[i]));
+          sb += char_hmhr(who);
         break;
 
       case '_':
-        if (!otokens[i])
-          strcat(sb, "something");
+        if (!piece.obj)
+          sb += "something";
         else
-          strcat(sb, obj_shortdesc_for(g, ((struct obj_data *)otokens[i]), ch));
+          sb += obj_shortdesc_for(g, piece.obj, ch);
         break;
     }
   }
 
-  strcat(sb, tokens[i]);
-  strcat(sb, "\n\r");
-  sb[0] = toupper(sb[0]);
+  sb += "\n\r";
+  sb[0] = (char)toupper((unsigned char)sb[0]);
   send_to_char(g, ch, "{}", sb);
 }
 
-void sub_write(GameWorld *g, char *arg, struct char_data *ch, int8_t find_invis, int targets)
+/*
+ * Sends arg to ch (TO_CHAR) and to the others in ch's room (TO_ROOM), each seeing the characters and objects it
+ * names as they see them: ~name is the character's name (you), |name its possessive (your), ^name his/her/its,
+ * &name he/she/it, *name him/her/it, and _name an object's short description. They are found in ch's room whether
+ * or not ch can see them. A backslash gives the character after it as it is.
+ */
+void sub_write(GameWorld *g, std::string_view arg, struct char_data *ch, int targets)
 {
-  char str[MAX_INPUT_LENGTH * 2];
-  char type[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-  char *tokens[MAX_INPUT_LENGTH], *s, *p;
-  void *otokens[MAX_INPUT_LENGTH];
-  struct obj_data *obj;
-  int i, tmp;
+  std::vector<sub_piece> pieces(1);
+  room_data *room = room_of(g, char_get_in_room(ch));
   int to_sleeping = 1; /* mainly for windows compiles */
 
-  if (!arg)
-    return;
-
-  tokens[0] = str;
-
-  for (i = 0, p = arg, s = str; *p;) {
-    switch (*p) {
+  for (size_t p = 0; p < arg.size();) {
+    switch (arg[p]) {
       case '~':
       case '|':
       case '^':
       case '&':
-      case '*':
-        /* get char_data, move to next token */
-        type[i] = *p;
-        *s      = '\0';
-        p       = any_one_name(++p, name);
-        otokens[i] =
-            find_invis ? (void *)get_char_in_room(g, room_of(g, char_get_in_room(ch)), name) : (void *)get_char_room_vis(g, ch, name, nullptr);
-        tokens[++i] = ++s;
+      case '*': {
+        sub_piece &piece = pieces.back();
+        piece.type       = arg[p++];
+        piece.ch         = get_char_in_room(g, room, take_name(arg, p));
+        pieces.emplace_back();
         break;
+      }
 
-      case '_':
-        /* get obj_data, move to next token */
-        type[i] = *p;
-        *s      = '\0';
-        p       = any_one_name(++p, name);
-
-        if (find_invis) obj = get_obj_in_room(g, room_of(g, char_get_in_room(ch)), name);
-        else if (!(obj = get_obj_in_list_vis(g, ch, name, nullptr, room_get_contents(g, char_get_in_room(ch)))))
-          ;
-        else if (!(obj = get_obj_in_equip_vis(g, ch, name, &tmp, char_get_equipment_array(ch))))
-          ;
-        else obj = get_obj_in_list_vis(g, ch, name, nullptr, char_get_inventory(ch));
-
-        otokens[i]  = (void *)obj;
-        tokens[++i] = ++s;
+      case '_': {
+        sub_piece &piece = pieces.back();
+        piece.type       = arg[p++];
+        piece.obj        = get_obj_in_room(g, room, take_name(arg, p));
+        pieces.emplace_back();
         break;
+      }
 
       case '\\': /* the next character as it is, if there is one */
         p++;
-        if (*p)
-          *s++ = *p++;
+        if (p < arg.size())
+          pieces.back().text += arg[p++];
         break;
 
       default:
-        *s++ = *p++;
+        pieces.back().text += arg[p++];
     }
   }
 
-  *s          = '\0';
-  tokens[++i] = nullptr;
-
   if (IS_SET(targets, TO_CHAR) && sendok(ch, to_sleeping))
-    sub_write_to_char(g, ch, tokens, otokens, type);
+    sub_write_to_char(g, ch, pieces);
 
   if (IS_SET(targets, TO_ROOM))
     for (char_data *to : room_people(g, char_get_in_room(ch)))
       if (to != ch && sendok(to, to_sleeping))
-        sub_write_to_char(g, to, tokens, otokens, type);
+        sub_write_to_char(g, to, pieces);
 }
 
-void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone)
+void send_to_zone(GameWorld *g, std::string_view messg, struct zone_data *zone)
 {
-
-  if (!messg || !*messg)
+  if (messg.empty())
     return;
 
   for (descriptor_data *i : each_desc(g))

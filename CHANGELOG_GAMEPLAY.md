@@ -5,6 +5,7 @@
 - In a script's `switch`, a case that falls through into `default` carries on past it, rather than running `default` as a command. [Volund]
 - A script whose `wait` has a time it can't read (`wait until x`, or a variable holding no number) logs an error and ends, rather than waiting a random time, or, for an empty one, never running again until a reboot. A `wait` whose time is written out wrong is refused when the trigger loads. [Volund]
 - A script working out text that ends in a quote and a backslash, such as something a player said, no longer reads past the end of it into whatever memory follows. [Volund]
+- A script message (`msend`, `wsend`, `oecho` and the like) naming more people or things than fit in its buffer no longer overruns it: a long line of `~` or `|`, which can come from something a player said, wrote past the end of a 64KB buffer on the stack. [Volund]
 - Script errors say where they happened: the trigger, its instance, the line's number and text, what it ran on and who set it off. [Volund]
 - Looking at an object given a trigger in play (by a script's `attach`, say), with room flags showing, no longer crashes the game when the object's prototype has no triggers of its own. [Volund]
 - A script on an object or a room asking a mob's globals for `self` (`%mob.global(self)%`) gets its own id, rather than reading the object or room as though it were a mob. [Volund]

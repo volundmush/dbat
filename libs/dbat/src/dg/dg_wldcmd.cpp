@@ -28,7 +28,7 @@
  */
 
 #define WCMD(name) \
-  void(name)(GameWorld * g, room_data * room, char *argument, int cmd, int subcmd)
+  void(name)(GameWorld * g, room_data * room, std::string_view argument, int cmd, int subcmd)
 
 static void wld_log(GameWorld *g, room_data *room, std::string_view text);
 template <class... Args>
@@ -37,7 +37,7 @@ static void wld_log(GameWorld *g, room_data *room, std::format_string<Args...> f
 {
   wld_log(g, room, str_format(fmt, std::forward<Args>(args)...));
 }
-static void act_to_room(GameWorld *g, char *str, room_data *room);
+static void act_to_room(GameWorld *g, std::string_view str, room_data *room);
 static WCMD(do_wasound);
 static WCMD(do_wecho);
 static WCMD(do_wsend);
@@ -54,7 +54,7 @@ static WCMD(do_weffect);
 
 struct wld_command_info {
   const char *command{};
-  void (*command_pointer)(GameWorld *g, room_data *room, char *argument, int cmd, int subcmd){};
+  void (*command_pointer)(GameWorld *g, room_data *room, std::string_view argument, int cmd, int subcmd){};
   int subcmd{};
 };
 
@@ -69,7 +69,7 @@ static void wld_log(GameWorld *g, room_data *room, std::string_view text)
 }
 
 /* sends str to room */
-static void act_to_room(GameWorld *g, char *str, room_data *room)
+static void act_to_room(GameWorld *g, std::string_view str, room_data *room)
 {
   /* no one is in the room */
   if (!room_get_people(room))
@@ -80,8 +80,9 @@ static void act_to_room(GameWorld *g, char *str, room_data *room)
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-  act(g, str, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
-  act(g, str, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
+  std::string text(str);
+  act(g, text.c_str(), false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
+  act(g, text.c_str(), false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
 }
 
 /* World commands */
@@ -147,10 +148,9 @@ static WCMD(do_weffect)
 static WCMD(do_wasound)
 {
   int door;
+  std::string_view text = skip_spaces(argument);
 
-  skip_spaces(&argument);
-
-  if (!*argument) {
+  if (text.empty()) {
     wld_log(g, room, "wasound called with no argument");
     return;
   }
@@ -160,45 +160,43 @@ static WCMD(do_wasound)
 
     if ((newexit = room_get_dir_option(room, door)) && (newexit->to_room != NOWHERE) &&
         room != room_of(g, newexit->to_room))
-      act_to_room(g, argument, room_of(g, newexit->to_room));
+      act_to_room(g, text, room_of(g, newexit->to_room));
   }
 }
 
 static WCMD(do_wecho)
 {
-  skip_spaces(&argument);
+  std::string_view text = skip_spaces(argument);
 
-  if (!*argument)
+  if (text.empty())
     wld_log(g, room, "wecho called with no args");
 
   else
-    act_to_room(g, argument, room);
+    act_to_room(g, text, room);
 }
 
 static WCMD(do_wsend)
 {
-  char buf[MAX_INPUT_LENGTH], *msg;
   char_data *ch;
+  std::string_view msg = argument;
+  std::string name     = take_word(msg);
 
-  msg = any_one_arg(argument, buf);
-
-  if (!*buf) {
+  if (name.empty()) {
     wld_log(g, room, "wsend called with no args");
     return;
   }
 
-  skip_spaces(&msg);
-
-  if (!*msg) {
+  msg = skip_spaces(msg);
+  if (msg.empty()) {
     wld_log(g, room, "wsend called without a message");
     return;
   }
 
-  if ((ch = get_char_by_room(g, room, buf))) {
+  if ((ch = get_char_by_room(g, room, name))) {
     if (subcmd == SCMD_WSEND)
-      sub_write(g, msg, ch, true, TO_CHAR);
+      sub_write(g, msg, ch, TO_CHAR);
     else if (subcmd == SCMD_WECHOAROUND)
-      sub_write(g, msg, ch, true, TO_ROOM);
+      sub_write(g, msg, ch, TO_ROOM);
   }
 
   else
@@ -208,50 +206,47 @@ static WCMD(do_wsend)
 static WCMD(do_wzoneecho)
 {
   struct zone_data *zone;
-  char room_num[MAX_INPUT_LENGTH], *msg;
+  std::string_view msg = argument;
+  std::string room_num = take_word(msg);
 
-  msg = any_one_arg(argument, room_num);
-  skip_spaces(&msg);
-
-  if (!*room_num || !*msg)
+  msg = skip_spaces(msg);
+  if (room_num.empty() || msg.empty())
     wld_log(g, room, "wzoneecho called with too few args");
 
-  else if ((zone = find_zone_by_thing(g, atoi(room_num))) == nullptr)
+  else if ((zone = find_zone_by_thing(g, parse_int(room_num))) == nullptr)
     wld_log(g, room, "wzoneecho called for nonexistant zone");
 
-  else {
-    send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
-  }
+  else
+    send_to_zone(g, std::string(msg) + "\r\n", zone);
 }
 
+/* prints the message to everyone in the range of numbers */
 /* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
 static WCMD(do_wrecho)
 {
-  char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
+  std::string_view msg = argument;
+  std::string start    = take_arg(msg);
+  std::string finish   = take_arg(msg);
 
-  msg = two_arguments(argument, start, finish);
-
-  skip_spaces(&msg);
-
-  if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
+  msg = skip_spaces(msg);
+  if (msg.empty() || start.empty() || finish.empty() || !is_number(start) || !is_number(finish))
     wld_log(g, room, "wrecho: too few args");
   else
-    send_to_range(g, atoi(start), atoi(finish), "{}\r\n", msg);
+    send_to_range(g, parse_int(start), parse_int(finish), "{}\r\n", msg);
 }
 
 static WCMD(do_wdoor)
 {
-  char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
-  char field[MAX_INPUT_LENGTH], *value;
   room_data *rm;
   int dir, fd;
+  std::string_view value = argument;
+  std::string target     = take_arg(value);
+  std::string direction  = take_arg(value);
+  std::string field      = take_arg(value);
 
-  argument = two_arguments(argument, target, direction);
-  value    = one_argument(argument, field);
-  skip_spaces(&value);
-
-  if (!*target || !*direction || !*field) {
+  value = skip_spaces(value);
+  if (target.empty() || direction.empty() || field.empty()) {
     wld_log(g, room, "wdoor called with too few args");
     return;
   }
@@ -259,8 +254,8 @@ static WCMD(do_wdoor)
     wld_log(g, room, "wdoor: invalid target");
     return;
   }
-  if (atoi(direction) >= 0 && atoi(direction) <= 11) {
-    dir = atoi(direction);
+  if (parse_int(direction) >= 0 && parse_int(direction) <= 11) {
+    dir = parse_int(direction);
   } else {
     wld_log(g, room, "wdoor: invalid direction");
     return;
@@ -328,16 +323,15 @@ static WCMD(do_wteleport)
 static WCMD(do_wforce)
 {
   char_data *ch;
-  char arg1[MAX_INPUT_LENGTH], *line;
+  std::string_view line = argument; /* the command, as it is, spaces and all */
+  std::string arg1      = take_arg(line);
 
-  line = one_argument(argument, arg1);
-
-  if (!*arg1 || !*line) {
+  if (arg1.empty() || line.empty()) {
     wld_log(g, room, "wforce called with too few args");
     return;
   }
 
-  if (!strcasecmp(arg1, "all")) {
+  if (str_eq_nocase(arg1, "all")) {
     for (char_data *tch : room_people(g, room)) {
 
       if (valid_dg_target(g, tch, 0)) {
@@ -412,29 +406,28 @@ static WCMD(do_wpurge)
 /* loads a mobile or object into the room */
 static WCMD(do_wload)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   IDXTYPE number = 0;
   char_data *mob;
   obj_data *object;
-  char *target;
   char_data *tch;
   obj_data *cnt;
   int pos;
+  std::string_view target = argument; /* what follows the type and number, as it is */
+  std::string type        = take_arg(target);
+  std::string vnum        = take_arg(target);
 
-  target = two_arguments(argument, arg1, arg2);
-
-  if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+  if (type.empty() || vnum.empty() || !is_number(vnum) || ((number = parse_int(vnum)) < 0)) {
     wld_log(g, room, "wload: bad syntax");
     return;
   }
 
   /* load mob to target room - Jamie Nelson, April 13 2004 */
-  if (is_abbrev(arg1, "mob")) {
+  if (is_abbrev(type, "mob")) {
     room_vnum rnum;
-    if (!target || !*target) {
+    if (target.empty()) {
       rnum = room_get_number(room);
     } else {
-      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
+      if (!isdigit((unsigned char)target[0]) || !room_of(g, rnum = parse_int(target))) {
         wld_log(g, room, "wload: room target vnum doesn't exist (loading mob vnum {:d} to room {})", number, target);
         return;
       }
@@ -446,33 +439,34 @@ static WCMD(do_wload)
     char_to_room(g, mob, rnum);
     if (room_get_script(room)) { /* It _should_ have, but it might be detached. */
       std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(mob));
-      add_var(room_get_script(room)->global_vars, "lastloaded", buf.c_str(), 0);
+      add_var(room_get_script(room)->global_vars, "lastloaded", buf, 0);
     }
     load_mtrigger(g, mob);
   }
 
-  else if (is_abbrev(arg1, "obj")) {
+  else if (is_abbrev(type, "obj")) {
     if ((object = read_object(g, number)) == nullptr) {
       wld_log(g, room, "wload: bad object vnum");
       return;
     }
     /* special handling to make objects able to load on a person/in a container/worn etc. */
-    if (!target || !*target) {
+    if (target.empty()) {
       add_unique_id(g, object);
       obj_to_room(g, object, room_get_number(room));
       if (room_get_script(room)) { /* It _should_ have, but it might be detached. */
         std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
-        add_var(room_get_script(room)->global_vars, "lastloaded", buf.c_str(), 0);
+        add_var(room_get_script(room)->global_vars, "lastloaded", buf, 0);
       }
       load_otrigger(g, object);
       return;
     }
 
-    two_arguments(target, arg1, arg2); /* recycling ... */
-    tch = get_char_in_room(g, room, arg1);
+    std::string who   = take_arg(target);
+    std::string where = take_arg(target);
+    tch               = get_char_in_room(g, room, who);
     if (tch) {
-      if (*arg2 &&
-          (pos = find_eq_pos_script(arg2)) >= 0 &&
+      if (!where.empty() &&
+          (pos = find_eq_pos_script(where)) >= 0 &&
           !char_get_equipment(tch, pos) &&
           can_wear_on_pos(object, pos)) {
         equip_char(g, tch, object, pos);
@@ -483,7 +477,7 @@ static WCMD(do_wload)
       load_otrigger(g, object);
       return;
     }
-    cnt = get_obj_in_room(g, room, arg1);
+    cnt = get_obj_in_room(g, room, who);
     if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       obj_to_obj(g, object, cnt);
       load_otrigger(g, object);
@@ -531,30 +525,28 @@ static WCMD(do_wat)
 {
   room_vnum loc = NOWHERE;
   struct char_data *ch;
-  char arg[MAX_INPUT_LENGTH], *command;
+  std::string_view command = argument;
+  std::string where        = take_word(command);
 
-  command = any_one_arg(argument, arg);
-
-  if (!*arg) {
+  if (where.empty()) {
     wld_log(g, room, "wat called with no args");
     return;
   }
 
-  skip_spaces(&command);
-
-  if (!*command) {
+  command = skip_spaces(command);
+  if (command.empty()) {
     wld_log(g, room, "wat called without a command");
     return;
   }
 
-  if (isdigit(*arg)) {
-    loc = atoi(arg);
-  } else if ((ch = get_char_by_room(g, room, arg))) {
+  if (isdigit((unsigned char)where[0])) {
+    loc = parse_int(where);
+  } else if ((ch = get_char_by_room(g, room, where))) {
     loc = char_get_in_room(ch);
   }
 
   if (!room_of(g, loc)) {
-    wld_log(g, room, "wat: location not found ({})", arg);
+    wld_log(g, room, "wat: location not found ({})", where);
     return;
   }
 
@@ -584,23 +576,22 @@ static const struct wld_command_info wld_cmd_info[] = {
 /*
  *  This is the command interpreter used by rooms, called by script_driver.
  */
-void wld_command_interpreter(GameWorld *g, room_data *room, char *argument)
+void wld_command_interpreter(GameWorld *g, room_data *room, std::string_view argument)
 {
-  int cmd, length;
-  char *line, arg[MAX_INPUT_LENGTH];
+  int cmd;
 
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
   /* just drop to next line for hitting CR */
-  if (!*argument)
+  if (argument.empty())
     return;
 
-  line = any_one_arg(argument, arg);
+  std::string_view line = argument;
+  std::string arg       = take_word(line);
 
-  /* find the command */
-  for (length = strlen(arg), cmd = 0;
-       *wld_cmd_info[cmd].command != '\n'; cmd++)
-    if (!strncmp(wld_cmd_info[cmd].command, arg, length))
+  /* find the command: the first whose name begins with the word */
+  for (cmd = 0; *wld_cmd_info[cmd].command != '\n'; cmd++)
+    if (std::string_view(wld_cmd_info[cmd].command).starts_with(arg))
       break;
 
   if (*wld_cmd_info[cmd].command == '\n')

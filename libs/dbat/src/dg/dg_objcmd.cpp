@@ -34,7 +34,7 @@
  * Local functions
  */
 #define OCMD(name) \
-  void(name)(GameWorld * g, obj_data * obj, char *argument, int cmd, int subcmd)
+  void(name)(GameWorld * g, obj_data * obj, std::string_view argument, int cmd, int subcmd)
 
 static void obj_log(GameWorld *g, obj_data *obj, std::string_view text);
 template <class... Args>
@@ -64,7 +64,7 @@ static OCMD(do_oat);
 
 struct obj_command_info {
   const char *command{};
-  void (*command_pointer)(GameWorld *g, obj_data *obj, char *argument, int cmd, int subcmd){};
+  void (*command_pointer)(GameWorld *g, obj_data *obj, std::string_view argument, int cmd, int subcmd){};
   int subcmd{};
 };
 
@@ -137,16 +137,15 @@ static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, std::string_v
 static OCMD(do_oecho)
 {
   room_vnum room;
+  std::string_view text = skip_spaces(argument);
 
-  skip_spaces(&argument);
-
-  if (!*argument)
+  if (text.empty())
     obj_log(g, obj, "oecho called with no args");
 
   else if ((room = obj_room(obj)) != NOWHERE) {
     if (room_get_people(g, room)) {
-      sub_write(g, argument, first_char(g, room_get_people(g, room)), true, TO_ROOM);
-      sub_write(g, argument, first_char(g, room_get_people(g, room)), true, TO_CHAR);
+      sub_write(g, text, first_char(g, room_get_people(g, room)), TO_ROOM);
+      sub_write(g, text, first_char(g, room_get_people(g, room)), TO_CHAR);
     }
   }
 
@@ -158,16 +157,15 @@ static OCMD(do_oforce)
 {
   char_data *ch;
   room_vnum room;
-  char arg1[MAX_INPUT_LENGTH], *line;
+  std::string_view line = argument; /* the command, as it is, spaces and all */
+  std::string arg1      = take_arg(line);
 
-  line = one_argument(argument, arg1);
-
-  if (!*arg1 || !*line) {
+  if (arg1.empty() || line.empty()) {
     obj_log(g, obj, "oforce called with too few args");
     return;
   }
 
-  if (!strcasecmp(arg1, "all")) {
+  if (str_eq_nocase(arg1, "all")) {
     if ((room = obj_room(obj)) == NOWHERE)
       obj_log(g, obj, "oforce called by object in NOWHERE");
     else {
@@ -194,51 +192,46 @@ static OCMD(do_oforce)
 static OCMD(do_ozoneecho)
 {
   struct zone_data *zone;
-  char room_number[MAX_INPUT_LENGTH], *msg;
+  std::string_view msg    = argument;
+  std::string room_number = take_word(msg);
 
-  msg = any_one_arg(argument, room_number);
-  skip_spaces(&msg);
-
-  if (!*room_number || !*msg)
+  msg = skip_spaces(msg);
+  if (room_number.empty() || msg.empty())
     obj_log(g, obj, "ozoneecho called with too few args");
 
-  else if ((zone = find_zone_by_thing(g, atoi(room_number))) == nullptr)
+  else if ((zone = find_zone_by_thing(g, parse_int(room_number))) == nullptr)
     obj_log(g, obj, "ozoneecho called for nonexistant zone");
 
-  else {
-    send_to_zone(g, (std::string(msg) + "\r\n").c_str(), zone);
-  }
+  else
+    send_to_zone(g, std::string(msg) + "\r\n", zone);
 }
 
 static OCMD(do_osend)
 {
-  char buf[MAX_INPUT_LENGTH], *msg;
   char_data *ch;
+  std::string_view msg = argument;
+  std::string name     = take_word(msg);
 
-  msg = any_one_arg(argument, buf);
-
-  if (!*buf) {
+  if (name.empty()) {
     obj_log(g, obj, "osend called with no args");
     return;
   }
 
-  skip_spaces(&msg);
-
-  if (!*msg) {
+  msg = skip_spaces(msg);
+  if (msg.empty()) {
     obj_log(g, obj, "osend called without a message");
     return;
   }
 
-  if ((ch = get_char_by_obj(g, obj, buf))) {
+  if ((ch = get_char_by_obj(g, obj, name))) {
     if (subcmd == SCMD_OSEND)
-      sub_write(g, msg, ch, true, TO_CHAR);
+      sub_write(g, msg, ch, TO_CHAR);
     else if (subcmd == SCMD_OECHOAROUND) {
-      std::string text = msg;
+      std::string text(msg);
 
-      if (const char *name = char_get_name(ch)) /* null for a mob with no short description */
-        search_replace(text, name, "$n");
+      if (const char *who = char_get_name(ch)) /* null for a mob with no short description */
+        search_replace(text, who, "$n");
       act(g, text.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-      /*sub_write(msg, ch, TRUE, TO_ROOM);*/
     }
   }
 
@@ -247,19 +240,19 @@ static OCMD(do_osend)
 }
 
 /* prints the message to everyone in the range of numbers */
+/* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
 static OCMD(do_orecho)
 {
-  char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
+  std::string_view msg = argument;
+  std::string start    = take_arg(msg);
+  std::string finish   = take_arg(msg);
 
-  msg = two_arguments(argument, start, finish);
-
-  skip_spaces(&msg);
-
-  if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
+  msg = skip_spaces(msg);
+  if (msg.empty() || start.empty() || finish.empty() || !is_number(start) || !is_number(finish))
     obj_log(g, obj, "orecho: too few args");
   else
-    send_to_range(g, atoi(start), atoi(finish), "{}\r\n", msg);
+    send_to_range(g, parse_int(start), parse_int(finish), "{}\r\n", msg);
 }
 
 /* set the object's timer value */
@@ -462,19 +455,18 @@ static OCMD(do_oteleport)
 
 static OCMD(do_dgoload)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   IDXTYPE number = 0;
   room_vnum room;
   char_data *mob;
   obj_data *object;
-  char *target;
   char_data *tch;
   obj_data *cnt;
   int pos;
+  std::string_view target = argument; /* what follows the type and number, as it is */
+  std::string type        = take_arg(target);
+  std::string vnum        = take_arg(target);
 
-  target = two_arguments(argument, arg1, arg2);
-
-  if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+  if (type.empty() || vnum.empty() || !is_number(vnum) || ((number = parse_int(vnum)) < 0)) {
     obj_log(g, obj, "oload: bad syntax");
     return;
   }
@@ -485,12 +477,12 @@ static OCMD(do_dgoload)
   }
 
   /* load mob to target room - Jamie Nelson, April 13 2004 */
-  if (is_abbrev(arg1, "mob")) {
+  if (is_abbrev(type, "mob")) {
     room_vnum rnum;
-    if (!target || !*target) {
+    if (target.empty()) {
       rnum = room;
     } else {
-      if (!isdigit(*target) || !room_of(g, rnum = atoi(target))) {
+      if (!isdigit((unsigned char)target[0]) || !room_of(g, rnum = parse_int(target))) {
         obj_log(g, obj, "oload: room target vnum doesn't exist (loading mob vnum {:d} to room {})",
                 number, target);
         return;
@@ -504,13 +496,13 @@ static OCMD(do_dgoload)
 
     if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
       std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(mob));
-      add_var(obj_get_script(obj)->global_vars, "lastloaded", buf.c_str(), 0);
+      add_var(obj_get_script(obj)->global_vars, "lastloaded", buf, 0);
     }
 
     load_mtrigger(g, mob);
   }
 
-  else if (is_abbrev(arg1, "obj")) {
+  else if (is_abbrev(type, "obj")) {
     if ((object = read_object(g, number)) == nullptr) {
       obj_log(g, obj, "oload: bad object vnum");
       return;
@@ -518,21 +510,22 @@ static OCMD(do_dgoload)
 
     if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
       std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
-      add_var(obj_get_script(obj)->global_vars, "lastloaded", buf.c_str(), 0);
+      add_var(obj_get_script(obj)->global_vars, "lastloaded", buf, 0);
     }
 
     /* special handling to make objects able to load on a person/in a container/worn etc. */
-    if (!target || !*target) {
+    if (target.empty()) {
       add_unique_id(g, object);
       obj_to_room(g, object, room);
       load_otrigger(g, object);
       return;
     }
-    two_arguments(target, arg1, arg2); /* recycling ... */
-    tch = get_char_near_obj(g, obj, arg1);
+    std::string who   = take_arg(target);
+    std::string where = take_arg(target);
+    tch               = get_char_near_obj(g, obj, who);
     if (tch) {
-      if (*arg2 &&
-          (pos = find_eq_pos_script(arg2)) >= 0 &&
+      if (!where.empty() &&
+          (pos = find_eq_pos_script(where)) >= 0 &&
           !char_get_equipment(tch, pos) &&
           can_wear_on_pos(object, pos)) {
         equip_char(g, tch, object, pos);
@@ -543,7 +536,7 @@ static OCMD(do_dgoload)
       load_otrigger(g, object);
       return;
     }
-    cnt = get_obj_near_obj(g, obj, arg1);
+    cnt = get_obj_near_obj(g, obj, who);
     if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       obj_to_obj(g, object, cnt);
       load_otrigger(g, object);
@@ -590,10 +583,9 @@ static OCMD(do_oasound)
 {
   room_vnum room;
   int door;
+  std::string_view text = skip_spaces(argument);
 
-  skip_spaces(&argument);
-
-  if (!*argument) {
+  if (text.empty()) {
     obj_log(g, obj, "oasound called with no args");
     return;
   }
@@ -604,28 +596,25 @@ static OCMD(do_oasound)
   }
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (room_get_dir_option(g, room, door) != nullptr &&
-        (room_get_dir_option(g, room, door))->to_room != NOWHERE &&
-        (room_get_dir_option(g, room, door))->to_room != room &&
-        room_get_people(g, (room_get_dir_option(g, room, door))->to_room)) {
-      sub_write(g, argument, first_char(g, room_get_people(g, (room_get_dir_option(g, room, door))->to_room)), true, TO_ROOM);
-      sub_write(g, argument, first_char(g, room_get_people(g, (room_get_dir_option(g, room, door))->to_room)), true, TO_CHAR);
+    const room_direction_data *exit = room_get_dir_option(g, room, door);
+    if (exit != nullptr && exit->to_room != NOWHERE && exit->to_room != room && room_get_people(g, exit->to_room)) {
+      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), TO_ROOM);
+      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), TO_CHAR);
     }
   }
 }
 
 static OCMD(do_odoor)
 {
-  char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
-  char field[MAX_INPUT_LENGTH], *value;
   room_data *rm;
   int dir, fd;
+  std::string_view value = argument;
+  std::string target     = take_arg(value);
+  std::string direction  = take_arg(value);
+  std::string field      = take_arg(value);
 
-  argument = two_arguments(argument, target, direction);
-  value    = one_argument(argument, field);
-  skip_spaces(&value);
-
-  if (!*target || !*direction || !*field) {
+  value = skip_spaces(value);
+  if (target.empty() || direction.empty() || field.empty()) {
     obj_log(g, obj, "odoor called with too few args");
     return;
   }
@@ -677,29 +666,27 @@ static OCMD(do_oat)
   room_vnum loc = NOWHERE;
   struct char_data *ch;
   struct obj_data *object;
-  char arg[MAX_INPUT_LENGTH], *command;
+  std::string_view command = argument;
+  std::string where        = take_word(command);
 
-  command = any_one_arg(argument, arg);
-
-  if (!*arg) {
+  if (where.empty()) {
     obj_log(g, obj, "oat called with no args");
     return;
   }
 
-  skip_spaces(&command);
-
-  if (!*command) {
+  command = skip_spaces(command);
+  if (command.empty()) {
     obj_log(g, obj, "oat called without a command");
     return;
   }
 
-  if (isdigit(*arg))
-    loc = atoi(arg);
-  else if ((ch = get_char_by_obj(g, obj, arg)))
+  if (isdigit((unsigned char)where[0]))
+    loc = parse_int(where);
+  else if ((ch = get_char_by_obj(g, obj, where)))
     loc = char_get_in_room(ch);
 
   if (!room_of(g, loc)) {
-    obj_log(g, obj, "oat: location not found ({})", arg);
+    obj_log(g, obj, "oat: location not found ({})", where);
     return;
   }
 
@@ -742,23 +729,22 @@ static const struct obj_command_info obj_cmd_info[] = {
 /*
  *  This is the command interpreter used by objects, called by script_driver.
  */
-void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument)
+void obj_command_interpreter(GameWorld *g, obj_data *obj, std::string_view argument)
 {
-  int cmd, length;
-  char *line, arg[MAX_INPUT_LENGTH];
+  int cmd;
 
-  skip_spaces(&argument);
+  argument = skip_spaces(argument);
 
   /* just drop to next line for hitting CR */
-  if (!*argument)
+  if (argument.empty())
     return;
 
-  line = any_one_arg(argument, arg);
+  std::string_view line = argument;
+  std::string arg       = take_word(line);
 
-  /* find the command */
-  for (length = strlen(arg), cmd = 0;
-       *obj_cmd_info[cmd].command != '\n'; cmd++)
-    if (!strncmp(obj_cmd_info[cmd].command, arg, length))
+  /* find the command: the first whose name begins with the word */
+  for (cmd = 0; *obj_cmd_info[cmd].command != '\n'; cmd++)
+    if (std::string_view(obj_cmd_info[cmd].command).starts_with(arg))
       break;
 
   if (*obj_cmd_info[cmd].command == '\n')

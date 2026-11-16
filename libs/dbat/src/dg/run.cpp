@@ -129,7 +129,7 @@ private:
   {
     at(c.line);
     std::string cmd = render(g_, c.command, go_, sc_, trig_);
-    command_call call{g_, go_, sc_, trig_, cmd.data(), c.line, ret_val_, owner_gone_};
+    command_call call{g_, go_, sc_, trig_, cmd, c.line, ret_val_, owner_gone_};
 
     switch (run_command(call)) {
       case command_result::next:

@@ -123,7 +123,7 @@ ACMD(do_masound)
     if (((newexit = room_get_dir_option(g, was_in_room, door)) != nullptr) &&
         newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
       char_set_in_room(ch, newexit->to_room);
-      sub_write(g, text.data(), ch, true, TO_ROOM);
+      sub_write(g, text, ch, TO_ROOM);
     }
   }
 
@@ -332,7 +332,7 @@ ACMD(do_msend)
     return;
   }
 
-  sub_write(g, p.data(), victim, true, TO_CHAR);
+  sub_write(g, p, victim, TO_CHAR);
 }
 
 /* prints the message to the room at large */
@@ -347,7 +347,7 @@ ACMD(do_mecho)
   }
   std::string p(skip_spaces(argument));
 
-  sub_write(g, p.data(), ch, true, TO_ROOM);
+  sub_write(g, p, ch, TO_ROOM);
 }
 
 ACMD(do_mzoneecho)

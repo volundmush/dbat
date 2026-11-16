@@ -1753,6 +1753,26 @@ static void check_substituting_stops_at_the_longest_line(void)
   th_shutdown(g);
 }
 
+/*
+ * A message that names more people than its buffer could hold: each '|' with no name after it is "someone's", so a
+ * line of them came out nine times as long, and overran the buffer sub_write() built it in.
+ */
+static void check_message_naming_too_many_people(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("set s ||||||||||||||||||||||||||||||||\n"
+                            "set n 0\n"
+                            "while %n% < 9\n"
+                            "  set s %s%%s%\n"
+                            "  eval n %n% + 1\n"
+                            "done\n"
+                            "wsend %actor% %s%",
+                            &ch);
+
+  CHECK(saw(ch, "Someone'ssomeone'ssomeone's"));
+  th_shutdown(g);
+}
+
 /* eval reads its expression after the line is substituted, so a variable can hold an operator */
 static void check_eval_reads_its_line_after_substitution(void)
 {
@@ -2128,6 +2148,7 @@ static const struct {
     {"scripts_compile_as_the_old_scan_read_them",   check_scripts_compile_as_the_old_scan_read_them  },
     {"substituting_stops_at_the_longest_line",      check_substituting_stops_at_the_longest_line     },
     {"eval_reads_its_line_after_substitution",      check_eval_reads_its_line_after_substitution     },
+    {"message_naming_too_many_people",              check_message_naming_too_many_people             },
     {"variable_left_open_at_the_end",               check_variable_left_open_at_the_end              },
     {"wait_too_long_to_count",                      check_wait_too_long_to_count                     },
     {"wait_until_no_time",                          check_wait_until_no_time                         },

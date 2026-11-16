@@ -24,7 +24,7 @@ struct command_call {
   owner_ptr go;
   struct script_data *sc;
   trig_data *trig;
-  char *cmd;
+  std::string_view cmd; /* the line, substituted */
   size_t at; /* its line, in trig->run.program */
   int &ret_val;
   bool &owner_gone;

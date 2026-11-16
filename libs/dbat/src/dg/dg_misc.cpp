@@ -7,6 +7,9 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 #include <cstdlib>
+#include <optional>
+
+#include "dbat/args.hpp"
 
 #include "dbat/consts/maximums.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -28,6 +31,28 @@
 /* copied from spell_parser.c: */
 #define SINFO g->spell_info[spellnum]
 
+/* The next piece of text between single quotes, as strtok(text, "'") reads it: past any quotes, up to the next
+   quote or the end, which the following piece starts after */
+static std::optional<std::string_view> take_quote_piece(std::string_view &rest)
+{
+  size_t start = rest.find_first_not_of('\'');
+  if (start == std::string_view::npos) {
+    rest = {};
+    return std::nullopt;
+  }
+  size_t stop           = rest.find('\'', start);
+  std::string_view piece = rest.substr(start, stop == std::string_view::npos ? std::string_view::npos : stop - start);
+  rest                   = stop == std::string_view::npos ? std::string_view{} : rest.substr(stop + 1);
+  return piece;
+}
+
+/* cast a spell; can be called by mobiles, objects and rooms, and no   */
+/* level check is required. Note that mobs should generally use the    */
+/* normal 'cast' command (which must be patched to allow mobs to cast  */
+/* spells) as the spell system is designed to have a character caster, */
+/* and this cast routine may overlook certain issues.                  */
+/* LIMITATION: a target MUST exist for the spell unless the spell is   */
+/* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* cast a spell; can be called by mobiles, objects and rooms, and no   */
 /* level check is required. Note that mobs should generally use the    */
 /* normal 'cast' command (which must be patched to allow mobs to cast  */
@@ -36,16 +61,14 @@
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
-void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
   struct char_data *caster      = nullptr;
   struct char_data *tch         = nullptr;
   struct obj_data *tobj         = nullptr;
   struct room_data *caster_room = nullptr;
-  char *s, *t;
   int spellnum, target = 0;
-  char buf2[MAX_STRING_LENGTH];
-  std::string orig_cmd;
+  std::optional<std::string> victim; /* the target's name, if anything follows the spell */
 
   /* need to get the caster or the room of the temporary caster */
   if (auto *mob = std::get_if<char_data *>(&go))
@@ -57,42 +80,39 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
     return;
   }
 
-  orig_cmd = cmd;
   /* get: blank, spell name, target name */
-  s = strtok(cmd, "'");
-  if (s == nullptr) {
+  std::string_view rest = cmd;
+  if (!take_quote_piece(rest)) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast needs spell name.",
                trig->name, trig_get_vnum(g, trig));
     return;
   }
-  s = strtok(nullptr, "'");
-  if (s == nullptr) {
+  std::optional<std::string_view> spell = take_quote_piece(rest);
+  if (!spell) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast needs spell name in `'s.",
                trig->name, trig_get_vnum(g, trig));
     return;
   }
-  t = strtok(nullptr, "\0");
 
   /* spellnum = search_block(s, spells, 0); */
-  spellnum = find_skill_num(g, s, SKTYPE_SPELL);
+  std::string spell_name(*spell);
+  spellnum = find_skill_num(g, spell_name.data(), SKTYPE_SPELL);
   if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!IS_SET(skill_type(g, spellnum), SKTYPE_SPELL)))) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: invalid spell name ({})",
-               trig->name, trig_get_vnum(g, trig), orig_cmd);
+               trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* Find the target */
-  if (t != nullptr) {
-    one_argument(strcpy(buf2, t), t);
-    skip_spaces(&t);
-  }
+  if (!rest.empty())
+    victim = take_arg(rest);
   if (IS_SET(SINFO.targets, TAR_IGNORE)) {
     target = true;
-  } else if (t != nullptr && *t) {
+  } else if (victim && !victim->empty()) {
     if (!target &&
         (IS_SET(SINFO.targets, TAR_CHAR_ROOM) ||
          IS_SET(SINFO.targets, TAR_CHAR_WORLD))) {
-      if ((tch = get_char(g, t)) != nullptr)
+      if ((tch = get_char(g, *victim)) != nullptr)
         target = true;
     }
 
@@ -101,23 +121,24 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
          IS_SET(SINFO.targets, TAR_OBJ_EQUIP) ||
          IS_SET(SINFO.targets, TAR_OBJ_ROOM) ||
          IS_SET(SINFO.targets, TAR_OBJ_WORLD))) {
-      if ((tobj = get_obj(g, t)) != nullptr)
+      if ((tobj = get_obj(g, *victim)) != nullptr)
         target = true;
     }
 
     if (!target) {
       script_log(g, "Trigger: {}, VNum {:d}. dg_cast: target not found ({})",
-                 trig->name, trig_get_vnum(g, trig), orig_cmd);
+                 trig->name, trig_get_vnum(g, trig), cmd);
       return;
     }
   }
 
   if (IS_SET(SINFO.routines, MAG_GROUPS)) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: group spells not permitted ({})",
-               trig->name, trig_get_vnum(g, trig), orig_cmd);
+               trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
+  char *arg = victim ? victim->data() : nullptr;
   if (!caster) {
     caster = read_mobile(g, DG_CASTER_PROXY);
     if (!caster) {
@@ -131,10 +152,10 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
       char_set_sdesc(caster, "The gods");
     caster_room->people.add(char_get_id(caster)); /* there, without char_to_room()'s side effects */
     char_set_in_room(caster, room_get_number(caster_room));
-    call_magic(g, caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
+    call_magic(g, caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, arg);
     extract_char(g, caster);
   } else
-    call_magic(g, caster, tch, tobj, spellnum, char_get_level(caster), CAST_SPELL, t);
+    call_magic(g, caster, tch, tobj, spellnum, char_get_level(caster), CAST_SPELL, arg);
 }
 
 /* modify an affection on the target. affections can be of the AFF_x  */
@@ -144,31 +165,29 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
 /* usage:  apply <target> <property> <value> <duration>               */
 constexpr int APPLY_TYPE  = 1;
 constexpr int AFFECT_TYPE = 2;
-void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
   struct char_data *ch = nullptr;
   int value = 0, duration = 0;
-  char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */
-  char charname[MAX_INPUT_LENGTH], property[MAX_INPUT_LENGTH];
-  char value_p[MAX_INPUT_LENGTH], duration_p[MAX_INPUT_LENGTH];
   int i = 0, type = 0;
   struct affected_type af = {};
 
-  half_chop(cmd, junk, cmd);
-  half_chop(cmd, charname, cmd);
-  half_chop(cmd, property, cmd);
-  half_chop(cmd, value_p, duration_p);
+  std::string_view rest  = cmd;
+  take_word(rest); /* "dg_affect" */
+  std::string charname   = take_word(rest);
+  std::string property   = take_word(rest);
+  std::string value_p    = take_word(rest);
+  std::string duration_p = std::string(skip_spaces(rest)); /* the rest, as it is */
 
   /* make sure all parameters are present */
-  if (!*charname || !*property ||
-      !*value_p || !*duration_p) {
+  if (charname.empty() || property.empty() || value_p.empty() || duration_p.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_affect usage: <target> <property> <value> <duration>",
                trig->name, trig_get_vnum(g, trig));
     return;
   }
 
-  value    = atoi(value_p);
-  duration = atoi(duration_p);
+  value    = parse_int(value_p);
+  duration = parse_int(duration_p);
   if (duration <= 0) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_affect: need positive duration!",
                trig->name, trig_get_vnum(g, trig));
@@ -180,7 +199,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
   /* find the property -- first search apply_types */
   i = 0;
   while (strcasecmp(apply_types[i], "\n")) {
-    if (!strcasecmp(apply_types[i], property)) {
+    if (str_eq_nocase(apply_types[i], property)) {
       type = APPLY_TYPE;
       break;
     }
@@ -190,7 +209,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
   if (!type) { /* search affect_types now */
     i = 0;
     while (strcasecmp(affected_bits[i], "\n")) {
-      if (!strcasecmp(affected_bits[i], property)) {
+      if (str_eq_nocase(affected_bits[i], property)) {
         type = AFFECT_TYPE;
         break;
       }
@@ -212,7 +231,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
     return;
   }
 
-  if (!strcasecmp(value_p, "off")) {
+  if (str_eq_nocase(value_p, "off")) {
     affect_from_char(g, ch, SPELL_DG_AFFECT);
     return;
   }
@@ -317,7 +336,7 @@ const char *const dg_door_fields[] = {
  * exit first if needed; "purge" removes the exit. Returns false if field is "room" and
  * value is not a room vnum, so the caller can log it.
  */
-bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
+bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_view value)
 {
   struct room_direction_data *newexit = room_get_dir_option(rm, dir);
   room_vnum to_room;
@@ -338,17 +357,19 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value)
     case 1: /* description */
       newexit->general_description = std::string(value) + "\r\n";
       break;
-    case 2: /* flags       */
-      newexit->exit_info = (int16_t)asciiflag_conv(value);
+    case 2: { /* flags       */
+      std::string flags(value);
+      newexit->exit_info = (int16_t)asciiflag_conv(flags.data());
       break;
+    }
     case 3: /* key         */
-      newexit->key = atoi(value);
+      newexit->key = parse_int(value);
       break;
     case 4: /* name        */
       newexit->keyword = value;
       break;
     case 5: /* room        */
-      if (room_of(g, to_room = atoi(value)))
+      if (room_of(g, to_room = parse_int(value)))
         newexit->to_room = to_room;
       else
         return false;

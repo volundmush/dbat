@@ -222,8 +222,8 @@ void script_log(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
   script_log(g, str_format(fmt, std::forward<Args>(args)...));
 }
 struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj);
-void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument);
-void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
+void obj_command_interpreter(GameWorld *g, obj_data *obj, std::string_view argument);
+void wld_command_interpreter(GameWorld *g, room_data *room, std::string_view argument);
 
 /* What running a trigger came to: its return value, and whether what it ran on was purged */
 struct run_result {
@@ -235,7 +235,7 @@ struct run_result {
 run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode);
 struct index_data *find_trigger(GameWorld *g, trig_vnum vnum);
 obj_data *find_obj(GameWorld *g, long n);
-void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
+void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
 void read_saved_vars(struct char_data *ch);
 void save_char_vars(GameWorld *g, struct char_data *ch);
 long dg_new_mob_uid(GameWorld *g);
@@ -270,16 +270,16 @@ void copy_proto_script(owner_ptr source, owner_ptr dest); /* of the same kind */
 void delete_variables(const char *charname);
 
 /* from dg_comm.c */
-void sub_write(GameWorld *g, char *arg, char_data *ch, int8_t find_invis, int targets);
-void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone);
+void sub_write(GameWorld *g, std::string_view arg, char_data *ch, int targets);
+void send_to_zone(GameWorld *g, std::string_view messg, struct zone_data *zone);
 
 /* from dg_misc.c */
-void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
-void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
+void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
+void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
 bool valid_dg_target(GameWorld *g, char_data *ch, int bitvector);
 void script_damage(GameWorld *g, char_data *vict, int dam);
 extern const char *const dg_door_fields[];
-bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, char *value);
+bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_view value);
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[]);
 

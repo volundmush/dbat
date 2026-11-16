@@ -14,6 +14,7 @@
 
 #include <unistd.h>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_event.hpp"
@@ -32,19 +33,19 @@ constexpr int PULSES_PER_MUD_HOUR = SECS_PER_MUD_HOUR * PASSES_PER_SEC;
 
 
 /* Local functions not used elsewhere */
-static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at);
-static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
-static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
-static int process_return(GameWorld *g, trig_data *trig, char *cmd);
-static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd, long id);
-static void process_context(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
+static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, std::string_view cmd, size_t at);
+static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static int process_return(GameWorld *g, trig_data *trig, std::string_view cmd);
+static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd, long id);
+static void process_context(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
+static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd);
 static EVENTFUNC(trig_wait_event);
 
 /* By id, because a trigger can purge any object at all, including the next one in the list. */
@@ -197,31 +198,30 @@ void schedule_wait(GameWorld *g, owner_ptr go, trig_data *trig, long when)
 }
 
 /* The wait command; at is its line. False if it can't read the time, which ends the run. */
-static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at)
+static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, std::string_view cmd, size_t at)
 {
   const std::string &written = trig->run.prog->lines[at].text;
-  char buf[MAX_INPUT_LENGTH], *arg;
   long when, hr, min, ntime;
   char c;
 
-  arg = any_one_arg(cmd, buf);
-  skip_spaces(&arg);
+  take_word(cmd); /* "wait" */
+  std::string arg(skip_spaces(cmd));
 
-  if (!*arg) {
+  if (arg.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. wait w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), written);
     return false;
   }
-  if (!dg::readable_wait(arg)) {
+  if (!dg::readable_wait(arg.c_str())) {
     script_log(g, "Trigger: {}, VNum {:d}. wait without a time it can read: '{}'",
                trig->name, trig_get_vnum(g, trig), written);
     return false;
   }
 
-  if (!strncasecmp(arg, "until ", 6)) {
+  if (!strncasecmp(arg.c_str(), "until ", 6)) {
 
     /* valid forms of time are 14:30 and 1430 */
-    if (sscanf(arg, "until %ld:%ld", &hr, &min) == 2)
+    if (sscanf(arg.c_str(), "until %ld:%ld", &hr, &min) == 2)
       min = wait_mul(hr, 60) + min;
     else
       min = (hr % 100) + wait_mul(hr / 100, 60);
@@ -239,7 +239,7 @@ static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
       when = ntime - when;
   }
 
-  else if (sscanf(arg, "%ld %c", &when, &c) == 2) {
+  else if (sscanf(arg.c_str(), "%ld %c", &when, &c) == 2) {
     if (c == 't')
       when = wait_mul(when, PULSES_PER_MUD_HOUR);
     else if (c == 's')
@@ -250,15 +250,14 @@ static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
 }
 
 /* processes a script set command */
-static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *value;
+  std::string_view value = cmd;
+  take_arg(value); /* "set" */
+  std::string name = take_arg(value);
 
-  value = two_arguments(cmd, arg, name);
-
-  skip_spaces(&value);
-
-  if (!*name) {
+  value = skip_spaces(value);
+  if (name.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. set w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
@@ -268,74 +267,69 @@ static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, c
 }
 
 /* processes a script eval command */
-void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *expr;
+  std::string_view expr = cmd;
+  take_arg(expr); /* "eval" */
+  std::string name = take_arg(expr);
 
-  expr = one_argument(cmd, arg);   /* cut off 'eval' */
-  expr = one_argument(expr, name); /* cut off name */
-
-  skip_spaces(&expr);
-
-  if (!*name) {
+  expr = skip_spaces(expr);
+  if (name.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. eval w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
   std::string result = eval_expr(g, expr, go, sc, trig);
-  add_var(trig->var_list, name, result.c_str(), sc ? sc->context : 0);
+  add_var(trig->var_list, name, result, sc ? sc->context : 0);
+}
+
+/* The thing an attach or detach id names, worked out as an expression; false if there is none */
+static bool find_target(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view id_text,
+                        char_data *&c, obj_data *&o, room_data *&r)
+{
+  long id;
+
+  if (id_text.empty() || parse_int(id_text) == 0)
+    return false;
+
+  /* parse and locate the id specified */
+  std::string result = eval_expr(g, id_text, go, sc, trig);
+  if (!(id = parse_int(result)))
+    return false;
+  if ((c = find_char(g, id)) || (o = find_obj(g, id)) || (r = find_room(g, id)))
+    return true;
+  return false;
 }
 
 /* script attaching a trigger to something */
-static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
-  char *id_p;
   trig_data *newtrig;
   char_data *c = nullptr;
   obj_data *o  = nullptr;
   room_data *r = nullptr;
   struct index_data *trignum;
-  long id;
 
-  id_p = two_arguments(cmd, arg, trignum_s);
-  skip_spaces(&id_p);
+  std::string_view id_p = cmd;
+  take_arg(id_p); /* "attach" */
+  std::string trignum_s = take_arg(id_p);
+  id_p                  = skip_spaces(id_p);
 
-  if (!*trignum_s) {
+  if (trignum_s.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. attach w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
-  if (!id_p || !*id_p || atoi(id_p) == 0) {
+  if (!find_target(g, go, sc, trig, id_p, c, o, r)) {
     script_log(g, "Trigger: {}, VNum {:d}. attach invalid id arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
-  }
-
-  /* parse and locate the id specified */
-  std::string result = eval_expr(g, id_p, go, sc, trig);
-  if (!(id = atoi(result.c_str()))) {
-    script_log(g, "Trigger: {}, VNum {:d}. attach invalid id arg: '{}'",
-               trig->name, trig_get_vnum(g, trig), cmd);
-    return;
-  }
-  c = find_char(g, id);
-  if (!c) {
-    o = find_obj(g, id);
-    if (!o) {
-      r = find_room(g, id);
-      if (!r) {
-        script_log(g, "Trigger: {}, VNum {:d}. attach invalid id arg: '{}'",
-                   trig->name, trig_get_vnum(g, trig), cmd);
-        return;
-      }
-    }
   }
 
   /* locate and load the trigger specified */
-  trignum = find_trigger(g, atoi(trignum_s));
+  trignum = find_trigger(g, parse_int(trignum_s));
   if (trignum == nullptr || !(newtrig = read_trigger(g, trignum))) {
     script_log(g, "Trigger: {}, VNum {:d}. attach invalid trigger: '{}'",
                trig->name, trig_get_vnum(g, trig), trignum_s);
@@ -364,88 +358,48 @@ static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, t
 }
 
 /* script detaching a trigger from something */
-static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
-  char *id_p;
   char_data *c = nullptr;
   obj_data *o  = nullptr;
   room_data *r = nullptr;
-  long id;
 
-  id_p = two_arguments(cmd, arg, trignum_s);
-  skip_spaces(&id_p);
+  std::string_view id_p = cmd;
+  take_arg(id_p); /* "detach" */
+  std::string trignum_s = take_arg(id_p);
+  id_p                  = skip_spaces(id_p);
 
-  if (!*trignum_s) {
+  if (trignum_s.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. detach w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
-  if (!id_p || !*id_p || atoi(id_p) == 0) {
+  if (!find_target(g, go, sc, trig, id_p, c, o, r)) {
     script_log(g, "Trigger: {}, VNum {:d}. detach invalid id arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
-  /* parse and locate the id specified */
-  std::string result = eval_expr(g, id_p, go, sc, trig);
-  if (!(id = atoi(result.c_str()))) {
-    script_log(g, "Trigger: {}, VNum {:d}. detach invalid id arg: '{}'",
-               trig->name, trig_get_vnum(g, trig), cmd);
-    return;
-  }
-  c = find_char(g, id);
-  if (!c) {
-    o = find_obj(g, id);
-    if (!o) {
-      r = find_room(g, id);
-      if (!r) {
-        script_log(g, "Trigger: {}, VNum {:d}. detach invalid id arg: '{}'",
-                   trig->name, trig_get_vnum(g, trig), cmd);
-        return;
-      }
-    }
-  }
-
-  if (c && char_get_script(c)) {
-    if (!strcmp(trignum_s, "all")) {
-      extract_script(g, c);
+  /* all of them, or the one named; a thing left with none loses its script */
+  auto detach = [&](auto *thing, struct script_data *script) {
+    if (!script)
+      return;
+    if (trignum_s == "all") {
+      extract_script(g, thing);
       return;
     }
-    if (remove_trigger(g, char_get_script(c), trignum_s)) {
-      if (!char_get_script(c)->trig_list) {
-        extract_script(g, c);
-      }
-    }
-    return;
-  }
+    std::string name = trignum_s; /* remove_trigger() cuts it up */
+    if (remove_trigger(g, script, name.data()) && !script->trig_list)
+      extract_script(g, thing);
+  };
 
-  if (o && obj_get_script(o)) {
-    if (!strcmp(trignum_s, "all")) {
-      extract_script(g, o);
-      return;
-    }
-    if (remove_trigger(g, obj_get_script(o), trignum_s)) {
-      if (!obj_get_script(o)->trig_list) {
-        extract_script(g, o);
-      }
-    }
-    return;
-  }
-
-  if (r && room_get_script(r)) {
-    if (!strcmp(trignum_s, "all")) {
-      extract_script(g, r);
-      return;
-    }
-    if (remove_trigger(g, room_get_script(r), trignum_s)) {
-      if (!room_get_script(r)->trig_list) {
-        extract_script(g, r);
-      }
-    }
-    return;
-  }
+  if (c)
+    detach(c, char_get_script(c));
+  else if (o)
+    detach(o, obj_get_script(o));
+  else if (r)
+    detach(r, room_get_script(r));
 }
 
 struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj)
@@ -458,36 +412,36 @@ struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj)
 }
 
 /* create a UID variable from the id number */
-static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
+static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
   int type = owner_type(go);
-  char junk[MAX_INPUT_LENGTH], varname[MAX_INPUT_LENGTH];
-  char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
   std::string uid;
-  half_chop(cmd, junk, cmd);    /* makeuid */
-  half_chop(cmd, varname, cmd); /* variable name */
-  half_chop(cmd, arg, cmd);     /* numerical id or 'obj' 'mob' or 'room' */
-  half_chop(cmd, name, cmd);    /* if the above was obj, mob or room, this is the name */
 
-  if (!*varname) {
+  take_word(cmd);                       /* makeuid */
+  std::string varname = take_word(cmd); /* variable name */
+  std::string arg     = take_word(cmd); /* numerical id or 'obj' 'mob' or 'room' */
+  std::string name    = take_word(cmd); /* if the above was obj, mob or room, this is the name */
+  cmd                 = skip_spaces(cmd); /* what is left, which the messages show */
+
+  if (varname.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. makeuid w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
 
     return;
   }
 
-  if (!*arg) {
+  if (arg.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. makeuid invalid id arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
-  if (atoi(arg) != 0) { /* easy, if you pass an id number */
+  if (parse_int(arg) != 0) { /* easy, if you pass an id number */
 
     std::string result = eval_expr(g, arg, go, sc, trig);
     uid                = str_format("{:c}{}", as_char(UID_CHAR), result);
   } else { /* a lot more work without it */
-    if (!*name) {
+    if (name.empty()) {
       script_log(g, "Trigger: {}, VNum {:d}. makeuid needs name: '{}'",
                  trig->name, trig_get_vnum(g, trig), cmd);
       return;
@@ -517,7 +471,7 @@ static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig
         case OBJ_TRIGGER:
           o = get_obj_near_obj(g, std::get<obj_data *>(go), name);
           break;
-        case MOB_TRIGGER:
+        case MOB_TRIGGER: /* the second search reads the name as the first left it */
           if ((o = get_obj_in_list_vis(g, std::get<char_data *>(go), name, nullptr,
                                        char_get_inventory(std::get<char_data *>(go)))) == nullptr)
             o = get_obj_in_list_vis(g, std::get<char_data *>(go), name, nullptr,
@@ -549,42 +503,40 @@ static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig
     }
   }
   if (!uid.empty())
-    add_var(trig->var_list, varname, uid.c_str(), sc ? sc->context : 0);
+    add_var(trig->var_list, varname, uid, sc ? sc->context : 0);
 }
 
 /*
  * processes a script return command.
  * returns the new value for the script to return.
  */
-static int process_return(GameWorld *g, trig_data *trig, char *cmd)
+static int process_return(GameWorld *g, trig_data *trig, std::string_view cmd)
 {
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  std::string_view rest = cmd;
+  take_arg(rest); /* "return" */
+  std::string value = take_arg(rest);
 
-  two_arguments(cmd, arg1, arg2);
-
-  if (!*arg2) {
+  if (value.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. return w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
 
     return 1;
   }
 
-  return atoi(arg2);
+  return parse_int(value);
 }
 
 /*
  * removes a variable from the global vars of sc,
  * or the local vars of trig if not found in global list.
  */
-static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], *var;
+  std::string_view var = cmd;
+  take_word(var); /* "unset" */
+  var = skip_spaces(var);
 
-  var = any_one_arg(cmd, arg);
-
-  skip_spaces(&var);
-
-  if (!*var) {
+  if (var.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. unset w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
@@ -594,49 +546,68 @@ static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig,
     trig->var_list.erase(var);
 }
 
-/*
- * copy a locally owned variable to the globals of another script
- *     'remote <variable_name> <uid>'
- */
-static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+/* The script of the thing uid names, as remote and rdelete find it; false, after logging, if there is no such
+   thing. is_player is set for a player's. */
+static bool find_remote_script(GameWorld *g, trig_data *trig, long uid, struct script_data *&sc_remote,
+                               bool &is_player)
 {
-  const dg::variable *vd;
-  struct script_data *sc_remote = nullptr;
-  char *line, *var, *uid_p;
-  char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-  long uid, context;
   room_data *room;
   char_data *mob;
   obj_data *obj;
 
-  line = any_one_arg(cmd, arg);
-  two_arguments(line, buf, buf2);
-  var   = buf;
-  uid_p = buf2;
-  skip_spaces(&var);
-  skip_spaces(&uid_p);
+  is_player = false;
+  if ((room = find_room(g, uid))) {
+    sc_remote = room_get_script(room);
+  } else if ((mob = find_char(g, uid))) {
+    sc_remote = char_get_script(mob);
+    is_player = !char_is_npc(mob);
+  } else if ((obj = find_obj(g, uid))) {
+    sc_remote = obj_get_script(obj);
+  } else {
+    script_log(g, "Trigger: {}, VNum {:d}. remote: uid '{:d}' invalid",
+               trig->name, trig_get_vnum(g, trig), uid);
+    return false;
+  }
+  return true;
+}
 
-  if (!*buf || !*buf2) {
+/*
+ * copy a locally owned variable to the globals of another script
+ *     'remote <variable_name> <uid>'
+ */
+static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
+{
+  const dg::variable *vd;
+  struct script_data *sc_remote = nullptr;
+  long uid, context;
+  bool is_player;
+
+  std::string_view rest = cmd;
+  take_word(rest); /* "remote" */
+  std::string var   = take_arg(rest);
+  std::string uid_p = take_arg(rest);
+
+  if (var.empty() || uid_p.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. remote: invalid arguments '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* find the locally owned variable */
-  vd = trig->var_list.find(buf);
+  vd = trig->var_list.find(var);
   if (!vd)
     vd = sc->global_vars.find_in(var, sc->context);
 
   if (!vd) {
     script_log(g, "Trigger: {}, VNum {:d}. local var '{}' not found in remote call",
-               trig->name, trig_get_vnum(g, trig), buf);
+               trig->name, trig_get_vnum(g, trig), var);
     return;
   }
   /* find the target script from the uid number */
-  uid = atoi(buf2);
+  uid = parse_int(uid_p);
   if (uid <= 0) {
     script_log(g, "Trigger: {}, VNum {:d}. remote: illegal uid '{}'",
-               trig->name, trig_get_vnum(g, trig), buf2);
+               trig->name, trig_get_vnum(g, trig), uid_p);
     return;
   }
 
@@ -644,18 +615,10 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
   /* for PC's, context is 0 (global) */
   context = vd->context;
 
-  if ((room = find_room(g, uid))) {
-    sc_remote = room_get_script(room);
-  } else if ((mob = find_char(g, uid))) {
-    sc_remote = char_get_script(mob);
-    if (!char_is_npc(mob)) context = 0;
-  } else if ((obj = find_obj(g, uid))) {
-    sc_remote = obj_get_script(obj);
-  } else {
-    script_log(g, "Trigger: {}, VNum {:d}. remote: uid '{:d}' invalid",
-               trig->name, trig_get_vnum(g, trig), uid);
+  if (!find_remote_script(g, trig, uid, sc_remote, is_player))
     return;
-  }
+  if (is_player)
+    context = 0;
 
   if (sc_remote == nullptr) return; /* no script to assign */
 
@@ -666,48 +629,33 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
  */
-static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
   struct script_data *sc_remote = nullptr;
-  char *line, *var, *uid_p;
-  char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   long uid;
-  room_data *room;
-  char_data *mob;
-  obj_data *obj;
+  bool is_player;
 
-  line = any_one_arg(cmd, arg);
-  two_arguments(line, buf, buf2);
-  var   = buf;
-  uid_p = buf2;
-  skip_spaces(&var);
-  skip_spaces(&uid_p);
+  std::string_view rest = cmd;
+  take_word(rest); /* "rdelete" */
+  std::string var   = take_arg(rest);
+  std::string uid_p = take_arg(rest);
 
-  if (!*buf || !*buf2) {
+  if (var.empty() || uid_p.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. rdelete: invalid arguments '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
   /* find the target script from the uid number */
-  uid = atoi(buf2);
+  uid = parse_int(uid_p);
   if (uid <= 0) {
     script_log(g, "Trigger: {}, VNum {:d}. rdelete: illegal uid '{}'",
-               trig->name, trig_get_vnum(g, trig), buf2);
+               trig->name, trig_get_vnum(g, trig), uid_p);
     return;
   }
 
-  if ((room = find_room(g, uid))) {
-    sc_remote = room_get_script(room);
-  } else if ((mob = find_char(g, uid))) {
-    sc_remote = char_get_script(mob);
-  } else if ((obj = find_obj(g, uid))) {
-    sc_remote = obj_get_script(obj);
-  } else {
-    script_log(g, "Trigger: {}, VNum {:d}. remote: uid '{:d}' invalid",
-               trig->name, trig_get_vnum(g, trig), uid);
+  if (!find_remote_script(g, trig, uid, sc_remote, is_player))
     return;
-  }
 
   if (sc_remote == nullptr) return; /* no script to delete a trigger from */
 
@@ -719,16 +667,14 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
 /*
  * makes a local variable into a global variable
  */
-static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd, long id)
+static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd, long id)
 {
   const dg::variable *vd;
-  char arg[MAX_INPUT_LENGTH], *var;
+  std::string_view var = cmd;
+  take_word(var); /* "global" */
+  var = skip_spaces(var);
 
-  var = any_one_arg(cmd, arg);
-
-  skip_spaces(&var);
-
-  if (!*var) {
+  if (var.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. global w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
@@ -746,52 +692,49 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
 }
 
 /* set the current context for a script */
-static void process_context(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+static void process_context(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char arg[MAX_INPUT_LENGTH], *var;
+  std::string_view var = cmd;
+  take_word(var); /* "context" */
+  var = skip_spaces(var);
 
-  var = any_one_arg(cmd, arg);
-
-  skip_spaces(&var);
-
-  if (!*var) {
+  if (var.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. context w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
   }
 
-  sc->context = atol(var);
+  sc->context = atol(std::string(var).c_str());
 }
 
-static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+/* extract <variable> <n> <text>: the variable gets the text's nth word, lowercased, or nothing */
+static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
-  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-  char *buf3;
-  char to[128];
+  constexpr size_t longest_name = 127;
   int num;
 
-  buf3 = any_one_arg(cmd, buf);
-  half_chop(buf3, buf2, buf);
-  if (strlen(buf2) >= sizeof(to)) {
-    script_log(g, "extract: variable name is longer than {:d} characters", as_unsigned(sizeof(to) - 1));
+  take_word(cmd); /* "extract" */
+  std::string to = take_word(cmd);
+  cmd            = skip_spaces(cmd);
+  if (to.size() > longest_name) {
+    script_log(g, "extract: variable name is longer than {:d} characters", as_unsigned(longest_name));
     return;
   }
-  strcpy(to, buf2); /* strcpy: OK (length checked above) */
 
-  num = atoi(buf);
+  num = parse_int(cmd);
   if (num < 1) {
     script_log(g, "extract number < 1!");
     return;
   }
 
-  half_chop(buf, buf3, buf2);
-
+  take_word(cmd); /* the number */
+  std::string word;
   while (num > 0) {
-    half_chop(buf2, buf, buf2);
+    word = take_word(cmd);
     num--;
   }
 
-  add_var(trig->var_list, to, buf, sc ? sc->context : 0);
+  add_var(trig->var_list, to, word, sc ? sc->context : 0);
 }
 
 /*
@@ -811,20 +754,17 @@ static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig,
 
 */
 
-static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
+static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
   //set the letter/number at position 'num' as the variable.
-  char junk[MAX_INPUT_LENGTH];
-  char varname[MAX_INPUT_LENGTH];
-  char num_s[MAX_INPUT_LENGTH];
-  char string[MAX_INPUT_LENGTH];
   int num;
 
-  half_chop(cmd, junk, cmd); /* "dg_letter" */
-  half_chop(cmd, varname, cmd);
-  half_chop(cmd, num_s, string);
+  take_word(cmd); /* "dg_letter" */
+  std::string varname   = take_word(cmd);
+  std::string num_s     = take_word(cmd);
+  std::string_view text = skip_spaces(cmd);
 
-  num = atoi(num_s);
+  num = parse_int(num_s);
 
   script_log(g, "The use of dg_letter is deprecated");
   script_log(g, "- Use 'set <new variable> %<text/var>.charat(index)%' instead.");
@@ -834,14 +774,12 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
     return;
   }
 
-  if ((size_t)num > strlen(string)) {
+  if ((size_t)num > text.size()) {
     script_log(g, "Trigger #{:d} : dg_letter number > strlen!", trig_get_vnum(g, trig));
     return;
   }
 
-  *junk       = string[num - 1];
-  *(junk + 1) = '\0';
-  add_var(trig->var_list, varname, junk, sc->context);
+  add_var(trig->var_list, varname, text.substr(num - 1, 1), sc->context);
 }
 
 /*
@@ -887,7 +825,7 @@ constexpr dg_command dg_commands[] = {
 command_result run_command(command_call &c)
 {
   for (const dg_command &command : dg_commands)
-    if (!strncasecmp(c.cmd, command.prefix.data(), command.prefix.size()))
+    if (c.cmd.size() >= command.prefix.size() && str_eq_nocase(c.cmd.substr(0, command.prefix.size()), command.prefix))
       return command.run(c);
 
   std::visit(overloaded{[&](char_data *ch) { command_interpreter(c.g, ch, c.cmd); },

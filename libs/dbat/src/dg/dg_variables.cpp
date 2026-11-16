@@ -1514,7 +1514,7 @@ static std::string look_up(GameWorld *g, const dg::var_ref &r, owner_ptr go, str
     if (value.empty())
       continue;
     std::string eval = "eval tmpvr " + value; /* quirk: the value is worked out as an expression */
-    process_eval(g, go, sc, trig, eval.data());
+    process_eval(g, go, sc, trig, eval);
     var   = "tmpvr";
     field = link.next_field;
   }

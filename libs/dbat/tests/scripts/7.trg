@@ -63,4 +63,27 @@ weffect lava
 weffect lava 20000
 nosuchroomcommand
 ~
+#703
+room argument corners~
+2 g 100
+~
+%load% obj 300
+%load% obj 301 %actor% wield
+%load% obj 302 chest
+%load% obj 302 nothing
+%door% 300 99 description x
+%door% 300 1 nosuchfield x
+%door% 300 1 room 99999
+%force% all say all forced by the room
+%at% 310
+%teleport% all %self.vnum%
+weffect light 300
+weffect light 300
+weffect light 99999
+weffect lava 99999
+weffect gravity 20000
+%zoneecho% 99999 nowhere
+dg_cast 'heal' %actor%
+%send% %actor% |%actor.name% ^%actor.name% and _chest
+~
 $~

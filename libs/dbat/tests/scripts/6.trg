@@ -80,4 +80,29 @@ obj purges itself~
 %purge% %self%
 %echo% obj after purge, never
 ~
+#604
+obj argument corners~
+1 h 100
+~
+%load% obj 300
+%load% mob 300 abc
+%load% obj 301 %actor% wield
+%load% obj 302 chest
+%load% obj 302 nothing
+%asound% a sound from an obj
+%door% nosuchroom north description x
+%door% 300 north nosuchfield x
+%door% 300 north room 99999
+%door% 300 north description a carved door
+%door% 300 north flags ab
+%door% 300 north key 301
+%door% 300 north name gate
+%door% 300 north purge
+%at% %actor.name% %echo% at the actor
+%at% 310
+%force% all say all forced by an obj
+%zoneecho% 99999 nowhere
+dg_cast 'heal' %actor%
+%send% %actor% |%actor.name% ^%actor.name% &%actor.name% *%actor.name% and _chest
+~
 $~
